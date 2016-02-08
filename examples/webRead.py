@@ -1,7 +1,10 @@
 from lib.AuthenticationContext import AuthenticationContext
 from lib.ClientRequest import ClientRequest
 
+
+
 def readWeb(url,ctxAuth):
+    "Read Web client object"
     request = ClientRequest(url,ctxAuth)
     requestUrl = "/_api/web/"   #Web resource endpoint
     data = request.executeQuery(requestUrl=requestUrl)
