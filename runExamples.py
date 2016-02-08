@@ -1,8 +1,8 @@
-from lib.AuthenticationContext import AuthenticationContext
-from lib.ClientRequest import ClientRequest
+from client.AuthenticationContext import AuthenticationContext
+from client.ClientRequest import ClientRequest
 from settings import settings
 from examples.webRead import readWeb
-from examples.ListItemsOperations import readListItems, createListItem
+#from examples.ListItemsOperations import readListItems, createListItem
 
 
 if __name__ == '__main__':

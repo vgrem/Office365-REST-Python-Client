@@ -1,4 +1,4 @@
-from lib.ClientRequest import ClientRequest
+from client.ClientRequest import ClientRequest
 
 listTitle = "Tasks"
 

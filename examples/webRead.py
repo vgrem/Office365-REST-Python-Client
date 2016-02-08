@@ -1,5 +1,5 @@
-from lib.AuthenticationContext import AuthenticationContext
-from lib.ClientRequest import ClientRequest
+from client.AuthenticationContext import AuthenticationContext
+from client.ClientRequest import ClientRequest
 
 
 
