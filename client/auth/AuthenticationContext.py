@@ -34,8 +34,6 @@ class AuthenticationContext(object):
             }
             
             if self.acquireServiceToken(options) and self.acquireAuthenticationCookie(options):
-                self.FedAuth = options['FedAuth']
-                self.rtFa = options['rtFa']
                 return True
             return False
         except requests.exceptions.RequestException as e:
@@ -91,8 +89,8 @@ class AuthenticationContext(object):
         response = session.post(url, data = self.token)
         cookies = requests.utils.dict_from_cookiejar(session.cookies);
         if 'FedAuth' in cookies and 'rtFa' in cookies:
-            options['FedAuth'] = cookies['FedAuth']
-            options['rtFa'] = cookies['rtFa']
+            self.FedAuth = cookies['FedAuth']
+            self.rtFa = cookies['rtFa']
             return True
         self.error = "An error occured while retrieving auth cookies" 
         return False

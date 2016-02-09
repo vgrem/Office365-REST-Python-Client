@@ -1,4 +1,4 @@
-from client.AuthenticationContext import AuthenticationContext
+from client.auth.AuthenticationContext import AuthenticationContext
 from client.ClientRequest import ClientRequest
 from settings import settings
 from examples.webRead import readWeb
