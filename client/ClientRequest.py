@@ -20,14 +20,16 @@ class ClientRequest(object):
             url = self.url + requestUrl
             for key in self.defaultHeaders:
                 headers[key] = self.defaultHeaders[key]
-            if data:
+            if data or 'X-HTTP-Method' in headers:
                 if not self.formDigestValue:
                     self.requestFormDigest()
                     headers['X-RequestDigest'] = self.formDigestValue
                 result = requests.post(url=url,headers=headers,json = data)
             else:
                 result = requests.get(url=url,headers=headers)
-            return result.json()
+            if result.content:
+                return result.json()
+            return {}
         except requests.exceptions.RequestException as e:
             return "Error: {}".format(e)
 
