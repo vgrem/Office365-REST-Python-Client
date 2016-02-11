@@ -1,16 +1,18 @@
 from ClientRequest import ClientRequest
+from ClientQuery import ClientQuery
 from Web import Web
 from Site import Site
 
 class ClientContext(object):
-    """SharePoint CSOM Client Context"""
+    """SharePoint client context"""
     def __init__(self,url,authContext):
         self.__url = url
         self.__authContext = authContext
         self.__web = None
         self.__site = None
         self.__pendingRequest = None
-        self.__resultObject = None
+        self.__queries = []
+        
 
     @property
     def Web(self):
@@ -35,15 +37,20 @@ class ClientContext(object):
 
     def load(self,clientObject,retrievals=None):
         "Load client object"
-        clientObject.buildQuery()
-        self.__resultObject = clientObject
+        qry = ClientQuery(clientObject)
+        self.addQuery(qry)
 
 
     def executeQuery(self):
         "Submit pending request to the server"
-        query = self.__resultObject.Query
-        data = self.PendingRequest.executeQuery(requestUrl=query.Url,headers=query.Headers,data=query.Payload)
-        self.__resultObject.Properties = data['d']
+        for qry in self.__queries:
+            data = self.PendingRequest.executeQuery(requestUrl=qry.Url,headers=qry.Headers,data=qry.Payload)
+            if any(data):
+                qry.ResultObject.Properties = data['d']
+
+
+    def addQuery(self,query):
+        self.__queries.append(query)
         
 
 

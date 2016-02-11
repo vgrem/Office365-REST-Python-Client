@@ -96,7 +96,7 @@ class AuthenticationContext(object):
         return False
 
     def prepareSamlMessage(self,params):
-        "Read & prepare SAML WS template" 
+        "Read & prepare SAML template" 
         f = open(os.path.join(os.path.dirname(__file__), 'SAML.xml'))
         saml = f.read()
         for key in params:
