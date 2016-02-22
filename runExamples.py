@@ -2,7 +2,7 @@ from client.auth.AuthenticationContext import AuthenticationContext
 from client.ClientRequest import ClientRequest
 from settings import settings
 from examples.webRead import readWeb
-from examples.listItemsOperations import createListItem, readListItems, updateListItem, deleteListItem
+from examples.ListItemsOperations import createListItem, readListItems, updateListItem, deleteListItem
 
 
 if __name__ == '__main__':    
