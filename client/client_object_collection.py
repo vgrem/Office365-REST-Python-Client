@@ -13,3 +13,27 @@ class ClientObjectCollection(ClientObject):
 
     def __iter__(self):
         return iter(self.__data)
+
+    def expand(self, value):
+        self.query_options['expand'] = value
+        return self
+
+    def filter(self, value):
+        self.query_options['filter'] = value
+        return self
+
+    def order_by(self, value):
+        self.query_options['orderby'] = value
+        return self
+
+    def select(self, value):
+        self.query_options['select'] = value
+        return self
+
+    def skip(self, value):
+        self.query_options['skip'] = value
+        return self
+
+    def top(self, value):
+        self.query_options['top'] = value
+        return self

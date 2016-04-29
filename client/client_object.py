@@ -6,7 +6,7 @@ class ClientObject(object):
 
     def __init__(self, context, resource_path=None, parent_resource_path=None):
         self._entity_type_name = None
-        self._query_options = None
+        self._query_options = {}
         self._service_root_url = context.url + "/_api/"
         self._parent_collection = None
         self._context = context
@@ -26,9 +26,9 @@ class ClientObject(object):
                 class_name = typeParts[2]
         module_name = "client.{0}".format(class_name.lower())
         clientObjectClass = getattr(importlib.import_module(module_name), class_name)
-        clientObject = clientObjectClass(ctx)
-        clientObject.properties = properties
-        return clientObject
+        client_object = clientObjectClass(ctx)
+        client_object.properties = properties
+        return client_object
 
     def remove_from_parent_collection(self):
         if self._parent_collection is None:
@@ -40,6 +40,10 @@ class ClientObject(object):
         if name in self.properties and not '__deferred' in self.properties[name]:
             return True
         return False
+
+    def query_options_to_url(self):
+        """Convert query options to url"""
+        return '&'.join(['$%s=%s' % (key, value) for (key, value) in self.query_options.items()])
 
     @property
     def context(self):
@@ -66,7 +70,7 @@ class ClientObject(object):
         else:
             self._url = self.service_root_url + self.resource_path
         if self.query_options:
-            self._url = self._url + "?" + self.query_options
+            self._url = self._url + "?" + self.query_options_to_url()
         return self._url
 
     @property
