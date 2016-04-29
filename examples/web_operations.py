@@ -5,31 +5,31 @@ from client.auth.authentication_context import AuthenticationContext
 from settings import settings
 
 
-def load_web(ctx):
-    web = ctx.web
-    ctx.load(web)
-    ctx.execute_query()
-    print "Web site url: {0}".format(web.properties['ServerRelativeUrl'])
-    return web
+def load_web(context):
+    cur_web = context.web
+    context.load(cur_web)
+    context.execute_query()
+    print "Web site url: {0}".format(cur_web.properties['ServerRelativeUrl'])
+    return cur_web
 
 
-def update_web(web):
-    propertiesToUpdate = {'Title': "New web site"}
-    web.update(propertiesToUpdate)
+def update_web():
+    properties_to_update = {'Title': "New web site"}
+    web.update(properties_to_update)
     web.context.execute_query()
     print "Web site has been updated"
 
 
-def create_web(ctx):
+def create_web(context):
     web_prefix = str(randint(0, 100))
     creation_info = {'Url': "workspace" + web_prefix, 'Title': "Workspace"}
-    newWeb = ctx.web.webs.add(creation_info)
-    ctx.execute_query()
-    print "Web site {0} has been created".format(newWeb.properties['ServerRelativeUrl'])
-    return newWeb
+    new_web = context.web.webs.add(creation_info)
+    context.execute_query()
+    print "Web site {0} has been created".format(new_web.properties['ServerRelativeUrl'])
+    return new_web
 
 
-def delete_web(web):
+def delete_web():
     web.delete_object()
     web.context.execute_query()
     print "Web site has been deleted"
@@ -51,8 +51,8 @@ if __name__ == '__main__':
 
         # web = load_web(ctx)
         web = create_web(ctx)
-        update_web(web)
-        delete_web(web)
+        update_web()
+        delete_web()
 
     else:
         print ctxAuth.get_last_error()

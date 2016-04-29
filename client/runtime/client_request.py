@@ -15,7 +15,8 @@ class ClientRequest(object):
                                'Cookie': auth_context.get_authentication_cookie()}
         self.contextWebInformation = None
 
-    def process_response(self, response):
+    @staticmethod
+    def process_response_json(response):
         if response.content:
             json = response.json()
             if 'error' in json:
@@ -38,7 +39,7 @@ class ClientRequest(object):
         if query.action_type != ClientActionType.Read:
             method = HttpMethod.Post
         result = self.execute_query_direct(url, headers, data, method)
-        return self.process_response(result)
+        return self.process_response_json(result)
 
     def execute_query_direct(self, request_url, headers=None, data=None, method=HttpMethod.Get):
         """Execute client request"""
