@@ -20,8 +20,8 @@ class List(ClientObject):
         """The recommended way to add a list item is to send a POST request to the ListItemCollection resource endpoint,
          as shown in ListItemCollection request examples."""
         item = ListItem(self.context)
-        qry = ClientQuery.create_create_query(item, self.url + "/items", list_item_creation_information)
-        self.context.add_query(qry)
+        qry = ClientQuery.create_create_query(self.url + "/items", list_item_creation_information)
+        self.context.add_query(qry, item)
         return item
 
     def get_item_by_id(self, item_id):

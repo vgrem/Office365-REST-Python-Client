@@ -10,7 +10,7 @@ class FileCollection(ClientObjectCollection):
         """Creates a File resource"""
         file_new = File(self.context)
         payload = file_creation_information
-        qry = ClientQuery.create_create_query(file_new, self.url, payload)
-        self.context.add_query(qry)
+        qry = ClientQuery.create_create_query(self.url, payload)
+        self.context.add_query(qry, file_new)
         self.add_child(file)
         return file

@@ -7,7 +7,7 @@ listTitle = "Tasks"
 
 
 def readListItemById(ctx):
-    "Read list item by id example"
+    print "Read list item by id example..."
     list = ctx.web.lists.get_by_title(listTitle)
     items = list.get_items()
     ctx.load(items)
@@ -21,26 +21,26 @@ def readListItemById(ctx):
         print "List item title: {0}".format(curItem.properties["Title"])
 
 
-def readList(list):
-    "Read list items example"
+def read_list(list):
+    print "Read list items example..."
     ctx = list.context
     ctx.load(list)
     ctx.execute_query()
     print "List title: {0}".format(list.properties["Title"])
 
     listSiteAssets = ctx.web.lists.ensure_site_assets_library()
-    #ctx.load(listSiteAssets)
+    ctx.load(listSiteAssets)
     ctx.execute_query()
     print "Site Assets title: {0}".format(listSiteAssets.properties["Title"])
 
     listSitePages = ctx.web.lists.ensure_site_pages_library()
-    #ctx.load(listSitePages)
+    ctx.load(listSitePages)
     ctx.execute_query()
     print "Site Pages title: {0}".format(listSitePages.properties["Title"])
 
 
-def createRandomTasksList(ctx):
-    "Create list item example"
+def create_random_tasks_list(ctx):
+    print "Create list example..."
     listTitle = "Tasks" + str(randint(0, 100))
     listProperties = {'__metadata': {'type': 'SP.List'}, 'AllowContentTypes': True, 'BaseTemplate': 171,
                       'Title': listTitle}
@@ -51,8 +51,8 @@ def createRandomTasksList(ctx):
     return list
 
 
-def updateList(list):
-    """Update list item example"""
+def update_list(list):
+    print "Update list example..."
     ctx = list.context
     listProperties = {'__metadata': {'type': 'SP.List'}, 'Description': list.properties["Title"]}
     list.update(listProperties)
@@ -61,8 +61,8 @@ def updateList(list):
     print "List {0} has been updated".format(list.properties["Title"])
 
 
-def deleteList(list):
-    """Delete list item example"""
+def delete_list(list):
+    print "Delete list example..."
     listTitle = list.properties["Title"]
     ctx = list.context
     list.delete_object()
@@ -77,9 +77,9 @@ if __name__ == '__main__':
         #listTitle = "Tasks"
         #list = ctx.Web.Lists.getByTitle(listTitle)
         #readList(list)
-        list = createRandomTasksList(ctx)
-        #updateList(list)
-        #deleteList(list)
+        list_obj = create_random_tasks_list(ctx)
+        update_list(list_obj)
+        delete_list(list_obj)
         # readListItemById(ctx)
     else:
-        print ctxAuth.getLastErrorMessage()
+        print ctxAuth.get_last_error()

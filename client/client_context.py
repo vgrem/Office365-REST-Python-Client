@@ -16,6 +16,7 @@ class ClientContext(object):
         self.__site = None
         self.__pending_request = None
         self.__queries = []
+        self.__resultObjects = {}
 
     @property
     def web(self):
@@ -38,26 +39,29 @@ class ClientContext(object):
         return self.__pending_request
 
     def load(self, client_object):
-        """Prepare query for the server"""
+        """Prepare query"""
         qry = ClientQuery(client_object.url, ClientActionType.Read)
-        qry.add_result_object(client_object)
-        self.add_query(qry)
+        if qry.id not in self.__resultObjects:
+            self.add_query(qry, client_object)
 
     def execute_query(self):
         """Submit pending request to the server"""
         for qry in self.__queries:
             data = self.pending_request.execute_query(qry)
-            if any(data):
+            if any(data) and qry.id in self.__resultObjects:
+                result_object = self.__resultObjects[qry.id]
                 if 'results' in data['d']:
                     for item in data['d']['results']:
-                        clientObject = ClientObject.create_typed_object(self, item)
-                        qry.result_object.add_child(clientObject)
+                        child_client_object = ClientObject.create_typed_object(self, item)
+                        result_object.add_child(child_client_object)
                 else:
-                    qry.result_object.properties = data['d']
+                    result_object.properties = data['d']
             self.__queries.remove(qry)
 
-    def add_query(self, query):
+    def add_query(self, query, result_object=None):
         self.__queries.append(query)
+        if result_object:
+            self.__resultObjects[query.id] = result_object
 
     @property
     def url(self):

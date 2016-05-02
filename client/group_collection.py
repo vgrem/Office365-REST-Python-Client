@@ -9,8 +9,8 @@ class GroupCollection(ClientObjectCollection):
     def add(self, group_creation_information):
         """Creates a Group resource"""
         group = Group(self.context)
-        qry = ClientQuery.create_create_query(group, self.url, group_creation_information)
-        self.context.add_query(qry)
+        qry = ClientQuery.create_create_query(self.url, group_creation_information)
+        self.context.add_query(qry, group)
         self.add_child(group)
         return group
 

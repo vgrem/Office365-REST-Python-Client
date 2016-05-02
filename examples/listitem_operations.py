@@ -6,7 +6,7 @@ listTitle = "Tasks"
 
 
 def read_list_items():
-    """Read list items example"""
+    print "Read list items example..."
     list_object = ctx.web.lists.get_by_title(listTitle)
     items = list_object.get_items()
     ctx.load(items)
@@ -17,7 +17,7 @@ def read_list_items():
 
 
 def filter_list_items():
-    """ODATA query against list items example"""
+    print "ODATA query against list items example..."
     list_object = ctx.web.lists.get_by_title(listTitle)
     items = list_object.get_items().top(1).select("Id,Title")
     ctx.load(items)
@@ -28,7 +28,7 @@ def filter_list_items():
 
 
 def create_list_item():
-    "Create list item example"
+    print "Create list item example..."
     list_object = ctx.web.lists.get_by_title(listTitle)
     item_properties = {'__metadata': {'type': 'SP.Data.TasksListItem'}, 'Title': 'New Task'}
     item = list_object.add_item(item_properties)
@@ -41,8 +41,8 @@ if __name__ == '__main__':
     if ctxAuth.acquire_token_for_user(username=settings['username'], password=settings['password']):
         ctx = ClientContext(settings['url'], ctxAuth)
 
-        #read_list_items()
-        #create_list_item()
+        read_list_items()
+        create_list_item()
         filter_list_items()
 
     else:

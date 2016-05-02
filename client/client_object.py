@@ -88,6 +88,6 @@ class ClientObject(object):
     @properties.setter
     def properties(self, value):
         self._properties = value
-        if '__metadata' in self._properties and 'uri' in self._properties['__metadata']:
+        if '__metadata' in self._properties:
             self._url = self._properties['__metadata']['uri']
             self._entity_type_name = self._properties['__metadata']['type']

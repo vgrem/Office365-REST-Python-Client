@@ -11,7 +11,7 @@ class WebCollection(ClientObjectCollection):
             payload['parameters'][key] = web_creation_information[key]
         from web import Web
         web = Web(self.context)
-        qry = ClientQuery.create_create_query(web, self.url + "/add", payload)
-        self.context.add_query(qry)
+        qry = ClientQuery.create_create_query(self.url + "/add", payload)
+        self.context.add_query(qry, web)
         self.add_child(web)
         return web

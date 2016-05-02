@@ -20,22 +20,20 @@ class ListCollection(ClientObjectCollection):
         upload to their wiki pages."""
         list_site_assets = List(self.context)
         qry = ClientQuery(self.url + "/ensuresiteassetslibrary", ClientActionType.Update)
-        qry.add_result_object(list_site_assets)
-        self.context.add_query(qry)
+        self.context.add_query(qry, list_site_assets)
         return list_site_assets
 
     def ensure_site_pages_library(self):
         """Gets a list that is the default location for wiki pages."""
         list_site_pages = List(self.context)
         qry = ClientQuery(self.url + "/ensuresitepageslibrary", ClientActionType.Update)
-        qry.add_result_object(list_site_pages)
-        self.context.add_query(qry)
+        self.context.add_query(qry, list_site_pages)
         return list_site_pages
 
     def add(self, list_creation_information):
         """Creates a List resource"""
         list_new = List(self.context)
-        qry = ClientQuery.create_create_query(list_new, self.url, list_creation_information)
-        self.context.add_query(qry)
+        qry = ClientQuery.create_create_query(self.url, list_creation_information)
+        self.context.add_query(qry, list_new)
         self.add_child(list_new)
         return list_new

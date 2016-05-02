@@ -5,18 +5,13 @@ class ClientQuery(object):
     """Client query"""
 
     def __init__(self, url, action_type=ClientActionType.Read, parameters=None):
-        self.__resultObject = None
         self.__url = url
         self.__actionType = action_type
         self.__parameters = parameters
 
-    def add_result_object(self, client_object):
-        self.__resultObject = client_object
-
     @staticmethod
-    def create_create_query(client_object, url, parameters):
+    def create_create_query(url, parameters):
         qry = ClientQuery(url, ClientActionType.Create, parameters)
-        qry.add_result_object(client_object)
         return qry
 
     @staticmethod
@@ -45,5 +40,5 @@ class ClientQuery(object):
         return self.__parameters
 
     @property
-    def result_object(self):
-        return self.__resultObject
+    def id(self):
+        return id(self)
