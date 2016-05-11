@@ -26,8 +26,8 @@ class List(ClientObject):
 
     def get_item_by_id(self, item_id):
         """Returns the list item with the specified list item identifier."""
-        listItem = ListItem(self.context, "getitembyid('{0}')".format(item_id), self.resource_path)
-        return listItem
+        list_item = ListItem(self.context, "getitembyid('{0}')".format(item_id), self.resource_path)
+        return list_item
 
     def get_view(self, view_id):
         """Returns the list view with the specified view identifier."""

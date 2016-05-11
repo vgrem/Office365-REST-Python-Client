@@ -5,6 +5,9 @@ from web import Web
 class Site(ClientObject):
     """Site client object"""
 
+    def __init__(self, context):
+        super(Site, self).__init__(context, "site")
+
     @property
     def root_web(self):
         """Get root web"""

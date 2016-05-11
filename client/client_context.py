@@ -38,7 +38,7 @@ class ClientContext(object):
             self.__pending_request = ClientRequest(self.__base_url, self.__auth_context)
         return self.__pending_request
 
-    def load(self, client_object):
+    def load(self, client_object, properties_to_retrieve=[]):
         """Prepare query"""
         qry = ClientQuery(client_object.url, ClientActionType.Read)
         if qry.id not in self.__resultObjects:
