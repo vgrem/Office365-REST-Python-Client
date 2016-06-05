@@ -14,6 +14,9 @@ class ClientObjectCollection(ClientObject):
     def __iter__(self):
         return iter(self.__data)
 
+    def __len__(self):
+        return len(self.__data)
+
     def expand(self, value):
         self.query_options['expand'] = value
         return self

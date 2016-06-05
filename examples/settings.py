@@ -1,5 +1,5 @@
 settings = {
-    'url': 'https://contoso.sharepoint.com',
-    'username': 'jdoe@contoso.onmicrosoft.com',
-    'password': ''
+    'url': 'https://media17.sharepoint.com/sites/news/t',
+    'username': 'tester@media17.onmicrosoft.com',
+    'password': 'P@ssw0rd'
 }
