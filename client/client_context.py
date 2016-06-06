@@ -41,15 +41,15 @@ class ClientContext(object):
     def load(self, client_object, properties_to_retrieve=[]):
         """Prepare query"""
         qry = ClientQuery(client_object.url, ClientActionType.Read)
-        if qry.id not in self.__resultObjects:
+        if qry not in self.__resultObjects:
             self.add_query(qry, client_object)
 
     def execute_query(self):
         """Submit pending request to the server"""
         for qry in self.__queries:
             data = self.pending_request.execute_query(qry)
-            if any(data) and qry.id in self.__resultObjects:
-                result_object = self.__resultObjects[qry.id]
+            if any(data) and qry in self.__resultObjects:
+                result_object = self.__resultObjects[qry]
                 if 'results' in data['d']:
                     for item in data['d']['results']:
                         child_client_object = ClientObject.create_typed_object(self, item)
@@ -60,8 +60,8 @@ class ClientContext(object):
 
     def add_query(self, query, result_object=None):
         self.__queries.append(query)
-        if result_object:
-            self.__resultObjects[query.id] = result_object
+        if result_object is not None:
+            self.__resultObjects[query] = result_object
 
     @property
     def url(self):

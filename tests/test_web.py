@@ -5,31 +5,43 @@ from tests.sharepoint_case import SPTestCase
 
 
 class TestWeb(SPTestCase):
-    target_web_name = "workspace_" + str(randint(0, 10000))
+    target_web = None
 
-    def test_can_create_web(self):
-        self.context.execute_query()  # force to clear pending queue
-        creation_info = {'Url': self.target_web_name, 'Title': self.target_web_name}
-        target_web = self.context.web.webs.add(creation_info)
+    def setUp(self):
+        pass
+
+    def test_1_can_create_web(self):
+        self.context.execute_query()  # force to clear the pending queue
+        target_web_name = "workspace_" + str(randint(0, 10000))
+        creation_info = {'Url': target_web_name, 'Title': target_web_name}
+        self.__class__.target_web = self.context.web.webs.add(creation_info)
         self.context.execute_query()
 
-        results = self.context.web.webs.filter("Title eq '{0}'".format(self.target_web_name))
+        results = self.context.web.webs.filter("Title eq '{0}'".format(target_web_name))
         self.context.load(results)
         self.context.execute_query()
         self.assertEquals(len(results), 1)
 
-    def test_if_web_updated(self):
+    def test_2_if_web_updated(self):
         """Test to update Web resource"""
-        # properties_to_update = {'Title': "New web site"}
-        # self.target_web.update(properties_to_update)
-        # self.context.execute_query()
+        properties_to_update = {'Title': self.__class__.target_web.properties['Title'] + "_updated"}
+        self.__class__.target_web.update(properties_to_update)
+        self.context.execute_query()
 
-        # self.context.load(self.target_web)
-        # self.context.execute_query()
-        # self.assertEquals(properties_to_update['Title'], self.target_web.properties['Title'], "Web site update error")
+        self.context.load(self.__class__.target_web)
+        self.context.execute_query()
+        self.assertEquals(properties_to_update["Title"], self.__class__.target_web.properties['Title'])
 
-    def test_if_web_deleted(self):
+    def test_3_if_web_deleted(self):
         """Test to delete Web resource"""
+        title = self.__class__.target_web.properties['Title']
+        self.__class__.target_web.delete_object()
+        self.context.execute_query()
+
+        results = self.context.web.webs.filter("Title eq '{0}'".format(title))
+        self.context.load(results)
+        self.context.execute_query()
+        self.assertEquals(len(results), 0)
 
 
 if __name__ == '__main__':
