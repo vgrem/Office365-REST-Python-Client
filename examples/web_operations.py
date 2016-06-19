@@ -1,7 +1,7 @@
 from random import randint
 
 from client.client_context import ClientContext
-from client.auth.authentication_context import AuthenticationContext
+from client.runtime.auth.authentication_context import AuthenticationContext
 from settings import settings
 
 

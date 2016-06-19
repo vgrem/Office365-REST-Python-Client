@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from client.auth.authentication_context import AuthenticationContext
 from client.client_context import ClientContext
+from client.runtime.auth.authentication_context import AuthenticationContext
 from examples.settings import settings
 
 

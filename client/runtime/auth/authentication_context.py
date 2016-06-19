@@ -58,32 +58,32 @@ class AuthenticationContext(object):
             'endpoint': self.url
         })
 
-        stsUrl = 'https://' + options['sts']['host'] + options['sts']['path']
-        response = requests.post(stsUrl, data=samlMessage)
+        sts_url = 'https://' + options['sts']['host'] + options['sts']['path']
+        response = requests.post(sts_url, data=samlMessage)
         token = self.process_service_token_response(response)
-        if (token):
+        if token:
             self.token = token
             return True
         return False
 
     def process_service_token_response(self, response):
         xml = ElementTree.fromstring(response.content)
-        nsPrefixes = {'S': '{http://www.w3.org/2003/05/soap-envelope}',
+        ns_prefixes = {'S': '{http://www.w3.org/2003/05/soap-envelope}',
                       'psf': '{http://schemas.microsoft.com/Passport/SoapServices/SOAPFault}',
                       'wst': '{http://schemas.xmlsoap.org/ws/2005/02/trust}',
                       'wsse': '{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd}'}
 
         # check for errors
-        if xml.find('{0}Body/{0}Fault'.format(nsPrefixes['S'])) is not None:
-            error = xml.find('{0}Body/{0}Fault/{0}Detail/{1}error/{1}internalerror/{1}text'.format(nsPrefixes['S'],
-                                                                                                   nsPrefixes['psf']))
+        if xml.find('{0}Body/{0}Fault'.format(ns_prefixes['S'])) is not None:
+            error = xml.find('{0}Body/{0}Fault/{0}Detail/{1}error/{1}internalerror/{1}text'.format(ns_prefixes['S'],
+                                                                                                   ns_prefixes['psf']))
             self.error = 'An error occurred while retrieving token: {0}'.format(error.text)
             return None
 
         # extract token
         token = xml.find(
             '{0}Body/{1}RequestSecurityTokenResponse/{1}RequestedSecurityToken/{2}BinarySecurityToken'.format(
-                nsPrefixes['S'], nsPrefixes['wst'], nsPrefixes['wsse']))
+                ns_prefixes['S'], ns_prefixes['wst'], ns_prefixes['wsse']))
         return token.text
 
     def acquire_authentication_cookie(self, options):

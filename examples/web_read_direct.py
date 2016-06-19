@@ -1,4 +1,4 @@
-from client.auth.authentication_context import AuthenticationContext
+from client.runtime.auth.authentication_context import AuthenticationContext
 from client.runtime.client_request import ClientRequest
 from settings import settings
 
