@@ -2,7 +2,7 @@ import requests
 
 from client.runtime.client_action_type import ClientActionType
 from client.runtime.context_web_information import ContextWebInformation
-from client.utilities.http_method import HttpMethod
+from client.runtime.utilities.http_method import HttpMethod
 
 
 class ClientRequest(object):
@@ -10,9 +10,9 @@ class ClientRequest(object):
 
     def __init__(self, url, auth_context):
         self.url = url
+        self.auth_context = auth_context
         self.defaultHeaders = {'content-type': 'application/json;odata=verbose',
-                               'accept': 'application/json;odata=verbose',
-                               'Cookie': auth_context.get_authentication_cookie()}
+                               'accept': 'application/json;odata=verbose'}
         self.contextWebInformation = None
 
     @staticmethod
@@ -48,6 +48,7 @@ class ClientRequest(object):
         if headers is None:
             headers = {}
         try:
+            self.auth_context.authenticate_request(headers)
             for key in self.defaultHeaders:
                 headers[key] = self.defaultHeaders[key]
             if data or 'X-HTTP-Method' in headers or method is HttpMethod.Post:
@@ -67,7 +68,9 @@ class ClientRequest(object):
     def request_form_digest(self):
         """Request Form Digest"""
         url = self.url + "/_api/contextinfo"
-        result = requests.post(url=url, headers=self.defaultHeaders)
+        headers = self.defaultHeaders
+        self.auth_context.authenticate_request(headers)
+        result = requests.post(url=url, headers=headers)
         json = result.json()
         self.contextWebInformation = ContextWebInformation()
         self.contextWebInformation.from_json(json['d']['GetContextWebInformation'])
