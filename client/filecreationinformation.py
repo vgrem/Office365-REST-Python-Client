@@ -1,4 +1,7 @@
-class FileCreationInformation(object):
+from client.client_value_object import ClientValueObject
+
+
+class FileCreationInformation(ClientValueObject):
     """Represents properties that can be set when creating a file by using the FileCollection.Add method."""
 
     def __init__(self):

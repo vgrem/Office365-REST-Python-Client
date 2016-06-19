@@ -1,6 +1,7 @@
 import unittest
 from random import randint
 
+from client.webcreationinformation import WebCreationInformation
 from tests.sharepoint_case import SPTestCase
 
 
@@ -13,7 +14,9 @@ class TestWeb(SPTestCase):
     def test_1_can_create_web(self):
         self.context.execute_query()  # force to clear the pending queue
         target_web_name = "workspace_" + str(randint(0, 100000))
-        creation_info = {'Url': target_web_name, 'Title': target_web_name}
+        creation_info = WebCreationInformation()
+        creation_info.Url = target_web_name
+        creation_info.Title = target_web_name
         self.__class__.target_web = self.context.web.webs.add(creation_info)
         self.context.execute_query()
 
