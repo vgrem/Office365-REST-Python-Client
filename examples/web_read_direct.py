@@ -8,8 +8,7 @@ if __name__ == '__main__':
         """Read Web client object"""
         request = ClientRequest(settings['url'], context_auth)
         request_url = "{0}/_api/web/".format(settings['url'])
-        response = request.execute_query_direct(request_url=request_url)
-        data = ClientRequest.process_response_json(response)
+        data = request.execute_query_direct(request_url=request_url)
         web_title = data['d']['Title']
         print "Web title: {0}".format(web_title)
 

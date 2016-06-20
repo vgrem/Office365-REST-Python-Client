@@ -19,33 +19,32 @@ There are **two approaches** available to perform REST queries:
 The first example demonstrates how to read Web resource:
 
 ```
-ctxAuth = AuthenticationContext(url)
-if ctxAuth.acquireTokenForUser(username, password):
-  request = ClientRequest(url,ctxAuth)
+ctx_auth = AuthenticationContext(url)
+if ctx_auth.acquireTokenForUser(username, password):
+  request = ClientRequest(url,ctx_auth)
   requestUrl = "/_api/web/"   #Web resource endpoint
-  data = request.executeQuery(requestUrl=requestUrl)
-
-  webTitle = data['d']['Title']
-  print "Web title: {0}".format(webTitle)
+  data = request.execute_query_direct(requestUrl=requestUrl)
+  web_title = data['d']['Title']
+  print "Web title: {0}".format(web_title)
 
 else:
-  print ctxAuth.getLastErrorMessage()
+  print ctx_auth.get_last_error()
 ```
 
 2) via `ClientContext class` where you target client object resources such as Web, ListItem and etc.
  
 
 ```
-ctxAuth = AuthenticationContext(url)
-if ctxAuth.acquireTokenForUser(username, password):
-  ctx = ClientContext(url, ctxAuth)   
+ctx_auth = AuthenticationContext(url)
+if ctx_auth.acquireTokenForUser(username, password):
+  ctx = ClientContext(url, ctx_auth)   
   web = ctx.web
   ctx.load(web)
   ctx.execute_query()
   print "Web title: {0}".format(web.properties['Title'])
 
 else:
-  print ctxAuth.getLastErrorMessage()
+  print ctx_auth.get_last_error()
 ```
 
 

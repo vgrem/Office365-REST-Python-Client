@@ -38,8 +38,7 @@ class ClientRequest(object):
         method = HttpMethod.Get
         if query.action_type != ClientActionType.Read:
             method = HttpMethod.Post
-        result = self.execute_query_direct(url, headers, data, method)
-        return self.process_response_json(result)
+        return self.execute_query_direct(url, headers, data, method)
 
     def execute_query_direct(self, request_url, headers=None, data=None, method=HttpMethod.Get):
         """Execute client request"""
@@ -56,7 +55,7 @@ class ClientRequest(object):
                 result = requests.post(url=request_url, headers=headers, json=data)
             else:
                 result = requests.get(url=request_url, headers=headers)
-            return result
+            return self.process_response_json(result)
         except requests.exceptions.RequestException as e:
             return "Error: {}".format(e)
 
@@ -70,7 +69,7 @@ class ClientRequest(object):
         url = self.url + "/_api/contextinfo"
         headers = self.defaultHeaders
         self.auth_context.authenticate_request(headers)
-        result = requests.post(url=url, headers=headers)
-        json = result.json()
+        response = requests.post(url=url, headers=headers)
+        data = self.process_response_json(response)
         self.contextWebInformation = ContextWebInformation()
-        self.contextWebInformation.from_json(json['d']['GetContextWebInformation'])
+        self.contextWebInformation.from_json(data['d']['GetContextWebInformation'])

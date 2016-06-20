@@ -9,8 +9,7 @@ def read_list_items(web_url, ctx_auth, list_title):
     request_url = "{0}/_api/web/lists/getbyTitle('{1}')/items".format(web_url, list_title)  # Web resource endpoint
 
     print "Retrieving list items from List {0}".format(list_title)
-    response = request.execute_query_direct(request_url=request_url)
-    data = ClientRequest.process_response_json(response)
+    data = request.execute_query_direct(request_url=request_url)
     for item in data['d']['results']:
         print "Item title: {0}".format(item["Title"])
 
@@ -22,9 +21,7 @@ def create_list_item(web_url, ctx_auth, list_title):
 
     print "Creating list item..."
     item_payload = {'__metadata': {'type': 'SP.Data.TasksListItem'}, 'Title': 'New Task'}
-    response = request.execute_query_direct(request_url=request_url, data=item_payload)
-    data = ClientRequest.process_response_json(response)
-
+    data = request.execute_query_direct(request_url=request_url, data=item_payload)
     print "Task {0} has been successfully [created]".format(data['d']['Title'])
     return data['d']
 
@@ -39,7 +36,7 @@ def update_list_item(web_url, ctx_auth, list_title, item_id):
         'IF-MATCH': '*',
         'X-HTTP-Method': 'MERGE'
     }
-    response = request.execute_query_direct(request_url=request_url, headers=headers, data=item_payload)
+    request.execute_query_direct(request_url=request_url, headers=headers, data=item_payload)
     print "Task has been successfully [updated]"
 
 
@@ -52,7 +49,7 @@ def delete_list_item(web_url, ctx_auth, list_title, item_id):
         'IF-MATCH': '*',
         'X-HTTP-Method': 'DELETE'
     }
-    response = request.execute_query_direct(request_url=request_url, headers=headers)
+    request.execute_query_direct(request_url=request_url, headers=headers)
     print "Task has been successfully [deleted]"
 
 
