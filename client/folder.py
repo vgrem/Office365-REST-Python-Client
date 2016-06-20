@@ -1,3 +1,4 @@
+from client.folder_collection import FolderCollection
 from client.listitem import ListItem
 from client.runtime.client_action_type import ClientActionType
 from client.runtime.client_query import ClientQuery
@@ -31,3 +32,11 @@ class Folder(ClientObject):
             return self.properties["Files"]
         else:
             return FileCollection(self.context, "files", self.resource_path)
+
+    @property
+    def folders(self):
+        """Get a folder collection"""
+        if self.is_property_available('Folders'):
+            return self.properties["Folders"]
+        else:
+            return FolderCollection(self.context, "folders", self.resource_path)

@@ -16,7 +16,8 @@ class ClientValueObject(object):
         """Ensures metadata type is contained in payload"""
         entity["__metadata"] = {'type': self.metadata_type}
 
-    def get_metadata(self):
+    @property
+    def metadata(self):
         """Generates resource payload for REST endpoint"""
         entity = dict(self.__dict__)
         self.ensure_metadata_type(entity)

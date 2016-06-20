@@ -5,13 +5,10 @@ class WebCreationInformation(ClientValueObject):
     """Represents metadata about site creation."""
 
     def __init__(self):
+        super(WebCreationInformation, self).__init__()
         self.Title = None
         self.Url = None
         self.metadata_type = "SP.WebCreationInformation"
 
-    def get_metadata(self):
-        return {'parameters': ClientValueObject.get_metadata(self)}
-
-
-
-
+    def metadata(self):
+        return {'parameters': super(WebCreationInformation, self).metadata}

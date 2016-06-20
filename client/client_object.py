@@ -14,6 +14,28 @@ class ClientObject(object):
         self._resource_path = resource_path
         self._parent_resource_path = parent_resource_path
         self._url = None
+        self.__metadata_type = None
+
+    @property
+    def metadata_type(self):
+        if self.__metadata_type is None:
+            self.__metadata_type = "SP." + type(self).__name__
+        return self.__metadata_type
+
+    @metadata_type.setter
+    def metadata_type(self, value):
+        self.__metadata_type = value
+
+    @property
+    def metadata(self):
+        """Generates resource payload for REST endpoint"""
+        entity = dict(self._properties)
+        self.ensure_metadata_type(entity)
+        return entity
+
+    def ensure_metadata_type(self, entity):
+        """Ensures metadata type is contained in payload"""
+        entity["__metadata"] = {'type': self.metadata_type}
 
     @staticmethod
     def create_typed_object(ctx, properties):
@@ -37,7 +59,7 @@ class ClientObject(object):
 
     def is_property_available(self, name):
         """Returns a Boolean value that indicates whether the specified property has been retrieved or set."""
-        if name in self.properties and not '__deferred' in self.properties[name]:
+        if name in self.properties and '__deferred' not in self.properties[name]:
             return True
         return False
 
