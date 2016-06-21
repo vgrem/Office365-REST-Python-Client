@@ -34,8 +34,8 @@ class List(ClientObject):
         view = View(self.context, "getview('{0}')".format(view_id), self.resource_path)
         return view
 
-    def update(self, list_updation_information):
-        qry = ClientQuery.create_update_query(self, list_updation_information)
+    def update(self):
+        qry = ClientQuery.create_update_query(self, self.to_json())
         self.context.add_query(qry)
 
     def delete_object(self):

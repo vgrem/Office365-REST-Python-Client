@@ -17,7 +17,7 @@ class TestFolder(SPTestCase):
     def test_2_update_folder(self):
         folder_to_update = self.target_list.root_folder.folders.get_by_url(self.target_folder_name)
         new_folder_name = "_Archive_" + str(randint(0, 1000))
-        folder_to_update.properties["Name"] = new_folder_name
+        folder_to_update.set_property("Name", new_folder_name)
         folder_to_update.update()
         self.context.execute_query()
 

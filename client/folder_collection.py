@@ -10,8 +10,8 @@ class FolderCollection(ClientObjectCollection):
     def add(self, folder_url):
         from client.folder import Folder
         folder = Folder(self.context)
-        folder.properties["ServerRelativeUrl"] = folder_url
-        qry = ClientQuery(self.url, ClientActionType.Create, folder.metadata)
+        folder.set_property("ServerRelativeUrl", folder_url)
+        qry = ClientQuery(self.url, ClientActionType.Create, folder.to_json())
         self.context.add_query(qry, folder)
         return folder
 

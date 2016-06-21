@@ -26,13 +26,14 @@ class TestWeb(SPTestCase):
 
     def test_2_if_web_updated(self):
         """Test to update Web resource"""
-        properties_to_update = {'Title': self.__class__.target_web.properties['Title'] + "_updated"}
-        self.__class__.target_web.update(properties_to_update)
+        web_title_updated = self.__class__.target_web.properties["Title"] + "_updated"
+        self.__class__.target_web.set_property("Title", web_title_updated)
+        self.__class__.target_web.update()
         self.context.execute_query()
 
         self.context.load(self.__class__.target_web)
         self.context.execute_query()
-        self.assertEquals(properties_to_update["Title"], self.__class__.target_web.properties['Title'])
+        self.assertEquals(web_title_updated, self.__class__.target_web.properties['Title'])
 
     def test_3_if_web_deleted(self):
         """Test to delete Web resource"""

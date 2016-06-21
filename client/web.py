@@ -17,16 +17,13 @@ class Web(ClientObject):
     def __init__(self, context):
         super(Web, self).__init__(context, "web")
 
-    def update(self, properties_to_update):
-        """Update web"""
-        payload = {'__metadata': {'type': self.entity_type_name}}
-        for key in properties_to_update:
-            payload[key] = properties_to_update[key]
-        qry = ClientQuery.create_update_query(self, payload)
+    def update(self):
+        """Update a Web resource"""
+        qry = ClientQuery.create_update_query(self, self.to_json())
         self.context.add_query(qry)
 
     def delete_object(self):
-        """Delete web"""
+        """Delete a Web resource"""
         qry = ClientQuery.create_delete_query(self)
         self.context.add_query(qry)
         # self.removeFromParentCollection()

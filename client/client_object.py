@@ -11,31 +11,24 @@ class ClientObject(object):
         self._parent_collection = None
         self._context = context
         self._properties = {}
+        self._changed_properties = {}
         self._resource_path = resource_path
         self._parent_resource_path = parent_resource_path
         self._url = None
-        self.__metadata_type = None
 
     @property
-    def metadata_type(self):
-        if self.__metadata_type is None:
-            self.__metadata_type = "SP." + type(self).__name__
-        return self.__metadata_type
+    def entity_type_name(self):
+        if self._entity_type_name is None:
+            self._entity_type_name = "SP." + type(self).__name__
+        return self._entity_type_name
 
-    @metadata_type.setter
-    def metadata_type(self, value):
-        self.__metadata_type = value
-
-    @property
-    def metadata(self):
-        """Generates resource payload for REST endpoint"""
-        entity = dict(self._properties)
-        self.ensure_metadata_type(entity)
-        return entity
+    @entity_type_name.setter
+    def entity_type_name(self, value):
+        self._entity_type_name = value
 
     def ensure_metadata_type(self, entity):
         """Ensures metadata type is contained in payload"""
-        entity["__metadata"] = {'type': self.metadata_type}
+        entity["__metadata"] = {'type': self.entity_type_name}
 
     @staticmethod
     def create_typed_object(ctx, properties):
@@ -49,7 +42,7 @@ class ClientObject(object):
         module_name = "client.{0}".format(class_name.lower())
         clientObjectClass = getattr(importlib.import_module(module_name), class_name)
         client_object = clientObjectClass(ctx)
-        client_object.properties = properties
+        client_object.from_json(properties)
         return client_object
 
     def remove_from_parent_collection(self):
@@ -66,6 +59,12 @@ class ClientObject(object):
     def query_options_to_url(self):
         """Convert query options to url"""
         return '&'.join(['$%s=%s' % (key, value) for (key, value) in self.query_options.items()])
+
+    def set_property(self, name, value, track_changes=True):
+        """Set resource property"""
+        if track_changes:  # track changed/updated properties
+            self._changed_properties[name] = value
+        self._properties[name] = value
 
     @property
     def context(self):
@@ -100,16 +99,17 @@ class ClientObject(object):
         return self.__module__ + "." + self.__class__.__name__
 
     @property
-    def entity_type_name(self):
-        return "SP." + self.__class__.__name__
-
-    @property
     def properties(self):
         return self._properties
 
-    @properties.setter
-    def properties(self, value):
-        self._properties = value
+    def to_json(self):
+        """Generates resource payload for REST endpoint"""
+        json = dict(self._changed_properties)
+        self.ensure_metadata_type(json)
+        return json
+
+    def from_json(self, json):
+        self._properties = json
         if '__metadata' in self._properties:
             self._url = self._properties['__metadata']['uri']
             self._entity_type_name = self._properties['__metadata']['type']

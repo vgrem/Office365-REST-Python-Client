@@ -55,7 +55,7 @@ class ClientContext(object):
                         child_client_object = ClientObject.create_typed_object(self, item)
                         result_object.add_child(child_client_object)
                 else:
-                    result_object.properties = data['d']
+                    result_object.from_json(data['d'])
             self.__queries.remove(qry)
 
     def add_query(self, query, result_object=None):
