@@ -1,7 +1,6 @@
 import unittest
 from random import randint
-
-from client.webcreationinformation import WebCreationInformation
+from client.web_creation_information import WebCreationInformation
 from tests.sharepoint_case import SPTestCase
 
 

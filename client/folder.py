@@ -17,6 +17,16 @@ class Folder(ClientObject):
         qry = ClientQuery(item.url, ClientActionType.Update, item)
         self.context.add_query(qry, self)
 
+    def update(self):
+        qry = ClientQuery.create_update_query(self, self.metadata)
+        self.context.add_query(qry)
+
+    def delete_object(self):
+        """Deletes the folder."""
+        qry = ClientQuery.create_delete_query(self)
+        self.context.add_query(qry)
+        # self.removeFromParentCollection()
+
     @property
     def list_item_all_fields(self):
         """Specifies the list item field (2) values for the list item corresponding to the folder."""

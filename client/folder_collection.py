@@ -15,3 +15,8 @@ class FolderCollection(ClientObjectCollection):
         self.context.add_query(qry, folder)
         return folder
 
+    def get_by_url(self, url):
+        """Retrieve Folder resource by url"""
+        from client.folder import Folder
+        return Folder(self.context, "GetByUrl('{0}')".format(url), self.resource_path)
+

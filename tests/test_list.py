@@ -1,5 +1,5 @@
 from random import randint
-
+from client.list_creation_information import ListCreationInformation
 from tests.sharepoint_case import SPTestCase
 
 
@@ -7,8 +7,10 @@ class TestList(SPTestCase):
     list_title = "Tasks" + str(randint(0, 1000))
 
     def test_1_create_list(self):
-        list_properties = {'__metadata': {'type': 'SP.List'}, 'AllowContentTypes': True, 'BaseTemplate': 171,
-                           'Title': self.list_title}
+        list_properties = ListCreationInformation()
+        list_properties.AllowContentTypes = True
+        list_properties.BaseTemplate = 171
+        list_properties.Title = self.list_title
         list_to_create = self.context.web.lists.add(list_properties)
         self.context.execute_query()
         self.assertEqual(list_properties['Title'], list_to_create.properties['Title'])

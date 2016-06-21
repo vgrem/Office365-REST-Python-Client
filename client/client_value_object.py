@@ -19,7 +19,8 @@ class ClientValueObject(object):
     @property
     def metadata(self):
         """Generates resource payload for REST endpoint"""
-        entity = dict(self.__dict__)
+        #entity = dict(self.__dict__)
+        entity = dict((k, v) for k, v in self.__dict__.iteritems() if v)
         self.ensure_metadata_type(entity)
         del entity["_ClientValueObject__metadata_type"]
         return entity
