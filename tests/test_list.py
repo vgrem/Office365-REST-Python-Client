@@ -4,7 +4,7 @@ from tests.sharepoint_case import SPTestCase
 
 
 class TestList(SPTestCase):
-    list_title = "Tasks" + str(randint(0, 1000))
+    list_title = "Tasks" + str(randint(0, 10000))
 
     def test_1_create_list(self):
         list_properties = ListCreationInformation()

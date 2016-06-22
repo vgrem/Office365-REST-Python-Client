@@ -1,8 +1,8 @@
-from client.client_object import ClientObject
+from client.principal import Principal
 from client.user_collection import UserCollection
 
 
-class Group(ClientObject):
+class Group(Principal):
     """Represents a collection of users in a SharePoint site. A group is a type of SP.Principal."""
 
     @property

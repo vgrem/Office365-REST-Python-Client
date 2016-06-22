@@ -19,8 +19,8 @@ class List(ClientObject):
     def add_item(self, list_item_creation_information):
         """The recommended way to add a list item is to send a POST request to the ListItemCollection resource endpoint,
          as shown in ListItemCollection request examples."""
-        item = ListItem(self.context)
-        qry = ClientQuery.create_create_query(self.url + "/items", list_item_creation_information)
+        item = ListItem(self.context, None, None, list_item_creation_information)
+        qry = ClientQuery.create_create_query(self.url + "/items", item.to_json())
         self.context.add_query(qry, item)
         return item
 
@@ -35,7 +35,7 @@ class List(ClientObject):
         return view
 
     def update(self):
-        qry = ClientQuery.create_update_query(self, self.to_json())
+        qry = ClientQuery.create_update_query(self)
         self.context.add_query(qry)
 
     def delete_object(self):

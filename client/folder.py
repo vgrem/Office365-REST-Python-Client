@@ -18,7 +18,7 @@ class Folder(ClientObject):
         self.context.add_query(qry, self)
 
     def update(self):
-        qry = ClientQuery.create_update_query(self, self.to_json())
+        qry = ClientQuery.create_update_query(self)
         self.context.add_query(qry)
 
     def delete_object(self):

@@ -15,8 +15,8 @@ class ClientQuery(object):
         return qry
 
     @staticmethod
-    def create_update_query(client_object, parameters):
-        qry = ClientQuery(client_object.url, ClientActionType.Update, parameters)
+    def create_update_query(client_object):
+        qry = ClientQuery(client_object.url, ClientActionType.Update, client_object.to_json())
         return qry
 
     @staticmethod

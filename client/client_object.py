@@ -4,14 +4,16 @@ import importlib
 class ClientObject(object):
     """Base client object"""
 
-    def __init__(self, context, resource_path=None, parent_resource_path=None):
+    def __init__(self, context, resource_path=None, parent_resource_path=None, properties=None):
+        if properties is None:
+            properties = {}
         self._entity_type_name = None
         self._query_options = {}
         self._service_root_url = context.url + "/_api/"
         self._parent_collection = None
         self._context = context
-        self._properties = {}
-        self._changed_properties = {}
+        self._properties = properties
+        self._changed_properties = properties
         self._resource_path = resource_path
         self._parent_resource_path = parent_resource_path
         self._url = None
@@ -28,7 +30,8 @@ class ClientObject(object):
 
     def ensure_metadata_type(self, entity):
         """Ensures metadata type is contained in payload"""
-        entity["__metadata"] = {'type': self.entity_type_name}
+        if '__metadata' not in entity:
+            entity["__metadata"] = {'type': self.entity_type_name}
 
     @staticmethod
     def create_typed_object(ctx, properties):

@@ -1,7 +1,7 @@
 import urllib
-
 from client.file import File
 from client.folder import Folder
+from client.user import User
 from client_object import ClientObject
 from list_collection import ListCollection
 from web_collection import WebCollection
@@ -19,7 +19,7 @@ class Web(ClientObject):
 
     def update(self):
         """Update a Web resource"""
-        qry = ClientQuery.create_update_query(self, self.to_json())
+        qry = ClientQuery.create_update_query(self)
         self.context.add_query(qry)
 
     def delete_object(self):
@@ -79,3 +79,11 @@ class Web(ClientObject):
             return self.properties['SiteGroups']
         else:
             return GroupCollection(self.context, "sitegroups", self.resource_path)
+
+    @property
+    def current_user(self):
+        """Gets the current user."""
+        if self.is_property_available('CurrentUser'):
+            return self.properties['CurrentUser']
+        else:
+            return User(self.context, "CurrentUser", self.resource_path)
