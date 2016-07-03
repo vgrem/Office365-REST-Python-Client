@@ -63,9 +63,9 @@ class ClientObject(object):
         """Convert query options to url"""
         return '&'.join(['$%s=%s' % (key, value) for (key, value) in self.query_options.items()])
 
-    def set_property(self, name, value, track_changes=True):
+    def set_property(self, name, value, persist_changes=True):
         """Set resource property"""
-        if track_changes:  # track changed/updated properties
+        if persist_changes:  # persist changed/updated properties
             self._changed_properties[name] = value
         self._properties[name] = value
 
