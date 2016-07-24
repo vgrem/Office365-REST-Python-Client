@@ -1,9 +1,9 @@
-from site import Site
-from web import Web
-from client.client_object import ClientObject
 from client.runtime.client_action_type import ClientActionType
+from client.runtime.client_object import ClientObject
 from client.runtime.client_query import ClientQuery
 from client.runtime.client_request import ClientRequest
+from site import Site
+from web import Web
 
 
 class ClientContext(object):

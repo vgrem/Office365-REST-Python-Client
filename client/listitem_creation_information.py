@@ -1,4 +1,4 @@
-from client.client_value_object import ClientValueObject
+from client.runtime.client_value_object import ClientValueObject
 
 
 class ListItemCreationInformation(ClientValueObject):

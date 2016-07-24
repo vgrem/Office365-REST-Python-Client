@@ -1,4 +1,4 @@
-from client.client_object_collection import ClientObjectCollection
+from client.runtime.client_object_collection import ClientObjectCollection
 from client.view import View
 
 

@@ -3,7 +3,7 @@ SharePoint Online REST API client for Python
 
 ## Status
 
-[![Build Status](https://travis-ci.org/vgrem/SharePointOnline-REST-Python-Client.svg?branch=master)](https://github.com/vgrem/SharePointOnline-REST-Python-Client)
+[![Build Status](https://travis-ci.org/vgrem/SharePointOnline-REST-Python-Client.svg?branch=master)](https://travis-ci.org/vgrem/SharePointOnline-REST-Python-Client)
 
 # Installation
 

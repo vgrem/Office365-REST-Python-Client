@@ -1,4 +1,4 @@
-from client.client_object import ClientObject
+from client.runtime.client_object import ClientObject
 
 
 class ListItem(ClientObject):

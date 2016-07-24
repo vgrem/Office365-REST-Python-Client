@@ -1,6 +1,5 @@
-import urllib
-from client.client_object_collection import ClientObjectCollection
 from client.runtime.client_action_type import ClientActionType
+from client.runtime.client_object_collection import ClientObjectCollection
 from client.runtime.client_query import ClientQuery
 
 

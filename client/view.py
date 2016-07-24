@@ -1,5 +1,5 @@
+from client.runtime.client_object import ClientObject
 from client.runtime.client_query import ClientQuery
-from client_object import ClientObject
 
 
 class View(ClientObject):

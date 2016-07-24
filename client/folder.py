@@ -1,9 +1,9 @@
+from client.file_collection import FileCollection
 from client.folder_collection import FolderCollection
 from client.listitem import ListItem
 from client.runtime.client_action_type import ClientActionType
+from client.runtime.client_object import ClientObject
 from client.runtime.client_query import ClientQuery
-from client_object import ClientObject
-from client.file_collection import FileCollection
 
 
 class Folder(ClientObject):

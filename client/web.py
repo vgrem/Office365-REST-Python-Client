@@ -1,14 +1,15 @@
 import urllib
+
 from client.file import File
 from client.folder import Folder
-from client.user import User
-from client_object import ClientObject
-from list_collection import ListCollection
-from web_collection import WebCollection
 from client.folder_collection import FolderCollection
 from client.group_collection import GroupCollection
-from client.user_collection import UserCollection
+from client.runtime.client_object import ClientObject
 from client.runtime.client_query import ClientQuery
+from client.user import User
+from client.user_collection import UserCollection
+from list_collection import ListCollection
+from web_collection import WebCollection
 
 
 class Web(ClientObject):

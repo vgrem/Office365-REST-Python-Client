@@ -1,7 +1,7 @@
-from client_object_collection import ClientObjectCollection
-from list import List
 from client.runtime.client_action_type import ClientActionType
+from client.runtime.client_object_collection import ClientObjectCollection
 from client.runtime.client_query import ClientQuery
+from list import List
 
 
 class ListCollection(ClientObjectCollection):

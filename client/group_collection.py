@@ -1,5 +1,5 @@
-from client.client_object_collection import ClientObjectCollection
 from client.group import Group
+from client.runtime.client_object_collection import ClientObjectCollection
 from client.runtime.client_query import ClientQuery
 
 

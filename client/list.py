@@ -1,11 +1,11 @@
-from client.client_object import ClientObject
 from client.content_type_collection import ContentTypeCollection
 from client.folder import Folder
-from client.listitem import ListItem
 from client.listItem_collection import ListItemCollection
+from client.listitem import ListItem
+from client.runtime.client_object import ClientObject
+from client.runtime.client_query import ClientQuery
 from client.view import View
 from client.view_collection import ViewCollection
-from client.runtime.client_query import ClientQuery
 
 
 class List(ClientObject):
