@@ -1,9 +1,9 @@
 from client.file_collection import FileCollection
 from client.folder_collection import FolderCollection
 from client.listitem import ListItem
-from client.runtime.client_action_type import ClientActionType
 from client.runtime.client_object import ClientObject
 from client.runtime.client_query import ClientQuery
+from client.runtime.resource_path_entry import ResourcePathEntry
 
 
 class Folder(ClientObject):
@@ -14,16 +14,16 @@ class Folder(ClientObject):
         item = self.list_item_all_fields
         item.properties['Title'] = name
         item.properties['FileLeafRef'] = name
-        qry = ClientQuery(item.url, ClientActionType.Update, item)
+        qry = ClientQuery.update_entry_query(item)
         self.context.add_query(qry, self)
 
     def update(self):
-        qry = ClientQuery.create_update_query(self)
+        qry = ClientQuery.update_entry_query(self)
         self.context.add_query(qry)
 
     def delete_object(self):
         """Deletes the folder."""
-        qry = ClientQuery.create_delete_query(self)
+        qry = ClientQuery.delete_entry_query(self)
         self.context.add_query(qry)
         # self.removeFromParentCollection()
 
@@ -33,7 +33,7 @@ class Folder(ClientObject):
         if self.is_property_available('ListItemAllFields'):
             return self.properties["ListItemAllFields"]
         else:
-            return ListItem(self.context, "ListItemAllFields", self.resource_path)
+            return ListItem(self.context, ResourcePathEntry(self.context, self.resource_path, "ListItemAllFields"))
 
     @property
     def files(self):
@@ -41,7 +41,7 @@ class Folder(ClientObject):
         if self.is_property_available('Files'):
             return self.properties["Files"]
         else:
-            return FileCollection(self.context, "files", self.resource_path)
+            return FileCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "Files"))
 
     @property
     def folders(self):
@@ -49,4 +49,4 @@ class Folder(ClientObject):
         if self.is_property_available('Folders'):
             return self.properties["Folders"]
         else:
-            return FolderCollection(self.context, "folders", self.resource_path)
+            return FolderCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "Folders"))

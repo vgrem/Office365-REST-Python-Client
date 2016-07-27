@@ -17,9 +17,9 @@ class ClientValueObject(object):
         entity["__metadata"] = {'type': self.metadata_type}
 
     @property
-    def metadata(self):
+    def payload(self):
         """Generates resource payload for REST endpoint"""
-        entity = dict((k, v) for k, v in self.__dict__.iteritems() if v)
+        entity = dict((k, v) for k, v in self.__dict__.iteritems()
+                      if v and k != "_ClientValueObject__metadata_type")
         self.ensure_metadata_type(entity)
-        del entity["_ClientValueObject__metadata_type"]
         return entity

@@ -11,5 +11,5 @@ class WebCreationInformation(ClientValueObject):
         self.metadata_type = "SP.WebCreationInformation"
 
     @property
-    def metadata(self):
-        return {'parameters': super(WebCreationInformation, self).metadata}
+    def payload(self):
+        return {'parameters': super(WebCreationInformation, self).payload}

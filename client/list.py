@@ -4,6 +4,9 @@ from client.listItem_collection import ListItemCollection
 from client.listitem import ListItem
 from client.runtime.client_object import ClientObject
 from client.runtime.client_query import ClientQuery
+from client.runtime.action_type import ActionType
+from client.runtime.resource_path_entry import ResourcePathEntry
+from client.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from client.view import View
 from client.view_collection import ViewCollection
 
@@ -13,34 +16,38 @@ class List(ClientObject):
 
     def get_items(self):
         """Returns a collection of items from the list based on the specified query."""
-        items = ListItemCollection(self.context, "items", self.resource_path)
+        items = ListItemCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "items"))
         return items
 
     def add_item(self, list_item_creation_information):
         """The recommended way to add a list item is to send a POST request to the ListItemCollection resource endpoint,
          as shown in ListItemCollection request examples."""
-        item = ListItem(self.context, None, None, list_item_creation_information)
-        qry = ClientQuery.create_create_query(self.url + "/items", item.to_json())
+        item = ListItem(self.context)
+        qry = ClientQuery(self.url + "/items", ActionType.CreateEntry, list_item_creation_information)
         self.context.add_query(qry, item)
         return item
 
     def get_item_by_id(self, item_id):
         """Returns the list item with the specified list item identifier."""
-        list_item = ListItem(self.context, "getitembyid('{0}')".format(item_id), self.resource_path)
+        list_item = ListItem(self.context,
+                             ClientQuery.service_operation_query(self, ActionType.ReadMethod, "getitembyid", [item_id]))
         return list_item
 
     def get_view(self, view_id):
         """Returns the list view with the specified view identifier."""
-        view = View(self.context, "getview('{0}')".format(view_id), self.resource_path)
+        view = View(self.context, ResourcePathServiceOperation(self.context,
+                                                               self.resource_path,
+                                                               "getview",
+                                                               [view_id]))
         return view
 
     def update(self):
-        qry = ClientQuery.create_update_query(self)
+        qry = ClientQuery.update_entry_query(self)
         self.context.add_query(qry)
 
     def delete_object(self):
         """Deletes the list."""
-        qry = ClientQuery.create_delete_query(self)
+        qry = ClientQuery.delete_entry_query(self)
         self.context.add_query(qry)
         # self.removeFromParentCollection()
 
@@ -50,7 +57,7 @@ class List(ClientObject):
         if self.is_property_available('RootFolder'):
             return self.properties["RootFolder"]
         else:
-            return Folder(self.context, "rootfolder", self.resource_path)
+            return Folder(self.context, ResourcePathEntry(self.context, self.resource_path, "RootFolder"))
 
     @property
     def views(self):
@@ -59,7 +66,7 @@ class List(ClientObject):
         if self.is_property_available('Views'):
             return self.properties['Views']
         else:
-            return ViewCollection(self.context, "views", self.resource_path)
+            return ViewCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "views"))
 
     @property
     def content_types(self):
@@ -67,4 +74,4 @@ class List(ClientObject):
         if self.is_property_available('ContentTypes'):
             return self.properties['ContentTypes']
         else:
-            return ContentTypeCollection(self.context, "contenttypes", self.resource_path)
+            return ContentTypeCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "contenttypes"))

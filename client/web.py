@@ -1,11 +1,12 @@
 import urllib
 
+from client.runtime.client_object import ClientObject
+from client.runtime.client_query import ClientQuery
+from client.runtime.resource_path_entry import ResourcePathEntry
 from client.file import File
 from client.folder import Folder
 from client.folder_collection import FolderCollection
 from client.group_collection import GroupCollection
-from client.runtime.client_object import ClientObject
-from client.runtime.client_query import ClientQuery
 from client.user import User
 from client.user_collection import UserCollection
 from list_collection import ListCollection
@@ -13,19 +14,22 @@ from web_collection import WebCollection
 
 
 class Web(ClientObject):
-    """Web client object. Refer this link https://msdn.microsoft.com/en-us/library/office/dn499819.aspx for a details"""
+    """Web client object.
+    Refer this link https://msdn.microsoft.com/en-us/library/office/dn499819.aspx for a details"""
 
-    def __init__(self, context):
-        super(Web, self).__init__(context, "web")
+    def __init__(self, context, resource_path=None):
+        if resource_path is None:
+            resource_path = ResourcePathEntry(context, None, "Web")
+        super(Web, self).__init__(context, resource_path)
 
     def update(self):
         """Update a Web resource"""
-        qry = ClientQuery.create_update_query(self)
+        qry = ClientQuery.update_entry_query(self)
         self.context.add_query(qry)
 
     def delete_object(self):
         """Delete a Web resource"""
-        qry = ClientQuery.create_delete_query(self)
+        qry = ClientQuery.delete_entry_query(self)
         self.context.add_query(qry)
         # self.removeFromParentCollection()
 
@@ -47,7 +51,7 @@ class Web(ClientObject):
         if self.is_property_available('Webs'):
             return self.properties['Webs']
         else:
-            return WebCollection(self.context, "webs", self.resource_path)
+            return WebCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "webs"))
 
     @property
     def folders(self):
@@ -55,7 +59,7 @@ class Web(ClientObject):
         if self.is_property_available('Folders'):
             return self.properties['Folders']
         else:
-            return FolderCollection(self.context, "folders", self.resource_path)
+            return FolderCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "folders"))
 
     @property
     def lists(self):
@@ -63,7 +67,7 @@ class Web(ClientObject):
         if self.is_property_available('Lists'):
             return self.properties['Lists']
         else:
-            return ListCollection(self.context, "lists", self.resource_path)
+            return ListCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "lists"))
 
     @property
     def site_users(self):
@@ -71,7 +75,7 @@ class Web(ClientObject):
         if self.is_property_available('SiteUsers'):
             return self.properties['SiteUsers']
         else:
-            return UserCollection(self.context, "siteusers", self.resource_path)
+            return UserCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "siteusers"))
 
     @property
     def site_groups(self):
@@ -79,7 +83,7 @@ class Web(ClientObject):
         if self.is_property_available('SiteGroups'):
             return self.properties['SiteGroups']
         else:
-            return GroupCollection(self.context, "sitegroups", self.resource_path)
+            return GroupCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "sitegroups"))
 
     @property
     def current_user(self):
@@ -87,4 +91,4 @@ class Web(ClientObject):
         if self.is_property_available('CurrentUser'):
             return self.properties['CurrentUser']
         else:
-            return User(self.context, "CurrentUser", self.resource_path)
+            return User(self.context, ResourcePathEntry(self.context, self.resource_path, "CurrentUser"))

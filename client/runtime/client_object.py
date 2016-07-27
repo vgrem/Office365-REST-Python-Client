@@ -1,10 +1,12 @@
 import importlib
 
+from client.runtime.odata.odata_path_parser import ODataPathParser
+
 
 class ClientObject(object):
     """Base client object"""
 
-    def __init__(self, context, resource_path=None, parent_resource_path=None, properties=None):
+    def __init__(self, context, resource_path=None, properties=None):
         if properties is None:
             properties = {}
         self._entity_type_name = None
@@ -15,7 +17,6 @@ class ClientObject(object):
         self._properties = properties
         self._changed_properties = properties
         self._resource_path = resource_path
-        self._parent_resource_path = parent_resource_path
         self._url = None
 
     @property
@@ -65,7 +66,7 @@ class ClientObject(object):
 
     def set_property(self, name, value, persist_changes=True):
         """Set resource property"""
-        if persist_changes:  # persist changed/updated properties
+        if persist_changes:  # persist properties
             self._changed_properties[name] = value
         self._properties[name] = value
 
@@ -79,8 +80,6 @@ class ClientObject(object):
 
     @property
     def resource_path(self):
-        if self._parent_resource_path:
-            return self._parent_resource_path + "/" + self._resource_path
         return self._resource_path
 
     @property
@@ -92,7 +91,7 @@ class ClientObject(object):
         if self._url:
             return self._url
         else:
-            self._url = self.service_root_url + self.resource_path
+            self._url = self.service_root_url + self.resource_path.build_path_url()
         if self.query_options:
             self._url = self._url + "?" + self.query_options_to_url()
         return self._url
@@ -112,7 +111,9 @@ class ClientObject(object):
         return json
 
     def from_json(self, json):
-        self._properties = json
-        if '__metadata' in self._properties:
-            self._url = self._properties['__metadata']['uri']
-            self._entity_type_name = self._properties['__metadata']['type']
+        self._properties = dict((k, v) for k, v in json.iteritems()
+                                if k != '__metadata')
+        if '__metadata' in json:
+            self._url = json['__metadata']['uri']
+            self._resource_path = ODataPathParser.parse_path_string(self._url)
+            self._entity_type_name = json['__metadata']['type']

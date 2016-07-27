@@ -1,4 +1,4 @@
-from client.runtime.client_action_type import ClientActionType
+from client.runtime.action_type import ActionType
 from client.runtime.client_object import ClientObject
 from client.runtime.client_query import ClientQuery
 from client.runtime.client_request import ClientRequest
@@ -40,7 +40,7 @@ class ClientContext(object):
 
     def load(self, client_object, properties_to_retrieve=[]):
         """Prepare query"""
-        qry = ClientQuery(client_object.url, ClientActionType.Read)
+        qry = ClientQuery(client_object.url, ActionType.ReadEntry)
         if qry not in self.__resultObjects:
             self.add_query(qry, client_object)
 

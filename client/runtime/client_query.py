@@ -1,30 +1,34 @@
-from client.runtime.client_action_type import ClientActionType
+from client.runtime.action_type import ActionType
+from client.runtime.odata.odata_path_parser import ODataPathParser
 
 
 class ClientQuery(object):
     """Client query"""
 
-    def __init__(self, url, action_type=ClientActionType.Read, parameters=None):
+    def __init__(self, url, action_type=ActionType.ReadEntry, parameters=None):
         self.__url = url
         self.__actionType = action_type
-        self.__parameters = parameters
+        self.__payload = parameters
 
     @staticmethod
-    def create_create_query(url, parameters):
-        qry = ClientQuery(url, ClientActionType.Create, parameters)
+    def create_entry_query(parent_client_object, parameters):
+        qry = ClientQuery(parent_client_object.url, ActionType.CreateEntry, parameters)
         return qry
 
     @staticmethod
-    def create_update_query(client_object):
-        qry = ClientQuery(client_object.url, ClientActionType.Update, client_object.to_json())
+    def update_entry_query(client_object):
+        qry = ClientQuery(client_object.url, ActionType.UpdateEntry, client_object.to_json())
         return qry
 
     @staticmethod
-    def create_delete_query(client_object, url=None):
-        if url:
-            qry = ClientQuery(url, ClientActionType.Delete)
-        else:
-            qry = ClientQuery(client_object.url, ClientActionType.Delete)
+    def service_operation_query(client_object, action_type, method_name, method_params=None):
+        url = client_object.url + ODataPathParser.from_method(method_name, method_params)
+        qry = ClientQuery(url, action_type)
+        return qry
+
+    @staticmethod
+    def delete_entry_query(client_object):
+        qry = ClientQuery(client_object.url, ActionType.DeleteEntry)
         return qry
 
     @property
@@ -36,8 +40,8 @@ class ClientQuery(object):
         return self.__actionType
 
     @property
-    def parameters(self):
-        return self.__parameters
+    def payload(self):
+        return self.__payload
 
     @property
     def id(self):
@@ -48,4 +52,3 @@ class ClientQuery(object):
 
     def __eq__(self, other):
         return self.url == other.url
-

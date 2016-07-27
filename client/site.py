@@ -1,4 +1,5 @@
 from client.runtime.client_object import ClientObject
+from client.runtime.resource_path_entry import ResourcePathEntry
 from web import Web
 
 
@@ -6,7 +7,7 @@ class Site(ClientObject):
     """Site client object"""
 
     def __init__(self, context):
-        super(Site, self).__init__(context, "site")
+        super(Site, self).__init__(context, ResourcePathEntry(context, None, "Site"))
 
     @property
     def root_web(self):
@@ -14,4 +15,4 @@ class Site(ClientObject):
         if self.is_property_available('RootWeb'):
             return self.properties['RootWeb']
         else:
-            return Web(self.context)
+            return Web(self.context, ResourcePathEntry(self.context, self.resource_path, "RootWeb"))

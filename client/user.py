@@ -1,5 +1,6 @@
 from client.group_collection import GroupCollection
 from client.principal import Principal
+from client.runtime.resource_path_entry import ResourcePathEntry
 
 
 class User(Principal):
@@ -11,4 +12,4 @@ class User(Principal):
         if self.is_property_available('Groups'):
             return self.properties['Groups']
         else:
-            return GroupCollection(self.context, "Groups", self.resource_path)
+            return GroupCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "Groups"))

@@ -1,6 +1,6 @@
 import requests
 
-from client.runtime.client_action_type import ClientActionType
+from client.runtime.action_type import ActionType
 from client.runtime.context_web_information import ContextWebInformation
 from client.runtime.utilities.http_method import HttpMethod
 
@@ -27,16 +27,16 @@ class ClientRequest(object):
     def execute_query(self, query):
         headers = {}
         "Execute client request"
-        if query.action_type == ClientActionType.Delete:
+        if query.action_type == ActionType.DeleteEntry:
             headers["X-HTTP-Method"] = "DELETE"
             headers["IF-MATCH"] = '*'
-        elif query.action_type == ClientActionType.Update:
+        elif query.action_type == ActionType.UpdateEntry:
             headers["X-HTTP-Method"] = "MERGE"
             headers["IF-MATCH"] = '*'
         url = query.url
-        data = query.parameters
+        data = query.payload
         method = HttpMethod.Get
-        if query.action_type != ClientActionType.Read:
+        if not (query.action_type == ActionType.ReadEntry or query.action_type == ActionType.ReadMethod):
             method = HttpMethod.Post
         return self.execute_query_direct(url, headers, data, method)
 
@@ -50,7 +50,7 @@ class ClientRequest(object):
             self.auth_context.authenticate_request(headers)
             for key in self.defaultHeaders:
                 headers[key] = self.defaultHeaders[key]
-            if data or 'X-HTTP-Method' in headers or method is HttpMethod.Post:
+            if method == HttpMethod.Post:
                 self.ensure_form_digest(headers)
                 result = requests.post(url=request_url, headers=headers, json=data)
             else:
