@@ -1,5 +1,6 @@
 from random import randint
-from client.list_creation_information import ListCreationInformation
+
+from client.office365.sharepoint.list_creation_information import ListCreationInformation
 from tests.sharepoint_case import SPTestCase
 
 

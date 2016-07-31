@@ -1,5 +1,5 @@
-from client.runtime.resource_path_entry import ResourcePathEntry
-from client.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from client.office365.runtime.resource_path_entry import ResourcePathEntry
+from client.office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from tests.sharepoint_case import SPTestCase
 
 

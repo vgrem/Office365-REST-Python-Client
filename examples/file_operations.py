@@ -1,5 +1,5 @@
-from client.client_context import ClientContext
-from client.runtime.auth.authentication_context import AuthenticationContext
+from client.office365.runtime.auth.authentication_context import AuthenticationContext
+from client.office365.sharepoint.client_context import ClientContext
 from settings import settings
 
 
