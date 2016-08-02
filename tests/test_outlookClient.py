@@ -22,13 +22,13 @@ class TestOutlookClient(TestCase):
             ]
         }
 
-        contact = client.get_contacts().add(contact_info)
+        contact = client.contacts.add(contact_info)
         client.execute_query()
         self.assertIsNotNone(contact.properties["GivenName"])
 
     def test_get_contacts(self):
         client = OutlookClient(username=settings['username'], password=settings['password'])
-        contacts = client.get_contacts()
+        contacts = client.contacts
         client.load(contacts)
         client.execute_query()
         self.assertGreaterEqual(len(contacts), 1)
