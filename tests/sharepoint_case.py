@@ -1,5 +1,4 @@
 from unittest import TestCase
-
 from client.office365.runtime.auth.authentication_context import AuthenticationContext
 from client.office365.sharepoint.client_context import ClientContext
 from examples.settings import settings

@@ -8,6 +8,11 @@ class ClientObjectCollection(ClientObject):
         super(ClientObjectCollection, self).__init__(context, resource_path)
         self.__data = []
 
+    def from_json(self, payload):
+        for properties in payload:
+            child_client_object = self.create_typed_object(properties)
+            self.add_child(child_client_object)
+
     def add_child(self, client_object):
         self.__data.append(client_object)
 

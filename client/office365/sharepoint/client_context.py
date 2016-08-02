@@ -1,22 +1,42 @@
-from client.office365.runtime.action_type import ActionType
-from client.office365.runtime.client_object import ClientObject
-from client.office365.runtime.client_query import ClientQuery
-from client.office365.runtime.client_request import ClientRequest
+import requests
+
+from client.office365.runtime.client_runtime_context import ClientRuntimeContext
+from client.office365.runtime.context_web_information import ContextWebInformation
+from client.office365.runtime.odata.sharepoint_json_format import SharePointJsonFormat
+from client.office365.runtime.odata.sharepoint_metadata_type import SharePointMetadataType
+from client.office365.runtime.utilities.request_options import RequestOptions
 from client.office365.sharepoint.site import Site
 from client.office365.sharepoint.web import Web
 
 
-class ClientContext(object):
+class ClientContext(ClientRuntimeContext):
     """SharePoint client context"""
 
     def __init__(self, url, auth_context):
-        self.__base_url = url
-        self.__auth_context = auth_context
+        super(ClientContext, self).__init__(url + "/_api/", auth_context)
         self.__web = None
         self.__site = None
-        self.__pending_request = None
-        self.__queries = []
-        self.__resultObjects = {}
+        self.contextWebInformation = None
+        self.json_format = SharePointJsonFormat(SharePointMetadataType.Verbose)
+
+    def ensure_form_digest(self, request_options):
+        if not self.contextWebInformation:
+            self.request_form_digest()
+        request_options.set_header('X-RequestDigest', self.contextWebInformation.form_digest_value)
+
+    def request_form_digest(self):
+        """Request Form Digest"""
+        request = RequestOptions(self.service_root_url + "contextinfo")
+        self.authenticate_request(request)
+        request.set_headers(self.json_format.build_http_headers())
+        response = requests.post(url=request.url,
+                                 headers=request.headers,
+                                 auth=request.auth)
+        payload = response.json()
+        if self.json_format.metadata == SharePointMetadataType.Verbose:
+            payload = payload['d']['GetContextWebInformation']
+        self.contextWebInformation = ContextWebInformation()
+        self.contextWebInformation.from_json(payload)
 
     @property
     def web(self):
@@ -31,39 +51,3 @@ class ClientContext(object):
         if not self.__site:
             self.__site = Site(self)
         return self.__site
-
-    @property
-    def pending_request(self):
-        if not self.__pending_request:
-            self.__pending_request = ClientRequest(self.__base_url, self.__auth_context)
-        return self.__pending_request
-
-    def load(self, client_object, properties_to_retrieve=[]):
-        """Prepare query"""
-        qry = ClientQuery(client_object.url, ActionType.ReadEntry)
-        if qry not in self.__resultObjects:
-            self.add_query(qry, client_object)
-
-    def execute_query(self):
-        """Submit pending request to the server"""
-        for qry in self.__queries:
-            data = self.pending_request.execute_query(qry)
-            if any(data) and qry in self.__resultObjects:
-                result_object = self.__resultObjects[qry]
-                if 'results' in data['d']:
-                    for item in data['d']['results']:
-                        child_client_object = ClientObject.create_typed_object(self, item)
-                        result_object.add_child(child_client_object)
-                else:
-                    result_object.from_json(data['d'])
-            self.__queries.remove(qry)
-
-    def add_query(self, query, result_object=None):
-        self.__queries.append(query)
-        if result_object is not None:
-            self.__resultObjects[query] = result_object
-
-    @property
-    def url(self):
-        """Get base url"""
-        return self.__base_url

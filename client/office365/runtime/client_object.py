@@ -1,8 +1,7 @@
 import importlib
 
-import sys
-
 from client.office365.runtime.odata.odata_path_parser import ODataPathParser
+from client.office365.runtime.odata.sharepoint_metadata_type import SharePointMetadataType
 
 
 class ClientObject(object):
@@ -13,13 +12,19 @@ class ClientObject(object):
             properties = {}
         self._entity_type_name = None
         self._query_options = {}
-        self._service_root_url = context.url + "/_api/"
         self._parent_collection = None
         self._context = context
         self._properties = properties
         self._changed_properties = properties
         self._resource_path = resource_path
         self._url = None
+
+    @property
+    def include_metadata(self):
+        if self.context.json_format.metadata == SharePointMetadataType.NoMetadata \
+                or self.context.json_format.metadata == SharePointMetadataType.MinimalMetadata:
+            return False
+        return True
 
     @property
     def entity_type_name(self):
@@ -36,18 +41,11 @@ class ClientObject(object):
         if '__metadata' not in entity:
             entity["__metadata"] = {'type': self.entity_type_name}
 
-    @staticmethod
-    def create_typed_object(ctx, properties):
-        typeParts = properties["__metadata"]["type"].split(".")
-        entity_name = typeParts[1]
-        if len(typeParts) == 3:
-            if typeParts[1] == "Data":
-                entity_name = "ListItem"
-            else:
-                entity_name = typeParts[2]
-        module_name = __package__.replace("runtime", "sharepoint." + entity_name.lower())
+    def create_typed_object(self, properties):
+        entity_name = self.__class__.__name__.replace("Collection", "")
+        module_name = self.context.__module__.replace("client_context", "") + entity_name.lower()
         clientObjectClass = getattr(importlib.import_module(module_name), entity_name)
-        client_object = clientObjectClass(ctx)
+        client_object = clientObjectClass(self.context)
         client_object.from_json(properties)
         return client_object
 
@@ -78,7 +76,7 @@ class ClientObject(object):
 
     @property
     def service_root_url(self):
-        return self._service_root_url
+        return self.context.service_root_url
 
     @property
     def resource_path(self):
@@ -108,14 +106,17 @@ class ClientObject(object):
 
     def to_json(self):
         """Generates resource payload for REST endpoint"""
-        json = dict(self._changed_properties)
-        self.ensure_metadata_type(json)
-        return json
+        payload = dict(self._changed_properties)
+        if self.include_metadata:
+            self.ensure_metadata_type(payload)
+        else:
+            payload = dict((k, v) for k, v in payload.iteritems() if k != "__metadata")
+        return payload
 
-    def from_json(self, json):
-        self._properties = dict((k, v) for k, v in json.iteritems()
+    def from_json(self, payload):
+        self._properties = dict((k, v) for k, v in payload.iteritems()
                                 if k != '__metadata')
-        if '__metadata' in json:
-            self._url = json['__metadata']['uri']
+        if '__metadata' in payload:
+            self._url = payload['__metadata']['uri']
             self._resource_path = ODataPathParser.parse_path_string(self._url)
-            self._entity_type_name = json['__metadata']['type']
+            self._entity_type_name = payload['__metadata']['type']

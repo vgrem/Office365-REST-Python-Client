@@ -1,75 +1,84 @@
 import requests
 
 from client.office365.runtime.action_type import ActionType
-from client.office365.runtime.context_web_information import ContextWebInformation
+from client.office365.runtime.client_object_collection import ClientObjectCollection
+from client.office365.runtime.odata.sharepoint_json_format import SharePointJsonFormat
 from client.office365.runtime.utilities.http_method import HttpMethod
+from client.office365.runtime.utilities.request_options import RequestOptions
 
 
 class ClientRequest(object):
-    """SharePoint client request"""
+    """Client request for SharePoint ODATA/REST service"""
 
-    def __init__(self, url, auth_context):
-        self.url = url
-        self.auth_context = auth_context
-        self.defaultHeaders = {'content-type': 'application/json;odata=verbose',
-                               'accept': 'application/json;odata=verbose'}
-        self.contextWebInformation = None
+    def __init__(self, context):
+        self.context = context
+        self.__queries = []
+        self.__resultObjects = {}
 
-    @staticmethod
-    def process_response_json(response):
-        if response.content:
-            json = response.json()
-            if 'error' in json:
-                raise ValueError("Response error:", json['error']['message']['value'])
-            return json
-        return {}
+    def execute_query(self):
+        """Submit pending request to the server"""
+        for qry in self.__queries:
+            request = self.build_request(qry)
+            payload = self.execute_query_direct(request)
+            self.process_payload_json(qry, payload)
+            self.__queries.remove(qry)
 
-    def execute_query(self, query):
-        headers = {}
-        "Execute client request"
+    def process_payload_json(self, query, response):
+        if not response.content:
+            return
+
+        payload = response.json()
+        "verify for any errors"
+        if 'error' in payload:
+            raise ValueError("Response error:", payload['error']['message'])
+
+        if any(payload) and query in self.__resultObjects:
+            result_object = self.__resultObjects[query]
+            json_format = self.context.json_format
+            if isinstance(json_format, SharePointJsonFormat):
+                if json_format.payload_root_entry:
+                    payload = payload[json_format.payload_root_entry]
+                if isinstance(result_object, ClientObjectCollection) \
+                        and json_format.payload_root_entry_collection:
+                    payload = payload[json_format.payload_root_entry_collection]
+            result_object.from_json(payload)
+
+    def build_request(self, query):
+        request = RequestOptions(query.url)
+        "set custom headers"
+        request.set_headers(self.context.json_format.build_http_headers())
         if query.action_type == ActionType.DeleteEntry:
-            headers["X-HTTP-Method"] = "DELETE"
-            headers["IF-MATCH"] = '*'
+            request.set_header("X-HTTP-Method", "DELETE")
+            request.set_header("IF-MATCH", '*')
         elif query.action_type == ActionType.UpdateEntry:
-            headers["X-HTTP-Method"] = "MERGE"
-            headers["IF-MATCH"] = '*'
-        url = query.url
-        data = query.payload
-        method = HttpMethod.Get
+            request.set_header("X-HTTP-Method", "MERGE")
+            request.set_header("IF-MATCH", '*')
+        "set request payload"
+        request.data = query.payload
+        "set method"
+        request.method = HttpMethod.Get
         if not (query.action_type == ActionType.ReadEntry or query.action_type == ActionType.ReadMethod):
-            method = HttpMethod.Post
-        return self.execute_query_direct(url, headers, data, method)
+            request.method = HttpMethod.Post
+        return request
 
-    def execute_query_direct(self, request_url, headers=None, data=None, method=HttpMethod.Get):
+    def execute_query_direct(self, request_options):
         """Execute client request"""
-        if data is None:
-            data = {}
-        if headers is None:
-            headers = {}
-        try:
-            self.auth_context.authenticate_request(headers)
-            for key in self.defaultHeaders:
-                headers[key] = self.defaultHeaders[key]
-            if method == HttpMethod.Post:
-                self.ensure_form_digest(headers)
-                result = requests.post(url=request_url, headers=headers, json=data)
-            else:
-                result = requests.get(url=request_url, headers=headers)
-            return self.process_response_json(result)
-        except requests.exceptions.RequestException as e:
-            return "Error: {}".format(e)
+        self.context.authenticate_request(request_options)
+        if request_options.method == HttpMethod.Post:
+            from client.office365.sharepoint.client_context import ClientContext
+            if isinstance(self.context, ClientContext):
+                self.context.ensure_form_digest(request_options)
+            result = requests.post(url=request_options.url,
+                                   headers=request_options.headers,
+                                   json=request_options.data,
+                                   auth=request_options.auth)
+        else:
+            result = requests.get(url=request_options.url,
+                                  headers=request_options.headers,
+                                  auth=request_options.auth)
+        return result
 
-    def ensure_form_digest(self, headers):
-        if not self.contextWebInformation:
-            self.request_form_digest()
-        headers['X-RequestDigest'] = self.contextWebInformation.form_digest_value
-
-    def request_form_digest(self):
-        """Request Form Digest"""
-        url = self.url + "/_api/contextinfo"
-        headers = self.defaultHeaders
-        self.auth_context.authenticate_request(headers)
-        response = requests.post(url=url, headers=headers)
-        data = self.process_response_json(response)
-        self.contextWebInformation = ContextWebInformation()
-        self.contextWebInformation.from_json(data['d']['GetContextWebInformation'])
+    def add_query(self, query, result_object=None):
+        self.__queries.append(query)
+        if result_object is not None:
+            self.__resultObjects[query] = result_object

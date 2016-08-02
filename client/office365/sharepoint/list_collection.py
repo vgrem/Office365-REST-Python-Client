@@ -35,8 +35,9 @@ class ListCollection(ClientObjectCollection):
 
     def add(self, list_creation_information):
         """Creates a List resource"""
-        list_new = List(self.context)
+        list_entry = List(self.context)
+        list_creation_information._include_metadata = self.include_metadata
         qry = ClientQuery.create_entry_query(self, list_creation_information.payload)
-        self.context.add_query(qry, list_new)
-        self.add_child(list_new)
-        return list_new
+        self.context.add_query(qry, list_entry)
+        self.add_child(list_entry)
+        return list_entry

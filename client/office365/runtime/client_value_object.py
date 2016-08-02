@@ -3,6 +3,7 @@ class ClientValueObject(object):
 
     def __init__(self):
         self.__metadata_type = None
+        self._include_metadata = True
 
     @property
     def metadata_type(self):
@@ -20,6 +21,8 @@ class ClientValueObject(object):
     def payload(self):
         """Generates resource payload for REST endpoint"""
         entity = dict((k, v) for k, v in self.__dict__.iteritems()
-                      if v and k != "_ClientValueObject__metadata_type")
-        self.ensure_metadata_type(entity)
+                      if v and k != "_ClientValueObject__metadata_type"
+                      and k != "_include_metadata")
+        if self._include_metadata:
+            self.ensure_metadata_type(entity)
         return entity

@@ -1,10 +1,12 @@
+from client.office365.runtime.auth.base_authentication_context import BaseAuthenticationContext
 from client.office365.runtime.auth.saml_token_provider import SamlTokenProvider
 
 
-class AuthenticationContext(object):
-    """SharePoint Online Authentication Context"""
+class AuthenticationContext(BaseAuthenticationContext):
+    """Authentication context for SharePoint Online/One Drive"""
 
     def __init__(self, url):
+        super(AuthenticationContext, self).__init__()
         self.url = url
         self.provider = None
 
@@ -13,9 +15,9 @@ class AuthenticationContext(object):
         self.provider = SamlTokenProvider(self.url, username, password)
         return self.provider.acquire_token()
 
-    def authenticate_request(self, headers):
+    def authenticate_request(self, request_options):
         """Authenticate request"""
-        headers['Cookie'] = self.provider.get_authentication_cookie()
+        request_options.set_header('Cookie', self.provider.get_authentication_cookie())
 
     def get_last_error(self):
         return self.provider.get_last_error()

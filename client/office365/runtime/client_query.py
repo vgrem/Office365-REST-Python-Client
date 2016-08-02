@@ -11,6 +11,11 @@ class ClientQuery(object):
         self.__payload = parameters
 
     @staticmethod
+    def read_entry_query(client_object):
+        qry = ClientQuery(client_object.url, ActionType.ReadEntry)
+        return qry
+
+    @staticmethod
     def create_entry_query(parent_client_object, parameters):
         qry = ClientQuery(parent_client_object.url, ActionType.CreateEntry, parameters)
         return qry
@@ -21,14 +26,14 @@ class ClientQuery(object):
         return qry
 
     @staticmethod
-    def service_operation_query(client_object, action_type, method_name, method_params=None):
-        url = client_object.url + ODataPathParser.from_method(method_name, method_params)
-        qry = ClientQuery(url, action_type)
+    def delete_entry_query(client_object):
+        qry = ClientQuery(client_object.url, ActionType.DeleteEntry)
         return qry
 
     @staticmethod
-    def delete_entry_query(client_object):
-        qry = ClientQuery(client_object.url, ActionType.DeleteEntry)
+    def service_operation_query(client_object, action_type, method_name, method_params=None):
+        url = client_object.url + ODataPathParser.from_method(method_name, method_params)
+        qry = ClientQuery(url, action_type)
         return qry
 
     @property
