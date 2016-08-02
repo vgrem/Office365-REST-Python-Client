@@ -2,7 +2,7 @@ import requests
 
 from client.office365.runtime.action_type import ActionType
 from client.office365.runtime.client_object_collection import ClientObjectCollection
-from client.office365.runtime.odata.sharepoint_json_format import SharePointJsonFormat
+from client.office365.runtime.odata.json_light_format import JsonLightFormat
 from client.office365.runtime.utilities.http_method import HttpMethod
 from client.office365.runtime.utilities.request_options import RequestOptions
 
@@ -35,11 +35,14 @@ class ClientRequest(object):
         if any(payload) and query in self.__resultObjects:
             result_object = self.__resultObjects[query]
             json_format = self.context.json_format
-            if isinstance(json_format, SharePointJsonFormat):
+            if isinstance(json_format, JsonLightFormat):
                 if json_format.payload_root_entry:
                     payload = payload[json_format.payload_root_entry]
                 if isinstance(result_object, ClientObjectCollection) \
                         and json_format.payload_root_entry_collection:
+                    payload = payload[json_format.payload_root_entry_collection]
+            else:
+                if isinstance(result_object, ClientObjectCollection):
                     payload = payload[json_format.payload_root_entry_collection]
             result_object.from_json(payload)
 

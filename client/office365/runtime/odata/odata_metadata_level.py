@@ -1,4 +1,5 @@
-class SharePointMetadataType:
+class ODataMetadataLevel:
+    """The amount of metadata information to serialize in an OData response (for JSON light)."""
     def __init__(self):
         pass
 

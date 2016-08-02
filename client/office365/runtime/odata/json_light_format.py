@@ -1,13 +1,13 @@
 from client.office365.runtime.odata.odata_json_format import ODataJsonFormat
-from client.office365.runtime.odata.sharepoint_metadata_type import SharePointMetadataType
+from client.office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
 
 
-class SharePointJsonFormat(ODataJsonFormat):
-    """JSON Light for SharePoint Online/One Drive for Business"""
+class JsonLightFormat(ODataJsonFormat):
+    """JSON Light format for SharePoint Online/One Drive for Business"""
 
     def __init__(self, metadata):
-        super(SharePointJsonFormat, self).__init__(metadata)
-        if self.metadata == SharePointMetadataType.Verbose:
+        super(JsonLightFormat, self).__init__(metadata)
+        if self.metadata == ODataMetadataLevel.Verbose:
             self.payload_root_entry = "d"
             self.payload_root_entry_collection = "results"
         else:

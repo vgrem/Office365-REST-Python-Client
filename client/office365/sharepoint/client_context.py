@@ -2,8 +2,8 @@ import requests
 
 from client.office365.runtime.client_runtime_context import ClientRuntimeContext
 from client.office365.runtime.context_web_information import ContextWebInformation
-from client.office365.runtime.odata.sharepoint_json_format import SharePointJsonFormat
-from client.office365.runtime.odata.sharepoint_metadata_type import SharePointMetadataType
+from client.office365.runtime.odata.json_light_format import JsonLightFormat
+from client.office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
 from client.office365.runtime.utilities.request_options import RequestOptions
 from client.office365.sharepoint.site import Site
 from client.office365.sharepoint.web import Web
@@ -17,7 +17,7 @@ class ClientContext(ClientRuntimeContext):
         self.__web = None
         self.__site = None
         self.contextWebInformation = None
-        self.json_format = SharePointJsonFormat(SharePointMetadataType.Verbose)
+        self.json_format = JsonLightFormat(ODataMetadataLevel.Verbose)
 
     def ensure_form_digest(self, request_options):
         if not self.contextWebInformation:
@@ -33,7 +33,7 @@ class ClientContext(ClientRuntimeContext):
                                  headers=request.headers,
                                  auth=request.auth)
         payload = response.json()
-        if self.json_format.metadata == SharePointMetadataType.Verbose:
+        if self.json_format.metadata == ODataMetadataLevel.Verbose:
             payload = payload['d']['GetContextWebInformation']
         self.contextWebInformation = ContextWebInformation()
         self.contextWebInformation.from_json(payload)

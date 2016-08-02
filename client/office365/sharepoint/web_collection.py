@@ -1,7 +1,7 @@
 from client.office365.runtime.action_type import ActionType
 from client.office365.runtime.client_object_collection import ClientObjectCollection
 from client.office365.runtime.client_query import ClientQuery
-from client.office365.runtime.odata.sharepoint_metadata_type import SharePointMetadataType
+from client.office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
 
 
 class WebCollection(ClientObjectCollection):

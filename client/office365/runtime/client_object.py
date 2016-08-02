@@ -1,7 +1,6 @@
 import importlib
-
 from client.office365.runtime.odata.odata_path_parser import ODataPathParser
-from client.office365.runtime.odata.sharepoint_metadata_type import SharePointMetadataType
+from client.office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
 
 
 class ClientObject(object):
@@ -21,8 +20,8 @@ class ClientObject(object):
 
     @property
     def include_metadata(self):
-        if self.context.json_format.metadata == SharePointMetadataType.NoMetadata \
-                or self.context.json_format.metadata == SharePointMetadataType.MinimalMetadata:
+        if self.context.json_format.metadata == ODataMetadataLevel.NoMetadata \
+                or self.context.json_format.metadata == ODataMetadataLevel.MinimalMetadata:
             return False
         return True
 
@@ -43,7 +42,11 @@ class ClientObject(object):
 
     def create_typed_object(self, properties):
         entity_name = self.__class__.__name__.replace("Collection", "")
-        module_name = self.context.__module__.replace("client_context", "") + entity_name.lower()
+        from client.office365.sharepoint.client_context import ClientContext
+        if isinstance(self.context, ClientContext):
+            module_name = self.context.__module__.replace("client_context", "") + entity_name.lower()
+        else:
+            module_name = self.context.__module__.replace("outlook_client", "") + entity_name.lower()
         clientObjectClass = getattr(importlib.import_module(module_name), entity_name)
         client_object = clientObjectClass(self.context)
         client_object.from_json(properties)
