@@ -48,20 +48,28 @@ class ClientRequest(object):
 
     def build_request(self, query):
         request = RequestOptions(query.url)
-        "set custom headers"
+        "set json format headers"
         request.set_headers(self.context.json_format.build_http_headers())
-        if query.action_type == ActionType.DeleteEntry:
-            request.set_header("X-HTTP-Method", "DELETE")
-            request.set_header("IF-MATCH", '*')
-        elif query.action_type == ActionType.UpdateEntry:
-            request.set_header("X-HTTP-Method", "MERGE")
-            request.set_header("IF-MATCH", '*')
+        if isinstance(self.context.json_format, JsonLightFormat):
+            "set custom method headers"
+            if query.action_type == ActionType.DeleteEntry:
+                request.set_header("X-HTTP-Method", "DELETE")
+                request.set_header("IF-MATCH", '*')
+            elif query.action_type == ActionType.UpdateEntry:
+                request.set_header("X-HTTP-Method", "MERGE")
+                request.set_header("IF-MATCH", '*')
+            "set method"
+            if not (query.action_type == ActionType.ReadEntry or query.action_type == ActionType.GetMethod):
+                request.method = HttpMethod.Post
+        else:
+            if query.action_type == ActionType.CreateEntry:
+                request.method = HttpMethod.Post
+            elif query.action_type == ActionType.UpdateEntry:
+                request.method = HttpMethod.Patch
+            elif query.action_type == ActionType.DeleteEntry:
+                request.method = HttpMethod.Delete
         "set request payload"
         request.data = query.payload
-        "set method"
-        request.method = HttpMethod.Get
-        if not (query.action_type == ActionType.ReadEntry or query.action_type == ActionType.ReadMethod):
-            request.method = HttpMethod.Post
         return request
 
     def execute_query_direct(self, request_options):
@@ -75,6 +83,15 @@ class ClientRequest(object):
                                    headers=request_options.headers,
                                    json=request_options.data,
                                    auth=request_options.auth)
+        elif request_options.method == HttpMethod.Patch:
+            result = requests.patch(url=request_options.url,
+                                    headers=request_options.headers,
+                                    json=request_options.data,
+                                    auth=request_options.auth)
+        elif request_options.method == HttpMethod.Delete:
+            result = requests.delete(url=request_options.url,
+                                     headers=request_options.headers,
+                                     auth=request_options.auth)
         else:
             result = requests.get(url=request_options.url,
                                   headers=request_options.headers,

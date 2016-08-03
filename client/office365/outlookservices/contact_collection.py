@@ -1,4 +1,4 @@
-from client.office365.outlook.contact import Contact
+from client.office365.outlookservices.contact import Contact
 from client.office365.runtime.client_object_collection import ClientObjectCollection
 from client.office365.runtime.client_query import ClientQuery
 

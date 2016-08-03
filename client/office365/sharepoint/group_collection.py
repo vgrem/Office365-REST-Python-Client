@@ -29,10 +29,10 @@ class GroupCollection(ClientObjectCollection):
 
     def remove_by_id(self, group_id):
         """Removes the group with the specified member ID from the collection."""
-        qry = ClientQuery.service_operation_query(self, ActionType.DeleteMethod, "removebyid", [group_id])
+        qry = ClientQuery.service_operation_query(self, ActionType.PostMethod, "removebyid", [group_id])
         self.context.add_query(qry)
 
     def remove_by_login_name(self, group_name):
         """Removes the cross-site group with the specified name from the collection."""
-        qry = ClientQuery.service_operation_query(self, ActionType.DeleteMethod, "removebyloginname", [group_name])
+        qry = ClientQuery.service_operation_query(self, ActionType.PostMethod, "removebyloginname", [group_name])
         self.context.add_query(qry)

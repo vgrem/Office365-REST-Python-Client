@@ -8,6 +8,5 @@ class ActionType:
     CreateEntry = 2
     UpdateEntry = 3
     DeleteEntry = 4
-    ReadMethod = 5
-    UpdateMethod = 6
-    DeleteMethod = 7
+    GetMethod = 5
+    PostMethod = 6

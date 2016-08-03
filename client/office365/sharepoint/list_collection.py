@@ -22,14 +22,14 @@ class ListCollection(ClientObjectCollection):
         """Gets a list that is the default asset location for images or other files, which the users
         upload to their wiki pages."""
         list_site_assets = List(self.context)
-        qry = ClientQuery.service_operation_query(self, ActionType.UpdateMethod, "ensuresiteassetslibrary")
+        qry = ClientQuery.service_operation_query(self, ActionType.PostMethod, "ensuresiteassetslibrary")
         self.context.add_query(qry, list_site_assets)
         return list_site_assets
 
     def ensure_site_pages_library(self):
         """Gets a list that is the default location for wiki pages."""
         list_site_pages = List(self.context)
-        qry = ClientQuery.service_operation_query(self, ActionType.UpdateMethod, "ensuresitepageslibrary")
+        qry = ClientQuery.service_operation_query(self, ActionType.PostMethod, "ensuresitepageslibrary")
         self.context.add_query(qry, list_site_pages)
         return list_site_pages
 

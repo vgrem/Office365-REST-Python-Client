@@ -12,7 +12,7 @@ class WebCollection(ClientObjectCollection):
         payload = web_creation_information.payload
         from web import Web
         web = Web(self.context)
-        qry = ClientQuery(self.url + "/add", ActionType.UpdateMethod, payload)
+        qry = ClientQuery(self.url + "/add", ActionType.PostMethod, payload)
         self.context.add_query(qry, web)
         self.add_child(web)
         return web

@@ -30,7 +30,7 @@ class List(ClientObject):
     def get_item_by_id(self, item_id):
         """Returns the list item with the specified list item identifier."""
         list_item = ListItem(self.context,
-                             ClientQuery.service_operation_query(self, ActionType.ReadMethod, "getitembyid", [item_id]))
+                             ClientQuery.service_operation_query(self, ActionType.GetMethod, "getitembyid", [item_id]))
         return list_item
 
     def get_view(self, view_id):
