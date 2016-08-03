@@ -8,3 +8,14 @@ class Contact(ClientObject):
     def update(self):
         qry = ClientQuery.update_entry_query(self)
         self.context.add_query(qry)
+
+    def delete_object(self):
+        """Deletes the contact."""
+        qry = ClientQuery.delete_entry_query(self)
+        self.context.add_query(qry)
+
+    @property
+    def contact_id(self):
+        if self.is_property_available('Id'):
+            return self.properties["Id"]
+        return None

@@ -6,13 +6,12 @@ from examples.settings import settings
 
 
 class TestOutlookClient(TestCase):
-
     @classmethod
     def setUpClass(cls):
         ctx_auth = NetworkCredentialContext(username=settings['username'], password=settings['password'])
         cls.client = OutlookClient(ctx_auth)
 
-    def test_create_contacts(self):
+    def test1_create_contacts(self):
         contact_info = {
             "GivenName": "Pavel",
             "Surname": "Bansky",
@@ -31,13 +30,13 @@ class TestOutlookClient(TestCase):
         self.client.execute_query()
         self.assertIsNotNone(contact.properties["GivenName"])
 
-    def test_get_contacts(self):
+    def test2_get_contacts(self):
         contacts = self.client.contacts
         self.client.load(contacts)
         self.client.execute_query()
         self.assertGreaterEqual(len(contacts), 1)
 
-    def test_update_contact(self):
+    def test3_update_contact(self):
         results = self.client.contacts.top(1)
         self.client.load(results)
         self.client.execute_query()
@@ -46,3 +45,18 @@ class TestOutlookClient(TestCase):
             contact.set_property("Department", "Media")
             contact.update()
             self.client.execute_query()
+
+    def test4_delete_contact(self):
+        results = self.client.contacts.top(1)
+        self.client.load(results)
+        self.client.execute_query()
+        if len(results) == 1:
+            contact = results[0]
+            contact.delete_object()
+            self.client.execute_query()
+            # verify
+            contacts = self.client.contacts
+            self.client.load(contacts)
+            self.client.execute_query()
+            results = [c for c in contacts if c.contact_id == contact.contact_id]
+            self.assertEqual(len(results), 0)
