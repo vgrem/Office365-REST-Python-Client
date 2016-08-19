@@ -1,8 +1,7 @@
 import importlib
 
-from client.office365.runtime.odata.json_light_format import JsonLightFormat
-from client.office365.runtime.odata.odata_path_parser import ODataPathParser
 from client.office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
+from client.office365.runtime.odata.odata_path_parser import ODataPathParser
 
 
 class ClientObject(object):
@@ -108,7 +107,7 @@ class ClientObject(object):
     def properties(self):
         return self._properties
 
-    def to_json(self):
+    def convert_to_payload(self):
         """Generates resource payload for REST endpoint"""
         payload = dict(self._changed_properties)
         if self.include_metadata:

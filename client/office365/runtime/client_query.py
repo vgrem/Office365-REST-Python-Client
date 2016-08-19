@@ -5,10 +5,10 @@ from client.office365.runtime.odata.odata_path_parser import ODataPathParser
 class ClientQuery(object):
     """Client query"""
 
-    def __init__(self, url, action_type=ActionType.ReadEntry, parameters=None):
+    def __init__(self, url, action_type=ActionType.ReadEntry, payload=None):
         self.__url = url
         self.__actionType = action_type
-        self.__payload = parameters
+        self.__payload = payload
 
     @staticmethod
     def read_entry_query(client_object):
@@ -22,7 +22,7 @@ class ClientQuery(object):
 
     @staticmethod
     def update_entry_query(client_object):
-        qry = ClientQuery(client_object.url, ActionType.UpdateEntry, client_object.to_json())
+        qry = ClientQuery(client_object.url, ActionType.UpdateEntry, client_object.convert_to_payload())
         return qry
 
     @staticmethod
