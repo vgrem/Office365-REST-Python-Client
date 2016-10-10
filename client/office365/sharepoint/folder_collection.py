@@ -11,7 +11,7 @@ class FolderCollection(ClientObjectCollection):
         from client.office365.sharepoint.folder import Folder
         folder = Folder(self.context)
         folder.set_property("ServerRelativeUrl", folder_url)
-        qry = ClientQuery(self.url, ActionType.CreateEntry, folder.to_json())
+        qry = ClientQuery(self.url, ActionType.CreateEntry, folder.convert_to_payload())
         self.context.add_query(qry, folder)
         return folder
 

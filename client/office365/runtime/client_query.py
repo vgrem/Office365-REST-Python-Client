@@ -22,7 +22,7 @@ class ClientQuery(object):
 
     @staticmethod
     def update_entry_query(client_object):
-        qry = ClientQuery(client_object.url, ActionType.UpdateEntry, client_object.to_json())
+        qry = ClientQuery(client_object.url, ActionType.UpdateEntry, client_object.convert_to_payload())
         return qry
 
     @staticmethod

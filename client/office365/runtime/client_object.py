@@ -107,7 +107,7 @@ class ClientObject(object):
     def properties(self):
         return self._properties
 
-    def to_json(self):
+    def convert_to_payload(self):
         """Generates resource payload for REST endpoint"""
         payload = dict(self._changed_properties)
         if self.include_metadata:

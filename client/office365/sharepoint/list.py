@@ -23,7 +23,7 @@ class List(ClientObject):
         """The recommended way to add a list item is to send a POST request to the ListItemCollection resource endpoint,
          as shown in ListItemCollection request examples."""
         item = ListItem(self.context, None, list_item_creation_information)
-        qry = ClientQuery(self.url + "/items", ActionType.CreateEntry, item.to_json())
+        qry = ClientQuery(self.url + "/items", ActionType.CreateEntry, item.convert_to_payload())
         self.context.add_query(qry, item)
         return item
 
