@@ -1,7 +1,6 @@
 from client.office365.outlookservices.contact_collection import ContactCollection
 from client.office365.outlookservices.event_collection import EventCollection
 from client.office365.outlookservices.message_collection import MessageCollection
-from client.office365.runtime.auth.network_credential_context import NetworkCredentialContext
 from client.office365.runtime.client_runtime_context import ClientRuntimeContext
 from client.office365.runtime.odata.v4_json_format import V4JsonFormat
 from client.office365.runtime.resource_path_entry import ResourcePathEntry

@@ -1,8 +1,7 @@
 import importlib
 
-from client.office365.runtime.odata.json_light_format import JsonLightFormat
-from client.office365.runtime.odata.odata_path_parser import ODataPathParser
 from client.office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
+from client.office365.runtime.odata.odata_path_parser import ODataPathParser
 
 
 class ClientObject(object):
@@ -48,8 +47,8 @@ class ClientObject(object):
             module_name = self.context.__module__.replace("client_context", "") + entity_name.lower()
         else:
             module_name = self.context.__module__.replace("outlook_client", "") + entity_name.lower()
-        clientObjectClass = getattr(importlib.import_module(module_name), entity_name)
-        client_object = clientObjectClass(self.context)
+        client_object_type = getattr(importlib.import_module(module_name), entity_name)
+        client_object = client_object_type(self.context)
         client_object.from_json(properties)
         return client_object
 

@@ -5,10 +5,10 @@ from client.office365.runtime.odata.odata_path_parser import ODataPathParser
 class ClientQuery(object):
     """Client query"""
 
-    def __init__(self, url, action_type=ActionType.ReadEntry, parameters=None):
+    def __init__(self, url, action_type=ActionType.ReadEntry, payload=None):
         self.__url = url
         self.__actionType = action_type
-        self.__payload = parameters
+        self.__payload = payload
 
     @staticmethod
     def read_entry_query(client_object):
@@ -31,9 +31,9 @@ class ClientQuery(object):
         return qry
 
     @staticmethod
-    def service_operation_query(client_object, action_type, method_name, method_params=None):
+    def service_operation_query(client_object, action_type, method_name, method_params=None, payload=None):
         url = client_object.url + ODataPathParser.from_method(method_name, method_params)
-        qry = ClientQuery(url, action_type)
+        qry = ClientQuery(url, action_type, payload)
         return qry
 
     @property

@@ -1,4 +1,4 @@
-from client.office365.runtime import ClientValueObject
+from client.office365.runtime.client_value_object import ClientValueObject
 
 
 class FileCreationInformation(ClientValueObject):

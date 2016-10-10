@@ -1,16 +1,25 @@
 # About
-SharePoint Online REST API client for Python
+Office365 REST API client for Python
+
+The list of supported Office 365 REST APIs:
+
+-   [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) (_supported_ versions: [SharePoint 2013](https://msdn.microsoft.com/library/office/jj860569(v=office.15).aspx), SharePoint 2016, SharePoint Online and OneDrive for Business)
+-   [Outlook REST API](https://msdn.microsoft.com/en-us/office/office365/api/use-outlook-rest-api#DefineOutlookRESTAPI) 
+    -   [Outlook Contacts REST API](https://msdn.microsoft.com/en-us/office/office365/api/contacts-rest-operations)
+    -   [Outlook Calendar REST API](https://msdn.microsoft.com/en-us/office/office365/api/calendar-rest-operations)
+    -   [Outlook Mail REST API](https://msdn.microsoft.com/en-us/office/office365/api/mail-rest-operations)
+
 
 ## Status
 
-[![Build Status](https://travis-ci.org/vgrem/SharePointOnline-REST-Python-Client.svg?branch=master)](https://travis-ci.org/vgrem/SharePointOnline-REST-Python-Client)
+[![Build Status](https://travis-ci.org/vgrem/Office365-REST-Python-Client.svg?branch=master)](https://travis-ci.org/vgrem/Office365-REST-Python-Client)
 
 # Installation
 
 Todo
 
 
-# Usage 
+# Usage: working with SharePoint API 
 
 There are **two approaches** available to perform REST queries:
 
