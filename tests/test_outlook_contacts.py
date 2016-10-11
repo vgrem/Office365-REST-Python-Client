@@ -26,18 +26,18 @@ class TestOutlookClient(TestCase):
             ]
         }
 
-        contact = self.client.contacts.add(contact_info)
+        contact = self.client.me.contacts.add(contact_info)
         self.client.execute_query()
         self.assertIsNotNone(contact.properties["GivenName"])
 
     def test2_get_contacts(self):
-        contacts = self.client.contacts
+        contacts = self.client.me.contacts
         self.client.load(contacts)
         self.client.execute_query()
         self.assertGreaterEqual(len(contacts), 1)
 
     def test3_update_contact(self):
-        results = self.client.contacts.top(1)
+        results = self.client.me.contacts.top(1)
         self.client.load(results)
         self.client.execute_query()
         if len(results) == 1:
@@ -47,7 +47,7 @@ class TestOutlookClient(TestCase):
             self.client.execute_query()
 
     def test4_delete_contact(self):
-        results = self.client.contacts.top(1)
+        results = self.client.me.contacts.top(1)
         self.client.load(results)
         self.client.execute_query()
         if len(results) == 1:
@@ -55,7 +55,7 @@ class TestOutlookClient(TestCase):
             contact.delete_object()
             self.client.execute_query()
             # verify
-            contacts = self.client.contacts
+            contacts = self.client.me.contacts
             self.client.load(contacts)
             self.client.execute_query()
             results = [c for c in contacts if c.contact_id == contact.contact_id]

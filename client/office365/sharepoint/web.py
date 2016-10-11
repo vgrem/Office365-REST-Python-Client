@@ -3,9 +3,9 @@ import urllib
 from client.office365.sharepoint.file import File
 from client.office365.sharepoint.folder import Folder
 from client.office365.sharepoint.folder_collection import FolderCollection
+from client.office365.sharepoint.securable_object import SecurableObject
 from client.office365.sharepoint.user import User
 from client.office365.sharepoint.user_collection import UserCollection
-from client.office365.runtime.client_object import ClientObject
 from client.office365.runtime.client_query import ClientQuery
 from client.office365.runtime.resource_path_entry import ResourcePathEntry
 from client.office365.sharepoint.group_collection import GroupCollection
@@ -13,8 +13,8 @@ from client.office365.sharepoint.list_collection import ListCollection
 from client.office365.sharepoint.web_collection import WebCollection
 
 
-class Web(ClientObject):
-    """Web client object.
+class Web(SecurableObject):
+    """Represents a SharePoint site. A site is a type of SP.SecurableObject.
     Refer this link https://msdn.microsoft.com/en-us/library/office/dn499819.aspx for a details"""
 
     def __init__(self, context, resource_path=None):

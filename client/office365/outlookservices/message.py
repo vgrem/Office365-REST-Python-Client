@@ -1,5 +1,5 @@
-from client.office365.runtime.client_object import ClientObject
+from client.office365.outlookservices.item import Item
 
 
-class Message(ClientObject):
+class Message(Item):
     """A message in a mailbox folder."""

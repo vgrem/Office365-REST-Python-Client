@@ -1,4 +1,4 @@
-from client.office365.runtime import BaseTokenProvider
+from client.office365.runtime.auth.base_token_provider import BaseTokenProvider
 
 
 class OAuthTokenProvider(BaseTokenProvider):

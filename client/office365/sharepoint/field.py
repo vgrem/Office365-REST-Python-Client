@@ -1,4 +1,4 @@
-from client.office365.runtime import ClientObject
+from client.office365.runtime.client_object import ClientObject
 
 
 class Field(ClientObject):

@@ -1,17 +1,17 @@
 from client.office365.sharepoint.content_type_collection import ContentTypeCollection
 from client.office365.sharepoint.folder import Folder
 from client.office365.sharepoint.listitem import ListItem
+from client.office365.sharepoint.securable_object import SecurableObject
 from client.office365.sharepoint.view import View
 from client.office365.sharepoint.view_collection import ViewCollection
 from client.office365.runtime.action_type import ActionType
-from client.office365.runtime.client_object import ClientObject
 from client.office365.runtime.client_query import ClientQuery
 from client.office365.runtime.resource_path_entry import ResourcePathEntry
 from client.office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from client.office365.sharepoint.listItem_collection import ListItemCollection
 
 
-class List(ClientObject):
+class List(SecurableObject):
     """List client object"""
 
     def get_items(self):

@@ -19,7 +19,7 @@ The list of supported Office 365 REST APIs:
 Todo
 
 
-# Usage: working with SharePoint API 
+# Usage: working with SharePoint resources 
 
 There are **two approaches** available to perform REST queries:
 
