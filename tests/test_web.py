@@ -24,6 +24,7 @@ class TestWeb(SPTestCase):
         self.context.load(results)
         self.context.execute_query()
         self.assertEquals(len(results), 1)
+        self.assertIsNotNone(results[0].url)
 
     def test_2_if_web_updated(self):
         """Test to update Web resource"""

@@ -9,6 +9,7 @@ from tests.sharepoint_case import SPTestCase
 
 
 class TestFile(SPTestCase):
+
     def test_upload_file(self):
         """Test file upload operation"""
 

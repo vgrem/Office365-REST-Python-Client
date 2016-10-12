@@ -42,6 +42,7 @@ class TestOutlookClient(TestCase):
         self.client.execute_query()
         if len(results) == 1:
             contact = results[0]
+            self.assertIsNotNone(contact.url)
             contact.set_property("Department", "Media")
             contact.update()
             self.client.execute_query()

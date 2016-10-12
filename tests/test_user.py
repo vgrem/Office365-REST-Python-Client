@@ -8,3 +8,4 @@ class TestUser(SPTestCase):
         self.context.execute_query()
         self.assertIsNotNone(user.properties['LoginName'], "Current user was not requested")
         self.assertIsNotNone(user.login_name, "Current user was not requested")
+        self.assertIsNotNone(user.url)

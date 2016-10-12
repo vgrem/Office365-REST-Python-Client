@@ -15,4 +15,18 @@ class File(ClientObject):
         else:
             return ListItem(self.context, ResourcePathEntry(self.context, self.resource_path, "listItemAllFields"))
 
+    @property
+    def resource_path(self):
+        orig_path = ClientObject.resource_path.fget(self)
+        if self.is_property_available("ServerRelativeUrl") and orig_path is None:
+            return ResourcePathEntry(self.context,
+                                     self.context.web.resource_path,
+                                     "GetFileByServerRelativeUrl('{0}')".format(self.properties["ServerRelativeUrl"]))
+        elif self.is_property_available("UniqueId") and orig_path is None:
+            path = ResourcePathEntry(self.context,
+                                     ResourcePathEntry(self.context, None, "Web"),
+                                     "GetFileById(guid'{0}')".format(self.properties["UniqueId"]))
+            return path
+        return orig_path
+
 

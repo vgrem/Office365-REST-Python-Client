@@ -1,5 +1,7 @@
 import urllib
 
+from client.office365.runtime.client_object import ClientObject
+from client.office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from client.office365.sharepoint.file import File
 from client.office365.sharepoint.folder import Folder
 from client.office365.sharepoint.folder_collection import FolderCollection
@@ -35,14 +37,18 @@ class Web(SecurableObject):
 
     def get_file_by_server_relative_url(self, url):
         """Returns the file object located at the specified server-relative URL."""
-        enc_url = urllib.urlencode(url)
-        file_obj = File(self.context, "getfilebyserverrelativeurl('{0}')".format(enc_url), self.resource_path)
+        file_obj = File(
+            self.context,
+            ResourcePathServiceOperation(self.context, self.resource_path, "getfilebyserverrelativeurl", [url])
+        )
         return file_obj
 
     def get_folder_by_server_relative_url(self, url):
         """Returns the folder object located at the specified server-relative URL."""
-        enc_url = urllib.urlencode(url)
-        folder_obj = Folder(self.context, "getfolderbyserverrelativeurl('{0}')".format(enc_url), self.resource_path)
+        folder_obj = Folder(
+            self.context,
+            ResourcePathServiceOperation(self.context, self.resource_path, "getfolderbyserverrelativeurl", [url])
+        )
         return folder_obj
 
     @property
@@ -92,3 +98,11 @@ class Web(SecurableObject):
             return self.properties['CurrentUser']
         else:
             return User(self.context, ResourcePathEntry(self.context, self.resource_path, "CurrentUser"))
+
+    @property
+    def service_root_url(self):
+        orig_root_url = ClientObject.service_root_url.fget(self)
+        if self.is_property_available("Url"):
+            cur_root_url = self.properties["Url"] + "/_api/"
+            return cur_root_url
+        return orig_root_url

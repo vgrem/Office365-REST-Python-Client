@@ -14,6 +14,7 @@ class ClientObjectCollection(ClientObject):
             self.add_child(child_client_object)
 
     def add_child(self, client_object):
+        client_object._parent_collection = self
         self.__data.append(client_object)
 
     def __iter__(self):

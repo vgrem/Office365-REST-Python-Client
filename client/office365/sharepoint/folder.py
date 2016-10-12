@@ -50,3 +50,16 @@ class Folder(ClientObject):
             return self.properties["Folders"]
         else:
             return FolderCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "Folders"))
+
+    @property
+    def resource_path(self):
+        orig_path = ClientObject.resource_path.fget(self)
+        if self.is_property_available("ServerRelativeUrl") and orig_path is None:
+            return ResourcePathEntry(self.context,
+                                     self.context.web.resource_path,
+                                     "GetFolderByServerRelativeUrl('{0}')".format(self.properties["ServerRelativeUrl"]))
+        elif self.is_property_available("UniqueId") and orig_path is None:
+            return ResourcePathEntry(self.context,
+                                     self.context.web.resource_path,
+                                     "GetFolderById(guid'{0}')".format(self.properties["UniqueId"]))
+        return orig_path

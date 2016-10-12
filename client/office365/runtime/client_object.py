@@ -117,14 +117,6 @@ class ClientObject(object):
         return payload
 
     def from_json(self, payload):
-        json_format = self.context.json_format
-
+        #json_format = self.context.json_format
         self._properties = dict((k, v) for k, v in payload.iteritems()
                                 if k != '__metadata')
-        if '__metadata' in payload:
-            self._url = payload['__metadata']['uri']
-            self._resource_path = ODataPathParser.parse_path_string(self._url)
-            self._entity_type_name = payload['__metadata']['type']
-        elif '@odata.id' in payload:
-            self._url = payload['@odata.id']
-            self._resource_path = ODataPathParser.parse_path_string(self._url)
