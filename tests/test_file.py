@@ -1,10 +1,10 @@
 import os
 import shutil
 import urllib
-
 import requests
 
 from client.office365.runtime.utilities.request_options import RequestOptions
+from client.office365.sharepoint.file import File
 from tests.sharepoint_case import SPTestCase
 
 
@@ -12,6 +12,8 @@ class TestFile(SPTestCase):
 
     def test_upload_file(self):
         """Test file upload operation"""
+        file_url = "/sites/contoso/documents/report.csv"
+        File.save_binary(self.context, file_url, "Report data")
 
     def test_download_file(self):
         """Test file download operation"""
