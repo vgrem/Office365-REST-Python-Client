@@ -19,6 +19,7 @@
           <a:Address>[endpoint]</a:Address>
         </a:EndpointReference>
       </wsp:AppliesTo>
+      <wsp:PolicyReference xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" URI="MBI"></wsp:PolicyReference>
       <t:KeyType>http://schemas.xmlsoap.org/ws/2005/05/identity/NoProofKey</t:KeyType>
       <t:RequestType>http://schemas.xmlsoap.org/ws/2005/02/trust/Issue</t:RequestType>
       <t:TokenType>urn:oasis:names:tc:SAML:1.0:assertion</t:TokenType>
