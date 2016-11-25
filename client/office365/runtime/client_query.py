@@ -32,7 +32,7 @@ class ClientQuery(object):
 
     @staticmethod
     def service_operation_query(client_object, action_type, method_name, method_params=None, payload=None):
-        url = client_object.url + ODataPathParser.from_method(method_name, method_params)
+        url = client_object.url + "/" + ODataPathParser.from_method(method_name, method_params)
         qry = ClientQuery(url, action_type, payload)
         return qry
 

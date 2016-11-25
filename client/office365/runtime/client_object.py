@@ -93,10 +93,10 @@ class ClientObject(object):
     def url(self):
         if self._url:
             return self._url
-        else:
+        elif self.resource_path:
             self._url = self.service_root_url + self.resource_path.build_path_url()
-        if self.query_options:
-            self._url = self._url + "?" + self.query_options_to_url()
+            if self.query_options:
+                self._url = self._url + "?" + self.query_options_to_url()
         return self._url
 
     @property

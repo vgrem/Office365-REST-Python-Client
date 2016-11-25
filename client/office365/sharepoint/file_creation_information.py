@@ -12,8 +12,13 @@ class FileCreationInformation(ClientValueObject):
 
     @property
     def content(self):
-        """The binary content of the file."""
+        """Gets the binary content of the file."""
         return self._content
+
+    @content.setter
+    def content(self, value):
+        """Sets the binary content of the file."""
+        self._content = value
 
     @property
     def overwrite(self):
@@ -25,3 +30,11 @@ class FileCreationInformation(ClientValueObject):
     def url(self):
         """The URL of the file."""
         return self._url
+
+    @url.setter
+    def url(self, value):
+        self._url = value
+
+    @overwrite.setter
+    def overwrite(self, value):
+        self._overwrite = value

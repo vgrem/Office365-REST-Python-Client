@@ -10,7 +10,7 @@ class TestFolder(SPTestCase):
         self.target_list = self.context.web.lists.get_by_title("Documents")
 
     def test_enum_folders_and_files(self):
-        folder_url = '/sites/contoso/documents/archive'
+        folder_url = '/sites/contoso/documents'
         folder_object = self.context.web.get_folder_by_server_relative_url(folder_url)
         self.context.load(folder_object)
         self.context.execute_query()

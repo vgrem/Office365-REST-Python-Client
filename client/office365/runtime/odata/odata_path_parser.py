@@ -24,4 +24,6 @@ class ODataPathParser(object):
     def encode_method_value(value):
         if isinstance(value, basestring):
             value = "'{0}'".format(value)
+        elif isinstance(value, bool):
+            value = str(value).lower()
         return value

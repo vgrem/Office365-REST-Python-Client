@@ -19,5 +19,8 @@ class AuthenticationContext(BaseAuthenticationContext):
         """Authenticate request"""
         request_options.set_header('Cookie', self.provider.get_authentication_cookie())
 
+    def get_auth_url(self, redirect_url):
+        return ""
+
     def get_last_error(self):
         return self.provider.get_last_error()

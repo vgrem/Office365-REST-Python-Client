@@ -21,6 +21,15 @@ class File(ClientObject):
         request.data = content
         ctx.execute_query_direct(request)
 
+    @staticmethod
+    def open_binary(ctx, server_relative_url):
+        server_relative_url = urllib.quote(server_relative_url)
+        url = "{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(ctx.service_root_url, server_relative_url)
+        request = RequestOptions(url)
+        request.method = HttpMethod.Get
+        response = ctx.execute_query_direct(request)
+        return response
+
     @property
     def listitem_allfields(self):
         """Gets a value that specifies the list item field values for the list item corresponding to the file."""

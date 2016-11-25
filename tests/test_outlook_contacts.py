@@ -26,7 +26,7 @@ class TestOutlookClient(TestCase):
             ]
         }
 
-        contact = self.client.me.contacts.add(contact_info)
+        contact = self.client.me.contacts.add_from_json(contact_info)
         self.client.execute_query()
         self.assertIsNotNone(contact.properties["GivenName"])
 
