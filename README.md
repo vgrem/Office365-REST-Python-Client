@@ -16,7 +16,11 @@ The list of supported Office 365 REST APIs:
 
 # Installation
 
-Todo
+Use pip:
+
+```
+pip install Office365-REST-Python-Client
+```
 
 
 # Usage: working with SharePoint resources 
