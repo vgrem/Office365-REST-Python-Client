@@ -32,14 +32,22 @@ There are **two approaches** available to perform REST queries:
 The first example demonstrates how to read Web resource:
 
 ```
-ctx_auth = AuthenticationContext(url)
-if ctx_auth.acquireTokenForUser(username, password):
-  request = ClientRequest(url,ctx_auth)
-  requestUrl = "/_api/web/"   #Web resource endpoint
-  data = request.execute_query_direct(requestUrl=requestUrl)
-  web_title = data['d']['Title']
-  print "Web title: {0}".format(web_title)
+import json
 
+from client.office365.runtime.auth.authentication_context import AuthenticationContext
+from client.office365.runtime.client_request import ClientRequest
+from client.office365.runtime.utilities.request_options import RequestOptions
+
+ctx_auth = AuthenticationContext(url)
+if ctx_auth.acquire_token_for_user(username, password):
+  request = ClientRequest(ctx_auth)
+  options = RequestOptions("{0}/_api/web/".format(url))
+  options.set_header('Accept', 'application/json')
+  options.set_header('Content-Type', 'application/json')
+  data = request.execute_query_direct(options)
+  s = json.loads(data.content)
+  web_title = s['Title']
+  print "Web title: " + web_title
 else:
   print ctx_auth.get_last_error()
 ```
@@ -48,9 +56,12 @@ else:
  
 
 ```
+from client.office365.runtime.auth.authentication_context import AuthenticationContext
+from client.office365.sharepoint.client_context import ClientContext
+
 ctx_auth = AuthenticationContext(url)
-if ctx_auth.acquireTokenForUser(username, password):
-  ctx = ClientContext(url, ctx_auth)   
+if ctx_auth.acquire_token_for_user(username, password):
+  ctx = ClientContext(url, ctx_auth)
   web = ctx.web
   ctx.load(web)
   ctx.execute_query()
