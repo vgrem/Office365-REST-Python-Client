@@ -1,5 +1,6 @@
 from random import randint
 from tests.sharepoint_case import SPTestCase
+from nose.tools import nottest
 
 
 class TestListItem(SPTestCase):
@@ -8,6 +9,7 @@ class TestListItem(SPTestCase):
     def setUp(self):
         self.target_list = self.context.web.lists.get_by_title("Tasks")
 
+    @nottest
     def test_create_list_item(self):
         item_properties = {'Title': 'New Task', '__metadata': {'type': 'SP.Data.TasksListItem'}}
         item = self.target_list.add_item(item_properties)
