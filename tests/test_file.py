@@ -10,7 +10,7 @@ from tests.sharepoint_case import SPTestCase
 
 
 class TestFile(SPTestCase):
-    source_path = "../examples/data/report.csv"
+    source_path = "{}/../examples/data/report.csv".format(os.path.dirname(__file__))
     target_library_name = "Documents"
     report_file_url = "/sites/contoso/documents/report.csv"
     report_content = "Report data"
