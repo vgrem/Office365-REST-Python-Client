@@ -14,7 +14,7 @@ def ensure_debug_secrets():
 
 
 # noinspection PyClassHasNoInit
-class LoggableClass:
+class LoggerContext:
     """Superclass for all classes that require namespaced logger."""
     _logger = None
 

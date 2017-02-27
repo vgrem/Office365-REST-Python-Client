@@ -10,7 +10,7 @@ import client.office365.logger
 client.office365.logger.ensure_debug_secrets()
 
 
-class SamlTokenProvider(BaseTokenProvider, client.office365.logger.LoggableClass):
+class SamlTokenProvider(BaseTokenProvider, client.office365.logger.LoggerContext):
     """ SAML Security Token Service for O365"""
 
     def __init__(self, url, username, password):
