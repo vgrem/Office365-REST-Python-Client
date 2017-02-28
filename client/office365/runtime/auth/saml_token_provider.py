@@ -79,7 +79,8 @@ class SamlTokenProvider(BaseTokenProvider, client.office365.logger.LoggerContext
         })
 
         sts_url = 'https://' + options['sts']['host'] + options['sts']['path']
-        response = requests.post(sts_url, data=request_body)
+        response = requests.post(sts_url, data=request_body,
+                                 headers={'Content-Type': 'application/x-www-form-urlencoded'})
         token = self.process_service_token_response(response)
         logger.debug_secrets('token: %s', token)
         if token:
@@ -121,7 +122,7 @@ class SamlTokenProvider(BaseTokenProvider, client.office365.logger.LoggerContext
 
         session = requests.session()
         logger.debug_secrets("session: %s\nsession.post(%s, data=%s)", session, url, self.token)
-        session.post(url, data=self.token)
+        session.post(url, data=self.token, headers={'Content-Type': 'application/x-www-form-urlencoded'})
         logger.debug_secrets("session.cookies: %s", session.cookies)
         cookies = requests.utils.dict_from_cookiejar(session.cookies)
         logger.debug_secrets("cookies: %s", cookies)
