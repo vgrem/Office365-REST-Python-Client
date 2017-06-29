@@ -1,5 +1,5 @@
-from client.office365.runtime.auth.authentication_context import AuthenticationContext
-from client.office365.runtime.client_request import ClientRequest
+from office365.runtime.auth.authentication_context import AuthenticationContext
+from office365.runtime.client_request import ClientRequest
 from settings import settings
 
 

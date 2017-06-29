@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from client.office365.outlookservices.outlook_client import OutlookClient
-from client.office365.runtime.auth.network_credential_context import NetworkCredentialContext
+from office365.outlookservices.outlook_client import OutlookClient
+from office365.runtime.auth.network_credential_context import NetworkCredentialContext
 from examples.settings import settings
 
 
