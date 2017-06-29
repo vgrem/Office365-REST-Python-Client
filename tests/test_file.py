@@ -3,9 +3,9 @@ import shutil
 import urllib
 import requests
 
-from client.office365.runtime.utilities.request_options import RequestOptions
-from client.office365.sharepoint.file import File
-from client.office365.sharepoint.file_creation_information import FileCreationInformation
+from office365.runtime.utilities.request_options import RequestOptions
+from office365.sharepoint.file import File
+from office365.sharepoint.file_creation_information import FileCreationInformation
 from tests.sharepoint_case import SPTestCase
 
 

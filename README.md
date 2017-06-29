@@ -34,9 +34,9 @@ The first example demonstrates how to read Web resource:
 ```
 import json
 
-from client.office365.runtime.auth.authentication_context import AuthenticationContext
-from client.office365.runtime.client_request import ClientRequest
-from client.office365.runtime.utilities.request_options import RequestOptions
+from office365.runtime.auth.authentication_context import AuthenticationContext
+from office365.runtime.client_request import ClientRequest
+from office365.runtime.utilities.request_options import RequestOptions
 
 ctx_auth = AuthenticationContext(url)
 if ctx_auth.acquire_token_for_user(username, password):
@@ -56,8 +56,8 @@ else:
  
 
 ```
-from client.office365.runtime.auth.authentication_context import AuthenticationContext
-from client.office365.sharepoint.client_context import ClientContext
+from office365.runtime.auth.authentication_context import AuthenticationContext
+from office365.sharepoint.client_context import ClientContext
 
 ctx_auth = AuthenticationContext(url)
 if ctx_auth.acquire_token_for_user(username, password):
