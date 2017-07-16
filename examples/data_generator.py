@@ -1,18 +1,17 @@
 from faker import Faker
-
+from examples import settings
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.client_context import ClientContext
-from settings import settings
 
 
 def generate_tasks(context):
     tasks_list = ctx.web.lists.get_by_title("Tasks")
-    for idx in range(0, 1000):
+    for idx in range(0, 10):
         title = "Task{0}".format(idx)
         task_properties = {'__metadata': {'type': 'SP.Data.TasksListItem'}, 'Title': title}
         task_item = tasks_list.add_item(task_properties)
         context.execute_query()
-        print "Task '{0}' has been created".format(task_item.properties["Title"])
+        print("Task '{0}' has been created".format(task_item.properties["Title"]))
 
 
 def generate_contacts(context):
@@ -23,7 +22,7 @@ def generate_contacts(context):
         contact_properties = {'__metadata': {'type': 'SP.Data.ContactsListItem'}, 'Title': name}
         contact_item = contacts_list.add_item(contact_properties)
         context.execute_query()
-        print "Contact '{0}' has been created".format(contact_item.properties["Title"])
+        print("Contact '{0}' has been created".format(contact_item.properties["Title"]))
 
 
 if __name__ == '__main__':
@@ -31,6 +30,6 @@ if __name__ == '__main__':
     if ctx_auth.acquire_token_for_user(username=settings['username'], password=settings['password']):
         ctx = ClientContext(settings['url'], ctx_auth)
         generate_tasks(ctx)
-        #generate_contacts(ctx)
+        # generate_contacts(ctx)
     else:
-        print ctx_auth.get_last_error()
+        print(ctx_auth.get_last_error())

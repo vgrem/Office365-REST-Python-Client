@@ -1,5 +1,3 @@
-import urllib
-
 from office365.runtime.client_object import ClientObject
 from office365.runtime.resource_path_entry import ResourcePathEntry
 from office365.runtime.utilities.http_method import HttpMethod
@@ -13,7 +11,11 @@ class File(ClientObject):
 
     @staticmethod
     def save_binary(ctx, server_relative_url, content):
-        server_relative_url = urllib.quote(server_relative_url)
+        try:
+            from urllib import quote  # Python 2.X
+        except ImportError:
+            from urllib.parse import quote  # Python 3+
+        server_relative_url = quote(server_relative_url)
         url = "{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(ctx.service_root_url, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Post
@@ -23,7 +25,11 @@ class File(ClientObject):
 
     @staticmethod
     def open_binary(ctx, server_relative_url):
-        server_relative_url = urllib.quote(server_relative_url)
+        try:
+            from urllib import quote  # Python 2.X
+        except ImportError:
+            from urllib.parse import quote  # Python 3+
+        server_relative_url = quote(server_relative_url)
         url = "{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(ctx.service_root_url, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Get

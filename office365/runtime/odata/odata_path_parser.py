@@ -1,3 +1,6 @@
+from requests.compat import basestring
+
+
 class ODataPathParser(object):
     @staticmethod
     def parse_path_string(string):

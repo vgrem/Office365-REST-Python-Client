@@ -1,6 +1,7 @@
+from examples.settings import settings
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.client_context import ClientContext
-from settings import settings
+
 
 listTitle = "Documents"
 
@@ -18,7 +19,7 @@ def print_list_views(ctx):
         curView = views.get_by_title(viewTitle)
         ctx.load(curView)
         ctx.execute_query()
-        print "View title: {0}".format(curView.properties["Title"])
+        print("View title: {0}".format(curView.properties["Title"]))
 
 
 if __name__ == '__main__':
@@ -29,4 +30,4 @@ if __name__ == '__main__':
         print_list_views(ctx)
 
     else:
-        print ctxAuth.get_last_error()
+        print(ctxAuth.get_last_error())

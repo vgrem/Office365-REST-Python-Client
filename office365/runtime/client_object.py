@@ -1,7 +1,6 @@
 import importlib
 
 from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
-from office365.runtime.odata.odata_path_parser import ODataPathParser
 
 
 class ClientObject(object):
@@ -113,10 +112,9 @@ class ClientObject(object):
         if self.include_metadata:
             self.ensure_metadata_type(payload)
         else:
-            payload = dict((k, v) for k, v in payload.iteritems() if k != "__metadata")
+            payload = dict((k, v) for k, v in payload.items() if k != "__metadata")
         return payload
 
     def from_json(self, payload):
-        #json_format = self.context.json_format
-        self._properties = dict((k, v) for k, v in payload.iteritems()
+        self._properties = dict((k, v) for k, v in payload.items()
                                 if k != '__metadata')

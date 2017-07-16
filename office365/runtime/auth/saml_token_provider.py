@@ -1,11 +1,12 @@
 import os
-import urlparse
+import sys
 from xml.etree import ElementTree
+
 import requests
 import requests.utils
 
-from office365.runtime.auth.base_token_provider import BaseTokenProvider
 import office365.logger
+from office365.runtime.auth.base_token_provider import BaseTokenProvider
 
 office365.logger.ensure_debug_secrets()
 
@@ -41,8 +42,12 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
         logger.debug('called')
 
         try:
-            logger.debug("Parsing URL")
-            url = urlparse.urlparse(self.url)
+            logger.debug("Acquiring Access Token..")
+            try:
+                from urlparse import urlparse  # Python 2.X
+            except ImportError:
+                from urllib.parse import urlparse  # Python 3+
+            url = urlparse(self.url)
             options = {
                 'username': self.username,
                 'password': self.password,

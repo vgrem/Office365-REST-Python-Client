@@ -20,7 +20,7 @@ class ClientValueObject(object):
     @property
     def payload(self):
         """Generates resource payload for REST endpoint"""
-        entity = dict((k, v) for k, v in self.__dict__.iteritems()
+        entity = dict((k, v) for k, v in self.__dict__.items()
                       if v and k != "_ClientValueObject__metadata_type"
                       and k != "_include_metadata")
         if self._include_metadata:

@@ -1,6 +1,6 @@
 from office365.runtime.client_object import ClientObject
 from office365.runtime.resource_path_entry import ResourcePathEntry
-from web import Web
+from office365.sharepoint.web import Web
 
 
 class Site(ClientObject):

@@ -1,6 +1,6 @@
+from examples.settings import settings
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.client_context import ClientContext
-from settings import settings
 
 
 def read_folder_and_files():
@@ -9,19 +9,19 @@ def read_folder_and_files():
     folder = list_obj.root_folder
     ctx.load(folder)
     ctx.execute_query()
-    print "List url: {0}".format(folder.properties["ServerRelativeUrl"])
+    print("List url: {0}".format(folder.properties["ServerRelativeUrl"]))
 
     files = folder.files
     ctx.load(files)
     ctx.execute_query()
     for cur_file in files:
-        print "File name: {0}".format(cur_file.properties["Name"])
+        print("File name: {0}".format(cur_file.properties["Name"]))
 
     folders = ctx.web.folders
     ctx.load(folders)
     ctx.execute_query()
     for folder in folders:
-        print "Folder name: {0}".format(folder.properties["Name"])
+        print("Folder name: {0}".format(folder.properties["Name"]))
 
 
 if __name__ == '__main__':
@@ -33,4 +33,4 @@ if __name__ == '__main__':
         read_folder_and_files()
 
     else:
-        print ctx_auth.get_last_error()
+        print(ctx_auth.get_last_error())
