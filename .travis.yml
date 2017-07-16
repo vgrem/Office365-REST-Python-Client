@@ -8,6 +8,13 @@ python:
   - "3.5"
   - "3.6"
 
+# optionally set up exclutions and allowed failures in the matrix
+matrix:
+  allow_failures:
+      - python: 2.6
+      - python: 3.2
+
+
 install:
   - pip install requests
 
