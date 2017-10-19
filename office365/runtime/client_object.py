@@ -14,6 +14,7 @@ class ClientObject(object):
         self._parent_collection = None
         self._context = context
         self._properties = properties
+        self._metadata = {}
         self._changed_properties = properties
         self._resource_path = resource_path
         self._url = None
@@ -96,6 +97,8 @@ class ClientObject(object):
             self._url = self.service_root_url + self.resource_path.build_path_url()
             if self.query_options:
                 self._url = self._url + "?" + self.query_options_to_url()
+        elif self._metadata and 'uri' in self._metadata:
+            self._url = self._metadata['uri']
         return self._url
 
     @property
@@ -116,5 +119,6 @@ class ClientObject(object):
         return payload
 
     def from_json(self, payload):
+        self._metadata = payload.get('__metadata')
         self._properties = dict((k, v) for k, v in payload.items()
                                 if k != '__metadata')
