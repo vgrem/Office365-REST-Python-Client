@@ -15,3 +15,16 @@ class Group(Principal):
             return self.properties['Users']
         else:
             return UserCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "Users"))
+
+    @property
+    def resource_path(self):
+        orig_path = ClientObject.resource_path.fget(self)
+        if self.is_property_available("Id") and orig_path is None:
+            return ResourcePathEntry(self.context,
+                                     self.context.web.site_groups.resource_path,
+                                     ODataPathParser.from_method("GetById", self.properties["Id"]))
+        if self.is_property_available("LoginName") and orig_path is None:
+            return ResourcePathEntry(self.context,
+                                     self.context.web.site_groups.resource_path,
+                                     ODataPathParser.from_method("GetByName", self.properties["LoginName"]))
+        return orig_path
