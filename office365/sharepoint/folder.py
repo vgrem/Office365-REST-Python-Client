@@ -1,3 +1,4 @@
+from office365.runtime.odata.odata_path_parser import ODataPathParser
 from office365.sharepoint.file_collection import FileCollection
 from office365.sharepoint.listitem import ListItem
 from office365.runtime.client_object import ClientObject
@@ -57,9 +58,9 @@ class Folder(ClientObject):
         if self.is_property_available("ServerRelativeUrl") and orig_path is None:
             return ResourcePathEntry(self.context,
                                      self.context.web.resource_path,
-                                     "GetFolderByServerRelativeUrl('{0}')".format(self.properties["ServerRelativeUrl"]))
+                                     ODataPathParser.from_method("GetFolderByServerRelativeUrl", [self.properties["ServerRelativeUrl"]]))
         elif self.is_property_available("UniqueId") and orig_path is None:
             return ResourcePathEntry(self.context,
                                      self.context.web.resource_path,
-                                     "GetFolderById(guid'{0}')".format(self.properties["UniqueId"]))
+                                     ODataPathParser.from_method("GetFolderById", [{'guid': self.properties["UniqueId"]}]))
         return orig_path

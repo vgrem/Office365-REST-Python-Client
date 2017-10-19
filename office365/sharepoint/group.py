@@ -22,9 +22,9 @@ class Group(Principal):
         if self.is_property_available("Id") and orig_path is None:
             return ResourcePathEntry(self.context,
                                      self.context.web.site_groups.resource_path,
-                                     ODataPathParser.from_method("GetById", self.properties["Id"]))
+                                     ODataPathParser.from_method("GetById", [self.properties["Id"]]))
         if self.is_property_available("LoginName") and orig_path is None:
             return ResourcePathEntry(self.context,
                                      self.context.web.site_groups.resource_path,
-                                     ODataPathParser.from_method("GetByName", self.properties["LoginName"]))
+                                     ODataPathParser.from_method("GetByName", [self.properties["LoginName"]]))
         return orig_path
