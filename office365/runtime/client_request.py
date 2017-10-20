@@ -79,10 +79,16 @@ class ClientRequest(object):
             from office365.sharepoint.client_context import ClientContext
             if isinstance(self.context, ClientContext):
                 self.context.ensure_form_digest(request_options)
-            result = requests.post(url=request_options.url,
-                                   headers=request_options.headers,
-                                   json=request_options.data,
-                                   auth=request_options.auth)
+            if hasattr(request_options.data, 'decode') and callable(request_options.data.decode):
+                result = requests.post(url=request_options.url,
+                                       headers=request_options.headers,
+                                       data=request_options.data,
+                                       auth=request_options.auth)
+            else:
+                result = requests.post(url=request_options.url,
+                                       headers=request_options.headers,
+                                       json=request_options.data,
+                                       auth=request_options.auth)
         elif request_options.method == HttpMethod.Patch:
             result = requests.patch(url=request_options.url,
                                     headers=request_options.headers,

@@ -9,21 +9,22 @@ from office365.sharepoint.file_creation_information import FileCreationInformati
 from tests.sharepoint_case import SPTestCase
 
 
-class TestFile(SPTestCase):
+class TestTextFile(SPTestCase):
     source_path = "{}/../examples/data/report.csv".format(os.path.dirname(__file__))
-    target_library_name = "Documents"
-    report_file_url = "/sites/contoso/documents/report.csv"
-    report_content = "Report data"
+    library_name = "Documents"
+    file_url = "/sites/contoso/documents/report.csv"
+    with open(source_path, 'r') as content_file:
+        file_content = content_file.read()
+    updated_content = "Report data"
 
     def setUp(self):
-        self.target_library = self.context.web.lists.get_by_title(self.target_library_name)
+        self.target_library = self.context.web.lists.get_by_title(self.library_name)
         self.context.load(self.target_library)
         self.context.execute_query()
 
     def test_1_upload_file(self):
         info = FileCreationInformation()
-        with open(self.source_path, 'r') as content_file:
-            info.content = content_file.read()
+        info.content = self.file_content
         info.url = os.path.basename(self.source_path)
         info.overwrite = True
         #upload file
@@ -33,29 +34,44 @@ class TestFile(SPTestCase):
 
     def test_2_update_file(self):
         """Test file upload operation"""
-        File.save_binary(self.context, self.report_file_url, self.report_content)
+        File.save_binary(self.context, self.file_url, self.updated_content)
 
     def test_3_download_file(self):
         """Test file upload operation"""
-        response = File.open_binary(self.context, self.report_file_url)
+        response = File.open_binary(self.context, self.file_url)
         str_output_content = response.content.decode("utf-8")
-        self.assertEqual(str_output_content, '"{0}"'.format(self.report_content))
+        self.assertEqual(str_output_content, '"{0}"'.format(self.updated_content))
 
-    def test_4_download_file_alt(self):
-        """Test file download operation"""
-        # file_url = "https://media18.sharepoint.com/sites/news/Documents/User Guide.docx"
-        # options = RequestOptions(file_url)
-        # self.context.authenticate_request(options)
-        # options.headers["X-FORMS_BASED_AUTH_ACCEPTED"] = "f"
-        # options.headers["User-Agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:39.0)"
 
-        # http_proxy = "https://127.0.0.1:8888"
-        # proxies = {
-        #    "https": http_proxy
-        # }
+class TestBinaryFile(SPTestCase):
+    source_path = "{}/../examples/data/binary".format(os.path.dirname(__file__))
+    library_name = "Documents"
+    file_url = "/sites/contoso/documents/binary"
+    with open(source_path, 'rb') as content_file:
+        file_content = content_file.read()
+    updated_content = os.urandom(1024)
 
-        # response = requests.get(file_url, headers=options.headers, proxies=proxies, verify=False, allow_redirects=True)
-        # file_name = os.path.basename(file_url)
-        # with open("data/" + file_name, 'wb') as out_file:
-        #    shutil.copyfileobj(response.raw, out_file)
-        # del response
+    def setUp(self):
+        self.target_library = self.context.web.lists.get_by_title(self.library_name)
+        self.context.load(self.target_library)
+        self.context.execute_query()
+
+    def test_1_upload_file(self):
+        info = FileCreationInformation()
+        info.content = self.file_content
+        info.url = os.path.basename(self.source_path)
+        info.overwrite = True
+        #upload file
+        upload_file = self.target_library.root_folder.files.add(info)
+        self.context.execute_query()
+        self.assertEquals(upload_file.properties["Name"], info.url)
+
+    def test_2_update_file(self):
+        """Test file upload operation"""
+        File.save_binary(self.context, self.file_url, self.updated_content)
+
+    def test_3_download_file(self):
+        """Test file upload operation"""
+        response = File.open_binary(self.context, self.file_url)
+        output_content = response.content
+        self.assertEqual(output_content, self.updated_content)
