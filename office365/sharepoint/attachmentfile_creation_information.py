@@ -1,11 +1,11 @@
 from office365.runtime.client_value_object import ClientValueObject
 
 
-class AttachmentFileCreationInformation(ClientValueObject):
+class AttachmentfileCreationInformation(ClientValueObject):
     """Represents properties that can be set when creating a file by using the AttachmentFiles.Add method."""
 
     def __init__(self, filename=None, content=None):
-        super(AttachmentFileCreationInformation, self).__init__()
+        super(AttachmentfileCreationInformation, self).__init__()
         self._filename = filename
         self._content = content
 

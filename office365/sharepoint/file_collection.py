@@ -1,6 +1,7 @@
 from office365.runtime.action_type import ActionType
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_query import ClientQuery
+from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.file import File
 
 
@@ -21,3 +22,7 @@ class FileCollection(ClientObjectCollection):
         self.context.add_query(qry, file_new)
         self.add_child(file_new)
         return file_new
+
+    def get_by_url(self, url):
+        """Retrieve File object by url"""
+        return File(self.context, ResourcePathServiceOperation(self.context, self.resource_path, "GetByUrl", [url]))

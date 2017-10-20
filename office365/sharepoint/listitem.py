@@ -39,6 +39,6 @@ class ListItem(SecurableObject):
         if self.is_property_available('AttachmentFiles'):
             return self.properties["AttachmentFiles"]
         else:
-            from office365.sharepoint.attachment_file_collection import AttachmentFileCollection
-            return AttachmentFileCollection(self.context,
+            from office365.sharepoint.attachmentfile_collection import AttachmentfileCollection
+            return AttachmentfileCollection(self.context,
                                             ResourcePathEntry(self.context, self.resource_path, "AttachmentFiles"))

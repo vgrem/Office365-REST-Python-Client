@@ -1,3 +1,5 @@
+from office365.runtime.client_object import ClientObject
+from office365.runtime.odata.odata_path_parser import ODataPathParser
 from office365.sharepoint.content_type_collection import ContentTypeCollection
 from office365.sharepoint.folder import Folder
 from office365.sharepoint.listitem import ListItem
@@ -76,3 +78,17 @@ class List(SecurableObject):
         else:
             return ContentTypeCollection(self.context,
                                          ResourcePathEntry(self.context, self.resource_path, "contenttypes"))
+
+    @property
+    def resource_path(self):
+        orig_path = ClientObject.resource_path.fget(self)
+        if self.is_property_available("Id") and orig_path is None:
+            return ResourcePathEntry(self.context,
+                                     self.context.web.lists.resource_path,
+                                     ODataPathParser.from_method("GetById", [self.properties["Id"]]))
+        elif self.is_property_available("Title") and orig_path is None:
+            path = ResourcePathEntry(self.context,
+                                     ResourcePathEntry(self.context, None, "Web"),
+                                     ODataPathParser.from_method("GetByTitle", [self.properties["Title"]]))
+            return path
+        return orig_path

@@ -4,7 +4,8 @@ from tests.sharepoint_case import SPTestCase
 class TestListItem(SPTestCase):
     target_list = None
 
-    def setUp(self):
+    def setUpClass(self):
+        super().setUpClass()
         self.target_list = self.context.web.lists.get_by_id("f15b5b99-f7b6-49d2-be85-81a51fdf52eb")  # Tasks
 
     def test_create_list_item(self):
