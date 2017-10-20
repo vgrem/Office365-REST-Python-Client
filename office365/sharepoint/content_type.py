@@ -1,4 +1,4 @@
-from office365.runtime import ClientObject
+from office365.runtime.client_object import ClientObject
 
 
 class ContentType(ClientObject):

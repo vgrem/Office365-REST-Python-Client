@@ -1,4 +1,5 @@
 from office365.runtime.client_object import ClientObject
+from office365.runtime.odata.odata_path_parser import ODataPathParser
 from office365.runtime.resource_path_entry import ResourcePathEntry
 from office365.runtime.utilities.http_method import HttpMethod
 from office365.runtime.utilities.request_options import RequestOptions
@@ -50,10 +51,10 @@ class File(ClientObject):
         if self.is_property_available("ServerRelativeUrl") and orig_path is None:
             return ResourcePathEntry(self.context,
                                      self.context.web.resource_path,
-                                     "GetFileByServerRelativeUrl('{0}')".format(self.properties["ServerRelativeUrl"]))
+                                     ODataPathParser.from_method("GetFileByServerRelativeUrl", [self.properties["ServerRelativeUrl"]]))
         elif self.is_property_available("UniqueId") and orig_path is None:
             path = ResourcePathEntry(self.context,
                                      ResourcePathEntry(self.context, None, "Web"),
-                                     "GetFileById(guid'{0}')".format(self.properties["UniqueId"]))
+                                     ODataPathParser.from_method("GetFileById", [{'guid': self.properties["UniqueId"]}]))
             return path
         return orig_path
