@@ -2,6 +2,7 @@ import os
 
 from office365.sharepoint.file_creation_information import FileCreationInformation
 from office365.sharepoint.list_creation_information import ListCreationInformation
+from tests import random_seed
 from tests.sharepoint_case import SPTestCase
 
 
@@ -14,14 +15,13 @@ class _File(SPTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super().setUpClass()
-        cls.target_library = cls.context.web.lists.get_by_title(cls.library_name)
+        super(_File, cls).setUpClass()
         try:
-            cls.context.web.lists.add(ListCreationInformation(cls.library_name, None, 101))
+            cls.target_library = cls.context.web.lists.add(ListCreationInformation(cls.library_name, None, 101))
             cls.context.execute_query()
         except ValueError as e:
             cls.context.pending_request.clear()
-            cls.context.load(cls.target_library)
+            cls.target_library = cls.context.web.lists.get_by_title(cls.library_name)
             cls.context.execute_query()
 
             cls.target_library.delete_object()
@@ -46,8 +46,8 @@ class _File(SPTestCase):
         # upload file
         upload_file = self.target_library.root_folder.files.add(info)
         self.context.execute_query()
-        self.assertEquals(upload_file.properties["Name"], info.url)
-        self.assertEquals(upload_file.properties["ServerRelativeUrl"], self.server_relative_url)
+        self.assertEqual(upload_file.properties["Name"], info.url)
+        self.assertEqual(upload_file.properties["ServerRelativeUrl"], self.server_relative_url)
 
     def test_2_list_files(self):
         files = self.target_library.root_folder.files
@@ -56,12 +56,12 @@ class _File(SPTestCase):
         self.context.execute_query()
         files_items = list(files)
 
-        self.assertEquals(len(files_items), 1)
+        self.assertEqual(len(files_items), 1)
 
         file = files_items[0]
         self.context.load(file)
         self.context.execute_query()
-        self.assertEquals(file.properties["Name"], os.path.basename(self.source_path))
+        self.assertEqual(file.properties["Name"], os.path.basename(self.source_path))
 
     def test_3_update_file(self):
         """Test file upload operation"""
@@ -90,22 +90,22 @@ class _File(SPTestCase):
         self.context.execute_query()
         files_items = list(files)
 
-        self.assertEquals(len(files_items), 0)
+        self.assertEqual(len(files_items), 0)
 
 
 class TestTextFile(_File):
     source_path = "{}/data/text".format(os.path.dirname(__file__))
-    library_name = "TestTextFile"
+    library_name = "TestTextFile_%s" % random_seed
     with open(source_path, 'r') as content_file:
         file_content = content_file.read()
     updated_content = b'Updated Content'
-    server_relative_url = '/sites/contoso/TestTextFile/text'
+    server_relative_url = '/sites/contoso/TestTextFile_%s/text' % random_seed
 
 
 class TestBinaryFile(_File):
     source_path = "{}/data/binary".format(os.path.dirname(__file__))
-    library_name = "TestBinaryFile"
+    library_name = "TestBinaryFile_%s" % random_seed
     with open(source_path, 'rb') as content_file:
         file_content = content_file.read()
     updated_content = os.urandom(1024)
-    server_relative_url = '/sites/contoso/TestBinaryFile/binary'
+    server_relative_url = '/sites/contoso/TestBinaryFile_%s/binary' % random_seed

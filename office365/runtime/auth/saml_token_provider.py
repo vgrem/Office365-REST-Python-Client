@@ -146,7 +146,10 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
         logger.debug_secrets('params: %s', params)
 
         f = open(os.path.join(os.path.dirname(__file__), 'SAML.xml'))
-        data = f.read()
-        for key in params:
-            data = data.replace('[' + key + ']', params[key])
-        return data
+        try:
+            data = f.read()
+            for key in params:
+                data = data.replace('[' + key + ']', params[key])
+            return data
+        finally:
+            f.close()

@@ -14,7 +14,7 @@ class TestListItem(SPTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super().setUpClass()
+        super(TestListItem, cls).setUpClass()
         cls.target_list = cls.context.web.lists.get_by_title("TestContact")
         item_properties = {'Title': 'Test Attachment Contact'}
         cls.target_item = cls.target_list.add_item(item_properties)
@@ -38,8 +38,8 @@ class TestListItem(SPTestCase):
         self.context.execute_query()
 
         attachment_files_items = list(attachment_files)
-        self.assertEquals(len(attachment_files_items), 1)
-        self.assertEquals(attachment_files_items[0].properties['FileName'], self.filename)
+        self.assertEqual(len(attachment_files_items), 1)
+        self.assertEqual(attachment_files_items[0].properties['FileName'], self.filename)
 
     def test_3_read_attachments(self):
         attachment_file = self.target_item.attachment_files.get_by_filename(self.filename)
@@ -47,7 +47,7 @@ class TestListItem(SPTestCase):
         self.context.execute_query()
         data = attachment_file.read()
 
-        self.assertEquals(data, self.file_content)
+        self.assertEqual(data, self.file_content)
 
     def test_4_update_attachments(self):
         attachment_file = self.target_item.attachment_files.get_by_filename(self.filename)
@@ -62,7 +62,7 @@ class TestListItem(SPTestCase):
 
         data = attachment_file.read()
 
-        self.assertEquals(data, updated_data)
+        self.assertEqual(data, updated_data)
 
     def test_5_delete_attachments(self):
         attachment_file = self.target_item.attachment_files.get_by_filename(self.filename)
@@ -78,4 +78,4 @@ class TestListItem(SPTestCase):
         attachment_files = attachment_files
         attachment_files_items = list(attachment_files)
 
-        self.assertEquals(len(attachment_files_items), 0)
+        self.assertEqual(len(attachment_files_items), 0)

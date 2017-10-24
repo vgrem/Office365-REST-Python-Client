@@ -12,9 +12,5 @@ matrix:
       - python: 2.6
       - python: 3.2
 
-
-install:
-  - pip install requests
-
 # command to run tests
-script: nosetests
+script: python setup.py test

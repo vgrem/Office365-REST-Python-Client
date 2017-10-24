@@ -32,7 +32,7 @@ class TestList(SPTestCase):
         result = self.context.web.lists.filter("Title eq '{0}'".format(self.list_title))
         self.context.load(result)
         self.context.execute_query()
-        self.assertEquals(len(result), 1)
+        self.assertEqual(len(result), 1)
 
     def test_4_delete_list(self):
         list_title = self.list_title + "_updated"
@@ -43,4 +43,4 @@ class TestList(SPTestCase):
         result = self.context.web.lists.filter("Title eq '{0}'".format(list_title))
         self.context.load(result)
         self.context.execute_query()
-        self.assertEquals(len(result), 0)
+        self.assertEqual(len(result), 0)
