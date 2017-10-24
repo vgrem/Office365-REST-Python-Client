@@ -1,4 +1,5 @@
 from office365.runtime.client_object import ClientObject
+from office365.runtime.client_query import ClientQuery
 from office365.runtime.odata.odata_path_parser import ODataPathParser
 from office365.runtime.resource_path_entry import ResourcePathEntry
 from office365.runtime.utilities.http_method import HttpMethod
@@ -6,7 +7,30 @@ from office365.runtime.utilities.request_options import RequestOptions
 from office365.sharepoint.listitem import ListItem
 
 
-class File(ClientObject):
+class AbstractFile(ClientObject):
+    def read(self, response_object=False):
+        """Immediately read content of file"""
+        if not self.is_property_available("ServerRelativeUrl"):
+            raise ValueError
+        response = File.open_binary(self.context, self.properties["ServerRelativeUrl"])
+        if not response_object:
+            return response.content
+        return response
+
+    def write(self, content):
+        """Immediately writes content of file"""
+        if not self.is_property_available("ServerRelativeUrl"):
+            raise ValueError
+        response = File.save_binary(self.context, self.properties["ServerRelativeUrl"], content)
+        return response
+
+    def delete_object(self):
+        """Deletes the file."""
+        qry = ClientQuery.delete_entry_query(self)
+        self.context.add_query(qry)
+
+
+class File(AbstractFile):
     """Represents a file in a SharePoint Web site that can be a Web Part Page, an item in a document library,
     or a file in a folder."""
 
@@ -22,7 +46,8 @@ class File(ClientObject):
         request.method = HttpMethod.Post
         request.set_header('X-HTTP-Method', 'PUT')
         request.data = content
-        ctx.execute_query_direct(request)
+        response = ctx.execute_query_direct(request)
+        return response
 
     @staticmethod
     def open_binary(ctx, server_relative_url):
@@ -34,6 +59,19 @@ class File(ClientObject):
         url = "{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(ctx.service_root_url, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Get
+        response = ctx.execute_query_direct(request)
+        return response
+
+    @staticmethod
+    def delete_binary(ctx, server_relative_url):
+        try:
+            from urllib import quote  # Python 2.X
+        except ImportError:
+            from urllib.parse import quote  # Python 3+
+        server_relative_url = quote(server_relative_url)
+        url = "{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(ctx.service_root_url, server_relative_url)
+        request = RequestOptions(url)
+        request.method = HttpMethod.Delete
         response = ctx.execute_query_direct(request)
         return response
 

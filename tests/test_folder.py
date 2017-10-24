@@ -41,7 +41,7 @@ class TestFolder(SPTestCase):
         # result = self.target_list.root_folder.folders.filter("Name eq '{0}'".format(new_folder_name))
         # self.context.load(result)
         # self.context.execute_query()
-        # self.assertEquals(len(result), 1)
+        # self.assertEqual(len(result), 1)
 
     def test_3_delete_folder(self):
         folder_to_delete = self.target_list.root_folder.folders.get_by_url(self.target_folder_name)
@@ -51,4 +51,4 @@ class TestFolder(SPTestCase):
         result = self.target_list.root_folder.folders.filter("Name eq '{0}'".format(self.target_folder_name))
         self.context.load(result)
         self.context.execute_query()
-        self.assertEquals(len(result), 0)
+        self.assertEqual(len(result), 0)

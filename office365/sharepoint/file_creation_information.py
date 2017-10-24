@@ -4,11 +4,11 @@ from office365.runtime.client_value_object import ClientValueObject
 class FileCreationInformation(ClientValueObject):
     """Represents properties that can be set when creating a file by using the FileCollection.Add method."""
 
-    def __init__(self):
+    def __init__(self, url=None, overwrite=False, content=None):
         super(FileCreationInformation, self).__init__()
-        self._url = None
-        self._overwrite = False
-        self._content = None
+        self._url = url
+        self._overwrite = overwrite
+        self._content = content
 
     @property
     def content(self):

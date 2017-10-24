@@ -20,6 +20,8 @@ setup(
     long_description=read("README.md"),
     url="https://github.com/vgrem/Office365-REST-Python-Client",
     install_requires=['requests'],
+    tests_require=['nose'],
+    test_suite='nose.collector',
     license="MIT",
     keywords="git",
     classifiers=[

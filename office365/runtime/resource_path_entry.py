@@ -12,3 +12,16 @@ class ResourcePathEntry(ResourcePath):
     @property
     def url(self):
         return self._entity_name
+
+    @staticmethod
+    def from_uri(uri, context):
+        """Creates a ResourcePathEntry from uri"""
+        if uri.startswith(context.service_root_url):
+            uri = uri[len(context.service_root_url):]
+        elements = uri.split('/')
+        parent = None
+        for element in elements:
+            parent = ResourcePathEntry(context, parent, element)
+        return parent
+
+

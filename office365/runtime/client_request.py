@@ -15,13 +15,19 @@ class ClientRequest(object):
         self.__queries = []
         self.__resultObjects = {}
 
+    def clear(self):
+        self.__queries = []
+        self.__resultObjects = {}
+
     def execute_query(self):
         """Submit pending request to the server"""
-        for qry in self.__queries:
-            request = self.build_request(qry)
-            payload = self.execute_query_direct(request)
-            self.process_payload_json(qry, payload)
-            self.__queries.remove(qry)
+        try:
+            for qry in self.__queries:
+                request = self.build_request(qry)
+                payload = self.execute_query_direct(request)
+                self.process_payload_json(qry, payload)
+        finally:
+            self.clear()
 
     def process_payload_json(self, query, response):
         if not response.content:
