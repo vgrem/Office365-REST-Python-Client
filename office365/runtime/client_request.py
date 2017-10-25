@@ -5,6 +5,37 @@ from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.utilities.http_method import HttpMethod
 from office365.runtime.utilities.request_options import RequestOptions
+from requests import HTTPError, RequestException
+
+
+class ClientRequestException(RequestException):
+    def __init__(self, *args, **kwargs):
+        super(ClientRequestException, self).__init__(*args, **kwargs)
+        self.content = self.response.json()
+        args = (self.code, self.message) + args
+        self.args = args
+
+    @property
+    def code(self):
+        error = self.content.get('error')
+        if error:
+            return error.get('code')
+
+    @property
+    def message_lang(self):
+        error = self.content.get('error')
+        if error:
+            message = error.get('message')
+            if message:
+                return message.get('lang')
+
+    @property
+    def message(self):
+        error = self.content.get('error')
+        if error:
+            message = error.get('message')
+            if message:
+                return message.get('value')
 
 
 class ClientRequest(object):
@@ -35,8 +66,10 @@ class ClientRequest(object):
 
         payload = response.json()
         "verify for any errors"
-        if 'error' in payload:
-            raise ValueError("Response error:", payload['error']['message'])
+        try:
+            response.raise_for_status()
+        except HTTPError as e:
+            raise ClientRequestException(*e.args, response=e.response)
 
         if any(payload) and query in self.__resultObjects:
             result_object = self.__resultObjects[query]
