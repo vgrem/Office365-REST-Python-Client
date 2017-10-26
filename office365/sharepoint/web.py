@@ -1,5 +1,6 @@
 import urllib
 
+from office365.runtime.action_type import ActionType
 from office365.runtime.client_object import ClientObject
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.file import File
@@ -50,6 +51,12 @@ class Web(SecurableObject):
             ResourcePathServiceOperation(self.context, self.resource_path, "getfolderbyserverrelativeurl", [url])
         )
         return folder_obj
+
+    def ensure_user(self, login_name):
+        user = User(self.context)
+        qry = ClientQuery.service_operation_query(self, ActionType.PostMethod, "ensureuser", [login_name])
+        self.context.add_query(qry, user)
+        return user
 
     @property
     def webs(self):
