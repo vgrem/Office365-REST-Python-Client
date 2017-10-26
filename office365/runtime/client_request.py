@@ -11,32 +11,39 @@ from requests import HTTPError, RequestException
 class ClientRequestException(RequestException):
     def __init__(self, *args, **kwargs):
         super(ClientRequestException, self).__init__(*args, **kwargs)
-        self.content = self.response.json()
+        if self.response.content and \
+                        self.response.headers.get('Content-Type', '').lower().split(';')[0] == 'application/json':
+            self.payload = self.response.json()
+        else:
+            self.payload = None
         args = (self.code, self.message) + args
         self.args = args
 
     @property
     def code(self):
-        error = self.content.get('error')
-        if error:
-            return error.get('code')
+        if self.payload:
+            error = self.payload.get('error')
+            if error:
+                return error.get('code')
 
     @property
     def message_lang(self):
-        error = self.content.get('error')
-        if error:
-            message = error.get('message')
-            if isinstance(message, dict):
-                return message.get('lang')
+        if self.payload:
+            error = self.payload.get('error')
+            if error:
+                message = error.get('message')
+                if isinstance(message, dict):
+                    return message.get('lang')
 
     @property
     def message(self):
-        error = self.content.get('error')
-        if error:
-            message = error.get('message')
-            if isinstance(message, dict):
-                return message.get('value')
-            return message
+        if self.payload:
+            error = self.payload.get('error')
+            if error:
+                message = error.get('message')
+                if isinstance(message, dict):
+                    return message.get('value')
+                return message
 
 
 class ClientRequest(object):
@@ -62,15 +69,15 @@ class ClientRequest(object):
             self.clear()
 
     def process_payload_json(self, query, response):
-        if not response.content:
-            return
-
-        payload = response.json()
-        "verify for any errors"
         try:
             response.raise_for_status()
         except HTTPError as e:
             raise ClientRequestException(*e.args, response=e.response)
+
+        if not response.content or response.headers.get('Content-Type', '').lower().split(';')[0] != 'application/json':
+            return
+
+        payload = response.json()
 
         if payload and query in self.__resultObjects:
             result_object = self.__resultObjects[query]
