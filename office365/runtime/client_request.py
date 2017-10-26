@@ -72,7 +72,7 @@ class ClientRequest(object):
         except HTTPError as e:
             raise ClientRequestException(*e.args, response=e.response)
 
-        if any(payload) and query in self.__resultObjects:
+        if payload and query in self.__resultObjects:
             result_object = self.__resultObjects[query]
             json_format = self.context.json_format
             if isinstance(json_format, JsonLightFormat):
