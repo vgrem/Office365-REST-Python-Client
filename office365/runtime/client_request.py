@@ -26,7 +26,7 @@ class ClientRequestException(RequestException):
         error = self.content.get('error')
         if error:
             message = error.get('message')
-            if message:
+            if isinstance(message, dict):
                 return message.get('lang')
 
     @property
@@ -34,8 +34,9 @@ class ClientRequestException(RequestException):
         error = self.content.get('error')
         if error:
             message = error.get('message')
-            if message:
+            if isinstance(message, dict):
                 return message.get('value')
+            return message
 
 
 class ClientRequest(object):
