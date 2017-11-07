@@ -58,17 +58,28 @@ class ClientRequest(object):
         self.__queries = []
         self.__resultObjects = {}
 
-    def execute_query(self):
+    def execute_query(self, query=None, result_object=None):
         """Submit pending request to the server"""
+        if query:
+            return self.execute_single_query(query, result_object)
+        return self.execute_pending_queries()
+
+    def execute_pending_queries(self):
         try:
-            for qry in self.__queries:
-                request = self.build_request(qry)
-                payload = self.execute_query_direct(request)
-                self.process_payload_json(qry, payload)
+            for query in self.__queries:
+                request = self.build_request(query)
+                response = self.execute_request_direct(request)
+                self.process_payload_json(query, response)
         finally:
             self.clear()
 
-    def process_payload_json(self, query, response):
+    def execute_single_query(self, query, result_object=None):
+        """Submit single query to the server"""
+        request = self.build_request(query)
+        response = self.execute_request_direct(request)
+        return self.process_payload_json(query, response, result_object)
+
+    def process_payload_json(self, query, response, result_object=None):
         try:
             response.raise_for_status()
         except HTTPError as e:
@@ -79,8 +90,17 @@ class ClientRequest(object):
 
         payload = response.json()
 
-        if payload and query in self.__resultObjects:
-            result_object = self.__resultObjects[query]
+        if not response.content:
+            return
+
+        if response.headers.get('Content-Type', '').lower().split(';')[0] == 'application/json':
+            payload = response.json()
+        else:
+            payload = None
+
+        result_object = result_object if result_object else self.__resultObjects.get(query)
+
+        if payload and result_object is not None:
             json_format = self.context.json_format
             if isinstance(json_format, JsonLightFormat):
                 if json_format.payload_root_entry:
@@ -92,6 +112,8 @@ class ClientRequest(object):
                 if isinstance(result_object, ClientObjectCollection):
                     payload = payload[json_format.payload_root_entry_collection]
             result_object.from_json(payload)
+
+        return payload
 
     def build_request(self, query):
         request = RequestOptions(query.url)
@@ -119,7 +141,7 @@ class ClientRequest(object):
         request.data = query.payload
         return request
 
-    def execute_query_direct(self, request_options):
+    def execute_request_direct(self, request_options):
         """Execute client request"""
         self.context.authenticate_request(request_options)
         if request_options.method == HttpMethod.Post:
