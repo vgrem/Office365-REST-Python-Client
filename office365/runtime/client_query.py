@@ -52,6 +52,10 @@ class ClientQuery(object):
     def id(self):
         return id(self)
 
+    def execute(self, context, client_object=None):
+        from office365.runtime.client_request import ClientRequest
+        return ClientRequest(context).execute_single_query(self, client_object)
+
     def __hash__(self):
         return hash(self.url)
 

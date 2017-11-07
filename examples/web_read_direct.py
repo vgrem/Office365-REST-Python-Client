@@ -16,7 +16,7 @@ if __name__ == '__main__':
         options = RequestOptions("{0}/_api/web/".format(settings['url']))
         options.set_header('Accept', 'application/json')
         options.set_header('Content-Type', 'application/json')
-        data = ctx.execute_query_direct(options)
+        data = ctx.execute_request_direct(options)
         s = json.loads(data.content)
         web_title = s['Title']
         print("Web title: {0}".format(web_title))

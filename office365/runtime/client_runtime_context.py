@@ -26,8 +26,8 @@ class ClientRuntimeContext(object):
         qry = ClientQuery(client_object.url, ActionType.ReadEntry)
         self.pending_request.add_query(qry, client_object)
 
-    def execute_query_direct(self, request):
-        return self.pending_request.execute_query_direct(request)
+    def execute_request_direct(self, request):
+        return self.pending_request.execute_request_direct(request)
 
     def execute_query(self):
         self.pending_request.execute_query()

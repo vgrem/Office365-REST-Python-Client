@@ -46,7 +46,7 @@ class File(AbstractFile):
         request.method = HttpMethod.Post
         request.set_header('X-HTTP-Method', 'PUT')
         request.data = content
-        response = ctx.execute_query_direct(request)
+        response = ctx.execute_request_direct(request)
         return response
 
     @staticmethod
@@ -59,7 +59,7 @@ class File(AbstractFile):
         url = "{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(ctx.service_root_url, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Get
-        response = ctx.execute_query_direct(request)
+        response = ctx.execute_request_direct(request)
         return response
 
     @staticmethod
@@ -72,7 +72,7 @@ class File(AbstractFile):
         url = "{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(ctx.service_root_url, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Delete
-        response = ctx.execute_query_direct(request)
+        response = ctx.execute_request_direct(request)
         return response
 
     @property
