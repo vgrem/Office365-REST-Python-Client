@@ -1,15 +1,7 @@
-from unittest import TestCase
-
-from office365.outlookservices.outlook_client import OutlookClient
-from office365.runtime.auth.network_credential_context import NetworkCredentialContext
-from examples.settings import settings
+from tests.outlook_client_case import OutlookClientTestCase
 
 
-class TestOutlookClient(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        ctx_auth = NetworkCredentialContext(username=settings['username'], password=settings['password'])
-        cls.client = OutlookClient(ctx_auth)
+class TestOutlookContacts(OutlookClientTestCase):
 
     def test1_create_contacts(self):
         contact_info = {

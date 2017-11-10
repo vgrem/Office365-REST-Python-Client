@@ -1,24 +1,30 @@
 import os.path
 
 from office365.sharepoint.attachmentfile_creation_information import AttachmentfileCreationInformation
+from office365.sharepoint.list_creation_information import ListCreationInformation
+from office365.sharepoint.list_template_type import ListTemplateType
 from tests.sharepoint_case import SPTestCase
+from tests.test_file import TestFile
+from tests.test_utilities import ListExtensions
 
 
-class TestListItem(SPTestCase):
+class TestListItemAttachment(SPTestCase):
+    context = None
     target_list = None
     target_item = None
-    source_path = "{}/data/binary".format(os.path.dirname(__file__))
-    filename = 'test.bin'
-    with open(source_path, 'rb') as content_file:
-        file_content = content_file.read()
 
     @classmethod
     def setUpClass(cls):
-        super(TestListItem, cls).setUpClass()
-        cls.target_list = cls.context.web.lists.get_by_title("TestContact")
-        item_properties = {'Title': 'Test Attachment Contact'}
+        super(TestListItemAttachment, cls).setUpClass()
+        cls.target_list = ListExtensions.ensure_list(cls.context.web,
+                                                     ListCreationInformation("Tasks",
+                                                                             None,
+                                                                             ListTemplateType.Tasks))
+        item_properties = {'Title': 'Approval Task'}
         cls.target_item = cls.target_list.add_item(item_properties)
         cls.context.execute_query()
+
+        cls.attachment_file_name = "SharePoint User Guide.docx"
 
     @classmethod
     def tearDownClass(cls):
@@ -26,11 +32,12 @@ class TestListItem(SPTestCase):
         cls.context.execute_query()
 
     def test_1_add_attachment(self):
-        attachment_file_information = AttachmentfileCreationInformation(self.filename, self.file_content)
+        file_content = self.read_attachment_file()
+        attachment_file_information = AttachmentfileCreationInformation(self.attachment_file_name, file_content)
 
         created_file = self.target_item.attachment_files.add(attachment_file_information)
         self.context.execute_query()
-        print('Attachment \'{0}\' has been created.'.format(created_file.properties["FileName"]))
+        self.assertIsNotNone(created_file.properties["FileName"])
 
     def test_2_list_attachments(self):
         attachment_files = self.target_item.attachment_files
@@ -39,18 +46,19 @@ class TestListItem(SPTestCase):
 
         attachment_files_items = list(attachment_files)
         self.assertEqual(len(attachment_files_items), 1)
-        self.assertEqual(attachment_files_items[0].properties['FileName'], self.filename)
+        self.assertEqual(attachment_files_items[0].properties['FileName'], self.attachment_file_name)
 
     def test_3_read_attachments(self):
-        attachment_file = self.target_item.attachment_files.get_by_filename(self.filename)
+        attachment_file = self.target_item.attachment_files.get_by_filename(self.attachment_file_name)
         self.context.load(attachment_file)
         self.context.execute_query()
         data = attachment_file.read()
 
-        self.assertEqual(data, self.file_content)
+        file_content = self.read_attachment_file()
+        self.assertEqual(data, file_content)
 
     def test_4_update_attachments(self):
-        attachment_file = self.target_item.attachment_files.get_by_filename(self.filename)
+        attachment_file = self.target_item.attachment_files.get_by_filename(self.attachment_file_name)
         self.context.load(attachment_file)
         self.context.execute_query()
 
@@ -65,7 +73,7 @@ class TestListItem(SPTestCase):
         self.assertEqual(data, updated_data)
 
     def test_5_delete_attachments(self):
-        attachment_file = self.target_item.attachment_files.get_by_filename(self.filename)
+        attachment_file = self.target_item.attachment_files.get_by_filename(self.attachment_file_name)
         self.context.load(attachment_file)
         self.context.execute_query()
 
@@ -79,3 +87,7 @@ class TestListItem(SPTestCase):
         attachment_files_items = list(attachment_files)
 
         self.assertEqual(len(attachment_files_items), 0)
+
+    def read_attachment_file(self):
+        path = "{0}/data/{1}".format(os.path.dirname(__file__), self.attachment_file_name)
+        return TestFile.read_file_as_binary(path)

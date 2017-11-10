@@ -1,5 +1,9 @@
 from random import randint
+
+from office365.sharepoint.list_creation_information import ListCreationInformation
+from office365.sharepoint.list_template_type import ListTemplateType
 from tests.sharepoint_case import SPTestCase
+from tests.test_utilities import ListExtensions
 
 
 class TestFolder(SPTestCase):
@@ -7,10 +11,19 @@ class TestFolder(SPTestCase):
     target_list = None
 
     def setUp(self):
-        self.target_list = self.context.web.lists.get_by_title("Documents")
+        self.target_list = ListExtensions.ensure_list(self.context.web,
+                                                      ListCreationInformation(
+                                                          "Documents",
+                                                          None,
+                                                          ListTemplateType.DocumentLibrary))
 
     def test_enum_folders_and_files(self):
-        folder_url = '/sites/contoso/documents'
+        parent_folder = self.target_list.root_folder
+        self.context.load(parent_folder)
+        self.context.execute_query()
+        self.assertIsNotNone(parent_folder.properties["ServerRelativeUrl"])
+
+        folder_url = parent_folder.properties["ServerRelativeUrl"]
         folder_object = self.context.web.get_folder_by_server_relative_url(folder_url)
         self.context.load(folder_object)
         self.context.execute_query()

@@ -1,5 +1,5 @@
-from office365.runtime.client_object import ClientObject
+from office365.outlookservices.item import Item
 
 
-class Event(ClientObject):
+class Event(Item):
     """An event in a calendar."""

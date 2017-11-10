@@ -80,17 +80,9 @@ class ClientRequest(object):
         return self.process_payload_json(query, response, result_object)
 
     def process_payload_json(self, query, response, result_object=None):
-        try:
-            response.raise_for_status()
-        except HTTPError as e:
-            raise ClientRequestException(*e.args, response=e.response)
+        self.validate_response(response)
 
         if not response.content or response.headers.get('Content-Type', '').lower().split(';')[0] != 'application/json':
-            return
-
-        payload = response.json()
-
-        if not response.content:
             return
 
         if response.headers.get('Content-Type', '').lower().split(';')[0] == 'application/json':
@@ -177,3 +169,9 @@ class ClientRequest(object):
         self.__queries.append(query)
         if result_object is not None:
             self.__resultObjects[query] = result_object
+
+    def validate_response(self, response):
+        try:
+            response.raise_for_status()
+        except HTTPError as e:
+            raise ClientRequestException(*e.args, response=e.response)

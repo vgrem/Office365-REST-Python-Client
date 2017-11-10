@@ -1,5 +1,7 @@
 import requests
+from requests import HTTPError
 
+from office365.runtime.client_request import ClientRequestException
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.context_web_information import ContextWebInformation
 from office365.runtime.odata.json_light_format import JsonLightFormat
@@ -32,6 +34,7 @@ class ClientContext(ClientRuntimeContext):
         response = requests.post(url=request.url,
                                  headers=request.headers,
                                  auth=request.auth)
+        self.pending_request.validate_response(response)
         payload = response.json()
         if self.json_format.metadata == ODataMetadataLevel.Verbose:
             payload = payload['d']['GetContextWebInformation']
