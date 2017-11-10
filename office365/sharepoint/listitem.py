@@ -34,6 +34,24 @@ class ListItem(SecurableObject):
         return orig_path
 
     @property
+    def file(self):
+        """Get file"""
+        if self.is_property_available("File"):
+            return self.properties["File"]
+        else:
+            from office365.sharepoint.file import File
+            return File(self.context, ResourcePathEntry(self.context, self.resource_path, "File"))
+
+    @property
+    def folder(self):
+        """Get folder"""
+        if self.is_property_available("Folder"):
+            return self.properties["Folder"]
+        else:
+            from office365.sharepoint.folder import Folder
+            return Folder(self.context, ResourcePathEntry(self.context, self.resource_path, "Folder"))
+
+    @property
     def attachment_files(self):
         """Get attachment files"""
         if self.is_property_available('AttachmentFiles'):
