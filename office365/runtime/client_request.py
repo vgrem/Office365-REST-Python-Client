@@ -2,48 +2,11 @@ import requests
 
 from office365.runtime.action_type import ActionType
 from office365.runtime.client_object_collection import ClientObjectCollection
+from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.utilities.http_method import HttpMethod
 from office365.runtime.utilities.request_options import RequestOptions
-from requests import HTTPError, RequestException
-
-
-class ClientRequestException(RequestException):
-    def __init__(self, *args, **kwargs):
-        super(ClientRequestException, self).__init__(*args, **kwargs)
-        if self.response.content and \
-                        self.response.headers.get('Content-Type', '').lower().split(';')[0] == 'application/json':
-            self.payload = self.response.json()
-        else:
-            self.payload = None
-        args = (self.code, self.message) + args
-        self.args = args
-
-    @property
-    def code(self):
-        if self.payload:
-            error = self.payload.get('error')
-            if error:
-                return error.get('code')
-
-    @property
-    def message_lang(self):
-        if self.payload:
-            error = self.payload.get('error')
-            if error:
-                message = error.get('message')
-                if isinstance(message, dict):
-                    return message.get('lang')
-
-    @property
-    def message(self):
-        if self.payload:
-            error = self.payload.get('error')
-            if error:
-                message = error.get('message')
-                if isinstance(message, dict):
-                    return message.get('value')
-                return message
+from requests import HTTPError
 
 
 class ClientRequest(object):
@@ -103,7 +66,7 @@ class ClientRequest(object):
             else:
                 if isinstance(result_object, ClientObjectCollection):
                     payload = payload[json_format.payload_root_entry_collection]
-            result_object.from_json(payload)
+            result_object.map_json(payload)
 
         return payload
 

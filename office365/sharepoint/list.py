@@ -31,9 +31,8 @@ class List(SecurableObject):
 
     def get_item_by_id(self, item_id):
         """Returns the list item with the specified list item identifier."""
-        list_item = ListItem(self.context,
-                             ClientQuery.service_operation_query(self, ActionType.GetMethod, "getitembyid", [item_id]))
-        return list_item
+        return ListItem(self.context,
+                        ResourcePathServiceOperation(self.context, self.resource_path, "getitembyid", [item_id]))
 
     def get_view(self, view_id):
         """Returns the list view with the specified view identifier."""

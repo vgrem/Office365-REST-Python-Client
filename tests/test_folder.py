@@ -2,20 +2,29 @@ from random import randint
 
 from office365.sharepoint.list_creation_information import ListCreationInformation
 from office365.sharepoint.list_template_type import ListTemplateType
+from tests import random_seed
 from tests.sharepoint_case import SPTestCase
 from tests.test_utilities import ListExtensions
 
 
 class TestFolder(SPTestCase):
+    context = None
     target_folder_name = "Archive_" + str(randint(0, 1000))
     target_list = None
 
-    def setUp(self):
-        self.target_list = ListExtensions.ensure_list(self.context.web,
-                                                      ListCreationInformation(
-                                                          "Documents",
-                                                          None,
-                                                          ListTemplateType.DocumentLibrary))
+    @classmethod
+    def setUpClass(cls):
+        super(TestFolder, cls).setUpClass()
+        cls.target_list = ListExtensions.ensure_list(cls.context.web,
+                                                     ListCreationInformation(
+                                                         "Documents %s" % random_seed,
+                                                         None,
+                                                         ListTemplateType.DocumentLibrary))
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.target_list.delete_object()
+        cls.context.execute_query()
 
     def test_enum_folders_and_files(self):
         parent_folder = self.target_list.root_folder

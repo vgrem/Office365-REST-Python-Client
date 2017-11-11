@@ -1,6 +1,7 @@
 from random import randint
 
 from office365.sharepoint.list_creation_information import ListCreationInformation
+from office365.sharepoint.list_template_type import ListTemplateType
 from tests.sharepoint_case import SPTestCase
 
 
@@ -10,7 +11,7 @@ class TestList(SPTestCase):
     def test_1_create_list(self):
         list_properties = ListCreationInformation()
         list_properties.AllowContentTypes = True
-        list_properties.BaseTemplate = 171
+        list_properties.BaseTemplate = ListTemplateType.TasksWithTimelineAndHierarchy
         list_properties.Title = self.list_title
         list_to_create = self.context.web.lists.add(list_properties)
         self.context.execute_query()

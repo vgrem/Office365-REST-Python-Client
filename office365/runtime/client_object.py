@@ -49,7 +49,7 @@ class ClientObject(object):
             module_name = self.context.__module__.replace("outlook_client", "") + entity_name.lower()
         client_object_type = getattr(importlib.import_module(module_name), entity_name)
         client_object = client_object_type(self.context)
-        client_object.from_json(properties)
+        client_object.map_json(properties)
         return client_object
 
     def remove_from_parent_collection(self):
@@ -118,7 +118,7 @@ class ClientObject(object):
             payload = dict((k, v) for k, v in payload.items() if k != "__metadata")
         return payload
 
-    def from_json(self, payload):
+    def map_json(self, payload):
         self._metadata = payload.get('__metadata')
         self._properties = dict((k, v) for k, v in payload.items()
                                 if k != '__metadata')
