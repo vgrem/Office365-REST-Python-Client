@@ -6,7 +6,6 @@ from tests.sharepoint_case import SPTestCase
 
 
 class TestWeb(SPTestCase):
-    target_web = None
 
     def setUp(self):
         pass

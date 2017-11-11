@@ -8,9 +8,6 @@ from tests.test_utilities import ListExtensions, read_file_as_binary
 
 
 class TestListItemAttachment(SPTestCase):
-    context = None
-    target_list = None
-    target_item = None
     attachment_file_name = "SharePoint User Guide.docx"
 
     @classmethod

@@ -8,9 +8,7 @@ from tests.test_utilities import ListExtensions
 
 
 class TestFolder(SPTestCase):
-    context = None
     target_folder_name = "Archive_" + str(randint(0, 1000))
-    target_list = None
 
     @classmethod
     def setUpClass(cls):

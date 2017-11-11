@@ -6,8 +6,6 @@ from tests.test_utilities import ListExtensions
 
 
 class TestListItem(SPTestCase):
-    context = None
-    target_list = None
 
     @classmethod
     def setUpClass(cls):

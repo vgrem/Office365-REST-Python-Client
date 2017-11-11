@@ -8,9 +8,7 @@ from tests.test_utilities import ListExtensions, FileExtensions, read_file_as_bi
 
 
 class TestFile(SPTestCase):
-    target_list = None
-    context = None
-    content_placeholder = "1234567890 abcdABCCD"
+    content_placeholder = "1234567890 abcdABCCD %s" % random_seed
     file_entries = [
         {"Name": "Sample.txt", "Type": "Text"},
         {"Name": "SharePoint User Guide.docx", "Type": "Binary"}
