@@ -44,3 +44,10 @@ def read_file_as_binary(path):
     with open(path, 'rb') as content_file:
         file_content = content_file.read()
     return file_content
+
+
+def normalize_response(response):
+    content = response.decode("utf-8")
+    if (content[0] == content[-1]) and content.startswith(("'", '"')):
+        return content[1:-1]
+    return content

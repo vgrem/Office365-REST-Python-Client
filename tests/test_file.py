@@ -4,11 +4,12 @@ from office365.sharepoint.list_creation_information import ListCreationInformati
 from office365.sharepoint.list_template_type import ListTemplateType
 from tests import random_seed
 from tests.sharepoint_case import SPTestCase
-from tests.test_utilities import ListExtensions, FileExtensions, read_file_as_binary, read_file_as_text
+from tests.test_utilities import ListExtensions, FileExtensions, read_file_as_binary, read_file_as_text, \
+    normalize_response
 
 
 class TestFile(SPTestCase):
-    content_placeholder = "1234567890 abcdABCCD %s" % random_seed
+    content_placeholder = "1234567890 abcdABCD %s" % random_seed
     file_entries = [
         {"Name": "Sample.txt", "Type": "Text"},
         {"Name": "SharePoint User Guide.docx", "Type": "Binary"}
@@ -60,7 +61,8 @@ class TestFile(SPTestCase):
         self.context.execute_query()
         for file_download in files:
             content = file_download.read()
-            self.assertEqual(content, self.content_placeholder)
+            enc_content = normalize_response(content)
+            self.assertEqual(enc_content, self.content_placeholder)
 
     def test_5_delete_file(self):
         files_to_delete = self.target_list.root_folder.files
@@ -76,3 +78,4 @@ class TestFile(SPTestCase):
         self.context.execute_query()
         files_items = list(result)
         self.assertEqual(len(files_items), 0)
+
