@@ -32,3 +32,15 @@ class FileExtensions(object):
         upload_file = list.root_folder.files.add(info)
         list.context.execute_query()
         return upload_file
+
+
+def read_file_as_text(path):
+    with open(path, 'r') as content_file:
+        file_content = content_file.read()
+    return file_content
+
+
+def read_file_as_binary(path):
+    with open(path, 'rb') as content_file:
+        file_content = content_file.read()
+    return file_content

@@ -4,14 +4,14 @@ from office365.sharepoint.attachmentfile_creation_information import Attachmentf
 from office365.sharepoint.list_creation_information import ListCreationInformation
 from office365.sharepoint.list_template_type import ListTemplateType
 from tests.sharepoint_case import SPTestCase
-from tests.test_file import TestFile
-from tests.test_utilities import ListExtensions
+from tests.test_utilities import ListExtensions, read_file_as_binary
 
 
 class TestListItemAttachment(SPTestCase):
     context = None
     target_list = None
     target_item = None
+    attachment_file_name = "SharePoint User Guide.docx"
 
     @classmethod
     def setUpClass(cls):
@@ -23,8 +23,6 @@ class TestListItemAttachment(SPTestCase):
         item_properties = {'Title': 'Approval Task'}
         cls.target_item = cls.target_list.add_item(item_properties)
         cls.context.execute_query()
-
-        cls.attachment_file_name = "SharePoint User Guide.docx"
 
     @classmethod
     def tearDownClass(cls):
@@ -90,4 +88,4 @@ class TestListItemAttachment(SPTestCase):
 
     def read_attachment_file(self):
         path = "{0}/data/{1}".format(os.path.dirname(__file__), self.attachment_file_name)
-        return TestFile.read_file_as_binary(path)
+        return read_file_as_binary(path)

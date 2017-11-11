@@ -4,13 +4,17 @@ from office365.sharepoint.list_creation_information import ListCreationInformati
 from office365.sharepoint.list_template_type import ListTemplateType
 from tests import random_seed
 from tests.sharepoint_case import SPTestCase
-from tests.test_utilities import ListExtensions, FileExtensions
+from tests.test_utilities import ListExtensions, FileExtensions, read_file_as_binary, read_file_as_text
 
 
 class TestFile(SPTestCase):
     target_list = None
     context = None
     content_placeholder = "1234567890 abcdABCCD"
+    file_entries = [
+        {"Name": "Sample.txt", "Type": "Text"},
+        {"Name": "SharePoint User Guide.docx", "Type": "Binary"}
+    ]
 
     @classmethod
     def setUpClass(cls):
@@ -21,11 +25,6 @@ class TestFile(SPTestCase):
                                                          None,
                                                          ListTemplateType.DocumentLibrary))
 
-        cls.file_entries = [
-            {"Name": "Sample.txt", "Type": "Text"},
-            {"Name": "SharePoint User Guide.docx", "Type": "Binary"}
-        ]
-
     @classmethod
     def tearDownClass(cls):
         cls.target_list.delete_object()
@@ -35,9 +34,9 @@ class TestFile(SPTestCase):
         for entry in self.file_entries:
             path = "{0}/data/{1}".format(os.path.dirname(__file__), entry["Name"])
             if entry["Type"] == "Binary":
-                file_content = self.read_file_as_binary(path)
+                file_content = read_file_as_binary(path)
             else:
-                file_content = self.read_file_as_text(path)
+                file_content = read_file_as_text(path)
             upload_file = FileExtensions.upload_file(self.target_list, entry["Name"], file_content)
             self.assertEqual(upload_file.properties["Name"], entry["Name"])
 
@@ -79,15 +78,3 @@ class TestFile(SPTestCase):
         self.context.execute_query()
         files_items = list(result)
         self.assertEqual(len(files_items), 0)
-
-    @classmethod
-    def read_file_as_text(cls, path):
-        with open(path, 'r') as content_file:
-            file_content = content_file.read()
-        return file_content
-
-    @classmethod
-    def read_file_as_binary(cls, path):
-        with open(path, 'rb') as content_file:
-            file_content = content_file.read()
-        return file_content
