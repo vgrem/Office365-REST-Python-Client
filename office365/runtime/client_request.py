@@ -108,6 +108,11 @@ class ClientRequest(object):
                                        headers=request_options.headers,
                                        data=request_options.data,
                                        auth=request_options.auth)
+            elif hasattr(request_options.data, 'read') and callable(request_options.data.read):
+                result = requests.post(url=request_options.url,
+                                       headers=request_options.headers,
+                                       data=request_options.data,
+                                       auth=request_options.auth)
             else:
                 result = requests.post(url=request_options.url,
                                        headers=request_options.headers,
