@@ -45,7 +45,7 @@ if ctx_auth.acquire_token_for_user(username, password):
   options = RequestOptions("{0}/_api/web/".format(url))
   options.set_header('Accept', 'application/json')
   options.set_header('Content-Type', 'application/json')
-  data = request.execute_query_direct(options)
+  data = request.execute_request_direct(options)
   s = json.loads(data.content)
   web_title = s['Title']
   print "Web title: " + web_title
