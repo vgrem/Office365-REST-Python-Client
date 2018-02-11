@@ -1,5 +1,4 @@
 import os
-import sys
 from xml.etree import ElementTree
 
 import requests
