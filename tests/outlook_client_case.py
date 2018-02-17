@@ -9,5 +9,6 @@ class OutlookClientTestCase(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        ctx_auth = NetworkCredentialContext(username=settings['username'], password=settings['password'])
+        ctx_auth = NetworkCredentialContext(username=settings['user_credentials']['username'],
+                                            password=settings['user_credentials']['password'])
         cls.client = OutlookClient(ctx_auth)

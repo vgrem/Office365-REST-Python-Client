@@ -10,6 +10,7 @@ class SPTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         ctx_auth = AuthenticationContext(url=settings['url'])
-        ctx_auth.acquire_token_for_user(username=settings['username'], password=settings['password'])
+        ctx_auth.acquire_token_for_user(username=settings['user_credentials']['username'],
+                                        password=settings['user_credentials']['password'])
         cls.context = ClientContext(settings['url'], ctx_auth)
 

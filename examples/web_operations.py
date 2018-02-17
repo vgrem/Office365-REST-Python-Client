@@ -48,7 +48,8 @@ def list_site_users(ctx):
 
 if __name__ == '__main__':
     ctxAuth = AuthenticationContext(url=settings['url'])
-    if ctxAuth.acquire_token_for_user(username=settings['username'], password=settings['password']):
+    if ctxAuth.acquire_token_for_user(username=settings['user_credentials']['username'],
+                                      password=settings['user_credentials']['password']):
         ctx = ClientContext(settings['url'], ctxAuth)
         # web = load_web(ctx)
         web = create_web(ctx)

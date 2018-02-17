@@ -9,7 +9,6 @@ app_settings = {
     'url': 'https://contoso.sharepoint.com/',
     'client_id': '8efc226b-ba3b-4def-a195-4acdb8d20ca9',
     'client_secret': '',
-    'redirect_url': 'https://github.com/vgrem/Office365-REST-Python-Client/'
 }
 
 

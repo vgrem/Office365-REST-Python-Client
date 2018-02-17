@@ -16,9 +16,12 @@ from office365.sharepoint.listItem_collection import ListItemCollection
 class List(SecurableObject):
     """List client object"""
 
-    def get_items(self):
+    def get_items(self, caml_query=None):
         """Returns a collection of items from the list based on the specified query."""
         items = ListItemCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "items"))
+        if caml_query:
+            qry = ClientQuery.service_operation_query(self, ActionType.PostMethod, "GetItems", None, caml_query.payload)
+            self.context.add_query(qry, items)
         return items
 
     def add_item(self, list_item_creation_information):

@@ -11,7 +11,7 @@ def read(fname):
 
 setup(
     name="Office365-REST-Python-Client",
-    version="2.1.0",
+    version="2.1.1",
     author="Vadim Gremyachev",
     author_email="vvgrem@gmail.com",
     maintainer="Konrad Gądek",
