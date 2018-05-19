@@ -18,6 +18,15 @@ class ClientObject(object):
         self._changed_properties = properties
         self._resource_path = resource_path
         self._url = None
+        self._use_custom_mapper = False
+
+    @property
+    def use_custom_mapper(self):
+        return self._use_custom_mapper
+
+    @use_custom_mapper.setter
+    def use_custom_mapper(self, value):
+        self._use_custom_mapper = value
 
     @property
     def include_metadata(self):
@@ -88,6 +97,14 @@ class ClientObject(object):
     @property
     def query_options(self):
         return self._query_options
+
+    def expand(self, value):
+        self.query_options['expand'] = value
+        return self
+
+    def select(self, value):
+        self.query_options['select'] = value
+        return self
 
     @property
     def url(self):

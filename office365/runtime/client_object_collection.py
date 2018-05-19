@@ -26,20 +26,12 @@ class ClientObjectCollection(ClientObject):
     def __getitem__(self, index):
         return self.__data[index]
 
-    def expand(self, value):
-        self.query_options['expand'] = value
-        return self
-
     def filter(self, value):
         self.query_options['filter'] = value
         return self
 
     def order_by(self, value):
         self.query_options['orderby'] = value
-        return self
-
-    def select(self, value):
-        self.query_options['select'] = value
         return self
 
     def skip(self, value):

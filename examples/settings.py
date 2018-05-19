@@ -1,8 +1,8 @@
 settings = {
-    'url': 'https://mediadev23.sharepoint.com',
+    'url': 'https://crmsato.sharepoint.com/teams/mallipohjademo',
     'user_credentials': {
-        'username': 'mattim@mediadev23.onmicrosoft.com',
-        'password': 'P@ssw0rd'
+        'username': '',
+        'password': ''
     },
     'client_credentials': {
         'client_id': '',

@@ -3,8 +3,8 @@ from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.caml_query import CamlQuery
 from office365.sharepoint.client_context import ClientContext
 
-list_title = "Documents"
-view_title = "All Documents"
+list_title = "Survey"
+view_title = "All Responses"
 
 
 def print_list_views(ctx):
@@ -29,10 +29,15 @@ def print_view_items(ctx):
     list_object = ctx.web.lists.get_by_title(list_title)
     # 1.get View query
     view = list_object.views.get_by_title(view_title)
-    ctx.load(view, "ViewQuery")
+    ctx.load(view, ["ViewQuery"])
     ctx.execute_query()
 
-    # 2.get items for View query
+    # 2.get View fields
+    view_fields = view.view_fields
+    ctx.load(view_fields)
+    ctx.execute_query()
+
+    # 3.get items for View query
     qry = CamlQuery()
     qry.ViewXml = "<View><Where>{0}</Where></View>".format(view.properties["ViewQuery"])
     items = list_object.get_items(qry)
@@ -45,8 +50,8 @@ def print_view_items(ctx):
 
 if __name__ == '__main__':
     ctx_auth = AuthenticationContext(url=settings['url'])
-    if ctx_auth.acquire_token_for_app(client_id=settings['client_credentials']['client_id'],
-                                      client_secret=settings['client_credentials']['client_secret']):
+    if ctx_auth.acquire_token_for_user(username=settings['user_credentials']['username'],
+                                       password=settings['user_credentials']['password']):
         ctx = ClientContext(settings['url'], ctx_auth)
 
         # print_list_views(ctx)
