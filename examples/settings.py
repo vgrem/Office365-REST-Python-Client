@@ -1,5 +1,5 @@
 settings = {
-    'url': 'https://crmsato.sharepoint.com/teams/mallipohjademo',
+    'url': 'https://contoso.sharepoint.com/',
     'user_credentials': {
         'username': '',
         'password': ''
