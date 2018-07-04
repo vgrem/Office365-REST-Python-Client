@@ -78,7 +78,6 @@ class TestListItemAttachment(SPTestCase):
         attachment_files = self.target_item.attachment_files
         self.context.load(attachment_files)
         self.context.execute_query()
-        attachment_files = attachment_files
         attachment_files_items = list(attachment_files)
 
         self.assertEqual(len(attachment_files_items), 0)

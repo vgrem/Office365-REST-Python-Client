@@ -1,8 +1,8 @@
 settings = {
-    'url': 'https://contoso.sharepoint.com/',
+    'url': 'https://mediadev88.sharepoint.com/',
     'user_credentials': {
-        'username': '',
-        'password': ''
+        'username': 'mattim@mediadev88.onmicrosoft.com',
+        'password': 'P@ssw0rd'
     },
     'client_credentials': {
         'client_id': '',

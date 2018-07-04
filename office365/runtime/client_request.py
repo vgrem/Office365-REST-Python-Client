@@ -10,12 +10,16 @@ from requests import HTTPError
 
 
 class ClientRequest(object):
-    """Client request for SharePoint ODATA/REST service"""
+    """Client request for Office365 ODATA/REST service"""
 
     def __init__(self, context):
         self.context = context
         self.__queries = []
         self.__resultObjects = {}
+
+    def __int__(self, url, ctx_auth):
+        from office365.sharepoint.client_context import ClientContext
+        self.context = ClientContext(url, ctx_auth)
 
     def clear(self):
         self.__queries = []
