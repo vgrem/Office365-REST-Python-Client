@@ -7,10 +7,10 @@ from office365.runtime.utilities.http_method import HttpMethod
 from office365.runtime.utilities.request_options import RequestOptions
 
 
-def read_list_items(context, list_title):
+def read_list_items(context, list_title, url):
     """Read list items example"""
     request = ClientRequest(context)
-    options = RequestOptions("web/lists/getbyTitle('{0}')/items".format(list_title))
+    options = RequestOptions("{0}/web/lists/getbyTitle('{1}')/items".format(url, list_title))
     options.set_header('Accept', 'application/json; odata=nometadata')
 
     print("Retrieving list items from List {0}".format(list_title))
@@ -20,10 +20,10 @@ def read_list_items(context, list_title):
         print("Item title: {0}".format(item["Title"]))
 
 
-def create_list_item(context, list_title):
+def create_list_item(context, list_title, url):
     """Create list item example"""
     request = ClientRequest(context)
-    options = RequestOptions("web/lists/getbyTitle('{0}')/items".format(list_title))
+    options = RequestOptions("{0}/web/lists/getbyTitle('{1}')/items".format(url, list_title))
     options.set_header('Accept', 'application/json; odata=nometadata')  # JSON Light nometadata mode!
     options.data = {'Title': 'New Task'}
     options.method = HttpMethod.Post
@@ -34,11 +34,11 @@ def create_list_item(context, list_title):
     return item
 
 
-def update_list_item(context, list_title, item_id):
+def update_list_item(context, list_title, item_id, url):
     """Update list item example"""
     request = ClientRequest(context)
     options = RequestOptions(
-        "web/lists/getbyTitle('{0}')/items({1})".format(list_title, item_id))
+        "{0}/web/lists/getbyTitle('{1}')/items({2})".format(url, list_title, item_id))
     options.set_header('Accept', 'application/json; odata=nometadata')  # JSON Light nometadata mode!
     options.set_header('IF-MATCH', '*')
     options.set_header('X-HTTP-Method', 'MERGE')
@@ -49,11 +49,11 @@ def update_list_item(context, list_title, item_id):
     print("Task has been successfully [updated]")
 
 
-def delete_list_item(context, list_title, item_id):
+def delete_list_item(context, list_title, item_id, url):
     """Delete list item example"""
     request = ClientRequest(context)
     options = RequestOptions(
-        "web/lists/getbyTitle('{0}')/items({1})".format(list_title, item_id))
+        "{0}/web/lists/getbyTitle('{1}')/items({2})".format(url, list_title, item_id))
     options.set_header('Accept', 'application/json; odata=nometadata')  # JSON Light nometadata mode!
     options.set_header('IF-MATCH', '*')
     options.set_header('X-HTTP-Method', 'DELETE')
@@ -70,10 +70,10 @@ if __name__ == '__main__':
                                        password=settings['user_credentials']['password']):
         target_list_title = "Tasks"
         # ctx = ClientContext(settings['url'], ctx_auth)  # Initialize client context
-        read_list_items(ctx, target_list_title)
-        task_item = create_list_item(ctx, target_list_title)
-        update_list_item(ctx, target_list_title, task_item['Id'])
-        delete_list_item(ctx, target_list_title, task_item['Id'])
+        read_list_items(ctx, target_list_title, settings['url'])
+        task_item = create_list_item(ctx, target_list_title, settings['url'])
+        update_list_item(ctx, target_list_title, task_item['Id'], settings['url'])
+        delete_list_item(ctx, target_list_title, task_item['Id'], settings['url'])
 
     else:
         print(ctx_auth.get_last_error())
