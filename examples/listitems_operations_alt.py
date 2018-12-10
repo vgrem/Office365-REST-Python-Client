@@ -69,7 +69,7 @@ if __name__ == '__main__':
     if ctx_auth.acquire_token_for_user(username=settings['user_credentials']['username'],
                                        password=settings['user_credentials']['password']):
         target_list_title = "Tasks"
-        # ctx = ClientContext(settings['url'], ctx_auth)  # Initialize client context
+        ctx = ClientContext(settings['url'], ctx_auth)  # Initialize client context
         read_list_items(ctx, target_list_title, settings['url'])
         task_item = create_list_item(ctx, target_list_title, settings['url'])
         update_list_item(ctx, target_list_title, task_item['Id'], settings['url'])

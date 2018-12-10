@@ -1,8 +1,12 @@
+import os
+
+user_credentials = os.environ['Office365_Python_Sdk_Credentials'].split(';')
+
 settings = {
     'url': 'https://mediadev88.sharepoint.com/',
     'user_credentials': {
-        'username': 'mattim@mediadev88.onmicrosoft.com',
-        'password': 'P@ssw0rd'
+        'username': user_credentials[0],
+        'password': user_credentials[1]
     },
     'client_credentials': {
         'client_id': '',
