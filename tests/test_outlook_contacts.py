@@ -2,6 +2,11 @@ from tests.outlook_client_case import OutlookClientTestCase
 
 
 class TestOutlookContacts(OutlookClientTestCase):
+    def test0_ensure_user_context(self):
+        me = self.client.me
+        self.client.load(me)
+        self.client.execute_query()
+        self.assertIsNotNone(me.properties['userPrincipalName'])
 
     def test1_create_contacts(self):
         contact_info = {
@@ -20,7 +25,7 @@ class TestOutlookContacts(OutlookClientTestCase):
 
         contact = self.client.me.contacts.add_from_json(contact_info)
         self.client.execute_query()
-        self.assertIsNotNone(contact.properties["GivenName"])
+        self.assertIsNotNone(contact.properties["givenName"])
 
     def test2_get_contacts(self):
         contacts = self.client.me.contacts
@@ -35,7 +40,7 @@ class TestOutlookContacts(OutlookClientTestCase):
         if len(results) == 1:
             contact = results[0]
             self.assertIsNotNone(contact.url)
-            contact.set_property("Department", "Media")
+            contact.set_property("department", "Media")
             contact.update()
             self.client.execute_query()
 

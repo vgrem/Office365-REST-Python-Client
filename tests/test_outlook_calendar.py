@@ -40,7 +40,7 @@ class TestOutlookCalendar(OutlookClientTestCase):
         self.client.execute_query()
         if len(results) == 1:
             event = results[0]
-            self.assertIsNotNone(event.properties["Subject"])
+            self.assertIsNotNone(event.properties["subject"])
             event.set_property("Subject", "Discuss the Calendar REST API (updated)")
             event.update()
             self.client.execute_query()
