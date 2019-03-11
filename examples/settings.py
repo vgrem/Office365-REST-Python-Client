@@ -1,6 +1,7 @@
 import os
 
 user_credentials = os.environ['Office365_Python_Sdk_Credentials'].split(';')
+client_credentials = os.environ['Office365_Python_Sdk_ClientCredentials'].split(';')
 
 settings = {
     'url': 'https://mediadev88.sharepoint.com/',
@@ -12,6 +13,6 @@ settings = {
     },
     'client_credentials': {
         'client_id': 'd4b2d51e-2d8e-4f08-8bce-961a7a435130',
-        'client_secret': 'v+lDZaIvLTHRsZ8/opvurqneZnH/DKXls18MVyX+0BY=',
+        'client_secret': client_credentials[1],
     }
 }

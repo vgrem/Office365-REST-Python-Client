@@ -3,30 +3,37 @@ from tests.outlook_client_case import OutlookClientTestCase
 
 class TestOutlookCalendar(OutlookClientTestCase):
     def test1_create_event(self):
-        event_info = {
-            "Subject": "Discuss the Calendar REST API",
-            "Body": {
-                "ContentType": "HTML",
-                "Content": "I think it will meet our requirements!"
+        event_payload = {
+            "subject": "Let's go for lunch",
+            "body": {
+                "contentType": "HTML",
+                "content": "Does late morning work for you?"
             },
-            "Start": "2014-02-02T18:00:00-08:00",
-            "StartTimeZone": "Pacific Standard Time",
-            "End": "2014-02-02T19:00:00-08:00",
-            "EndTimeZone": "Pacific Standard Time",
-            "Attendees": [
+            "start": {
+                "dateTime": "2017-04-15T12:00:00",
+                "timeZone": "Pacific Standard Time"
+            },
+            "end": {
+                "dateTime": "2017-04-15T14:00:00",
+                "timeZone": "Pacific Standard Time"
+            },
+            "location": {
+                "displayName": "Harry's Bar"
+            },
+            "attendees": [
                 {
-                    "EmailAddress": {
-                        "Address": "janets@a830edad9050849NDA1.onmicrosoft.com",
-                        "Name": "Janet Schorr"
+                    "emailAddress": {
+                        "address": "samanthab@contoso.onmicrosoft.com",
+                        "name": "Samantha Booth"
                     },
-                    "Type": "Required"
+                    "type": "required"
                 }
             ]
         }
 
-        event = self.client.me.events.add_from_json(event_info)
+        event = self.client.me.events.add_from_json(event_payload)
         self.client.execute_query()
-        self.assertIsNotNone(event.properties["Id"])
+        self.assertIsNotNone(event.properties["id"])
 
     def test2_get_events(self):
         events = self.client.me.events
@@ -41,7 +48,7 @@ class TestOutlookCalendar(OutlookClientTestCase):
         if len(results) == 1:
             event = results[0]
             self.assertIsNotNone(event.properties["subject"])
-            event.set_property("Subject", "Discuss the Calendar REST API (updated)")
+            event.set_property("subject", "Discuss the Calendar REST API (updated)")
             event.update()
             self.client.execute_query()
 
@@ -57,5 +64,5 @@ class TestOutlookCalendar(OutlookClientTestCase):
             events = self.client.me.events
             self.client.load(events)
             self.client.execute_query()
-            results = [e for e in events if e.properties["Id"] == event.properties["Id"]]
+            results = [e for e in events if e.properties["id"] == event.properties["id"]]
             self.assertEqual(len(results), 0)

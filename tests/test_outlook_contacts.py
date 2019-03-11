@@ -39,7 +39,7 @@ class TestOutlookContacts(OutlookClientTestCase):
         self.client.execute_query()
         if len(results) == 1:
             contact = results[0]
-            self.assertIsNotNone(contact.url)
+            self.assertIsNotNone(contact.properties["id"])
             contact.set_property("department", "Media")
             contact.update()
             self.client.execute_query()

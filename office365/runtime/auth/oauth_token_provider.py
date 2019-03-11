@@ -17,7 +17,7 @@ class OAuthTokenProvider(BaseTokenProvider):
         self.client_secret = client_secret
         self.user_name = user_name
         self.password = password
-        self.scope = 'user.read openid profile offline_access https://graph.microsoft.com/Contacts.ReadWrite'
+        self.scope = 'user.read openid profile offline_access'
 
     def acquire_token(self):
         try:
