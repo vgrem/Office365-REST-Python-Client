@@ -22,10 +22,12 @@ class AuthenticationContext(BaseAuthenticationContext):
         self.provider = ACSTokenProvider(self.url, client_id, client_secret)
         return self.provider.acquire_token()
 
-    def acquire_token_password_grant(self, client_id, client_secret, user_name, password):
+    def acquire_token_password_grant(self, client_credentials, user_credentials):
         """Acquire token via resource owner password credential (ROPC) grant"""
-        self.provider = OAuthTokenProvider(self.url, client_id, client_secret, user_name, password)
-        return self.provider.acquire_token()
+        self.provider = OAuthTokenProvider(self.url)
+        return self.provider.acquire_token_password_type("https://outlook.office365.com",
+                                                         client_credentials,
+                                                         user_credentials)
 
     def authenticate_request(self, request_options):
         """Authenticate request"""
@@ -37,7 +39,7 @@ class AuthenticationContext(BaseAuthenticationContext):
             raise ValueError('Unknown authentication provider')
 
     def get_auth_url(self, redirect_url):
-        return ""
+        return redirect_url
 
     def get_last_error(self):
         return self.provider.get_last_error()

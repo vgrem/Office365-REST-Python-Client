@@ -1,7 +1,7 @@
 from unittest import TestCase
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.client_context import ClientContext
-from examples.settings import settings
+from settings import settings
 
 
 class SPTestCase(TestCase):

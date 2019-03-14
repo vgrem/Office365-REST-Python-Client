@@ -6,7 +6,7 @@ class TestOutlookContacts(OutlookClientTestCase):
         me = self.client.me
         self.client.load(me)
         self.client.execute_query()
-        self.assertIsNotNone(me.properties['userPrincipalName'])
+        self.assertIsNotNone(me.properties['Id'])
 
     def test1_create_contacts(self):
         contact_info = {
@@ -25,7 +25,7 @@ class TestOutlookContacts(OutlookClientTestCase):
 
         contact = self.client.me.contacts.add_from_json(contact_info)
         self.client.execute_query()
-        self.assertIsNotNone(contact.properties["givenName"])
+        self.assertIsNotNone(contact.properties["GivenName"])
 
     def test2_get_contacts(self):
         contacts = self.client.me.contacts
@@ -39,8 +39,8 @@ class TestOutlookContacts(OutlookClientTestCase):
         self.client.execute_query()
         if len(results) == 1:
             contact = results[0]
-            self.assertIsNotNone(contact.properties["id"])
-            contact.set_property("department", "Media")
+            self.assertIsNotNone(contact.properties["Id"])
+            contact.set_property("Department", "Media")
             contact.update()
             self.client.execute_query()
 

@@ -1,5 +1,5 @@
 from random import randint
-from examples.settings import settings
+from settings import settings
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.web_creation_information import WebCreationInformation

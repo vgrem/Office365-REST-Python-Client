@@ -6,5 +6,5 @@ class BaseTokenProvider(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def acquire_token(self):
+    def acquire_token(self, parameters):
         pass

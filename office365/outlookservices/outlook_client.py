@@ -8,8 +8,8 @@ class OutlookClient(ClientRuntimeContext):
     """Office365 Outlook client context"""
 
     def __init__(self, ctx_auth):
-        # self.__service_root_url = "https://outlook.office365.com/api/v1.0/"
-        self.__service_root_url = "https://graph.microsoft.com/v1.0/"
+        self.__service_root_url = "https://outlook.office365.com/api/v1.0/"
+        # self.__service_root_url = "https://graph.microsoft.com/v1.0/"
         super(OutlookClient, self).__init__(self.__service_root_url, ctx_auth)
         self.json_format = V4JsonFormat("minimal")
 
