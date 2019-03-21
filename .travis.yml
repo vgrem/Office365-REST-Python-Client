@@ -14,3 +14,26 @@ matrix:
 
 # command to run tests
 script: python setup.py test
+
+stages:
+  # Tests are configured in upstream
+  - name: test
+    if: repo = "vgrem/Office365-REST-Python-Client"
+  # Deploy is currently configured in maintainer's fork
+  - name: deploy
+    if: repo = "kgadek/Office365-REST-Python-Client" AND tag IS present
+
+jobs:
+  include:
+    - stage: deploy
+      python: 3.6
+      script: true
+      deploy:
+        provider: pypi
+        user: kgadek
+        skip_existing: true
+        password:
+          secure: yEUHdUuAIVyU5UNtUo+9SVnQ//0E732eyb/yurA+dEx5M2THohzdX6T8jt+4xj4y0brtfSY1xOfNX4OW+yDXjsEZfOL7GZQSEkF+6LLRcO4gEJNYPXxDNe/N0/G1gN/w5d5jhzw6JUJaLsTzk5tmx51JYI6wMEHjYdM5948Mbja7Ya6h6wTIq0bmIu54OMUdcwdSXEFj3s3ZnxT8Qc57WS8Tg/ax1fL8JuPJNvOVe3qW9+NbFL01vosymLWqwOyhMkJp8J06nNtL3ijpZ/4uxITjRbKKRhcuMbBuTF5aV4FzONlxh+7lJ7ZvLWliB6HvYlJL1fQWj3ff/mxu8sa9YNeytGGfrZFeV/6AcqcJQnTj80vfwVKseL1Y4hqGMQey7kRGwUN1PjwaSQcAsqWcSDvgvb+LH4+c+Ha/LqM3ysQckR9FRFLarnX9wOhIUiLA3M9iEK7exCeOXstmJv3mGb774BetmrVT/Sp58SC8TVmbs/NbqukOkoUfTIwsOhNNSZPmpm/c6xjDXcVqdawAr4t6pjpy7q6yu9nuKJ7/V8A57Vm7o53O4CNwhkywPT9PVnDfzazj2a3Ech8BZ34nKugsz1o5r8fVRrdfbtcNR+NN3/TuuYYTLmM4JMkngc8XJNxubnHt53oCxyLsbuCr8VqlGTVQ+AH+2HpDZQ3be5I=
+        on:
+          tags: true
+
