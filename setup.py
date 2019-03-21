@@ -5,9 +5,8 @@ import os
 from distutils.core import setup
 import setuptools
 
-def read(fname):
-    """From an_example_pypi_project (https://pypi.python.org/pypi/an_example_pypi_project). """
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
 setup(
     name="Office365-REST-Python-Client",
@@ -17,7 +16,7 @@ setup(
     maintainer="Konrad Gądek",
     maintainer_email="kgadek@gmail.com",
     description="Office 365 REST client for Python",
-    long_description=read("README.md"),
+    long_description=long_description,
     url="https://github.com/vgrem/Office365-REST-Python-Client",
     install_requires=['requests'],
     tests_require=['nose'],
