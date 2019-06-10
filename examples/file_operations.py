@@ -1,10 +1,22 @@
 import os
 
+from office365.sharepoint.caml_query import CamlQuery
 from settings import settings
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.file import File
 from office365.sharepoint.file_creation_information import FileCreationInformation
+
+
+def read_folder_and_files_alt(context, list_title):
+    """Read a folder example"""
+    list_obj = context.web.lists.get_by_title(list_title)
+    qry = CamlQuery.create_all_items_query()
+    items = list_obj.get_items(qry)
+    context.load(items)
+    context.execute_query()
+    for cur_item in items:
+        print("File name: {0}".format(cur_item.properties["Title"]))
 
 
 def read_folder_and_files(context, list_title):
@@ -65,9 +77,12 @@ if __name__ == '__main__':
     ctx_auth = AuthenticationContext(url=settings['url'])
     if ctx_auth.acquire_token_for_user(username=settings['user_credentials']['username'],
                                        password=settings['user_credentials']['password']):
+        # if ctx_auth.acquire_token_for_app(client_id=settings['client_credentials']['client_id'],
+        #                                  client_secret=settings['client_credentials']['client_secret']):
         ctx = ClientContext(settings['url'], ctx_auth)
-        # read_folder_and_files(ctx)
+        # read_folder_and_files(ctx, "Documents")
+        read_folder_and_files_alt(ctx, "Documents")
         # upload_file(ctx)
-        download_file(ctx)
+        # download_file(ctx)
     else:
         print(ctx_auth.get_last_error())

@@ -21,8 +21,10 @@ class ClientRuntimeContext(object):
             self.__pending_request = ClientRequest(self)
         return self.__pending_request
 
-    def load(self, client_object, properties_to_retrieve=[]):
+    def load(self, client_object, properties_to_retrieve=None):
         """Prepare query"""
+        if properties_to_retrieve is None:
+            properties_to_retrieve = []
         if properties_to_retrieve:
             select_expr = ",".join(properties_to_retrieve)
             client_object = client_object.select(select_expr)

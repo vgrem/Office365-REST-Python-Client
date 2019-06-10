@@ -1,5 +1,6 @@
 import os
 
+from office365.sharepoint.file import File
 from office365.sharepoint.list_creation_information import ListCreationInformation
 from office365.sharepoint.list_template_type import ListTemplateType
 from tests import random_seed
@@ -64,7 +65,24 @@ class TestFile(SPTestCase):
             enc_content = normalize_response(content)
             self.assertEqual(enc_content, self.content_placeholder)
 
-    def test_5_delete_file(self):
+    def test_5_move_file(self):
+        """Test file upload operation"""
+        files = self.target_list.root_folder.files
+        self.context.load(files,)
+        self.context.execute_query()
+        for file in files:
+            file_url = file.properties["ServerRelativeUrl"]
+            path, file_name = os.path.split(file_url)
+            new_file_url = '/'.join([path, "new_" + file_name])
+            file.moveto(new_file_url, 1)
+            self.context.execute_query()
+
+            file = self.context.web.get_file_by_server_relative_url(new_file_url)
+            self.context.load(file)
+            self.context.execute_query()
+            self.assertEqual(new_file_url, file.properties["ServerRelativeUrl"])
+
+    def test_6_delete_file(self):
         files_to_delete = self.target_list.root_folder.files
         self.context.load(files_to_delete)
         self.context.execute_query()
