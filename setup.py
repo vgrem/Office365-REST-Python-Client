@@ -10,13 +10,14 @@ with open("README.md", "r") as fh:
 
 setup(
     name="Office365-REST-Python-Client",
-    version="2.1.1",
+    version="2.1.2",
     author="Vadim Gremyachev",
     author_email="vvgrem@gmail.com",
     maintainer="Konrad Gądek",
     maintainer_email="kgadek@gmail.com",
     description="Office 365 REST client for Python",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/vgrem/Office365-REST-Python-Client",
     install_requires=['requests'],
     tests_require=['nose'],
