@@ -74,6 +74,20 @@ class File(AbstractFile):
         request.method = HttpMethod.Delete
         response = ctx.execute_request_direct(request)
         return response
+    
+    @staticmethod
+    def moveto_binary(ctx, server_relative_url, new_relative_url):
+        try:
+            from urllib import quote  # Python 2.X
+        except ImportError:
+            from urllib.parse import quote  # Python 3+
+        server_relative_url = quote(server_relative_url)
+        new_relative_url = quote(new_relative_url)
+        url = "{0}/web/getfilebyserverrelativeurl('{1}')/\moveto(newurl='{2}', flags=1)".format(ctx.service_root_url, server_relative_url, new_relative_url)
+        request = RequestOptions(url)
+        request.method = HttpMethod.Post
+        response = ctx.execute_request_direct(request)
+        return response
 
     @property
     def listitem_allfields(self):
