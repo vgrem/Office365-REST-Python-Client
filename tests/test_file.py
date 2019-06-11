@@ -82,7 +82,22 @@ class TestFile(SPTestCase):
             self.context.execute_query()
             self.assertEqual(new_file_url, file.properties["ServerRelativeUrl"])
 
-    def test_6_delete_file(self):
+    def test_6_recycle_first_file(self):
+        """Test file upload operation"""
+        files = self.target_list.root_folder.files
+        self.context.load(files)
+        self.context.execute_query()
+        files_count = len(files)
+        if files_count > 0:
+            first_file = files[0]
+            first_file.recycle()
+            self.context.execute_query()
+            files_after = self.target_list.root_folder.files
+            self.context.load(files_after)
+            self.context.execute_query()
+            self.assertEqual(len(files)-1, len(files_after))
+
+    def test_7_delete_file(self):
         files_to_delete = self.target_list.root_folder.files
         self.context.load(files_to_delete)
         self.context.execute_query()

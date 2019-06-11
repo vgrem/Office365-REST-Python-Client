@@ -1,11 +1,14 @@
 from office365.runtime.action_type import ActionType
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_query import ClientQuery
+from office365.runtime.client_result import ClientResult
 from office365.runtime.odata.odata_path_parser import ODataPathParser
 from office365.runtime.resource_path_entry import ResourcePathEntry
+from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.utilities.http_method import HttpMethod
 from office365.runtime.utilities.request_options import RequestOptions
 from office365.sharepoint.listitem import ListItem
+from office365.sharepoint.webparts.limited_webpart_manager import LimitedWebPartManager
 
 
 class AbstractFile(ClientObject):
@@ -35,7 +38,28 @@ class File(AbstractFile):
     """Represents a file in a SharePoint Web site that can be a Web Part Page, an item in a document library,
     or a file in a folder."""
 
+    def approve(self, comment):
+        """Approves the file submitted for content approval with the specified comment."""
+        qry = ClientQuery.service_operation_query(self,
+                                                  ActionType.PostMethod,
+                                                  "approve",
+                                                  {
+                                                      "comment": comment
+                                                  })
+        self.context.add_query(qry)
+
+    def deny(self, comment):
+        """Denies approval for a file that was submitted for content approval."""
+        qry = ClientQuery.service_operation_query(self,
+                                                  ActionType.PostMethod,
+                                                  "deny",
+                                                  {
+                                                      "comment": comment
+                                                  })
+        self.context.add_query(qry)
+
     def copyto(self, new_relative_url, overwrite):
+        """Copies the file to the destination URL."""
         qry = ClientQuery.service_operation_query(self,
                                                   ActionType.PostMethod,
                                                   "moveto",
@@ -47,6 +71,7 @@ class File(AbstractFile):
         self.context.add_query(qry)
 
     def moveto(self, new_relative_url, flag):
+        """Moves the file to the specified destination URL."""
         qry = ClientQuery.service_operation_query(self,
                                                   ActionType.PostMethod,
                                                   "moveto",
@@ -56,6 +81,119 @@ class File(AbstractFile):
                                                   },
                                                   None)
         self.context.add_query(qry)
+
+    def publish(self, comment):
+        """Submits the file for content approval with the specified comment."""
+        qry = ClientQuery.service_operation_query(self,
+                                                  ActionType.PostMethod,
+                                                  "publish",
+                                                  {
+                                                      "comment": comment,
+                                                  }
+                                                  )
+        self.context.add_query(qry)
+
+    def unpublish(self, comment):
+        """Removes the file from content approval or unpublish a major version."""
+        qry = ClientQuery.service_operation_query(self,
+                                                  ActionType.PostMethod,
+                                                  "unpublish",
+                                                  {
+                                                      "comment": comment,
+                                                  }
+                                                  )
+        self.context.add_query(qry)
+
+    def checkout(self):
+        """Checks out the file from a document library based on the check-out type."""
+        qry = ClientQuery.service_operation_query(self,
+                                                  ActionType.PostMethod,
+                                                  "checkout",
+                                                  )
+        self.context.add_query(qry)
+
+    def checkin(self, comment, checkin_type):
+        """Checks the file in to a document library based on the check-in type."""
+        qry = ClientQuery.service_operation_query(self,
+                                                  ActionType.PostMethod,
+                                                  "checkin",
+                                                  {
+                                                      "comment": comment,
+                                                      "checkInType": checkin_type
+                                                  }
+                                                  )
+        self.context.add_query(qry)
+
+    def undocheckout(self):
+        """Reverts an existing checkout for the file."""
+        qry = ClientQuery.service_operation_query(self,
+                                                  ActionType.PostMethod,
+                                                  "undocheckout",
+                                                  )
+        self.context.add_query(qry)
+
+    def recycle(self):
+        """Moves the file to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
+        qry = ClientQuery.service_operation_query(self,
+                                                  ActionType.PostMethod,
+                                                  "recycle",
+                                                  )
+        self.context.add_query(qry)
+
+    def get_limited_webpart_manager(self, scope):
+        """Specifies the control set used to access, modify, or add Web Parts associated with this Web Part Page and
+        view. """
+        return LimitedWebPartManager(self.context,
+                                     ResourcePathServiceOperation(self.context, self.resource_path,
+                                                                  "getlimitedwebpartmanager",
+                                                                  [scope]
+                                                                  ))
+
+    def start_upload(self, upload_id, content):
+        """Starts a new chunk upload session and uploads the first fragment."""
+        qry = ClientQuery.service_operation_query(self,
+                                                  ActionType.PostMethod,
+                                                  "startupload",
+                                                  {
+                                                      "uploadID": upload_id
+                                                  },
+                                                  content
+                                                  )
+        result = ClientResult
+        self.context.add_query(qry, result)
+        return result
+
+    def continue_upload(self, upload_id, file_offset, content):
+        """Continues the chunk upload session with an additional fragment. The current file content is not changed."""
+        qry = ClientQuery.service_operation_query(self,
+                                                  ActionType.PostMethod,
+                                                  "continueupload",
+                                                  {
+                                                      "uploadID": upload_id,
+                                                      "fileOffset": file_offset,
+                                                  },
+                                                  content
+                                                  )
+        result = ClientResult
+        self.context.add_query(qry, result)
+        return result
+
+    def finish_upload(self, upload_id, file_offset, content):
+        """Uploads the last file fragment and commits the file. The current file content is changed when this method
+        completes. """
+        qry = ClientQuery.service_operation_query(self,
+                                                  ActionType.PostMethod,
+                                                  "finishupload",
+                                                  {
+                                                      "uploadID": upload_id,
+                                                      "fileOffset": file_offset,
+                                                  },
+                                                  content
+                                                  )
+        self.context.add_query(qry, self)
+        return self
+
+
 
     @staticmethod
     def save_binary(ctx, server_relative_url, content):
