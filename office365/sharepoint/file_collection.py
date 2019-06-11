@@ -23,6 +23,20 @@ class FileCollection(ClientObjectCollection):
         self.add_child(file_new)
         return file_new
 
+    def add_template_file(self, url_of_file, template_file_type):
+        """Adds a ghosted file to an existing list or document library."""
+        file_new = File(self.context)
+        qry = ClientQuery.service_operation_query(self,
+                                                  ActionType.PostMethod,
+                                                  "addTemplateFile",
+                                                  {
+                                                      "urlOfFile": url_of_file,
+                                                      "templateFileType": template_file_type
+                                                  })
+        self.context.add_query(qry, file_new)
+        self.add_child(file_new)
+        return file_new
+
     def get_by_url(self, url):
         """Retrieve File object by url"""
         return File(self.context, ResourcePathServiceOperation(self.context, self.resource_path, "GetByUrl", [url]))

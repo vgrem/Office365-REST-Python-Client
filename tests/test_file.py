@@ -3,6 +3,7 @@ import os
 from office365.sharepoint.file import File
 from office365.sharepoint.list_creation_information import ListCreationInformation
 from office365.sharepoint.list_template_type import ListTemplateType
+from office365.sharepoint.template_file_type import TemplateFileType
 from tests import random_seed
 from tests.sharepoint_case import SPTestCase
 from tests.test_utilities import ListExtensions, FileExtensions, read_file_as_binary, read_file_as_text, \
@@ -68,7 +69,7 @@ class TestFile(SPTestCase):
     def test_5_move_file(self):
         """Test file upload operation"""
         files = self.target_list.root_folder.files
-        self.context.load(files,)
+        self.context.load(files, )
         self.context.execute_query()
         for file in files:
             file_url = file.properties["ServerRelativeUrl"]
@@ -95,9 +96,18 @@ class TestFile(SPTestCase):
             files_after = self.target_list.root_folder.files
             self.context.load(files_after)
             self.context.execute_query()
-            self.assertEqual(len(files)-1, len(files_after))
+            self.assertEqual(len(files) - 1, len(files_after))
 
-    def test_7_delete_file(self):
+    def test_7_create_template_file(self):
+        target_folder = self.target_list.root_folder
+        self.context.load(target_folder)
+        self.context.execute_query()
+        file_url = '/'.join([target_folder.properties["ServerRelativeUrl"], "WikiPage.aspx"])
+        file_new = self.target_list.root_folder.files.add_template_file(file_url, TemplateFileType.WikiPage)
+        self.context.execute_query()
+        self.assertEqual(file_new.properties["ServerRelativeUrl"], file_url)
+
+    def test_8_delete_file(self):
         files_to_delete = self.target_list.root_folder.files
         self.context.load(files_to_delete)
         self.context.execute_query()
@@ -111,4 +121,3 @@ class TestFile(SPTestCase):
         self.context.execute_query()
         files_items = list(result)
         self.assertEqual(len(files_items), 0)
-
