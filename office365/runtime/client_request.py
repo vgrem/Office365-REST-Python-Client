@@ -17,10 +17,6 @@ class ClientRequest(object):
         self.__queries = []
         self.__resultObjects = {}
 
-    def __int__(self, url, ctx_auth):
-        from office365.sharepoint.client_context import ClientContext
-        self.context = ClientContext(url, ctx_auth)
-
     def clear(self):
         self.__queries = []
         self.__resultObjects = {}
