@@ -50,9 +50,10 @@ class ClientObjectCollection(ClientObject):
         return len(self.__data)
 
     def __getitem__(self, index):
-        if self.__next_query_url:
-            # resolve all items first
-            list(iter(self))
+        # fetch only as much items as necessary
+        item_iterator = iter(self)
+        while len(self.__data) <= index and self.__next_query_url:
+            next(item_iterator)
 
         return self.__data[index]
 
