@@ -43,6 +43,14 @@ class ClientRequest(object):
         return self.process_payload_json(query, response, result_object)
 
     def process_payload_json(self, query, response, result_object=None):
+        payload = self.process_response_json(response)
+        result_object = result_object if result_object else self.__resultObjects.get(query)
+        if result_object is not None:
+            result_object.map_json(payload)
+
+        return payload
+
+    def process_response_json(self, response):
         self.validate_response(response)
 
         if not response.content or response.headers.get('Content-Type', '').lower().split(';')[0] != 'application/json':
@@ -53,36 +61,31 @@ class ClientRequest(object):
         else:
             payload = None
 
-        result_object = result_object if result_object else self.__resultObjects.get(query)
-
-        if payload and result_object is not None:
+        if payload:
             json_format = self.context.json_format
-            if isinstance(json_format, JsonLightFormat):
-                if json_format.payload_root_entry:
-                    payload = payload[json_format.payload_root_entry]
-                if isinstance(result_object, ClientObjectCollection) \
-                        and json_format.payload_root_entry_collection:
-                    payload = payload[json_format.payload_root_entry_collection]
-            else:
-                if isinstance(result_object, ClientObjectCollection):
-                    payload = payload[json_format.payload_root_entry_collection]
-            result_object.map_json(payload)
+            if json_format.payload_root_entry:
+                payload = payload[json_format.payload_root_entry]
+            if json_format.payload_root_entry_collection in payload:
+                payload = {
+                    "collection": payload[json_format.payload_root_entry_collection],
+                    "next": payload.get(json_format.payload_root_entry_collection_next, None)
+                }
 
         return payload
 
     def build_request(self, query):
         request = RequestOptions(query.url)
-        "set json format headers"
+        # set json format headers
         request.set_headers(self.context.json_format.build_http_headers())
         if isinstance(self.context.json_format, JsonLightFormat):
-            "set custom method headers"
+            # set custom method headers
             if query.action_type == ActionType.DeleteEntry:
                 request.set_header("X-HTTP-Method", "DELETE")
                 request.set_header("IF-MATCH", '*')
             elif query.action_type == ActionType.UpdateEntry:
                 request.set_header("X-HTTP-Method", "MERGE")
                 request.set_header("IF-MATCH", '*')
-            "set method"
+            # set method
             if not (query.action_type == ActionType.ReadEntry or query.action_type == ActionType.GetMethod):
                 request.method = HttpMethod.Post
         else:
@@ -92,7 +95,7 @@ class ClientRequest(object):
                 request.method = HttpMethod.Patch
             elif query.action_type == ActionType.DeleteEntry:
                 request.method = HttpMethod.Delete
-        "set request payload"
+        # set request payload
         request.data = query.payload
         return request
 

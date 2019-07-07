@@ -8,6 +8,7 @@ class ODataJsonFormat(object):
         self.metadata = metadata
         self.payload_root_entry = None
         self.payload_root_entry_collection = None
+        self.payload_root_entry_collection_next = None
 
     __metaclass__ = ABCMeta
 

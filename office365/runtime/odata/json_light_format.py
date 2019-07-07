@@ -10,6 +10,7 @@ class JsonLightFormat(ODataJsonFormat):
         if self.metadata == ODataMetadataLevel.Verbose:
             self.payload_root_entry = "d"
             self.payload_root_entry_collection = "results"
+            self.payload_root_entry_collection_next = "__next"
         else:
             self.payload_root_entry_collection = "value"
 
