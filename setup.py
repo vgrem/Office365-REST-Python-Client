@@ -20,6 +20,9 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/vgrem/Office365-REST-Python-Client",
     install_requires=['requests'],
+    extras_require={
+        'NTLMAuthentication': ["requests_ntlm"],
+    },
     tests_require=['nose'],
     test_suite='nose.collector',
     license="MIT",
