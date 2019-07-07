@@ -44,3 +44,6 @@ class ClientRuntimeContext(object):
     def service_root_url(self):
         return self.__service_root_url
 
+    @property
+    def auth_context(self):
+        return self.__auth_context

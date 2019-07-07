@@ -57,7 +57,13 @@ class ClientObject(object):
         else:
             module_name = self.context.__module__.replace("outlook_client", "") + entity_name.lower()
         client_object_type = getattr(importlib.import_module(module_name), entity_name)
-        client_object = client_object_type(self.context)
+        context = self.context
+        if entity_name == "Web":
+            # create a new context to represent the new web object
+            web_url = properties["__metadata"]["uri"]
+            web_url = web_url[:web_url.rfind("/_api")]
+            context = ClientContext(web_url, self.context.auth_context)
+        client_object = client_object_type(context)
         client_object.map_json(properties)
         return client_object
 
