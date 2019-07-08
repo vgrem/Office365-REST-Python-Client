@@ -10,6 +10,6 @@
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once).
 # all codes: http://pylint-messages.wikidot.com/all-codes
-disable=C0103, C0303
+disable=C0103, C0303, C0111
 
 max-line-length=120
