@@ -11,3 +11,5 @@
 # it should appear only once).
 # all codes: http://pylint-messages.wikidot.com/all-codes
 disable=C0103, C0303
+
+max-line-length=120
