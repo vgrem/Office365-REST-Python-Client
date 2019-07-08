@@ -1,4 +1,3 @@
-from office365.runtime.client_object import ClientObject
 from office365.runtime.odata.odata_path_parser import ODataPathParser
 from office365.runtime.resource_path_entry import ResourcePathEntry
 from office365.sharepoint.file import AbstractFile
@@ -9,10 +8,16 @@ class Attachmentfile(AbstractFile):
 
     @property
     def resource_path(self):
-        orig_path = ClientObject.resource_path.fget(self)
-        if self.is_property_available("ServerRelativeUrl") and orig_path is None:
-            return ResourcePathEntry(self.context,
-                                     self.context.web.resource_path,
-                                     ODataPathParser.from_method("GetFileByServerRelativeUrl",
-                                                                 [self.properties["ServerRelativeUrl"]]))
-        return orig_path
+        resource_path = super(Attachmentfile, self).resource_path
+        if resource_path:
+            return resource_path
+
+        # fallback: create a new resource path
+        if self.is_property_available("ServerRelativeUrl"):
+            self._resource_path = ResourcePathEntry(
+                self.context,
+                ResourcePathEntry(self.context, None, "Web"),
+                ODataPathParser.from_method("GetFileByServerRelativeUrl",
+                                            [self.properties["ServerRelativeUrl"]]))
+
+        return self._resource_path

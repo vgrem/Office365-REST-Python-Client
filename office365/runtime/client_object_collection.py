@@ -5,6 +5,9 @@ from office365.runtime.utilities.request_options import RequestOptions
 class ClientObjectCollection(ClientObject):
     """Client object collection"""
 
+    # The object type this collection holds
+    item_type = ClientObject
+
     def __init__(self, context, resource_path=None):
         super(ClientObjectCollection, self).__init__(context, resource_path)
         self.__data = []
@@ -12,7 +15,7 @@ class ClientObjectCollection(ClientObject):
 
     def map_json(self, payload):
         for properties in payload["collection"]:
-            child_client_object = self.create_typed_object(properties)
+            child_client_object = self.create_typed_object(properties, self.item_type)
             self.add_child(child_client_object)
         self.__next_query_url = payload["next"]
 

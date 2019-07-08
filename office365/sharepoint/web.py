@@ -1,7 +1,4 @@
-import urllib
-
 from office365.runtime.action_type import ActionType
-from office365.runtime.client_object import ClientObject
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.file import File
 from office365.sharepoint.folder import Folder
@@ -13,7 +10,6 @@ from office365.runtime.client_query import ClientQuery
 from office365.runtime.resource_path_entry import ResourcePathEntry
 from office365.sharepoint.group_collection import GroupCollection
 from office365.sharepoint.list_collection import ListCollection
-from office365.sharepoint.web_collection import WebCollection
 
 
 class Web(SecurableObject):
@@ -64,6 +60,7 @@ class Web(SecurableObject):
         if self.is_property_available('Webs'):
             return self.properties['Webs']
         else:
+            from office365.sharepoint.web_collection import WebCollection
             return WebCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "webs"))
 
     @property
@@ -108,7 +105,7 @@ class Web(SecurableObject):
 
     @property
     def service_root_url(self):
-        orig_root_url = ClientObject.service_root_url.fget(self)
+        orig_root_url = super(Web, self).service_root_url
         if self.is_property_available("Url"):
             cur_root_url = self.properties["Url"] + "/_api/"
             return cur_root_url

@@ -8,6 +8,9 @@ from office365.sharepoint.list import List
 class ListCollection(ClientObjectCollection):
     """Lists collection"""
 
+    # The object type this collection holds
+    item_type = List
+
     def get_by_title(self, list_title):
         """Retrieve List client object by title"""
         return List(self.context,

@@ -1,10 +1,8 @@
-from office365.runtime.odata.odata_path_parser import ODataPathParser
-from office365.sharepoint.file_collection import FileCollection
-from office365.sharepoint.listitem import ListItem
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_query import ClientQuery
+from office365.runtime.odata.odata_path_parser import ODataPathParser
 from office365.runtime.resource_path_entry import ResourcePathEntry
-from office365.sharepoint.folder_collection import FolderCollection
+from office365.sharepoint.listitem import ListItem
 
 
 class Folder(ClientObject):
@@ -42,6 +40,7 @@ class Folder(ClientObject):
         if self.is_property_available('Files'):
             return self.properties["Files"]
         else:
+            from office365.sharepoint.file_collection import FileCollection
             return FileCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "Files"))
 
     @property
@@ -50,17 +49,25 @@ class Folder(ClientObject):
         if self.is_property_available('Folders'):
             return self.properties["Folders"]
         else:
+            from office365.sharepoint.folder_collection import FolderCollection
             return FolderCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "Folders"))
 
     @property
     def resource_path(self):
-        orig_path = ClientObject.resource_path.fget(self)
-        if self.is_property_available("ServerRelativeUrl") and orig_path is None:
-            return ResourcePathEntry(self.context,
-                                     self.context.web.resource_path,
-                                     ODataPathParser.from_method("GetFolderByServerRelativeUrl", [self.properties["ServerRelativeUrl"]]))
-        elif self.is_property_available("UniqueId") and orig_path is None:
-            return ResourcePathEntry(self.context,
-                                     self.context.web.resource_path,
-                                     ODataPathParser.from_method("GetFolderById", [{'guid': self.properties["UniqueId"]}]))
-        return orig_path
+        resource_path = super(Folder, self).resource_path
+        if resource_path:
+            return resource_path
+
+        # fallback: create a new resource path
+        if self.is_property_available("ServerRelativeUrl"):
+            self._resource_path = ResourcePathEntry(
+                self.context,
+                ResourcePathEntry.from_uri("Web/Folders", self.context),
+                ODataPathParser.from_method("GetFolderByServerRelativeUrl", [self.properties["ServerRelativeUrl"]]))
+        elif self.is_property_available("UniqueId"):
+            self._resource_path = ResourcePathEntry(
+                self.context,
+                ResourcePathEntry.from_uri("Web/Folders", self.context),
+                ODataPathParser.from_method("GetFolderById", [{'guid': self.properties["UniqueId"]}]))
+
+        return self._resource_path

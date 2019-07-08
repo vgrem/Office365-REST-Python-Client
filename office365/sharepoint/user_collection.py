@@ -6,6 +6,9 @@ from office365.sharepoint.user import User
 class UserCollection(ClientObjectCollection):
     """Represents a collection of User resources."""
 
+    # The object type this collection holds
+    item_type = User
+
     def get_by_email(self, email):
         """Retrieve User object by email"""
         return User(self.context, ResourcePathServiceOperation(self.context, self.resource_path, "GetByEmail", [email]))
@@ -19,9 +22,9 @@ class UserCollection(ClientObjectCollection):
         return User(self.context,
                     ResourcePathServiceOperation(self.context, self.resource_path, "GetByLoginName", [login_name]))
 
-    def remove_by_id(self, id):
+    def remove_by_id(self, _id):
         """Retrieve User object by id"""
-        return User(self.context, ResourcePathServiceOperation(self.context, self.resource_path, "RemoveById", [id]))
+        return User(self.context, ResourcePathServiceOperation(self.context, self.resource_path, "RemoveById", [_id]))
 
     def remove_by_login_name(self, login_name):
         """Remove User object by login name"""

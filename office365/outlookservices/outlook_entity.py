@@ -17,10 +17,15 @@ class OutlookEntity(ClientObject):
 
     @property
     def resource_path(self):
-        orig_path = ClientObject.resource_path.fget(self)
-        if self.is_property_available("Id") and orig_path is None:
-            return ResourcePathEntry(self.context,
-                                     self._parent_collection.resource_path,
-                                     self.properties["Id"])
-        return orig_path
+        resource_path = super(OutlookEntity, self).resource_path
+        if resource_path:
+            return resource_path
 
+        # fallback: create a new resource path
+        if self.is_property_available("Id"):
+            return ResourcePathEntry(
+                self.context,
+                self._parent_collection.resource_path,
+                self.properties["Id"])
+
+        return self._resource_path
