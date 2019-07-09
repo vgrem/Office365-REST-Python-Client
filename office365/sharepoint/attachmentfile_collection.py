@@ -10,6 +10,9 @@ from office365.sharepoint.file import File
 class AttachmentfileCollection(ClientObjectCollection):
     """Represents a collection of AttachmentFile resources."""
 
+    # The object type this collection holds
+    item_type = Attachmentfile
+
     def add(self, attachment_file_information):
         """Creates an attachment"""
         if isinstance(attachment_file_information, dict):

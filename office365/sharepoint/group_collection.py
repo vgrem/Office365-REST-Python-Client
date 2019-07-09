@@ -8,6 +8,9 @@ from office365.sharepoint.group import Group
 class GroupCollection(ClientObjectCollection):
     """Represents a collection of Group resources."""
 
+    # The object type this collection holds
+    item_type = Group
+
     def add(self, group_creation_information):
         """Creates a Group resource"""
         group = Group(self.context)

@@ -1,6 +1,8 @@
 import importlib
+from urllib3.util import parse_url
 
 from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
+from office365.runtime.resource_path_entry import ResourcePathEntry
 
 
 class ClientObject(object):
@@ -49,22 +51,34 @@ class ClientObject(object):
         if '__metadata' not in entity:
             entity["__metadata"] = {'type': self.entity_type_name}
 
-    def create_typed_object(self, properties):
-        entity_name = self.__class__.__name__.replace("Collection", "")
+    def create_typed_object(self, properties, client_object_type=None):
         from office365.sharepoint.client_context import ClientContext
-        if isinstance(self.context, ClientContext):
-            module_name = self.context.__module__.replace("client_context", "") + entity_name.lower()
-        else:
-            module_name = self.context.__module__.replace("outlook_client", "") + entity_name.lower()
-        client_object_type = getattr(importlib.import_module(module_name), entity_name)
+
+        if client_object_type is None:
+            # get type from metadata; the form is 'SP.ObjectType'
+            client_object_type_name = properties["__metadata"]["type"][3:]
+
+            if isinstance(self.context, ClientContext):
+                module_name = self.context.__module__.replace("client_context", "") + client_object_type_name.lower()
+            else:
+                module_name = self.context.__module__.replace("outlook_client", "") + client_object_type_name.lower()
+
+            try:
+                lib = importlib.import_module(module_name)
+                client_object_type = getattr(lib, client_object_type_name)
+            except ModuleNotFoundError:
+                raise ModuleNotFoundError("No class for object type '{0}' found".format(client_object_type_name))
+
+        web_url, resource_path = properties["__metadata"]["uri"].split("/_api/")
+
         context = self.context
-        if entity_name == "Web":
+        if client_object_type.__name__ == "Web":
             # create a new context to represent the new web object
-            web_url = properties["__metadata"]["uri"]
-            web_url = web_url[:web_url.rfind("/_api")]
             context = ClientContext(web_url, self.context.auth_context)
-        client_object = client_object_type(context)
+
+        client_object = client_object_type(context, ResourcePathEntry.from_uri(resource_path, self.context))
         client_object.map_json(properties)
+
         return client_object
 
     def remove_from_parent_collection(self):
@@ -98,6 +112,14 @@ class ClientObject(object):
 
     @property
     def resource_path(self):
+        if self._resource_path:
+            return self._resource_path
+
+        url_parsed = parse_url(self._metadata.get("uri", ""))
+        if url_parsed.path:
+            self._resource_path = ResourcePathEntry.from_uri(
+                url_parsed.path[url_parsed.path.rfind("/_api/")+6:], self._context)
+
         return self._resource_path
 
     @property

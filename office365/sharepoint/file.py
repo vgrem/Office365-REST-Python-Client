@@ -16,7 +16,8 @@ class AbstractFile(ClientObject):
         """Immediately read content of file"""
         if not self.is_property_available("ServerRelativeUrl"):
             raise ValueError
-        response = File.open_binary(self.context, self.properties["ServerRelativeUrl"])
+        response = File.open_binary(
+            self.context, self.properties["ServerRelativeUrl"])
         if not response_object:
             return response.content
         return response
@@ -25,7 +26,8 @@ class AbstractFile(ClientObject):
         """Immediately writes content of file"""
         if not self.is_property_available("ServerRelativeUrl"):
             raise ValueError
-        response = File.save_binary(self.context, self.properties["ServerRelativeUrl"], content)
+        response = File.save_binary(
+            self.context, self.properties["ServerRelativeUrl"], content)
         return response
 
     def delete_object(self):
@@ -193,8 +195,6 @@ class File(AbstractFile):
         self.context.add_query(qry, self)
         return self
 
-
-
     @staticmethod
     def save_binary(ctx, server_relative_url, content):
         try:
@@ -202,7 +202,8 @@ class File(AbstractFile):
         except ImportError:
             from urllib.parse import quote  # Python 3+
         server_relative_url = quote(server_relative_url)
-        url = "{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(ctx.service_root_url, server_relative_url)
+        url = "{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(
+            ctx.service_root_url, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Post
         request.set_header('X-HTTP-Method', 'PUT')
@@ -217,7 +218,8 @@ class File(AbstractFile):
         except ImportError:
             from urllib.parse import quote  # Python 3+
         server_relative_url = quote(server_relative_url)
-        url = "{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(ctx.service_root_url, server_relative_url)
+        url = "{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(
+            ctx.service_root_url, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Get
         response = ctx.execute_request_direct(request)
@@ -233,16 +235,22 @@ class File(AbstractFile):
 
     @property
     def resource_path(self):
-        orig_path = ClientObject.resource_path.fget(self)
-        if self.is_property_available("ServerRelativeUrl") and orig_path is None:
-            return ResourcePathEntry(self.context,
-                                     self.context.web.resource_path,
-                                     ODataPathParser.from_method("GetFileByServerRelativeUrl",
-                                                                 [self.properties["ServerRelativeUrl"]]))
-        elif self.is_property_available("UniqueId") and orig_path is None:
-            path = ResourcePathEntry(self.context,
-                                     ResourcePathEntry(self.context, None, "Web"),
-                                     ODataPathParser.from_method("GetFileById",
-                                                                 [{'guid': self.properties["UniqueId"]}]))
-            return path
-        return orig_path
+        resource_path = super(File, self).resource_path
+        if resource_path:
+            return resource_path
+
+        # fallback: create a new resource path
+        if self.is_property_available("ServerRelativeUrl"):
+            self._resource_path = ResourcePathEntry(
+                self.context,
+                ResourcePathEntry(self.context, None, "Web"),
+                ODataPathParser.from_method("GetFileByServerRelativeUrl",
+                                            [self.properties["ServerRelativeUrl"]]))
+        elif self.is_property_available("UniqueId"):
+            self._resource_path = ResourcePathEntry(
+                self.context,
+                ResourcePathEntry(self.context, None, "Web"),
+                ODataPathParser.from_method("GetFileById",
+                                            [{'guid': self.properties["UniqueId"]}]))
+
+        return self._resource_path

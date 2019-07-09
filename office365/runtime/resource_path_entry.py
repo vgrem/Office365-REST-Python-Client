@@ -23,5 +23,3 @@ class ResourcePathEntry(ResourcePath):
         for element in elements:
             parent = ResourcePathEntry(context, parent, element)
         return parent
-
-

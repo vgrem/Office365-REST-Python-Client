@@ -6,6 +6,9 @@ from office365.sharepoint.view import View
 class ViewCollection(ClientObjectCollection):
     """Represents a collection of View resources."""
 
+    # The object type this collection holds
+    item_type = View
+
     def get_by_title(self, view_title):
         """Gets the list view with the specified title."""
         return View(self.context,

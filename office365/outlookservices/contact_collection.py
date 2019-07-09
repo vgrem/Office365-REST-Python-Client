@@ -7,6 +7,9 @@ from office365.runtime.resource_path_entry import ResourcePathEntry
 class ContactCollection(ClientObjectCollection):
     """User's contact collection"""
 
+    # The object type this collection holds
+    item_type = Contact
+
     def add_from_json(self, contact_creation_information):
         """Creates a Contact resource from JSON"""
         contact = Contact(self.context)

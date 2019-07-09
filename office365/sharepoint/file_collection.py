@@ -8,6 +8,9 @@ from office365.sharepoint.file import File
 class FileCollection(ClientObjectCollection):
     """Represents a collection of File resources."""
 
+    # The object type this collection holds
+    item_type = File
+
     def add(self, file_creation_information):
         """Creates a File resource"""
         file_new = File(self.context)

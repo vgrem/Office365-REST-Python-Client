@@ -1,16 +1,15 @@
-from office365.runtime.client_object import ClientObject
+from office365.runtime.action_type import ActionType
+from office365.runtime.client_query import ClientQuery
 from office365.runtime.odata.odata_path_parser import ODataPathParser
+from office365.runtime.resource_path_entry import ResourcePathEntry
+from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.content_type_collection import ContentTypeCollection
 from office365.sharepoint.folder import Folder
 from office365.sharepoint.listitem import ListItem
+from office365.sharepoint.listItem_collection import ListItemCollection
 from office365.sharepoint.securable_object import SecurableObject
 from office365.sharepoint.view import View
 from office365.sharepoint.view_collection import ViewCollection
-from office365.runtime.action_type import ActionType
-from office365.runtime.client_query import ClientQuery
-from office365.runtime.resource_path_entry import ResourcePathEntry
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.sharepoint.listItem_collection import ListItemCollection
 
 
 class List(SecurableObject):
@@ -83,14 +82,20 @@ class List(SecurableObject):
 
     @property
     def resource_path(self):
-        orig_path = ClientObject.resource_path.fget(self)
-        if self.is_property_available("Id") and orig_path is None:
-            return ResourcePathEntry(self.context,
-                                     self.context.web.lists.resource_path,
-                                     ODataPathParser.from_method("GetById", [self.properties["Id"]]))
-        elif self.is_property_available("Title") and orig_path is None:
-            path = ResourcePathEntry(self.context,
-                                     ResourcePathEntry(self.context, None, "Web"),
-                                     ODataPathParser.from_method("GetByTitle", [self.properties["Title"]]))
-            return path
-        return orig_path
+        resource_path = super(List, self).resource_path
+        if resource_path:
+            return resource_path
+
+        # fallback: create a new resource path
+        if self.is_property_available("Id"):
+            self._resource_path = ResourcePathEntry(
+                self.context,
+                ResourcePathEntry.from_uri("Web/Lists", self.context),
+                ODataPathParser.from_method("GetById", [self.properties["Id"]]))
+        elif self.is_property_available("Title"):
+            self._resource_path = ResourcePathEntry(
+                self.context,
+                ResourcePathEntry.from_uri("Web/Lists", self.context),
+                ODataPathParser.from_method("GetByTitle", [self.properties["Title"]]))
+
+        return self._resource_path
