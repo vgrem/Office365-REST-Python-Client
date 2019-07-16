@@ -8,6 +8,7 @@ from office365.runtime.utilities.http_method import HttpMethod
 from office365.runtime.utilities.request_options import RequestOptions
 from office365.sharepoint.listitem import ListItem
 from office365.sharepoint.webparts.limited_webpart_manager import LimitedWebPartManager
+from runtime.odata.odata_path_parser import ODataPathParser
 
 
 class AbstractFile(ClientObject):
@@ -232,3 +233,24 @@ class File(AbstractFile):
         else:
             return ListItem(self.context, ResourcePathEntry(self.context, self.resource_path, "listItemAllFields"))
 
+    @property
+    def resource_path(self):
+        resource_path = super(File, self).resource_path
+        if resource_path:
+            return resource_path
+
+        # fallback: create a new resource path
+        if self.is_property_available("ServerRelativeUrl"):
+            self._resource_path = ResourcePathEntry(
+                self.context,
+                ResourcePathEntry(self.context, None, "Web"),
+                ODataPathParser.from_method("GetFileByServerRelativeUrl",
+                                            [self.properties["ServerRelativeUrl"]]))
+        elif self.is_property_available("UniqueId"):
+            self._resource_path = ResourcePathEntry(
+                self.context,
+                ResourcePathEntry(self.context, None, "Web"),
+                ODataPathParser.from_method("GetFileById",
+                                            [{'guid': self.properties["UniqueId"]}]))
+
+        return self._resource_path

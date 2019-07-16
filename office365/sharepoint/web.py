@@ -117,12 +117,6 @@ class Web(SecurableObject):
         else:
             return User(self.context, ResourcePathEntry(self.context, self.resource_path, "ParentWeb"))
 
-    #def map_json(self, payload):
-    #    super(Web, self).map_json(payload)
-    #    if self.is_property_available("Url"):
-    #        web_svc_url = self.properties["Url"] + "/_api/"
-    #        self.context.service_root_url = svc_url
-
     @property
     def service_root_url(self):
         orig_root_url = super(Web, self).service_root_url
@@ -130,4 +124,3 @@ class Web(SecurableObject):
             cur_root_url = self.properties["Url"] + "/_api/"
             return cur_root_url
         return orig_root_url
-
