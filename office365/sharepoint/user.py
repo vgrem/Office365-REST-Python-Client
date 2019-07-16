@@ -21,23 +21,3 @@ class User(Principal):
         qry = ClientQuery.delete_entry_query(self)
         self.context.add_query(qry)
         self.remove_from_parent_collection()
-
-    @property
-    def resource_path(self):
-        resource_path = super(User, self).resource_path
-        if resource_path:
-            return resource_path
-
-        # fallback: create a new resource path
-        if self.is_property_available("Id"):
-            self._resource_path = ResourcePathEntry(
-                self.context,
-                ResourcePathEntry.from_uri("Web/SiteUsers", self.context),
-                ODataPathParser.from_method("GetById", [self.properties["Id"]]))
-        elif self.is_property_available("LoginName"):
-            self._resource_path = ResourcePathEntry(
-                self.context,
-                ResourcePathEntry.from_uri("Web/SiteUsers", self.context),
-                ODataPathParser.from_method("GetByName", [self.properties["LoginName"]]))
-
-        return self._resource_path

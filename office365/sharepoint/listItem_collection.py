@@ -4,6 +4,5 @@ from office365.sharepoint.listitem import ListItem
 
 class ListItemCollection(ClientObjectCollection):
     """List Item collection"""
-
-    # The object type this collection holds
-    item_type = ListItem
+    def __init__(self, context, resource_path=None):
+        super(ListItemCollection, self).__init__(context, ListItem, resource_path)

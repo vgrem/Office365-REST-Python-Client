@@ -18,27 +18,6 @@ class ListItem(SecurableObject):
         self.context.add_query(qry)
 
     @property
-    def resource_path(self):
-        resource_path = super(ListItem, self).resource_path
-        if resource_path:
-            return resource_path
-
-        # fallback: create a new resource path
-        if self.is_property_available("Id") and "ParentList" in self.properties:
-            parent_list = self.properties["ParentList"]
-            if '__deferred' in parent_list:
-                list_resource_path = ResourcePathEntry.from_uri(
-                    self.properties["ParentList"]['__deferred']['uri'], self.context)
-            else:
-                list_resource_path = parent_list.resource_path
-            self._resource_path = ResourcePathEntry(
-                self.context,
-                list_resource_path,
-                ODataPathParser.from_method("getItemById", [self.properties["Id"]]))
-
-        return self._resource_path
-
-    @property
     def file(self):
         """Get file"""
         if self.is_property_available("File"):
@@ -65,3 +44,18 @@ class ListItem(SecurableObject):
             from office365.sharepoint.attachmentfile_collection import AttachmentfileCollection
             return AttachmentfileCollection(self.context,
                                             ResourcePathEntry(self.context, self.resource_path, "AttachmentFiles"))
+
+    @property
+    def resource_path(self):
+        resource_path = super(ListItem, self).resource_path
+        if resource_path:
+            return resource_path
+
+        # fallback: create a new resource path
+        if self.is_property_available("Id"):
+            self._resource_path = ResourcePathEntry(
+                self.context,
+                self._parent_collection.resource_path,
+                ODataPathParser.from_method("getItemById", [self.properties["Id"]]))
+
+        return self._resource_path

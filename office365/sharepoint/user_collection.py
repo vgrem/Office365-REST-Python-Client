@@ -5,9 +5,8 @@ from office365.sharepoint.user import User
 
 class UserCollection(ClientObjectCollection):
     """Represents a collection of User resources."""
-
-    # The object type this collection holds
-    item_type = User
+    def __init__(self, context, resource_path=None):
+        super(UserCollection, self).__init__(context, User, resource_path)
 
     def get_by_email(self, email):
         """Retrieve User object by email"""

@@ -5,9 +5,8 @@ from office365.runtime.client_query import ClientQuery
 
 class EventCollection(ClientObjectCollection):
     """Event's collection"""
-
-    # The object type this collection holds
-    item_type = Event
+    def __init__(self, context, resource_path=None):
+        super(EventCollection, self).__init__(context, Event, resource_path)
 
     def add_from_json(self, event_creation_information):
         """Creates a Event resource from JSON"""

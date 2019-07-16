@@ -1,7 +1,6 @@
 import requests
 
 from office365.runtime.action_type import ActionType
-from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.utilities.http_method import HttpMethod

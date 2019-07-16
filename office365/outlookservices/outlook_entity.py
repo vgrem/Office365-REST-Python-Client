@@ -27,5 +27,3 @@ class OutlookEntity(ClientObject):
                 self.context,
                 self._parent_collection.resource_path,
                 self.properties["Id"])
-
-        return self._resource_path

@@ -62,12 +62,11 @@ class Folder(ClientObject):
         if self.is_property_available("ServerRelativeUrl"):
             self._resource_path = ResourcePathEntry(
                 self.context,
-                ResourcePathEntry.from_uri("Web/Folders", self.context),
+                ResourcePathEntry.from_uri("Web", self.context),
                 ODataPathParser.from_method("GetFolderByServerRelativeUrl", [self.properties["ServerRelativeUrl"]]))
         elif self.is_property_available("UniqueId"):
             self._resource_path = ResourcePathEntry(
                 self.context,
-                ResourcePathEntry.from_uri("Web/Folders", self.context),
+                ResourcePathEntry.from_uri("Web", self.context),
                 ODataPathParser.from_method("GetFolderById", [{'guid': self.properties["UniqueId"]}]))
-
         return self._resource_path

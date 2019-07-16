@@ -22,7 +22,7 @@ class TestFolder(SPTestCase):
     @classmethod
     def tearDownClass(cls):
         cls.target_list.delete_object()
-        cls.context.execute_query()
+        #cls.context.execute_query()
 
     def test_enum_folders_and_files(self):
         parent_folder = self.target_list.root_folder
@@ -40,6 +40,7 @@ class TestFolder(SPTestCase):
         self.context.execute_query()
         for child_folder in folders:
             self.assertIsNotNone(child_folder.url)
+            self.assertIsNotNone(child_folder.resource_path)
             files = child_folder.files
             self.context.load(files)
             self.context.execute_query()

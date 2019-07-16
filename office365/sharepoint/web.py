@@ -20,6 +20,7 @@ class Web(SecurableObject):
         if resource_path is None:
             resource_path = ResourcePathEntry(context, None, "Web")
         super(Web, self).__init__(context, resource_path)
+        self._web_path = None
 
     def update(self):
         """Update a Web resource"""
@@ -61,7 +62,12 @@ class Web(SecurableObject):
             return self.properties['Webs']
         else:
             from office365.sharepoint.web_collection import WebCollection
-            return WebCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "webs"))
+            parent_web_url = None
+            if self.is_property_available('Url'):
+                parent_web_url = self.properties['Url']
+            return WebCollection(self.context,
+                                 ResourcePathEntry(self.context, self.resource_path, "webs"),
+                                 parent_web_url)
 
     @property
     def folders(self):
@@ -104,9 +110,24 @@ class Web(SecurableObject):
             return User(self.context, ResourcePathEntry(self.context, self.resource_path, "CurrentUser"))
 
     @property
+    def parent_web(self):
+        """Gets the parent website of the specified website."""
+        if self.is_property_available('ParentWeb'):
+            return self.properties['ParentWeb']
+        else:
+            return User(self.context, ResourcePathEntry(self.context, self.resource_path, "ParentWeb"))
+
+    #def map_json(self, payload):
+    #    super(Web, self).map_json(payload)
+    #    if self.is_property_available("Url"):
+    #        web_svc_url = self.properties["Url"] + "/_api/"
+    #        self.context.service_root_url = svc_url
+
+    @property
     def service_root_url(self):
         orig_root_url = super(Web, self).service_root_url
         if self.is_property_available("Url"):
             cur_root_url = self.properties["Url"] + "/_api/"
             return cur_root_url
         return orig_root_url
+

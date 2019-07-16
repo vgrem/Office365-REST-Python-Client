@@ -7,9 +7,8 @@ from office365.sharepoint.folder import Folder
 
 class FolderCollection(ClientObjectCollection):
     """Represents a collection of Folder resources."""
-
-    # The object type this collection holds
-    item_type = Folder
+    def __init__(self, context, resource_path=None):
+        super(FolderCollection, self).__init__(context, Folder, resource_path)
 
     def add(self, folder_url):
         folder = Folder(self.context)

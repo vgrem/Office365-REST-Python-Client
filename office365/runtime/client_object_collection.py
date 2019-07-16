@@ -5,13 +5,20 @@ from office365.runtime.utilities.request_options import RequestOptions
 class ClientObjectCollection(ClientObject):
     """Client object collection"""
 
-    # The object type this collection holds
-    item_type = ClientObject
-
-    def __init__(self, context, resource_path=None):
+    def __init__(self, context, item_type, resource_path=None):
         super(ClientObjectCollection, self).__init__(context, resource_path)
         self.__data = []
         self.__next_query_url = None
+        self.item_type = item_type
+
+    def create_typed_object(self, properties, client_object_type):
+        if client_object_type is None:
+            raise AttributeError("No class for object type '{0}' found".format(client_object_type))
+
+        client_object = client_object_type(self.context)
+        client_object._parent_collection = self
+        client_object.map_json(properties)
+        return client_object
 
     def map_json(self, payload):
         for properties in payload["collection"]:

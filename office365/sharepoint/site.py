@@ -16,3 +16,4 @@ class Site(ClientObject):
             return self.properties['RootWeb']
         else:
             return Web(self.context, ResourcePathEntry(self.context, self.resource_path, "RootWeb"))
+

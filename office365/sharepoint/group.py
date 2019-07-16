@@ -14,23 +14,3 @@ class Group(Principal):
             return self.properties['Users']
         else:
             return UserCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "Users"))
-
-    @property
-    def resource_path(self):
-        resource_path = super(Group, self).resource_path
-        if resource_path:
-            return resource_path
-
-        # fallback: create a new resource path
-        if self.is_property_available("Id"):
-            self._resource_path = ResourcePathEntry(
-                self.context,
-                ResourcePathEntry.from_uri("Web/SiteGroups", self.context),
-                ODataPathParser.from_method("GetById", [self.properties["Id"]]))
-        elif self.is_property_available("LoginName"):
-            self._resource_path = ResourcePathEntry(
-                self.context,
-                ResourcePathEntry.from_uri("Web/SiteGroups", self.context),
-                ODataPathParser.from_method("GetByName", [self.properties["LoginName"]]))
-
-        return self._resource_path

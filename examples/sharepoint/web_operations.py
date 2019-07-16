@@ -46,14 +46,28 @@ def list_site_users(ctx):
         print("User title: {0}".format(user.properties["Title"]))
 
 
+def print_webs_recursively(parent_web):
+    print(parent_web.properties["ServerRelativeUrl"])
+    webs = parent_web.webs
+    parent_web.context.load(webs)
+    parent_web.context.execute_query()
+    for web in webs:
+        print_webs_recursively(web)
+
+
 if __name__ == '__main__':
     ctxAuth = AuthenticationContext(url=settings['url'])
     if ctxAuth.acquire_token_for_user(username=settings['user_credentials']['username'],
                                       password=settings['user_credentials']['password']):
         ctx = ClientContext(settings['url'], ctxAuth)
         # web = load_web(ctx)
-        web = create_web(ctx)
-        update_web(web)
-        delete_web(web)
+        # web = create_web(ctx)
+        # update_web(web)
+        # delete_web(web)
+        root_web = ctx.web
+        ctx.load(root_web)
+        ctx.execute_query()
+        print_webs_recursively(root_web)
+
     else:
         print(ctxAuth.get_last_error())

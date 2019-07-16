@@ -7,9 +7,8 @@ from office365.sharepoint.file import File
 
 class FileCollection(ClientObjectCollection):
     """Represents a collection of File resources."""
-
-    # The object type this collection holds
-    item_type = File
+    def __init__(self, context, resource_path=None):
+        super(FileCollection, self).__init__(context, File, resource_path)
 
     def add(self, file_creation_information):
         """Creates a File resource"""

@@ -11,11 +11,9 @@ from office365.sharepoint.web import Web
 class ClientContext(ClientRuntimeContext):
     """SharePoint client context"""
 
-    def __init__(self, url, auth_context):
-        if url.endswith("/"):
-            base_url = url[:len(url)-1]
-        else:
-            base_url = url
+    def __init__(self, base_url, auth_context):
+        if base_url.endswith("/"):
+            base_url = base_url[:len(base_url) - 1]
         super(ClientContext, self).__init__(base_url + "/_api/", auth_context)
         self.__web = None
         self.__site = None

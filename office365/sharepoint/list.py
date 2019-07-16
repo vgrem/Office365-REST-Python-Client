@@ -1,6 +1,5 @@
 from office365.runtime.action_type import ActionType
 from office365.runtime.client_query import ClientQuery
-from office365.runtime.odata.odata_path_parser import ODataPathParser
 from office365.runtime.resource_path_entry import ResourcePathEntry
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.content_type_collection import ContentTypeCollection
@@ -10,6 +9,7 @@ from office365.sharepoint.listItem_collection import ListItemCollection
 from office365.sharepoint.securable_object import SecurableObject
 from office365.sharepoint.view import View
 from office365.sharepoint.view_collection import ViewCollection
+from runtime.odata.odata_path_parser import ODataPathParser
 
 
 class List(SecurableObject):
@@ -27,6 +27,7 @@ class List(SecurableObject):
         """The recommended way to add a list item is to send a POST request to the ListItemCollection resource endpoint,
          as shown in ListItemCollection request examples."""
         item = ListItem(self.context, None, list_item_creation_information)
+        item._parent_collection = self
         qry = ClientQuery(self.url + "/items", ActionType.CreateEntry, item.convert_to_payload())
         self.context.add_query(qry, item)
         return item
@@ -90,12 +91,12 @@ class List(SecurableObject):
         if self.is_property_available("Id"):
             self._resource_path = ResourcePathEntry(
                 self.context,
-                ResourcePathEntry.from_uri("Web/Lists", self.context),
+                self._parent_collection.resource_path,
                 ODataPathParser.from_method("GetById", [self.properties["Id"]]))
         elif self.is_property_available("Title"):
             self._resource_path = ResourcePathEntry(
                 self.context,
-                ResourcePathEntry.from_uri("Web/Lists", self.context),
+                self._parent_collection.resource_path,
                 ODataPathParser.from_method("GetByTitle", [self.properties["Title"]]))
 
         return self._resource_path
