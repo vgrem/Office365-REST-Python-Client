@@ -1,6 +1,5 @@
 from office365.runtime.client_object import ClientObject
 from office365.runtime.resource_path_entry import ResourcePathEntry
-from office365.sharepoint.web import Web
 
 
 class Site(ClientObject):
@@ -15,5 +14,5 @@ class Site(ClientObject):
         if self.is_property_available('RootWeb'):
             return self.properties['RootWeb']
         else:
+            from sharepoint.web import Web
             return Web(self.context, ResourcePathEntry(self.context, self.resource_path, "RootWeb"))
-

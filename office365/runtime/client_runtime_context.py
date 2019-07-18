@@ -4,7 +4,7 @@ from office365.runtime.client_request import ClientRequest
 
 
 class ClientRuntimeContext(object):
-    """SharePoint client context"""
+    """OData client context"""
 
     def __init__(self, url, auth_context):
         self.__service_root_url = url

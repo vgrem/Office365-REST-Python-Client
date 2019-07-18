@@ -1,7 +1,7 @@
 # About
-Office365 REST API client for Python
+Office 365 Library for Python
 
-The list of supported Office 365 REST APIs:
+The list of supported Office 365 APIs:
 
 -   [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) (_supported_ versions: [SharePoint 2013](https://msdn.microsoft.com/library/office/jj860569(v=office.15).aspx), SharePoint 2016, SharePoint Online and OneDrive for Business)
 -   [Outlook REST API](https://msdn.microsoft.com/en-us/office/office365/api/use-outlook-rest-api#DefineOutlookRESTAPI) 
