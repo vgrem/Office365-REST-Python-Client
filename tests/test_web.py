@@ -3,6 +3,7 @@ from random import randint
 
 from office365.sharepoint.web_creation_information import WebCreationInformation
 from tests.sharepoint_case import SPTestCase
+from tests.test_utilities import WebExtensions
 
 
 class TestWeb(SPTestCase):
@@ -48,6 +49,12 @@ class TestWeb(SPTestCase):
         self.context.load(results)
         self.context.execute_query()
         self.assertEqual(len(results), 0)
+
+    def test_4_enum_all_webs(self):
+        """Test to enumerate all webs within site"""
+        all_webs = WebExtensions.get_all_webs(self.context.web)
+        self.context.execute_query()
+        self.assertTrue(len(all_webs) > 0)
 
 
 if __name__ == '__main__':

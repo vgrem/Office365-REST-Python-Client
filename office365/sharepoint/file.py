@@ -8,7 +8,7 @@ from office365.runtime.utilities.http_method import HttpMethod
 from office365.runtime.utilities.request_options import RequestOptions
 from office365.sharepoint.listitem import ListItem
 from office365.sharepoint.webparts.limited_webpart_manager import LimitedWebPartManager
-from runtime.odata.odata_path_parser import ODataPathParser
+from office365.runtime.odata.odata_path_parser import ODataPathParser
 
 
 class AbstractFile(ClientObject):

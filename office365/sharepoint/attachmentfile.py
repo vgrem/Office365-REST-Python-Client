@@ -1,6 +1,6 @@
 from office365.sharepoint.file import AbstractFile
-from runtime.odata.odata_path_parser import ODataPathParser
-from runtime.resource_path_entry import ResourcePathEntry
+from office365.runtime.odata.odata_path_parser import ODataPathParser
+from office365.runtime.resource_path_entry import ResourcePathEntry
 
 
 class Attachmentfile(AbstractFile):

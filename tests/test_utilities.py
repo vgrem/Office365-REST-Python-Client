@@ -34,6 +34,23 @@ class FileExtensions(object):
         return upload_file
 
 
+class WebExtensions(object):
+    """SharePoint Web extensions"""
+
+    @classmethod
+    def get_all_webs(cls, parent_web, result=None):
+        if result is None:
+            result = []
+        ctx = parent_web.context
+        webs = parent_web.webs
+        ctx.load(webs)
+        ctx.execute_query()
+        result = result + list(webs)
+        for web in webs:
+            return cls.get_all_webs(web, result)
+        return result
+
+
 def read_file_as_text(path):
     with open(path, 'r') as content_file:
         file_content = content_file.read()

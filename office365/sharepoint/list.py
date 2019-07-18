@@ -9,7 +9,7 @@ from office365.sharepoint.listItem_collection import ListItemCollection
 from office365.sharepoint.securable_object import SecurableObject
 from office365.sharepoint.view import View
 from office365.sharepoint.view_collection import ViewCollection
-from runtime.odata.odata_path_parser import ODataPathParser
+from office365.runtime.odata.odata_path_parser import ODataPathParser
 
 
 class List(SecurableObject):
