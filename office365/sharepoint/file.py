@@ -2,7 +2,7 @@ from office365.runtime.action_type import ActionType
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_query import ClientQuery
 from office365.runtime.client_result import ClientResult
-from office365.runtime.resource_path_entry import ResourcePathEntry
+from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.utilities.http_method import HttpMethod
 from office365.runtime.utilities.request_options import RequestOptions
@@ -231,7 +231,7 @@ class File(AbstractFile):
         if self.is_property_available('ListItemAllFields'):
             return self.properties['ListItemAllFields']
         else:
-            return ListItem(self.context, ResourcePathEntry(self.context, self.resource_path, "listItemAllFields"))
+            return ListItem(self.context, ResourcePathEntity(self.context, self.resource_path, "listItemAllFields"))
 
     @property
     def resource_path(self):
@@ -241,15 +241,15 @@ class File(AbstractFile):
 
         # fallback: create a new resource path
         if self.is_property_available("ServerRelativeUrl"):
-            self._resource_path = ResourcePathEntry(
+            self._resource_path = ResourcePathEntity(
                 self.context,
-                ResourcePathEntry(self.context, None, "Web"),
+                ResourcePathEntity(self.context, None, "Web"),
                 ODataPathParser.from_method("GetFileByServerRelativeUrl",
                                             [self.properties["ServerRelativeUrl"]]))
         elif self.is_property_available("UniqueId"):
-            self._resource_path = ResourcePathEntry(
+            self._resource_path = ResourcePathEntity(
                 self.context,
-                ResourcePathEntry(self.context, None, "Web"),
+                ResourcePathEntity(self.context, None, "Web"),
                 ODataPathParser.from_method("GetFileById",
                                             [{'guid': self.properties["UniqueId"]}]))
 

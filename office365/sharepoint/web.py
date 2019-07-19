@@ -7,7 +7,7 @@ from office365.sharepoint.securable_object import SecurableObject
 from office365.sharepoint.user import User
 from office365.sharepoint.user_collection import UserCollection
 from office365.runtime.client_query import ClientQuery
-from office365.runtime.resource_path_entry import ResourcePathEntry
+from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.sharepoint.group_collection import GroupCollection
 from office365.sharepoint.list_collection import ListCollection
 
@@ -18,7 +18,7 @@ class Web(SecurableObject):
 
     def __init__(self, context, resource_path=None):
         if resource_path is None:
-            resource_path = ResourcePathEntry(context, None, "Web")
+            resource_path = ResourcePathEntity(context, None, "Web")
         super(Web, self).__init__(context, resource_path)
         self._web_path = None
 
@@ -66,7 +66,7 @@ class Web(SecurableObject):
             if self.is_property_available('Url'):
                 parent_web_url = self.properties['Url']
             return WebCollection(self.context,
-                                 ResourcePathEntry(self.context, self.resource_path, "webs"),
+                                 ResourcePathEntity(self.context, self.resource_path, "webs"),
                                  parent_web_url)
 
     @property
@@ -75,7 +75,7 @@ class Web(SecurableObject):
         if self.is_property_available('Folders'):
             return self.properties['Folders']
         else:
-            return FolderCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "folders"))
+            return FolderCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "folders"))
 
     @property
     def lists(self):
@@ -83,7 +83,7 @@ class Web(SecurableObject):
         if self.is_property_available('Lists'):
             return self.properties['Lists']
         else:
-            return ListCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "lists"))
+            return ListCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "lists"))
 
     @property
     def site_users(self):
@@ -91,7 +91,7 @@ class Web(SecurableObject):
         if self.is_property_available('SiteUsers'):
             return self.properties['SiteUsers']
         else:
-            return UserCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "siteusers"))
+            return UserCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "siteusers"))
 
     @property
     def site_groups(self):
@@ -99,7 +99,7 @@ class Web(SecurableObject):
         if self.is_property_available('SiteGroups'):
             return self.properties['SiteGroups']
         else:
-            return GroupCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "sitegroups"))
+            return GroupCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "sitegroups"))
 
     @property
     def current_user(self):
@@ -107,7 +107,7 @@ class Web(SecurableObject):
         if self.is_property_available('CurrentUser'):
             return self.properties['CurrentUser']
         else:
-            return User(self.context, ResourcePathEntry(self.context, self.resource_path, "CurrentUser"))
+            return User(self.context, ResourcePathEntity(self.context, self.resource_path, "CurrentUser"))
 
     @property
     def parent_web(self):
@@ -115,7 +115,7 @@ class Web(SecurableObject):
         if self.is_property_available('ParentWeb'):
             return self.properties['ParentWeb']
         else:
-            return User(self.context, ResourcePathEntry(self.context, self.resource_path, "ParentWeb"))
+            return User(self.context, ResourcePathEntity(self.context, self.resource_path, "ParentWeb"))
 
     @property
     def service_root_url(self):

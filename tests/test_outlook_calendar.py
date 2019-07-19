@@ -1,4 +1,4 @@
-from tests.outlook_client_case import OutlookClientTestCase
+from tests.outlook_case import OutlookClientTestCase
 
 
 class TestOutlookCalendar(OutlookClientTestCase):

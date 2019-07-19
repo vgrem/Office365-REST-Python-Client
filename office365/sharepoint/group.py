@@ -1,5 +1,5 @@
 from office365.runtime.odata.odata_path_parser import ODataPathParser
-from office365.runtime.resource_path_entry import ResourcePathEntry
+from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.sharepoint.principal import Principal
 
 
@@ -13,4 +13,4 @@ class Group(Principal):
         if self.is_property_available('Users'):
             return self.properties['Users']
         else:
-            return UserCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "Users"))
+            return UserCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "Users"))

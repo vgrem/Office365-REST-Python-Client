@@ -1,4 +1,3 @@
-import json
 import os
 
 from office365.graph_client import GraphClient
@@ -16,14 +15,8 @@ tenant_name = "mediadev88.onmicrosoft.com"
 client_id, client_secret = os.environ['Office365_Python_Sdk_ClientCredentials'].split(';')
 
 client = GraphClient(tenant_name, get_token)
-resp = client.execute_request("/users")
-users = json.loads(resp.content)['value']
-for user in users:
-    print("User name: {0}".format(user['userPrincipalName']))
-
-
 drives = client.drives
 client.load(drives)
 client.execute_query()
 for drive in drives:
-    print("Drive url: {0}".format(drive.properties['webUrl']))
+    print("Drive url: {0}".format(drive.web_url))

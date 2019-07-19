@@ -1,7 +1,7 @@
 from office365.outlookservices.user import User
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.odata.v4_json_format import V4JsonFormat
-from office365.runtime.resource_path_entry import ResourcePathEntry
+from office365.runtime.resource_path_entity import ResourcePathEntity
 
 
 class OutlookClient(ClientRuntimeContext):
@@ -16,6 +16,6 @@ class OutlookClient(ClientRuntimeContext):
     @property
     def me(self):
         """The Me endpoint is provided as a shortcut for specifying the current user by SMTP address."""
-        return User(self, ResourcePathEntry(self, None, "me"))
+        return User(self, ResourcePathEntity(self, None, "me"))
 
 

@@ -1,6 +1,6 @@
 from office365.runtime.client_object import ClientObject
 from office365.runtime.odata.odata_path_parser import ODataPathParser
-from office365.runtime.resource_path_entry import ResourcePathEntry
+from office365.runtime.resource_path_entity import ResourcePathEntity
 
 
 class Principal(ClientObject):
@@ -58,12 +58,12 @@ class Principal(ClientObject):
 
         # fallback: create a new resource path
         if self.is_property_available("Id"):
-            self._resource_path = ResourcePathEntry(
+            self._resource_path = ResourcePathEntity(
                 self.context,
                 self._parent_collection.resource_path,
                 ODataPathParser.from_method("GetById", [self.properties["Id"]]))
         elif self.is_property_available("LoginName"):
-            self._resource_path = ResourcePathEntry(
+            self._resource_path = ResourcePathEntity(
                 self.context,
                 self._parent_collection.resource_path,
                 ODataPathParser.from_method("GetByName", [self.properties["LoginName"]]))

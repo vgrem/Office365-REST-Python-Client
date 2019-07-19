@@ -1,7 +1,7 @@
 from office365.outlookservices.contact import Contact
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_query import ClientQuery
-from office365.runtime.resource_path_entry import ResourcePathEntry
+from office365.runtime.resource_path_entity import ResourcePathEntity
 
 
 class ContactCollection(ClientObjectCollection):
@@ -29,4 +29,4 @@ class ContactCollection(ClientObjectCollection):
     def get_by_id(self, contact_id):
         """Retrieve Contact resource by id"""
         return Contact(self.context,
-                       ResourcePathEntry(self.context, self.resource_path, contact_id))
+                       ResourcePathEntity(self.context, self.resource_path, contact_id))

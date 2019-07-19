@@ -1,6 +1,6 @@
 from office365.runtime.client_query import ClientQuery
 from office365.runtime.odata.odata_path_parser import ODataPathParser
-from office365.runtime.resource_path_entry import ResourcePathEntry
+from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.sharepoint.securable_object import SecurableObject
 
 
@@ -24,7 +24,7 @@ class ListItem(SecurableObject):
             return self.properties["File"]
         else:
             from office365.sharepoint.file import File
-            return File(self.context, ResourcePathEntry(self.context, self.resource_path, "File"))
+            return File(self.context, ResourcePathEntity(self.context, self.resource_path, "File"))
 
     @property
     def folder(self):
@@ -33,7 +33,7 @@ class ListItem(SecurableObject):
             return self.properties["Folder"]
         else:
             from office365.sharepoint.folder import Folder
-            return Folder(self.context, ResourcePathEntry(self.context, self.resource_path, "Folder"))
+            return Folder(self.context, ResourcePathEntity(self.context, self.resource_path, "Folder"))
 
     @property
     def attachment_files(self):
@@ -43,7 +43,7 @@ class ListItem(SecurableObject):
         else:
             from office365.sharepoint.attachmentfile_collection import AttachmentfileCollection
             return AttachmentfileCollection(self.context,
-                                            ResourcePathEntry(self.context, self.resource_path, "AttachmentFiles"))
+                                            ResourcePathEntity(self.context, self.resource_path, "AttachmentFiles"))
 
     @property
     def resource_path(self):
@@ -53,7 +53,7 @@ class ListItem(SecurableObject):
 
         # fallback: create a new resource path
         if self.is_property_available("Id"):
-            self._resource_path = ResourcePathEntry(
+            self._resource_path = ResourcePathEntity(
                 self.context,
                 self._parent_collection.resource_path,
                 ODataPathParser.from_method("getItemById", [self.properties["Id"]]))

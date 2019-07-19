@@ -1,6 +1,6 @@
 from office365.runtime.action_type import ActionType
 from office365.runtime.client_query import ClientQuery
-from office365.runtime.resource_path_entry import ResourcePathEntry
+from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.content_type_collection import ContentTypeCollection
 from office365.sharepoint.folder import Folder
@@ -17,7 +17,7 @@ class List(SecurableObject):
 
     def get_items(self, caml_query=None):
         """Returns a collection of items from the list based on the specified query."""
-        items = ListItemCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "items"))
+        items = ListItemCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "items"))
         if caml_query:
             qry = ClientQuery.service_operation_query(self, ActionType.PostMethod, "GetItems", None, caml_query.payload)
             self.context.add_query(qry, items)
@@ -61,7 +61,7 @@ class List(SecurableObject):
         if self.is_property_available('RootFolder'):
             return self.properties["RootFolder"]
         else:
-            return Folder(self.context, ResourcePathEntry(self.context, self.resource_path, "RootFolder"))
+            return Folder(self.context, ResourcePathEntity(self.context, self.resource_path, "RootFolder"))
 
     @property
     def views(self):
@@ -70,7 +70,7 @@ class List(SecurableObject):
         if self.is_property_available('Views'):
             return self.properties['Views']
         else:
-            return ViewCollection(self.context, ResourcePathEntry(self.context, self.resource_path, "views"))
+            return ViewCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "views"))
 
     @property
     def content_types(self):
@@ -79,7 +79,7 @@ class List(SecurableObject):
             return self.properties['ContentTypes']
         else:
             return ContentTypeCollection(self.context,
-                                         ResourcePathEntry(self.context, self.resource_path, "contenttypes"))
+                                         ResourcePathEntity(self.context, self.resource_path, "contenttypes"))
 
     @property
     def resource_path(self):
@@ -89,12 +89,12 @@ class List(SecurableObject):
 
         # fallback: create a new resource path
         if self.is_property_available("Id"):
-            self._resource_path = ResourcePathEntry(
+            self._resource_path = ResourcePathEntity(
                 self.context,
                 self._parent_collection.resource_path,
                 ODataPathParser.from_method("GetById", [self.properties["Id"]]))
         elif self.is_property_available("Title"):
-            self._resource_path = ResourcePathEntry(
+            self._resource_path = ResourcePathEntity(
                 self.context,
                 self._parent_collection.resource_path,
                 ODataPathParser.from_method("GetByTitle", [self.properties["Title"]]))

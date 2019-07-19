@@ -5,7 +5,7 @@ from office365.sharepoint.list_template_type import ListTemplateType
 from tests.sharepoint_case import SPTestCase
 
 
-class TestList(SPTestCase):
+class TestSPList(SPTestCase):
     list_title = "Tasks" + str(randint(0, 10000))
 
     def test_1_create_list(self):

@@ -1,10 +1,10 @@
 import adal
 
-from onedrive.drive_collection import DriveCollection
-from runtime.client_runtime_context import ClientRuntimeContext
-from runtime.odata.v4_json_format import V4JsonFormat
-from runtime.resource_path_entry import ResourcePathEntry
-from runtime.utilities.request_options import RequestOptions
+from office365.onedrive.drive_collection import DriveCollection
+from office365.runtime.client_runtime_context import ClientRuntimeContext
+from office365.runtime.odata.v4_json_format import V4JsonFormat
+from office365.runtime.resource_path_entity import ResourcePathEntity
+from office365.runtime.utilities.request_options import RequestOptions
 
 
 class GraphClient(ClientRuntimeContext):
@@ -32,4 +32,4 @@ class GraphClient(ClientRuntimeContext):
     @property
     def drives(self):
         """Get one drives"""
-        return DriveCollection(self, ResourcePathEntry(self, None, "drives"))
+        return DriveCollection(self, ResourcePathEntity(self, None, "drives"))
