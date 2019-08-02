@@ -39,3 +39,6 @@ class OAuthTokenProvider(BaseTokenProvider):
             'resource': resource
         }
         self.acquire_token(parameters)
+
+    def get_last_error(self):
+        return self.error

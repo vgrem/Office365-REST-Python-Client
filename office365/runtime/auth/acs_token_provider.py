@@ -74,3 +74,6 @@ class ACSTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
 
     def get_authorization_header(self):
         return 'Bearer {0}'.format(self.access_token["access_token"])
+
+    def get_last_error(self):
+        return self.error
