@@ -13,7 +13,7 @@ class FolderCollection(ClientObjectCollection):
     def add(self, folder_url):
         folder = Folder(self.context)
         folder.set_property("ServerRelativeUrl", folder_url)
-        qry = ClientQuery(self.url, ActionType.CreateEntry, folder.convert_to_payload())
+        qry = ClientQuery(self.resource_url, ActionType.CreateEntity, folder)
         self.context.add_query(qry, folder)
         return folder
 

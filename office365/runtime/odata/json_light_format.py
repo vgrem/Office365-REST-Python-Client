@@ -8,11 +8,11 @@ class JsonLightFormat(ODataJsonFormat):
     def __init__(self, metadata):
         super(JsonLightFormat, self).__init__(metadata)
         if self.metadata == ODataMetadataLevel.Verbose:
-            self.payload_root_entry = "d"
-            self.payload_root_entry_collection = "results"
-            self.payload_root_entry_collection_next = "__next"
+            self.security_tag_name = "d"
+            self.collection_tag_name = "results"
+            self.collection_next_tag_name = "__next"
         else:
-            self.payload_root_entry_collection = "value"
+            self.collection_next_tag_name = "value"
 
     def build_http_headers(self):
         if self.metadata is None:

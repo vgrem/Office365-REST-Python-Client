@@ -11,7 +11,7 @@ class V4JsonFormat(ODataJsonFormat):
         self.IEEE754Compatible = False
         """"""
         self.streaming = False
-        self.payload_root_entry_collection = "value"
+        self.collection_tag_name = "value"
 
     def build_http_headers(self):
         type_string = "application/json;odata.metadata={0};odata.streaming={1};IEEE754Compatible={2}" \

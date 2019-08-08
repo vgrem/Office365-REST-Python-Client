@@ -1,12 +1,12 @@
 class ActionType:
-    """Http method"""
+    """Query type"""
 
     def __init__(self):
         pass
 
-    ReadEntry = 1
-    CreateEntry = 2
-    UpdateEntry = 3
-    DeleteEntry = 4
+    ReadEntity = 1
+    CreateEntity = 2
+    UpdateEntity = 3
+    DeleteEntity = 4
     GetMethod = 5
     PostMethod = 6

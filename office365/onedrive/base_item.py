@@ -18,6 +18,13 @@ class BaseItem(ClientObject):
         return None
 
     @property
+    def etag(self):
+        """ETag for the item."""
+        if self.is_property_available("eTag"):
+            return self.properties['eTag']
+        return None
+
+    @property
     def created_by(self):
         """Identity of the user, device, or application which created the item."""
         if self.is_property_available("createdBy"):

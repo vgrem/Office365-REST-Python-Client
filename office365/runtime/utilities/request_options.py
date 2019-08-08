@@ -6,7 +6,7 @@ class RequestOptions(object):
 
     def __init__(self, url):
         self.url = url
-        self.data = {}
+        self.data = None
         self.headers = {}
         self.auth = None
         self.method = HttpMethod.Get

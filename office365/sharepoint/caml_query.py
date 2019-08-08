@@ -9,7 +9,6 @@ class CamlQuery(ClientValueObject):
         self.DatesInUtc = None
         self.FolderServerRelativeUrl = None
         self.ViewXml = None
-        self.metadata_type = "SP.CamlQuery"
 
     @staticmethod
     def create_all_items_query():
@@ -26,5 +25,9 @@ class CamlQuery(ClientValueObject):
         return qry
 
     @property
-    def payload(self):
-        return {'query': super(CamlQuery, self).payload}
+    def type_name(self):
+        return 'SP.CamlQuery'
+
+    @property
+    def tag_name(self):
+        return 'query'

@@ -5,34 +5,34 @@ from office365.runtime.odata.odata_path_parser import ODataPathParser
 class ClientQuery(object):
     """Client query"""
 
-    def __init__(self, url, action_type=ActionType.ReadEntry, payload=None):
+    def __init__(self, url, action_type=ActionType.ReadEntity, payload=None):
         self.__url = url
         self.__actionType = action_type
         self.__payload = payload
 
     @staticmethod
     def read_entry_query(client_object):
-        qry = ClientQuery(client_object.url, ActionType.ReadEntry)
+        qry = ClientQuery(client_object.resource_url, ActionType.ReadEntity)
         return qry
 
     @staticmethod
     def create_entry_query(parent_client_object, parameters):
-        qry = ClientQuery(parent_client_object.url, ActionType.CreateEntry, parameters)
+        qry = ClientQuery(parent_client_object.resource_url, ActionType.CreateEntity, parameters)
         return qry
 
     @staticmethod
     def update_entry_query(client_object):
-        qry = ClientQuery(client_object.url, ActionType.UpdateEntry, client_object.convert_to_payload())
+        qry = ClientQuery(client_object.resource_url, ActionType.UpdateEntity, client_object)
         return qry
 
     @staticmethod
     def delete_entry_query(client_object):
-        qry = ClientQuery(client_object.url, ActionType.DeleteEntry)
+        qry = ClientQuery(client_object.resource_url, ActionType.DeleteEntity)
         return qry
 
     @staticmethod
     def service_operation_query(client_object, action_type, method_name, method_params=None, payload=None):
-        url = client_object.url + "/" + ODataPathParser.from_method(method_name, method_params)
+        url = client_object.resource_url + "/" + ODataPathParser.from_method(method_name, method_params)
         qry = ClientQuery(url, action_type, payload)
         return qry
 

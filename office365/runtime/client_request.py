@@ -1,8 +1,8 @@
 import requests
-
 from office365.runtime.action_type import ActionType
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.odata.json_light_format import JsonLightFormat
+from office365.runtime.odata.odata_encoder import ODataEncoder
 from office365.runtime.utilities.http_method import HttpMethod
 from office365.runtime.utilities.request_options import RequestOptions
 from requests import HTTPError
@@ -62,12 +62,12 @@ class ClientRequest(object):
 
         if payload:
             json_format = self.context.json_format
-            if json_format.payload_root_entry:
-                payload = payload[json_format.payload_root_entry]
-            if json_format.payload_root_entry_collection in payload:
+            if json_format.security_tag_name:
+                payload = payload[json_format.security_tag_name]
+            if json_format.collection_tag_name in payload:
                 payload = {
-                    "collection": payload[json_format.payload_root_entry_collection],
-                    "next": payload.get(json_format.payload_root_entry_collection_next, None)
+                    "collection": payload[json_format.collection_tag_name],
+                    "next": payload.get(json_format.collection_next_tag_name, None)
                 }
 
         return payload
@@ -78,24 +78,25 @@ class ClientRequest(object):
         request.set_headers(self.context.json_format.build_http_headers())
         if isinstance(self.context.json_format, JsonLightFormat):
             # set custom method headers
-            if query.action_type == ActionType.DeleteEntry:
+            if query.action_type == ActionType.DeleteEntity:
                 request.set_header("X-HTTP-Method", "DELETE")
                 request.set_header("IF-MATCH", '*')
-            elif query.action_type == ActionType.UpdateEntry:
+            elif query.action_type == ActionType.UpdateEntity:
                 request.set_header("X-HTTP-Method", "MERGE")
                 request.set_header("IF-MATCH", '*')
             # set method
-            if not (query.action_type == ActionType.ReadEntry or query.action_type == ActionType.GetMethod):
+            if not (query.action_type == ActionType.ReadEntity or query.action_type == ActionType.GetMethod):
                 request.method = HttpMethod.Post
         else:
-            if query.action_type == ActionType.CreateEntry:
+            if query.action_type == ActionType.CreateEntity:
                 request.method = HttpMethod.Post
-            elif query.action_type == ActionType.UpdateEntry:
+            elif query.action_type == ActionType.UpdateEntity:
                 request.method = HttpMethod.Patch
-            elif query.action_type == ActionType.DeleteEntry:
+            elif query.action_type == ActionType.DeleteEntity:
                 request.method = HttpMethod.Delete
         # set request payload
-        request.data = query.payload
+        if query.payload is not None:
+            request.data = ODataEncoder(self.context.json_format).default(query.payload)
         return request
 
     def execute_request_direct(self, request_options):

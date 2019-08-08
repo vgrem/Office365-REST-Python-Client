@@ -6,9 +6,9 @@ class ODataJsonFormat(object):
 
     def __init__(self, metadata=None):
         self.metadata = metadata
-        self.payload_root_entry = None
-        self.payload_root_entry_collection = None
-        self.payload_root_entry_collection_next = None
+        self.security_tag_name = None
+        self.collection_tag_name = None
+        self.collection_next_tag_name = None
 
     __metaclass__ = ABCMeta
 

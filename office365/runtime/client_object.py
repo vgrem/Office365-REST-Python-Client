@@ -5,26 +5,17 @@ class ClientObject(object):
     """Base client object"""
 
     def __init__(self, context, resource_path=None, properties=None):
-        if properties is None:
-            properties = {}
+        self._properties = {}
+        self._properties_metadata = {}
+        if properties is not None:
+            for k, v in properties.items():
+                self.set_property(k, v, True)
         self._entity_type_name = None
         self._query_options = {}
         self._parent_collection = None
         self._context = context
-        self._properties = properties
-        self._metadata = {}
-        self._changed_properties = properties
         self._resource_path = resource_path
-        self._url = None
-        self._use_custom_mapper = False
-
-    @property
-    def use_custom_mapper(self):
-        return self._use_custom_mapper
-
-    @use_custom_mapper.setter
-    def use_custom_mapper(self, value):
-        self._use_custom_mapper = value
+        self._resource_url = None
 
     @property
     def include_metadata(self):
@@ -41,11 +32,6 @@ class ClientObject(object):
     @entity_type_name.setter
     def entity_type_name(self, value):
         self._entity_type_name = value
-
-    def ensure_metadata_type(self, entity):
-        """Ensures metadata type is contained in payload"""
-        if '__metadata' not in entity:
-            entity["__metadata"] = {'type': self.entity_type_name}
 
     def remove_from_parent_collection(self):
         if self._parent_collection is None:
@@ -64,9 +50,8 @@ class ClientObject(object):
         return '&'.join(['$%s=%s' % (key, value) for (key, value) in self.query_options.items()])
 
     def set_property(self, name, value, persist_changes=True):
-        """Set resource property"""
-        if persist_changes:  # persist properties
-            self._changed_properties[name] = value
+        """Set resource property value"""
+        self._properties_metadata[name] = {'readonly': not persist_changes}
         self._properties[name] = value
 
     @property
@@ -94,16 +79,15 @@ class ClientObject(object):
         return self
 
     @property
-    def url(self):
-        if self._url:
-            return self._url
+    def resource_url(self):
+        """Get resource Url"""
+        if self._resource_url:
+            return self._resource_url
         elif self.resource_path:
-            self._url = self.service_root_url + self.resource_path.build_path_url()
+            self._resource_url = self.service_root_url + self.resource_path.build_path_url()
             if self.query_options:
-                self._url = self._url + "?" + self.query_options_to_url()
-        elif self._metadata and 'uri' in self._metadata:
-            self._url = self._metadata['uri']
-        return self._url
+                self._resource_url = self._resource_url + "?" + self.query_options_to_url()
+        return self._resource_url
 
     @property
     def type_name(self):
@@ -113,16 +97,10 @@ class ClientObject(object):
     def properties(self):
         return self._properties
 
-    def convert_to_payload(self):
-        """Generates resource payload for REST endpoint"""
-        payload = dict(self._changed_properties)
-        if self.include_metadata:
-            self.ensure_metadata_type(payload)
-        else:
-            payload = dict((k, v) for k, v in payload.items() if k != "__metadata")
-        return payload
+    @property
+    def properties_metadata(self):
+        return self._properties_metadata
 
     def map_json(self, payload):
-        self._metadata = payload.get('__metadata')
         self._properties = dict((k, v) for k, v in payload.items()
                                 if k != '__metadata')

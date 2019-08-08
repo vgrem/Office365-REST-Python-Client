@@ -28,7 +28,7 @@ class ClientRuntimeContext(object):
         if properties_to_retrieve:
             select_expr = ",".join(properties_to_retrieve)
             client_object = client_object.select(select_expr)
-        qry = ClientQuery(client_object.url, ActionType.ReadEntry)
+        qry = ClientQuery(client_object.resource_url, ActionType.ReadEntity)
         self.pending_request.add_query(qry, client_object)
 
     def execute_request_direct(self, request):

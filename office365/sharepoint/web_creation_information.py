@@ -8,8 +8,11 @@ class WebCreationInformation(ClientValueObject):
         super(WebCreationInformation, self).__init__()
         self.Title = None
         self.Url = None
-        self.metadata_type = "SP.WebCreationInformation"
 
     @property
-    def payload(self):
-        return {'parameters': super(WebCreationInformation, self).payload}
+    def tag_name(self):
+        return "parameters"
+
+    @property
+    def type_name(self):
+        return "SP.WebCreationInformation"

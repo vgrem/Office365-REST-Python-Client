@@ -10,5 +10,7 @@ class ListCreationInformation(ClientValueObject):
         self.Description = description
         self.BaseTemplate = base_template
         self.AllowContentTypes = allow_content_types
-        self.metadata_type = "SP.List"
 
+    @property
+    def type_name(self):
+        return "SP.List"

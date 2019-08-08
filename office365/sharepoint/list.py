@@ -19,7 +19,7 @@ class List(SecurableObject):
         """Returns a collection of items from the list based on the specified query."""
         items = ListItemCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "items"))
         if caml_query:
-            qry = ClientQuery.service_operation_query(self, ActionType.PostMethod, "GetItems", None, caml_query.payload)
+            qry = ClientQuery.service_operation_query(self, ActionType.PostMethod, "GetItems", None, caml_query)
             self.context.add_query(qry, items)
         return items
 
@@ -28,7 +28,7 @@ class List(SecurableObject):
          as shown in ListItemCollection request examples."""
         item = ListItem(self.context, None, list_item_creation_information)
         item._parent_collection = self
-        qry = ClientQuery(self.url + "/items", ActionType.CreateEntry, item.convert_to_payload())
+        qry = ClientQuery(self.resource_url + "/items", ActionType.CreateEntity, item)
         self.context.add_query(qry, item)
         return item
 

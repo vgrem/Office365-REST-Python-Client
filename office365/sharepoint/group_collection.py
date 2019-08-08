@@ -13,7 +13,7 @@ class GroupCollection(ClientObjectCollection):
     def add(self, group_creation_information):
         """Creates a Group resource"""
         group = Group(self.context)
-        qry = ClientQuery(self.url, ActionType.CreateEntry, group_creation_information)
+        qry = ClientQuery(self.resource_url, ActionType.CreateEntity, group_creation_information)
         self.context.add_query(qry, group)
         self.add_child(group)
         return group

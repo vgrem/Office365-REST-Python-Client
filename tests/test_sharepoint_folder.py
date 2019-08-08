@@ -39,13 +39,13 @@ class TestFolder(SPTestCase):
         self.context.load(folders)
         self.context.execute_query()
         for child_folder in folders:
-            self.assertIsNotNone(child_folder.url)
+            self.assertIsNotNone(child_folder.resource_url)
             self.assertIsNotNone(child_folder.resource_path)
             files = child_folder.files
             self.context.load(files)
             self.context.execute_query()
             for file_in_folder in files:
-                self.assertIsNotNone(file_in_folder.url)
+                self.assertIsNotNone(file_in_folder.resource_url)
 
     def test_1_create_folder(self):
         folder_new = self.target_list.root_folder.folders.add(self.target_folder_name)

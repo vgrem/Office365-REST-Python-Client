@@ -11,10 +11,8 @@ class WebCollection(ClientObjectCollection):
         self._parent_web_url = parent_web_url
 
     def add(self, web_creation_information):
-        web_creation_information._include_metadata = self.include_metadata
-        payload = web_creation_information.payload
         web = Web(self.context)
-        qry = ClientQuery(self.url + "/add", ActionType.PostMethod, payload)
+        qry = ClientQuery(self.resource_url + "/add", ActionType.PostMethod, web_creation_information)
         self.context.add_query(qry, web)
         self.add_child(web)
         return web

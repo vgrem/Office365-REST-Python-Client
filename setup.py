@@ -19,10 +19,9 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/vgrem/Office365-REST-Python-Client",
-    install_requires=['requests'],
+    install_requires=['requests', 'adal'],
     extras_require={
-        'NTLMAuthentication': ["requests_ntlm"],
-        'GraphClient': ["adal"],
+        'NTLMAuthentication': ["requests_ntlm"]
     },
     tests_require=['nose'],
     test_suite='nose.collector',

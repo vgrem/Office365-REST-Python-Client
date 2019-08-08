@@ -1,13 +1,14 @@
 # About
-Office 365 Library for Python
+Office 365 & Microsoft Graph Library for Python
 
-The list of supported Office 365 APIs:
+The list of supported APIs:
 
 -   [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) (_supported_ versions: [SharePoint 2013](https://msdn.microsoft.com/library/office/jj860569(v=office.15).aspx), SharePoint 2016, SharePoint Online and OneDrive for Business)
 -   [Outlook REST API](https://msdn.microsoft.com/en-us/office/office365/api/use-outlook-rest-api#DefineOutlookRESTAPI) 
     -   [Outlook Contacts REST API](https://msdn.microsoft.com/en-us/office/office365/api/contacts-rest-operations)
     -   [Outlook Calendar REST API](https://msdn.microsoft.com/en-us/office/office365/api/calendar-rest-operations)
     -   [Outlook Mail REST API](https://msdn.microsoft.com/en-us/office/office365/api/mail-rest-operations)
+-   [OneDrive API](https://docs.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0)    
 
 
 ## Status
@@ -24,7 +25,9 @@ pip install Office365-REST-Python-Client
 ```
 
 
-# Usage: working with SharePoint resources 
+# Usage
+ 
+## Working with SharePoint resources 
 
 There are **two approaches** available to perform REST queries:
 
@@ -74,12 +77,13 @@ else:
 
 
 # Python Version
-Python 2.7 is fully supported.
+Python `2.7 & 3.4–3.6` are supported.
 
 
 # Third Party Libraries and Dependencies
 The following libraries will be installed when you install the client library:
 * [requests](https://github.com/kennethreitz/requests)
+* [adal](https://github.com/AzureAD/azure-activedirectory-library-for-python)
 
 
 
