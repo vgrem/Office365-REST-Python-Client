@@ -11,7 +11,7 @@ def get_token(auth_ctx):
     return token
 
 
-tenant_name = "mediadev88.onmicrosoft.com"
+tenant_name = "mediadev8.onmicrosoft.com"
 client_id, client_secret = os.environ['Office365_Python_Sdk_ClientCredentials'].split(';')
 
 client = GraphClient(tenant_name, get_token)

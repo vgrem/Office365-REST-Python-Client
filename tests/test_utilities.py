@@ -40,7 +40,7 @@ class WebExtensions(object):
     @classmethod
     def get_all_webs(cls, parent_web, result=None):
         if result is None:
-            result = []
+            result = [parent_web]
         ctx = parent_web.context
         webs = parent_web.webs
         ctx.load(webs)

@@ -1,5 +1,8 @@
+import json
 import os
 
+from office365.runtime.client_request import ClientRequest
+from office365.runtime.utilities.request_options import RequestOptions
 from office365.sharepoint.caml_query import CamlQuery
 from settings import settings
 from office365.runtime.auth.authentication_context import AuthenticationContext
@@ -74,14 +77,16 @@ def download_file(context):
 
 
 if __name__ == '__main__':
-    ctx_auth = AuthenticationContext(url=settings['url'])
+    site_url = 'https://mediadev8.sharepoint.com/sites/Team123'
+
+    ctx_auth = AuthenticationContext(url=site_url)
     if ctx_auth.acquire_token_for_user(username=settings['user_credentials']['username'],
                                        password=settings['user_credentials']['password']):
         # if ctx_auth.acquire_token_for_app(client_id=settings['client_credentials']['client_id'],
         #                                  client_secret=settings['client_credentials']['client_secret']):
-        ctx = ClientContext(settings['url'], ctx_auth)
+        ctx = ClientContext(site_url, ctx_auth)
         # read_folder_and_files(ctx, "Documents")
-        read_folder_and_files_alt(ctx, "Documents")
+        # read_folder_and_files_alt(ctx, "Documents")
         # upload_file(ctx)
         # download_file(ctx)
     else:
