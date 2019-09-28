@@ -19,7 +19,8 @@ def read_list_items():
 def filter_list_items():
     print("OData query against list items example...")
     list_object = ctx.web.lists.get_by_title(listTitle)
-    items = list_object.get_items().top(1).select("Id,Title")
+    # items = list_object.get_items().top(1).select("Id,Title")
+    items = list_object.get_items().select("Id,Title").filter("AssignedTo ne null")
     ctx.load(items)
     ctx.execute_query()
 
@@ -38,11 +39,11 @@ def create_list_item():
 
 if __name__ == '__main__':
     ctxAuth = AuthenticationContext(url=settings['url'])
-    if ctxAuth.acquire_token_for_user(username=settings['username'], password=settings['password']):
+    if ctxAuth.acquire_token_for_user(username=settings['user_credentials']['username'], password=settings['user_credentials']['password']):
         ctx = ClientContext(settings['url'], ctxAuth)
 
-        read_list_items()
-        create_list_item()
+        # read_list_items()
+        # create_list_item()
         filter_list_items()
 
     else:

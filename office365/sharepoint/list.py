@@ -3,6 +3,7 @@ from office365.runtime.client_query import ClientQuery
 from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.content_type_collection import ContentTypeCollection
+from office365.sharepoint.field_collection import FieldCollection
 from office365.sharepoint.folder import Folder
 from office365.sharepoint.listitem import ListItem
 from office365.sharepoint.listItem_collection import ListItemCollection
@@ -62,6 +63,14 @@ class List(SecurableObject):
             return self.properties["RootFolder"]
         else:
             return Folder(self.context, ResourcePathEntity(self.context, self.resource_path, "RootFolder"))
+
+    @property
+    def fields(self):
+        """Gets a value that specifies the collection of all fields in the list."""
+        if self.is_property_available('Fields'):
+            return self.properties['Fields']
+        else:
+            return FieldCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "Fields"))
 
     @property
     def views(self):
