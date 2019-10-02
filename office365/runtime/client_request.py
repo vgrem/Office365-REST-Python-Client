@@ -1,11 +1,12 @@
 import requests
+from requests import HTTPError
+
 from office365.runtime.action_type import ActionType
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_encoder import ODataEncoder
 from office365.runtime.utilities.http_method import HttpMethod
 from office365.runtime.utilities.request_options import RequestOptions
-from requests import HTTPError
 
 
 class ClientRequest(object):

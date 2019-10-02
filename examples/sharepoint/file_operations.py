@@ -1,13 +1,14 @@
 import json
 import os
 
-from office365.sharepoint.caml_query import CamlQuery
-from office365.sharepoint.list_data_service import ListDataService
 from settings import settings
+
 from office365.runtime.auth.authentication_context import AuthenticationContext
+from office365.sharepoint.caml_query import CamlQuery
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.file import File
 from office365.sharepoint.file_creation_information import FileCreationInformation
+from office365.sharepoint.list_data_service import ListDataService
 
 
 def read_folder_and_files_alt(context, list_title):

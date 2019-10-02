@@ -1,12 +1,18 @@
 import os
 
+from tests import random_seed
+from tests.sharepoint_case import SPTestCase
+from tests.test_utilities import (
+    FileExtensions,
+    ListExtensions,
+    normalize_response,
+    read_file_as_binary,
+    read_file_as_text,
+)
+
 from office365.sharepoint.list_creation_information import ListCreationInformation
 from office365.sharepoint.list_template_type import ListTemplateType
 from office365.sharepoint.template_file_type import TemplateFileType
-from tests import random_seed
-from tests.sharepoint_case import SPTestCase
-from tests.test_utilities import ListExtensions, FileExtensions, read_file_as_binary, read_file_as_text, \
-    normalize_response
 
 
 class TestFile(SPTestCase):

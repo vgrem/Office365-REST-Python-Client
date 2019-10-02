@@ -2,13 +2,13 @@ from office365.runtime.action_type import ActionType
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_query import ClientQuery
 from office365.runtime.client_result import ClientResult
+from office365.runtime.odata.odata_path_parser import ODataPathParser
 from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.utilities.http_method import HttpMethod
 from office365.runtime.utilities.request_options import RequestOptions
 from office365.sharepoint.listitem import ListItem
 from office365.sharepoint.webparts.limited_webpart_manager import LimitedWebPartManager
-from office365.runtime.odata.odata_path_parser import ODataPathParser
 
 
 class AbstractFile(ClientObject):

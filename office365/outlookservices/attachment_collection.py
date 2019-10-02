@@ -1,5 +1,5 @@
-from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.outlookservices.attachment import Attachment
+from office365.runtime.client_object_collection import ClientObjectCollection
 
 
 class AttachmentCollection(ClientObjectCollection):

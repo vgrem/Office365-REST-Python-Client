@@ -1,6 +1,7 @@
+from settings import settings
+
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.client_context import ClientContext
-from settings import settings
 
 url = 'https://mediadev8.sharepoint.com/NewsArchive'
 settings['client_credentials']['client_id'] = '82e32e70-f031-4978-9fcd-1233db95990f'

@@ -1,10 +1,11 @@
 import os.path
 
+from tests.sharepoint_case import SPTestCase
+from tests.test_utilities import ListExtensions, read_file_as_binary
+
 from office365.sharepoint.attachmentfile_creation_information import AttachmentfileCreationInformation
 from office365.sharepoint.list_creation_information import ListCreationInformation
 from office365.sharepoint.list_template_type import ListTemplateType
-from tests.sharepoint_case import SPTestCase
-from tests.test_utilities import ListExtensions, read_file_as_binary
 
 
 class TestListItemAttachment(SPTestCase):

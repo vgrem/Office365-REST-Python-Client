@@ -1,4 +1,5 @@
 import requests
+
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.context_web_information import ContextWebInformation
 from office365.runtime.odata.json_light_format import JsonLightFormat
