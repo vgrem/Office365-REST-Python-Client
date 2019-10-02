@@ -1,4 +1,3 @@
-from office365.runtime.odata.odata_path_parser import ODataPathParser
 from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.sharepoint.principal import Principal
 

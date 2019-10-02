@@ -21,4 +21,3 @@ class Attachmentfile(AbstractFile):
                                             [self.properties["ServerRelativeUrl"]]))
 
         return self._resource_path
-

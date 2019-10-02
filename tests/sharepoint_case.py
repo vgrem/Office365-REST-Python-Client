@@ -13,4 +13,3 @@ class SPTestCase(TestCase):
         ctx_auth.acquire_token_for_user(username=settings['user_credentials']['username'],
                                         password=settings['user_credentials']['password'])
         cls.context = ClientContext(settings['url'], ctx_auth)
-

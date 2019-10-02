@@ -1,9 +1,6 @@
 import json
 import os
 
-from office365.runtime.client_request import ClientRequest
-from office365.runtime.utilities.http_method import HttpMethod
-from office365.runtime.utilities.request_options import RequestOptions
 from office365.sharepoint.caml_query import CamlQuery
 from office365.sharepoint.list_data_service import ListDataService
 from settings import settings
@@ -132,7 +129,7 @@ if __name__ == '__main__':
         # list_item.system_update(field_values, True)
 
         list_svc = ListDataService(site_url, ctx_auth)
-        #field_values = {"Comment": "Some comment goes here"}
+        # field_values = {"Comment": "Some comment goes here"}
         field_values = {"ModifiedById": 11}
 
         # list_item = list_svc.get_list_item("Documents", 4)

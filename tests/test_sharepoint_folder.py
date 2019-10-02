@@ -22,7 +22,7 @@ class TestFolder(SPTestCase):
     @classmethod
     def tearDownClass(cls):
         cls.target_list.delete_object()
-        #cls.context.execute_query()
+        # cls.context.execute_query()
 
     def test_enum_folders_and_files(self):
         parent_folder = self.target_list.root_folder

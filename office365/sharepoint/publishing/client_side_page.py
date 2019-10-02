@@ -7,5 +7,3 @@ class ClientSidePage(ClientObject):
     @staticmethod
     def from_file(file):
         return None
-
-

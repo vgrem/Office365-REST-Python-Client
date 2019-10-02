@@ -17,5 +17,3 @@ class OutlookClient(ClientRuntimeContext):
     def me(self):
         """The Me endpoint is provided as a shortcut for specifying the current user by SMTP address."""
         return User(self, ResourcePathEntity(self, None, "me"))
-
-

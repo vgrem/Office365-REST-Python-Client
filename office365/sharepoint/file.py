@@ -202,7 +202,7 @@ class File(AbstractFile):
         except ImportError:
             from urllib.parse import quote  # Python 3+
         server_relative_url = quote(server_relative_url)
-        url = "{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(
+        url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(
             ctx.service_root_url, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Post
@@ -218,7 +218,7 @@ class File(AbstractFile):
         except ImportError:
             from urllib.parse import quote  # Python 3+
         server_relative_url = quote(server_relative_url)
-        url = "{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(
+        url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(
             ctx.service_root_url, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Get

@@ -20,8 +20,8 @@ class CamlQuery(ClientValueObject):
     def create_all_folders_query():
         qry = CamlQuery()
         qry.ViewXml = "<View Scope=\"RecursiveAll\"><Query>" \
-                       "<Where><Eq><FieldRef Name=\"FSObjType\" /><Value Type=\"Integer\">1</Value></Eq></Where>" \
-                       "</Query></View>"
+                      "<Where><Eq><FieldRef Name=\"FSObjType\" /><Value Type=\"Integer\">1</Value></Eq></Where>" \
+                      "</Query></View>"
         return qry
 
     @property

@@ -4,8 +4,8 @@ from requests import RequestException
 class ClientRequestException(RequestException):
     def __init__(self, *args, **kwargs):
         super(ClientRequestException, self).__init__(*args, **kwargs)
-        if self.response.content and \
-                        self.response.headers.get('Content-Type', '').lower().split(';')[0] == 'application/json':
+        content_type = self.response.headers.get('Content-Type', '').lower().split(';')[0]
+        if self.response.content and content_type == 'application/json':
             self.payload = self.response.json()
         else:
             self.payload = None

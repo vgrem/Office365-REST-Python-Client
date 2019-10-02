@@ -1,6 +1,5 @@
 import os
 
-from office365.sharepoint.file import File
 from office365.sharepoint.list_creation_information import ListCreationInformation
 from office365.sharepoint.list_template_type import ListTemplateType
 from office365.sharepoint.template_file_type import TemplateFileType

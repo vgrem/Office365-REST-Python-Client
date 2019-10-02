@@ -6,4 +6,3 @@ class PhysicalAddress(ClientObject):
 
     def __init__(self, context):
         super(PhysicalAddress, self).__init__(context)
-
