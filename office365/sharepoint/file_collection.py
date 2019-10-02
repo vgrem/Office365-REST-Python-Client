@@ -42,3 +42,7 @@ class FileCollection(ClientObjectCollection):
     def get_by_url(self, url):
         """Retrieve File object by url"""
         return File(self.context, ResourcePathServiceOperation(self.context, self.resource_path, "GetByUrl", [url]))
+
+    def get_by_id(self, _id):
+        """Gets the File with the specified ID."""
+        return File(self.context, ResourcePathServiceOperation(self.context, self.resource_path, "getById", [_id]))
