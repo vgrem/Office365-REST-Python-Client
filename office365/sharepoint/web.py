@@ -1,15 +1,15 @@
 from office365.runtime.action_type import ActionType
+from office365.runtime.client_query import ClientQuery
+from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.file import File
 from office365.sharepoint.folder import Folder
 from office365.sharepoint.folder_collection import FolderCollection
+from office365.sharepoint.group_collection import GroupCollection
+from office365.sharepoint.list_collection import ListCollection
 from office365.sharepoint.securable_object import SecurableObject
 from office365.sharepoint.user import User
 from office365.sharepoint.user_collection import UserCollection
-from office365.runtime.client_query import ClientQuery
-from office365.runtime.resource_path_entity import ResourcePathEntity
-from office365.sharepoint.group_collection import GroupCollection
-from office365.sharepoint.list_collection import ListCollection
 
 
 class Web(SecurableObject):

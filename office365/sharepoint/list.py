@@ -1,5 +1,6 @@
 from office365.runtime.action_type import ActionType
 from office365.runtime.client_query import ClientQuery
+from office365.runtime.odata.odata_path_parser import ODataPathParser
 from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.content_type_collection import ContentTypeCollection
@@ -10,7 +11,6 @@ from office365.sharepoint.listItem_collection import ListItemCollection
 from office365.sharepoint.securable_object import SecurableObject
 from office365.sharepoint.view import View
 from office365.sharepoint.view_collection import ViewCollection
-from office365.runtime.odata.odata_path_parser import ODataPathParser
 
 
 class List(SecurableObject):

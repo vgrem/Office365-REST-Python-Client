@@ -1,9 +1,10 @@
 import unittest
 from random import randint
 
-from office365.sharepoint.web_creation_information import WebCreationInformation
 from tests.sharepoint_case import SPTestCase
 from tests.test_utilities import WebExtensions
+
+from office365.sharepoint.web_creation_information import WebCreationInformation
 
 
 class TestWeb(SPTestCase):
