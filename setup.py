@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 from distutils.core import setup
 import setuptools
 
@@ -39,4 +38,3 @@ setup(
         'office365': ["runtime/auth/SAML.xml"]
     }
 )
-

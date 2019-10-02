@@ -67,4 +67,3 @@ class Principal(ClientObject):
                 self.context,
                 self._parent_collection.resource_path,
                 ODataPathParser.from_method("GetByName", [self.properties["LoginName"]]))
-

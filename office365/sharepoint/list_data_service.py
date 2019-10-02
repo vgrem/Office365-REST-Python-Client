@@ -29,8 +29,3 @@ class ListDataService(ClientRuntimeContext):
         resource_url = self.service_root_url + list_name + "(" + str(item_id) + ")"
         qry = ClientQuery(resource_url, ActionType.UpdateEntity, field_values)
         self.add_query(qry)
-
-
-
-
-

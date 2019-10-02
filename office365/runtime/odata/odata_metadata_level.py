@@ -6,4 +6,3 @@ class ODataMetadataLevel:
     Verbose = "verbose"
     NoMetadata = "nometadata"
     MinimalMetadata = "minimalmetadata"
-

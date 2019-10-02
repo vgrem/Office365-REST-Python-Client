@@ -18,5 +18,3 @@ class SiteCollection(ClientValueObject):
     def root(self):
         """If present, indicates that this is a root site collection in SharePoint."""
         return self._root
-
-
