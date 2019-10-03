@@ -40,8 +40,8 @@ class ClientObject(object):
 
     def is_property_available(self, name):
         """Returns a Boolean value that indicates whether the specified property has been retrieved or set."""
-        deferred = (not isinstance(self.properties[name], dict) or '__deferred' not in self.properties[name])
-        if name in self.properties and deferred:
+        if name in self.properties and not (isinstance(self.properties[name], dict)
+                                            and '__deferred' in self.properties[name]):
             return True
         return False
 

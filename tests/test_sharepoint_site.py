@@ -6,4 +6,5 @@ class TestSite(SPTestCase):
         site = self.context.site
         self.context.load(site)
         self.context.execute_query()
-        self.assertIsNotNone(site.properties['Url'], "Site resource was not requested")
+        self.assertIs(site.is_property_available('Url'), True, "Site resource was not requested")
+        self.assertIs(site.is_property_available('RootWeb'), False)
