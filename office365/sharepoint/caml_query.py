@@ -24,6 +24,12 @@ class CamlQuery(ClientValueObject):
                       "</Query></View>"
         return qry
 
+    @staticmethod
+    def create_custom_query(query):
+        qry = CamlQuery()
+        qry.ViewXml = query
+        return qry
+
     @property
     def type_name(self):
         return 'SP.CamlQuery'
