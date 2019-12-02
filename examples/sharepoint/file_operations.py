@@ -16,7 +16,6 @@ def read_folder_and_files_alt(context, list_title):
     list_obj = context.web.lists.get_by_title(list_title)
     qry = CamlQuery.create_all_items_query()
     items = list_obj.get_items(qry)
-    context.load(items)
     context.execute_query()
     for cur_item in items:
         print("File name: {0}".format(cur_item.properties["Title"]))

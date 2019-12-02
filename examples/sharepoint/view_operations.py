@@ -42,7 +42,6 @@ def print_view_items(ctx):
     qry = CamlQuery()
     qry.ViewXml = "<View><Where>{0}</Where></View>".format(view.properties["ViewQuery"])
     items = list_object.get_items(qry)
-    ctx.load(items)
     ctx.execute_query()
 
     for item in items:
