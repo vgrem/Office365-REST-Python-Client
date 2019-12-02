@@ -1,12 +1,23 @@
+from office365.runtime.action_type import ActionType
 from office365.runtime.client_object_collection import ClientObjectCollection
+from office365.runtime.client_query import ClientQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.user import User
 
 
 class UserCollection(ClientObjectCollection):
     """Represents a collection of User resources."""
+
     def __init__(self, context, resource_path=None):
         super(UserCollection, self).__init__(context, User, resource_path)
+
+    def add_user(self, login_name):
+        user = User(self.context)
+        user.set_property('LoginName', login_name)
+        qry = ClientQuery(self.resource_url, ActionType.PostMethod, user)
+        self.context.add_query(qry,user)
+        self.add_child(user)
+        return user
 
     def get_by_email(self, email):
         """Retrieve User object by email"""

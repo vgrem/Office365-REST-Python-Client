@@ -118,6 +118,30 @@ class Web(SecurableObject):
             return User(self.context, ResourcePathEntity(self.context, self.resource_path, "ParentWeb"))
 
     @property
+    def associated_visitor_group(self):
+        """Gets or sets the associated visitor group of the Web site."""
+        if self.is_property_available('AssociatedVisitorGroup'):
+            return self.properties['AssociatedVisitorGroup']
+        else:
+            return User(self.context, ResourcePathEntity(self.context, self.resource_path, "AssociatedVisitorGroup"))
+
+    @property
+    def associated_owner_group(self):
+        """Gets or sets the associated owner group of the Web site."""
+        if self.is_property_available('AssociatedOwnerGroup'):
+            return self.properties['AssociatedOwnerGroup']
+        else:
+            return User(self.context, ResourcePathEntity(self.context, self.resource_path, "AssociatedOwnerGroup"))
+
+    @property
+    def associated_member_group(self):
+        """Gets or sets the group of users who have been given contribute permissions to the Web site."""
+        if self.is_property_available('AssociatedMemberGroup'):
+            return self.properties['AssociatedMemberGroup']
+        else:
+            return User(self.context, ResourcePathEntity(self.context, self.resource_path, "AssociatedMemberGroup"))
+
+    @property
     def service_root_url(self):
         orig_root_url = super(Web, self).service_root_url
         if self.is_property_available("Url"):

@@ -8,7 +8,6 @@ from office365.sharepoint.caml_query import CamlQuery
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.file import File
 from office365.sharepoint.file_creation_information import FileCreationInformation
-from office365.sharepoint.list_data_service import ListDataService
 
 
 def read_folder_and_files_alt(context, list_title):
@@ -77,7 +76,7 @@ def download_file(context):
 
 
 if __name__ == '__main__':
-    site_url = 'https://mediadev8.sharepoint.com/'
+    site_url = 'https://mediadev8.sharepoint.com/teams/DemoSite/'
 
     ctx_auth = AuthenticationContext(url=site_url)
     if ctx_auth.acquire_token_for_user(username=settings['user_credentials']['username'],
@@ -89,54 +88,21 @@ if __name__ == '__main__':
         # read_folder_and_files_alt(ctx, "Documents")
         # upload_file(ctx)
         # download_file(ctx)
+        # response = File.open_binary(ctx, "/teams/DemoSite/Shared Documents/Guide.docx")
+        # with open("../data/SharePoint User Guide.docx", "wb") as local_file:
+        #    local_file.write(response.content)
 
-        file = ctx.web.get_file_by_server_relative_url("/Shared Documents/SharePoint User Guide.docx")
-        ctx.load(file)
-        ctx.execute_query()
-
-        path = "../data/SharePoint User Guide.docx"
+        # path = "../data/SharePoint User Guide.docx"
+        # info = FileCreationInformation()
         # with open(path, 'rb') as content_file:
-        #    file_content = content_file.read()
-        # list_title = "Documents"
-        # target_list = ctx.web.lists.get_by_title(list_title)
-        # file = upload_file_alt(target_list.root_folder, os.path.basename(path), file_content)
+        #    info.content = content_file.read()
+        # info.url = os.path.basename(path)
+        # info.overwrite = True
+        # target_list = ctx.web.lists.get_by_title("Documents")
+        # target_file = target_list.root_folder.files.add(info)
+        # ctx.execute_query()
 
-        # find out user id
-        user = ctx.web.site_users.get_by_email("vgrem@mediadev8.onmicrosoft.com")
-        ctx.load(user)
+        target_folder = ctx.web.folders.add("Shared Documents/Archive")
         ctx.execute_query()
-        user_id = user.properties['Id']
-        user_field_value = json.dumps([{'Key': user.properties['LoginName']}])
-
-        # set file metadata
-        list_item = file.listitem_allfields  # get associated listItem
-
-        field_editor = list_item.parent_list.fields.get_by_internal_name_or_title("Modified By")
-        ctx.load(field_editor)
-        ctx.execute_query()
-
-        if field_editor.properties['ReadOnlyField']:
-            field_editor.set_property('ReadOnlyField', False)
-            field_editor.update()
-            ctx.execute_query()
-
-        list_item.set_property("EditorId", user_id)  # update ModifiedBy field value
-        # list_item.set_property("ModifiedById", user_id)  # update ModifiedBy field value
-        # list_item.set_property("Comment", 'some comment goes here212aaa..')
-
-        # field_values = [
-        #    {"FieldName": 'Editor', "FieldValue": user_field_value},
-        # ]
-        # list_item.system_update(field_values, True)
-
-        list_svc = ListDataService(site_url, ctx_auth)
-        # field_values = {"Comment": "Some comment goes here"}
-        field_values = {"ModifiedById": 11}
-
-        # list_item = list_svc.get_list_item("Documents", 4)
-        # list_svc.load(list_item)
-        list_svc.update_list_item("Documents", 4, field_values)
-        list_svc.execute_query()
-        print("Ok")
     else:
         print(ctx_auth.get_last_error())
