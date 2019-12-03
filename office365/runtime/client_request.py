@@ -89,7 +89,7 @@ class ClientRequest(object):
             if not (query.action_type == ActionType.ReadEntity or query.action_type == ActionType.GetMethod):
                 request.method = HttpMethod.Post
         else:
-            if query.action_type == ActionType.CreateEntity:
+            if query.action_type == ActionType.CreateEntity or query.action_type == ActionType.PostMethod:
                 request.method = HttpMethod.Post
             elif query.action_type == ActionType.UpdateEntity:
                 request.method = HttpMethod.Patch

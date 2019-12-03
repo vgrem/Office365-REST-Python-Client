@@ -15,7 +15,7 @@ class UserCollection(ClientObjectCollection):
         user = User(self.context)
         user.set_property('LoginName', login_name)
         qry = ClientQuery(self.resource_url, ActionType.PostMethod, user)
-        self.context.add_query(qry,user)
+        self.context.add_query(qry, user)
         self.add_child(user)
         return user
 

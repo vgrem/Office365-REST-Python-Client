@@ -1,7 +1,9 @@
 from office365.outlookservices.contact_collection import ContactCollection
 from office365.outlookservices.event_collection import EventCollection
 from office365.outlookservices.message_collection import MessageCollection
+from office365.runtime.action_type import ActionType
 from office365.runtime.client_object import ClientObject
+from office365.runtime.client_query import ClientQuery
 from office365.runtime.resource_path_entity import ResourcePathEntity
 
 
@@ -26,3 +28,9 @@ class User(ClientObject):
         """Get an event collection or an event."""
         messages = MessageCollection(self.context, ResourcePathEntity(self, self._resource_path, "messages"))
         return messages
+
+    def sendmail(self, message):
+        """Send a new message on the fly"""
+        url = self.resource_url + "/sendmail"
+        qry = ClientQuery(url, ActionType.PostMethod, message)
+        self.context.add_query(qry)
