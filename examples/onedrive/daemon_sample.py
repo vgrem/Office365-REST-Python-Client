@@ -4,6 +4,7 @@ from office365.graph_client import GraphClient
 
 
 def get_token(auth_ctx):
+    """Acquire token via client credential flow (ADAL Python library is utilized)"""
     token = auth_ctx.acquire_token_with_client_credentials(
         "https://graph.microsoft.com",
         client_id,

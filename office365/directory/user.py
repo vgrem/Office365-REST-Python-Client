@@ -29,7 +29,7 @@ class User(ClientObject):
         messages = MessageCollection(self.context, ResourcePathEntity(self, self._resource_path, "messages"))
         return messages
 
-    def sendmail(self, message):
+    def send_mail(self, message):
         """Send a new message on the fly"""
         url = self.resource_url + "/sendmail"
         qry = ClientQuery(url, ActionType.PostMethod, message)

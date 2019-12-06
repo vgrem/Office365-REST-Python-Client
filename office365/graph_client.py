@@ -1,5 +1,7 @@
 import adal
 
+from office365.directory.user import User
+from office365.directory.user_collection import UserCollection
 from office365.onedrive.drive_collection import DriveCollection
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.odata.v4_json_format import V4JsonFormat
@@ -30,6 +32,16 @@ class GraphClient(ClientRuntimeContext):
         return self.execute_request_direct(request)
 
     @property
+    def me(self):
+        """The Me endpoint is provided as a shortcut for specifying the current user"""
+        return User(self, ResourcePathEntity(self, None, "me"))
+
+    @property
     def drives(self):
         """Get one drives"""
         return DriveCollection(self, ResourcePathEntity(self, None, "drives"))
+
+    @property
+    def users(self):
+        """Get users"""
+        return UserCollection(self, ResourcePathEntity(self, None, "users"))

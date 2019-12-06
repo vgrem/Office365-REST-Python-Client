@@ -1,11 +1,18 @@
-from office365.outlookservices.outlook_client import OutlookClient
-from office365.runtime.auth.authentication_context import AuthenticationContext
-from settings import settings
+import os
+from office365.graph_client import GraphClient
 
-ctx_auth = AuthenticationContext(url=settings['tenant'])
-ctx_auth.acquire_token_password_grant(client_credentials=settings['client_credentials'],
-                                      user_credentials=settings['user_credentials'])
-client = OutlookClient(ctx_auth)
+
+def get_token(auth_ctx):
+    token = auth_ctx.acquire_token_with_client_credentials(
+        "https://graph.microsoft.com",
+        client_id,
+        client_secret)
+    return token
+
+
+tenant_name = "mediadev8.onmicrosoft.com"
+client_id, client_secret = os.environ['Office365_Python_Sdk_ClientCredentials'].split(';')
+client = GraphClient(tenant_name, get_token)
 
 message_payload = {
     "Message": {
@@ -17,20 +24,14 @@ message_payload = {
         "ToRecipients": [
             {
                 "EmailAddress": {
-                    "Address": "jdoe@mediadev8.onmicrosoft.com"
+                    "Address": "vgrem@mediadev8.onmicrosoft.com"
                 }
-            }
-        ],
-        "Attachments": [
-            {
-                "@odata.type": "#Microsoft.OutlookServices.FileAttachment",
-                "Name": "menu.txt",
-                "ContentBytes": "bWFjIGFuZCBjaGVlc2UgdG9kYXk="
             }
         ]
     },
     "SaveToSentItems": "false"
 }
 
-client.me.sendmail(message_payload)
+login_name = "mdoe@mediadev8.onmicrosoft.com"
+client.users[login_name].send_mail(message_payload)
 client.execute_query()

@@ -1,14 +1,12 @@
 # About
 Office 365 & Microsoft Graph Library for Python
 
-The list of supported APIs:
+# Usage
 
--   [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) (_supported_ versions: [SharePoint 2013](https://msdn.microsoft.com/library/office/jj860569(v=office.15).aspx), SharePoint 2016, SharePoint Online and OneDrive for Business)
--   [Outlook REST API](https://msdn.microsoft.com/en-us/office/office365/api/use-outlook-rest-api#DefineOutlookRESTAPI) 
-    -   [Outlook Contacts REST API](https://msdn.microsoft.com/en-us/office/office365/api/contacts-rest-operations)
-    -   [Outlook Calendar REST API](https://msdn.microsoft.com/en-us/office/office365/api/calendar-rest-operations)
-    -   [Outlook Mail REST API](https://msdn.microsoft.com/en-us/office/office365/api/mail-rest-operations)
--   [OneDrive API](https://docs.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0)    
+1.   [Installation](#Installation)
+1.   [Working with SharePoint REST API](#Working with SharePoint REST API) 
+2.   [Working with Outlook REST API](#Working with Outlook REST API) 
+3.   [Working with OneDrive REST API](#Working with OneDrive API)    
 
 
 ## Status
@@ -27,13 +25,49 @@ pip install Office365-REST-Python-Client
 
 # Usage
  
-## Working with SharePoint resources 
+## Working with SharePoint REST API
 
-There are **two approaches** available to perform REST queries:
+The list of supported API versions: 
+-   [SharePoint 2013](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and above 
+-   SharePoint Online & OneDrive for Business
 
-1) via `ClientRequest class` where you need to construct REST queries by specifying endpoint url, headers if required and payload (aka low level approach)
+#### Authentication
 
-The first example demonstrates how to read Web resource:
+The following auth flows are supported:
+
+- app principals auth (refer [Granting access using SharePoint App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs) for a details): `AuthenticationContext.ctx_auth.acquire_token_for_app(client_id, client_secret)`
+- user credentials auth: `AuthenticationContext.ctx_auth.acquire_token_for_user(username, password)`
+
+
+####Examples
+ 
+
+There are **two approaches** available to perform API queries:
+
+1. `ClientContext class` - where you target SharePoint resources such as `Web`, `ListItem` and etc (recommended)
+ 
+
+```
+from office365.runtime.auth.authentication_context import AuthenticationContext
+from office365.sharepoint.client_context import ClientContext
+
+ctx_auth = AuthenticationContext(url)
+if ctx_auth.acquire_token_for_user(username, password):
+  ctx = ClientContext(url, ctx_auth)
+  web = ctx.web
+  ctx.load(web)
+  ctx.execute_query()
+  print "Web title: {0}".format(web.properties['Title'])
+
+else:
+  print ctx_auth.get_last_error()
+```
+
+2. `ClientRequest class` - where you construct REST queries by specifying endpoint url, headers if required and payload (aka low level approach)
+
+   The example demonstrates how to read `Web` properties:
+   
+   
 
 ```
 import json
@@ -56,23 +90,103 @@ else:
   print ctx_auth.get_last_error()
 ```
 
-2) via `ClientContext class` where you target client object resources such as Web, ListItem and etc.
- 
+
+## Working with Outlook REST API
+
+The list of supported APIs:
+-   [Outlook Contacts REST API](https://msdn.microsoft.com/en-us/office/office365/api/contacts-rest-operations)
+-   [Outlook Calendar REST API](https://msdn.microsoft.com/en-us/office/office365/api/calendar-rest-operations)
+-   [Outlook Mail REST API](https://msdn.microsoft.com/en-us/office/office365/api/mail-rest-operations)
+
+
+Since Outlook REST APIs are available in both Microsoft Graph and the Outlook API endpoint, 
+the following clients are available:
+
+- `GraphClient` which targets Outlook `v2.0` version (*preferable* nowadays, refer [transition to Microsoft Graph-based Outlook REST API](https://docs.microsoft.com/en-us/outlook/rest/compare-graph-outlook) for a details)   
+- `OutlookClient` which targets Outlook `v1.0` version (not recommended for usage since `v1.0` version is being deprecated.)
+
+
+#### Authentication
+
+[ADAL Python](https://adal-python.readthedocs.io/en/latest/#) 
+library is utilized to authenticate users to Active Directory (AD) and obtain tokens
+
+
+#### Example
+
+The example demonstrates how to send an email via [Microsoft Graph endpoint](https://docs.microsoft.com/en-us/graph/api/user-sendmail?view=graph-rest-1.0&tabs=http).
+
+> Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
 
 ```
-from office365.runtime.auth.authentication_context import AuthenticationContext
-from office365.sharepoint.client_context import ClientContext
+def get_token(auth_ctx):
+    token = auth_ctx.acquire_token_with_client_credentials(
+        "https://graph.microsoft.com",
+        client_id,
+        client_secret)
+    return token
 
-ctx_auth = AuthenticationContext(url)
-if ctx_auth.acquire_token_for_user(username, password):
-  ctx = ClientContext(url, ctx_auth)
-  web = ctx.web
-  ctx.load(web)
-  ctx.execute_query()
-  print "Web title: {0}".format(web.properties['Title'])
 
-else:
-  print ctx_auth.get_last_error()
+tenant_name = "contoso.onmicrosoft.com"
+client = GraphClient(tenant_name, get_token)
+
+message_payload = {
+    "Message": {
+        "Subject": "Meet for lunch?",
+        "Body": {
+            "ContentType": "Text",
+            "Content": "The new cafeteria is open."
+        },
+        "ToRecipients": [
+            {
+                "EmailAddress": {
+                    "Address": "jdoe@contoso.onmicrosoft.com"
+                }
+            }
+        ]
+    },
+    "SaveToSentItems": "false"
+}
+
+login_name = "mdoe@contoso.onmicrosoft.com"
+client.users[login_name].send_mail(message_payload)
+client.execute_query()
+```
+
+
+## Working with OneDrive API
+
+####Documentation 
+
+[OneDrive Graph API reference](https://docs.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0)
+
+####Authentication
+
+[ADAL Python](https://adal-python.readthedocs.io/en/latest/#) 
+library is utilized to authenticate users to Active Directory (AD) and obtain tokens  
+
+####Example 
+The example demonstrates how to print drive's url via [`list available drives` endpoint](https://docs.microsoft.com/en-us/onedrive/developer/rest-api/api/drive_list?view=odsp-graph-online)
+
+> Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
+
+```
+def get_token(auth_ctx):
+    """Acquire token via client credential flow (ADAL Python library is utilized)"""
+    token = auth_ctx.acquire_token_with_client_credentials(
+        "https://graph.microsoft.com",
+        client_id,
+        client_secret)
+    return token
+
+
+tenant_name = "contoso.onmicrosoft.com"
+client = GraphClient(tenant_name, get_token)
+drives = client.drives
+client.load(drives)
+client.execute_query()
+for drive in drives:
+    print("Drive url: {0}".format(drive.web_url))
 ```
 
 
