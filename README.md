@@ -23,9 +23,7 @@ pip install Office365-REST-Python-Client
 ```
 
 
-# Usage
- 
-## Working with SharePoint REST API
+# Working with SharePoint REST API
 
 The list of supported API versions: 
 -   [SharePoint 2013](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and above 
@@ -91,7 +89,7 @@ else:
 ```
 
 
-## Working with Outlook REST API
+# Working with Outlook REST API
 
 The list of supported APIs:
 -   [Outlook Contacts REST API](https://msdn.microsoft.com/en-us/office/office365/api/contacts-rest-operations)
@@ -154,7 +152,7 @@ client.execute_query()
 ```
 
 
-## Working with OneDrive API
+# Working with OneDrive API
 
 ####Documentation 
 
