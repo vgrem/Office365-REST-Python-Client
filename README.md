@@ -4,9 +4,9 @@ Office 365 & Microsoft Graph Library for Python
 # Usage
 
 1.   [Installation](#Installation)
-1.   [Working with SharePoint REST API](#Working with SharePoint REST API) 
-2.   [Working with Outlook REST API](#Working with Outlook REST API) 
-3.   [Working with OneDrive REST API](#Working with OneDrive API)    
+1.   [Working with SharePoint REST API](#Working-with-SharePoint-REST-API) 
+2.   [Working with Outlook REST API](#Working-with-Outlook-REST-API) 
+3.   [Working with OneDrive REST API](#Working-with-OneDrive-API)    
 
 
 ## Status
@@ -37,7 +37,7 @@ The following auth flows are supported:
 - user credentials auth: `AuthenticationContext.ctx_auth.acquire_token_for_user(username, password)`
 
 
-####Examples
+#### Examples
  
 
 There are **two approaches** available to perform API queries:
@@ -154,16 +154,16 @@ client.execute_query()
 
 # Working with OneDrive API
 
-####Documentation 
+#### Documentation 
 
 [OneDrive Graph API reference](https://docs.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0)
 
-####Authentication
+#### Authentication
 
 [ADAL Python](https://adal-python.readthedocs.io/en/latest/#) 
 library is utilized to authenticate users to Active Directory (AD) and obtain tokens  
 
-####Example 
+#### Example 
 The example demonstrates how to print drive's url via [`list available drives` endpoint](https://docs.microsoft.com/en-us/onedrive/developer/rest-api/api/drive_list?view=odsp-graph-online)
 
 > Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
