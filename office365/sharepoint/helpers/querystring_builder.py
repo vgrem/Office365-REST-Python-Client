@@ -1,10 +1,8 @@
 import logging
 
+from office365.sharepoint.helpers.utils import to_camel
+
 logger = logging.getLogger(__name__)
-
-
-def to_camel(snake_str):
-    return ''.join(x.title() for x in snake_str.split('_'))
 
 
 class QueryStringBuilder:
