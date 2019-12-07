@@ -34,9 +34,10 @@ class UserCollection(ClientObjectCollection):
 
     def remove_by_id(self, _id):
         """Retrieve User object by id"""
-        return User(self.context, ResourcePathServiceOperation(self.context, self.resource_path, "RemoveById", [_id]))
+        qry = ClientQuery.service_operation_query(self, ActionType.PostMethod, "RemoveById", [_id])
+        self.context.add_query(qry)
 
     def remove_by_login_name(self, login_name):
         """Remove User object by login name"""
-        return User(self.context,
-                    ResourcePathServiceOperation(self.context, self.resource_path, "RemoveByLoginName", [login_name]))
+        qry = ClientQuery.service_operation_query(self, ActionType.PostMethod, "RemoveByLoginName", [login_name])
+        self.context.add_query(qry)

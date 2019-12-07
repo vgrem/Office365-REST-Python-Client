@@ -1,4 +1,5 @@
 from office365.runtime.client_object import ClientObject
+from office365.runtime.client_query import ClientQuery
 from office365.runtime.odata.odata_path_parser import ODataPathParser
 from office365.runtime.resource_path_entity import ResourcePathEntity
 
@@ -67,3 +68,8 @@ class Principal(ClientObject):
                 self.context,
                 self._parent_collection.resource_path,
                 ODataPathParser.from_method("GetByName", [self.properties["LoginName"]]))
+
+    def update(self):
+        """Update a User or Group resource"""
+        qry = ClientQuery.update_entry_query(self)
+        self.context.add_query(qry)

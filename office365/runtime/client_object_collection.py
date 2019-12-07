@@ -21,6 +21,7 @@ class ClientObjectCollection(ClientObject):
         return client_object
 
     def map_json(self, payload):
+        self.__data = []
         for properties in payload["collection"]:
             child_client_object = self.create_typed_object(properties, self.item_type)
             self.add_child(child_client_object)

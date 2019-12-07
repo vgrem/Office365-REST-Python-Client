@@ -1,7 +1,7 @@
 from tests.sharepoint_case import SPTestCase
 
 
-class TestUser(SPTestCase):
+class TestSharePointUser(SPTestCase):
     def test_get_current_user(self):
         user = self.context.web.current_user
         self.context.load(user)
