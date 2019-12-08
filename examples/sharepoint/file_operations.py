@@ -23,7 +23,7 @@ def read_folder_and_files_alt(context, list_title):
 def read_folder_and_files(context, list_title):
     """Read a folder example"""
     list_obj = context.web.lists.get_by_title(list_title)
-    folder = list_obj.root_folder
+    folder = list_obj.rootFolder
     context.load(folder)
     context.execute_query()
     print("List url: {0}".format(folder.properties["ServerRelativeUrl"]))
@@ -60,7 +60,7 @@ def upload_file(context):
 
     if upload_into_library:
         list_title = "Documents"
-        target_folder = context.web.lists.get_by_title(list_title).root_folder
+        target_folder = context.web.lists.get_by_title(list_title).rootFolder
         file = upload_file_alt(target_folder, os.path.basename(path), file_content)
         print("File url: {0}".format(file.properties["ServerRelativeUrl"]))
     else:

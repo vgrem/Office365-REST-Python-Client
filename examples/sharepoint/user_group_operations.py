@@ -6,7 +6,7 @@ from office365.sharepoint.client_context import ClientContext
 
 def read_groups(ctx):
     """Read site groups example"""
-    groups = ctx.web.site_groups
+    groups = ctx.web.siteGroups
     ctx.load(groups)
     ctx.execute_query()
 
@@ -17,7 +17,7 @@ def read_groups(ctx):
 def crud_group(ctx):
     """Create a group"""
     groupName = "Orders Approvers221"
-    groups = ctx.web.site_groups
+    groups = ctx.web.siteGroups
     groupProperties = {'__metadata': {'type': 'SP.Group'}, 'Title': groupName}
     group = groups.add(groupProperties)
     ctx.execute_query()

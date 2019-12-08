@@ -1,6 +1,6 @@
 import requests
 from requests import HTTPError
-from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery, CreateEntityQuery
+from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_encoder import ODataEncoder
@@ -127,6 +127,11 @@ class ClientRequest(object):
             result = requests.delete(url=request_options.url,
                                      headers=request_options.headers,
                                      auth=request_options.auth)
+        elif request_options.method == HttpMethod.Put:
+            result = requests.put(url=request_options.url,
+                                  data=request_options.data,
+                                  headers=request_options.headers,
+                                  auth=request_options.auth)
         else:
             result = requests.get(url=request_options.url,
                                   headers=request_options.headers,

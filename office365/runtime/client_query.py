@@ -35,25 +35,25 @@ class ClientQuery(object):
 
 class CreateEntityQuery(ClientQuery):
     def __init__(self, parent_resource, parameters):
-        super(CreateEntityQuery, self).__init__(parent_resource.resource_url, HttpMethod.Post, parameters)
+        super(CreateEntityQuery, self).__init__(parent_resource.resourceUrl, HttpMethod.Post, parameters)
 
 
 class ReadEntityQuery(ClientQuery):
     def __init__(self, resource):
-        super(ReadEntityQuery, self).__init__(resource.resource_url, HttpMethod.Get)
+        super(ReadEntityQuery, self).__init__(resource.resourceUrl, HttpMethod.Get)
 
 
 class UpdateEntityQuery(ClientQuery):
     def __init__(self, resource):
-        super(UpdateEntityQuery, self).__init__(resource.resource_url, HttpMethod.Post, resource)
+        super(UpdateEntityQuery, self).__init__(resource.resourceUrl, HttpMethod.Post, resource)
 
 
 class DeleteEntityQuery(ClientQuery):
     def __init__(self, resource):
-        super(DeleteEntityQuery, self).__init__(resource.resource_url, HttpMethod.Post)
+        super(DeleteEntityQuery, self).__init__(resource.resourceUrl, HttpMethod.Post)
 
 
 class ServiceOperationQuery(ClientQuery):
     def __init__(self, resource, method, method_name, method_params=None, payload=None):
-        url = resource.resource_url + "/" + ODataPathParser.from_method(method_name, method_params)
+        url = resource.resourceUrl + "/" + ODataPathParser.from_method(method_name, method_params)
         super(ServiceOperationQuery, self).__init__(url, method, payload)

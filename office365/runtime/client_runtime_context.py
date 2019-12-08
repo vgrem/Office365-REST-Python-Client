@@ -28,7 +28,7 @@ class ClientRuntimeContext(object):
         if properties_to_retrieve:
             select_expr = ",".join(properties_to_retrieve)
             client_object = client_object.select(select_expr)
-        qry = ClientQuery(client_object.resource_url, HttpMethod.Get)
+        qry = ClientQuery(client_object.resourceUrl, HttpMethod.Get)
         self.pending_request.add_query(qry, client_object)
 
     def execute_request_direct(self, request):
@@ -41,13 +41,9 @@ class ClientRuntimeContext(object):
         self.pending_request.add_query(query, result_object)
 
     @property
-    def service_root_url(self):
+    def serviceRootUrl(self):
         return self.__service_root_url
 
-    @service_root_url.setter
-    def service_root_url(self, value):
+    @serviceRootUrl.setter
+    def serviceRootUrl(self, value):
         self.__service_root_url = value
-
-    @property
-    def auth_context(self):
-        return self.__auth_context

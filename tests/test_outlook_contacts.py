@@ -56,5 +56,5 @@ class TestOutlookContacts(OutlookClientTestCase):
             contacts = self.client.me.contacts
             self.client.load(contacts)
             self.client.execute_query()
-            results = [c for c in contacts if c.contact_id == contact.contact_id]
+            results = [c for c in contacts if c.contactId == contact.contactId]
             self.assertEqual(len(results), 0)

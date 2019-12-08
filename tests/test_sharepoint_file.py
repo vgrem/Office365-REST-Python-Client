@@ -47,7 +47,7 @@ class TestFile(SPTestCase):
             self.assertEqual(upload_file.properties["Name"], entry["Name"])
 
     def test_2_list_files(self):
-        files = self.target_list.root_folder.files
+        files = self.target_list.rootFolder.files
         self.context.load(files)
         self.context.execute_query()
         files_items = list(files)
@@ -55,7 +55,7 @@ class TestFile(SPTestCase):
 
     def test_3_update_file(self):
         """Test file upload operation"""
-        files = self.target_list.root_folder.files
+        files = self.target_list.rootFolder.files
         self.context.load(files)
         self.context.execute_query()
         for file_upload in files:
@@ -63,7 +63,7 @@ class TestFile(SPTestCase):
 
     def test_4_download_file(self):
         """Test file upload operation"""
-        files = self.target_list.root_folder.files
+        files = self.target_list.rootFolder.files
         self.context.load(files)
         self.context.execute_query()
         for file_download in files:
@@ -73,7 +73,7 @@ class TestFile(SPTestCase):
 
     def test_5_move_file(self):
         """Test file upload operation"""
-        files = self.target_list.root_folder.files
+        files = self.target_list.rootFolder.files
         self.context.load(files, )
         self.context.execute_query()
         for file in files:
@@ -90,7 +90,7 @@ class TestFile(SPTestCase):
 
     def test_6_recycle_first_file(self):
         """Test file upload operation"""
-        files = self.target_list.root_folder.files
+        files = self.target_list.rootFolder.files
         self.context.load(files)
         self.context.execute_query()
         files_count = len(files)
@@ -98,22 +98,22 @@ class TestFile(SPTestCase):
             first_file = files[0]
             first_file.recycle()
             self.context.execute_query()
-            files_after = self.target_list.root_folder.files
+            files_after = self.target_list.rootFolder.files
             self.context.load(files_after)
             self.context.execute_query()
             self.assertEqual(len(files) - 1, len(files_after))
 
     def test_7_create_template_file(self):
-        target_folder = self.target_list.root_folder
+        target_folder = self.target_list.rootFolder
         self.context.load(target_folder)
         self.context.execute_query()
         file_url = '/'.join([target_folder.properties["ServerRelativeUrl"], "WikiPage.aspx"])
-        file_new = self.target_list.root_folder.files.add_template_file(file_url, TemplateFileType.WikiPage)
+        file_new = self.target_list.rootFolder.files.add_template_file(file_url, TemplateFileType.WikiPage)
         self.context.execute_query()
         self.assertEqual(file_new.properties["ServerRelativeUrl"], file_url)
 
     def test_8_delete_file(self):
-        files_to_delete = self.target_list.root_folder.files
+        files_to_delete = self.target_list.rootFolder.files
         self.context.load(files_to_delete)
         self.context.execute_query()
         for file_to_delete in files_to_delete:
@@ -121,7 +121,7 @@ class TestFile(SPTestCase):
             self.context.execute_query()
 
         # verify
-        result = self.target_list.root_folder.files
+        result = self.target_list.rootFolder.files
         self.context.load(result)
         self.context.execute_query()
         files_items = list(result)

@@ -34,7 +34,7 @@ def print_view_items(ctx):
     ctx.execute_query()
 
     # 2.get View fields
-    view_fields = view.view_fields
+    view_fields = view.viewFields
     ctx.load(view_fields)
     ctx.execute_query()
 

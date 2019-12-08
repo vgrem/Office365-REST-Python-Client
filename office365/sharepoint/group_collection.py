@@ -13,7 +13,7 @@ class GroupCollection(ClientObjectCollection):
     def add(self, group_creation_information):
         """Creates a Group resource"""
         group = Group(self.context)
-        qry = ClientQuery(self.resource_url, HttpMethod.Post, group_creation_information)
+        qry = ClientQuery(self.resourceUrl, HttpMethod.Post, group_creation_information)
         self.context.add_query(qry, group)
         self.add_child(group)
         return group
@@ -21,13 +21,13 @@ class GroupCollection(ClientObjectCollection):
     def get_by_id(self, group_id):
         """Returns the list item with the specified list item identifier."""
         group = Group(self.context,
-                      ResourcePathServiceOperation(self.context, self.resource_path, "getbyid", [group_id]))
+                      ResourcePathServiceOperation(self.context, self.resourcePath, "getbyid", [group_id]))
         return group
 
     def get_by_name(self, group_name):
         """Returns a cross-site group from the collection based on the name of the group."""
         return Group(self.context,
-                     ResourcePathServiceOperation(self.context, self.resource_path, "getbyname", [group_name]))
+                     ResourcePathServiceOperation(self.context, self.resourcePath, "getbyname", [group_name]))
 
     def remove_by_id(self, group_id):
         """Removes the group with the specified member ID from the collection."""

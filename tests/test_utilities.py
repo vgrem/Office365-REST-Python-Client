@@ -29,7 +29,7 @@ class FileExtensions(object):
         info.content = content
         info.url = url
         info.overwrite = True
-        upload_file = list.root_folder.files.add(info)
+        upload_file = list.rootFolder.files.add(info)
         list.context.execute_query()
         return upload_file
 

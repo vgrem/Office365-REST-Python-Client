@@ -12,4 +12,4 @@ class DriveCollection(ClientObjectCollection):
     def get_by_id(self, drive_id):
         """Retrieve Drive by unique identifier"""
         return Drive(self.context,
-                     ResourcePathEntity(self.context, self.resource_path, drive_id))
+                     ResourcePathEntity(self.context, self.resourcePath, drive_id))

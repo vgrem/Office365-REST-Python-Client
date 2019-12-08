@@ -8,4 +8,4 @@ class DirectoryObjectCollection(ClientObjectCollection):
 
     def __getitem__(self, key):
         return User(self.context,
-                    ResourcePathEntity(self.context, self.resource_path, key))
+                    ResourcePathEntity(self.context, self.resourcePath, key))

@@ -31,7 +31,7 @@ class TestDrive(TestCase):
         self.client.execute_query()
         self.assertLessEqual(len(drives), 2)
         for drive in drives:
-            self.assertIsNotNone(drive.web_url)
+            self.assertIsNotNone(drive.webUrl)
 
     def test2_get_drives_alt(self):
         resp = self.client.execute_request("/drives?$top=2")
@@ -63,4 +63,4 @@ class TestDrive(TestCase):
         self.client.load(items)
         self.client.execute_query()
         self.assertGreater(len(items), 0)
-        self.assertIsNotNone(items[0].file_system_info)
+        self.assertIsNotNone(items[0].fileSystemInfo)

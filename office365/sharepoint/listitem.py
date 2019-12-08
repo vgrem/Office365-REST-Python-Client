@@ -45,13 +45,13 @@ class ListItem(SecurableObject):
         self.context.add_query(qry)
 
     @property
-    def parent_list(self):
+    def parentList(self):
         """Get parent List"""
         if self.is_property_available("ParentList"):
             return self.properties["ParentList"]
         else:
             from office365.sharepoint.list import List
-            return List(self.context, ResourcePathEntity(self.context, self.resource_path, "ParentList"))
+            return List(self.context, ResourcePathEntity(self.context, self.resourcePath, "ParentList"))
 
     @property
     def file(self):
@@ -60,7 +60,7 @@ class ListItem(SecurableObject):
             return self.properties["File"]
         else:
             from office365.sharepoint.file import File
-            return File(self.context, ResourcePathEntity(self.context, self.resource_path, "File"))
+            return File(self.context, ResourcePathEntity(self.context, self.resourcePath, "File"))
 
     @property
     def folder(self):
@@ -69,21 +69,21 @@ class ListItem(SecurableObject):
             return self.properties["Folder"]
         else:
             from office365.sharepoint.folder import Folder
-            return Folder(self.context, ResourcePathEntity(self.context, self.resource_path, "Folder"))
+            return Folder(self.context, ResourcePathEntity(self.context, self.resourcePath, "Folder"))
 
     @property
-    def attachment_files(self):
+    def attachmentFiles(self):
         """Get attachment files"""
         if self.is_property_available('AttachmentFiles'):
             return self.properties["AttachmentFiles"]
         else:
             from office365.sharepoint.attachmentfile_collection import AttachmentfileCollection
             return AttachmentfileCollection(self.context,
-                                            ResourcePathEntity(self.context, self.resource_path, "AttachmentFiles"))
+                                            ResourcePathEntity(self.context, self.resourcePath, "AttachmentFiles"))
 
     @property
-    def resource_path(self):
-        resource_path = super(ListItem, self).resource_path
+    def resourcePath(self):
+        resource_path = super(ListItem, self).resourcePath
         if resource_path:
             return resource_path
 
@@ -91,7 +91,7 @@ class ListItem(SecurableObject):
         if self.is_property_available("Id"):
             self._resource_path = ResourcePathEntity(
                 self.context,
-                self._parent_collection.resource_path,
+                self._parent_collection.resourcePath,
                 ODataPathParser.from_method("getItemById", [self.properties["Id"]]))
 
         return self._resource_path

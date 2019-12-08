@@ -32,7 +32,7 @@ class Folder(ClientObject):
         if self.is_property_available('ListItemAllFields'):
             return self.properties["ListItemAllFields"]
         else:
-            return ListItem(self.context, ResourcePathEntity(self.context, self.resource_path, "ListItemAllFields"))
+            return ListItem(self.context, ResourcePathEntity(self.context, self.resourcePath, "ListItemAllFields"))
 
     @property
     def files(self):
@@ -41,7 +41,7 @@ class Folder(ClientObject):
             return self.properties["Files"]
         else:
             from office365.sharepoint.file_collection import FileCollection
-            return FileCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "Files"))
+            return FileCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "Files"))
 
     @property
     def folders(self):
@@ -50,11 +50,11 @@ class Folder(ClientObject):
             return self.properties["Folders"]
         else:
             from office365.sharepoint.folder_collection import FolderCollection
-            return FolderCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "Folders"))
+            return FolderCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "Folders"))
 
     @property
-    def resource_path(self):
-        resource_path = super(Folder, self).resource_path
+    def resourcePath(self):
+        resource_path = super(Folder, self).resourcePath
         if resource_path:
             return resource_path
 

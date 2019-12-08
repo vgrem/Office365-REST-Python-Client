@@ -13,10 +13,10 @@ class FolderCollection(ClientObjectCollection):
     def add(self, folder_url):
         folder = Folder(self.context)
         folder.set_property("ServerRelativeUrl", folder_url)
-        qry = ClientQuery(self.resource_url, HttpMethod.Post, folder)
+        qry = ClientQuery(self.resourceUrl, HttpMethod.Post, folder)
         self.context.add_query(qry, folder)
         return folder
 
     def get_by_url(self, url):
         """Retrieve Folder resource by url"""
-        return Folder(self.context, ResourcePathServiceOperation(self.context, self.resource_path, "GetByUrl", [url]))
+        return Folder(self.context, ResourcePathServiceOperation(self.context, self.resourcePath, "GetByUrl", [url]))

@@ -31,12 +31,12 @@ class TestListItemAttachment(SPTestCase):
         file_content = self.read_attachment_file()
         attachment_file_information = AttachmentfileCreationInformation(self.attachment_file_name, file_content)
 
-        created_file = self.target_item.attachment_files.add(attachment_file_information)
+        created_file = self.target_item.attachmentFiles.add(attachment_file_information)
         self.context.execute_query()
         self.assertIsNotNone(created_file.properties["FileName"])
 
     def test_2_list_attachments(self):
-        attachment_files = self.target_item.attachment_files
+        attachment_files = self.target_item.attachmentFiles
         self.context.load(attachment_files)
         self.context.execute_query()
 
@@ -45,7 +45,7 @@ class TestListItemAttachment(SPTestCase):
         self.assertEqual(attachment_files_items[0].properties['FileName'], self.attachment_file_name)
 
     def test_3_read_attachments(self):
-        attachment_file = self.target_item.attachment_files.get_by_filename(self.attachment_file_name)
+        attachment_file = self.target_item.attachmentFiles.get_by_filename(self.attachment_file_name)
         self.context.load(attachment_file)
         self.context.execute_query()
         data = attachment_file.read()
@@ -54,7 +54,7 @@ class TestListItemAttachment(SPTestCase):
         self.assertEqual(data, file_content)
 
     def test_4_update_attachments(self):
-        attachment_file = self.target_item.attachment_files.get_by_filename(self.attachment_file_name)
+        attachment_file = self.target_item.attachmentFiles.get_by_filename(self.attachment_file_name)
         self.context.load(attachment_file)
         self.context.execute_query()
 
@@ -69,14 +69,14 @@ class TestListItemAttachment(SPTestCase):
         self.assertEqual(data, updated_data)
 
     def test_5_delete_attachments(self):
-        attachment_file = self.target_item.attachment_files.get_by_filename(self.attachment_file_name)
+        attachment_file = self.target_item.attachmentFiles.get_by_filename(self.attachment_file_name)
         self.context.load(attachment_file)
         self.context.execute_query()
 
         attachment_file.delete_object()
         self.context.execute_query()
 
-        attachment_files = self.target_item.attachment_files
+        attachment_files = self.target_item.attachmentFiles
         self.context.load(attachment_files)
         self.context.execute_query()
         attachment_files_items = list(attachment_files)

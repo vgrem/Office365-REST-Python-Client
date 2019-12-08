@@ -12,14 +12,14 @@ class WebCollection(ClientObjectCollection):
 
     def add(self, web_creation_information):
         web = Web(self.context)
-        qry = ClientQuery(self.resource_url + "/add", HttpMethod.Post, web_creation_information)
+        qry = ClientQuery(self.resourceUrl + "/add", HttpMethod.Post, web_creation_information)
         self.context.add_query(qry, web)
         self.add_child(web)
         return web
 
     @property
-    def service_root_url(self):
-        orig_root_url = super(WebCollection, self).service_root_url
+    def serviceRootUrl(self):
+        orig_root_url = super(WebCollection, self).serviceRootUrl
         if self._parent_web_url:
             cur_root_url = self._parent_web_url + "/_api/"
             return cur_root_url

@@ -2,9 +2,9 @@ class ClientValueObject(object):
     """Base client value object"""
 
     @property
-    def type_name(self):
+    def typeName(self):
         return None
 
     @property
-    def tag_name(self):
+    def tagName(self):
         return None

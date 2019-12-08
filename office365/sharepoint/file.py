@@ -145,7 +145,7 @@ class File(AbstractFile):
         """Specifies the control set used to access, modify, or add Web Parts associated with this Web Part Page and
         view. """
         return LimitedWebPartManager(self.context,
-                                     ResourcePathServiceOperation(self.context, self.resource_path,
+                                     ResourcePathServiceOperation(self.context, self.resourcePath,
                                                                   "getlimitedwebpartmanager",
                                                                   [scope]
                                                                   ))
@@ -202,7 +202,7 @@ class File(AbstractFile):
             from urllib.parse import quote  # Python 3+
         server_relative_url = quote(server_relative_url)
         url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(
-            ctx.service_root_url, server_relative_url)
+            ctx.serviceRootUrl, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Post
         request.set_header('X-HTTP-Method', 'PUT')
@@ -218,23 +218,23 @@ class File(AbstractFile):
             from urllib.parse import quote  # Python 3+
         server_relative_url = quote(server_relative_url)
         url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(
-            ctx.service_root_url, server_relative_url)
+            ctx.serviceRootUrl, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Get
         response = ctx.execute_request_direct(request)
         return response
 
     @property
-    def listitem_allfields(self):
+    def listItemAllFields(self):
         """Gets a value that specifies the list item field values for the list item corresponding to the file."""
         if self.is_property_available('ListItemAllFields'):
             return self.properties['ListItemAllFields']
         else:
-            return ListItem(self.context, ResourcePathEntity(self.context, self.resource_path, "listItemAllFields"))
+            return ListItem(self.context, ResourcePathEntity(self.context, self.resourcePath, "listItemAllFields"))
 
     @property
-    def resource_path(self):
-        resource_path = super(File, self).resource_path
+    def resourcePath(self):
+        resource_path = super(File, self).resourcePath
         if resource_path:
             return resource_path
 

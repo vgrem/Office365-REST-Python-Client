@@ -5,7 +5,7 @@ class Contact(Item):
     """User's contact."""
 
     @property
-    def contact_id(self):
+    def contactId(self):
         if self.is_property_available('Id'):
             return self.properties["Id"]
         return None

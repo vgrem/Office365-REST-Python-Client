@@ -13,7 +13,7 @@ class Site(BaseItem):
         if self.is_property_available('lists'):
             return self.properties['lists']
         else:
-            return ListCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "lists"))
+            return ListCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "lists"))
 
     @property
     def drive(self):
@@ -21,7 +21,7 @@ class Site(BaseItem):
         if self.is_property_available('drive'):
             return self.properties['drive']
         else:
-            return Drive(self.context, ResourcePathEntity(self.context, self.resource_path, "drive"))
+            return Drive(self.context, ResourcePathEntity(self.context, self.resourcePath, "drive"))
 
     @property
     def sharepointids(self):

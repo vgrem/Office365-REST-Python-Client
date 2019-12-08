@@ -12,8 +12,10 @@ class DriveItem(BaseItem):
 
     def upload_file(self, name, content):
         """Uploads a file"""
-        qry = ClientQuery(self.resource_url + ":/{0}:/content".format(name), HttpMethod.Put, content)
-        self.context.add_query(qry)
+        drive_item = DriveItem(self.context, None)
+        qry = ClientQuery(self.resourceUrl + ":/{0}:/content".format(name), HttpMethod.Put, content)
+        self.context.add_query(qry, drive_item)
+        return drive_item
 
     def create_folder(self, name):
         """Create a new folder or DriveItem in a Drive with a specified parent item or path."""
@@ -24,12 +26,12 @@ class DriveItem(BaseItem):
           "folder": {},
           "@microsoft.graph.conflictBehavior": "rename"
         }
-        qry = ClientQuery(self.resource_url + "/children", HttpMethod.Post, payload)
+        qry = ClientQuery(self.resourceUrl + "/children", HttpMethod.Post, payload)
         self.context.add_query(qry, drive_item)
         return drive_item
 
     @property
-    def file_system_info(self):
+    def fileSystemInfo(self):
         """File system information on client."""
         if self.is_property_available('fileSystemInfo'):
             return FileSystemInfo(self.properties['fileSystemInfo'])
@@ -44,7 +46,7 @@ class DriveItem(BaseItem):
             return self.properties['children']
         else:
             from office365.onedrive.drive_item_collection import DriveItemCollection
-            return DriveItemCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "children"))
+            return DriveItemCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "children"))
 
     @property
     def listItem(self):
@@ -52,9 +54,9 @@ class DriveItem(BaseItem):
         if self.is_property_available('listItem'):
             return self.properties['listItem']
         else:
-            return ListItem(self.context, ResourcePathEntity(self.context, self.resource_path, "listItem"))
+            return ListItem(self.context, ResourcePathEntity(self.context, self.resourcePath, "listItem"))
 
     def item_with_path(self, path):
         """Retrieve DriveItem by path"""
         return DriveItem(self.context,
-                         ResourcePathEntity(self.context, self.resource_path, ':/{0}'.format(path)))
+                         ResourcePathEntity(self.context, self.resourcePath, ':/{0}'.format(path)))

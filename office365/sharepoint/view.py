@@ -8,11 +8,11 @@ class View(ClientObject):
     """Specifies a list view."""
 
     @property
-    def view_fields(self):
+    def viewFields(self):
         if self.is_property_available('ViewFields'):
             return self.properties['ViewFields']
         else:
-            return ViewFieldCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "ViewFields"))
+            return ViewFieldCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "ViewFields"))
 
     def delete_object(self):
         """The recommended way to delete a view is to send a DELETE request to the View resource endpoint, as shown

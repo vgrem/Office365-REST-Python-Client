@@ -2,7 +2,7 @@ from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_query import ClientQuery, ServiceOperationQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.utilities.http_method import HttpMethod
-from office365.sharepoint.attachmentfile import Attachmentfile
+from office365.sharepoint.attachmentfile import AttachmentFile
 from office365.sharepoint.attachmentfile_creation_information import AttachmentfileCreationInformation
 from office365.sharepoint.file import File
 
@@ -11,7 +11,7 @@ class AttachmentfileCollection(ClientObjectCollection):
     """Represents a collection of AttachmentFile resources."""
 
     def __init__(self, context, resource_path=None):
-        super(AttachmentfileCollection, self).__init__(context, Attachmentfile, resource_path)
+        super(AttachmentfileCollection, self).__init__(context, AttachmentFile, resource_path)
 
     def add(self, attachment_file_information):
         """Creates an attachment"""
@@ -35,6 +35,6 @@ class AttachmentfileCollection(ClientObjectCollection):
 
     def get_by_filename(self, filename):
         """Retrieve Attachmentfile object by filename"""
-        return Attachmentfile(self.context,
-                              ResourcePathServiceOperation(self.context, self.resource_path, "GetByFileName",
+        return AttachmentFile(self.context,
+                              ResourcePathServiceOperation(self.context, self.resourcePath, "GetByFileName",
                                                            [filename]))

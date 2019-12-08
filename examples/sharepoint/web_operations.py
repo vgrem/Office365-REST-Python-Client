@@ -40,7 +40,7 @@ def delete_web(web_to_delete):
 
 
 def list_site_users(ctx):
-    users = ctx.web.site_users
+    users = ctx.web.siteUsers
     ctx.load(users)
     ctx.execute_query()
     print("The list of users:")

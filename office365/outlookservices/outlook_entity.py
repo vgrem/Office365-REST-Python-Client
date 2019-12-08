@@ -16,8 +16,8 @@ class OutlookEntity(ClientObject):
         self.context.add_query(qry)
 
     @property
-    def resource_path(self):
-        resource_path = super(OutlookEntity, self).resource_path
+    def resourcePath(self):
+        resource_path = super(OutlookEntity, self).resourcePath
         if resource_path:
             return resource_path
 
@@ -25,5 +25,5 @@ class OutlookEntity(ClientObject):
         if self.is_property_available("Id"):
             return ResourcePathEntity(
                 self.context,
-                self._parent_collection.resource_path,
+                self._parent_collection.resourcePath,
                 self.properties["Id"])

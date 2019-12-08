@@ -13,7 +13,7 @@ class Group(DirectoryObject):
             return self.properties['members']
         else:
             return DirectoryObjectCollection(self.context,
-                                             ResourcePathEntity(self.context, self.resource_path, "members"))
+                                             ResourcePathEntity(self.context, self.resourcePath, "members"))
 
     @property
     def owners(self):
@@ -22,4 +22,4 @@ class Group(DirectoryObject):
             return self.properties['owners']
         else:
             return DirectoryObjectCollection(self.context,
-                                             ResourcePathEntity(self.context, self.resource_path, "owners"))
+                                             ResourcePathEntity(self.context, self.resourcePath, "owners"))

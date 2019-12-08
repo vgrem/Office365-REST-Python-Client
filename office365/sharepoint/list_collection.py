@@ -13,12 +13,12 @@ class ListCollection(ClientObjectCollection):
     def get_by_title(self, list_title):
         """Retrieve List client object by title"""
         return List(self.context,
-                    ResourcePathServiceOperation(self.context, self.resource_path, "GetByTitle", [list_title]))
+                    ResourcePathServiceOperation(self.context, self.resourcePath, "GetByTitle", [list_title]))
 
     def get_by_id(self, list_id):
         """Retrieve List client object by id"""
         return List(self.context,
-                    ResourcePathServiceOperation(self.context, self.resource_path, "GetById", [list_id]))
+                    ResourcePathServiceOperation(self.context, self.resourcePath, "GetById", [list_id]))
 
     def ensure_site_assets_library(self):
         """Gets a list that is the default asset location for images or other files, which the users

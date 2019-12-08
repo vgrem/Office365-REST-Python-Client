@@ -18,7 +18,7 @@ class List(SecurableObject):
 
     def get_items(self, caml_query=None):
         """Returns a collection of items from the list based on the specified query."""
-        items = ListItemCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "items"))
+        items = ListItemCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "items"))
         if caml_query:
             qry = ServiceOperationQuery(self, HttpMethod.Post, "GetItems", None, caml_query)
             self.context.add_query(qry, items)
@@ -29,19 +29,19 @@ class List(SecurableObject):
          as shown in ListItemCollection request examples."""
         item = ListItem(self.context, None, list_item_creation_information)
         item._parent_collection = self
-        qry = ClientQuery(self.resource_url + "/items", HttpMethod.Post, item)
+        qry = ClientQuery(self.resourceUrl + "/items", HttpMethod.Post, item)
         self.context.add_query(qry, item)
         return item
 
     def get_item_by_id(self, item_id):
         """Returns the list item with the specified list item identifier."""
         return ListItem(self.context,
-                        ResourcePathServiceOperation(self.context, self.resource_path, "getitembyid", [item_id]))
+                        ResourcePathServiceOperation(self.context, self.resourcePath, "getitembyid", [item_id]))
 
     def get_view(self, view_id):
         """Returns the list view with the specified view identifier."""
         view = View(self.context, ResourcePathServiceOperation(self.context,
-                                                               self.resource_path,
+                                                               self.resourcePath,
                                                                "getview",
                                                                [view_id]))
         return view
@@ -57,12 +57,12 @@ class List(SecurableObject):
         # self.removeFromParentCollection()
 
     @property
-    def root_folder(self):
+    def rootFolder(self):
         """Get a root folder"""
         if self.is_property_available('RootFolder'):
             return self.properties["RootFolder"]
         else:
-            return Folder(self.context, ResourcePathEntity(self.context, self.resource_path, "RootFolder"))
+            return Folder(self.context, ResourcePathEntity(self.context, self.resourcePath, "RootFolder"))
 
     @property
     def fields(self):
@@ -70,7 +70,7 @@ class List(SecurableObject):
         if self.is_property_available('Fields'):
             return self.properties['Fields']
         else:
-            return FieldCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "Fields"))
+            return FieldCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "Fields"))
 
     @property
     def views(self):
@@ -79,20 +79,20 @@ class List(SecurableObject):
         if self.is_property_available('Views'):
             return self.properties['Views']
         else:
-            return ViewCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "views"))
+            return ViewCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "views"))
 
     @property
-    def content_types(self):
+    def contentTypes(self):
         """Gets the content types that are associated with the list."""
         if self.is_property_available('ContentTypes'):
             return self.properties['ContentTypes']
         else:
             return ContentTypeCollection(self.context,
-                                         ResourcePathEntity(self.context, self.resource_path, "contenttypes"))
+                                         ResourcePathEntity(self.context, self.resourcePath, "contenttypes"))
 
     @property
-    def resource_path(self):
-        resource_path = super(List, self).resource_path
+    def resourcePath(self):
+        resource_path = super(List, self).resourcePath
         if resource_path:
             return resource_path
 
@@ -100,12 +100,12 @@ class List(SecurableObject):
         if self.is_property_available("Id"):
             self._resource_path = ResourcePathEntity(
                 self.context,
-                self._parent_collection.resource_path,
+                self._parent_collection.resourcePath,
                 ODataPathParser.from_method("GetById", [self.properties["Id"]]))
         elif self.is_property_available("Title"):
             self._resource_path = ResourcePathEntity(
                 self.context,
-                self._parent_collection.resource_path,
+                self._parent_collection.resourcePath,
                 ODataPathParser.from_method("GetByTitle", [self.properties["Title"]]))
 
         return self._resource_path

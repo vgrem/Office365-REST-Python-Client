@@ -7,7 +7,7 @@ class BaseItem(ClientObject):
     other resources types """
 
     @property
-    def entity_type_name(self):
+    def entityTypeName(self):
         return "microsoft.graph." + type(self).__name__
 
     @property
@@ -25,28 +25,28 @@ class BaseItem(ClientObject):
         return None
 
     @property
-    def created_by(self):
+    def createdBy(self):
         """Identity of the user, device, or application which created the item."""
         if self.is_property_available("createdBy"):
             return self.properties['createdBy']
         return None
 
     @property
-    def last_modified_by(self):
+    def lastModifiedBy(self):
         """Identity of the user, device, and application which last modified the item."""
         if self.is_property_available("lastModifiedBy"):
             return self.properties['lastModifiedBy']
         return None
 
     @property
-    def created_datetime(self):
+    def createdDateTime(self):
         """Date and time of item creation."""
         if self.is_property_available("createdDateTime"):
             return self.properties['createdDateTime']
         return None
 
     @property
-    def last_modified_datetime(self):
+    def lastModifiedDateTime(self):
         """Date and time the item was last modified."""
         if self.is_property_available("lastModifiedDateTime"):
             return self.properties['lastModifiedDateTime']
@@ -75,19 +75,19 @@ class BaseItem(ClientObject):
         self.properties['description'] = value
 
     @property
-    def web_url(self):
+    def webUrl(self):
         """URL that displays the resource in the browser."""
         if self.is_property_available("webUrl"):
             return self.properties['webUrl']
         return None
 
     @property
-    def resource_path(self):
-        resource_path = super(BaseItem, self).resource_path
+    def resourcePath(self):
+        resource_path = super(BaseItem, self).resourcePath
         if resource_path:
             return resource_path
-        if self.is_property_available("Id"):
+        if self.is_property_available("id"):
             return ResourcePathEntity(
                 self.context,
-                self._parent_collection.resource_path,
-                self.properties["Id"])
+                self._parent_collection.resourcePath,
+                self.properties["id"])

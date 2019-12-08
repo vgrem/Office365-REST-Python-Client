@@ -52,8 +52,8 @@ class Principal(ClientObject):
             return None
 
     @property
-    def resource_path(self):
-        resource_path = super(Principal, self).resource_path
+    def resourcePath(self):
+        resource_path = super(Principal, self).resourcePath
         if resource_path:
             return resource_path
 
@@ -61,12 +61,12 @@ class Principal(ClientObject):
         if self.is_property_available("Id"):
             self._resource_path = ResourcePathEntity(
                 self.context,
-                self._parent_collection.resource_path,
+                self._parent_collection.resourcePath,
                 ODataPathParser.from_method("GetById", [self.properties["Id"]]))
         elif self.is_property_available("LoginName"):
             self._resource_path = ResourcePathEntity(
                 self.context,
-                self._parent_collection.resource_path,
+                self._parent_collection.resourcePath,
                 ODataPathParser.from_method("GetByName", [self.properties["LoginName"]]))
 
     def update(self):

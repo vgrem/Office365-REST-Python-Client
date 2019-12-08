@@ -9,7 +9,7 @@ class ClientObjectCollection(ClientObject):
         super(ClientObjectCollection, self).__init__(context, resource_path)
         self.__data = []
         self.__next_query_url = None
-        self.item_type = item_type
+        self._item_type = item_type
 
     def create_typed_object(self, properties, client_object_type):
         if client_object_type is None:
@@ -23,7 +23,7 @@ class ClientObjectCollection(ClientObject):
     def map_json(self, payload):
         self.__data = []
         for properties in payload["collection"]:
-            child_client_object = self.create_typed_object(properties, self.item_type)
+            child_client_object = self.create_typed_object(properties, self._item_type)
             self.add_child(child_client_object)
         self.__next_query_url = payload["next"]
 
@@ -46,7 +46,7 @@ class ClientObjectCollection(ClientObject):
             child_client_objects = []
             # add the new objects to the collection before yielding the results
             for properties in payload["collection"]:
-                child_client_object = self.create_typed_object(properties, self.item_type)
+                child_client_object = self.create_typed_object(properties, self._item_type)
                 self.add_child(child_client_object)
                 child_client_objects.append(child_client_object)
 

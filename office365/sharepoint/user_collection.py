@@ -14,23 +14,23 @@ class UserCollection(ClientObjectCollection):
     def add_user(self, login_name):
         user = User(self.context)
         user.set_property('LoginName', login_name)
-        qry = ClientQuery(self.resource_url, HttpMethod.Post, user)
+        qry = ClientQuery(self.resourceUrl, HttpMethod.Post, user)
         self.context.add_query(qry, user)
         self.add_child(user)
         return user
 
     def get_by_email(self, email):
         """Retrieve User object by email"""
-        return User(self.context, ResourcePathServiceOperation(self.context, self.resource_path, "GetByEmail", [email]))
+        return User(self.context, ResourcePathServiceOperation(self.context, self.resourcePath, "GetByEmail", [email]))
 
     def get_by_id(self, user_id):
         """Retrieve User object by id"""
-        return User(self.context, ResourcePathServiceOperation(self.context, self.resource_path, "GetById", [user_id]))
+        return User(self.context, ResourcePathServiceOperation(self.context, self.resourcePath, "GetById", [user_id]))
 
     def get_by_login_name(self, login_name):
         """Retrieve User object by login name"""
         return User(self.context,
-                    ResourcePathServiceOperation(self.context, self.resource_path, "GetByLoginName", [login_name]))
+                    ResourcePathServiceOperation(self.context, self.resourcePath, "GetByLoginName", [login_name]))
 
     def remove_by_id(self, _id):
         """Retrieve User object by id"""

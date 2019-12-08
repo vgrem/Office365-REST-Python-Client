@@ -13,7 +13,7 @@ class User(Principal):
             return self.properties['Groups']
         else:
             from office365.sharepoint.group_collection import GroupCollection
-            return GroupCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "Groups"))
+            return GroupCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "Groups"))
 
     def delete_object(self):
         """Deletes the user."""

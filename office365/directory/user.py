@@ -17,7 +17,7 @@ class User(DirectoryObject):
         if self.is_property_available('drive'):
             return self.properties['drive']
         else:
-            return Drive(self.context, ResourcePathEntity(self.context, self.resource_path, "drive"))
+            return Drive(self.context, ResourcePathEntity(self.context, self.resourcePath, "drive"))
 
     @property
     def contacts(self):
@@ -46,6 +46,6 @@ class User(DirectoryObject):
 
     def send_mail(self, message):
         """Send a new message on the fly"""
-        url = self.resource_url + "/sendmail"
+        url = self.resourceUrl + "/sendmail"
         qry = ClientQuery(url, HttpMethod.Post, message)
         self.context.add_query(qry)

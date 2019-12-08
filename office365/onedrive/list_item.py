@@ -13,4 +13,4 @@ class ListItem(BaseItem):
             return self.properties['driveItem']
         else:
             from office365.onedrive.drive_item import DriveItem
-            return DriveItem(self.context, ResourcePathEntity(self.context, self.resource_path, "driveItem"))
+            return DriveItem(self.context, ResourcePathEntity(self.context, self.resourcePath, "driveItem"))
