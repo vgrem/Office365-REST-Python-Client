@@ -1,5 +1,7 @@
 from office365.onedrive.base_item import BaseItem
 from office365.onedrive.drive_item import DriveItem
+from office365.onedrive.drive_item_collection import DriveItemCollection
+from office365.onedrive.list import List
 from office365.runtime.resource_path_entity import ResourcePathEntity
 
 
@@ -16,9 +18,17 @@ class Drive(BaseItem):
             return DriveItem(self.context, ResourcePathEntity(self.context, self.resource_path, "root"))
 
     @property
+    def list(self):
+        """For drives in SharePoint, the underlying document library list."""
+        if self.is_property_available("list"):
+            return self.properties['list']
+        else:
+            return List(self.context, ResourcePathEntity(self.context, self.resource_path, "list"))
+
+    @property
     def items(self):
         """All items contained in the drive."""
         if self.is_property_available("items"):
             return self.properties['items']
         else:
-            return None
+            return DriveItemCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "items"))

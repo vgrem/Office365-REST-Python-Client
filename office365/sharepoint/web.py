@@ -1,7 +1,7 @@
-from office365.runtime.action_type import ActionType
-from office365.runtime.client_query import ClientQuery
+from office365.runtime.client_query import  UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery
 from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.utilities.http_method import HttpMethod
 from office365.sharepoint.file import File
 from office365.sharepoint.folder import Folder
 from office365.sharepoint.folder_collection import FolderCollection
@@ -24,12 +24,12 @@ class Web(SecurableObject):
 
     def update(self):
         """Update a Web resource"""
-        qry = ClientQuery.update_entry_query(self)
+        qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
 
     def delete_object(self):
         """Delete a Web resource"""
-        qry = ClientQuery.delete_entry_query(self)
+        qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         # self.removeFromParentCollection()
 
@@ -51,7 +51,7 @@ class Web(SecurableObject):
 
     def ensure_user(self, login_name):
         user = User(self.context)
-        qry = ClientQuery.service_operation_query(self, ActionType.PostMethod, "ensureuser", [login_name])
+        qry = ServiceOperationQuery(self, HttpMethod.Post, "ensureuser", [login_name])
         self.context.add_query(qry, user)
         return user
 

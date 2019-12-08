@@ -1,7 +1,6 @@
 import requests
 from requests import HTTPError
-
-from office365.runtime.action_type import ActionType
+from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery, CreateEntityQuery
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_encoder import ODataEncoder
@@ -77,23 +76,20 @@ class ClientRequest(object):
         request = RequestOptions(query.url)
         # set json format headers
         request.set_headers(self.context.json_format.build_http_headers())
+        # set method
+        request.method = query.method
+        # set custom method headers
         if isinstance(self.context.json_format, JsonLightFormat):
-            # set custom method headers
-            if query.action_type == ActionType.DeleteEntity:
+            if isinstance(query, DeleteEntityQuery):
                 request.set_header("X-HTTP-Method", "DELETE")
                 request.set_header("IF-MATCH", '*')
-            elif query.action_type == ActionType.UpdateEntity:
+            elif isinstance(query, UpdateEntityQuery):
                 request.set_header("X-HTTP-Method", "MERGE")
                 request.set_header("IF-MATCH", '*')
-            # set method
-            if not (query.action_type == ActionType.ReadEntity or query.action_type == ActionType.GetMethod):
-                request.method = HttpMethod.Post
         else:
-            if query.action_type == ActionType.CreateEntity or query.action_type == ActionType.PostMethod:
-                request.method = HttpMethod.Post
-            elif query.action_type == ActionType.UpdateEntity:
+            if isinstance(query, UpdateEntityQuery):
                 request.method = HttpMethod.Patch
-            elif query.action_type == ActionType.DeleteEntity:
+            elif isinstance(query, DeleteEntityQuery):
                 request.method = HttpMethod.Delete
         # set request payload
         if query.payload is not None:

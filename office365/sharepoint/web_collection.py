@@ -1,6 +1,6 @@
-from office365.runtime.action_type import ActionType
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_query import ClientQuery
+from office365.runtime.utilities.http_method import HttpMethod
 from office365.sharepoint.web import Web
 
 
@@ -12,7 +12,7 @@ class WebCollection(ClientObjectCollection):
 
     def add(self, web_creation_information):
         web = Web(self.context)
-        qry = ClientQuery(self.resource_url + "/add", ActionType.PostMethod, web_creation_information)
+        qry = ClientQuery(self.resource_url + "/add", HttpMethod.Post, web_creation_information)
         self.context.add_query(qry, web)
         self.add_child(web)
         return web

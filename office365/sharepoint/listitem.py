@@ -1,7 +1,7 @@
-from office365.runtime.action_type import ActionType
-from office365.runtime.client_query import ClientQuery
+from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery
 from office365.runtime.odata.odata_path_parser import ODataPathParser
 from office365.runtime.resource_path_entity import ResourcePathEntity
+from office365.runtime.utilities.http_method import HttpMethod
 from office365.sharepoint.securable_object import SecurableObject
 
 
@@ -10,38 +10,38 @@ class ListItem(SecurableObject):
 
     def update(self):
         """Update the list item."""
-        qry = ClientQuery.update_entry_query(self)
+        qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
 
     def validate_update_listItem(self, form_values, new_document_update):
         """Validates and sets the values of the specified collection of fields for the list item."""
-        qry = ClientQuery.service_operation_query(self,
-                                                  ActionType.PostMethod,
-                                                  "validateUpdateListItem",
-                                                  None,
-                                                  {
-                                                      "formValues": form_values,
-                                                      "bNewDocumentUpdate": new_document_update,
-                                                  })
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Post,
+                                    "validateUpdateListItem",
+                                    None,
+                                    {
+                                        "formValues": form_values,
+                                        "bNewDocumentUpdate": new_document_update,
+                                    })
         self.context.add_query(qry)
 
     def system_update(self):
         """Update the list item."""
-        qry = ClientQuery.service_operation_query(self,
-                                                  ActionType.PostMethod,
-                                                  "systemUpdate")
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Post,
+                                    "systemUpdate")
         self.context.add_query(qry)
 
     def update_overwrite_version(self):
         """Update the list item."""
-        qry = ClientQuery.service_operation_query(self,
-                                                  ActionType.PostMethod,
-                                                  "updateOverwriteVersion")
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Post,
+                                    "updateOverwriteVersion")
         self.context.add_query(qry)
 
     def delete_object(self):
         """Deletes the list."""
-        qry = ClientQuery.delete_entry_query(self)
+        qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
 
     @property

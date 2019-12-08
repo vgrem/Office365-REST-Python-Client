@@ -1,6 +1,6 @@
-from office365.runtime.action_type import ActionType
 from office365.runtime.client_query import ClientQuery
 from office365.runtime.client_request import ClientRequest
+from office365.runtime.utilities.http_method import HttpMethod
 
 
 class ClientRuntimeContext(object):
@@ -28,7 +28,7 @@ class ClientRuntimeContext(object):
         if properties_to_retrieve:
             select_expr = ",".join(properties_to_retrieve)
             client_object = client_object.select(select_expr)
-        qry = ClientQuery(client_object.resource_url, ActionType.ReadEntity)
+        qry = ClientQuery(client_object.resource_url, HttpMethod.Get)
         self.pending_request.add_query(qry, client_object)
 
     def execute_request_direct(self, request):

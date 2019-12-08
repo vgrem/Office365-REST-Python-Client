@@ -1,6 +1,6 @@
 from office365.outlookservices.contact import Contact
 from office365.runtime.client_object_collection import ClientObjectCollection
-from office365.runtime.client_query import ClientQuery
+from office365.runtime.client_query import CreateEntityQuery
 from office365.runtime.resource_path_entity import ResourcePathEntity
 
 
@@ -13,7 +13,7 @@ class ContactCollection(ClientObjectCollection):
     def add_from_json(self, contact_creation_information):
         """Creates a Contact resource from JSON"""
         contact = Contact(self.context)
-        qry = ClientQuery.create_entry_query(self, contact_creation_information)
+        qry = CreateEntityQuery(self, contact_creation_information)
         self.context.add_query(qry, contact)
         self.add_child(contact)
         return contact
@@ -21,7 +21,7 @@ class ContactCollection(ClientObjectCollection):
     def add(self):
         """Creates a Contact resource"""
         contact = Contact(self.context)
-        qry = ClientQuery.create_entry_query(self, contact)
+        qry = CreateEntityQuery(self, contact)
         self.context.add_query(qry, contact)
         self.add_child(contact)
         return contact

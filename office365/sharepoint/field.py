@@ -1,5 +1,5 @@
 from office365.runtime.client_object import ClientObject
-from office365.runtime.client_query import ClientQuery
+from office365.runtime.client_query import ClientQuery, UpdateEntityQuery, DeleteEntityQuery
 
 
 class Field(ClientObject):
@@ -7,11 +7,11 @@ class Field(ClientObject):
 
     def update(self):
         """Update the field."""
-        qry = ClientQuery.update_entry_query(self)
+        qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
 
     def delete_object(self):
         """Deletes the field."""
-        qry = ClientQuery.delete_entry_query(self)
+        qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         self.remove_from_parent_collection()

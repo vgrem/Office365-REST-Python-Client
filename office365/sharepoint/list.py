@@ -1,8 +1,8 @@
-from office365.runtime.action_type import ActionType
-from office365.runtime.client_query import ClientQuery
+from office365.runtime.client_query import ClientQuery, UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery
 from office365.runtime.odata.odata_path_parser import ODataPathParser
 from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.utilities.http_method import HttpMethod
 from office365.sharepoint.content_type_collection import ContentTypeCollection
 from office365.sharepoint.field_collection import FieldCollection
 from office365.sharepoint.folder import Folder
@@ -20,7 +20,7 @@ class List(SecurableObject):
         """Returns a collection of items from the list based on the specified query."""
         items = ListItemCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "items"))
         if caml_query:
-            qry = ClientQuery.service_operation_query(self, ActionType.PostMethod, "GetItems", None, caml_query)
+            qry = ServiceOperationQuery(self, HttpMethod.Post, "GetItems", None, caml_query)
             self.context.add_query(qry, items)
         return items
 
@@ -29,7 +29,7 @@ class List(SecurableObject):
          as shown in ListItemCollection request examples."""
         item = ListItem(self.context, None, list_item_creation_information)
         item._parent_collection = self
-        qry = ClientQuery(self.resource_url + "/items", ActionType.CreateEntity, item)
+        qry = ClientQuery(self.resource_url + "/items", HttpMethod.Post, item)
         self.context.add_query(qry, item)
         return item
 
@@ -47,12 +47,12 @@ class List(SecurableObject):
         return view
 
     def update(self):
-        qry = ClientQuery.update_entry_query(self)
+        qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
 
     def delete_object(self):
         """Deletes the list."""
-        qry = ClientQuery.delete_entry_query(self)
+        qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         # self.removeFromParentCollection()
 

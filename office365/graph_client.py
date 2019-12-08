@@ -1,12 +1,13 @@
 import adal
 
 from office365.directory.user import User
-from office365.directory.user_collection import UserCollection
-from office365.onedrive.drive_collection import DriveCollection
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.odata.v4_json_format import V4JsonFormat
 from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.runtime.utilities.request_options import RequestOptions
+from office365.directory.group_collection import GroupCollection
+from office365.directory.user_collection import UserCollection
+from office365.onedrive.drive_collection import DriveCollection
 
 
 class GraphClient(ClientRuntimeContext):
@@ -45,3 +46,8 @@ class GraphClient(ClientRuntimeContext):
     def users(self):
         """Get users"""
         return UserCollection(self, ResourcePathEntity(self, None, "users"))
+
+    @property
+    def groups(self):
+        """Get groups"""
+        return GroupCollection(self, ResourcePathEntity(self, None, "groups"))

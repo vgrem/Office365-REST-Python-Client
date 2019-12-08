@@ -1,4 +1,4 @@
-from office365.runtime.client_query import ClientQuery
+from office365.runtime.client_query import ClientQuery, DeleteEntityQuery
 from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.sharepoint.principal import Principal
 
@@ -17,6 +17,6 @@ class User(Principal):
 
     def delete_object(self):
         """Deletes the user."""
-        qry = ClientQuery.delete_entry_query(self)
+        qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         self.remove_from_parent_collection()
