@@ -19,6 +19,7 @@ def get_token(auth_ctx):
 
 class TestDrive(TestCase):
     """OneDrive specific test case base class"""
+    target_file = None
 
     @classmethod
     def setUpClass(cls):
@@ -64,3 +65,17 @@ class TestDrive(TestCase):
         self.client.execute_query()
         self.assertGreater(len(items), 0)
         self.assertIsNotNone(items[0].fileSystemInfo)
+
+    def test6_drive_item_upload(self):
+        path = "./data/SharePoint User Guide.docx"
+        with open(path, 'rb') as content_file:
+            file_content = content_file.read()
+        file_name = os.path.basename(path)
+        self.__class__.target_file = self.client.me.drive.root.upload(file_name, file_content)
+        self.client.execute_query()
+        self.assertIsNotNone(self.target_file.webUrl)
+
+    def test7_drive_item_download(self):
+        result = self.__class__.target_file.download()
+        self.client.execute_query()
+        self.assertIsNotNone(result.value)

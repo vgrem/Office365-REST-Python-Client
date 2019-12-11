@@ -9,14 +9,15 @@ class ResourcePath(object):
         self._parent = parent
         self._context = context
 
-    def build_path_url(self):
+    def build_url(self):
+        delimiter = '/'
         current = self
         paths = []
         while current:
-            paths.insert(0, current.url)
+            paths.insert(0, current.segment)
             current = current._parent
-        return '/'.join(paths)
+        return delimiter.join(paths)
 
     @abstractproperty
-    def url(self):
+    def segment(self):
         return ""

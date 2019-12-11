@@ -1,4 +1,4 @@
-from office365.runtime.client_query import ClientQuery, DeleteEntityQuery, UpdateEntityQuery
+from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel

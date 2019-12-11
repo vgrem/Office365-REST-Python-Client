@@ -24,7 +24,7 @@ class ClientContext(ClientRuntimeContext):
     def ensure_form_digest(self, request_options):
         if not self.contextWebInformation:
             self.request_form_digest()
-        request_options.set_header('X-RequestDigest', self.contextWebInformation.form_digest_value)
+        request_options.set_header('X-RequestDigest', self.contextWebInformation.formDigestValue)
 
     def request_form_digest(self):
         """Request Form Digest"""

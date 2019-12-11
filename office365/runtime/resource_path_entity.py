@@ -10,7 +10,7 @@ class ResourcePathEntity(ResourcePath):
         self._entity_name = entity_name
 
     @property
-    def url(self):
+    def segment(self):
         return self._entity_name
 
     @staticmethod

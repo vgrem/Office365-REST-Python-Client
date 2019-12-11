@@ -23,7 +23,7 @@ class ClientObject(object):
 
     def query_options_to_url(self):
         """Convert query options to url"""
-        return '&'.join(['$%s=%s' % (key, value) for (key, value) in self.query_options.items()])
+        return '&'.join(['$%s=%s' % (key, value) for (key, value) in self.queryOptions.items()])
 
     def set_property(self, name, value, persist_changes=True):
         """Set resource property value"""
@@ -31,11 +31,11 @@ class ClientObject(object):
         self._properties[name] = value
 
     def expand(self, value):
-        self.query_options['expand'] = value
+        self.queryOptions['expand'] = value
         return self
 
     def select(self, value):
-        self.query_options['select'] = value
+        self.queryOptions['select'] = value
         return self
 
     def remove_from_parent_collection(self):
@@ -63,8 +63,8 @@ class ClientObject(object):
         if self._resource_url:
             return self._resource_url
         elif self.resourcePath:
-            self._resource_url = self.serviceRootUrl + self.resourcePath.build_path_url()
-            if self.query_options:
+            self._resource_url = self.serviceRootUrl + self.resourcePath.build_url()
+            if self.queryOptions:
                 self._resource_url = self._resource_url + "?" + self.query_options_to_url()
         return self._resource_url
 
@@ -81,7 +81,7 @@ class ClientObject(object):
         return self._resource_path
 
     @property
-    def query_options(self):
+    def queryOptions(self):
         return self._query_options
 
     @property

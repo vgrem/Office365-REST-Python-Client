@@ -49,7 +49,7 @@ class Web(SecurableObject):
         )
         return folder_obj
 
-    def ensure_user(self, login_name):
+    def ensureUser(self, login_name):
         user = User(self.context)
         qry = ServiceOperationQuery(self, HttpMethod.Post, "ensureuser", [login_name])
         self.context.add_query(qry, user)

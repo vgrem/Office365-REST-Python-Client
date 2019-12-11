@@ -83,6 +83,13 @@ if __name__ == '__main__':
         # if ctx_auth.acquire_token_for_app(client_id=settings['client_credentials']['client_id'],
         #                                  client_secret=settings['client_credentials']['client_secret']):
         ctx = ClientContext(site_url, ctx_auth)
+        # get a source file located in library 'Shared Documents'
+        source_file = ctx.web.get_file_by_server_relative_url("/teams/DemoSite/Shared Documents/Guide.docx")
+        # move a file into sub folder called 'Archive'
+        source_file.moveto("/teams/DemoSite/Shared Documents/Archive/Guide.docx", 1)
+        # execute a query
+        ctx.execute_query()
+
         # read_folder_and_files(ctx, "Documents")
         # read_folder_and_files_alt(ctx, "Documents")
         # upload_file(ctx)
@@ -101,7 +108,7 @@ if __name__ == '__main__':
         # target_file = target_list.root_folder.files.add(info)
         # ctx.execute_query()
 
-        target_folder = ctx.web.folders.add("Shared Documents/Archive")
-        ctx.execute_query()
+
+
     else:
         print(ctx_auth.get_last_error())

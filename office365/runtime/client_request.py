@@ -2,6 +2,7 @@ import requests
 from requests import HTTPError
 from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_request_exception import ClientRequestException
+from office365.runtime.client_result import ClientResult
 from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_encoder import ODataEncoder
 from office365.runtime.utilities.http_method import HttpMethod
@@ -20,18 +21,12 @@ class ClientRequest(object):
         self.__queries = []
         self.__resultObjects = {}
 
-    def execute_query(self, query=None, result_object=None):
+    def execute_query(self):
         """Submit pending request to the server"""
-        if query:
-            return self.execute_single_query(query, result_object)
-        return self.execute_pending_queries()
-
-    def execute_pending_queries(self):
         try:
             for query in self.__queries:
-                request = self.build_request(query)
-                response = self.execute_request_direct(request)
-                self.process_payload_json(query, response)
+                result_object = self.__resultObjects.get(query)
+                self.execute_single_query(query, result_object)
         finally:
             self.clear()
 
@@ -39,15 +34,12 @@ class ClientRequest(object):
         """Submit single query to the server"""
         request = self.build_request(query)
         response = self.execute_request_direct(request)
-        return self.process_payload_json(query, response, result_object)
-
-    def process_payload_json(self, query, response, result_object=None):
-        payload = self.process_response_json(response)
-        result_object = result_object if result_object else self.__resultObjects.get(query)
-        if result_object is not None:
-            result_object.map_json(payload)
-
-        return payload
+        if isinstance(result_object, ClientResult):
+            result_object.value = response.content
+        else:
+            payload = self.process_response_json(response)
+            if result_object is not None:
+                result_object.map_json(payload)
 
     def process_response_json(self, response):
         self.validate_response(response)

@@ -69,17 +69,17 @@ class ClientObjectCollection(ClientObject):
         return self.__data[index]
 
     def filter(self, value):
-        self.query_options['filter'] = value
+        self.queryOptions['filter'] = value
         return self
 
     def order_by(self, value):
-        self.query_options['orderby'] = value
+        self.queryOptions['orderby'] = value
         return self
 
     def skip(self, value):
-        self.query_options['skip'] = value
+        self.queryOptions['skip'] = value
         return self
 
     def top(self, value):
-        self.query_options['top'] = value
+        self.queryOptions['top'] = value
         return self
