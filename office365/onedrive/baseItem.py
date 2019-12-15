@@ -1,10 +1,17 @@
 from office365.runtime.client_object import ClientObject
+from office365.runtime.client_query import DeleteEntityQuery
 from office365.runtime.resource_path_entity import ResourcePathEntity
 
 
 class BaseItem(ClientObject):
     """The baseItem resource is an abstract resource that contains a common set of properties shared among several
     other resources types """
+
+    def delete_object(self):
+        """Deletes the item."""
+        qry = DeleteEntityQuery(self)
+        self.context.add_query(qry)
+        self.remove_from_parent_collection()
 
     @property
     def entityTypeName(self):

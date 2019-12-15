@@ -1,11 +1,9 @@
 import json
-import os
-import uuid
 from unittest import TestCase
 
 from settings import settings
 
-from office365.graph_client import GraphClient
+from office365.graphClient import GraphClient
 
 
 def get_token(auth_ctx):
@@ -52,30 +50,3 @@ class TestDrive(TestCase):
         self.client.load(target_drive)
         self.client.execute_query()
         self.assertEqual(target_drive.id, target_drive_id)
-
-    def test4_create_folder(self):
-        target_folder_name = "New_" + uuid.uuid4().hex
-        folder = self.client.me.drive.root.create_folder(target_folder_name)
-        self.client.execute_query()
-        self.assertEqual(folder.properties["name"], target_folder_name)
-
-    def test5_list_drive_items(self):
-        items = self.client.me.drive.root.children
-        self.client.load(items)
-        self.client.execute_query()
-        self.assertGreater(len(items), 0)
-        self.assertIsNotNone(items[0].fileSystemInfo)
-
-    def test6_drive_item_upload(self):
-        path = "./data/SharePoint User Guide.docx"
-        with open(path, 'rb') as content_file:
-            file_content = content_file.read()
-        file_name = os.path.basename(path)
-        self.__class__.target_file = self.client.me.drive.root.upload(file_name, file_content)
-        self.client.execute_query()
-        self.assertIsNotNone(self.target_file.webUrl)
-
-    def test7_drive_item_download(self):
-        result = self.__class__.target_file.download()
-        self.client.execute_query()
-        self.assertIsNotNone(result.value)

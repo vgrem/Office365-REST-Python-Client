@@ -1,9 +1,9 @@
-from office365.onedrive.file_system_info import FileSystemInfo
-from office365.runtime.client_query import ClientQuery
+from office365.onedrive.fileSystemInfo import FileSystemInfo
+from office365.runtime.client_query import ClientQuery, ServiceOperationQuery
 from office365.runtime.client_result import ClientResult
 from office365.runtime.resource_path_entity import ResourcePathEntity
-from office365.onedrive.base_item import BaseItem
-from office365.onedrive.list_item import ListItem
+from office365.onedrive.baseItem import BaseItem
+from office365.onedrive.listItem import ListItem
 from office365.runtime.resource_path_url import ResourcePathUrl
 from office365.runtime.utilities.http_method import HttpMethod
 
@@ -42,10 +42,29 @@ class DriveItem(BaseItem):
         self.context.add_query(qry, drive_item)
         return drive_item
 
-    def get_by_url(self, url):
-        """Retrieve DriveItem by url"""
-        return DriveItem(self.context,
-                         ResourcePathUrl(self.context, self.resourcePath, url))
+    def convert(self, format_name):
+        """Converts the contents of an item in a specific format"""
+        url = r"{0}content?format={1}".format(self.resourceUrl, format_name)
+        qry = ClientQuery(url, HttpMethod.Get)
+        result = ClientResult(None)
+        self.context.add_query(qry, result)
+        return result
+
+    def copy(self, name, parent_reference=None):
+        """Asynchronously creates a copy of an driveItem (including any children), under a new parent item or with a
+        new name. """
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Post,
+                                    "copy",
+                                    None,
+                                    {
+                                        "name": name,
+                                        "parentReference": parent_reference
+                                    }
+                                    )
+        result = ClientResult(None)
+        self.context.add_query(qry, result)
+        return result
 
     @property
     def fileSystemInfo(self):
@@ -62,7 +81,7 @@ class DriveItem(BaseItem):
         if self.is_property_available('children'):
             return self.properties['children']
         else:
-            from office365.onedrive.drive_item_collection import DriveItemCollection
+            from office365.onedrive.driveItemCollection import DriveItemCollection
             return DriveItemCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "children"))
 
     @property

@@ -1,4 +1,4 @@
-from office365.directory.directory_object import DirectoryObject
+from office365.directory.directoryObject import DirectoryObject
 from office365.onedrive.drive import Drive
 from office365.outlookservices.contact_collection import ContactCollection
 from office365.outlookservices.event_collection import EventCollection

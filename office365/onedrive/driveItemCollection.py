@@ -1,6 +1,7 @@
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.resource_path_entity import ResourcePathEntity
-from office365.onedrive.drive_item import DriveItem
+from office365.onedrive.driveItem import DriveItem
+from office365.runtime.resource_path_url import ResourcePathUrl
 
 
 class DriveItemCollection(ClientObjectCollection):
@@ -10,6 +11,11 @@ class DriveItemCollection(ClientObjectCollection):
         super(DriveItemCollection, self).__init__(context, DriveItem, resource_path)
 
     def get_by_id(self, _id):
-        """Retrieve DriveItem by unique identifier"""
+        """Retrieve DriveItem by id"""
         return DriveItem(self.context,
                          ResourcePathEntity(self.context, self.resourcePath, _id))
+
+    def get_by_url(self, url):
+        """Retrieve DriveItem by url"""
+        return DriveItem(self.context,
+                         ResourcePathUrl(self.context, self.resourcePath, url))

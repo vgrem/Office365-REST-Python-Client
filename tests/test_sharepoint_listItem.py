@@ -6,11 +6,11 @@ from office365.sharepoint.list_creation_information import ListCreationInformati
 from office365.sharepoint.list_template_type import ListTemplateType
 
 
-class TestListItem(SPTestCase):
+class TestSharePointListItem(SPTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestListItem, cls).setUpClass()
+        super(TestSharePointListItem, cls).setUpClass()
         cls.target_list = ListExtensions.ensure_list(cls.context.web,
                                                      ListCreationInformation("Tasks",
                                                                              None,

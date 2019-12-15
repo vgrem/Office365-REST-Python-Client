@@ -8,12 +8,12 @@ from office365.sharepoint.list_creation_information import ListCreationInformati
 from office365.sharepoint.list_template_type import ListTemplateType
 
 
-class TestFolder(SPTestCase):
+class TestSharePointFolder(SPTestCase):
     target_folder_name = "Archive_" + str(randint(0, 1000))
 
     @classmethod
     def setUpClass(cls):
-        super(TestFolder, cls).setUpClass()
+        super(TestSharePointFolder, cls).setUpClass()
         cls.target_list = ListExtensions.ensure_list(cls.context.web,
                                                      ListCreationInformation(
                                                          "Documents %s" % random_seed,

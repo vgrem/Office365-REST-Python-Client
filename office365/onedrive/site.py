@@ -1,4 +1,4 @@
-from office365.onedrive.base_item import BaseItem
+from office365.onedrive.baseItem import BaseItem
 from office365.onedrive.drive import Drive
 from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.sharepoint.list_collection import ListCollection

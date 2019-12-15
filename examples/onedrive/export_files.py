@@ -2,7 +2,7 @@ import os
 from os.path import isfile, join
 from settings import settings
 
-from office365.graph_client import GraphClient
+from office365.graphClient import GraphClient
 
 export_settings = {
     "sourcePath": "../data",

@@ -15,7 +15,7 @@ from office365.sharepoint.list_template_type import ListTemplateType
 from office365.sharepoint.template_file_type import TemplateFileType
 
 
-class TestFile(SPTestCase):
+class TestSharePointFile(SPTestCase):
     content_placeholder = "1234567890 abcdABCD %s" % random_seed
     file_entries = [
         {"Name": "Sample.txt", "Type": "Text"},
@@ -24,7 +24,7 @@ class TestFile(SPTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestFile, cls).setUpClass()
+        super(TestSharePointFile, cls).setUpClass()
         cls.target_list = ListExtensions.ensure_list(cls.context.web,
                                                      ListCreationInformation(
                                                          "Archive Documents N%s" % random_seed,

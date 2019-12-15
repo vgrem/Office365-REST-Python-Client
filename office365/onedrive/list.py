@@ -1,4 +1,4 @@
-from office365.onedrive.base_item import BaseItem
+from office365.onedrive.baseItem import BaseItem
 
 
 class List(BaseItem):
