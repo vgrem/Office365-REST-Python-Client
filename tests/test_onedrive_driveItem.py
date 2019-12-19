@@ -44,7 +44,8 @@ class TestDriveItem(TestCase):
         self.assertEqual(folder.properties["name"], target_folder_name)
 
     def test2_upload_file(self):
-        path = "./data/SharePoint User Guide.docx"
+        file_name = "SharePoint User Guide.docx"
+        path = "{0}/data/{1}".format(os.path.dirname(__file__), file_name)
         with open(path, 'rb') as content_file:
             file_content = content_file.read()
         file_name = os.path.basename(path)
@@ -80,15 +81,15 @@ class TestDriveItem(TestCase):
         self.assertEqual(count_before, len(items) + 1)
 
     def test7_upload_file_session(self):
-        path = "./data/big_buck_bunny.mp4"
-        item_name = os.path.basename(path)
+        file_name = "big_buck_bunny.mp4"
+        path = "{0}/data/{1}".format(os.path.dirname(__file__), file_name)
         # 1. create a file
-        target_item = self.client.me.drive.root.upload(item_name, None)
+        target_item = self.client.me.drive.root.upload(file_name, None)
         self.client.execute_query()
         self.assertIsNotNone(target_item.properties['id'])
         # 2. create upload session
         item = DriveItemUploadableProperties()
-        item.name = item_name
+        item.name = file_name
         session_result = target_item.create_upload_session(item)
         self.client.execute_query()
         self.assertIsNotNone(session_result.value)

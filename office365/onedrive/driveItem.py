@@ -99,6 +99,20 @@ class DriveItem(BaseItem):
         self.context.add_query(qry, result)
         return result
 
+    def search(self, query_text):
+        """Search the hierarchy of items for items matching a query. You can search within a folder hierarchy,
+        a whole drive, or files shared with the current user. """
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Get,
+                                    "search",
+                                    {
+                                        "q": query_text,
+                                    }
+                                    )
+        result = ClientResult(None)
+        self.context.add_query(qry, result)
+        return result
+
     @property
     def fileSystemInfo(self):
         """File system information on client."""
