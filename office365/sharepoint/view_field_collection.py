@@ -7,5 +7,5 @@ class ViewFieldCollection(ClientObjectCollection):
     def __init__(self, context, resource_path=None):
         super(ViewFieldCollection, self).__init__(context, Field, resource_path)
 
-    def map_json(self, payload):
-        super(ViewFieldCollection, self).map_json(payload)
+    def map_json(self, json):
+        super(ViewFieldCollection, self).map_json(json)

@@ -1,7 +1,9 @@
 import os
 import uuid
 from unittest import TestCase
-
+from office365.onedrive.driveItemUploadableProperties import DriveItemUploadableProperties
+from office365.runtime.utilities.http_method import HttpMethod
+from office365.runtime.utilities.request_options import RequestOptions
 from settings import settings
 
 from office365.graphClient import GraphClient
@@ -14,6 +16,16 @@ def get_token(auth_ctx):
         settings['user_credentials']['password'],
         settings['client_credentials']['client_id'])
     return token
+
+
+def read_in_chunks(file_object, chunk_size=1024):
+    """Lazy function (generator) to read a file piece by piece.
+    Default chunk size: 1k."""
+    while True:
+        data = file_object.read(chunk_size)
+        if not data:
+            break
+        yield data
 
 
 class TestDriveItem(TestCase):
@@ -66,3 +78,32 @@ class TestDriveItem(TestCase):
         self.client.load(items)
         self.client.execute_query()
         self.assertEqual(count_before, len(items) + 1)
+
+    def test7_upload_file_session(self):
+        path = "./data/big_buck_bunny.mp4"
+        item_name = os.path.basename(path)
+        # 1. create a file
+        target_item = self.client.me.drive.root.upload(item_name, None)
+        self.client.execute_query()
+        self.assertIsNotNone(target_item.properties['id'])
+        # 2. create upload session
+        item = DriveItemUploadableProperties()
+        item.name = item_name
+        session_result = target_item.create_upload_session(item)
+        self.client.execute_query()
+        self.assertIsNotNone(session_result.value)
+        # 3. start upload
+        f = open(path)
+        st = os.stat(path)
+        f_pos = 0
+        for piece in read_in_chunks(f, chunk_size=1000000):
+            req = RequestOptions(session_result.value.uploadUrl)
+            req.method = HttpMethod.Put
+            req.set_header('Content-Length', str(len(piece)))
+            req.set_header('Content-Range', 'bytes {0}-{1}/{2}'.format(f_pos, (f_pos + len(piece) - 1), st.st_size))
+            req.set_header('Accept', '*/*')
+            req.data = piece
+            resp = self.client.execute_request_direct(req)
+            self.assertTrue(resp.ok)
+            f_pos += len(piece)
+

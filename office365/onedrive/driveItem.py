@@ -1,4 +1,6 @@
+from office365.onedrive.conflictBehavior import ConflictBehavior
 from office365.onedrive.fileSystemInfo import FileSystemInfo
+from office365.onedrive.uploadSession import UploadSession
 from office365.runtime.client_query import ClientQuery, ServiceOperationQuery
 from office365.runtime.client_result import ClientResult
 from office365.runtime.resource_path_entity import ResourcePathEntity
@@ -11,6 +13,21 @@ from office365.runtime.utilities.http_method import HttpMethod
 class DriveItem(BaseItem):
     """The driveItem resource represents a file, folder, or other item stored in a drive. All file system objects in
     OneDrive and SharePoint are returned as driveItem resources """
+
+    def create_upload_session(self, item):
+        """Creates a temporary storage location where the bytes of the file will be saved until the complete file is
+        uploaded. """
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Post,
+                                    "createUploadSession",
+                                    None,
+                                    {
+                                        "item": item
+                                    }
+                                    )
+        result = ClientResult(UploadSession())
+        self.context.add_query(qry, result)
+        return result
 
     def upload(self, name, content):
         """The simple upload API allows you to provide the contents of a new file or update the contents of an
@@ -36,7 +53,7 @@ class DriveItem(BaseItem):
         payload = {
             "name": name,
             "folder": {},
-            "@microsoft.graph.conflictBehavior": "rename"
+            "@microsoft.graph.conflictBehavior": ConflictBehavior.Rename
         }
         qry = ClientQuery(self.resourceUrl + "/children", HttpMethod.Post, payload)
         self.context.add_query(qry, drive_item)
@@ -56,6 +73,22 @@ class DriveItem(BaseItem):
         qry = ServiceOperationQuery(self,
                                     HttpMethod.Post,
                                     "copy",
+                                    None,
+                                    {
+                                        "name": name,
+                                        "parentReference": parent_reference
+                                    }
+                                    )
+        result = ClientResult(None)
+        self.context.add_query(qry, result)
+        return result
+
+    def move(self, name, parent_reference=None):
+        """To move a DriveItem to a new parent item, your app requests to update the parentReference of the DriveItem
+        to move. """
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Patch,
+                                    "move",
                                     None,
                                     {
                                         "name": name,

@@ -34,7 +34,7 @@ class TestDrive(TestCase):
 
     def test2_get_drives_alt(self):
         resp = self.client.execute_request("/drives?$top=2")
-        drives = json.loads(resp.content.decode('utf-8'))['value']
+        drives = resp.json()['value']
         self.assertLessEqual(len(drives), 2)
         for drive in drives:
             self.assertIsNotNone(drive['webUrl'])

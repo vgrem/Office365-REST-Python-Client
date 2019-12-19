@@ -43,8 +43,8 @@ class ClientObject(object):
             return
         self._parent_collection.remove(self)
 
-    def map_json(self, payload):
-        self._properties = dict((k, v) for k, v in payload.items()
+    def map_json(self, json):
+        self._properties = dict((k, v) for k, v in json.items()
                                 if k != '__metadata')
 
     @property

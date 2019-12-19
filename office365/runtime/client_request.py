@@ -21,49 +21,6 @@ class ClientRequest(object):
         self.__queries = []
         self.__resultObjects = {}
 
-    def execute_query(self):
-        """Submit pending request to the server"""
-        try:
-            for query in self.__queries:
-                result_object = self.__resultObjects.get(query)
-                self.execute_single_query(query, result_object)
-        finally:
-            self.clear()
-
-    def execute_single_query(self, query, result_object=None):
-        """Submit single query to the server"""
-        request = self.build_request(query)
-        response = self.execute_request_direct(request)
-        if isinstance(result_object, ClientResult):
-            result_object.value = response.content
-        else:
-            payload = self.process_response_json(response)
-            if result_object is not None:
-                result_object.map_json(payload)
-
-    def process_response_json(self, response):
-        self.validate_response(response)
-
-        if not response.content or response.headers.get('Content-Type', '').lower().split(';')[0] != 'application/json':
-            return
-
-        if response.headers.get('Content-Type', '').lower().split(';')[0] == 'application/json':
-            payload = response.json()
-        else:
-            payload = None
-
-        if payload:
-            json_format = self.context.json_format
-            if json_format.security_tag_name:
-                payload = payload[json_format.security_tag_name]
-            if json_format.collection_tag_name in payload:
-                payload = {
-                    "collection": payload[json_format.collection_tag_name],
-                    "next": payload.get(json_format.collection_next_tag_name, None)
-                }
-
-        return payload
-
     def build_request(self, query):
         request = RequestOptions(query.url)
         # set json format headers
@@ -87,6 +44,36 @@ class ClientRequest(object):
         if query.payload is not None:
             request.data = ODataEncoder(self.context.json_format).default(query.payload)
         return request
+
+    def execute_query(self):
+        """Submit pending request to the server"""
+        try:
+            for query in self.__queries:
+                request = self.build_request(query)
+                response = self.execute_request_direct(request)
+                result_object = self.__resultObjects.get(query)
+                self.process_response(response, result_object)
+        finally:
+            self.clear()
+
+    def process_response(self, response, result_object):
+        self.validate_response(response)
+        if response.headers.get('Content-Type', '').lower().split(';')[0] != 'application/json':
+            if isinstance(result_object, ClientResult):
+                result_object.value = response.content
+            return
+
+        payload = response.json()
+        if payload and result_object is not None:
+            json_format = self.context.json_format
+            if json_format.security_tag_name:
+                payload = payload[json_format.security_tag_name]
+            if json_format.collection_tag_name in payload:
+                payload = {
+                    "collection": payload[json_format.collection_tag_name],
+                    "next": payload.get(json_format.collection_next_tag_name, None)
+                }
+            result_object.map_json(payload)
 
     def execute_request_direct(self, request_options):
         """Execute client request"""

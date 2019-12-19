@@ -18,10 +18,13 @@ class ODataEncoder(JSONEncoder):
         elif isinstance(payload, ClientValueObject):
             return self.normalize_property(payload)
         else:
+            if isinstance(payload, dict):
+                for k, v in payload.items():
+                    payload[k] = self.default(v)
             return payload
 
     def normalize_property(self, value):
-        payload = dict((k, v) for k, v in value.__dict__.items() if v is not None)
+        payload = dict((k, v) for k, v in vars(value).items() if v is not None)
         if self._json_format.metadata == ODataMetadataLevel.Verbose:
             payload["__metadata"] = {'type': value.typeName}
         if value.tagName:
