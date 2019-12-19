@@ -25,4 +25,12 @@ class ODataV4Reader(object):
         return model
 
     def _process_property_node(self, type_schema, type_node):
+        xml_namespaces = {
+            'xmlns': 'http://docs.oasis-open.org/odata/ns/edm',
+            'edmx': 'http://docs.oasis-open.org/odata/ns/edmx'
+        }
         type_schema['properties'] = {}
+        for prop_node in type_node.findall('xmlns:Property', xml_namespaces):
+            name = prop_node.get('Name')
+            prop_schema = {'name': name}
+            type_schema['properties'][name] = prop_schema

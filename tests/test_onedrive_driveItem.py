@@ -94,7 +94,7 @@ class TestDriveItem(TestCase):
         self.client.execute_query()
         self.assertIsNotNone(session_result.value)
         # 3. start upload
-        f = open(path)
+        f = open(path, 'rb')
         st = os.stat(path)
         f_pos = 0
         for piece in read_in_chunks(f, chunk_size=1000000):
@@ -107,4 +107,3 @@ class TestDriveItem(TestCase):
             resp = self.client.execute_request_direct(req)
             self.assertTrue(resp.ok)
             f_pos += len(piece)
-
