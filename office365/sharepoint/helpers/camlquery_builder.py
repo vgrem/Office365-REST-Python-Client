@@ -55,7 +55,7 @@ class CamlQueryBuilder:
                     query = '<{}><FieldRef Name="{}" /><Value Type="{}">{}</Value></{}>'.format(
                         operator, filter_name, column_type, value, operator)
                 elif operator == 'Contains':
-                    column_type, values = 'Note', filter_value
+                    column_type = 'Text'
                     query = '<{}><FieldRef Name="{}" /><Value Type="{}">{}</Value></{}>'.format(
                             operator, filter_name, column_type, filter_value, operator)
                 else:
