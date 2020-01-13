@@ -39,15 +39,6 @@ def delete_web(web_to_delete):
     print("Web site has been deleted")
 
 
-def list_site_users(ctx):
-    users = ctx.web.siteUsers
-    ctx.load(users)
-    ctx.execute_query()
-    print("The list of users:")
-    for user in users:
-        print("User title: {0}".format(user.properties["Title"]))
-
-
 def print_webs_recursively(parent_web):
     print(parent_web.properties["ServerRelativeUrl"])
     webs = parent_web.webs

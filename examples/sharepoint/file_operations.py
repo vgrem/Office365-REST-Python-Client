@@ -41,31 +41,21 @@ def read_folder_and_files(context, list_title):
         print("Folder name: {0}".format(folder.properties["Name"]))
 
 
-def upload_file_alt(target_folder, name, content):
-    context = target_folder.context
-    info = FileCreationInformation()
-    info.content = content
-    info.url = name
-    info.overwrite = True
-    target_file = target_folder.files.add(info)
-    context.execute_query()
-    return target_file
-
-
 def upload_file(context):
-    upload_into_library = True
+
     path = "../tests/data/SharePoint User Guide.docx"
     with open(path, 'rb') as content_file:
         file_content = content_file.read()
 
-    if upload_into_library:
-        list_title = "Documents"
-        target_folder = context.web.lists.get_by_title(list_title).rootFolder
-        file = upload_file_alt(target_folder, os.path.basename(path), file_content)
-        print("File url: {0}".format(file.properties["ServerRelativeUrl"]))
-    else:
-        target_url = "/Shared Documents/{0}".format(os.path.basename(path))
-        File.save_binary(context, target_url, file_content)
+    list_title = "Documents"
+    target_folder = context.web.lists.get_by_title(list_title).rootFolder
+    info = FileCreationInformation()
+    info.content = file_content
+    info.url = os.path.basename(path)
+    info.overwrite = True
+    target_file = target_folder.files.add(info)
+    context.execute_query()
+    print("File url: {0}".format(target_file.properties["ServerRelativeUrl"]))
 
 
 def download_file(context):
@@ -89,26 +79,5 @@ if __name__ == '__main__':
         source_file.moveto("/teams/DemoSite/Shared Documents/Archive/Guide.docx", 1)
         # execute a query
         ctx.execute_query()
-
-        # read_folder_and_files(ctx, "Documents")
-        # read_folder_and_files_alt(ctx, "Documents")
-        # upload_file(ctx)
-        # download_file(ctx)
-        # response = File.open_binary(ctx, "/teams/DemoSite/Shared Documents/Guide.docx")
-        # with open("../data/SharePoint User Guide.docx", "wb") as local_file:
-        #    local_file.write(response.content)
-
-        # path = "../data/SharePoint User Guide.docx"
-        # info = FileCreationInformation()
-        # with open(path, 'rb') as content_file:
-        #    info.content = content_file.read()
-        # info.url = os.path.basename(path)
-        # info.overwrite = True
-        # target_list = ctx.web.lists.get_by_title("Documents")
-        # target_file = target_list.root_folder.files.add(info)
-        # ctx.execute_query()
-
-
-
     else:
         print(ctx_auth.get_last_error())

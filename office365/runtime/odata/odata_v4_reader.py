@@ -9,28 +9,23 @@ class ODataV4Reader(object):
 
     def __init__(self, options):
         self._options = options
+        self._namespaces = {
+            'xmlns': 'http://docs.oasis-open.org/odata/ns/edm',
+            'edmx': 'http://docs.oasis-open.org/odata/ns/edmx'
+        }
 
     def generate_model(self):
-        xml_namespaces = {
-            'xmlns': 'http://docs.oasis-open.org/odata/ns/edm',
-            'edmx': 'http://docs.oasis-open.org/odata/ns/edmx'
-        }
         model = ODataModel()
         root = ET.parse(self._options['inputPath']).getroot()
-        schema_node = root.find('edmx:DataServices/xmlns:Schema', xml_namespaces)
-        for complex_type_node in schema_node.findall('xmlns:ComplexType', xml_namespaces):
+        schema_node = root.find('edmx:DataServices/xmlns:Schema', self._namespaces)
+        for complex_type_node in schema_node.findall('xmlns:ComplexType', self._namespaces):
             type_schema = {'namespace': schema_node.attrib['Namespace'], 'name': complex_type_node.get('Name')}
             model.resolve_type(type_schema)
-            self._process_property_node(type_schema, complex_type_node)
+            self._process_type_node(model, type_schema, complex_type_node)
         return model
 
-    def _process_property_node(self, type_schema, type_node):
-        xml_namespaces = {
-            'xmlns': 'http://docs.oasis-open.org/odata/ns/edm',
-            'edmx': 'http://docs.oasis-open.org/odata/ns/edmx'
-        }
-        type_schema['properties'] = {}
-        for prop_node in type_node.findall('xmlns:Property', xml_namespaces):
+    def _process_type_node(self, model, type_schema, type_node):
+        for prop_node in type_node.findall('xmlns:Property', self._namespaces):
             name = prop_node.get('Name')
             prop_schema = {'name': name}
-            type_schema['properties'][name] = prop_schema
+            model.resolve_property(type_schema, prop_schema)

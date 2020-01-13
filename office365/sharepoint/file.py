@@ -160,7 +160,7 @@ class File(AbstractFile):
                                     },
                                     content
                                     )
-        result = ClientResult
+        result = ClientResult(None)
         self.context.add_query(qry, result)
         return result
 
@@ -175,7 +175,7 @@ class File(AbstractFile):
                                     },
                                     content
                                     )
-        result = ClientResult
+        result = ClientResult(None)
         self.context.add_query(qry, result)
         return result
 

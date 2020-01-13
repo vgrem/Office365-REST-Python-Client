@@ -4,9 +4,9 @@ Office 365 & Microsoft Graph Library for Python
 # Usage
 
 1.   [Installation](#Installation)
-1.   [Working with SharePoint REST API](#Working-with-SharePoint-REST-API) 
-2.   [Working with Outlook REST API](#Working-with-Outlook-REST-API) 
-3.   [Working with OneDrive REST API](#Working-with-OneDrive-API)    
+1.   [Working with SharePoint API](#Working-with-SharePoint-API) 
+2.   [Working with Outlook API](#Working-with-Outlook-API) 
+3.   [Working with OneDrive API](#Working-with-OneDrive-API)    
 
 
 ## Status
@@ -23,7 +23,7 @@ pip install Office365-REST-Python-Client
 ```
 
 
-# Working with SharePoint REST API
+# Working with SharePoint API
 
 The list of supported API versions: 
 -   [SharePoint 2013](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and above 
@@ -89,7 +89,7 @@ else:
 ```
 
 
-# Working with Outlook REST API
+# Working with Outlook API
 
 The list of supported APIs:
 -   [Outlook Contacts REST API](https://msdn.microsoft.com/en-us/office/office365/api/contacts-rest-operations)
