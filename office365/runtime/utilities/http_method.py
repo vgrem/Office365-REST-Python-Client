@@ -6,3 +6,4 @@ class HttpMethod:
     Post = "POST"
     Patch = "PATCH"
     Delete = "DELETE"
+    Put = "PUT"

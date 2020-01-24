@@ -3,12 +3,12 @@ from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.sharepoint.file import AbstractFile
 
 
-class Attachmentfile(AbstractFile):
+class AttachmentFile(AbstractFile):
     """Represents an attachment file in a SharePoint List Item."""
 
     @property
-    def resource_path(self):
-        resource_path = super(Attachmentfile, self).resource_path
+    def resourcePath(self):
+        resource_path = super(AttachmentFile, self).resourcePath
         if resource_path:
             return resource_path
 

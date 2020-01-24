@@ -8,6 +8,6 @@ class ContextWebInformation(object):
         self._properties = properties
 
     @property
-    def form_digest_value(self):
+    def formDigestValue(self):
         """The form digest value."""
         return self._properties['FormDigestValue']

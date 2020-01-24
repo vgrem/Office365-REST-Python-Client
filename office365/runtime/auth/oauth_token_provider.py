@@ -4,18 +4,17 @@ from office365.runtime.auth.base_token_provider import BaseTokenProvider
 
 
 class OAuthTokenProvider(BaseTokenProvider):
-    """ OAuth security Token Service for O365"""
+    """ Security token service for Azure AD and OAuth"""
 
     def __init__(self, tenant):
         self.tenant = tenant
         self.AuthorityUrl = "https://login.microsoftonline.com/"
-        self.TokenEndpoint = "/oauth2/token"
+        self.Version = "v1.0"
         self.error = None
         self.access_token = None
 
     def acquire_token(self, parameters):
         try:
-            # url = "https://login.microsoftonline.com/{0}/oauth2/v2.0/token".format(self.tenant)
             url = "https://login.microsoftonline.com/{0}/oauth2/token".format(self.tenant)
             response = requests.post(url=url, headers={'Content-Type': 'application/x-www-form-urlencoded'},
                                      data=parameters)

@@ -1,23 +1,23 @@
 import json
-import os
 from unittest import TestCase
 
 from settings import settings
 
-from office365.graph_client import GraphClient
+from office365.graphClient import GraphClient
 
 
 def get_token(auth_ctx):
-    client_id, client_secret = os.environ['Office365_Python_Sdk_ClientCredentials'].split(';')
-    token = auth_ctx.acquire_token_with_client_credentials(
-        "https://graph.microsoft.com",
-        client_id,
-        client_secret)
+    token = auth_ctx.acquire_token_with_username_password(
+        'https://graph.microsoft.com',
+        settings['user_credentials']['username'],
+        settings['user_credentials']['password'],
+        settings['client_credentials']['client_id'])
     return token
 
 
 class TestDrive(TestCase):
     """OneDrive specific test case base class"""
+    target_file = None
 
     @classmethod
     def setUpClass(cls):
@@ -30,11 +30,11 @@ class TestDrive(TestCase):
         self.client.execute_query()
         self.assertLessEqual(len(drives), 2)
         for drive in drives:
-            self.assertIsNotNone(drive.web_url)
+            self.assertIsNotNone(drive.webUrl)
 
     def test2_get_drives_alt(self):
         resp = self.client.execute_request("/drives?$top=2")
-        drives = json.loads(resp.content.decode('utf-8'))['value']
+        drives = resp.json()['value']
         self.assertLessEqual(len(drives), 2)
         for drive in drives:
             self.assertIsNotNone(drive['webUrl'])

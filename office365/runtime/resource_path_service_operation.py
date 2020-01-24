@@ -12,5 +12,5 @@ class ResourcePathServiceOperation(ResourcePath):
         self._method_parameters = method_parameters
 
     @property
-    def url(self):
+    def segment(self):
         return ODataPathParser.from_method(self._method_name, self._method_parameters)

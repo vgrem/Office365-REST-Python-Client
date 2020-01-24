@@ -10,14 +10,14 @@ class ResourcePathEntity(ResourcePath):
         self._entity_name = entity_name
 
     @property
-    def url(self):
+    def segment(self):
         return self._entity_name
 
     @staticmethod
     def from_uri(uri, context):
         """Constructs aan instance of ResourcePathEntity from uri"""
-        if uri.startswith(context.service_root_url):
-            uri = uri[len(context.service_root_url):]
+        if uri.startswith(context.serviceRootUrl):
+            uri = uri[len(context.serviceRootUrl):]
         elements = uri.split('/')
         parent = None
         for element in elements:

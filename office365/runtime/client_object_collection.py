@@ -9,7 +9,7 @@ class ClientObjectCollection(ClientObject):
         super(ClientObjectCollection, self).__init__(context, resource_path)
         self.__data = []
         self.__next_query_url = None
-        self.item_type = item_type
+        self._item_type = item_type
 
     def create_typed_object(self, properties, client_object_type):
         if client_object_type is None:
@@ -20,11 +20,12 @@ class ClientObjectCollection(ClientObject):
         client_object.map_json(properties)
         return client_object
 
-    def map_json(self, payload):
-        for properties in payload["collection"]:
-            child_client_object = self.create_typed_object(properties, self.item_type)
+    def map_json(self, json):
+        self.__data = []
+        for properties in json["collection"]:
+            child_client_object = self.create_typed_object(properties, self._item_type)
             self.add_child(child_client_object)
-        self.__next_query_url = payload["next"]
+        self.__next_query_url = json["next"]
 
     def add_child(self, client_object):
         client_object._parent_collection = self
@@ -40,12 +41,12 @@ class ClientObjectCollection(ClientObject):
             response = self.context.execute_request_direct(request)
 
             # process the response
-            payload = self.context.pending_request.process_response_json(response)
+            payload = self.context.pending_request.process_response(response)
             self.__next_query_url = payload["next"]
             child_client_objects = []
             # add the new objects to the collection before yielding the results
             for properties in payload["collection"]:
-                child_client_object = self.create_typed_object(properties, self.item_type)
+                child_client_object = self.create_typed_object(properties, self._item_type)
                 self.add_child(child_client_object)
                 child_client_objects.append(child_client_object)
 
@@ -68,17 +69,17 @@ class ClientObjectCollection(ClientObject):
         return self.__data[index]
 
     def filter(self, value):
-        self.query_options['filter'] = value
+        self.queryOptions['filter'] = value
         return self
 
     def order_by(self, value):
-        self.query_options['orderby'] = value
+        self.queryOptions['orderby'] = value
         return self
 
     def skip(self, value):
-        self.query_options['skip'] = value
+        self.queryOptions['skip'] = value
         return self
 
     def top(self, value):
-        self.query_options['top'] = value
+        self.queryOptions['top'] = value
         return self

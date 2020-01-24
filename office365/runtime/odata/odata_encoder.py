@@ -18,22 +18,25 @@ class ODataEncoder(JSONEncoder):
         elif isinstance(payload, ClientValueObject):
             return self.normalize_property(payload)
         else:
+            if isinstance(payload, dict):
+                for k, v in payload.items():
+                    payload[k] = self.default(v)
             return payload
 
     def normalize_property(self, value):
-        payload = dict((k, v) for k, v in value.__dict__.items() if v is not None)
+        payload = dict((k, v) for k, v in vars(value).items() if v is not None)
         if self._json_format.metadata == ODataMetadataLevel.Verbose:
-            payload["__metadata"] = {'type': value.type_name}
-        if value.tag_name:
-            payload = {value.tag_name: payload}
+            payload["__metadata"] = {'type': value.typeName}
+        if value.tagName:
+            payload = {value.tagName: payload}
         return payload
 
     def normalize_entity(self, value):
         """Generates resource payload for OData endpoint"""
         payload = dict((k, v) for k, v in value.properties.items()
-                       if k in value.properties_metadata and value.properties_metadata[k]['readonly'] is False)
+                       if k in value.metadata and value.metadata[k]['readonly'] is False)
         if self._json_format.metadata == ODataMetadataLevel.Verbose and "__metadata" not in payload.items():
-            payload["__metadata"] = {'type': value.entity_type_name}
+            payload["__metadata"] = {'type': value.entityTypeName}
         else:
             payload = dict((k, v) for k, v in payload.items() if k != "__metadata")
         return payload

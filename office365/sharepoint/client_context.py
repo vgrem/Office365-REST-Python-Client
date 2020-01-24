@@ -4,6 +4,7 @@ from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.context_web_information import ContextWebInformation
 from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
+from office365.runtime.utilities.http_method import HttpMethod
 from office365.runtime.utilities.request_options import RequestOptions
 from office365.sharepoint.site import Site
 from office365.sharepoint.web import Web
@@ -24,11 +25,11 @@ class ClientContext(ClientRuntimeContext):
     def ensure_form_digest(self, request_options):
         if not self.contextWebInformation:
             self.request_form_digest()
-        request_options.set_header('X-RequestDigest', self.contextWebInformation.form_digest_value)
+        request_options.set_header('X-RequestDigest', self.contextWebInformation.formDigestValue)
 
     def request_form_digest(self):
         """Request Form Digest"""
-        request = RequestOptions(self.service_root_url + "contextinfo")
+        request = RequestOptions(self.serviceRootUrl + "contextinfo")
         self.authenticate_request(request)
         request.set_headers(self.json_format.build_http_headers())
         response = requests.post(url=request.url,

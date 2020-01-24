@@ -1,48 +1,22 @@
-from office365.runtime.action_type import ActionType
 from office365.runtime.odata.odata_path_parser import ODataPathParser
+from office365.runtime.utilities.http_method import HttpMethod
 
 
 class ClientQuery(object):
     """Client query"""
 
-    def __init__(self, url, action_type=ActionType.ReadEntity, payload=None):
+    def __init__(self, url, method=HttpMethod.Get, payload=None):
         self.__url = url
-        self.__actionType = action_type
+        self.__method = method
         self.__payload = payload
-
-    @staticmethod
-    def read_entry_query(client_object):
-        qry = ClientQuery(client_object.resource_url, ActionType.ReadEntity)
-        return qry
-
-    @staticmethod
-    def create_entry_query(parent_client_object, parameters):
-        qry = ClientQuery(parent_client_object.resource_url, ActionType.CreateEntity, parameters)
-        return qry
-
-    @staticmethod
-    def update_entry_query(client_object):
-        qry = ClientQuery(client_object.resource_url, ActionType.UpdateEntity, client_object)
-        return qry
-
-    @staticmethod
-    def delete_entry_query(client_object):
-        qry = ClientQuery(client_object.resource_url, ActionType.DeleteEntity)
-        return qry
-
-    @staticmethod
-    def service_operation_query(client_object, action_type, method_name, method_params=None, payload=None):
-        url = client_object.resource_url + "/" + ODataPathParser.from_method(method_name, method_params)
-        qry = ClientQuery(url, action_type, payload)
-        return qry
 
     @property
     def url(self):
         return self.__url
 
     @property
-    def action_type(self):
-        return self.__actionType
+    def method(self):
+        return self.__method
 
     @property
     def payload(self):
@@ -52,12 +26,34 @@ class ClientQuery(object):
     def id(self):
         return id(self)
 
-    def execute(self, context, client_object=None):
-        from office365.runtime.client_request import ClientRequest
-        return ClientRequest(context).execute_single_query(self, client_object)
-
     def __hash__(self):
         return hash(self.url)
 
     def __eq__(self, other):
         return self.url == other.url
+
+
+class CreateEntityQuery(ClientQuery):
+    def __init__(self, parent_resource, parameters):
+        super(CreateEntityQuery, self).__init__(parent_resource.resourceUrl, HttpMethod.Post, parameters)
+
+
+class ReadEntityQuery(ClientQuery):
+    def __init__(self, resource):
+        super(ReadEntityQuery, self).__init__(resource.resourceUrl, HttpMethod.Get)
+
+
+class UpdateEntityQuery(ClientQuery):
+    def __init__(self, resource):
+        super(UpdateEntityQuery, self).__init__(resource.resourceUrl, HttpMethod.Post, resource)
+
+
+class DeleteEntityQuery(ClientQuery):
+    def __init__(self, resource):
+        super(DeleteEntityQuery, self).__init__(resource.resourceUrl, HttpMethod.Post)
+
+
+class ServiceOperationQuery(ClientQuery):
+    def __init__(self, resource, method, method_name, method_params=None, payload=None):
+        url = resource.resourceUrl + "/" + ODataPathParser.from_method(method_name, method_params)
+        super(ServiceOperationQuery, self).__init__(url, method, payload)

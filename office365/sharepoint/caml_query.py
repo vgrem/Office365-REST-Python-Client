@@ -31,9 +31,9 @@ class CamlQuery(ClientValueObject):
         return qry
 
     @property
-    def type_name(self):
+    def typeName(self):
         return 'SP.CamlQuery'
 
     @property
-    def tag_name(self):
+    def tagName(self):
         return 'query'

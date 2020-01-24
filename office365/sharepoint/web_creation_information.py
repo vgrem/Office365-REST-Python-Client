@@ -10,9 +10,9 @@ class WebCreationInformation(ClientValueObject):
         self.Url = None
 
     @property
-    def tag_name(self):
+    def tagName(self):
         return "parameters"
 
     @property
-    def type_name(self):
+    def typeName(self):
         return "SP.WebCreationInformation"

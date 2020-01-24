@@ -1,5 +1,5 @@
 from office365.runtime.client_object import ClientObject
-from office365.runtime.client_query import ClientQuery
+from office365.runtime.client_query import ClientQuery, UpdateEntityQuery, DeleteEntityQuery
 from office365.runtime.odata.odata_path_parser import ODataPathParser
 from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.sharepoint.listitem import ListItem
@@ -13,16 +13,16 @@ class Folder(ClientObject):
         item = self.list_item_all_fields
         item.properties['Title'] = name
         item.properties['FileLeafRef'] = name
-        qry = ClientQuery.update_entry_query(item)
+        qry = UpdateEntityQuery(item)
         self.context.add_query(qry, self)
 
     def update(self):
-        qry = ClientQuery.update_entry_query(self)
+        qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
 
     def delete_object(self):
         """Deletes the folder."""
-        qry = ClientQuery.delete_entry_query(self)
+        qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         # self.removeFromParentCollection()
 
@@ -32,7 +32,7 @@ class Folder(ClientObject):
         if self.is_property_available('ListItemAllFields'):
             return self.properties["ListItemAllFields"]
         else:
-            return ListItem(self.context, ResourcePathEntity(self.context, self.resource_path, "ListItemAllFields"))
+            return ListItem(self.context, ResourcePathEntity(self.context, self.resourcePath, "ListItemAllFields"))
 
     @property
     def files(self):
@@ -41,7 +41,7 @@ class Folder(ClientObject):
             return self.properties["Files"]
         else:
             from office365.sharepoint.file_collection import FileCollection
-            return FileCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "Files"))
+            return FileCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "Files"))
 
     @property
     def folders(self):
@@ -50,11 +50,11 @@ class Folder(ClientObject):
             return self.properties["Folders"]
         else:
             from office365.sharepoint.folder_collection import FolderCollection
-            return FolderCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "Folders"))
+            return FolderCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "Folders"))
 
     @property
-    def resource_path(self):
-        resource_path = super(Folder, self).resource_path
+    def resourcePath(self):
+        resource_path = super(Folder, self).resourcePath
         if resource_path:
             return resource_path
 

@@ -1,7 +1,7 @@
-from office365.runtime.action_type import ActionType
-from office365.runtime.client_query import ClientQuery
+from office365.runtime.client_query import  UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery
 from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.utilities.http_method import HttpMethod
 from office365.sharepoint.file import File
 from office365.sharepoint.folder import Folder
 from office365.sharepoint.folder_collection import FolderCollection
@@ -24,12 +24,12 @@ class Web(SecurableObject):
 
     def update(self):
         """Update a Web resource"""
-        qry = ClientQuery.update_entry_query(self)
+        qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
 
     def delete_object(self):
         """Delete a Web resource"""
-        qry = ClientQuery.delete_entry_query(self)
+        qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         # self.removeFromParentCollection()
 
@@ -37,7 +37,7 @@ class Web(SecurableObject):
         """Returns the file object located at the specified server-relative URL."""
         file_obj = File(
             self.context,
-            ResourcePathServiceOperation(self.context, self.resource_path, "getfilebyserverrelativeurl", [url])
+            ResourcePathServiceOperation(self.context, self.resourcePath, "getfilebyserverrelativeurl", [url])
         )
         return file_obj
 
@@ -45,13 +45,13 @@ class Web(SecurableObject):
         """Returns the folder object located at the specified server-relative URL."""
         folder_obj = Folder(
             self.context,
-            ResourcePathServiceOperation(self.context, self.resource_path, "getfolderbyserverrelativeurl", [url])
+            ResourcePathServiceOperation(self.context, self.resourcePath, "getfolderbyserverrelativeurl", [url])
         )
         return folder_obj
 
-    def ensure_user(self, login_name):
+    def ensureUser(self, login_name):
         user = User(self.context)
-        qry = ClientQuery.service_operation_query(self, ActionType.PostMethod, "ensureuser", [login_name])
+        qry = ServiceOperationQuery(self, HttpMethod.Post, "ensureuser", [login_name])
         self.context.add_query(qry, user)
         return user
 
@@ -66,7 +66,7 @@ class Web(SecurableObject):
             if self.is_property_available('Url'):
                 parent_web_url = self.properties['Url']
             return WebCollection(self.context,
-                                 ResourcePathEntity(self.context, self.resource_path, "webs"),
+                                 ResourcePathEntity(self.context, self.resourcePath, "webs"),
                                  parent_web_url)
 
     @property
@@ -75,7 +75,7 @@ class Web(SecurableObject):
         if self.is_property_available('Folders'):
             return self.properties['Folders']
         else:
-            return FolderCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "folders"))
+            return FolderCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "folders"))
 
     @property
     def lists(self):
@@ -83,43 +83,67 @@ class Web(SecurableObject):
         if self.is_property_available('Lists'):
             return self.properties['Lists']
         else:
-            return ListCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "lists"))
+            return ListCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "lists"))
 
     @property
-    def site_users(self):
+    def siteUsers(self):
         """Get site users"""
         if self.is_property_available('SiteUsers'):
             return self.properties['SiteUsers']
         else:
-            return UserCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "siteusers"))
+            return UserCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "siteusers"))
 
     @property
-    def site_groups(self):
+    def siteGroups(self):
         """Gets the collection of groups for the site collection."""
         if self.is_property_available('SiteGroups'):
             return self.properties['SiteGroups']
         else:
-            return GroupCollection(self.context, ResourcePathEntity(self.context, self.resource_path, "sitegroups"))
+            return GroupCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "sitegroups"))
 
     @property
-    def current_user(self):
+    def currentUser(self):
         """Gets the current user."""
         if self.is_property_available('CurrentUser'):
             return self.properties['CurrentUser']
         else:
-            return User(self.context, ResourcePathEntity(self.context, self.resource_path, "CurrentUser"))
+            return User(self.context, ResourcePathEntity(self.context, self.resourcePath, "CurrentUser"))
 
     @property
-    def parent_web(self):
+    def parentWeb(self):
         """Gets the parent website of the specified website."""
         if self.is_property_available('ParentWeb'):
             return self.properties['ParentWeb']
         else:
-            return User(self.context, ResourcePathEntity(self.context, self.resource_path, "ParentWeb"))
+            return User(self.context, ResourcePathEntity(self.context, self.resourcePath, "ParentWeb"))
 
     @property
-    def service_root_url(self):
-        orig_root_url = super(Web, self).service_root_url
+    def associatedVisitorGroup(self):
+        """Gets or sets the associated visitor group of the Web site."""
+        if self.is_property_available('AssociatedVisitorGroup'):
+            return self.properties['AssociatedVisitorGroup']
+        else:
+            return User(self.context, ResourcePathEntity(self.context, self.resourcePath, "AssociatedVisitorGroup"))
+
+    @property
+    def associatedOwnerGroup(self):
+        """Gets or sets the associated owner group of the Web site."""
+        if self.is_property_available('AssociatedOwnerGroup'):
+            return self.properties['AssociatedOwnerGroup']
+        else:
+            return User(self.context, ResourcePathEntity(self.context, self.resourcePath, "AssociatedOwnerGroup"))
+
+    @property
+    def associatedMemberGroup(self):
+        """Gets or sets the group of users who have been given contribute permissions to the Web site."""
+        if self.is_property_available('AssociatedMemberGroup'):
+            return self.properties['AssociatedMemberGroup']
+        else:
+            return User(self.context, ResourcePathEntity(self.context, self.resourcePath, "AssociatedMemberGroup"))
+
+    @property
+    def serviceRootUrl(self):
+        orig_root_url = super(Web, self).serviceRootUrl
         if self.is_property_available("Url"):
             cur_root_url = self.properties["Url"] + "/_api/"
             return cur_root_url

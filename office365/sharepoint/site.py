@@ -10,9 +10,9 @@ class Site(ClientObject):
         super(Site, self).__init__(context, ResourcePathEntity(context, None, "Site"))
 
     @property
-    def root_web(self):
+    def rootWeb(self):
         """Get root web"""
         if self.is_property_available('RootWeb'):
             return self.properties['RootWeb']
         else:
-            return Web(self.context, ResourcePathEntity(self.context, self.resource_path, "RootWeb"))
+            return Web(self.context, ResourcePathEntity(self.context, self.resourcePath, "RootWeb"))

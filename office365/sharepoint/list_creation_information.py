@@ -12,5 +12,5 @@ class ListCreationInformation(ClientValueObject):
         self.AllowContentTypes = allow_content_types
 
     @property
-    def type_name(self):
+    def typeName(self):
         return "SP.List"

@@ -1,6 +1,5 @@
-from office365.runtime.action_type import ActionType
 from office365.runtime.client_object import ClientObject
-from office365.runtime.client_query import ClientQuery
+from office365.runtime.client_query import DeleteEntityQuery, ServiceOperationQuery
 from office365.runtime.client_result import ClientResult
 from office365.runtime.odata.odata_path_parser import ODataPathParser
 from office365.runtime.resource_path_entity import ResourcePathEntity
@@ -32,7 +31,7 @@ class AbstractFile(ClientObject):
 
     def delete_object(self):
         """Deletes the file."""
-        qry = ClientQuery.delete_entry_query(self)
+        qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
 
 
@@ -42,156 +41,156 @@ class File(AbstractFile):
 
     def approve(self, comment):
         """Approves the file submitted for content approval with the specified comment."""
-        qry = ClientQuery.service_operation_query(self,
-                                                  ActionType.PostMethod,
-                                                  "approve",
-                                                  {
-                                                      "comment": comment
-                                                  })
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Post,
+                                    "approve",
+                                    {
+                                        "comment": comment
+                                    })
         self.context.add_query(qry)
 
     def deny(self, comment):
         """Denies approval for a file that was submitted for content approval."""
-        qry = ClientQuery.service_operation_query(self,
-                                                  ActionType.PostMethod,
-                                                  "deny",
-                                                  {
-                                                      "comment": comment
-                                                  })
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Post,
+                                    "deny",
+                                    {
+                                        "comment": comment
+                                    })
         self.context.add_query(qry)
 
     def copyto(self, new_relative_url, overwrite):
         """Copies the file to the destination URL."""
-        qry = ClientQuery.service_operation_query(self,
-                                                  ActionType.PostMethod,
-                                                  "moveto",
-                                                  {
-                                                      "newurl": new_relative_url,
-                                                      "boverwrite": overwrite
-                                                  },
-                                                  None)
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Post,
+                                    "moveto",
+                                    {
+                                        "newurl": new_relative_url,
+                                        "boverwrite": overwrite
+                                    },
+                                    None)
         self.context.add_query(qry)
 
     def moveto(self, new_relative_url, flag):
         """Moves the file to the specified destination URL."""
-        qry = ClientQuery.service_operation_query(self,
-                                                  ActionType.PostMethod,
-                                                  "moveto",
-                                                  {
-                                                      "newurl": new_relative_url,
-                                                      "flags": flag
-                                                  },
-                                                  None)
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Post,
+                                    "moveto",
+                                    {
+                                        "newurl": new_relative_url,
+                                        "flags": flag
+                                    },
+                                    None)
         self.context.add_query(qry)
 
     def publish(self, comment):
         """Submits the file for content approval with the specified comment."""
-        qry = ClientQuery.service_operation_query(self,
-                                                  ActionType.PostMethod,
-                                                  "publish",
-                                                  {
-                                                      "comment": comment,
-                                                  }
-                                                  )
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Post,
+                                    "publish",
+                                    {
+                                        "comment": comment,
+                                    }
+                                    )
         self.context.add_query(qry)
 
     def unpublish(self, comment):
         """Removes the file from content approval or unpublish a major version."""
-        qry = ClientQuery.service_operation_query(self,
-                                                  ActionType.PostMethod,
-                                                  "unpublish",
-                                                  {
-                                                      "comment": comment,
-                                                  }
-                                                  )
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Post,
+                                    "unpublish",
+                                    {
+                                        "comment": comment,
+                                    }
+                                    )
         self.context.add_query(qry)
 
     def checkout(self):
         """Checks out the file from a document library based on the check-out type."""
-        qry = ClientQuery.service_operation_query(self,
-                                                  ActionType.PostMethod,
-                                                  "checkout",
-                                                  )
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Post,
+                                    "checkout",
+                                    )
         self.context.add_query(qry)
 
     def checkin(self, comment, checkin_type):
         """Checks the file in to a document library based on the check-in type."""
-        qry = ClientQuery.service_operation_query(self,
-                                                  ActionType.PostMethod,
-                                                  "checkin",
-                                                  {
-                                                      "comment": comment,
-                                                      "checkInType": checkin_type
-                                                  }
-                                                  )
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Post,
+                                    "checkin",
+                                    {
+                                        "comment": comment,
+                                        "checkInType": checkin_type
+                                    }
+                                    )
         self.context.add_query(qry)
 
     def undocheckout(self):
         """Reverts an existing checkout for the file."""
-        qry = ClientQuery.service_operation_query(self,
-                                                  ActionType.PostMethod,
-                                                  "undocheckout",
-                                                  )
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Post,
+                                    "undocheckout"
+                                    )
         self.context.add_query(qry)
 
     def recycle(self):
         """Moves the file to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
-        qry = ClientQuery.service_operation_query(self,
-                                                  ActionType.PostMethod,
-                                                  "recycle",
-                                                  )
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Post,
+                                    "recycle"
+                                    )
         self.context.add_query(qry)
 
     def get_limited_webpart_manager(self, scope):
         """Specifies the control set used to access, modify, or add Web Parts associated with this Web Part Page and
         view. """
         return LimitedWebPartManager(self.context,
-                                     ResourcePathServiceOperation(self.context, self.resource_path,
+                                     ResourcePathServiceOperation(self.context, self.resourcePath,
                                                                   "getlimitedwebpartmanager",
                                                                   [scope]
                                                                   ))
 
     def start_upload(self, upload_id, content):
         """Starts a new chunk upload session and uploads the first fragment."""
-        qry = ClientQuery.service_operation_query(self,
-                                                  ActionType.PostMethod,
-                                                  "startupload",
-                                                  {
-                                                      "uploadID": upload_id
-                                                  },
-                                                  content
-                                                  )
-        result = ClientResult
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Post,
+                                    "startupload",
+                                    {
+                                        "uploadID": upload_id
+                                    },
+                                    content
+                                    )
+        result = ClientResult(None)
         self.context.add_query(qry, result)
         return result
 
     def continue_upload(self, upload_id, file_offset, content):
         """Continues the chunk upload session with an additional fragment. The current file content is not changed."""
-        qry = ClientQuery.service_operation_query(self,
-                                                  ActionType.PostMethod,
-                                                  "continueupload",
-                                                  {
-                                                      "uploadID": upload_id,
-                                                      "fileOffset": file_offset,
-                                                  },
-                                                  content
-                                                  )
-        result = ClientResult
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Post,
+                                    "continueupload",
+                                    {
+                                        "uploadID": upload_id,
+                                        "fileOffset": file_offset,
+                                    },
+                                    content
+                                    )
+        result = ClientResult(None)
         self.context.add_query(qry, result)
         return result
 
     def finish_upload(self, upload_id, file_offset, content):
         """Uploads the last file fragment and commits the file. The current file content is changed when this method
         completes. """
-        qry = ClientQuery.service_operation_query(self,
-                                                  ActionType.PostMethod,
-                                                  "finishupload",
-                                                  {
-                                                      "uploadID": upload_id,
-                                                      "fileOffset": file_offset,
-                                                  },
-                                                  content
-                                                  )
+        qry = ServiceOperationQuery(self,
+                                    HttpMethod.Post,
+                                    "finishupload",
+                                    {
+                                        "uploadID": upload_id,
+                                        "fileOffset": file_offset,
+                                    },
+                                    content
+                                    )
         self.context.add_query(qry, self)
         return self
 
@@ -203,7 +202,7 @@ class File(AbstractFile):
             from urllib.parse import quote  # Python 3+
         server_relative_url = quote(server_relative_url)
         url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(
-            ctx.service_root_url, server_relative_url)
+            ctx.serviceRootUrl, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Post
         request.set_header('X-HTTP-Method', 'PUT')
@@ -220,16 +219,16 @@ class File(AbstractFile):
         return response
 
     @property
-    def listitem_allfields(self):
+    def listItemAllFields(self):
         """Gets a value that specifies the list item field values for the list item corresponding to the file."""
         if self.is_property_available('ListItemAllFields'):
             return self.properties['ListItemAllFields']
         else:
-            return ListItem(self.context, ResourcePathEntity(self.context, self.resource_path, "listItemAllFields"))
+            return ListItem(self.context, ResourcePathEntity(self.context, self.resourcePath, "listItemAllFields"))
 
     @property
-    def resource_path(self):
-        resource_path = super(File, self).resource_path
+    def resourcePath(self):
+        resource_path = super(File, self).resourcePath
         if resource_path:
             return resource_path
 
