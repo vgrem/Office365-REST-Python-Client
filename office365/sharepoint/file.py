@@ -212,13 +212,7 @@ class File(AbstractFile):
 
     @staticmethod
     def open_binary(ctx, server_relative_url):
-        try:
-            from urllib import quote  # Python 2.X
-        except ImportError:
-            from urllib.parse import quote  # Python 3+
-        server_relative_url = quote(server_relative_url)
-        url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(
-            ctx.serviceRootUrl, server_relative_url)
+        url = r"{}web/getfilebyserverrelativeurl('{}')/\$value".format(ctx.service_root_url, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Get
         response = ctx.execute_request_direct(request)
