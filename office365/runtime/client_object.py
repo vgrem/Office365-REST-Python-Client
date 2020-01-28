@@ -25,11 +25,6 @@ class ClientObject(object):
         """Convert query options to url"""
         return '&'.join(['$%s=%s' % (key, value) for (key, value) in self.queryOptions.items()])
 
-    def set_property(self, name, value, persist_changes=True):
-        """Set resource property value"""
-        self._metadata[name] = {'readonly': not persist_changes}
-        self._properties[name] = value
-
     def expand(self, value):
         self.queryOptions['expand'] = value
         return self
@@ -41,11 +36,16 @@ class ClientObject(object):
     def remove_from_parent_collection(self):
         if self._parent_collection is None:
             return
-        self._parent_collection.remove(self)
+        self._parent_collection.remove_child(self)
+
+    def set_property(self, name, value, serializable=True):
+        """Set resource property value"""
+        self._metadata[name] = {'serializable': serializable}
+        self._properties[name] = value
 
     def map_json(self, json):
-        self._properties = dict((k, v) for k, v in json.items()
-                                if k != '__metadata')
+        [self.set_property(k, v, False) for k, v in json.items()
+         if k != '__metadata']
 
     @property
     def entityTypeName(self):

@@ -71,24 +71,39 @@ class TestSharePointFile(SPTestCase):
             enc_content = normalize_response(content)
             self.assertEqual(enc_content, self.content_placeholder)
 
-    def test_5_move_file(self):
-        """Test file upload operation"""
+    def test_5_copy_file(self):
         files = self.target_list.rootFolder.files
-        self.context.load(files, )
+        self.context.load(files)
         self.context.execute_query()
-        for file in files:
-            file_url = file.properties["ServerRelativeUrl"]
+        for cur_file in files:
+            file_url = cur_file.properties["ServerRelativeUrl"]
             path, file_name = os.path.split(file_url)
-            new_file_url = '/'.join([path, "new_" + file_name])
-            file.moveto(new_file_url, 1)
+            new_file_url = '/'.join([path, "copied_" + file_name])
+            cur_file.copyto(new_file_url, True)
             self.context.execute_query()
 
-            file = self.context.web.get_file_by_server_relative_url(new_file_url)
-            self.context.load(file)
+            moved_file = self.context.web.get_file_by_server_relative_url(new_file_url)
+            self.context.load(moved_file)
             self.context.execute_query()
-            self.assertEqual(new_file_url, file.properties["ServerRelativeUrl"])
+            self.assertEqual(new_file_url, moved_file.properties["ServerRelativeUrl"])
 
-    def test_6_recycle_first_file(self):
+    def test_6_move_file(self):
+        files = self.target_list.rootFolder.files
+        self.context.load(files)
+        self.context.execute_query()
+        for cur_file in files:
+            file_url = cur_file.properties["ServerRelativeUrl"]
+            path, file_name = os.path.split(file_url)
+            new_file_url = '/'.join([path, "moved_" + file_name])
+            cur_file.moveto(new_file_url, 1)
+            self.context.execute_query()
+
+            moved_file = self.context.web.get_file_by_server_relative_url(new_file_url)
+            self.context.load(moved_file)
+            self.context.execute_query()
+            self.assertEqual(new_file_url, moved_file.properties["ServerRelativeUrl"])
+
+    def test_7_recycle_first_file(self):
         """Test file upload operation"""
         files = self.target_list.rootFolder.files
         self.context.load(files)
@@ -103,7 +118,7 @@ class TestSharePointFile(SPTestCase):
             self.context.execute_query()
             self.assertEqual(len(files) - 1, len(files_after))
 
-    def test_7_create_template_file(self):
+    def test_8_create_template_file(self):
         target_folder = self.target_list.rootFolder
         self.context.load(target_folder)
         self.context.execute_query()
@@ -112,7 +127,7 @@ class TestSharePointFile(SPTestCase):
         self.context.execute_query()
         self.assertEqual(file_new.properties["ServerRelativeUrl"], file_url)
 
-    def test_8_delete_file(self):
+    def test_9_delete_file(self):
         files_to_delete = self.target_list.rootFolder.files
         self.context.load(files_to_delete)
         self.context.execute_query()

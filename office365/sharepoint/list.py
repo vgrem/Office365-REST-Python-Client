@@ -90,22 +90,19 @@ class List(SecurableObject):
             return ContentTypeCollection(self.context,
                                          ResourcePathEntity(self.context, self.resourcePath, "contenttypes"))
 
-    @property
-    def resourcePath(self):
-        resource_path = super(List, self).resourcePath
-        if resource_path:
-            return resource_path
-
+    def set_property(self, name, value, serializable=True):
+        super(List, self).set_property(name, value, serializable)
         # fallback: create a new resource path
-        if self.is_property_available("Id"):
-            self._resource_path = ResourcePathEntity(
-                self.context,
-                self._parent_collection.resourcePath,
-                ODataPathParser.from_method("GetById", [self.properties["Id"]]))
-        elif self.is_property_available("Title"):
-            self._resource_path = ResourcePathEntity(
-                self.context,
-                self._parent_collection.resourcePath,
-                ODataPathParser.from_method("GetByTitle", [self.properties["Title"]]))
+        if self._resource_path is None:
+            if name == "Id":
+                self._resource_path = ResourcePathEntity(
+                    self.context,
+                    self._parent_collection.resourcePath,
+                    ODataPathParser.from_method("GetById", [value]))
+            elif name == "Title":
+                self._resource_path = ResourcePathEntity(
+                    self.context,
+                    self._parent_collection.resourcePath,
+                    ODataPathParser.from_method("GetByTitle", [value]))
 
-        return self._resource_path
+

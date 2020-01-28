@@ -13,6 +13,7 @@ class UserCollection(ClientObjectCollection):
 
     def add_user(self, login_name):
         user = User(self.context)
+        user._parent_collection = self
         user.set_property('LoginName', login_name)
         qry = ClientQuery(self.resourceUrl, HttpMethod.Post, user)
         self.context.add_query(qry, user)

@@ -15,15 +15,11 @@ class OutlookEntity(ClientObject):
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
 
-    @property
-    def resourcePath(self):
-        resource_path = super(OutlookEntity, self).resourcePath
-        if resource_path:
-            return resource_path
-
+    def set_property(self, name, value, serializable=True):
+        super(OutlookEntity, self).set_property(name, value, serializable)
         # fallback: create a new resource path
-        if self.is_property_available("Id"):
-            return ResourcePathEntity(
+        if name == "Id":
+            self._resource_path = ResourcePathEntity(
                 self.context,
                 self._parent_collection.resourcePath,
-                self.properties["Id"])
+                value)

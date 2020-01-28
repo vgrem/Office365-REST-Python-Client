@@ -12,11 +12,15 @@ class ResourcePath(object):
     def build_url(self):
         delimiter = '/'
         current = self
-        paths = []
+        segments = []
         while current:
-            paths.insert(0, current.segment)
+            segments.insert(0, current.segment)
             current = current._parent
-        return delimiter.join(paths)
+        return delimiter.join(segments)
+
+    @property
+    def parent(self):
+        return self._parent
 
     @abstractproperty
     def segment(self):

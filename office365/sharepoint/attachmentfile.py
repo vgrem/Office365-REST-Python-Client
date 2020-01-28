@@ -6,18 +6,11 @@ from office365.sharepoint.file import AbstractFile
 class AttachmentFile(AbstractFile):
     """Represents an attachment file in a SharePoint List Item."""
 
-    @property
-    def resourcePath(self):
-        resource_path = super(AttachmentFile, self).resourcePath
-        if resource_path:
-            return resource_path
-
+    def set_property(self, name, value, serializable=True):
+        super(AttachmentFile, self).set_property(name, value, serializable)
         # fallback: create a new resource path
-        if self.is_property_available("ServerRelativeUrl"):
+        if name == "ServerRelativeUrl":
             self._resource_path = ResourcePathEntity(
                 self.context,
                 ResourcePathEntity(self.context, None, "Web"),
-                ODataPathParser.from_method("GetFileByServerRelativeUrl",
-                                            [self.properties["ServerRelativeUrl"]]))
-
-        return self._resource_path
+                ODataPathParser.from_method("GetFileByServerRelativeUrl", [value]))

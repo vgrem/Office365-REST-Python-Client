@@ -63,9 +63,9 @@ class File(AbstractFile):
         """Copies the file to the destination URL."""
         qry = ServiceOperationQuery(self,
                                     HttpMethod.Post,
-                                    "moveto",
+                                    "copyto",
                                     {
-                                        "newurl": new_relative_url,
+                                        "strNewUrl": new_relative_url,
                                         "boverwrite": overwrite
                                     },
                                     None)
@@ -232,24 +232,20 @@ class File(AbstractFile):
         else:
             return ListItem(self.context, ResourcePathEntity(self.context, self.resourcePath, "listItemAllFields"))
 
-    @property
-    def resourcePath(self):
-        resource_path = super(File, self).resourcePath
-        if resource_path:
-            return resource_path
-
+    def set_property(self, name, value, serializable=True):
+        super(File, self).set_property(name, value, serializable)
         # fallback: create a new resource path
-        if self.is_property_available("ServerRelativeUrl"):
-            self._resource_path = ResourcePathEntity(
-                self.context,
-                ResourcePathEntity(self.context, None, "Web"),
-                ODataPathParser.from_method("GetFileByServerRelativeUrl",
-                                            [self.properties["ServerRelativeUrl"]]))
-        elif self.is_property_available("UniqueId"):
-            self._resource_path = ResourcePathEntity(
-                self.context,
-                ResourcePathEntity(self.context, None, "Web"),
-                ODataPathParser.from_method("GetFileById",
-                                            [{'guid': self.properties["UniqueId"]}]))
+        if self._resource_path is None:
+            if name == "ServerRelativeUrl":
+                self._resource_path = ResourcePathEntity(
+                    self.context,
+                    ResourcePathEntity(self.context, None, "Web"),
+                    ODataPathParser.from_method("GetFileByServerRelativeUrl",
+                                                [value]))
+            elif name == "UniqueId":
+                self._resource_path = ResourcePathEntity(
+                    self.context,
+                    ResourcePathEntity(self.context, None, "Web"),
+                    ODataPathParser.from_method("GetFileById",
+                                                [value]))
 
-        return self._resource_path

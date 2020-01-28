@@ -1,13 +1,12 @@
 import adal
 
-from office365.runtime.client_object_collection import ClientObjectCollection
+from office365.onedrive.siteCollection import SiteCollection
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.odata.v4_json_format import V4JsonFormat
 from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.runtime.utilities.request_options import RequestOptions
 from office365.directory.user import User
 from office365.onedrive.sharedDriveItem import SharedDriveItem
-from office365.onedrive.site import Site
 from office365.directory.groupCollection import GroupCollection
 from office365.directory.userCollection import UserCollection
 from office365.onedrive.driveCollection import DriveCollection
@@ -59,7 +58,7 @@ class GraphClient(ClientRuntimeContext):
     @property
     def sites(self):
         """Get sites"""
-        return ClientObjectCollection(self, Site, ResourcePathEntity(self, Site, "sites"))
+        return SiteCollection(self, ResourcePathEntity(self, None, "sites"))
 
     @property
     def shares(self):

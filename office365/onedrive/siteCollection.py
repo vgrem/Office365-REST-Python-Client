@@ -1,20 +1,18 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.onedrive.site import Site
+from office365.runtime.client_object_collection import ClientObjectCollection
+from office365.runtime.resource_path_entity import ResourcePathEntity
 
 
-class SiteCollection(ClientValueObject):
-    """The siteCollection resource provides more information about a site collection. """
+class SiteCollection(ClientObjectCollection):
+    """Drive site's collection"""
 
-    def __init__(self):
-        super(SiteCollection, self).__init__()
-        self._hostname = None
-        self._root = None
-
-    @property
-    def hostname(self):
-        """The hostname for the site collection."""
-        return self._hostname
+    def __init__(self, context, resource_path=None):
+        super(SiteCollection, self).__init__(context, Site, resource_path)
 
     @property
     def root(self):
         """If present, indicates that this is a root site collection in SharePoint."""
-        return self._root
+        if self.is_property_available('root'):
+            return self.properties['root']
+        else:
+            return Site(self.context, ResourcePathEntity(self.context, self.resourcePath, "root"))

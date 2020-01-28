@@ -34,7 +34,7 @@ class ODataEncoder(JSONEncoder):
     def normalize_entity(self, value):
         """Generates resource payload for OData endpoint"""
         payload = dict((k, v) for k, v in value.properties.items()
-                       if k in value.metadata and value.metadata[k]['readonly'] is False)
+                       if k in value.metadata and value.metadata[k]['serializable'] is True)
         if self._json_format.metadata == ODataMetadataLevel.Verbose and "__metadata" not in payload.items():
             payload["__metadata"] = {'type': value.entityTypeName}
         else:

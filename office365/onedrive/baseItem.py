@@ -88,13 +88,10 @@ class BaseItem(ClientObject):
             return self.properties['webUrl']
         return None
 
-    @property
-    def resourcePath(self):
-        resource_path = super(BaseItem, self).resourcePath
-        if resource_path:
-            return resource_path
-        if self.is_property_available("id"):
-            return ResourcePathEntity(
+    def set_property(self, name, value, serializable=True):
+        super(BaseItem, self).set_property(name, value, serializable)
+        if name == "id" and self._resource_path is None:
+            self._resource_path = ResourcePathEntity(
                 self.context,
                 self._parent_collection.resourcePath,
-                self.properties["id"])
+                value)

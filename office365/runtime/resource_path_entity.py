@@ -18,8 +18,8 @@ class ResourcePathEntity(ResourcePath):
         """Constructs aan instance of ResourcePathEntity from uri"""
         if uri.startswith(context.serviceRootUrl):
             uri = uri[len(context.serviceRootUrl):]
-        elements = uri.split('/')
+        segments = uri.split('/')
         parent = None
-        for element in elements:
-            parent = ResourcePathEntity(context, parent, element)
+        for segment in segments:
+            parent = ResourcePathEntity(context, parent, segment)
         return parent

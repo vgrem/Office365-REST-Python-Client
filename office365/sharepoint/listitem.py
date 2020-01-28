@@ -81,17 +81,11 @@ class ListItem(SecurableObject):
             return AttachmentfileCollection(self.context,
                                             ResourcePathEntity(self.context, self.resourcePath, "AttachmentFiles"))
 
-    @property
-    def resourcePath(self):
-        resource_path = super(ListItem, self).resourcePath
-        if resource_path:
-            return resource_path
-
+    def set_property(self, name, value, serializable=True):
+        super(ListItem, self).set_property(name, value, serializable)
         # fallback: create a new resource path
-        if self.is_property_available("Id"):
+        if name == "Id":
             self._resource_path = ResourcePathEntity(
                 self.context,
                 self._parent_collection.resourcePath,
-                ODataPathParser.from_method("getItemById", [self.properties["Id"]]))
-
-        return self._resource_path
+                ODataPathParser.from_method("getItemById", [value]))

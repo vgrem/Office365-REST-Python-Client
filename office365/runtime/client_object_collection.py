@@ -31,6 +31,9 @@ class ClientObjectCollection(ClientObject):
         client_object._parent_collection = self
         self.__data.append(client_object)
 
+    def remove_child(self, client_object):
+        self.__data.remove(client_object)
+
     def __iter__(self):
         for _object in self.__data:
             yield _object

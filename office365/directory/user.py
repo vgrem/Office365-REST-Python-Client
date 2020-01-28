@@ -26,7 +26,7 @@ class User(DirectoryObject):
         if self.is_property_available('contacts'):
             return self.properties['contacts']
         else:
-            return ContactCollection(self.context, ResourcePathEntity(self, self._resource_path, "contacts"))
+            return ContactCollection(self.context, ResourcePathEntity(self, self.resourcePath, "contacts"))
 
     @property
     def events(self):
@@ -34,7 +34,7 @@ class User(DirectoryObject):
         if self.is_property_available('events'):
             return self.properties['events']
         else:
-            return EventCollection(self.context, ResourcePathEntity(self, self._resource_path, "events"))
+            return EventCollection(self.context, ResourcePathEntity(self, self.resourcePath, "events"))
 
     @property
     def messages(self):
@@ -42,7 +42,7 @@ class User(DirectoryObject):
         if self.is_property_available('messages'):
             return self.properties['messages']
         else:
-            return MessageCollection(self.context, ResourcePathEntity(self, self._resource_path, "messages"))
+            return MessageCollection(self.context, ResourcePathEntity(self, self.resourcePath, "messages"))
 
     def send_mail(self, message):
         """Send a new message on the fly"""

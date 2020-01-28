@@ -138,3 +138,11 @@ class DriveItem(BaseItem):
             return self.properties['listItem']
         else:
             return ListItem(self.context, ResourcePathEntity(self.context, self.resourcePath, "listItem"))
+
+    def set_property(self, name, value, serializable=True):
+        super(DriveItem, self).set_property(name, value, serializable)
+        if name == "id" and self._resource_path.parent.segment == "children":
+            self._resource_path = ResourcePathEntity(
+                self.context,
+                ResourcePathEntity(self.context, self._parent_collection.resourcePath.parent.parent, "items"),
+                self._resource_path.segment)
