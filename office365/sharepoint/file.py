@@ -212,7 +212,7 @@ class File(AbstractFile):
 
     @staticmethod
     def open_binary(ctx, server_relative_url):
-        url = r"{}web/getfilebyserverrelativeurl('{}')/\$value".format(ctx.service_root_url, server_relative_url)
+        url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(ctx.serviceRootUrl, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Get
         response = ctx.execute_request_direct(request)

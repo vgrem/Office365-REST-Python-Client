@@ -26,8 +26,8 @@ pip install Office365-REST-Python-Client
 # Working with SharePoint API
 
 The list of supported API versions: 
--   [SharePoint 2013](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and above 
--   SharePoint Online & OneDrive for Business
+-   [SharePoint 2013 REST API or above](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and above 
+-   SharePoint Online & OneDrive for Business REST API
 
 #### Authentication
 
