@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import io
 from distutils.core import setup
 
 import setuptools
 
-with open("README.md", "r", encoding='utf-8') as fh:
+with io.open("README.md", mode='r', encoding='utf-8') as fh:
     long_description = fh.read()
 
 setup(
