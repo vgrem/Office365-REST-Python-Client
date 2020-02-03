@@ -1,9 +1,7 @@
 import os
 import uuid
 from unittest import TestCase
-from office365.onedrive.driveItemUploadableProperties import DriveItemUploadableProperties
-from office365.runtime.utilities.http_method import HttpMethod
-from office365.runtime.utilities.request_options import RequestOptions
+from office365.onedrive.file_upload import ResumableFileUpload
 from settings import settings
 
 from office365.graphClient import GraphClient
@@ -16,16 +14,6 @@ def get_token(auth_ctx):
         settings['user_credentials']['password'],
         settings['client_credentials']['client_id'])
     return token
-
-
-def read_in_chunks(file_object, chunk_size=1024):
-    """Lazy function (generator) to read a file piece by piece.
-    Default chunk size: 1k."""
-    while True:
-        data = file_object.read(chunk_size)
-        if not data:
-            break
-        yield data
 
 
 def create_listDrive(client):
@@ -70,6 +58,13 @@ class TestDriveItem(TestCase):
         self.client.execute_query()
         self.assertIsNotNone(self.target_file.webUrl)
 
+    def test21_upload_file_session(self):
+        file_name = "big_buck_bunny.mp4"
+        local_path = "{0}/data/{1}".format(os.path.dirname(__file__), file_name)
+        uploader = ResumableFileUpload(self.target_drive.root, local_path, 1000000)
+        uploader.execute()
+        print("{0} bytes has been uploaded".format(0))
+
     def test3_download_file(self):
         result = self.__class__.target_file.download()
         self.client.execute_query()
@@ -97,31 +92,3 @@ class TestDriveItem(TestCase):
         self.client.execute_query()
 
         self.assertEqual(before_count - 1, len(items))
-
-    def test7_upload_file_session(self):
-        file_name = "big_buck_bunny.mp4"
-        path = "{0}/data/{1}".format(os.path.dirname(__file__), file_name)
-        # 1. create a file
-        target_item = self.target_drive.root.upload(file_name, None)
-        self.client.execute_query()
-        self.assertIsNotNone(target_item.properties['id'])
-        # 2. create upload session
-        item = DriveItemUploadableProperties()
-        item.name = file_name
-        session_result = target_item.create_upload_session(item)
-        self.client.execute_query()
-        self.assertIsNotNone(session_result.value)
-        # 3. start upload
-        f = open(path, 'rb')
-        st = os.stat(path)
-        f_pos = 0
-        for piece in read_in_chunks(f, chunk_size=1000000):
-            req = RequestOptions(session_result.value.uploadUrl)
-            req.method = HttpMethod.Put
-            req.set_header('Content-Length', str(len(piece)))
-            req.set_header('Content-Range', 'bytes {0}-{1}/{2}'.format(f_pos, (f_pos + len(piece) - 1), st.st_size))
-            req.set_header('Accept', '*/*')
-            req.data = piece
-            resp = self.client.execute_request_direct(req)
-            self.assertTrue(resp.ok)
-            f_pos += len(piece)

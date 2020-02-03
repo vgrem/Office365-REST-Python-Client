@@ -3,6 +3,7 @@ from office365.runtime.client_query import ServiceOperationQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.utilities.http_method import HttpMethod
 from office365.sharepoint.file import File
+from office365.sharepoint.upload_session import UploadSession
 
 
 class FileCollection(ClientObjectCollection):
@@ -10,6 +11,12 @@ class FileCollection(ClientObjectCollection):
 
     def __init__(self, context, resource_path=None):
         super(FileCollection, self).__init__(context, File, resource_path)
+
+    def create_upload_session(self, source_path, chunk_size, chunk_uploaded=None):
+        """Upload a file as multiple chunks"""
+        session = UploadSession(source_path, chunk_size, chunk_uploaded)
+        session.build_query(self)
+        return session.file
 
     def add(self, file_creation_information):
         """Creates a File resource"""

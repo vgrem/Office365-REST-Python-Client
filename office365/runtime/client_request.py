@@ -16,10 +16,12 @@ class ClientRequest(object):
         self.context = context
         self.__queries = []
         self.__resultObjects = {}
+        self.__events_list = {}
 
     def clear(self):
         self.__queries = []
         self.__resultObjects = {}
+        self.__events_list = {}
 
     def build_request(self, query):
         request = RequestOptions(query.url)
@@ -50,9 +52,13 @@ class ClientRequest(object):
         try:
             for query in self.__queries:
                 request = self.build_request(query)
+                if 'BeforeExecuteQuery' in self.__events_list:
+                    self.__events_list['BeforeExecuteQuery'](request)
                 response = self.execute_request_direct(request)
                 result_object = self.__resultObjects.get(query)
                 self.process_response(response, result_object)
+                if 'AfterExecuteQuery' in self.__events_list:
+                    self.__events_list['AfterExecuteQuery'](result_object)
         finally:
             self.clear()
 
@@ -121,6 +127,12 @@ class ClientRequest(object):
         self.__queries.append(query)
         if result_object is not None:
             self.__resultObjects[query] = result_object
+
+    def before_execute_query(self, event):
+        self.__events_list['BeforeExecuteQuery'] = event
+
+    def after_execute_query(self, event):
+        self.__events_list['AfterExecuteQuery'] = event
 
     def validate_response(self, response):
         try:

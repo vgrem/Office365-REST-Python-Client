@@ -196,11 +196,7 @@ class File(AbstractFile):
 
     @staticmethod
     def save_binary(ctx, server_relative_url, content):
-        try:
-            from urllib import quote  # Python 2.X
-        except ImportError:
-            from urllib.parse import quote  # Python 3+
-        server_relative_url = quote(server_relative_url)
+        """Uploads a file"""
         url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(
             ctx.serviceRootUrl, server_relative_url)
         request = RequestOptions(url)
