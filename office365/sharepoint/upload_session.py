@@ -7,8 +7,7 @@ from office365.sharepoint.file_creation_information import FileCreationInformati
 
 
 def read_in_chunks(file_object, size=1024):
-    """Lazy function (generator) to read a file piece by piece.
-    Default chunk size: 1k."""
+    """Lazy function (generator) to read a file piece by piece."""
     while True:
         data = file_object.read(size)
         if not data:

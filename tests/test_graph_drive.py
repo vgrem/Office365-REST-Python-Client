@@ -1,27 +1,9 @@
-from unittest import TestCase
-
-from settings import settings
-
-from office365.graphClient import GraphClient
+from tests.graph_case import GraphTestCase
 
 
-def get_token(auth_ctx):
-    token = auth_ctx.acquire_token_with_username_password(
-        'https://graph.microsoft.com',
-        settings['user_credentials']['username'],
-        settings['user_credentials']['password'],
-        settings['client_credentials']['client_id'])
-    return token
-
-
-class TestDrive(TestCase):
+class TestDrive(GraphTestCase):
     """OneDrive specific test case base class"""
     target_file = None
-
-    @classmethod
-    def setUpClass(cls):
-        ci_tenant_name = settings['tenant']
-        cls.client = GraphClient(ci_tenant_name, get_token)
 
     def test1_get_drives(self):
         drives = self.client.drives.top(2)

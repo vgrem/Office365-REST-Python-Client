@@ -1,23 +1,7 @@
-from unittest import TestCase
-
-from office365.graphClient import GraphClient
-from settings import settings
+from tests.graph_case import GraphTestCase
 
 
-def get_token(auth_ctx):
-    token = auth_ctx.acquire_token_with_username_password(
-        'https://graph.microsoft.com',
-        settings['user_credentials']['username'],
-        settings['user_credentials']['password'],
-        settings['client_credentials']['client_id'])
-    return token
-
-
-class TestGraphMail(TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.client = GraphClient(settings['tenant'], get_token)
+class TestGraphMail(GraphTestCase):
 
     def test1_send_mail(self):
         message = {

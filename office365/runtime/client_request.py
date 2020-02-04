@@ -1,16 +1,14 @@
 import requests
 from requests import HTTPError
-from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.client_result import ClientResult
-from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_encoder import ODataEncoder
 from office365.runtime.utilities.http_method import HttpMethod
 from office365.runtime.utilities.request_options import RequestOptions
 
 
 class ClientRequest(object):
-    """Client request for Office365 ODATA/REST service"""
+    """Generic client request for Office365 ODATA/REST service"""
 
     def __init__(self, context):
         self.context = context
@@ -29,19 +27,6 @@ class ClientRequest(object):
         request.set_headers(self.context.json_format.build_http_headers())
         # set method
         request.method = query.method
-        # set custom method headers
-        if isinstance(self.context.json_format, JsonLightFormat):
-            if isinstance(query, DeleteEntityQuery):
-                request.set_header("X-HTTP-Method", "DELETE")
-                request.set_header("IF-MATCH", '*')
-            elif isinstance(query, UpdateEntityQuery):
-                request.set_header("X-HTTP-Method", "MERGE")
-                request.set_header("IF-MATCH", '*')
-        else:
-            if isinstance(query, UpdateEntityQuery):
-                request.method = HttpMethod.Patch
-            elif isinstance(query, DeleteEntityQuery):
-                request.method = HttpMethod.Delete
         # set request payload
         if query.payload is not None:
             request.data = ODataEncoder(self.context.json_format).default(query.payload)
@@ -53,7 +38,7 @@ class ClientRequest(object):
             for query in self.__queries:
                 request = self.build_request(query)
                 if 'BeforeExecuteQuery' in self.__events_list:
-                    self.__events_list['BeforeExecuteQuery'](request)
+                    self.__events_list['BeforeExecuteQuery'](request, query)
                 response = self.execute_request_direct(request)
                 result_object = self.__resultObjects.get(query)
                 self.process_response(response, result_object)
@@ -85,9 +70,6 @@ class ClientRequest(object):
         """Execute client request"""
         self.context.authenticate_request(request_options)
         if request_options.method == HttpMethod.Post:
-            from office365.sharepoint.client_context import ClientContext
-            if isinstance(self.context, ClientContext):
-                self.context.ensure_form_digest(request_options)
             if hasattr(request_options.data, 'decode') and callable(request_options.data.decode):
                 result = requests.post(url=request_options.url,
                                        headers=request_options.headers,
@@ -134,7 +116,8 @@ class ClientRequest(object):
     def after_execute_query(self, event):
         self.__events_list['AfterExecuteQuery'] = event
 
-    def validate_response(self, response):
+    @staticmethod
+    def validate_response(response):
         try:
             response.raise_for_status()
         except HTTPError as e:

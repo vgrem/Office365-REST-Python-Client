@@ -9,7 +9,7 @@ from office365.runtime.utilities.http_method import HttpMethod
 
 
 class User(DirectoryObject):
-    """A user in the system."""
+    """Represents an Azure AD user account. Inherits from directoryObject."""
 
     @property
     def drive(self):

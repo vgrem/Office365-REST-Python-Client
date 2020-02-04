@@ -1,5 +1,6 @@
 from office365.directory.group import Group
-from office365.directory.directory_object_collection import DirectoryObjectCollection
+from office365.directory.directoryObjectCollection import DirectoryObjectCollection
+from office365.runtime.client_query import CreateEntityQuery
 
 
 class GroupCollection(DirectoryObjectCollection):
@@ -7,3 +8,13 @@ class GroupCollection(DirectoryObjectCollection):
 
     def __init__(self, context, resource_path=None):
         super(GroupCollection, self).__init__(context, Group, resource_path)
+
+    def add(self, group_properties):
+        """Create a Group resource.  You can create the following types of groups:
+        Office 365 group (unified group)
+        Security group"""
+        grp = Group(self.context)
+        qry = CreateEntityQuery(self, group_properties)
+        self.context.add_query(qry, grp)
+        self.add_child(grp)
+        return grp

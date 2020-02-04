@@ -1,19 +1,7 @@
 import os
 import uuid
-from unittest import TestCase
 from office365.onedrive.file_upload import ResumableFileUpload
-from settings import settings
-
-from office365.graphClient import GraphClient
-
-
-def get_token(auth_ctx):
-    token = auth_ctx.acquire_token_with_username_password(
-        'https://graph.microsoft.com',
-        settings['user_credentials']['username'],
-        settings['user_credentials']['password'],
-        settings['client_credentials']['client_id'])
-    return token
+from tests.graph_case import GraphTestCase
 
 
 def create_listDrive(client):
@@ -26,17 +14,15 @@ def create_listDrive(client):
     return new_list.drive
 
 
-class TestDriveItem(TestCase):
+class TestDriveItem(GraphTestCase):
     """OneDrive specific test case base class"""
-    client = None
     target_drive = None
     target_file = None
 
     @classmethod
     def setUpClass(cls):
-        ci_tenant_name = settings['tenant']
-        cls.client = GraphClient(ci_tenant_name, get_token)
-        cls.target_drive = create_listDrive(cls.client)  # cls.client.me.drive
+        super(TestDriveItem, cls).setUpClass()
+        cls.target_drive = create_listDrive(cls.client)
 
     @classmethod
     def tearDownClass(cls):

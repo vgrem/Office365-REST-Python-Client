@@ -1,5 +1,5 @@
 from office365.directory.user import User
-from office365.directory.directory_object_collection import DirectoryObjectCollection
+from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 
 
 class UserCollection(DirectoryObjectCollection):
