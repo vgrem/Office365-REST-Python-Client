@@ -1,7 +1,7 @@
 from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.odata.v4_json_format import V4JsonFormat
-from office365.runtime.resource_path_entity import ResourcePathEntity
+from office365.runtime.resource_path import ResourcePath
 from office365.runtime.utilities.http_method import HttpMethod
 from office365.directory.user import User
 
@@ -15,7 +15,7 @@ class OutlookClient(ClientRuntimeContext):
         self.json_format = V4JsonFormat("minimal")
 
     def execute_query(self):
-        self.pending_request.before_execute_query(self._build_specific_query)
+        self.pending_request.before_execute_request(self._build_specific_query)
         super(OutlookClient, self).execute_query()
 
     @staticmethod
@@ -28,4 +28,4 @@ class OutlookClient(ClientRuntimeContext):
     @property
     def me(self):
         """The Me endpoint is provided as a shortcut for specifying the current user by SMTP address."""
-        return User(self, ResourcePathEntity(self, None, "me"))
+        return User(self, ResourcePath("me", None))

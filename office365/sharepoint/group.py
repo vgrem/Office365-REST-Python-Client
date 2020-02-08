@@ -1,4 +1,4 @@
-from office365.runtime.resource_path_entity import ResourcePathEntity
+from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.principal import Principal
 
 
@@ -12,4 +12,4 @@ class Group(Principal):
         if self.is_property_available('Users'):
             return self.properties['Users']
         else:
-            return UserCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "Users"))
+            return UserCollection(self.context, ResourcePath("Users", self.resourcePath))

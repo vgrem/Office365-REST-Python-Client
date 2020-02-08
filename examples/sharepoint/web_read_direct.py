@@ -13,14 +13,12 @@ if __name__ == '__main__':
                                            password=settings['user_credentials']['password']):
         """Read Web client object"""
         ctx = ClientContext(settings['url'], context_auth)
-
-        request = ClientRequest(ctx)
         options = RequestOptions("{0}/_api/web/".format(settings['url']))
         options.set_header('Accept', 'application/json')
         options.set_header('Content-Type', 'application/json')
         data = ctx.execute_request_direct(options)
-        s = json.loads(data.content)
-        web_title = s['Title']
+        json = json.loads(data.content)
+        web_title = json['Title']
         print("Web title: {0}".format(web_title))
 
     else:

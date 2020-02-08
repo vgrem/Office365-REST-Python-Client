@@ -2,10 +2,9 @@ from office365.directory.directoryObject import DirectoryObject
 from office365.onedrive.drive import Drive
 from office365.outlookservices.contact_collection import ContactCollection
 from office365.outlookservices.event_collection import EventCollection
-from office365.outlookservices.message_collection import MessageCollection
-from office365.runtime.client_query import ClientQuery
-from office365.runtime.resource_path_entity import ResourcePathEntity
-from office365.runtime.utilities.http_method import HttpMethod
+from office365.outlookservices.messageCollection import MessageCollection
+from office365.runtime.client_query import ServiceOperationQuery
+from office365.runtime.resource_path import ResourcePath
 
 
 class User(DirectoryObject):
@@ -17,7 +16,7 @@ class User(DirectoryObject):
         if self.is_property_available('drive'):
             return self.properties['drive']
         else:
-            return Drive(self.context, ResourcePathEntity(self.context, self.resourcePath, "drive"))
+            return Drive(self.context, ResourcePath("drive", self.resourcePath))
 
     @property
     def contacts(self):
@@ -26,7 +25,7 @@ class User(DirectoryObject):
         if self.is_property_available('contacts'):
             return self.properties['contacts']
         else:
-            return ContactCollection(self.context, ResourcePathEntity(self, self.resourcePath, "contacts"))
+            return ContactCollection(self.context, ResourcePath("contacts", self.resourcePath))
 
     @property
     def events(self):
@@ -34,7 +33,7 @@ class User(DirectoryObject):
         if self.is_property_available('events'):
             return self.properties['events']
         else:
-            return EventCollection(self.context, ResourcePathEntity(self, self.resourcePath, "events"))
+            return EventCollection(self.context, ResourcePath("events", self.resourcePath))
 
     @property
     def messages(self):
@@ -42,10 +41,18 @@ class User(DirectoryObject):
         if self.is_property_available('messages'):
             return self.properties['messages']
         else:
-            return MessageCollection(self.context, ResourcePathEntity(self, self.resourcePath, "messages"))
+            return MessageCollection(self.context, ResourcePath("messages", self.resourcePath))
 
     def send_mail(self, message):
         """Send a new message on the fly"""
-        url = self.resourceUrl + "/sendmail"
-        qry = ClientQuery(url, HttpMethod.Post, message)
+        qry = ServiceOperationQuery(self, "sendmail", None, message)
         self.context.add_query(qry)
+
+    def set_property(self, name, value, serializable=True):
+        super(User, self).set_property(name, value, serializable)
+        # fallback: create a new resource path
+        if self._resource_path is None:
+            if name == "id" or name == "userPrincipalName":
+                self._resource_path = ResourcePath(
+                    value,
+                    self._parent_collection.resourcePath)

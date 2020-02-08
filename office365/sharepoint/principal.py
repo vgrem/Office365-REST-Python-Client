@@ -1,7 +1,6 @@
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_query import UpdateEntityQuery
-from office365.runtime.odata.odata_path_parser import ODataPathParser
-from office365.runtime.resource_path_entity import ResourcePathEntity
+from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 
 
 class Principal(ClientObject):
@@ -56,15 +55,11 @@ class Principal(ClientObject):
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id":
-                self._resource_path = ResourcePathEntity(
-                    self.context,
-                    self._parent_collection.resourcePath,
-                    ODataPathParser.from_method("GetById", [value]))
+                self._resource_path = ResourcePathServiceOperation(
+                    "GetById", [value], self._parent_collection.resourcePath)
             elif name == "LoginName":
-                self._resource_path = ResourcePathEntity(
-                    self.context,
-                    self._parent_collection.resourcePath,
-                    ODataPathParser.from_method("GetByName", [value]))
+                self._resource_path = ResourcePathServiceOperation(
+                    "GetByName", [value], self._parent_collection.resourcePath)
 
     def update(self):
         """Update a User or Group resource"""

@@ -10,7 +10,7 @@ with io.open("README.md", mode='r', encoding='utf-8') as fh:
 
 setup(
     name="Office365-REST-Python-Client",
-    version="2.1.6",
+    version="2.1.6-1",
     author="Vadim Gremyachev",
     author_email="vvgrem@gmail.com",
     maintainer="Konrad Gądek",

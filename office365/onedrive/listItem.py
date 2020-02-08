@@ -1,6 +1,6 @@
-from office365.runtime.resource_path_entity import ResourcePathEntity
 from office365.onedrive.baseItem import BaseItem
 from office365.onedrive.fieldValueSet import FieldValueSet
+from office365.runtime.resource_path import ResourcePath
 
 
 class ListItem(BaseItem):
@@ -13,7 +13,7 @@ class ListItem(BaseItem):
         if self.is_property_available('fields'):
             return self.properties['fields']
         else:
-            return FieldValueSet(self.context, ResourcePathEntity(self.context, self.resourcePath, "fields"))
+            return FieldValueSet(self.context, ResourcePath("fields", self.resourcePath))
 
     @property
     def driveItem(self):
@@ -22,4 +22,4 @@ class ListItem(BaseItem):
             return self.properties['driveItem']
         else:
             from office365.onedrive.driveItem import DriveItem
-            return DriveItem(self.context, ResourcePathEntity(self.context, self.resourcePath, "driveItem"))
+            return DriveItem(self.context, ResourcePath("driveItem", self.resourcePath))

@@ -1,5 +1,5 @@
 from office365.runtime.client_object import ClientObject
-from office365.runtime.client_query import ClientQuery, UpdateEntityQuery, DeleteEntityQuery
+from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery
 
 
 class Field(ClientObject):

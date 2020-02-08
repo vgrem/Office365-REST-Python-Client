@@ -9,9 +9,8 @@ class WebCreationInformation(ClientValueObject):
         self.Title = None
         self.Url = None
 
-    @property
-    def tagName(self):
-        return "parameters"
+    def to_json(self, data_format):
+        return {"parameters": super(WebCreationInformation, self).to_json(data_format)}
 
     @property
     def typeName(self):

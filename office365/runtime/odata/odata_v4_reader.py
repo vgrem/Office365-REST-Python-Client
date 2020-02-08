@@ -1,9 +1,10 @@
 import xml.etree.ElementTree as ET
 
+from office365.runtime.odata.odata_base_reader import ODataBaseReader
 from office365.runtime.odata.odata_model import ODataModel
 
 
-class ODataV4Reader(object):
+class ODataV4Reader(ODataBaseReader):
     """OData v4 reader"""
     _options = None
 

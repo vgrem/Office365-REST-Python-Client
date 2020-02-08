@@ -8,6 +8,8 @@ from office365.sharepoint.list_template_type import ListTemplateType
 
 class TestSharePointListItem(SPTestCase):
 
+    target_list = None
+
     @classmethod
     def setUpClass(cls):
         super(TestSharePointListItem, cls).setUpClass()

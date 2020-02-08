@@ -1,5 +1,5 @@
 from office365.onedrive.baseItem import BaseItem
-from office365.runtime.resource_path_entity import ResourcePathEntity
+from office365.runtime.resource_path import ResourcePath
 from office365.onedrive.columnDefinitionCollection import ColumnDefinitionCollection
 from office365.onedrive.contentTypeCollection import ContentTypeCollection
 from office365.onedrive.drive import Drive
@@ -17,7 +17,7 @@ class Site(BaseItem):
             return self.properties['columns']
         else:
             return ColumnDefinitionCollection(self.context,
-                                              ResourcePathEntity(self.context, self.resourcePath, "columns"))
+                                              ResourcePath("columns", self.resourcePath))
 
     @property
     def contentTypes(self):
@@ -26,7 +26,7 @@ class Site(BaseItem):
             return self.properties['contentTypes']
         else:
             return ContentTypeCollection(self.context,
-                                         ResourcePathEntity(self.context, self.resourcePath, "contentTypes"))
+                                         ResourcePath("contentTypes", self.resourcePath))
 
     @property
     def lists(self):
@@ -34,7 +34,7 @@ class Site(BaseItem):
         if self.is_property_available('lists'):
             return self.properties['lists']
         else:
-            return ListCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "lists"))
+            return ListCollection(self.context, ResourcePath("lists", self.resourcePath))
 
     @property
     def drive(self):
@@ -42,7 +42,7 @@ class Site(BaseItem):
         if self.is_property_available('drive'):
             return self.properties['drive']
         else:
-            return Drive(self.context, ResourcePathEntity(self.context, self.resourcePath, "drive"))
+            return Drive(self.context, ResourcePath("drive", self.resourcePath))
 
     @property
     def drives(self):
@@ -50,7 +50,7 @@ class Site(BaseItem):
         if self.is_property_available('drives'):
             return self.properties['drives']
         else:
-            return DriveCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "drives"))
+            return DriveCollection(self.context, ResourcePath("drives", self.resourcePath))
 
     @property
     def sharepointids(self):
@@ -67,4 +67,4 @@ class Site(BaseItem):
         else:
             from office365.onedrive.siteCollection import SiteCollection
             return SiteCollection(self.context,
-                                  ResourcePathEntity(self.context, self.resourcePath, "sites"))
+                                  ResourcePath("sites", self.resourcePath))

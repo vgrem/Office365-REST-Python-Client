@@ -1,6 +1,6 @@
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_query import DeleteEntityQuery
-from office365.runtime.resource_path_entity import ResourcePathEntity
+from office365.runtime.resource_path import ResourcePath
 
 
 class BaseItem(ClientObject):
@@ -91,7 +91,6 @@ class BaseItem(ClientObject):
     def set_property(self, name, value, serializable=True):
         super(BaseItem, self).set_property(name, value, serializable)
         if name == "id" and self._resource_path is None:
-            self._resource_path = ResourcePathEntity(
-                self.context,
-                self._parent_collection.resourcePath,
-                value)
+            self._resource_path = ResourcePath(
+                value,
+                self._parent_collection.resourcePath)

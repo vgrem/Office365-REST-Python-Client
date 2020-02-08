@@ -1,3 +1,6 @@
+from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
+
+
 class ClientObject(object):
     """Base client object"""
 
@@ -12,7 +15,6 @@ class ClientObject(object):
         self._parent_collection = None
         self._context = context
         self._resource_path = resource_path
-        self._resource_url = None
 
     def is_property_available(self, name):
         """Returns a Boolean value that indicates whether the specified property has been retrieved or set."""
@@ -44,8 +46,14 @@ class ClientObject(object):
         self._properties[name] = value
 
     def map_json(self, json):
-        [self.set_property(k, v, False) for k, v in json.items()
-         if k != '__metadata']
+        [self.set_property(k, v, False) for k, v in json.items() if k != '__metadata']
+
+    def to_json(self, data_format):
+        json = dict((k, v) for k, v in self.properties.items()
+                    if k in self.metadata and self.metadata[k]['serializable'] is True)
+        if data_format.metadata == ODataMetadataLevel.Verbose and "__metadata" not in json.items():
+            json["__metadata"] = {'type': self.entityTypeName}
+        return json
 
     @property
     def entityTypeName(self):
@@ -59,22 +67,17 @@ class ClientObject(object):
 
     @property
     def resourceUrl(self):
-        """Get resource Url"""
-        if self._resource_url:
-            return self._resource_url
-        elif self.resourcePath:
-            self._resource_url = self.serviceRootUrl + self.resourcePath.build_url()
+        """Generate resource Url"""
+        if self.resourcePath:
+            url = self.context.serviceRootUrl + self.resourcePath.to_string()
             if self.queryOptions:
-                self._resource_url = self._resource_url + "?" + self.query_options_to_url()
-        return self._resource_url
+                url = url + "?" + self.query_options_to_url()
+            return url
+        return None
 
     @property
     def context(self):
         return self._context
-
-    @property
-    def serviceRootUrl(self):
-        return self.context.serviceRootUrl
 
     @property
     def resourcePath(self):

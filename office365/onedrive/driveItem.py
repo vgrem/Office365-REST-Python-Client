@@ -1,13 +1,12 @@
 from office365.onedrive.conflictBehavior import ConflictBehavior
 from office365.onedrive.fileSystemInfo import FileSystemInfo
 from office365.onedrive.uploadSession import UploadSession
-from office365.runtime.client_query import ClientQuery, ServiceOperationQuery
+from office365.runtime.client_query import ServiceOperationQuery, CreateEntityQuery
 from office365.runtime.client_result import ClientResult
-from office365.runtime.resource_path_entity import ResourcePathEntity
+from office365.runtime.resource_path import ResourcePath
 from office365.onedrive.baseItem import BaseItem
 from office365.onedrive.listItem import ListItem
 from office365.runtime.resource_path_url import ResourcePathUrl
-from office365.runtime.utilities.http_method import HttpMethod
 
 
 class DriveItem(BaseItem):
@@ -18,7 +17,6 @@ class DriveItem(BaseItem):
         """Creates a temporary storage location where the bytes of the file will be saved until the complete file is
         uploaded. """
         qry = ServiceOperationQuery(self,
-                                    HttpMethod.Post,
                                     "createUploadSession",
                                     None,
                                     {
@@ -33,15 +31,16 @@ class DriveItem(BaseItem):
         """The simple upload API allows you to provide the contents of a new file or update the contents of an
         existing file in a single API call. This method only supports files up to 4MB in size. """
         drive_item = DriveItem(self.context, ResourcePathUrl(self.context, self.resourcePath, name))
-        qry = ClientQuery(r"{0}content".format(drive_item.resourceUrl), HttpMethod.Put, content)
+        from office365.graphClient import UploadContentQuery
+        qry = UploadContentQuery(drive_item, content)
         self.context.add_query(qry, drive_item)
         return drive_item
 
     def download(self):
         """Download the contents of the primary stream (file) of a DriveItem. Only driveItems with the file property
         can be downloaded. """
-        url = r"{0}content".format(self.resourceUrl)
-        qry = ClientQuery(url, HttpMethod.Get)
+        from office365.graphClient import DownloadContentQuery
+        qry = DownloadContentQuery(self)
         result = ClientResult(None)
         self.context.add_query(qry, result)
         return result
@@ -55,14 +54,14 @@ class DriveItem(BaseItem):
             "folder": {},
             "@microsoft.graph.conflictBehavior": ConflictBehavior.Rename
         }
-        qry = ClientQuery(self.resourceUrl + "/children", HttpMethod.Post, payload)
+        qry = CreateEntityQuery(self.children, payload)
         self.context.add_query(qry, drive_item)
         return drive_item
 
     def convert(self, format_name):
         """Converts the contents of an item in a specific format"""
-        url = r"{0}content?format={1}".format(self.resourceUrl, format_name)
-        qry = ClientQuery(url, HttpMethod.Get)
+        from office365.graphClient import DownloadContentQuery
+        qry = DownloadContentQuery(self, format_name)
         result = ClientResult(None)
         self.context.add_query(qry, result)
         return result
@@ -71,7 +70,6 @@ class DriveItem(BaseItem):
         """Asynchronously creates a copy of an driveItem (including any children), under a new parent item or with a
         new name. """
         qry = ServiceOperationQuery(self,
-                                    HttpMethod.Post,
                                     "copy",
                                     None,
                                     {
@@ -86,15 +84,15 @@ class DriveItem(BaseItem):
     def move(self, name, parent_reference=None):
         """To move a DriveItem to a new parent item, your app requests to update the parentReference of the DriveItem
         to move. """
-        qry = ServiceOperationQuery(self,
-                                    HttpMethod.Patch,
-                                    "move",
-                                    None,
-                                    {
-                                        "name": name,
-                                        "parentReference": parent_reference
-                                    }
-                                    )
+        from office365.graphClient import ReplaceMethodQuery
+        qry = ReplaceMethodQuery(self,
+                                 "move",
+                                 None,
+                                 {
+                                     "name": name,
+                                     "parentReference": parent_reference
+                                 }
+                                 )
         result = ClientResult(None)
         self.context.add_query(qry, result)
         return result
@@ -102,13 +100,8 @@ class DriveItem(BaseItem):
     def search(self, query_text):
         """Search the hierarchy of items for items matching a query. You can search within a folder hierarchy,
         a whole drive, or files shared with the current user. """
-        qry = ServiceOperationQuery(self,
-                                    HttpMethod.Get,
-                                    "search",
-                                    {
-                                        "q": query_text,
-                                    }
-                                    )
+        from office365.graphClient import SearchQuery
+        qry = SearchQuery(self, query_text)
         result = ClientResult(None)
         self.context.add_query(qry, result)
         return result
@@ -129,7 +122,7 @@ class DriveItem(BaseItem):
             return self.properties['children']
         else:
             from office365.onedrive.driveItemCollection import DriveItemCollection
-            return DriveItemCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "children"))
+            return DriveItemCollection(self.context, ResourcePath("children", self.resourcePath))
 
     @property
     def listItem(self):
@@ -137,12 +130,11 @@ class DriveItem(BaseItem):
         if self.is_property_available('listItem'):
             return self.properties['listItem']
         else:
-            return ListItem(self.context, ResourcePathEntity(self.context, self.resourcePath, "listItem"))
+            return ListItem(self.context, ResourcePath("listItem", self.resourcePath))
 
     def set_property(self, name, value, serializable=True):
         super(DriveItem, self).set_property(name, value, serializable)
         if name == "id" and self._resource_path.parent.segment == "children":
-            self._resource_path = ResourcePathEntity(
-                self.context,
-                ResourcePathEntity(self.context, self._parent_collection.resourcePath.parent.parent, "items"),
-                self._resource_path.segment)
+            self._resource_path = ResourcePath(
+                value,
+                ResourcePath("items", self._parent_collection.resourcePath.parent.parent))

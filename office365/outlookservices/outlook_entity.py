@@ -1,6 +1,6 @@
 from office365.runtime.client_object import ClientObject
-from office365.runtime.client_query import ClientQuery, UpdateEntityQuery, DeleteEntityQuery
-from office365.runtime.resource_path_entity import ResourcePathEntity
+from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery
+from office365.runtime.resource_path import ResourcePath
 
 
 class OutlookEntity(ClientObject):
@@ -19,7 +19,6 @@ class OutlookEntity(ClientObject):
         super(OutlookEntity, self).set_property(name, value, serializable)
         # fallback: create a new resource path
         if name == "Id":
-            self._resource_path = ResourcePathEntity(
-                self.context,
-                self._parent_collection.resourcePath,
-                value)
+            self._resource_path = ResourcePath(
+                value,
+                self._parent_collection.resourcePath)

@@ -1,5 +1,5 @@
-from office365.runtime.client_query import ClientQuery, DeleteEntityQuery
-from office365.runtime.resource_path_entity import ResourcePathEntity
+from office365.runtime.client_query import DeleteEntityQuery
+from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.principal import Principal
 
 
@@ -13,7 +13,7 @@ class User(Principal):
             return self.properties['Groups']
         else:
             from office365.sharepoint.group_collection import GroupCollection
-            return GroupCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "Groups"))
+            return GroupCollection(self.context, ResourcePath("Groups", self.resourcePath))
 
     def delete_object(self):
         """Deletes the user."""

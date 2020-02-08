@@ -1,6 +1,6 @@
 from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery
-from office365.runtime.odata.odata_path_parser import ODataPathParser
-from office365.runtime.resource_path_entity import ResourcePathEntity
+from office365.runtime.resource_path import ResourcePath
+from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.utilities.http_method import HttpMethod
 from office365.sharepoint.securable_object import SecurableObject
 
@@ -16,7 +16,6 @@ class ListItem(SecurableObject):
     def validate_update_listItem(self, form_values, new_document_update):
         """Validates and sets the values of the specified collection of fields for the list item."""
         qry = ServiceOperationQuery(self,
-                                    HttpMethod.Post,
                                     "validateUpdateListItem",
                                     None,
                                     {
@@ -28,7 +27,6 @@ class ListItem(SecurableObject):
     def system_update(self):
         """Update the list item."""
         qry = ServiceOperationQuery(self,
-                                    HttpMethod.Post,
                                     "systemUpdate")
         self.context.add_query(qry)
 
@@ -51,7 +49,7 @@ class ListItem(SecurableObject):
             return self.properties["ParentList"]
         else:
             from office365.sharepoint.list import List
-            return List(self.context, ResourcePathEntity(self.context, self.resourcePath, "ParentList"))
+            return List(self.context, ResourcePath("ParentList", self.resourcePath))
 
     @property
     def file(self):
@@ -60,7 +58,7 @@ class ListItem(SecurableObject):
             return self.properties["File"]
         else:
             from office365.sharepoint.file import File
-            return File(self.context, ResourcePathEntity(self.context, self.resourcePath, "File"))
+            return File(self.context, ResourcePath("File", self.resourcePath))
 
     @property
     def folder(self):
@@ -69,7 +67,7 @@ class ListItem(SecurableObject):
             return self.properties["Folder"]
         else:
             from office365.sharepoint.folder import Folder
-            return Folder(self.context, ResourcePathEntity(self.context, self.resourcePath, "Folder"))
+            return Folder(self.context, ResourcePath("Folder", self.resourcePath))
 
     @property
     def attachmentFiles(self):
@@ -79,13 +77,11 @@ class ListItem(SecurableObject):
         else:
             from office365.sharepoint.attachmentfile_collection import AttachmentfileCollection
             return AttachmentfileCollection(self.context,
-                                            ResourcePathEntity(self.context, self.resourcePath, "AttachmentFiles"))
+                                            ResourcePath("AttachmentFiles", self.resourcePath))
 
     def set_property(self, name, value, serializable=True):
         super(ListItem, self).set_property(name, value, serializable)
         # fallback: create a new resource path
         if name == "Id":
-            self._resource_path = ResourcePathEntity(
-                self.context,
-                self._parent_collection.resourcePath,
-                ODataPathParser.from_method("getItemById", [value]))
+            self._resource_path = ResourcePathServiceOperation(
+                "getItemById", [value], self._parent_collection.resourcePath)

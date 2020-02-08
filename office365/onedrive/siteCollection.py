@@ -1,6 +1,6 @@
 from office365.onedrive.site import Site
 from office365.runtime.client_object_collection import ClientObjectCollection
-from office365.runtime.resource_path_entity import ResourcePathEntity
+from office365.runtime.resource_path import ResourcePath
 
 
 class SiteCollection(ClientObjectCollection):
@@ -15,4 +15,4 @@ class SiteCollection(ClientObjectCollection):
         if self.is_property_available('root'):
             return self.properties['root']
         else:
-            return Site(self.context, ResourcePathEntity(self.context, self.resourcePath, "root"))
+            return Site(self.context, ResourcePath("root", self.resourcePath))

@@ -1,15 +1,11 @@
-from abc import ABCMeta, abstractproperty
-
-
 class ResourcePath(object):
     """OData resource path"""
-    __metaclass__ = ABCMeta
 
-    def __init__(self, context, parent=None):
+    def __init__(self, segment, parent=None):
+        self._segment = segment
         self._parent = parent
-        self._context = context
 
-    def build_url(self):
+    def to_string(self):
         delimiter = '/'
         current = self
         segments = []
@@ -22,6 +18,6 @@ class ResourcePath(object):
     def parent(self):
         return self._parent
 
-    @abstractproperty
+    @property
     def segment(self):
-        return ""
+        return self._segment

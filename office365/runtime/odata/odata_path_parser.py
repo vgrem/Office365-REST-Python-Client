@@ -7,20 +7,20 @@ class ODataPathParser(object):
         pass
 
     @staticmethod
-    def from_method(method_name, method_parameters):
+    def from_method(method_name, method_parameters=None):
         url = ""
         if method_name:
             url = method_name
 
-        url += "("
-        if method_parameters:
+        if method_parameters is not None:
+            url += "("
             if isinstance(method_parameters, dict):
                 url += ','.join(['%s=%s' % (key, ODataPathParser.encode_method_value(value)) for (key, value) in
                                  method_parameters.items()])
             else:
                 url += ','.join(['%s' % (ODataPathParser.encode_method_value(value)) for (i, value) in
                                  enumerate(method_parameters)])
-        url += ")"
+            url += ")"
         return url
 
     @staticmethod

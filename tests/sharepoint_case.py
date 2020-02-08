@@ -9,6 +9,8 @@ from office365.sharepoint.client_context import ClientContext
 class SPTestCase(TestCase):
     """SharePoint specific test case base class"""
 
+    context = None
+
     @classmethod
     def setUpClass(cls):
         ctx_auth = AuthenticationContext(url=settings['url'])

@@ -1,7 +1,6 @@
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_query import ServiceOperationQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.runtime.utilities.http_method import HttpMethod
 from office365.sharepoint.file import File
 from office365.sharepoint.upload_session import UploadSession
 
@@ -22,7 +21,6 @@ class FileCollection(ClientObjectCollection):
         """Creates a File resource"""
         file_new = File(self.context)
         qry = ServiceOperationQuery(self,
-                                    HttpMethod.Post,
                                     "add",
                                     {
                                         "overwrite": file_creation_information.overwrite,
@@ -37,7 +35,6 @@ class FileCollection(ClientObjectCollection):
         """Adds a ghosted file to an existing list or document library."""
         file_new = File(self.context)
         qry = ServiceOperationQuery(self,
-                                    HttpMethod.Post,
                                     "addTemplateFile",
                                     {
                                         "urlOfFile": url_of_file,
@@ -49,8 +46,8 @@ class FileCollection(ClientObjectCollection):
 
     def get_by_url(self, url):
         """Retrieve File object by url"""
-        return File(self.context, ResourcePathServiceOperation(self.context, self.resourcePath, "GetByUrl", [url]))
+        return File(self.context, ResourcePathServiceOperation("GetByUrl", [url], self.resourcePath))
 
     def get_by_id(self, _id):
         """Gets the File with the specified ID."""
-        return File(self.context, ResourcePathServiceOperation(self.context, self.resourcePath, "getById", [_id]))
+        return File(self.context, ResourcePathServiceOperation("getById", [_id], self.resourcePath))

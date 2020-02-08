@@ -76,5 +76,4 @@ class TestDriveItem(GraphTestCase):
         items[0].delete_object()
         self.client.load(items)
         self.client.execute_query()
-
         self.assertEqual(before_count - 1, len(items))

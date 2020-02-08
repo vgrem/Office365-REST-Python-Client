@@ -1,7 +1,6 @@
-from office365.runtime.client_query import  UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery
-from office365.runtime.resource_path_entity import ResourcePathEntity
+from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery
+from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.runtime.utilities.http_method import HttpMethod
 from office365.sharepoint.file import File
 from office365.sharepoint.folder import Folder
 from office365.sharepoint.folder_collection import FolderCollection
@@ -18,9 +17,9 @@ class Web(SecurableObject):
 
     def __init__(self, context, resource_path=None):
         if resource_path is None:
-            resource_path = ResourcePathEntity(context, None, "Web")
+            resource_path = ResourcePath("Web")
         super(Web, self).__init__(context, resource_path)
-        self._web_path = None
+        self._web_url = None
 
     def update(self):
         """Update a Web resource"""
@@ -31,13 +30,13 @@ class Web(SecurableObject):
         """Delete a Web resource"""
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
-        # self.removeFromParentCollection()
+        self.remove_from_parent_collection()
 
     def get_file_by_server_relative_url(self, url):
         """Returns the file object located at the specified server-relative URL."""
         file_obj = File(
             self.context,
-            ResourcePathServiceOperation(self.context, self.resourcePath, "getfilebyserverrelativeurl", [url])
+            ResourcePathServiceOperation("getfilebyserverrelativeurl", [url], self.resourcePath)
         )
         return file_obj
 
@@ -45,13 +44,13 @@ class Web(SecurableObject):
         """Returns the folder object located at the specified server-relative URL."""
         folder_obj = Folder(
             self.context,
-            ResourcePathServiceOperation(self.context, self.resourcePath, "getfolderbyserverrelativeurl", [url])
+            ResourcePathServiceOperation("getfolderbyserverrelativeurl", [url], self.resourcePath)
         )
         return folder_obj
 
     def ensureUser(self, login_name):
         user = User(self.context)
-        qry = ServiceOperationQuery(self, HttpMethod.Post, "ensureuser", [login_name])
+        qry = ServiceOperationQuery("ensureuser", [login_name], self.resourcePath)
         self.context.add_query(qry, user)
         return user
 
@@ -66,7 +65,7 @@ class Web(SecurableObject):
             if self.is_property_available('Url'):
                 parent_web_url = self.properties['Url']
             return WebCollection(self.context,
-                                 ResourcePathEntity(self.context, self.resourcePath, "webs"),
+                                 ResourcePath("webs", self.resourcePath),
                                  parent_web_url)
 
     @property
@@ -75,7 +74,7 @@ class Web(SecurableObject):
         if self.is_property_available('Folders'):
             return self.properties['Folders']
         else:
-            return FolderCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "folders"))
+            return FolderCollection(self.context, ResourcePath("folders", self.resourcePath))
 
     @property
     def lists(self):
@@ -83,7 +82,7 @@ class Web(SecurableObject):
         if self.is_property_available('Lists'):
             return self.properties['Lists']
         else:
-            return ListCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "lists"))
+            return ListCollection(self.context, ResourcePath("lists", self.resourcePath))
 
     @property
     def siteUsers(self):
@@ -91,7 +90,7 @@ class Web(SecurableObject):
         if self.is_property_available('SiteUsers'):
             return self.properties['SiteUsers']
         else:
-            return UserCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "siteusers"))
+            return UserCollection(self.context, ResourcePath("siteusers", self.resourcePath))
 
     @property
     def siteGroups(self):
@@ -99,7 +98,7 @@ class Web(SecurableObject):
         if self.is_property_available('SiteGroups'):
             return self.properties['SiteGroups']
         else:
-            return GroupCollection(self.context, ResourcePathEntity(self.context, self.resourcePath, "sitegroups"))
+            return GroupCollection(self.context, ResourcePath("sitegroups", self.resourcePath))
 
     @property
     def currentUser(self):
@@ -107,7 +106,7 @@ class Web(SecurableObject):
         if self.is_property_available('CurrentUser'):
             return self.properties['CurrentUser']
         else:
-            return User(self.context, ResourcePathEntity(self.context, self.resourcePath, "CurrentUser"))
+            return User(self.context, ResourcePath("CurrentUser", self.resourcePath))
 
     @property
     def parentWeb(self):
@@ -115,7 +114,7 @@ class Web(SecurableObject):
         if self.is_property_available('ParentWeb'):
             return self.properties['ParentWeb']
         else:
-            return User(self.context, ResourcePathEntity(self.context, self.resourcePath, "ParentWeb"))
+            return User(self.context, ResourcePath("ParentWeb", self.resourcePath))
 
     @property
     def associatedVisitorGroup(self):
@@ -123,7 +122,7 @@ class Web(SecurableObject):
         if self.is_property_available('AssociatedVisitorGroup'):
             return self.properties['AssociatedVisitorGroup']
         else:
-            return User(self.context, ResourcePathEntity(self.context, self.resourcePath, "AssociatedVisitorGroup"))
+            return User(self.context, ResourcePath("AssociatedVisitorGroup", self.resourcePath))
 
     @property
     def associatedOwnerGroup(self):
@@ -131,7 +130,7 @@ class Web(SecurableObject):
         if self.is_property_available('AssociatedOwnerGroup'):
             return self.properties['AssociatedOwnerGroup']
         else:
-            return User(self.context, ResourcePathEntity(self.context, self.resourcePath, "AssociatedOwnerGroup"))
+            return User(self.context, ResourcePath("AssociatedOwnerGroup", self.resourcePath))
 
     @property
     def associatedMemberGroup(self):
@@ -139,12 +138,17 @@ class Web(SecurableObject):
         if self.is_property_available('AssociatedMemberGroup'):
             return self.properties['AssociatedMemberGroup']
         else:
-            return User(self.context, ResourcePathEntity(self.context, self.resourcePath, "AssociatedMemberGroup"))
+            return User(self.context, ResourcePath("AssociatedMemberGroup", self.resourcePath))
+
+    def set_property(self, name, value, serializable=True):
+        super(Web, self).set_property(name, value, serializable)
+        # fallback: create a new resource path
+        if name == "Url":
+            self._web_url = value
 
     @property
-    def serviceRootUrl(self):
-        orig_root_url = super(Web, self).serviceRootUrl
-        if self.is_property_available("Url"):
-            cur_root_url = self.properties["Url"] + "/_api/"
-            return cur_root_url
-        return orig_root_url
+    def resourceUrl(self):
+        url = super(Web, self).resourceUrl
+        if self._web_url is not None:
+            url = url.replace(self.context.serviceRootUrl, self._web_url + '/_api/')
+        return url

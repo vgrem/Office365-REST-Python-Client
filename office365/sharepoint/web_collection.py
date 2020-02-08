@@ -1,6 +1,5 @@
 from office365.runtime.client_object_collection import ClientObjectCollection
-from office365.runtime.client_query import ClientQuery
-from office365.runtime.utilities.http_method import HttpMethod
+from office365.runtime.client_query import ServiceOperationQuery
 from office365.sharepoint.web import Web
 
 
@@ -12,15 +11,15 @@ class WebCollection(ClientObjectCollection):
 
     def add(self, web_creation_information):
         web = Web(self.context)
-        qry = ClientQuery(self.resourceUrl + "/add", HttpMethod.Post, web_creation_information)
+        qry = ServiceOperationQuery(self, "add", None, web_creation_information)
         self.context.add_query(qry, web)
         self.add_child(web)
         return web
 
     @property
-    def serviceRootUrl(self):
-        orig_root_url = super(WebCollection, self).serviceRootUrl
-        if self._parent_web_url:
-            cur_root_url = self._parent_web_url + "/_api/"
-            return cur_root_url
-        return orig_root_url
+    def resourceUrl(self):
+        url = super(WebCollection, self).resourceUrl
+        if self._parent_web_url is not None:
+            url = url.replace(self.context.serviceRootUrl, self._parent_web_url + '/_api/')
+        return url
+

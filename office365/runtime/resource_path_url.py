@@ -8,8 +8,8 @@ class ResourcePathUrl(ResourcePath):
         super(ResourcePathUrl, self).__init__(context, parent)
         self._url = url
 
-    def build_url(self):
-        return self._parent.build_url() + self.segment
+    def to_string(self):
+        return self._parent.to_string() + self.segment
 
     @property
     def segment(self):

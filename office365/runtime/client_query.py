@@ -1,59 +1,61 @@
-from office365.runtime.odata.odata_path_parser import ODataPathParser
-from office365.runtime.utilities.http_method import HttpMethod
+from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 
 
 class ClientQuery(object):
     """Client query"""
 
-    def __init__(self, url, method=HttpMethod.Get, payload=None):
-        self.__url = url
-        self.__method = method
-        self.__payload = payload
+    def __init__(self, entity_type, parameters=None):
+        self._entity_type = entity_type
+        self._parameters = parameters
+        self._return_type = None
 
     @property
-    def url(self):
-        return self.__url
+    def entity_type(self):
+        return self._entity_type
 
     @property
-    def method(self):
-        return self.__method
+    def parameters(self):
+        return self._parameters
 
     @property
-    def payload(self):
-        return self.__payload
+    def return_type(self):
+        return self._return_type
+
+    @return_type.setter
+    def return_type(self, val):
+        self._return_type = val
 
     @property
     def id(self):
         return id(self)
 
-    def __hash__(self):
-        return hash(self.url)
-
-    def __eq__(self, other):
-        return self.url == other.url
-
 
 class CreateEntityQuery(ClientQuery):
     def __init__(self, parent_resource, parameters):
-        super(CreateEntityQuery, self).__init__(parent_resource.resourceUrl, HttpMethod.Post, parameters)
+        super(CreateEntityQuery, self).__init__(parent_resource, parameters)
 
 
 class ReadEntityQuery(ClientQuery):
-    def __init__(self, resource):
-        super(ReadEntityQuery, self).__init__(resource.resourceUrl, HttpMethod.Get)
+    def __init__(self, entity_type):
+        super(ReadEntityQuery, self).__init__(entity_type)
 
 
 class UpdateEntityQuery(ClientQuery):
-    def __init__(self, resource):
-        super(UpdateEntityQuery, self).__init__(resource.resourceUrl, HttpMethod.Post, resource)
+    def __init__(self, entity_type):
+        super(UpdateEntityQuery, self).__init__(entity_type, entity_type)
 
 
 class DeleteEntityQuery(ClientQuery):
-    def __init__(self, resource):
-        super(DeleteEntityQuery, self).__init__(resource.resourceUrl, HttpMethod.Post)
+    def __init__(self, entity_type):
+        super(DeleteEntityQuery, self).__init__(entity_type)
 
 
 class ServiceOperationQuery(ClientQuery):
-    def __init__(self, resource, method, method_name, method_params=None, payload=None):
-        url = resource.resourceUrl + "/" + ODataPathParser.from_method(method_name, method_params)
-        super(ServiceOperationQuery, self).__init__(url, method, payload)
+    def __init__(self, entity_type, method_name, method_params=None, parameters=None):
+        super(ServiceOperationQuery, self).__init__(entity_type, parameters)
+        self._method_path = ResourcePathServiceOperation(method_name, method_params, entity_type.resourcePath)
+
+    @property
+    def method_path(self):
+        return self._method_path
+

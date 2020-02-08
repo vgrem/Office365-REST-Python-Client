@@ -1,6 +1,5 @@
-from office365.runtime.client_query import ClientQuery
-from office365.runtime.client_request import ClientRequest
-from office365.runtime.utilities.http_method import HttpMethod
+from office365.runtime.client_query import ReadEntityQuery
+from office365.runtime.odata.odata_request import ODataRequest
 
 
 class ClientRuntimeContext(object):
@@ -18,7 +17,7 @@ class ClientRuntimeContext(object):
     @property
     def pending_request(self):
         if not self.__pending_request:
-            self.__pending_request = ClientRequest(self)
+            self.__pending_request = ODataRequest(self)
         return self.__pending_request
 
     def load(self, client_object, properties_to_retrieve=None):
@@ -28,7 +27,7 @@ class ClientRuntimeContext(object):
         if properties_to_retrieve:
             select_expr = ",".join(properties_to_retrieve)
             client_object = client_object.select(select_expr)
-        qry = ClientQuery(client_object.resourceUrl, HttpMethod.Get)
+        qry = ReadEntityQuery(client_object)
         self.pending_request.add_query(qry, client_object)
 
     def execute_request_direct(self, request):

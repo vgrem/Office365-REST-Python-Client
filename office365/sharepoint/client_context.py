@@ -1,5 +1,3 @@
-import requests
-
 from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.context_web_information import ContextWebInformation
@@ -31,12 +29,9 @@ class ClientContext(ClientRuntimeContext):
     def request_form_digest(self):
         """Request Form Digest"""
         request = RequestOptions(self.serviceRootUrl + "contextinfo")
-        self.authenticate_request(request)
+        request.method = HttpMethod.Post
         request.set_headers(self.json_format.build_http_headers())
-        response = requests.post(url=request.url,
-                                 headers=request.headers,
-                                 auth=request.auth)
-        self.pending_request.validate_response(response)
+        response = self.execute_request_direct(request)
         payload = response.json()
         if self.json_format.metadata == ODataMetadataLevel.Verbose:
             payload = payload['d']['GetContextWebInformation']
@@ -44,7 +39,7 @@ class ClientContext(ClientRuntimeContext):
         self.contextWebInformation.from_json(payload)
 
     def execute_query(self):
-        self.pending_request.before_execute_query(self._build_specific_query)
+        self.pending_request.before_execute_request(self._build_specific_query)
         super(ClientContext, self).execute_query()
 
     def _build_specific_query(self, request, query):

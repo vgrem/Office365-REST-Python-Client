@@ -30,10 +30,9 @@ class CamlQuery(ClientValueObject):
         qry.ViewXml = query
         return qry
 
+    def to_json(self, data_format):
+        return {"query": super(CamlQuery, self).to_json(data_format)}
+
     @property
     def typeName(self):
         return 'SP.CamlQuery'
-
-    @property
-    def tagName(self):
-        return 'query'
