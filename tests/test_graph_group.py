@@ -18,6 +18,6 @@ class TestGraphGroup(GraphTestCase):
         self.__class__.target_group = new_group
 
     def test2_delete_group(self):
-        grp = self.__class__.target_group
-        grp.delete_object()
+        grp_to_delete = self.__class__.target_group
+        grp_to_delete.delete_object()
         self.client.execute_query()

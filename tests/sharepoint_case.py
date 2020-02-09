@@ -1,7 +1,5 @@
 from unittest import TestCase
-
 from settings import settings
-
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.client_context import ClientContext
 
@@ -9,7 +7,7 @@ from office365.sharepoint.client_context import ClientContext
 class SPTestCase(TestCase):
     """SharePoint specific test case base class"""
 
-    context = None
+    client = None
 
     @classmethod
     def setUpClass(cls):
@@ -18,4 +16,4 @@ class SPTestCase(TestCase):
         #                                password=settings['user_credentials']['password'])
         ctx_auth.acquire_token_for_app(client_id=settings['client_credentials']['client_id'],
                                        client_secret=settings['client_credentials']['client_secret'])
-        cls.context = ClientContext(settings['url'], ctx_auth)
+        cls.client = ClientContext(settings['url'], ctx_auth)

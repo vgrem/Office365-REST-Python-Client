@@ -13,7 +13,7 @@ class TestSharePointListItem(SPTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestSharePointListItem, cls).setUpClass()
-        cls.target_list = ListExtensions.ensure_list(cls.context.web,
+        cls.target_list = ListExtensions.ensure_list(cls.client.web,
                                                      ListCreationInformation("Tasks",
                                                                              None,
                                                                              ListTemplateType.Tasks)
@@ -26,21 +26,21 @@ class TestSharePointListItem(SPTestCase):
     @classmethod
     def tearDownClass(cls):
         cls.target_list.delete_object()
-        cls.context.execute_query()
+        cls.client.execute_query()
 
     def test_1_create_list_item(self):
         item_properties = {'Title': self.target_item_properties["Title"], '__metadata': {'type': 'SP.Data.TasksListItem'}}
         item = self.target_list.add_item(item_properties)
-        self.context.execute_query()
+        self.client.execute_query()
         self.assertIsNotNone(item.properties["Title"])
         self.target_item_properties["Id"] = item.properties["Id"]
 
     def test_2_delete_list_item(self):
         item = self.target_list.get_item_by_id(self.target_item_properties["Id"])
         item.delete_object()
-        self.context.execute_query()
+        self.client.execute_query()
 
         result = self.target_list.get_items().filter("Id eq {0}".format(self.target_item_properties["Id"]))
-        self.context.load(result)
-        self.context.execute_query()
+        self.client.load(result)
+        self.client.execute_query()
         self.assertEqual(0, len(result))
