@@ -115,7 +115,10 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
         if xml.find('{0}Body/{0}Fault'.format(ns_prefixes['S'])) is not None:
             error = xml.find('{0}Body/{0}Fault/{0}Detail/{1}error/{1}internalerror/{1}text'.format(ns_prefixes['S'],
                                                                                                    ns_prefixes['psf']))
-            self.error = 'An error occurred while retrieving token: {0}'.format(error.text)
+            if error is None:
+                self.error = 'An error occurred while retrieving token from XML response.'
+            else:
+                self.error = 'An error occurred while retrieving token from XML response: {0}'.format(error.text)
             logger.error(self.error)
             return None
 
@@ -123,6 +126,10 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
         token = xml.find(
             '{0}Body/{1}RequestSecurityTokenResponse/{1}RequestedSecurityToken/{2}BinarySecurityToken'.format(
                 ns_prefixes['S'], ns_prefixes['wst'], ns_prefixes['wsse']))
+        if token is None:
+            self.error = 'The service token could not be extracted from the XML response.'
+            logger.error(self.error)
+            return None
         logger.debug_secrets("token: %s", token)
         return token.text
 
