@@ -54,8 +54,10 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
                 'endpoint': url.scheme + '://' + url.hostname + self.login
             }
 
-            self.acquire_service_token(options)
-            self.acquire_authentication_cookie(options)
+            if not self.acquire_service_token(options):
+                return False
+            if not self.acquire_authentication_cookie(options):
+                return False
             return True
         except requests.exceptions.RequestException as e:
             self.error = "Error: {}".format(e)
@@ -96,7 +98,13 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
         logger = self.logger(self.process_service_token_response.__name__)
         logger.debug_secrets('response: %s\nresponse.content: %s', response, response.content)
 
-        xml = ElementTree.fromstring(response.content)
+        try:
+            xml = ElementTree.fromstring(response.content)
+        except ElementTree.ParseError as e:
+            self.error = 'An error occurred while parsing the server response: {}'.format(e)
+            logger.error(self.error)
+            return None
+
         ns_prefixes = {'S': '{http://www.w3.org/2003/05/soap-envelope}',
                        'psf': '{http://schemas.microsoft.com/Passport/SoapServices/SOAPFault}',
                        'wst': '{http://schemas.xmlsoap.org/ws/2005/02/trust}',
