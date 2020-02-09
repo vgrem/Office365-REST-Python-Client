@@ -1,6 +1,8 @@
+import unittest
 import uuid
 
 from office365.directory.groupCreationProperties import GroupCreationProperties
+from office365.runtime.client_request_exception import ClientRequestException
 from tests.graph_case import GraphTestCase
 
 
@@ -10,14 +12,25 @@ class TestGraphGroup(GraphTestCase):
     target_group = None
 
     def test1_create_group(self):
-        grp_name = "Group_" + uuid.uuid4().hex
-        properties = GroupCreationProperties(grp_name)
-        new_group = self.client.groups.add(properties)
-        self.client.execute_query()
-        self.assertIsNotNone(new_group.properties['id'])
-        self.__class__.target_group = new_group
+        try:
+            grp_name = "Group_" + uuid.uuid4().hex
+            properties = GroupCreationProperties(grp_name)
+            properties.securityEnabled = False
+            properties.mailEnabled = True
+            properties.groupTypes = ["Unified"]
+            new_group = self.client.groups.add(properties)
+            self.client.execute_query()
+            self.assertIsNotNone(new_group.properties['id'])
+            self.__class__.target_group = new_group
+        except ClientRequestException as e:
+            if e.code == 'Directory_QuotaExceeded':
+                self.__class__.target_group = None
+            else:
+                raise
 
     def test2_delete_group(self):
         grp_to_delete = self.__class__.target_group
-        grp_to_delete.delete_object()
-        self.client.execute_query()
+        if grp_to_delete is not None:
+            grp_to_delete.delete_object()
+            self.client.execute_query()
+

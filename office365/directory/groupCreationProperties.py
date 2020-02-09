@@ -11,3 +11,4 @@ class GroupCreationProperties(ClientValueObject):
         self.securityEnabled = True
         self.owners = []
         self.members = []
+        self.groupTypes = []
