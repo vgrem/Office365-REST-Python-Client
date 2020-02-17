@@ -82,6 +82,6 @@ class ListItem(SecurableObject):
     def set_property(self, name, value, serializable=True):
         super(ListItem, self).set_property(name, value, serializable)
         # fallback: create a new resource path
-        if name == "Id":
+        if name == "Id" and self._resource_path is None:
             self._resource_path = ResourcePathServiceOperation(
                 "getItemById", [value], self._parent_collection.resourcePath)

@@ -44,30 +44,30 @@ class TestDriveItem(GraphTestCase):
         self.client.execute_query()
         self.assertIsNotNone(self.target_file.webUrl)
 
-    def test21_upload_file_session(self):
+    def test3_upload_file_session(self):
         file_name = "big_buck_bunny.mp4"
         local_path = "{0}/data/{1}".format(os.path.dirname(__file__), file_name)
         uploader = ResumableFileUpload(self.target_drive.root, local_path, 1000000)
         uploader.execute()
         print("{0} bytes has been uploaded".format(0))
 
-    def test3_download_file(self):
+    def test4_download_file(self):
         result = self.__class__.target_file.download()
         self.client.execute_query()
         self.assertIsNotNone(result.value)
 
-    def test4_convert_file(self):
+    def test5_convert_file(self):
         result = self.__class__.target_file.convert('pdf')
         self.client.execute_query()
         self.assertIsNotNone(result.value)
 
-    def test5_copy_file(self):
+    def test6_copy_file(self):
         copy_file_name = "Copied_{0}_SharePoint User Guide.docx".format(uuid.uuid4().hex)
         result = self.__class__.target_file.copy(copy_file_name)
         self.client.execute_query()
         self.assertIsNotNone(result.value)
 
-    def test6_delete_file(self):
+    def test7_delete_file(self):
         items = self.target_drive.root.children
         self.client.load(items)
         self.client.execute_query()

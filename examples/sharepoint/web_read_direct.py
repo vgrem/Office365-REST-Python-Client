@@ -3,11 +3,11 @@ import json
 from settings import settings
 
 from office365.runtime.auth.authentication_context import AuthenticationContext
-from office365.runtime.client_request import ClientRequest
 from office365.runtime.utilities.request_options import RequestOptions
 from office365.sharepoint.client_context import ClientContext
 
 if __name__ == '__main__':
+
     context_auth = AuthenticationContext(url=settings['url'])
     if context_auth.acquire_token_for_user(username=settings['user_credentials']['username'],
                                            password=settings['user_credentials']['password']):

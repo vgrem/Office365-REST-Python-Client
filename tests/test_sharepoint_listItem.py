@@ -35,7 +35,13 @@ class TestSharePointListItem(SPTestCase):
         self.assertIsNotNone(item.properties["Title"])
         self.target_item_properties["Id"] = item.properties["Id"]
 
-    def test_2_delete_list_item(self):
+    def test_2_get_list_item(self):
+        item = self.target_list.get_item_by_id(self.target_item_properties["Id"])
+        self.client.load(item)
+        self.client.execute_query()
+        self.assertIsNotNone(item.properties["Id"])
+
+    def test_3_delete_list_item(self):
         item = self.target_list.get_item_by_id(self.target_item_properties["Id"])
         item.delete_object()
         self.client.execute_query()
