@@ -1,14 +1,9 @@
 language: python
 python:
   - "2.7"
-  - "3.4"
-  - "3.5"
   - "3.6"
-
-# optionally set up exclusions and allowed failures in the matrix
-matrix:
-  allow_failures:
-    - python: "3.3"
+  - "3.7"
+  - "3.8"
 
 # command to run tests
 script: python setup.py test
@@ -19,7 +14,7 @@ stages:
     if: repo = "vgrem/Office365-REST-Python-Client"
   # Deploy is currently configured in maintainer's fork
   - name: deploy
-    if: repo = "kgadek/Office365-REST-Python-Client" AND tag IS present
+    if: repo = "vgrem/Office365-REST-Python-Client" AND tag IS present
 
 jobs:
   include:
