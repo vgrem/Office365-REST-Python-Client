@@ -5,7 +5,7 @@ import requests
 import requests.utils
 import office365.logger
 from office365.runtime.auth.base_token_provider import BaseTokenProvider
-from office365.runtime.auth.sts_info import STSInfo
+from office365.runtime.auth.sts_profile import STSProfile
 from office365.runtime.auth.user_realm_info import UserRealmInfo
 
 office365.logger.ensure_debug_secrets()
@@ -18,12 +18,10 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
         self.__username = username
         self.__password = password
         # Security Token Service info
-        self.sts = STSInfo(authority_url)
+        self.__sts_profile = STSProfile(authority_url)
         # Last occurred error
         self.error = ''
-        self.FedAuth = None
-        self.rtFa = None
-        self._auth_cookies = []
+        self._auth_cookies = {}
         self.__ns_prefixes = {
             'S': '{http://www.w3.org/2003/05/soap-envelope}',
             's': '{http://www.w3.org/2003/05/soap-envelope}',
@@ -53,15 +51,14 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
                 token = self.acquire_service_token_from_adfs(user_realm.STSAuthUrl, self.__username, self.__password)
             else:
                 token = self.acquire_service_token(self.__username, self.__password)
-            self.acquire_authentication_cookie(token)
-            return True
+            return self.acquire_authentication_cookie(token, user_realm.IsFederated)
         except requests.exceptions.RequestException as e:
             self.error = "Error: {}".format(e)
             return False
 
     def get_user_realm(self, login):
         """Get User Realm"""
-        response = requests.post(self.sts.userRealmServiceUrl, data="login={0}&xml=1".format(login),
+        response = requests.post(self.__sts_profile.userRealmServiceUrl, data="login={0}&xml=1".format(login),
                                  headers={'Content-Type': 'application/x-www-form-urlencoded'})
         xml = ElementTree.fromstring(response.content)
         node = xml.find('NameSpaceType')
@@ -76,9 +73,8 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
     def get_authentication_cookie(self):
         """Generate Auth Cookie"""
         logger = self.logger(self.get_authentication_cookie.__name__)
-
-        logger.debug_secrets("self.FedAuth: %s\nself.rtFa: %s", self.FedAuth, self.rtFa)
-        return 'FedAuth=' + self.FedAuth + '; rtFa=' + self.rtFa
+        logger.debug_secrets(self._auth_cookies)
+        return "; ".join(["=".join([key, str(val)]) for key, val in self._auth_cookies.items()])
 
     def get_last_error(self):
         return self.error
@@ -90,9 +86,9 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
             'username': username,
             'password': password,
             'message_id': str(uuid.uuid4()),
-            'created': self.sts.created,
-            'expires': self.sts.expires,
-            'issuer': self.sts.federationTokenIssuer
+            'created': self.__sts_profile.created,
+            'expires': self.__sts_profile.expires,
+            'issuer': self.__sts_profile.federationTokenIssuer
         })
         response = requests.post(adfs_url, data=payload,
                                  headers={'Content-Type': 'application/soap+xml; charset=utf-8'})
@@ -107,10 +103,11 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
                 logger.error(self.error)
                 return None
             # 2. prepare & submit token request
-            self.sts.securityTokenServicePath = 'rst2.srf'
+            self.__sts_profile.signInPage = '_vti_bin/idcrl.svc'
+            self.__sts_profile.securityTokenServicePath = 'rst2.srf'
             template = self._prepare_request_from_template('RST2.xml', {
-                'auth_url': self.sts.authorityUrl,
-                'serviceTokenUrl': self.sts.securityTokenServiceUrl
+                'auth_url': self.__sts_profile.authorityUrl,
+                'serviceTokenUrl': self.__sts_profile.securityTokenServiceUrl
             })
             template_xml = ElementTree.fromstring(template)
             security_node = template_xml.find(
@@ -119,7 +116,7 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
             security_node.insert(1, assertion_node)
             payload = ElementTree.tostring(template_xml).decode()
             # 3. get token
-            response = requests.post(self.sts.securityTokenServiceUrl, data=payload,
+            response = requests.post(self.__sts_profile.securityTokenServiceUrl, data=payload,
                                      headers={'Content-Type': 'application/soap+xml'})
             token = self._process_service_token_response(response)
             logger.debug_secrets('security token: %s', token)
@@ -133,16 +130,16 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
         """Retrieve service token"""
         logger = self.logger(self.acquire_service_token.__name__)
         payload = self._prepare_request_from_template('SAML.xml', {
-            'auth_url': self.sts.authorityUrl,
+            'auth_url': self.__sts_profile.authorityUrl,
             'username': username,
             'password': password,
             'message_id': str(uuid.uuid4()),
-            'created': self.sts.created,
-            'expires': self.sts.expires,
-            'issuer': self.sts.federationTokenIssuer
+            'created': self.__sts_profile.created,
+            'expires': self.__sts_profile.expires,
+            'issuer': self.__sts_profile.federationTokenIssuer
         })
         logger.debug_secrets('options: %s', payload)
-        response = requests.post(self.sts.securityTokenServiceUrl, data=payload,
+        response = requests.post(self.__sts_profile.securityTokenServiceUrl, data=payload,
                                  headers={'Content-Type': 'application/x-www-form-urlencoded'})
         token = self._process_service_token_response(response)
         logger.debug_secrets('security token: %s', token)
@@ -161,8 +158,9 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
 
         # check for errors
         if xml.find('{0}Body/{0}Fault'.format(self.__ns_prefixes['s'])) is not None:
-            error = xml.find('{0}Body/{0}Fault/{0}Detail/{1}error/{1}internalerror/{1}text'.format(self.__ns_prefixes['s'],
-                                                                                                   self.__ns_prefixes['psf']))
+            error = xml.find(
+                '{0}Body/{0}Fault/{0}Detail/{1}error/{1}internalerror/{1}text'.format(self.__ns_prefixes['s'],
+                                                                                      self.__ns_prefixes['psf']))
             if error is None:
                 self.error = 'An error occurred while retrieving token from XML response.'
             else:
@@ -175,30 +173,43 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
             '{0}Body/{1}RequestSecurityTokenResponse/{1}RequestedSecurityToken/{2}BinarySecurityToken'.format(
                 self.__ns_prefixes['s'], self.__ns_prefixes['wst'], self.__ns_prefixes['wsse']))
         if token is None:
-            self.error = 'Cannot get binary security token for from {0}'.format(self.sts.securityTokenServiceUrl)
+            self.error = 'Cannot get binary security token for from {0}'.format(
+                self.__sts_profile.securityTokenServiceUrl)
             logger.error(self.error)
             return None
         logger.debug_secrets("token: %s", token)
         return token.text
 
-    def acquire_authentication_cookie(self, security_token):
-        """Retrieve SPO auth cookie"""
+    def acquire_authentication_cookie(self, security_token, federated=False):
+        """Retrieve auth cookie from STS"""
         logger = self.logger(self.acquire_authentication_cookie.__name__)
         session = requests.session()
-        logger.debug_secrets("session: %s\nsession.post(%s, data=%s)", session, self.sts.signInPageUrl,
+        logger.debug_secrets("session: %s\nsession.post(%s, data=%s)", session, self.__sts_profile.signInPageUrl,
                              security_token)
-        session.post(self.sts.signInPageUrl, data=security_token,
-                     headers={'Content-Type': 'application/x-www-form-urlencoded'})
+        if not federated:
+            self._auth_cookies['FedAuth'] = None
+            self._auth_cookies['rtFa'] = None
+            session.post(self.__sts_profile.signInPageUrl, data=security_token,
+                         headers={'Content-Type': 'application/x-www-form-urlencoded'})
+        else:
+            self._auth_cookies['SPOIDCRL'] = None
+            session.head(self.__sts_profile.signInPageUrl,
+                         headers={
+                             'User-Agent': 'Office365 Python Client',
+                             'X-IDCRL_ACCEPTED': 't',
+                             'Authorization': 'BPOSIDCRL {0}'.format(security_token),
+                             'Content-Type': 'application/x-www-form-urlencoded'
+                         })
         logger.debug_secrets("session.cookies: %s", session.cookies)
         cookies = requests.utils.dict_from_cookiejar(session.cookies)
         logger.debug_secrets("cookies: %s", cookies)
-        if 'FedAuth' in cookies and 'rtFa' in cookies:
-            self.FedAuth = cookies['FedAuth']
-            self.rtFa = cookies['rtFa']
-            return True
-        self.error = "An error occurred while retrieving auth cookies"
-        logger.error(self.error)
-        return False
+        if not cookies:
+            self.error = "An error occurred while retrieving auth cookies from {0}".format(self.__sts_profile.signInPageUrl)
+            logger.error(self.error)
+            return False
+        for name in self._auth_cookies.keys():
+            self._auth_cookies[name] = cookies[name]
+        return True
 
     @staticmethod
     def _prepare_request_from_template(template_name, params):

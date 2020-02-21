@@ -7,7 +7,7 @@ class ClientObjectCollection(ClientObject):
 
     def __init__(self, context, item_type, resource_path=None):
         super(ClientObjectCollection, self).__init__(context, resource_path)
-        self.__data = []
+        self._data = []
         self.__next_query_url = None
         self._item_type = item_type
 
@@ -21,7 +21,7 @@ class ClientObjectCollection(ClientObject):
         return client_object
 
     def map_json(self, json):
-        self.__data = []
+        self._data = []
         for properties in json["collection"]:
             child_client_object = self.create_typed_object(properties, self._item_type)
             self.add_child(child_client_object)
@@ -29,13 +29,13 @@ class ClientObjectCollection(ClientObject):
 
     def add_child(self, client_object):
         client_object._parent_collection = self
-        self.__data.append(client_object)
+        self._data.append(client_object)
 
     def remove_child(self, client_object):
-        self.__data.remove(client_object)
+        self._data.remove(client_object)
 
     def __iter__(self):
-        for _object in self.__data:
+        for _object in self._data:
             yield _object
         while self.__next_query_url:
             # create a request with the __next_query_url
@@ -61,15 +61,15 @@ class ClientObjectCollection(ClientObject):
             # resolve all items first
             list(iter(self))
 
-        return len(self.__data)
+        return len(self._data)
 
     def __getitem__(self, index):
         # fetch only as much items as necessary
         item_iterator = iter(self)
-        while len(self.__data) <= index and self.__next_query_url:
+        while len(self._data) <= index and self.__next_query_url:
             next(item_iterator)
 
-        return self.__data[index]
+        return self._data[index]
 
     def filter(self, value):
         self.queryOptions['filter'] = value

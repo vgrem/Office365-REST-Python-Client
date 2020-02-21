@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import io
 from distutils.core import setup
-
 import setuptools
 
 with io.open("README.md", mode='r', encoding='utf-8') as fh:
@@ -10,7 +9,7 @@ with io.open("README.md", mode='r', encoding='utf-8') as fh:
 
 setup(
     name="Office365-REST-Python-Client",
-    version="2.1.6-1",
+    version="2.1.7",
     author="Vadim Gremyachev",
     author_email="vvgrem@gmail.com",
     maintainer="Konrad Gądek",
@@ -32,7 +31,15 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Topic :: Internet :: WWW/HTTP",
-        "Topic :: Software Development :: Libraries"
+        "Topic :: Software Development :: Libraries",
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
     packages=setuptools.find_packages(),
     package_data={

@@ -1,6 +1,4 @@
-import unittest
 import uuid
-
 from office365.directory.groupCreationProperties import GroupCreationProperties
 from office365.runtime.client_request_exception import ClientRequestException
 from tests.graph_case import GraphTestCase
@@ -11,7 +9,15 @@ class TestGraphGroup(GraphTestCase):
 
     target_group = None
 
-    def test1_create_group(self):
+    def test1_get_group_list(self):
+        groups = self.client.groups.top(1)
+        self.client.load(groups)
+        self.client.execute_query()
+        self.assertEquals(len(groups), 1)
+        for group in groups:
+            self.assertIsNotNone(group.properties['id'])
+
+    def test2_create_group(self):
         try:
             grp_name = "Group_" + uuid.uuid4().hex
             properties = GroupCreationProperties(grp_name)
@@ -28,7 +34,7 @@ class TestGraphGroup(GraphTestCase):
             else:
                 raise
 
-    def test2_delete_group(self):
+    def test3_delete_group(self):
         grp_to_delete = self.__class__.target_group
         if grp_to_delete is not None:
             grp_to_delete.delete_object()

@@ -1,7 +1,7 @@
 import datetime
 
 
-class STSInfo(object):
+class STSProfile(object):
 
     def __init__(self, authority_url):
         self.authorityUrl = authority_url
@@ -11,6 +11,7 @@ class STSInfo(object):
         self.federationTokenIssuer = 'urn:federation:MicrosoftOnline'
         self.created = datetime.datetime.now()
         self.expires = self.created + datetime.timedelta(minutes=10)
+        self.signInPage = '_forms/default.aspx?wa=wsignin1.0'
 
     @property
     def securityTokenServiceUrl(self):
@@ -18,7 +19,7 @@ class STSInfo(object):
 
     @property
     def signInPageUrl(self):
-        return "/".join([self.authorityUrl, '_forms/default.aspx?wa=wsignin1.0'])
+        return "/".join([self.authorityUrl, self.signInPage])
 
     @property
     def userRealmServiceUrl(self):
