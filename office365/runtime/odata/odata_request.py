@@ -1,7 +1,9 @@
+from requests import HTTPError
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_query import CreateEntityQuery, UpdateEntityQuery, DeleteEntityQuery, \
     ServiceOperationQuery
 from office365.runtime.client_request import ClientRequest
+from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_object import ClientValueObject
 from office365.runtime.utilities.http_method import HttpMethod
@@ -14,7 +16,18 @@ class ODataRequest(ClientRequest):
         super(ODataRequest, self).__init__(context)
         self.__current_query = None
 
-    def build_request(self):
+    def execute_query(self):
+        """Submit pending request to the server"""
+        for request in self._build_request():
+            try:
+                response = self.execute_request_direct(request)
+                response.raise_for_status()
+                self.process_response(response)
+            except HTTPError as e:
+                raise ClientRequestException(*e.args, response=e.response)
+        self.clear()
+
+    def _build_request(self):
         for qry in self._queries:
             request = RequestOptions(qry.entity_type.resourceUrl)
             # set json format headers
@@ -36,18 +49,6 @@ class ODataRequest(ClientRequest):
             self.__current_query = qry
             yield request
 
-    def _normalize_payload(self, value):
-        if isinstance(value, ClientObject) or isinstance(value, ClientValueObject):
-            json = value.to_json(self.context.json_format)
-            for k, v in json.items():
-                json[k] = self._normalize_payload(v)
-            return json
-        elif isinstance(value, dict):
-            for k, v in value.items():
-                value[k] = self._normalize_payload(v)
-            return value
-        return value
-
     def process_response(self, response):
         result_object = self.__current_query.return_type
         if response.headers.get('Content-Type', '').lower().split(';')[0] != 'application/json':
@@ -66,5 +67,17 @@ class ODataRequest(ClientRequest):
                     "next": payload.get(json_format.collection_next_tag_name, None)
                 }
             result_object.map_json(payload)
-            if 'after' in self._events:
+            if 'after' in self._events and self._events['after'] is not None:
                 self._events['after'](result_object)
+
+    def _normalize_payload(self, value):
+        if isinstance(value, ClientObject) or isinstance(value, ClientValueObject):
+            json = value.to_json(self.context.json_format)
+            for k, v in json.items():
+                json[k] = self._normalize_payload(v)
+            return json
+        elif isinstance(value, dict):
+            for k, v in value.items():
+                value[k] = self._normalize_payload(v)
+            return value
+        return value

@@ -5,6 +5,7 @@ from office365.sharepoint.web import Web
 
 class WebCollection(ClientObjectCollection):
     """Web collection"""
+
     def __init__(self, context, resource_path=None, parent_web_url=None):
         super(WebCollection, self).__init__(context, Web, resource_path)
         self._parent_web_url = parent_web_url
@@ -22,4 +23,3 @@ class WebCollection(ClientObjectCollection):
         if self._parent_web_url is not None:
             url = url.replace(self.context.serviceRootUrl, self._parent_web_url + '/_api/')
         return url
-

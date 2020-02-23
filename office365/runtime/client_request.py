@@ -1,12 +1,10 @@
 from abc import abstractmethod
 import requests
-from requests import HTTPError
-from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.utilities.http_method import HttpMethod
 
 
 class ClientRequest(object):
-    """Generic client request for OData/REST service"""
+    """Base request for OData/REST service"""
 
     def __init__(self, context):
         self.context = context
@@ -18,23 +16,12 @@ class ClientRequest(object):
         self._events = {}
 
     @abstractmethod
-    def build_request(self):
-        pass
-
-    @abstractmethod
     def process_response(self, response):
         pass
 
+    @abstractmethod
     def execute_query(self):
-        """Submit pending request to the server"""
-        for request in self.build_request():
-            try:
-                response = self.execute_request_direct(request)
-                response.raise_for_status()
-                self.process_response(response)
-            except HTTPError as e:
-                raise ClientRequestException(*e.args, response=e.response)
-        self.clear()
+        pass
 
     def execute_request_direct(self, request_options):
         """Execute client request"""
@@ -85,3 +72,5 @@ class ClientRequest(object):
 
     def after_execute_request(self, event):
         self._events['after'] = event
+
+

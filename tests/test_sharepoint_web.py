@@ -1,6 +1,7 @@
 from random import randint
+
+from office365.sharepoint.subwebQuery import SubwebQuery
 from tests.sharepoint_case import SPTestCase
-from tests.test_utilities import WebExtensions
 from office365.sharepoint.web_creation_information import WebCreationInformation
 
 
@@ -26,7 +27,12 @@ class TestSharePointWeb(SPTestCase):
         self.assertEqual(len(results), 1)
         self.assertIsNotNone(results[0].resourceUrl)
 
-    def test2_if_web_updated(self):
+    def test2_get_sub_web(self):
+        sub_webs = self.client.web.getSubwebsFilteredForCurrentUser(SubwebQuery())
+        self.client.execute_query()
+        self.assertGreater(len(sub_webs), 0)
+
+    def test3_if_web_updated(self):
         """Test to update Web resource"""
         web_title_updated = self.__class__.target_web.properties["Title"] + "_updated"
         self.__class__.target_web.set_property("Title", web_title_updated)
@@ -37,7 +43,7 @@ class TestSharePointWeb(SPTestCase):
         self.client.execute_query()
         self.assertEqual(web_title_updated, self.__class__.target_web.properties['Title'])
 
-    def test3_if_web_deleted(self):
+    def test4_if_web_deleted(self):
         """Test to delete Web resource"""
         title = self.__class__.target_web.properties['Title']
         self.__class__.target_web.delete_object()
@@ -48,8 +54,8 @@ class TestSharePointWeb(SPTestCase):
         self.client.execute_query()
         self.assertEqual(len(results), 0)
 
-    def test4_enum_all_webs(self):
+    def test5_enum_all_webs(self):
         """Test to enumerate all webs within site"""
-        all_webs = WebExtensions.get_all_webs(self.client.web)
+        result = self.client.web.get_all_webs()
         self.client.execute_query()
-        self.assertTrue(len(all_webs) > 0)
+        self.assertTrue(len(result.value) > 0)

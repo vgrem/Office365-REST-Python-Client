@@ -1,6 +1,8 @@
-from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery
+from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery, ReadEntityQuery
+from office365.runtime.client_result import ClientResult
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.field_collection import FieldCollection
 from office365.sharepoint.file import File
 from office365.sharepoint.folder import Folder
 from office365.sharepoint.folder_collection import FolderCollection
@@ -20,6 +22,40 @@ class Web(SecurableObject):
             resource_path = ResourcePath("Web")
         super(Web, self).__init__(context, resource_path)
         self._web_url = None
+
+    def getSubwebsFilteredForCurrentUser(self, query):
+        """Returns a collection of objects that contain metadata about subsites of the current site (2) in which the
+        current user is a member. """
+        users = UserCollection(self.context)
+        qry = ServiceOperationQuery(self, "getSubwebsFilteredForCurrentUser", {
+            "nWebTemplateFilter": query.WebTemplateFilter,
+            "nConfigurationFilter": query.ConfigurationFilter
+        })
+        self.context.add_query(qry, users)
+        return users
+
+    def get_all_webs(self):
+        """Returns a collection containing a flat list of all Web objects in the Web object."""
+        qry = ReadEntityQuery(self.webs)
+        result = ClientResult(self.webs)
+        self.context.add_query(qry, result)
+        self.context.pending_request.after_execute_request(self._load_sub_webs)
+        return result
+
+    def _load_sub_webs(self, result):
+        self.context.pending_request.after_execute_request(None)
+        self._load_sub_webs_inner(result.value)
+
+    def _load_sub_webs_inner(self, webs, result=None):
+        if result is None:
+            result = webs
+        for parent_web in webs:
+            sub_webs = parent_web.webs
+            self.context.load(sub_webs)
+            self.context.execute_query()
+            for web in sub_webs:
+                result.add_child(web)
+            self._load_sub_webs_inner(sub_webs, result)
 
     def update(self):
         """Update a Web resource"""
@@ -139,6 +175,14 @@ class Web(SecurableObject):
             return self.properties['AssociatedMemberGroup']
         else:
             return User(self.context, ResourcePath("AssociatedMemberGroup", self.resourcePath))
+
+    @property
+    def fields(self):
+        """Specifies the collection of all the fields (2) in the site (2)."""
+        if self.is_property_available('Fields'):
+            return self.properties['Fields']
+        else:
+            return FieldCollection(self.context, ResourcePath("Fields", self.resourcePath))
 
     def set_property(self, name, value, serializable=True):
         super(Web, self).set_property(name, value, serializable)

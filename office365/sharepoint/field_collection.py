@@ -20,16 +20,14 @@ class FieldCollection(ClientObjectCollection):
 
     def get_by_id(self, _id):
         """Gets the field with the specified ID."""
-        return Field(self.context, ResourcePathServiceOperation(self.context, self.resourcePath, "getById", [_id]))
+        return Field(self.context, ResourcePathServiceOperation("getById", [_id], self.resourcePath))
 
     def get_by_internal_name_or_title(self, name_title):
         """Returns the first Field object with the specified internal name or title from the collection."""
         return Field(self.context,
-                     ResourcePathServiceOperation(self.context,
-                                                  self.resourcePath,
-                                                  "getByInternalNameOrTitle", [name_title]))
+                     ResourcePathServiceOperation("getByInternalNameOrTitle", [name_title], self.resourcePath))
 
     def get_by_title(self, title):
         """Returns the first field object in the collection based on the title of the specified field."""
         return Field(self.context,
-                     ResourcePathServiceOperation(self.context, self.resourcePath, "getByTitle", [title]))
+                     ResourcePathServiceOperation("getByTitle", [title], self.resourcePath))

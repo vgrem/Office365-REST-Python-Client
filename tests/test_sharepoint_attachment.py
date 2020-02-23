@@ -1,11 +1,9 @@
 import os.path
-
 from tests.sharepoint_case import SPTestCase
-from tests.test_utilities import ListExtensions, read_file_as_binary
-
 from office365.sharepoint.attachmentfile_creation_information import AttachmentfileCreationInformation
 from office365.sharepoint.list_creation_information import ListCreationInformation
 from office365.sharepoint.list_template_type import ListTemplateType
+from tests.test_methods import ensure_list, read_file_as_binary
 
 
 class TestListItemAttachment(SPTestCase):
@@ -15,10 +13,10 @@ class TestListItemAttachment(SPTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestListItemAttachment, cls).setUpClass()
-        cls.target_list = ListExtensions.ensure_list(cls.client.web,
-                                                     ListCreationInformation("Tasks",
-                                                                             None,
-                                                                             ListTemplateType.Tasks))
+        cls.target_list = ensure_list(cls.client.web,
+                                      ListCreationInformation("Tasks",
+                                                              None,
+                                                              ListTemplateType.Tasks))
         item_properties = {'Title': 'Approval Task'}
         cls.target_item = cls.target_list.add_item(item_properties)
         cls.client.execute_query()

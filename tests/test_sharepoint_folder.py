@@ -1,11 +1,9 @@
 from random import randint
-
 from tests import random_seed
 from tests.sharepoint_case import SPTestCase
-from tests.test_utilities import ListExtensions
-
 from office365.sharepoint.list_creation_information import ListCreationInformation
 from office365.sharepoint.list_template_type import ListTemplateType
+from tests.test_methods import ensure_list
 
 
 class TestSharePointFolder(SPTestCase):
@@ -15,11 +13,11 @@ class TestSharePointFolder(SPTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestSharePointFolder, cls).setUpClass()
-        cls.target_list = ListExtensions.ensure_list(cls.client.web,
-                                                     ListCreationInformation(
-                                                         "Documents %s" % random_seed,
-                                                         None,
-                                                         ListTemplateType.DocumentLibrary))
+        cls.target_list = ensure_list(cls.client.web,
+                                      ListCreationInformation(
+                                          "Documents %s" % random_seed,
+                                          None,
+                                          ListTemplateType.DocumentLibrary))
 
     @classmethod
     def tearDownClass(cls):

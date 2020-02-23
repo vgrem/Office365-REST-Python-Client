@@ -1,18 +1,33 @@
 import os
 
+from office365.sharepoint.file_creation_information import FileCreationInformation
 from tests import random_seed
 from tests.sharepoint_case import SPTestCase
-from tests.test_utilities import (
-    FileExtensions,
-    ListExtensions,
-    normalize_response,
+from tests.test_methods import (
     read_file_as_binary,
     read_file_as_text,
-)
+    ensure_list)
 
 from office365.sharepoint.list_creation_information import ListCreationInformation
 from office365.sharepoint.list_template_type import ListTemplateType
 from office365.sharepoint.template_file_type import TemplateFileType
+
+
+def normalize_response(response):
+    content = response.decode("utf-8")
+    if (content[0] == content[-1]) and content.startswith(("'", '"')):
+        return content[1:-1]
+    return content
+
+
+def upload_file(list_object, url, content):
+    info = FileCreationInformation()
+    info.content = content
+    info.url = url
+    info.overwrite = True
+    uploaded_file = list_object.rootFolder.files.add(info)
+    list_object.context.execute_query()
+    return uploaded_file
 
 
 class TestSharePointFile(SPTestCase):
@@ -26,11 +41,11 @@ class TestSharePointFile(SPTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestSharePointFile, cls).setUpClass()
-        cls.target_list = ListExtensions.ensure_list(cls.client.web,
-                                                     ListCreationInformation(
-                                                         "Archive Documents N%s" % random_seed,
-                                                         None,
-                                                         ListTemplateType.DocumentLibrary))
+        cls.target_list = ensure_list(cls.client.web,
+                                      ListCreationInformation(
+                                          "Archive Documents N%s" % random_seed,
+                                          None,
+                                          ListTemplateType.DocumentLibrary))
 
     @classmethod
     def tearDownClass(cls):
@@ -44,8 +59,8 @@ class TestSharePointFile(SPTestCase):
                 file_content = read_file_as_binary(path)
             else:
                 file_content = read_file_as_text(path)
-            upload_file = FileExtensions.upload_file(self.__class__.target_list, entry["Name"], file_content)
-            self.assertEqual(upload_file.properties["Name"], entry["Name"])
+            uploaded_file = upload_file(self.__class__.target_list, entry["Name"], file_content)
+            self.assertEqual(uploaded_file.properties["Name"], entry["Name"])
 
     def test_2_list_files(self):
         files = self.__class__.target_list.rootFolder.files
@@ -136,7 +151,6 @@ class TestSharePointFile(SPTestCase):
             file_to_delete.delete_object()
             self.client.execute_query()
 
-        # verify
         result = self.__class__.target_list.rootFolder.files
         self.client.load(result)
         self.client.execute_query()

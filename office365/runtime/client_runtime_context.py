@@ -3,13 +3,12 @@ from office365.runtime.odata.odata_request import ODataRequest
 
 
 class ClientRuntimeContext(object):
-    """OData client context"""
+    """Client context"""
 
     def __init__(self, url, auth_context):
         self.__service_root_url = url
         self.__auth_context = auth_context
         self.__pending_request = None
-        self.json_format = None
 
     def authenticate_request(self, request):
         self.__auth_context.authenticate_request(request)
@@ -42,7 +41,3 @@ class ClientRuntimeContext(object):
     @property
     def serviceRootUrl(self):
         return self.__service_root_url
-
-    @serviceRootUrl.setter
-    def serviceRootUrl(self, value):
-        self.__service_root_url = value

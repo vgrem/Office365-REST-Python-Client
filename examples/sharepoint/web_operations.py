@@ -48,19 +48,35 @@ def print_webs_recursively(parent_web):
         print_webs_recursively(web)
 
 
+def get_all_webs(parent_web, result=None):
+    if result is None:
+        result = []
+    ctx = parent_web.context
+    webs = parent_web.webs
+    ctx.load(webs)
+    ctx.execute_query()
+    result = result + list(webs)
+    for web in webs:
+        result = get_all_webs(web, result)
+    return result
+
+
 if __name__ == '__main__':
     ctxAuth = AuthenticationContext(url=settings['url'])
-    if ctxAuth.acquire_token_for_user(username=settings['user_credentials']['username'],
-                                      password=settings['user_credentials']['password']):
+    if ctxAuth.acquire_token_for_app(client_id=settings['client_credentials']['client_id'],
+                                     client_secret=settings['client_credentials']['client_secret']):
         ctx = ClientContext(settings['url'], ctxAuth)
         # web = load_web(ctx)
         # web = create_web(ctx)
         # update_web(web)
         # delete_web(web)
-        root_web = ctx.web
-        ctx.load(root_web)
-        ctx.execute_query()
-        print_webs_recursively(root_web)
-
+        #root_web = ctx.web
+        #ctx.load(root_web)
+        #ctx.execute_query()
+        #print_webs_recursively(root_web)
+        all_webs = get_all_webs(ctx.web)
+        for w in all_webs:
+            print(w.properties['Url'])
+        #print_webs_recursively(all_webs)
     else:
         print(ctxAuth.get_last_error())
