@@ -43,8 +43,8 @@ class Group(DirectoryObject):
             return SiteCollection(self.context,
                                   ResourcePath("sites", self.resourcePath))
 
-    def set_property(self, name, value, serializable=True):
-        super(Group, self).set_property(name, value, serializable)
+    def set_property(self, name, value, persist_changes=True):
+        super(Group, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "id":

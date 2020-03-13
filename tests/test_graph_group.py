@@ -13,7 +13,7 @@ class TestGraphGroup(GraphTestCase):
         groups = self.client.groups.top(1)
         self.client.load(groups)
         self.client.execute_query()
-        self.assertEquals(len(groups), 1)
+        self.assertEqual(len(groups), 1)
         for group in groups:
             self.assertIsNotNone(group.properties['id'])
 

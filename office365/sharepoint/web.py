@@ -184,8 +184,8 @@ class Web(SecurableObject):
         else:
             return FieldCollection(self.context, ResourcePath("Fields", self.resourcePath))
 
-    def set_property(self, name, value, serializable=True):
-        super(Web, self).set_property(name, value, serializable)
+    def set_property(self, name, value, persist_changes=True):
+        super(Web, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "Url":
             self._web_url = value

@@ -15,8 +15,8 @@ class OutlookEntity(ClientObject):
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
 
-    def set_property(self, name, value, serializable=True):
-        super(OutlookEntity, self).set_property(name, value, serializable)
+    def set_property(self, name, value, persist_changes=True):
+        super(OutlookEntity, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "Id":
             self._resource_path = ResourcePath(

@@ -7,14 +7,14 @@ class ClientObject(object):
     def __init__(self, context, resource_path=None, properties=None):
         self._properties = {}
         self._metadata = {}
-        if properties is not None:
-            for k, v in properties.items():
-                self.set_property(k, v, True)
         self._entity_type_name = None
         self._query_options = {}
         self._parent_collection = None
         self._context = context
         self._resource_path = resource_path
+        if properties is not None:
+            for k, v in properties.items():
+                self.set_property(k, v, True)
 
     def is_property_available(self, name):
         """Returns a Boolean value that indicates whether the specified property has been retrieved or set."""
@@ -40,9 +40,9 @@ class ClientObject(object):
             return
         self._parent_collection.remove_child(self)
 
-    def set_property(self, name, value, serializable=True):
+    def set_property(self, name, value, persist_changes=True):
         """Set resource property value"""
-        self._metadata[name] = {'serializable': serializable}
+        self._metadata[name] = {'persist_changes': persist_changes}
         self._properties[name] = value
 
     def map_json(self, json):
@@ -50,7 +50,7 @@ class ClientObject(object):
 
     def to_json(self, data_format):
         json = dict((k, v) for k, v in self.properties.items()
-                    if k in self.metadata and self.metadata[k]['serializable'] is True)
+                    if k in self._metadata and self._metadata[k]['persist_changes'] is True)
         if data_format.metadata == ODataMetadataLevel.Verbose and "__metadata" not in json.items():
             json["__metadata"] = {'type': self.entityTypeName}
         return json
@@ -94,7 +94,3 @@ class ClientObject(object):
     @property
     def properties(self):
         return self._properties
-
-    @property
-    def metadata(self):
-        return self._metadata

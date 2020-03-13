@@ -1,5 +1,4 @@
 from random import randint
-
 from office365.sharepoint.subwebQuery import SubwebQuery
 from tests.sharepoint_case import SPTestCase
 from office365.sharepoint.web_creation_information import WebCreationInformation
@@ -58,4 +57,4 @@ class TestSharePointWeb(SPTestCase):
         """Test to enumerate all webs within site"""
         result = self.client.web.get_all_webs()
         self.client.execute_query()
-        self.assertTrue(len(result.value) > 0)
+        self.assertTrue(len(result.value) > 0)    

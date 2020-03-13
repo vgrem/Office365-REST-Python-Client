@@ -79,9 +79,10 @@ class ListItem(SecurableObject):
             return AttachmentfileCollection(self.context,
                                             ResourcePath("AttachmentFiles", self.resourcePath))
 
-    def set_property(self, name, value, serializable=True):
-        super(ListItem, self).set_property(name, value, serializable)
+    def set_property(self, name, value, persist_changes=True):
+        super(ListItem, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
-        if name == "Id" and self._resource_path is None:
-            self._resource_path = ResourcePathServiceOperation(
-                "getItemById", [value], self._parent_collection.resourcePath)
+        if self._resource_path is None:
+            if name == "Id":
+                self._resource_path = ResourcePathServiceOperation(
+                    "getItemById", [value], self._parent_collection.resourcePath.parent)

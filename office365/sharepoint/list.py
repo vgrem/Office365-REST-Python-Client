@@ -26,8 +26,8 @@ class List(SecurableObject):
         """The recommended way to add a list item is to send a POST request to the ListItemCollection resource endpoint,
          as shown in ListItemCollection request examples."""
         item = ListItem(self.context, None, list_item_creation_information)
-        item._parent_collection = self
-        qry = ServiceOperationQuery(self,"items", None, item)
+        item._parent_collection = ListItemCollection(self.context, ResourcePath("items", self.resourcePath))
+        qry = ServiceOperationQuery(self, "items", None, item)
         self.context.add_query(qry, item)
         return item
 
@@ -85,8 +85,8 @@ class List(SecurableObject):
             return ContentTypeCollection(self.context,
                                          ResourcePath("contenttypes", self.resourcePath))
 
-    def set_property(self, name, value, serializable=True):
-        super(List, self).set_property(name, value, serializable)
+    def set_property(self, name, value, persist_changes=True):
+        super(List, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id":
@@ -95,5 +95,3 @@ class List(SecurableObject):
             elif name == "Title":
                 self._resource_path = ResourcePathServiceOperation(
                     "GetByTitle", [value], self._parent_collection.resourcePath)
-
-

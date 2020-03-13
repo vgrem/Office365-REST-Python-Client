@@ -50,8 +50,8 @@ class Principal(ClientObject):
         else:
             return None
 
-    def set_property(self, name, value, serializable=True):
-        super(Principal, self).set_property(name, value, serializable)
+    def set_property(self, name, value, persist_changes=True):
+        super(Principal, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id":

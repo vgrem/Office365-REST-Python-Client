@@ -11,6 +11,6 @@ class TestGraphUser(GraphTestCase):
         users = self.client.users.top(1)
         self.client.load(users)
         self.client.execute_query()
-        self.assertEquals(len(users), 1)
+        self.assertEqual(len(users), 1)
         for user in users:
             self.assertIsNotNone(user.properties['id'])

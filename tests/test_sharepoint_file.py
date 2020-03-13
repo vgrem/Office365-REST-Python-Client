@@ -69,6 +69,15 @@ class TestSharePointFile(SPTestCase):
         files_items = list(files)
         self.assertEqual(len(files_items), 2)
 
+        items = self.__class__.target_list.get_items()
+        self.client.load(items)
+        self.client.execute_query()
+
+        item_id = items[0].properties["Id"]
+        file = items[0].parentList.get_item_by_id(item_id).file
+        self.client.load(file)
+        self.client.execute_query()
+
     def test_3_update_file(self):
         """Test file upload operation"""
         files = self.__class__.target_list.rootFolder.files

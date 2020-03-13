@@ -52,8 +52,8 @@ class Folder(ClientObject):
             from office365.sharepoint.folder_collection import FolderCollection
             return FolderCollection(self.context, ResourcePath("Folders", self.resourcePath))
 
-    def set_property(self, name, value, serializable=True):
-        super(Folder, self).set_property(name, value, serializable)
+    def set_property(self, name, value, persist_changes=True):
+        super(Folder, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "ServerRelativeUrl":

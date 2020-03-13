@@ -6,8 +6,8 @@ from office365.sharepoint.file import AbstractFile
 class AttachmentFile(AbstractFile):
     """Represents an attachment file in a SharePoint List Item."""
 
-    def set_property(self, name, value, serializable=True):
-        super(AttachmentFile, self).set_property(name, value, serializable)
+    def set_property(self, name, value, persist_changes=True):
+        super(AttachmentFile, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "ServerRelativeUrl":
             self._resource_path = ResourcePathServiceOperation(

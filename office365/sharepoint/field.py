@@ -17,8 +17,8 @@ class Field(ClientObject):
         self.context.add_query(qry)
         self.remove_from_parent_collection()
 
-    def set_property(self, name, value, serializable=True):
-        super(Field, self).set_property(name, value, serializable)
+    def set_property(self, name, value, persist_changes=True):
+        super(Field, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "Id" and self._resource_path is None:
             self._resource_path = ResourcePathServiceOperation(
