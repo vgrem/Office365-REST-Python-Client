@@ -15,7 +15,7 @@ def recursive_builder(queries, operator='And'):
             last_query = queries.pop()
             return f'<{operator}>' + query + last_query + f'</{operator}>'
         else:
-            return f'<{operator}>' + query + recursive_builder(queries) + f'</{operator}>'
+            return f'<{operator}>' + query + recursive_builder(queries, operator) + f'</{operator}>'
     return ''
 
 
@@ -60,12 +60,9 @@ class CamlQueryBuilder:
                             operator, filter_name, column_type, filter_value, operator)
                 else:
                     column_type, values = 'Text', filter_value.split(',')
-                    query = ''
-                    for value in values:
-                        query = query + '<{}><FieldRef Name="{}" /><Value Type="{}">{}</Value></{}>'.format(
-                            operator, filter_name, column_type, value, operator)
-                    if len(values) > 1:
-                        query = f'<Or>{query}</Or>'
+                    queries = ['<{}><FieldRef Name="{}" /><Value Type="{}">{}</Value></{}>'.format(
+                        operator, filter_name, column_type, value, operator) for value in values]
+                    query = recursive_builder(queries, 'Or')
                 filter_queries.append(query)
             where_condition = recursive_builder(filter_queries)
             if len(filter_queries) > 1:
