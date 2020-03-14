@@ -29,6 +29,10 @@ class TestSPView(SPTestCase):
     def test1_create_view(self):
         view_properties = ViewCreationInformation()
         view_properties.Title = self.target_view_title
+        view_properties.PersonalView = True
+        view_properties.Query = "<Where><Eq><FieldRef ID='Assigned To' /><Value " \
+                                "Type='Integer'><UserID/></Value></Eq></Where> "
+
         view_to_create = self.target_list.views.add(view_properties)
         self.client.execute_query()
         self.assertEqual(view_properties.Title, view_to_create.properties['Title'])

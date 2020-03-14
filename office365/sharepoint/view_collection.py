@@ -1,5 +1,5 @@
 from office365.runtime.client_object_collection import ClientObjectCollection
-from office365.runtime.client_query import CreateEntityQuery
+from office365.runtime.client_query import ServiceOperationQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.view import View
 
@@ -12,7 +12,7 @@ class ViewCollection(ClientObjectCollection):
     def add(self, view_creation_information):
         view = View(self.context)
         view._parent_collection = self
-        qry = CreateEntityQuery(self, view_creation_information)
+        qry = ServiceOperationQuery(self, "Add", None, view_creation_information)
         self.context.add_query(qry, view)
         return view
 

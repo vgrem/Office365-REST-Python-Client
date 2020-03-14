@@ -1,7 +1,7 @@
 from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.runtime.utilities.http_method import HttpMethod
+from office365.runtime.http.http_method import HttpMethod
 from office365.sharepoint.securable_object import SecurableObject
 
 

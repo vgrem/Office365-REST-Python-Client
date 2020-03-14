@@ -1,5 +1,5 @@
 from office365.runtime.client_object import ClientObject
-from office365.runtime.utilities.request_options import RequestOptions
+from office365.runtime.http.request_options import RequestOptions
 
 
 class ClientObjectCollection(ClientObject):

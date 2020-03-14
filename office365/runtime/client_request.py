@@ -1,6 +1,8 @@
 from abc import abstractmethod
 import requests
-from office365.runtime.utilities.http_method import HttpMethod
+from requests import HTTPError
+from office365.runtime.client_request_exception import ClientRequestException
+from office365.runtime.http.http_method import HttpMethod
 
 
 class ClientRequest(object):
@@ -10,18 +12,43 @@ class ClientRequest(object):
         self.context = context
         self._queries = []
         self._events = {}
+        self._current_query = None
 
     def clear(self):
         self._queries = []
         self._events = {}
 
     @abstractmethod
-    def process_response(self, response):
+    def build_request(self):
         pass
 
     @abstractmethod
-    def execute_query(self):
+    def process_response(self, response):
         pass
+
+    def execute_query(self):
+        """Submit a pending request to the server"""
+        for qry in self.get_query():
+            try:
+                request = self.build_request()
+                if 'before' in self._events:
+                    self._events['before'](request, qry)
+                response = self.execute_request_direct(request)
+                response.raise_for_status()
+                self.process_response(response)
+                if 'after' in self._events and self._events['after'] is not None:
+                    self._events['after'](qry.return_type)
+            except HTTPError as e:
+                raise ClientRequestException(*e.args, response=e.response)
+        self.clear()
+
+    def get_query(self):
+        for qry in self._queries:
+            self._current_query = qry
+            yield qry
+
+    def _get_current_query(self):
+        return self._current_query
 
     def execute_request_direct(self, request_options):
         """Execute client request"""

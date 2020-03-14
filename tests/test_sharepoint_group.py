@@ -32,5 +32,4 @@ class TestSharePointGroup(SPTestCase):
         target_users.remove_by_id(user_id)
         self.client.load(target_users)
         self.client.execute_query()
-
         self.assertEqual(users_count_before, len(target_users) + 1)

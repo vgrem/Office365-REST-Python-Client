@@ -1,4 +1,4 @@
-from office365.runtime.utilities.http_method import HttpMethod
+from office365.runtime.http.http_method import HttpMethod
 
 
 class RequestOptions(object):
