@@ -7,6 +7,7 @@ class ODataJsonFormat(object):
     def __init__(self, metadata=None):
         self.metadata = metadata
         self.security_tag_name = None
+        self.function_tag_name = None
         self.collection_tag_name = None
         self.collection_next_tag_name = None
 

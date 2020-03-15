@@ -45,6 +45,10 @@ class ODataRequest(ClientRequest):
             json_format = self.context.json_format
             if json_format.security_tag_name:
                 payload = payload[json_format.security_tag_name]
+            if isinstance(qry, ServiceOperationQuery):
+                func_name = qry.method_path.segment
+                if func_name in payload:
+                    payload = payload[func_name]
             if json_format.collection_tag_name in payload:
                 payload = {
                     "collection": payload[json_format.collection_tag_name],

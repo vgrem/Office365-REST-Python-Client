@@ -11,12 +11,12 @@ class ClientRequest(object):
     def __init__(self, context):
         self.context = context
         self._queries = []
-        self._events = {}
+        self._events = []
         self._current_query = None
 
     def clear(self):
         self._queries = []
-        self._events = {}
+        self._events = []
 
     @abstractmethod
     def build_request(self):
@@ -31,13 +31,15 @@ class ClientRequest(object):
         for qry in self.get_query():
             try:
                 request = self.build_request()
-                if 'before' in self._events:
-                    self._events['before'](request, qry)
+                for e in self._events:
+                    if e['name'] == 'before':
+                        e['handler'](request, qry)
                 response = self.execute_request_direct(request)
                 response.raise_for_status()
                 self.process_response(response)
-                if 'after' in self._events and self._events['after'] is not None:
-                    self._events['after'](qry.return_type)
+                for e in self._events:
+                    if e['name'] == 'after':
+                        e['handler'](qry.return_type)
             except HTTPError as e:
                 raise ClientRequestException(*e.args, response=e.response)
         self.clear()
@@ -94,10 +96,10 @@ class ClientRequest(object):
         if result_object is not None:
             query.return_type = result_object
 
-    def before_execute_request(self, event):
-        self._events['before'] = event
+    def before_execute_request(self, handler):
+        self._events.append({'name': 'before', 'handler': handler})
 
-    def after_execute_request(self, event):
-        self._events['after'] = event
+    def after_execute_request(self, handler):
+        self._events.append({'name': 'after', 'handler': handler})
 
 

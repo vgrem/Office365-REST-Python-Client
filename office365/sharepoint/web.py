@@ -43,7 +43,7 @@ class Web(SecurableObject):
         return result
 
     def _load_sub_webs(self, result):
-        self.context.pending_request.after_execute_request(None)
+        self.context.pending_request.clear()
         self._load_sub_webs_inner(result.value)
 
     def _load_sub_webs_inner(self, webs, result=None):
@@ -96,7 +96,7 @@ class Web(SecurableObject):
         if self.is_property_available('Webs'):
             return self.properties['Webs']
         else:
-            from office365.sharepoint.web_collection import WebCollection
+            from office365.sharepoint.webCollection import WebCollection
             parent_web_url = None
             if self.is_property_available('Url'):
                 parent_web_url = self.properties['Url']
