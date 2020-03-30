@@ -39,13 +39,13 @@ class TestSharePointFolder(SPTestCase):
         self.client.load(folders)
         self.client.execute_query()
         for child_folder in folders:
-            self.assertIsNotNone(child_folder.resourceUrl)
+            self.assertIsNotNone(child_folder.resourcePath)
             self.assertIsNotNone(child_folder.resourcePath)
             files = child_folder.files
             self.client.load(files)
             self.client.execute_query()
             for file_in_folder in files:
-                self.assertIsNotNone(file_in_folder.resourceUrl)
+                self.assertIsNotNone(file_in_folder.resourcePath)
 
     def test_1_create_folder(self):
         folder_new = self.__class__.target_list.rootFolder.folders.add(self.target_folder_name)

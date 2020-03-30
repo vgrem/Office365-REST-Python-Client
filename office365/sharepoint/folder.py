@@ -14,7 +14,7 @@ class Folder(ClientObject):
         item.properties['Title'] = name
         item.properties['FileLeafRef'] = name
         qry = UpdateEntityQuery(item)
-        self.context.add_query(qry, self)
+        self.context.add_query(qry)
 
     def update(self):
         qry = UpdateEntityQuery(self)

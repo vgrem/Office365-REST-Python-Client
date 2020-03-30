@@ -14,8 +14,8 @@ class UserCollection(ClientObjectCollection):
         user = User(self.context)
         user._parent_collection = self
         user.set_property('LoginName', login_name)
-        qry = CreateEntityQuery(self, user)
-        self.context.add_query(qry, user)
+        qry = CreateEntityQuery(self, user, user)
+        self.context.add_query(qry)
         self.add_child(user)
         return user
 

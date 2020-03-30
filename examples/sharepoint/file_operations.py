@@ -1,8 +1,8 @@
 import os
 
+from office365.runtime.auth.UserCredential import UserCredential
 from settings import settings
 
-from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.caml_query import CamlQuery
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.file import File
@@ -41,8 +41,7 @@ def read_folder_and_files(context, list_title):
 
 
 def upload_file(context):
-
-    path = "../tests/data/SharePoint User Guide.docx"
+    path = "../../tests/data/SharePoint User Guide.docx"
     with open(path, 'rb') as content_file:
         file_content = content_file.read()
 
@@ -58,25 +57,25 @@ def upload_file(context):
 
 
 def download_file(context):
-    response = File.open_binary(context, "/Shared Documents/SharePoint User Guide.docx")
-    with open("./data/SharePoint User Guide.docx", "wb") as local_file:
+    path = "../../tests/data/SharePoint User Guide.docx"
+    response = File.open_binary(context, "/teams/DemoSite/Shared Documents/SharePoint User Guide.docx")
+    response.raise_for_status()
+    with open(path, "wb") as local_file:
         local_file.write(response.content)
 
 
 if __name__ == '__main__':
     site_url = 'https://mediadev8.sharepoint.com/teams/DemoSite/'
 
-    ctx_auth = AuthenticationContext(url=site_url)
-    if ctx_auth.acquire_token_for_user(username=settings['user_credentials']['username'],
-                                       password=settings['user_credentials']['password']):
-        # if ctx_auth.acquire_token_for_app(client_id=settings['client_credentials']['client_id'],
-        #                                  client_secret=settings['client_credentials']['client_secret']):
-        ctx = ClientContext(site_url, ctx_auth)
-        # get a source file located in library 'Shared Documents'
-        source_file = ctx.web.get_file_by_server_relative_url("/teams/DemoSite/Shared Documents/Guide.docx")
-        # move a file into sub folder called 'Archive'
-        source_file.moveto("/teams/DemoSite/Shared Documents/Archive/Guide.docx", 1)
-        # execute a query
-        ctx.execute_query()
-    else:
-        print(ctx_auth.get_last_error())
+    ctx = ClientContext.connect_with_credentials(site_url, UserCredential(settings['user_credentials']['username'],
+                                                                          settings['user_credentials']['password']))
+
+    # upload_file(ctx)
+    download_file(ctx)
+
+    # get a source file located in library 'Shared Documents'
+    # source_file = ctx.web.get_file_by_server_relative_url("/teams/DemoSite/Shared Documents/Guide.docx")
+    # move a file into sub folder called 'Archive'
+    # source_file.moveto("/teams/DemoSite/Shared Documents/Archive/Guide.docx", 1)
+    # execute a query
+    # ctx.execute_query()

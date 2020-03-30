@@ -1,6 +1,3 @@
-import uuid
-from office365.directory.groupCreationProperties import GroupCreationProperties
-from office365.runtime.client_request_exception import ClientRequestException
 from tests.graph_case import GraphTestCase
 
 

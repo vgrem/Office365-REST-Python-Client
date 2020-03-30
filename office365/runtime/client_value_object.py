@@ -10,12 +10,9 @@ class ClientValueObject(object):
             # if hasattr(type(self), key):
             self.__dict__[key] = val
 
-    def to_json(self, data_format):
-        json = dict((k, v) for k, v in vars(self).items() if v is not None)
-        if isinstance(data_format, JsonLightFormat) and data_format.metadata == ODataMetadataLevel.Verbose:
-            json["__metadata"] = {'type': self.typeName}
-        return json
+    def to_json(self):
+        return dict((k, v) for k, v in vars(self).items() if v is not None)
 
     @property
-    def typeName(self):
+    def entityTypeName(self):
         return None

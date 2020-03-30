@@ -6,6 +6,7 @@ from office365.sharepoint.list import List
 
 class ListCollection(ClientObjectCollection):
     """Lists collection"""
+
     def __init__(self, context, resource_path=None):
         super(ListCollection, self).__init__(context, List, resource_path)
 
@@ -22,22 +23,24 @@ class ListCollection(ClientObjectCollection):
     def ensure_site_assets_library(self):
         """Gets a list that is the default asset location for images or other files, which the users
         upload to their wiki pages."""
-        list_site_assets = List(self.context)
-        qry = ServiceOperationQuery(self, "ensuresiteassetslibrary")
-        self.context.add_query(qry, list_site_assets)
-        return list_site_assets
+        target_list = List(self.context)
+        self.add_child(target_list)
+        qry = ServiceOperationQuery(self, "ensuresiteassetslibrary", None, None, None, target_list)
+        self.context.add_query(qry)
+        return target_list
 
     def ensure_site_pages_library(self):
         """Gets a list that is the default location for wiki pages."""
-        list_site_pages = List(self.context)
-        qry = ServiceOperationQuery(self, "ensuresitepageslibrary")
-        self.context.add_query(qry, list_site_pages)
-        return list_site_pages
+        target_list = List(self.context)
+        self.add_child(target_list)
+        qry = ServiceOperationQuery(self, "ensuresitepageslibrary", None, None, None, target_list)
+        self.context.add_query(qry)
+        return target_list
 
     def add(self, list_creation_information):
         """Creates a List resource"""
-        list_entry = List(self.context)
-        qry = CreateEntityQuery(self, list_creation_information)
-        self.context.add_query(qry, list_entry)
-        self.add_child(list_entry)
-        return list_entry
+        target_list = List(self.context)
+        self.add_child(target_list)
+        qry = CreateEntityQuery(self, list_creation_information, target_list)
+        self.context.add_query(qry)
+        return target_list

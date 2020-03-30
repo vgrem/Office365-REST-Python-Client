@@ -14,7 +14,7 @@ class GroupCollection(DirectoryObjectCollection):
         Office 365 group (unified group)
         Security group"""
         grp = Group(self.context)
-        qry = CreateEntityQuery(self, group_properties)
-        self.context.add_query(qry, grp)
         self.add_child(grp)
+        qry = CreateEntityQuery(self, group_properties, grp)
+        self.context.add_query(qry)
         return grp

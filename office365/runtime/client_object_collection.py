@@ -11,21 +11,21 @@ class ClientObjectCollection(ClientObject):
         self.__next_query_url = None
         self._item_type = item_type
 
-    def create_typed_object(self, properties, client_object_type):
-        if client_object_type is None:
-            raise AttributeError("No class for object type '{0}' found".format(client_object_type))
+    def create_typed_object(self, properties):
+        if self._item_type is None:
+            raise AttributeError("No class for object type '{0}' found".format(self._item_type))
 
-        client_object = client_object_type(self.context)
+        client_object = self._item_type(self.context)
         client_object._parent_collection = self
         client_object.map_json(properties)
         return client_object
 
-    def map_json(self, json):
+    def map_json(self, json, next_query_url=None):
         self._data = []
-        for properties in json["collection"]:
-            child_client_object = self.create_typed_object(properties, self._item_type)
+        for properties in json:
+            child_client_object = self.create_typed_object(properties)
             self.add_child(child_client_object)
-        self.__next_query_url = json["next"]
+        self.__next_query_url = next_query_url
 
     def add_child(self, client_object):
         client_object._parent_collection = self
@@ -40,27 +40,20 @@ class ClientObjectCollection(ClientObject):
         while self.__next_query_url:
             # create a request with the __next_query_url
             request = RequestOptions(self.__next_query_url)
-            request.set_headers(self.context.json_format.build_http_headers())
             response = self.context.execute_request_direct(request)
+            payload = response.json()
+            next_collection = ClientObjectCollection(self.context, self._item_type)
+            next_collection.map_json(payload["collection"], payload["next"])
 
-            # process the response
-            payload = self.context.pending_request.process_response(response)
-            self.__next_query_url = payload["next"]
-            child_client_objects = []
             # add the new objects to the collection before yielding the results
-            for properties in payload["collection"]:
-                child_client_object = self.create_typed_object(properties, self._item_type)
-                self.add_child(child_client_object)
-                child_client_objects.append(child_client_object)
-
-            for child_client_object in child_client_objects:
-                yield child_client_object
+            for item in next_collection:
+                self.add_child(item)
+                yield item
 
     def __len__(self):
         if self.__next_query_url:
             # resolve all items first
             list(iter(self))
-
         return len(self._data)
 
     def __getitem__(self, index):
@@ -71,18 +64,18 @@ class ClientObjectCollection(ClientObject):
 
         return self._data[index]
 
-    def filter(self, value):
-        self.queryOptions['filter'] = value
+    def filter(self, expression):
+        self.queryOptions.filter = expression
         return self
 
     def order_by(self, value):
-        self.queryOptions['orderby'] = value
+        self.queryOptions.orderBy = value
         return self
 
     def skip(self, value):
-        self.queryOptions['skip'] = value
+        self.queryOptions.skip = value
         return self
 
     def top(self, value):
-        self.queryOptions['top'] = value
+        self.queryOptions.top = value
         return self

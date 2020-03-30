@@ -17,8 +17,5 @@ class SPSiteCreationRequest(ClientValueObject):
         self.WebTemplateExtensionId = "00000000-0000-0000-0000-000000000000"
 
     @property
-    def typeName(self):
+    def entityTypeName(self):
         return "Microsoft.SharePoint.Portal.SPSiteCreationRequest"
-
-    def to_json(self, data_format):
-        return {"request": super(SPSiteCreationRequest, self).to_json(data_format)}

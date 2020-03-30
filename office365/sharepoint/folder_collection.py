@@ -11,9 +11,10 @@ class FolderCollection(ClientObjectCollection):
 
     def add(self, folder_url):
         folder = Folder(self.context)
+        self.add_child(folder)
         folder.set_property("ServerRelativeUrl", folder_url)
-        qry = CreateEntityQuery(self, folder)
-        self.context.add_query(qry, folder)
+        qry = CreateEntityQuery(self, folder, folder)
+        self.context.add_query(qry)
         return folder
 
     def get_by_url(self, url):

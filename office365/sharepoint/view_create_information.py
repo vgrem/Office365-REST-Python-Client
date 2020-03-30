@@ -15,9 +15,6 @@ class ViewCreationInformation(ClientValueObject):
         self.PersonalView = False
         self.Paged = False
 
-    def to_json(self, data_format):
-        return {"parameters": super(ViewCreationInformation, self).to_json(data_format)}
-
     @property
-    def typeName(self):
+    def entityTypeName(self):
         return "SP.ViewCreationInformation"

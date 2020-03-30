@@ -11,5 +11,5 @@ class FieldCreationInformation(ClientValueObject):
         self.Description = description
 
     @property
-    def typeName(self):
+    def entityTypeName(self):
         return "SP.Field"

@@ -12,8 +12,8 @@ class ViewCollection(ClientObjectCollection):
     def add(self, view_creation_information):
         view = View(self.context)
         view._parent_collection = self
-        qry = ServiceOperationQuery(self, "Add", None, view_creation_information)
-        self.context.add_query(qry, view)
+        qry = ServiceOperationQuery(self, "Add", None, view_creation_information, "parameters", view)
+        self.context.add_query(qry)
         return view
 
     def get_by_title(self, view_title):

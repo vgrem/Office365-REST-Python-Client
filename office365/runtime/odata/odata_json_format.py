@@ -14,5 +14,5 @@ class ODataJsonFormat(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def build_http_headers(self):
+    def get_media_type(self):
         pass

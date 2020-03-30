@@ -13,17 +13,17 @@ class ContactCollection(ClientObjectCollection):
     def add_from_json(self, contact_creation_information):
         """Creates a Contact resource from JSON"""
         contact = Contact(self.context)
-        qry = CreateEntityQuery(self, contact_creation_information)
-        self.context.add_query(qry, contact)
         self.add_child(contact)
+        qry = CreateEntityQuery(self, contact_creation_information, contact)
+        self.context.add_query(qry)
         return contact
 
     def add(self):
         """Creates a Contact resource"""
         contact = Contact(self.context)
-        qry = CreateEntityQuery(self, contact)
-        self.context.add_query(qry, contact)
         self.add_child(contact)
+        qry = CreateEntityQuery(self, contact, contact)
+        self.context.add_query(qry)
         return contact
 
     def get_by_id(self, contact_id):

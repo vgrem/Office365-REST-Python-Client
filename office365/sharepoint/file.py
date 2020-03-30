@@ -142,29 +142,33 @@ class File(AbstractFile):
 
     def start_upload(self, upload_id, content):
         """Starts a new chunk upload session and uploads the first fragment."""
+        result = ClientResult(None)
         qry = ServiceOperationQuery(self,
                                     "startupload",
                                     {
                                         "uploadID": upload_id
                                     },
-                                    content
+                                    content,
+                                    None,
+                                    result
                                     )
-        result = ClientResult(None)
-        self.context.add_query(qry, result)
+        self.context.add_query(qry)
         return result
 
     def continue_upload(self, upload_id, file_offset, content):
         """Continues the chunk upload session with an additional fragment. The current file content is not changed."""
+        result = ClientResult(None)
         qry = ServiceOperationQuery(self,
                                     "continueupload",
                                     {
                                         "uploadID": upload_id,
                                         "fileOffset": file_offset,
                                     },
-                                    content
+                                    content,
+                                    None,
+                                    result
                                     )
-        result = ClientResult(None)
-        self.context.add_query(qry, result)
+        self.context.add_query(qry)
         return result
 
     def finish_upload(self, upload_id, file_offset, content):
@@ -176,9 +180,11 @@ class File(AbstractFile):
                                         "uploadID": upload_id,
                                         "fileOffset": file_offset,
                                     },
-                                    content
+                                    content,
+                                    None,
+                                    self
                                     )
-        self.context.add_query(qry, self)
+        self.context.add_query(qry)
         return self
 
     @staticmethod

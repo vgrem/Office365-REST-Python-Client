@@ -13,8 +13,6 @@ class V4JsonFormat(ODataJsonFormat):
         self.streaming = False
         self.collection_tag_name = "value"
 
-    def build_http_headers(self):
-        type_string = "application/json;odata.metadata={0};odata.streaming={1};IEEE754Compatible={2}" \
+    def get_media_type(self):
+        return "application/json;odata.metadata={0};odata.streaming={1};IEEE754Compatible={2}" \
             .format(self.metadata, self.streaming, self.IEEE754Compatible)
-        return {'content-type': type_string,
-                'accept': type_string}

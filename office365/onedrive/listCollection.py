@@ -11,8 +11,8 @@ class ListCollection(ClientObjectCollection):
 
     def add(self, list_creation_information):
         """Creates a Drive list resource"""
-        new_list = List(self.context)
-        qry = CreateEntityQuery(self, list_creation_information)
-        self.context.add_query(qry, new_list)
-        self.add_child(new_list)
-        return new_list
+        target_list = List(self.context)
+        self.add_child(target_list)
+        qry = CreateEntityQuery(self, list_creation_information, target_list)
+        self.context.add_query(qry)
+        return target_list

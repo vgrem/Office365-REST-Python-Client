@@ -6,7 +6,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.resource_path import ResourcePath
 from office365.onedrive.baseItem import BaseItem
 from office365.onedrive.listItem import ListItem
-from office365.runtime.resource_path_url import ResourcePathUrl
+
 
 
 class DriveItem(BaseItem):
@@ -16,34 +16,34 @@ class DriveItem(BaseItem):
     def create_upload_session(self, item):
         """Creates a temporary storage location where the bytes of the file will be saved until the complete file is
         uploaded. """
+        result = ClientResult(UploadSession())
         qry = ServiceOperationQuery(self,
                                     "createUploadSession",
                                     None,
                                     {
                                         "item": item
-                                    }
+                                    },
+                                    None,
+                                    result
                                     )
-        result = ClientResult(UploadSession())
-        self.context.add_query(qry, result)
+        self.context.add_query(qry)
         return result
 
     def upload(self, name, content):
         """The simple upload API allows you to provide the contents of a new file or update the contents of an
         existing file in a single API call. This method only supports files up to 4MB in size. """
-        drive_item = DriveItem(self.context, ResourcePathUrl(self.context, self.resourcePath, name))
         from office365.graphClient import UploadContentQuery
-        qry = UploadContentQuery(drive_item, content)
-        self.context.add_query(qry, drive_item)
-        return drive_item
+        qry = UploadContentQuery(self, name, content)
+        self.context.add_query(qry)
+        return qry.returnType
 
     def download(self):
         """Download the contents of the primary stream (file) of a DriveItem. Only driveItems with the file property
         can be downloaded. """
         from office365.graphClient import DownloadContentQuery
         qry = DownloadContentQuery(self)
-        result = ClientResult(None)
-        self.context.add_query(qry, result)
-        return result
+        self.context.add_query(qry)
+        return qry.returnType
 
     def create_folder(self, name):
         """Create a new folder or DriveItem in a Drive with a specified parent item or path."""
@@ -54,56 +54,59 @@ class DriveItem(BaseItem):
             "folder": {},
             "@microsoft.graph.conflictBehavior": ConflictBehavior.Rename
         }
-        qry = CreateEntityQuery(self.children, payload)
-        self.context.add_query(qry, drive_item)
+        qry = CreateEntityQuery(self.children, payload, drive_item)
+        self.context.add_query(qry)
         return drive_item
 
     def convert(self, format_name):
         """Converts the contents of an item in a specific format"""
         from office365.graphClient import DownloadContentQuery
         qry = DownloadContentQuery(self, format_name)
-        result = ClientResult(None)
-        self.context.add_query(qry, result)
-        return result
+        self.context.add_query(qry)
+        return qry.returnType
 
     def copy(self, name, parent_reference=None):
         """Asynchronously creates a copy of an driveItem (including any children), under a new parent item or with a
         new name. """
+        result = ClientResult(None)
         qry = ServiceOperationQuery(self,
                                     "copy",
                                     None,
                                     {
                                         "name": name,
                                         "parentReference": parent_reference
-                                    }
+                                    },
+                                    None,
+                                    result
                                     )
-        result = ClientResult(None)
-        self.context.add_query(qry, result)
+        self.context.add_query(qry)
         return result
 
     def move(self, name, parent_reference=None):
         """To move a DriveItem to a new parent item, your app requests to update the parentReference of the DriveItem
         to move. """
         from office365.graphClient import ReplaceMethodQuery
+        result = ClientResult(None)
         qry = ReplaceMethodQuery(self,
                                  "move",
                                  None,
                                  {
                                      "name": name,
                                      "parentReference": parent_reference
-                                 }
+                                 },
+                                 None,
+                                 result
                                  )
-        result = ClientResult(None)
-        self.context.add_query(qry, result)
+        self.context.add_query(qry)
         return result
 
     def search(self, query_text):
         """Search the hierarchy of items for items matching a query. You can search within a folder hierarchy,
         a whole drive, or files shared with the current user. """
         from office365.graphClient import SearchQuery
-        qry = SearchQuery(self, query_text)
         result = ClientResult(None)
-        self.context.add_query(qry, result)
+        qry = SearchQuery(self, query_text, result)
+        self.context.add_query(qry)
         return result
 
     @property

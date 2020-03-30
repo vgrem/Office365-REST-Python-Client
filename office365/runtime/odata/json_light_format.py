@@ -14,8 +14,5 @@ class JsonLightFormat(ODataJsonFormat):
         else:
             self.collection_next_tag_name = "value"
 
-    def build_http_headers(self):
-        if self.metadata is None:
-            return {}
-        return {'content-type': 'application/json;odata={0}'.format(self.metadata),
-                'accept': 'application/json;odata={0}'.format(self.metadata)}
+    def get_media_type(self):
+        return 'application/json;odata={0}'.format(self.metadata)

@@ -1,3 +1,4 @@
+
 class ResourcePath(object):
     """OData resource path"""
 
@@ -5,13 +6,13 @@ class ResourcePath(object):
         self._segment = segment
         self._parent = parent
 
-    def to_string(self):
+    def to_url(self):
         delimiter = '/'
         current = self
         segments = []
         while current:
             segments.insert(0, current.segment)
-            current = current._parent
+            current = current.parent
         return delimiter.join(segments)
 
     @property
@@ -21,3 +22,4 @@ class ResourcePath(object):
     @property
     def segment(self):
         return self._segment
+

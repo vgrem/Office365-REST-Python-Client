@@ -11,11 +11,11 @@ class WebCollection(ClientObjectCollection):
         self._parent_web_url = parent_web_url
 
     def add(self, web_creation_information):
-        web = Web(self.context)
-        qry = ServiceOperationQuery(self, "add", None, web_creation_information)
-        self.context.add_query(qry, web)
-        self.add_child(web)
-        return web
+        target_web = Web(self.context)
+        self.add_child(target_web)
+        qry = ServiceOperationQuery(self, "add", None, web_creation_information, "parameters", target_web)
+        self.context.add_query(qry)
+        return target_web
 
     @property
     def resourceUrl(self):

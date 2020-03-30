@@ -11,7 +11,7 @@ class MessageCollection(ClientObjectCollection):
     def add_from_json(self, message_creation_information):
         """Create a draft of a new message from JSON"""
         contact = Message(self.context)
-        qry = CreateEntityQuery(self, message_creation_information)
-        self.context.add_query(qry, contact)
         self.add_child(contact)
+        qry = CreateEntityQuery(self, message_creation_information, contact)
+        self.context.add_query(qry)
         return contact

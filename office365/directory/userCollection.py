@@ -12,7 +12,7 @@ class UserCollection(DirectoryObjectCollection):
     def add(self, user_properties):
         """Create a new user."""
         usr = User(self.context)
-        qry = CreateEntityQuery(self, user_properties)
-        self.context.add_query(qry, usr)
+        qry = CreateEntityQuery(self, user_properties, usr)
+        self.context.add_query(qry)
         self.add_child(usr)
         return usr

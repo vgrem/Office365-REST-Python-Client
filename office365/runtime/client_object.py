@@ -1,15 +1,15 @@
-from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
+from office365.runtime.odata.odata_query_options import QueryOptions
 
 
 class ClientObject(object):
     """Base client object"""
 
-    def __init__(self, context, resource_path=None, properties=None):
+    def __init__(self, context, resource_path=None, properties=None, parent_collection=None):
         self._properties = {}
-        self._metadata = {}
+        self._changes = []
         self._entity_type_name = None
-        self._query_options = {}
-        self._parent_collection = None
+        self._query_options = QueryOptions()
+        self._parent_collection = parent_collection
         self._context = context
         self._resource_path = resource_path
         if properties is not None:
@@ -23,16 +23,12 @@ class ClientObject(object):
             return True
         return False
 
-    def query_options_to_url(self):
-        """Convert query options to url"""
-        return '&'.join(['$%s=%s' % (key, value) for (key, value) in self.queryOptions.items()])
-
-    def expand(self, value):
-        self.queryOptions['expand'] = value
+    def expand(self, names):
+        self.queryOptions.expand = names
         return self
 
-    def select(self, value):
-        self.queryOptions['select'] = value
+    def select(self, names):
+        self.queryOptions.select = names
         return self
 
     def remove_from_parent_collection(self):
@@ -42,18 +38,21 @@ class ClientObject(object):
 
     def set_property(self, name, value, persist_changes=True):
         """Set resource property value"""
-        self._metadata[name] = {'persist_changes': persist_changes}
+        if persist_changes:
+            self._changes.append(name)
+        safe_name = name[0].lower() + name[1:]
+        if hasattr(self, safe_name):
+            child_prop = getattr(self, safe_name)
+            if isinstance(child_prop, ClientObject):  # is navigation property?
+                pass
+                # child_prop.map_json(value)
         self._properties[name] = value
 
     def map_json(self, json):
         [self.set_property(k, v, False) for k, v in json.items() if k != '__metadata']
 
-    def to_json(self, data_format):
-        json = dict((k, v) for k, v in self.properties.items()
-                    if k in self._metadata and self._metadata[k]['persist_changes'] is True)
-        if data_format.metadata == ODataMetadataLevel.Verbose and "__metadata" not in json.items():
-            json["__metadata"] = {'type': self.entityTypeName}
-        return json
+    def to_json(self):
+        return dict((k, v) for k, v in self.properties.items() if k in self._changes)
 
     @property
     def entityTypeName(self):
@@ -69,9 +68,9 @@ class ClientObject(object):
     def resourceUrl(self):
         """Generate resource Url"""
         if self.resourcePath:
-            url = self.context.serviceRootUrl + self.resourcePath.to_string()
-            if self.queryOptions:
-                url = url + "?" + self.query_options_to_url()
+            url = self.context.serviceRootUrl + self.resourcePath.to_url()
+            if not self.queryOptions.is_empty:
+                url = url + "?" + self._query_options.to_url()
             return url
         return None
 
@@ -94,3 +93,7 @@ class ClientObject(object):
     @property
     def properties(self):
         return self._properties
+
+    @property
+    def parent_collection(self):
+        return self._parent_collection

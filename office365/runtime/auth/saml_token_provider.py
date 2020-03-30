@@ -11,14 +11,20 @@ from office365.runtime.auth.user_realm_info import UserRealmInfo
 office365.logger.ensure_debug_secrets()
 
 
+def _get_authority_url(url):
+    parts = url.split('://')
+    host_name = parts[1].split("/")[0]
+    return parts[0] + '://' + host_name
+
+
 class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
     """SAML Security Token Service provider"""
 
-    def __init__(self, authority_url, username, password):
+    def __init__(self, url, username, password):
         self.__username = username
         self.__password = password
         # Security Token Service info
-        self.__sts_profile = STSProfile(authority_url)
+        self.__sts_profile = STSProfile(_get_authority_url(url))
         # Last occurred error
         self.error = ''
         self._auth_cookies = {}

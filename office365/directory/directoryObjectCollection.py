@@ -14,7 +14,7 @@ class DirectoryObjectCollection(ClientObjectCollection):
 
     def getByIds(self, ids):
         """Returns the directory objects specified in a list of IDs."""
-        qry = ServiceOperationQuery(self, "getByIds")
         result = ClientResult(None)
-        self.context.add_query(qry, result)
+        qry = ServiceOperationQuery(self, "getByIds", None, None, None, result)
+        self.context.add_query(qry)
         return result

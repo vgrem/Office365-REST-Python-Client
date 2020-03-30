@@ -27,9 +27,8 @@ class TestListItemAttachment(SPTestCase):
         cls.client.execute_query()
 
     def test1_add_attachment(self):
-        file_content = self.read_attachment_file()
+        file_content = self.read_attachment_test_file()
         attachment_file_information = AttachmentfileCreationInformation(self.attachment_file_name, file_content)
-
         created_file = self.__class__.target_item.attachmentFiles.add(attachment_file_information)
         self.client.execute_query()
         self.assertIsNotNone(created_file.properties["FileName"])
@@ -49,7 +48,7 @@ class TestListItemAttachment(SPTestCase):
         self.client.execute_query()
         data = attachment_file.read()
 
-        file_content = self.read_attachment_file()
+        file_content = self.read_attachment_test_file()
         self.assertEqual(data, file_content)
 
     def test4_update_attachments(self):
@@ -82,6 +81,6 @@ class TestListItemAttachment(SPTestCase):
 
         self.assertEqual(len(attachment_files_items), 0)
 
-    def read_attachment_file(self):
+    def read_attachment_test_file(self):
         path = "{0}/data/{1}".format(os.path.dirname(__file__), self.attachment_file_name)
         return read_file_as_binary(path)

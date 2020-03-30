@@ -1,4 +1,8 @@
 from random import randint
+
+from office365.sharepoint.client_context import ClientContext
+from settings import settings
+from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.subwebQuery import SubwebQuery
 from tests.sharepoint_case import SPTestCase
 from office365.sharepoint.web_creation_information import WebCreationInformation
@@ -24,7 +28,7 @@ class TestSharePointWeb(SPTestCase):
         self.client.load(results)
         self.client.execute_query()
         self.assertEqual(len(results), 1)
-        self.assertIsNotNone(results[0].resourceUrl)
+        self.assertIsNotNone(results[0].resourcePath)
 
     def test2_get_sub_web(self):
         sub_webs = self.client.web.getSubwebsFilteredForCurrentUser(SubwebQuery())
@@ -57,4 +61,13 @@ class TestSharePointWeb(SPTestCase):
         """Test to enumerate all webs within site"""
         result = self.client.web.get_all_webs()
         self.client.execute_query()
-        self.assertTrue(len(result.value) > 0)    
+        self.assertTrue(len(result.value) > 0)
+
+    def test6_read_site(self):
+        url = "https://mediadev8.sharepoint.com/sites/team"
+        ctx_auth = AuthenticationContext(url)
+        ctx_auth.acquire_token_for_user(username=settings['user_credentials']['username'],
+                                        password=settings['user_credentials']['password'])
+        client = ClientContext(url, ctx_auth)
+        client.load(client.web)
+        client.execute_query()

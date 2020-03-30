@@ -11,7 +11,7 @@ class EventCollection(ClientObjectCollection):
     def add_from_json(self, event_creation_information):
         """Creates a Event resource from JSON"""
         event = Event(self.context)
-        qry = CreateEntityQuery(self, event_creation_information)
-        self.context.add_query(qry, event)
         self.add_child(event)
+        qry = CreateEntityQuery(self, event_creation_information, event)
+        self.context.add_query(qry)
         return event

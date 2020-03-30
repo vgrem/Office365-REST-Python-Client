@@ -20,16 +20,18 @@ class AttachmentfileCollection(ClientObjectCollection):
                 attachment_file_information.get('content')
             )
 
-        file_new = File(self.context)
+        target_file = File(self.context)
+        self.add_child(target_file)
         qry = ServiceOperationQuery(self,
                                     "add",
                                     {
                                         "filename": attachment_file_information.filename,
                                     },
-                                    attachment_file_information.content)
-        self.context.add_query(qry, file_new)
-        self.add_child(file_new)
-        return file_new
+                                    attachment_file_information.content,
+                                    None,
+                                    target_file)
+        self.context.add_query(qry)
+        return target_file
 
     def get_by_filename(self, filename):
         """Retrieve Attachment file object by filename"""

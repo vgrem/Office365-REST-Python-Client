@@ -13,9 +13,9 @@ class FieldCollection(ClientObjectCollection):
     def add(self, field_creation_information):
         """Adds a field to the field collection."""
         field = Field(self.context)
-        qry = CreateEntityQuery(self, field_creation_information)
-        self.context.add_query(qry, field)
         self.add_child(field)
+        qry = CreateEntityQuery(self, field_creation_information, field)
+        self.context.add_query(qry)
         return field
 
     def get_by_id(self, _id):

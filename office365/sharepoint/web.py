@@ -1,4 +1,5 @@
-from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery, ReadEntityQuery
+from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery, ReadEntityQuery, \
+    ClientQuery
 from office365.runtime.client_result import ClientResult
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
@@ -30,20 +31,20 @@ class Web(SecurableObject):
         qry = ServiceOperationQuery(self, "getSubwebsFilteredForCurrentUser", {
             "nWebTemplateFilter": query.WebTemplateFilter,
             "nConfigurationFilter": query.ConfigurationFilter
-        })
-        self.context.add_query(qry, users)
+        }, None, None, users)
+        self.context.add_query(qry)
         return users
 
     def get_all_webs(self):
         """Returns a collection containing a flat list of all Web objects in the Web object."""
-        qry = ReadEntityQuery(self.webs)
         result = ClientResult(self.webs)
-        self.context.add_query(qry, result)
-        self.context.pending_request.after_execute_request(self._load_sub_webs)
+        qry = ClientQuery(self.webs, None, None, result)
+        self.context.add_query(qry)
+        self.context.get_pending_request().afterExecute += self._load_sub_webs
         return result
 
     def _load_sub_webs(self, result):
-        self.context.pending_request.clear()
+        self.context.get_pending_request().afterExecute -= self._load_sub_webs
         self._load_sub_webs_inner(result.value)
 
     def _load_sub_webs_inner(self, webs, result=None):
@@ -85,10 +86,11 @@ class Web(SecurableObject):
         return folder_obj
 
     def ensureUser(self, login_name):
-        user = User(self.context)
-        qry = ServiceOperationQuery("ensureuser", [login_name], self.resourcePath)
-        self.context.add_query(qry, user)
-        return user
+        target_user = User(self.context)
+        self.siteUsers.add_child(target_user)
+        qry = ServiceOperationQuery(self, "ensureuser", [login_name], None, None, target_user)
+        self.context.add_query(qry)
+        return target_user
 
     @property
     def webs(self):

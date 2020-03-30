@@ -19,30 +19,30 @@ class FileCollection(ClientObjectCollection):
 
     def add(self, file_creation_information):
         """Creates a File resource"""
-        file_new = File(self.context)
+        target_file = File(self.context)
+        self.add_child(target_file)
         qry = ServiceOperationQuery(self,
                                     "add",
                                     {
                                         "overwrite": file_creation_information.overwrite,
                                         "url": file_creation_information.url
                                     },
-                                    file_creation_information.content)
-        self.context.add_query(qry, file_new)
-        self.add_child(file_new)
-        return file_new
+                                    file_creation_information.content, None, target_file)
+        self.context.add_query(qry)
+        return target_file
 
     def add_template_file(self, url_of_file, template_file_type):
         """Adds a ghosted file to an existing list or document library."""
-        file_new = File(self.context)
+        target_file = File(self.context)
+        self.add_child(target_file)
         qry = ServiceOperationQuery(self,
                                     "addTemplateFile",
                                     {
                                         "urlOfFile": url_of_file,
                                         "templateFileType": template_file_type
-                                    })
-        self.context.add_query(qry, file_new)
-        self.add_child(file_new)
-        return file_new
+                                    }, None, None, target_file)
+        self.context.add_query(qry)
+        return target_file
 
     def get_by_url(self, url):
         """Retrieve File object by url"""

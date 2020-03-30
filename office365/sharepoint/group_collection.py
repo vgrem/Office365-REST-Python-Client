@@ -12,9 +12,9 @@ class GroupCollection(ClientObjectCollection):
     def add(self, group_creation_information):
         """Creates a Group resource"""
         group = Group(self.context)
-        qry = CreateEntityQuery(self, group_creation_information)
-        self.context.add_query(qry, group)
         self.add_child(group)
+        qry = CreateEntityQuery(self, group_creation_information)
+        self.context.add_query(qry)
         return group
 
     def get_by_id(self, group_id):

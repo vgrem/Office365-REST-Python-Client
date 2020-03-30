@@ -14,21 +14,27 @@ from office365.sharepoint.view_collection import ViewCollection
 class List(SecurableObject):
     """List client object"""
 
+    def __init__(self, context, resource_path=None):
+        super(List, self).__init__(context, resource_path)
+        self._items = None
+
     def get_items(self, caml_query=None):
         """Returns a collection of items from the list based on the specified query."""
-        items = ListItemCollection(self.context, ResourcePath("items", self.resourcePath))
+        self._items = ListItemCollection(self.context, ResourcePath("items", self.resourcePath))
         if caml_query:
-            qry = ServiceOperationQuery(self, "GetItems", None, caml_query)
-            self.context.add_query(qry, items)
-        return items
+            qry = ServiceOperationQuery(self, "GetItems", None, caml_query, "query", self._items)
+            self.context.add_query(qry)
+        return self._items
 
     def add_item(self, list_item_creation_information):
         """The recommended way to add a list item is to send a POST request to the ListItemCollection resource endpoint,
          as shown in ListItemCollection request examples."""
         item = ListItem(self.context, None, list_item_creation_information)
-        item._parent_collection = ListItemCollection(self.context, ResourcePath("items", self.resourcePath))
-        qry = ServiceOperationQuery(self, "items", None, item)
-        self.context.add_query(qry, item)
+        if self._items is None:
+            self._items = ListItemCollection(self.context, ResourcePath("items", self.resourcePath))
+        self._items.add_child(item)
+        qry = ServiceOperationQuery(self, "items", None, item, None, item)
+        self.context.add_query(qry)
         return item
 
     def get_item_by_id(self, item_id):

@@ -5,11 +5,6 @@ from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.portal.SPSiteCreationResponse import SPSiteCreationResponse
 
 
-def _construct_status_request(request, query):
-    request.method = HttpMethod.Get
-    request.url += "?url='{0}'".format(query.parameters['url'])
-
-
 class SPSiteManager(ClientObject):
 
     def __init__(self, context):
@@ -18,8 +13,8 @@ class SPSiteManager(ClientObject):
     def create(self, request):
         """Create a modern site"""
         response = SPSiteCreationResponse()
-        qry = ServiceOperationQuery(self, "Create", None, request)
-        self.context.add_query(qry, response)
+        qry = ServiceOperationQuery(self, "Create", None, request, "request", response)
+        self.context.add_query(qry)
         return response
 
     def delete(self, site_id):
@@ -33,7 +28,12 @@ class SPSiteManager(ClientObject):
     def get_status(self, url):
         """Get the status of a SharePoint site"""
         response = SPSiteCreationResponse()
-        qry = ServiceOperationQuery(self, "Status", None, {'url': url})
-        self.context.add_query(qry, response)
-        self.context.pending_request.before_execute_request(_construct_status_request)
+        qry = ServiceOperationQuery(self, "Status", None, {'url': url}, None, response)
+        self.context.add_query(qry)
+        self.context.get_pending_request().beforeExecute += self._construct_status_request
         return response
+
+    def _construct_status_request(self, request, query):
+        request.method = HttpMethod.Get
+        request.url += "?url='{0}'".format(query.parameterType['url'])
+        self.context.get_pending_request().beforeExecute -= self._construct_status_request

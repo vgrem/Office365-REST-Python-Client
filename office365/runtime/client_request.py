@@ -3,6 +3,7 @@ import requests
 from requests import HTTPError
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.utilities.EventHandler import EventHandler
 
 
 class ClientRequest(object):
@@ -11,12 +12,12 @@ class ClientRequest(object):
     def __init__(self, context):
         self.context = context
         self._queries = []
-        self._events = []
-        self._current_query = None
+        self._currentQuery = None
+        self.beforeExecute = EventHandler()
+        self.afterExecute = EventHandler()
 
     def clear(self):
         self._queries = []
-        self._events = []
 
     @abstractmethod
     def build_request(self):
@@ -31,26 +32,22 @@ class ClientRequest(object):
         for qry in self.get_query():
             try:
                 request = self.build_request()
-                for e in self._events:
-                    if e['name'] == 'before':
-                        e['handler'](request, qry)
+                self.beforeExecute.notify(request, qry)
                 response = self.execute_request_direct(request)
                 response.raise_for_status()
                 self.process_response(response)
-                for e in self._events:
-                    if e['name'] == 'after':
-                        e['handler'](qry.return_type)
+                self.afterExecute.notify(qry.returnType)
             except HTTPError as e:
                 raise ClientRequestException(*e.args, response=e.response)
         self.clear()
 
     def get_query(self):
         for qry in self._queries:
-            self._current_query = qry
+            self._currentQuery = qry
             yield qry
 
     def _get_current_query(self):
-        return self._current_query
+        return self._currentQuery
 
     def execute_request_direct(self, request_options):
         """Execute client request"""
@@ -91,15 +88,7 @@ class ClientRequest(object):
                                   auth=request_options.auth)
         return result
 
-    def add_query(self, query, result_object=None):
+    def add_query(self, query):
         self._queries.append(query)
-        if result_object is not None:
-            query.return_type = result_object
-
-    def before_execute_request(self, handler):
-        self._events.append({'name': 'before', 'handler': handler})
-
-    def after_execute_request(self, handler):
-        self._events.append({'name': 'after', 'handler': handler})
 
 
