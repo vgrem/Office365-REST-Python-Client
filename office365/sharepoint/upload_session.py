@@ -47,7 +47,7 @@ class UploadSession(object):
             f_pos += len(piece)
 
         if self._chunk_uploaded is not None:
-            files.context.get_pending_request.onAfterExecute += self._process_chunk_upload
+            files.context.get_pending_request().afterExecute += self._process_chunk_upload
 
     def _process_chunk_upload(self, result_object):
         if isinstance(result_object, ClientResult):

@@ -58,7 +58,7 @@ def upload_file(context):
 
 def download_file(context):
     path = "../../tests/data/SharePoint User Guide.docx"
-    response = File.open_binary(context, "/teams/DemoSite/Shared Documents/SharePoint User Guide.docx")
+    response = File.open_binary(context, "Shared Documents/SharePoint User Guide.docx")
     response.raise_for_status()
     with open(path, "wb") as local_file:
         local_file.write(response.content)
