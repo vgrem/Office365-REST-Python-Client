@@ -22,9 +22,9 @@ class TestSharePointFolder(SPTestCase):
     @classmethod
     def tearDownClass(cls):
         cls.target_list.delete_object()
-        # cls.context.execute_query()
+        cls.client.execute_query()
 
-    def test_enum_folders_and_files(self):
+    def test1_enum_folders_and_files(self):
         parent_folder = self.__class__.target_list.rootFolder
         self.client.load(parent_folder)
         self.client.execute_query()
@@ -47,29 +47,28 @@ class TestSharePointFolder(SPTestCase):
             for file_in_folder in files:
                 self.assertIsNotNone(file_in_folder.resourcePath)
 
-    def test_1_create_folder(self):
-        folder_new = self.__class__.target_list.rootFolder.folders.add(self.target_folder_name)
+    def test2_create_folder(self):
+        folder_new = self.__class__.target_list.rootFolder.folders.add(self.__class__.target_folder_name)
         self.client.execute_query()
         self.assertTrue(folder_new.properties["Exists"])
 
-    def test_2_update_folder(self):
-        folder_to_update = self.__class__.target_list.rootFolder.folders.get_by_url(self.target_folder_name)
-        new_folder_name = "_Archive_" + str(randint(0, 1000))
-        folder_to_update.set_property("Name", new_folder_name)
-        folder_to_update.update()
+    def test3_update_folder(self):
+        folder_to_update = self.__class__.target_list.rootFolder.folders.get_by_url(self.__class__.target_folder_name)
+        self.__class__.target_folder_name = "_Archive_" + str(randint(0, 1000))
+        folder_to_update.rename(self.__class__.target_folder_name)
         self.client.execute_query()
 
-        # result = self.target_list.root_folder.folders.filter("Name eq '{0}'".format(new_folder_name))
-        # self.context.load(result)
-        # self.context.execute_query()
-        # self.assertEqual(len(result), 1)
+        result = self.__class__.target_list.rootFolder.folders.filter("Name eq '{0}'".format(self.__class__.target_folder_name))
+        self.client.load(result)
+        self.client.execute_query()
+        self.assertEqual(len(result), 1)
 
-    def test_3_delete_folder(self):
-        folder_to_delete = self.__class__.target_list.rootFolder.folders.get_by_url(self.target_folder_name)
+    def test4_delete_folder(self):
+        folder_to_delete = self.__class__.target_list.rootFolder.folders.get_by_url(self.__class__.target_folder_name)
         folder_to_delete.delete_object()
         self.client.execute_query()
 
-        result = self.__class__.target_list.rootFolder.folders.filter("Name eq '{0}'".format(self.target_folder_name))
+        result = self.__class__.target_list.rootFolder.folders.filter("Name eq '{0}'".format(self.__class__.target_folder_name))
         self.client.load(result)
         self.client.execute_query()
         self.assertEqual(len(result), 0)

@@ -11,8 +11,8 @@ class Folder(ClientObject):
     def rename(self, name):
         """Rename a Folder resource"""
         item = self.list_item_all_fields
-        item.properties['Title'] = name
-        item.properties['FileLeafRef'] = name
+        item.set_property('Title', name)
+        item.set_property('FileLeafRef', name)
         qry = UpdateEntityQuery(item)
         self.context.add_query(qry)
 
@@ -24,7 +24,7 @@ class Folder(ClientObject):
         """Deletes the folder."""
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
-        # self.removeFromParentCollection()
+        self.remove_from_parent_collection()
 
     @property
     def list_item_all_fields(self):

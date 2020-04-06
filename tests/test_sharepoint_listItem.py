@@ -26,7 +26,7 @@ class TestSharePointListItem(SPTestCase):
         cls.target_list.delete_object()
         cls.client.execute_query()
 
-    def test_1_create_list_item(self):
+    def test1_create_list_item(self):
         item_properties = {'Title': self.target_item_properties["Title"],
                            '__metadata': {'type': 'SP.Data.TasksListItem'}}
         item = self.target_list.add_item(item_properties)
@@ -34,13 +34,41 @@ class TestSharePointListItem(SPTestCase):
         self.assertIsNotNone(item.properties["Title"])
         self.target_item_properties["Id"] = item.properties["Id"]
 
-    def test_2_get_list_item(self):
+    def test2_get_list_item(self):
         item = self.target_list.get_item_by_id(self.target_item_properties["Id"])
         self.client.load(item)
         self.client.execute_query()
         self.assertIsNotNone(item.properties["Id"])
 
-    def test_3_delete_list_item(self):
+    def test3_update_listItem(self):
+        item_to_update = self.target_list.get_item_by_id(self.target_item_properties["Id"])
+        self.client.load(item_to_update)
+        self.client.execute_query()
+        last_updated = item_to_update.properties['Modified']
+
+        new_title = "Task item %s" % random_seed
+        item_to_update.set_property('Title', new_title)
+        item_to_update.update()
+        self.client.load(item_to_update)  # retrieve updated
+        self.client.execute_query()
+        self.assertNotEqual(item_to_update.properties["Modified"], last_updated)
+        self.assertEqual(item_to_update.properties["Title"], new_title)
+
+    def test4_systemUpdate_listItem(self):
+        item_to_update = self.target_list.get_item_by_id(self.target_item_properties["Id"])
+        self.client.load(item_to_update)
+        self.client.execute_query()
+        last_updated = item_to_update.properties['Modified']
+
+        new_title = "Task item %s" % random_seed
+        item_to_update.set_property('Title', new_title)
+        item_to_update.system_update()
+        self.client.load(item_to_update)  # retrieve updated
+        self.client.execute_query()
+        self.assertEqual(item_to_update.properties["Modified"], last_updated)
+        self.assertEqual(item_to_update.properties["Title"], new_title)
+
+    def test5_delete_list_item(self):
         item = self.target_list.get_item_by_id(self.target_item_properties["Id"])
         item.delete_object()
         self.client.execute_query()

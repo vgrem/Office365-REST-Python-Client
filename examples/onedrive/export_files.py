@@ -44,6 +44,6 @@ target_drive = result[0]
 for file_name in get_file_names():
     print("Reading local file: {0}".format(file_name))
     file_content = get_file_content(file_name)
-    uploaded_file = target_drive.root.execute(file_name, file_content)
+    uploaded_file = target_drive.root.upload(file_name, file_content)
     client.execute_query()
     print("File has been uploaded into: {0}".format(uploaded_file.webUrl))
