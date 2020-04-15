@@ -1,4 +1,5 @@
 from office365.directory.directoryObject import DirectoryObject
+from office365.directory.groupCollection import GroupCollection
 from office365.onedrive.drive import Drive
 from office365.outlookservices.contact_collection import ContactCollection
 from office365.outlookservices.event_collection import EventCollection
@@ -47,6 +48,14 @@ class User(DirectoryObject):
         """Send a new message on the fly"""
         qry = ServiceOperationQuery(self, "sendmail", None, message)
         self.context.add_query(qry)
+
+    @property
+    def joinedTeams(self):
+        """Get the teams in Microsoft Teams that the user is a direct member of."""
+        if self.is_property_available('joinedTeams'):
+            return self.properties['joinedTeams']
+        else:
+            return GroupCollection(self.context, ResourcePath("joinedTeams", self.resourcePath))
 
     def set_property(self, name, value, persist_changes=True):
         super(User, self).set_property(name, value, persist_changes)
