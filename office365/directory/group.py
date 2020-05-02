@@ -1,12 +1,32 @@
+import json
+
 from office365.directory.directoryObject import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.onedrive.driveCollection import DriveCollection
 from office365.onedrive.siteCollection import SiteCollection
+from office365.runtime.client_query import ServiceOperationQuery
+from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.resource_path import ResourcePath
+from office365.teams.team import Team
+
+
+def _construct_create_team_request(request, query):
+    request.method = HttpMethod.Put
+    request.set_header('Content-Type', "application/json")
+    # request.set_header('Accept', "application/json")
+    request.data = json.dumps(request.data)
 
 
 class Group(DirectoryObject):
     """Represents an Azure Active Directory (Azure AD) group, which can be an Office 365 group, or a security group."""
+
+    def add_team(self):
+        """Create a new team under a group."""
+        team = Team(self.context)
+        qry = ServiceOperationQuery(self, "team", None, team, None, team)
+        self.context.add_query(qry)
+        self.context.get_pending_request().beforeExecute += _construct_create_team_request
+        return team
 
     @property
     def members(self):

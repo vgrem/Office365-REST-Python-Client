@@ -14,6 +14,10 @@ class RequestOptions(object):
     def set_header(self, name, value):
         self.headers[name] = value
 
-    def set_headers(self, headers):
+    def ensure_header(self, name, value):
+        if name not in self.headers:
+            self.headers[name] = value
+
+    def ensure_headers(self, headers):
         for key in headers:
-            self.set_header(key, headers[key])
+            self.ensure_header(key, headers[key])

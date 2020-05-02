@@ -9,6 +9,8 @@ class DirectoryObjectCollection(ClientObjectCollection):
     """User's collection"""
 
     def __getitem__(self, key):
+        if type(key) == int:
+            return self._data[key]
         return DirectoryObject(self.context,
                                ResourcePath(key, self.resourcePath))
 

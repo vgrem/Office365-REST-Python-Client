@@ -8,8 +8,11 @@ class ClientObjectCollection(ClientObject):
     def __init__(self, context, item_type, resource_path=None):
         super(ClientObjectCollection, self).__init__(context, resource_path)
         self._data = []
-        self.__next_query_url = None
+        self.next_query_url = None
         self._item_type = item_type
+
+    def clear(self):
+        self._data = []
 
     def create_typed_object(self, properties):
         if self._item_type is None:
@@ -17,15 +20,13 @@ class ClientObjectCollection(ClientObject):
 
         client_object = self._item_type(self.context)
         client_object._parent_collection = self
-        client_object.map_json(properties)
+        for k, v in properties.items():
+            client_object.set_property(k, v, False)
         return client_object
 
-    def map_json(self, json, next_query_url=None):
-        self._data = []
-        for properties in json:
-            child_client_object = self.create_typed_object(properties)
-            self.add_child(child_client_object)
-        self.__next_query_url = next_query_url
+    def set_property(self, name, value, persist_changes=False):
+        child_client_object = self.create_typed_object(value)
+        self.add_child(child_client_object)
 
     def add_child(self, client_object):
         client_object._parent_collection = self
@@ -37,9 +38,9 @@ class ClientObjectCollection(ClientObject):
     def __iter__(self):
         for _object in self._data:
             yield _object
-        while self.__next_query_url:
+        while self.next_query_url:
             # create a request with the __next_query_url
-            request = RequestOptions(self.__next_query_url)
+            request = RequestOptions(self.next_query_url)
             response = self.context.execute_request_direct(request)
             payload = response.json()
             next_collection = ClientObjectCollection(self.context, self._item_type)
@@ -51,7 +52,7 @@ class ClientObjectCollection(ClientObject):
                 yield item
 
     def __len__(self):
-        if self.__next_query_url:
+        if self.next_query_url:
             # resolve all items first
             list(iter(self))
         return len(self._data)
@@ -59,7 +60,7 @@ class ClientObjectCollection(ClientObject):
     def __getitem__(self, index):
         # fetch only as much items as necessary
         item_iterator = iter(self)
-        while len(self._data) <= index and self.__next_query_url:
+        while len(self._data) <= index and self.next_query_url:
             next(item_iterator)
 
         return self._data[index]

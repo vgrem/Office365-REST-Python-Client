@@ -5,10 +5,8 @@ from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
 class ClientValueObject(object):
     """Base client value object"""
 
-    def map_json(self, json):
-        for key, val in json.items():
-            # if hasattr(type(self), key):
-            self.__dict__[key] = val
+    def set_property(self, k, v, persist_changes=True):
+        self.__dict__[k] = v
 
     def to_json(self):
         return dict((k, v) for k, v in vars(self).items() if v is not None)

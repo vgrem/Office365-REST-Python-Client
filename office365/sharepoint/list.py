@@ -33,6 +33,7 @@ class List(SecurableObject):
         if self._items is None:
             self._items = ListItemCollection(self.context, ResourcePath("items", self.resourcePath))
         self._items.add_child(item)
+        item.ensure_type_name(self)
         qry = ServiceOperationQuery(self, "items", None, item, None, item)
         self.context.add_query(qry)
         return item

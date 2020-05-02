@@ -10,6 +10,7 @@ class ListItem(SecurableObject):
 
     def update(self):
         """Update the list item."""
+        self.ensure_type_name(self.parentList)
         qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
 
@@ -86,3 +87,6 @@ class ListItem(SecurableObject):
             if name == "Id":
                 self._resource_path = ResourcePathServiceOperation(
                     "getItemById", [value], self._parent_collection.resourcePath.parent)
+
+    def ensure_type_name(self, target_list):
+        pass

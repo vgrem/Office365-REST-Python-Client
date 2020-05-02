@@ -16,8 +16,8 @@ class ClientResult(object):
     def value(self, value):
         self._value = value
 
-    def map_json(self, json):
+    def set_property(self, key, value, persist_changes=False):
         if isinstance(self._value, ClientValueObject) or isinstance(self._value, ClientObject):
-            self._value.map_json(json)
+            self._value.set_property(key, value, persist_changes)
         else:
-            self._value = json
+            self._value = value

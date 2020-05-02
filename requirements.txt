@@ -1,3 +1,4 @@
 requests
 requests_ntlm [NTLMAuthentication]
 setuptools
+adal

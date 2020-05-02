@@ -1,3 +1,4 @@
+from office365.runtime.client_value_object import ClientValueObject
 from office365.runtime.odata.odata_query_options import QueryOptions
 
 
@@ -18,8 +19,7 @@ class ClientObject(object):
 
     def is_property_available(self, name):
         """Returns a Boolean value that indicates whether the specified property has been retrieved or set."""
-        if name in self.properties and not (isinstance(self.properties[name], dict)
-                                            and '__deferred' in self.properties[name]):
+        if name in self.properties:
             return True
         return False
 
@@ -40,16 +40,17 @@ class ClientObject(object):
         """Set resource property value"""
         if persist_changes:
             self._changes.append(name)
+
         safe_name = name[0].lower() + name[1:]
         if hasattr(self, safe_name):
-            child_prop = getattr(self, safe_name)
-            if isinstance(child_prop, ClientObject):  # is navigation property?
-                pass
-                # child_prop.map_json(value)
-        self._properties[name] = value
-
-    def map_json(self, json):
-        [self.set_property(k, v, False) for k, v in json.items() if k != '__metadata']
+            prop_type = getattr(self, safe_name)
+            if isinstance(prop_type, ClientObject) or isinstance(prop_type, ClientValueObject):
+                [prop_type.set_property(k, v, persist_changes) for k, v in value.items()]
+                self._properties[name] = prop_type
+            else:
+                self._properties[name] = value
+        else:
+            self._properties[name] = value
 
     def to_json(self):
         return dict((k, v) for k, v in self.properties.items() if k in self._changes)
@@ -85,10 +86,6 @@ class ClientObject(object):
     @property
     def queryOptions(self):
         return self._query_options
-
-    @property
-    def typeName(self):
-        return self.__module__ + "." + self.__class__.__name__
 
     @property
     def properties(self):

@@ -16,6 +16,7 @@ from office365.directory.userCollection import UserCollection
 from office365.onedrive.driveCollection import DriveCollection
 from office365.onedrive.sharedDriveItemCollection import SharedDriveItemCollection
 from office365.runtime.resource_path_url import ResourcePathUrl
+from office365.teams.teamCollection import TeamCollection
 
 
 class DownloadContentQuery(ServiceOperationQuery):
@@ -117,3 +118,8 @@ class GraphClient(ClientRuntimeContext):
     def directoryObjects(self):
         """Get Directory Objects"""
         return DirectoryObjectCollection(self, ResourcePath("directoryObjects"))
+
+    @property
+    def teams(self):
+        """Get teams"""
+        return TeamCollection(self, ResourcePath("teams"))

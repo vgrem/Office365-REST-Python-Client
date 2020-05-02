@@ -1,4 +1,5 @@
 from office365.runtime.client_object import ClientObject
+from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_query import CreateEntityQuery, UpdateEntityQuery, DeleteEntityQuery, \
     ServiceOperationQuery
 from office365.runtime.client_request import ClientRequest
@@ -18,7 +19,7 @@ class ODataRequest(ClientRequest):
 
     def execute_request_direct(self, request):
         media_type = self.json_format.get_media_type()
-        request.set_headers({'Content-Type': media_type, 'Accept': media_type})  # set OData format
+        request.ensure_headers({'Content-Type': media_type, 'Accept': media_type})  # set OData format
         return super(ODataRequest, self).execute_request_direct(request)
 
     @property
@@ -28,12 +29,11 @@ class ODataRequest(ClientRequest):
     def build_request(self):
         qry = self._get_current_query()
         request = RequestOptions(qry.bindingType.resourceUrl)
+        self.json_format.function_tag_name = None
         if isinstance(qry, ServiceOperationQuery):
             request.url = '/'.join([qry.bindingType.resourceUrl, qry.methodUrl])
+            self.json_format.function_tag_name = qry.methodName
 
-        # set json format headers
-        media_type = self.json_format.get_media_type()
-        request.set_headers({'Content-Type': media_type, 'Accept': media_type})
         # set method
         request.method = HttpMethod.Get
         if isinstance(qry, DeleteEntityQuery):
@@ -49,6 +49,8 @@ class ODataRequest(ClientRequest):
     def process_response(self, response):
         qry = self._get_current_query()
         result_object = qry.returnType
+        if isinstance(result_object, ClientObjectCollection):
+            result_object.clear()
 
         if response.headers.get('Content-Type', '').lower().split(';')[0] != 'application/json':
             if isinstance(result_object, ClientResult):
@@ -57,15 +59,37 @@ class ODataRequest(ClientRequest):
 
         payload = response.json()
         if payload and result_object is not None:
-            if self.json_format.security_tag_name:
-                payload = payload[self.json_format.security_tag_name]
-            if isinstance(qry, ServiceOperationQuery):
-                if qry.methodName in payload:
-                    payload = payload[qry.methodName]
-            if self.json_format.collection_tag_name in payload:
-                next_link_url = payload.get(self.json_format.collection_next_tag_name, None)
-                payload = payload[self.json_format.collection_tag_name]
-            result_object.map_json(payload)
+            for k, v in self._get_property(payload, self.json_format):
+                result_object.set_property(k, v, False)
+
+    def _get_property(self, json, data_format):
+
+        if isinstance(data_format, JsonLightFormat):
+            json = json.get(data_format.security_tag_name, json)
+            json = json.get(data_format.function_tag_name, json)
+
+        next_link_url = json.get(self.json_format.collection_next_tag_name, None)
+        json = json.get(data_format.collection_tag_name, json)
+
+        if next_link_url:
+            yield self.json_format.collection_next_tag_name, next_link_url
+
+        if isinstance(json, list):
+            for index, item in enumerate(json):
+                if isinstance(item, dict):
+                    item = {k: v for k, v in self._get_property(item, data_format)}
+                yield index, item
+        else:
+            for name, value in json.items():
+                if isinstance(data_format, JsonLightFormat):
+                    is_valid = name != "__metadata" and not (isinstance(value, dict) and "__deferred" in value)
+                else:
+                    is_valid = "@odata" not in name
+
+                if is_valid:
+                    if isinstance(value, dict):
+                        value = {k: v for k, v in self._get_property(value, data_format)}
+                    yield name, value
 
     def _normalize_payload(self, value):
         if isinstance(value, ClientObject) or isinstance(value, ClientValueObject):
@@ -73,10 +97,10 @@ class ODataRequest(ClientRequest):
             for k, v in json.items():
                 json[k] = self._normalize_payload(v)
 
-            include_metadata = isinstance(self._json_format, JsonLightFormat) \
-                               and self._json_format.metadata == ODataMetadataLevel.Verbose
-            if include_metadata:
+            if isinstance(self._json_format,
+                          JsonLightFormat) and self._json_format.metadata == ODataMetadataLevel.Verbose:
                 json["__metadata"] = {'type': value.entityTypeName}
+
             qry = self._get_current_query()
             if isinstance(qry, ServiceOperationQuery) and qry.parameterName is not None:
                 json = {qry.parameterName: json}
