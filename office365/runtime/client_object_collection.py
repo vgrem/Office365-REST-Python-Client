@@ -8,7 +8,7 @@ class ClientObjectCollection(ClientObject):
     def __init__(self, context, item_type, resource_path=None):
         super(ClientObjectCollection, self).__init__(context, resource_path)
         self._data = []
-        self.next_query_url = None
+        self.next_request_url = None
         self._item_type = item_type
 
     def clear(self):
@@ -36,33 +36,21 @@ class ClientObjectCollection(ClientObject):
         self._data.remove(client_object)
 
     def __iter__(self):
-        for _object in self._data:
-            yield _object
-        while self.next_query_url:
-            # create a request with the __next_query_url
-            request = RequestOptions(self.next_query_url)
-            response = self.context.execute_request_direct(request)
-            payload = response.json()
-            next_collection = ClientObjectCollection(self.context, self._item_type)
-            next_collection.map_json(payload["collection"], payload["next"])
-
-            # add the new objects to the collection before yielding the results
-            for item in next_collection:
-                self.add_child(item)
-                yield item
+        for _item in self._data:
+            yield _item
+        for item in self._get_next_items():
+            self.add_child(item)
+            yield item
 
     def __len__(self):
-        if self.next_query_url:
-            # resolve all items first
-            list(iter(self))
+        list(iter(self))
         return len(self._data)
 
     def __getitem__(self, index):
         # fetch only as much items as necessary
         item_iterator = iter(self)
-        while len(self._data) <= index and self.next_query_url:
+        while len(self._data) <= index:
             next(item_iterator)
-
         return self._data[index]
 
     def filter(self, expression):
@@ -80,3 +68,14 @@ class ClientObjectCollection(ClientObject):
     def top(self, value):
         self.queryOptions.top = value
         return self
+
+    def _get_next_items(self):
+        if self.next_request_url:
+            items = ClientObjectCollection(self.context, self._item_type, self.resourcePath)
+            request = RequestOptions(self.next_request_url)
+            response = self.context.execute_request_direct(request)
+            json = response.json()
+            self.context.get_pending_request().map_json(json, items)
+            self.next_request_url = None
+            for item in items:
+                yield item

@@ -57,13 +57,19 @@ class ODataRequest(ClientRequest):
                 result_object.value = response.content
             return
 
-        payload = response.json()
-        if payload and result_object is not None:
-            for k, v in self._get_property(payload, self.json_format):
-                result_object.set_property(k, v, False)
+        self.map_json(response.json(), result_object, self.json_format)
+
+    def map_json(self, json_payload, result_object, json_format=None):
+        if not json_format:
+            json_format = self.json_format
+        if json_payload and result_object is not None:
+            for k, v in self._get_property(json_payload, json_format):
+                if isinstance(result_object, ClientObjectCollection) and k == json_format.collection_next_tag_name:
+                    result_object.next_request_url = v
+                else:
+                    result_object.set_property(k, v, False)
 
     def _get_property(self, json, data_format):
-
         if isinstance(data_format, JsonLightFormat):
             json = json.get(data_format.security_tag_name, json)
             json = json.get(data_format.function_tag_name, json)

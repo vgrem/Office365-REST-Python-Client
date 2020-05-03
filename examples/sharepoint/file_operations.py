@@ -72,10 +72,3 @@ if __name__ == '__main__':
 
     # upload_file(ctx)
     download_file(ctx)
-
-    # get a source file located in library 'Shared Documents'
-    # source_file = ctx.web.get_file_by_server_relative_url("/teams/DemoSite/Shared Documents/Guide.docx")
-    # move a file into sub folder called 'Archive'
-    # source_file.moveto("/teams/DemoSite/Shared Documents/Archive/Guide.docx", 1)
-    # execute a query
-    # ctx.execute_query()

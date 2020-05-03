@@ -47,23 +47,18 @@ There are **two approaches** available to perform API queries:
 1. `ClientContext class` - where you target SharePoint resources such as `Web`, `ListItem` and etc (recommended)
  
 
-```
-from office365.runtime.auth.authentication_context import AuthenticationContext
-from office365.sharepoint.client_context import ClientContext
+   ```
 
-ctx_auth = AuthenticationContext(url)
-if ctx_auth.acquire_token_for_user(username, password):
-  ctx = ClientContext(url, ctx_auth)
-  web = ctx.web
-  ctx.load(web)
-  ctx.execute_query()
-  print "Web title: {0}".format(web.properties['Title'])
+    from office365.sharepoint.client_context import ClientContext
 
-else:
-  print ctx_auth.get_last_error()
-```
+    ctx = ClientContext.connect_with_credentials(url,UserCredential(username, password))
+    web = ctx.web
+    ctx.load(web)
+    ctx.execute_query()
+    print "Web title: {0}".format(web.properties['Title'])
+   ```
 
-2. `ClientRequest class` - where you construct REST queries by specifying endpoint url, headers if required and payload (aka low level approach)
+2. `RequestOptions class` - where you construct REST queries (and no model is involved)
 
    The example demonstrates how to read `Web` properties:
    
@@ -71,23 +66,17 @@ else:
 
 ```
 import json
+from office365.runtime.auth.UserCredential import UserCredential
+from office365.runtime.http.request_options import RequestOptions
+from office365.sharepoint.client_context import ClientContext
 
-from office365.runtime.auth.authentication_context import AuthenticationContext
-from office365.runtime.client_request import ClientRequest
-from office365.runtime.utilities.request_options import RequestOptions
+ctx = ClientContext.connect_with_credentials(url,UserCredential(username, password))
+request = RequestOptions("{0}/_api/web/".format(settings['url']))
+response = ctx.execute_request_direct(request)
+json = json.loads(response.content)
+web_title = json['d']['Title']
+print("Web title: {0}".format(web_title))
 
-ctx_auth = AuthenticationContext(url)
-if ctx_auth.acquire_token_for_user(username, password):
-  request = ClientRequest(ctx_auth)
-  options = RequestOptions("{0}/_api/web/".format(url))
-  options.set_header('Accept', 'application/json')
-  options.set_header('Content-Type', 'application/json')
-  data = request.execute_request_direct(options)
-  s = json.loads(data.content)
-  web_title = s['Title']
-  print "Web title: " + web_title
-else:
-  print ctx_auth.get_last_error()
 ```
 
 
@@ -188,10 +177,6 @@ client.execute_query()
 for drive in drives:
     print("Drive url: {0}".format(drive.web_url))
 ```
-
-
-# Python Version
-Python `2.7 & 3.4–3.6` are supported.
 
 
 # Third Party Libraries and Dependencies

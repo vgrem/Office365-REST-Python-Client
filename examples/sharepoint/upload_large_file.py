@@ -8,8 +8,8 @@ def print_upload_progress(offset):
 
 
 if __name__ == '__main__':
-    site_url = settings['url']
-    ctx = ClientContext.connect_with_credentials(site_url, UserCredential(settings['user_credentials']['username'],
+
+    ctx = ClientContext.connect_with_credentials(settings['url'], UserCredential(settings['user_credentials']['username'],
                                                                           settings['user_credentials']['password']))
     size_1Mb = 1000000
     local_path = "../../tests/data/big_buck_bunny.mp4"

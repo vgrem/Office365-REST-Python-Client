@@ -1,7 +1,7 @@
 from office365.runtime.auth.ClientCredential import ClientCredential
 from office365.runtime.auth.UserCredential import UserCredential
 from office365.runtime.auth.authentication_context import AuthenticationContext
-from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery, ServiceOperationQuery
+from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.context_web_information import ContextWebInformation
 from office365.runtime.odata.json_light_format import JsonLightFormat
@@ -30,7 +30,7 @@ class ClientContext(ClientRuntimeContext):
 
     @classmethod
     def connect_with_credentials(cls, base_url, credentials):
-        """Creates authenticated SharePoint context"""
+        """Creates authenticated SharePoint client context"""
         ctx_auth = AuthenticationContext(url=base_url)
         if isinstance(credentials, ClientCredential):
             ctx_auth.acquire_token_for_app(client_id=credentials.clientId, client_secret=credentials.clientSecret)
@@ -45,6 +45,7 @@ class ClientContext(ClientRuntimeContext):
 
     def ensure_form_digest(self, request_options):
         if not self._contextWebInformation:
+            self._contextWebInformation = ContextWebInformation()
             self.request_form_digest()
         request_options.set_header('X-RequestDigest', self._contextWebInformation.formDigestValue)
 
@@ -53,11 +54,10 @@ class ClientContext(ClientRuntimeContext):
         request = RequestOptions(self.serviceRootUrl + "contextinfo")
         request.method = HttpMethod.Post
         response = self.execute_request_direct(request)
-        payload = response.json()
-        if self._pendingRequest.json_format.metadata == ODataMetadataLevel.Verbose:
-            payload = payload['d']['GetContextWebInformation']
-        self._contextWebInformation = ContextWebInformation()
-        self._contextWebInformation.from_json(payload)
+        json = response.json()
+        json_format = JsonLightFormat()
+        json_format.function_tag_name = "GetContextWebInformation"
+        self.get_pending_request().map_json(json, self._contextWebInformation, json_format)
 
     def _build_specific_query(self, request, query):
 

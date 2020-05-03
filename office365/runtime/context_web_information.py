@@ -1,13 +1,11 @@
-class ContextWebInformation(object):
+from office365.runtime.client_value_object import ClientValueObject
+
+
+class ContextWebInformation(ClientValueObject):
     """The context information for a site."""
 
-    def __init__(self):
-        self._properties = {}
-
-    def from_json(self, properties):
-        self._properties = properties
 
     @property
     def formDigestValue(self):
         """The form digest value."""
-        return self._properties['FormDigestValue']
+        return self.get_property('FormDigestValue')
