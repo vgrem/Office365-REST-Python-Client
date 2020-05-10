@@ -7,7 +7,7 @@ from office365.sharepoint.portal.SPSiteCreationRequest import SPSiteCreationRequ
 from office365.sharepoint.portal.SPSiteManager import SPSiteManager
 from office365.sharepoint.portal.SiteStatus import SiteStatus
 from settings import settings
-from tests.sharepoint_case import SPTestCase
+
 
 
 def load_current_user(ctx):

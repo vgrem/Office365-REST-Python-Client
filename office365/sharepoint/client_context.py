@@ -1,3 +1,4 @@
+import adal
 from office365.runtime.auth.ClientCredential import ClientCredential
 from office365.runtime.auth.UserCredential import UserCredential
 from office365.runtime.auth.authentication_context import AuthenticationContext
@@ -11,6 +12,16 @@ from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.odata_request import ODataRequest
 from office365.sharepoint.site import Site
 from office365.sharepoint.web import Web
+
+
+def get_tenant_info(url):
+    parts = url.split('://')
+    host_name = parts[1].split("/")[0]
+    tenant_name = "{0}.onmicrosoft.com".format(host_name.split(".")[0])
+    return {
+        "base_url": "{0}://{1}".format(parts[0], host_name),
+        "name": tenant_name
+    }
 
 
 class ClientContext(ClientRuntimeContext):
@@ -27,6 +38,7 @@ class ClientContext(ClientRuntimeContext):
         self._pendingRequest = ODataRequest(self, JsonLightFormat(ODataMetadataLevel.Verbose))
         self._pendingRequest.beforeExecute += self._build_specific_query
         self._pendingRequest.afterExecute += self._process_specific_response
+        self._accessToken = None
 
     @classmethod
     def connect_with_credentials(cls, base_url, credentials):
@@ -39,6 +51,29 @@ class ClientContext(ClientRuntimeContext):
         else:
             raise ValueError("Unknown credential type")
         return cls(base_url, ctx_auth)
+
+    @classmethod
+    def connect_with_certificate(cls, base_url, client_id, thumbprint, cert_path):
+        """Gets a token for a given resource via certificate credentials"""
+        tenant_info = get_tenant_info(base_url)
+        authority_url = 'https://login.microsoftonline.com/{0}'.format(tenant_info['name'])
+        auth_ctx = adal.AuthenticationContext(authority_url)
+        resource = tenant_info['base_url']
+        with open(cert_path, 'r') as file:
+            key = file.read()
+        ctx = ClientContext(base_url, None)
+        ctx._accessToken = auth_ctx.acquire_token_with_client_certificate(
+            resource,
+            client_id,
+            key,
+            thumbprint)
+        return ctx
+
+    def authenticate_request(self, request):
+        if self._accessToken:
+            request.set_header('Authorization', 'Bearer {0}'.format(self._accessToken["accessToken"]))
+        else:
+            super(ClientContext, self).authenticate_request(request)
 
     def get_pending_request(self):
         return self._pendingRequest

@@ -7,6 +7,7 @@ from office365.sharepoint.field_collection import FieldCollection
 from office365.sharepoint.file import File
 from office365.sharepoint.folder import Folder
 from office365.sharepoint.folder_collection import FolderCollection
+from office365.sharepoint.group import Group
 from office365.sharepoint.group_collection import GroupCollection
 from office365.sharepoint.list_collection import ListCollection
 from office365.sharepoint.securable_object import SecurableObject
@@ -160,7 +161,7 @@ class Web(SecurableObject):
         if self.is_property_available('AssociatedVisitorGroup'):
             return self.properties['AssociatedVisitorGroup']
         else:
-            return User(self.context, ResourcePath("AssociatedVisitorGroup", self.resourcePath))
+            return Group(self.context, ResourcePath("AssociatedVisitorGroup", self.resourcePath))
 
     @property
     def associatedOwnerGroup(self):
@@ -168,7 +169,7 @@ class Web(SecurableObject):
         if self.is_property_available('AssociatedOwnerGroup'):
             return self.properties['AssociatedOwnerGroup']
         else:
-            return User(self.context, ResourcePath("AssociatedOwnerGroup", self.resourcePath))
+            return Group(self.context, ResourcePath("AssociatedOwnerGroup", self.resourcePath))
 
     @property
     def associatedMemberGroup(self):
@@ -176,7 +177,7 @@ class Web(SecurableObject):
         if self.is_property_available('AssociatedMemberGroup'):
             return self.properties['AssociatedMemberGroup']
         else:
-            return User(self.context, ResourcePath("AssociatedMemberGroup", self.resourcePath))
+            return Group(self.context, ResourcePath("AssociatedMemberGroup", self.resourcePath))
 
     @property
     def fields(self):
@@ -185,6 +186,22 @@ class Web(SecurableObject):
             return self.properties['Fields']
         else:
             return FieldCollection(self.context, ResourcePath("Fields", self.resourcePath))
+
+    @property
+    def url(self):
+        """Gets the absolute URL for the website."""
+        if self.is_property_available('Url'):
+            return self.properties['Url']
+        else:
+            return None
+
+    @property
+    def webTemplate(self):
+        """Gets the name of the site definition or site template that was used to create the site."""
+        if self.is_property_available('WebTemplate'):
+            return self.properties['WebTemplate']
+        else:
+            return None
 
     def set_property(self, name, value, persist_changes=True):
         super(Web, self).set_property(name, value, persist_changes)

@@ -35,13 +35,12 @@ The list of supported API versions:
 
 The following auth flows are supported:
 
-- app principals auth (refer [Granting access using SharePoint App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs) for a details): `AuthenticationContext.ctx_auth.acquire_token_for_app(client_id, client_secret)`
-- user credentials auth: `AuthenticationContext.ctx_auth.acquire_token_for_user(username, password)`
-
+- app principals flow: `AuthenticationContext.ctx_auth.acquire_token_for_app(client_id, client_secret)`  (refer [Granting access using SharePoint App-Only] (https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs) for a details) 
+- user credentials flow:`AuthenticationContext.ctx_auth.acquire_token_for_user(username, password)`
+- certificate credentials flow `ClientContext.connect_with_certificate(site_url, client_id,thumbprint, certificate_path)`
 
 #### Examples
  
-
 There are **two approaches** available to perform API queries:
 
 1. `ClientContext class` - where you target SharePoint resources such as `Web`, `ListItem` and etc (recommended)

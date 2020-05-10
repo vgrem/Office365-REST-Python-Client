@@ -7,8 +7,7 @@ class TestSharePointGroup(SPTestCase):
     def setUpClass(cls):
         super(TestSharePointGroup, cls).setUpClass()
         cls.target_user_name = "i:0#.f|membership|mdoe@mediadev8.onmicrosoft.com"
-        target_group_name = "Communication site Visitors"
-        cls.target_group = cls.client.web.siteGroups.get_by_name(target_group_name)
+        cls.target_group = cls.client.web.associatedMemberGroup
 
     def test1_get_current_user_groups(self):
         groups = self.client.web.currentUser.groups
