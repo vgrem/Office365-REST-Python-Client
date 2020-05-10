@@ -89,4 +89,13 @@ class ListItem(SecurableObject):
                     "getItemById", [value], self._parent_collection.resourcePath.parent)
 
     def ensure_type_name(self, target_list):
-        pass
+        if not self._entity_type_name:
+            if not target_list.is_property_available("ListItemEntityTypeFullName"):
+                self.context.load(target_list, "ListItemEntityTypeFullName")
+                self.context.get_pending_request().afterExecute += self._init_item_type
+            else:
+                self._entity_type_name = target_list.properties['ListItemEntityTypeFullName']
+
+    def _init_item_type(self, result):
+        self.context.get_pending_request().afterExecute -= self._init_item_type
+        self._entity_type_name = result.properties['ListItemEntityTypeFullName']

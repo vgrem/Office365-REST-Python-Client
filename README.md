@@ -35,7 +35,7 @@ The list of supported API versions:
 
 The following auth flows are supported:
 
-- app principals flow: `AuthenticationContext.ctx_auth.acquire_token_for_app(client_id, client_secret)`  (refer [Granting access using SharePoint App-Only] (https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs) for a details) 
+- app principals flow: `AuthenticationContext.ctx_auth.acquire_token_for_app(client_id, client_secret)`  (refer [Granting access using SharePoint App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs) for a details) 
 - user credentials flow:`AuthenticationContext.ctx_auth.acquire_token_for_user(username, password)`
 - certificate credentials flow `ClientContext.connect_with_certificate(site_url, client_id,thumbprint, certificate_path)`
 

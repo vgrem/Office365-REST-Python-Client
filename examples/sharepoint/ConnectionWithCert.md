@@ -41,7 +41,7 @@ where
 ```
 site_url - SharePoint site url
 client_id - The OAuth client id of the calling application. 
-thumbprint - ex encoded thumbprint of the certificate
+thumbprint - hex encoded thumbprint of the certificate
 certificate_path - path to a PEM encoded certificate private key
 ```
 
