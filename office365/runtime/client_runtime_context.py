@@ -14,6 +14,9 @@ class ClientRuntimeContext(object):
     def get_pending_request(self):
         pass
 
+    def has_pending_request(self):
+        return len(self.get_pending_request().queries) > 0
+
     def authenticate_request(self, request):
         self.__auth_context.authenticate_request(request)
 
@@ -26,7 +29,8 @@ class ClientRuntimeContext(object):
         return self.get_pending_request().execute_request_direct(request)
 
     def execute_query(self):
-        self.get_pending_request().execute_query()
+        while self.has_pending_request():
+            self.get_pending_request().execute_query()
 
     def add_query(self, query):
         self.get_pending_request().add_query(query)

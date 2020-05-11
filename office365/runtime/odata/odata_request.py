@@ -16,6 +16,7 @@ class ODataRequest(ClientRequest):
     def __init__(self, context, json_format):
         super(ODataRequest, self).__init__(context)
         self._json_format = json_format
+        self._currentQuery = None
 
     def execute_request_direct(self, request):
         media_type = self.json_format.get_media_type()
@@ -26,8 +27,12 @@ class ODataRequest(ClientRequest):
     def json_format(self):
         return self._json_format
 
+    def get_query(self):
+        self._currentQuery = self._queries.pop(0)
+        return self._currentQuery
+
     def build_request(self):
-        qry = self._get_current_query()
+        qry = self._currentQuery
         request = RequestOptions(qry.bindingType.resourceUrl)
         self.json_format.function_tag_name = None
         if isinstance(qry, ServiceOperationQuery):
@@ -47,8 +52,7 @@ class ODataRequest(ClientRequest):
         return request
 
     def process_response(self, response):
-        qry = self._get_current_query()
-        result_object = qry.returnType
+        result_object = self._currentQuery.returnType
         if isinstance(result_object, ClientObjectCollection):
             result_object.clear()
 
@@ -107,9 +111,8 @@ class ODataRequest(ClientRequest):
                           JsonLightFormat) and self._json_format.metadata == ODataMetadataLevel.Verbose:
                 json["__metadata"] = {'type': value.entityTypeName}
 
-            qry = self._get_current_query()
-            if isinstance(qry, ServiceOperationQuery) and qry.parameterName is not None:
-                json = {qry.parameterName: json}
+            if isinstance(self._currentQuery, ServiceOperationQuery) and self._currentQuery.parameterName is not None:
+                json = {self._currentQuery.parameterName: json}
             return json
         elif isinstance(value, dict):
             for k, v in value.items():

@@ -10,13 +10,6 @@ from office365.runtime.resource_path import ResourcePath
 from office365.teams.team import Team
 
 
-def _construct_create_team_request(request, query):
-    request.method = HttpMethod.Put
-    request.set_header('Content-Type', "application/json")
-    # request.set_header('Accept', "application/json")
-    request.data = json.dumps(request.data)
-
-
 class Group(DirectoryObject):
     """Represents an Azure Active Directory (Azure AD) group, which can be an Office 365 group, or a security group."""
 
@@ -25,8 +18,14 @@ class Group(DirectoryObject):
         team = Team(self.context)
         qry = ServiceOperationQuery(self, "team", None, team, None, team)
         self.context.add_query(qry)
-        self.context.get_pending_request().beforeExecute += _construct_create_team_request
+        self.context.get_pending_request().beforeExecute += self._construct_create_team_request
         return team
+
+    def _construct_create_team_request(self, request, query):
+        request.method = HttpMethod.Put
+        request.set_header('Content-Type', "application/json")
+        request.data = json.dumps(request.data)
+        self.context.get_pending_request().beforeExecute -= self._construct_create_team_request
 
     @property
     def members(self):
@@ -35,6 +34,7 @@ class Group(DirectoryObject):
             return self.properties['members']
         else:
             return DirectoryObjectCollection(self.context,
+                                             DirectoryObject,
                                              ResourcePath("members", self.resourcePath))
 
     @property
@@ -44,6 +44,7 @@ class Group(DirectoryObject):
             return self.properties['owners']
         else:
             return DirectoryObjectCollection(self.context,
+                                             DirectoryObject,
                                              ResourcePath("owners", self.resourcePath))
 
     @property

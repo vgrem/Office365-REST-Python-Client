@@ -8,9 +8,9 @@ def print_upload_progress(offset):
 
 
 if __name__ == '__main__':
-
-    ctx = ClientContext.connect_with_credentials(settings['url'], UserCredential(settings['user_credentials']['username'],
-                                                                          settings['user_credentials']['password']))
+    ctx = ClientContext.connect_with_credentials(settings['url'],
+                                                 UserCredential(settings['user_credentials']['username'],
+                                                                settings['user_credentials']['password']))
     size_1Mb = 1000000
     local_path = "../../tests/data/big_buck_bunny.mp4"
     target_url = "/Shared Documents"

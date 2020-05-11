@@ -1,3 +1,5 @@
+import unittest
+
 from tests.graph_case import GraphTestCase
 
 
@@ -9,11 +11,12 @@ class TestGraphTeam(GraphTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestGraphTeam, cls).setUpClass()
-        result = cls.client.groups.top(1)
+        result = cls.client.groups.filter("groupTypes/any(c:c eq 'Unified')").top(1)
         cls.client.load(result)
         cls.client.execute_query()
         cls.target_group = result[0]
 
+    @unittest.skipIf(target_group is None, "Group does not exist")
     def test2_ensure_team(self):
         group_id = self.__class__.target_group.properties['id']
         teams = self.client.me.joinedTeams.filter("id eq '{0}'".format(group_id))
@@ -28,6 +31,7 @@ class TestGraphTeam(GraphTestCase):
         else:
             self.assertEqual(len(teams), 1)
 
+    @unittest.skipIf(target_group is None, "Group does not exist")
     def test3_get_team(self):
         group_id = self.__class__.target_group.properties['id']
         existing_team = self.client.teams[group_id]
@@ -42,6 +46,7 @@ class TestGraphTeam(GraphTestCase):
             self.client.execute_query()
             self.assertFalse(existing_team.properties["isArchived"])
 
+    @unittest.skipIf(target_group is None, "Group does not exist")
     def test4_update_team(self):
         group_id = self.__class__.target_group.properties['id']
         team_to_update = self.client.teams[group_id]
@@ -49,6 +54,7 @@ class TestGraphTeam(GraphTestCase):
         team_to_update.update()
         self.client.execute_query()
 
+    @unittest.skipIf(target_group is None, "Group does not exist")
     def test5_archive_team(self):
         group_id = self.__class__.target_group.properties['id']
         team_to_archive = self.client.teams[group_id]
