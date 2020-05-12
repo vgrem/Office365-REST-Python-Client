@@ -14,7 +14,7 @@ class CamlQuery(ClientValueObject):
     @staticmethod
     def parse(query_expr, scope=ViewScope.DefaultValue):
         qry = CamlQuery()
-        qry.ViewXml = "<View Scope=\"{0}\"><Query>{1}</Query></View>".format(str(scope), query_expr)
+        qry.ViewXml = "<View Scope=\"{0}\"><Query>{1}</Query></View>".format(scope, query_expr)
         return qry
 
     @staticmethod

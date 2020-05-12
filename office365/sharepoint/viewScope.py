@@ -3,7 +3,7 @@ class ViewScope:
     def __init__(self):
         pass
 
-    DefaultValue = 0
-    Recursive = 1
-    RecursiveAll = 2
-    FilesOnly = 3
+    DefaultValue = "DefaultValue"
+    Recursive = "Recursive"
+    RecursiveAll = "RecursiveAll"
+    FilesOnly = "FilesOnly"
