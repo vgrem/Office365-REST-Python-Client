@@ -1,4 +1,5 @@
 from office365.runtime.client_value_object import ClientValueObject
+from office365.sharepoint.viewScope import ViewScope
 
 
 class CamlQuery(ClientValueObject):
@@ -11,9 +12,21 @@ class CamlQuery(ClientValueObject):
         self.ViewXml = None
 
     @staticmethod
+    def parse(query_expr, scope=ViewScope.DefaultValue):
+        qry = CamlQuery()
+        qry.ViewXml = "<View Scope=\"{0}\"><Query>{1}</Query></View>".format(str(scope), query_expr)
+        return qry
+
+    @staticmethod
     def create_all_items_query():
         qry = CamlQuery()
         qry.ViewXml = "<View Scope=\"RecursiveAll\"><Query></Query></View>"
+        return qry
+
+    @staticmethod
+    def create_custom_query(query):
+        qry = CamlQuery()
+        qry.ViewXml = query
         return qry
 
     @staticmethod
@@ -22,12 +35,6 @@ class CamlQuery(ClientValueObject):
         qry.ViewXml = "<View Scope=\"RecursiveAll\"><Query>" \
                       "<Where><Eq><FieldRef Name=\"FSObjType\" /><Value Type=\"Integer\">1</Value></Eq></Where>" \
                       "</Query></View>"
-        return qry
-
-    @staticmethod
-    def create_custom_query(query):
-        qry = CamlQuery()
-        qry.ViewXml = query
         return qry
 
     @property

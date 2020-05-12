@@ -7,7 +7,6 @@ from tests.test_methods import ensure_list
 
 
 class TestSPView(SPTestCase):
-
     target_list = None
 
     @classmethod
@@ -26,7 +25,14 @@ class TestSPView(SPTestCase):
         cls.target_list.delete_object()
         cls.client.execute_query()
 
-    def test1_create_view(self):
+    def test1_get_all_views(self):
+        all_views = self.target_list.views
+        self.client.load(all_views)
+        self.client.execute_query()
+        for cur_view in all_views:
+            self.assertIsNotNone(cur_view.resourcePath)
+
+    def test2_create_view(self):
         view_properties = ViewCreationInformation()
         view_properties.Title = self.target_view_title
         view_properties.PersonalView = True
@@ -37,13 +43,19 @@ class TestSPView(SPTestCase):
         self.client.execute_query()
         self.assertEqual(view_properties.Title, view_to_create.properties['Title'])
 
-    def test2_read_view(self):
+    def test3_read_view(self):
         view_to_read = self.target_list.views.get_by_title(self.target_view_title)
         self.client.load(view_to_read)
         self.client.execute_query()
         self.assertEqual(self.target_view_title, view_to_read.properties['Title'])
 
-    def test4_update_view(self):
+    def test4_get_view_items(self):
+        view_items = self.target_list.defaultView.get_items()
+        self.client.load(view_items)
+        self.client.execute_query()
+        self.assertIsNotNone(view_items.resourcePath)
+
+    def test5_update_view(self):
         view_to_update = self.target_list.views.get_by_title(self.target_view_title)
         view_to_update.set_property('Title', self.target_view_title_updated)
         view_to_update.update()
@@ -54,7 +66,7 @@ class TestSPView(SPTestCase):
         self.client.execute_query()
         self.assertEqual(len(result), 1)
 
-    def test5_delete_view(self):
+    def test6_delete_view(self):
         view_to_delete = self.target_list.views.get_by_title(self.target_view_title_updated)
         view_to_delete.delete_object()
         self.client.execute_query()

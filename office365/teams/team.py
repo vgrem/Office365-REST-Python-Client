@@ -1,5 +1,8 @@
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_query import UpdateEntityQuery, ServiceOperationQuery
+from office365.runtime.resource_path import ResourcePath
+from office365.teams.channel import Channel
+from office365.teams.channelCollection import ChannelCollection
 from office365.teams.teamFunSettings import TeamFunSettings
 from office365.teams.teamGuestSettings import TeamGuestSettings
 from office365.teams.teamMemberSettings import TeamMemberSettings
@@ -16,6 +19,16 @@ class Team(ClientObject):
         self.guestSettings = TeamGuestSettings()
         self.messagingSettings = TeamMessagingSettings()
         self.funSettings = TeamFunSettings()
+
+    @property
+    def channels(self):
+        """The collection of channels & messages associated with the team."""
+        return ChannelCollection(self, ResourcePath("channels"))
+
+    @property
+    def primaryChannel(self):
+        """The general channel for the team."""
+        return Channel(self, ResourcePath("primaryChannel"))
 
     def update(self):
         """Updates team."""

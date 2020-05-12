@@ -11,11 +11,12 @@ if __name__ == '__main__':
     model = reader.generate_model()
     print(model)
 
-    generator_options_sharepoint = {
-        'namespace': 'office365.sharepoint',
-        'inputPath': './metadata/SharePoint.xml',
-        'outputPath': '/office365/sharepoint'
-    }
-    reader = ODataV3Reader(generator_options_sharepoint)
-    model = reader.generate_model()
-    print(model)
+
+    #generator_options_sharepoint = {
+    #    'namespace': 'office365.sharepoint',
+    #    'inputPath': './metadata/SharePoint.xml',
+    #    'outputPath': '/office365/sharepoint'
+    #}
+    #reader = ODataV3Reader(generator_options_sharepoint)
+    #model = reader.generate_model()
+    #print(model)

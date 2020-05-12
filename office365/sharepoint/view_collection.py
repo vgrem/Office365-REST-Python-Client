@@ -6,11 +6,13 @@ from office365.sharepoint.view import View
 
 class ViewCollection(ClientObjectCollection):
     """Represents a collection of View resources."""
-    def __init__(self, context, resource_path=None):
+
+    def __init__(self, context, resource_path=None, parent_list=None):
         super(ViewCollection, self).__init__(context, View, resource_path)
+        self._parent_list = parent_list
 
     def add(self, view_creation_information):
-        view = View(self.context)
+        view = View(self.context, None, self._parent_list)
         view._parent_collection = self
         qry = ServiceOperationQuery(self, "Add", None, view_creation_information, "parameters", view)
         self.context.add_query(qry)
@@ -19,9 +21,9 @@ class ViewCollection(ClientObjectCollection):
     def get_by_title(self, view_title):
         """Gets the list view with the specified title."""
         return View(self.context,
-                    ResourcePathServiceOperation("GetByTitle", [view_title], self.resourcePath))
+                    ResourcePathServiceOperation("GetByTitle", [view_title], self.resourcePath), self._parent_list)
 
     def get_by_id(self, view_id):
         """Gets the list view with the specified ID."""
         return View(self.context,
-                    ResourcePathServiceOperation("GetById", [view_id], self.resourcePath))
+                    ResourcePathServiceOperation("GetById", [view_id], self.resourcePath), self._parent_list)

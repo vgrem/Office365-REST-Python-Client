@@ -40,7 +40,7 @@ class TestSharePointListItem(SPTestCase):
         self.client.execute_query()
         self.assertIsNotNone(item.properties["Id"])
 
-    def test3_update_listItem(self):
+    def test4_update_listItem(self):
         item_to_update = self.target_list.get_item_by_id(self.target_item_properties["Id"])
         self.client.load(item_to_update)
         self.client.execute_query()
@@ -54,7 +54,7 @@ class TestSharePointListItem(SPTestCase):
         self.assertNotEqual(item_to_update.properties["Modified"], last_updated)
         self.assertEqual(item_to_update.properties["Title"], new_title)
 
-    def test4_systemUpdate_listItem(self):
+    def test5_systemUpdate_listItem(self):
         item_to_update = self.target_list.get_item_by_id(self.target_item_properties["Id"])
         self.client.load(item_to_update)
         self.client.execute_query()
@@ -68,12 +68,12 @@ class TestSharePointListItem(SPTestCase):
         self.assertEqual(item_to_update.properties["Modified"], last_updated)
         self.assertEqual(item_to_update.properties["Title"], new_title)
 
-    def test5_delete_list_item(self):
+    def test6_delete_list_item(self):
         item = self.target_list.get_item_by_id(self.target_item_properties["Id"])
         item.delete_object()
         self.client.execute_query()
 
-        result = self.target_list.get_items().filter("Id eq {0}".format(self.target_item_properties["Id"]))
+        result = self.target_list.items.filter("Id eq {0}".format(self.target_item_properties["Id"]))
         self.client.load(result)
         self.client.execute_query()
         self.assertEqual(0, len(result))

@@ -1,5 +1,6 @@
 import adal
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
+from office365.directory.groupSettingTemplateCollection import GroupSettingTemplateCollection
 from office365.onedrive.driveItem import DriveItem
 from office365.onedrive.siteCollection import SiteCollection
 from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery
@@ -123,3 +124,8 @@ class GraphClient(ClientRuntimeContext):
     def teams(self):
         """Get teams"""
         return TeamCollection(self, ResourcePath("teams"))
+
+    @property
+    def groupSettingTemplates(self):
+        """Get teams"""
+        return GroupSettingTemplateCollection(self, ResourcePath("groupSettingTemplates"))

@@ -1,14 +1,37 @@
 from office365.runtime.client_object import ClientObject
-from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
+from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery, ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.caml_query import CamlQuery
 from office365.sharepoint.view_field_collection import ViewFieldCollection
 
 
 class View(ClientObject):
     """Specifies a list view."""
 
+    def __init__(self, context, resource_path=None, parent_list=None):
+        super(View, self).__init__(context, resource_path, None, None)
+        self._parent_list = parent_list
+
+    def get_items(self):
+        """Get list items per a view """
+        if not self.viewQuery:
+            self.context.load(self, "ViewQuery")
+            self.context.get_pending_request().afterExecute += self._get_items_inner
+            return self._parent_list.items
+        else:
+            qry = CamlQuery.parse(self.viewQuery)
+            items = self._parent_list.get_items(qry)
+            return items
+
+    def _get_items_inner(self, target_view):
+        self.context.get_pending_request().afterExecute -= self._get_items_inner
+        caml_query = CamlQuery.parse(target_view.viewQuery)
+        qry = ServiceOperationQuery(self._parent_list, "GetItems", None, caml_query, "query", self._parent_list.items)
+        self.context.add_query(qry)
+
     def update(self):
+        """Update view"""
         qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
 
@@ -21,10 +44,19 @@ class View(ClientObject):
 
     @property
     def viewFields(self):
+        """Gets a value that specifies the collection of fields in the list view."""
         if self.is_property_available('ViewFields'):
             return self.properties['ViewFields']
         else:
             return ViewFieldCollection(self.context, ResourcePath("ViewFields", self.resourcePath))
+
+    @property
+    def viewQuery(self):
+        """Gets or sets a value that specifies the query that is used by the list view."""
+        if self.is_property_available('ViewQuery'):
+            return self.properties['ViewQuery']
+        else:
+            return None
 
     def set_property(self, name, value, persist_changes=True):
         super(View, self).set_property(name, value, persist_changes)

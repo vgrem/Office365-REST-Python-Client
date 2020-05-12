@@ -1,6 +1,7 @@
 from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.caml_query import CamlQuery
 from office365.sharepoint.content_type_collection import ContentTypeCollection
 from office365.sharepoint.field_collection import FieldCollection
 from office365.sharepoint.folder import Folder
@@ -16,23 +17,21 @@ class List(SecurableObject):
 
     def __init__(self, context, resource_path=None):
         super(List, self).__init__(context, resource_path)
-        self._items = None
 
     def get_items(self, caml_query=None):
         """Returns a collection of items from the list based on the specified query."""
-        self._items = ListItemCollection(self.context, ResourcePath("items", self.resourcePath))
-        if caml_query:
-            qry = ServiceOperationQuery(self, "GetItems", None, caml_query, "query", self._items)
-            self.context.add_query(qry)
-        return self._items
+        items = ListItemCollection(self.context)
+        if not caml_query:
+            caml_query = CamlQuery.create_all_items_query()
+        qry = ServiceOperationQuery(self, "GetItems", None, caml_query, "query", items)
+        self.context.add_query(qry)
+        return items
 
     def add_item(self, list_item_creation_information):
         """The recommended way to add a list item is to send a POST request to the ListItemCollection resource endpoint,
          as shown in ListItemCollection request examples."""
         item = ListItem(self.context, None, list_item_creation_information)
-        if self._items is None:
-            self._items = ListItemCollection(self.context, ResourcePath("items", self.resourcePath))
-        self._items.add_child(item)
+        self.items.add_child(item)
         item.ensure_type_name(self)
         qry = ServiceOperationQuery(self, "items", None, item, None, item)
         self.context.add_query(qry)
@@ -41,11 +40,11 @@ class List(SecurableObject):
     def get_item_by_id(self, item_id):
         """Returns the list item with the specified list item identifier."""
         return ListItem(self.context,
-                        ResourcePathServiceOperation("getitembyid", [item_id], self.resourcePath))
+                        ResourcePathServiceOperation("getItemById", [item_id], self.resourcePath))
 
     def get_view(self, view_id):
         """Returns the list view with the specified view identifier."""
-        view = View(self.context, ResourcePathServiceOperation("getview", [view_id], self.resourcePath))
+        view = View(self.context, ResourcePathServiceOperation("getView", [view_id], self.resourcePath), self)
         return view
 
     def update(self):
@@ -57,6 +56,14 @@ class List(SecurableObject):
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         self.remove_from_parent_collection()
+
+    @property
+    def items(self):
+        """Get list items"""
+        if self.is_property_available('Items'):
+            return self.properties["Items"]
+        else:
+            return ListItemCollection(self.context, ResourcePath("items", self.resourcePath))
 
     @property
     def rootFolder(self):
@@ -81,7 +88,15 @@ class List(SecurableObject):
         if self.is_property_available('Views'):
             return self.properties['Views']
         else:
-            return ViewCollection(self.context, ResourcePath("views", self.resourcePath))
+            return ViewCollection(self.context, ResourcePath("views", self.resourcePath), self)
+
+    @property
+    def defaultView(self):
+        """Gets or sets a value that specifies whether the list view is the default list view."""
+        if self.is_property_available('DefaultView'):
+            return self.properties['DefaultView']
+        else:
+            return View(self.context, ResourcePath("DefaultView", self.resourcePath), self)
 
     @property
     def contentTypes(self):
