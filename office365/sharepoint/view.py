@@ -17,7 +17,7 @@ class View(ClientObject):
         """Get list items per a view """
         if not self.viewQuery:
             self.context.load(self, "ViewQuery")
-            self.context.get_pending_request().afterExecute += self._get_items_inner
+            self.context.afterExecuteOnce += self._get_items_inner
             return self._parent_list.items
         else:
             qry = CamlQuery.parse(self.viewQuery)
@@ -25,7 +25,6 @@ class View(ClientObject):
             return items
 
     def _get_items_inner(self, target_view):
-        self.context.get_pending_request().afterExecute -= self._get_items_inner
         caml_query = CamlQuery.parse(target_view.viewQuery)
         qry = ServiceOperationQuery(self._parent_list, "GetItems", None, caml_query, "query", self._parent_list.items)
         self.context.add_query(qry)

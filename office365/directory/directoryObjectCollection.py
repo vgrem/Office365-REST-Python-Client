@@ -36,6 +36,6 @@ class DirectoryObjectCollection(ClientObjectCollection):
         self.context.add_query(qry)
         self.context.get_pending_request().beforeExecute += self._construct_remove_user_request
 
-    def _construct_remove_user_request(self, request, query):
+    def _construct_remove_user_request(self, request):
         request.method = HttpMethod.Delete
         self.context.get_pending_request().beforeExecute -= self._construct_remove_user_request

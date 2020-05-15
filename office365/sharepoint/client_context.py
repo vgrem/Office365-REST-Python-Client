@@ -10,6 +10,7 @@ from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.odata_request import ODataRequest
+from office365.runtime.utilities.EventHandler import EventHandler
 from office365.sharepoint.site import Site
 from office365.sharepoint.web import Web
 
@@ -39,6 +40,7 @@ class ClientContext(ClientRuntimeContext):
         self._pendingRequest.beforeExecute += self._build_specific_query
         self._pendingRequest.afterExecute += self._process_specific_response
         self._accessToken = None
+        self.afterExecuteOnce = EventHandler(True)
 
     @classmethod
     def connect_with_credentials(cls, base_url, credentials):
@@ -94,7 +96,8 @@ class ClientContext(ClientRuntimeContext):
         json_format.function_tag_name = "GetContextWebInformation"
         self.get_pending_request().map_json(json, self._contextWebInformation, json_format)
 
-    def _build_specific_query(self, request, query):
+    def _build_specific_query(self, request):
+        query = self.get_pending_request().current_query
 
         if request.method == HttpMethod.Post:
             self.ensure_form_digest(request)
@@ -106,11 +109,10 @@ class ClientContext(ClientRuntimeContext):
             elif isinstance(query, UpdateEntityQuery):
                 request.set_header("X-HTTP-Method", "MERGE")
                 request.set_header("IF-MATCH", '*')
-            if self._pendingRequest.json_format.metadata == ODataMetadataLevel.Verbose:
-                pass
 
-    def _process_specific_response(self, return_type):
-        pass
+    def _process_specific_response(self, response):
+        query = self.get_pending_request().current_query
+        self.afterExecuteOnce.notify(query.returnType)
 
     @property
     def web(self):

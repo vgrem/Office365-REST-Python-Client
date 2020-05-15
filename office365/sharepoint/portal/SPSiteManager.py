@@ -33,7 +33,8 @@ class SPSiteManager(ClientObject):
         self.context.get_pending_request().beforeExecute += self._construct_status_request
         return response
 
-    def _construct_status_request(self, request, query):
+    def _construct_status_request(self, request):
+        query = self.context.get_pending_request().current_query
         request.method = HttpMethod.Get
         request.url += "?url='{0}'".format(query.parameterType['url'])
         self.context.get_pending_request().beforeExecute -= self._construct_status_request

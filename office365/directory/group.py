@@ -21,7 +21,7 @@ class Group(DirectoryObject):
         self.context.get_pending_request().beforeExecute += self._construct_create_team_request
         return team
 
-    def _construct_create_team_request(self, request, query):
+    def _construct_create_team_request(self, request):
         request.method = HttpMethod.Put
         request.set_header('Content-Type', "application/json")
         request.data = json.dumps(request.data)

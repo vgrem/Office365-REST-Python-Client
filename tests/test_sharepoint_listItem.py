@@ -27,8 +27,7 @@ class TestSharePointListItem(SPTestCase):
         cls.client.execute_query()
 
     def test1_create_list_item(self):
-        item_properties = {'Title': self.target_item_properties["Title"],
-                           '__metadata': {'type': 'SP.Data.TasksListItem'}}
+        item_properties = {'Title': self.target_item_properties["Title"]}
         item = self.target_list.add_item(item_properties)
         self.client.execute_query()
         self.assertIsNotNone(item.properties["Title"])

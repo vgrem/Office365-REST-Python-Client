@@ -1,4 +1,4 @@
-from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery, ReadEntityQuery, \
+from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery, \
     ClientQuery
 from office365.runtime.client_result import ClientResult
 from office365.runtime.resource_path import ResourcePath
@@ -41,11 +41,10 @@ class Web(SecurableObject):
         result = ClientResult(self.webs)
         qry = ClientQuery(self.webs, None, None, result)
         self.context.add_query(qry)
-        self.context.get_pending_request().afterExecute += self._load_sub_webs
+        self.context.afterExecuteOnce += self._load_sub_webs
         return result
 
     def _load_sub_webs(self, result):
-        self.context.get_pending_request().afterExecute -= self._load_sub_webs
         self._load_sub_webs_inner(result.value)
 
     def _load_sub_webs_inner(self, webs, result=None):

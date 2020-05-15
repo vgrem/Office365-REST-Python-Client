@@ -29,20 +29,15 @@ class ClientRequest(object):
 
     def execute_query(self):
         """Submit a pending request to the server"""
-        qry = self.get_query()
         try:
             request = self.build_request()
-            self.beforeExecute.notify(request, qry)
+            self.beforeExecute.notify(request)
             response = self.execute_request_direct(request)
             response.raise_for_status()
             self.process_response(response)
-            self.afterExecute.notify(qry.returnType)
+            self.afterExecute.notify(response)
         except HTTPError as e:
             raise ClientRequestException(*e.args, response=e.response)
-
-    @abstractmethod
-    def get_query(self):
-        pass
 
     def execute_request_direct(self, request_options):
         """Execute client request"""
@@ -52,35 +47,42 @@ class ClientRequest(object):
                 result = requests.post(url=request_options.url,
                                        headers=request_options.headers,
                                        data=request_options.data,
-                                       auth=request_options.auth)
+                                       auth=request_options.auth,
+                                       verify=request_options.verify)
             elif hasattr(request_options.data, 'read') and callable(request_options.data.read):
                 result = requests.post(url=request_options.url,
                                        headers=request_options.headers,
                                        data=request_options.data,
-                                       auth=request_options.auth)
+                                       auth=request_options.auth,
+                                       verify=request_options.verify)
             else:
                 result = requests.post(url=request_options.url,
                                        headers=request_options.headers,
                                        json=request_options.data,
-                                       auth=request_options.auth)
+                                       auth=request_options.auth,
+                                       verify=request_options.verify)
         elif request_options.method == HttpMethod.Patch:
             result = requests.patch(url=request_options.url,
                                     headers=request_options.headers,
                                     json=request_options.data,
-                                    auth=request_options.auth)
+                                    auth=request_options.auth,
+                                    verify=request_options.verify)
         elif request_options.method == HttpMethod.Delete:
             result = requests.delete(url=request_options.url,
                                      headers=request_options.headers,
-                                     auth=request_options.auth)
+                                     auth=request_options.auth,
+                                     verify=request_options.verify)
         elif request_options.method == HttpMethod.Put:
             result = requests.put(url=request_options.url,
                                   data=request_options.data,
                                   headers=request_options.headers,
-                                  auth=request_options.auth)
+                                  auth=request_options.auth,
+                                  verify=request_options.verify)
         else:
             result = requests.get(url=request_options.url,
                                   headers=request_options.headers,
-                                  auth=request_options.auth)
+                                  auth=request_options.auth,
+                                  verify=request_options.verify)
         return result
 
     def add_query(self, query):
