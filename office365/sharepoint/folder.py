@@ -2,6 +2,7 @@ from office365.runtime.client_object import ClientObject
 from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.file_creation_information import FileCreationInformation
 from office365.sharepoint.listitem import ListItem
 
 
@@ -25,6 +26,18 @@ class Folder(ClientObject):
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         self.remove_from_parent_collection()
+
+    def upload_file(self, name, content):
+        """Upload a file into folder
+        :type name: str
+        :type content: str
+        """
+        info = FileCreationInformation()
+        info.content = content
+        info.url = name
+        info.overwrite = True
+        target_file = self.files.add(info)
+        return target_file
 
     @property
     def list_item_all_fields(self):

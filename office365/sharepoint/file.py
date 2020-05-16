@@ -236,6 +236,14 @@ class File(AbstractFile):
         else:
             return ListItem(self.context, ResourcePath("listItemAllFields", self.resourcePath))
 
+    @property
+    def serverRelativeUrl(self):
+        """Gets the relative URL of the file based on the URL for the server."""
+        if self.is_property_available('ServerRelativeUrl'):
+            return self.properties["ServerRelativeUrl"]
+        else:
+            return None
+
     def set_property(self, name, value, persist_changes=True):
         super(File, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path

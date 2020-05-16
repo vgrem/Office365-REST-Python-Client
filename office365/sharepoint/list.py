@@ -24,7 +24,7 @@ class List(SecurableObject):
         """
         if not caml_query:
             caml_query = CamlQuery.create_all_items_query()
-        items = ListItemCollection(self.context, ResourcePath("GetItems", self.resourcePath))
+        items = ListItemCollection(self.context, ResourcePath("items", self.resourcePath))
         qry = ServiceOperationQuery(self, "GetItems", None, caml_query, "query", items)
         self.context.add_query(qry)
         return items

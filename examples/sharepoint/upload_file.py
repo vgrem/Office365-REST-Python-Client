@@ -2,7 +2,6 @@ import os
 from office365.runtime.auth.UserCredential import UserCredential
 from settings import settings
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.file_creation_information import FileCreationInformation
 
 
 ctx = ClientContext.connect_with_credentials(settings['url'],
@@ -15,10 +14,7 @@ with open(path, 'rb') as content_file:
 
 list_title = "Documents"
 target_folder = ctx.web.lists.get_by_title(list_title).rootFolder
-info = FileCreationInformation()
-info.content = file_content
-info.url = os.path.basename(path)
-info.overwrite = True
-target_file = target_folder.files.add(info)
+name = os.path.basename(path)
+target_file = target_folder.upload_file(name, file_content)
 ctx.execute_query()
-print("File url: {0}".format(target_file.properties["ServerRelativeUrl"]))
+print("File url: {0}".format(target_file.serverRelativeUrl))
