@@ -7,5 +7,6 @@ class ResourcePathServiceOperation(ResourcePath):
     represents simple functions exposed by an OData service"""
 
     def __init__(self, method_name, method_parameters=None, parent=None):
-        super(ResourcePathServiceOperation, self).__init__(ODataPathParser.from_method(method_name, method_parameters), parent)
+        super(ResourcePathServiceOperation, self).__init__(ODataPathParser.from_method(method_name, method_parameters),
+                                                           parent)
 

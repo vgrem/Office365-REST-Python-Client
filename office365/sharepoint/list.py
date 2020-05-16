@@ -19,17 +19,20 @@ class List(SecurableObject):
         super(List, self).__init__(context, resource_path)
 
     def get_items(self, caml_query=None):
-        """Returns a collection of items from the list based on the specified query."""
-        items = ListItemCollection(self.context)
+        """Returns a collection of items from the list based on the specified query.
+        :type caml_query: CamlQuery
+        """
         if not caml_query:
             caml_query = CamlQuery.create_all_items_query()
+        items = ListItemCollection(self.context, ResourcePath("GetItems", self.resourcePath))
         qry = ServiceOperationQuery(self, "GetItems", None, caml_query, "query", items)
         self.context.add_query(qry)
         return items
 
     def add_item(self, list_item_creation_information):
         """The recommended way to add a list item is to send a POST request to the ListItemCollection resource endpoint,
-         as shown in ListItemCollection request examples."""
+         as shown in ListItemCollection request examples.
+         :type list_item_creation_information: ListItemCreationInformation"""
         item = ListItem(self.context, None, list_item_creation_information)
         self.items.add_child(item)
         item.ensure_type_name(self)
@@ -38,12 +41,16 @@ class List(SecurableObject):
         return item
 
     def get_item_by_id(self, item_id):
-        """Returns the list item with the specified list item identifier."""
+        """Returns the list item with the specified list item identifier.
+        :type item_id: int
+        """
         return ListItem(self.context,
                         ResourcePathServiceOperation("getItemById", [item_id], self.resourcePath))
 
     def get_view(self, view_id):
-        """Returns the list view with the specified view identifier."""
+        """Returns the list view with the specified view identifier.
+        :type view_id: str
+        """
         view = View(self.context, ResourcePathServiceOperation("getView", [view_id], self.resourcePath), self)
         return view
 

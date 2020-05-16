@@ -39,7 +39,7 @@ class ListItem(SecurableObject):
         self.context.add_query(qry)
 
     def delete_object(self):
-        """Deletes the list."""
+        """Deletes the ListItem."""
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
 

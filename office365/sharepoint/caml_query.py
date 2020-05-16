@@ -13,14 +13,13 @@ class CamlQuery(ClientValueObject):
 
     @staticmethod
     def parse(query_expr, scope=ViewScope.DefaultValue):
+        """
+        Construct CamlQuery object from expression
+        :type query_expr: str
+        :type scope: ViewScope
+        """
         qry = CamlQuery()
         qry.ViewXml = "<View Scope=\"{0}\"><Query>{1}</Query></View>".format(scope, query_expr)
-        return qry
-
-    @staticmethod
-    def create_all_items_query():
-        qry = CamlQuery()
-        qry.ViewXml = "<View Scope=\"RecursiveAll\"><Query></Query></View>"
         return qry
 
     @staticmethod
@@ -30,12 +29,18 @@ class CamlQuery(ClientValueObject):
         return qry
 
     @staticmethod
+    def create_all_items_query():
+        return CamlQuery.parse("", ViewScope.RecursiveAll)
+
+    @staticmethod
     def create_all_folders_query():
-        qry = CamlQuery()
-        qry.ViewXml = "<View Scope=\"RecursiveAll\"><Query>" \
-                      "<Where><Eq><FieldRef Name=\"FSObjType\" /><Value Type=\"Integer\">1</Value></Eq></Where>" \
-                      "</Query></View>"
-        return qry
+        qry_text = "<Where><Eq><FieldRef Name=\"FSObjType\" /><Value Type=\"Integer\">1</Value></Eq></Where>"
+        return CamlQuery.parse(qry_text, ViewScope.RecursiveAll)
+
+    @staticmethod
+    def create_all_files_query():
+        qry_text = "<Where><Eq><FieldRef Name=\"FSObjType\" /><Value Type=\"Integer\">0</Value></Eq></Where>"
+        return CamlQuery.parse(qry_text, ViewScope.RecursiveAll)
 
     @property
     def entityTypeName(self):

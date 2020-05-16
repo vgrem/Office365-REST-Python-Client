@@ -138,7 +138,7 @@ class File(AbstractFile):
                                          "getlimitedwebpartmanager",
                                          [scope],
                                          self.resourcePath
-                                         ))
+                                     ))
 
     def start_upload(self, upload_id, content):
         """Starts a new chunk upload session and uploads the first fragment."""
@@ -207,6 +207,27 @@ class File(AbstractFile):
         response = ctx.execute_request_direct(request)
         return response
 
+    def download(self):
+        """Download a file content"""
+        result = ClientResult(None)
+        if not self.is_property_available("ServerRelativeUrl"):
+            self.context.load(self, "ServerRelativeUrl")
+            self.context.afterExecuteOnce += self._download_inner
+        else:
+            self._download_inner(self, result)
+        return result
+
+    def _download_inner(self, target_file, result):
+        qry = ServiceOperationQuery(self.context.web,
+                                    r"getFileByServerRelativeUrl('{0}')/\$value".format(
+                                        target_file.properties["ServerRelativeUrl"]), None, None, None, result)
+        self.context.add_query(qry)
+        self.context.get_pending_request().beforeExecute += self._construct_download_query
+
+    def _construct_download_query(self, request):
+        self.context.get_pending_request().beforeExecute -= self._construct_download_query
+        request.method = HttpMethod.Get
+
     @property
     def listItemAllFields(self):
         """Gets a value that specifies the list item field values for the list item corresponding to the file."""
@@ -229,4 +250,3 @@ class File(AbstractFile):
                     "GetFileById",
                     [value],
                     ResourcePath("Web"))
-
