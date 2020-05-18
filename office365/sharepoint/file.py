@@ -5,6 +5,7 @@ from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
+from office365.sharepoint.fileVersionCollection import FileVersionCollection
 from office365.sharepoint.listitem import ListItem
 from office365.sharepoint.webparts.limited_webpart_manager import LimitedWebPartManager
 
@@ -235,6 +236,14 @@ class File(AbstractFile):
             return self.properties['ListItemAllFields']
         else:
             return ListItem(self.context, ResourcePath("listItemAllFields", self.resourcePath))
+
+    @property
+    def versions(self):
+        """Gets a value that returns a collection of file version objects that represent the versions of the file."""
+        if self.is_property_available('Versions'):
+            return self.properties['Versions']
+        else:
+            return FileVersionCollection(self.context, ResourcePath("versions", self.resourcePath))
 
     @property
     def serverRelativeUrl(self):

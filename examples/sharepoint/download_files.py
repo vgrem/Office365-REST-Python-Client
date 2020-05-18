@@ -33,9 +33,10 @@ def download_file(remote_file, local_path):
         local_file.write(result.value)
 
 
-ctx = ClientContext.connect_with_credentials(settings['url'],
+ctx = ClientContext.connect_with_credentials("https://mediadev8.sharepoint.com/sites/team",
                                              ClientCredential(settings['client_credentials']['client_id'],
                                                               settings['client_credentials']['client_secret']))
+
 
 # retrieve files from library
 source_library = ctx.web.lists.get_by_title("Documents")

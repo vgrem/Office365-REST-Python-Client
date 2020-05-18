@@ -4,7 +4,7 @@ from office365.runtime.odata.odata_v4_reader import ODataV4Reader
 if __name__ == '__main__':
     generator_options = {
         'namespace': 'office365',
-        'inputPath': './metadata/MicrosoftGraph15122019.xml',
+        'inputPath': './metadata/MicrosoftGraph.xml',
         'outputPath': '/office365'
     }
     reader = ODataV4Reader(generator_options)

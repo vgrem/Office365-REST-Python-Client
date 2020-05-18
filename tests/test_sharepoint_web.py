@@ -31,7 +31,7 @@ class TestSharePointWeb(SPTestCase):
         self.assertIsNotNone(results[0].resourcePath)
 
     def test2_get_sub_web(self):
-        sub_webs = self.client.web.getSubwebsFilteredForCurrentUser(SubwebQuery())
+        sub_webs = self.client.web.get_sub_webs_filtered_for_current_user(SubwebQuery())
         self.client.execute_query()
         self.assertGreater(len(sub_webs), 0)
 
@@ -63,11 +63,8 @@ class TestSharePointWeb(SPTestCase):
         self.client.execute_query()
         self.assertTrue(len(result.value) > 0)
 
-    def test6_read_site(self):
-        url = "https://mediadev8.sharepoint.com/sites/team"
-        ctx_auth = AuthenticationContext(url)
-        ctx_auth.acquire_token_for_user(username=settings['user_credentials']['username'],
-                                        password=settings['user_credentials']['password'])
-        client = ClientContext(url, ctx_auth)
-        client.load(client.web)
-        client.execute_query()
+    def test6_read_list(self):
+        site_pages = self.client.web.get_list("SitePages")
+        self.client.load(site_pages)
+        self.client.execute_query()
+        self.assertIsNotNone(site_pages.properties['Title'])

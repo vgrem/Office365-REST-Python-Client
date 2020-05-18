@@ -3,12 +3,14 @@ from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery,
 from office365.runtime.client_result import ClientResult
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.basePermissions import BasePermissions
 from office365.sharepoint.field_collection import FieldCollection
 from office365.sharepoint.file import File
 from office365.sharepoint.folder import Folder
 from office365.sharepoint.folder_collection import FolderCollection
 from office365.sharepoint.group import Group
 from office365.sharepoint.group_collection import GroupCollection
+from office365.sharepoint.list import List
 from office365.sharepoint.list_collection import ListCollection
 from office365.sharepoint.securable_object import SecurableObject
 from office365.sharepoint.user import User
@@ -25,9 +27,10 @@ class Web(SecurableObject):
         super(Web, self).__init__(context, resource_path)
         self._web_url = None
 
-    def getSubwebsFilteredForCurrentUser(self, query):
+    def get_sub_webs_filtered_for_current_user(self, query):
         """Returns a collection of objects that contain metadata about subsites of the current site (2) in which the
-        current user is a member. """
+        current user is a member.
+        :type query: SubwebQuery"""
         users = UserCollection(self.context)
         qry = ServiceOperationQuery(self, "getSubwebsFilteredForCurrentUser", {
             "nWebTemplateFilter": query.WebTemplateFilter,
@@ -70,27 +73,49 @@ class Web(SecurableObject):
         self.remove_from_parent_collection()
 
     def get_file_by_server_relative_url(self, url):
-        """Returns the file object located at the specified server-relative URL."""
-        file_obj = File(
+        """Returns the file object located at the specified server-relative URL.
+        :type url: str
+        """
+        return File(
             self.context,
-            ResourcePathServiceOperation("getfilebyserverrelativeurl", [url], self.resourcePath)
+            ResourcePathServiceOperation("getFileByServerRelativeUrl", [url], self.resourcePath)
         )
-        return file_obj
 
     def get_folder_by_server_relative_url(self, url):
-        """Returns the folder object located at the specified server-relative URL."""
-        folder_obj = Folder(
+        """Returns the folder object located at the specified server-relative URL.
+        :type url: str
+        """
+        return Folder(
             self.context,
-            ResourcePathServiceOperation("getfolderbyserverrelativeurl", [url], self.resourcePath)
+            ResourcePathServiceOperation("getFolderByServerRelativeUrl", [url], self.resourcePath)
         )
-        return folder_obj
 
-    def ensureUser(self, login_name):
+    def ensure_user(self, login_name):
+        """Checks whether the specified logon name belongs to a valid user of the website, and if the logon name does
+        not already exist, adds it to the website.
+        :type login_name: str
+        """
         target_user = User(self.context)
         self.siteUsers.add_child(target_user)
-        qry = ServiceOperationQuery(self, "ensureuser", [login_name], None, None, target_user)
+        qry = ServiceOperationQuery(self, "ensureUser", [login_name], None, None, target_user)
         self.context.add_query(qry)
         return target_user
+
+    def get_user_effective_permissions(self, user_name):
+        """Gets the effective permissions that the specified user has within the current application scope.
+        :type user_name: str
+        """
+        result = ClientResult(BasePermissions)
+        qry = ServiceOperationQuery(self, "getUserEffectivePermissions", [user_name], None, None, result)
+        self.context.add_query(qry)
+        return result
+
+    def get_list(self, url):
+        """Get list by url
+        :type url: str
+        """
+        return List(self.context,
+                    ResourcePathServiceOperation("getList", [url], self.resourcePath))
 
     @property
     def webs(self):
@@ -128,7 +153,7 @@ class Web(SecurableObject):
         if self.is_property_available('SiteUsers'):
             return self.properties['SiteUsers']
         else:
-            return UserCollection(self.context, ResourcePath("siteusers", self.resourcePath))
+            return UserCollection(self.context, ResourcePath("siteUsers", self.resourcePath))
 
     @property
     def siteGroups(self):
@@ -136,7 +161,7 @@ class Web(SecurableObject):
         if self.is_property_available('SiteGroups'):
             return self.properties['SiteGroups']
         else:
-            return GroupCollection(self.context, ResourcePath("sitegroups", self.resourcePath))
+            return GroupCollection(self.context, ResourcePath("siteGroups", self.resourcePath))
 
     @property
     def currentUser(self):
