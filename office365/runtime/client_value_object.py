@@ -1,7 +1,3 @@
-from office365.runtime.odata.json_light_format import JsonLightFormat
-from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
-
-
 class ClientValueObject(object):
     """Base client value object"""
 

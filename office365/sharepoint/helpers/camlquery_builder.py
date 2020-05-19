@@ -1,6 +1,6 @@
 import logging
 
-from office365.sharepoint.caml_query import CamlQuery
+from office365.sharepoint.camlQuery import CamlQuery
 from office365.sharepoint.helpers.utils import to_camel
 
 logger = logging.getLogger(__name__)

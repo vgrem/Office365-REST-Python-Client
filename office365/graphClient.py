@@ -3,6 +3,7 @@ from office365.directory.directoryObjectCollection import DirectoryObjectCollect
 from office365.directory.groupSettingTemplateCollection import GroupSettingTemplateCollection
 from office365.onedrive.driveItem import DriveItem
 from office365.onedrive.siteCollection import SiteCollection
+from office365.outlookservices.contact_collection import ContactCollection
 from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_runtime_context import ClientRuntimeContext
@@ -129,3 +130,8 @@ class GraphClient(ClientRuntimeContext):
     def groupSettingTemplates(self):
         """Get teams"""
         return GroupSettingTemplateCollection(self, ResourcePath("groupSettingTemplates"))
+
+    @property
+    def contacts(self):
+        """o get all the contacts in a user's mailbox"""
+        return ContactCollection(self, ResourcePath("contacts"))

@@ -15,6 +15,14 @@ class User(Principal):
             from office365.sharepoint.group_collection import GroupCollection
             return GroupCollection(self.context, ResourcePath("Groups", self.resourcePath))
 
+    @property
+    def isSiteAdmin(self):
+        """Gets or sets a Boolean value that specifies whether the user is a site collection administrator."""
+        if self.is_property_available('isSiteAdmin'):
+            return self.properties['isSiteAdmin']
+        else:
+            return None
+
     def delete_object(self):
         """Deletes the user."""
         qry = DeleteEntityQuery(self)

@@ -37,11 +37,17 @@ class ODataRequest(ClientRequest):
 
     def build_request(self):
         qry = self._get_next_query()
-        request = RequestOptions(qry.bindingType.resourceUrl)
         self.json_format.function_tag_name = None
+
         if isinstance(qry, ServiceOperationQuery):
-            request.url = '/'.join([qry.bindingType.resourceUrl, qry.methodUrl])
             self.json_format.function_tag_name = qry.methodName
+            if qry.static:
+                request_url = self.context.serviceRootUrl + '.'.join([qry.bindingType.entityTypeName, qry.methodUrl])
+            else:
+                request_url = '/'.join([qry.bindingType.resourceUrl, qry.methodUrl])
+        else:
+            request_url = qry.bindingType.resourceUrl
+        request = RequestOptions(request_url)
 
         # set method
         request.method = HttpMethod.Get
@@ -82,28 +88,30 @@ class ODataRequest(ClientRequest):
             json = json.get(data_format.security_tag_name, json)
             json = json.get(data_format.function_tag_name, json)
 
-        next_link_url = json.get(self.json_format.collection_next_tag_name, None)
-        json = json.get(data_format.collection_tag_name, json)
-
-        if next_link_url:
-            yield self.json_format.collection_next_tag_name, next_link_url
-
-        if isinstance(json, list):
-            for index, item in enumerate(json):
-                if isinstance(item, dict):
-                    item = {k: v for k, v in self._get_property(item, data_format)}
-                yield index, item
+        if not isinstance(json, dict):
+            yield "value", json
         else:
-            for name, value in json.items():
-                if isinstance(data_format, JsonLightFormat):
-                    is_valid = name != "__metadata" and not (isinstance(value, dict) and "__deferred" in value)
-                else:
-                    is_valid = "@odata" not in name
+            next_link_url = json.get(self.json_format.collection_next_tag_name, None)
+            json = json.get(data_format.collection_tag_name, json)
+            if next_link_url:
+                yield self.json_format.collection_next_tag_name, next_link_url
 
-                if is_valid:
-                    if isinstance(value, dict):
-                        value = {k: v for k, v in self._get_property(value, data_format)}
-                    yield name, value
+            if isinstance(json, list):
+                for index, item in enumerate(json):
+                    if isinstance(item, dict):
+                        item = {k: v for k, v in self._get_property(item, data_format)}
+                    yield index, item
+            else:
+                for name, value in json.items():
+                    if isinstance(data_format, JsonLightFormat):
+                        is_valid = name != "__metadata" and not (isinstance(value, dict) and "__deferred" in value)
+                    else:
+                        is_valid = "@odata" not in name
+
+                    if is_valid:
+                        if isinstance(value, dict):
+                            value = {k: v for k, v in self._get_property(value, data_format)}
+                        yield name, value
 
     def _normalize_payload(self, value):
         if isinstance(value, ClientObject) or isinstance(value, ClientValueObject):

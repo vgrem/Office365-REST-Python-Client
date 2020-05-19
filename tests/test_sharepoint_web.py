@@ -1,8 +1,4 @@
 from random import randint
-
-from office365.sharepoint.client_context import ClientContext
-from settings import settings
-from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.subwebQuery import SubwebQuery
 from tests.sharepoint_case import SPTestCase
 from office365.sharepoint.web_creation_information import WebCreationInformation
@@ -10,13 +6,20 @@ from office365.sharepoint.web_creation_information import WebCreationInformation
 
 class TestSharePointWeb(SPTestCase):
     target_web = None
+    target_user = None
 
     @classmethod
     def setUpClass(cls):
         super(TestSharePointWeb, cls).setUpClass()
 
+    def test0_get_current_user(self):
+        current_user = self.client.web.currentUser
+        self.client.load(current_user)
+        self.client.execute_query()
+        self.assertIsNotNone(current_user.login_name)
+        self.__class__.target_user = current_user
+
     def test1_can_create_web(self):
-        self.client.execute_query()  # force to clear the pending queue
         target_web_name = "workspace_" + str(randint(0, 100000))
         creation_info = WebCreationInformation()
         creation_info.Url = target_web_name
@@ -68,3 +71,15 @@ class TestSharePointWeb(SPTestCase):
         self.client.load(site_pages)
         self.client.execute_query()
         self.assertIsNotNone(site_pages.properties['Title'])
+
+    def test7_get_user_perms(self):
+        result = self.client.web.get_user_effective_permissions(self.__class__.target_user.login_name)
+        self.client.execute_query()
+        self.assertIsNotNone(result.value)
+        self.assertGreater(len(result.value.permission_levels), 0)
+
+    def test8_get_user_by_id(self):
+        result_user = self.client.web.get_user_by_id(self.__class__.target_user.id)
+        self.client.load(result_user)
+        self.client.execute_query()
+        self.assertEqual(result_user.login_name, self.__class__.target_user.login_name)

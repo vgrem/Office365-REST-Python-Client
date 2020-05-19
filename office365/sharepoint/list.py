@@ -1,7 +1,7 @@
 from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.sharepoint.caml_query import CamlQuery
+from office365.sharepoint.camlQuery import CamlQuery
 from office365.sharepoint.content_type_collection import ContentTypeCollection
 from office365.sharepoint.field_collection import FieldCollection
 from office365.sharepoint.folder import Folder

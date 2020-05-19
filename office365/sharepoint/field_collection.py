@@ -11,7 +11,9 @@ class FieldCollection(ClientObjectCollection):
         super(FieldCollection, self).__init__(context, Field, resource_path)
 
     def add(self, field_creation_information):
-        """Adds a field to the field collection."""
+        """Adds a field to the field collection.
+        :type field_creation_information: FieldCreationInformation
+        """
         field = Field(self.context)
         self.add_child(field)
         qry = CreateEntityQuery(self, field_creation_information, field)
@@ -23,11 +25,15 @@ class FieldCollection(ClientObjectCollection):
         return Field(self.context, ResourcePathServiceOperation("getById", [_id], self.resourcePath))
 
     def get_by_internal_name_or_title(self, name_title):
-        """Returns the first Field object with the specified internal name or title from the collection."""
+        """Returns the first Field object with the specified internal name or title from the collection.
+        :type name_title: str
+        """
         return Field(self.context,
                      ResourcePathServiceOperation("getByInternalNameOrTitle", [name_title], self.resourcePath))
 
     def get_by_title(self, title):
-        """Returns the first field object in the collection based on the title of the specified field."""
+        """Returns the first field object in the collection based on the title of the specified field.
+        :type title: str
+        """
         return Field(self.context,
                      ResourcePathServiceOperation("getByTitle", [title], self.resourcePath))

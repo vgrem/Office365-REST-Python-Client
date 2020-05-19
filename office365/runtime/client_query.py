@@ -38,6 +38,7 @@ class ServiceOperationQuery(ClientQuery):
         super(ServiceOperationQuery, self).__init__(binding_type, parameter_type, parameter_name, return_type)
         self._method_name = method_name
         self._method_params = method_params
+        self.static = False
 
     @property
     def methodUrl(self):

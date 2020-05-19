@@ -4,6 +4,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.basePermissions import BasePermissions
+from office365.sharepoint.changeCollection import ChangeCollection
 from office365.sharepoint.field_collection import FieldCollection
 from office365.sharepoint.file import File
 from office365.sharepoint.folder import Folder
@@ -105,10 +106,26 @@ class Web(SecurableObject):
         """Gets the effective permissions that the specified user has within the current application scope.
         :type user_name: str
         """
-        result = ClientResult(BasePermissions)
-        qry = ServiceOperationQuery(self, "getUserEffectivePermissions", [user_name], None, None, result)
+        result = ClientResult(BasePermissions())
+        qry = ServiceOperationQuery(self, "GetUserEffectivePermissions", [user_name], None, None, result)
         self.context.add_query(qry)
         return result
+
+    def does_user_have_permissions(self, permission_mask):
+        """Returns whether the current user has the given set of permissions.
+        :type permission_mask: BasePermissions
+        """
+        result = ClientResult(bool)
+        qry = ServiceOperationQuery(self, "doesUserHavePermissions", [permission_mask], None, None, result)
+        self.context.add_query(qry)
+        return result
+
+    def get_user_by_id(self, user_id):
+        """Returns the user corresponding to the specified member identifier for the current site.
+        :type user_id: long
+        """
+        return User(self.context,
+                    ResourcePathServiceOperation("getUserById", [user_id], self.resourcePath))
 
     def get_list(self, url):
         """Get list by url
@@ -116,6 +133,15 @@ class Web(SecurableObject):
         """
         return List(self.context,
                     ResourcePathServiceOperation("getList", [url], self.resourcePath))
+
+    def get_changes(self, query):
+        """Returns the collection of all changes from the change log that have occurred within the scope of the site,
+        based on the specified query.
+        :type query: ChangeQuery"""
+        changes = ChangeCollection(self.context)
+        qry = ServiceOperationQuery(self, "getChanges", None, query, "query", changes)
+        self.context.add_query(qry)
+        return changes
 
     @property
     def webs(self):

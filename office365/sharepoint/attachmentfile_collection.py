@@ -6,11 +6,11 @@ from office365.sharepoint.attachmentfile_creation_information import Attachmentf
 from office365.sharepoint.file import File
 
 
-class AttachmentfileCollection(ClientObjectCollection):
+class AttachmentFileCollection(ClientObjectCollection):
     """Represents a collection of AttachmentFile resources."""
 
     def __init__(self, context, resource_path=None):
-        super(AttachmentfileCollection, self).__init__(context, AttachmentFile, resource_path)
+        super(AttachmentFileCollection, self).__init__(context, AttachmentFile, resource_path)
 
     def add(self, attachment_file_information):
         """Creates an attachment"""
