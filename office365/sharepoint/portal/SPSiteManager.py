@@ -1,7 +1,7 @@
 from office365.runtime.client_object import ClientObject
-from office365.runtime.client_query import ServiceOperationQuery
+from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.resourcePath import ResourcePath
 from office365.sharepoint.portal.SPSiteCreationResponse import SPSiteCreationResponse
 
 

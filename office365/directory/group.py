@@ -4,9 +4,9 @@ from office365.directory.directoryObject import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.onedrive.driveCollection import DriveCollection
 from office365.onedrive.siteCollection import SiteCollection
-from office365.runtime.client_query import ServiceOperationQuery
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.resourcePath import ResourcePath
+from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 from office365.teams.team import Team
 
 

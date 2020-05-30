@@ -26,7 +26,7 @@ def generate_contacts(context):
                                 )
 
     fake = Faker()
-    for idx in range(0, 100):
+    for idx in range(0, 301):
         contact_properties = {
 
                               'Title': fake.name(),

@@ -1,6 +1,7 @@
 from office365.runtime.client_object import ClientObject
-from office365.runtime.client_query import UpdateEntityQuery, ServiceOperationQuery
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.client_query import UpdateEntityQuery
+from office365.runtime.resourcePath import ResourcePath
+from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 from office365.teams.channel import Channel
 from office365.teams.channelCollection import ChannelCollection
 from office365.teams.teamFunSettings import TeamFunSettings

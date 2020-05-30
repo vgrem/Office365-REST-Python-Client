@@ -38,9 +38,7 @@ class ClientContext(ClientRuntimeContext):
         self._contextWebInformation = None
         self._pendingRequest = ODataRequest(self, JsonLightFormat(ODataMetadataLevel.Verbose))
         self._pendingRequest.beforeExecute += self._build_specific_query
-        self._pendingRequest.afterExecute += self._process_specific_response
         self._accessToken = None
-        self.afterExecuteOnce = EventHandler(True)
 
     @classmethod
     def connect_with_credentials(cls, base_url, credentials):
@@ -109,10 +107,6 @@ class ClientContext(ClientRuntimeContext):
             elif isinstance(query, UpdateEntityQuery):
                 request.set_header("X-HTTP-Method", "MERGE")
                 request.set_header("IF-MATCH", '*')
-
-    def _process_specific_response(self, response):
-        query = self.get_pending_request().current_query
-        self.afterExecuteOnce.notify(query.returnType)
 
     @property
     def web(self):

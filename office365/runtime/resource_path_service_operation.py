@@ -1,5 +1,5 @@
 from office365.runtime.odata.odata_path_parser import ODataPathParser
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.resourcePath import ResourcePath
 
 
 class ResourcePathServiceOperation(ResourcePath):

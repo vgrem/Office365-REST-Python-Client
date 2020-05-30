@@ -21,6 +21,8 @@ class RequestOptions(object):
         #: to a CA bundle to use. Defaults to `True`
         self.verify = True
 
+        self.stream = False
+
     def set_header(self, name, value):
         self.headers[name] = value
 

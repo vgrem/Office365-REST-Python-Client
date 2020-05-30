@@ -38,7 +38,8 @@ class ClientObjectCollection(ClientObject):
     def __iter__(self):
         for _item in self._data:
             yield _item
-        for item in self._get_next_items():
+
+        for item in self._load_next_items():
             self.add_child(item)
             yield item
 
@@ -69,8 +70,8 @@ class ClientObjectCollection(ClientObject):
         self.queryOptions.top = value
         return self
 
-    def _get_next_items(self):
-        if self.next_request_url:
+    def _load_next_items(self):
+        if self.next_request_url and not self.queryOptions.top:
             items = ClientObjectCollection(self.context, self._item_type, self.resourcePath)
             request = RequestOptions(self.next_request_url)
             response = self.context.execute_request_direct(request)

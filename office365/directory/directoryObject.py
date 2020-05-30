@@ -1,6 +1,7 @@
 from office365.runtime.client_object import ClientObject
-from office365.runtime.client_query import DeleteEntityQuery, ServiceOperationQuery
+from office365.runtime.client_query import DeleteEntityQuery
 from office365.runtime.client_result import ClientResult
+from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 
 
 class DirectoryObject(ClientObject):

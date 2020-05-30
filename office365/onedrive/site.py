@@ -1,5 +1,5 @@
 from office365.onedrive.baseItem import BaseItem
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.resourcePath import ResourcePath
 from office365.onedrive.columnDefinitionCollection import ColumnDefinitionCollection
 from office365.onedrive.contentTypeCollection import ContentTypeCollection
 from office365.onedrive.drive import Drive

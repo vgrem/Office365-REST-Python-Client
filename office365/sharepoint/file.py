@@ -1,25 +1,46 @@
+import shutil
+from functools import partial
 from office365.runtime.client_object import ClientObject
-from office365.runtime.client_query import DeleteEntityQuery, ServiceOperationQuery
+from office365.runtime.client_query import DeleteEntityQuery
 from office365.runtime.client_result import ClientResult
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.resourcePath import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
+from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.fileVersionCollection import FileVersionCollection
 from office365.sharepoint.listitem import ListItem
 from office365.sharepoint.webparts.limited_webpart_manager import LimitedWebPartManager
 
 
+class DownloadFileQuery(ServiceOperationQuery):
+
+    def __init__(self, web, file_url, file_object):
+        self.file_object = file_object
+        web.context.get_pending_request().beforeExecute += self._construct_download_query
+        web.context.get_pending_request().afterExecute += self._process_response
+        super(DownloadFileQuery, self).__init__(web, r"getFileByServerRelativeUrl('{0}')/\$value".format(file_url))
+
+    def _construct_download_query(self, request):
+        self.bindingType.context.get_pending_request().beforeExecute -= self._construct_download_query
+        request.method = HttpMethod.Get
+        request.stream = True
+
+    def _process_response(self, response):
+        self.bindingType.context.get_pending_request().afterExecute -= self._process_response
+        # self.file_object.write(response.content)
+        # response.raw.decode_content = True
+        shutil.copyfileobj(response.raw, self.file_object)
+
+
 class AbstractFile(ClientObject):
-    def read(self, response_object=False):
+    def read(self):
         """Immediately read content of file"""
         if not self.is_property_available("ServerRelativeUrl"):
             raise ValueError
         response = File.open_binary(
             self.context, self.properties["ServerRelativeUrl"])
-        if not response_object:
-            return response.content
-        return response
+        return response.content
 
     def write(self, content):
         """Immediately writes content of file"""
@@ -190,7 +211,11 @@ class File(AbstractFile):
 
     @staticmethod
     def save_binary(ctx, server_relative_url, content):
-        """Uploads a file"""
+        """Uploads a file
+        :type ctx: ClientContext
+        :type server_relative_url: str
+        :type content: str
+        """
         url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(
             ctx.serviceRootUrl, server_relative_url)
         request = RequestOptions(url)
@@ -202,32 +227,25 @@ class File(AbstractFile):
 
     @staticmethod
     def open_binary(ctx, server_relative_url):
+        """
+        Returns the file object located at the specified server-relative URL.
+        :type ctx: ClientContext
+        :type server_relative_url: str
+        """
         url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(ctx.serviceRootUrl, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Get
         response = ctx.execute_request_direct(request)
         return response
 
-    def download(self):
+    def download(self, file_object):
         """Download a file content"""
-        result = ClientResult(None)
-        if not self.is_property_available("ServerRelativeUrl"):
-            self.context.load(self, "ServerRelativeUrl")
-            self.context.afterExecuteOnce += self._download_inner
-        else:
-            self._download_inner(self, result)
-        return result
+        self.ensure_property("ServerRelativeUrl", partial(self._download_inner, file_object))
 
-    def _download_inner(self, target_file, result):
-        qry = ServiceOperationQuery(self.context.web,
-                                    r"getFileByServerRelativeUrl('{0}')/\$value".format(
-                                        target_file.properties["ServerRelativeUrl"]), None, None, None, result)
+    def _download_inner(self, file_object, target_file):
+        file_url = target_file.properties['ServerRelativeUrl']
+        qry = DownloadFileQuery(self.context.web, file_url, file_object)
         self.context.add_query(qry)
-        self.context.get_pending_request().beforeExecute += self._construct_download_query
-
-    def _construct_download_query(self, request):
-        self.context.get_pending_request().beforeExecute -= self._construct_download_query
-        request.method = HttpMethod.Get
 
     @property
     def listItemAllFields(self):

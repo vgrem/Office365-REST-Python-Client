@@ -82,7 +82,8 @@ class ClientRequest(object):
             result = requests.get(url=request_options.url,
                                   headers=request_options.headers,
                                   auth=request_options.auth,
-                                  verify=request_options.verify)
+                                  verify=request_options.verify,
+                                  stream=request_options.stream)
         return result
 
     def add_query(self, query):

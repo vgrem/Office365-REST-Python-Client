@@ -1,6 +1,6 @@
 from office365.onedrive.baseItem import BaseItem
 from office365.onedrive.fieldValueSet import FieldValueSet
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.resourcePath import ResourcePath
 
 
 class ListItem(BaseItem):

@@ -55,6 +55,13 @@ class ClientObject(object):
     def to_json(self):
         return dict((k, v) for k, v in self.properties.items() if k in self._changes)
 
+    def ensure_property(self, name, loaded):
+        if not self.is_property_available(name):
+            self.context.load(self, [name])
+            self.context.afterExecuteOnce += loaded
+        else:
+            loaded(self)
+
     @property
     def entityTypeName(self):
         if self._entity_type_name is None:

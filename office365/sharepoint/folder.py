@@ -1,6 +1,6 @@
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.resourcePath import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.file_creation_information import FileCreationInformation
 from office365.sharepoint.listitem import ListItem
@@ -38,6 +38,20 @@ class Folder(ClientObject):
         info.overwrite = True
         target_file = self.files.add(info)
         return target_file
+
+    def copyto(self, new_relative_url, overwrite):
+        """Copies the folder with files to the destination URL.
+        :type new_relative_url: str
+        :type overwrite: bool
+        """
+        if self.is_property_available("Files"):
+            [source_file.copyto(new_relative_url, overwrite) for source_file in self.files]
+        else:
+            self.context.load(self, "Files")
+            self.context.afterExecuteOnce += self._copy_files_inner
+
+    def _copy_files_inner(self, target_folder):
+        pass
 
     @property
     def list_item_all_fields(self):

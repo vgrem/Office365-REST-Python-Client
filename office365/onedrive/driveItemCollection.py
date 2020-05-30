@@ -1,7 +1,7 @@
 from office365.runtime.client_object_collection import ClientObjectCollection
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.resourcePath import ResourcePath
 from office365.onedrive.driveItem import DriveItem
-from office365.runtime.resource_path_url import ResourcePathUrl
+from office365.runtime.resourcePathUrl import ResourcePathUrl
 
 
 class DriveItemCollection(ClientObjectCollection):

@@ -4,12 +4,12 @@ from office365.directory.groupSettingTemplateCollection import GroupSettingTempl
 from office365.onedrive.driveItem import DriveItem
 from office365.onedrive.siteCollection import SiteCollection
 from office365.outlookservices.contact_collection import ContactCollection
-from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery
+from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.odata.odata_request import ODataRequest
 from office365.runtime.odata.v4_json_format import V4JsonFormat
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.resourcePath import ResourcePath
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.directory.user import User
@@ -17,7 +17,8 @@ from office365.directory.groupCollection import GroupCollection
 from office365.directory.userCollection import UserCollection
 from office365.onedrive.driveCollection import DriveCollection
 from office365.onedrive.sharedDriveItemCollection import SharedDriveItemCollection
-from office365.runtime.resource_path_url import ResourcePathUrl
+from office365.runtime.resourcePathUrl import ResourcePathUrl
+from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 from office365.teams.teamCollection import TeamCollection
 
 

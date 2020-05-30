@@ -1,6 +1,7 @@
 import abc
 
 from office365.runtime.client_query import ReadEntityQuery
+from office365.runtime.utilities.EventHandler import EventHandler
 
 
 class ClientRuntimeContext(object):
@@ -9,6 +10,7 @@ class ClientRuntimeContext(object):
     def __init__(self, url, auth_context):
         self.__service_root_url = url
         self.__auth_context = auth_context
+        self.afterExecuteOnce = EventHandler()
 
     @abc.abstractmethod
     def get_pending_request(self):
@@ -34,6 +36,11 @@ class ClientRuntimeContext(object):
 
     def add_query(self, query):
         self.get_pending_request().add_query(query)
+
+    def _process_specific_response(self, response):
+        self.get_pending_request().afterExecute -= self._process_specific_response
+        query = self.get_pending_request().current_query
+        self.afterExecuteOnce.notify(query.returnType)
 
     @property
     def serviceRootUrl(self):

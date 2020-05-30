@@ -1,8 +1,8 @@
-from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery, \
-    ClientQuery
+from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ClientQuery
 from office365.runtime.client_result import ClientResult
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.resourcePath import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.basePermissions import BasePermissions
 from office365.sharepoint.changeCollection import ChangeCollection
 from office365.sharepoint.field_collection import FieldCollection

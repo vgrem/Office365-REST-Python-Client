@@ -1,7 +1,7 @@
 from office365.outlookservices.contact import Contact
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_query import CreateEntityQuery
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.resourcePath import ResourcePath
 
 
 class ContactCollection(ClientObjectCollection):

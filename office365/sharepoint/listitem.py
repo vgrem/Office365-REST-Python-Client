@@ -1,7 +1,10 @@
-from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ServiceOperationQuery
-from office365.runtime.resource_path import ResourcePath
+from functools import partial
+
+from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery
+from office365.runtime.resourcePath import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.securable_object import SecurableObject
 
 
@@ -90,11 +93,7 @@ class ListItem(SecurableObject):
 
     def ensure_type_name(self, target_list):
         if not self._entity_type_name:
-            if not target_list.is_property_available("ListItemEntityTypeFullName"):
-                self.context.load(target_list, "ListItemEntityTypeFullName")
-                self.context.afterExecuteOnce += self._init_item_type
-            else:
-                self._entity_type_name = target_list.properties['ListItemEntityTypeFullName']
+            target_list.ensure_property("ListItemEntityTypeFullName", self._init_item_type)
 
     def _init_item_type(self, target_list):
         self._entity_type_name = target_list.properties['ListItemEntityTypeFullName']

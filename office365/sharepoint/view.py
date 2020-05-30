@@ -1,7 +1,8 @@
 from office365.runtime.client_object import ClientObject
-from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery, ServiceOperationQuery
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
+from office365.runtime.resourcePath import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.camlQuery import CamlQuery
 from office365.sharepoint.view_field_collection import ViewFieldCollection
 

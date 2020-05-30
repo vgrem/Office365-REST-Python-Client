@@ -2,7 +2,7 @@ from office365.onedrive.baseItem import BaseItem
 from office365.onedrive.driveItem import DriveItem
 from office365.onedrive.driveItemCollection import DriveItemCollection
 from office365.onedrive.list import List
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.resourcePath import ResourcePath
 
 
 class Drive(BaseItem):
