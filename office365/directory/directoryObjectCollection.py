@@ -13,7 +13,7 @@ class DirectoryObjectCollection(ClientObjectCollection):
         if type(key) == int:
             return self._data[key]
         return DirectoryObject(self.context,
-                               ResourcePath(key, self.resourcePath))
+                               ResourcePath(key, self.resource_path))
 
     def getByIds(self, ids):
         """Returns the directory objects specified in a list of IDs."""

@@ -29,4 +29,4 @@ class ContactCollection(ClientObjectCollection):
     def get_by_id(self, contact_id):
         """Retrieve Contact resource by id"""
         return Contact(self.context,
-                       ResourcePath(contact_id, self.resourcePath))
+                       ResourcePath(contact_id, self.resource_path))

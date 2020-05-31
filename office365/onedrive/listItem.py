@@ -13,7 +13,7 @@ class ListItem(BaseItem):
         if self.is_property_available('fields'):
             return self.properties['fields']
         else:
-            return FieldValueSet(self.context, ResourcePath("fields", self.resourcePath))
+            return FieldValueSet(self.context, ResourcePath("fields", self.resource_path))
 
     @property
     def driveItem(self):
@@ -22,4 +22,4 @@ class ListItem(BaseItem):
             return self.properties['driveItem']
         else:
             from office365.onedrive.driveItem import DriveItem
-            return DriveItem(self.context, ResourcePath("driveItem", self.resourcePath))
+            return DriveItem(self.context, ResourcePath("driveItem", self.resource_path))

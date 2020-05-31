@@ -12,7 +12,7 @@ class ContentType(ClientObject):
         if self.is_property_available('Fields'):
             return self.properties['Fields']
         else:
-            return FieldCollection(self.context, ResourcePath("Fields", self.resourcePath))
+            return FieldCollection(self.context, ResourcePath("Fields", self.resource_path))
 
     @property
     def parent(self):
@@ -20,4 +20,4 @@ class ContentType(ClientObject):
         if self.is_property_available('Parent'):
             return self.properties['Parent']
         else:
-            return ContentType(self.context, ResourcePath("Parent", self.resourcePath))
+            return ContentType(self.context, ResourcePath("Parent", self.resource_path))

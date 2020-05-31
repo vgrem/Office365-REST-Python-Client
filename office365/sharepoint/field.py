@@ -22,4 +22,4 @@ class Field(ClientObject):
         # fallback: create a new resource path
         if name == "Id" and self._resource_path is None:
             self._resource_path = ResourcePathServiceOperation(
-                "getById", [value], self._parent_collection.resourcePath)
+                "getById", [value], self._parent_collection.resource_path)

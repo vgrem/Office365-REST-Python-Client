@@ -15,4 +15,4 @@ class SiteCollection(ClientObjectCollection):
         if self.is_property_available('root'):
             return self.properties['root']
         else:
-            return Site(self.context, ResourcePath("root", self.resourcePath))
+            return Site(self.context, ResourcePath("root", self.resource_path))

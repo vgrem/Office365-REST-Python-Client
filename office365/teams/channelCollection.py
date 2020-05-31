@@ -12,4 +12,4 @@ class ChannelCollection(ClientObjectCollection):
     def __getitem__(self, key):
         if type(key) == int:
             return self._data[key]
-        return Channel(self.context, ResourcePath(key, self.resourcePath))
+        return Channel(self.context, ResourcePath(key, self.resource_path))

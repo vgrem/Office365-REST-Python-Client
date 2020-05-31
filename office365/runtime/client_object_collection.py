@@ -3,9 +3,12 @@ from office365.runtime.http.request_options import RequestOptions
 
 
 class ClientObjectCollection(ClientObject):
-    """Client object collection"""
 
     def __init__(self, context, item_type, resource_path=None):
+        """Client object collection
+        :type context: ClientRuntimeContext
+        :type resource_path: ResourcePath
+        """
         super(ClientObjectCollection, self).__init__(context, resource_path)
         self._data = []
         self.next_request_url = None
@@ -55,24 +58,24 @@ class ClientObjectCollection(ClientObject):
         return self._data[index]
 
     def filter(self, expression):
-        self.queryOptions.filter = expression
+        self.query_options.filter = expression
         return self
 
     def order_by(self, value):
-        self.queryOptions.orderBy = value
+        self.query_options.orderBy = value
         return self
 
     def skip(self, value):
-        self.queryOptions.skip = value
+        self.query_options.skip = value
         return self
 
     def top(self, value):
-        self.queryOptions.top = value
+        self.query_options.top = value
         return self
 
     def _load_next_items(self):
-        if self.next_request_url and not self.queryOptions.top:
-            items = ClientObjectCollection(self.context, self._item_type, self.resourcePath)
+        if self.next_request_url and not self.query_options.top:
+            items = ClientObjectCollection(self.context, self._item_type, self.resource_path)
             request = RequestOptions(self.next_request_url)
             response = self.context.execute_request_direct(request)
             json = response.json()

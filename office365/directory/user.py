@@ -17,7 +17,7 @@ class User(DirectoryObject):
         if self.is_property_available('drive'):
             return self.properties['drive']
         else:
-            return Drive(self.context, ResourcePath("drive", self.resourcePath))
+            return Drive(self.context, ResourcePath("drive", self.resource_path))
 
     @property
     def contacts(self):
@@ -26,7 +26,7 @@ class User(DirectoryObject):
         if self.is_property_available('contacts'):
             return self.properties['contacts']
         else:
-            return ContactCollection(self.context, ResourcePath("contacts", self.resourcePath))
+            return ContactCollection(self.context, ResourcePath("contacts", self.resource_path))
 
     @property
     def events(self):
@@ -34,7 +34,7 @@ class User(DirectoryObject):
         if self.is_property_available('events'):
             return self.properties['events']
         else:
-            return EventCollection(self.context, ResourcePath("events", self.resourcePath))
+            return EventCollection(self.context, ResourcePath("events", self.resource_path))
 
     @property
     def messages(self):
@@ -42,7 +42,7 @@ class User(DirectoryObject):
         if self.is_property_available('messages'):
             return self.properties['messages']
         else:
-            return MessageCollection(self.context, ResourcePath("messages", self.resourcePath))
+            return MessageCollection(self.context, ResourcePath("messages", self.resource_path))
 
     def send_mail(self, message):
         """Send a new message on the fly"""
@@ -55,7 +55,7 @@ class User(DirectoryObject):
         if self.is_property_available('joinedTeams'):
             return self.properties['joinedTeams']
         else:
-            return GroupCollection(self.context, ResourcePath("joinedTeams", self.resourcePath))
+            return GroupCollection(self.context, ResourcePath("joinedTeams", self.resource_path))
 
     def set_property(self, name, value, persist_changes=True):
         super(User, self).set_property(name, value, persist_changes)
@@ -64,4 +64,4 @@ class User(DirectoryObject):
             if name == "id" or name == "userPrincipalName":
                 self._resource_path = ResourcePath(
                     value,
-                    self._parent_collection.resourcePath)
+                    self._parent_collection.resource_path)

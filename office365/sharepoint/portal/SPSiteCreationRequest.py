@@ -17,5 +17,5 @@ class SPSiteCreationRequest(ClientValueObject):
         self.WebTemplateExtensionId = "00000000-0000-0000-0000-000000000000"
 
     @property
-    def entityTypeName(self):
+    def entity_type_name(self):
         return "Microsoft.SharePoint.Portal.SPSiteCreationRequest"

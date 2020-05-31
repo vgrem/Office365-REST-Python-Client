@@ -24,11 +24,11 @@ class ClientObject(object):
         return False
 
     def expand(self, names):
-        self.queryOptions.expand = names
+        self.query_options.expand = names
         return self
 
     def select(self, names):
-        self.queryOptions.select = names
+        self.query_options.select = names
         return self
 
     def remove_from_parent_collection(self):
@@ -63,21 +63,21 @@ class ClientObject(object):
             loaded(self)
 
     @property
-    def entityTypeName(self):
+    def entity_type_name(self):
         if self._entity_type_name is None:
             self._entity_type_name = "SP." + type(self).__name__
         return self._entity_type_name
 
-    @entityTypeName.setter
-    def entityTypeName(self, value):
+    @entity_type_name.setter
+    def entity_type_name(self, value):
         self._entity_type_name = value
 
     @property
-    def resourceUrl(self):
+    def resource_url(self):
         """Generate resource Url"""
-        if self.resourcePath:
-            url = self.context.serviceRootUrl + self.resourcePath.to_url()
-            if not self.queryOptions.is_empty:
+        if self.resource_path:
+            url = self.context.service_root_url + self.resource_path.to_url()
+            if not self.query_options.is_empty:
                 url = url + "?" + self._query_options.to_url()
             return url
         return None
@@ -87,11 +87,11 @@ class ClientObject(object):
         return self._context
 
     @property
-    def resourcePath(self):
+    def resource_path(self):
         return self._resource_path
 
     @property
-    def queryOptions(self):
+    def query_options(self):
         return self._query_options
 
     @property

@@ -41,5 +41,5 @@ class GroupSiteManager(ClientObject):
     def _construct_status_request(self, request):
         query = self.context.get_pending_request().current_query
         request.method = HttpMethod.Get
-        request.url += "?groupId='{0}'".format(query.parameterType['groupId'])
+        request.url += "?groupId='{0}'".format(query.parameter_type['groupId'])
         self.context.get_pending_request().beforeExecute -= self._construct_status_request

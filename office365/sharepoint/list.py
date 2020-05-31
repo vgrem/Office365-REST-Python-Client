@@ -25,7 +25,7 @@ class List(SecurableObject):
         """
         if not caml_query:
             caml_query = CamlQuery.create_all_items_query()
-        items = ListItemCollection(self.context, ResourcePath("items", self.resourcePath))
+        items = ListItemCollection(self.context, ResourcePath("items", self.resource_path))
         qry = ServiceOperationQuery(self, "GetItems", None, caml_query, "query", items)
         self.context.add_query(qry)
         return items
@@ -46,13 +46,13 @@ class List(SecurableObject):
         :type item_id: int
         """
         return ListItem(self.context,
-                        ResourcePathServiceOperation("getItemById", [item_id], self.resourcePath))
+                        ResourcePathServiceOperation("getItemById", [item_id], self.resource_path))
 
     def get_view(self, view_id):
         """Returns the list view with the specified view identifier.
         :type view_id: str
         """
-        view = View(self.context, ResourcePathServiceOperation("getView", [view_id], self.resourcePath), self)
+        view = View(self.context, ResourcePathServiceOperation("getView", [view_id], self.resource_path), self)
         return view
 
     def update(self):
@@ -71,7 +71,7 @@ class List(SecurableObject):
         if self.is_property_available('Items'):
             return self.properties["Items"]
         else:
-            return ListItemCollection(self.context, ResourcePath("items", self.resourcePath))
+            return ListItemCollection(self.context, ResourcePath("items", self.resource_path))
 
     @property
     def rootFolder(self):
@@ -79,7 +79,7 @@ class List(SecurableObject):
         if self.is_property_available('RootFolder'):
             return self.properties["RootFolder"]
         else:
-            return Folder(self.context, ResourcePath("RootFolder", self.resourcePath))
+            return Folder(self.context, ResourcePath("RootFolder", self.resource_path))
 
     @property
     def fields(self):
@@ -87,7 +87,7 @@ class List(SecurableObject):
         if self.is_property_available('Fields'):
             return self.properties['Fields']
         else:
-            return FieldCollection(self.context, ResourcePath("Fields", self.resourcePath))
+            return FieldCollection(self.context, ResourcePath("Fields", self.resource_path))
 
     @property
     def views(self):
@@ -96,7 +96,7 @@ class List(SecurableObject):
         if self.is_property_available('Views'):
             return self.properties['Views']
         else:
-            return ViewCollection(self.context, ResourcePath("views", self.resourcePath), self)
+            return ViewCollection(self.context, ResourcePath("views", self.resource_path), self)
 
     @property
     def defaultView(self):
@@ -104,7 +104,7 @@ class List(SecurableObject):
         if self.is_property_available('DefaultView'):
             return self.properties['DefaultView']
         else:
-            return View(self.context, ResourcePath("DefaultView", self.resourcePath), self)
+            return View(self.context, ResourcePath("DefaultView", self.resource_path), self)
 
     @property
     def contentTypes(self):
@@ -113,7 +113,7 @@ class List(SecurableObject):
             return self.properties['ContentTypes']
         else:
             return ContentTypeCollection(self.context,
-                                         ResourcePath("contenttypes", self.resourcePath))
+                                         ResourcePath("contenttypes", self.resource_path))
 
     def set_property(self, name, value, persist_changes=True):
         super(List, self).set_property(name, value, persist_changes)
@@ -121,7 +121,7 @@ class List(SecurableObject):
         if self._resource_path is None:
             if name == "Id":
                 self._resource_path = ResourcePathServiceOperation(
-                    "GetById", [value], self._parent_collection.resourcePath)
+                    "GetById", [value], self._parent_collection.resource_path)
             elif name == "Title":
                 self._resource_path = ResourcePathServiceOperation(
-                    "GetByTitle", [value], self._parent_collection.resourcePath)
+                    "GetByTitle", [value], self._parent_collection.resource_path)

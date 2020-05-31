@@ -43,13 +43,7 @@ class ClientRequest(object):
         """Execute client request"""
         self.context.authenticate_request(request_options)
         if request_options.method == HttpMethod.Post:
-            if hasattr(request_options.data, 'decode') and callable(request_options.data.decode):
-                result = requests.post(url=request_options.url,
-                                       headers=request_options.headers,
-                                       data=request_options.data,
-                                       auth=request_options.auth,
-                                       verify=request_options.verify)
-            elif hasattr(request_options.data, 'read') and callable(request_options.data.read):
+            if request_options.is_bytes or request_options.is_file:
                 result = requests.post(url=request_options.url,
                                        headers=request_options.headers,
                                        data=request_options.data,
@@ -83,7 +77,8 @@ class ClientRequest(object):
                                   headers=request_options.headers,
                                   auth=request_options.auth,
                                   verify=request_options.verify,
-                                  stream=request_options.stream)
+                                  stream=request_options.stream,
+                                  proxies=request_options.proxies)
         return result
 
     def add_query(self, query):

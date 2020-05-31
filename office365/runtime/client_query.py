@@ -1,6 +1,3 @@
-from office365.runtime.odata.odata_query_options import QueryOptions
-
-
 class ClientQuery(object):
     """Client query"""
 
@@ -15,19 +12,19 @@ class ClientQuery(object):
         return id(self)
 
     @property
-    def bindingType(self):
+    def binding_type(self):
         return self._binding_type
 
     @property
-    def parameterName(self):
+    def parameter_name(self):
         return self._parameter_name
 
     @property
-    def parameterType(self):
+    def parameter_type(self):
         return self._parameter_type
 
     @property
-    def returnType(self):
+    def return_type(self):
         return self._return_type
 
 
@@ -40,14 +37,7 @@ class ReadEntityQuery(ClientQuery):
     def __init__(self, entity_to_read, properties_to_include=None):
         super(ReadEntityQuery, self).__init__(entity_to_read, None, None, entity_to_read)
         if properties_to_include:
-            self._query_options = QueryOptions()
-            self._query_options.expand = properties_to_include
-        else:
-            self._query_options = entity_to_read.queryOptions
-
-    @property
-    def queryOptions(self):
-        return self._query_options
+            entity_to_read.query_options.expand = properties_to_include
 
 
 class UpdateEntityQuery(ClientQuery):

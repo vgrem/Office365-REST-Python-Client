@@ -22,16 +22,16 @@ class UserCollection(ClientObjectCollection):
 
     def get_by_email(self, email):
         """Retrieve User object by email"""
-        return User(self.context, ResourcePathServiceOperation("GetByEmail", [email], self.resourcePath))
+        return User(self.context, ResourcePathServiceOperation("GetByEmail", [email], self.resource_path))
 
     def get_by_id(self, user_id):
         """Retrieve User object by id"""
-        return User(self.context, ResourcePathServiceOperation("GetById", [user_id], self.resourcePath))
+        return User(self.context, ResourcePathServiceOperation("GetById", [user_id], self.resource_path))
 
     def get_by_login_name(self, login_name):
         """Retrieve User object by login name"""
         return User(self.context,
-                    ResourcePathServiceOperation("GetByLoginName", [login_name], self.resourcePath))
+                    ResourcePathServiceOperation("GetByLoginName", [login_name], self.resource_path))
 
     def remove_by_id(self, _id):
         """Retrieve User object by id"""

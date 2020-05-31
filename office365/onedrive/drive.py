@@ -15,7 +15,7 @@ class Drive(BaseItem):
         if self.is_property_available("root"):
             return self.properties['root']
         else:
-            return DriveItem(self.context, ResourcePath("root", self.resourcePath))
+            return DriveItem(self.context, ResourcePath("root", self.resource_path))
 
     @property
     def list(self):
@@ -23,7 +23,7 @@ class Drive(BaseItem):
         if self.is_property_available("list"):
             return self.properties['list']
         else:
-            return List(self.context, ResourcePath("list", self.resourcePath))
+            return List(self.context, ResourcePath("list", self.resource_path))
 
     @property
     def items(self):
@@ -31,4 +31,4 @@ class Drive(BaseItem):
         if self.is_property_available("items"):
             return self.properties['items']
         else:
-            return DriveItemCollection(self.context, ResourcePath("items", self.resourcePath))
+            return DriveItemCollection(self.context, ResourcePath("items", self.resource_path))

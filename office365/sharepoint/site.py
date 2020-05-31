@@ -33,7 +33,7 @@ class Site(ClientObject):
         """Specifies the list template gallery, site template gallery, Web Part gallery, master page gallery,
         or other galleries from the site collection, including custom galleries that are defined by users.
         :type type_catalog: int"""
-        return List(self.context, ResourcePathServiceOperation("getCatalog", [type_catalog], self.resourcePath))
+        return List(self.context, ResourcePathServiceOperation("getCatalog", [type_catalog], self.resource_path))
 
     @property
     def rootWeb(self):
@@ -41,7 +41,7 @@ class Site(ClientObject):
         if self.is_property_available('RootWeb'):
             return self.properties['RootWeb']
         else:
-            return Web(self.context, ResourcePath("RootWeb", self.resourcePath))
+            return Web(self.context, ResourcePath("RootWeb", self.resource_path))
 
     @property
     def owner(self):
@@ -49,4 +49,4 @@ class Site(ClientObject):
         if self.is_property_available('owner'):
             return self.properties['owner']
         else:
-            return User(self.context, ResourcePath("owner", self.resourcePath))
+            return User(self.context, ResourcePath("owner", self.resource_path))

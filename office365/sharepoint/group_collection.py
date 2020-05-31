@@ -21,13 +21,13 @@ class GroupCollection(ClientObjectCollection):
     def get_by_id(self, group_id):
         """Returns the list item with the specified list item identifier."""
         group = Group(self.context,
-                      ResourcePathServiceOperation("getbyid", [group_id], self.resourcePath))
+                      ResourcePathServiceOperation("getbyid", [group_id], self.resource_path))
         return group
 
     def get_by_name(self, group_name):
         """Returns a cross-site group from the collection based on the name of the group."""
         return Group(self.context,
-                     ResourcePathServiceOperation("getbyname", [group_name], self.resourcePath))
+                     ResourcePathServiceOperation("getbyname", [group_name], self.resource_path))
 
     def remove_by_id(self, group_id):
         """Removes the group with the specified member ID from the collection."""

@@ -10,7 +10,7 @@ class TestSharePointUser(SPTestCase):
         self.client.execute_query()
         self.assertIsNotNone(user.properties['LoginName'], "Current user was not requested")
         self.assertIsNotNone(user.login_name, "Current user was not requested")
-        self.assertIsNotNone(user.resourcePath)
+        self.assertIsNotNone(user.resource_path)
         self.__class__.target_user_name = user.properties['LoginName']
 
     def test2_ensure_user(self):

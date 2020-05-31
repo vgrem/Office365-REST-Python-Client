@@ -11,5 +11,5 @@ class ClientValueObject(object):
         return dict((k, v) for k, v in vars(self).items() if v is not None)
 
     @property
-    def entityTypeName(self):
+    def entity_type_name(self):
         return None

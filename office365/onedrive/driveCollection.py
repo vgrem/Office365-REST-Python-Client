@@ -12,4 +12,4 @@ class DriveCollection(ClientObjectCollection):
     def get_by_id(self, url):
         """Retrieve DriveItem by url"""
         return Drive(self.context,
-                     ResourcePath(url, self.resourcePath))
+                     ResourcePath(url, self.resource_path))

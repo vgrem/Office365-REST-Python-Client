@@ -30,7 +30,7 @@ class TestSPView(SPTestCase):
         self.client.load(all_views)
         self.client.execute_query()
         for cur_view in all_views:
-            self.assertIsNotNone(cur_view.resourcePath)
+            self.assertIsNotNone(cur_view.resource_path)
 
     def test2_create_view(self):
         view_properties = ViewCreationInformation()
@@ -53,13 +53,13 @@ class TestSPView(SPTestCase):
         view_items = self.target_list.defaultView.get_items()
         self.client.load(view_items)
         self.client.execute_query()
-        self.assertIsNotNone(view_items.resourcePath)
+        self.assertIsNotNone(view_items.resource_path)
 
     def test5_get_view_items(self):
         view_items = self.target_list.views.get_by_title(self.target_view_title).get_items()
         self.client.load(view_items)
         self.client.execute_query()
-        self.assertIsNotNone(view_items.resourcePath)
+        self.assertIsNotNone(view_items.resource_path)
 
     def test6_update_view(self):
         view_to_update = self.target_list.views.get_by_title(self.target_view_title)

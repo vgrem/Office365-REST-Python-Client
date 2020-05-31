@@ -79,7 +79,7 @@ class Web(SecurableObject):
         """
         return File(
             self.context,
-            ResourcePathServiceOperation("getFileByServerRelativeUrl", [url], self.resourcePath)
+            ResourcePathServiceOperation("getFileByServerRelativeUrl", [url], self.resource_path)
         )
 
     def get_folder_by_server_relative_url(self, url):
@@ -88,7 +88,7 @@ class Web(SecurableObject):
         """
         return Folder(
             self.context,
-            ResourcePathServiceOperation("getFolderByServerRelativeUrl", [url], self.resourcePath)
+            ResourcePathServiceOperation("getFolderByServerRelativeUrl", [url], self.resource_path)
         )
 
     def ensure_user(self, login_name):
@@ -125,14 +125,14 @@ class Web(SecurableObject):
         :type user_id: long
         """
         return User(self.context,
-                    ResourcePathServiceOperation("getUserById", [user_id], self.resourcePath))
+                    ResourcePathServiceOperation("getUserById", [user_id], self.resource_path))
 
     def get_list(self, url):
         """Get list by url
         :type url: str
         """
         return List(self.context,
-                    ResourcePathServiceOperation("getList", [url], self.resourcePath))
+                    ResourcePathServiceOperation("getList", [url], self.resource_path))
 
     def get_changes(self, query):
         """Returns the collection of all changes from the change log that have occurred within the scope of the site,
@@ -154,7 +154,7 @@ class Web(SecurableObject):
             if self.is_property_available('Url'):
                 parent_web_url = self.properties['Url']
             return WebCollection(self.context,
-                                 ResourcePath("webs", self.resourcePath),
+                                 ResourcePath("webs", self.resource_path),
                                  parent_web_url)
 
     @property
@@ -163,7 +163,7 @@ class Web(SecurableObject):
         if self.is_property_available('Folders'):
             return self.properties['Folders']
         else:
-            return FolderCollection(self.context, ResourcePath("folders", self.resourcePath))
+            return FolderCollection(self.context, ResourcePath("folders", self.resource_path))
 
     @property
     def lists(self):
@@ -171,7 +171,7 @@ class Web(SecurableObject):
         if self.is_property_available('Lists'):
             return self.properties['Lists']
         else:
-            return ListCollection(self.context, ResourcePath("lists", self.resourcePath))
+            return ListCollection(self.context, ResourcePath("lists", self.resource_path))
 
     @property
     def siteUsers(self):
@@ -179,7 +179,7 @@ class Web(SecurableObject):
         if self.is_property_available('SiteUsers'):
             return self.properties['SiteUsers']
         else:
-            return UserCollection(self.context, ResourcePath("siteUsers", self.resourcePath))
+            return UserCollection(self.context, ResourcePath("siteUsers", self.resource_path))
 
     @property
     def siteGroups(self):
@@ -187,7 +187,7 @@ class Web(SecurableObject):
         if self.is_property_available('SiteGroups'):
             return self.properties['SiteGroups']
         else:
-            return GroupCollection(self.context, ResourcePath("siteGroups", self.resourcePath))
+            return GroupCollection(self.context, ResourcePath("siteGroups", self.resource_path))
 
     @property
     def currentUser(self):
@@ -195,7 +195,7 @@ class Web(SecurableObject):
         if self.is_property_available('CurrentUser'):
             return self.properties['CurrentUser']
         else:
-            return User(self.context, ResourcePath("CurrentUser", self.resourcePath))
+            return User(self.context, ResourcePath("CurrentUser", self.resource_path))
 
     @property
     def parentWeb(self):
@@ -203,7 +203,7 @@ class Web(SecurableObject):
         if self.is_property_available('ParentWeb'):
             return self.properties['ParentWeb']
         else:
-            return User(self.context, ResourcePath("ParentWeb", self.resourcePath))
+            return User(self.context, ResourcePath("ParentWeb", self.resource_path))
 
     @property
     def associatedVisitorGroup(self):
@@ -211,7 +211,7 @@ class Web(SecurableObject):
         if self.is_property_available('AssociatedVisitorGroup'):
             return self.properties['AssociatedVisitorGroup']
         else:
-            return Group(self.context, ResourcePath("AssociatedVisitorGroup", self.resourcePath))
+            return Group(self.context, ResourcePath("AssociatedVisitorGroup", self.resource_path))
 
     @property
     def associatedOwnerGroup(self):
@@ -219,7 +219,7 @@ class Web(SecurableObject):
         if self.is_property_available('AssociatedOwnerGroup'):
             return self.properties['AssociatedOwnerGroup']
         else:
-            return Group(self.context, ResourcePath("AssociatedOwnerGroup", self.resourcePath))
+            return Group(self.context, ResourcePath("AssociatedOwnerGroup", self.resource_path))
 
     @property
     def associatedMemberGroup(self):
@@ -227,7 +227,7 @@ class Web(SecurableObject):
         if self.is_property_available('AssociatedMemberGroup'):
             return self.properties['AssociatedMemberGroup']
         else:
-            return Group(self.context, ResourcePath("AssociatedMemberGroup", self.resourcePath))
+            return Group(self.context, ResourcePath("AssociatedMemberGroup", self.resource_path))
 
     @property
     def fields(self):
@@ -235,7 +235,7 @@ class Web(SecurableObject):
         if self.is_property_available('Fields'):
             return self.properties['Fields']
         else:
-            return FieldCollection(self.context, ResourcePath("Fields", self.resourcePath))
+            return FieldCollection(self.context, ResourcePath("Fields", self.resource_path))
 
     @property
     def url(self):
@@ -260,8 +260,8 @@ class Web(SecurableObject):
             self._web_url = value
 
     @property
-    def resourceUrl(self):
-        url = super(Web, self).resourceUrl
+    def resource_url(self):
+        url = super(Web, self).resource_url
         if self._web_url is not None:
-            url = url.replace(self.context.serviceRootUrl, self._web_url + '/_api/')
+            url = url.replace(self.context.service_root_url, self._web_url + '/_api/')
         return url

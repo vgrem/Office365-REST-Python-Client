@@ -53,7 +53,7 @@ class ListItem(SecurableObject):
             return self.properties["ParentList"]
         else:
             from office365.sharepoint.list import List
-            return List(self.context, ResourcePath("ParentList", self.resourcePath))
+            return List(self.context, ResourcePath("ParentList", self.resource_path))
 
     @property
     def file(self):
@@ -62,7 +62,7 @@ class ListItem(SecurableObject):
             return self.properties["File"]
         else:
             from office365.sharepoint.file import File
-            return File(self.context, ResourcePath("File", self.resourcePath))
+            return File(self.context, ResourcePath("File", self.resource_path))
 
     @property
     def folder(self):
@@ -71,7 +71,7 @@ class ListItem(SecurableObject):
             return self.properties["Folder"]
         else:
             from office365.sharepoint.folder import Folder
-            return Folder(self.context, ResourcePath("Folder", self.resourcePath))
+            return Folder(self.context, ResourcePath("Folder", self.resource_path))
 
     @property
     def attachmentFiles(self):
@@ -81,7 +81,7 @@ class ListItem(SecurableObject):
         else:
             from office365.sharepoint.attachmentfile_collection import AttachmentFileCollection
             return AttachmentFileCollection(self.context,
-                                            ResourcePath("AttachmentFiles", self.resourcePath))
+                                            ResourcePath("AttachmentFiles", self.resource_path))
 
     def set_property(self, name, value, persist_changes=True):
         super(ListItem, self).set_property(name, value, persist_changes)
@@ -89,7 +89,7 @@ class ListItem(SecurableObject):
         if self._resource_path is None:
             if name == "Id":
                 self._resource_path = ResourcePathServiceOperation(
-                    "getItemById", [value], self._parent_collection.resourcePath.parent)
+                    "getItemById", [value], self._parent_collection.resource_path.parent)
 
     def ensure_type_name(self, target_list):
         if not self._entity_type_name:

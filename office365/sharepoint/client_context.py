@@ -86,7 +86,7 @@ class ClientContext(ClientRuntimeContext):
 
     def request_form_digest(self):
         """Request Form Digest"""
-        request = RequestOptions(self.serviceRootUrl + "contextinfo")
+        request = RequestOptions(self.service_root_url + "contextinfo")
         request.method = HttpMethod.Post
         response = self.execute_request_direct(request)
         json = response.json()
@@ -127,5 +127,5 @@ class ClientContext(ClientRuntimeContext):
         return self.__base_url
 
     @property
-    def serviceRootUrl(self):
-        return super(ClientContext, self).serviceRootUrl
+    def service_root_url(self):
+        return super(ClientContext, self).service_root_url

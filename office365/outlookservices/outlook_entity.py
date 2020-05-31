@@ -21,4 +21,4 @@ class OutlookEntity(ClientObject):
         if name == "Id":
             self._resource_path = ResourcePath(
                 value,
-                self._parent_collection.resourcePath)
+                self._parent_collection.resource_path)

@@ -1,8 +1,4 @@
-import xml.etree.ElementTree as ET
-from abc import ABC
-
 from office365.runtime.odata.odata_base_reader import ODataBaseReader
-from office365.runtime.odata.odata_model import ODataModel
 
 
 class ODataV4Reader(ODataBaseReader):

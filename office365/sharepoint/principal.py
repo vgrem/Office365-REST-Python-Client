@@ -56,10 +56,10 @@ class Principal(ClientObject):
         if self._resource_path is None:
             if name == "Id":
                 self._resource_path = ResourcePathServiceOperation(
-                    "GetById", [value], self._parent_collection.resourcePath)
+                    "GetById", [value], self._parent_collection.resource_path)
             elif name == "LoginName":
                 self._resource_path = ResourcePathServiceOperation(
-                    "GetByName", [value], self._parent_collection.resourcePath)
+                    "GetByName", [value], self._parent_collection.resource_path)
 
     def update(self):
         """Update a User or Group resource"""

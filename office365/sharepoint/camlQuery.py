@@ -43,5 +43,5 @@ class CamlQuery(ClientValueObject):
         return CamlQuery.parse(qry_text, ViewScope.RecursiveAll)
 
     @property
-    def entityTypeName(self):
+    def entity_type_name(self):
         return 'SP.CamlQuery'

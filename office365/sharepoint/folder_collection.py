@@ -9,14 +9,19 @@ class FolderCollection(ClientObjectCollection):
     def __init__(self, context, resource_path=None):
         super(FolderCollection, self).__init__(context, Folder, resource_path)
 
-    def add(self, folder_url):
+    def add(self, server_relative_url):
+        """Adds the folder that is located at the specified URL to the collection.
+        :type server_relative_url: str
+        """
         folder = Folder(self.context)
         self.add_child(folder)
-        folder.set_property("ServerRelativeUrl", folder_url)
+        folder.set_property("ServerRelativeUrl", server_relative_url)
         qry = CreateEntityQuery(self, folder, folder)
         self.context.add_query(qry)
         return folder
 
     def get_by_url(self, url):
-        """Retrieve Folder resource by url"""
-        return Folder(self.context, ResourcePathServiceOperation("GetByUrl", [url], self.resourcePath))
+        """Retrieve Folder resource by url
+        :type url: str
+        """
+        return Folder(self.context, ResourcePathServiceOperation("GetByUrl", [url], self.resource_path))

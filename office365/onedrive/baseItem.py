@@ -14,7 +14,7 @@ class BaseItem(ClientObject):
         self.remove_from_parent_collection()
 
     @property
-    def entityTypeName(self):
+    def entity_type_name(self):
         return "microsoft.graph." + type(self).__name__
 
     @property
@@ -93,4 +93,4 @@ class BaseItem(ClientObject):
         if name == "id" and self._resource_path is None:
             self._resource_path = ResourcePath(
                 value,
-                self._parent_collection.resourcePath)
+                self._parent_collection.resource_path)

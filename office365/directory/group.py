@@ -35,7 +35,7 @@ class Group(DirectoryObject):
         else:
             return DirectoryObjectCollection(self.context,
                                              DirectoryObject,
-                                             ResourcePath("members", self.resourcePath))
+                                             ResourcePath("members", self.resource_path))
 
     @property
     def owners(self):
@@ -45,7 +45,7 @@ class Group(DirectoryObject):
         else:
             return DirectoryObjectCollection(self.context,
                                              DirectoryObject,
-                                             ResourcePath("owners", self.resourcePath))
+                                             ResourcePath("owners", self.resource_path))
 
     @property
     def drives(self):
@@ -53,7 +53,7 @@ class Group(DirectoryObject):
         if self.is_property_available('drives'):
             return self.properties['drives']
         else:
-            return DriveCollection(self.context, ResourcePath("drives", self.resourcePath))
+            return DriveCollection(self.context, ResourcePath("drives", self.resource_path))
 
     @property
     def sites(self):
@@ -62,7 +62,7 @@ class Group(DirectoryObject):
             return self.properties['sites']
         else:
             return SiteCollection(self.context,
-                                  ResourcePath("sites", self.resourcePath))
+                                  ResourcePath("sites", self.resource_path))
 
     def set_property(self, name, value, persist_changes=True):
         super(Group, self).set_property(name, value, persist_changes)
@@ -71,4 +71,4 @@ class Group(DirectoryObject):
             if name == "id":
                 self._resource_path = ResourcePath(
                     value,
-                    self._parent_collection.resourcePath)
+                    self._parent_collection.resource_path)

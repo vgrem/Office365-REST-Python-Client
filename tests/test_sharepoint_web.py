@@ -31,7 +31,7 @@ class TestSharePointWeb(SPTestCase):
         self.client.load(results)
         self.client.execute_query()
         self.assertEqual(len(results), 1)
-        self.assertIsNotNone(results[0].resourcePath)
+        self.assertIsNotNone(results[0].resource_path)
 
     def test2_get_sub_web(self):
         sub_webs = self.client.web.get_sub_webs_filtered_for_current_user(SubwebQuery())

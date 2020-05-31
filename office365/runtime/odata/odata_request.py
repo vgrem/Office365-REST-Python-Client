@@ -20,7 +20,8 @@ class ODataRequest(ClientRequest):
 
     def execute_request_direct(self, request):
         media_type = self.json_format.get_media_type()
-        request.ensure_headers({'Content-Type': media_type, 'Accept': media_type})  # set OData format
+        request.ensure_header('Content-Type', media_type)
+        request.ensure_header('Accept', media_type)
         return super(ODataRequest, self).execute_request_direct(request)
 
     @property
@@ -42,11 +43,11 @@ class ODataRequest(ClientRequest):
         if isinstance(qry, ServiceOperationQuery):
             self.json_format.function_tag_name = qry.methodName
             if qry.static:
-                request_url = self.context.serviceRootUrl + '.'.join([qry.bindingType.entityTypeName, qry.methodUrl])
+                request_url = self.context.service_root_url + '.'.join([qry.binding_type.entity_type_name, qry.methodUrl])
             else:
-                request_url = '/'.join([qry.bindingType.resourceUrl, qry.methodUrl])
+                request_url = '/'.join([qry.binding_type.resource_url, qry.methodUrl])
         else:
-            request_url = qry.bindingType.resourceUrl
+            request_url = qry.binding_type.resource_url
         request = RequestOptions(request_url)
 
         # set method
@@ -57,12 +58,12 @@ class ODataRequest(ClientRequest):
             or isinstance(qry, UpdateEntityQuery) \
             or isinstance(qry, ServiceOperationQuery):
             request.method = HttpMethod.Post
-            if qry.parameterType is not None:
-                request.data = self._normalize_payload(qry.parameterType)
+            if qry.parameter_type is not None:
+                request.data = self._normalize_payload(qry.parameter_type)
         return request
 
     def process_response(self, response):
-        result_object = self._current_query.returnType
+        result_object = self._current_query.return_type
         if isinstance(result_object, ClientObjectCollection):
             result_object.clear()
 
@@ -121,10 +122,10 @@ class ODataRequest(ClientRequest):
 
             if isinstance(self._json_format,
                           JsonLightFormat) and self._json_format.metadata == ODataMetadataLevel.Verbose:
-                json["__metadata"] = {'type': value.entityTypeName}
+                json["__metadata"] = {'type': value.entity_type_name}
 
-            if isinstance(self._current_query, ServiceOperationQuery) and self._current_query.parameterName is not None:
-                json = {self._current_query.parameterName: json}
+            if isinstance(self._current_query, ServiceOperationQuery) and self._current_query.parameter_name is not None:
+                json = {self._current_query.parameter_name: json}
             return json
         elif isinstance(value, dict):
             for k, v in value.items():

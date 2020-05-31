@@ -16,5 +16,5 @@ class ViewCreationInformation(ClientValueObject):
         self.Paged = False
 
     @property
-    def entityTypeName(self):
+    def entity_type_name(self):
         return "SP.ViewCreationInformation"

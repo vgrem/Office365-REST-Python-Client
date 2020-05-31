@@ -13,7 +13,7 @@ class User(Principal):
             return self.properties['Groups']
         else:
             from office365.sharepoint.group_collection import GroupCollection
-            return GroupCollection(self.context, ResourcePath("Groups", self.resourcePath))
+            return GroupCollection(self.context, ResourcePath("Groups", self.resource_path))
 
     @property
     def isSiteAdmin(self):

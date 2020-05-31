@@ -35,7 +35,7 @@ class DriveItem(BaseItem):
         from office365.graphClient import UploadContentQuery
         qry = UploadContentQuery(self, name, content)
         self.context.add_query(qry)
-        return qry.returnType
+        return qry.return_type
 
     def download(self):
         """Download the contents of the primary stream (file) of a DriveItem. Only driveItems with the file property
@@ -43,7 +43,7 @@ class DriveItem(BaseItem):
         from office365.graphClient import DownloadContentQuery
         qry = DownloadContentQuery(self)
         self.context.add_query(qry)
-        return qry.returnType
+        return qry.return_type
 
     def create_folder(self, name):
         """Create a new folder or DriveItem in a Drive with a specified parent item or path."""
@@ -63,7 +63,7 @@ class DriveItem(BaseItem):
         from office365.graphClient import DownloadContentQuery
         qry = DownloadContentQuery(self, format_name)
         self.context.add_query(qry)
-        return qry.returnType
+        return qry.return_type
 
     def copy(self, name, parent_reference=None):
         """Asynchronously creates a copy of an driveItem (including any children), under a new parent item or with a
@@ -125,7 +125,7 @@ class DriveItem(BaseItem):
             return self.properties['children']
         else:
             from office365.onedrive.driveItemCollection import DriveItemCollection
-            return DriveItemCollection(self.context, ResourcePath("children", self.resourcePath))
+            return DriveItemCollection(self.context, ResourcePath("children", self.resource_path))
 
     @property
     def listItem(self):
@@ -133,11 +133,11 @@ class DriveItem(BaseItem):
         if self.is_property_available('listItem'):
             return self.properties['listItem']
         else:
-            return ListItem(self.context, ResourcePath("listItem", self.resourcePath))
+            return ListItem(self.context, ResourcePath("listItem", self.resource_path))
 
     def set_property(self, name, value, persist_changes=True):
         super(DriveItem, self).set_property(name, value, persist_changes)
         if name == "id" and self._resource_path.parent.segment == "children":
             self._resource_path = ResourcePath(
                 value,
-                ResourcePath("items", self._parent_collection.resourcePath.parent.parent))
+                ResourcePath("items", self._parent_collection.resource_path.parent.parent))

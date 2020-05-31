@@ -12,4 +12,4 @@ class TeamCollection(ClientObjectCollection):
     def __getitem__(self, key):
         if type(key) == int:
             return self._data[key]
-        return Team(self.context, ResourcePath(key, self.resourcePath))
+        return Team(self.context, ResourcePath(key, self.resource_path))

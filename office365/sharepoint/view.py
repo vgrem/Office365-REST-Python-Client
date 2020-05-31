@@ -16,14 +16,8 @@ class View(ClientObject):
 
     def get_items(self):
         """Get list items per a view """
-        if not self.viewQuery:
-            self.context.load(self, "ViewQuery")
-            self.context.afterExecuteOnce += self._get_items_inner
-            return self._parent_list.items
-        else:
-            qry = CamlQuery.parse(self.viewQuery)
-            items = self._parent_list.get_items(qry)
-            return items
+        self.ensure_property("viewQuery", self._get_items_inner)
+        return self._parent_list.items
 
     def _get_items_inner(self, target_view):
         caml_query = CamlQuery.parse(target_view.viewQuery)
@@ -48,7 +42,7 @@ class View(ClientObject):
         if self.is_property_available('ViewFields'):
             return self.properties['ViewFields']
         else:
-            return ViewFieldCollection(self.context, ResourcePath("ViewFields", self.resourcePath))
+            return ViewFieldCollection(self.context, ResourcePath("ViewFields", self.resource_path))
 
     @property
     def viewQuery(self):
@@ -64,7 +58,7 @@ class View(ClientObject):
         if self._resource_path is None:
             if name == "Id":
                 self._resource_path = ResourcePathServiceOperation(
-                    "GetById", [value], self._parent_collection.resourcePath)
+                    "GetById", [value], self._parent_collection.resource_path)
             elif name == "Title":
                 self._resource_path = ResourcePathServiceOperation(
-                    "GetByTitle", [value], self._parent_collection.resourcePath)
+                    "GetByTitle", [value], self._parent_collection.resource_path)

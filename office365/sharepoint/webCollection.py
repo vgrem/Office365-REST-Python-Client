@@ -18,8 +18,8 @@ class WebCollection(ClientObjectCollection):
         return target_web
 
     @property
-    def resourceUrl(self):
-        url = super(WebCollection, self).resourceUrl
+    def resource_url(self):
+        url = super(WebCollection, self).resource_url
         if self._parent_web_url is not None:
-            url = url.replace(self.context.serviceRootUrl, self._parent_web_url + '/_api/')
+            url = url.replace(self.context.service_root_url, self._parent_web_url + '/_api/')
         return url

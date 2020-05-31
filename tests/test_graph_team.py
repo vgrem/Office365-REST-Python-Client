@@ -22,7 +22,7 @@ class TestGraphTeam(GraphTestCase):
         teams = self.client.me.joinedTeams.filter("id eq '{0}'".format(group_id))
         self.client.load(teams)
         self.client.execute_query()
-        self.assertIsNotNone(teams.resourcePath)
+        self.assertIsNotNone(teams.resource_path)
 
         if len(teams) == 0:
             new_team = self.__class__.target_group.add_team()
@@ -37,7 +37,7 @@ class TestGraphTeam(GraphTestCase):
         existing_team = self.client.teams[group_id]
         self.client.load(existing_team)
         self.client.execute_query()
-        self.assertIsNotNone(existing_team.resourceUrl)
+        self.assertIsNotNone(existing_team.resource_url)
         self.assertIsNotNone(existing_team.messagingSettings)
 
         if existing_team.properties["isArchived"]:

@@ -23,7 +23,7 @@ class List(BaseItem):
             return self.properties['drive']
         else:
             from office365.onedrive.drive import Drive
-            return Drive(self.context, ResourcePath("drive", self.resourcePath))
+            return Drive(self.context, ResourcePath("drive", self.resource_path))
 
     @property
     def columns(self):
@@ -32,7 +32,7 @@ class List(BaseItem):
             return self.properties['columns']
         else:
             return ColumnDefinitionCollection(self.context,
-                                              ResourcePath("columns", self.resourcePath))
+                                              ResourcePath("columns", self.resource_path))
 
     @property
     def contentTypes(self):
@@ -41,7 +41,7 @@ class List(BaseItem):
             return self.properties['contentTypes']
         else:
             return ContentTypeCollection(self.context,
-                                         ResourcePath("contentTypes", self.resourcePath))
+                                         ResourcePath("contentTypes", self.resource_path))
 
     @property
     def items(self):
@@ -49,4 +49,4 @@ class List(BaseItem):
         if self.is_property_available('items'):
             return self.properties['items']
         else:
-            return ListItemCollection(self.context, ResourcePath("items", self.resourcePath))
+            return ListItemCollection(self.context, ResourcePath("items", self.resource_path))

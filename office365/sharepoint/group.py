@@ -12,4 +12,4 @@ class Group(Principal):
         if self.is_property_available('Users'):
             return self.properties['Users']
         else:
-            return UserCollection(self.context, ResourcePath("Users", self.resourcePath))
+            return UserCollection(self.context, ResourcePath("Users", self.resource_path))

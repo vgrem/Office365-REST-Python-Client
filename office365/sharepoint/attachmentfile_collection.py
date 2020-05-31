@@ -36,4 +36,4 @@ class AttachmentFileCollection(ClientObjectCollection):
     def get_by_filename(self, filename):
         """Retrieve Attachment file object by filename"""
         return AttachmentFile(self.context,
-                              ResourcePathServiceOperation("GetByFileName", [filename], self.resourcePath))
+                              ResourcePathServiceOperation("GetByFileName", [filename], self.resource_path))

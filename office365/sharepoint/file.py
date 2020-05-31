@@ -1,4 +1,3 @@
-import shutil
 from functools import partial
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_query import DeleteEntityQuery
@@ -22,15 +21,12 @@ class DownloadFileQuery(ServiceOperationQuery):
         super(DownloadFileQuery, self).__init__(web, r"getFileByServerRelativeUrl('{0}')/\$value".format(file_url))
 
     def _construct_download_query(self, request):
-        self.bindingType.context.get_pending_request().beforeExecute -= self._construct_download_query
+        self.binding_type.context.get_pending_request().beforeExecute -= self._construct_download_query
         request.method = HttpMethod.Get
-        request.stream = True
 
     def _process_response(self, response):
-        self.bindingType.context.get_pending_request().afterExecute -= self._process_response
-        # self.file_object.write(response.content)
-        # response.raw.decode_content = True
-        shutil.copyfileobj(response.raw, self.file_object)
+        self.binding_type.context.get_pending_request().afterExecute -= self._process_response
+        self.file_object.write(response.content)
 
 
 class AbstractFile(ClientObject):
@@ -79,7 +75,10 @@ class File(AbstractFile):
         self.context.add_query(qry)
 
     def copyto(self, new_relative_url, overwrite):
-        """Copies the file to the destination URL."""
+        """Copies the file to the destination URL.
+        :type new_relative_url: str
+        :type overwrite: bool
+        """
         qry = ServiceOperationQuery(self,
                                     "copyto",
                                     {
@@ -90,7 +89,10 @@ class File(AbstractFile):
         self.context.add_query(qry)
 
     def moveto(self, new_relative_url, flag):
-        """Moves the file to the specified destination URL."""
+        """Moves the file to the specified destination URL.
+        :type new_relative_url: str
+        :type flag: int
+        """
         qry = ServiceOperationQuery(self,
                                     "moveto",
                                     {
@@ -101,7 +103,9 @@ class File(AbstractFile):
         self.context.add_query(qry)
 
     def publish(self, comment):
-        """Submits the file for content approval with the specified comment."""
+        """Submits the file for content approval with the specified comment.
+        :type comment: str
+        """
         qry = ServiceOperationQuery(self,
                                     "publish",
                                     {
@@ -111,7 +115,9 @@ class File(AbstractFile):
         self.context.add_query(qry)
 
     def unpublish(self, comment):
-        """Removes the file from content approval or unpublish a major version."""
+        """Removes the file from content approval or unpublish a major version.
+        :type comment: str
+        """
         qry = ServiceOperationQuery(self,
                                     "unpublish",
                                     {
@@ -159,7 +165,7 @@ class File(AbstractFile):
                                      ResourcePathServiceOperation(
                                          "getlimitedwebpartmanager",
                                          [scope],
-                                         self.resourcePath
+                                         self.resource_path
                                      ))
 
     def start_upload(self, upload_id, content):
@@ -217,7 +223,7 @@ class File(AbstractFile):
         :type content: str
         """
         url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(
-            ctx.serviceRootUrl, server_relative_url)
+            ctx.service_root_url, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Post
         request.set_header('X-HTTP-Method', 'PUT')
@@ -232,7 +238,7 @@ class File(AbstractFile):
         :type ctx: ClientContext
         :type server_relative_url: str
         """
-        url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(ctx.serviceRootUrl, server_relative_url)
+        url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(ctx.service_root_url, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Get
         response = ctx.execute_request_direct(request)
@@ -253,7 +259,7 @@ class File(AbstractFile):
         if self.is_property_available('ListItemAllFields'):
             return self.properties['ListItemAllFields']
         else:
-            return ListItem(self.context, ResourcePath("listItemAllFields", self.resourcePath))
+            return ListItem(self.context, ResourcePath("listItemAllFields", self.resource_path))
 
     @property
     def versions(self):
@@ -261,7 +267,7 @@ class File(AbstractFile):
         if self.is_property_available('Versions'):
             return self.properties['Versions']
         else:
-            return FileVersionCollection(self.context, ResourcePath("versions", self.resourcePath))
+            return FileVersionCollection(self.context, ResourcePath("versions", self.resource_path))
 
     @property
     def serverRelativeUrl(self):

@@ -21,9 +21,9 @@ class ViewCollection(ClientObjectCollection):
     def get_by_title(self, view_title):
         """Gets the list view with the specified title."""
         return View(self.context,
-                    ResourcePathServiceOperation("GetByTitle", [view_title], self.resourcePath), self._parent_list)
+                    ResourcePathServiceOperation("GetByTitle", [view_title], self.resource_path), self._parent_list)
 
     def get_by_id(self, view_id):
         """Gets the list view with the specified ID."""
         return View(self.context,
-                    ResourcePathServiceOperation("GetById", [view_id], self.resourcePath), self._parent_list)
+                    ResourcePathServiceOperation("GetById", [view_id], self.resource_path), self._parent_list)

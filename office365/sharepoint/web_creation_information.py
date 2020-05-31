@@ -10,5 +10,5 @@ class WebCreationInformation(ClientValueObject):
         self.Url = None
 
     @property
-    def entityTypeName(self):
+    def entity_type_name(self):
         return "SP.WebCreationInformation"
