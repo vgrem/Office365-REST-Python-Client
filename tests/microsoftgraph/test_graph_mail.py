@@ -1,10 +1,10 @@
-from tests.graph_case import GraphTestCase
+from tests.microsoftgraph.graph_case import GraphTestCase
 
 
 class TestGraphMail(GraphTestCase):
 
-    def test1_send_mail(self):
-        message = {
+    def test1_send_mail_json(self):
+        message_json = {
             "Message": {
                 "Subject": "Meet for lunch?",
                 "Body": {
@@ -28,5 +28,6 @@ class TestGraphMail(GraphTestCase):
             },
             "SaveToSentItems": "false"
         }
-        self.client.me.send_mail(message)
+        self.client.me.send_mail(message_json)
         self.client.execute_query()
+

@@ -1,20 +1,18 @@
-import os
 from office365.graphClient import GraphClient
+from settings import settings
 
 
 def get_token(auth_ctx):
+    """Acquire token via client credential flow (ADAL Python library is utilized)"""
     token = auth_ctx.acquire_token_with_client_credentials(
         "https://graph.microsoft.com",
-        client_id,
-        client_secret)
+        settings['client_credentials']['client_id'],
+        settings['client_credentials']['client_secret'])
     return token
 
 
-tenant_name = "mediadev8.onmicrosoft.com"
-client_id, client_secret = os.environ['Office365_Python_Sdk_ClientCredentials'].split(';')
-client = GraphClient(tenant_name, get_token)
-
-message_payload = {
+client = GraphClient(settings['tenant'], get_token)
+message_json = {
     "Message": {
         "Subject": "Meet for lunch?",
         "Body": {
@@ -33,5 +31,5 @@ message_payload = {
 }
 
 login_name = "mdoe@mediadev8.onmicrosoft.com"
-client.users[login_name].send_mail(message_payload)
+client.users[login_name].send_mail(message_json)
 client.execute_query()

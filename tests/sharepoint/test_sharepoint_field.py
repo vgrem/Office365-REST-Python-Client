@@ -2,7 +2,7 @@ import uuid
 
 from office365.sharepoint.fieldType import FieldType
 from office365.sharepoint.field_creation_information import FieldCreationInformation
-from tests.sharepoint_case import SPTestCase
+from tests.sharepoint.sharepoint_case import SPTestCase
 
 
 class TestField(SPTestCase):

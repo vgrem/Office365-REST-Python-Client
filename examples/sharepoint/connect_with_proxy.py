@@ -5,7 +5,7 @@ from settings import settings
 
 def set_proxy(request):
     proxies = {
-      "https://mediadev8.sharepoint.com": 'https://127.0.0.1:8888',
+      settings['url']: 'https://127.0.0.1:8888',
     }
     request.proxies = proxies
 

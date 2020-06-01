@@ -4,13 +4,12 @@ from office365.runtime.auth.UserCredential import UserCredential
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_runtime_context import ClientRuntimeContext
-from office365.runtime.context_web_information import ContextWebInformation
+from office365.sharepoint.context_web_information import ContextWebInformation
 from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.odata_request import ODataRequest
-from office365.runtime.utilities.EventHandler import EventHandler
 from office365.sharepoint.site import Site
 from office365.sharepoint.web import Web
 
@@ -82,7 +81,7 @@ class ClientContext(ClientRuntimeContext):
         if not self._contextWebInformation:
             self._contextWebInformation = ContextWebInformation()
             self.request_form_digest()
-        request_options.set_header('X-RequestDigest', self._contextWebInformation.formDigestValue)
+        request_options.set_header('X-RequestDigest', self._contextWebInformation.FormDigestValue)
 
     def request_form_digest(self):
         """Request Form Digest"""
@@ -123,7 +122,7 @@ class ClientContext(ClientRuntimeContext):
         return self.__site
 
     @property
-    def baseUrl(self):
+    def base_url(self):
         return self.__base_url
 
     @property

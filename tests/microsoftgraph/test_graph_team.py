@@ -1,6 +1,6 @@
 import unittest
 
-from tests.graph_case import GraphTestCase
+from tests.microsoftgraph.graph_case import GraphTestCase
 
 
 class TestGraphTeam(GraphTestCase):

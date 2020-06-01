@@ -1,4 +1,4 @@
-from tests.outlook_case import OutlookClientTestCase
+from tests.outlookservices.outlook_case import OutlookClientTestCase
 
 
 class TestOutlookMail(OutlookClientTestCase):

@@ -16,7 +16,8 @@ class OAuthTokenProvider(BaseTokenProvider):
     def acquire_token(self, parameters):
         try:
             url = "https://login.microsoftonline.com/{0}/oauth2/token".format(self.tenant)
-            response = requests.post(url=url, headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            response = requests.post(url=url,
+                                     headers={'Content-Type': 'application/x-www-form-urlencoded'},
                                      data=parameters)
             self.access_token = response.json()
             return True

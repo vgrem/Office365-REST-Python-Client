@@ -15,12 +15,14 @@ class AuthenticationContext(BaseAuthenticationContext):
     def acquire_token_for_user(self, username, password):
         """Acquire token via user credentials"""
         self.provider = SamlTokenProvider(self.url, username, password)
-        return self.provider.acquire_token()
+        if not self.provider.acquire_token():
+            raise ValueError('Acquire token failed: {0}'.format(self.provider.error))
 
     def acquire_token_for_app(self, client_id, client_secret):
         """Acquire token via client credentials (SharePoint App Principal)"""
         self.provider = ACSTokenProvider(self.url, client_id, client_secret)
-        return self.provider.acquire_token()
+        if not self.provider.acquire_token():
+            raise ValueError('Acquire token failed: {0}'.format(self.provider.error))
 
     def acquire_token_password_grant(self, client_credentials, user_credentials):
         """Acquire token via resource owner password credential (ROPC) grant"""

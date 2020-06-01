@@ -1,9 +1,9 @@
 import os.path
-from tests.sharepoint_case import SPTestCase
+from tests.sharepoint.sharepoint_case import SPTestCase
 from office365.sharepoint.attachmentfile_creation_information import AttachmentfileCreationInformation
 from office365.sharepoint.list_creation_information import ListCreationInformation
 from office365.sharepoint.list_template_type import ListTemplateType
-from tests.test_methods import ensure_list, read_file_as_binary
+from tests.sharepoint.test_methods import ensure_list, read_file_as_binary
 
 
 class TestListItemAttachment(SPTestCase):
@@ -82,5 +82,7 @@ class TestListItemAttachment(SPTestCase):
         self.assertEqual(len(attachment_files_items), 0)
 
     def read_attachment_test_file(self):
-        path = "{0}/data/{1}".format(os.path.dirname(__file__), self.attachment_file_name)
-        return read_file_as_binary(path)
+        path = "{0}/../data/{1}".format(os.path.dirname(__file__), self.attachment_file_name)
+        with open(path, 'rb') as content_file:
+            file_content = content_file.read()
+        return file_content

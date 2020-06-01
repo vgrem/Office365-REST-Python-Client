@@ -1,6 +1,6 @@
 from random import randint
 
-from tests.sharepoint_case import SPTestCase
+from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.list_creation_information import ListCreationInformation
 from office365.sharepoint.list_template_type import ListTemplateType

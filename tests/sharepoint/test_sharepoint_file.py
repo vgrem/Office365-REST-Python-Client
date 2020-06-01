@@ -2,8 +2,8 @@ import os
 
 from office365.sharepoint.file import File
 from tests import random_seed
-from tests.sharepoint_case import SPTestCase
-from tests.test_methods import (
+from tests.sharepoint.sharepoint_case import SPTestCase
+from tests.sharepoint.test_methods import (
     read_file_as_binary,
     read_file_as_text,
     ensure_list)
@@ -45,7 +45,7 @@ class TestSharePointFile(SPTestCase):
 
     def test1_upload_file(self):
         for entry in self.file_entries:
-            path = "{0}/data/{1}".format(os.path.dirname(__file__), entry["Name"])
+            path = "{0}/../data/{1}".format(os.path.dirname(__file__), entry["Name"])
             if entry["Type"] == "Binary":
                 file_content = read_file_as_binary(path)
             else:

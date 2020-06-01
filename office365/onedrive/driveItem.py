@@ -1,4 +1,8 @@
+from functools import partial
+
+from office365.onedrive.folder import Folder
 from office365.onedrive.conflictBehavior import ConflictBehavior
+from office365.onedrive.file import File
 from office365.onedrive.fileSystemInfo import FileSystemInfo
 from office365.onedrive.uploadSession import UploadSession
 from office365.runtime.client_query import CreateEntityQuery
@@ -7,6 +11,10 @@ from office365.runtime.resourcePath import ResourcePath
 from office365.onedrive.baseItem import BaseItem
 from office365.onedrive.listItem import ListItem
 from office365.runtime.serviceOperationQuery import ServiceOperationQuery
+
+
+def _content_downloaded(file_object, result):
+    file_object.write(result.value)
 
 
 class DriveItem(BaseItem):
@@ -37,13 +45,17 @@ class DriveItem(BaseItem):
         self.context.add_query(qry)
         return qry.return_type
 
-    def download(self):
+    def get_content(self):
         """Download the contents of the primary stream (file) of a DriveItem. Only driveItems with the file property
         can be downloaded. """
         from office365.graphClient import DownloadContentQuery
         qry = DownloadContentQuery(self)
         self.context.add_query(qry)
         return qry.return_type
+
+    def download(self, file_object):
+        self.get_content()
+        self.context.afterExecuteOnce += partial(_content_downloaded, file_object)
 
     def create_folder(self, name):
         """Create a new folder or DriveItem in a Drive with a specified parent item or path."""
@@ -113,9 +125,25 @@ class DriveItem(BaseItem):
     def fileSystemInfo(self):
         """File system information on client."""
         if self.is_property_available('fileSystemInfo'):
-            return FileSystemInfo(self.properties['fileSystemInfo'])
+            return self.properties['fileSystemInfo']
         else:
-            return None
+            return FileSystemInfo()
+
+    @property
+    def folder(self):
+        """Folder metadata, if the item is a folder."""
+        if self.is_property_available('folder'):
+            return self.properties['folder']
+        else:
+            return Folder()
+
+    @property
+    def file(self):
+        """File metadata, if the item is a file."""
+        if self.is_property_available('file'):
+            return self.properties['file']
+        else:
+            return File()
 
     @property
     def children(self):

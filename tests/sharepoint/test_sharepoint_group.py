@@ -1,4 +1,4 @@
-from tests.sharepoint_case import SPTestCase
+from tests.sharepoint.sharepoint_case import SPTestCase
 
 
 class TestSharePointGroup(SPTestCase):

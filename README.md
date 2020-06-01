@@ -1,5 +1,5 @@
 # About
-Office 365 & Microsoft Graph Library for Python
+Office 365 & Microsoft Graph library for Python
 
 # Usage
 
@@ -118,7 +118,7 @@ def get_token(auth_ctx):
 tenant_name = "contoso.onmicrosoft.com"
 client = GraphClient(tenant_name, get_token)
 
-message_payload = {
+message_json = {
     "Message": {
         "Subject": "Meet for lunch?",
         "Body": {
@@ -137,7 +137,7 @@ message_payload = {
 }
 
 login_name = "mdoe@contoso.onmicrosoft.com"
-client.users[login_name].send_mail(message_payload)
+client.users[login_name].send_mail(message_json)
 client.execute_query()
 ```
 
@@ -153,8 +153,12 @@ client.execute_query()
 [ADAL Python](https://adal-python.readthedocs.io/en/latest/#) 
 library is utilized to authenticate users to Active Directory (AD) and obtain tokens  
 
-#### Example 
-The example demonstrates how to print drive's url via [`list available drives` endpoint](https://docs.microsoft.com/en-us/onedrive/developer/rest-api/api/drive_list?view=odsp-graph-online)
+#### Examples 
+
+##### Example: list available drives
+
+The example demonstrates how to enumerate and print drive's url 
+which corresponds to [`list available drives` endpoint](https://docs.microsoft.com/en-us/onedrive/developer/rest-api/api/drive_list?view=odsp-graph-online)
 
 > Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
 
@@ -176,6 +180,38 @@ client.execute_query()
 for drive in drives:
     print("Drive url: {0}".format(drive.web_url))
 ```
+
+
+##### Example: download the contents of a DriveItem(folder facet)
+
+```
+# retrieve drive properties (source)
+drive = client.users[user_id_or_principal_name].drive
+client.load(drive)
+client.execute_query()
+
+# download files from OneDrive into local folder 
+with tempfile.TemporaryDirectory() as path:
+    download_files(drive.root, path)
+```
+
+where
+
+```
+def download_files(remote_folder, local_path):
+    drive_items = remote_folder.children
+    client.load(drive_items)
+    client.execute_query()
+    for drive_item in drive_items:
+        if not drive_item.file.is_server_object_null:  # is file?
+            # download file content
+            with open(os.path.join(local_path, drive_item.name), 'wb') as local_file:
+                drive_item.download(local_file)
+                client.execute_query()
+```
+
+
+Refer [OneDrive examples section](examples/onedrive) for a more examples.
 
 
 # Third Party Libraries and Dependencies

@@ -24,11 +24,11 @@ from office365.teams.teamCollection import TeamCollection
 
 class DownloadContentQuery(ServiceOperationQuery):
     def __init__(self, entity_type, format_name=None):
-        return_type = ClientResult(None)
+        result = ClientResult(None)
         action_name = "content"
         if format_name is not None:
             action_name = action_name + r"?format={0}".format(format_name)
-        super(DownloadContentQuery, self).__init__(entity_type, action_name, None, None, None, return_type)
+        super(DownloadContentQuery, self).__init__(entity_type, action_name, None, None, None, result)
 
 
 class ReplaceMethodQuery(ServiceOperationQuery):

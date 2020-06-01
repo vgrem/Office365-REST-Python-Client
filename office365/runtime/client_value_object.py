@@ -1,6 +1,9 @@
 class ClientValueObject(object):
     """Base client value object"""
 
+    def __init__(self):
+        super(ClientValueObject, self).__init__()
+
     def set_property(self, k, v, persist_changes=True):
         self.__dict__[k] = v
 
@@ -13,3 +16,7 @@ class ClientValueObject(object):
     @property
     def entity_type_name(self):
         return None
+
+    @property
+    def is_server_object_null(self):
+        return not self.to_json()

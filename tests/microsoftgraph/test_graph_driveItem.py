@@ -1,7 +1,7 @@
 import os
 import uuid
 from office365.onedrive.file_upload import ResumableFileUpload
-from tests.graph_case import GraphTestCase
+from tests.microsoftgraph.graph_case import GraphTestCase
 
 
 def create_listDrive(client):
@@ -36,7 +36,7 @@ class TestDriveItem(GraphTestCase):
 
     def test2_upload_file(self):
         file_name = "SharePoint User Guide.docx"
-        path = "{0}/data/{1}".format(os.path.dirname(__file__), file_name)
+        path = "{0}/../data/{1}".format(os.path.dirname(__file__), file_name)
         with open(path, 'rb') as content_file:
             file_content = content_file.read()
         file_name = os.path.basename(path)
@@ -46,13 +46,13 @@ class TestDriveItem(GraphTestCase):
 
     def test3_upload_file_session(self):
         file_name = "big_buck_bunny.mp4"
-        local_path = "{0}/data/{1}".format(os.path.dirname(__file__), file_name)
+        local_path = "{0}/../data/{1}".format(os.path.dirname(__file__), file_name)
         uploader = ResumableFileUpload(self.target_drive.root, local_path, 1000000)
         uploader.execute()
         print("{0} bytes has been uploaded".format(0))
 
     def test4_download_file(self):
-        result = self.__class__.target_file.download()
+        result = self.__class__.target_file.get_content()
         self.client.execute_query()
         self.assertIsNotNone(result.value)
 

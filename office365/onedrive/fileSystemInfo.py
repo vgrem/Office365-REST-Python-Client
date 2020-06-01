@@ -7,6 +7,6 @@ class FileSystemInfo(ClientValueObject):
 
     def __init__(self, json=None):
         super(FileSystemInfo, self).__init__()
-        self.createdDateTime = json.get('createdDateTime', None)
-        self.lastAccessedDateTime = json.get('lastAccessedDateTime', None)
-        self.lastModifiedDateTime = json.get('lastModifiedDateTime', None)
+        self.createdDateTime = None
+        self.lastAccessedDateTime = None
+        self.lastModifiedDateTime = None

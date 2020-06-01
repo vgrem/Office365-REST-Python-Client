@@ -1,8 +1,8 @@
 from tests import random_seed
-from tests.sharepoint_case import SPTestCase
+from tests.sharepoint.sharepoint_case import SPTestCase
 from office365.sharepoint.list_creation_information import ListCreationInformation
 from office365.sharepoint.list_template_type import ListTemplateType
-from tests.test_methods import ensure_list
+from tests.sharepoint.test_methods import ensure_list
 
 
 class TestSharePointListItem(SPTestCase):

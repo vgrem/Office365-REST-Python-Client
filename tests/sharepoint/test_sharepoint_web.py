@@ -1,6 +1,6 @@
 from random import randint
 from office365.sharepoint.subwebQuery import SubwebQuery
-from tests.sharepoint_case import SPTestCase
+from tests.sharepoint.sharepoint_case import SPTestCase
 from office365.sharepoint.web_creation_information import WebCreationInformation
 
 
