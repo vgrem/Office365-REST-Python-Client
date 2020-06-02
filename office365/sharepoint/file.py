@@ -2,7 +2,7 @@ from functools import partial
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_query import DeleteEntityQuery
 from office365.runtime.client_result import ClientResult
-from office365.runtime.resourcePath import ResourcePath
+from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
@@ -57,7 +57,10 @@ class File(AbstractFile):
     or a file in a folder."""
 
     def approve(self, comment):
-        """Approves the file submitted for content approval with the specified comment."""
+        """Approves the file submitted for content approval with the specified comment.
+
+        :type comment: str
+        """
         qry = ServiceOperationQuery(self,
                                     "approve",
                                     {
@@ -66,7 +69,10 @@ class File(AbstractFile):
         self.context.add_query(qry)
 
     def deny(self, comment):
-        """Denies approval for a file that was submitted for content approval."""
+        """Denies approval for a file that was submitted for content approval.
+
+        :type comment: str
+        """
         qry = ServiceOperationQuery(self,
                                     "deny",
                                     {
@@ -76,6 +82,7 @@ class File(AbstractFile):
 
     def copyto(self, new_relative_url, overwrite):
         """Copies the file to the destination URL.
+
         :type new_relative_url: str
         :type overwrite: bool
         """
@@ -90,6 +97,7 @@ class File(AbstractFile):
 
     def moveto(self, new_relative_url, flag):
         """Moves the file to the specified destination URL.
+
         :type new_relative_url: str
         :type flag: int
         """

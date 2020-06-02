@@ -1,7 +1,7 @@
 from functools import partial
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, CreateEntityQuery
-from office365.runtime.resourcePath import ResourcePath
+from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.file_creation_information import FileCreationInformation
 from office365.sharepoint.listitem import ListItem

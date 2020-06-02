@@ -1,4 +1,3 @@
-from office365.onedrive.listItemCollection import ListItemCollection
 from office365.runtime.auth.ClientCredential import ClientCredential
 from office365.runtime.auth.UserCredential import UserCredential
 from office365.runtime.auth.authentication_context import AuthenticationContext
@@ -8,6 +7,7 @@ from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
 from office365.runtime.odata.odata_request import ODataRequest
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.listItem_collection import ListItemCollection
 from office365.sharepoint.listitem import ListItem
 
 

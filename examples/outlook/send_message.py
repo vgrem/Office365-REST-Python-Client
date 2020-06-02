@@ -1,4 +1,4 @@
-from office365.graphClient import GraphClient
+from office365.graph.graph_client import GraphClient
 from settings import settings
 
 
