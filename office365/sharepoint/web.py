@@ -23,6 +23,11 @@ class Web(SecurableObject):
     Refer this link https://msdn.microsoft.com/en-us/library/office/dn499819.aspx for a details"""
 
     def __init__(self, context, resource_path=None):
+        """
+
+        :type resource_path: ResourcePath or None
+        :type context: ClientContext
+        """
         if resource_path is None:
             resource_path = ResourcePath("Web")
         super(Web, self).__init__(context, resource_path)

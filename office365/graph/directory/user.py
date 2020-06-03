@@ -1,4 +1,5 @@
 from office365.graph.directory.directoryObject import DirectoryObject
+from office365.graph.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.graph.directory.groupCollection import GroupCollection
 from office365.graph.onedrive.drive import Drive
 from office365.outlookservices.contact_collection import ContactCollection
@@ -76,6 +77,23 @@ class User(DirectoryObject):
             return self.properties['joinedTeams']
         else:
             return GroupCollection(self.context, ResourcePath("joinedTeams", self.resource_path))
+
+    @property
+    def memberOf(self):
+        """Get groups and directory roles that the user is a direct member of."""
+        if self.is_property_available('memberOf'):
+            return self.properties['memberOf']
+        else:
+            return DirectoryObjectCollection(self.context, ResourcePath("memberOf", self.resource_path))
+
+    @property
+    def transitiveMemberOf(self):
+        """Get groups, directory roles that the user is a member of. This API request is transitive, and will also
+        return all groups the user is a nested member of. """
+        if self.is_property_available('transitiveMemberOf'):
+            return self.properties['transitiveMemberOf']
+        else:
+            return DirectoryObjectCollection(self.context, ResourcePath("transitiveMemberOf", self.resource_path))
 
     def set_property(self, name, value, persist_changes=True):
         super(User, self).set_property(name, value, persist_changes)

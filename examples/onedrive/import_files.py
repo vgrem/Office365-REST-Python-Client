@@ -2,10 +2,14 @@ import os
 from os.path import isfile, join
 from settings import settings
 from office365.graph.graph_client import GraphClient
+from office365.graph.onedrive.drive import Drive
 
 
 def get_token(auth_ctx):
-    """Acquire token via client credential flow (ADAL Python library is utilized)"""
+    """Acquire token via client credential flow
+
+    :type auth_ctx: adal.AuthenticationContext
+    """
     token = auth_ctx.acquire_token_with_client_credentials(
         "https://graph.microsoft.com",
         settings['client_credentials']['client_id'],
@@ -14,6 +18,12 @@ def get_token(auth_ctx):
 
 
 def upload_files(remote_drive, local_root_path):
+    """
+    Uploads files from local folder into OneDrive drive
+
+    :type remote_drive: Drive
+    :type local_root_path: str
+    """
     for name in os.listdir(local_root_path):
         path = join(local_root_path, name)
         if isfile(path):
@@ -21,7 +31,7 @@ def upload_files(remote_drive, local_root_path):
                 content = local_file.read()
             uploaded_drive_item = remote_drive.root.upload(name, content)
             remote_drive.context.execute_query()
-            print("File '{0}' uploaded into {1}".format(path, uploaded_drive_item.webUrl),)
+            print("File '{0}' uploaded into {1}".format(path, uploaded_drive_item.webUrl), )
 
 
 # get target drive

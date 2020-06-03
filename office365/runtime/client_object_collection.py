@@ -49,6 +49,11 @@ class ClientObjectCollection(ClientObject):
         self.add_child(child_client_object)
 
     def add_child(self, client_object):
+        """
+        Adds client object into collection
+
+        :type client_object: ClientObject
+        """
         client_object._parent_collection = self
         self._data.append(client_object)
 
@@ -80,6 +85,10 @@ class ClientObjectCollection(ClientObject):
         return self._data[index]
 
     def filter(self, expression):
+        """
+
+        :type expression: str
+        """
         self.query_options.filter = expression
         return self
 

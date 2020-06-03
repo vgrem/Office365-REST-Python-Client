@@ -3,14 +3,14 @@ from office365.runtime.odata.odata_query_options import QueryOptions
 
 
 class ClientObject(object):
-    """Base client object"""
 
     def __init__(self, context, resource_path=None, properties=None, parent_collection=None):
         """
+        Base client object
 
-        :type parent_collection: office365.runtime.client_object_collection.ClientObjectCollection
-        :type properties: dict
-        :type resource_path: office365.runtime.resource_path.ResourcePath
+        :type parent_collection: office365.runtime.client_object_collection.ClientObjectCollection or None
+        :type properties: dict or None
+        :type resource_path: office365.runtime.resource_path.ResourcePath or None
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         """
         self._properties = {}

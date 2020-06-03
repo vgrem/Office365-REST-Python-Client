@@ -10,6 +10,16 @@ from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 from office365.graph.teams.team import Team
 
 
+def _delete_group_from_directory(target_group):
+    """
+    Deletes the group from directory
+
+    :type target_group: Group
+    """
+    deleted_item = target_group.context.directory.deletedGroups[target_group.id]
+    deleted_item.delete_object()
+
+
 class Group(DirectoryObject):
     """Represents an Azure Active Directory (Azure AD) group, which can be an Office 365 group, or a security group."""
 
@@ -21,6 +31,16 @@ class Group(DirectoryObject):
         self.context.add_query(qry)
         self.context.get_pending_request().beforeExecute += self._construct_create_team_request
         return team
+
+    def delete_object(self, permanent_delete=False):
+        """
+        :param permanent_delete: Permanently deletes the group from directory
+        :type permanent_delete: bool
+
+        """
+        super(Group, self).delete_object()
+        if permanent_delete:
+            self.ensure_property("id", _delete_group_from_directory)
 
     def _construct_create_team_request(self, request):
         request.method = HttpMethod.Put

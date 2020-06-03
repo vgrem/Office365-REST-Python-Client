@@ -57,7 +57,7 @@ class ReadEntityQuery(ClientQuery):
         """
         Read query
 
-        :type properties_to_include: list or None
+        :type properties_to_include: list[str] or None
         :type entity_to_read: ClientObject
         """
         super(ReadEntityQuery, self).__init__(entity_to_read, None, None, entity_to_read)

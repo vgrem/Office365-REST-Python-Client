@@ -4,6 +4,10 @@ import datetime
 class STSProfile(object):
 
     def __init__(self, authority_url):
+        """
+
+        :type authority_url: str
+        """
         self.authorityUrl = authority_url
         self.serviceUrl = 'https://login.microsoftonline.com'
         self.securityTokenServicePath = 'extSTS.srf'
@@ -14,13 +18,13 @@ class STSProfile(object):
         self.signInPage = '_forms/default.aspx?wa=wsignin1.0'
 
     @property
-    def securityTokenServiceUrl(self):
+    def security_token_service_url(self):
         return "/".join([self.serviceUrl, self.securityTokenServicePath])
 
     @property
-    def signInPageUrl(self):
+    def signin_page_url(self):
         return "/".join([self.authorityUrl, self.signInPage])
 
     @property
-    def userRealmServiceUrl(self):
+    def user_realm_service_url(self):
         return '/'.join([self.serviceUrl, self.userRealmServicePath])

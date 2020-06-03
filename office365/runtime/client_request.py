@@ -1,19 +1,20 @@
 from abc import abstractmethod
 import requests
+from office365.runtime.http.request_options import RequestOptions
 from requests import HTTPError
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.utilities.EventHandler import EventHandler
-from office365.runtime.client_runtime_context import ClientRuntimeContext
+from office365.runtime.client_query import ClientQuery
 
 
 class ClientRequest(object):
-    """Base request for OData/REST service"""
 
     def __init__(self, context):
         """
+        Base request for OData/REST service
 
-        :type context: ClientRuntimeContext
+        :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         """
         self.context = context
         self._queries = []
@@ -90,4 +91,8 @@ class ClientRequest(object):
         return result
 
     def add_query(self, query):
+        """
+        :type query: ClientQuery
+
+        """
         self._queries.append(query)

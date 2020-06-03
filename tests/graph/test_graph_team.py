@@ -1,19 +1,20 @@
 import uuid
 
-from office365.graph.directory.groupCreationProperties import GroupCreationProperties
+from office365.graph.directory.group import Group
+from office365.graph.directory.groupProfile import GroupProfile
 from tests.graph.graph_case import GraphTestCase
 
 
 class TestGraphTeam(GraphTestCase):
     """Tests for teams"""
 
-    target_group = None
+    target_group = None  # type: Group
 
     @classmethod
     def setUpClass(cls):
         super(TestGraphTeam, cls).setUpClass()
         grp_name = "Group_" + uuid.uuid4().hex
-        properties = GroupCreationProperties(grp_name)
+        properties = GroupProfile(grp_name)
         properties.securityEnabled = False
         properties.mailEnabled = True
         properties.groupTypes = ["Unified"]
@@ -34,7 +35,7 @@ class TestGraphTeam(GraphTestCase):
             self.assertEqual(len(teams), 1)
 
     def test3_get_team(self):
-        group_id = self.__class__.target_group.properties['id']
+        group_id = self.__class__.target_group.id
         existing_team = self.client.teams[group_id]
         self.client.load(existing_team)
         self.client.execute_query()
@@ -55,17 +56,12 @@ class TestGraphTeam(GraphTestCase):
         self.client.execute_query()
 
     def test5_archive_team(self):
-        group_id = self.__class__.target_group.properties['id']
+        group_id = self.__class__.target_group.id
         team_to_archive = self.client.teams[group_id]
         team_to_archive.archive()
         self.client.execute_query()
 
-    def test6_delete_group(self):
-        group_id = self.__class__.target_group.properties['id']
-        grp_to_delete = self.client.groups[group_id]
-        grp_to_delete.delete_object()
-        self.client.execute_query()
-
-        deleted_group = self.client.directory.deletedGroups[group_id]
-        deleted_group.delete_object()
+    def test6_delete_group_with_team(self):
+        grp_to_delete = self.__class__.target_group
+        grp_to_delete.delete_object(True)
         self.client.execute_query()

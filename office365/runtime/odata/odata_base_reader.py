@@ -8,6 +8,10 @@ class ODataBaseReader(object):
     """OData reader"""
 
     def __init__(self, options):
+        """
+
+        :type options: dict
+        """
         self._options = options
 
     @abstractmethod

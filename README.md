@@ -6,7 +6,8 @@ Office 365 & Microsoft Graph library for Python
 1.   [Installation](#Installation)
 1.   [Working with SharePoint API](#Working-with-SharePoint-API) 
 2.   [Working with Outlook API](#Working-with-Outlook-API) 
-3.   [Working with OneDrive API](#Working-with-OneDrive-API)    
+3.   [Working with OneDrive API](#Working-with-OneDrive-API)
+4.   [Working with Microsoft Teams API](#Working-with-Microsoft-Teams-API)    
 
 
 ## Status
@@ -212,6 +213,44 @@ def download_files(remote_folder, local_path):
 
 
 Refer [OneDrive examples section](examples/onedrive) for a more examples.
+
+
+# Working with Microsoft Teams API
+
+#### Authentication
+
+[ADAL Python](https://adal-python.readthedocs.io/en/latest/#) 
+library is utilized to authenticate users to Active Directory (AD) and obtain tokens  
+
+#### Examples 
+
+##### Example: create a new team under a group
+
+The example demonstrates how create a new team under a group 
+which corresponds to [`Create team` endpoint](https://docs.microsoft.com/en-us/graph/api/team-put-teams?view=graph-rest-1.0&tabs=http)
+
+```
+
+tenant_name = "contoso.onmicrosoft.com"
+client = GraphClient(tenant_name, get_token)
+new_team = client.groups[group_id].add_team()
+client.execute_query()
+
+```
+
+where
+
+```
+def get_token(auth_ctx):
+    """Acquire token via client credential flow (ADAL Python library is utilized)
+    :type auth_ctx: adal.AuthenticationContext
+    """
+    token = auth_ctx.acquire_token_with_client_credentials(
+        "https://graph.microsoft.com",
+        client_id,
+        client_secret)
+    return token
+```
 
 
 # Third Party Libraries and Dependencies

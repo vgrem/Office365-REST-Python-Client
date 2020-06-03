@@ -10,7 +10,9 @@ class Entity(ClientObject):
 
     @property
     def id(self):
-        """The unique identifier of the drive."""
+        """The unique identifier of the drive.
+        :rtype: str or None
+        """
         if self.is_property_available("id"):
             return self.properties['id']
         return None

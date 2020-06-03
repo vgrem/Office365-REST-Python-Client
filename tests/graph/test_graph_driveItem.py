@@ -1,5 +1,8 @@
 import os
 import uuid
+
+from office365.graph.onedrive.drive import Drive
+from office365.graph.onedrive.driveItem import DriveItem
 from office365.graph.onedrive.file_upload import ResumableFileUpload
 from tests.graph.graph_case import GraphTestCase
 
@@ -16,9 +19,9 @@ def create_list_drive(client):
 
 class TestDriveItem(GraphTestCase):
     """OneDrive specific test case base class"""
-    target_drive = None
-    target_file = None
-    target_folder = None
+    target_drive = None  # type: Drive
+    target_file = None   # type: DriveItem
+    target_folder = None  # type: DriveItem
 
     @classmethod
     def setUpClass(cls):

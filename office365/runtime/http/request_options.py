@@ -5,6 +5,10 @@ class RequestOptions(object):
     """Request options"""
 
     def __init__(self, url):
+        """
+
+        :type url: str
+        """
         self.url = url
         self.data = None
         self.headers = {}

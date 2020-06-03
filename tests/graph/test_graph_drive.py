@@ -1,9 +1,10 @@
+from office365.graph.onedrive.file import File
 from tests.graph.graph_case import GraphTestCase
 
 
 class TestDrive(GraphTestCase):
     """OneDrive specific test case base class"""
-    target_file = None
+    target_file = None  # type: File
 
     def test1_get_drives(self):
         drives = self.client.drives.top(2)

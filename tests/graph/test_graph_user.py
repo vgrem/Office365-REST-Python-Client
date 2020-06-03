@@ -1,3 +1,4 @@
+from office365.graph.directory.user import User
 from office365.graph.directory.userProfile import UserProfile
 from settings import settings
 from tests import random_seed
@@ -7,7 +8,7 @@ from tests.graph.graph_case import GraphTestCase
 class TestGraphUser(GraphTestCase):
     """Tests for Azure Active Directory (Azure AD) users"""
 
-    test_user = None
+    test_user = None  # type: User
 
     def test1_get_user_list(self):
         users = self.client.users.top(1)

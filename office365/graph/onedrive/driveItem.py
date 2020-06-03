@@ -11,6 +11,7 @@ from office365.runtime.resource_path import ResourcePath
 from office365.graph.base_item import BaseItem
 from office365.graph.onedrive.listItem import ListItem
 from office365.runtime.serviceOperationQuery import ServiceOperationQuery
+from office365.graph.onedrive.itemReference import ItemReference
 
 
 def _content_downloaded(file_object, result):
@@ -40,10 +41,12 @@ class DriveItem(BaseItem):
     def upload(self, name, content):
         """The simple upload API allows you to provide the contents of a new file or update the contents of an
         existing file in a single API call. This method only supports files up to 4MB in size.
+
         :param name: The contents of the request body should be the binary stream of the file to be uploaded.
         :type name: str
         :param content: The contents of the request body should be the binary stream of the file to be uploaded.
         :type content: str
+        :rtype: DriveItem
         """
         from office365.graph.graph_client import UploadContentQuery
         qry = UploadContentQuery(self, name, content)
@@ -84,6 +87,7 @@ class DriveItem(BaseItem):
 
         :param format_name: Specify the format the item's content should be downloaded as.
         :type format_name: str
+        :rtype: ClientResult
         """
         from office365.graph.graph_client import DownloadContentQuery
         qry = DownloadContentQuery(self, format_name)
@@ -95,7 +99,7 @@ class DriveItem(BaseItem):
         new name.
 
         :type name: str
-        :type parent_reference: ItemReference
+        :type parent_reference: ItemReference or None
         """
         result = ClientResult(None)
         qry = ServiceOperationQuery(self,
@@ -113,7 +117,11 @@ class DriveItem(BaseItem):
 
     def move(self, name, parent_reference=None):
         """To move a DriveItem to a new parent item, your app requests to update the parentReference of the DriveItem
-        to move. """
+        to move.
+
+        :type name: str
+        :type parent_reference: ItemReference
+        """
         from office365.graph.graph_client import ReplaceMethodQuery
         result = ClientResult(None)
         qry = ReplaceMethodQuery(self,
@@ -132,6 +140,7 @@ class DriveItem(BaseItem):
     def search(self, query_text):
         """Search the hierarchy of items for items matching a query. You can search within a folder hierarchy,
         a whole drive, or files shared with the current user.
+
         :type query_text: str"""
         from office365.graph.graph_client import SearchQuery
         result = ClientResult(None)

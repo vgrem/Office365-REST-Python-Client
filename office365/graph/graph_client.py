@@ -25,8 +25,13 @@ class GraphClient(ClientRuntimeContext):
     """Graph client"""
 
     def __init__(self, tenant, acquire_token_callback):
+        """
+
+        :param (adal.AuthenticationContext) -> dict acquire_token_callback: Acquire token function
+        :param str tenant: Tenant name
+        """
         self.__service_root_url = "https://graph.microsoft.com/v1.0/"
-        super(GraphClient, self).__init__(self.__service_root_url, None)
+        super(GraphClient, self).__init__(self.__service_root_url)
         self._pending_request = ODataRequest(self, V4JsonFormat("minimal"))
         self._pending_request.beforeExecute += self._build_specific_query
         self._resource = "https://graph.microsoft.com"
@@ -38,6 +43,11 @@ class GraphClient(ClientRuntimeContext):
         return self._pending_request
 
     def _build_specific_query(self, request):
+        """
+        Builds Graph specific request
+
+        :type request: RequestOptions
+        """
         query = self.get_pending_request().current_query
         if isinstance(query, UpdateEntityQuery):
             request.method = HttpMethod.Patch
@@ -53,14 +63,24 @@ class GraphClient(ClientRuntimeContext):
             request.method = HttpMethod.Get
 
     def authenticate_request(self, request):
+        """
+
+        :type request: RequestOptions
+        """
         authority_url = self._authority_host_url + '/' + self._tenant
         auth_ctx = adal.AuthenticationContext(authority_url)
         token = self._acquire_token_callback(auth_ctx)
         request.set_header('Authorization', 'Bearer {0}'.format(token["accessToken"]))
 
-    def execute_request(self, url):
-        request = RequestOptions("{0}/{1}".format(self.__service_root_url, url))
-        return self.execute_request_direct(request)
+    def execute_request(self, url_or_options):
+        """
+        Constructs and submits request directly
+
+        :type url_or_options: str or RequestOptions
+        """
+        if not isinstance(url_or_options, RequestOptions):
+            url_or_options = RequestOptions("{0}/{1}".format(self.__service_root_url, url_or_options))
+        return self.execute_request_direct(url_or_options)
 
     @property
     def me(self):
@@ -116,3 +136,4 @@ class GraphClient(ClientRuntimeContext):
     def directory(self):
         """Represents a deleted item in the directory"""
         return Directory(self, ResourcePath("directory"))
+

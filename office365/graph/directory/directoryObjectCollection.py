@@ -13,9 +13,15 @@ class DirectoryObjectCollection(ClientObjectCollection):
         super(DirectoryObjectCollection, self).__init__(context, DirectoryObject, resource_path)
 
     def __getitem__(self, key):
+        """
+
+        :param key: key is used to address a DirectoryObject resource by either an index in collection
+        or by resource id
+        :type key: int or str
+        """
         if type(key) == int:
-            return self._data[key]
-        return DirectoryObject(self.context,
+            return super(DirectoryObjectCollection, self).__getitem__(key)
+        return self._item_type(self.context,
                                ResourcePath(key, self.resource_path))
 
     def getByIds(self, ids):
@@ -40,5 +46,9 @@ class DirectoryObjectCollection(ClientObjectCollection):
         self.context.get_pending_request().beforeExecute += self._construct_remove_user_request
 
     def _construct_remove_user_request(self, request):
+        """
+
+        :type request: RequestOptions
+        """
         request.method = HttpMethod.Delete
         self.context.get_pending_request().beforeExecute -= self._construct_remove_user_request

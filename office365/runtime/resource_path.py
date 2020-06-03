@@ -12,6 +12,10 @@ class ResourcePath(object):
         self._parent = parent
 
     def to_url(self):
+        """
+        Builds url
+        :rtype: str
+        """
         delimiter = '/'
         current = self
         segments = []

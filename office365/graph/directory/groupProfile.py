@@ -1,9 +1,13 @@
 from office365.runtime.client_value_object import ClientValueObject
 
 
-class GroupCreationProperties(ClientValueObject):
+class GroupProfile(ClientValueObject):
     def __init__(self, name):
-        super(GroupCreationProperties, self).__init__()
+        """
+
+        :param str name: Group name
+        """
+        super(GroupProfile, self).__init__()
         self.mailNickname = name
         self.displayName = name
         self.description = None

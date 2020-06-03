@@ -1,11 +1,17 @@
 from office365.graph.onedrive.driveItem import DriveItem
 from office365.runtime.client_result import ClientResult
+from office365.runtime.client_object import ClientObject
 from office365.graph.resource_path_url import ResourcePathUrl
 from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 
 
 class DownloadContentQuery(ServiceOperationQuery):
     def __init__(self, entity_type, format_name=None):
+        """
+
+        :type entity_type: ClientObject
+        :type format_name: str or None
+        """
         result = ClientResult(None)
         action_name = "content"
         if format_name is not None:

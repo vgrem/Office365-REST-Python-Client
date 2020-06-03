@@ -5,6 +5,10 @@ from settings import settings
 
 
 def get_token(auth_ctx):
+    """
+    Get token
+    :type auth_ctx: adal.AuthenticationContext
+    """
     token = auth_ctx.acquire_token_with_username_password(
         'https://graph.microsoft.com',
         settings['user_credentials']['username'],
