@@ -9,6 +9,7 @@ from office365.sharepoint.listitem import ListItem
 
 def _copy_files(new_folder_relative_url, overwrite, folder):
     """Copies files
+
     :type new_folder_relative_url: str
     :type overwrite: bool
     :type folder: Folder
@@ -20,6 +21,7 @@ def _copy_files(new_folder_relative_url, overwrite, folder):
 
 def _move_folder_with_files(new_folder_relative_url, flag, folder):
     """Moves folder with files
+
     :type new_folder_relative_url: str
     :type flag: int
     :type folder: Folder
@@ -31,6 +33,7 @@ def _move_folder_with_files(new_folder_relative_url, flag, folder):
 
 def _add_sub_folder(new_folder_name, target_folder, parent_folder):
     """Creates sub folder by name
+
     :type new_folder_name: str
     :type parent_folder: Folder
     """
@@ -45,6 +48,7 @@ class Folder(ClientObject):
 
     def add(self, name):
         """Adds the folder that is located under a current folder
+
         :type name: str
         """
         new_folder = Folder(self.context)
@@ -52,7 +56,10 @@ class Folder(ClientObject):
         return new_folder
 
     def rename(self, name):
-        """Rename a Folder resource"""
+        """Rename a Folder resource
+
+        :type name: str
+        """
         item = self.list_item_all_fields
         item.set_property('Title', name)
         item.set_property('FileLeafRef', name)
@@ -70,7 +77,8 @@ class Folder(ClientObject):
         self.remove_from_parent_collection()
 
     def upload_file(self, name, content):
-        """Upload a file into folder
+        """Uploads a file into folder
+
         :type name: str
         :type content: str
         """
@@ -83,6 +91,7 @@ class Folder(ClientObject):
 
     def copyto(self, new_relative_url, overwrite):
         """Copies the folder with files to the destination URL.
+
         :type new_relative_url: str
         :type overwrite: bool
         """
@@ -90,6 +99,7 @@ class Folder(ClientObject):
 
     def moveto(self, new_relative_url, flags):
         """Moves the folder with files to the destination URL.
+
         :type new_relative_url: str
         :type flags: int
         """

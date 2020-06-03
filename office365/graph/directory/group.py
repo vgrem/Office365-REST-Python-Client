@@ -16,6 +16,7 @@ class Group(DirectoryObject):
     def add_team(self):
         """Create a new team under a group."""
         team = Team(self.context)
+        team._parent_collection = self.parent_collection
         qry = ServiceOperationQuery(self, "team", None, team, None, team)
         self.context.add_query(qry)
         self.context.get_pending_request().beforeExecute += self._construct_create_team_request

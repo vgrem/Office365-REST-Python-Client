@@ -1,3 +1,6 @@
+import uuid
+
+from office365.graph.directory.groupCreationProperties import GroupCreationProperties
 from tests.graph.graph_case import GraphTestCase
 
 
@@ -9,14 +12,16 @@ class TestGraphTeam(GraphTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestGraphTeam, cls).setUpClass()
-        result = cls.client.groups.filter("groupTypes/any(c:c eq 'Unified')").top(1)
-        cls.client.load(result)
+        grp_name = "Group_" + uuid.uuid4().hex
+        properties = GroupCreationProperties(grp_name)
+        properties.securityEnabled = False
+        properties.mailEnabled = True
+        properties.groupTypes = ["Unified"]
+        cls.target_group = cls.client.groups.add(properties)
         cls.client.execute_query()
-        cls.target_group = result[0]
 
     def test2_ensure_team(self):
-        group_id = self.__class__.target_group.properties['id']
-        teams = self.client.me.joinedTeams.filter("id eq '{0}'".format(group_id))
+        teams = self.client.me.joinedTeams.filter("id eq '{0}'".format(self.__class__.target_group.id))
         self.client.load(teams)
         self.client.execute_query()
         self.assertIsNotNone(teams.resource_path)

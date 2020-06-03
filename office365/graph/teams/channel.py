@@ -1,7 +1,7 @@
-from office365.runtime.client_object import ClientObject
+from office365.graph.entity import Entity
 
 
-class Channel(ClientObject):
+class Channel(Entity):
     """Teams are made up of channels, which are the conversations you have with your teammates"""
 
     @property

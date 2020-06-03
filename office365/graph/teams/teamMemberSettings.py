@@ -6,6 +6,7 @@ class TeamMemberSettings(ClientValueObject):
     in the team. """
 
     def __init__(self):
+        super().__init__()
         self.allowCreateUpdateChannels = True
         self.allowDeleteChannels = True
         self.allowAddRemoveApps = True

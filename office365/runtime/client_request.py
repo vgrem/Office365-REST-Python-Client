@@ -4,12 +4,17 @@ from requests import HTTPError
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.utilities.EventHandler import EventHandler
+from office365.runtime.client_runtime_context import ClientRuntimeContext
 
 
 class ClientRequest(object):
     """Base request for OData/REST service"""
 
     def __init__(self, context):
+        """
+
+        :type context: ClientRuntimeContext
+        """
         self.context = context
         self._queries = []
         self.beforeExecute = EventHandler()
@@ -40,7 +45,10 @@ class ClientRequest(object):
             raise ClientRequestException(*e.args, response=e.response)
 
     def execute_request_direct(self, request_options):
-        """Execute client request"""
+        """Execute client request
+
+        :type request_options: RequestOptions
+        """
         self.context.authenticate_request(request_options)
         if request_options.method == HttpMethod.Post:
             if request_options.is_bytes or request_options.is_file:

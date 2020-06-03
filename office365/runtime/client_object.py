@@ -6,6 +6,13 @@ class ClientObject(object):
     """Base client object"""
 
     def __init__(self, context, resource_path=None, properties=None, parent_collection=None):
+        """
+
+        :type parent_collection: office365.runtime.client_object_collection.ClientObjectCollection
+        :type properties: dict
+        :type resource_path: office365.runtime.resource_path.ResourcePath
+        :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
+        """
         self._properties = {}
         self._changes = []
         self._entity_type_name = None
@@ -55,12 +62,18 @@ class ClientObject(object):
     def to_json(self):
         return dict((k, v) for k, v in self.properties.items() if k in self._changes)
 
-    def ensure_property(self, name, loaded):
+    def ensure_property(self, name, action):
+        """
+        Ensures property is loaded
+
+        :type action: any
+        :type name: str
+        """
         if not self.is_property_available(name):
             self.context.load(self, [name])
-            self.context.afterExecuteOnce += loaded
+            self.context.afterExecuteOnce += action
         else:
-            loaded(self)
+            action(self)
 
     @property
     def entity_type_name(self):

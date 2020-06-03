@@ -3,6 +3,7 @@ from office365.runtime.client_query import CreateEntityQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.list import List
+from office365.sharepoint.list_creation_information import ListCreationInformation
 
 
 class ListCollection(ClientObjectCollection):
@@ -12,12 +13,18 @@ class ListCollection(ClientObjectCollection):
         super(ListCollection, self).__init__(context, List, resource_path)
 
     def get_by_title(self, list_title):
-        """Retrieve List client object by title"""
+        """Retrieve List client object by title
+
+        :type list_title: str
+        """
         return List(self.context,
                     ResourcePathServiceOperation("GetByTitle", [list_title], self.resource_path))
 
     def get_by_id(self, list_id):
-        """Retrieve List client object by id"""
+        """Retrieve List client object by id
+
+        :type list_id: str
+        """
         return List(self.context,
                     ResourcePathServiceOperation("GetById", [list_id], self.resource_path))
 
@@ -39,7 +46,10 @@ class ListCollection(ClientObjectCollection):
         return target_list
 
     def add(self, list_creation_information):
-        """Creates a List resource"""
+        """Creates a List resource
+
+        :type list_creation_information: ListCreationInformation
+        """
         target_list = List(self.context)
         self.add_child(target_list)
         qry = CreateEntityQuery(self, list_creation_information, target_list)

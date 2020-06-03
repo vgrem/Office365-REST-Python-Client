@@ -41,11 +41,11 @@ class ODataRequest(ClientRequest):
         self.json_format.function_tag_name = None
 
         if isinstance(qry, ServiceOperationQuery):
-            self.json_format.function_tag_name = qry.methodName
+            self.json_format.function_tag_name = qry.method_name
             if qry.static:
-                request_url = self.context.service_root_url + '.'.join([qry.binding_type.entity_type_name, qry.methodUrl])
+                request_url = self.context.service_root_url + '.'.join([qry.binding_type.entity_type_name, qry.method_url])
             else:
-                request_url = '/'.join([qry.binding_type.resource_url, qry.methodUrl])
+                request_url = '/'.join([qry.binding_type.resource_url, qry.method_url])
         else:
             request_url = qry.binding_type.resource_url
         request = RequestOptions(request_url)
@@ -122,7 +122,7 @@ class ODataRequest(ClientRequest):
 
             if isinstance(self._json_format,
                           JsonLightFormat) and self._json_format.metadata == ODataMetadataLevel.Verbose:
-                json["__metadata"] = {'type': value.entity_type_name}
+                json[self._json_format.metadata_type_tag_name] = {'type': value.entity_type_name}
 
             if isinstance(self._current_query, ServiceOperationQuery) and self._current_query.parameter_name is not None:
                 json = {self._current_query.parameter_name: json}

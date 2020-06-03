@@ -17,7 +17,10 @@ class UserCollection(DirectoryObjectCollection):
         return User(self.context, ResourcePath(key, self.resource_path))
 
     def add(self, user_properties):
-        """Create a new user."""
+        """Create a new user.
+
+        :type user_properties: UserCreationProperties
+        """
         usr = User(self.context)
         qry = CreateEntityQuery(self, user_properties, usr)
         self.context.add_query(qry)

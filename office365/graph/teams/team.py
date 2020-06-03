@@ -1,4 +1,4 @@
-from office365.runtime.client_object import ClientObject
+from office365.graph.entity import Entity
 from office365.runtime.client_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.serviceOperationQuery import ServiceOperationQuery
@@ -10,7 +10,7 @@ from office365.graph.teams.teamMemberSettings import TeamMemberSettings
 from office365.graph.teams.teamMessagingSettings import TeamMessagingSettings
 
 
-class Team(ClientObject):
+class Team(Entity):
     """A team in Microsoft Teams is a collection of channel objects. A channel represents a topic, and therefore a
     logical isolation of discussion, within a team. """
 
@@ -24,12 +24,18 @@ class Team(ClientObject):
     @property
     def channels(self):
         """The collection of channels & messages associated with the team."""
-        return ChannelCollection(self, ResourcePath("channels"))
+        if self.is_property_available("channels"):
+            return self.properties['channels']
+        else:
+            return ChannelCollection(self.context, ResourcePath("channels", self.resource_path))
 
     @property
     def primaryChannel(self):
         """The general channel for the team."""
-        return Channel(self, ResourcePath("primaryChannel"))
+        if self.is_property_available("primaryChannel"):
+            return self.properties['primaryChannel']
+        else:
+            return Channel(self.context, ResourcePath("primaryChannel"))
 
     def update(self):
         """Updates team."""

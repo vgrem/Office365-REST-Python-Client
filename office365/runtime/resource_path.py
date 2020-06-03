@@ -3,6 +3,11 @@ class ResourcePath(object):
     """OData resource path"""
 
     def __init__(self, segment, parent=None):
+        """
+
+        :type parent: ResourcePath
+        :type segment: str
+        """
         self._segment = segment
         self._parent = parent
 

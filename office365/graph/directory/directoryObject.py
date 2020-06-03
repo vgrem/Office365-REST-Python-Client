@@ -1,5 +1,5 @@
 from office365.graph.entity import Entity
-from office365.runtime.client_query import DeleteEntityQuery
+from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_result import ClientResult
 from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 
@@ -10,7 +10,9 @@ class DirectoryObject(Entity):
 
     def get_member_groups(self, security_enabled_only=True):
         """Return all the groups that the specified user, group, or directory object is a member of. This function is
-        transitive. """
+        transitive.
+
+        :type security_enabled_only: bool"""
         result = ClientResult(None)
         payload = {
             "securityEnabledOnly": security_enabled_only
@@ -18,6 +20,11 @@ class DirectoryObject(Entity):
         qry = ServiceOperationQuery(self, "getMemberGroups", None, payload, None, result)
         self.context.add_query(qry)
         return result
+
+    def update(self):
+        """Updates the directory object."""
+        qry = UpdateEntityQuery(self)
+        self.context.add_query(qry)
 
     def delete_object(self):
         """Deletes the directory object."""

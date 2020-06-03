@@ -1,7 +1,19 @@
+from office365.runtime.client_object import ClientObject
+from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value_object import ClientValueObject
+
+
 class ClientQuery(object):
     """Client query"""
 
     def __init__(self, binding_type, parameter_type=None, parameter_name=None, return_type=None):
+        """
+
+        :type binding_type: ClientObject
+        :type parameter_type:  ClientObject or ClientValueObject or dict or None
+        :type parameter_name:  str or None
+        :type return_type:  ClientObject or ClientResult or ClientValueObject or None
+        """
         self._binding_type = binding_type
         self._parameter_type = parameter_type
         self._parameter_name = parameter_name
@@ -30,11 +42,24 @@ class ClientQuery(object):
 
 class CreateEntityQuery(ClientQuery):
     def __init__(self, parent_entity, create_info, entity_to_create):
+        """
+        Create query
+
+        :type entity_to_create: ClientObject
+        :type create_info: ClientObject or ClientValueObject or dict
+        :type parent_entity: ClientObject
+        """
         super(CreateEntityQuery, self).__init__(parent_entity, create_info, None, entity_to_create)
 
 
 class ReadEntityQuery(ClientQuery):
     def __init__(self, entity_to_read, properties_to_include=None):
+        """
+        Read query
+
+        :type properties_to_include: list or None
+        :type entity_to_read: ClientObject
+        """
         super(ReadEntityQuery, self).__init__(entity_to_read, None, None, entity_to_read)
         if properties_to_include:
             entity_to_read.query_options.expand = properties_to_include
@@ -42,9 +67,19 @@ class ReadEntityQuery(ClientQuery):
 
 class UpdateEntityQuery(ClientQuery):
     def __init__(self, entity_to_update):
+        """
+        Update query
+
+        :type entity_to_update: ClientObject
+        """
         super(UpdateEntityQuery, self).__init__(entity_to_update, entity_to_update, None, None)
 
 
 class DeleteEntityQuery(ClientQuery):
     def __init__(self, entity_to_delete):
+        """
+        Delete query
+
+        :type entity_to_delete: ClientObject
+        """
         super(DeleteEntityQuery, self).__init__(entity_to_delete, None, None, None)

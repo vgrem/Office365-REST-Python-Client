@@ -8,8 +8,28 @@ from office365.runtime.resource_path import ResourcePath
 from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 
 
+def _delete_user_from_directory(target_user):
+    """
+    Deletes the user from directory
+
+    :type target_user: User
+    """
+    deleted_user = target_user.context.directory.deletedUsers[target_user.id]
+    deleted_user.delete_object()
+
+
 class User(DirectoryObject):
     """Represents an Azure AD user account. Inherits from directoryObject."""
+
+    def delete_object(self, permanent_delete=False):
+        """
+        :param permanent_delete: Permanently deletes the user from directory
+        :type permanent_delete: bool
+
+        """
+        super(User, self).delete_object()
+        if permanent_delete:
+            self.ensure_property("id", _delete_user_from_directory)
 
     @property
     def drive(self):
