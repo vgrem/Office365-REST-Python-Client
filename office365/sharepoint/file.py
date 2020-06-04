@@ -142,7 +142,15 @@ class File(AbstractFile):
         self.context.add_query(qry)
 
     def checkin(self, comment, checkin_type):
-        """Checks the file in to a document library based on the check-in type."""
+        """
+        Checks the file in to a document library based on the check-in type.
+
+        :param comment: comment to the new version of the file
+        :param checkin_type: 0 (minor), or 1 (major) or 2 (overwrite)
+            For more information on checkin types, please see
+            https://docs.microsoft.com/en-us/previous-versions/office/sharepoint-csom/ee542953(v%3Doffice.15)
+        :type checkin_type: int
+        """
         qry = ServiceOperationQuery(self,
                                     "checkin",
                                     {
