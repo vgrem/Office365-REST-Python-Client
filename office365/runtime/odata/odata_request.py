@@ -14,11 +14,22 @@ from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 class ODataRequest(ClientRequest):
 
     def __init__(self, context, json_format):
+        """
+
+        :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
+        :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat
+        """
         super(ODataRequest, self).__init__(context)
         self._json_format = json_format
         self._current_query = None
 
     def execute_request_direct(self, request):
+        """
+        Executes request directly
+
+        :param RequestOptions request: request
+        :return: Response
+        """
         media_type = self.json_format.get_media_type()
         request.ensure_header('Content-Type', media_type)
         request.ensure_header('Accept', media_type)

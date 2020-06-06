@@ -5,8 +5,8 @@ class ResourcePath(object):
     def __init__(self, segment, parent=None):
         """
 
-        :type parent: ResourcePath
         :type segment: str
+        :type parent: ResourcePath or None
         """
         self._segment = segment
         self._parent = parent

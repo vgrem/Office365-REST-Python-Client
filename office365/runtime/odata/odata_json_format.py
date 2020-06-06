@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
 
 
 class ODataJsonFormat(object):

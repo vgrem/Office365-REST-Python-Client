@@ -7,6 +7,11 @@ class ResourcePathServiceOperation(ResourcePath):
     represents simple functions exposed by an OData service"""
 
     def __init__(self, method_name, method_parameters=None, parent=None):
+        """
+        :type method_parameters: list or dict
+        :type method_name: str
+
+
+        """
         super(ResourcePathServiceOperation, self).__init__(ODataPathParser.from_method(method_name, method_parameters),
                                                            parent)
-

@@ -26,7 +26,7 @@ class Web(SecurableObject):
         """
 
         :type resource_path: ResourcePath or None
-        :type context: ClientContext
+        :type context: office365.sharepoint.client_context.ClientContext
         """
         if resource_path is None:
             resource_path = ResourcePath("Web")

@@ -8,6 +8,11 @@ class ODataPathParser(object):
 
     @staticmethod
     def from_method(method_name, method_parameters=None):
+        """
+
+        :type method_parameters: list or dict
+        :type method_name: str
+        """
         url = ""
         if method_name:
             url = method_name

@@ -1,8 +1,16 @@
+from functools import partial
+
+from office365.runtime.client_result import ClientResult
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.utilities.EventHandler import EventHandler
+
+
+def _calc_items_count(result, target_collection):
+    list(iter(target_collection))
+    result.value = len(target_collection)
 
 
 class ClientObjectCollection(ClientObject):
@@ -18,18 +26,10 @@ class ClientObjectCollection(ClientObject):
         self._data = []
         self._item_type = item_type
         self.page_loaded = EventHandler(False)
-        self._page_size = 100
+        self._default_page_size = 100
+        self._paged_mode = True
         self._page_index = 0
         self.next_request_url = None
-
-    @property
-    def page_size(self):
-        return self._page_size
-
-    @page_size.setter
-    def page_size(self, value):
-        self._page_size = value
-        self.top(value)
 
     def clear(self):
         self._data = []
@@ -64,17 +64,12 @@ class ClientObjectCollection(ClientObject):
         for cur_item in self._data:
             yield cur_item
 
-        while self.next_request_url:
-            self._page_index += 1
-            next_index = self._page_size * self._page_index
-            self._load_next_items()
-            self.page_loaded.notify(len(self._data))
-            next_items = self._data[next_index:]
-            for cur_item in next_items:
-                yield cur_item
+        if self._paged_mode:
+            while self.next_request_url:
+                for cur_item in self._get_next_items():
+                    yield cur_item
 
     def __len__(self):
-        list(iter(self))
         return len(self._data)
 
     def __getitem__(self, index):
@@ -86,6 +81,7 @@ class ClientObjectCollection(ClientObject):
 
     def filter(self, expression):
         """
+        Sets OData $filter query option
 
         :type expression: str
         """
@@ -97,16 +93,39 @@ class ClientObjectCollection(ClientObject):
         return self
 
     def skip(self, value):
+        """
+        Sets $skip system query option
+
+        :type value: int
+        """
         self.query_options.skip = value
         return self
 
     def top(self, value):
+        self._paged_mode = False
         self.query_options.top = value
         return self
 
-    def _load_next_items(self):
+    def get_items_count(self):
+        """
+        Gets total items count
+        :return: ClientResult
+        """
+        result = ClientResult(None)
+        self.context.load(self)
+        self.context.afterExecuteOnce += partial(_calc_items_count, result)
+        return result
+
+    def _load_paged_items(self):
         request = RequestOptions(self.next_request_url)
         response = self.context.execute_request_direct(request)
         json = response.json()
         self.next_request_url = None
         self.context.get_pending_request().map_json(json, self)
+
+    def _get_next_items(self):
+        self._page_index += 1
+        next_index = self._default_page_size * self._page_index
+        self._load_paged_items()
+        self.page_loaded.notify(len(self._data))
+        return self._data[next_index:]
