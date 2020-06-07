@@ -1,3 +1,4 @@
+from office365.sharepoint.list import List
 from office365.sharepoint.list_creation_information import ListCreationInformation
 from office365.sharepoint.list_template_type import ListTemplateType
 from office365.sharepoint.view_create_information import ViewCreationInformation
@@ -7,7 +8,7 @@ from tests.sharepoint.test_methods import ensure_list
 
 
 class TestSPView(SPTestCase):
-    target_list = None
+    target_list = None  # type: List
 
     @classmethod
     def setUpClass(cls):

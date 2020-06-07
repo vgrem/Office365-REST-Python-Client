@@ -1,3 +1,4 @@
+from office365.sharepoint.list import List
 from tests import random_seed
 from tests.sharepoint.sharepoint_case import SPTestCase
 from office365.sharepoint.list_creation_information import ListCreationInformation
@@ -6,7 +7,8 @@ from tests.sharepoint.test_methods import ensure_list
 
 
 class TestSharePointListItem(SPTestCase):
-    target_list = None
+
+    target_list = None  # type: List
 
     @classmethod
     def setUpClass(cls):
@@ -67,7 +69,12 @@ class TestSharePointListItem(SPTestCase):
         self.assertEqual(item_to_update.properties["Modified"], last_updated)
         self.assertEqual(item_to_update.properties["Title"], new_title)
 
-    def test6_delete_list_item(self):
+    def test6_update_overwrite_version(self):
+        item_to_update = self.target_list.get_item_by_id(self.target_item_properties["Id"])
+        item_to_update.update_overwrite_version()
+        self.client.execute_query()
+
+    def test7_delete_list_item(self):
         item = self.target_list.get_item_by_id(self.target_item_properties["Id"])
         item.delete_object()
         self.client.execute_query()

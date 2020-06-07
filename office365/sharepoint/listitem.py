@@ -1,9 +1,6 @@
-from functools import partial
-
 from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.securable_object import SecurableObject
 
@@ -37,7 +34,6 @@ class ListItem(SecurableObject):
     def update_overwrite_version(self):
         """Update the list item."""
         qry = ServiceOperationQuery(self,
-                                    HttpMethod.Post,
                                     "updateOverwriteVersion")
         self.context.add_query(qry)
 

@@ -1,14 +1,10 @@
 language: python
 os: linux
 python:
-  - "2.7"
+  - "3.5"
   - "3.6"
   - "3.7"
   - "3.8"
-
-matrix:
-  allow_failures:
-    - python: "2.7"
 
 install:
   - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install requests adal setuptools requests_ntlm; fi

@@ -121,7 +121,7 @@ class Web(SecurableObject):
         :type permission_mask: BasePermissions
         """
         result = ClientResult(bool)
-        qry = ServiceOperationQuery(self, "doesUserHavePermissions", [permission_mask], None, None, result)
+        qry = ServiceOperationQuery(self, "doesUserHavePermissions", permission_mask, None, None, result)
         self.context.add_query(qry)
         return result
 

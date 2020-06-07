@@ -1,6 +1,7 @@
 import os
 
 from office365.sharepoint.file import File
+from office365.sharepoint.list import List
 from tests import random_seed
 from tests.sharepoint.sharepoint_case import SPTestCase
 from tests.sharepoint.test_methods import (
@@ -26,8 +27,8 @@ class TestSharePointFile(SPTestCase):
         {"Name": "Sample.txt", "Type": "Text"},
         {"Name": "SharePoint User Guide.docx", "Type": "Binary"}
     ]
-    target_list = None
-    target_file = None
+    target_list = None  # type: List
+    target_file = None  # type: File
 
     @classmethod
     def setUpClass(cls):

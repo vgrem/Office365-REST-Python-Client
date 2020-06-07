@@ -1,4 +1,6 @@
-from requests.compat import basestring
+import json
+
+from office365.runtime.client_value_object import ClientValueObject
 
 
 class ODataPathParser(object):
@@ -10,14 +12,17 @@ class ODataPathParser(object):
     def from_method(method_name, method_parameters=None):
         """
 
-        :type method_parameters: list or dict
+        :type method_parameters: list or dict or ClientValueObject
         :type method_name: str
         """
         url = ""
         if method_name:
             url = method_name
 
-        if method_parameters is not None:
+        if isinstance(method_parameters, ClientValueObject):
+            param_value = method_parameters.to_json()
+            url += "(@v)?@v={0}".format(json.dumps(param_value))
+        elif method_parameters is not None:
             url += "("
             if isinstance(method_parameters, dict):
                 url += ','.join(['%s=%s' % (key, ODataPathParser.encode_method_value(value)) for (key, value) in
@@ -30,7 +35,7 @@ class ODataPathParser(object):
 
     @staticmethod
     def encode_method_value(value):
-        if isinstance(value, basestring):
+        if type(value) is str:
             value = value.replace("'", "''")
 
             # Same replacements as SQL Server

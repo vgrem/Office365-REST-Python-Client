@@ -25,7 +25,7 @@ class ODataBaseReader(object):
         for complex_type_node in schema_node.findall('xmlns:ComplexType', self._options['namespaces']):
             type_schema = {'namespace': schema_node.attrib['Namespace'],
                            'name': complex_type_node.get('Name'),
-                           'baseType': 'clientValueObject'}
+                           'baseType': 'ComplexType'}
             model.resolve_type(type_schema)
             self.process_type_node(model, type_schema, complex_type_node)
         return model

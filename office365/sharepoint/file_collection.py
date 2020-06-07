@@ -12,13 +12,22 @@ class FileCollection(ClientObjectCollection):
         super(FileCollection, self).__init__(context, File, resource_path)
 
     def create_upload_session(self, source_path, chunk_size, chunk_uploaded=None):
-        """Upload a file as multiple chunks"""
+        """Upload a file as multiple chunks
+
+        :param str source_path: path where file to upload resides
+        :param int chunk_size: upload chunk size
+        :param (int)->None or None chunk_uploaded: uploaded event
+        :return: office365.sharepoint.file.File
+        """
         session = UploadSession(source_path, chunk_size, chunk_uploaded)
         session.build_query(self)
         return session.file
 
     def add(self, file_creation_information):
-        """Creates a File resource"""
+        """Creates a File resource
+
+        :type file_creation_information: office365.sharepoint.file_creation_information.FileCreationInformation
+        """
         target_file = File(self.context)
         self.add_child(target_file)
         qry = ServiceOperationQuery(self,
@@ -32,7 +41,11 @@ class FileCollection(ClientObjectCollection):
         return target_file
 
     def add_template_file(self, url_of_file, template_file_type):
-        """Adds a ghosted file to an existing list or document library."""
+        """Adds a ghosted file to an existing list or document library.
+
+        :param int template_file_type: refer TemplateFileType enum
+        :param str url_of_file: server relative url of a file
+        """
         target_file = File(self.context)
         self.add_child(target_file)
         qry = ServiceOperationQuery(self,

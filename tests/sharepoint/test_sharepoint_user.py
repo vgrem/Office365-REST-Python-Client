@@ -1,3 +1,4 @@
+from office365.sharepoint.basePermissions import BasePermissions
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 
@@ -26,4 +27,4 @@ class TestSharePointUser(SPTestCase):
     def test4_get_user_permissions(self):
         perms_result = self.client.web.get_user_effective_permissions(self.__class__.target_user_name)
         self.client.execute_query()
-        self.assertIsNotNone(perms_result.value)
+        self.assertIsInstance(perms_result.value, BasePermissions)

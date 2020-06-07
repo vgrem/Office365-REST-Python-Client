@@ -1,5 +1,6 @@
 from random import randint
 
+from office365.sharepoint.list import List
 from office365.sharepoint.move_operations import MoveOperations
 from tests import random_seed
 from tests.sharepoint.sharepoint_case import SPTestCase
@@ -10,7 +11,7 @@ from tests.sharepoint.test_methods import ensure_list
 
 class TestSharePointFolder(SPTestCase):
     target_folder_name = "Archive_" + str(randint(0, 1000))
-    target_list = None
+    target_list = None  # type: List
 
     @classmethod
     def setUpClass(cls):
@@ -60,7 +61,8 @@ class TestSharePointFolder(SPTestCase):
         folder_to_update.rename(self.__class__.target_folder_name)
         self.client.execute_query()
 
-        result = self.__class__.target_list.rootFolder.folders.filter("Name eq '{0}'".format(self.__class__.target_folder_name))
+        result = self.__class__.target_list.rootFolder.folders.filter(
+            "Name eq '{0}'".format(self.__class__.target_folder_name))
         self.client.load(result)
         self.client.execute_query()
         self.assertEqual(len(result), 1)
@@ -102,7 +104,8 @@ class TestSharePointFolder(SPTestCase):
         folder_to_delete.delete_object()
         self.client.execute_query()
 
-        result = self.__class__.target_list.rootFolder.folders.filter("Name eq '{0}'".format(self.__class__.target_folder_name))
+        result = self.__class__.target_list.rootFolder.folders.filter(
+            "Name eq '{0}'".format(self.__class__.target_folder_name))
         self.client.load(result)
         self.client.execute_query()
         self.assertEqual(len(result), 0)

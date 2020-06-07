@@ -6,15 +6,20 @@ class ODataModel(object):
     _types = {}
     _namespaces = ['directory', 'onedrive', 'outlookservices', 'teams']
 
+    @property
+    def types(self):
+        return self._types
+
     def resolve_type(self, schema):
         type_alias = schema['name']
-        types = [locate("office365.{0}.{1}".format(ns, type_alias)) for ns in self._namespaces]
+        types = [locate("office365.graph.{0}.{1}".format(ns, type_alias)) for ns in self._namespaces]
         found_modules = [t for t in types if t is not None]
         if any(found_modules):
             schema['state'] = 'attached'
             schema['file'] = found_modules[0].__file__
         else:
             schema['state'] = 'detached'
+            schema['file'] = ''
         schema['properties'] = {}
         self._types[type_alias] = schema
 

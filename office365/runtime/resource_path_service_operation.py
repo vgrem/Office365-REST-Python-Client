@@ -8,7 +8,7 @@ class ResourcePathServiceOperation(ResourcePath):
 
     def __init__(self, method_name, method_parameters=None, parent=None):
         """
-        :type method_parameters: list or dict
+        :type method_parameters: list or dict or office365.runtime.client_value_object.ClientValueObject
         :type method_name: str
 
 

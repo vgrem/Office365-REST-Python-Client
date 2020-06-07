@@ -5,6 +5,7 @@ from office365.runtime.resource_path_service_operation import ResourcePathServic
 from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.camlQuery import CamlQuery
 from office365.sharepoint.view_field_collection import ViewFieldCollection
+from office365.sharepoint.listItem_collection import ListItemCollection
 
 
 class View(ClientObject):
@@ -15,11 +16,18 @@ class View(ClientObject):
         self._parent_list = parent_list
 
     def get_items(self):
-        """Get list items per a view """
+        """Get list items per a view
+
+        :rtype: ListItemCollection
+        """
         self.ensure_property("viewQuery", self._get_items_inner)
         return self._parent_list.items
 
     def _get_items_inner(self, target_view):
+        """
+
+        :type target_view: View
+        """
         caml_query = CamlQuery.parse(target_view.viewQuery)
         qry = ServiceOperationQuery(self._parent_list, "GetItems", None, caml_query, "query", self._parent_list.items)
         self.context.add_query(qry)

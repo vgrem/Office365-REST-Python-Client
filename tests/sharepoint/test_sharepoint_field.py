@@ -1,12 +1,13 @@
 import uuid
 
+from office365.sharepoint.field import Field
 from office365.sharepoint.fieldType import FieldType
 from office365.sharepoint.field_creation_information import FieldCreationInformation
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 
 class TestField(SPTestCase):
-    target_field = None
+    target_field = None   # type: Field
     target_field_name = "Title"
 
     def test_1_get_site_fields(self):

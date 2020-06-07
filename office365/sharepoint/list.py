@@ -1,7 +1,9 @@
 from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery
+from office365.runtime.client_result import ClientResult
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.serviceOperationQuery import ServiceOperationQuery
+from office365.sharepoint.basePermissions import BasePermissions
 from office365.sharepoint.camlQuery import CamlQuery
 from office365.sharepoint.content_type_collection import ContentTypeCollection
 from office365.sharepoint.field_collection import FieldCollection
@@ -18,6 +20,22 @@ class List(SecurableObject):
 
     def __init__(self, context, resource_path=None):
         super(List, self).__init__(context, resource_path)
+
+    def get_user_effective_permissions(self, user_name):
+        """
+
+        :type user_name: str
+        """
+        result = ClientResult(BasePermissions())
+        qry = ServiceOperationQuery(self, "getUserEffectivePermissions", [user_name], None, None, result)
+        self.context.add_query(qry)
+        return result
+
+    def get_web_dav_url(self, source_url):
+        result = ClientResult(None)
+        qry = ServiceOperationQuery(self, "getWebDavUrl", [source_url], None, None, result)
+        self.context.add_query(qry)
+        return result
 
     def get_items(self, caml_query=None):
         """Returns a collection of items from the list based on the specified query.
