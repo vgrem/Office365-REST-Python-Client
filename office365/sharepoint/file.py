@@ -1,5 +1,4 @@
 from functools import partial
-from office365.runtime.client_object import ClientObject
 from office365.runtime.client_query import DeleteEntityQuery
 from office365.runtime.client_result import ClientResult
 from office365.runtime.resource_path import ResourcePath
@@ -7,29 +6,14 @@ from office365.runtime.resource_path_service_operation import ResourcePathServic
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.serviceOperationQuery import ServiceOperationQuery
+from office365.sharepoint.actions.download_file import DownloadFileQuery
+from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.fileVersionCollection import FileVersionCollection
 from office365.sharepoint.listitem import ListItem
 from office365.sharepoint.webparts.limited_webpart_manager import LimitedWebPartManager
 
 
-class DownloadFileQuery(ServiceOperationQuery):
-
-    def __init__(self, web, file_url, file_object):
-        self.file_object = file_object
-        web.context.get_pending_request().beforeExecute += self._construct_download_query
-        web.context.get_pending_request().afterExecute += self._process_response
-        super(DownloadFileQuery, self).__init__(web, r"getFileByServerRelativeUrl('{0}')/\$value".format(file_url))
-
-    def _construct_download_query(self, request):
-        self.binding_type.context.get_pending_request().beforeExecute -= self._construct_download_query
-        request.method = HttpMethod.Get
-
-    def _process_response(self, response):
-        self.binding_type.context.get_pending_request().afterExecute -= self._process_response
-        self.file_object.write(response.content)
-
-
-class AbstractFile(ClientObject):
+class AbstractFile(BaseEntity):
     def read(self):
         """Immediately read content of file"""
         if not self.is_property_available("ServerRelativeUrl"):
@@ -185,10 +169,14 @@ class File(AbstractFile):
                                      ))
 
     def start_upload(self, upload_id, content):
-        """Starts a new chunk upload session and uploads the first fragment."""
+        """Starts a new chunk upload session and uploads the first fragment.
+
+        :param bytes content: File content
+        :param str upload_id: Upload session id
+        """
         result = ClientResult(None)
         qry = ServiceOperationQuery(self,
-                                    "startupload",
+                                    "startUpload",
                                     {
                                         "uploadID": upload_id
                                     },
@@ -200,10 +188,16 @@ class File(AbstractFile):
         return result
 
     def continue_upload(self, upload_id, file_offset, content):
-        """Continues the chunk upload session with an additional fragment. The current file content is not changed."""
+        """
+        Continues the chunk upload session with an additional fragment. The current file content is not changed.
+
+        :param str upload_id: Upload session id
+        :param int file_offset: File offset
+        :param bytes content: File content
+        """
         result = ClientResult(None)
         qry = ServiceOperationQuery(self,
-                                    "continueupload",
+                                    "continueUpload",
                                     {
                                         "uploadID": upload_id,
                                         "fileOffset": file_offset,
@@ -217,9 +211,14 @@ class File(AbstractFile):
 
     def finish_upload(self, upload_id, file_offset, content):
         """Uploads the last file fragment and commits the file. The current file content is changed when this method
-        completes. """
+        completes.
+
+        :param str upload_id: Upload session id
+        :param int file_offset: File offset
+        :param bytes content: File content
+        """
         qry = ServiceOperationQuery(self,
-                                    "finishupload",
+                                    "finishUpload",
                                     {
                                         "uploadID": upload_id,
                                         "fileOffset": file_offset,
@@ -234,11 +233,12 @@ class File(AbstractFile):
     @staticmethod
     def save_binary(ctx, server_relative_url, content):
         """Uploads a file
+
         :type ctx: ClientContext
         :type server_relative_url: str
         :type content: str
         """
-        url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(
+        url = r"{0}web/getFileByServerRelativeUrl('{1}')/\$value".format(
             ctx.service_root_url, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Post
@@ -290,6 +290,14 @@ class File(AbstractFile):
         """Gets the relative URL of the file based on the URL for the server."""
         if self.is_property_available('ServerRelativeUrl'):
             return self.properties["ServerRelativeUrl"]
+        else:
+            return None
+
+    @property
+    def length(self):
+        """Gets the file size."""
+        if self.is_property_available('Length'):
+            return int(self.properties["Length"])
         else:
             return None
 

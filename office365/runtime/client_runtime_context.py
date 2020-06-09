@@ -1,4 +1,5 @@
 import abc
+
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.client_request import ClientRequest
 from office365.runtime.client_query import ReadEntityQuery
@@ -9,14 +10,14 @@ from office365.runtime.auth.authentication_context import AuthenticationContext
 
 class ClientRuntimeContext(object):
 
-    def __init__(self, url, auth_context=None):
+    def __init__(self, service_root_url, auth_context=None):
         """
         Client runtime context for services
 
-        :type url: str
+        :type service_root_url: str
         :type auth_context: AuthenticationContext or None
         """
-        self.__service_root_url = url
+        self.__service_root_url = service_root_url
         self.__auth_context = auth_context
         self.afterExecuteOnce = EventHandler(True)
 
@@ -24,7 +25,6 @@ class ClientRuntimeContext(object):
     def get_pending_request(self):
         """
         :rtype: ClientRequest
-
         """
         pass
 

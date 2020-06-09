@@ -1,9 +1,8 @@
-from office365.runtime.client_object import ClientObject
-from office365.runtime.client_query import UpdateEntityQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.base_entity import BaseEntity
 
 
-class Principal(ClientObject):
+class Principal(BaseEntity):
     """Represents a user or group that can be assigned permissions to control security."""
 
     @property
@@ -60,8 +59,3 @@ class Principal(ClientObject):
             elif name == "LoginName":
                 self._resource_path = ResourcePathServiceOperation(
                     "GetByName", [value], self._parent_collection.resource_path)
-
-    def update(self):
-        """Update a User or Group resource"""
-        qry = UpdateEntityQuery(self)
-        self.context.add_query(qry)

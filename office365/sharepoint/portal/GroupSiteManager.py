@@ -10,7 +10,15 @@ class GroupSiteManager(ClientObject):
         super(GroupSiteManager, self).__init__(context, ResourcePath("GroupSiteManager"), None)
 
     def create_group_ex(self, display_name, alias, is_public, optional_params):
-        """Create a modern site"""
+        """
+        Create a modern site
+
+        :param str display_name:
+        :param str alias:
+        :param bool is_public:
+        :param list or None optional_params:
+        :return: GroupSiteInfo
+        """
         payload = {
             "displayName": display_name,
             "alias": alias,
@@ -23,7 +31,11 @@ class GroupSiteManager(ClientObject):
         return group_site_info
 
     def delete(self, site_url):
-        """Deletes a SharePoint Team site"""
+        """
+        Deletes a SharePoint Team site
+
+        :type site_url: str
+        """
         payload = {
             "siteUrl": site_url
         }

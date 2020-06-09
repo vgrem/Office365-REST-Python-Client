@@ -9,7 +9,6 @@ from office365.sharepoint.portal.SiteStatus import SiteStatus
 from settings import settings
 
 
-
 def load_current_user(ctx):
     current_user = ctx.web.currentUser
     ctx.load(current_user)

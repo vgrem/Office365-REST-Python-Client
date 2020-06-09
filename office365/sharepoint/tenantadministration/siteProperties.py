@@ -1,0 +1,19 @@
+from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.base_entity import BaseEntity
+
+
+class SiteProperties(BaseEntity):
+
+    def __init__(self, context):
+        super().__init__(context, None, "Microsoft.Online.SharePoint.TenantAdministration")
+
+    def set_property(self, name, value, persist_changes=True):
+        super(SiteProperties, self).set_property(name, value, persist_changes)
+        # fallback: create a new resource path
+        if name == "Url" and self._resource_path is None:
+            site_ctx = self.context.clone(value)
+            target_site = site_ctx.site
+            site_ctx.load(target_site)
+            site_ctx.execute_query()
+            self._resource_path = ResourcePathServiceOperation(
+                "getById", [target_site.properties['Id']], self._parent_collection.resource_path)

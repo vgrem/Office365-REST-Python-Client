@@ -1,5 +1,19 @@
 from office365.runtime.client_object import ClientObject
+from office365.runtime.client_result import ClientResult
+from office365.runtime.serviceOperationQuery import ServiceOperationQuery
+from office365.sharepoint.basePermissions import BasePermissions
+from office365.sharepoint.base_entity import BaseEntity
 
 
-class SecurableObject(ClientObject):
+class SecurableObject(BaseEntity):
     """An object that can be assigned security permissions."""
+
+    def get_user_effective_permissions(self, user_name):
+        """
+
+        :type user_name: str
+        """
+        result = ClientResult(BasePermissions())
+        qry = ServiceOperationQuery(self, "getUserEffectivePermissions", [user_name], None, None, result)
+        self.context.add_query(qry)
+        return result

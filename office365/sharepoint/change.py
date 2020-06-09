@@ -1,5 +1,5 @@
-from office365.runtime.client_object import ClientObject
+from office365.sharepoint.base_entity import BaseEntity
 
 
-class Change(ClientObject):
+class Change(BaseEntity):
     pass

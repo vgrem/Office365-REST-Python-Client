@@ -2,6 +2,7 @@ from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_query import CreateEntityQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.field import Field
+from office365.sharepoint.field_creation_information import FieldCreationInformation
 
 
 class FieldCollection(ClientObjectCollection):
@@ -12,6 +13,7 @@ class FieldCollection(ClientObjectCollection):
 
     def add(self, field_creation_information):
         """Adds a field to the field collection.
+
         :type field_creation_information: FieldCreationInformation
         """
         field = Field(self.context)

@@ -1,15 +1,10 @@
-from office365.runtime.client_object import ClientObject
-from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery
+from office365.runtime.client_query import DeleteEntityQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.base_entity import BaseEntity
 
 
-class Field(ClientObject):
+class Field(BaseEntity):
     """Represents a field in a SharePoint Web site"""
-
-    def update(self):
-        """Update the field."""
-        qry = UpdateEntityQuery(self)
-        self.context.add_query(qry)
 
     def delete_object(self):
         """Deletes the field."""

@@ -5,6 +5,7 @@ from office365.runtime.resource_path_service_operation import ResourcePathServic
 from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.basePermissions import BasePermissions
 from office365.sharepoint.changeCollection import ChangeCollection
+from office365.sharepoint.content_type_collection import ContentTypeCollection
 from office365.sharepoint.field_collection import FieldCollection
 from office365.sharepoint.file import File
 from office365.sharepoint.folder import Folder
@@ -78,6 +79,25 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         self.remove_from_parent_collection()
 
+    @staticmethod
+    def create_anonymous_link(context, url, is_edit_link):
+        """Create an anonymous link which can be used to access a document without needing to authenticate.
+
+        :param bool is_edit_link: If true, the link will allow the guest user edit privileges on the item.
+        :param str url: The URL of the site, with the path of the object in SharePoint represented as query
+        string parameters
+        :param office365.sharepoint.client_context.ClientContext context: client context
+        """
+        result = ClientResult(bool)
+        payload = {
+           "url": context.base_url + url,
+           "isEditLink": is_edit_link
+        }
+        qry = ServiceOperationQuery(context.web, "CreateAnonymousLink", None, payload, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
+
     def get_file_by_server_relative_url(self, url):
         """Returns the file object located at the specified server-relative URL.
         :type url: str
@@ -142,7 +162,9 @@ class Web(SecurableObject):
     def get_changes(self, query):
         """Returns the collection of all changes from the change log that have occurred within the scope of the site,
         based on the specified query.
-        :type query: ChangeQuery"""
+
+        :param office365.sharepoint.changeQuery.ChangeQuery query: Specifies which changes to return
+        """
         changes = ChangeCollection(self.context)
         qry = ServiceOperationQuery(self, "getChanges", None, query, "query", changes)
         self.context.add_query(qry)
@@ -241,6 +263,14 @@ class Web(SecurableObject):
             return self.properties['Fields']
         else:
             return FieldCollection(self.context, ResourcePath("Fields", self.resource_path))
+
+    @property
+    def contentTypes(self):
+        """Gets the collection of content types for the Web site."""
+        if self.is_property_available('ContentTypes'):
+            return self.properties['ContentTypes']
+        else:
+            return ContentTypeCollection(self.context, ResourcePath("ContentTypes", self.resource_path))
 
     @property
     def url(self):

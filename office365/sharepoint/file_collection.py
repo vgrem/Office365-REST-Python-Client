@@ -2,7 +2,8 @@ from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.file import File
-from office365.sharepoint.upload_session import UploadSession
+from office365.sharepoint.actions.create_file import CreateFileQuery
+from office365.sharepoint.actions.upload_session import UploadSessionQuery
 
 
 class FileCollection(ClientObjectCollection):
@@ -16,29 +17,21 @@ class FileCollection(ClientObjectCollection):
 
         :param str source_path: path where file to upload resides
         :param int chunk_size: upload chunk size
-        :param (int)->None or None chunk_uploaded: uploaded event
-        :return: office365.sharepoint.file.File
+        :param (long)->None or None chunk_uploaded: uploaded event
+        :rtype: office365.sharepoint.file.File
         """
-        session = UploadSession(source_path, chunk_size, chunk_uploaded)
-        session.build_query(self)
-        return session.file
+        qry = UploadSessionQuery(self, source_path, chunk_size, chunk_uploaded)
+        self.context.add_query(qry)
+        return qry.return_type
 
     def add(self, file_creation_information):
         """Creates a File resource
 
         :type file_creation_information: office365.sharepoint.file_creation_information.FileCreationInformation
         """
-        target_file = File(self.context)
-        self.add_child(target_file)
-        qry = ServiceOperationQuery(self,
-                                    "add",
-                                    {
-                                        "overwrite": file_creation_information.overwrite,
-                                        "url": file_creation_information.url
-                                    },
-                                    file_creation_information.content, None, target_file)
+        qry = CreateFileQuery(self, file_creation_information)
         self.context.add_query(qry)
-        return target_file
+        return qry.return_type
 
     def add_template_file(self, url_of_file, template_file_type):
         """Adds a ghosted file to an existing list or document library.

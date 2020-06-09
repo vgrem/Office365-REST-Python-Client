@@ -2,6 +2,7 @@ import os
 
 from office365.sharepoint.file import File
 from office365.sharepoint.list import List
+from office365.sharepoint.web import Web
 from tests import random_seed
 from tests.sharepoint.sharepoint_case import SPTestCase
 from tests.sharepoint.test_methods import (
@@ -44,7 +45,7 @@ class TestSharePointFile(SPTestCase):
         cls.target_list.delete_object()
         cls.client.execute_query()
 
-    def test1_upload_file(self):
+    def test1_upload_files(self):
         for entry in self.file_entries:
             path = "{0}/../data/{1}".format(os.path.dirname(__file__), entry["Name"])
             if entry["Type"] == "Binary":
@@ -55,18 +56,34 @@ class TestSharePointFile(SPTestCase):
             self.client.execute_query()
             self.assertEqual(uploaded_file.properties["Name"], entry["Name"])
 
-    def test2_list_files(self):
+    def test2_upload_large_file(self):
+        path = "{0}/../data/big_buck_bunny.mp4".format(os.path.dirname(__file__))
+        file_size = os.path.getsize(path)
+        size_1mb = 1000000
+        result_file = self.__class__.target_list.rootFolder.files.create_upload_session(path, size_1mb)
+        self.client.execute_query()
+        self.assertEqual(file_size, int(result_file.length))
+
+    def test3_get_file(self):
         files = self.__class__.target_list.rootFolder.files.top(1)
         self.client.load(files)
         self.client.execute_query()
-        files_items = list(files)
-        self.assertEqual(len(files_items), 1)
-        first_item = files[0].listItemAllFields
-        self.client.load(first_item, ["File"])
-        self.client.execute_query()
-        self.assertIsNotNone(first_item.file)
+        self.assertEqual(len(files), 1)
+        self.__class__.target_file = files[0]
 
-    def test3_update_file_content(self):
+    def test4_create_file_anon_link(self):
+        file_url = self.__class__.target_file.serverRelativeUrl
+        result = Web.create_anonymous_link(self.client, file_url, False)
+        self.client.execute_query()
+        self.assertIsNotNone(result.value)
+
+    def test5_file_metadata(self):
+        list_item = self.__class__.target_file.listItemAllFields
+        self.client.load(list_item, ["File"])
+        self.client.execute_query()
+        self.assertIsNotNone(list_item.file)
+
+    def test6_update_file_content(self):
         """Test file upload operation"""
         files = self.__class__.target_list.rootFolder.files
         self.client.load(files)
@@ -76,26 +93,21 @@ class TestSharePointFile(SPTestCase):
                                         self.content_placeholder)
             self.assertTrue(response.ok)
 
-    def test4_update_file_metadata(self):
+    def test7_update_file_metadata(self):
         """Test file update metadata"""
-        files = self.__class__.target_list.rootFolder.files.top(1)
-        self.client.load(files)
-        self.client.execute_query()
-        first_file = files[0]
-        self.__class__.target_file = first_file
-        list_item = first_file.listItemAllFields  # get metadata
+        list_item = self.__class__.target_file.listItemAllFields  # get metadata
         list_item.set_property('Title', 'Updated')
         list_item.update()
         self.client.execute_query()
 
-    def test5_get_file_versions(self):
+    def test8_get_file_versions(self):
         """Test file update metadata"""
         file_with_versions = self.__class__.target_file.expand(["Versions"])
         self.client.load(file_with_versions)
         self.client.execute_query()
         self.assertGreater(len(file_with_versions.versions), 0)
 
-    def test6_download_file(self):
+    def test9_download_file(self):
         """Test file upload operation"""
         files = self.__class__.target_list.rootFolder.files
         self.client.load(files)
@@ -105,7 +117,7 @@ class TestSharePointFile(SPTestCase):
             enc_content = normalize_response(content)
             self.assertEqual(enc_content, self.content_placeholder)
 
-    def test7_copy_file(self):
+    def test_10_copy_file(self):
         files = self.__class__.target_list.rootFolder.files
         self.client.load(files)
         self.client.execute_query()
@@ -121,7 +133,7 @@ class TestSharePointFile(SPTestCase):
             self.client.execute_query()
             self.assertEqual(new_file_url, moved_file.properties["ServerRelativeUrl"])
 
-    def test8_move_file(self):
+    def test_11_move_file(self):
         files = self.__class__.target_list.rootFolder.files
         self.client.load(files)
         self.client.execute_query()
@@ -137,7 +149,7 @@ class TestSharePointFile(SPTestCase):
             self.client.execute_query()
             self.assertEqual(new_file_url, moved_file.properties["ServerRelativeUrl"])
 
-    def test9_recycle_first_file(self):
+    def test_12_recycle_first_file(self):
         """Test file upload operation"""
         files = self.__class__.target_list.rootFolder.files
         self.client.load(files)
@@ -152,7 +164,7 @@ class TestSharePointFile(SPTestCase):
             self.client.execute_query()
             self.assertEqual(len(files) - 1, len(files_after))
 
-    def test10_create_template_file(self):
+    def test_13_create_template_file(self):
         target_folder = self.__class__.target_list.rootFolder
         self.client.load(target_folder)
         self.client.execute_query()
@@ -161,7 +173,7 @@ class TestSharePointFile(SPTestCase):
         self.client.execute_query()
         self.assertEqual(file_new.properties["ServerRelativeUrl"], file_url)
 
-    def test11_delete_file(self):
+    def test_14_delete_file(self):
         files_to_delete = self.__class__.target_list.rootFolder.files
         self.client.load(files_to_delete)
         self.client.execute_query()

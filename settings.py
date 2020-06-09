@@ -1,11 +1,11 @@
 import os
 
-secure_vars = os.environ['Office365_Python_Sdk_SecureVars'].split(';')
-company = os.environ.get('COMPANY', 'mediadev8')
+secure_vars = os.environ['office365_python_sdk_securevars'].split(';')
+tenant = os.environ.get('office365_python_sdk_tenant', 'mediadev8')
 
 settings = {
-    'url': 'https://{company}.sharepoint.com/'.format(company=company),
-    'tenant': '{company}.onmicrosoft.com'.format(company=company),
+    'url': 'https://{tenant}.sharepoint.com/'.format(tenant=tenant),
+    'tenant': '{tenant}.onmicrosoft.com'.format(tenant=tenant),
     'redirect_url': 'https://github.com/vgrem/Office365-REST-Python-Client/',
     'user_credentials': {
         'username': secure_vars[0],

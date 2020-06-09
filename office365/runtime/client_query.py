@@ -10,7 +10,7 @@ class ClientQuery(object):
         """
 
         :type binding_type: ClientObject
-        :type parameter_type:  ClientObject or ClientValueObject or dict or None
+        :type parameter_type:  ClientObject or ClientValueObject or dict or bytes or None
         :type parameter_name:  str or None
         :type return_type:  ClientObject or ClientResult or ClientValueObject or None
         """

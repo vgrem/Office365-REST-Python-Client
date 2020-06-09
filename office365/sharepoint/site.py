@@ -17,7 +17,7 @@ class Site(ClientObject):
     @staticmethod
     def exists(context, url):
         """Determine whether site exists
-        :type context: ClientRuntimeContext
+        :type context: office365.sharepoint.client_context.ClientContext
         :type url: str
         """
         result = ClientResult(bool)

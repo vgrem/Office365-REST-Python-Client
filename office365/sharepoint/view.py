@@ -1,18 +1,18 @@
-from office365.runtime.client_object import ClientObject
-from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
+from office365.runtime.client_query import DeleteEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.serviceOperationQuery import ServiceOperationQuery
+from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.camlQuery import CamlQuery
 from office365.sharepoint.view_field_collection import ViewFieldCollection
 from office365.sharepoint.listItem_collection import ListItemCollection
 
 
-class View(ClientObject):
+class View(BaseEntity):
     """Specifies a list view."""
 
     def __init__(self, context, resource_path=None, parent_list=None):
-        super(View, self).__init__(context, resource_path, None, None)
+        super(View, self).__init__(context, resource_path)
         self._parent_list = parent_list
 
     def get_items(self):
@@ -30,11 +30,6 @@ class View(ClientObject):
         """
         caml_query = CamlQuery.parse(target_view.viewQuery)
         qry = ServiceOperationQuery(self._parent_list, "GetItems", None, caml_query, "query", self._parent_list.items)
-        self.context.add_query(qry)
-
-    def update(self):
-        """Update view"""
-        qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
 
     def delete_object(self):

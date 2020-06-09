@@ -1,3 +1,4 @@
+import copy
 import adal
 from office365.runtime.auth.ClientCredential import ClientCredential
 from office365.runtime.auth.UserCredential import UserCredential
@@ -68,6 +69,16 @@ class ClientContext(ClientRuntimeContext):
             thumbprint)
         return ctx
 
+    def clone(self, url):
+        """
+
+        :param str url: Site Url
+        :return ClientContext
+        """
+        ctx_copy = copy.deepcopy(self)
+        ctx_copy.__base_url = url
+        return ctx_copy
+
     def authenticate_request(self, request):
         if self._accessToken:
             request.set_header('Authorization', 'Bearer {0}'.format(self._accessToken["accessToken"]))
@@ -127,4 +138,4 @@ class ClientContext(ClientRuntimeContext):
 
     @property
     def service_root_url(self):
-        return super(ClientContext, self).service_root_url
+        return '/'.join(s.strip('/') for s in [self.__base_url, '_api']) + '/'

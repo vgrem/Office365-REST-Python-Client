@@ -1,8 +1,8 @@
 from functools import partial
-from office365.runtime.client_object import ClientObject
 from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, CreateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.file_creation_information import FileCreationInformation
 from office365.sharepoint.listitem import ListItem
 
@@ -43,7 +43,7 @@ def _add_sub_folder(new_folder_name, target_folder, parent_folder):
     parent_folder.context.add_query(qry)
 
 
-class Folder(ClientObject):
+class Folder(BaseEntity):
     """Represents a folder in a SharePoint Web site."""
 
     def add(self, name):
@@ -64,10 +64,6 @@ class Folder(ClientObject):
         item.set_property('Title', name)
         item.set_property('FileLeafRef', name)
         qry = UpdateEntityQuery(item)
-        self.context.add_query(qry)
-
-    def update(self):
-        qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
 
     def delete_object(self):
