@@ -3,6 +3,8 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.serviceOperationQuery import ServiceOperationQuery
+from office365.sharepoint.actions.getWebUrlFromPage import GetWebUrlFromPageUrlQuery
+from office365.sharepoint.regionalSettings import RegionalSettings
 from office365.sharepoint.basePermissions import BasePermissions
 from office365.sharepoint.changeCollection import ChangeCollection
 from office365.sharepoint.content_type_collection import ContentTypeCollection
@@ -33,6 +35,16 @@ class Web(SecurableObject):
             resource_path = ResourcePath("Web")
         super(Web, self).__init__(context, resource_path)
         self._web_url = None
+
+    @staticmethod
+    def get_web_url_from_page_url(context, page_full_url):
+        """Determine whether site exists
+        :type context: office365.sharepoint.client_context.ClientContext
+        :type page_full_url: str
+        """
+        qry = GetWebUrlFromPageUrlQuery(context, page_full_url)
+        context.add_query(qry)
+        return qry.return_type
 
     def get_sub_webs_filtered_for_current_user(self, query):
         """Returns a collection of objects that contain metadata about subsites of the current site (2) in which the
@@ -287,6 +299,14 @@ class Web(SecurableObject):
             return self.properties['WebTemplate']
         else:
             return None
+
+    @property
+    def regionalSettings(self):
+        """Gets the regional settings that are currently implemented on the website."""
+        if self.is_property_available('RegionalSettings'):
+            return self.properties['RegionalSettings']
+        else:
+            return RegionalSettings(self.context, ResourcePath("RegionalSettings", self.resource_path))
 
     def set_property(self, name, value, persist_changes=True):
         super(Web, self).set_property(name, value, persist_changes)

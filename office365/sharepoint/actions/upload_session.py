@@ -63,7 +63,7 @@ class UploadSessionQuery(CreateFileQuery):
             else:
                 self._return_type = target_file.finish_upload(self._upload_id, f_pos, piece)
             f_pos += len(piece)
-
+        fh.close()
         if self._chunk_uploaded is not None:
             self._binding_type.context.afterExecuteOnce += self._process_chunk_upload
 

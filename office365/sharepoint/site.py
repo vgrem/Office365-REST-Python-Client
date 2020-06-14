@@ -15,6 +15,23 @@ class Site(ClientObject):
         super(Site, self).__init__(context, ResourcePath("Site", None))
 
     @staticmethod
+    def get_url_by_id(context, site_id, stop_redirect=False):
+        """Gets Site Url By Id
+        :type context: office365.sharepoint.client_context.ClientContext
+        :type site_id: str
+        :type stop_redirect: bool
+        """
+        result = ClientResult(str)
+        payload = {
+            "id": site_id,
+            "stopRedirect": stop_redirect
+        }
+        qry = ServiceOperationQuery(context.site, "GetUrlById", None, payload, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
+
+    @staticmethod
     def exists(context, url):
         """Determine whether site exists
         :type context: office365.sharepoint.client_context.ClientContext

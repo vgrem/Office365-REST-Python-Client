@@ -17,8 +17,8 @@ class ClientRuntimeContext(object):
         :type service_root_url: str
         :type auth_context: AuthenticationContext or None
         """
-        self.__service_root_url = service_root_url
-        self.__auth_context = auth_context
+        self._service_root_url = service_root_url
+        self._auth_context = auth_context
         self.afterExecuteOnce = EventHandler(True)
 
     @abc.abstractmethod
@@ -33,7 +33,7 @@ class ClientRuntimeContext(object):
         return len(self.get_pending_request().queries) > 0
 
     def authenticate_request(self, request):
-        self.__auth_context.authenticate_request(request)
+        self._auth_context.authenticate_request(request)
 
     def load(self, client_object, properties_to_retrieve=None):
         """Prepare query
@@ -64,6 +64,12 @@ class ClientRuntimeContext(object):
         """
         self.get_pending_request().add_query(query)
 
+    def add_query_first(self, query):
+        self.get_pending_request().queries.insert(0, query)
+
+    def clear_queries(self):
+        self.get_pending_request().queries.clear()
+
     @property
     def service_root_url(self):
-        return self.__service_root_url
+        return self._service_root_url

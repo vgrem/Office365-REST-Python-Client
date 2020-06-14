@@ -11,9 +11,10 @@ class SiteProperties(BaseEntity):
         super(SiteProperties, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "Url" and self._resource_path is None:
-            site_ctx = self.context.clone(value)
-            target_site = site_ctx.site
-            site_ctx.load(target_site)
-            site_ctx.execute_query()
-            self._resource_path = ResourcePathServiceOperation(
-                "getById", [target_site.properties['Id']], self._parent_collection.resource_path)
+            pass
+            #site_ctx = self.context.clone(value)
+            #target_site = site_ctx.site
+            #site_ctx.load(target_site)
+            #site_ctx.execute_query()
+            #self._resource_path = ResourcePathServiceOperation(
+            #    "getById", [target_site.properties['Id']], self._parent_collection.resource_path)

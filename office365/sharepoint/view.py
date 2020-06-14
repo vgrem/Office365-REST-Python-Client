@@ -20,17 +20,18 @@ class View(BaseEntity):
 
         :rtype: ListItemCollection
         """
-        self.ensure_property("viewQuery", self._get_items_inner)
+
+        def _get_items_inner(target_view):
+            """
+
+            :type target_view: View
+            """
+            caml_query = CamlQuery.parse(target_view.viewQuery)
+            qry = ServiceOperationQuery(self._parent_list, "GetItems", None, caml_query, "query",
+                                        self._parent_list.items)
+            self.context.add_query(qry)
+        self.ensure_property("viewQuery", _get_items_inner)
         return self._parent_list.items
-
-    def _get_items_inner(self, target_view):
-        """
-
-        :type target_view: View
-        """
-        caml_query = CamlQuery.parse(target_view.viewQuery)
-        qry = ServiceOperationQuery(self._parent_list, "GetItems", None, caml_query, "query", self._parent_list.items)
-        self.context.add_query(qry)
 
     def delete_object(self):
         """The recommended way to delete a view is to send a DELETE request to the View resource endpoint, as shown

@@ -1,4 +1,4 @@
-# installing to virtualenv
+# Installing to virtualenv
 In the pipenv/poetry era one would already forget these commands...
 
 ```bash
@@ -8,7 +8,7 @@ $ pip install -r requirements.txt
 $ pip install -r requirements-dev.txt
 ```
 
-# running tests
+# Running tests
 
 Most of the tests are end-to-end - connecting to real sites (not mocked). So one has to configure his/her office/sharepoint credentials. To do so, create a file ```.env``` like this (replace the bracketed values by your values):
 

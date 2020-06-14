@@ -5,12 +5,18 @@ from office365.runtime.odata.v4_json_format import V4JsonFormat
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.http.http_method import HttpMethod
 from office365.graph.directory.user import User
+from office365.runtime.auth.authentication_context import AuthenticationContext
 
 
 class OutlookClient(ClientRuntimeContext):
-    """Office365 Outlook client context (deprecated, prefer GraphClient instead)"""
 
     def __init__(self, ctx_auth):
+        """
+        Office365 Outlook client context
+        Status: deprecated, prefer GraphClient instead
+
+        :type ctx_auth: AuthenticationContext
+        """
         self.__service_root_url = "https://outlook.office365.com/api/v1.0/"
         super(OutlookClient, self).__init__(self.__service_root_url, ctx_auth)
         self._pendingRequest = ODataRequest(self, V4JsonFormat("minimal"))

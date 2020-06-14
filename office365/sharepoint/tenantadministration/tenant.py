@@ -3,6 +3,9 @@ from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.tenantadministration.siteProperties import SiteProperties
 from office365.sharepoint.tenantadministration.sitePropertiesCollection import SitePropertiesCollection
+from office365.sharepoint.tenantadministration.sitePropertiesEnumerableFilter import SitePropertiesEnumerableFilter
+from office365.sharepoint.tenantadministration.spoOperation import SpoOperation
+from office365.sharepoint.tenantadministration.siteCreationProperties import SiteCreationProperties
 
 
 class Tenant(BaseEntity):
@@ -10,6 +13,27 @@ class Tenant(BaseEntity):
     def __init__(self, context):
         super().__init__(context, ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant"),
                          "Microsoft.Online.SharePoint.TenantAdministration")
+
+    def create_site(self, site_create_props):
+        """Queues a site collection for creation with the specified properties.
+
+        :param SiteCreationProperties site_create_props: A SiteCreationProperties object that contains the initial properties
+        of the new site collection.
+        """
+        result = SpoOperation(self.context)
+        qry = ServiceOperationQuery(self, "CreateSite", None, site_create_props, "siteCreationProperties", result)
+        self.context.add_query(qry)
+        return result
+
+    def remove_site(self, site_url):
+        """Deletes the site with the specified URL
+
+        :param str site_url: A string representing the URL of the site.
+        """
+        result = SpoOperation(self.context)
+        qry = ServiceOperationQuery(self, "removeSite", [site_url], None, None, result)
+        self.context.add_query(qry)
+        return result
 
     def get_site_properties_by_url(self, url, include_detail):
         """
@@ -26,6 +50,22 @@ class Tenant(BaseEntity):
         qry = ServiceOperationQuery(self, "getSitePropertiesByUrl", None, payload, None, site_props)
         self.context.add_query(qry)
         return site_props
+
+    def get_site_properties_from_sharepoint_by_filters(self, _filter, start_index=0, include_detail=False):
+        """
+
+        :param bool include_detail:
+        :param int start_index:
+        :param str _filter:
+        """
+        site_props_col = SitePropertiesCollection(self.context)
+        qry = ServiceOperationQuery(self, "getSitePropertiesFromSharePointByFilters",
+                                    None,
+                                    SitePropertiesEnumerableFilter(_filter, start_index, include_detail),
+                                    "speFilter",
+                                    site_props_col)
+        self.context.add_query(qry)
+        return site_props_col
 
     @property
     def _sites(self):

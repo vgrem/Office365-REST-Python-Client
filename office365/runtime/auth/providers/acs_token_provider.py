@@ -1,46 +1,56 @@
 import requests
-
 import office365.logger
 from office365.runtime.auth.base_token_provider import BaseTokenProvider
+from office365.runtime.auth.tokenResponse import TokenResponse
 
 
 class ACSTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
-    """ Provider to acquire the access token from a Microsoft Azure Access Control Service (ACS)"""
 
     def __init__(self, url, client_id, client_secret):
+        """
+        Provider to acquire the access token from a Microsoft Azure Access Control Service (ACS)
+
+        :type client_secret: str
+        :type client_id: str
+        :type url: str
+        """
+        self.token = TokenResponse()
         self.url = url
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_url = None
-        self.access_token = None
         self.error = None
         self.SharePointPrincipal = "00000003-0000-0ff1-ce00-000000000000"
 
+    def is_authenticated(self):
+        return self.token and self.token.is_valid
+
     def acquire_token(self, **kwargs):
         try:
-            realm = self.get_realm_from_target_url()
+            realm = self._get_realm_from_target_url()
             try:
                 from urlparse import urlparse  # Python 2.X
             except ImportError:
                 from urllib.parse import urlparse  # Python 3+
             url_info = urlparse(self.url)
-            self.access_token = self.get_app_only_access_token(url_info.hostname, realm)
-            return True
+            self.token = self.get_app_only_access_token(url_info.hostname, realm)
+            return self.token.is_valid
         except requests.exceptions.RequestException as e:
             self.error = "Error: {}".format(e)
             return False
 
-    def get_realm_from_target_url(self):
-        response = requests.head(url=self.url, headers={'Authorization': 'Bearer'})
-        return self.process_realm_response(response)
-
     def get_app_only_access_token(self, target_host, target_realm):
         resource = self.get_formatted_principal(self.SharePointPrincipal, target_host, target_realm)
-        client_id = self.get_formatted_principal(self.client_id, None, target_realm)
+        principal_id = self.get_formatted_principal(self.client_id, None, target_realm)
         sts_url = self.get_security_token_service_url(target_realm)
-        oauth2_request = self.create_access_token_request(client_id, self.client_secret, resource)
-        response = requests.post(url=sts_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=oauth2_request)
-        return response.json()
+        oauth2_request = self.create_access_token_request(principal_id, self.client_secret, resource)
+        response = requests.post(url=sts_url, headers={'Content-Type': 'application/x-www-form-urlencoded'},
+                                 data=oauth2_request)
+        return TokenResponse.from_json(response.content)
+
+    def _get_realm_from_target_url(self):
+        response = requests.head(url=self.url, headers={'Authorization': 'Bearer'})
+        return self.process_realm_response(response)
 
     @staticmethod
     def process_realm_response(response):
@@ -73,7 +83,7 @@ class ACSTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
         return data
 
     def get_authorization_header(self):
-        return 'Bearer {0}'.format(self.access_token["access_token"])
+        return 'Bearer {0}'.format(self.token.accessToken)
 
     def get_last_error(self):
         return self.error

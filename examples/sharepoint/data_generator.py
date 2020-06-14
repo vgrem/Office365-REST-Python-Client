@@ -1,6 +1,6 @@
 from settings import settings
 from faker import Faker
-from office365.runtime.auth.UserCredential import UserCredential
+from office365.runtime.auth.userCredential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.list_creation_information import ListCreationInformation
 from office365.sharepoint.list_template_type import ListTemplateType

@@ -1,4 +1,3 @@
-from functools import partial
 from office365.runtime.client_query import DeleteEntityQuery
 from office365.runtime.client_result import ClientResult
 from office365.runtime.resource_path import ResourcePath
@@ -39,6 +38,19 @@ class AbstractFile(BaseEntity):
 class File(AbstractFile):
     """Represents a file in a SharePoint Web site that can be a Web Part Page, an item in a document library,
     or a file in a folder."""
+
+    @staticmethod
+    def from_url(abs_url):
+        """
+        Retrieves a File from absolute url
+
+        :type abs_url: str
+        """
+        from office365.sharepoint.client_context import ClientContext
+        ctx = ClientContext.from_url(abs_url)
+        file_relative_url = abs_url.replace(ctx.base_url, "")
+        file = ctx.web.get_file_by_server_relative_url(file_relative_url)
+        return file
 
     def approve(self, comment):
         """Approves the file submitted for content approval with the specified comment.
@@ -251,8 +263,10 @@ class File(AbstractFile):
     def open_binary(ctx, server_relative_url):
         """
         Returns the file object located at the specified server-relative URL.
+
         :type ctx: ClientContext
         :type server_relative_url: str
+        :return Response
         """
         url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(ctx.service_root_url, server_relative_url)
         request = RequestOptions(url)
@@ -261,13 +275,17 @@ class File(AbstractFile):
         return response
 
     def download(self, file_object):
-        """Download a file content"""
-        self.ensure_property("ServerRelativeUrl", partial(self._download_inner, file_object))
+        """Download a file content
+        :type file_object: typing.IO
+        """
 
-    def _download_inner(self, file_object, target_file):
-        file_url = target_file.properties['ServerRelativeUrl']
-        qry = DownloadFileQuery(self.context.web, file_url, file_object)
-        self.context.add_query(qry)
+        def _download_inner(target_file):
+            file_url = target_file.properties['ServerRelativeUrl']
+            qry = DownloadFileQuery(self.context.web, file_url, file_object)
+            self.context.add_query(qry)
+
+        self.ensure_property("ServerRelativeUrl", _download_inner)
+        return self
 
     @property
     def listItemAllFields(self):

@@ -1,8 +1,10 @@
 import copy
 import adal
-from office365.runtime.auth.ClientCredential import ClientCredential
-from office365.runtime.auth.UserCredential import UserCredential
+from office365.runtime.auth.clientCredential import ClientCredential
+from office365.runtime.auth.userCredential import UserCredential
 from office365.runtime.auth.authentication_context import AuthenticationContext
+from office365.runtime.auth.providers.saml_token_provider import resolve_base_url
+from office365.runtime.auth.tokenResponse import TokenResponse
 from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.sharepoint.context_web_information import ContextWebInformation
@@ -28,67 +30,101 @@ def get_tenant_info(url):
 class ClientContext(ClientRuntimeContext):
     """SharePoint client context"""
 
-    def __init__(self, base_url, auth_context):
+    def __init__(self, base_url, auth_context=None):
+        """
+        :type base_url: str
+        :type auth_context: AuthenticationContext or None
+        """
         if base_url.endswith("/"):
             base_url = base_url[:len(base_url) - 1]
         super(ClientContext, self).__init__(base_url + "/_api/", auth_context)
         self.__web = None
         self.__site = None
-        self.__base_url = base_url
+        self._base_url = base_url
         self._contextWebInformation = None
         self._pendingRequest = ODataRequest(self, JsonLightFormat(ODataMetadataLevel.Verbose))
-        self._pendingRequest.beforeExecute += self._build_specific_query
-        self._accessToken = None
+        self._pendingRequest.beforeExecute += self._build_modification_query
 
-    @classmethod
-    def connect_with_credentials(cls, base_url, credentials):
-        """Creates authenticated SharePoint client context"""
-        ctx_auth = AuthenticationContext(url=base_url)
-        if isinstance(credentials, ClientCredential):
-            ctx_auth.acquire_token_for_app(client_id=credentials.clientId, client_secret=credentials.clientSecret)
-        elif isinstance(credentials, UserCredential):
-            ctx_auth.acquire_token_for_user(username=credentials.userName, password=credentials.password)
-        else:
-            raise ValueError("Unknown credential type")
-        return cls(base_url, ctx_auth)
+    @staticmethod
+    def from_url(abs_url):
+        """
+        Constructs ClientContext from absolute Url
 
-    @classmethod
-    def connect_with_certificate(cls, base_url, client_id, thumbprint, cert_path):
-        """Gets a token for a given resource via certificate credentials"""
-        tenant_info = get_tenant_info(base_url)
-        authority_url = 'https://login.microsoftonline.com/{0}'.format(tenant_info['name'])
-        auth_ctx = adal.AuthenticationContext(authority_url)
-        resource = tenant_info['base_url']
-        with open(cert_path, 'r') as file:
-            key = file.read()
-        ctx = ClientContext(base_url, None)
-        ctx._accessToken = auth_ctx.acquire_token_with_client_certificate(
-            resource,
-            client_id,
-            key,
-            thumbprint)
+        :param str abs_url: Absolute Url to resource
+        :return: ClientContext
+        """
+        base_url = resolve_base_url(abs_url)
+        ctx = ClientContext(base_url)
+        Web.get_web_url_from_page_url(ctx, abs_url)
+
+        def _init_context_for_web(result):
+            ctx._base_url = result.value
+
+        ctx.afterExecuteOnce += _init_context_for_web
         return ctx
 
-    def clone(self, url):
+    @staticmethod
+    def connect_with_credentials(base_url, credentials):
+        """
+        Creates authenticated SharePoint context via user or client credentials
+
+        :param str base_url: Url to Site or Web
+        :param ClientCredential or UserCredential credentials: Credentials object """
+        ctx = ClientContext(base_url).with_credentials(credentials)
+        ctx.authentication_context.acquire_token()
+        return ctx
+
+    @staticmethod
+    def connect_with_certificate(base_url, client_id, thumbprint, cert_path):
+        """Creates authenticated SharePoint context via certificate credentials
+
+        :param str cert_path: Path to A PEM encoded certificate private key.
+        :param str thumbprint: Hex encoded thumbprint of the certificate.
+        :param str client_id: The OAuth client id of the calling application.
+        :param str base_url: Url to Site or Web
         """
 
-        :param str url: Site Url
-        :return ClientContext
+        def acquire_token():
+            tenant_info = get_tenant_info(base_url)
+            authority_url = 'https://login.microsoftonline.com/{0}'.format(tenant_info['name'])
+            auth_ctx = adal.AuthenticationContext(authority_url)
+            resource = tenant_info['base_url']
+            with open(cert_path, 'r') as file:
+                key = file.read()
+            json_token = auth_ctx.acquire_token_with_client_certificate(
+                resource,
+                client_id,
+                key,
+                thumbprint)
+            return TokenResponse(**json_token)
+
+        ctx_auth = AuthenticationContext(url=base_url)
+        ctx_auth.set_token(acquire_token())
+        ctx = ClientContext(base_url, ctx_auth)
+        return ctx
+
+    def with_credentials(self, credentials):
         """
-        ctx_copy = copy.deepcopy(self)
-        ctx_copy.__base_url = url
-        return ctx_copy
+        Sets credentials
+
+        :type credentials: UserCredential or ClientCredential
+        """
+        self._auth_context = AuthenticationContext(url=self._base_url, credentials=credentials)
+        return self
 
     def authenticate_request(self, request):
-        if self._accessToken:
-            request.set_header('Authorization', 'Bearer {0}'.format(self._accessToken["accessToken"]))
-        else:
-            super(ClientContext, self).authenticate_request(request)
+        if not self.authentication_context.is_authenticated:
+            self.authentication_context.acquire_token()
+
+        super(ClientContext, self).authenticate_request(request)
 
     def get_pending_request(self):
         return self._pendingRequest
 
     def ensure_form_digest(self, request_options):
+        """
+        :type request_options: RequestOptions
+        """
         if not self._contextWebInformation:
             self._contextWebInformation = ContextWebInformation()
             self.request_form_digest()
@@ -104,7 +140,24 @@ class ClientContext(ClientRuntimeContext):
         json_format.function_tag_name = "GetContextWebInformation"
         self.get_pending_request().map_json(json, self._contextWebInformation, json_format)
 
-    def _build_specific_query(self, request):
+    def clone(self, url):
+        """
+        Creates a clone of ClientContext
+
+        :param str url: Site Url
+        :return ClientContext
+        """
+        ctx = copy.deepcopy(self)
+        ctx._base_url = url
+        ctx.clear_queries()
+        return ctx
+
+    def _build_modification_query(self, request):
+        """
+        Constructs SharePoint specific modification OData request
+
+        :type request: RequestOptions
+        """
         query = self.get_pending_request().current_query
 
         if request.method == HttpMethod.Post:
@@ -134,8 +187,12 @@ class ClientContext(ClientRuntimeContext):
 
     @property
     def base_url(self):
-        return self.__base_url
+        return self._base_url
+
+    @property
+    def authentication_context(self):
+        return self._auth_context
 
     @property
     def service_root_url(self):
-        return '/'.join(s.strip('/') for s in [self.__base_url, '_api']) + '/'
+        return '/'.join(s.strip('/') for s in [self._base_url, '_api']) + '/'

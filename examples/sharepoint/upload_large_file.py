@@ -1,4 +1,4 @@
-from office365.runtime.auth.UserCredential import UserCredential
+from office365.runtime.auth.userCredential import UserCredential
 from settings import settings
 from office365.sharepoint.client_context import ClientContext
 
@@ -17,4 +17,4 @@ if __name__ == '__main__':
     result_file = ctx.web.get_folder_by_server_relative_url(target_url) \
         .files.create_upload_session(local_path, size_1Mb, print_upload_progress)
     ctx.execute_query()
-    print('File {0} has been uploaded successfully'.format(result_file.properties['ServerRelativeUrl']))
+    print('File {0} has been uploaded successfully'.format(result_file.serverRelativeUrl))

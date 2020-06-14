@@ -1,18 +1,17 @@
 import os
 import tempfile
 
-from office365.runtime.auth.ClientCredential import ClientCredential
+from office365.runtime.auth.clientCredential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
 from settings import settings
 
-ctx = ClientContext.connect_with_credentials("https://mediadev8.sharepoint.com/sites/team",
+ctx = ClientContext("https://mediadev8.sharepoint.com/sites/team").with_credentials(
                                              ClientCredential(settings['client_credentials']['client_id'],
                                                               settings['client_credentials']['client_secret']))
 
 # retrieve files from library
 source_folder = ctx.web.lists.get_by_title("Documents").rootFolder
 files = source_folder.files
-# items_for_files = source_library.items.filter("FSObjType eq 0").select(["File"]).expand(["File"])
 ctx.load(files)
 ctx.execute_query()
 download_path = tempfile.mkdtemp()

@@ -1,5 +1,5 @@
-from office365.runtime.auth.ClientCredential import ClientCredential
-from office365.runtime.auth.UserCredential import UserCredential
+from office365.runtime.auth.clientCredential import ClientCredential
+from office365.runtime.auth.userCredential import UserCredential
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_runtime_context import ClientRuntimeContext
