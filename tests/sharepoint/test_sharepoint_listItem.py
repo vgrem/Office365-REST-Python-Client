@@ -1,23 +1,23 @@
+from time import sleep
+
 from office365.sharepoint.list import List
 from tests import random_seed
 from tests.sharepoint.sharepoint_case import SPTestCase
 from office365.sharepoint.list_creation_information import ListCreationInformation
 from office365.sharepoint.list_template_type import ListTemplateType
-from tests.sharepoint.test_methods import ensure_list
 
 
 class TestSharePointListItem(SPTestCase):
-
     target_list = None  # type: List
 
     @classmethod
     def setUpClass(cls):
         super(TestSharePointListItem, cls).setUpClass()
-        cls.target_list = ensure_list(cls.client.web,
-                                      ListCreationInformation("Tasks",
-                                                              None,
-                                                              ListTemplateType.Tasks)
-                                      )
+        cls.target_list = cls.ensure_list(cls.client.web,
+                                          ListCreationInformation("Tasks",
+                                                                  None,
+                                                                  ListTemplateType.Tasks)
+                                          )
         cls.target_item_properties = {
             "Title": "Task %s" % random_seed,
             "Id": None
@@ -47,6 +47,7 @@ class TestSharePointListItem(SPTestCase):
         self.client.execute_query()
         last_updated = item_to_update.properties['Modified']
 
+        sleep(1)
         new_title = "Task item %s" % random_seed
         item_to_update.set_property('Title', new_title)
         item_to_update.update()

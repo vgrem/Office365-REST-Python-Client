@@ -120,7 +120,7 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
                 logger.error(self.error)
                 return None
             # 2. prepare & submit token request
-            self.__sts_profile.signInPage = '_vti_bin/idcrl.svc'
+            self.__sts_profile.signInPage = '_vti_bin/idcrl.svc/'
             self.__sts_profile.securityTokenServicePath = 'rst2.srf'
             template = self._prepare_request_from_template('RST2.xml', {
                 'auth_url': self.__sts_profile.authorityUrl,
@@ -198,7 +198,11 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
         return token.text
 
     def _acquire_authentication_cookie(self, security_token, federated=False):
-        """Retrieve auth cookie from STS"""
+        """Retrieve auth cookie from STS
+
+        :type federated: bool
+        :type security_token: str
+        """
         logger = self.logger(self._acquire_authentication_cookie.__name__)
         session = requests.session()
         logger.debug_secrets("session: %s\nsession.post(%s, data=%s)", session, self.__sts_profile.signin_page_url,
@@ -210,13 +214,12 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
                          headers={'Content-Type': 'application/x-www-form-urlencoded'})
         else:
             self._auth_cookies['SPOIDCRL'] = None
-            session.head(self.__sts_profile.signin_page_url,
-                         headers={
-                             'User-Agent': 'Office365 Python Client',
-                             'X-IDCRL_ACCEPTED': 't',
-                             'Authorization': 'BPOSIDCRL {0}'.format(security_token),
-                             'Content-Type': 'application/x-www-form-urlencoded'
-                         })
+            session.get(self.__sts_profile.signin_page_url,
+                        headers={
+                            'User-Agent': 'Office365 Python Client',
+                            'X-IDCRL_ACCEPTED': 't',
+                            'Authorization': 'BPOSIDCRL {0}'.format(security_token)
+                        })
         logger.debug_secrets("session.cookies: %s", session.cookies)
         cookies = requests.utils.dict_from_cookiejar(session.cookies)
         logger.debug_secrets("cookies: %s", cookies)

@@ -1,9 +1,10 @@
 from unittest import TestCase
-
 from office365.runtime.auth.clientCredential import ClientCredential
 from settings import settings
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.web import Web
+from office365.sharepoint.list_creation_information import ListCreationInformation
 
 
 class SPTestCase(TestCase):
@@ -24,3 +25,44 @@ class SPTestCase(TestCase):
     @property
     def credentials(self):
         return ClientCredential(self.client_id, self.client_secret)
+
+    @staticmethod
+    def create_list(web, list_properties):
+        """
+
+        :param Web web:
+        :param ListCreationInformation list_properties:
+        :return: List
+        """
+        ctx = web.context
+        list_obj = web.lists.add(list_properties)
+        ctx.execute_query()
+        return list_obj
+
+    @staticmethod
+    def ensure_list(web, list_properties):
+        """
+
+        :param Web web:
+        :param ListCreationInformation list_properties:
+        :return: List
+        """
+        ctx = web.context
+        lists = web.lists.filter("Title eq '{0}'".format(list_properties.Title))
+        ctx.load(lists)
+        ctx.execute_query()
+        if len(lists) == 1:
+            return lists[0]
+        return SPTestCase.create_list(web, list_properties)
+
+    @staticmethod
+    def read_file_as_text(path):
+        with open(path, 'r') as content_file:
+            file_content = content_file.read()
+        return file_content
+
+    @staticmethod
+    def read_file_as_binary(path):
+        with open(path, 'rb') as content_file:
+            file_content = content_file.read()
+        return file_content

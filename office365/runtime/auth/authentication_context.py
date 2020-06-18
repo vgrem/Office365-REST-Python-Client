@@ -12,7 +12,7 @@ class AuthenticationContext(BaseAuthenticationContext):
 
     def __init__(self, url, credentials=None):
         """
-        Authentication context for SharePoint Online/One Drive
+        Authentication context for SharePoint Online/OneDrive
 
         :param str url:  authority url
         :param ClientCredential or UserCredential credentials: credentials
@@ -33,9 +33,9 @@ class AuthenticationContext(BaseAuthenticationContext):
 
     def acquire_token(self):
         if isinstance(self.credentials, ClientCredential):
-            self.acquire_token_for_app(self.credentials.clientId, self.credentials.clientSecret)
+            return self.acquire_token_for_app(self.credentials.clientId, self.credentials.clientSecret)
         elif isinstance(self.credentials, UserCredential):
-            self.acquire_token_for_user(self.credentials.userName, self.credentials.password)
+            return self.acquire_token_for_user(self.credentials.userName, self.credentials.password)
         else:
             raise ValueError("Unknown credential type")
 
@@ -48,19 +48,30 @@ class AuthenticationContext(BaseAuthenticationContext):
         self.provider = SamlTokenProvider(self.url, username, password)
         if not self.provider.acquire_token():
             raise ValueError('Acquire token failed: {0}'.format(self.provider.error))
+        return True
 
     def acquire_token_for_app(self, client_id, client_secret):
         """Acquire token via client credentials (SharePoint App Principal)"""
         self.provider = ACSTokenProvider(self.url, client_id, client_secret)
         if not self.provider.acquire_token():
             raise ValueError('Acquire token failed: {0}'.format(self.provider.error))
+        return True
 
-    def acquire_token_password_grant(self, client_credentials, user_credentials):
-        """Acquire token via resource owner password credential (ROPC) grant"""
+    def acquire_token_password_grant(self, client_id, username, password, resource, scope):
+        """
+        Acquire token via resource owner password credential (ROPC) grant
+
+        :param str resource: A URI that identifies the resource for which the token is valid.
+        :param str username: : The username of the user on behalf this application is authenticating.
+        :param str password: The password of the user named in the username parameter.
+        :param str client_id: str The OAuth client id of the calling application.
+        :param list[str] scope:
+        """
         self.provider = OAuthTokenProvider(self.url)
-        return self.provider.acquire_token_password_type("https://outlook.office365.com",
-                                                         client_credentials,
-                                                         user_credentials)
+        return self.provider.acquire_token_password_type(resource=resource,
+                                                         client_id=client_id,
+                                                         user_credentials=UserCredential(username, password),
+                                                         scope=scope)
 
     def authenticate_request(self, request_options):
         """Authenticate request

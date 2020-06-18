@@ -1,10 +1,26 @@
 from office365.runtime.client_query import DeleteEntityQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 
 
 class Field(BaseEntity):
     """Represents a field in a SharePoint Web site"""
+
+    def set_show_in_display_form(self, flag):
+        """Sets the value of the ShowInDisplayForm property for this field."""
+        qry = ServiceOperationQuery(self, "setShowInDisplayForm", [flag])
+        self.context.add_query(qry)
+
+    def set_show_in_edit_form(self, flag):
+        """Sets the value of the ShowInEditForm property for this field."""
+        qry = ServiceOperationQuery(self, "setShowInEditForm", [flag])
+        self.context.add_query(qry)
+
+    def set_show_in_new_form(self, flag):
+        """Sets the value of the ShowInNewForm property for this field."""
+        qry = ServiceOperationQuery(self, "setShowInNewForm", [flag])
+        self.context.add_query(qry)
 
     def delete_object(self):
         """Deletes the field."""

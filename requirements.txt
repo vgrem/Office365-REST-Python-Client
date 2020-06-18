@@ -1,4 +1,4 @@
-requests~=2.23.0
+requests~=2.24.0
 requests_ntlm [NTLMAuthentication]
-setuptools~=46.4.0
-adal~=1.2.3
+setuptools~=47.3.1
+adal~=1.2.4

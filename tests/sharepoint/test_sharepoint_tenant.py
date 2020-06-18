@@ -36,7 +36,7 @@ class TestTenant(TestCase):
         self.client.execute_query()
         self.assertIsInstance(sites, SitePropertiesCollection)
 
-    # def test4_create_site(self):
+    #def test4_create_site(self):
     #    current_user = self.client.web.currentUser
     #    self.client.load(current_user)
     #    self.client.execute_query()

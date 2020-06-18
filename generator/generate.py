@@ -1,5 +1,4 @@
-import ast
-
+from generator.typeBuilder import TypeBuilder
 from office365.runtime.odata.odata_v3_reader import ODataV3Reader
 from office365.runtime.odata.odata_v4_reader import ODataV4Reader
 
@@ -10,9 +9,9 @@ def generate_files(model):
 
 
 def generate_type_file(type_schema):
-    if type_schema['state'] == 'attached':
-        tree = ast.parse(open(type_schema['file']).read())
-        print(type_schema['file'])
+    builder = TypeBuilder(type_schema)
+    if builder.build():
+        builder.save()
 
 
 def generate_sharepoint_model():

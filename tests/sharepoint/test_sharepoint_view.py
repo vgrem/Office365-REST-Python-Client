@@ -4,7 +4,6 @@ from office365.sharepoint.list_template_type import ListTemplateType
 from office365.sharepoint.view_create_information import ViewCreationInformation
 from tests import random_seed
 from tests.sharepoint.sharepoint_case import SPTestCase
-from tests.sharepoint.test_methods import ensure_list
 
 
 class TestSPView(SPTestCase):
@@ -13,11 +12,11 @@ class TestSPView(SPTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestSPView, cls).setUpClass()
-        cls.target_list = ensure_list(cls.client.web,
-                                      ListCreationInformation("Tasks",
-                                                              None,
-                                                              ListTemplateType.Tasks)
-                                      )
+        cls.target_list = cls.ensure_list(cls.client.web,
+                                          ListCreationInformation("Tasks",
+                                                                  None,
+                                                                  ListTemplateType.Tasks)
+                                          )
         cls.target_view_title = "My Tasks %s" % random_seed
         cls.target_view_title_updated = cls.target_view_title + "_updated"
 

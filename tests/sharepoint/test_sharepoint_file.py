@@ -1,15 +1,9 @@
 import os
-from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.file import File
 from office365.sharepoint.list import List
 from office365.sharepoint.web import Web
 from tests import random_seed
 from tests.sharepoint.sharepoint_case import SPTestCase
-from tests.sharepoint.test_methods import (
-    read_file_as_binary,
-    read_file_as_text,
-    ensure_list)
-
 from office365.sharepoint.list_creation_information import ListCreationInformation
 from office365.sharepoint.list_template_type import ListTemplateType
 from office365.sharepoint.template_file_type import TemplateFileType
@@ -34,11 +28,11 @@ class TestSharePointFile(SPTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestSharePointFile, cls).setUpClass()
-        cls.target_list = ensure_list(cls.client.web,
-                                      ListCreationInformation(
-                                          "Archive Documents N%s" % random_seed,
-                                          None,
-                                          ListTemplateType.DocumentLibrary))
+        cls.target_list = cls.ensure_list(cls.client.web,
+                                          ListCreationInformation(
+                                              "Archive Documents N%s" % random_seed,
+                                              None,
+                                              ListTemplateType.DocumentLibrary))
 
     @classmethod
     def tearDownClass(cls):
@@ -49,9 +43,9 @@ class TestSharePointFile(SPTestCase):
         for entry in self.file_entries:
             path = "{0}/../data/{1}".format(os.path.dirname(__file__), entry["Name"])
             if entry["Type"] == "Binary":
-                file_content = read_file_as_binary(path)
+                file_content = self.read_file_as_binary(path)
             else:
-                file_content = read_file_as_text(path)
+                file_content = self.read_file_as_text(path)
             uploaded_file = self.__class__.target_list.rootFolder.upload_file(entry["Name"], file_content)
             self.client.execute_query()
             self.assertEqual(uploaded_file.properties["Name"], entry["Name"])

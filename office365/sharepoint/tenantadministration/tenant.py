@@ -6,6 +6,7 @@ from office365.sharepoint.tenantadministration.sitePropertiesCollection import S
 from office365.sharepoint.tenantadministration.sitePropertiesEnumerableFilter import SitePropertiesEnumerableFilter
 from office365.sharepoint.tenantadministration.spoOperation import SpoOperation
 from office365.sharepoint.tenantadministration.siteCreationProperties import SiteCreationProperties
+from office365.sharepoint.tenantadministration.secondaryAdministratorsFieldsData import SecondaryAdministratorsFieldsData
 
 
 class Tenant(BaseEntity):
@@ -34,6 +35,19 @@ class Tenant(BaseEntity):
         qry = ServiceOperationQuery(self, "removeSite", [site_url], None, None, result)
         self.context.add_query(qry)
         return result
+
+    def remove_deleted_site(self, site_url):
+        pass
+
+    def restore_deleted_site(self, site_url):
+        pass
+
+    def set_site_secondary_administrators(self, data):
+        """
+
+        :type data: SecondaryAdministratorsFieldsData
+        """
+        pass
 
     def get_site_properties_by_url(self, url, include_detail):
         """
