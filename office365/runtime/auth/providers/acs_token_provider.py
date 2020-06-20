@@ -46,7 +46,7 @@ class ACSTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
         oauth2_request = self.create_access_token_request(principal_id, self.client_secret, resource)
         response = requests.post(url=sts_url, headers={'Content-Type': 'application/x-www-form-urlencoded'},
                                  data=oauth2_request)
-        return TokenResponse.from_json(response.content)
+        return TokenResponse.from_json(response.json())
 
     def _get_realm_from_target_url(self):
         response = requests.head(url=self.url, headers={'Authorization': 'Bearer'})

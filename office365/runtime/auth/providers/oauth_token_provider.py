@@ -19,7 +19,7 @@ class OAuthTokenProvider(BaseTokenProvider):
             response = requests.post(url=token_url,
                                      headers={'Content-Type': 'application/x-www-form-urlencoded'},
                                      data=parameters)
-            self.token = TokenResponse.from_json(response.content)
+            self.token = TokenResponse.from_json(response.json())
             return self.token.is_valid
         except requests.exceptions.RequestException as e:
             self.error = "Error: {0}".format(e)

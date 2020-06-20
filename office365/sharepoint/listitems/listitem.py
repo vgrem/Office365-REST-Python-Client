@@ -1,3 +1,4 @@
+from office365.runtime.clientValueCollection import ClientValueCollection
 from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
@@ -9,20 +10,6 @@ from office365.sharepoint.permissions.securable_object import SecurableObject
 
 class ListItem(SecurableObject):
     """ListItem resource"""
-
-    def set_field_value(self, name, value):
-        """
-        Sets fields value
-
-        :param str name: Field name
-        :param str or FieldLookupValue or FieldUserValue value: field value
-        """
-        if isinstance(value, FieldMultiLookupValue):
-            self.set_property("{name}Id".format(name=name), value, True)
-        elif isinstance(value, FieldLookupValue):
-            self.set_property("{name}Id".format(name=name), value, True)
-        else:
-            self.set_property(name, value, True)
 
     def update(self):
         """Update the list item."""
@@ -110,8 +97,23 @@ class ListItem(SecurableObject):
         :param office365.sharepoint.lists.list.List target_list: List entity
         :return:
         """
+
         def _init_item_type(result):
             self._entity_type_name = result.properties['ListItemEntityTypeFullName']
+
         if not self._entity_type_name:
             target_list.ensure_property("ListItemEntityTypeFullName", _init_item_type)
 
+    def to_json(self):
+        payload_orig = super(ListItem, self).to_json()
+        payload = {}
+        for k, v in payload_orig.items():
+            if isinstance(v, FieldMultiLookupValue):
+                collection = ClientValueCollection(int)
+                [collection.add(lv.LookupId) for lv in v]
+                payload["{name}Id".format(name=k)] = collection
+            elif isinstance(v, FieldLookupValue):
+                payload["{name}Id".format(name=k)] = v
+            else:
+                payload[k] = v
+        return payload

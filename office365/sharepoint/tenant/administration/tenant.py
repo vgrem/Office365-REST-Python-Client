@@ -1,12 +1,10 @@
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.tenantadministration.siteProperties import SiteProperties
-from office365.sharepoint.tenantadministration.sitePropertiesCollection import SitePropertiesCollection
-from office365.sharepoint.tenantadministration.sitePropertiesEnumerableFilter import SitePropertiesEnumerableFilter
-from office365.sharepoint.tenantadministration.spoOperation import SpoOperation
-from office365.sharepoint.tenantadministration.siteCreationProperties import SiteCreationProperties
-from office365.sharepoint.tenantadministration.secondaryAdministratorsFieldsData import SecondaryAdministratorsFieldsData
+from office365.sharepoint.tenant.administration.siteProperties import SiteProperties
+from office365.sharepoint.tenant.administration.sitePropertiesCollection import SitePropertiesCollection
+from office365.sharepoint.tenant.administration.sitePropertiesEnumerableFilter import SitePropertiesEnumerableFilter
+from office365.sharepoint.tenant.administration.spoOperation import SpoOperation
 
 
 class Tenant(BaseEntity):

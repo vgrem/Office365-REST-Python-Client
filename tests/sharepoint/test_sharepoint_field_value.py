@@ -1,7 +1,11 @@
 from office365.sharepoint.fields.fieldLookupValue import FieldLookupValue
+from office365.sharepoint.fields.fieldMultiChoice import FieldMultiChoice
+from office365.sharepoint.fields.fieldMultiChoiceValue import FieldMultiChoiceValue
 from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupValue
 from office365.sharepoint.fields.fieldMultiUserValue import FieldMultiUserValue
+from office365.sharepoint.fields.fieldType import FieldType
 from office365.sharepoint.fields.fieldUserValue import FieldUserValue
+from office365.sharepoint.fields.field_creation_information import FieldCreationInformation
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.list_creation_information import ListCreationInformation
 from office365.sharepoint.lists.list_template_type import ListTemplateType
@@ -13,6 +17,7 @@ from tests.sharepoint.sharepoint_case import SPTestCase
 class TestFieldValue(SPTestCase):
     target_list = None  # type: List
     target_item = None  # type: ListItem
+    target_field = None  # type: FieldMultiChoice
 
     @classmethod
     def setUpClass(cls):
@@ -48,17 +53,33 @@ class TestFieldValue(SPTestCase):
         multi_lookup_value = FieldMultiLookupValue()
         multi_lookup_value.add(FieldLookupValue(lookup_id))
         new_item = self.target_list.add_item(create_info)
-        new_item.set_field_value("Predecessors", multi_lookup_value)
+        new_item.set_property("Predecessors", multi_lookup_value)
         self.client.load(items)
         self.client.execute_query()
         self.assertGreaterEqual(len(items), 1)
 
-    def test_3_set_field_user_value(self):
+    def test_3_set_field_multi_user_value(self):
         current_user = self.client.web.currentUser
         multi_user_value = FieldMultiUserValue()
         multi_user_value.add(FieldUserValue.from_user(current_user))
 
         item_to_update = self.__class__.target_item
-        item_to_update.set_field_value("AssignedTo",  multi_user_value)
+        item_to_update.set_property("AssignedTo",  multi_user_value)
+        item_to_update.update()
+        self.client.execute_query()
+
+    def test_4_create_list_field(self):
+        field_name = "TaskStatuses"
+        create_field_info = FieldCreationInformation(field_name, FieldType.MultiChoice)
+        [create_field_info.Choices.add(choice) for choice in ["Not Started", "In Progress", "Completed", "Deferred"]]
+        created_field = self.__class__.target_list.fields.add(create_field_info)
+        self.client.execute_query()
+        self.assertIsInstance(created_field, FieldMultiChoice)
+        self.__class__.target_field = created_field
+
+    def test_5_set_field_multi_choice_value(self):
+        item_to_update = self.__class__.target_item
+        multi_choice_value = FieldMultiChoiceValue(["In Progress"])
+        item_to_update.set_property("TaskStatuses", multi_choice_value)
         item_to_update.update()
         self.client.execute_query()

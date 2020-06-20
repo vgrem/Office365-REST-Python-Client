@@ -6,3 +6,4 @@ class FieldMultiUserValue(FieldMultiLookupValue):
 
     def __init__(self):
         super().__init__()
+        self._item_type = FieldUserValue

@@ -1,16 +1,3 @@
-import json
-
-
-def _normalize_token_response(json_data):
-    for key in json_data.keys():
-        key_parts = key.split("_")
-        if len(key_parts) == 2:
-            new_key = "".join([key_parts[0], key_parts[1].title()])
-            json_data[new_key] = json_data[key]
-            del json_data[key]
-    return json_data
-
-
 class TokenResponse(object):
 
     def __init__(self, accessToken=None, tokenType=None, **kwargs):
@@ -24,6 +11,14 @@ class TokenResponse(object):
         return self.accessToken is not None and self.tokenType == 'Bearer'
 
     @staticmethod
-    def from_json(json_str):
-        json_object = json.loads(json_str, object_hook=_normalize_token_response)
-        return TokenResponse(**json_object)
+    def from_json(value):
+
+        def _normalize_key(name):
+            key_parts = name.split("_")
+            if len(key_parts) >= 2:
+                names = [n.title() for n in key_parts[1:]]
+                return key_parts[0] + "".join(names)
+            return name
+
+        token_json = {_normalize_key(k): v for k, v in value.items()}
+        return TokenResponse(**token_json)

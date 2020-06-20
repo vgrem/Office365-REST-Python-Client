@@ -10,6 +10,9 @@ class Field(BaseEntity):
 
     def __init__(self, context, resource_path=None):
         super().__init__(context, resource_path)
+
+    @staticmethod
+    def get_field_type(type_id):
         from office365.sharepoint.fields.fieldText import FieldText
         from office365.sharepoint.fields.fieldCalculated import FieldCalculated
         from office365.sharepoint.fields.fieldChoice import FieldChoice
@@ -21,7 +24,7 @@ class Field(BaseEntity):
         from office365.sharepoint.fields.fieldGuid import FieldGuid
         from office365.sharepoint.fields.fieldCurrency import FieldCurrency
         from office365.sharepoint.fields.fieldMultiLineText import FieldMultiLineText
-        self._field_types = {
+        field_types = {
             FieldType.Text: FieldText,
             FieldType.Calculated: FieldCalculated,
             FieldType.Choice: FieldChoice,
@@ -34,14 +37,25 @@ class Field(BaseEntity):
             FieldType.Currency: FieldCurrency,
             FieldType.Note: FieldMultiLineText
         }
+        return field_types.get(type_id, Field)
+
+    @staticmethod
+    def create_field_from_type(context, field_type):
+        field_type = Field.get_field_type(field_type)
+        return field_type(context)
 
     def set_show_in_display_form(self, flag):
-        """Sets the value of the ShowInDisplayForm property for this fields."""
+        """Sets the value of the ShowInDisplayForm property for this fields.
+
+        :type flag: bool
+        """
         qry = ServiceOperationQuery(self, "setShowInDisplayForm", [flag])
         self.context.add_query(qry)
 
     def set_show_in_edit_form(self, flag):
-        """Sets the value of the ShowInEditForm property for this fields."""
+        """Sets the value of the ShowInEditForm property for this fields.
+        :type flag: bool
+        """
         qry = ServiceOperationQuery(self, "setShowInEditForm", [flag])
         self.context.add_query(qry)
 
@@ -59,7 +73,7 @@ class Field(BaseEntity):
     @property
     def internal_name(self):
         """Gets a value that specifies the field internal name."""
-        return self.properties['InternalName']
+        return self.properties.get('InternalName', None)
 
     def set_property(self, name, value, persist_changes=True):
         super(Field, self).set_property(name, value, persist_changes)
@@ -68,4 +82,4 @@ class Field(BaseEntity):
             self._resource_path = ResourcePathServiceOperation(
                 "getById", [value], self._parent_collection.resource_path)
         if name == "FieldTypeKind":
-            self.__class__ = self._field_types.get(value, Field)
+            self.__class__ = self.get_field_type(value)

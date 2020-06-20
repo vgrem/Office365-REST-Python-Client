@@ -1,3 +1,4 @@
+from office365.runtime.clientValueCollection import ClientValueCollection
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_query import CreateEntityQuery, UpdateEntityQuery, DeleteEntityQuery
@@ -54,7 +55,8 @@ class ODataRequest(ClientRequest):
         if isinstance(qry, ServiceOperationQuery):
             self.json_format.function_tag_name = qry.method_name
             if qry.static:
-                request_url = self.context.service_root_url + '.'.join([qry.binding_type.entity_type_name, qry.method_url])
+                request_url = self.context.service_root_url + '.'.join(
+                    [qry.binding_type.entity_type_name, qry.method_url])
             else:
                 request_url = '/'.join([qry.binding_type.resource_url, qry.method_url])
         else:
@@ -126,7 +128,11 @@ class ODataRequest(ClientRequest):
                         yield name, value
 
     def _normalize_payload(self, value):
-        if isinstance(value, ClientObject) or isinstance(value, ClientValue):
+        if isinstance(value, ClientValueCollection):
+            if isinstance(self._json_format,
+                          JsonLightFormat) and self._json_format.metadata == ODataMetadataLevel.Verbose:
+                value = {"results": value.to_json()}
+        elif isinstance(value, ClientObject) or isinstance(value, ClientValue):
             json = value.to_json()
             for k, v in json.items():
                 json[k] = self._normalize_payload(v)
@@ -135,7 +141,8 @@ class ODataRequest(ClientRequest):
                           JsonLightFormat) and self._json_format.metadata == ODataMetadataLevel.Verbose:
                 json[self._json_format.metadata_type_tag_name] = {'type': value.entity_type_name}
 
-            if isinstance(self._current_query, ServiceOperationQuery) and self._current_query.parameter_name is not None:
+            if isinstance(self._current_query,
+                          ServiceOperationQuery) and self._current_query.parameter_name is not None:
                 json = {self._current_query.parameter_name: json}
             return json
         elif isinstance(value, dict):
