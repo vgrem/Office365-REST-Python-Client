@@ -10,7 +10,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.resource_path import ResourcePath
 from office365.graph.base_item import BaseItem
 from office365.graph.onedrive.listItem import ListItem
-from office365.runtime.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 from office365.graph.onedrive.itemReference import ItemReference
 
 

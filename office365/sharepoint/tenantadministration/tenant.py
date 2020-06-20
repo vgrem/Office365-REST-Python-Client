@@ -1,5 +1,5 @@
 from office365.runtime.resource_path import ResourcePath
-from office365.runtime.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.tenantadministration.siteProperties import SiteProperties
 from office365.sharepoint.tenantadministration.sitePropertiesCollection import SitePropertiesCollection

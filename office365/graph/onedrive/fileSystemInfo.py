@@ -1,7 +1,7 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class FileSystemInfo(ClientValueObject):
+class FileSystemInfo(ClientValue):
     """The FileSystemInfo resource contains properties that are reported by the device's local file system for the
     local version of an item. """
 

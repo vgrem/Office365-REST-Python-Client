@@ -1,5 +1,5 @@
 from office365.runtime.client_object_collection import ClientObjectCollection
-from office365.runtime.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.tenantadministration.siteProperties import SiteProperties
 
 

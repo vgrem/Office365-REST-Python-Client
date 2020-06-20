@@ -3,7 +3,7 @@ from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.resource_path import ResourcePath
-from office365.runtime.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 
 
 class DirectoryObjectCollection(ClientObjectCollection):

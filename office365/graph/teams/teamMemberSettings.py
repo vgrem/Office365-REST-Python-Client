@@ -1,7 +1,7 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class TeamMemberSettings(ClientValueObject):
+class TeamMemberSettings(ClientValue):
     """Settings to configure whether members can perform certain actions, for example, create channels and add bots,
     in the team. """
 

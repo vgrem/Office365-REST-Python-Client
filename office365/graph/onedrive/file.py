@@ -1,7 +1,7 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class File(ClientValueObject):
+class File(ClientValue):
 
     def __init__(self):
         super(File, self).__init__()

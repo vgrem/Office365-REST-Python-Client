@@ -1,4 +1,4 @@
-from office365.sharepoint.basePermissions import BasePermissions
+from office365.sharepoint.permissions.basePermissions import BasePermissions
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 

@@ -1,8 +1,9 @@
 import uuid
 
-from office365.sharepoint.field import Field
-from office365.sharepoint.fieldType import FieldType
-from office365.sharepoint.field_creation_information import FieldCreationInformation
+from office365.sharepoint.fields.field import Field
+from office365.sharepoint.fields.fieldText import FieldText
+from office365.sharepoint.fields.fieldType import FieldType
+from office365.sharepoint.fields.field_creation_information import FieldCreationInformation
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 
@@ -22,6 +23,8 @@ class TestField(SPTestCase):
         self.client.execute_query()
         self.assertIsNotNone(title_field.properties['InternalName'])
         self.assertEqual(title_field.properties['InternalName'], self.target_field_name)
+        self.assertIsInstance(title_field, FieldText)
+        self.assertIsNotNone(title_field.max_length)
 
     def test_3_get_field_by_title(self):
         title_field = self.client.site.rootWeb.fields.get_by_title(self.target_field_name)

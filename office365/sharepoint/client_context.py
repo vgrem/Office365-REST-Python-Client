@@ -13,8 +13,8 @@ from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.odata_request import ODataRequest
-from office365.sharepoint.site import Site
-from office365.sharepoint.web import Web
+from office365.sharepoint.sites.site import Site
+from office365.sharepoint.webs.web import Web
 
 
 def get_tenant_info(url):

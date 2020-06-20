@@ -1,8 +1,8 @@
 from office365.graph.directory.identity import Identity
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class IdentitySet(ClientValueObject):
+class IdentitySet(ClientValue):
     """The IdentitySet resource is a keyed collection of identity resources. It is used to represent a set of
     identities associated with various events for an item, such as created by or last modified by. """
 

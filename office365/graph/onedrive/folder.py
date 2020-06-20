@@ -1,7 +1,7 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class Folder(ClientValueObject):
+class Folder(ClientValue):
 
     def __init__(self):
         super(Folder, self).__init__()

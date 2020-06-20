@@ -1,8 +1,8 @@
 from office365.graph.directory.passwordProfile import PasswordProfile
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class UserProfile(ClientValueObject):
+class UserProfile(ClientValue):
     def __init__(self, principal_name, password, display_name=None, account_enabled=False):
         """
         User profile

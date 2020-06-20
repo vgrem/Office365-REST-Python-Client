@@ -1,5 +1,5 @@
 from office365.runtime.client_object import ClientObject
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
 class ClientResult(object):
@@ -17,7 +17,7 @@ class ClientResult(object):
         self._value = value
 
     def set_property(self, key, value, persist_changes=False):
-        if isinstance(self._value, ClientValueObject) or isinstance(self._value, ClientObject):
+        if isinstance(self._value, ClientValue) or isinstance(self._value, ClientObject):
             self._value.set_property(key, value, persist_changes)
         else:
             self._value = value

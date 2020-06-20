@@ -1,5 +1,5 @@
-from office365.sharepoint.list_template_type import ListTemplateType
-from office365.sharepoint.site import Site
+from office365.sharepoint.lists.list_template_type import ListTemplateType
+from office365.sharepoint.sites.site import Site
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 

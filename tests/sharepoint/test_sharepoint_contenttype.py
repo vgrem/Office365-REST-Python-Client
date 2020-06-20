@@ -1,4 +1,4 @@
-from office365.sharepoint.content_type_collection import ContentTypeCollection
+from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 

@@ -1,7 +1,7 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class SiteCollectionType(ClientValueObject):
+class SiteCollectionType(ClientValue):
     """The siteCollection resource provides more information about a site collection. """
 
     def __init__(self):

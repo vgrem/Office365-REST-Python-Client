@@ -1,12 +1,12 @@
 from random import randint
-from office365.sharepoint.basePermissions import BasePermissions
-from office365.sharepoint.permissionKind import PermissionKind
-from office365.sharepoint.subwebQuery import SubwebQuery
-from office365.sharepoint.user import User
-from office365.sharepoint.web import Web
+from office365.sharepoint.permissions.basePermissions import BasePermissions
+from office365.sharepoint.permissions.permissionKind import PermissionKind
+from office365.sharepoint.webs.subwebQuery import SubwebQuery
+from office365.sharepoint.principal.user import User
+from office365.sharepoint.webs.web import Web
 from settings import settings
 from tests.sharepoint.sharepoint_case import SPTestCase
-from office365.sharepoint.web_creation_information import WebCreationInformation
+from office365.sharepoint.webs.web_creation_information import WebCreationInformation
 
 
 class TestSharePointWeb(SPTestCase):

@@ -1,6 +1,6 @@
 import json
 
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
 class ODataPathParser(object):
@@ -12,14 +12,14 @@ class ODataPathParser(object):
     def from_method(method_name, method_parameters=None):
         """
 
-        :type method_parameters: list or dict or ClientValueObject
+        :type method_parameters: list or dict or ClientValue
         :type method_name: str
         """
         url = ""
         if method_name:
             url = method_name
 
-        if isinstance(method_parameters, ClientValueObject):
+        if isinstance(method_parameters, ClientValue):
             param_value = method_parameters.to_json()
             url += "(@v)?@v={0}".format(json.dumps(param_value))
         elif method_parameters is not None:

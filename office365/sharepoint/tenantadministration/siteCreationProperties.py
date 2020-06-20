@@ -1,7 +1,7 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class SiteCreationProperties(ClientValueObject):
+class SiteCreationProperties(ClientValue):
 
     def __init__(self, url, owner):
         """Sets the initial properties for a new site when it is created.

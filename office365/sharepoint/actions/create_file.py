@@ -1,5 +1,5 @@
-from office365.runtime.serviceOperationQuery import ServiceOperationQuery
-from office365.sharepoint.file import File
+from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
+from office365.sharepoint.files.file import File
 
 
 class CreateFileQuery(ServiceOperationQuery):

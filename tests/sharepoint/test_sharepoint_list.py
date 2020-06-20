@@ -1,11 +1,11 @@
 from random import randint
 
-from office365.sharepoint.basePermissions import BasePermissions
-from office365.sharepoint.list import List
+from office365.sharepoint.permissions.basePermissions import BasePermissions
+from office365.sharepoint.lists.list import List
 from tests.sharepoint.sharepoint_case import SPTestCase
 
-from office365.sharepoint.list_creation_information import ListCreationInformation
-from office365.sharepoint.list_template_type import ListTemplateType
+from office365.sharepoint.lists.list_creation_information import ListCreationInformation
+from office365.sharepoint.lists.list_template_type import ListTemplateType
 
 
 class TestSPList(SPTestCase):

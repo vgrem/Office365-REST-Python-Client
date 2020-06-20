@@ -1,7 +1,7 @@
 from office365.runtime.resource_path import ResourcePath
-from office365.runtime.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.simpleDataTable import SimpleDataTable
+from office365.sharepoint.search.simpleDataTable import SimpleDataTable
 
 
 class DocumentCrawlLog(BaseEntity):

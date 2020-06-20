@@ -1,5 +1,5 @@
-from office365.sharepoint.changeCollection import ChangeCollection
-from office365.sharepoint.changeQuery import ChangeQuery
+from office365.sharepoint.changes.changeCollection import ChangeCollection
+from office365.sharepoint.changes.changeQuery import ChangeQuery
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 

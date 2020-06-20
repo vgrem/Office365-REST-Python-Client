@@ -1,7 +1,7 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class DriveRecipient(ClientValueObject):
+class DriveRecipient(ClientValue):
 
     def __init__(self):
         super(DriveRecipient, self).__init__()

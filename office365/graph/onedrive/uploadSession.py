@@ -1,7 +1,7 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class UploadSession(ClientValueObject):
+class UploadSession(ClientValue):
     """The UploadSession resource provides information about how to upload large files to OneDrive, OneDrive for
     Business, or SharePoint document libraries. """
 

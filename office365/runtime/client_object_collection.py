@@ -1,16 +1,9 @@
-from functools import partial
-
 from office365.runtime.client_result import ClientResult
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.utilities.EventHandler import EventHandler
-
-
-def _calc_items_count(result, target_collection):
-    list(iter(target_collection))
-    result.value = len(target_collection)
+from office365.runtime.types.EventHandler import EventHandler
 
 
 class ClientObjectCollection(ClientObject):
@@ -113,7 +106,11 @@ class ClientObjectCollection(ClientObject):
         """
         result = ClientResult(None)
         self.context.load(self)
-        self.context.afterExecuteOnce += partial(_calc_items_count, result)
+
+        def _calc_items_count(target_collection):
+            list(iter(target_collection))
+            result.value = len(target_collection)
+        self.context.afterExecuteOnce += _calc_items_count
         return result
 
     def _load_paged_items(self):

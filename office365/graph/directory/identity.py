@@ -1,7 +1,7 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class Identity(ClientValueObject):
+class Identity(ClientValue):
     """The Identity resource represents an identity of an actor. For example, an actor can be a user, device,
     or application. """
 

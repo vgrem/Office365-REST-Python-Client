@@ -1,7 +1,7 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class PasswordProfile(ClientValueObject):
+class PasswordProfile(ClientValue):
     """Contains the password profile associated with a user. The passwordProfile property of the user entity is a
     passwordProfile object. """
     def __init__(self, password):

@@ -1,5 +1,5 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class SecondaryAdministratorsFieldsData(ClientValueObject):
+class SecondaryAdministratorsFieldsData(ClientValue):
     pass

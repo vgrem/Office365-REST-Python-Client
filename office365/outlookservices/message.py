@@ -1,5 +1,5 @@
 from office365.outlookservices.item import Item
-from office365.runtime.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 
 
 class Message(Item):

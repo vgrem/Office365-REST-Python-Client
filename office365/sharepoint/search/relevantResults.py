@@ -1,8 +1,8 @@
-from office365.runtime.client_value_object import ClientValueObject
-from office365.sharepoint.simpleDataTable import SimpleDataTable
+from office365.runtime.clientValue import ClientValue
+from office365.sharepoint.search.simpleDataTable import SimpleDataTable
 
 
-class RelevantResults(ClientValueObject):
+class RelevantResults(ClientValue):
 
     def __init__(self):
         super().__init__()

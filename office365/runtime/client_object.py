@@ -1,4 +1,4 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 from office365.runtime.odata.odata_query_options import QueryOptions
 
 
@@ -51,7 +51,7 @@ class ClientObject(object):
         safe_name = name[0].lower() + name[1:]
         if hasattr(self, safe_name):
             prop_type = getattr(self, safe_name)
-            if isinstance(prop_type, ClientObject) or isinstance(prop_type, ClientValueObject):
+            if isinstance(prop_type, ClientObject) or isinstance(prop_type, ClientValue):
                 [prop_type.set_property(k, v, persist_changes) for k, v in value.items()]
                 self._properties[name] = prop_type
             else:

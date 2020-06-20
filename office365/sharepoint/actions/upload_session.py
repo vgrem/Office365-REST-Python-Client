@@ -2,8 +2,8 @@ import os
 import uuid
 
 from office365.runtime.client_result import ClientResult
-from office365.sharepoint.file import File
-from office365.sharepoint.file_creation_information import FileCreationInformation
+from office365.sharepoint.files.file import File
+from office365.sharepoint.files.file_creation_information import FileCreationInformation
 from office365.sharepoint.actions.create_file import CreateFileQuery
 
 

@@ -1,5 +1,5 @@
 from office365.runtime.client_result import ClientResult
-from office365.runtime.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 
 
 class GetWebUrlFromPageUrlQuery(ServiceOperationQuery):

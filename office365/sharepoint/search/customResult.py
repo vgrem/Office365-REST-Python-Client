@@ -1,5 +1,5 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class CustomResult(ClientValueObject):
+class CustomResult(ClientValue):
     pass

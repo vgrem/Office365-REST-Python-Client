@@ -1,7 +1,7 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class SearchRequest(ClientValueObject):
+class SearchRequest(ClientValue):
 
     def __init__(self, query_text):
         super().__init__()

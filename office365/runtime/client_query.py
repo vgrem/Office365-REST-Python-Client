@@ -1,6 +1,6 @@
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_result import ClientResult
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
 class ClientQuery(object):
@@ -10,7 +10,7 @@ class ClientQuery(object):
         """
 
         :type binding_type: ClientObject
-        :type parameter_type:  ClientObject or ClientValueObject or dict or bytes or None
+        :type parameter_type:  ClientObject or ClientValue or dict or bytes or None
         :type parameter_name:  str or None
         :type return_type:  ClientObject or ClientResult or ClientValueObject or None
         """
@@ -46,7 +46,7 @@ class CreateEntityQuery(ClientQuery):
         Create query
 
         :type entity_to_create: ClientObject
-        :type create_info: ClientObject or ClientValueObject or dict
+        :type create_info: ClientObject or ClientValue or dict
         :type parent_entity: ClientObject
         """
         super(CreateEntityQuery, self).__init__(parent_entity, create_info, None, entity_to_create)

@@ -1,7 +1,7 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class TeamFunSettings(ClientValueObject):
+class TeamFunSettings(ClientValue):
     """Settings to configure use of Giphy, memes, and stickers in the team."""
 
     def __init__(self):

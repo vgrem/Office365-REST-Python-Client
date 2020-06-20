@@ -1,7 +1,7 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class SitePropertiesEnumerableFilter(ClientValueObject):
+class SitePropertiesEnumerableFilter(ClientValue):
 
     def __init__(self, _filter, start_index, include_detail):
         super().__init__()

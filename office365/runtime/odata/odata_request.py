@@ -3,12 +3,12 @@ from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_query import CreateEntityQuery, UpdateEntityQuery, DeleteEntityQuery
 from office365.runtime.client_request import ClientRequest
 from office365.runtime.client_result import ClientResult
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
-from office365.runtime.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 
 
 class ODataRequest(ClientRequest):
@@ -126,7 +126,7 @@ class ODataRequest(ClientRequest):
                         yield name, value
 
     def _normalize_payload(self, value):
-        if isinstance(value, ClientObject) or isinstance(value, ClientValueObject):
+        if isinstance(value, ClientObject) or isinstance(value, ClientValue):
             json = value.to_json()
             for k, v in json.items():
                 json[k] = self._normalize_payload(v)

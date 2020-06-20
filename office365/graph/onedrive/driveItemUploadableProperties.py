@@ -1,7 +1,7 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class DriveItemUploadableProperties(ClientValueObject):
+class DriveItemUploadableProperties(ClientValue):
     """The driveItemUploadableProperties resource represents an item being uploaded when creating an upload session."""
 
     def __init__(self):

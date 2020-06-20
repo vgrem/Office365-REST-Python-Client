@@ -1,8 +1,8 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 from office365.sharepoint.search.queryResult import QueryResult
 
 
-class SearchResult(ClientValueObject):
+class SearchResult(ClientValue):
 
     def __init__(self):
         super().__init__()

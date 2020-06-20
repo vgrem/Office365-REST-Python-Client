@@ -1,7 +1,7 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class SPSiteCreationResponse(ClientValueObject):
+class SPSiteCreationResponse(ClientValue):
 
     def __init__(self):
         super(SPSiteCreationResponse, self).__init__()

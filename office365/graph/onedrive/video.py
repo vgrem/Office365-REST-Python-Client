@@ -1,6 +1,6 @@
-from office365.runtime.client_value_object import ClientValueObject
+from office365.runtime.clientValue import ClientValue
 
 
-class Video(ClientValueObject):
+class Video(ClientValue):
     """The Video resource groups video-related data items into a single structure."""
     pass

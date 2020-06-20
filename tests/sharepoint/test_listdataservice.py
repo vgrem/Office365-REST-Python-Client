@@ -1,6 +1,6 @@
 from unittest import TestCase
 from office365.runtime.auth.clientCredential import ClientCredential
-from office365.sharepoint.list_data_service import ListDataService
+from office365.sharepoint.listdatasvc.list_data_service import ListDataService
 from settings import settings
 
 

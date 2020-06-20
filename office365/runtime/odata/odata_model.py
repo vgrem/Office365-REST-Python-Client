@@ -4,7 +4,7 @@ from pydoc import locate
 class ODataModel(object):
     """OData model"""
     _types = {}
-    _namespaces = ['directory', 'onedrive', 'outlookservices', 'teams']
+    _namespaces = ['principal', 'onedrive', 'outlookservices', 'teams']
 
     @property
     def types(self):

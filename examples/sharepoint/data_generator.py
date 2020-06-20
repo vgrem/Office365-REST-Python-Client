@@ -2,12 +2,11 @@ from settings import settings
 from faker import Faker
 from office365.runtime.auth.userCredential import UserCredential
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.list_creation_information import ListCreationInformation
-from office365.sharepoint.list_template_type import ListTemplateType
+from office365.sharepoint.lists.list_creation_information import ListCreationInformation
+from office365.sharepoint.lists.list_template_type import ListTemplateType
 
 
 def ensure_list(web, list_properties):
-    ctx = web.context
     lists = web.lists.filter("Title eq '{0}'".format(list_properties.Title))
     ctx.load(lists)
     ctx.execute_query()
