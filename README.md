@@ -51,12 +51,24 @@ There are **two approaches** available to perform API queries:
 
     from office365.sharepoint.client_context import ClientContext
 
-    ctx = ClientContext.connect_with_credentials(url,UserCredential(username, password))
+    ctx = ClientContext(site_url).with_credentials(UserCredential(username, password))
     web = ctx.web
     ctx.load(web)
     ctx.execute_query()
     print "Web title: {0}".format(web.properties['Title'])
    ```
+or alternatively via method chaining (a.k.a Fluent Interface): 
+
+```
+
+    from office365.sharepoint.client_context import ClientContext
+
+    ctx = ClientContext(site_url).with_credentials(UserCredential(username, password))
+    web = ctx.web.load().execute_query()
+    print "Web title: {0}".format(web.properties['Title'])
+   ```
+
+
 
 2. `RequestOptions class` - where you construct REST queries (and no model is involved)
 
@@ -70,7 +82,7 @@ from office365.runtime.auth.UserCredential import UserCredential
 from office365.runtime.http.request_options import RequestOptions
 from office365.sharepoint.client_context import ClientContext
 
-ctx = ClientContext.connect_with_credentials(url,UserCredential(username, password))
+ctx = ClientContext(site_url).with_credentials(UserCredential(username, password))
 request = RequestOptions("{0}/_api/web/".format(settings['url']))
 response = ctx.execute_request_direct(request)
 json = json.loads(response.content)
