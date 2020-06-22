@@ -2,9 +2,10 @@ import csv
 import os
 import tempfile
 
+from settings import settings
+
 from office365.runtime.auth.clientCredential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
-from settings import settings
 
 "Demonstrates how to export a List data"
 
@@ -29,6 +30,3 @@ with open(path, 'w') as fh:
     for item in list_items:
         w.writerow(item.properties)
 print("List data has been exported into '{0}' file".format(path))
-
-
-

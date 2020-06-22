@@ -1,9 +1,10 @@
 import os
 import tempfile
 
+from settings import settings
+
 from office365.runtime.auth.userCredential import UserCredential
 from office365.sharepoint.files.file import File
-from settings import settings
 
 abs_file_url = "{site_url}sites/team/Shared Documents/sample.docx".format(site_url=settings.get('url'))
 user_credentials = UserCredential(settings.get('user_credentials').get('username'),

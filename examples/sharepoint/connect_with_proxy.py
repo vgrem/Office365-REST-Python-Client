@@ -1,12 +1,11 @@
+from settings import settings
+
 from office365.runtime.auth.clientCredential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
-from settings import settings
 
 
 def set_proxy(request):
-    proxies = {
-      settings['url']: 'https://127.0.0.1:8888',
-    }
+    proxies = {settings['url']: 'https://127.0.0.1:8888'}
     request.proxies = proxies
 
 

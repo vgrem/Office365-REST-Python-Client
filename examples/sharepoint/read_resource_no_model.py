@@ -1,8 +1,9 @@
 import json
 
+from settings import settings
+
 from office365.runtime.auth.userCredential import UserCredential
 from office365.runtime.http.request_options import RequestOptions
-from settings import settings
 from office365.sharepoint.client_context import ClientContext
 
 if __name__ == '__main__':
