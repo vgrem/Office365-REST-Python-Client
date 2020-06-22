@@ -12,7 +12,6 @@ class SearchRequest(ClientValue):
         self.CollapseSpecification = None
         self.Culture = None
 
-
     @property
     def entity_type_name(self):
         return "Microsoft.Office.Server.Search.REST.SearchRequest"

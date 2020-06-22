@@ -49,7 +49,7 @@ class ResumableFileUpload(object):
             req.set_header('Content-Range', 'bytes {0}-{1}/{2}'.format(f_pos, (f_pos + len(piece) - 1), st.st_size))
             req.set_header('Accept', '*/*')
             req.data = piece
-            resp = ctx.execute_request_direct(req)
+            ctx.execute_request_direct(req)
             f_pos += len(piece)
             if chunk_uploaded is not None:
                 chunk_uploaded(f_pos)

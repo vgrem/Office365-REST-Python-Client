@@ -31,4 +31,3 @@ class ResourcePath(object):
     @property
     def segment(self):
         return self._segment
-

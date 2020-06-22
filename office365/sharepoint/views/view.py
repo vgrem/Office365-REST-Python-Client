@@ -5,7 +5,6 @@ from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuer
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.caml.camlQuery import CamlQuery
 from office365.sharepoint.views.view_field_collection import ViewFieldCollection
-from office365.sharepoint.listitems.listItem_collection import ListItemCollection
 
 
 class View(BaseEntity):

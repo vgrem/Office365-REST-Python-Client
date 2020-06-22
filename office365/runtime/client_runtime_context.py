@@ -1,11 +1,7 @@
 import abc
 
-from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.client_request import ClientRequest
 from office365.runtime.client_query import ReadEntityQuery
 from office365.runtime.types.EventHandler import EventHandler
-from office365.runtime.client_query import ClientQuery
-from office365.runtime.auth.authentication_context import AuthenticationContext
 
 
 class ClientRuntimeContext(object):

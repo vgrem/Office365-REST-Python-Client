@@ -40,5 +40,3 @@ class PermissionKind:
     EditMyUserInfo = 41
     EnumeratePermissions = 63
     FullMask = 65
-
-

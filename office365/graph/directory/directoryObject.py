@@ -41,5 +41,3 @@ class DirectoryObject(Entity):
 
     def set_property(self, name, value, persist_changes=True):
         super(DirectoryObject, self).set_property(name, value, persist_changes)
-
-

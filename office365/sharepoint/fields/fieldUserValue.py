@@ -1,5 +1,4 @@
 from office365.sharepoint.fields.fieldLookupValue import FieldLookupValue
-from office365.sharepoint.principal.user import User
 
 
 class FieldUserValue(FieldLookupValue):

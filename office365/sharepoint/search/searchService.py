@@ -4,7 +4,6 @@ from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuer
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.search.query.querySuggestionResults import QuerySuggestionResults
 from office365.sharepoint.search.searchResult import SearchResult
-from office365.sharepoint.search.searchRequest import SearchRequest
 
 
 class SearchService(BaseEntity):
