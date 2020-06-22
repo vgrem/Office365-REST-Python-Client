@@ -12,9 +12,3 @@ class TeamMemberSettings(ClientValue):
         self.allowAddRemoveApps = True
         self.allowCreateUpdateRemoveTabs = True
         self.allowCreateUpdateRemoveConnectors = True
-
-
-
-
-
-

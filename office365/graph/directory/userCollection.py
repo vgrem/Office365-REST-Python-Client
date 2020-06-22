@@ -1,7 +1,6 @@
 from office365.graph.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.graph.directory.user import User
 from office365.runtime.client_query import CreateEntityQuery
-from office365.graph.directory.userProfile import UserProfile
 
 
 class UserCollection(DirectoryObjectCollection):

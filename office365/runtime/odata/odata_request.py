@@ -67,9 +67,7 @@ class ODataRequest(ClientRequest):
         request.method = HttpMethod.Get
         if isinstance(qry, DeleteEntityQuery):
             request.method = HttpMethod.Post
-        elif isinstance(qry, CreateEntityQuery) \
-            or isinstance(qry, UpdateEntityQuery) \
-            or isinstance(qry, ServiceOperationQuery):
+        elif isinstance(qry, (CreateEntityQuery, UpdateEntityQuery, ServiceOperationQuery)):
             request.method = HttpMethod.Post
             if qry.parameter_type is not None:
                 request.data = self._normalize_payload(qry.parameter_type)

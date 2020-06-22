@@ -1,6 +1,5 @@
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_query import UpdateEntityQuery
-from office365.runtime.resource_path import ResourcePath
 
 
 class BaseEntity(ClientObject):

@@ -136,4 +136,3 @@ class GraphClient(ClientRuntimeContext):
     def directory(self):
         """Represents a deleted item in the directory"""
         return Directory(self, ResourcePath("directory"))
-

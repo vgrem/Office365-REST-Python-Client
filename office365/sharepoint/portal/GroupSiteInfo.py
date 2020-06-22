@@ -10,4 +10,3 @@ class GroupSiteInfo(ClientValue):
         self.DocumentsUrl = None
         self.ErrorMessage = None
         self.GroupId = None
-

@@ -1,8 +1,3 @@
-from office365.runtime.client_object import ClientObject
-from office365.runtime.client_result import ClientResult
-from office365.runtime.clientValue import ClientValue
-
-
 class ClientQuery(object):
     """Client query"""
 

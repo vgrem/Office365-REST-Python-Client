@@ -8,4 +8,3 @@ class UserRealmInfo(object):
         """
         self.STSAuthUrl = auth_url
         self.IsFederated = federated
-

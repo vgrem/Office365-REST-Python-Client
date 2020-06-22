@@ -26,4 +26,3 @@ class FieldCreationInformation(ClientValue):
     def entity_type_name(self):
         type_name = Field.get_field_type(self.FieldTypeKind).__name__
         return "SP.{0}".format(type_name)
-

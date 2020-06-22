@@ -9,5 +9,3 @@ class ResourcePathUrl(ResourcePath):
 
     def to_url(self):
         return self._parent.to_url() + ":/{0}:/".format(self.segment)
-
-

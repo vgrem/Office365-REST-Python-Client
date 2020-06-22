@@ -1,7 +1,6 @@
 import requests
 from office365.runtime.auth.base_token_provider import BaseTokenProvider
 from office365.runtime.auth.tokenResponse import TokenResponse
-from office365.runtime.auth.userCredential import UserCredential
 
 
 class OAuthTokenProvider(BaseTokenProvider):

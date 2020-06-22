@@ -4,8 +4,6 @@ from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
 from office365.runtime.auth.base_authentication_context import BaseAuthenticationContext
 from office365.runtime.auth.providers.oauth_token_provider import OAuthTokenProvider
 from office365.runtime.auth.providers.saml_token_provider import SamlTokenProvider
-from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.auth.tokenResponse import TokenResponse
 
 
 class AuthenticationContext(BaseAuthenticationContext):

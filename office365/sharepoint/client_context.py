@@ -1,7 +1,5 @@
 import copy
 import adal
-from office365.runtime.auth.clientCredential import ClientCredential
-from office365.runtime.auth.userCredential import UserCredential
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.auth.providers.saml_token_provider import resolve_base_url
 from office365.runtime.auth.tokenResponse import TokenResponse

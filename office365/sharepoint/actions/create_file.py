@@ -14,6 +14,5 @@ class CreateFileQuery(ServiceOperationQuery):
         super().__init__(container, "add", {
             "overwrite": file_creation_information.overwrite,
             "url": file_creation_information.url
-        },
-                         file_creation_information.content, None, self._return_type)
+        }, file_creation_information.content, None, self._return_type)
         container.add_child(self._return_type)

@@ -13,8 +13,9 @@ class Directory(Entity):
         if self.is_property_available('deletedItems'):
             return self.properties['deletedItems']
         else:
-            res_path = entity_type and ResourcePath(entity_type, ResourcePath("deletedItems", self.resource_path)) or\
-                       ResourcePath("deletedItems", self.resource_path)
+            res_path = entity_type and \
+                ResourcePath(entity_type, ResourcePath("deletedItems", self.resource_path)) or \
+                ResourcePath("deletedItems", self.resource_path)
             return DirectoryObjectCollection(self.context, res_path)
 
     @property

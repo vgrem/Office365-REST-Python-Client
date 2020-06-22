@@ -102,8 +102,8 @@ class Web(SecurableObject):
         """
         result = ClientResult(bool)
         payload = {
-           "url": context.base_url + url,
-           "isEditLink": is_edit_link
+            "url": context.base_url + url,
+            "isEditLink": is_edit_link
         }
         qry = ServiceOperationQuery(context.web, "CreateAnonymousLink", None, payload, None, result)
         qry.static = True
