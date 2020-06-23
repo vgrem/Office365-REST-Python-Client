@@ -43,6 +43,6 @@ setup(
     ],
     packages=setuptools.find_packages(),
     package_data={
-        'office365': ["runtime/auth/SAML.xml", "runtime/auth/RST2.xml", "runtime/auth/FederatedSAML.xml"]
+        'office365': ["runtime/auth/providers/templates/SAML.xml", "runtime/auth/providers/templates/RST2.xml", "runtime/auth/providers/templates/FederatedSAML.xml"]
     }
 )
