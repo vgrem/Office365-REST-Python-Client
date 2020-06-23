@@ -1,8 +1,9 @@
 import os
 from os.path import isfile, join
+
 from settings import settings
+
 from office365.graph.graph_client import GraphClient
-from office365.graph.onedrive.drive import Drive
 
 
 def get_token(auth_ctx):

@@ -1,5 +1,6 @@
-from settings import settings
 from faker import Faker
+from settings import settings
+
 from office365.runtime.auth.userCredential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.lists.list_creation_information import ListCreationInformation
@@ -27,18 +28,17 @@ def generate_contacts(context):
     fake = Faker()
     for idx in range(0, 301):
         contact_properties = {
-
-                              'Title': fake.name(),
-                              'FullName': fake.name(),
-                              'Email': fake.email(),
-                              'Company': fake.company(),
-                              'WorkPhone': fake.phone_number(),
-                              'WorkAddress': fake.street_address(),
-                              'WorkCity': fake.city(),
-                              'WorkZip': fake.postcode(),
-                              'WorkCountry': fake.country(),
-                              'WebPage': {'Url': fake.url()}
-                              }
+            'Title': fake.name(),
+            'FullName': fake.name(),
+            'Email': fake.email(),
+            'Company': fake.company(),
+            'WorkPhone': fake.phone_number(),
+            'WorkAddress': fake.street_address(),
+            'WorkCity': fake.city(),
+            'WorkZip': fake.postcode(),
+            'WorkCountry': fake.country(),
+            'WebPage': {'Url': fake.url()}
+        }
         contact_item = contacts_list.add_item(contact_properties)
         context.execute_query()
         print("Contact '{0}' has been created".format(contact_item.properties["Title"]))

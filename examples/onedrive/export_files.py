@@ -1,7 +1,9 @@
 import os
 import tempfile
-from office365.graph.graph_client import GraphClient
+
 from settings import settings
+
+from office365.graph.graph_client import GraphClient
 
 
 def get_token(auth_ctx):
@@ -42,4 +44,3 @@ client.execute_query()
 with tempfile.TemporaryDirectory() as path:
     download_files(drive.root, path)
     print("Done")
-

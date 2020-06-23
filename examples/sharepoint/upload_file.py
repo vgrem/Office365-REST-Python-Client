@@ -1,8 +1,9 @@
 import os
-from office365.runtime.auth.userCredential import UserCredential
-from settings import settings
-from office365.sharepoint.client_context import ClientContext
 
+from settings import settings
+
+from office365.runtime.auth.userCredential import UserCredential
+from office365.sharepoint.client_context import ClientContext
 
 ctx = ClientContext.connect_with_credentials(settings['url'],
                                              UserCredential(settings['user_credentials']['username'],

@@ -1,7 +1,7 @@
-from office365.runtime.auth.userCredential import UserCredential
-from office365.sharepoint.client_context import ClientContext
 from settings import settings
 
+from office365.runtime.auth.userCredential import UserCredential
+from office365.sharepoint.client_context import ClientContext
 
 ctx = ClientContext.connect_with_credentials("https://mediadev8.sharepoint.com/sites/team/",
                                              UserCredential(settings['user_credentials']['username'],
@@ -11,5 +11,3 @@ web = ctx.web
 ctx.load(web)
 ctx.execute_query()
 print(web.properties["Url"])
-
-

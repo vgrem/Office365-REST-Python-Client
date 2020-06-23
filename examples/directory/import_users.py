@@ -1,8 +1,9 @@
 from faker import Faker
-from office365.graph.directory.userProfile import UserProfile
-from office365.graph.graph_client import GraphClient
 from settings import settings
 from tests import random_seed
+
+from office365.graph.directory.userProfile import UserProfile
+from office365.graph.graph_client import GraphClient
 
 
 def acquire_token(auth_ctx):
