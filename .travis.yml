@@ -8,12 +8,8 @@ python:
 
 install:
   - pip install -r requirements.txt
-  - pip install flake8 isort
 
-script:
-    flake8 office365
-    isort office365
-    python setup.py test
+script: python setup.py test
 
 stages:
   # Tests are configured in upstream
