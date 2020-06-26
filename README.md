@@ -46,37 +46,31 @@ There are **two approaches** available to perform API queries:
 
 1. `ClientContext class` - where you target SharePoint resources such as `Web`, `ListItem` and etc (recommended)
  
+```python
+from office365.sharepoint.client_context import ClientContext
 
-   ```
-
-    from office365.sharepoint.client_context import ClientContext
-
-    ctx = ClientContext(site_url).with_credentials(UserCredential(username, password))
-    web = ctx.web
-    ctx.load(web)
-    ctx.execute_query()
-    print "Web title: {0}".format(web.properties['Title'])
-   ```
+ctx = ClientContext(site_url).with_credentials(UserCredential(username, password))
+web = ctx.web
+ctx.load(web)
+ctx.execute_query()
+print "Web title: {0}".format(web.properties['Title'])
+```
 or alternatively via method chaining (a.k.a Fluent Interface): 
 
+```python
+from office365.sharepoint.client_context import ClientContext
+
+ctx = ClientContext(site_url).with_credentials(UserCredential(username, password))
+web = ctx.web.load().execute_query()
+print "Web title: {0}".format(web.properties['Title'])
 ```
-
-    from office365.sharepoint.client_context import ClientContext
-
-    ctx = ClientContext(site_url).with_credentials(UserCredential(username, password))
-    web = ctx.web.load().execute_query()
-    print "Web title: {0}".format(web.properties['Title'])
-   ```
-
 
 
 2. `RequestOptions class` - where you construct REST queries (and no model is involved)
 
    The example demonstrates how to read `Web` properties:
    
-   
-
-```
+```python
 import json
 from office365.runtime.auth.UserCredential import UserCredential
 from office365.runtime.http.request_options import RequestOptions
@@ -88,7 +82,6 @@ response = ctx.execute_request_direct(request)
 json = json.loads(response.content)
 web_title = json['d']['Title']
 print("Web title: {0}".format(web_title))
-
 ```
 
 
@@ -119,7 +112,7 @@ The example demonstrates how to send an email via [Microsoft Graph endpoint](htt
 
 > Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
 
-```
+```python
 def get_token(auth_ctx):
     token = auth_ctx.acquire_token_with_client_credentials(
         "https://graph.microsoft.com",
@@ -175,7 +168,7 @@ which corresponds to [`list available drives` endpoint](https://docs.microsoft.c
 
 > Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
 
-```
+```python
 def get_token(auth_ctx):
     """Acquire token via client credential flow (ADAL Python library is utilized)"""
     token = auth_ctx.acquire_token_with_client_credentials(
@@ -197,7 +190,7 @@ for drive in drives:
 
 ##### Example: download the contents of a DriveItem(folder facet)
 
-```
+```python
 # retrieve drive properties (source)
 drive = client.users[user_id_or_principal_name].drive
 client.load(drive)
@@ -210,7 +203,7 @@ with tempfile.TemporaryDirectory() as path:
 
 where
 
-```
+```python
 def download_files(remote_folder, local_path):
     drive_items = remote_folder.children
     client.load(drive_items)
@@ -241,18 +234,16 @@ library is utilized to authenticate users to Active Directory (AD) and obtain to
 The example demonstrates how create a new team under a group 
 which corresponds to [`Create team` endpoint](https://docs.microsoft.com/en-us/graph/api/team-put-teams?view=graph-rest-1.0&tabs=http)
 
-```
-
+```python
 tenant_name = "contoso.onmicrosoft.com"
 client = GraphClient(tenant_name, get_token)
 new_team = client.groups[group_id].add_team()
 client.execute_query()
-
 ```
 
 where
 
-```
+```python
 def get_token(auth_ctx):
     """Acquire token via client credential flow (ADAL Python library is utilized)
     :type auth_ctx: adal.AuthenticationContext
