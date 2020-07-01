@@ -1,4 +1,6 @@
 from random import randint
+
+from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.files.move_operations import MoveOperations
 from tests import random_seed
@@ -10,6 +12,7 @@ from office365.sharepoint.lists.list_template_type import ListTemplateType
 class TestSharePointFolder(SPTestCase):
     target_folder_name = "Archive_" + str(randint(0, 1000))
     target_list = None  # type: List
+    target_folder = None  # type: Folder
 
     @classmethod
     def setUpClass(cls):
@@ -52,6 +55,13 @@ class TestSharePointFolder(SPTestCase):
         folder_new = self.__class__.target_list.rootFolder.folders.add(self.__class__.target_folder_name)
         self.client.execute_query()
         self.assertTrue(folder_new.properties["Exists"])
+        self.__class__.target_folder = folder_new
+
+    def test3_get_folder_by_id(self):
+        folder_id = self.__class__.target_folder.properties['UniqueId']
+        folder = self.client.web.get_folder_by_id(folder_id)
+        self.client.execute_query()
+        self.assertIsNotNone(folder.resource_path)
 
     def test4_update_folder(self):
         folder_to_update = self.__class__.target_list.rootFolder.folders.get_by_url(self.__class__.target_folder_name)

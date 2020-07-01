@@ -18,11 +18,26 @@ class ClientValueCollection(ClientValue):
     def to_json(self):
         return self._data
 
+    def set_property(self, index, value, persist_changes=False):
+        child_value = self._item_type
+        if isinstance(child_value, ClientValue):
+            for k, v in value.items():
+                child_value.set_property(k, v, False)
+        else:
+            child_value = value
+        self.add(child_value)
+
     @property
     def entity_type_name(self):
-        edm_primitive_types = {
-            int: "Edm.Int32",
-            str: "Edm.String",
+        primitive_types = {
+            "bool": "Edm.Boolean",
+            "int": "Edm.Int32",
+            "str": "Edm.String",
         }
-        item_type_name = edm_primitive_types.get(self._item_type, "Edm.Int32")
+        item_type_name = type(self._item_type).__name__
+        is_primitive = primitive_types.get(item_type_name, None) is not None
+        if is_primitive:
+            item_type_name = primitive_types[item_type_name]
+        elif isinstance(self._item_type, ClientValue):
+            item_type_name = self._item_type.entity_type_name
         return "Collection({0})".format(item_type_name)

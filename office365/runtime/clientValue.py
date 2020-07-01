@@ -4,8 +4,9 @@ class ClientValue(object):
     containing entity or as a temporary value
     """
 
-    def __init__(self):
+    def __init__(self, namespace=None):
         super(ClientValue, self).__init__()
+        self._namespace = namespace
 
     def set_property(self, k, v, persist_changes=True):
         if hasattr(self, k):
@@ -26,7 +27,9 @@ class ClientValue(object):
 
     @property
     def entity_type_name(self):
-        return None
+        if self._namespace:
+            return ".".join([self._namespace, type(self).__name__])
+        return type(self).__name__
 
     @property
     def is_server_object_null(self):

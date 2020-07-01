@@ -4,6 +4,10 @@ from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.actions.getWebUrlFromPage import GetWebUrlFromPageUrlQuery
+from office365.sharepoint.permissions.roleDefinitionCollection import RoleDefinitionCollection
+from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
+from office365.sharepoint.sharing.objectSharingSettings import ObjectSharingSettings
+from office365.sharepoint.sharing.sharingResult import SharingResult
 from office365.sharepoint.webs.regionalSettings import RegionalSettings
 from office365.sharepoint.permissions.basePermissions import BasePermissions
 from office365.sharepoint.changes.changeCollection import ChangeCollection
@@ -110,6 +114,34 @@ class Web(SecurableObject):
         context.add_query(qry)
         return result
 
+    @staticmethod
+    def get_object_sharing_settings(context, object_url, group_id, use_simplified_roles):
+        """Given a path to an object in SharePoint, this will generate a sharing settings object which contains
+        necessary information for rendering sharing information..
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint client
+        :param str object_url: A URL with one of two possible formats.
+              The two possible URL formats are:
+              1) The URL of the site, with the path of the object in SharePoint represented as query string parameters,
+              forSharing set to 1 if sharing, and mbypass set to 1 to bypass any mobile logic
+              e.g. http://contoso.com/?forSharing=1&mbypass=1&List=%7BCF908473%2D72D4%2D449D%2D8A53%2D4BD01EC54B84%7D&obj={CF908473-72D4-449D-8A53-4BD01EC54B84},1,DOCUMENT
+              2) The URL of the SharePoint object (web, list, item) intended for sharing
+              e.g. http://contoso.com/Documents/SampleFile.docx
+        :param int group_id: The id value of the permissions group if adding to a group, 0 otherwise.
+        :param bool use_simplified_roles: A Boolean value indicating whether to use the SharePoint
+        simplified roles (Edit, View) or not.
+        """
+        result = ObjectSharingSettings(context)
+        payload = {
+            "objectUrl": object_url,
+            "groupId": group_id,
+            "useSimplifiedRoles": use_simplified_roles
+        }
+        qry = ServiceOperationQuery(context.web, "GetObjectSharingSettings", None, payload, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
+
     def get_file_by_server_relative_url(self, url):
         """Returns the file object located at the specified server-relative URL.
         :type url: str
@@ -157,12 +189,28 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return result
 
+    def get_folder_by_id(self, unique_id):
+        """
+
+        :type unique_id: str
+        """
+        folder = Folder(self.context)
+        qry = ServiceOperationQuery(self, "getFolderById", [unique_id], None, None, folder)
+        self.context.add_query(qry)
+        return folder
+
     def get_user_by_id(self, user_id):
         """Returns the user corresponding to the specified member identifier for the current site.
-        :type user_id: long
+
+        :param int user_id: Specifies the member identifier.
         """
         return User(self.context,
                     ResourcePathServiceOperation("getUserById", [user_id], self.resource_path))
+
+    def default_document_library(self):
+        """Retrieves the default document library."""
+        return List(self.context,
+                    ResourcePathServiceOperation("defaultDocumentLibrary", [], self.resource_path))
 
     def get_list(self, url):
         """Get list by url
@@ -181,6 +229,50 @@ class Web(SecurableObject):
         qry = ServiceOperationQuery(self, "getChanges", None, query, "query", changes)
         self.context.add_query(qry)
         return changes
+
+    @staticmethod
+    def share_object(context, url, peoplePickerInput,
+                     roleValue=ExternalSharingSiteOption.View,
+                     groupId=0, propagateAcl=False,
+                     sendEmail=True, includeAnonymousLinkInEmail=False, emailSubject=None, emailBody=None,
+                     useSimplifiedRoles=True):
+        """
+        This method shares an object in SharePoint such as a list item or site. It returns a SharingResult object
+        which contains the completion script and a page to redirect to if desired.
+
+
+        :param office365.sharepoint.client_context.ClientContext context:
+        :param str url: The URL of the website with the path of an object in SharePoint query string parameters.
+        :param str roleValue: The sharing role value for the type of permission to grant on the object.
+        :param str peoplePickerInput: A string of JSON representing users in people picker format.
+        :param str groupId: The ID of the group to be added. Zero if not adding to a permissions group.
+        :param bool propagateAcl:  A flag to determine if permissions SHOULD be pushed to items with unique permissions.
+        :param bool sendEmail: A flag to determine if an email notification SHOULD be sent (if email is configured).
+        :param bool includeAnonymousLinkInEmail: If an email is being sent, this determines if an anonymous link
+        SHOULD be added to the message.
+        :param str emailSubject: The email subject.
+        :param str emailBody: The email subject.
+        :param bool useSimplifiedRoles: A Boolean value indicating whether to use the SharePoint simplified roles
+        (Edit, View) or not.
+
+        """
+        result = SharingResult(context)
+        payload = {
+            "url": url,
+            "groupId": groupId,
+            "peoplePickerInput": peoplePickerInput,
+            "roleValue": roleValue,
+            "includeAnonymousLinkInEmail": includeAnonymousLinkInEmail,
+            "propagateAcl": propagateAcl,
+            "sendEmail": sendEmail,
+            "emailSubject": emailSubject,
+            "emailBody": emailBody,
+            "useSimplifiedRoles": useSimplifiedRoles
+        }
+        qry = ServiceOperationQuery(context.web, "ShareObject", None, payload, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
 
     @property
     def webs(self):
@@ -283,6 +375,14 @@ class Web(SecurableObject):
             return self.properties['ContentTypes']
         else:
             return ContentTypeCollection(self.context, ResourcePath("ContentTypes", self.resource_path))
+
+    @property
+    def roleDefinitions(self):
+        """Gets the collection of role definitions for the Web site."""
+        return self.properties.get("RoleDefinitions",
+                                   RoleDefinitionCollection(self.context,
+                                                            ResourcePath("RoleDefinitions",
+                                                                         self.resource_path)))
 
     @property
     def url(self):
