@@ -4,10 +4,14 @@ from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.actions.getWebUrlFromPage import GetWebUrlFromPageUrlQuery
+from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.permissions.roleDefinitionCollection import RoleDefinitionCollection
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
 from office365.sharepoint.sharing.objectSharingSettings import ObjectSharingSettings
 from office365.sharepoint.sharing.sharingResult import SharingResult
+from office365.sharepoint.ui.applicationpages.clientPeoplePickerQueryParameters import ClientPeoplePickerQueryParameters
+from office365.sharepoint.ui.applicationpages.clientPeoplePickerWebServiceInterface import \
+    ClientPeoplePickerWebServiceInterface
 from office365.sharepoint.webs.regionalSettings import RegionalSettings
 from office365.sharepoint.permissions.basePermissions import BasePermissions
 from office365.sharepoint.changes.changeCollection import ChangeCollection
@@ -230,9 +234,114 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return changes
 
+    def share(self, user_principal_name,
+              shareOption=ExternalSharingSiteOption.View,
+              sendEmail=True, emailSubject=None, emailBody=None):
+        """
+        Share a Web with user
+
+        :param str user_principal_name: User identifier
+        :param ExternalSharingSiteOption shareOption: The sharing type of permission to grant on the object.
+        :param bool sendEmail: A flag to determine if an email notification SHOULD be sent (if email is configured).
+        :param str emailSubject: The email subject.
+        :param str emailBody: The email subject.
+        :return: SharingResult
+        """
+
+        picker_result = ClientResult(str)
+        sharing_result = ClientResult(SharingResult(self.context))
+
+        def _picker_value_resolved(picker_value):
+            picker_result.value = picker_value
+
+        def _grp_resolved(role_value):
+            def _web_initialized(target_web):
+                sharing_result.value = Web.share_object(self.context, self.url, picker_result.value, role_value,
+                                                        0,
+                                                        False, sendEmail, False, emailSubject, emailBody)
+
+            self.ensure_property("Url", _web_initialized)
+
+        params = ClientPeoplePickerQueryParameters(user_principal_name)
+        ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(self.context, params,
+                                                                                _picker_value_resolved)
+        Web._resolve_group_value(self.context, shareOption, _grp_resolved)
+        return sharing_result.value
+
+    def unshare(self):
+        """
+        Unshare a Web
+
+        :return: SharingResult
+        """
+
+        sharing_result = ClientResult(SharingResult(self.context))
+
+        def _web_initialized(target_web):
+            sharing_result.value = Web.unshare_object(self.context, target_web.url)
+
+        self.ensure_property("Url", _web_initialized)
+        return sharing_result.value
+
+    @staticmethod
+    def share_file(context, abs_file_url, user_principal_name,
+                   shareOption=ExternalSharingSiteOption.View,
+                   sendEmail=True, emailSubject=None, emailBody=None):
+        """
+        Share a file
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param str abs_file_url: A file absolute Url for sharing
+        :param str user_principal_name: User identifier
+        :param ExternalSharingSiteOption shareOption: The sharing type of permission to grant on the object.
+        :param bool sendEmail: A flag to determine if an email notification SHOULD be sent (if email is configured).
+        :param str emailSubject: The email subject.
+        :param str emailBody: The email subject.
+        :return: SharingResult
+        """
+
+        result = {
+            "return_type": SharingResult(context),
+        }
+        role_values = {
+            ExternalSharingSiteOption.View: "role:1073741826",
+            ExternalSharingSiteOption.Edit: "role:1073741827",
+        }
+
+        def _picker_value_resolved(picker_value):
+            result["return_type"] = Web.share_object(context, abs_file_url, picker_value, role_values[shareOption],
+                                                     0,
+                                                     False, sendEmail, False, emailSubject, emailBody)
+
+        params = ClientPeoplePickerQueryParameters(user_principal_name)
+        ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(context, params, _picker_value_resolved)
+        return result["return_type"]
+
+    @staticmethod
+    def _resolve_group_value(context, share_option, on_resolved):
+        """
+
+        :param office365.sharepoint.client_context.ClientContext context:
+        :param ExternalSharingSiteOption share_option:
+        :param (str) -> None on_resolved:
+        """
+
+        def _group_resolved(return_grp):
+            role_value = "group:{groupId}".format(groupId=return_grp.properties["Id"])
+            on_resolved(role_value)
+
+        options = {
+            ExternalSharingSiteOption.View: context.web.associatedVisitorGroup,
+            ExternalSharingSiteOption.Edit: context.web.associatedMemberGroup,
+            ExternalSharingSiteOption.Owner: context.web.associatedOwnerGroup,
+        }
+        grp = options[share_option]
+        context.load(grp)
+        context.afterExecuteOnce += _group_resolved
+
     @staticmethod
     def share_object(context, url, peoplePickerInput,
-                     roleValue=ExternalSharingSiteOption.View,
+                     roleValue=None,
                      groupId=0, propagateAcl=False,
                      sendEmail=True, includeAnonymousLinkInEmail=False, emailSubject=None, emailBody=None,
                      useSimplifiedRoles=True):
@@ -241,11 +350,11 @@ class Web(SecurableObject):
         which contains the completion script and a page to redirect to if desired.
 
 
-        :param office365.sharepoint.client_context.ClientContext context:
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
         :param str url: The URL of the website with the path of an object in SharePoint query string parameters.
         :param str roleValue: The sharing role value for the type of permission to grant on the object.
         :param str peoplePickerInput: A string of JSON representing users in people picker format.
-        :param str groupId: The ID of the group to be added. Zero if not adding to a permissions group.
+        :param int groupId: The ID of the group to be added. Zero if not adding to a permissions group.
         :param bool propagateAcl:  A flag to determine if permissions SHOULD be pushed to items with unique permissions.
         :param bool sendEmail: A flag to determine if an email notification SHOULD be sent (if email is configured).
         :param bool includeAnonymousLinkInEmail: If an email is being sent, this determines if an anonymous link
@@ -273,6 +382,47 @@ class Web(SecurableObject):
         qry.static = True
         context.add_query(qry)
         return result
+
+    @staticmethod
+    def unshare_object(context, url):
+        """
+        Removes Sharing permissions on an object.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param str url: A SharingResult object which contains status codes pertaining to the completion of the operation.
+        :return: SharingResult
+        """
+        result = SharingResult(context)
+        payload = {
+            "url": url
+        }
+        qry = ServiceOperationQuery(context.web, "UnshareObject", None, payload, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
+
+    def get_file_by_id(self, unique_id):
+        """Returns the file object with the specified GUID.
+
+        :param str unique_id: A GUID that identifies the file object.
+        """
+        return_file = File(self.context)
+        qry = ServiceOperationQuery(self.context.web, "GetFileById", [unique_id], None, None, return_file)
+        self.context.add_query(qry)
+        return return_file
+
+    def get_list_item(self, str_url):
+        """
+        Returns the list item that is associated with the specified server-relative URL.
+
+        :param str str_url: A string that contains the server-relative URL,
+        for example, "/sites/MySite/Shared Documents/MyDocument.docx".
+        :return: ListItem
+        """
+        return_item = ListItem(self.context)
+        qry = ServiceOperationQuery(self.context.web, "GetListItem", [str_url], None, None, return_item)
+        self.context.add_query(qry)
+        return return_item
 
     @property
     def webs(self):

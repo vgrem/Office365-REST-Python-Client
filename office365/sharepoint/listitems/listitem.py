@@ -86,9 +86,11 @@ class ListItem(SecurableObject):
         super(ListItem, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:
-            if name == "Id":
+            if name == "Id" and self._parent_collection:
                 self._resource_path = ResourcePathServiceOperation(
                     "getItemById", [value], self._parent_collection.resource_path.parent)
+            elif name == "GUID":
+                self._resource_path = ResourcePathServiceOperation("GetFileById", [value], self.context.web.resource_path)
 
     def ensure_type_name(self, target_list):
         """

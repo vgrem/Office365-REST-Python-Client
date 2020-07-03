@@ -49,7 +49,7 @@ class ClientObject(object):
             self._changes.append(name)
 
         safe_name = name[0].lower() + name[1:]
-        if hasattr(self, safe_name):
+        if hasattr(self, safe_name) and value:
             prop_type = getattr(self, safe_name)
             if isinstance(prop_type, ClientObject) or isinstance(prop_type, ClientValue):
                 [prop_type.set_property(k, v, persist_changes) for k, v in value.items()]

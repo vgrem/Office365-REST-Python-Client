@@ -30,19 +30,25 @@ class TestSharePointWeb(SPTestCase):
         self.client.execute_query()
         self.assertIsNotNone(result.value)
 
-    def test3_does_user_has_perms(self):
+    def test3_get_list_item_by_url(self):
+        page_url = "SitePages/Home.aspx".format(site_url=settings['url'])
+        target_item = self.client.web.get_list_item(page_url)
+        self.client.execute_query()
+        self.assertIsNotNone(target_item.resource_path)
+
+    def test4_does_user_has_perms(self):
         perms = BasePermissions()
         perms.set(PermissionKind.ManageWeb)
         result = self.client.web.does_user_have_permissions(perms)
         self.client.execute_query()
         self.assertIsInstance(result.value, bool)
 
-    def test4_get_user_permissions(self):
+    def test5_get_user_permissions(self):
         result = self.client.web.get_user_effective_permissions(self.__class__.target_user.login_name)
         self.client.execute_query()
         self.assertIsInstance(result.value, BasePermissions)
 
-    def test5_can_create_web(self):
+    def test6_can_create_web(self):
         target_web_name = "workspace_" + str(randint(0, 100000))
         creation_info = WebCreationInformation()
         creation_info.Url = target_web_name
@@ -56,12 +62,12 @@ class TestSharePointWeb(SPTestCase):
         self.assertEqual(len(results), 1)
         self.assertIsNotNone(results[0].resource_path)
 
-    def test6_get_sub_web(self):
+    def test7_get_sub_web(self):
         sub_webs = self.client.web.get_sub_webs_filtered_for_current_user(SubwebQuery())
         self.client.execute_query()
         self.assertGreater(len(sub_webs), 0)
 
-    def test7_if_web_updated(self):
+    def test8_if_web_updated(self):
         """Test to update Web resource"""
         web_title_updated = self.__class__.target_web.properties["Title"] + "_updated"
         self.__class__.target_web.set_property("Title", web_title_updated)
@@ -72,7 +78,7 @@ class TestSharePointWeb(SPTestCase):
         self.client.execute_query()
         self.assertEqual(web_title_updated, self.__class__.target_web.properties['Title'])
 
-    def test8_if_web_deleted(self):
+    def test9_if_web_deleted(self):
         """Test to delete Web resource"""
         title = self.__class__.target_web.properties['Title']
         self.__class__.target_web.delete_object()
@@ -83,25 +89,25 @@ class TestSharePointWeb(SPTestCase):
         self.client.execute_query()
         self.assertEqual(len(results), 0)
 
-    def test9_enum_all_webs(self):
+    def test_10_enum_all_webs(self):
         """Test to enumerate all webs within site"""
         result = self.client.web.get_all_webs()
         self.client.execute_query()
         self.assertTrue(len(result.value) > 0)
 
-    def test_10_read_list(self):
+    def test_11_read_list(self):
         site_pages = self.client.web.get_list("SitePages")
         self.client.load(site_pages)
         self.client.execute_query()
         self.assertIsNotNone(site_pages.properties['Title'])
 
-    def test_11_get_user_perms(self):
+    def test_12_get_user_perms(self):
         result = self.client.web.get_user_effective_permissions(self.__class__.target_user.login_name)
         self.client.execute_query()
         self.assertIsInstance(result.value, BasePermissions)
         self.assertGreater(len(result.value.permission_levels), 0)
 
-    def test_12_get_user_by_id(self):
+    def test_13_get_user_by_id(self):
         result_user = self.client.web.get_user_by_id(self.__class__.target_user.id)
         self.client.load(result_user)
         self.client.execute_query()

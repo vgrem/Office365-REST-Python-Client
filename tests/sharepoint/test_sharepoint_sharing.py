@@ -2,15 +2,15 @@ import urllib.parse
 from unittest import TestCase
 from office365.runtime.auth.userCredential import UserCredential
 from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.principal.user import User
 from office365.sharepoint.sharing.sharingResult import SharingResult
-from office365.sharepoint.ui.applicationpages.clientPeoplePickerQueryParameters import ClientPeoplePickerQueryParameters
-from office365.sharepoint.ui.applicationpages.clientPeoplePickerWebServiceInterface import \
-    ClientPeoplePickerWebServiceInterface
 from office365.sharepoint.webs.web import Web
 from settings import settings
 
 
 class TestSharePointSharing(TestCase):
+    target_user = None  # type: User
+    target_file_url = urllib.parse.urljoin(settings['url'], "/SitePages/Home.aspx")
 
     @classmethod
     def setUpClass(cls):
@@ -18,25 +18,33 @@ class TestSharePointSharing(TestCase):
                                      password=settings['user_credentials']['password'])
         cls.client = ClientContext(settings['url']).with_credentials(credentials)
 
+        current_user = cls.client.web.currentUser
+        cls.client.load(current_user)
+        cls.client.execute_query()
+        cls.target_user = current_user
+
     def test1_get_object_sharing_settings(self):
-        file_abs_url = urllib.parse.urljoin(settings['url'], "/SitePages/Home.aspx")
-        result = Web.get_object_sharing_settings(self.client, file_abs_url, 0, True)
+        result = Web.get_object_sharing_settings(self.client, self.target_file_url, 0, True)
         self.client.execute_query()
         self.assertIsNotNone(result.web_url)
 
     def test2_share_file(self):
-        file_abs_url = urllib.parse.urljoin(settings['url'], "/SitePages/Home.aspx")
-
-        current_user = self.client.web.currentUser
-        self.client.load(current_user)
+        result = Web.share_file(self.client, self.target_file_url, self.target_user.properties['UserPrincipalName'])
         self.client.execute_query()
+        self.assertIsInstance(result, SharingResult)
 
-        params = ClientPeoplePickerQueryParameters(current_user.properties['UserPrincipalName'])
-        result = ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(self.client, params)
+    def test3_unshare_file(self):
+        result = Web.unshare_object(self.client, self.target_file_url)
         self.client.execute_query()
-        self.assertIsNotNone(result.value)
+        self.assertIsInstance(result, SharingResult)
+        self.assertIsNone(result.errorMessage)
 
-        sharing_result = Web.share_object(self.client, file_abs_url, result.value)
+    def test4_share_web(self):
+        result = self.client.web.share(self.target_user.properties['UserPrincipalName'])
         self.client.execute_query()
-        self.assertIsInstance(sharing_result, SharingResult)
-        self.assertIsNone(sharing_result.errorMessage)
+        self.assertIsInstance(result, SharingResult)
+
+    def test5_unshare_web(self):
+        result = self.client.web.unshare()
+        self.client.execute_query()
+        self.assertIsInstance(result, SharingResult)
