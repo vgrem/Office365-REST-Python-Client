@@ -6,7 +6,7 @@ class ClientObject(object):
 
     def __init__(self, context, resource_path=None, properties=None, parent_collection=None):
         """
-        Base client object
+        Base client object which define named properties and relationships of an entity
 
         :type parent_collection: office365.runtime.client_object_collection.ClientObjectCollection or None
         :type properties: dict or None
@@ -25,7 +25,10 @@ class ClientObject(object):
                 self.set_property(k, v, True)
 
     def is_property_available(self, name):
-        """Returns a Boolean value that indicates whether the specified property has been retrieved or set."""
+        """Returns a Boolean value that indicates whether the specified property has been retrieved or set.
+
+        :param str name: A Property name
+        """
         if name in self.properties:
             return True
         return False
@@ -43,8 +46,18 @@ class ClientObject(object):
             return
         self._parent_collection.remove_child(self)
 
+    def get_property(self, name):
+        getter_name = name[0].lower() + name[1:]
+        if hasattr(self, getter_name):
+            return getattr(self, getter_name)
+        return self._properties.get(name, None)
+
     def set_property(self, name, value, persist_changes=True):
-        """Set resource property value"""
+        """Sets Property value
+        :param str name: Property name
+        :param any value: Property value
+        :param bool persist_changes: Persist changes
+        """
         if persist_changes:
             self._changes.append(name)
 
@@ -62,15 +75,22 @@ class ClientObject(object):
     def to_json(self):
         return dict((k, v) for k, v in self.properties.items() if k in self._changes)
 
-    def ensure_property(self, name, action):
+    def ensure_property(self, name_or_names, action):
         """
-        Ensures property is loaded
+        Ensures if property is loaded or list of properties are loaded
 
         :type action: any
-        :type name: str
+        :type name_or_names: str or list[str]
         """
-        if not self.is_property_available(name):
-            self.context.load(self, [name])
+        names_to_include = []
+        if isinstance(name_or_names, list):
+            names_to_include = [n for n in name_or_names if not self.is_property_available(n)]
+        else:
+            if not self.is_property_available(name_or_names):
+                names_to_include.append(name_or_names)
+
+        if len(names_to_include) > 0:
+            self.context.load(self, names_to_include)
             self.context.afterExecuteOnce += action
         else:
             action(self)
@@ -80,10 +100,6 @@ class ClientObject(object):
         if self._entity_type_name is None:
             self._entity_type_name = "SP." + type(self).__name__
         return self._entity_type_name
-
-    @entity_type_name.setter
-    def entity_type_name(self, value):
-        self._entity_type_name = value
 
     @property
     def resource_url(self):

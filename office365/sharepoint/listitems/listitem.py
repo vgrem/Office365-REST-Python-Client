@@ -1,15 +1,83 @@
 from office365.runtime.clientValueCollection import ClientValueCollection
 from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery
+from office365.runtime.client_result import ClientResult
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.fields.fieldLookupValue import FieldLookupValue
 from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupValue
 from office365.sharepoint.permissions.securable_object import SecurableObject
+from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
+from office365.sharepoint.sharing.objectSharingInformation import ObjectSharingInformation
+from office365.sharepoint.sharing.sharingResult import SharingResult
+from office365.sharepoint.ui.applicationpages.clientPeoplePickerQueryParameters import ClientPeoplePickerQueryParameters
+from office365.sharepoint.ui.applicationpages.clientPeoplePickerWebServiceInterface import \
+    ClientPeoplePickerWebServiceInterface
 
 
 class ListItem(SecurableObject):
     """ListItem resource"""
+
+    def share(self, user_principal_name,
+              shareOption=ExternalSharingSiteOption.View,
+              sendEmail=True, emailSubject=None, emailBody=None):
+        """
+        Share a ListItem (file or folder facet)
+
+        :param str user_principal_name: User identifier
+        :param ExternalSharingSiteOption shareOption: The sharing type of permission to grant on the object.
+        :param bool sendEmail: A flag to determine if an email notification SHOULD be sent (if email is configured).
+        :param str emailSubject: The email subject.
+        :param str emailBody: The email subject.
+        :return: SharingResult
+        """
+
+        result = ClientResult(SharingResult(self.context))
+        file_result = ClientResult(str)
+
+        role_values = {
+            ExternalSharingSiteOption.View: "role:1073741826",
+            ExternalSharingSiteOption.Edit: "role:1073741827",
+        }
+
+        def _property_resolved(target_item):
+            file_result.value = target_item.get_property("EncodedAbsUrl")
+
+        def _picker_value_resolved(picker_value):
+            from office365.sharepoint.webs.web import Web
+            result.value = Web.share_object(self.context, file_result.value, picker_value, role_values[shareOption],
+                                            0,
+                                            False, sendEmail, False, emailSubject, emailBody)
+
+        self.ensure_property("EncodedAbsUrl", _property_resolved)
+        params = ClientPeoplePickerQueryParameters(user_principal_name)
+        ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(self.context,
+                                                                                params, _picker_value_resolved)
+        return result.value
+
+    def unshare(self):
+        """
+                Share a ListItem (file or folder facet)
+        """
+        result = ClientResult(SharingResult(self.context))
+
+        def _property_resolved(target_item):
+            abs_url = target_item.get_property("EncodedAbsUrl")
+            from office365.sharepoint.webs.web import Web
+            result.value = Web.unshare_object(self.context, abs_url)
+
+        self.ensure_property("EncodedAbsUrl", _property_resolved)
+        return result.value
+
+    def get_sharing_information(self):
+        result = ClientResult(ObjectSharingInformation(self.context))
+
+        def _item_resolved(return_type):
+            result.value = ObjectSharingInformation.get_list_item_sharing_information(
+                self.context, return_type.parentList.properties["Id"], return_type.properties["Id"])
+
+        self.ensure_property(["Id", "ParentList"], _item_resolved)
+        return result.value
 
     def update(self):
         """Update the list item."""
@@ -89,8 +157,6 @@ class ListItem(SecurableObject):
             if name == "Id" and self._parent_collection:
                 self._resource_path = ResourcePathServiceOperation(
                     "getItemById", [value], self._parent_collection.resource_path.parent)
-            elif name == "GUID":
-                self._resource_path = ResourcePathServiceOperation("GetFileById", [value], self.context.web.resource_path)
 
     def ensure_type_name(self, target_list):
         """

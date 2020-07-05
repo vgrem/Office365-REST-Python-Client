@@ -214,7 +214,7 @@ class Web(SecurableObject):
     def default_document_library(self):
         """Retrieves the default document library."""
         return List(self.context,
-                    ResourcePathServiceOperation("defaultDocumentLibrary", [], self.resource_path))
+                    ResourcePathServiceOperation("defaultDocumentLibrary", None, self.resource_path))
 
     def get_list(self, url):
         """Get list by url
@@ -282,40 +282,6 @@ class Web(SecurableObject):
 
         self.ensure_property("Url", _web_initialized)
         return sharing_result.value
-
-    @staticmethod
-    def share_file(context, abs_file_url, user_principal_name,
-                   shareOption=ExternalSharingSiteOption.View,
-                   sendEmail=True, emailSubject=None, emailBody=None):
-        """
-        Share a file
-
-        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
-        :param str abs_file_url: A file absolute Url for sharing
-        :param str user_principal_name: User identifier
-        :param ExternalSharingSiteOption shareOption: The sharing type of permission to grant on the object.
-        :param bool sendEmail: A flag to determine if an email notification SHOULD be sent (if email is configured).
-        :param str emailSubject: The email subject.
-        :param str emailBody: The email subject.
-        :return: SharingResult
-        """
-
-        result = {
-            "return_type": SharingResult(context),
-        }
-        role_values = {
-            ExternalSharingSiteOption.View: "role:1073741826",
-            ExternalSharingSiteOption.Edit: "role:1073741827",
-        }
-
-        def _picker_value_resolved(picker_value):
-            result["return_type"] = Web.share_object(context, abs_file_url, picker_value, role_values[shareOption],
-                                                     0,
-                                                     False, sendEmail, False, emailSubject, emailBody)
-
-        params = ClientPeoplePickerQueryParameters(user_principal_name)
-        ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(context, params, _picker_value_resolved)
-        return result["return_type"]
 
     @staticmethod
     def _resolve_group_value(context, share_option, on_resolved):
@@ -419,9 +385,7 @@ class Web(SecurableObject):
         for example, "/sites/MySite/Shared Documents/MyDocument.docx".
         :return: ListItem
         """
-        return_item = ListItem(self.context)
-        qry = ServiceOperationQuery(self.context.web, "GetListItem", [str_url], None, None, return_item)
-        self.context.add_query(qry)
+        return_item = ListItem(self.context, ResourcePathServiceOperation("GetListItem", [str_url], self.resource_path))
         return return_item
 
     @property

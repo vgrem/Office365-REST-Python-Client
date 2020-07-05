@@ -15,14 +15,52 @@ from office365.sharepoint.views.view_collection import ViewCollection
 
 
 class List(SecurableObject):
-    """List client object"""
+    """List resource"""
 
     def __init__(self, context, resource_path=None):
         super(List, self).__init__(context, resource_path)
 
+    def save_as_template(self, fileName, name, description, saveData):
+        """
+        Saves the list as a template in the list template gallery and includes the option of saving with or
+        without the data that is contained in the current list.
+
+        :param bool saveData: true to save the data of the original list along with the list template; otherwise, false.
+        :param str description: A string that contains the description for the list template.
+        :param str name: A string that contains the title for the list template.
+        :param str fileName: A string that contains the file name for the list template with an .stp extension.
+        :return:
+        """
+        payload = {
+            "strFileName": fileName,
+            "strName": name,
+            "strDescription": description,
+            "bSaveData": saveData
+        }
+        qry = ServiceOperationQuery(self, "saveAsTemplate", None, payload, None, None)
+        self.context.add_query(qry)
+
+    def get_item_by_unique_id(self, uniqueId):
+        """
+        Returns the list item with the specified ID.
+
+        :param str uniqueId:"""
+        item = ListItem(self.context, ResourcePathServiceOperation("getItemByUniqueId", [uniqueId], self.resource_path))
+        return item
+
     def get_web_dav_url(self, source_url):
-        result = ClientResult(None)
-        qry = ServiceOperationQuery(self, "getWebDavUrl", [source_url], None, None, result)
+        """
+        Gets the trusted URL for opening the folder in Explorer view.
+
+        :param str source_url: The URL of the current folder the user is in.
+        :return: ClientResult
+        """
+
+        result = ClientResult(str)
+        payload = {
+            "sourceUrl": source_url
+        }
+        qry = ServiceOperationQuery(self, "getWebDavUrl", None, payload, None, result)
         self.context.add_query(qry)
         return result
 
@@ -40,6 +78,7 @@ class List(SecurableObject):
     def add_item(self, list_item_creation_information):
         """The recommended way to add a list item is to send a POST request to the ListItemCollection resource endpoint,
          as shown in ListItemCollection request examples.
+
          :type list_item_creation_information: ListItemCreationInformation or dict"""
         item = ListItem(self.context)
         for k, v in list_item_creation_information.items():
@@ -52,6 +91,7 @@ class List(SecurableObject):
 
     def get_item_by_id(self, item_id):
         """Returns the list item with the specified list item identifier.
+
         :type item_id: int
         """
         return ListItem(self.context,
@@ -59,6 +99,7 @@ class List(SecurableObject):
 
     def get_view(self, view_id):
         """Returns the list view with the specified view identifier.
+
         :type view_id: str
         """
         view = View(self.context, ResourcePathServiceOperation("getView", [view_id], self.resource_path), self)

@@ -1,10 +1,15 @@
+import copy
+from office365.runtime.client_object import ClientObject
+
+
 class ClientQuery(object):
     """Client query"""
 
     def __init__(self, binding_type, parameter_type=None, parameter_name=None, return_type=None):
         """
+        Base query
 
-        :type binding_type: ClientObject
+        :type binding_type: office365.runtime.client_object.ClientObject
         :type parameter_type:  ClientObject or ClientValue or dict or bytes or None
         :type parameter_name:  str or None
         :type return_type:  ClientObject or ClientResult or ClientValueObject or None
@@ -38,9 +43,9 @@ class ClientQuery(object):
 class CreateEntityQuery(ClientQuery):
     def __init__(self, parent_entity, create_info, entity_to_create):
         """
-        Create query
+        Create entity query
 
-        :type entity_to_create: ClientObject
+        :type entity_to_create: office365.runtime.client_object.ClientObject
         :type create_info: ClientObject or ClientValue or dict
         :type parent_entity: ClientObject
         """
@@ -50,22 +55,30 @@ class CreateEntityQuery(ClientQuery):
 class ReadEntityQuery(ClientQuery):
     def __init__(self, entity_to_read, properties_to_include=None):
         """
-        Read query
+        Read entity query
 
         :type properties_to_include: list[str] or None
-        :type entity_to_read: ClientObject
+        :type entity_to_read: office365.runtime.client_object.ClientObject
         """
-        super(ReadEntityQuery, self).__init__(entity_to_read, None, None, entity_to_read)
+        binding_type = copy.deepcopy(entity_to_read)
+        super(ReadEntityQuery, self).__init__(binding_type, None, None, entity_to_read)
         if properties_to_include:
-            entity_to_read.query_options.expand = properties_to_include
+            self._include_properties(properties_to_include)
+
+    def _include_properties(self, properties_to_include):
+        for n in properties_to_include:
+            prop_val = self._binding_type.get_property(n)
+            if isinstance(prop_val, ClientObject):
+                self._binding_type.query_options.expand.append(n)
+            self._binding_type.query_options.select.append(n)
 
 
 class UpdateEntityQuery(ClientQuery):
     def __init__(self, entity_to_update):
         """
-        Update query
+        Update entity query
 
-        :type entity_to_update: ClientObject
+        :type entity_to_update: office365.runtime.client_object.ClientObject
         """
         super(UpdateEntityQuery, self).__init__(entity_to_update, entity_to_update, None, None)
 
@@ -73,8 +86,8 @@ class UpdateEntityQuery(ClientQuery):
 class DeleteEntityQuery(ClientQuery):
     def __init__(self, entity_to_delete):
         """
-        Delete query
+        Delete entity query
 
-        :type entity_to_delete: ClientObject
+        :type entity_to_delete: office365.runtime.client_object.ClientObject
         """
         super(DeleteEntityQuery, self).__init__(entity_to_delete, None, None, None)

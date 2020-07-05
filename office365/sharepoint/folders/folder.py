@@ -121,6 +121,11 @@ class Folder(BaseEntity):
             return FileCollection(self.context, ResourcePath("Files", self.resource_path))
 
     @property
+    def serverRelativeUrl(self):
+        """Gets the server-relative URL of the list folder."""
+        return self.properties.get("ServerRelativeUrl", None)
+
+    @property
     def folders(self):
         """Get a folder collection"""
         if self.is_property_available('Folders'):
