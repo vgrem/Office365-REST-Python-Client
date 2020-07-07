@@ -1,5 +1,6 @@
 from time import sleep
 
+from office365.sharepoint.caml.camlQuery import CamlQuery
 from office365.sharepoint.lists.list import List
 from tests import random_seed
 from tests.sharepoint.sharepoint_case import SPTestCase
@@ -40,6 +41,12 @@ class TestSharePointListItem(SPTestCase):
         self.client.load(item)
         self.client.execute_query()
         self.assertIsNotNone(item.properties["Id"])
+
+    def test3_get_list_item_via_caml(self):
+        caml_query = CamlQuery.parse("<Where><Eq><FieldRef Name='ID' /><Value Type='Counter'>{0}</Value></Eq></Where>".format(self.target_item_properties["Id"]))
+        result = self.target_list.get_items(caml_query)
+        self.client.execute_query()
+        self.assertEqual(len(result), 1)
 
     def test4_update_listItem(self):
         item_to_update = self.target_list.get_item_by_id(self.target_item_properties["Id"])

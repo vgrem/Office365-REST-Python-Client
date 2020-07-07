@@ -4,6 +4,8 @@ from requests import HTTPError
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.types.EventHandler import EventHandler
+from office365.runtime.client_query import ClientQuery
+from office365.runtime.http.request_options import RequestOptions
 
 
 class ClientRequest(object):
@@ -16,12 +18,41 @@ class ClientRequest(object):
         """
         self.context = context
         self._queries = []
+        self._current_query = None
         self.beforeExecute = EventHandler()
         self.afterExecute = EventHandler()
 
     @property
     def queries(self):
+        """
+        :rtype: list[ClientQuery]
+        """
         return self._queries
+
+    @property
+    def current_query(self):
+        """
+        :rtype: ClientQuery or None
+        """
+        if self._current_query is None and len(self._queries) > 0:
+            self.next_query()
+        return self._current_query
+
+    @property
+    def last_query(self):
+        """
+        :rtype: ClientQuery or None
+        """
+        return self._queries and self._queries[-1]
+
+    def next_query(self):
+        self._current_query = self._queries and self._queries.pop(0)
+
+    def add_query(self, query):
+        """
+        :type query: ClientQuery
+        """
+        self._queries.append(query)
 
     @abstractmethod
     def build_request(self):
@@ -87,10 +118,3 @@ class ClientRequest(object):
                                   stream=request_options.stream,
                                   proxies=request_options.proxies)
         return result
-
-    def add_query(self, query):
-        """
-        :type query: ClientQuery
-
-        """
-        self._queries.append(query)

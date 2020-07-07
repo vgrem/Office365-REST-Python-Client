@@ -1,7 +1,6 @@
 import abc
-
+from functools import partial
 from office365.runtime.client_query import ReadEntityQuery
-from office365.runtime.types.EventHandler import EventHandler
 
 
 class ClientRuntimeContext(object):
@@ -15,12 +14,11 @@ class ClientRuntimeContext(object):
         """
         self._service_root_url = service_root_url
         self._auth_context = auth_context
-        self.afterExecuteOnce = EventHandler(True)
 
     @abc.abstractmethod
     def get_pending_request(self):
         """
-        :rtype: ClientRequest
+        :rtype: office365.runtime.client_request.ClientRequest
         """
         pass
 
@@ -40,18 +38,27 @@ class ClientRuntimeContext(object):
         qry = ReadEntityQuery(client_object, properties_to_retrieve)
         self.get_pending_request().add_query(qry)
 
-    def execute_request_direct(self, request):
+    def after_query_executed(self, action):
+        """
+        :param (office365.runtime.client_object.ClientObject or office365.runtime.client_result.ClientResult) -> None action:
         """
 
+        def _process_response(qry, response):
+            current_qry = self.get_pending_request().current_query
+            if current_qry.id == qry.id:
+                action(qry.return_type)
+        self.get_pending_request().afterExecute += partial(_process_response, self.get_pending_request().last_query)
+
+    def execute_request_direct(self, request):
+        """
         :type request: RequestOptions
         """
         return self.get_pending_request().execute_request_direct(request)
 
     def execute_query(self):
         while self.has_pending_request:
+            self.get_pending_request().next_query()
             self.get_pending_request().execute_query()
-            query = self.get_pending_request().current_query
-            self.afterExecuteOnce.notify(query.return_type)
 
     def add_query(self, query):
         """
@@ -59,9 +66,6 @@ class ClientRuntimeContext(object):
         :type query: ClientQuery
         """
         self.get_pending_request().add_query(query)
-
-    def add_query_first(self, query):
-        self.get_pending_request().queries.insert(0, query)
 
     def clear_queries(self):
         self.get_pending_request().queries.clear()

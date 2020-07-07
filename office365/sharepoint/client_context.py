@@ -56,9 +56,11 @@ class ClientContext(ClientRuntimeContext):
         Web.get_web_url_from_page_url(ctx, abs_url)
 
         def _init_context_for_web(result):
+            """
+            :param office365.runtime.client_result.ClientResult result:
+            """
             ctx._base_url = result.value
-
-        ctx.afterExecuteOnce += _init_context_for_web
+        ctx.after_query_executed(_init_context_for_web)
         return ctx
 
     @staticmethod
@@ -103,7 +105,7 @@ class ClientContext(ClientRuntimeContext):
 
     def with_credentials(self, credentials):
         """
-        Sets credentials
+        Assigns credentials
 
         :type credentials: UserCredential or ClientCredential
         """
@@ -117,6 +119,9 @@ class ClientContext(ClientRuntimeContext):
         super(ClientContext, self).authenticate_request(request)
 
     def get_pending_request(self):
+        """
+        :return: ODataRequest
+        """
         return self._pendingRequest
 
     def ensure_form_digest(self, request_options):

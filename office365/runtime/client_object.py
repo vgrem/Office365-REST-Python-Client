@@ -79,7 +79,7 @@ class ClientObject(object):
         """
         Ensures if property is loaded or list of properties are loaded
 
-        :type action: any
+        :type action: (any) -> None
         :type name_or_names: str or list[str]
         """
         names_to_include = []
@@ -91,7 +91,7 @@ class ClientObject(object):
 
         if len(names_to_include) > 0:
             self.context.load(self, names_to_include)
-            self.context.afterExecuteOnce += action
+            self.context.after_query_executed(action)
         else:
             action(self)
 

@@ -1,4 +1,3 @@
-from functools import partial
 from office365.graph.directory.permission_collection import PermissionCollection
 from office365.graph.onedrive.folder import Folder
 from office365.graph.onedrive.conflictBehavior import ConflictBehavior
@@ -11,10 +10,6 @@ from office365.runtime.resource_path import ResourcePath
 from office365.graph.base_item import BaseItem
 from office365.graph.onedrive.listItem import ListItem
 from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
-
-
-def _content_downloaded(file_object, result):
-    file_object.write(result.value)
 
 
 class DriveItem(BaseItem):
@@ -61,8 +56,11 @@ class DriveItem(BaseItem):
         return qry.return_type
 
     def download(self, file_object):
+        def _content_downloaded(result):
+            file_object.write(result.value)
+
         self.get_content()
-        self.context.afterExecuteOnce += partial(_content_downloaded, file_object)
+        self.context.after_query_executed(_content_downloaded)
 
     def create_folder(self, name):
         """Create a new folder or DriveItem in a Drive with a specified parent item or path.
@@ -151,20 +149,15 @@ class DriveItem(BaseItem):
         """Sends a sharing invitation for a driveItem. A sharing invitation provides permissions to the recipients
         and optionally sends them an email with a sharing link.
 
-        :param recipients: A collection of recipients who will receive access and the sharing invitation.
-        :type recipients: list[DriveRecipient]
-
-        :param message: A plain text formatted message that is included in the sharing invitation. Maximum length 2000 characters.
-        :type message: str
-
-        :param require_sign_in: Specifies whether the recipient of the invitation is required to sign-in to view the shared item.
-        :type require_sign_in: bool
-
-        :param send_invitation: If true, a sharing link is sent to the recipient. Otherwise, a permission is granted directly without sending a notification.
-        :type send_invitation: bool
-
-        :param roles: Specify the roles that are to be granted to the recipients of the sharing invitation.
-        :type roles: list[str]
+        :param list[DriveRecipient] recipients: A collection of recipients who will receive access and the sharing
+        invitation.
+        :param str message: A plain text formatted message that is included in the sharing invitation.
+        Maximum length 2000 characters.
+        :param bool require_sign_in: Specifies whether the recipient of the invitation is required to sign-in to view
+        the shared item.
+        :param bool send_invitation: If true, a sharing link is sent to the recipient. Otherwise, a permission is
+        granted directly without sending a notification.
+        :param list[str] roles: Specify the roles that are to be granted to the recipients of the sharing invitation.
         """
         if roles is None:
             roles = ["read"]

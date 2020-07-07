@@ -22,7 +22,10 @@ class ODataRequest(ClientRequest):
         """
         super(ODataRequest, self).__init__(context)
         self._json_format = json_format
-        self._current_query = None
+
+    @property
+    def json_format(self):
+        return self._json_format
 
     def execute_request_direct(self, request):
         """
@@ -36,20 +39,8 @@ class ODataRequest(ClientRequest):
         request.ensure_header('Accept', media_type)
         return super(ODataRequest, self).execute_request_direct(request)
 
-    @property
-    def current_query(self):
-        return self._current_query
-
-    @property
-    def json_format(self):
-        return self._json_format
-
-    def _get_next_query(self):
-        self._current_query = self._queries.pop(0)
-        return self._current_query
-
     def build_request(self):
-        qry = self._get_next_query()
+        qry = self.current_query
         self.json_format.function_tag_name = None
 
         if isinstance(qry, ServiceOperationQuery):

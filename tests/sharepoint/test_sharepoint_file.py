@@ -167,10 +167,10 @@ class TestSharePointFile(SPTestCase):
         target_folder = self.__class__.target_list.rootFolder
         self.client.load(target_folder)
         self.client.execute_query()
-        file_url = '/'.join([target_folder.properties["ServerRelativeUrl"], "WikiPage.aspx"])
+        file_url = '/'.join([target_folder.serverRelativeUrl, "WikiPage.aspx"])
         file_new = self.__class__.target_list.rootFolder.files.add_template_file(file_url, TemplateFileType.WikiPage)
         self.client.execute_query()
-        self.assertEqual(file_new.properties["ServerRelativeUrl"], file_url)
+        self.assertEqual(file_new.serverRelativeUrl, file_url)
 
     def test_15_delete_file(self):
         files_to_delete = self.__class__.target_list.rootFolder.files

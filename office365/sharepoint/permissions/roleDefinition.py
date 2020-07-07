@@ -5,6 +5,18 @@ class RoleDefinition(BaseEntity):
     """Defines a single role definition, including a name, description, and set of rights."""
 
     @property
+    def id(self):
+        """Specifies the identifier of the role definition.
+        Its value MUST be equal to or greater than 1073741824."""
+        return self.properties.get('Id', None)
+
+    @property
+    def roleTypeKind(self):
+        """Specifies the type of the role definition.
+        Its value MUST be equal to or greater than 0. Its value MUST be equal to or less than 5."""
+        return self.properties.get('RoleTypeKind', None)
+
+    @property
     def name(self):
         """Gets a value that specifies the role definition name."""
         return self.properties.get('Name', None)

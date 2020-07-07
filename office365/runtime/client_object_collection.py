@@ -103,12 +103,12 @@ class ClientObjectCollection(ClientObject):
         :return: ClientResult
         """
         result = ClientResult(None)
-        self.context.load(self)
 
         def _calc_items_count(target_collection):
             list(iter(target_collection))
             result.value = len(target_collection)
-        self.context.afterExecuteOnce += _calc_items_count
+        self.context.load(self)
+        self.context.after_query_executed(_calc_items_count)
         return result
 
     def _load_paged_items(self):
