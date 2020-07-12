@@ -1,6 +1,10 @@
 # About
 Office 365 & Microsoft Graph library for Python
 
+
+#### Sponsored by
+[![https://tracking.gitads.io/?repo=Office365-REST-Python-Client](https://images.gitads.io/Office365-REST-Python-Client)](https://tracking.gitads.io/?repo=Office365-REST-Python-Client)
+
 # Usage
 
 1.   [Installation](#Installation)

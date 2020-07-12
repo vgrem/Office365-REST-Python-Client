@@ -60,13 +60,12 @@ class DriveItem(BaseItem):
             file_object.write(result.value)
 
         self.get_content()
-        self.context.after_query_executed(_content_downloaded)
+        self.context.after_execute_query(_content_downloaded)
 
     def create_folder(self, name):
         """Create a new folder or DriveItem in a Drive with a specified parent item or path.
 
-        :param name: Folder name
-        :type name: str
+        :param str name: Folder name
         """
         drive_item = DriveItem(self.context, None)
         drive_item._parent_collection = self.children

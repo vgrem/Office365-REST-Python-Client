@@ -30,9 +30,10 @@ class FieldCollection(ClientObjectCollection):
         return Field(self.context, ResourcePathServiceOperation("getById", [_id], self.resource_path))
 
     def get_by_internal_name_or_title(self, name_title):
-        """Returns the first Field object with the specified internal name or title from the collection.
+        """Returns the first field (2) in the collection based on the internal name or the title specified
+        by the parameter.
 
-        :type name_title: str
+        :param str name_title:  The title or internal name to look up the field (2) by.
         """
         return Field(self.context,
                      ResourcePathServiceOperation("getByInternalNameOrTitle", [name_title], self.resource_path))

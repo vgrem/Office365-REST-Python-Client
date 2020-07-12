@@ -6,7 +6,7 @@ from office365.sharepoint.fields.fieldType import FieldType
 
 
 class Field(BaseEntity):
-    """Represents a fields in a SharePoint Web site"""
+    """A container for metadata within a SharePoint list and associated list items."""
 
     def __init__(self, context, resource_path=None):
         super().__init__(context, resource_path)
@@ -72,7 +72,10 @@ class Field(BaseEntity):
 
     @property
     def internal_name(self):
-        """Gets a value that specifies the field internal name."""
+        """Gets a value that specifies the field internal name.
+
+        :rtype: str or None
+        """
         return self.properties.get('InternalName', None)
 
     def set_property(self, name, value, persist_changes=True):

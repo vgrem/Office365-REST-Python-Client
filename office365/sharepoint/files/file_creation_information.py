@@ -5,6 +5,10 @@ class FileCreationInformation(ClientValue):
     """Represents properties that can be set when creating a file by using the FileCollection.Add method."""
 
     def __init__(self, url=None, overwrite=False, content=None):
+        """
+
+        :type url: str
+        """
         super(FileCreationInformation, self).__init__()
         self._url = url
         self._overwrite = overwrite

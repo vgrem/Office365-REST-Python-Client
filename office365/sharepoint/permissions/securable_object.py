@@ -3,11 +3,27 @@ from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuer
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.permissions.basePermissions import BasePermissions
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.permissions.roleAssignment import RoleAssignment
 from office365.sharepoint.permissions.roleAssignmentCollection import RoleAssignmentCollection
 
 
 class SecurableObject(BaseEntity):
     """An object that can be assigned security permissions."""
+
+    def get_role_assignment(self, principal):
+        """
+
+        :param office365.sharepoint.principal.principal.Principal principal: Specifies the user or group of the
+        role assignment.
+        :return: RoleAssignment
+        """
+        result = ClientResult(RoleAssignment(self.context))
+
+        def _principal_loaded(p):
+            result.value = self.roleAssignments.get_by_principal_id(p.id)
+
+        principal.ensure_property("Id", _principal_loaded)
+        return result.value
 
     def add_role_assignment(self, principal, role_def):
         """Adds a role assignment to the role assignment collection.<81>
@@ -72,10 +88,12 @@ class SecurableObject(BaseEntity):
         return result
 
     @property
-    def hasUniqueRoleAssignments(self):
+    def has_unique_role_assignments(self):
         """Specifies whether the role assignments are uniquely defined for this securable object or inherited from a
         parent securable object. If the value is "false", role assignments are inherited from a parent securable
         object.
+
+        :rtype: bool or None
         """
         return self.properties.get("HasUniqueRoleAssignments", None)
 

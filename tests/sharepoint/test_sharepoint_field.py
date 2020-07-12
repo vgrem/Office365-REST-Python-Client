@@ -30,8 +30,8 @@ class TestField(SPTestCase):
         title_field = self.client.site.rootWeb.fields.get_by_title(self.target_field_name)
         self.client.load(title_field)
         self.client.execute_query()
-        self.assertIsNotNone(title_field.properties['InternalName'])
-        self.assertEqual(title_field.properties['InternalName'], self.target_field_name)
+        self.assertIsNotNone(title_field.internal_name)
+        self.assertEqual(title_field.internal_name, self.target_field_name)
 
     def test_4_create_site_field(self):
         field_name = "Title_" + uuid.uuid4().hex

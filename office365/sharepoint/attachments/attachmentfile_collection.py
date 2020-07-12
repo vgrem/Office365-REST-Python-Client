@@ -13,7 +13,10 @@ class AttachmentFileCollection(ClientObjectCollection):
         super(AttachmentFileCollection, self).__init__(context, AttachmentFile, resource_path)
 
     def add(self, attachment_file_information):
-        """Creates an attachment"""
+        """
+        Creates an attachment
+        :type attachment_file_information: AttachmentfileCreationInformation
+        """
         if isinstance(attachment_file_information, dict):
             attachment_file_information = AttachmentfileCreationInformation(
                 attachment_file_information.get('filename'),
@@ -34,6 +37,12 @@ class AttachmentFileCollection(ClientObjectCollection):
         return target_file
 
     def get_by_filename(self, filename):
-        """Retrieve Attachment file object by filename"""
-        return AttachmentFile(self.context,
-                              ResourcePathServiceOperation("GetByFileName", [filename], self.resource_path))
+        """Retrieve Attachment file object by filename
+
+        :type filename: str
+        """
+        return AttachmentFile(context=self.context,
+                              resource_path=ResourcePathServiceOperation("GetByFileName",
+                                                                         [filename],
+                                                                         self.resource_path),
+                              parent_collection=self)

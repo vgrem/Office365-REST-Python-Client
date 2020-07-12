@@ -16,7 +16,8 @@ from office365.sharepoint.ui.applicationpages.clientPeoplePickerWebServiceInterf
 
 
 class ListItem(SecurableObject):
-    """ListItem resource"""
+    """An individual entry within a SharePoint list. Each list item has a schema that maps to fields in the list
+    that contains the item, depending on the content type of the item."""
 
     def share(self, user_principal_name,
               shareOption=ExternalSharingSiteOption.View,
@@ -114,6 +115,14 @@ class ListItem(SecurableObject):
         self.context.add_query(qry)
 
     @property
+    def display_name(self):
+        """Specifies the display name of the list item.
+
+        :rtype: str or None
+        """
+        return self.properties.get("DisplayName", None)
+
+    @property
     def parentList(self):
         """Get parent List"""
         if self.is_property_available("ParentList"):
@@ -142,7 +151,7 @@ class ListItem(SecurableObject):
 
     @property
     def attachmentFiles(self):
-        """Get attachment files"""
+        """Specifies the collection of attachments that are associated with the list item.<62>"""
         if self.is_property_available('AttachmentFiles'):
             return self.properties["AttachmentFiles"]
         else:

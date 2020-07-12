@@ -47,11 +47,11 @@ class GroupSiteManager(ClientObject):
         group_site_info = GroupSiteInfo()
         qry = ServiceOperationQuery(self, "GetSiteStatus", None, {'groupId': group_id}, None, group_site_info)
         self.context.add_query(qry)
-        self.context.get_pending_request().beforeExecute += self._construct_status_request
+
+        def _construct_status_request(request):
+            query = self.context.get_pending_request().current_query
+            request.method = HttpMethod.Get
+            request.url += "?groupId='{0}'".format(query.parameter_type['groupId'])
+        self.context.before_execute(_construct_status_request)
         return group_site_info
 
-    def _construct_status_request(self, request):
-        query = self.context.get_pending_request().current_query
-        request.method = HttpMethod.Get
-        request.url += "?groupId='{0}'".format(query.parameter_type['groupId'])
-        self.context.get_pending_request().beforeExecute -= self._construct_status_request

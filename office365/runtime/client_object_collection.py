@@ -1,3 +1,4 @@
+from office365.runtime.resource_path import ResourcePath
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_object import ClientObject
 from office365.runtime.http.request_options import RequestOptions
@@ -9,7 +10,7 @@ class ClientObjectCollection(ClientObject):
     def __init__(self, context, item_type, resource_path=None):
         """Client object collection
 
-        :type context: ClientRuntimeContext
+        :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         :type item_type: type[ClientObject]
         :type resource_path: ResourcePath
         """
@@ -52,6 +53,9 @@ class ClientObjectCollection(ClientObject):
         self._data.remove(client_object)
 
     def __iter__(self):
+        """
+        :rtype: collections.Iterable[ClientObject]
+        """
         for cur_item in self._data:
             yield cur_item
 
@@ -108,7 +112,7 @@ class ClientObjectCollection(ClientObject):
             list(iter(target_collection))
             result.value = len(target_collection)
         self.context.load(self)
-        self.context.after_query_executed(_calc_items_count)
+        self.context.after_execute_query(_calc_items_count)
         return result
 
     def _load_paged_items(self):

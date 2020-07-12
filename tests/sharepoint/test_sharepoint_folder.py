@@ -32,9 +32,9 @@ class TestSharePointFolder(SPTestCase):
         parent_folder = self.__class__.target_list.rootFolder
         self.client.load(parent_folder)
         self.client.execute_query()
-        self.assertIsNotNone(parent_folder.properties["ServerRelativeUrl"])
+        self.assertIsNotNone(parent_folder.serverRelativeUrl)
 
-        folder_url = parent_folder.properties["ServerRelativeUrl"]
+        folder_url = parent_folder.serverRelativeUrl
         folder_object = self.client.web.get_folder_by_server_relative_url(folder_url)
         self.client.load(folder_object)
         self.client.execute_query()
@@ -88,7 +88,7 @@ class TestSharePointFolder(SPTestCase):
         folder_name = "Copy_" + str(randint(0, 1000))
         folder_to = self.__class__.target_list.rootFolder.add(folder_name)
         self.client.execute_query()
-        self.assertIsNotNone(folder_to.properties['ServerRelativeUrl'])
+        self.assertIsNotNone(folder_to.serverRelativeUrl)
 
         # 3. copy folder with files
         folder_to_copy.copyto(folder_to.properties['ServerRelativeUrl'], True)

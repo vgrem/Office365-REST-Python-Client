@@ -1,6 +1,8 @@
 import abc
-from functools import partial
+from office365.runtime.http.request_options import RequestOptions
+from office365.runtime.client_query import ClientQuery
 from office365.runtime.client_query import ReadEntityQuery
+
 
 
 class ClientRuntimeContext(object):
@@ -38,16 +40,53 @@ class ClientRuntimeContext(object):
         qry = ReadEntityQuery(client_object, properties_to_retrieve)
         self.get_pending_request().add_query(qry)
 
-    def after_query_executed(self, action):
+    def before_execute(self, action, once=True):
         """
-        :param (office365.runtime.client_object.ClientObject or office365.runtime.client_result.ClientResult) -> None action:
+        Attach an event handler which is triggered before request is submitted to server
+
+        :param (RequestOptions) -> None action:
+        :param bool once:
+        :return: None
+        """
+        def _process_request(request):
+            if once:
+                self.get_pending_request().beforeExecute -= _process_request
+            action(request)
+
+        self.get_pending_request().beforeExecute += _process_request
+
+    def after_execute(self, action, once=True):
+        """
+        Attach an event handler which is triggered after request is submitted to server
+
+        :param (RequestOptions) -> None action:
+        :param bool once:
+        :return: None
         """
 
-        def _process_response(qry, response):
+        def _process_response(response):
+            if once:
+                self.get_pending_request().afterExecute -= _process_response
+            action(response)
+        self.get_pending_request().afterExecute += _process_response
+
+    def after_execute_query(self, action, query=None):
+        """
+        Attach an event handler (for a query) which is triggered once the request is submitted to server
+
+        :type action: (office365.runtime.client_object.ClientObject or office365.runtime.client_result.ClientResult) -> None
+        :type query: ClientQuery or None
+        """
+        if query is None:
+            query = self.get_pending_request().last_query
+
+        def _process_response(response):
             current_qry = self.get_pending_request().current_query
-            if current_qry.id == qry.id:
-                action(qry.return_type)
-        self.get_pending_request().afterExecute += partial(_process_response, self.get_pending_request().last_query)
+            if current_qry.id == query.id:
+                self.get_pending_request().afterExecute -= _process_response
+                action(query.return_type)
+
+        self.get_pending_request().afterExecute += _process_response
 
     def execute_request_direct(self, request):
         """

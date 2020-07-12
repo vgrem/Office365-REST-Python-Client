@@ -9,7 +9,7 @@ ctx = ClientContext.connect_with_credentials(settings['url'],
                                              UserCredential(settings['user_credentials']['username'],
                                                             settings['user_credentials']['password']))
 
-path = "../../tests/data/SharePoint User Guide.docx"
+path = "../../../tests/data/SharePoint User Guide.docx"
 with open(path, 'rb') as content_file:
     file_content = content_file.read()
 

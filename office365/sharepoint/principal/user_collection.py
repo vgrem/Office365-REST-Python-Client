@@ -12,6 +12,11 @@ class UserCollection(ClientObjectCollection):
         super(UserCollection, self).__init__(context, User, resource_path)
 
     def add_user(self, login_name):
+        """
+        Adds a user
+
+        :type login_name: str
+        """
         user = User(self.context)
         user._parent_collection = self
         user.set_property('LoginName', login_name)
@@ -21,7 +26,10 @@ class UserCollection(ClientObjectCollection):
         return user
 
     def get_by_email(self, email):
-        """Retrieve User object by email"""
+        """Retrieve User object by email
+
+        :type email: str
+        """
         return User(self.context, ResourcePathServiceOperation("GetByEmail", [email], self.resource_path))
 
     def get_by_id(self, user_id):
@@ -29,7 +37,10 @@ class UserCollection(ClientObjectCollection):
         return User(self.context, ResourcePathServiceOperation("GetById", [user_id], self.resource_path))
 
     def get_by_login_name(self, login_name):
-        """Retrieve User object by login name"""
+        """Retrieve User object by login name
+
+        :type login_name: str
+        """
         return User(self.context,
                     ResourcePathServiceOperation("GetByLoginName", [login_name], self.resource_path))
 

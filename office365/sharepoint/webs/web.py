@@ -71,7 +71,7 @@ class Web(SecurableObject):
         result = ClientResult(self.webs)
         qry = ClientQuery(self.webs, None, None, result)
         self.context.add_query(qry)
-        self.context.after_query_executed(self._load_sub_webs)
+        self.context.after_execute_query(self._load_sub_webs)
         return result
 
     def _load_sub_webs(self, result):
@@ -218,6 +218,7 @@ class Web(SecurableObject):
 
     def get_list(self, url):
         """Get list by url
+
         :type url: str
         """
         return List(self.context,
@@ -303,7 +304,7 @@ class Web(SecurableObject):
         }
         grp = options[share_option]
         context.load(grp)
-        context.after_query_executed(_group_resolved)
+        context.after_execute_query(_group_resolved)
 
     @staticmethod
     def share_object(context, url, peoplePickerInput,

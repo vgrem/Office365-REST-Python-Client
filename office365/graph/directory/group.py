@@ -19,7 +19,13 @@ class Group(DirectoryObject):
         team._parent_collection = self.parent_collection
         qry = ServiceOperationQuery(self, "team", None, team, None, team)
         self.context.add_query(qry)
-        self.context.get_pending_request().beforeExecute += self._construct_create_team_request
+
+        def _construct_create_team_request(request):
+            request.method = HttpMethod.Put
+            request.set_header('Content-Type', "application/json")
+            request.data = json.dumps(request.data)
+
+        self.context.before_execute(_construct_create_team_request)
         return team
 
     def delete_object(self, permanent_delete=False):
@@ -32,12 +38,6 @@ class Group(DirectoryObject):
         if permanent_delete:
             deleted_item = self.context.directory.deletedGroups[self.id]
             deleted_item.delete_object()
-
-    def _construct_create_team_request(self, request):
-        request.method = HttpMethod.Put
-        request.set_header('Content-Type', "application/json")
-        request.data = json.dumps(request.data)
-        self.context.get_pending_request().beforeExecute -= self._construct_create_team_request
 
     @property
     def members(self):

@@ -66,7 +66,7 @@ class TestSharePointFile(SPTestCase):
         self.__class__.target_file = files[0]
 
     def test4_get_file_from_absolute_url(self):
-        file_abs_url = self.client.base_url + self.__class__.target_file.properties['ServerRelativeUrl']
+        file_abs_url = self.client.base_url + self.__class__.target_file.serverRelativeUrl
         file = File.from_url(file_abs_url).with_credentials(self.credentials).load().execute_query()
         self.assertIsNotNone(file.serverRelativeUrl)
 

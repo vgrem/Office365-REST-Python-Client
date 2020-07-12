@@ -4,7 +4,7 @@ from office365.runtime.client_query import UpdateEntityQuery
 
 class BaseEntity(ClientObject):
 
-    def __init__(self, context, resource_path=None, namespace="SP"):
+    def __init__(self, context, resource_path=None, namespace="SP", parent_collection=None):
         """
         SharePoint base entity
 
@@ -12,7 +12,7 @@ class BaseEntity(ClientObject):
         :param ResourcePath resource_path:
         :param str namespace:
         """
-        super().__init__(context, resource_path)
+        super().__init__(context, resource_path, None, parent_collection)
         self._namespace = namespace
 
     def with_credentials(self, credentials):

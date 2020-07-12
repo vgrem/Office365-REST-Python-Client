@@ -60,7 +60,7 @@ class ClientContext(ClientRuntimeContext):
             :param office365.runtime.client_result.ClientResult result:
             """
             ctx._base_url = result.value
-        ctx.after_query_executed(_init_context_for_web)
+        ctx.after_execute_query(_init_context_for_web)
         return ctx
 
     @staticmethod

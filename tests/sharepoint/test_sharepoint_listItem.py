@@ -1,6 +1,6 @@
 from time import sleep
-
 from office365.sharepoint.caml.camlQuery import CamlQuery
+from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.list import List
 from tests import random_seed
 from tests.sharepoint.sharepoint_case import SPTestCase
@@ -10,6 +10,7 @@ from office365.sharepoint.lists.list_template_type import ListTemplateType
 
 class TestSharePointListItem(SPTestCase):
     target_list = None  # type: List
+    target_item = None  # type: ListItem
 
     @classmethod
     def setUpClass(cls):
@@ -19,10 +20,7 @@ class TestSharePointListItem(SPTestCase):
                                                                   None,
                                                                   ListTemplateType.Tasks)
                                           )
-        cls.target_item_properties = {
-            "Title": "Task %s" % random_seed,
-            "Id": None
-        }
+        cls.default_title = "Task %s" % random_seed
 
     @classmethod
     def tearDownClass(cls):
@@ -30,26 +28,27 @@ class TestSharePointListItem(SPTestCase):
         cls.client.execute_query()
 
     def test1_create_list_item(self):
-        item_properties = {'Title': self.target_item_properties["Title"]}
-        item = self.target_list.add_item(item_properties)
+        item_properties = {'Title': self.default_title}
+        new_item = self.target_list.add_item(item_properties)
         self.client.execute_query()
-        self.assertIsNotNone(item.properties["Title"])
-        self.target_item_properties["Id"] = item.properties["Id"]
+        self.assertIsNotNone(new_item.properties["Title"])
+        self.__class__.target_item = new_item
 
-    def test2_get_list_item(self):
-        item = self.target_list.get_item_by_id(self.target_item_properties["Id"])
+    def test3_get_list_item(self):
+        item = self.target_list.get_item_by_id(self.__class__.target_item.properties["Id"])
         self.client.load(item)
         self.client.execute_query()
         self.assertIsNotNone(item.properties["Id"])
 
-    def test3_get_list_item_via_caml(self):
-        caml_query = CamlQuery.parse("<Where><Eq><FieldRef Name='ID' /><Value Type='Counter'>{0}</Value></Eq></Where>".format(self.target_item_properties["Id"]))
+    def test4_get_list_item_via_caml(self):
+        item_id = self.__class__.target_item.properties["Id"]
+        caml_query = CamlQuery.parse("<Where><Eq><FieldRef Name='ID' /><Value Type='Counter'>{0}</Value></Eq></Where>".format(item_id))
         result = self.target_list.get_items(caml_query)
         self.client.execute_query()
         self.assertEqual(len(result), 1)
 
-    def test4_update_listItem(self):
-        item_to_update = self.target_list.get_item_by_id(self.target_item_properties["Id"])
+    def test5_update_listItem(self):
+        item_to_update = self.__class__.target_item
         self.client.load(item_to_update)
         self.client.execute_query()
         last_updated = item_to_update.properties['Modified']
@@ -61,10 +60,10 @@ class TestSharePointListItem(SPTestCase):
         self.client.load(item_to_update)  # retrieve updated
         self.client.execute_query()
         self.assertNotEqual(item_to_update.properties["Modified"], last_updated)
-        self.assertEqual(item_to_update.properties["Title"], new_title)
+        self.assertNotEqual(self.default_title, new_title)
 
-    def test5_systemUpdate_listItem(self):
-        item_to_update = self.target_list.get_item_by_id(self.target_item_properties["Id"])
+    def test6_systemUpdate_listItem(self):
+        item_to_update = self.__class__.target_item
         self.client.load(item_to_update)
         self.client.execute_query()
         last_updated = item_to_update.properties['Modified']
@@ -75,19 +74,20 @@ class TestSharePointListItem(SPTestCase):
         self.client.load(item_to_update)  # retrieve updated
         self.client.execute_query()
         self.assertEqual(item_to_update.properties["Modified"], last_updated)
-        self.assertEqual(item_to_update.properties["Title"], new_title)
+        self.assertNotEqual(self.default_title, new_title)
 
-    def test6_update_overwrite_version(self):
-        item_to_update = self.target_list.get_item_by_id(self.target_item_properties["Id"])
+    def test7_update_overwrite_version(self):
+        item_to_update = self.__class__.target_item
         item_to_update.update_overwrite_version()
         self.client.execute_query()
 
-    def test7_delete_list_item(self):
-        item = self.target_list.get_item_by_id(self.target_item_properties["Id"])
-        item.delete_object()
+    def test8_delete_list_item(self):
+        item_id = self.__class__.target_item.properties["Id"]
+        item_to_delete = self.__class__.target_item
+        item_to_delete.delete_object()
         self.client.execute_query()
 
-        result = self.target_list.items.filter("Id eq {0}".format(self.target_item_properties["Id"]))
+        result = self.target_list.items.filter("Id eq {0}".format(item_id))
         self.client.load(result)
         self.client.execute_query()
         self.assertEqual(0, len(result))

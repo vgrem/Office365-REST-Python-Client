@@ -1,4 +1,5 @@
 import uuid
+from time import sleep
 
 from office365.graph.directory.group import Group
 from office365.graph.directory.groupProfile import GroupProfile
@@ -20,6 +21,7 @@ class TestGraphTeam(GraphTestCase):
         properties.groupTypes = ["Unified"]
         cls.target_group = cls.client.groups.add(properties)
         cls.client.execute_query()
+        sleep(5)
 
     def test2_ensure_team(self):
         teams = self.client.me.joinedTeams.filter("id eq '{0}'".format(self.__class__.target_group.id))

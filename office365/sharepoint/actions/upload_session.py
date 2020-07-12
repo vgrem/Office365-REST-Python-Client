@@ -40,10 +40,9 @@ class UploadSessionQuery(CreateFileQuery):
         self._chunk_uploaded = chunk_uploaded
         self._uploaded_bytes = 0
         self._upload_results = []
-        self._binding_type.context.get_pending_request().afterExecute += self._build_upload_session_query
+        self._binding_type.context.after_execute(self._build_upload_session_query)
 
     def _build_upload_session_query(self, response):
-        self._binding_type.context.get_pending_request().afterExecute -= self._build_upload_session_query
         st = os.stat(self._source_path)
         # upload a file in chunks
         f_pos = 0
@@ -59,7 +58,7 @@ class UploadSessionQuery(CreateFileQuery):
                 self._return_type = self.file.finish_upload(self._upload_id, f_pos, piece)
             f_pos += len(piece)
             if self._chunk_uploaded is not None:
-                self._binding_type.context.after_query_executed(self._process_chunk_upload)
+                self._binding_type.context.after_execute_query(self._process_chunk_upload)
         fh.close()
 
     def _process_chunk_upload(self, result_object):

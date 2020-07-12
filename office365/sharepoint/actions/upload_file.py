@@ -3,7 +3,7 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 
 
-class DownloadFileQuery(ServiceOperationQuery):
+class UploadFileQuery(ServiceOperationQuery):
 
     def __init__(self, web, file_url, file_object):
         """
@@ -13,14 +13,21 @@ class DownloadFileQuery(ServiceOperationQuery):
         :type web: office365.sharepoint.webs.web.Web
         :type file_object: typing.IO
         """
-
-        def _construct_download_query(request):
-            request.method = HttpMethod.Get
+        super().__init__(web)
 
         def _process_response(response):
+            """
+            :type response: RequestOptions
+            """
             file_object.write(response.content)
 
-        web.context.before_execute(_construct_download_query)
+        def _construct_upload_request(request):
+            request.data = file_object.read()
+            request.method = HttpMethod.Post
+            request.set_header('X-HTTP-Method', 'PUT')
+
+        web.context.before_execute(_construct_upload_request)
         web.context.after_execute(_process_response)
-        super(DownloadFileQuery, self).__init__(web, r"getFileByServerRelativeUrl('{0}')/\$value".format(file_url))
+        super(UploadFileQuery, self).__init__(web, r"getFileByServerRelativeUrl('{0}')/\$value".format(file_url))
+
 

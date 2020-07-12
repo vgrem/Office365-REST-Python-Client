@@ -1,5 +1,4 @@
 from settings import settings
-
 from office365.runtime.auth.userCredential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 
@@ -13,7 +12,7 @@ if __name__ == '__main__':
                                                  UserCredential(settings['user_credentials']['username'],
                                                                 settings['user_credentials']['password']))
     size_1Mb = 1000000
-    local_path = "../../tests/data/big_buck_bunny.mp4"
+    local_path = "../../../tests/data/big_buck_bunny.mp4"
     target_url = "/Shared Documents"
     result_file = ctx.web.get_folder_by_server_relative_url(target_url) \
         .files.create_upload_session(local_path, size_1Mb, print_upload_progress)

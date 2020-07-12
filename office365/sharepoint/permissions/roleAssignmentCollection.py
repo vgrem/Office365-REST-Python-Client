@@ -1,6 +1,7 @@
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
+from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.permissions.roleAssignment import RoleAssignment
 
 
@@ -19,15 +20,23 @@ class RoleAssignmentCollection(ClientObjectCollection):
         return self._item_type(self.context,
                                ResourcePath(index_or_principal_id, self.resource_path))
 
-    def get_by_principal_id(self):
-        """Retrieves the role assignment object (1) based on the specified user or group."""
-        pass
+    def get_by_principal_id(self, principal_id):
+        """Retrieves the role assignment object (1) based on the specified user or group.
+
+        :param int principal_id: Specifies the user or group of the role assignment.
+        """
+        role_assignment = RoleAssignment(self.context,
+                                         ResourcePathServiceOperation("GetByPrincipalId",
+                                                                      [principal_id],
+                                                                      self.resource_path))
+        self.context.load(role_assignment)
+        return role_assignment
 
     def add_role_assignment(self, principal_id, role_def_id):
         """Adds a role assignment to the role assignment collection.<81>
 
-        :param str role_def_id: Specifies the role definition of the role assignment.
-        :param str principal_id: Specifies the user or group of the role assignment.
+        :param int role_def_id: Specifies the role definition of the role assignment.
+        :param int principal_id: Specifies the user or group of the role assignment.
         """
         payload = {
             "principalId": principal_id,

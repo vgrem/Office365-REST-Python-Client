@@ -91,7 +91,7 @@ class ClientObject(object):
 
         if len(names_to_include) > 0:
             self.context.load(self, names_to_include)
-            self.context.after_query_executed(action)
+            self.context.after_execute_query(action)
         else:
             action(self)
 

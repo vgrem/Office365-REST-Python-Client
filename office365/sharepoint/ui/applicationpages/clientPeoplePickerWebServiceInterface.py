@@ -30,7 +30,7 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
             result.value = "[{0}]".format(return_value.value)
             if callable(on_resolved):
                 on_resolved(result.value)
-        context.after_query_executed(_process_result)
+        context.after_execute_query(_process_result)
         return result
 
     @property
