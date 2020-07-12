@@ -163,7 +163,7 @@ class ListItem(SecurableObject):
         super(ListItem, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:
-            if name == "Id" and self._parent_collection:
+            if name == "Id" and self._parent_collection is not None:
                 self._resource_path = ResourcePathServiceOperation(
                     "getItemById", [value], self._parent_collection.resource_path.parent)
 

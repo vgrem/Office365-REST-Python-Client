@@ -4,7 +4,6 @@ from office365.runtime.client_query import ClientQuery
 from office365.runtime.client_query import ReadEntityQuery
 
 
-
 class ClientRuntimeContext(object):
 
     def __init__(self, service_root_url, auth_context=None):
@@ -48,6 +47,7 @@ class ClientRuntimeContext(object):
         :param bool once:
         :return: None
         """
+
         def _process_request(request):
             if once:
                 self.get_pending_request().beforeExecute -= _process_request
@@ -68,6 +68,7 @@ class ClientRuntimeContext(object):
             if once:
                 self.get_pending_request().afterExecute -= _process_response
             action(response)
+
         self.get_pending_request().afterExecute += _process_response
 
     def after_execute_query(self, action, query=None):
