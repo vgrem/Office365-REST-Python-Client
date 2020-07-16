@@ -7,18 +7,6 @@ from office365.sharepoint.files.file_creation_information import FileCreationInf
 from office365.sharepoint.listitems.listitem import ListItem
 
 
-def _copy_files(new_folder_relative_url, overwrite, folder):
-    """Copies files
-
-    :type new_folder_relative_url: str
-    :type overwrite: bool
-    :type folder: Folder
-    """
-    for file in folder.files:
-        new_file_url = "/".join([new_folder_relative_url, file.properties['Name']])
-        file.copyto(new_file_url, overwrite)
-
-
 def _move_folder_with_files(new_folder_relative_url, flag, folder):
     """Moves folder with files
 
@@ -91,7 +79,17 @@ class Folder(BaseEntity):
         :type new_relative_url: str
         :type overwrite: bool
         """
-        self.ensure_property("Files", partial(_copy_files, new_relative_url, overwrite))
+
+        def _copy_files(folder):
+            """Copies files
+
+            :type folder: Folder
+            """
+            for file in folder.files:
+                new_file_url = "/".join([new_relative_url, file.properties['Name']])
+                file.copyto(new_file_url, overwrite)
+
+        self.ensure_property("Files", _copy_files)
 
     def moveto(self, new_relative_url, flags):
         """Moves the folder with files to the destination URL.

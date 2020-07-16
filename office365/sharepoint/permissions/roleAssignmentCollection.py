@@ -51,4 +51,9 @@ class RoleAssignmentCollection(ClientObjectCollection):
         :param int role_def_id: The ID of the role definition in the role assignment.
         :param int principal_id: The ID of the user or group in the role assignment.
         """
-        pass
+        payload = {
+            "principalId": principal_id,
+            "roleDefId": role_def_id
+        }
+        qry = ServiceOperationQuery(self, "RemoveRoleAssignment", payload, None, None, None)
+        self.context.add_query(qry)

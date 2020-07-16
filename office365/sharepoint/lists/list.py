@@ -3,7 +3,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
-from office365.sharepoint.caml.camlQuery import CamlQuery
+from office365.sharepoint.listitems.caml.camlQuery import CamlQuery
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.folders.folder import Folder
@@ -12,6 +12,7 @@ from office365.sharepoint.listitems.listItem_collection import ListItemCollectio
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.views.view import View
 from office365.sharepoint.views.view_collection import ViewCollection
+from office365.sharepoint.listitems.listitem_creation_information import ListItemCreationInformation
 
 
 class List(SecurableObject):
@@ -81,12 +82,20 @@ class List(SecurableObject):
 
          :type list_item_creation_information: ListItemCreationInformation or dict"""
         item = ListItem(self.context)
-        for k, v in list_item_creation_information.items():
-            item.set_property(k, v, True)
-        self.items.add_child(item)
-        item.ensure_type_name(self)
-        qry = ServiceOperationQuery(self, "items", None, item, None, item)
-        self.context.add_query(qry)
+        if isinstance(list_item_creation_information, dict):
+            for k, v in list_item_creation_information.items():
+                item.set_property(k, v, True)
+            self.items.add_child(item)
+            item.ensure_type_name(self)
+            qry = ServiceOperationQuery(self, "items", None, item, None, item)
+            self.context.add_query(qry)
+        else:
+            def _resolve_folder_url(target_folder):
+                list_item_creation_information.FolderUrl = self.context.base_url + target_folder.properties["ServerRelativeUrl"] + "/foo"
+                add_item_qry = ServiceOperationQuery(self, "addItem", None, list_item_creation_information, "parameters", item)
+                self.context.add_query(add_item_qry)
+
+            self.rootFolder.ensure_property("ServerRelativeUrl", _resolve_folder_url)
         return item
 
     def get_item_by_id(self, item_id):
@@ -110,6 +119,19 @@ class List(SecurableObject):
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         self.remove_from_parent_collection()
+
+    @property
+    def enableFolderCreation(self):
+        """
+        Specifies whether new list folders can be added to the list.
+
+        :rtype: bool or None
+        """
+        return self.properties.get("EnableFolderCreation", None)
+
+    @enableFolderCreation.setter
+    def enableFolderCreation(self, value):
+        self.set_property("EnableFolderCreation", value, True)
 
     @property
     def items(self):

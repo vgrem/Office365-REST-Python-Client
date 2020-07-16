@@ -1,5 +1,4 @@
 from random import randint
-
 from office365.sharepoint.permissions.basePermissions import BasePermissions
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.sharing.roleType import RoleType
@@ -47,7 +46,11 @@ class TestSPList(SPTestCase):
         self.assertIsNotNone(assignment)
 
     def test6_library_remove_unique_perms(self):
-        pass
+        target_role_def = self.client.web.roleDefinitions.get_by_type(RoleType.Contributor)
+        target_user = self.client.web.currentUser
+        target_lib = self.client.web.default_document_library()
+        target_lib.remove_role_assignment(target_user, target_role_def)
+        self.client.execute_query()
 
     def test7_library_reset_role_inheritance(self):
         default_lib = self.client.web.default_document_library()

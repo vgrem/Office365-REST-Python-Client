@@ -26,7 +26,7 @@ class SecurableObject(BaseEntity):
         return result.value
 
     def add_role_assignment(self, principal, role_def):
-        """Adds a role assignment to the role assignment collection.<81>
+        """Adds a role assignment to securable resource.<81>
 
         :param office365.sharepoint.permissions.roleDefinition.RoleDefinition role_def: Specifies the role definition
         of the role assignment.
@@ -41,6 +41,25 @@ class SecurableObject(BaseEntity):
 
         def _role_def_loaded(rd):
             self.roleAssignments.add_role_assignment(principal_result.value, rd.id)
+
+        principal.ensure_property("Id", _principal_loaded)
+
+    def remove_role_assignment(self, principal, role_def):
+        """Removes a role assignment from a securable resource.<81>
+
+        :param office365.sharepoint.permissions.roleDefinition.RoleDefinition role_def: Specifies the role definition
+        of the role assignment.
+        :param office365.sharepoint.principal.principal.Principal principal: Specifies the user or group of the
+        role assignment.
+        """
+        principal_result = ClientResult(int)
+
+        def _principal_loaded(p):
+            principal_result.value = p.id
+            role_def.ensure_property("Id", _role_def_loaded)
+
+        def _role_def_loaded(rd):
+            self.roleAssignments.remove_role_assignment(principal_result.value, rd.id)
 
         principal.ensure_property("Id", _principal_loaded)
 

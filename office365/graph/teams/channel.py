@@ -8,8 +8,7 @@ class Channel(Entity):
     def webUrl(self):
         """A hyperlink that will navigate to the channel in Microsoft Teams. This is the URL that you get when you
         right-click a channel in Microsoft Teams and select Get link to channel. This URL should be treated as an
-        opaque blob, and not parsed. Read-only. """
-        if self.is_property_available('webUrl'):
-            return self.properties['webUrl']
-        else:
-            return None
+        opaque blob, and not parsed. Read-only.
+
+        :rtype: str or None """
+        return self.properties.get('webUrl', None)

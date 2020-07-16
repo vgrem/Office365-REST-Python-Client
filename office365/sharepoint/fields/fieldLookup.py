@@ -9,12 +9,16 @@ class FieldLookup(Field):
 
     @property
     def lookup_web_id(self):
-        """Gets the ID of the Web site that contains the list that is the source of this field's value."""
+        """Gets the ID of the Web site that contains the list that is the source of this field's value.
+        :rtype: str or None
+        """
         return self.properties.get('LookupWebId', None)
 
     @lookup_web_id.setter
     def lookup_web_id(self, val):
-        """Sets the ID of the Web site that contains the list that is the source of this field's value."""
+        """Sets the ID of the Web site that contains the list that is the source of this field's value.
+        :rtype: str or None
+        """
         self.set_property("LookupWebId", val, True)
 
     @property

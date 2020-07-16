@@ -1,5 +1,5 @@
 from time import sleep
-from office365.sharepoint.caml.camlQuery import CamlQuery
+from office365.sharepoint.listitems.caml.camlQuery import CamlQuery
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.list import List
 from tests import random_seed
@@ -34,20 +34,44 @@ class TestSharePointListItem(SPTestCase):
         self.assertIsNotNone(new_item.properties["Title"])
         self.__class__.target_item = new_item
 
-    def test3_get_list_item(self):
+    def test2_enable_folders_in_list(self):
+        def _init_list(target_list):
+            """
+            :type target_list: List
+            """
+            if not target_list.enableFolderCreation:
+                target_list.enableFolderCreation = True
+                target_list.update()
+                self.client.execute_query()
+            self.assertTrue(self.target_list.enableFolderCreation, "Folder creation enabled")
+
+        self.target_list.ensure_property("EnableFolderCreation", _init_list)
+        self.client.execute_query()
+
+    def test3_create_folder_in_list(self):
+        #item_info = ListItemCreationInformation()
+        #item_info.LeafName = None
+        #item_info.UnderlyingObjectType = 0
+        #new_item = self.target_list.add_item(item_info)
+        new_folder = self.target_list.rootFolder.add("Archive")
+        self.client.execute_query()
+        self.assertIsNotNone(new_folder.serverRelativeUrl)
+
+    def test4_get_list_item(self):
         item = self.target_list.get_item_by_id(self.__class__.target_item.properties["Id"])
         self.client.load(item)
         self.client.execute_query()
         self.assertIsNotNone(item.properties["Id"])
 
-    def test4_get_list_item_via_caml(self):
+    def test5_get_list_item_via_caml(self):
         item_id = self.__class__.target_item.properties["Id"]
-        caml_query = CamlQuery.parse("<Where><Eq><FieldRef Name='ID' /><Value Type='Counter'>{0}</Value></Eq></Where>".format(item_id))
+        caml_query = CamlQuery.parse(
+            "<Where><Eq><FieldRef Name='ID' /><Value Type='Counter'>{0}</Value></Eq></Where>".format(item_id))
         result = self.target_list.get_items(caml_query)
         self.client.execute_query()
         self.assertEqual(len(result), 1)
 
-    def test5_update_listItem(self):
+    def test6_update_listItem(self):
         item_to_update = self.__class__.target_item
         self.client.load(item_to_update)
         self.client.execute_query()
@@ -62,7 +86,7 @@ class TestSharePointListItem(SPTestCase):
         self.assertNotEqual(item_to_update.properties["Modified"], last_updated)
         self.assertNotEqual(self.default_title, new_title)
 
-    def test6_systemUpdate_listItem(self):
+    def test7_systemUpdate_listItem(self):
         item_to_update = self.__class__.target_item
         self.client.load(item_to_update)
         self.client.execute_query()
@@ -76,12 +100,12 @@ class TestSharePointListItem(SPTestCase):
         self.assertEqual(item_to_update.properties["Modified"], last_updated)
         self.assertNotEqual(self.default_title, new_title)
 
-    def test7_update_overwrite_version(self):
+    def test8_update_overwrite_version(self):
         item_to_update = self.__class__.target_item
         item_to_update.update_overwrite_version()
         self.client.execute_query()
 
-    def test8_delete_list_item(self):
+    def test9_delete_list_item(self):
         item_id = self.__class__.target_item.properties["Id"]
         item_to_delete = self.__class__.target_item
         item_to_delete.delete_object()

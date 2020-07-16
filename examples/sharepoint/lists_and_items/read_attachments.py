@@ -1,7 +1,7 @@
 import os
 import tempfile
 
-from office365.sharepoint.caml.camlQuery import CamlQuery
+from office365.sharepoint.listitems.caml import CamlQuery
 from settings import settings
 
 from office365.runtime.auth.clientCredential import ClientCredential

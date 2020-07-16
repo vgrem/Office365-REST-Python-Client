@@ -14,7 +14,7 @@ class ClientObject(object):
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         """
         self._properties = {}
-        self._changes = []
+        self._changed_properties = []
         self._entity_type_name = None
         self._query_options = QueryOptions()
         self._parent_collection = parent_collection
@@ -59,10 +59,10 @@ class ClientObject(object):
         :param bool persist_changes: Persist changes
         """
         if persist_changes:
-            self._changes.append(name)
+            self._changed_properties.append(name)
 
         safe_name = name[0].lower() + name[1:]
-        if hasattr(self, safe_name) and value:
+        if hasattr(self, safe_name) and value is not None:
             prop_type = getattr(self, safe_name)
             if isinstance(prop_type, ClientObject) or isinstance(prop_type, ClientValue):
                 [prop_type.set_property(k, v, persist_changes) for k, v in value.items()]
@@ -73,7 +73,7 @@ class ClientObject(object):
             self._properties[name] = value
 
     def to_json(self):
-        return dict((k, v) for k, v in self.properties.items() if k in self._changes)
+        return dict((k, v) for k, v in self.properties.items() if k in self._changed_properties)
 
     def ensure_property(self, name_or_names, action):
         """

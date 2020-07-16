@@ -3,7 +3,8 @@ from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.caml.camlQuery import CamlQuery
+from office365.sharepoint.contenttypes.contentTypeId import ContentTypeId
+from office365.sharepoint.listitems.caml.camlQuery import CamlQuery
 from office365.sharepoint.views.view_field_collection import ViewFieldCollection
 
 
@@ -17,7 +18,7 @@ class View(BaseEntity):
     def get_items(self):
         """Get list items per a view
 
-        :rtype: ListItemCollection
+        :rtype: office365.sharepoint.listitems.listItem_collection.ListItemCollection
         """
 
         def _get_items_inner(target_view):
@@ -38,6 +39,44 @@ class View(BaseEntity):
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         self.remove_from_parent_collection()
+
+    @property
+    def contentTypeId(self):
+        """Gets the identifier of the content type with which the view is associated.
+        :rtype: ContentTypeId
+        """
+        return self.properties.get("ContentTypeId", ContentTypeId())
+
+    @contentTypeId.setter
+    def contentTypeId(self, value):
+        """Sets the identifier of the content type with which the view is associated."""
+        self.set_property("ContentTypeId", value)
+
+    @property
+    def hidden(self):
+        """Gets whether the list view is hidden.
+        :rtype: bool or None
+        """
+        return self.properties.get("Hidden", None)
+
+    @hidden.setter
+    def hidden(self, value):
+        """Sets whether the list view is hidden.
+        """
+        self.set_property("Hidden", value)
+
+    @property
+    def defaultView(self):
+        """Gets whether the list view is the default list view.
+        :rtype: bool or None
+        """
+        return self.properties.get("DefaultView", None)
+
+    @defaultView.setter
+    def defaultView(self, value):
+        """Sets whether the list view is the default list view.
+        """
+        self.set_property("DefaultView", value)
 
     @property
     def viewFields(self):

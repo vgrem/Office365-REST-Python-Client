@@ -24,7 +24,7 @@ class AttachmentFile(AbstractFile):
 
     def upload(self, file_object):
         """
-        :type file_object: typing.IO file_object
+        :type file_object: typing.IO
         """
 
         def _upload_inner(target_attachment_file):

@@ -11,7 +11,7 @@ class ClientValue(object):
     def set_property(self, k, v, persist_changes=True):
         if hasattr(self, k):
             prop_type = getattr(self, k)
-            if isinstance(prop_type, ClientValue):
+            if isinstance(prop_type, ClientValue) and v is not None:
                 [prop_type.set_property(k, v, persist_changes) for k, v in v.items()]
                 setattr(self, k, prop_type)
             else:
@@ -23,7 +23,7 @@ class ClientValue(object):
         return getattr(self, k)
 
     def to_json(self):
-        return dict((k, v) for k, v in vars(self).items() if v is not None)
+        return dict((k, v) for k, v in vars(self).items() if v is not None and k != "_namespace")
 
     @property
     def entity_type_name(self):

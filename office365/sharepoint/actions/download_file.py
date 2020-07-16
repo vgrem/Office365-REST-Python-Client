@@ -18,6 +18,9 @@ class DownloadFileQuery(ServiceOperationQuery):
             request.method = HttpMethod.Get
 
         def _process_response(response):
+            """
+            :type response: RequestOptions
+            """
             file_object.write(response.content)
 
         web.context.before_execute(_construct_download_query)

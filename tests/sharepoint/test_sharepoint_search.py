@@ -36,13 +36,20 @@ class TestSearch(TestCase):
         self.assertIsNotNone(result.value)
 
     def test3_search_post_query(self):
-        request = SearchRequest("guide.docx")
+        request = SearchRequest("filename:guide.docx")
         result = self.search.post_query(request)
         self.client.execute_query()
         self.assertIsInstance(result, SearchResult)
         self.assertIsInstance(result.PrimaryQueryResult, QueryResult)
 
-    def test4_search_suggest(self):
+    def test4_search_get_query(self):
+        request = SearchRequest("guide.docx")
+        result = self.search.query(request)
+        self.client.execute_query()
+        self.assertIsInstance(result, SearchResult)
+        self.assertIsInstance(result.PrimaryQueryResult, QueryResult)
+
+    def test5_search_suggest(self):
         result = self.search.suggest("guide.docx")
         self.client.execute_query()
         self.assertIsInstance(result, QuerySuggestionResults)
