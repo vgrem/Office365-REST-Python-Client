@@ -9,7 +9,10 @@ python:
 install:
   - pip install -r requirements.txt
 
-script: python setup.py test
+script:
+    flake8 office365 generator examples
+    isort office365 generator examples
+    python setup.py test
 
 stages:
   # Tests are configured in upstream

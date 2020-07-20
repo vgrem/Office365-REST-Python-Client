@@ -1,6 +1,5 @@
 import abc
-from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.client_query import ClientQuery
+
 from office365.runtime.client_query import ReadEntityQuery
 
 

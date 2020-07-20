@@ -1,6 +1,6 @@
+from office365.graph.teams.team import Team
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.resource_path import ResourcePath
-from office365.graph.teams.team import Team
 
 
 class TeamCollection(ClientObjectCollection):

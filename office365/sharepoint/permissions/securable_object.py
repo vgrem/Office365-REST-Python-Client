@@ -1,8 +1,8 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
-from office365.sharepoint.permissions.basePermissions import BasePermissions
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.permissions.basePermissions import BasePermissions
 from office365.sharepoint.permissions.roleAssignment import RoleAssignment
 from office365.sharepoint.permissions.roleAssignmentCollection import RoleAssignmentCollection
 
@@ -77,7 +77,7 @@ class SecurableObject(BaseEntity):
 
         """
         payload = {
-            "copyRoleAssignments" : copyRoleAssignments,
+            "copyRoleAssignments": copyRoleAssignments,
             "clearSubscopes": clearSubscopes
         }
         qry = ServiceOperationQuery(self, "breakRoleInheritance", None, payload, None, None)

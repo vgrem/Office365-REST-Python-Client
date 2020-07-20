@@ -1,18 +1,21 @@
-from office365.runtime.clientValueCollection import ClientValueCollection
-from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery
+from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_result import ClientResult
+from office365.runtime.clientValueCollection import ClientValueCollection
+from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.fields.fieldLookupValue import FieldLookupValue
 from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupValue
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
 from office365.sharepoint.sharing.objectSharingInformation import ObjectSharingInformation
 from office365.sharepoint.sharing.sharingResult import SharingResult
-from office365.sharepoint.ui.applicationpages.clientPeoplePickerQueryParameters import ClientPeoplePickerQueryParameters
-from office365.sharepoint.ui.applicationpages.clientPeoplePickerWebServiceInterface import \
-    ClientPeoplePickerWebServiceInterface
+from office365.sharepoint.ui.applicationpages.clientPeoplePickerQueryParameters import (
+    ClientPeoplePickerQueryParameters,
+)
+from office365.sharepoint.ui.applicationpages.clientPeoplePickerWebServiceInterface import (
+    ClientPeoplePickerWebServiceInterface,
+)
 
 
 class ListItem(SecurableObject):

@@ -1,5 +1,5 @@
-import xml.etree.ElementTree as ET
 from abc import abstractmethod
+from xml.etree import ElementTree as ET
 
 from office365.runtime.odata.odata_model import ODataModel
 

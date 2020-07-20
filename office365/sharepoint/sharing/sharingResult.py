@@ -43,4 +43,3 @@ class SharingResult(BaseEntity):
     def groupsSharedWith(self):
         return self.properties.get("GroupsSharedWith",
                                    GroupCollection(self.context, ResourcePath("GroupsSharedWith", self.resource_path)))
-

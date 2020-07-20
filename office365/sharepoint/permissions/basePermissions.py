@@ -1,4 +1,5 @@
 import inspect
+
 from office365.runtime.clientValue import ClientValue
 from office365.sharepoint.permissions.permissionKind import PermissionKind
 

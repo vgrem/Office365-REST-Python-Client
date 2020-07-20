@@ -5,8 +5,8 @@ from office365.graph.onedrive.drive import Drive
 from office365.outlookservices.contact_collection import ContactCollection
 from office365.outlookservices.event_collection import EventCollection
 from office365.outlookservices.messageCollection import MessageCollection
-from office365.runtime.resource_path import ResourcePath
 from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.resource_path import ResourcePath
 
 
 class User(DirectoryObject):

@@ -1,10 +1,10 @@
 from faker import Faker
-from settings import settings
 
 from office365.runtime.auth.userCredential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.lists.list_creation_information import ListCreationInformation
 from office365.sharepoint.lists.list_template_type import ListTemplateType
+from settings import settings
 
 
 def ensure_list(web, list_properties):

@@ -1,32 +1,35 @@
-from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, ClientQuery
+from office365.runtime.client_query import ClientQuery, DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_result import ClientResult
+from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.actions.getWebUrlFromPage import GetWebUrlFromPageUrlQuery
-from office365.sharepoint.listitems.listitem import ListItem
-from office365.sharepoint.permissions.roleDefinitionCollection import RoleDefinitionCollection
-from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
-from office365.sharepoint.sharing.objectSharingSettings import ObjectSharingSettings
-from office365.sharepoint.sharing.sharingResult import SharingResult
-from office365.sharepoint.ui.applicationpages.clientPeoplePickerQueryParameters import ClientPeoplePickerQueryParameters
-from office365.sharepoint.ui.applicationpages.clientPeoplePickerWebServiceInterface import \
-    ClientPeoplePickerWebServiceInterface
-from office365.sharepoint.webs.regionalSettings import RegionalSettings
-from office365.sharepoint.permissions.basePermissions import BasePermissions
 from office365.sharepoint.changes.changeCollection import ChangeCollection
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.files.file import File
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.folders.folder_collection import FolderCollection
-from office365.sharepoint.principal.group import Group
-from office365.sharepoint.principal.group_collection import GroupCollection
+from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.list_collection import ListCollection
+from office365.sharepoint.permissions.basePermissions import BasePermissions
+from office365.sharepoint.permissions.roleDefinitionCollection import RoleDefinitionCollection
 from office365.sharepoint.permissions.securable_object import SecurableObject
+from office365.sharepoint.principal.group import Group
+from office365.sharepoint.principal.group_collection import GroupCollection
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.principal.user_collection import UserCollection
+from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
+from office365.sharepoint.sharing.objectSharingSettings import ObjectSharingSettings
+from office365.sharepoint.sharing.sharingResult import SharingResult
+from office365.sharepoint.ui.applicationpages.clientPeoplePickerQueryParameters import (
+    ClientPeoplePickerQueryParameters,
+)
+from office365.sharepoint.ui.applicationpages.clientPeoplePickerWebServiceInterface import (
+    ClientPeoplePickerWebServiceInterface,
+)
+from office365.sharepoint.webs.regionalSettings import RegionalSettings
 
 
 class Web(SecurableObject):

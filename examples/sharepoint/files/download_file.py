@@ -1,10 +1,9 @@
 import os
 import tempfile
 
-from settings import settings
-
 from office365.runtime.auth.clientCredential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
+from settings import settings
 
 ctx = ClientContext.connect_with_credentials(settings.get('url') + "/sites/team",
                                              ClientCredential(settings.get('client_credentials').get('client_id'),
