@@ -1,0 +1,90 @@
+import textwrap
+import uuid
+from email import message_from_bytes
+from email.message import Message
+from office365.runtime.client_request import ClientRequest
+from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.http.request_options import RequestOptions
+
+
+def _create_boundary(prefix):
+    """Creates a string that can be used as a multipart request boundary.
+    :param str prefix: String to use as the start of the boundary string
+    """
+    return prefix + str(uuid.uuid4())
+
+
+class ODataBatchRequest(ClientRequest):
+
+    def __init__(self, context):
+        """
+
+        :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
+        """
+        super(ODataBatchRequest, self).__init__(context)
+        media_type = "multipart/mixed"
+        self._current_boundary = _create_boundary("batch_")
+        self._content_type = "; ".join([media_type, "boundary={0}".format(self._current_boundary)])
+
+    def build_request(self):
+        request_url = "{0}$batch".format(self.context.service_root_url)
+        request = RequestOptions(request_url)
+        request.method = HttpMethod.Post
+        request.ensure_header('Content-Type', self._content_type)
+        request.data = self._prepare_payload()
+        return request
+
+    def process_response(self, response):
+        """Parses an HTTP response.
+
+        :type response: requests.Response
+        """
+        self._read_raw_parts(response)
+
+    def _read_raw_parts(self, response):
+        """Parses a multipart/mixed response body from from the position defined by the context.
+
+        :type response: requests.Response
+        """
+        content_type = response.headers['Content-Type'].encode("ascii")
+        http_body = (
+            b"Content-Type: "
+            + content_type
+            + b"\r\n\r\n"
+            + response.content
+        )
+
+        message = message_from_bytes(http_body)  # type: Message
+        for raw_reponse in message.get_payload():
+            if raw_reponse.get_content_type() == "application/http":
+                pass
+
+    def _prepare_payload(self):
+        """Serializes a batch request body."""
+        main_message = Message()
+        main_message.add_header("Content-Type", "multipart/mixed")
+        main_message.set_boundary(self._current_boundary)
+        while self.context.has_pending_request:
+            part_message = Message()
+            part_message.add_header("Content-Type", "application/http")
+            part_message.add_header("Content-Transfer-Encoding", "binary")
+            request = self.context.get_pending_request().build_request()
+            part_message.set_payload(self._serialize_request(request))
+            main_message.attach(part_message)
+
+        return main_message.as_bytes()
+
+    @staticmethod
+    def _serialize_request(request):
+        """Serializes a part of a batch request to a string. A part can be either a GET request or
+            a change set grouping several CUD (create, update, delete) requests.
+
+        :type request: RequestOptions
+        """
+        eol = "\r\n"
+        lines = ["{method} {url} HTTP/1.1".format(method=request.method, url=request.url),
+                 *[':'.join(h) for h in request.headers]]
+        if request.data:
+            lines.append(request.data)
+        buffer = eol + eol.join(lines) + eol
+        return buffer.encode('utf-8').lstrip()

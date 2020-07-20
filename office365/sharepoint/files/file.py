@@ -279,11 +279,9 @@ class File(AbstractFile):
         :type file_object: typing.IO
         """
 
-        def _download_inner(target_file):
-            file_url = target_file.properties['ServerRelativeUrl']
-            qry = DownloadFileQuery(self.context.web, file_url, file_object)
+        def _download_inner():
+            qry = DownloadFileQuery(self.context.web, self.serverRelativeUrl, file_object)
             self.context.add_query(qry)
-
         self.ensure_property("ServerRelativeUrl", _download_inner)
         return self
 
@@ -305,19 +303,63 @@ class File(AbstractFile):
 
     @property
     def serverRelativeUrl(self):
-        """Gets the relative URL of the file based on the URL for the server."""
-        if self.is_property_available('ServerRelativeUrl'):
-            return self.properties["ServerRelativeUrl"]
-        else:
-            return None
+        """Gets the relative URL of the file based on the URL for the server.
+
+        :rtype: str or None
+        """
+        return self.properties.get("ServerRelativeUrl", None)
 
     @property
     def length(self):
-        """Gets the file size."""
+        """Gets the file size.
+
+        :rtype: int or None
+        """
         if self.is_property_available('Length'):
             return int(self.properties["Length"])
         else:
             return None
+
+    @property
+    def exists(self):
+        """Specifies whether the file exists.
+
+        :rtype: bool or None
+        """
+        return self.properties.get("Exists", None)
+
+    @property
+    def name(self):
+        """Specifies the file name including the extension.
+            It MUST NOT be NULL. Its length MUST be equal to or less than 260.
+
+        :rtype: str or None
+        """
+        return self.properties.get("Name", None)
+
+    @property
+    def siteId(self):
+        """Gets the GUID that identifies the site collection containing the file.
+
+        :rtype: str or None
+        """
+        return self.properties.get("SiteId", None)
+
+    @property
+    def webId(self):
+        """Gets the GUID for the site containing the file.
+
+        :rtype: str or None
+        """
+        return self.properties.get("WebId", None)
+
+    @property
+    def timeLastModified(self):
+        """Specifies when the file was last modified.
+
+        :rtype: str or None
+        """
+        return self.properties.get("TimeLastModified", None)
 
     def set_property(self, name, value, persist_changes=True):
         super(File, self).set_property(name, value, persist_changes)

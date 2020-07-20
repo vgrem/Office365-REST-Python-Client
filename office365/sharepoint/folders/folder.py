@@ -1,34 +1,9 @@
-from functools import partial
 from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery, CreateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.files.file_creation_information import FileCreationInformation
 from office365.sharepoint.listitems.listitem import ListItem
-
-
-def _move_folder_with_files(new_folder_relative_url, flag, folder):
-    """Moves folder with files
-
-    :type new_folder_relative_url: str
-    :type flag: int
-    :type folder: Folder
-    """
-    for file in folder.files:
-        new_file_url = "/".join([new_folder_relative_url, file.properties['Name']])
-        file.moveto(new_file_url, flag)
-
-
-def _add_sub_folder(new_folder_name, target_folder, parent_folder):
-    """Creates sub folder by name
-
-    :type new_folder_name: str
-    :type parent_folder: Folder
-    """
-    new_folder_url = "/".join([parent_folder.properties['ServerRelativeUrl'], new_folder_name])
-    target_folder.set_property("ServerRelativeUrl", new_folder_url)
-    qry = CreateEntityQuery(parent_folder.folders, target_folder, target_folder)
-    parent_folder.context.add_query(qry)
 
 
 class Folder(BaseEntity):
@@ -40,7 +15,13 @@ class Folder(BaseEntity):
         :type name: str
         """
         new_folder = Folder(self.context)
-        self.ensure_property("ServerRelativeUrl", partial(_add_sub_folder, name, new_folder))
+
+        def _add_sub_folder():
+            new_folder_url = "/".join([self.serverRelativeUrl, name])
+            new_folder.set_property("ServerRelativeUrl", new_folder_url)
+            qry = CreateEntityQuery(self.folders, new_folder, new_folder)
+            self.context.add_query(qry)
+        self.ensure_property("ServerRelativeUrl", _add_sub_folder)
         return new_folder
 
     def rename(self, name):
@@ -80,12 +61,8 @@ class Folder(BaseEntity):
         :type overwrite: bool
         """
 
-        def _copy_files(folder):
-            """Copies files
-
-            :type folder: Folder
-            """
-            for file in folder.files:
+        def _copy_files():
+            for file in self.files:
                 new_file_url = "/".join([new_relative_url, file.properties['Name']])
                 file.copyto(new_file_url, overwrite)
 
@@ -99,7 +76,13 @@ class Folder(BaseEntity):
         """
         if flags:
             pass
-        self.ensure_property("Files", partial(_move_folder_with_files, new_relative_url, flags))
+
+        def _move_folder_with_files():
+            """Moves folder with files"""
+            for file in self.files:
+                new_file_url = "/".join([new_relative_url, file.properties['Name']])
+                file.moveto(new_file_url, flags)
+        self.ensure_property("Files", _move_folder_with_files)
 
     @property
     def list_item_all_fields(self):
@@ -120,7 +103,9 @@ class Folder(BaseEntity):
 
     @property
     def serverRelativeUrl(self):
-        """Gets the server-relative URL of the list folder."""
+        """Gets the server-relative URL of the list folder.
+        :rtype: str or None
+        """
         return self.properties.get("ServerRelativeUrl", None)
 
     @property

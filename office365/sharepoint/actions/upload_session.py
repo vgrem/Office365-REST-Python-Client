@@ -1,5 +1,7 @@
 import os
 import uuid
+from functools import partial
+
 from office365.runtime.client_result import ClientResult
 from office365.sharepoint.actions.create_file import CreateFileQuery
 from office365.sharepoint.files.file import File
@@ -40,7 +42,7 @@ class UploadSessionQuery(CreateFileQuery):
         self._chunk_uploaded = chunk_uploaded
         self._uploaded_bytes = 0
         self._upload_results = []
-        self._binding_type.context.after_execute(self._build_upload_session_query)
+        self.file.context.after_execute(self._build_upload_session_query)
 
     def _build_upload_session_query(self, response):
         st = os.stat(self._source_path)
@@ -57,15 +59,18 @@ class UploadSessionQuery(CreateFileQuery):
             else:
                 self._return_type = self.file.finish_upload(self._upload_id, f_pos, piece)
             f_pos += len(piece)
-            if self._chunk_uploaded is not None:
-                self._binding_type.context.after_execute_query(self._process_chunk_upload)
         fh.close()
 
-    def _process_chunk_upload(self, result_object):
-        if isinstance(result_object, ClientResult):
-            self._uploaded_bytes = int(result_object.value)
-        elif isinstance(result_object, File):
-            self._uploaded_bytes = result_object.length
+        if callable(self._chunk_uploaded):
+            self.file.context.after_execute(self._process_chunk_upload)
+
+    def _process_chunk_upload(self, resp):
+        qry = self.file.context.get_pending_request().current_query
+        if isinstance(qry.return_type, ClientResult):
+            self._uploaded_bytes = int(qry.return_type.value)
+            self.file.context.after_execute(self._process_chunk_upload)
+        elif isinstance(self._return_type, File):
+            self._uploaded_bytes = qry.return_type.length
         self._chunk_uploaded(self._uploaded_bytes)
 
     @property

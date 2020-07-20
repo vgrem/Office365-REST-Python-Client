@@ -56,11 +56,11 @@ class DriveItem(BaseItem):
         return qry.return_type
 
     def download(self, file_object):
-        def _content_downloaded(result):
-            file_object.write(result.value)
+        result = self.get_content()
 
-        self.get_content()
-        self.context.after_execute_query(_content_downloaded)
+        def _content_downloaded(resp):
+            file_object.write(result.value)
+        self.context.after_execute(_content_downloaded)
 
     def create_folder(self, name):
         """Create a new folder or DriveItem in a Drive with a specified parent item or path.

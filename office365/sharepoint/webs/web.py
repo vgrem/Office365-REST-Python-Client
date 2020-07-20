@@ -71,11 +71,11 @@ class Web(SecurableObject):
         result = ClientResult(self.webs)
         qry = ClientQuery(self.webs, None, None, result)
         self.context.add_query(qry)
-        self.context.after_execute_query(self._load_sub_webs)
-        return result
 
-    def _load_sub_webs(self, result):
-        self._load_sub_webs_inner(result.value)
+        def _load_sub_webs(resp):
+            self._load_sub_webs_inner(result.value)
+        self.context.after_execute(_load_sub_webs)
+        return result
 
     def _load_sub_webs_inner(self, webs, result=None):
         if result is None:
@@ -256,12 +256,12 @@ class Web(SecurableObject):
             picker_result.value = picker_value
 
         def _grp_resolved(role_value):
-            def _web_initialized(target_web):
+            def _web_loaded():
                 sharing_result.value = Web.share_object(self.context, self.url, picker_result.value, role_value,
                                                         0,
                                                         False, sendEmail, False, emailSubject, emailBody)
 
-            self.ensure_property("Url", _web_initialized)
+            self.ensure_property("Url", _web_loaded)
 
         params = ClientPeoplePickerQueryParameters(user_principal_name)
         ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(self.context, params,
@@ -275,12 +275,10 @@ class Web(SecurableObject):
 
         :return: SharingResult
         """
-
         sharing_result = ClientResult(SharingResult(self.context))
 
-        def _web_initialized(target_web):
-            sharing_result.value = Web.unshare_object(self.context, target_web.url)
-
+        def _web_initialized():
+            sharing_result.value = Web.unshare_object(self.context, self.url)
         self.ensure_property("Url", _web_initialized)
         return sharing_result.value
 
@@ -292,11 +290,6 @@ class Web(SecurableObject):
         :param ExternalSharingSiteOption share_option:
         :param (str) -> None on_resolved:
         """
-
-        def _group_resolved(return_grp):
-            role_value = "group:{groupId}".format(groupId=return_grp.properties["Id"])
-            on_resolved(role_value)
-
         options = {
             ExternalSharingSiteOption.View: context.web.associatedVisitorGroup,
             ExternalSharingSiteOption.Edit: context.web.associatedMemberGroup,
@@ -304,7 +297,11 @@ class Web(SecurableObject):
         }
         grp = options[share_option]
         context.load(grp)
-        context.after_execute_query(_group_resolved)
+
+        def _group_resolved(resp):
+            role_value = "group:{groupId}".format(groupId=grp.properties["Id"])
+            on_resolved(role_value)
+        context.after_execute(_group_resolved)
 
     @staticmethod
     def share_object(context, url, peoplePickerInput,

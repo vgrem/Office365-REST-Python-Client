@@ -5,7 +5,7 @@ from office365.runtime.auth.providers.saml_token_provider import resolve_base_ur
 from office365.runtime.auth.tokenResponse import TokenResponse
 from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_runtime_context import ClientRuntimeContext
-from office365.sharepoint.context_web_information import ContextWebInformation
+from office365.sharepoint.webs.context_web_information import ContextWebInformation
 from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
 from office365.runtime.http.http_method import HttpMethod
@@ -53,14 +53,11 @@ class ClientContext(ClientRuntimeContext):
         """
         base_url = resolve_base_url(abs_url)
         ctx = ClientContext(base_url)
-        Web.get_web_url_from_page_url(ctx, abs_url)
+        result = Web.get_web_url_from_page_url(ctx, abs_url)
 
-        def _init_context_for_web(result):
-            """
-            :param office365.runtime.client_result.ClientResult result:
-            """
+        def _init_context_for_web(resp):
             ctx._base_url = result.value
-        ctx.after_execute_query(_init_context_for_web)
+        ctx.after_execute(_init_context_for_web)
         return ctx
 
     @staticmethod

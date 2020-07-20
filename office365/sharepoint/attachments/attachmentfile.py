@@ -15,7 +15,7 @@ class AttachmentFile(AbstractFile):
         :type file_object: typing.IO
         """
 
-        def _download_inner(target_attachment_file):
+        def _download_inner():
             url = self.server_relative_url
             qry = DownloadFileQuery(self.context.web, url, file_object)
             self.context.add_query(qry)
@@ -27,7 +27,7 @@ class AttachmentFile(AbstractFile):
         :type file_object: typing.IO
         """
 
-        def _upload_inner(target_attachment_file):
+        def _upload_inner():
             qry = UploadFileQuery(self.context.web, self.server_relative_url, file_object)
             self.context.add_query(qry)
 

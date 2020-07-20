@@ -59,6 +59,13 @@ class ContentType(BaseEntity):
         self.set_property("Group", value)
 
     @property
+    def schemaXml(self):
+        """Specifies the XML schema that represents the content type.
+        :rtype: str or None
+        """
+        return self.properties.get("SchemaXml", None)
+
+    @property
     def fields(self):
         """Gets a value that specifies the collection of fields for the content type."""
         if self.is_property_available('Fields'):

@@ -108,11 +108,11 @@ class ClientObjectCollection(ClientObject):
         """
         result = ClientResult(None)
 
-        def _calc_items_count(target_collection):
-            list(iter(target_collection))
-            result.value = len(target_collection)
+        def _calc_items_count(resp):
+            list(iter(self))
+            result.value = len(self)
         self.context.load(self)
-        self.context.after_execute_query(_calc_items_count)
+        self.context.after_execute(_calc_items_count)
         return result
 
     def _load_paged_items(self):

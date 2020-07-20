@@ -23,36 +23,31 @@ class ClientRequest(object):
         self.afterExecute = EventHandler()
 
     @property
+    def current_query(self):
+        """
+        :rtype: ClientQuery
+        """
+        return self._current_query
+
+    @property
     def queries(self):
         """
         :rtype: list[ClientQuery]
         """
         return self._queries
 
-    @property
-    def current_query(self):
-        """
-        :rtype: ClientQuery or None
-        """
-        if self._current_query is None and len(self._queries) > 0:
-            self.next_query()
-        return self._current_query
-
-    @property
-    def last_query(self):
-        """
-        :rtype: ClientQuery or None
-        """
-        return self._queries and self._queries[-1]
-
-    def next_query(self):
-        self._current_query = self._queries and self._queries.pop(0)
-
     def add_query(self, query):
         """
         :type query: ClientQuery
         """
         self._queries.append(query)
+
+    def get_next_query(self):
+        if len(self._queries) > 0:
+            self._current_query = self._queries.pop(0)
+        else:
+            self._current_query = None
+        return self._current_query
 
     @abstractmethod
     def build_request(self):

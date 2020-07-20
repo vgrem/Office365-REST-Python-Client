@@ -30,14 +30,22 @@ class ClientRuntimeContext(object):
     def authenticate_request(self, request):
         self._auth_context.authenticate_request(request)
 
-    def load(self, client_object, properties_to_retrieve=None):
+    def load(self, client_object, properties_to_retrieve=None, onLoaded=None):
         """Prepare query
 
+        :type onLoaded: () -> None
         :type properties_to_retrieve: list[str] or None
         :type client_object: office365.runtime.client_object.ClientObject
         """
         qry = ReadEntityQuery(client_object, properties_to_retrieve)
         self.get_pending_request().add_query(qry)
+
+        def _process_response(resp):
+            if self.get_pending_request().current_query.id == qry.id:
+                self.get_pending_request().afterExecute -= _process_response
+                onLoaded()
+        if callable(onLoaded):
+            self.get_pending_request().afterExecute += _process_response
 
     def before_execute(self, action, once=True):
         """
@@ -71,24 +79,6 @@ class ClientRuntimeContext(object):
 
         self.get_pending_request().afterExecute += _process_response
 
-    def after_execute_query(self, action, query=None):
-        """
-        Attach an event handler (for a query) which is triggered once the request is submitted to server
-
-        :type action: (office365.runtime.client_object.ClientObject or office365.runtime.client_result.ClientResult) -> None
-        :type query: ClientQuery or None
-        """
-        if query is None:
-            query = self.get_pending_request().last_query
-
-        def _process_response(response):
-            current_qry = self.get_pending_request().current_query
-            if current_qry.id == query.id:
-                self.get_pending_request().afterExecute -= _process_response
-                action(query.return_type)
-
-        self.get_pending_request().afterExecute += _process_response
-
     def execute_request_direct(self, request):
         """
         :type request: RequestOptions
@@ -97,7 +87,6 @@ class ClientRuntimeContext(object):
 
     def execute_query(self):
         while self.has_pending_request:
-            self.get_pending_request().next_query()
             self.get_pending_request().execute_query()
 
     def add_query(self, query):

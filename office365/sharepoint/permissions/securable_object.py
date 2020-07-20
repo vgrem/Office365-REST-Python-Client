@@ -19,9 +19,8 @@ class SecurableObject(BaseEntity):
         """
         result = ClientResult(RoleAssignment(self.context))
 
-        def _principal_loaded(p):
-            result.value = self.roleAssignments.get_by_principal_id(p.id)
-
+        def _principal_loaded():
+            result.value = self.roleAssignments.get_by_principal_id(principal.id)
         principal.ensure_property("Id", _principal_loaded)
         return result.value
 
@@ -33,14 +32,12 @@ class SecurableObject(BaseEntity):
         :param office365.sharepoint.principal.principal.Principal principal: Specifies the user or group of the
         role assignment.
         """
-        principal_result = ClientResult(int)
 
-        def _principal_loaded(p):
-            principal_result.value = p.id
+        def _principal_loaded():
             role_def.ensure_property("Id", _role_def_loaded)
 
-        def _role_def_loaded(rd):
-            self.roleAssignments.add_role_assignment(principal_result.value, rd.id)
+        def _role_def_loaded():
+            self.roleAssignments.add_role_assignment(principal.id, role_def.id)
 
         principal.ensure_property("Id", _principal_loaded)
 
@@ -52,14 +49,11 @@ class SecurableObject(BaseEntity):
         :param office365.sharepoint.principal.principal.Principal principal: Specifies the user or group of the
         role assignment.
         """
-        principal_result = ClientResult(int)
 
-        def _principal_loaded(p):
-            principal_result.value = p.id
+        def _principal_loaded():
+            def _role_def_loaded():
+                self.roleAssignments.remove_role_assignment(principal.id, role_def.id)
             role_def.ensure_property("Id", _role_def_loaded)
-
-        def _role_def_loaded(rd):
-            self.roleAssignments.remove_role_assignment(principal_result.value, rd.id)
 
         principal.ensure_property("Id", _principal_loaded)
 

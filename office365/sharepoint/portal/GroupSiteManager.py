@@ -43,15 +43,17 @@ class GroupSiteManager(ClientObject):
         self.context.add_query(qry)
 
     def get_status(self, group_id):
-        """Get the status of a SharePoint site"""
+        """Get the status of a SharePoint site
+
+        :type group_id: str
+        """
         group_site_info = GroupSiteInfo()
         qry = ServiceOperationQuery(self, "GetSiteStatus", None, {'groupId': group_id}, None, group_site_info)
         self.context.add_query(qry)
 
         def _construct_status_request(request):
-            query = self.context.get_pending_request().current_query
             request.method = HttpMethod.Get
-            request.url += "?groupId='{0}'".format(query.parameter_type['groupId'])
+            request.url += "?groupId='{0}'".format(group_id)
         self.context.before_execute(_construct_status_request)
         return group_site_info
 

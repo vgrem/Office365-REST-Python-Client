@@ -11,7 +11,6 @@ ctx = ClientContext.connect_with_credentials(settings.get('url') + "/sites/team"
                                                               settings.get('client_credentials').get('client_secret')))
 
 
-# file_url = "/sites/team/Shared Documents/sample.docx"
 file_url = '/sites/team/Shared Documents/big_buck_bunny.mp4'
 download_path = os.path.join(tempfile.mkdtemp(), os.path.basename(file_url))
 with open(download_path, "wb") as local_file:

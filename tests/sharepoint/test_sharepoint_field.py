@@ -21,8 +21,8 @@ class TestField(SPTestCase):
         title_field = self.client.site.rootWeb.fields.get_by_internal_name_or_title(self.target_field_name)
         self.client.load(title_field)
         self.client.execute_query()
-        self.assertIsNotNone(title_field.properties['InternalName'])
-        self.assertEqual(title_field.properties['InternalName'], self.target_field_name)
+        self.assertIsNotNone(title_field.internal_name)
+        self.assertEqual(title_field.internal_name, self.target_field_name)
         self.assertIsInstance(title_field, FieldText)
         self.assertIsNotNone(title_field.max_length)
 

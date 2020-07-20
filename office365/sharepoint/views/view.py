@@ -21,12 +21,8 @@ class View(BaseEntity):
         :rtype: office365.sharepoint.listitems.listItem_collection.ListItemCollection
         """
 
-        def _get_items_inner(target_view):
-            """
-
-            :type target_view: View
-            """
-            caml_query = CamlQuery.parse(target_view.viewQuery)
+        def _get_items_inner():
+            caml_query = CamlQuery.parse(self.viewQuery)
             qry = ServiceOperationQuery(self._parent_list, "GetItems", None, caml_query, "query",
                                         self._parent_list.items)
             self.context.add_query(qry)

@@ -5,6 +5,13 @@ from office365.runtime.resource_path import ResourcePath
 class Entity(ClientObject):
 
     @property
+    def context(self):
+        """
+        :rtype: office365.graph.graph_client.GraphClient
+        """
+        return self._context
+
+    @property
     def entity_type_name(self):
         return "microsoft.graph." + type(self).__name__
 

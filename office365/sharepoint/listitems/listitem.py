@@ -41,8 +41,8 @@ class ListItem(SecurableObject):
             ExternalSharingSiteOption.Edit: "role:1073741827",
         }
 
-        def _property_resolved(target_item):
-            file_result.value = target_item.get_property("EncodedAbsUrl")
+        def _property_resolved():
+            file_result.value = self.get_property("EncodedAbsUrl")
 
         def _picker_value_resolved(picker_value):
             from office365.sharepoint.webs.web import Web
@@ -62,8 +62,8 @@ class ListItem(SecurableObject):
         """
         result = ClientResult(SharingResult(self.context))
 
-        def _property_resolved(target_item):
-            abs_url = target_item.get_property("EncodedAbsUrl")
+        def _property_resolved():
+            abs_url = self.get_property("EncodedAbsUrl")
             from office365.sharepoint.webs.web import Web
             result.value = Web.unshare_object(self.context, abs_url)
 
@@ -73,9 +73,9 @@ class ListItem(SecurableObject):
     def get_sharing_information(self):
         result = ClientResult(ObjectSharingInformation(self.context))
 
-        def _item_resolved(return_type):
+        def _item_resolved():
             result.value = ObjectSharingInformation.get_list_item_sharing_information(
-                self.context, return_type.parentList.properties["Id"], return_type.properties["Id"])
+                self.context, self.parentList.properties["Id"], self.properties["Id"])
 
         self.ensure_property(["Id", "ParentList"], _item_resolved)
         return result.value
@@ -86,7 +86,7 @@ class ListItem(SecurableObject):
         qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
 
-    def validate_update_listItem(self, form_values, new_document_update):
+    def validate_update_list_item(self, form_values, new_document_update):
         """Validates and sets the values of the specified collection of fields for the list item."""
         qry = ServiceOperationQuery(self,
                                     "validateUpdateListItem",
@@ -114,8 +114,23 @@ class ListItem(SecurableObject):
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
 
+    def parse_and_set_field_value(self, fieldName, value):
+        """Sets the value of the field (2) for the list item based on an implementation-specific transformation
+           of the value..
+           :param str fieldName: Specifies the field internal name.
+           :param str value: Specifies the new value for the field (2).
+
+        """
+        payload = {
+            "fieldName": fieldName,
+            "value": value
+        }
+        qry = ServiceOperationQuery(self,
+                                    "ParseAndSetFieldValue", None, payload, None, None)
+        self.context.add_query(qry)
+
     @property
-    def display_name(self):
+    def displayName(self):
         """Specifies the display name of the list item.
 
         :rtype: str or None
@@ -175,8 +190,8 @@ class ListItem(SecurableObject):
         :return:
         """
 
-        def _init_item_type(result):
-            self._entity_type_name = result.properties['ListItemEntityTypeFullName']
+        def _init_item_type():
+            self._entity_type_name = target_list.properties['ListItemEntityTypeFullName']
 
         if not self._entity_type_name:
             target_list.ensure_property("ListItemEntityTypeFullName", _init_item_type)
