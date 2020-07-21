@@ -16,7 +16,8 @@ class Tenant(BaseEntity):
     def create_site(self, site_create_props):
         """Queues a site collection for creation with the specified properties.
 
-        :param SiteCreationProperties site_create_props: A SiteCreationProperties object that contains the initial properties
+        :param SiteCreationProperties site_create_props:
+        A SiteCreationProperties object that contains the initial properties
         of the new site collection.
         """
         result = SpoOperation(self.context)

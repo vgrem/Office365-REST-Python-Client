@@ -10,9 +10,7 @@ from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
 from office365.sharepoint.sharing.objectSharingInformation import ObjectSharingInformation
 from office365.sharepoint.sharing.sharingResult import SharingResult
-from office365.sharepoint.ui.applicationpages.clientPeoplePickerQueryParameters import (
-    ClientPeoplePickerQueryParameters,
-)
+from office365.sharepoint.ui.applicationpages.clientPeoplePickerQueryParameters import ClientPeoplePickerQueryParameters
 from office365.sharepoint.ui.applicationpages.clientPeoplePickerWebServiceInterface import (
     ClientPeoplePickerWebServiceInterface,
 )

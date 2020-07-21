@@ -23,9 +23,7 @@ from office365.sharepoint.principal.user_collection import UserCollection
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
 from office365.sharepoint.sharing.objectSharingSettings import ObjectSharingSettings
 from office365.sharepoint.sharing.sharingResult import SharingResult
-from office365.sharepoint.ui.applicationpages.clientPeoplePickerQueryParameters import (
-    ClientPeoplePickerQueryParameters,
-)
+from office365.sharepoint.ui.applicationpages.clientPeoplePickerQueryParameters import ClientPeoplePickerQueryParameters
 from office365.sharepoint.ui.applicationpages.clientPeoplePickerWebServiceInterface import (
     ClientPeoplePickerWebServiceInterface,
 )
@@ -131,7 +129,8 @@ class Web(SecurableObject):
               The two possible URL formats are:
               1) The URL of the site, with the path of the object in SharePoint represented as query string parameters,
               forSharing set to 1 if sharing, and mbypass set to 1 to bypass any mobile logic
-              e.g. http://contoso.com/?forSharing=1&mbypass=1&List=%7BCF908473%2D72D4%2D449D%2D8A53%2D4BD01EC54B84%7D&obj={CF908473-72D4-449D-8A53-4BD01EC54B84},1,DOCUMENT
+              e.g. http://contoso.com/?forSharing=1&mbypass=1&List=%7BCF908473%2D72D4%2D449D%2D8A53%2D4BD01EC54B84%7D&
+              obj={CF908473-72D4-449D-8A53-4BD01EC54B84},1,DOCUMENT
               2) The URL of the SharePoint object (web, list, item) intended for sharing
               e.g. http://contoso.com/Documents/SampleFile.docx
         :param int group_id: The id value of the permissions group if adding to a group, 0 otherwise.
@@ -356,7 +355,7 @@ class Web(SecurableObject):
         Removes Sharing permissions on an object.
 
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
-        :param str url: A SharingResult object which contains status codes pertaining to the completion of the operation.
+        :param str url: A SharingResult object which contains status codes pertaining to the completion of the operation
         :return: SharingResult
         """
         result = SharingResult(context)
