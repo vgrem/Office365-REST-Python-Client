@@ -20,7 +20,7 @@ class ODataRequest(ClientRequest):
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat
         """
-        super(ODataRequest, self).__init__(context)
+        super().__init__(context)
         self._json_format = json_format
 
     @property
@@ -35,7 +35,7 @@ class ODataRequest(ClientRequest):
         :return: requests.Response
         """
         self.ensure_media_type(request)
-        return super(ODataRequest, self).execute_request_direct(request)
+        return super().execute_request_direct(request)
 
     def ensure_media_type(self, request):
         media_type = self.json_format.get_media_type()

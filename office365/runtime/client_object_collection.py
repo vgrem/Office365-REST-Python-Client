@@ -13,7 +13,7 @@ class ClientObjectCollection(ClientObject):
         :type item_type: type[ClientObject]
         :type resource_path: ResourcePath
         """
-        super(ClientObjectCollection, self).__init__(context, resource_path)
+        super().__init__(context, resource_path)
         self._data = []
         self._item_type = item_type
         self.page_loaded = EventHandler(False)
@@ -27,7 +27,7 @@ class ClientObjectCollection(ClientObject):
 
     def create_typed_object(self, properties):
         if self._item_type is None:
-            raise AttributeError("No class for object type '{0}' found".format(self._item_type))
+            raise AttributeError(f"No class for object type '{self._item_type}' found")
 
         client_object = self._item_type(self.context)
         client_object._parent_collection = self
@@ -55,13 +55,11 @@ class ClientObjectCollection(ClientObject):
         """
         :rtype: collections.Iterable[ClientObject]
         """
-        for cur_item in self._data:
-            yield cur_item
+        yield from self._data
 
         if self._paged_mode:
             while self.next_request_url:
-                for cur_item in self._get_next_items():
-                    yield cur_item
+                yield from self._get_next_items()
 
     def __len__(self):
         return len(self._data)

@@ -26,7 +26,7 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
         context.add_query(qry)
 
         def _process_result(resp):
-            result.value = "[{0}]".format(result.value)
+            result.value = f"[{result.value}]"
             if callable(on_resolved):
                 on_resolved(result.value)
         context.after_execute(_process_result)

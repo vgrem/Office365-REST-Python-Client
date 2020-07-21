@@ -250,7 +250,7 @@ class File(AbstractFile):
         :type server_relative_url: str
         :type content: str
         """
-        url = r"{0}web/getFileByServerRelativeUrl('{1}')/\$value".format(
+        url = r"{}web/getFileByServerRelativeUrl('{}')/\$value".format(
             ctx.service_root_url, server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Post
@@ -268,7 +268,7 @@ class File(AbstractFile):
         :type server_relative_url: str
         :return Response
         """
-        url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(ctx.service_root_url, server_relative_url)
+        url = fr"{ctx.service_root_url}web/getfilebyserverrelativeurl('{server_relative_url}')/\$value"
         request = RequestOptions(url)
         request.method = HttpMethod.Get
         response = ctx.execute_request_direct(request)
@@ -362,7 +362,7 @@ class File(AbstractFile):
         return self.properties.get("TimeLastModified", None)
 
     def set_property(self, name, value, persist_changes=True):
-        super(File, self).set_property(name, value, persist_changes)
+        super().set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "ServerRelativeUrl":

@@ -27,4 +27,4 @@ class UploadFileQuery(ServiceOperationQuery):
 
         web.context.before_execute(_construct_upload_request)
         web.context.after_execute(_process_response)
-        super(UploadFileQuery, self).__init__(web, r"getFileByServerRelativeUrl('{0}')/\$value".format(file_url))
+        super().__init__(web, fr"getFileByServerRelativeUrl('{file_url}')/\$value")

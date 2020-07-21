@@ -6,4 +6,4 @@ class PermissionCollection(ClientObjectCollection):
     """Permission's collection"""
 
     def __init__(self, context, resource_path=None):
-        super(PermissionCollection, self).__init__(context, Permission, resource_path)
+        super().__init__(context, Permission, resource_path)

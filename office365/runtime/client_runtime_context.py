@@ -3,7 +3,7 @@ import abc
 from office365.runtime.client_query import ReadEntityQuery
 
 
-class ClientRuntimeContext(object):
+class ClientRuntimeContext:
 
     def __init__(self, service_root_url, auth_context=None):
         """

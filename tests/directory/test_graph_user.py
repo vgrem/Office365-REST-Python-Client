@@ -19,7 +19,7 @@ class TestGraphUser(GraphTestCase):
             self.assertIsNotNone(user.id)
 
     def test2_create_user(self):
-        profile = UserProfile("testuser{0}@{1}".format(random_seed, settings['tenant']), "P@ssw0rd{0}".format(random_seed))
+        profile = UserProfile("testuser{}@{}".format(random_seed, settings['tenant']), f"P@ssw0rd{random_seed}")
         new_user = self.client.users.add(profile)
         self.client.execute_query()
         self.assertIsNotNone(new_user.id)
@@ -28,12 +28,12 @@ class TestGraphUser(GraphTestCase):
     def test3_update_user(self):
         user_to_update = self.__class__.test_user
         prop_name = 'city'
-        prop_val = 'Earth{0}'.format(random_seed)
+        prop_val = f'Earth{random_seed}'
         user_to_update.set_property(prop_name, prop_val)
         user_to_update.update()
         self.client.execute_query()
 
-        result = self.client.users.filter("{0} eq '{1}'".format(prop_name, prop_val))
+        result = self.client.users.filter(f"{prop_name} eq '{prop_val}'")
         self.client.load(result)
         self.client.execute_query()
         self.assertEqual(1, len(result))

@@ -10,7 +10,7 @@ from settings import settings
 
 
 def ensure_list(web, list_properties):
-    lists = web.lists.filter("Title eq '{0}'".format(list_properties.Title))
+    lists = web.lists.filter(f"Title eq '{list_properties.Title}'")
     ctx.load(lists)
     ctx.execute_query()
     if len(lists) == 1:
@@ -72,7 +72,7 @@ def generate_contacts(context):
         }
         contact_item = contacts_list.add_item(contact_properties)
         context.execute_query()
-        print("({0} of {1})  Contact '{2}' has been created".format(idx, total_amount, contact_item.properties["Title"]))
+        print("({} of {})  Contact '{}' has been created".format(idx, total_amount, contact_item.properties["Title"]))
 
 
 if __name__ == '__main__':

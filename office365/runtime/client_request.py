@@ -7,7 +7,7 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.types.EventHandler import EventHandler
 
 
-class ClientRequest(object):
+class ClientRequest:
 
     def __init__(self, context):
         """

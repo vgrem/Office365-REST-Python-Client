@@ -11,7 +11,7 @@ class TestSPView(SPTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestSPView, cls).setUpClass()
+        super().setUpClass()
         cls.target_list = cls.ensure_list(cls.client.web,
                                           ListCreationInformation("Tasks",
                                                                   None,
@@ -67,7 +67,7 @@ class TestSPView(SPTestCase):
         view_to_update.update()
         self.client.execute_query()
 
-        result = self.target_list.views.filter("Title eq '{0}'".format(self.target_view_title_updated))
+        result = self.target_list.views.filter(f"Title eq '{self.target_view_title_updated}'")
         self.client.load(result)
         self.client.execute_query()
         self.assertEqual(len(result), 1)
@@ -77,7 +77,7 @@ class TestSPView(SPTestCase):
         view_to_delete.delete_object()
         self.client.execute_query()
 
-        result = self.client.web.lists.filter("Title eq '{0}'".format(self.target_view_title_updated))
+        result = self.client.web.lists.filter(f"Title eq '{self.target_view_title_updated}'")
         self.client.load(result)
         self.client.execute_query()
         self.assertEqual(len(result), 0)

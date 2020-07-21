@@ -22,13 +22,13 @@ class ODataBatchRequest(ODataRequest):
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat
         """
-        super(ODataBatchRequest, self).__init__(context, json_format)
+        super().__init__(context, json_format)
         media_type = "multipart/mixed"
         self._current_boundary = _create_boundary("batch_")
-        self._content_type = "; ".join([media_type, "boundary={0}".format(self._current_boundary)])
+        self._content_type = "; ".join([media_type, f"boundary={self._current_boundary}"])
 
     def build_request(self):
-        request_url = "{0}$batch".format(self.context.service_root_url)
+        request_url = f"{self.context.service_root_url}$batch"
         request = RequestOptions(request_url)
         request.method = HttpMethod.Post
         request.ensure_header('Content-Type', self._content_type)
@@ -94,7 +94,7 @@ class ODataBatchRequest(ODataRequest):
         :type request: RequestOptions
         """
         eol = "\r\n"
-        lines = ["{method} {url} HTTP/1.1".format(method=request.method, url=request.url),
+        lines = [f"{request.method} {request.url} HTTP/1.1",
                  *[':'.join(h) for h in request.headers.items()]]
         if request.data:
             lines.append(request.data)

@@ -26,7 +26,7 @@ def download_files(remote_folder, local_path):
             with open(os.path.join(local_path, drive_item.name), 'wb') as local_file:
                 drive_item.download(local_file)
                 client.execute_query()
-            print("File '{0}' has been downloaded".format(local_file.name))
+            print(f"File '{local_file.name}' has been downloaded")
 
 
 # example demonstrates how to export OneDrive files into local file system

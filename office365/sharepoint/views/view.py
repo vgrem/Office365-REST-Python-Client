@@ -12,7 +12,7 @@ class View(BaseEntity):
     """Specifies a list view."""
 
     def __init__(self, context, resource_path=None, parent_list=None):
-        super(View, self).__init__(context, resource_path)
+        super().__init__(context, resource_path)
         self._parent_list = parent_list
 
     def get_items(self):
@@ -91,7 +91,7 @@ class View(BaseEntity):
             return None
 
     def set_property(self, name, value, persist_changes=True):
-        super(View, self).set_property(name, value, persist_changes)
+        super().set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id":

@@ -29,8 +29,8 @@ def generate_user_profile():
         'officeLocation': fake.street_address(),
         'city': fake.city(),
         'country': fake.country(),
-        'principalName': "{0}@{1}".format(fake.user_name(), settings['tenant']),
-        'password': "P@ssw0rd{0}".format(random_seed),
+        'principalName': "{}@{}".format(fake.user_name(), settings['tenant']),
+        'password': f"P@ssw0rd{random_seed}",
         'accountEnabled': True
     }
     return UserProfile(**user_json)
@@ -42,4 +42,4 @@ for idx in range(0, 5):
     user_profile = generate_user_profile()
     user = client.users.add(user_profile)
     client.execute_query()
-    print("{0} user has been created".format(user.properties['userPrincipalName']))
+    print("{} user has been created".format(user.properties['userPrincipalName']))

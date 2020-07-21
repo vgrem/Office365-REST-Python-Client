@@ -15,7 +15,7 @@ class AuthenticationContext(BaseAuthenticationContext):
         :param str url:  authority url
         :param ClientCredential or UserCredential credentials: credentials
         """
-        super(AuthenticationContext, self).__init__()
+        super().__init__()
         self.url = url
         self.credentials = credentials
         self.provider = None
@@ -45,14 +45,14 @@ class AuthenticationContext(BaseAuthenticationContext):
         """
         self.provider = SamlTokenProvider(self.url, username, password)
         if not self.provider.acquire_token():
-            raise ValueError('Acquire token failed: {0}'.format(self.provider.error))
+            raise ValueError(f'Acquire token failed: {self.provider.error}')
         return True
 
     def acquire_token_for_app(self, client_id, client_secret):
         """Acquire token via client credentials (SharePoint App Principal)"""
         self.provider = ACSTokenProvider(self.url, client_id, client_secret)
         if not self.provider.acquire_token():
-            raise ValueError('Acquire token failed: {0}'.format(self.provider.error))
+            raise ValueError(f'Acquire token failed: {self.provider.error}')
         return True
 
     def acquire_token_password_grant(self, client_id, username, password, resource, scope):

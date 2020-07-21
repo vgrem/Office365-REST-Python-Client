@@ -10,7 +10,7 @@ class AttachmentfileCreationInformation(ClientValue):
         :type filename: str
         :type content: str or bytes
         """
-        super(AttachmentfileCreationInformation, self).__init__()
+        super().__init__()
         self._filename = filename
         self._content = content
 

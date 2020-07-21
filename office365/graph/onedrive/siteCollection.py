@@ -7,7 +7,7 @@ class SiteCollection(ClientObjectCollection):
     """Drive site's collection"""
 
     def __init__(self, context, resource_path=None):
-        super(SiteCollection, self).__init__(context, Site, resource_path)
+        super().__init__(context, Site, resource_path)
 
     @property
     def root(self):

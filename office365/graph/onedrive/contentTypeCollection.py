@@ -6,4 +6,4 @@ class ContentTypeCollection(ClientObjectCollection):
     """Drive column's collection"""
 
     def __init__(self, context, resource_path=None):
-        super(ContentTypeCollection, self).__init__(context, ContentType, resource_path)
+        super().__init__(context, ContentType, resource_path)

@@ -223,7 +223,7 @@ class DriveItem(BaseItem):
             return PermissionCollection(self.context, ResourcePath("permissions", self.resource_path))
 
     def set_property(self, name, value, persist_changes=True):
-        super(DriveItem, self).set_property(name, value, persist_changes)
+        super().set_property(name, value, persist_changes)
         if name == "id" and self._resource_path.parent.segment == "children":
             self._resource_path = ResourcePath(
                 value,

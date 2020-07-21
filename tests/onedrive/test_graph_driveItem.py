@@ -25,7 +25,7 @@ class TestDriveItem(GraphTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestDriveItem, cls).setUpClass()
+        super().setUpClass()
         cls.target_drive = create_list_drive(cls.client)
 
     @classmethod
@@ -47,7 +47,7 @@ class TestDriveItem(GraphTestCase):
 
     def test3_upload_file(self):
         file_name = "SharePoint User Guide.docx"
-        path = "{0}/../data/{1}".format(os.path.dirname(__file__), file_name)
+        path = "{}/../data/{}".format(os.path.dirname(__file__), file_name)
         with open(path, 'rb') as content_file:
             file_content = content_file.read()
         file_name = os.path.basename(path)
@@ -57,10 +57,10 @@ class TestDriveItem(GraphTestCase):
 
     def test4_upload_file_session(self):
         file_name = "big_buck_bunny.mp4"
-        local_path = "{0}/../data/{1}".format(os.path.dirname(__file__), file_name)
+        local_path = "{}/../data/{}".format(os.path.dirname(__file__), file_name)
         uploader = ResumableFileUpload(self.target_drive.root, local_path, 1000000)
         uploader.execute()
-        print("{0} bytes has been uploaded".format(0))
+        print("{} bytes has been uploaded".format(0))
 
     def test5_download_file(self):
         result = self.__class__.target_file.get_content()
@@ -73,7 +73,7 @@ class TestDriveItem(GraphTestCase):
         self.assertIsNotNone(result.value)
 
     def test7_copy_file(self):
-        copy_file_name = "Copied_{0}_SharePoint User Guide.docx".format(uuid.uuid4().hex)
+        copy_file_name = f"Copied_{uuid.uuid4().hex}_SharePoint User Guide.docx"
         result = self.__class__.target_file.copy(copy_file_name)
         self.client.execute_query()
         self.assertIsNotNone(result.value)

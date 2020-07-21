@@ -79,7 +79,7 @@ class Field(BaseEntity):
         return self.properties.get('InternalName', None)
 
     def set_property(self, name, value, persist_changes=True):
-        super(Field, self).set_property(name, value, persist_changes)
+        super().set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "Id" and self._resource_path is None:
             self._resource_path = ResourcePathServiceOperation(

@@ -20,9 +20,9 @@ from office365.sharepoint.webs.web import Web
 def get_tenant_info(url):
     parts = url.split('://')
     host_name = parts[1].split("/")[0]
-    tenant_name = "{0}.onmicrosoft.com".format(host_name.split(".")[0])
+    tenant_name = "{}.onmicrosoft.com".format(host_name.split(".")[0])
     return {
-        "base_url": "{0}://{1}".format(parts[0], host_name),
+        "base_url": "{}://{}".format(parts[0], host_name),
         "name": tenant_name
     }
 
@@ -37,7 +37,7 @@ class ClientContext(ClientRuntimeContext):
         """
         if base_url.endswith("/"):
             base_url = base_url[:len(base_url) - 1]
-        super(ClientContext, self).__init__(base_url + "/_api/", auth_context)
+        super().__init__(base_url + "/_api/", auth_context)
         self.__web = None
         self.__site = None
         self._base_url = base_url
@@ -85,10 +85,10 @@ class ClientContext(ClientRuntimeContext):
 
         def acquire_token():
             tenant_info = get_tenant_info(base_url)
-            authority_url = 'https://login.microsoftonline.com/{0}'.format(tenant_info['name'])
+            authority_url = 'https://login.microsoftonline.com/{}'.format(tenant_info['name'])
             auth_ctx = adal.AuthenticationContext(authority_url)
             resource = tenant_info['base_url']
-            with open(cert_path, 'r') as file:
+            with open(cert_path) as file:
                 key = file.read()
             json_token = auth_ctx.acquire_token_with_client_certificate(
                 resource,
@@ -115,7 +115,7 @@ class ClientContext(ClientRuntimeContext):
         if not self.authentication_context.is_authenticated:
             self.authentication_context.acquire_token()
 
-        super(ClientContext, self).authenticate_request(request)
+        super().authenticate_request(request)
 
     def get_pending_request(self):
         """

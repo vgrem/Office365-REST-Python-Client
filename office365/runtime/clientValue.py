@@ -1,11 +1,11 @@
-class ClientValue(object):
+class ClientValue:
     """Represent complex type.
     Complex types consist of a list of properties with no key, and can therefore only exist as properties of a
     containing entity or as a temporary value
     """
 
     def __init__(self, namespace=None):
-        super(ClientValue, self).__init__()
+        super().__init__()
         self._namespace = namespace
 
     def set_property(self, k, v, persist_changes=True):
@@ -23,7 +23,7 @@ class ClientValue(object):
         return getattr(self, k)
 
     def to_json(self):
-        return dict((k, v) for k, v in vars(self).items() if v is not None and k != "_namespace")
+        return {k: v for k, v in vars(self).items() if v is not None and k != "_namespace"}
 
     @property
     def entity_type_name(self):

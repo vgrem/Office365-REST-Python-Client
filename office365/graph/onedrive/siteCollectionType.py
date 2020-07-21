@@ -5,7 +5,7 @@ class SiteCollectionType(ClientValue):
     """The siteCollection resource provides more information about a site collection. """
 
     def __init__(self):
-        super(SiteCollectionType, self).__init__()
+        super().__init__()
         self._hostname = None
         self._root = None
 

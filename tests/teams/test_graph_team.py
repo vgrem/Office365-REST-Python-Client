@@ -12,7 +12,7 @@ class TestGraphTeam(GraphTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestGraphTeam, cls).setUpClass()
+        super().setUpClass()
         grp_name = "Group_" + uuid.uuid4().hex
         properties = GroupProfile(grp_name)
         properties.securityEnabled = False
@@ -23,7 +23,7 @@ class TestGraphTeam(GraphTestCase):
         sleep(5)
 
     def test2_ensure_team(self):
-        teams = self.client.me.joinedTeams.filter("id eq '{0}'".format(self.__class__.target_group.id))
+        teams = self.client.me.joinedTeams.filter(f"id eq '{self.__class__.target_group.id}'")
         self.client.load(teams)
         self.client.execute_query()
         self.assertIsNotNone(teams.resource_path)

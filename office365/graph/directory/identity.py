@@ -6,6 +6,6 @@ class Identity(ClientValue):
     or application. """
 
     def __init__(self):
-        super(Identity, self).__init__()
+        super().__init__()
         self.displayName = None
         self.id = None

@@ -8,21 +8,21 @@ class OAuthTokenProvider(BaseTokenProvider):
     """ OAuth token provider for AAD"""
 
     def __init__(self, tenant):
-        self.authority_url = "https://login.microsoftonline.com/{tenant}".format(tenant=tenant)
+        self.authority_url = f"https://login.microsoftonline.com/{tenant}"
         self.version = "v1.0"
         self.error = None
         self.token = TokenResponse()
 
     def acquire_token(self, parameters):
         try:
-            token_url = "{authority}/oauth2/token".format(authority=self.authority_url)
+            token_url = f"{self.authority_url}/oauth2/token"
             response = requests.post(url=token_url,
                                      headers={'Content-Type': 'application/x-www-form-urlencoded'},
                                      data=parameters)
             self.token = TokenResponse.from_json(response.json())
             return self.token.is_valid
         except requests.exceptions.RequestException as e:
-            self.error = "Error: {0}".format(e)
+            self.error = f"Error: {e}"
             return False
 
     def is_authenticated(self):

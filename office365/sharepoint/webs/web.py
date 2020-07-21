@@ -42,7 +42,7 @@ class Web(SecurableObject):
         """
         if resource_path is None:
             resource_path = ResourcePath("Web")
-        super(Web, self).__init__(context, resource_path)
+        super().__init__(context, resource_path)
         self._web_url = None
 
     @staticmethod
@@ -523,14 +523,14 @@ class Web(SecurableObject):
             return RegionalSettings(self.context, ResourcePath("RegionalSettings", self.resource_path))
 
     def set_property(self, name, value, persist_changes=True):
-        super(Web, self).set_property(name, value, persist_changes)
+        super().set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "Url":
             self._web_url = value
 
     @property
     def resource_url(self):
-        url = super(Web, self).resource_url
+        url = super().resource_url
         if self._web_url is not None:
             url = url.replace(self.context.service_root_url, self._web_url + '/_api/')
         return url

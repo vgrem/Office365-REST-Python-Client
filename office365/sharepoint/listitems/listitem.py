@@ -190,7 +190,7 @@ class ListItem(SecurableObject):
         return self.properties.get("FieldValues", None)
 
     def set_property(self, name, value, persist_changes=True):
-        super(ListItem, self).set_property(name, value, persist_changes)
+        super().set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id" and self._parent_collection is not None:
@@ -212,15 +212,15 @@ class ListItem(SecurableObject):
             target_list.ensure_property("ListItemEntityTypeFullName", _init_item_type)
 
     def to_json(self):
-        payload_orig = super(ListItem, self).to_json()
+        payload_orig = super().to_json()
         payload = {}
         for k, v in payload_orig.items():
             if isinstance(v, FieldMultiLookupValue):
                 collection = ClientValueCollection(int)
                 [collection.add(lv.LookupId) for lv in v]
-                payload["{name}Id".format(name=k)] = collection
+                payload[f"{k}Id"] = collection
             elif isinstance(v, FieldLookupValue):
-                payload["{name}Id".format(name=k)] = v
+                payload[f"{k}Id"] = v
             else:
                 payload[k] = v
         return payload

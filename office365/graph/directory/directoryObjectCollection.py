@@ -10,7 +10,7 @@ class DirectoryObjectCollection(ClientObjectCollection):
     """DirectoryObject's collection"""
 
     def __init__(self, context, resource_path=None):
-        super(DirectoryObjectCollection, self).__init__(context, DirectoryObject, resource_path)
+        super().__init__(context, DirectoryObject, resource_path)
 
     def __getitem__(self, key):
         """
@@ -20,7 +20,7 @@ class DirectoryObjectCollection(ClientObjectCollection):
         :type key: int or str
         """
         if type(key) == int:
-            return super(DirectoryObjectCollection, self).__getitem__(key)
+            return super().__getitem__(key)
         return self._item_type(self.context,
                                ResourcePath(key, self.resource_path))
 
@@ -34,7 +34,7 @@ class DirectoryObjectCollection(ClientObjectCollection):
     def add(self, user_id):
         """Add a user to the group."""
         payload = {
-            "@odata.id": "https://graph.microsoft.com/v1.0/users/{0}".format(user_id)
+            "@odata.id": f"https://graph.microsoft.com/v1.0/users/{user_id}"
         }
         qry = ServiceOperationQuery(self, "$ref", None, payload)
         self.context.add_query(qry)
@@ -42,7 +42,7 @@ class DirectoryObjectCollection(ClientObjectCollection):
     def remove(self, user_id):
         """Remove a user from the group."""
 
-        qry = ServiceOperationQuery(self, "{0}/$ref".format(user_id))
+        qry = ServiceOperationQuery(self, f"{user_id}/$ref")
         self.context.add_query(qry)
 
         def _construct_remove_user_request(request):

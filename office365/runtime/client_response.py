@@ -1,2 +1,2 @@
-class ClientResponse(object):
+class ClientResponse:
     """Client response """

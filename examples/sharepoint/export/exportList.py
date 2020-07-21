@@ -28,4 +28,4 @@ with open(path, 'w') as fh:
     w.writeheader()
     for item in list_items:
         w.writerow(item.properties)
-print("List data has been exported into '{0}' file".format(path))
+print(f"List data has been exported into '{path}' file")

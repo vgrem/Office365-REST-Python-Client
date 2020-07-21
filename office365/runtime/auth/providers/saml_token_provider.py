@@ -69,7 +69,7 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
                 token = self._acquire_service_token(self.__username, self.__password)
             return self._acquire_authentication_cookie(token, user_realm.IsFederated)
         except requests.exceptions.RequestException as e:
-            self.error = "Error: {}".format(e)
+            self.error = f"Error: {e}"
             return False
 
     def _get_user_realm(self, login):
@@ -77,7 +77,7 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
 
         :type login: str
         """
-        response = requests.post(self.__sts_profile.user_realm_service_url, data="login={0}&xml=1".format(login),
+        response = requests.post(self.__sts_profile.user_realm_service_url, data=f"login={login}&xml=1",
                                  headers={'Content-Type': 'application/x-www-form-urlencoded'})
         xml = ElementTree.fromstring(response.content)
         node = xml.find('NameSpaceType')
@@ -118,7 +118,7 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
                 '{0}Body/{1}RequestSecurityTokenResponse/{1}RequestedSecurityToken/{2}Assertion'.format(
                     self.__ns_prefixes['s'], self.__ns_prefixes['wst'], self.__ns_prefixes['saml']))
             if assertion_node is None:
-                self.error = 'Cannot get security assertion for user {0} from {1}'.format(self.__username, adfs_url)
+                self.error = f'Cannot get security assertion for user {self.__username} from {adfs_url}'
                 logger.error(self.error)
                 return None
             # 2. prepare & submit token request
@@ -130,7 +130,7 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
             })
             template_xml = ElementTree.fromstring(template)
             security_node = template_xml.find(
-                '{0}Header/{1}Security'.format(self.__ns_prefixes['s'], self.__ns_prefixes['wsse']))
+                '{}Header/{}Security'.format(self.__ns_prefixes['s'], self.__ns_prefixes['wsse']))
 
             security_node.insert(1, assertion_node)
             payload = ElementTree.tostring(template_xml).decode()
@@ -141,7 +141,7 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
             logger.debug_secrets('security token: %s', token)
             return token
         except ElementTree.ParseError as e:
-            self.error = 'An error occurred while parsing the server response: {}'.format(e)
+            self.error = f'An error occurred while parsing the server response: {e}'
             logger.error(self.error)
             return None
 
@@ -171,7 +171,7 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
         try:
             xml = ElementTree.fromstring(response.content)
         except ElementTree.ParseError as e:
-            self.error = 'An error occurred while parsing the server response: {}'.format(e)
+            self.error = f'An error occurred while parsing the server response: {e}'
             logger.error(self.error)
             return None
 
@@ -183,7 +183,7 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
             if error is None:
                 self.error = 'An error occurred while retrieving token from XML response.'
             else:
-                self.error = 'An error occurred while retrieving token from XML response: {0}'.format(error.text)
+                self.error = f'An error occurred while retrieving token from XML response: {error.text}'
             logger.error(self.error)
             return None
 
@@ -192,7 +192,7 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
             '{0}Body/{1}RequestSecurityTokenResponse/{1}RequestedSecurityToken/{2}BinarySecurityToken'.format(
                 self.__ns_prefixes['s'], self.__ns_prefixes['wst'], self.__ns_prefixes['wsse']))
         if token is None:
-            self.error = 'Cannot get binary security token for from {0}'.format(
+            self.error = 'Cannot get binary security token for from {}'.format(
                 self.__sts_profile.security_token_service_url)
             logger.error(self.error)
             return None
@@ -220,13 +220,13 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
                         headers={
                             'User-Agent': 'Office365 Python Client',
                             'X-IDCRL_ACCEPTED': 't',
-                            'Authorization': 'BPOSIDCRL {0}'.format(security_token)
+                            'Authorization': f'BPOSIDCRL {security_token}'
                         })
         logger.debug_secrets("session.cookies: %s", session.cookies)
         cookies = requests.utils.dict_from_cookiejar(session.cookies)
         logger.debug_secrets("cookies: %s", cookies)
         if not cookies:
-            self.error = "An error occurred while retrieving auth cookies from {0}".format(
+            self.error = "An error occurred while retrieving auth cookies from {}".format(
                 self.__sts_profile.signin_page_url)
             logger.error(self.error)
             return False

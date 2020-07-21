@@ -8,7 +8,7 @@ class ContactCollection(ClientObjectCollection):
     """User's contact collection"""
 
     def __init__(self, context, resource_path=None):
-        super(ContactCollection, self).__init__(context, Contact, resource_path)
+        super().__init__(context, Contact, resource_path)
 
     def add_from_json(self, contact_creation_information):
         """Creates a Contact resource from JSON"""

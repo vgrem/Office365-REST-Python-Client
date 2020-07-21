@@ -6,7 +6,7 @@ from settings import settings
 
 
 def print_progress(items_read):
-    print("Items read: {0}".format(items_read))
+    print(f"Items read: {items_read}")
 
 
 def enum_items(target_list):
@@ -15,7 +15,7 @@ def enum_items(target_list):
     ctx.load(items)
     ctx.execute_query()
     for index, item in enumerate(items):
-        print("{0}: {1}".format(index, item.properties['Title']))
+        print("{}: {}".format(index, item.properties['Title']))
 
 
 def enum_files_and_folders(target_list):
@@ -36,7 +36,7 @@ def get_total_count(target_list):
     result = target_list.items.get_items_count()
     target_list.items.page_loaded += print_progress  # page load event
     ctx.execute_query()
-    print("Total items count: {0}".format(result.value))
+    print(f"Total items count: {result.value}")
 
 
 def get_item_at_index(target_list):
@@ -45,7 +45,7 @@ def get_item_at_index(target_list):
     ctx.load(items)
     ctx.execute_query()
     index = 1200
-    print("Item at index: {0}".format(items[index].properties))
+    print("Item at index: {}".format(items[index].properties))
 
 
 ctx = ClientContext.connect_with_credentials("https://mediadev8.sharepoint.com/sites/team",

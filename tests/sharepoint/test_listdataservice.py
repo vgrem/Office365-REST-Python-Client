@@ -8,7 +8,7 @@ class TestSharePointListDataService(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestSharePointListDataService, cls).setUpClass()
+        super().setUpClass()
         credential = ClientCredential(settings['client_credentials']['client_id'],
                                       settings['client_credentials']['client_secret'])
         cls.client = ListDataService.connect_with_credentials(settings['url'], credential)

@@ -17,7 +17,7 @@ class TestTenant(TestCase):
     @classmethod
     def setUpClass(cls):
         tenant = os.environ.get('office365_python_sdk_tenant', 'mediadev8')
-        admin_site_url = "https://{0}-admin.sharepoint.com/".format(tenant)
+        admin_site_url = f"https://{tenant}-admin.sharepoint.com/"
         credentials = UserCredential(settings['user_credentials']['username'],
                                      settings['user_credentials']['password'])
 

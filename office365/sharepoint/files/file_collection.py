@@ -10,7 +10,7 @@ class FileCollection(ClientObjectCollection):
     """Represents a collection of File resources."""
 
     def __init__(self, context, resource_path=None):
-        super(FileCollection, self).__init__(context, File, resource_path)
+        super().__init__(context, File, resource_path)
 
     def create_upload_session(self, source_path, chunk_size, chunk_uploaded=None):
         """Upload a file as multiple chunks

@@ -1,5 +1,4 @@
-
-class ResourcePath(object):
+class ResourcePath:
     """OData resource path"""
 
     def __init__(self, segment, parent=None):

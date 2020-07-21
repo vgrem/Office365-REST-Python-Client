@@ -16,4 +16,4 @@ with open(download_path, "wb") as local_file:
     source_file = ctx.web.get_file_by_server_relative_url(file_url)
     source_file.download(local_file)
     ctx.execute_query()
-    print("[Ok] file has been downloaded: {0}".format(download_path))
+    print(f"[Ok] file has been downloaded: {download_path}")

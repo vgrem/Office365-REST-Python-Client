@@ -17,4 +17,4 @@ target_folder = ctx.web.lists.get_by_title(list_title).rootFolder
 name = os.path.basename(path)
 target_file = target_folder.upload_file(name, file_content)
 ctx.execute_query()
-print("File url: {0}".format(target_file.serverRelativeUrl))
+print(f"File url: {target_file.serverRelativeUrl}")

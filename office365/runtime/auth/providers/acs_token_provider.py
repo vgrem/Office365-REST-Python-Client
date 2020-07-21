@@ -37,7 +37,7 @@ class ACSTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
             self.token = self.get_app_only_access_token(url_info.hostname, realm)
             return self.token.is_valid
         except requests.exceptions.RequestException as e:
-            self.error = "Error: {}".format(e)
+            self.error = f"Error: {e}"
             return False
 
     def get_app_only_access_token(self, target_host, target_realm):
@@ -65,12 +65,12 @@ class ACSTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
     @staticmethod
     def get_formatted_principal(principal_name, host_name, realm):
         if host_name:
-            return "{0}/{1}@{2}".format(principal_name, host_name, realm)
-        return "{0}@{1}".format(principal_name, realm)
+            return f"{principal_name}/{host_name}@{realm}"
+        return f"{principal_name}@{realm}"
 
     @staticmethod
     def get_security_token_service_url(realm):
-        return "https://accounts.accesscontrol.windows.net/{0}/tokens/OAuth/2".format(realm)
+        return f"https://accounts.accesscontrol.windows.net/{realm}/tokens/OAuth/2"
 
     @staticmethod
     def create_access_token_request(client_id, client_secret, scope):
@@ -84,7 +84,7 @@ class ACSTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
         return data
 
     def get_authorization_header(self):
-        return 'Bearer {0}'.format(self.token.accessToken)
+        return f'Bearer {self.token.accessToken}'
 
     def get_last_error(self):
         return self.error

@@ -48,7 +48,7 @@ class SPTestCase(TestCase):
         :return: List
         """
         ctx = web.context
-        lists = web.lists.filter("Title eq '{0}'".format(list_properties.Title))
+        lists = web.lists.filter(f"Title eq '{list_properties.Title}'")
         ctx.load(lists)
         ctx.execute_query()
         if len(lists) == 1:
@@ -57,7 +57,7 @@ class SPTestCase(TestCase):
 
     @staticmethod
     def read_file_as_text(path):
-        with open(path, 'r') as content_file:
+        with open(path) as content_file:
             file_content = content_file.read()
         return file_content
 

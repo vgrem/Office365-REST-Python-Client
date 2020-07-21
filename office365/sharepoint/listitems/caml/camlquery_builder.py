@@ -51,7 +51,7 @@ class CamlQueryBuilder:
 
                 filter_name = to_camel(filter_name.split('__')[0])
                 if operator in self.date_operators:
-                    column_type, value = 'DateTime', "{}T00:00:00Z".format(filter_value)  # 2016-03-26
+                    column_type, value = 'DateTime', f"{filter_value}T00:00:00Z"  # 2016-03-26
                     query = '<{}><FieldRef Name="{}" /><Value Type="{}">{}</Value></{}>'.format(
                         operator, filter_name, column_type, value, operator)
                 elif operator == 'Contains':

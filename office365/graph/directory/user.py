@@ -18,7 +18,7 @@ class User(DirectoryObject):
         :type permanent_delete: bool
 
         """
-        super(User, self).delete_object()
+        super().delete_object()
         if permanent_delete:
             deleted_user = self.context.directory.deletedUsers[self.id]
             deleted_user.delete_object()
@@ -87,7 +87,7 @@ class User(DirectoryObject):
             return DirectoryObjectCollection(self.context, ResourcePath("transitiveMemberOf", self.resource_path))
 
     def set_property(self, name, value, persist_changes=True):
-        super(User, self).set_property(name, value, persist_changes)
+        super().set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "id" or name == "userPrincipalName":

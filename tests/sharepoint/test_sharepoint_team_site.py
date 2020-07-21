@@ -13,7 +13,7 @@ class TestTeamSite(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestTeamSite, cls).setUpClass()
+        super().setUpClass()
 
         user_credentials = UserCredential(settings['user_credentials']['username'],
                                           settings['user_credentials']['password'])
@@ -21,7 +21,7 @@ class TestTeamSite(TestCase):
         cls.site_manager = GroupSiteManager(cls.client)
 
     def test1_create_site(self):
-        site_name = "TeamSite{0}".format(uuid.uuid4().hex)
+        site_name = f"TeamSite{uuid.uuid4().hex}"
         info = self.site_manager.create_group_ex("Team Site", site_name, True, None)
         self.client.execute_query()
         self.assertIsNotNone(info.GroupId)

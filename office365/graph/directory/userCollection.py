@@ -7,7 +7,7 @@ class UserCollection(DirectoryObjectCollection):
     """User's collection"""
 
     def __init__(self, context, resource_path=None):
-        super(UserCollection, self).__init__(context, resource_path)
+        super().__init__(context, resource_path)
         self._item_type = User
 
     def add(self, user_properties):

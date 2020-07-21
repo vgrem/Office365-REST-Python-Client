@@ -82,7 +82,7 @@ class ContentType(BaseEntity):
             return ContentType(self.context, ResourcePath("Parent", self.resource_path))
 
     def set_property(self, name, value, persist_changes=True):
-        super(ContentType, self).set_property(name, value, persist_changes)
+        super().set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "StringId" and self._resource_path is None:
             self._resource_path = ResourcePathServiceOperation(

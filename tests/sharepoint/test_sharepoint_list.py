@@ -88,7 +88,7 @@ class TestSPList(SPTestCase):
         list_to_update.update()
         self.client.execute_query()
 
-        result = self.client.web.lists.filter("Title eq '{0}'".format(self.target_list_title))
+        result = self.client.web.lists.filter(f"Title eq '{self.target_list_title}'")
         self.client.load(result)
         self.client.execute_query()
         self.assertEqual(len(result), 1)
@@ -109,7 +109,7 @@ class TestSPList(SPTestCase):
         list_to_delete.delete_object()
         self.client.execute_query()
 
-        result = self.client.web.lists.filter("Title eq '{0}'".format(list_title))
+        result = self.client.web.lists.filter(f"Title eq '{list_title}'")
         self.client.load(result)
         self.client.execute_query()
         self.assertEqual(len(result), 0)

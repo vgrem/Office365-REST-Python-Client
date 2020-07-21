@@ -7,7 +7,7 @@ class DriveCollection(ClientObjectCollection):
     """Drive's collection"""
 
     def __init__(self, context, resource_path=None):
-        super(DriveCollection, self).__init__(context, Drive, resource_path)
+        super().__init__(context, Drive, resource_path)
 
     def get_by_id(self, url):
         """Retrieve DriveItem by url"""

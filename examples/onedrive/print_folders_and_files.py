@@ -22,7 +22,7 @@ def enum_folders_and_files(root_folder):
     client.execute_query()
     for drive_item in drive_items:
         item_type = drive_item.folder.is_server_object_null and "file" or "folder"
-        print("Type: {0} Name: {1}".format(item_type, drive_item.name))
+        print(f"Type: {item_type} Name: {drive_item.name}")
         if not drive_item.folder.is_server_object_null and drive_item.folder.childCount > 0:
             enum_folders_and_files(drive_item)
 

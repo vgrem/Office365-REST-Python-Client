@@ -7,7 +7,7 @@ class ChannelCollection(ClientObjectCollection):
     """Team's collection"""
 
     def __init__(self, context, resource_path=None):
-        super(ChannelCollection, self).__init__(context, Channel, resource_path)
+        super().__init__(context, Channel, resource_path)
 
     def __getitem__(self, key):
         if type(key) == int:

@@ -12,8 +12,7 @@ class ClientValueCollection(ClientValue):
         self._data.append(value)
 
     def __iter__(self):
-        for item in self._data:
-            yield item
+        yield from self._data
 
     def to_json(self):
         return self._data
@@ -40,4 +39,4 @@ class ClientValueCollection(ClientValue):
             item_type_name = primitive_types[item_type_name]
         elif isinstance(self._item_type, ClientValue):
             item_type_name = self._item_type.entity_type_name
-        return "Collection({0})".format(item_type_name)
+        return f"Collection({item_type_name})"

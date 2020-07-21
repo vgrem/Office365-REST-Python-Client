@@ -10,11 +10,11 @@ from office365.sharepoint.lists.list_template_type import ListTemplateType
 class TestListItemAttachment(SPTestCase):
     attachment_file_name = "SharePoint User Guide.docx"
     target_item = None  # type: ListItem
-    attachment_path = "{0}/../data/{1}".format(os.path.dirname(__file__), attachment_file_name)
+    attachment_path = "{}/../data/{}".format(os.path.dirname(__file__), attachment_file_name)
 
     @classmethod
     def setUpClass(cls):
-        super(TestListItemAttachment, cls).setUpClass()
+        super().setUpClass()
         cls.target_list = cls.ensure_list(cls.client.web,
                                           ListCreationInformation("Tasks",
                                                                   None,

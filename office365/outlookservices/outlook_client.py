@@ -18,8 +18,8 @@ class OutlookClient(ClientRuntimeContext):
         :type auth_context: AuthenticationContext
         """
         self._resource = "https://outlook.office365.com"
-        self.__service_root_url = "{resource}/api/v1.0/".format(resource=self._resource)
-        super(OutlookClient, self).__init__(self.__service_root_url, auth_context)
+        self.__service_root_url = f"{self._resource}/api/v1.0/"
+        super().__init__(self.__service_root_url, auth_context)
         self._pendingRequest = ODataRequest(self, V4JsonFormat("minimal"))
         self._pendingRequest.beforeExecute += self._build_specific_query
         self._token_parameters = None
@@ -41,7 +41,7 @@ class OutlookClient(ClientRuntimeContext):
     def authenticate_request(self, request):
         if not self._auth_context.is_authenticated:
             self._auth_context.acquire_token_password_grant(**self._token_parameters)
-        super(OutlookClient, self).authenticate_request(request)
+        super().authenticate_request(request)
 
     def get_pending_request(self):
         return self._pendingRequest

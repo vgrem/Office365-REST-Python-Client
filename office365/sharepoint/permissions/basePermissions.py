@@ -8,7 +8,7 @@ class BasePermissions(ClientValue):
     """Specifies a set of built-in permissions."""
 
     def __init__(self):
-        super(BasePermissions, self).__init__()
+        super().__init__()
         self.High = 0
         self.Low = 0
 

@@ -3,7 +3,7 @@ import copy
 from office365.runtime.client_object import ClientObject
 
 
-class ClientQuery(object):
+class ClientQuery:
     """Client query"""
 
     def __init__(self, binding_type, parameter_type=None, parameter_name=None, return_type=None):
@@ -50,7 +50,7 @@ class CreateEntityQuery(ClientQuery):
         :type create_info: ClientObject or ClientValue or dict
         :type parent_entity: ClientObject
         """
-        super(CreateEntityQuery, self).__init__(parent_entity, create_info, None, entity_to_create)
+        super().__init__(parent_entity, create_info, None, entity_to_create)
 
 
 class ReadEntityQuery(ClientQuery):
@@ -62,7 +62,7 @@ class ReadEntityQuery(ClientQuery):
         :type entity_to_read: office365.runtime.client_object.ClientObject
         """
         binding_type = copy.deepcopy(entity_to_read)
-        super(ReadEntityQuery, self).__init__(binding_type, None, None, entity_to_read)
+        super().__init__(binding_type, None, None, entity_to_read)
         if properties_to_include:
             self._include_properties(properties_to_include)
 
@@ -81,7 +81,7 @@ class UpdateEntityQuery(ClientQuery):
 
         :type entity_to_update: office365.runtime.client_object.ClientObject
         """
-        super(UpdateEntityQuery, self).__init__(entity_to_update, entity_to_update, None, None)
+        super().__init__(entity_to_update, entity_to_update, None, None)
 
 
 class DeleteEntityQuery(ClientQuery):
@@ -91,4 +91,4 @@ class DeleteEntityQuery(ClientQuery):
 
         :type entity_to_delete: office365.runtime.client_object.ClientObject
         """
-        super(DeleteEntityQuery, self).__init__(entity_to_delete, None, None, None)
+        super().__init__(entity_to_delete, None, None, None)

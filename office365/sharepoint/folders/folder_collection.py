@@ -7,7 +7,7 @@ from office365.sharepoint.folders.folder import Folder
 class FolderCollection(ClientObjectCollection):
     """Represents a collection of Folder resources."""
     def __init__(self, context, resource_path=None):
-        super(FolderCollection, self).__init__(context, Folder, resource_path)
+        super().__init__(context, Folder, resource_path)
 
     def add(self, server_relative_url):
         """Adds the folder that is located at the specified URL to the collection.

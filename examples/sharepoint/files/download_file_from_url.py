@@ -14,4 +14,4 @@ file_name = os.path.basename(abs_file_url)
 with tempfile.TemporaryDirectory() as local_path:
     with open(os.path.join(local_path, file_name), 'wb') as local_file:
         file = File.from_url(abs_file_url).with_credentials(user_credentials).download(local_file).execute_query()
-    print("'{0}' file has been downloaded into {1}".format(file.serverRelativeUrl, local_file.name))
+    print(f"'{file.serverRelativeUrl}' file has been downloaded into {local_file.name}")

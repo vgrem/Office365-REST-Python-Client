@@ -21,7 +21,7 @@ class TestCommunicationSite(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestCommunicationSite, cls).setUpClass()
+        super().setUpClass()
         ctx_auth = AuthenticationContext(url=settings['url'])
         ctx_auth.acquire_token_for_user(username=settings['user_credentials']['username'],
                                         password=settings['user_credentials']['password'])
@@ -30,7 +30,7 @@ class TestCommunicationSite(TestCase):
 
     def test1_create_site(self):
         current_user = load_current_user(self.client)
-        site_url = "{0}sites/{1}".format(settings["url"], uuid.uuid4().hex)
+        site_url = "{}sites/{}".format(settings["url"], uuid.uuid4().hex)
         request = SPSiteCreationRequest("CommSite123", site_url, current_user.properties['UserPrincipalName'])
         response = self.site_manager.create(request)
         self.client.execute_query()

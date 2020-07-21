@@ -9,7 +9,7 @@ class ListCollection(ClientObjectCollection):
     """Lists collection"""
 
     def __init__(self, context, resource_path=None):
-        super(ListCollection, self).__init__(context, List, resource_path)
+        super().__init__(context, List, resource_path)
 
     def get_by_title(self, list_title):
         """Retrieve List client object by title

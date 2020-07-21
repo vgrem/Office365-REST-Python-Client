@@ -31,7 +31,7 @@ def upload_files(remote_drive, local_root_path):
                 content = local_file.read()
             uploaded_drive_item = remote_drive.root.upload(name, content)
             remote_drive.context.execute_query()
-            print("File '{0}' uploaded into {1}".format(path, uploaded_drive_item.webUrl), )
+            print(f"File '{path}' uploaded into {uploaded_drive_item.webUrl}", )
 
 
 # get target drive

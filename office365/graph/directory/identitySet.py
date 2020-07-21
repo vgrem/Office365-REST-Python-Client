@@ -7,7 +7,7 @@ class IdentitySet(ClientValue):
     identities associated with various events for an item, such as created by or last modified by. """
 
     def __init__(self):
-        super(IdentitySet, self).__init__()
+        super().__init__()
         self.application = Identity()
         self.device = Identity()
         self.user = Identity()

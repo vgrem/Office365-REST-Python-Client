@@ -6,7 +6,7 @@ class FileSystemInfo(ClientValue):
     local version of an item. """
 
     def __init__(self):
-        super(FileSystemInfo, self).__init__()
+        super().__init__()
         self.createdDateTime = None
         self.lastAccessedDateTime = None
         self.lastModifiedDateTime = None

@@ -1,7 +1,7 @@
 from office365.runtime.http.http_method import HttpMethod
 
 
-class RequestOptions(object):
+class RequestOptions:
     """Request options"""
 
     def __init__(self, url):

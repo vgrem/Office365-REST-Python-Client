@@ -12,7 +12,7 @@ class ListCreationInformation(ClientValue):
         :type description: str or None
         :type title: str
         """
-        super(ListCreationInformation, self).__init__()
+        super().__init__()
         self.Title = title
         self.Description = description
         self.BaseTemplate = base_template

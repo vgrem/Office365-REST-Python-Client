@@ -15,7 +15,7 @@ def read_in_chunks(file_object, chunk_size=1024):
         yield data
 
 
-class ResumableFileUpload(object):
+class ResumableFileUpload:
     """Create an upload session to allow your app to upload files up to the maximum file size. An upload session
     allows your app to upload ranges of the file in sequential API requests, which allows the transfer to be resumed
     if a connection is dropped while the upload is in progress. """
@@ -46,7 +46,7 @@ class ResumableFileUpload(object):
             req = RequestOptions(session_result.value.uploadUrl)
             req.method = HttpMethod.Put
             req.set_header('Content-Length', str(len(piece)))
-            req.set_header('Content-Range', 'bytes {0}-{1}/{2}'.format(f_pos, (f_pos + len(piece) - 1), st.st_size))
+            req.set_header('Content-Range', 'bytes {}-{}/{}'.format(f_pos, (f_pos + len(piece) - 1), st.st_size))
             req.set_header('Accept', '*/*')
             req.data = piece
             ctx.execute_request_direct(req)

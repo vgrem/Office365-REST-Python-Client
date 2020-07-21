@@ -16,7 +16,7 @@ class TestSharePointFolder(SPTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestSharePointFolder, cls).setUpClass()
+        super().setUpClass()
         cls.target_list = cls.ensure_list(cls.client.web,
                                           ListCreationInformation(
                                               "Documents %s" % random_seed,
@@ -70,7 +70,7 @@ class TestSharePointFolder(SPTestCase):
         self.client.execute_query()
 
         result = self.__class__.target_list.rootFolder.folders.filter(
-            "Name eq '{0}'".format(self.__class__.target_folder_name))
+            f"Name eq '{self.__class__.target_folder_name}'")
         self.client.load(result)
         self.client.execute_query()
         self.assertEqual(len(result), 1)
@@ -113,7 +113,7 @@ class TestSharePointFolder(SPTestCase):
         self.client.execute_query()
 
         result = self.__class__.target_list.rootFolder.folders.filter(
-            "Name eq '{0}'".format(self.__class__.target_folder_name))
+            f"Name eq '{self.__class__.target_folder_name}'")
         self.client.load(result)
         self.client.execute_query()
         self.assertEqual(len(result), 0)

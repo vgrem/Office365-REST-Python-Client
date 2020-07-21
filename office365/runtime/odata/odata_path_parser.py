@@ -3,7 +3,7 @@ import json
 from office365.runtime.clientValue import ClientValue
 
 
-class ODataPathParser(object):
+class ODataPathParser:
     @staticmethod
     def parse_path_string(string):
         pass
@@ -21,11 +21,11 @@ class ODataPathParser(object):
 
         if isinstance(method_parameters, ClientValue):
             param_value = method_parameters.to_json()
-            url += "(@v)?@v={0}".format(json.dumps(param_value))
+            url += "(@v)?@v={}".format(json.dumps(param_value))
         elif method_parameters is not None:
             url += "("
             if isinstance(method_parameters, dict):
-                url += ','.join(['%s=%s' % (key, ODataPathParser.encode_method_value(value)) for (key, value) in
+                url += ','.join(['{}={}'.format(key, ODataPathParser.encode_method_value(value)) for (key, value) in
                                  method_parameters.items()])
             else:
                 url += ','.join(['%s' % (ODataPathParser.encode_method_value(value)) for (i, value) in
@@ -48,7 +48,7 @@ class ODataPathParser(object):
             value = value.replace('#', '%23')
             value = value.replace('&', '%26')
 
-            value = "'{0}'".format(value)
+            value = f"'{value}'"
         elif isinstance(value, bool):
             value = str(value).lower()
         return value

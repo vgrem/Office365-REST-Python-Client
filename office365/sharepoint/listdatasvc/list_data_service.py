@@ -17,7 +17,7 @@ class ListDataService(ClientRuntimeContext):
     def __init__(self, base_url, auth_context):
         if base_url.endswith("/"):
             base_url = base_url[:len(base_url) - 1]
-        super(ListDataService, self).__init__(base_url + "/_vti_bin/listdata.svc/", auth_context)
+        super().__init__(base_url + "/_vti_bin/listdata.svc/", auth_context)
         self._pendingRequest = ODataRequest(self, JsonLightFormat(ODataMetadataLevel.Verbose))
 
     @classmethod

@@ -15,7 +15,7 @@ class TestSharePointWeb(SPTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestSharePointWeb, cls).setUpClass()
+        super().setUpClass()
 
     def test1_get_current_user(self):
         current_user = self.client.web.currentUser
@@ -56,7 +56,7 @@ class TestSharePointWeb(SPTestCase):
         self.__class__.target_web = self.client.web.webs.add(creation_info)
         self.client.execute_query()
 
-        results = self.client.web.webs.filter("Title eq '{0}'".format(target_web_name))
+        results = self.client.web.webs.filter(f"Title eq '{target_web_name}'")
         self.client.load(results)
         self.client.execute_query()
         self.assertEqual(len(results), 1)
@@ -84,7 +84,7 @@ class TestSharePointWeb(SPTestCase):
         self.__class__.target_web.delete_object()
         self.client.execute_query()
 
-        results = self.client.web.webs.filter("Title eq '{0}'".format(title))
+        results = self.client.web.webs.filter(f"Title eq '{title}'")
         self.client.load(results)
         self.client.execute_query()
         self.assertEqual(len(results), 0)

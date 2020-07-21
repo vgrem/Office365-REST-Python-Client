@@ -4,7 +4,7 @@ def _normalize(key, value):
     return value
 
 
-class QueryOptions(object):
+class QueryOptions:
 
     def __init__(self, select=None, expand=None, filter_expr=None, orderBy=None, top=None, skip=None):
         """
@@ -44,5 +44,5 @@ class QueryOptions(object):
         """Convert query options to url
         :return: str
         """
-        return '&'.join(['$%s=%s' % (key, _normalize(key, value))
+        return '&'.join(['${}={}'.format(key, _normalize(key, value))
                          for (key, value) in self.__dict__.items() if value is not None and value])

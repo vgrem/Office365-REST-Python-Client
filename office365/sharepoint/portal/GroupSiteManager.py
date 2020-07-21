@@ -7,7 +7,7 @@ from office365.sharepoint.portal.GroupSiteInfo import GroupSiteInfo
 
 class GroupSiteManager(ClientObject):
     def __init__(self, context):
-        super(GroupSiteManager, self).__init__(context, ResourcePath("GroupSiteManager"), None)
+        super().__init__(context, ResourcePath("GroupSiteManager"), None)
 
     def create_group_ex(self, display_name, alias, is_public, optional_params):
         """
@@ -53,6 +53,6 @@ class GroupSiteManager(ClientObject):
 
         def _construct_status_request(request):
             request.method = HttpMethod.Get
-            request.url += "?groupId='{0}'".format(group_id)
+            request.url += f"?groupId='{group_id}'"
         self.context.before_execute(_construct_status_request)
         return group_site_info

@@ -5,6 +5,6 @@ class UserIdInfo(ClientValue):
 
     def __init__(self):
         """Represents an identity provider’s unique identifier information."""
-        super(UserIdInfo, self).__init__()
+        super().__init__()
         self.NameId = None
         self.NameIdIssuer = None

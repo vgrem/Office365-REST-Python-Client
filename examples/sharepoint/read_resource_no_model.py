@@ -11,8 +11,8 @@ if __name__ == '__main__':
                                                  UserCredential(settings['user_credentials']['username'],
                                                                 settings['user_credentials']['password']))
 
-    request = RequestOptions("{0}/_api/web/".format(settings['url']))
+    request = RequestOptions("{}/_api/web/".format(settings['url']))
     response = ctx.execute_request_direct(request)
     json = json.loads(response.content)
     web_title = json['d']['Title']
-    print("Web title: {0}".format(web_title))
+    print(f"Web title: {web_title}")

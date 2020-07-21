@@ -31,7 +31,7 @@ class GraphClient(ClientRuntimeContext):
         :param str tenant: Tenant name
         """
         self.__service_root_url = "https://graph.microsoft.com/v1.0/"
-        super(GraphClient, self).__init__(self.__service_root_url)
+        super().__init__(self.__service_root_url)
         self._pending_request = ODataRequest(self, V4JsonFormat("minimal"))
         self._pending_request.beforeExecute += self._build_specific_query
         self._resource = "https://graph.microsoft.com"
@@ -70,7 +70,7 @@ class GraphClient(ClientRuntimeContext):
         authority_url = self._authority_host_url + '/' + self._tenant
         auth_ctx = adal.AuthenticationContext(authority_url)
         token = self._acquire_token_callback(auth_ctx)
-        request.set_header('Authorization', 'Bearer {0}'.format(token["accessToken"]))
+        request.set_header('Authorization', 'Bearer {}'.format(token["accessToken"]))
 
     def execute_request(self, url_or_options):
         """
@@ -79,7 +79,7 @@ class GraphClient(ClientRuntimeContext):
         :type url_or_options: str or RequestOptions
         """
         if not isinstance(url_or_options, RequestOptions):
-            url_or_options = RequestOptions("{0}/{1}".format(self.__service_root_url, url_or_options))
+            url_or_options = RequestOptions(f"{self.__service_root_url}/{url_or_options}")
         return self.execute_request_direct(url_or_options)
 
     @property

@@ -10,7 +10,7 @@ class ServiceOperationQuery(ClientQuery):
         :type method_params: list or dict or office365.runtime.clientValue.ClientValue or None
         :type method_name: str or None
         """
-        super(ServiceOperationQuery, self).__init__(binding_type, parameter_type, parameter_name, return_type)
+        super().__init__(binding_type, parameter_type, parameter_name, return_type)
         self._method_name = method_name
         self._method_params = method_params
         self.static = False

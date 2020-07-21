@@ -5,7 +5,7 @@ class TestSharePointGroup(SPTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestSharePointGroup, cls).setUpClass()
+        super().setUpClass()
         cls.target_user_name = "i:0#.f|membership|mdoe@mediadev8.onmicrosoft.com"
         cls.target_group = cls.client.web.associatedMemberGroup
 

@@ -6,4 +6,4 @@ class ColumnDefinitionCollection(ClientObjectCollection):
     """Drive column's collection"""
 
     def __init__(self, context, resource_path=None):
-        super(ColumnDefinitionCollection, self).__init__(context, ColumnDefinition, resource_path)
+        super().__init__(context, ColumnDefinition, resource_path)

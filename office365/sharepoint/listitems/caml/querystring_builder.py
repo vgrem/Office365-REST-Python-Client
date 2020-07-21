@@ -33,7 +33,7 @@ class QueryStringBuilder:
             # filter
             filter_name = to_camel(filter_name.split('__')[0])
             if operator in self.date_operators:
-                values = ["{}T00:00:00Z".format(filter_value)]  # 2016-03-26
+                values = [f"{filter_value}T00:00:00Z"]  # 2016-03-26
                 query = ' or '.join([f"{filter_name} {operator} datetime'{value}'" for value in values])
             elif operator == 'substringof':
                 values = filter_value.split(',')

@@ -5,7 +5,7 @@ class WebCreationInformation(ClientValue):
     """Represents metadata about site creation."""
 
     def __init__(self):
-        super(WebCreationInformation, self).__init__()
+        super().__init__()
         self.Title = None
         self.Url = None
 

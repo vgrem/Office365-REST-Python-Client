@@ -19,7 +19,7 @@ class NTLMAuthenticationContext(NetworkCredentialContext):
             :type username: str
             :type password: str
         """
-        super(NTLMAuthenticationContext, self).__init__(username, password)
+        super().__init__(username, password)
         self.auth = HttpNtlmAuth(*self.userCredentials)
 
     def authenticate_request(self, request_options):

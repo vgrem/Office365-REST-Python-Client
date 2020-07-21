@@ -16,9 +16,9 @@ ctx.load(files)
 ctx.execute_query()
 download_path = tempfile.mkdtemp()
 for file in files:
-    print("Downloading file: {0} ...".format(file.properties["ServerRelativeUrl"]))
+    print("Downloading file: {} ...".format(file.properties["ServerRelativeUrl"]))
     download_file_name = os.path.join(download_path, os.path.basename(file.properties["Name"]))
     with open(download_file_name, "wb") as local_file:
         file.download(local_file)
         ctx.execute_query()
-    print("[Ok] file has been downloaded: {0}".format(download_file_name))
+    print(f"[Ok] file has been downloaded: {download_file_name}")

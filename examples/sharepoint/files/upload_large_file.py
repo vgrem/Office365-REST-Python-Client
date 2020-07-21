@@ -4,7 +4,7 @@ from settings import settings
 
 
 def print_upload_progress(offset):
-    print("Uploaded '{0}' bytes...".format(offset))
+    print(f"Uploaded '{offset}' bytes...")
 
 
 if __name__ == '__main__':
@@ -17,4 +17,4 @@ if __name__ == '__main__':
     result_file = ctx.web.get_folder_by_server_relative_url(target_url) \
         .files.create_upload_session(local_path, size_1Mb, print_upload_progress)
     ctx.execute_query()
-    print('File {0} has been uploaded successfully'.format(result_file.serverRelativeUrl))
+    print(f'File {result_file.serverRelativeUrl} has been uploaded successfully')

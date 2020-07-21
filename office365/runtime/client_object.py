@@ -2,7 +2,7 @@ from office365.runtime.clientValue import ClientValue
 from office365.runtime.odata.odata_query_options import QueryOptions
 
 
-class ClientObject(object):
+class ClientObject:
 
     def __init__(self, context, resource_path=None, properties=None, parent_collection=None):
         """
@@ -77,7 +77,7 @@ class ClientObject(object):
             self._properties[name] = value
 
     def to_json(self):
-        return dict((k, v) for k, v in self.properties.items() if k in self._changed_properties)
+        return {k: v for k, v in self.properties.items() if k in self._changed_properties}
 
     def ensure_property(self, name_or_names, action):
         """

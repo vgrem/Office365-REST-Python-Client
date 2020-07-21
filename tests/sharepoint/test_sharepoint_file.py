@@ -27,7 +27,7 @@ class TestSharePointFile(SPTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestSharePointFile, cls).setUpClass()
+        super().setUpClass()
         cls.target_list = cls.ensure_list(cls.client.web,
                                           ListCreationInformation(
                                               "Archive Documents N%s" % random_seed,
@@ -41,7 +41,7 @@ class TestSharePointFile(SPTestCase):
 
     def test1_upload_files(self):
         for entry in self.file_entries:
-            path = "{0}/../data/{1}".format(os.path.dirname(__file__), entry["Name"])
+            path = "{}/../data/{}".format(os.path.dirname(__file__), entry["Name"])
             if entry["Type"] == "Binary":
                 file_content = self.read_file_as_binary(path)
             else:
@@ -51,7 +51,7 @@ class TestSharePointFile(SPTestCase):
             self.assertEqual(uploaded_file.properties["Name"], entry["Name"])
 
     def test2_upload_large_file(self):
-        path = "{0}/../data/big_buck_bunny.mp4".format(os.path.dirname(__file__))
+        path = "{}/../data/big_buck_bunny.mp4".format(os.path.dirname(__file__))
         file_size = os.path.getsize(path)
         size_1mb = 1000000
         result_file = self.__class__.target_list.rootFolder.files.create_upload_session(path, size_1mb)

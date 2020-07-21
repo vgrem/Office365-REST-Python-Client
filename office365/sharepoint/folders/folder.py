@@ -118,7 +118,7 @@ class Folder(BaseEntity):
             return FolderCollection(self.context, ResourcePath("Folders", self.resource_path))
 
     def set_property(self, name, value, persist_changes=True):
-        super(Folder, self).set_property(name, value, persist_changes)
+        super().set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "ServerRelativeUrl":

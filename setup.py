@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import io
 from distutils.core import setup
 import setuptools
 
-with io.open("README.md", mode='r', encoding='utf-8') as fh:
+with open("README.md", mode='r', encoding='utf-8') as fh:
     long_description = fh.read()
 
 setup(
@@ -18,6 +17,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/vgrem/Office365-REST-Python-Client",
+    python_requires='>=3.7',
     install_requires=['requests', 'adal'],
     extras_require={
         'NTLMAuthentication': ["requests_ntlm"]
@@ -33,10 +33,8 @@ setup(
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Software Development :: Libraries",
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
+        "Programming Language :: Python :: 3 :: Only",
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
