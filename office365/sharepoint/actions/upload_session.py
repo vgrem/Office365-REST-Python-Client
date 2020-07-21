@@ -64,7 +64,7 @@ class UploadSessionQuery(CreateFileQuery):
             self.file.context.after_execute(self._process_chunk_upload)
 
     def _process_chunk_upload(self, resp):
-        qry = self.file.context.get_pending_request().current_query
+        qry = self.file.context.current_query
         if isinstance(qry.return_type, ClientResult):
             self._uploaded_bytes = int(qry.return_type.value)
             self.file.context.after_execute(self._process_chunk_upload)

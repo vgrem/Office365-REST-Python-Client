@@ -2,7 +2,6 @@ from abc import abstractmethod
 
 import requests
 from requests import HTTPError
-
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.types.EventHandler import EventHandler
@@ -18,16 +17,19 @@ class ClientRequest(object):
         """
         self.context = context
         self._queries = []
-        self._current_query = None
         self.beforeExecute = EventHandler()
         self.afterExecute = EventHandler()
 
-    @property
-    def current_query(self):
-        """
-        :rtype: ClientQuery
-        """
-        return self._current_query
+    def __iter__(self):
+        while self._queries:
+            qry = self._queries.pop(0)
+            yield qry
+
+    def __len__(self):
+        return len(self._queries)
+
+    def __getitem__(self, index):
+        return self._queries[index]
 
     @property
     def queries(self):
@@ -41,13 +43,6 @@ class ClientRequest(object):
         :type query: ClientQuery
         """
         self._queries.append(query)
-
-    def get_next_query(self):
-        if len(self._queries) > 0:
-            self._current_query = self._queries.pop(0)
-        else:
-            self._current_query = None
-        return self._current_query
 
     @abstractmethod
     def build_request(self):

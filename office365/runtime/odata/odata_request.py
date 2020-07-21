@@ -34,13 +34,16 @@ class ODataRequest(ClientRequest):
         :param RequestOptions request: request
         :return: requests.Response
         """
+        self.ensure_media_type(request)
+        return super(ODataRequest, self).execute_request_direct(request)
+
+    def ensure_media_type(self, request):
         media_type = self.json_format.get_media_type()
         request.ensure_header('Content-Type', media_type)
         request.ensure_header('Accept', media_type)
-        return super(ODataRequest, self).execute_request_direct(request)
 
     def build_request(self):
-        qry = self.get_next_query()
+        qry = self.context.current_query
         self.json_format.function_tag_name = None
         if isinstance(qry, ServiceOperationQuery):
             self.json_format.function_tag_name = qry.method_name
@@ -67,7 +70,8 @@ class ODataRequest(ClientRequest):
         """
         :type response: requests.Response
         """
-        result_object = self.current_query.return_type
+        qry = self.context.current_query
+        result_object = qry.return_type
         if isinstance(result_object, ClientObjectCollection):
             result_object.clear()
 
@@ -122,6 +126,7 @@ class ODataRequest(ClientRequest):
         """
         :type value: ClientValue or ClientResult  or ClientObject
         """
+        qry = self.context.current_query
         if isinstance(value, ClientValueCollection):
             if isinstance(self._json_format,
                           JsonLightFormat) and self._json_format.metadata == ODataMetadataLevel.Verbose:
@@ -135,9 +140,9 @@ class ODataRequest(ClientRequest):
                           JsonLightFormat) and self._json_format.metadata == ODataMetadataLevel.Verbose:
                 json[self._json_format.metadata_type_tag_name] = {'type': value.entity_type_name}
 
-            if isinstance(self.current_query,
-                          ServiceOperationQuery) and self.current_query.parameter_name is not None:
-                json = {self.current_query.parameter_name: json}
+            if isinstance(qry,
+                          ServiceOperationQuery) and qry.parameter_name is not None:
+                json = {qry.parameter_name: json}
             return json
         elif isinstance(value, dict):
             for k, v in value.items():

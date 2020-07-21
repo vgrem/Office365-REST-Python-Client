@@ -4,7 +4,9 @@ from office365.runtime.auth.userCredential import UserCredential
 from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
 from office365.runtime.auth.providers.saml_token_provider import SamlTokenProvider
 from office365.runtime.auth.tokenResponse import TokenResponse
+from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_batch_request import ODataBatchRequest
+from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
 from office365.sharepoint.client_context import ClientContext
 from settings import settings
 
@@ -41,7 +43,7 @@ class TestSharePointClient(TestCase):
         current_web = client.web
         client.load(current_web)
 
-        batch_request = ODataBatchRequest(client)
+        batch_request = ODataBatchRequest(client, JsonLightFormat(ODataMetadataLevel.Verbose))
 
         def _prepare_request(request):
             client.ensure_form_digest(request)

@@ -47,7 +47,7 @@ class OutlookClient(ClientRuntimeContext):
         return self._pendingRequest
 
     def _build_specific_query(self, request):
-        query = self.get_pending_request().current_query
+        query = self.current_query
         if isinstance(query, UpdateEntityQuery):
             request.method = HttpMethod.Patch
         elif isinstance(query, DeleteEntityQuery):

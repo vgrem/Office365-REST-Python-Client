@@ -160,7 +160,7 @@ class ClientContext(ClientRuntimeContext):
 
         :type request: RequestOptions
         """
-        query = self.get_pending_request().current_query
+        query = self.current_query
 
         if request.method == HttpMethod.Post:
             self.ensure_form_digest(request)
