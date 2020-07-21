@@ -1,7 +1,7 @@
-import textwrap
 import uuid
 from email import message_from_bytes
 from email.message import Message
+
 from office365.runtime.client_request import ClientRequest
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
@@ -47,12 +47,7 @@ class ODataBatchRequest(ClientRequest):
         :type response: requests.Response
         """
         content_type = response.headers['Content-Type'].encode("ascii")
-        http_body = (
-            b"Content-Type: "
-            + content_type
-            + b"\r\n\r\n"
-            + response.content
-        )
+        http_body = b"Content-Type: " + content_type + b"\r\n\r\n" + response.content
 
         message = message_from_bytes(http_body)  # type: Message
         for raw_reponse in message.get_payload():

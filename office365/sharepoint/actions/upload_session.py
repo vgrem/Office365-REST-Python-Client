@@ -1,6 +1,5 @@
 import os
 import uuid
-from functools import partial
 
 from office365.runtime.client_result import ClientResult
 from office365.sharepoint.actions.create_file import CreateFileQuery

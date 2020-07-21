@@ -1,7 +1,6 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.ui.applicationpages.clientPeoplePickerQueryParameters import ClientPeoplePickerQueryParameters
 
 
 class ClientPeoplePickerWebServiceInterface(BaseEntity):

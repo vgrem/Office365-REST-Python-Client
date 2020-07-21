@@ -1,18 +1,17 @@
 from office365.runtime.client_query import DeleteEntityQuery
 from office365.runtime.client_result import ClientResult
+from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
-from office365.sharepoint.listitems.caml.camlQuery import CamlQuery
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.folders.folder import Folder
+from office365.sharepoint.listitems.caml.camlQuery import CamlQuery
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.listitems.listItem_collection import ListItemCollection
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.views.view import View
 from office365.sharepoint.views.view_collection import ViewCollection
-from office365.sharepoint.listitems.listitem_creation_information import ListItemCreationInformation
 
 
 class List(SecurableObject):

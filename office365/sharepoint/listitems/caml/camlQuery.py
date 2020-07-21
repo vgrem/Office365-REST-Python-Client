@@ -1,6 +1,5 @@
 from office365.runtime.clientValue import ClientValue
 from office365.sharepoint.views.viewScope import ViewScope
-from office365.sharepoint.listitems.listItemCollectionPosition import ListItemCollectionPosition
 
 
 class CamlQuery(ClientValue):

@@ -22,7 +22,7 @@ setup(
     extras_require={
         'NTLMAuthentication': ["requests_ntlm"]
     },
-    tests_require=['nose'],
+    tests_require=['nose', 'flake8', 'isort'],
     test_suite='nose.collector',
     license="MIT",
     keywords="git",

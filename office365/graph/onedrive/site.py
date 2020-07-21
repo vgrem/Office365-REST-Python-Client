@@ -1,10 +1,10 @@
 from office365.graph.base_item import BaseItem
-from office365.runtime.resource_path import ResourcePath
 from office365.graph.onedrive.columnDefinitionCollection import ColumnDefinitionCollection
 from office365.graph.onedrive.contentTypeCollection import ContentTypeCollection
 from office365.graph.onedrive.drive import Drive
 from office365.graph.onedrive.driveCollection import DriveCollection
 from office365.graph.onedrive.listCollection import ListCollection
+from office365.runtime.resource_path import ResourcePath
 
 
 class Site(BaseItem):

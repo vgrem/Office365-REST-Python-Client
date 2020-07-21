@@ -1,15 +1,15 @@
+from office365.graph.base_item import BaseItem
 from office365.graph.directory.permission_collection import PermissionCollection
-from office365.graph.onedrive.folder import Folder
 from office365.graph.onedrive.conflictBehavior import ConflictBehavior
 from office365.graph.onedrive.file import File
 from office365.graph.onedrive.fileSystemInfo import FileSystemInfo
+from office365.graph.onedrive.folder import Folder
+from office365.graph.onedrive.listItem import ListItem
 from office365.graph.onedrive.uploadSession import UploadSession
 from office365.runtime.client_query import CreateEntityQuery
 from office365.runtime.client_result import ClientResult
-from office365.runtime.resource_path import ResourcePath
-from office365.graph.base_item import BaseItem
-from office365.graph.onedrive.listItem import ListItem
 from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.resource_path import ResourcePath
 
 
 class DriveItem(BaseItem):

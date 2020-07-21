@@ -1,8 +1,8 @@
 from office365.graph.base_item import BaseItem
-from office365.graph.onedrive.listItemCollection import ListItemCollection
-from office365.runtime.resource_path import ResourcePath
 from office365.graph.onedrive.columnDefinitionCollection import ColumnDefinitionCollection
 from office365.graph.onedrive.contentTypeCollection import ContentTypeCollection
+from office365.graph.onedrive.listItemCollection import ListItemCollection
+from office365.runtime.resource_path import ResourcePath
 
 
 class List(BaseItem):

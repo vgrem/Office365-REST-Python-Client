@@ -1,11 +1,10 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.resource_path import ResourcePath
 from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.search.query.querySuggestionResults import QuerySuggestionResults
 from office365.sharepoint.search.searchResult import SearchResult
-from office365.sharepoint.search.searchRequest import SearchRequest
 
 
 class SearchService(BaseEntity):

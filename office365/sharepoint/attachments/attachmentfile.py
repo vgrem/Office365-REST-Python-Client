@@ -1,4 +1,3 @@
-import typing
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.actions.download_file import DownloadFileQuery

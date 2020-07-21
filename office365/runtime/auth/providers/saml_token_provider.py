@@ -1,8 +1,10 @@
 import os
 import uuid
 from xml.etree import ElementTree
+
 import requests
 import requests.utils
+
 import office365.logger
 from office365.runtime.auth.base_token_provider import BaseTokenProvider
 from office365.runtime.auth.sts_profile import STSProfile

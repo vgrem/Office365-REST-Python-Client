@@ -2,7 +2,6 @@ from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_query import CreateEntityQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.contenttypes.content_type import ContentType
-from office365.sharepoint.contenttypes.contentTypeCreationInformation import ContentTypeCreationInformation
 
 
 class ContentTypeCollection(ClientObjectCollection):

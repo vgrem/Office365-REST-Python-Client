@@ -1,13 +1,13 @@
 from office365.graph.entity import Entity
-from office365.runtime.client_query import UpdateEntityQuery
-from office365.runtime.resource_path import ResourcePath
-from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
 from office365.graph.teams.channel import Channel
 from office365.graph.teams.channelCollection import ChannelCollection
 from office365.graph.teams.teamFunSettings import TeamFunSettings
 from office365.graph.teams.teamGuestSettings import TeamGuestSettings
 from office365.graph.teams.teamMemberSettings import TeamMemberSettings
 from office365.graph.teams.teamMessagingSettings import TeamMessagingSettings
+from office365.runtime.client_query import UpdateEntityQuery
+from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.resource_path import ResourcePath
 
 
 class Team(Entity):

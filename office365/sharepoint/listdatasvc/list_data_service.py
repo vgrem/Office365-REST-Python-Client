@@ -1,14 +1,14 @@
+from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.auth.clientCredential import ClientCredential
 from office365.runtime.auth.userCredential import UserCredential
-from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
 from office365.runtime.odata.odata_request import ODataRequest
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.sharepoint.listitems.listItem_collection import ListItemCollection
 from office365.sharepoint.listitems.listitem import ListItem
+from office365.sharepoint.listitems.listItem_collection import ListItemCollection
 
 
 class ListDataService(ClientRuntimeContext):

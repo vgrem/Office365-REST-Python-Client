@@ -4,21 +4,21 @@ from office365.graph.directory.directory import Directory
 from office365.graph.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.graph.directory.groupCollection import GroupCollection
 from office365.graph.directory.groupSettingTemplateCollection import GroupSettingTemplateCollection
+from office365.graph.directory.user import User
 from office365.graph.directory.userCollection import UserCollection
-from office365.graph.one_drive_actions import DownloadContentQuery, UploadContentQuery, ReplaceMethodQuery, SearchQuery
+from office365.graph.one_drive_actions import DownloadContentQuery, ReplaceMethodQuery, SearchQuery, UploadContentQuery
+from office365.graph.onedrive.driveCollection import DriveCollection
 from office365.graph.onedrive.sharedDriveItemCollection import SharedDriveItemCollection
 from office365.graph.onedrive.siteCollection import SiteCollection
+from office365.graph.teams.teamCollection import TeamCollection
 from office365.outlookservices.contact_collection import ContactCollection
-from office365.runtime.client_query import UpdateEntityQuery, DeleteEntityQuery
+from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_runtime_context import ClientRuntimeContext
+from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.odata_request import ODataRequest
 from office365.runtime.odata.v4_json_format import V4JsonFormat
 from office365.runtime.resource_path import ResourcePath
-from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.http.request_options import RequestOptions
-from office365.graph.directory.user import User
-from office365.graph.onedrive.driveCollection import DriveCollection
-from office365.graph.teams.teamCollection import TeamCollection
 
 
 class GraphClient(ClientRuntimeContext):

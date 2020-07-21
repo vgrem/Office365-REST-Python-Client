@@ -1,10 +1,10 @@
-from office365.runtime.clientValueCollection import ClientValueCollection
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_object_collection import ClientObjectCollection
-from office365.runtime.client_query import CreateEntityQuery, UpdateEntityQuery, DeleteEntityQuery
+from office365.runtime.client_query import CreateEntityQuery, DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_request import ClientRequest
 from office365.runtime.client_result import ClientResult
 from office365.runtime.clientValue import ClientValue
+from office365.runtime.clientValueCollection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.json_light_format import JsonLightFormat
