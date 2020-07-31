@@ -1,11 +1,11 @@
 from office365.graph.entity import Entity
 from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 
 
 class DirectoryObject(Entity):
-    """Represents an Azure Active Directory object. The directoryObject type is the base type for many other
+    """Represents an Azure Active Directory object. The directory_object type is the base type for many other
     directory entity types. """
 
     def get_member_groups(self, security_enabled_only=True):

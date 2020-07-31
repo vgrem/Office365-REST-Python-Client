@@ -1,7 +1,7 @@
 import uuid
 from time import sleep
 from office365.graph.directory.group import Group
-from office365.graph.directory.groupProfile import GroupProfile
+from office365.graph.directory.group_profile import GroupProfile
 from tests.graph_case import GraphTestCase
 
 

@@ -1,4 +1,4 @@
-from office365.runtime.auth.clientCredential import ClientCredential
+from office365.runtime.auth.client_credential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.search.administration.documentCrawlLog import DocumentCrawlLog
 from settings import settings

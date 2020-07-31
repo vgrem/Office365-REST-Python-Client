@@ -1,11 +1,11 @@
 import adal
 
 from office365.graph.directory.directory import Directory
-from office365.graph.directory.directoryObjectCollection import DirectoryObjectCollection
-from office365.graph.directory.groupCollection import GroupCollection
-from office365.graph.directory.groupSettingTemplateCollection import GroupSettingTemplateCollection
+from office365.graph.directory.directory_object_collection import DirectoryObjectCollection
+from office365.graph.directory.group_collection import GroupCollection
+from office365.graph.directory.group_setting_template_collection import GroupSettingTemplateCollection
 from office365.graph.directory.user import User
-from office365.graph.directory.userCollection import UserCollection
+from office365.graph.directory.user_collection import UserCollection
 from office365.graph.one_drive_actions import DownloadContentQuery, ReplaceMethodQuery, SearchQuery, UploadContentQuery
 from office365.graph.onedrive.driveCollection import DriveCollection
 from office365.graph.onedrive.sharedDriveItemCollection import SharedDriveItemCollection

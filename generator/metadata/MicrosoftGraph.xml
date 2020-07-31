@@ -1826,10 +1826,10 @@
                 <Property Name="name" Type="Edm.String"/>
                 <Property Name="address" Type="Edm.String"/>
             </ComplexType>
-            <EntityType Name="directoryObject" BaseType="graph.entity" OpenType="true">
+            <EntityType Name="directory_object" BaseType="graph.entity" OpenType="true">
                 <Property Name="deletedDateTime" Type="Edm.DateTimeOffset"/>
             </EntityType>
-            <EntityType Name="user" BaseType="graph.directoryObject" OpenType="true">
+            <EntityType Name="user" BaseType="graph.directory_object" OpenType="true">
                 <Property Name="accountEnabled" Type="Edm.Boolean"/>
                 <Property Name="ageGroup" Type="Edm.String"/>
                 <Property Name="assignedLicenses" Type="Collection(graph.assignedLicense)" Nullable="false"/>
@@ -1897,17 +1897,17 @@
                 <Property Name="skills" Type="Collection(Edm.String)"/>
                 <NavigationProperty Name="appRoleAssignments" Type="Collection(graph.appRoleAssignment)"
                                     ContainsTarget="true"/>
-                <NavigationProperty Name="ownedDevices" Type="Collection(graph.directoryObject)"/>
-                <NavigationProperty Name="registeredDevices" Type="Collection(graph.directoryObject)"/>
-                <NavigationProperty Name="manager" Type="graph.directoryObject"/>
-                <NavigationProperty Name="directReports" Type="Collection(graph.directoryObject)"/>
-                <NavigationProperty Name="memberOf" Type="Collection(graph.directoryObject)"/>
-                <NavigationProperty Name="createdObjects" Type="Collection(graph.directoryObject)"/>
+                <NavigationProperty Name="ownedDevices" Type="Collection(graph.directory_object)"/>
+                <NavigationProperty Name="registeredDevices" Type="Collection(graph.directory_object)"/>
+                <NavigationProperty Name="manager" Type="graph.directory_object"/>
+                <NavigationProperty Name="directReports" Type="Collection(graph.directory_object)"/>
+                <NavigationProperty Name="memberOf" Type="Collection(graph.directory_object)"/>
+                <NavigationProperty Name="createdObjects" Type="Collection(graph.directory_object)"/>
                 <NavigationProperty Name="oauth2PermissionGrants" Type="Collection(graph.oAuth2PermissionGrant)"/>
-                <NavigationProperty Name="ownedObjects" Type="Collection(graph.directoryObject)"/>
+                <NavigationProperty Name="ownedObjects" Type="Collection(graph.directory_object)"/>
                 <NavigationProperty Name="licenseDetails" Type="Collection(graph.licenseDetails)"
                                     ContainsTarget="true"/>
-                <NavigationProperty Name="transitiveMemberOf" Type="Collection(graph.directoryObject)"/>
+                <NavigationProperty Name="transitiveMemberOf" Type="Collection(graph.directory_object)"/>
                 <NavigationProperty Name="outlook" Type="graph.outlookUser" ContainsTarget="true"/>
                 <NavigationProperty Name="messages" Type="Collection(graph.message)" ContainsTarget="true"/>
                 <NavigationProperty Name="mailFolders" Type="Collection(graph.mailFolder)" ContainsTarget="true"/>
@@ -1995,7 +1995,7 @@
                 <Property Name="provisioningStatus" Type="Edm.String"/>
                 <Property Name="service" Type="Edm.String"/>
             </ComplexType>
-            <EntityType Name="appRoleAssignment" BaseType="graph.directoryObject">
+            <EntityType Name="appRoleAssignment" BaseType="graph.directory_object">
                 <Property Name="appRoleId" Type="Edm.Guid" Nullable="false"/>
                 <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
                 <Property Name="principalDisplayName" Type="Edm.String"/>
@@ -2457,8 +2457,8 @@
                 <Property Name="clientId" Type="Edm.String"/>
                 <Property Name="clientSecret" Type="Edm.String"/>
             </EntityType>
-            <EntityType Name="administrativeUnit" BaseType="graph.directoryObject" OpenType="true"/>
-            <EntityType Name="application" BaseType="graph.directoryObject" OpenType="true">
+            <EntityType Name="administrativeUnit" BaseType="graph.directory_object" OpenType="true"/>
+            <EntityType Name="application" BaseType="graph.directory_object" OpenType="true">
                 <Property Name="addIns" Type="Collection(graph.addIn)" Nullable="false"/>
                 <Property Name="api" Type="graph.apiApplication"/>
                 <Property Name="appId" Type="Edm.String"/>
@@ -2487,10 +2487,10 @@
                 <Property Name="web" Type="graph.webApplication"/>
                 <NavigationProperty Name="extensionProperties" Type="Collection(graph.extensionProperty)"
                                     ContainsTarget="true"/>
-                <NavigationProperty Name="createdOnBehalfOf" Type="graph.directoryObject"/>
+                <NavigationProperty Name="createdOnBehalfOf" Type="graph.directory_object"/>
                 <NavigationProperty Name="homeRealmDiscoveryPolicies"
                                     Type="Collection(graph.homeRealmDiscoveryPolicy)"/>
-                <NavigationProperty Name="owners" Type="Collection(graph.directoryObject)"/>
+                <NavigationProperty Name="owners" Type="Collection(graph.directory_object)"/>
                 <NavigationProperty Name="tokenLifetimePolicies" Type="Collection(graph.tokenLifetimePolicy)"/>
                 <NavigationProperty Name="tokenIssuancePolicies" Type="Collection(graph.tokenIssuancePolicy)"/>
             </EntityType>
@@ -2592,27 +2592,27 @@
                 <Property Name="enableIdTokenIssuance" Type="Edm.Boolean"/>
                 <Property Name="enableAccessTokenIssuance" Type="Edm.Boolean"/>
             </ComplexType>
-            <EntityType Name="extensionProperty" BaseType="graph.directoryObject" OpenType="true">
+            <EntityType Name="extensionProperty" BaseType="graph.directory_object" OpenType="true">
                 <Property Name="appDisplayName" Type="Edm.String"/>
                 <Property Name="name" Type="Edm.String" Nullable="false"/>
                 <Property Name="dataType" Type="Edm.String" Nullable="false"/>
                 <Property Name="isSyncedFromOnPremises" Type="Edm.Boolean"/>
                 <Property Name="targetObjects" Type="Collection(Edm.String)" Nullable="false"/>
             </EntityType>
-            <EntityType Name="policyBase" BaseType="graph.directoryObject" Abstract="true">
+            <EntityType Name="policyBase" BaseType="graph.directory_object" Abstract="true">
                 <Property Name="description" Type="Edm.String"/>
                 <Property Name="displayName" Type="Edm.String"/>
             </EntityType>
             <EntityType Name="stsPolicy" BaseType="graph.policyBase" Abstract="true">
                 <Property Name="definition" Type="Collection(Edm.String)" Nullable="false"/>
                 <Property Name="isOrganizationDefault" Type="Edm.Boolean"/>
-                <NavigationProperty Name="appliesTo" Type="Collection(graph.directoryObject)"/>
+                <NavigationProperty Name="appliesTo" Type="Collection(graph.directory_object)"/>
             </EntityType>
             <EntityType Name="homeRealmDiscoveryPolicy" BaseType="graph.stsPolicy"/>
             <EntityType Name="tokenLifetimePolicy" BaseType="graph.stsPolicy"/>
             <EntityType Name="tokenIssuancePolicy" BaseType="graph.stsPolicy"/>
             <EntityType Name="directory" BaseType="graph.entity">
-                <NavigationProperty Name="deletedItems" Type="Collection(graph.directoryObject)" ContainsTarget="true"/>
+                <NavigationProperty Name="deletedItems" Type="Collection(graph.directory_object)" ContainsTarget="true"/>
             </EntityType>
             <EntityType Name="certificateBasedAuthConfiguration" BaseType="graph.entity">
                 <Property Name="certificateAuthorities" Type="Collection(graph.certificateAuthority)" Nullable="false"/>
@@ -2625,7 +2625,7 @@
                 <Property Name="issuer" Type="Edm.String" Nullable="false"/>
                 <Property Name="issuerSki" Type="Edm.String" Nullable="false"/>
             </ComplexType>
-            <EntityType Name="orgContact" BaseType="graph.directoryObject" OpenType="true">
+            <EntityType Name="orgContact" BaseType="graph.directory_object" OpenType="true">
                 <Property Name="addresses" Type="Collection(graph.physicalOfficeAddress)"/>
                 <Property Name="companyName" Type="Edm.String"/>
                 <Property Name="department" Type="Edm.String"/>
@@ -2640,10 +2640,10 @@
                 <Property Name="phones" Type="Collection(graph.phone)"/>
                 <Property Name="proxyAddresses" Type="Collection(Edm.String)" Nullable="false"/>
                 <Property Name="surname" Type="Edm.String"/>
-                <NavigationProperty Name="manager" Type="graph.directoryObject"/>
-                <NavigationProperty Name="directReports" Type="Collection(graph.directoryObject)"/>
-                <NavigationProperty Name="memberOf" Type="Collection(graph.directoryObject)"/>
-                <NavigationProperty Name="transitiveMemberOf" Type="Collection(graph.directoryObject)"/>
+                <NavigationProperty Name="manager" Type="graph.directory_object"/>
+                <NavigationProperty Name="directReports" Type="Collection(graph.directory_object)"/>
+                <NavigationProperty Name="memberOf" Type="Collection(graph.directory_object)"/>
+                <NavigationProperty Name="transitiveMemberOf" Type="Collection(graph.directory_object)"/>
             </EntityType>
             <ComplexType Name="physicalOfficeAddress">
                 <Property Name="city" Type="Edm.String"/>
@@ -2659,7 +2659,7 @@
                 <Property Name="region" Type="Edm.String"/>
                 <Property Name="language" Type="Edm.String"/>
             </ComplexType>
-            <EntityType Name="device" BaseType="graph.directoryObject" OpenType="true">
+            <EntityType Name="device" BaseType="graph.directory_object" OpenType="true">
                 <Property Name="accountEnabled" Type="Edm.Boolean"/>
                 <Property Name="alternativeSecurityIds" Type="Collection(graph.alternativeSecurityId)"
                           Nullable="false"/>
@@ -2680,10 +2680,10 @@
                 <Property Name="profileType" Type="Edm.String"/>
                 <Property Name="systemLabels" Type="Collection(Edm.String)" Nullable="false"/>
                 <Property Name="trustType" Type="Edm.String"/>
-                <NavigationProperty Name="memberOf" Type="Collection(graph.directoryObject)"/>
-                <NavigationProperty Name="registeredOwners" Type="Collection(graph.directoryObject)"/>
-                <NavigationProperty Name="registeredUsers" Type="Collection(graph.directoryObject)"/>
-                <NavigationProperty Name="transitiveMemberOf" Type="Collection(graph.directoryObject)"/>
+                <NavigationProperty Name="memberOf" Type="Collection(graph.directory_object)"/>
+                <NavigationProperty Name="registeredOwners" Type="Collection(graph.directory_object)"/>
+                <NavigationProperty Name="registeredUsers" Type="Collection(graph.directory_object)"/>
+                <NavigationProperty Name="transitiveMemberOf" Type="Collection(graph.directory_object)"/>
                 <NavigationProperty Name="extensions" Type="Collection(graph.extension)" ContainsTarget="true"/>
             </EntityType>
             <ComplexType Name="alternativeSecurityId">
@@ -2691,19 +2691,19 @@
                 <Property Name="identityProvider" Type="Edm.String"/>
                 <Property Name="key" Type="Edm.Binary"/>
             </ComplexType>
-            <EntityType Name="directoryObjectPartnerReference" BaseType="graph.directoryObject">
+            <EntityType Name="directoryObjectPartnerReference" BaseType="graph.directory_object">
                 <Property Name="description" Type="Edm.String"/>
                 <Property Name="displayName" Type="Edm.String"/>
                 <Property Name="externalPartnerTenantId" Type="Edm.Guid"/>
                 <Property Name="objectType" Type="Edm.String"/>
             </EntityType>
-            <EntityType Name="directoryRole" BaseType="graph.directoryObject" OpenType="true">
+            <EntityType Name="directoryRole" BaseType="graph.directory_object" OpenType="true">
                 <Property Name="description" Type="Edm.String"/>
                 <Property Name="displayName" Type="Edm.String"/>
                 <Property Name="roleTemplateId" Type="Edm.String"/>
-                <NavigationProperty Name="members" Type="Collection(graph.directoryObject)"/>
+                <NavigationProperty Name="members" Type="Collection(graph.directory_object)"/>
             </EntityType>
-            <EntityType Name="directoryRoleTemplate" BaseType="graph.directoryObject" OpenType="true">
+            <EntityType Name="directoryRoleTemplate" BaseType="graph.directory_object" OpenType="true">
                 <Property Name="description" Type="Edm.String"/>
                 <Property Name="displayName" Type="Edm.String"/>
             </EntityType>
@@ -2725,7 +2725,7 @@
                                     ContainsTarget="true"/>
                 <NavigationProperty Name="verificationDnsRecords" Type="Collection(graph.domainDnsRecord)"
                                     ContainsTarget="true"/>
-                <NavigationProperty Name="domainNameReferences" Type="Collection(graph.directoryObject)"/>
+                <NavigationProperty Name="domainNameReferences" Type="Collection(graph.directory_object)"/>
             </EntityType>
             <ComplexType Name="domainState">
                 <Property Name="status" Type="Edm.String"/>
@@ -2760,7 +2760,7 @@
             <EntityType Name="domainDnsUnavailableRecord" BaseType="graph.domainDnsRecord">
                 <Property Name="description" Type="Edm.String"/>
             </EntityType>
-            <EntityType Name="endpoint" BaseType="graph.directoryObject" OpenType="true">
+            <EntityType Name="endpoint" BaseType="graph.directory_object" OpenType="true">
                 <Property Name="capability" Type="Edm.String" Nullable="false"/>
                 <Property Name="providerId" Type="Edm.String"/>
                 <Property Name="providerName" Type="Edm.String"/>
@@ -2773,7 +2773,7 @@
                 <Property Name="provisioningStatus" Type="Edm.String"/>
                 <Property Name="appliesTo" Type="Edm.String"/>
             </ComplexType>
-            <EntityType Name="group" BaseType="graph.directoryObject" OpenType="true">
+            <EntityType Name="group" BaseType="graph.directory_object" OpenType="true">
                 <Property Name="assignedLabels" Type="Collection(graph.assignedLabel)"/>
                 <Property Name="assignedLicenses" Type="Collection(graph.assignedLicense)"/>
                 <Property Name="classification" Type="Edm.String"/>
@@ -2813,19 +2813,19 @@
                 <Property Name="isArchived" Type="Edm.Boolean"/>
                 <NavigationProperty Name="appRoleAssignments" Type="Collection(graph.appRoleAssignment)"
                                     ContainsTarget="true"/>
-                <NavigationProperty Name="members" Type="Collection(graph.directoryObject)"/>
-                <NavigationProperty Name="memberOf" Type="Collection(graph.directoryObject)"/>
-                <NavigationProperty Name="membersWithLicenseErrors" Type="Collection(graph.directoryObject)"/>
-                <NavigationProperty Name="transitiveMembers" Type="Collection(graph.directoryObject)"/>
-                <NavigationProperty Name="transitiveMemberOf" Type="Collection(graph.directoryObject)"/>
-                <NavigationProperty Name="createdOnBehalfOf" Type="graph.directoryObject"/>
-                <NavigationProperty Name="owners" Type="Collection(graph.directoryObject)"/>
+                <NavigationProperty Name="members" Type="Collection(graph.directory_object)"/>
+                <NavigationProperty Name="memberOf" Type="Collection(graph.directory_object)"/>
+                <NavigationProperty Name="membersWithLicenseErrors" Type="Collection(graph.directory_object)"/>
+                <NavigationProperty Name="transitiveMembers" Type="Collection(graph.directory_object)"/>
+                <NavigationProperty Name="transitiveMemberOf" Type="Collection(graph.directory_object)"/>
+                <NavigationProperty Name="createdOnBehalfOf" Type="graph.directory_object"/>
+                <NavigationProperty Name="owners" Type="Collection(graph.directory_object)"/>
                 <NavigationProperty Name="settings" Type="Collection(graph.groupSetting)" ContainsTarget="true"/>
                 <NavigationProperty Name="conversations" Type="Collection(graph.conversation)" ContainsTarget="true"/>
                 <NavigationProperty Name="photos" Type="Collection(graph.profilePhoto)" ContainsTarget="true"/>
-                <NavigationProperty Name="acceptedSenders" Type="Collection(graph.directoryObject)"
+                <NavigationProperty Name="acceptedSenders" Type="Collection(graph.directory_object)"
                                     ContainsTarget="true"/>
-                <NavigationProperty Name="rejectedSenders" Type="Collection(graph.directoryObject)"
+                <NavigationProperty Name="rejectedSenders" Type="Collection(graph.directory_object)"
                                     ContainsTarget="true"/>
                 <NavigationProperty Name="threads" Type="Collection(graph.conversationThread)" ContainsTarget="true"/>
                 <NavigationProperty Name="calendar" Type="graph.calendar" ContainsTarget="true"/>
@@ -2895,13 +2895,13 @@
             </EntityType>
             <EntityType Name="activityBasedTimeoutPolicy" BaseType="graph.stsPolicy"/>
             <EntityType Name="claimsMappingPolicy" BaseType="graph.stsPolicy"/>
-            <EntityType Name="contract" BaseType="graph.directoryObject" OpenType="true">
+            <EntityType Name="contract" BaseType="graph.directory_object" OpenType="true">
                 <Property Name="contractType" Type="Edm.String"/>
                 <Property Name="customerId" Type="Edm.Guid"/>
                 <Property Name="defaultDomainName" Type="Edm.String"/>
                 <Property Name="displayName" Type="Edm.String"/>
             </EntityType>
-            <EntityType Name="servicePrincipal" BaseType="graph.directoryObject" OpenType="true">
+            <EntityType Name="servicePrincipal" BaseType="graph.directory_object" OpenType="true">
                 <Property Name="accountEnabled" Type="Edm.Boolean"/>
                 <Property Name="addIns" Type="Collection(graph.addIn)" Nullable="false"/>
                 <Property Name="alternativeNames" Type="Collection(Edm.String)" Nullable="false"/>
@@ -2936,11 +2936,11 @@
                 <NavigationProperty Name="homeRealmDiscoveryPolicies"
                                     Type="Collection(graph.homeRealmDiscoveryPolicy)"/>
                 <NavigationProperty Name="oauth2PermissionGrants" Type="Collection(graph.oAuth2PermissionGrant)"/>
-                <NavigationProperty Name="memberOf" Type="Collection(graph.directoryObject)"/>
-                <NavigationProperty Name="transitiveMemberOf" Type="Collection(graph.directoryObject)"/>
-                <NavigationProperty Name="createdObjects" Type="Collection(graph.directoryObject)"/>
-                <NavigationProperty Name="owners" Type="Collection(graph.directoryObject)"/>
-                <NavigationProperty Name="ownedObjects" Type="Collection(graph.directoryObject)"/>
+                <NavigationProperty Name="memberOf" Type="Collection(graph.directory_object)"/>
+                <NavigationProperty Name="transitiveMemberOf" Type="Collection(graph.directory_object)"/>
+                <NavigationProperty Name="createdObjects" Type="Collection(graph.directory_object)"/>
+                <NavigationProperty Name="owners" Type="Collection(graph.directory_object)"/>
+                <NavigationProperty Name="ownedObjects" Type="Collection(graph.directory_object)"/>
                 <NavigationProperty Name="tokenIssuancePolicies" Type="Collection(graph.tokenIssuancePolicy)"/>
                 <NavigationProperty Name="tokenLifetimePolicies" Type="Collection(graph.tokenLifetimePolicy)"/>
             </EntityType>
@@ -2961,7 +2961,7 @@
                 <Property Name="suspended" Type="Edm.Int32"/>
                 <Property Name="warning" Type="Edm.Int32"/>
             </ComplexType>
-            <EntityType Name="organization" BaseType="graph.directoryObject" OpenType="true">
+            <EntityType Name="organization" BaseType="graph.directory_object" OpenType="true">
                 <Property Name="assignedPlans" Type="Collection(graph.assignedPlan)" Nullable="false"/>
                 <Property Name="businessPhones" Type="Collection(Edm.String)" Nullable="false"/>
                 <Property Name="city" Type="Edm.String"/>
@@ -3002,7 +3002,7 @@
                 <Property Name="name" Type="Edm.String"/>
                 <Property Name="value" Type="Edm.String"/>
             </ComplexType>
-            <EntityType Name="groupSettingTemplate" BaseType="graph.directoryObject" OpenType="true">
+            <EntityType Name="groupSettingTemplate" BaseType="graph.directory_object" OpenType="true">
                 <Property Name="displayName" Type="Edm.String"/>
                 <Property Name="description" Type="Edm.String"/>
                 <Property Name="values" Type="Collection(graph.settingTemplateValue)" Nullable="false"/>
@@ -7650,13 +7650,13 @@
                 <Property Name="messageUri" Type="Edm.String" Nullable="false"/>
             </EntityType>
             <Action Name="getByIds" IsBound="true" EntitySetPath="bindingParameter">
-                <Parameter Name="bindingParameter" Type="Collection(graph.directoryObject)" Nullable="false"/>
+                <Parameter Name="bindingParameter" Type="Collection(graph.directory_object)" Nullable="false"/>
                 <Parameter Name="ids" Type="Collection(Edm.String)" Nullable="false" Unicode="false"/>
                 <Parameter Name="types" Type="Collection(Edm.String)" Unicode="false"/>
-                <ReturnType Type="Collection(graph.directoryObject)" Nullable="false"/>
+                <ReturnType Type="Collection(graph.directory_object)" Nullable="false"/>
             </Action>
             <Action Name="validateProperties" IsBound="true" EntitySetPath="bindingParameter">
-                <Parameter Name="bindingParameter" Type="Collection(graph.directoryObject)" Nullable="false"/>
+                <Parameter Name="bindingParameter" Type="Collection(graph.directory_object)" Nullable="false"/>
                 <Parameter Name="entityType" Type="Edm.String" Unicode="false"/>
                 <Parameter Name="displayName" Type="Edm.String" Unicode="false"/>
                 <Parameter Name="mailNickname" Type="Edm.String" Unicode="false"/>
@@ -7725,28 +7725,28 @@
                 <Parameter Name="keyId" Type="Edm.Guid" Nullable="false"/>
             </Action>
             <Action Name="checkMemberGroups" IsBound="true">
-                <Parameter Name="bindingParameter" Type="graph.directoryObject" Nullable="false"/>
+                <Parameter Name="bindingParameter" Type="graph.directory_object" Nullable="false"/>
                 <Parameter Name="groupIds" Type="Collection(Edm.String)" Nullable="false" Unicode="false"/>
                 <ReturnType Type="Collection(Edm.String)" Nullable="false" Unicode="false"/>
             </Action>
             <Action Name="checkMemberObjects" IsBound="true">
-                <Parameter Name="bindingParameter" Type="graph.directoryObject" Nullable="false"/>
+                <Parameter Name="bindingParameter" Type="graph.directory_object" Nullable="false"/>
                 <Parameter Name="ids" Type="Collection(Edm.String)" Nullable="false" Unicode="false"/>
                 <ReturnType Type="Collection(Edm.String)" Nullable="false" Unicode="false"/>
             </Action>
             <Action Name="getMemberGroups" IsBound="true">
-                <Parameter Name="bindingParameter" Type="graph.directoryObject" Nullable="false"/>
+                <Parameter Name="bindingParameter" Type="graph.directory_object" Nullable="false"/>
                 <Parameter Name="securityEnabledOnly" Type="Edm.Boolean"/>
                 <ReturnType Type="Collection(Edm.String)" Nullable="false" Unicode="false"/>
             </Action>
             <Action Name="getMemberObjects" IsBound="true">
-                <Parameter Name="bindingParameter" Type="graph.directoryObject" Nullable="false"/>
+                <Parameter Name="bindingParameter" Type="graph.directory_object" Nullable="false"/>
                 <Parameter Name="securityEnabledOnly" Type="Edm.Boolean"/>
                 <ReturnType Type="Collection(Edm.String)" Nullable="false" Unicode="false"/>
             </Action>
             <Action Name="restore" IsBound="true">
-                <Parameter Name="bindingParameter" Type="graph.directoryObject" Nullable="false"/>
-                <ReturnType Type="graph.directoryObject"/>
+                <Parameter Name="bindingParameter" Type="graph.directory_object" Nullable="false"/>
+                <ReturnType Type="graph.directory_object"/>
             </Action>
             <Action Name="forceDelete" IsBound="true">
                 <Parameter Name="bindingParameter" Type="graph.domain" Nullable="false"/>
@@ -11743,7 +11743,7 @@
                 </EntitySet>
                 <EntitySet Name="certificateBasedAuthConfiguration"
                            EntityType="microsoft.graph.certificateBasedAuthConfiguration"/>
-                <EntitySet Name="directoryObjects" EntityType="microsoft.graph.directoryObject"/>
+                <EntitySet Name="directoryObjects" EntityType="microsoft.graph.directory_object"/>
                 <EntitySet Name="contacts" EntityType="microsoft.graph.orgContact">
                     <NavigationPropertyBinding Path="directReports" Target="directoryObjects"/>
                     <NavigationPropertyBinding Path="manager" Target="directoryObjects"/>
@@ -11870,7 +11870,7 @@
                 <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="true"/>
                 <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="true"/>
             </Annotations>
-            <Annotations Target="microsoft.graph.directoryObject">
+            <Annotations Target="microsoft.graph.directory_object">
                 <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
                     <Record>
                         <PropertyValue Property="Expandable" Bool="false"/>
@@ -11898,7 +11898,7 @@
                 </Annotation>
                 <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="false"/>
                 <Annotation Term="Org.OData.Core.V1.Description"
-                            String="Represents an Azure Active Directory object. The directoryObject type is the base type for many other directory entity types."/>
+                            String="Represents an Azure Active Directory object. The directory_object type is the base type for many other directory entity types."/>
             </Annotations>
             <Annotations Target="microsoft.graph.user">
                 <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">

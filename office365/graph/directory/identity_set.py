@@ -1,5 +1,5 @@
 from office365.graph.directory.identity import Identity
-from office365.runtime.clientValue import ClientValue
+from office365.runtime.client_value import ClientValue
 
 
 class IdentitySet(ClientValue):

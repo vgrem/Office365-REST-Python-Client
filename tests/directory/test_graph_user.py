@@ -1,5 +1,5 @@
 from office365.graph.directory.user import User
-from office365.graph.directory.userProfile import UserProfile
+from office365.graph.directory.user_profile import UserProfile
 from settings import settings
 from tests import random_seed
 from tests.graph_case import GraphTestCase

@@ -1,4 +1,4 @@
-from office365.graph.directory import DirectoryObject
+from office365.graph.directory.directory_object import DirectoryObject
 
 
 class DirectoryRole(DirectoryObject):

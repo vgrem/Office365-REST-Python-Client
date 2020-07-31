@@ -1,5 +1,5 @@
 from unittest import TestCase
-from office365.runtime.auth.clientCredential import ClientCredential
+from office365.runtime.auth.client_credential import ClientCredential
 from settings import settings
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.client_context import ClientContext

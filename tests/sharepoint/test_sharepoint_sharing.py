@@ -1,6 +1,6 @@
 import urllib.parse
 from unittest import TestCase
-from office365.runtime.auth.userCredential import UserCredential
+from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.permissions.roleDefinition import RoleDefinition
 from office365.sharepoint.principal.user import User

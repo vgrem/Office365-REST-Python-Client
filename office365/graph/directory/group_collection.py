@@ -1,4 +1,4 @@
-from office365.graph.directory.directoryObjectCollection import DirectoryObjectCollection
+from office365.graph.directory.directory_object_collection import DirectoryObjectCollection
 from office365.graph.directory.group import Group
 from office365.runtime.client_query import CreateEntityQuery
 

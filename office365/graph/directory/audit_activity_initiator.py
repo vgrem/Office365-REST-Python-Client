@@ -1,5 +1,5 @@
 from office365.runtime.client_value import ClientValue
 
 
-class UserDirectoryInfo(ClientValue):
+class AuditActivityInitiator(ClientValue):
     pass

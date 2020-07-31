@@ -1,4 +1,4 @@
-from office365.runtime.auth.userCredential import UserCredential
+from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from settings import settings
 

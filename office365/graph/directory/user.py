@@ -1,16 +1,16 @@
-from office365.graph.directory.directoryObject import DirectoryObject
-from office365.graph.directory.directoryObjectCollection import DirectoryObjectCollection
-from office365.graph.directory.groupCollection import GroupCollection
+from office365.graph.directory.directory_object import DirectoryObject
+from office365.graph.directory.directory_object_collection import DirectoryObjectCollection
+from office365.graph.directory.group_collection import GroupCollection
 from office365.graph.onedrive.drive import Drive
 from office365.outlookservices.contact_collection import ContactCollection
 from office365.outlookservices.event_collection import EventCollection
-from office365.outlookservices.messageCollection import MessageCollection
-from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
+from office365.outlookservices.message_collection import MessageCollection
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 
 
 class User(DirectoryObject):
-    """Represents an Azure AD user account. Inherits from directoryObject."""
+    """Represents an Azure AD user account. Inherits from directory_object."""
 
     def delete_object(self, permanent_delete=False):
         """

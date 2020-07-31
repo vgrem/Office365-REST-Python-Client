@@ -1,4 +1,4 @@
-from office365.graph.directory.directoryObject import DirectoryObject
+from office365.graph.directory.directory_object import DirectoryObject
 
 
 class GroupSettingTemplate(DirectoryObject):

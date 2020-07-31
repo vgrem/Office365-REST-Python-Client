@@ -1,4 +1,4 @@
-from office365.graph.directory.identitySet import IdentitySet
+from office365.graph.directory.identity_set import IdentitySet
 from office365.graph.entity import Entity
 from office365.graph.onedrive.itemReference import ItemReference
 from office365.runtime.client_query import DeleteEntityQuery

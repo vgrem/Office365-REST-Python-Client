@@ -2,7 +2,7 @@ import unittest
 import uuid
 
 from office365.graph.directory.group import Group
-from office365.graph.directory.groupProfile import GroupProfile
+from office365.graph.directory.group_profile import GroupProfile
 from office365.graph.directory.user import User
 from office365.runtime.client_request_exception import ClientRequestException
 from tests.graph_case import GraphTestCase

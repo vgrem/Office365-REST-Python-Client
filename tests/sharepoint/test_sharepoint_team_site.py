@@ -1,6 +1,6 @@
 import uuid
 from unittest import TestCase
-from office365.runtime.auth.userCredential import UserCredential
+from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.portal.GroupSiteInfo import GroupSiteInfo
 from office365.sharepoint.portal.GroupSiteManager import GroupSiteManager

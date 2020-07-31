@@ -1,6 +1,6 @@
 from office365.runtime.auth.authentication_context import AuthenticationContext
-from office365.runtime.auth.clientCredential import ClientCredential
-from office365.runtime.auth.userCredential import UserCredential
+from office365.runtime.auth.client_credential import ClientCredential
+from office365.runtime.auth.user_credential import UserCredential
 from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.odata.json_light_format import JsonLightFormat
