@@ -19,6 +19,10 @@ class BaseEntity(ClientObject):
         self.context.with_credentials(credentials)
         return self
 
+    def with_context(self, ctx):
+        self.context = ctx
+        return self
+
     def execute_query(self):
         self.context.execute_query()
         return self
@@ -38,6 +42,13 @@ class BaseEntity(ClientObject):
         :rtype: office365.sharepoint.client_context.ClientContext
         """
         return self._context
+
+    @context.setter
+    def context(self, ctx):
+        """
+        :rtype: office365.sharepoint.client_context.ClientContext
+        """
+        self._context = ctx
 
     @property
     def entity_type_name(self):
