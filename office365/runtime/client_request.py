@@ -1,5 +1,4 @@
 from abc import abstractmethod
-
 import requests
 from requests import HTTPError
 from office365.runtime.client_request_exception import ClientRequestException

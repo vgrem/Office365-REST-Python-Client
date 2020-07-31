@@ -177,6 +177,20 @@ class ListItem(SecurableObject):
             return AttachmentFileCollection(self.context,
                                             ResourcePath("AttachmentFiles", self.resource_path))
 
+    @property
+    def contentType(self):
+        """Gets a value that specifies the content type of the list item."""
+        from office365.sharepoint.contenttypes.content_type import ContentType
+        return self.properties.get("ContentType",
+                                   ContentType(self.context,
+                                               ResourcePath("ContentType", self.resource_path))
+                                   )
+
+    @property
+    def fieldValues(self):
+        """Gets a collection of key/value pairs containing the names and values for the fields of the list item."""
+        return self.properties.get("FieldValues", None)
+
     def set_property(self, name, value, persist_changes=True):
         super(ListItem, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path

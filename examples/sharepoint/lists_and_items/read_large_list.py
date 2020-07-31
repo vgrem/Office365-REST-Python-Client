@@ -1,5 +1,7 @@
 from office365.runtime.auth.clientCredential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.fileSystemObjectType import FileSystemObjectType
+from office365.sharepoint.lists.list import List
 from settings import settings
 
 
@@ -14,6 +16,20 @@ def enum_items(target_list):
     ctx.execute_query()
     for index, item in enumerate(items):
         print("{0}: {1}".format(index, item.properties['Title']))
+
+
+def enum_files_and_folders(target_list):
+    """
+    :type target_list: List
+    """
+    items = target_list.items.select(["FileSystemObjectType"]).expand(["File", "Folder"])
+    ctx.load(items)
+    ctx.execute_query()
+    for item in items:
+        if item.properties["FileSystemObjectType"] == FileSystemObjectType.Folder:
+            print("Folder url: {0}".format(item.folder.serverRelativeUrl))
+        else:
+            print("File url: {0}".format(item.file.serverRelativeUrl))
 
 
 def get_total_count(target_list):
@@ -36,8 +52,8 @@ ctx = ClientContext.connect_with_credentials("https://mediadev8.sharepoint.com/s
                                              ClientCredential(settings['client_credentials']['client_id'],
                                                               settings['client_credentials']['client_secret']))
 
-list_source = ctx.web.lists.get_by_title("Contacts_Large")
-
-enum_items(list_source)
+# list_source = ctx.web.lists.get_by_title("Contacts_Large")
+list_source = ctx.web.lists.get_by_title("Documents_Archive")
+enum_files_and_folders(list_source)
 # get_total_count(list_source)
 # get_item_at_index(list_source)

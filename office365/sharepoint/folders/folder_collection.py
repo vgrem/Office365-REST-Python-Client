@@ -11,6 +11,7 @@ class FolderCollection(ClientObjectCollection):
 
     def add(self, server_relative_url):
         """Adds the folder that is located at the specified URL to the collection.
+
         :type server_relative_url: str
         """
         folder = Folder(self.context)

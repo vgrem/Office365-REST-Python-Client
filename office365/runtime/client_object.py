@@ -34,6 +34,10 @@ class ClientObject(object):
         return False
 
     def expand(self, names):
+        """
+
+        :type names: list[str]
+        """
         self.query_options.expand = names
         return self
 
