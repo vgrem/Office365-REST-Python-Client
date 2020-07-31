@@ -1,5 +1,6 @@
-from office365.graph.onedrive.file import File
 from tests.graph_case import GraphTestCase
+
+from office365.graph.onedrive.file import File
 
 
 class TestDrive(GraphTestCase):

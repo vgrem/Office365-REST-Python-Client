@@ -2,9 +2,10 @@ import csv
 import os
 import tempfile
 
+from settings import settings
+
 from office365.runtime.auth.clientCredential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
-from settings import settings
 
 "Demonstrates how to export a List data"
 

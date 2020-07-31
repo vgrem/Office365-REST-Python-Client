@@ -1,5 +1,6 @@
-from office365.sharepoint.permissions.basePermissions import BasePermissions
 from tests.sharepoint.sharepoint_case import SPTestCase
+
+from office365.sharepoint.permissions.basePermissions import BasePermissions
 
 
 class TestSharePointUser(SPTestCase):

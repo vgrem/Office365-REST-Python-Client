@@ -1,8 +1,10 @@
 import os.path
 from io import BytesIO
-from office365.sharepoint.listitems.listitem import ListItem
+
 from tests.sharepoint.sharepoint_case import SPTestCase
+
 from office365.sharepoint.attachments.attachmentfile_creation_information import AttachmentfileCreationInformation
+from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.list_creation_information import ListCreationInformation
 from office365.sharepoint.lists.list_template_type import ListTemplateType
 
@@ -68,4 +70,3 @@ class TestListItemAttachment(SPTestCase):
         self.client.load(attachment_files)
         self.client.execute_query()
         self.assertEqual(len(attachment_files), 0)
-

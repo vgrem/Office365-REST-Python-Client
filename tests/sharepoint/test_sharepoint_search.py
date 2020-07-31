@@ -1,5 +1,8 @@
 from datetime import datetime, timedelta
 from unittest import TestCase
+
+from settings import settings
+
 from office365.runtime.auth.userCredential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.search.query.querySuggestionResults import QuerySuggestionResults
@@ -7,7 +10,6 @@ from office365.sharepoint.search.queryResult import QueryResult
 from office365.sharepoint.search.searchRequest import SearchRequest
 from office365.sharepoint.search.searchResult import SearchResult
 from office365.sharepoint.search.searchService import SearchService
-from settings import settings
 
 
 class TestSearch(TestCase):

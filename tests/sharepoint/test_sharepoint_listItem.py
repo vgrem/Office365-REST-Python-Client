@@ -1,9 +1,11 @@
 from time import sleep
+
+from tests import random_seed
+from tests.sharepoint.sharepoint_case import SPTestCase
+
 from office365.sharepoint.listitems.caml.camlQuery import CamlQuery
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.list import List
-from tests import random_seed
-from tests.sharepoint.sharepoint_case import SPTestCase
 from office365.sharepoint.lists.list_creation_information import ListCreationInformation
 from office365.sharepoint.lists.list_template_type import ListTemplateType
 
@@ -46,10 +48,10 @@ class TestSharePointListItem(SPTestCase):
         self.client.execute_query()
 
     def test3_create_folder_in_list(self):
-        #item_info = ListItemCreationInformation()
-        #item_info.LeafName = None
-        #item_info.UnderlyingObjectType = 0
-        #new_item = self.target_list.add_item(item_info)
+        # item_info = ListItemCreationInformation()
+        # item_info.LeafName = None
+        # item_info.UnderlyingObjectType = 0
+        # new_item = self.target_list.add_item(item_info)
         new_folder = self.target_list.rootFolder.add("Archive")
         self.client.execute_query()
         self.assertIsNotNone(new_folder.serverRelativeUrl)

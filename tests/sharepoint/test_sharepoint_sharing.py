@@ -1,15 +1,14 @@
 import urllib.parse
 from unittest import TestCase
+
+from settings import settings
+
 from office365.runtime.auth.userCredential import UserCredential
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.permissions.roleDefinition import RoleDefinition
 from office365.sharepoint.principal.user import User
-from office365.sharepoint.sharing.documentSharingManager import DocumentSharingManager
 from office365.sharepoint.sharing.objectSharingInformation import ObjectSharingInformation
-from office365.sharepoint.sharing.roleType import RoleType
 from office365.sharepoint.sharing.sharingResult import SharingResult
 from office365.sharepoint.webs.web import Web
-from settings import settings
 
 
 class TestSharePointSharing(TestCase):
@@ -27,7 +26,7 @@ class TestSharePointSharing(TestCase):
         cls.client.execute_query()
         cls.target_user = current_user
 
-    #def test1_get_role_def(self):
+    # def test1_get_role_def(self):
     #    dsm = DocumentSharingManager(self.client)
     #    role_def = dsm.get_role_definition(RoleType.View)
     #    self.client.execute_query()

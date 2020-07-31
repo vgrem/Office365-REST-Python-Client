@@ -1,3 +1,7 @@
+from tests import random_seed
+from tests.sharepoint.sharepoint_case import SPTestCase
+
+from office365.sharepoint.fields.field_creation_information import FieldCreationInformation
 from office365.sharepoint.fields.fieldLookupValue import FieldLookupValue
 from office365.sharepoint.fields.fieldMultiChoice import FieldMultiChoice
 from office365.sharepoint.fields.fieldMultiChoiceValue import FieldMultiChoiceValue
@@ -5,13 +9,10 @@ from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupVa
 from office365.sharepoint.fields.fieldMultiUserValue import FieldMultiUserValue
 from office365.sharepoint.fields.fieldType import FieldType
 from office365.sharepoint.fields.fieldUserValue import FieldUserValue
-from office365.sharepoint.fields.field_creation_information import FieldCreationInformation
+from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.list_creation_information import ListCreationInformation
 from office365.sharepoint.lists.list_template_type import ListTemplateType
-from office365.sharepoint.listitems.listitem import ListItem
-from tests import random_seed
-from tests.sharepoint.sharepoint_case import SPTestCase
 
 
 class TestFieldValue(SPTestCase):

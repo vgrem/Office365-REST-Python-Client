@@ -1,12 +1,13 @@
 import uuid
 from unittest import TestCase
 
+from settings import settings
+
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.portal.SiteStatus import SiteStatus
 from office365.sharepoint.portal.SPSiteCreationRequest import SPSiteCreationRequest
 from office365.sharepoint.portal.SPSiteManager import SPSiteManager
-from office365.sharepoint.portal.SiteStatus import SiteStatus
-from settings import settings
 
 
 def load_current_user(ctx):

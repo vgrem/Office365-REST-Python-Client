@@ -8,12 +8,9 @@ python:
 
 install:
   - pip install -r requirements.txt
-  - pip install -r requirements-dev.txt
 
 
 script:
-  - flake8 office365 examples generator
-  - isort office365 examples generator --check-only
   - python setup.py test
 
 stages:

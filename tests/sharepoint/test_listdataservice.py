@@ -1,7 +1,9 @@
 from unittest import TestCase
+
+from settings import settings
+
 from office365.runtime.auth.clientCredential import ClientCredential
 from office365.sharepoint.listdatasvc.list_data_service import ListDataService
-from settings import settings
 
 
 class TestSharePointListDataService(TestCase):
@@ -15,7 +17,3 @@ class TestSharePointListDataService(TestCase):
 
     def test1_get_list_items(self):
         pass
-        #items = self.client.get_list_items("Documents")
-        #self.client.load(items)
-        #self.client.execute_query()
-        #self.assertIsNotNone(items)

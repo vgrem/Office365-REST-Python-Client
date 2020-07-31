@@ -1,10 +1,11 @@
 import os
 import tempfile
 
+from settings import settings
+
 from office365.runtime.auth.clientCredential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.listitems.caml import CamlQuery
-from settings import settings
 
 download_path = tempfile.mkdtemp()
 

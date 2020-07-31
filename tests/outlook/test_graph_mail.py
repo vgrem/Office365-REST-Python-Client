@@ -30,4 +30,3 @@ class TestGraphMail(GraphTestCase):
         }
         self.client.me.send_mail(message_json)
         self.client.execute_query()
-

@@ -1,4 +1,5 @@
 from abc import abstractmethod
+
 import requests
 from requests import HTTPError
 

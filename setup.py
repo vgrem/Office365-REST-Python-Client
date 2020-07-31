@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import io
 from distutils.core import setup
+
 import setuptools
 
 with io.open("README.md", mode='r', encoding='utf-8') as fh:

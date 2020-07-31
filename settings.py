@@ -16,5 +16,3 @@ settings = {
         'client_secret': secure_vars[3],
     }
 }
-
-

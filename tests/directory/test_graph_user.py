@@ -1,8 +1,9 @@
-from office365.graph.directory.user import User
-from office365.graph.directory.userProfile import UserProfile
 from settings import settings
 from tests import random_seed
 from tests.graph_case import GraphTestCase
+
+from office365.graph.directory.user import User
+from office365.graph.directory.userProfile import UserProfile
 
 
 class TestGraphUser(GraphTestCase):
@@ -19,7 +20,8 @@ class TestGraphUser(GraphTestCase):
             self.assertIsNotNone(user.id)
 
     def test2_create_user(self):
-        profile = UserProfile("testuser{0}@{1}".format(random_seed, settings['tenant']), "P@ssw0rd{0}".format(random_seed))
+        password = "P@ssw0rd{0}".format(random_seed)
+        profile = UserProfile("testuser{0}@{1}".format(random_seed, settings['tenant']), password)
         new_user = self.client.users.add(profile)
         self.client.execute_query()
         self.assertIsNotNone(new_user.id)

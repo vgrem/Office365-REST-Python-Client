@@ -1,12 +1,14 @@
 import os
-from office365.sharepoint.files.file import File
-from office365.sharepoint.lists.list import List
-from office365.sharepoint.webs.web import Web
+
 from tests import random_seed
 from tests.sharepoint.sharepoint_case import SPTestCase
+
+from office365.sharepoint.files.file import File
+from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.list_creation_information import ListCreationInformation
 from office365.sharepoint.lists.list_template_type import ListTemplateType
 from office365.sharepoint.pages.template_file_type import TemplateFileType
+from office365.sharepoint.webs.web import Web
 
 
 def normalize_response(response):

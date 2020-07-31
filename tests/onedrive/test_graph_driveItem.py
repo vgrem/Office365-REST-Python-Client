@@ -1,10 +1,11 @@
 import os
 import uuid
 
+from tests.graph_case import GraphTestCase
+
 from office365.graph.onedrive.drive import Drive
 from office365.graph.onedrive.driveItem import DriveItem
 from office365.graph.onedrive.file_upload import ResumableFileUpload
-from tests.graph_case import GraphTestCase
 
 
 def create_list_drive(client):

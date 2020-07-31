@@ -1,11 +1,12 @@
 import unittest
 import uuid
 
+from tests.graph_case import GraphTestCase
+
 from office365.graph.directory.group import Group
 from office365.graph.directory.groupProfile import GroupProfile
 from office365.graph.directory.user import User
 from office365.runtime.client_request_exception import ClientRequestException
-from tests.graph_case import GraphTestCase
 
 
 class TestGraphGroup(GraphTestCase):
@@ -41,7 +42,7 @@ class TestGraphGroup(GraphTestCase):
                 self.client.execute_query()
                 if result.value:
                     self.assertIsNotNone(result.value)
-                    result = self.client.groups.filter("displayName eq 'FirstDistGroup'".format(result.value[0]))
+                    result = self.client.groups.filter("displayName eq '{0}'".format(result.value[0]))
                     self.client.load(result)
                     self.client.execute_query()
                     self.__class__.target_group = result[0]
@@ -92,4 +93,3 @@ class TestGraphGroup(GraphTestCase):
         grp_to_delete = self.__class__.target_group
         grp_to_delete.delete_object(True)
         self.client.execute_query()
-

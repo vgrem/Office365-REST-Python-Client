@@ -1,9 +1,10 @@
 from random import randint
 
-from office365.sharepoint.contenttypes.contentTypeCreationInformation import ContentTypeCreationInformation
+from tests.sharepoint.sharepoint_case import SPTestCase
+
 from office365.sharepoint.contenttypes.content_type import ContentType
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
-from tests.sharepoint.sharepoint_case import SPTestCase
+from office365.sharepoint.contenttypes.contentTypeCreationInformation import ContentTypeCreationInformation
 
 
 class TestContentType(SPTestCase):

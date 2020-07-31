@@ -1,10 +1,10 @@
 from unittest import TestCase
-from office365.runtime.auth.clientCredential import ClientCredential
+
 from settings import settings
+
 from office365.runtime.auth.authentication_context import AuthenticationContext
+from office365.runtime.auth.clientCredential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.webs.web import Web
-from office365.sharepoint.lists.list_creation_information import ListCreationInformation
 
 
 class SPTestCase(TestCase):

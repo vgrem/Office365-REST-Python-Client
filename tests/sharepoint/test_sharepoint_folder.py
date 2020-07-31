@@ -1,10 +1,11 @@
 from random import randint
 
-from office365.sharepoint.folders.folder import Folder
-from office365.sharepoint.lists.list import List
-from office365.sharepoint.files.move_operations import MoveOperations
 from tests import random_seed
 from tests.sharepoint.sharepoint_case import SPTestCase
+
+from office365.sharepoint.files.move_operations import MoveOperations
+from office365.sharepoint.folders.folder import Folder
+from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.list_creation_information import ListCreationInformation
 from office365.sharepoint.lists.list_template_type import ListTemplateType
 

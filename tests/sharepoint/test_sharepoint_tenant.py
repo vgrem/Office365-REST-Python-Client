@@ -1,12 +1,14 @@
 import os
 from random import randint
 from unittest import TestCase
+
+from settings import settings
+
 from office365.runtime.auth.userCredential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.tenant.administration.siteProperties import SiteProperties
 from office365.sharepoint.tenant.administration.sitePropertiesCollection import SitePropertiesCollection
 from office365.sharepoint.tenant.administration.tenant import Tenant
-from settings import settings
 
 
 class TestTenant(TestCase):
@@ -34,7 +36,7 @@ class TestTenant(TestCase):
         self.client.execute_query()
         self.assertIsInstance(sites, SitePropertiesCollection)
 
-    #def test4_create_site(self):
+    # def test4_create_site(self):
     #    current_user = self.client.web.currentUser
     #    self.client.load(current_user)
     #    self.client.execute_query()

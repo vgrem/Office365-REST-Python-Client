@@ -1,8 +1,10 @@
 import uuid
 from time import sleep
+
+from tests.graph_case import GraphTestCase
+
 from office365.graph.directory.group import Group
 from office365.graph.directory.groupProfile import GroupProfile
-from tests.graph_case import GraphTestCase
 
 
 class TestGraphTeam(GraphTestCase):

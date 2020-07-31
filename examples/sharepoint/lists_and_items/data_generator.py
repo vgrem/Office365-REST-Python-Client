@@ -1,12 +1,12 @@
 import os
 
 from faker import Faker
+from settings import settings
 
 from office365.runtime.auth.userCredential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.lists.list_creation_information import ListCreationInformation
 from office365.sharepoint.lists.list_template_type import ListTemplateType
-from settings import settings
 
 
 def ensure_list(web, list_properties):
@@ -72,7 +72,7 @@ def generate_contacts(context):
         }
         contact_item = contacts_list.add_item(contact_properties)
         context.execute_query()
-        print("({0} of {1})  Contact '{2}' has been created".format(idx, total_amount, contact_item.properties["Title"]))
+        print("({0} of {1}) Contact '{2}' has been created".format(idx, total_amount, contact_item.properties["Title"]))
 
 
 if __name__ == '__main__':

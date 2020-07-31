@@ -1,8 +1,8 @@
+from settings import settings
+
 from office365.runtime.auth.clientCredential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.fileSystemObjectType import FileSystemObjectType
-from office365.sharepoint.lists.list import List
-from settings import settings
 
 
 def print_progress(items_read):

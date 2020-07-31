@@ -1,11 +1,13 @@
 from random import randint
-from office365.sharepoint.permissions.basePermissions import BasePermissions
-from office365.sharepoint.permissions.permissionKind import PermissionKind
-from office365.sharepoint.webs.subwebQuery import SubwebQuery
-from office365.sharepoint.principal.user import User
-from office365.sharepoint.webs.web import Web
+
 from settings import settings
 from tests.sharepoint.sharepoint_case import SPTestCase
+
+from office365.sharepoint.permissions.basePermissions import BasePermissions
+from office365.sharepoint.permissions.permissionKind import PermissionKind
+from office365.sharepoint.principal.user import User
+from office365.sharepoint.webs.subwebQuery import SubwebQuery
+from office365.sharepoint.webs.web import Web
 from office365.sharepoint.webs.web_creation_information import WebCreationInformation
 
 
@@ -31,7 +33,7 @@ class TestSharePointWeb(SPTestCase):
         self.assertIsNotNone(result.value)
 
     def test3_get_list_item_by_url(self):
-        page_url = "SitePages/Home.aspx".format(site_url=settings['url'])
+        page_url = "{site_url}SitePages/Home.aspx".format(site_url=settings['url'])
         target_item = self.client.web.get_list_item(page_url)
         self.client.execute_query()
         self.assertIsNotNone(target_item.resource_path)
