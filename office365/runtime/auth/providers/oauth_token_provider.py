@@ -29,7 +29,9 @@ class OAuthTokenProvider(BaseTokenProvider):
         return self.token and self.token.is_valid
 
     def get_authorization_header(self):
-        return '{token_type} {access_token}'.format(token_type=self.token.tokenType, access_token=self.token.accessToken)
+        return '{token_type} {access_token}'.format(
+            token_type=self.token.tokenType,
+            access_token=self.token.accessToken)
 
     def acquire_token_password_type(self, resource, client_id, user_credentials, scope):
         """

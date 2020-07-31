@@ -91,7 +91,14 @@ class List(SecurableObject):
         else:
             def _resolve_folder_url():
                 list_item_creation_information.FolderUrl = self.context.base_url + self.rootFolder.serverRelativeUrl
-                add_item_qry = ServiceOperationQuery(self, "addItem", None, list_item_creation_information, "parameters", item)
+                add_item_qry = ServiceOperationQuery(
+                    self,
+                    "addItem",
+                    None,
+                    list_item_creation_information,
+                    "parameters",
+                    item
+                )
                 self.context.add_query(add_item_qry)
 
             self.rootFolder.ensure_property("ServerRelativeUrl", _resolve_folder_url)

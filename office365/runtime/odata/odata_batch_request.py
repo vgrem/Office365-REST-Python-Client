@@ -1,6 +1,7 @@
 import uuid
 from email import message_from_bytes
 from email.message import Message
+
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.odata_request import ODataRequest
@@ -8,7 +9,6 @@ from office365.runtime.odata.odata_request import ODataRequest
 
 def _create_boundary(prefix):
     """Creates a string that can be used as a multipart request boundary.
-
     :param str prefix: String to use as the start of the boundary string
     """
     return prefix + str(uuid.uuid4())
