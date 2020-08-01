@@ -6,7 +6,7 @@ from office365.graph.onedrive.driveCollection import DriveCollection
 from office365.graph.onedrive.siteCollection import SiteCollection
 from office365.graph.teams.team import Team
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 
 

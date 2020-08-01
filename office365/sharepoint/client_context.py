@@ -4,7 +4,7 @@ import adal
 
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.auth.providers.saml_token_provider import resolve_base_url
-from office365.runtime.auth.tokenResponse import TokenResponse
+from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod

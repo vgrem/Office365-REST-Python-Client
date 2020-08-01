@@ -1,7 +1,7 @@
 from office365.graph.onedrive.driveItem import DriveItem
 from office365.graph.resource_path_url import ResourcePathUrl
 from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 
 
 class DownloadContentQuery(ServiceOperationQuery):

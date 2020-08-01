@@ -9,7 +9,7 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
-from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 
 
 class ODataRequest(ClientRequest):

@@ -48,10 +48,6 @@ class TestSharePointListItem(SPTestCase):
         self.client.execute_query()
 
     def test3_create_folder_in_list(self):
-        # item_info = ListItemCreationInformation()
-        # item_info.LeafName = None
-        # item_info.UnderlyingObjectType = 0
-        # new_item = self.target_list.add_item(item_info)
         new_folder = self.target_list.rootFolder.add("Archive")
         self.client.execute_query()
         self.assertIsNotNone(new_folder.serverRelativeUrl)

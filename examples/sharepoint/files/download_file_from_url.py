@@ -1,15 +1,15 @@
 import os
 import tempfile
 
+from office365.runtime.auth.client_credential import ClientCredential
 from settings import settings
 
-from office365.runtime.auth.userCredential import UserCredential
+from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.files.file import File
 
 abs_file_url = "{site_url}sites/team/Shared Documents/sample.docx".format(site_url=settings.get('url'))
 user_credentials = UserCredential(settings.get('user_credentials').get('username'),
                                   settings.get('user_credentials').get('password'))
-
 
 file_name = os.path.basename(abs_file_url)
 with tempfile.TemporaryDirectory() as local_path:

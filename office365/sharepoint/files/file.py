@@ -2,7 +2,7 @@ from office365.runtime.client_query import DeleteEntityQuery
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.actions.download_file import DownloadFileQuery

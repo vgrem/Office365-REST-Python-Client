@@ -2,11 +2,11 @@ from unittest import TestCase
 
 from settings import settings
 
-from office365.runtime.auth.clientCredential import ClientCredential
+from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
 from office365.runtime.auth.providers.saml_token_provider import SamlTokenProvider
-from office365.runtime.auth.tokenResponse import TokenResponse
-from office365.runtime.auth.userCredential import UserCredential
+from office365.runtime.auth.token_response import TokenResponse
+from office365.runtime.auth.user_credential import UserCredential
 from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_batch_request import ODataBatchRequest
 from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel

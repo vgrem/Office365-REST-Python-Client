@@ -1,7 +1,7 @@
 from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_result import ClientResult
 from office365.runtime.clientValueCollection import ClientValueCollection
-from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.fields.fieldLookupValue import FieldLookupValue
@@ -185,9 +185,24 @@ class ListItem(SecurableObject):
                                    )
 
     @property
-    def fieldValues(self):
+    def effectiveBasePermissions(self):
+        """Gets a value that specifies the effective permissions on the list item that are assigned
+           to the current user."""
+        from office365.sharepoint.permissions.basePermissions import BasePermissions
+        return self.properties.get("EffectiveBasePermissions",
+                                   BasePermissions())
+
+    @property
+    def field_values(self):
         """Gets a collection of key/value pairs containing the names and values for the fields of the list item."""
         return self.properties.get("FieldValues", None)
+
+    @property
+    def comments_disabled(self):
+        """
+        :rtype: bool or None
+        """
+        return self.properties.get("CommentsDisabled", None)
 
     def set_property(self, name, value, persist_changes=True):
         super(ListItem, self).set_property(name, value, persist_changes)
@@ -202,7 +217,6 @@ class ListItem(SecurableObject):
         Determine metadata annotation for ListItem entity
 
         :param office365.sharepoint.lists.list.List target_list: List entity
-        :return:
         """
 
         def _init_item_type():

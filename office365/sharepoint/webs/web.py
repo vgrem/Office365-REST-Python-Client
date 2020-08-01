@@ -1,6 +1,6 @@
 from office365.runtime.client_query import ClientQuery, DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.serviceOperationQuery import ServiceOperationQuery
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.actions.getWebUrlFromPage import GetWebUrlFromPageUrlQuery

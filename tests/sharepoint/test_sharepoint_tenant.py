@@ -2,9 +2,10 @@ import os
 from random import randint
 from unittest import TestCase
 
+from office365.sharepoint.tenant.tenant_settings import TenantSettings
 from settings import settings
 
-from office365.runtime.auth.userCredential import UserCredential
+from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.tenant.administration.siteProperties import SiteProperties
 from office365.sharepoint.tenant.administration.sitePropertiesCollection import SitePropertiesCollection
@@ -30,6 +31,11 @@ class TestTenant(TestCase):
         self.client.load(self.tenant)
         self.client.execute_query()
         self.assertIsNotNone(self.tenant.properties['RootSiteUrl'])
+
+    def test2_get_tenant_settings(self):
+        tenant_settings = TenantSettings.current(self.client)
+        self.client.execute_query()
+        self.assertIsNotNone(tenant_settings.properties)
 
     def test3_list_sites(self):
         sites = self.tenant.get_site_properties_from_sharepoint_by_filters("", 0, False)
