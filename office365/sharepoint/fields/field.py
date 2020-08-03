@@ -13,17 +13,17 @@ class Field(BaseEntity):
 
     @staticmethod
     def get_field_type(type_id):
-        from office365.sharepoint.fields.fieldCalculated import FieldCalculated
-        from office365.sharepoint.fields.fieldChoice import FieldChoice
-        from office365.sharepoint.fields.fieldComputed import FieldComputed
-        from office365.sharepoint.fields.fieldCurrency import FieldCurrency
+        from office365.sharepoint.fields.field_calculated import FieldCalculated
+        from office365.sharepoint.fields.field_choice import FieldChoice
+        from office365.sharepoint.fields.field_computed import FieldComputed
+        from office365.sharepoint.fields.field_currency import FieldCurrency
         from office365.sharepoint.fields.fieldGuid import FieldGuid
         from office365.sharepoint.fields.fieldLookup import FieldLookup
         from office365.sharepoint.fields.fieldMultiChoice import FieldMultiChoice
         from office365.sharepoint.fields.fieldMultiLineText import FieldMultiLineText
-        from office365.sharepoint.fields.fieldText import FieldText
-        from office365.sharepoint.fields.fieldUrl import FieldUrl
-        from office365.sharepoint.fields.fieldUser import FieldUser
+        from office365.sharepoint.fields.field_text import FieldText
+        from office365.sharepoint.fields.field_url import FieldUrl
+        from office365.sharepoint.fields.field_user import FieldUser
         field_types = {
             FieldType.Text: FieldText,
             FieldType.Calculated: FieldCalculated,

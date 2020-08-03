@@ -1,12 +1,13 @@
 from random import randint
 
+from office365.sharepoint.lists.list_template_type import ListTemplateType
 from settings import settings
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.permissions.basePermissions import BasePermissions
 from office365.sharepoint.permissions.permissionKind import PermissionKind
 from office365.sharepoint.principal.user import User
-from office365.sharepoint.webs.subwebQuery import SubwebQuery
+from office365.sharepoint.webs.subweb_query import SubwebQuery
 from office365.sharepoint.webs.web import Web
 from office365.sharepoint.webs.web_creation_information import WebCreationInformation
 
@@ -114,3 +115,9 @@ class TestSharePointWeb(SPTestCase):
         self.client.load(result_user)
         self.client.execute_query()
         self.assertEqual(result_user.login_name, self.__class__.target_user.login_name)
+
+    def test_14_get_catalog(self):
+        catalog = self.client.web.get_catalog(ListTemplateType.MasterPageCatalog)
+        self.client.load(catalog)
+        self.client.execute_query()
+        self.assertIsNotNone(catalog.title)

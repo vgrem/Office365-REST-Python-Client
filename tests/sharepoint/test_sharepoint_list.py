@@ -82,7 +82,13 @@ class TestSPList(SPTestCase):
         self.client.execute_query()
         self.assertEqual(self.target_list.properties['Id'], list_to_read.properties['Id'])
 
-    def test_11_update_list(self):
+    def test_11_read_list_fields(self):
+        fields = self.__class__.target_list.get_related_fields()
+        self.client.load(fields)
+        self.client.execute_query()
+        self.assertGreater(len(fields), 0)
+
+    def test_12_update_list(self):
         list_to_update = self.client.web.lists.get_by_title(self.target_list_title)
         self.target_list_title += "_updated"
         list_to_update.set_property('Title', self.target_list_title)
@@ -94,7 +100,7 @@ class TestSPList(SPTestCase):
         self.client.execute_query()
         self.assertEqual(len(result), 1)
 
-    def test_12_get_list_permissions(self):
+    def test_13_get_list_permissions(self):
         current_user = self.client.web.currentUser
         self.client.load(current_user)
         self.client.execute_query()
@@ -104,7 +110,7 @@ class TestSPList(SPTestCase):
         self.client.execute_query()
         self.assertIsInstance(result.value, BasePermissions)
 
-    def test_13_delete_list(self):
+    def test_14_delete_list(self):
         list_title = self.target_list_title + "_updated"
         list_to_delete = self.client.web.lists.get_by_title(list_title)
         list_to_delete.delete_object()

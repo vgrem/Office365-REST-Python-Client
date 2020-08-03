@@ -16,3 +16,10 @@ class ListTemplate(BaseEntity):
 
         """
         super().__init__(context)
+
+    @property
+    def internalName(self):
+        """Gets a value that specifies the identifier for the list template.
+        :rtype: str or None
+        """
+        return self.properties.get('InternalName', None)

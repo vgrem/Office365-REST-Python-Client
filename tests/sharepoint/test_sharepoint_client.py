@@ -51,3 +51,5 @@ class TestSharePointClient(TestCase):
             client.ensure_form_digest(request)
         batch_request.beforeExecute += _prepare_request
         batch_request.execute_query()
+        self.assertIsNotNone(current_web.url)
+        self.assertIsNotNone(current_user.user_id)

@@ -27,7 +27,7 @@ from office365.sharepoint.ui.applicationpages.clientPeoplePickerQueryParameters 
 from office365.sharepoint.ui.applicationpages.clientPeoplePickerWebServiceInterface import (
     ClientPeoplePickerWebServiceInterface,
 )
-from office365.sharepoint.webs.regionalSettings import RegionalSettings
+from office365.sharepoint.webs.regional_settings import RegionalSettings
 
 
 class Web(SecurableObject):
@@ -188,6 +188,7 @@ class Web(SecurableObject):
 
     def does_user_have_permissions(self, permission_mask):
         """Returns whether the current user has the given set of permissions.
+
         :type permission_mask: BasePermissions
         """
         result = ClientResult(bool)
@@ -388,13 +389,20 @@ class Web(SecurableObject):
         return_item = ListItem(self.context, ResourcePathServiceOperation("GetListItem", [str_url], self.resource_path))
         return return_item
 
+    def get_catalog(self, type_catalog):
+        """Gets the list template gallery, site template gallery, or Web Part gallery for the Web site.
+
+        :param int type_catalog: The type of the gallery.
+        """
+        return List(self.context, ResourcePathServiceOperation("getCatalog", [type_catalog], self.resource_path))
+
     @property
     def webs(self):
         """Get child webs"""
         if self.is_property_available('Webs'):
             return self.properties['Webs']
         else:
-            from office365.sharepoint.webs.webCollection import WebCollection
+            from office365.sharepoint.webs.web_collection import WebCollection
             parent_web_url = None
             if self.is_property_available('Url'):
                 parent_web_url = self.properties['Url']

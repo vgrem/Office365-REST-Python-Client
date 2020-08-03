@@ -111,6 +111,12 @@ class ClientContext(ClientRuntimeContext):
         self._auth_context = AuthenticationContext(url=self._base_url, credentials=credentials)
         return self
 
+    def build_request(self):
+        request = super(ClientContext, self).build_request()
+        self.get_pending_request().ensure_media_type(request)
+        self.get_pending_request().beforeExecute.notify(request)
+        return request
+
     def authenticate_request(self, request):
         if not self.authentication_context.is_authenticated:
             self.authentication_context.acquire_token()

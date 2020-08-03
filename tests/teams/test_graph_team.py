@@ -1,8 +1,9 @@
 import uuid
 from time import sleep
 
+from office365.runtime.client_request_exception import ClientRequestException
 from tests.graph_case import GraphTestCase
-
+from office365.graph.graph_client import GraphClient
 from office365.graph.directory.group import Group
 from office365.graph.directory.groupProfile import GroupProfile
 
@@ -12,6 +13,30 @@ class TestGraphTeam(GraphTestCase):
 
     target_group = None  # type: Group
 
+    @staticmethod
+    def ensure_group(client, properties):
+        """
+
+        :type client: GraphClient
+        :type properties: GroupProfile
+        :return: Group
+        """
+        target_group = client.groups.add(properties)
+
+        def _ensure_group_provisioned(resp):
+            for retry in range(1, 5):
+                try:
+                    existing_group = client.groups[target_group.id]
+                    client.load(existing_group)
+                    client.execute_query()
+                    if existing_group:
+                        break
+                except ClientRequestException:
+                    sleep(5)
+
+        client.after_execute(_ensure_group_provisioned)
+        return target_group
+
     @classmethod
     def setUpClass(cls):
         super(TestGraphTeam, cls).setUpClass()
@@ -20,9 +45,9 @@ class TestGraphTeam(GraphTestCase):
         properties.securityEnabled = False
         properties.mailEnabled = True
         properties.groupTypes = ["Unified"]
-        cls.target_group = cls.client.groups.add(properties)
+        #cls.target_group = cls.client.groups.add(properties)
+        cls.target_group = cls.ensure_group(cls.client, properties)
         cls.client.execute_query()
-        sleep(5)
 
     def test2_ensure_team(self):
         teams = self.client.me.joinedTeams.filter("id eq '{0}'".format(self.__class__.target_group.id))

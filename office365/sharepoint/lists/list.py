@@ -3,9 +3,12 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.changes.changeCollection import ChangeCollection
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
+from office365.sharepoint.fields.related_field_collection import RelatedFieldCollection
 from office365.sharepoint.folders.folder import Folder
+from office365.sharepoint.forms.formCollection import FormCollection
 from office365.sharepoint.listitems.caml.camlQuery import CamlQuery
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.listitems.listItem_collection import ListItemCollection
@@ -120,6 +123,24 @@ class List(SecurableObject):
         view = View(self.context, ResourcePathServiceOperation("getView", [view_id], self.resource_path), self)
         return view
 
+    def get_changes(self, query):
+        """Returns the collection of changes from the change log that have occurred within the list,
+           based on the specified query.
+
+        :param office365.sharepoint.changeQuery.ChangeQuery query: Specifies which changes to return
+        """
+        changes = ChangeCollection(self.context)
+        qry = ServiceOperationQuery(self, "getChanges", None, query, "query", changes)
+        self.context.add_query(qry)
+        return changes
+
+    def get_related_fields(self):
+        """Returns a collection of lookup fields that use this list as a data source and
+            that have FieldLookup.IsRelationship set to true.
+        """
+        return RelatedFieldCollection(self.context,
+                                      ResourcePathServiceOperation("getRelatedFields", [], self.resource_path))
+
     def delete_object(self):
         """Deletes the list."""
         qry = DeleteEntityQuery(self)
@@ -188,6 +209,43 @@ class List(SecurableObject):
         else:
             return ContentTypeCollection(self.context,
                                          ResourcePath("contenttypes", self.resource_path))
+
+    @property
+    def forms(self):
+        """Gets a value that specifies the collection of all list forms in the list."""
+        return self.properties.get('Forms',
+                                   FormCollection(self.context, ResourcePath("forms", self.resource_path)))
+
+    @property
+    def itemCount(self):
+        """Gets a value that specifies the number of list items in the list.
+        :rtype: int or None
+        """
+        return self.properties.get('itemCount', None)
+
+    @property
+    def title(self):
+        """Gets the displayed title for the list.
+        :rtype: str or None
+        """
+        return self.properties.get('Title', None)
+
+    @title.setter
+    def title(self, val):
+        """Sets the displayed title for the list."""
+        self.set_property('Title', val)
+
+    @property
+    def description(self):
+        """Gets the description for the list.
+        :rtype: str or None
+        """
+        return self.properties.get('Description', None)
+
+    @description.setter
+    def description(self, val):
+        """Sets the description for the list."""
+        self.set_property('Description', val)
 
     def set_property(self, name, value, persist_changes=True):
         super(List, self).set_property(name, value, persist_changes)

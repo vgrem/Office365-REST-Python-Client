@@ -1,3 +1,4 @@
+import json
 import uuid
 from email import message_from_bytes
 from email.message import Message
@@ -26,6 +27,7 @@ class ODataBatchRequest(ODataRequest):
         media_type = "multipart/mixed"
         self._current_boundary = _create_boundary("batch_")
         self._content_type = "; ".join([media_type, "boundary={0}".format(self._current_boundary)])
+        self._boundary_queries = []
 
     def build_request(self):
         request_url = "{0}$batch".format(self.context.service_root_url)
@@ -40,10 +42,9 @@ class ODataBatchRequest(ODataRequest):
 
         :type response: requests.Response
         """
-        qry_index = 0
         for response_info in self._read_response(response):
-            # self.map_json(response_info["content"], self.queries[qry_index].return_type)
-            qry_index += 1
+            qry = self._boundary_queries.pop(0)
+            self.map_json(response_info["content"], qry.return_type)
 
     def _read_response(self, response):
         """Parses a multipart/mixed response body from from the position defined by the context.
@@ -61,15 +62,15 @@ class ODataBatchRequest(ODataRequest):
         message = message_from_bytes(http_body)  # type: Message
         for raw_response in message.get_payload():
             if raw_response.get_content_type() == "application/http":
-                payload = raw_response.get_payload(decode=True)
-                yield self._deserialize_response(payload)
+                yield self._deserialize_response(raw_response)
 
     def _prepare_payload(self):
         """Serializes a batch request body."""
         main_message = Message()
         main_message.add_header("Content-Type", "multipart/mixed")
         main_message.set_boundary(self._current_boundary)
-        for _ in self.context.get_next_query():
+        for qry in self.context.get_next_query():
+            self._boundary_queries.append(qry)
             part_message = Message()
             part_message.add_header("Content-Type", "application/http")
             part_message.add_header("Content-Transfer-Encoding", "binary")
@@ -79,11 +80,15 @@ class ODataBatchRequest(ODataRequest):
         return main_message.as_bytes()
 
     @staticmethod
-    def _deserialize_response(response):
-        details = list(filter(None, response.decode("utf-8").split("\r\n")))
+    def _deserialize_response(raw_response):
+        response = raw_response.get_payload(decode=True)
+        parts = list(filter(None, response.decode("utf-8").split("\r\n")))
+        headers = parts[1].split(":")
+        headers = dict(zip(headers[::2], headers[1::2]))
+        content = json.loads(parts[2])
         return {
-            "headers": details[1].split(":"),
-            "content": details[2]
+            "headers": headers,
+            "content": content
         }
 
     @staticmethod
