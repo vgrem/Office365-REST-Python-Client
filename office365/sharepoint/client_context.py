@@ -148,16 +148,18 @@ class ClientContext(ClientRuntimeContext):
         json_format.function_tag_name = "GetContextWebInformation"
         self.get_pending_request().map_json(json, self._contextWebInformation, json_format)
 
-    def clone(self, url):
+    def clone(self, url, clear_queries=True):
         """
         Creates a clone of ClientContext
 
+        :param bool clear_queries:
         :param str url: Site Url
         :return ClientContext
         """
         ctx = copy.deepcopy(self)
         ctx._base_url = url
-        ctx.clear_queries()
+        if clear_queries:
+            ctx.clear_queries()
         return ctx
 
     def _build_modification_query(self, request):

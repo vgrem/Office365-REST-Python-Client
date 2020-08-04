@@ -1,5 +1,6 @@
 import os.path
 from io import BytesIO
+from random import randint
 
 from tests.sharepoint.sharepoint_case import SPTestCase
 
@@ -17,8 +18,9 @@ class TestListItemAttachment(SPTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestListItemAttachment, cls).setUpClass()
+        list_name = "Tasks" + str(randint(0, 10000))
         cls.target_list = cls.ensure_list(cls.client.web,
-                                          ListCreationInformation("Tasks",
+                                          ListCreationInformation(list_name,
                                                                   None,
                                                                   ListTemplateType.Tasks))
         item_properties = {'Title': 'Approval Task'}

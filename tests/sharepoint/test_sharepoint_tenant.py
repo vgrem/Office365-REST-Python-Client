@@ -2,7 +2,6 @@ import os
 from random import randint
 from unittest import TestCase
 
-from office365.sharepoint.tenant.tenant_settings import TenantSettings
 from settings import settings
 
 from office365.runtime.auth.user_credential import UserCredential
@@ -10,6 +9,7 @@ from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.tenant.administration.siteProperties import SiteProperties
 from office365.sharepoint.tenant.administration.sitePropertiesCollection import SitePropertiesCollection
 from office365.sharepoint.tenant.administration.tenant import Tenant
+from office365.sharepoint.tenant.tenant_settings import TenantSettings
 
 
 class TestTenant(TestCase):

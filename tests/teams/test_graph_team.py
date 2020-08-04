@@ -1,11 +1,11 @@
 import uuid
 from time import sleep
 
-from office365.runtime.client_request_exception import ClientRequestException
 from tests.graph_case import GraphTestCase
-from office365.graph.graph_client import GraphClient
+
 from office365.graph.directory.group import Group
 from office365.graph.directory.groupProfile import GroupProfile
+from office365.runtime.client_request_exception import ClientRequestException
 
 
 class TestGraphTeam(GraphTestCase):
@@ -45,7 +45,7 @@ class TestGraphTeam(GraphTestCase):
         properties.securityEnabled = False
         properties.mailEnabled = True
         properties.groupTypes = ["Unified"]
-        #cls.target_group = cls.client.groups.add(properties)
+        # cls.target_group = cls.client.groups.add(properties)
         cls.target_group = cls.ensure_group(cls.client, properties)
         cls.client.execute_query()
 

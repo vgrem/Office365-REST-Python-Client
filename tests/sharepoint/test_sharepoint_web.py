@@ -1,9 +1,9 @@
 from random import randint
 
-from office365.sharepoint.lists.list_template_type import ListTemplateType
 from settings import settings
 from tests.sharepoint.sharepoint_case import SPTestCase
 
+from office365.sharepoint.lists.list_template_type import ListTemplateType
 from office365.sharepoint.permissions.basePermissions import BasePermissions
 from office365.sharepoint.permissions.permissionKind import PermissionKind
 from office365.sharepoint.principal.user import User

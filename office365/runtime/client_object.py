@@ -1,3 +1,5 @@
+import copy
+
 from office365.runtime.clientValue import ClientValue
 from office365.runtime.odata.odata_query_options import QueryOptions
 
@@ -97,6 +99,11 @@ class ClientObject(object):
             self.context.load(self, names_to_include, action)
         else:
             action()
+
+    def clone_object(self):
+        result = copy.deepcopy(self)
+        result._context = self.context
+        return result
 
     @property
     def entity_type_name(self):

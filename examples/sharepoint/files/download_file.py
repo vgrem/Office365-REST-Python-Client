@@ -6,10 +6,11 @@ from settings import settings
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
 
-ctx = ClientContext.connect_with_credentials(settings.get('url') + "/sites/team",
-                                             ClientCredential(settings.get('client_credentials').get('client_id'),
-                                                              settings.get('client_credentials').get('client_secret')))
+site_url = settings.get('url') + "/sites/team"
+credentials = ClientCredential(settings.get('client_credentials').get('client_id'),
+                               settings.get('client_credentials').get('client_secret'))
 
+ctx = ClientContext(site_url).with_credentials(credentials)
 
 file_url = '/sites/team/Shared Documents/big_buck_bunny.mp4'
 download_path = os.path.join(tempfile.mkdtemp(), os.path.basename(file_url))

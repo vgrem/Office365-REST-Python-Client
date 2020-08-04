@@ -1,5 +1,3 @@
-import copy
-
 from office365.runtime.client_object import ClientObject
 
 
@@ -61,7 +59,8 @@ class ReadEntityQuery(ClientQuery):
         :type properties_to_include: list[str] or None
         :type entity_to_read: office365.runtime.client_object.ClientObject
         """
-        binding_type = copy.deepcopy(entity_to_read)
+        binding_type = entity_to_read.clone_object()
+
         super(ReadEntityQuery, self).__init__(binding_type, None, None, entity_to_read)
         if properties_to_include:
             self._include_properties(properties_to_include)
