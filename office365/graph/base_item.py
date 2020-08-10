@@ -72,7 +72,7 @@ class BaseItem(Entity):
         self.properties['description'] = value
 
     @property
-    def webUrl(self):
+    def web_url(self):
         """URL that displays the resource in the browser."""
         if self.is_property_available("webUrl"):
             return self.properties['webUrl']

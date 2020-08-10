@@ -2,6 +2,7 @@ import os
 import tempfile
 
 from settings import settings
+
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.sharepoint.files.file import File
 

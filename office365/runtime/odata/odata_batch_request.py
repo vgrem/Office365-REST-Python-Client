@@ -82,10 +82,14 @@ class ODataBatchRequest(ODataRequest):
     @staticmethod
     def _deserialize_response(raw_response):
         response = raw_response.get_payload(decode=True)
-        parts = list(filter(None, response.decode("utf-8").split("\r\n")))
-        headers = parts[1].split(":")
-        headers = dict(zip(headers[::2], headers[1::2]))
-        content = json.loads(parts[2])
+        lines = list(filter(None, response.decode("utf-8").split("\r\n")))
+        status_info, *headers_raw, content = lines
+        headers = {}
+        for h in headers_raw:
+            kv = h.split(":")
+            headers[kv[0].lower()] = kv[1]
+
+        content = json.loads(content)
         return {
             "headers": headers,
             "content": content
@@ -102,6 +106,6 @@ class ODataBatchRequest(ODataRequest):
         lines = ["{method} {url} HTTP/1.1".format(method=request.method, url=request.url),
                  *[':'.join(h) for h in request.headers.items()]]
         if request.data:
-            lines.append(request.data)
+            lines.append(json.dumps(request.data))
         buffer = eol + eol.join(lines) + eol
         return buffer.encode('utf-8').lstrip()

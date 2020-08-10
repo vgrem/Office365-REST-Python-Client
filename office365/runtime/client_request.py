@@ -39,11 +39,15 @@ class ClientRequest(object):
         """
         return self._queries
 
-    def add_query(self, query):
+    def add_query(self, query, to_begin=False):
         """
+        :type to_begin: bool
         :type query: ClientQuery
         """
-        self._queries.append(query)
+        if to_begin:
+            self._queries.insert(0, query)
+        else:
+            self._queries.append(query)
 
     @abstractmethod
     def build_request(self):

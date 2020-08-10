@@ -20,7 +20,7 @@ def get_token(auth_ctx):
 
 class GraphTestCase(TestCase):
     """Microsoft Graph specific test case base class"""
-    client = None
+    client = None  # type: GraphClient
 
     @classmethod
     def setUpClass(cls):

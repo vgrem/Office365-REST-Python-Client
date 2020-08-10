@@ -1,5 +1,4 @@
 from office365.runtime.auth.base_authentication_context import BaseAuthenticationContext
-from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
 from office365.runtime.auth.providers.oauth_token_provider import OAuthTokenProvider
 from office365.runtime.auth.providers.saml_token_provider import SamlTokenProvider
@@ -8,17 +7,16 @@ from office365.runtime.auth.user_credential import UserCredential
 
 class AuthenticationContext(BaseAuthenticationContext):
 
-    def __init__(self, url, credentials=None):
+    def __init__(self, url):
         """
         Authentication context for SharePoint Online/OneDrive
 
         :param str url:  authority url
-        :param ClientCredential or UserCredential credentials: credentials
         """
         super(AuthenticationContext, self).__init__()
         self.url = url
-        self.credentials = credentials
         self.provider = None
+        self.acquire_token_func = None
 
     def set_token(self, token):
         """
@@ -28,14 +26,6 @@ class AuthenticationContext(BaseAuthenticationContext):
         """
         self.provider = OAuthTokenProvider(self.url)
         self.provider.token = token
-
-    def acquire_token(self):
-        if isinstance(self.credentials, ClientCredential):
-            return self.acquire_token_for_app(self.credentials.clientId, self.credentials.clientSecret)
-        elif isinstance(self.credentials, UserCredential):
-            return self.acquire_token_for_user(self.credentials.userName, self.credentials.password)
-        else:
-            raise ValueError("Unknown credential type")
 
     def acquire_token_for_user(self, username, password):
         """Acquire token via user credentials
@@ -75,6 +65,10 @@ class AuthenticationContext(BaseAuthenticationContext):
         """Authenticate request
 
         :type request_options: RequestOptions"""
+
+        if not self.is_authenticated and callable(self.acquire_token_func):
+            self.acquire_token_func()
+
         if isinstance(self.provider, SamlTokenProvider):
             request_options.set_header('Cookie', self.provider.get_authentication_cookie())
         elif isinstance(self.provider, ACSTokenProvider) or isinstance(self.provider, OAuthTokenProvider):
@@ -88,3 +82,6 @@ class AuthenticationContext(BaseAuthenticationContext):
 
     def get_last_error(self):
         return self.provider.get_last_error()
+
+    def acquire_token(self):
+        pass

@@ -54,7 +54,7 @@ class TestDriveItem(GraphTestCase):
         file_name = os.path.basename(path)
         self.__class__.target_file = self.target_drive.root.upload(file_name, file_content)
         self.client.execute_query()
-        self.assertIsNotNone(self.target_file.webUrl)
+        self.assertIsNotNone(self.target_file.web_url)
 
     def test4_upload_file_session(self):
         file_name = "big_buck_bunny.mp4"

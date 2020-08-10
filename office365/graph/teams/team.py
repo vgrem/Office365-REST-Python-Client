@@ -35,7 +35,7 @@ class Team(Entity):
         if self.is_property_available("primaryChannel"):
             return self.properties['primaryChannel']
         else:
-            return Channel(self.context, ResourcePath("primaryChannel"))
+            return Channel(self.context, ResourcePath("primaryChannel", self.resource_path))
 
     def update(self):
         """Updates team."""

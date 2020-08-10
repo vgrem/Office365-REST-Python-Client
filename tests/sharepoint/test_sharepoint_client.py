@@ -7,10 +7,8 @@ from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
 from office365.runtime.auth.providers.saml_token_provider import SamlTokenProvider
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.auth.user_credential import UserCredential
-from office365.runtime.odata.json_light_format import JsonLightFormat
-from office365.runtime.odata.odata_batch_request import ODataBatchRequest
-from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
 from office365.sharepoint.client_context import ClientContext
+
 
 user_credentials = UserCredential(settings.get('user_credentials').get('username'),
                                   settings.get('user_credentials').get('password'))
@@ -38,18 +36,22 @@ class TestSharePointClient(TestCase):
     def test4_connect_with_client_cert(self):
         pass
 
-    def test5_construct_batch_request(self):
+    def test5_get_batch_request(self):
         client = ClientContext(settings['url']).with_credentials(user_credentials)
         current_user = client.web.currentUser
         client.load(current_user)
         current_web = client.web
         client.load(current_web)
-
-        batch_request = ODataBatchRequest(client, JsonLightFormat(ODataMetadataLevel.Verbose))
-
-        def _prepare_request(request):
-            client.ensure_form_digest(request)
-        batch_request.beforeExecute += _prepare_request
-        batch_request.execute_query()
+        client.execute_batch()
         self.assertIsNotNone(current_web.url)
         self.assertIsNotNone(current_user.user_id)
+
+    def test6_update_batch_request(self):
+        pass
+        #client = ClientContext(settings['url']).with_credentials(user_credentials)
+        #list_item = client.web.get_file_by_server_relative_url("/SitePages/Home.aspx").listItemAllFields
+        #new_title = "Page %s" % random_seed
+        #list_item.set_property("Title", new_title)
+        #list_item.update()
+        #client.execute_batch()
+        #self.assertIsNotNone(list_item)

@@ -1,4 +1,4 @@
-from office365.sharepoint.fields.fieldLookup import FieldLookup
+from office365.sharepoint.fields.field_lookup import FieldLookup
 
 
 class FieldUser(FieldLookup):

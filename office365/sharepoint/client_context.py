@@ -3,13 +3,16 @@ import copy
 import adal
 
 from office365.runtime.auth.authentication_context import AuthenticationContext
+from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.providers.saml_token_provider import resolve_base_url
 from office365.runtime.auth.token_response import TokenResponse
+from office365.runtime.auth.user_credential import UserCredential
 from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.json_light_format import JsonLightFormat
+from office365.runtime.odata.odata_batch_request import ODataBatchRequest
 from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
 from office365.runtime.odata.odata_request import ODataRequest
 from office365.sharepoint.sites.site import Site
@@ -59,6 +62,7 @@ class ClientContext(ClientRuntimeContext):
 
         def _init_context_for_web(resp):
             ctx._base_url = result.value
+
         ctx.after_execute(_init_context_for_web)
         return ctx
 
@@ -70,7 +74,7 @@ class ClientContext(ClientRuntimeContext):
         :param str base_url: Url to Site or Web
         :param ClientCredential or UserCredential credentials: Credentials object """
         ctx = ClientContext(base_url).with_credentials(credentials)
-        ctx.authentication_context.acquire_token()
+        ctx.authentication_context.acquire_token_func()
         return ctx
 
     @staticmethod
@@ -108,20 +112,37 @@ class ClientContext(ClientRuntimeContext):
 
         :type credentials: UserCredential or ClientCredential
         """
-        self._auth_context = AuthenticationContext(url=self._base_url, credentials=credentials)
+        self._auth_context = AuthenticationContext(url=self._base_url)
+
+        def _acquire_token():
+            if not self.authentication_context.is_authenticated:
+                if isinstance(credentials, ClientCredential):
+                    return self.authentication_context.acquire_token_for_app(credentials.clientId,
+                                                                             credentials.clientSecret)
+                elif isinstance(credentials, UserCredential):
+                    return self.authentication_context.acquire_token_for_user(credentials.userName,
+                                                                              credentials.password)
+                else:
+                    raise ValueError("Unknown credential type")
+
+        self._auth_context.acquire_token_func = _acquire_token
         return self
+
+    def execute_batch(self):
+        """Construct and submit a batch request"""
+        batch_request = ODataBatchRequest(self, JsonLightFormat(ODataMetadataLevel.Verbose))
+
+        def _prepare_batch_request(request):
+            self.ensure_form_digest(request)
+
+        batch_request.beforeExecute += _prepare_batch_request
+        batch_request.execute_query()
 
     def build_request(self):
         request = super(ClientContext, self).build_request()
         self.get_pending_request().ensure_media_type(request)
         self.get_pending_request().beforeExecute.notify(request)
         return request
-
-    def authenticate_request(self, request):
-        if not self.authentication_context.is_authenticated:
-            self.authentication_context.acquire_token()
-
-        super(ClientContext, self).authenticate_request(request)
 
     def get_pending_request(self):
         """
@@ -140,7 +161,7 @@ class ClientContext(ClientRuntimeContext):
 
     def request_form_digest(self):
         """Request Form Digest"""
-        request = RequestOptions(self.service_root_url + "contextinfo")
+        request = RequestOptions(self.service_root_url + "contextInfo")
         request.method = HttpMethod.Post
         response = self.execute_request_direct(request)
         json = response.json()

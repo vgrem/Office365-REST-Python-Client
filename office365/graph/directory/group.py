@@ -15,7 +15,7 @@ class Group(DirectoryObject):
 
     def add_team(self):
         """Create a new team under a group."""
-        team = Team(self.context)
+        team = Team(self.context, ResourcePath("team", self.resource_path))
         team._parent_collection = self.parent_collection
         qry = ServiceOperationQuery(self, "team", None, team, None, team)
         self.context.add_query(qry)
@@ -24,8 +24,7 @@ class Group(DirectoryObject):
             request.method = HttpMethod.Put
             request.set_header('Content-Type', "application/json")
             request.data = json.dumps(request.data)
-
-        self.context.before_execute(_construct_create_team_request)
+        self.context.before_execute_query(_construct_create_team_request, qry)
         return team
 
     def delete_object(self, permanent_delete=False):

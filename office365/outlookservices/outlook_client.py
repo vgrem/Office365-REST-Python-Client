@@ -22,26 +22,24 @@ class OutlookClient(ClientRuntimeContext):
         super(OutlookClient, self).__init__(self.__service_root_url, auth_context)
         self._pendingRequest = ODataRequest(self, V4JsonFormat("minimal"))
         self._pendingRequest.beforeExecute += self._build_specific_query
-        self._token_parameters = None
 
     @classmethod
     def from_tenant(cls, tenant):
         return OutlookClient(AuthenticationContext(tenant))
 
     def with_user_credentials(self, client_id, user_name, password):
-        self._token_parameters = {
-            "client_id": client_id,
-            "username": user_name,
-            "password": password,
-            "resource": self._resource,
-            "scope": ("openid", "profile", "offline_access")
-        }
-        return self
+        def _acquire_token():
+            token_parameters = {
+                "client_id": client_id,
+                "username": user_name,
+                "password": password,
+                "resource": self._resource,
+                "scope": ("openid", "profile", "offline_access")
+            }
+            self._auth_context.acquire_token_password_grant(**token_parameters)
 
-    def authenticate_request(self, request):
-        if not self._auth_context.is_authenticated:
-            self._auth_context.acquire_token_password_grant(**self._token_parameters)
-        super(OutlookClient, self).authenticate_request(request)
+        self._auth_context.acquire_token_func = _acquire_token
+        return self
 
     def get_pending_request(self):
         return self._pendingRequest

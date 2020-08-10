@@ -47,7 +47,7 @@ class SearchService(BaseEntity):
             """
             request.method = HttpMethod.Get
 
-        self.context.before_execute(_construct_request)
+        self.context.before_execute(_construct_request, qry)
         return result
 
     def post_query(self, request):
