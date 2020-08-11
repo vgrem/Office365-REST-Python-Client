@@ -1,6 +1,6 @@
 import copy
 
-from office365.runtime.clientValue import ClientValue
+from office365.runtime.client_value import ClientValue
 from office365.runtime.odata.odata_query_options import QueryOptions
 
 

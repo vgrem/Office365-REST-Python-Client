@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from settings import settings
+from tests import random_seed
 
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
@@ -8,7 +9,6 @@ from office365.runtime.auth.providers.saml_token_provider import SamlTokenProvid
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
-
 
 user_credentials = UserCredential(settings.get('user_credentials').get('username'),
                                   settings.get('user_credentials').get('password'))
@@ -47,11 +47,33 @@ class TestSharePointClient(TestCase):
         self.assertIsNotNone(current_user.user_id)
 
     def test6_update_batch_request(self):
+        client = ClientContext(settings['url']).with_credentials(user_credentials)
+        web = client.web
+        new_web_title = "Site %s" % random_seed
+        web.set_property("Title", new_web_title)
+        web.update()
+        client.execute_batch()
+
+        updated_web = client.web
+        client.load(updated_web)
+        client.execute_query()
+        self.assertEqual(updated_web.properties['Title'], new_web_title)
+
+    def test7_get_and_update_batch_request(self):
+        client = ClientContext(settings['url']).with_credentials(user_credentials)
+        list_item = client.web.get_file_by_server_relative_url("/SitePages/Home.aspx").listItemAllFields
+        new_title = "Page %s" % random_seed
+        list_item.set_property("Title", new_title)
+        list_item.update()
+        client.execute_batch()
+
+        updated_list_item = client.web.get_file_by_server_relative_url("/SitePages/Home.aspx").listItemAllFields
+        client.load(updated_list_item)
+        client.execute_query()
+        self.assertEqual(updated_list_item.properties['Title'], new_title)
+
+    def test8_delete_batch_request(self):
         pass
-        #client = ClientContext(settings['url']).with_credentials(user_credentials)
-        #list_item = client.web.get_file_by_server_relative_url("/SitePages/Home.aspx").listItemAllFields
-        #new_title = "Page %s" % random_seed
-        #list_item.set_property("Title", new_title)
-        #list_item.update()
-        #client.execute_batch()
-        #self.assertIsNotNone(list_item)
+
+    def test9_get_and_delete_batch_request(self):
+        pass

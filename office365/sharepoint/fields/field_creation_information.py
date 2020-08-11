@@ -1,7 +1,7 @@
-from office365.runtime.clientValue import ClientValue
-from office365.runtime.clientValueCollection import ClientValueCollection
+from office365.runtime.client_value import ClientValue
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.fields.field import Field
-from office365.sharepoint.fields.fieldType import FieldType
+from office365.sharepoint.fields.field_type import FieldType
 
 
 class FieldCreationInformation(ClientValue):
@@ -24,5 +24,5 @@ class FieldCreationInformation(ClientValue):
 
     @property
     def entity_type_name(self):
-        type_name = Field.get_field_type(self.FieldTypeKind).__name__
+        type_name = Field.resolve_field_type(self.FieldTypeKind).__name__
         return "SP.{0}".format(type_name)

@@ -1,7 +1,7 @@
 import abc
 from time import sleep
 
-from office365.runtime.client_query import ClientQuery, ReadEntityQuery
+from office365.runtime.client_query import ReadEntityQuery
 from office365.runtime.client_request_exception import ClientRequestException
 
 
@@ -104,7 +104,7 @@ class ClientRuntimeContext(object):
         """
         Attach an event handler which is triggered before request is submitted to server
 
-        :param ClientQuery target_query:
+        :param office365.runtime.client_query.ClientQuery target_query:
         :param (RequestOptions) -> None action:
         :return: None
         """

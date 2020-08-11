@@ -5,7 +5,7 @@ from tests.sharepoint.sharepoint_case import SPTestCase
 from office365.sharepoint.fields.field import Field
 from office365.sharepoint.fields.field_creation_information import FieldCreationInformation
 from office365.sharepoint.fields.field_text import FieldText
-from office365.sharepoint.fields.fieldType import FieldType
+from office365.sharepoint.fields.field_type import FieldType
 
 
 class TestField(SPTestCase):

@@ -1,5 +1,5 @@
-from office365.runtime.clientValue import ClientValue
-from office365.runtime.clientValueCollection import ClientValueCollection
+from office365.runtime.client_value import ClientValue
+from office365.runtime.client_value_collection import ClientValueCollection
 
 
 class UserSharingResult(ClientValue):

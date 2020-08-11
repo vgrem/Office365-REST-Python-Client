@@ -1,8 +1,8 @@
 import uuid
 
-from office365.graph.directory.groupProfile import GroupProfile
 from settings import settings
 
+from office365.graph.directory.groupProfile import GroupProfile
 from office365.graph.graph_client import GraphClient
 
 

@@ -14,7 +14,7 @@ class FileVersion(ClientObject):
             return None
 
     @property
-    def versionLabel(self):
+    def version_label(self):
         """Gets a value that specifies the implementation specific identifier of the file."""
         if self.is_property_available('VersionLabel'):
             return self.properties["VersionLabel"]
@@ -22,7 +22,7 @@ class FileVersion(ClientObject):
             return None
 
     @property
-    def isCurrentVersion(self):
+    def is_current_version(self):
         """Gets a value that specifies whether the file version is the current version."""
         if self.is_property_available('IsCurrentVersion'):
             return self.properties["IsCurrentVersion"]
@@ -30,7 +30,7 @@ class FileVersion(ClientObject):
             return None
 
     @property
-    def checkInComment(self):
+    def checkin_comment(self):
         """Gets a value that specifies the check-in comment."""
         if self.is_property_available('CheckInComment'):
             return self.properties["CheckInComment"]

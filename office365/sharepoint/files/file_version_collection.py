@@ -1,5 +1,5 @@
 from office365.runtime.client_object_collection import ClientObjectCollection
-from office365.sharepoint.files.fileVersion import FileVersion
+from office365.sharepoint.files.file_version import FileVersion
 
 
 class FileVersionCollection(ClientObjectCollection):

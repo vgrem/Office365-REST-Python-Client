@@ -2,7 +2,7 @@ from office365.runtime.client_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.fields.fieldType import FieldType
+from office365.sharepoint.fields.field_type import FieldType
 
 
 class Field(BaseEntity):
@@ -12,7 +12,7 @@ class Field(BaseEntity):
         super().__init__(context, resource_path)
 
     @staticmethod
-    def get_field_type(type_id):
+    def resolve_field_type(type_id):
         from office365.sharepoint.fields.field_calculated import FieldCalculated
         from office365.sharepoint.fields.field_choice import FieldChoice
         from office365.sharepoint.fields.field_computed import FieldComputed
@@ -41,7 +41,7 @@ class Field(BaseEntity):
 
     @staticmethod
     def create_field_from_type(context, field_type):
-        field_type = Field.get_field_type(field_type)
+        field_type = Field.resolve_field_type(field_type)
         return field_type(context)
 
     def set_show_in_display_form(self, flag):
@@ -85,4 +85,4 @@ class Field(BaseEntity):
             self._resource_path = ResourcePathServiceOperation(
                 "getById", [value], self._parent_collection.resource_path)
         if name == "FieldTypeKind":
-            self.__class__ = self.get_field_type(value)
+            self.__class__ = self.resolve_field_type(value)

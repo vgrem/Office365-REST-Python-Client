@@ -1,4 +1,4 @@
-from office365.runtime.clientValueCollection import ClientValueCollection
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.fields.fieldLookupValue import FieldLookupValue
 
 

@@ -7,7 +7,7 @@ from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.actions.download_file import DownloadFileQuery
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.files.fileVersionCollection import FileVersionCollection
+from office365.sharepoint.files.file_version_collection import FileVersionCollection
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.webparts.limited_webpart_manager import LimitedWebPartManager
 
