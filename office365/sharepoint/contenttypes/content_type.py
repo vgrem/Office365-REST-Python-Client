@@ -2,7 +2,7 @@ from office365.runtime.client_query import DeleteEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.contenttypes.contentTypeId import ContentTypeId
+from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.fields.field_collection import FieldCollection
 
 

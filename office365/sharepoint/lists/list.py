@@ -148,7 +148,7 @@ class List(SecurableObject):
         self.remove_from_parent_collection()
 
     @property
-    def enableFolderCreation(self):
+    def enable_folder_creation(self):
         """
         Specifies whether new list folders can be added to the list.
 
@@ -156,8 +156,8 @@ class List(SecurableObject):
         """
         return self.properties.get("EnableFolderCreation", None)
 
-    @enableFolderCreation.setter
-    def enableFolderCreation(self, value):
+    @enable_folder_creation.setter
+    def enable_folder_creation(self, value):
         self.set_property("EnableFolderCreation", value, True)
 
     @property
@@ -217,7 +217,7 @@ class List(SecurableObject):
                                    FormCollection(self.context, ResourcePath("forms", self.resource_path)))
 
     @property
-    def itemCount(self):
+    def item_count(self):
         """Gets a value that specifies the number of list items in the list.
         :rtype: int or None
         """

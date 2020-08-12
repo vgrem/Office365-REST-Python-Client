@@ -38,11 +38,11 @@ class TestSharePointListItem(SPTestCase):
 
     def test2_enable_folders_in_list(self):
         def _init_list():
-            if not self.target_list.enableFolderCreation:
-                self.target_list.enableFolderCreation = True
+            if not self.target_list.enable_folder_creation:
+                self.target_list.enable_folder_creation = True
                 self.target_list.update()
                 self.client.execute_query()
-            self.assertTrue(self.target_list.enableFolderCreation, "Folder creation enabled")
+            self.assertTrue(self.target_list.enable_folder_creation, "Folder creation enabled")
 
         self.target_list.ensure_property("EnableFolderCreation", _init_list)
         self.client.execute_query()

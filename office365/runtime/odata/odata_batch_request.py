@@ -115,7 +115,7 @@ class ODataBatchRequest(ODataRequest):
         status_result = re.match(response_status_regex, lines[0])
         status_info = status_result.groups()
 
-        if status_info[1] == "No Content":
+        if status_info[1] == "No Content" or len(lines) < 3:
             headers_raw = lines[1:]
             return {
                 "status": status_info,

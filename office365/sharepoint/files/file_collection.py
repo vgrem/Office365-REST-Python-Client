@@ -18,7 +18,7 @@ class FileCollection(ClientObjectCollection):
         :param str source_path: path where file to upload resides
         :param int chunk_size: upload chunk size
         :param (long)->None or None chunk_uploaded: uploaded event
-        :return: office365.sharepoint.file.File
+        :return: office365.sharepoint.files.file.File
         """
         qry = UploadSessionQuery(self, source_path, chunk_size, chunk_uploaded)
         self.context.add_query(qry)
@@ -27,8 +27,8 @@ class FileCollection(ClientObjectCollection):
     def add(self, file_creation_information):
         """Creates a File resource
 
-        :type file_creation_information: office365.sharepoint.file_creation_information.FileCreationInformation
-        :return File
+        :type file_creation_information: office365.sharepoint.files.file_creation_information.FileCreationInformation
+        :rtype: office365.sharepoint.files.file.File
         """
         qry = CreateFileQuery(self, file_creation_information)
         self.context.add_query(qry)

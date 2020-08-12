@@ -72,8 +72,23 @@ class TestSharePointClient(TestCase):
         client.execute_query()
         self.assertEqual(updated_list_item.properties['Title'], new_title)
 
-    def test8_delete_batch_request(self):
+    def test8_create_and_delete_batch_request(self):
         pass
 
     def test9_get_and_delete_batch_request(self):
-        pass
+        file_name = "TestFile{0}.txt".format(random_seed)
+        client = ClientContext(settings['url']).with_credentials(user_credentials)
+        list_pages = client.web.lists.get_by_title("Documents")
+        files = list_pages.rootFolder.files
+        client.load(files)
+        client.execute_query()
+        files_count_before = len(files)
+        new_file = list_pages.rootFolder.upload_file(file_name, "-some content goes here-")
+        client.execute_query()
+        self.assertTrue(new_file.name, file_name)
+
+        new_file.delete_object()
+        files_after = list_pages.rootFolder.files
+        client.load(files_after)
+        client.execute_batch()
+        self.assertTrue(len(files_after), files_count_before)
