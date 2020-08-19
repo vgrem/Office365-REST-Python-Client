@@ -23,7 +23,7 @@ class BaseEntity(ClientObject):
         self.context.execute_query()
         return self
 
-    def load(self):
+    def get(self):
         self.context.load(self)
         return self
 

@@ -30,7 +30,7 @@ class TestSharePointClient(TestCase):
 
     def test3_init_from_url(self):
         ctx = ClientContext.from_url(settings['url']).with_credentials(user_credentials)
-        web = ctx.web.load().execute_query()
+        web = ctx.web.get().execute_query()
         self.assertIsNotNone(web.url)
 
     def test4_connect_with_client_cert(self):

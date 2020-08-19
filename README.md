@@ -25,6 +25,19 @@ Use pip:
 pip install Office365-REST-Python-Client
 ```
 
+>###Note:
+>
+>Due to the lengthy delay with updating `Office365-REST-Python-Client` PyPI package to the latest version, 
+>prefer nowadays an _alternative_ index instead to install the latest version: 
+>
+>```
+>pip install office365-rest-client
+>```
+>Alternatively the _latest_ version could be installed directly via GitHub:
+>```
+>pip install git+https://github.com/vgrem/Office365-REST-Python-Client.git
+>```
+
 
 # Working with SharePoint API
 
@@ -61,7 +74,7 @@ or alternatively via method chaining (a.k.a Fluent Interface):
 from office365.sharepoint.client_context import ClientContext
 
 ctx = ClientContext(site_url).with_credentials(UserCredential(username, password))
-web = ctx.web.load().execute_query()
+web = ctx.web.get().execute_query()
 print("Web title: {0}".format(web.properties['Title']))
 ```
 
