@@ -25,10 +25,11 @@ Use pip:
 pip install Office365-REST-Python-Client
 ```
 
->###Note:
+###Note 
 >
->Due to the lengthy delay with updating `Office365-REST-Python-Client` PyPI package to the latest version, 
->prefer nowadays an _alternative_ index instead to install the latest version: 
+>Since PyPI default index `Office365-REST-Python-Client` has not been updated for a while 
+> and the last version available from index is already considered _outdated_, 
+>prefer nowadays an _alternative_ index instead to install the _latest_ version: 
 >
 >```
 >pip install office365-rest-client
@@ -60,9 +61,10 @@ There are **two approaches** available to perform API queries:
 1. `ClientContext class` - where you target SharePoint resources such as `Web`, `ListItem` and etc (recommended)
  
 ```python
+from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
-
-ctx = ClientContext(site_url).with_credentials(UserCredential(username, password))
+site_url = "https://{your-tenant-prefix}.sharepoint.com"
+ctx = ClientContext(site_url).with_credentials(UserCredential("{username}", "{password}"))
 web = ctx.web
 ctx.load(web)
 ctx.execute_query()
@@ -71,9 +73,10 @@ print("Web title: {0}".format(web.properties['Title']))
 or alternatively via method chaining (a.k.a Fluent Interface): 
 
 ```python
+from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
-
-ctx = ClientContext(site_url).with_credentials(UserCredential(username, password))
+site_url = "https://{your-tenant-prefix}.sharepoint.com"
+ctx = ClientContext(site_url).with_credentials(UserCredential("{username}", "{password}"))
 web = ctx.web.get().execute_query()
 print("Web title: {0}".format(web.properties['Title']))
 ```
@@ -85,11 +88,11 @@ print("Web title: {0}".format(web.properties['Title']))
    
 ```python
 import json
-from office365.runtime.auth.UserCredential import UserCredential
+from office365.runtime.auth.user_credential import UserCredential
 from office365.runtime.http.request_options import RequestOptions
 from office365.sharepoint.client_context import ClientContext
-
-ctx = ClientContext(site_url).with_credentials(UserCredential(username, password))
+site_url = "https://{your-tenant-prefix}.sharepoint.com"
+ctx = ClientContext(site_url).with_credentials(UserCredential("{username}", "{password}"))
 request = RequestOptions("{0}/_api/web/".format(site_url))
 response = ctx.execute_request_direct(request)
 json = json.loads(response.content)
@@ -109,8 +112,8 @@ The list of supported APIs:
 Since Outlook REST APIs are available in both Microsoft Graph and the Outlook API endpoint, 
 the following clients are available:
 
-- `GraphClient` which targets Outlook `v2.0` version (*preferable* nowadays, refer [transition to Microsoft Graph-based Outlook REST API](https://docs.microsoft.com/en-us/outlook/rest/compare-graph-outlook) for a details)   
-- `OutlookClient` which targets Outlook `v1.0` version (not recommended for usage since `v1.0` version is being deprecated.)
+- `GraphClient` which targets Outlook API `v2.0` version (*preferable* nowadays, refer [transition to Microsoft Graph-based Outlook REST API](https://docs.microsoft.com/en-us/outlook/rest/compare-graph-outlook) for a details)   
+- `OutlookClient` which targets Outlook API `v1.0` version (not recommended for usage since `v1.0` version is being deprecated.)
 
 
 #### Authentication
@@ -126,15 +129,16 @@ The example demonstrates how to send an email via [Microsoft Graph endpoint](htt
 > Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
 
 ```python
+from office365.graph.graph_client import GraphClient
 def get_token(auth_ctx):
     token = auth_ctx.acquire_token_with_client_credentials(
         "https://graph.microsoft.com",
-        client_id,
-        client_secret)
+        "{client_id}",
+        "{client_secret}")
     return token
 
 
-tenant_name = "contoso.onmicrosoft.com"
+tenant_name = "{your-tenant-prefix}.onmicrosoft.com"
 client = GraphClient(tenant_name, get_token)
 
 message_json = {
@@ -182,12 +186,13 @@ which corresponds to [`list available drives` endpoint](https://docs.microsoft.c
 > Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
 
 ```python
+from office365.graph.graph_client import GraphClient
 def get_token(auth_ctx):
     """Acquire token via client credential flow (ADAL Python library is utilized)"""
     token = auth_ctx.acquire_token_with_client_credentials(
         "https://graph.microsoft.com",
-        client_id,
-        client_secret)
+        "{client_id}",
+        "{client_secret}")
     return token
 
 
@@ -204,7 +209,7 @@ for drive in drives:
 ##### Example: download the contents of a DriveItem(folder facet)
 
 ```python
-# retrieve drive properties (source)
+# retrieve drive properties 
 drive = client.users[user_id_or_principal_name].drive
 client.load(drive)
 client.execute_query()
@@ -248,6 +253,7 @@ The example demonstrates how create a new team under a group
 which corresponds to [`Create team` endpoint](https://docs.microsoft.com/en-us/graph/api/team-put-teams?view=graph-rest-1.0&tabs=http)
 
 ```python
+from office365.graph.graph_client import GraphClient
 tenant_name = "contoso.onmicrosoft.com"
 client = GraphClient(tenant_name, get_token)
 new_team = client.groups[group_id].add_team()

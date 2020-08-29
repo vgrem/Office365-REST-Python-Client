@@ -8,7 +8,7 @@ class ClientQuery(object):
         """
         Base query
 
-        :type binding_type: office365.runtime.client_object.ClientObject
+        :type binding_type: office365.runtime.client_object.ClientObject or None
         :type parameter_type:  ClientObject or ClientValue or dict or bytes or None
         :type parameter_name:  str or None
         :type return_type:  ClientObject or ClientResult or ClientValueObject or None
@@ -90,4 +90,4 @@ class DeleteEntityQuery(ClientQuery):
 
         :type entity_to_delete: office365.runtime.client_object.ClientObject
         """
-        super(DeleteEntityQuery, self).__init__(entity_to_delete, None, None, None)
+        super(DeleteEntityQuery, self).__init__(entity_to_delete)

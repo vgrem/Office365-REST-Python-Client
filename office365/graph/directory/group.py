@@ -21,10 +21,12 @@ class Group(DirectoryObject):
         self.context.add_query(qry)
 
         def _construct_create_team_request(request):
-            request.method = HttpMethod.Put
-            request.set_header('Content-Type', "application/json")
-            request.data = json.dumps(request.data)
-        self.context.before_execute_query(_construct_create_team_request, qry)
+            cur_qry = self.context.pending_request().current_query
+            if cur_qry.id == qry.id:
+                request.method = HttpMethod.Put
+                request.set_header('Content-Type', "application/json")
+                request.data = json.dumps(request.data)
+        self.context.before_execute(_construct_create_team_request, False)
         return team
 
     def delete_object(self, permanent_delete=False):

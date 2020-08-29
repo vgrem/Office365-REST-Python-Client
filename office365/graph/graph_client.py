@@ -12,7 +12,7 @@ from office365.graph.onedrive.sharedDriveItemCollection import SharedDriveItemCo
 from office365.graph.onedrive.siteCollection import SiteCollection
 from office365.graph.teams.teamCollection import TeamCollection
 from office365.outlookservices.contact_collection import ContactCollection
-from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
+from office365.runtime.queries.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
@@ -30,8 +30,7 @@ class GraphClient(ClientRuntimeContext):
         :param (adal.AuthenticationContext) -> dict acquire_token_callback: Acquire token function
         :param str tenant: Tenant name
         """
-        self.__service_root_url = "https://graph.microsoft.com/v1.0/"
-        super(GraphClient, self).__init__(self.__service_root_url)
+        super(GraphClient, self).__init__()
         self._pending_request = ODataRequest(self, V4JsonFormat("minimal"))
         self._pending_request.beforeExecute += self._build_specific_query
         self._resource = "https://graph.microsoft.com"
@@ -39,8 +38,11 @@ class GraphClient(ClientRuntimeContext):
         self._tenant = tenant
         self._acquire_token_callback = acquire_token_callback
 
-    def get_pending_request(self):
+    def pending_request(self):
         return self._pending_request
+
+    def service_root_url(self):
+        return "https://graph.microsoft.com/v1.0/"
 
     def _build_specific_query(self, request):
         """
@@ -48,7 +50,7 @@ class GraphClient(ClientRuntimeContext):
 
         :type request: RequestOptions
         """
-        query = self.current_query
+        query = self.pending_request().current_query
         if isinstance(query, UpdateEntityQuery):
             request.method = HttpMethod.Patch
         elif isinstance(query, DeleteEntityQuery):
@@ -79,7 +81,7 @@ class GraphClient(ClientRuntimeContext):
         :type url_or_options: str or RequestOptions
         """
         if not isinstance(url_or_options, RequestOptions):
-            url_or_options = RequestOptions("{0}/{1}".format(self.__service_root_url, url_or_options))
+            url_or_options = RequestOptions("{0}/{1}".format(self.service_root_url(), url_or_options))
         return self.execute_request_direct(url_or_options)
 
     @property

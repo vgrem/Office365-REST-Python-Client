@@ -1,4 +1,4 @@
-from office365.runtime.client_query import DeleteEntityQuery
+from office365.runtime.queries.client_query import DeleteEntityQuery
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
@@ -251,7 +251,7 @@ class File(AbstractFile):
         :type content: str
         """
         url = r"{0}web/getFileByServerRelativeUrl('{1}')/\$value".format(
-            ctx.service_root_url, server_relative_url)
+            ctx.service_root_url(), server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Post
         request.set_header('X-HTTP-Method', 'PUT')
@@ -268,7 +268,7 @@ class File(AbstractFile):
         :type server_relative_url: str
         :return Response
         """
-        url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(ctx.service_root_url, server_relative_url)
+        url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(ctx.service_root_url(), server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Get
         response = ctx.execute_request_direct(request)

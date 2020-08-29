@@ -1,4 +1,4 @@
-from office365.runtime.client_query import DeleteEntityQuery
+from office365.runtime.queries.client_query import DeleteEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.principal.principal import Principal
 from office365.sharepoint.principal.userIdInfo import UserIdInfo

@@ -1,4 +1,4 @@
-from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
+from office365.runtime.queries.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
@@ -78,7 +78,7 @@ class ListItem(SecurableObject):
             result.value = ObjectSharingInformation.get_list_item_sharing_information(
                 self.context, self.parentList.properties["Id"], self.properties["Id"])
 
-        self.ensure_property(["Id", "ParentList"], _item_resolved)
+        self.ensure_properties(["Id", "ParentList"], _item_resolved)
         return result.value
 
     def update(self):

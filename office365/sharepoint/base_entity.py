@@ -1,5 +1,5 @@
 from office365.runtime.client_object import ClientObject
-from office365.runtime.client_query import UpdateEntityQuery
+from office365.runtime.queries.client_query import UpdateEntityQuery
 
 
 class BaseEntity(ClientObject):
@@ -17,14 +17,6 @@ class BaseEntity(ClientObject):
 
     def with_credentials(self, credentials):
         self.context.with_credentials(credentials)
-        return self
-
-    def execute_query(self):
-        self.context.execute_query()
-        return self
-
-    def get(self):
-        self.context.load(self)
         return self
 
     def update(self):

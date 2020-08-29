@@ -119,7 +119,7 @@ class ClientObjectCollection(ClientObject):
         response = self.context.execute_request_direct(request)
         json = response.json()
         self.next_request_url = None
-        self.context.get_pending_request().map_json(json, self)
+        self.context.pending_request().map_json(json, self)
 
     def _get_next_items(self):
         self._page_index += 1

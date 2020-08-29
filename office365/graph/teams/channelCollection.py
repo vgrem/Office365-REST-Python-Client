@@ -1,6 +1,6 @@
 from office365.graph.teams.channel import Channel
 from office365.runtime.client_object_collection import ClientObjectCollection
-from office365.runtime.client_query import CreateEntityQuery
+from office365.runtime.queries.client_query import CreateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 
 

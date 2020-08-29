@@ -1,6 +1,6 @@
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_object_collection import ClientObjectCollection
-from office365.runtime.client_query import CreateEntityQuery, DeleteEntityQuery, UpdateEntityQuery
+from office365.runtime.queries.client_query import CreateEntityQuery, DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_request import ClientRequest
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value import ClientValue
@@ -43,12 +43,12 @@ class ODataRequest(ClientRequest):
         request.ensure_header('Accept', media_type)
 
     def build_request(self):
-        qry = self.context.current_query
+        qry = self.current_query
         self.json_format.function_tag_name = None
         if isinstance(qry, ServiceOperationQuery):
             self.json_format.function_tag_name = qry.method_name
             if qry.static:
-                request_url = self.context.service_root_url + '.'.join(
+                request_url = self.context.service_root_url() + '.'.join(
                     [qry.binding_type.entity_type_name, qry.method_url])
             else:
                 request_url = '/'.join([qry.binding_type.resource_url, qry.method_url])
@@ -70,7 +70,7 @@ class ODataRequest(ClientRequest):
         """
         :type response: requests.Response
         """
-        qry = self.context.current_query
+        qry = self.current_query
         result_object = qry.return_type
         if isinstance(result_object, ClientObjectCollection):
             result_object.clear()
@@ -126,7 +126,7 @@ class ODataRequest(ClientRequest):
         """
         :type value: ClientValue or ClientResult  or ClientObject
         """
-        qry = self.context.current_query
+        qry = self.current_query
         if isinstance(value, ClientValueCollection):
             if isinstance(self._json_format,
                           JsonLightFormat) and self._json_format.metadata == ODataMetadataLevel.Verbose:

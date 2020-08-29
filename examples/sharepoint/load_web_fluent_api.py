@@ -7,5 +7,5 @@ credentials = ClientCredential(settings['client_credentials']['client_id'],
                                settings['client_credentials']['client_secret'])
 ctx = ClientContext(settings['url']).with_credentials(credentials)
 
-target_web = ctx.web.load().execute_query()
+target_web = ctx.web.get().execute_query()
 print(target_web.url)

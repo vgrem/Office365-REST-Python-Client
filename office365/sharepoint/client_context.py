@@ -7,7 +7,7 @@ from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.providers.saml_token_provider import resolve_base_url
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.auth.user_credential import UserCredential
-from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
+from office365.runtime.queries.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
@@ -40,7 +40,7 @@ class ClientContext(ClientRuntimeContext):
         """
         if base_url.endswith("/"):
             base_url = base_url[:len(base_url) - 1]
-        super(ClientContext, self).__init__(base_url + "/_api/", auth_context)
+        super(ClientContext, self).__init__(auth_context)
         self.__web = None
         self.__site = None
         self._base_url = base_url
@@ -130,7 +130,7 @@ class ClientContext(ClientRuntimeContext):
 
     def execute_batch(self):
         """Construct and submit a batch request"""
-        batch_request = ODataBatchRequest(self, JsonLightFormat(ODataMetadataLevel.Verbose))
+        batch_request = ODataBatchRequest(self)
 
         def _prepare_batch_request(request):
             self.ensure_form_digest(request)
@@ -140,11 +140,11 @@ class ClientContext(ClientRuntimeContext):
 
     def build_request(self):
         request = super(ClientContext, self).build_request()
-        self.get_pending_request().ensure_media_type(request)
-        self.get_pending_request().beforeExecute.notify(request)
+        self.pending_request().ensure_media_type(request)
+        self.pending_request().beforeExecute.notify(request)
         return request
 
-    def get_pending_request(self):
+    def pending_request(self):
         """
         :return: ODataRequest
         """
@@ -161,13 +161,13 @@ class ClientContext(ClientRuntimeContext):
 
     def request_form_digest(self):
         """Request Form Digest"""
-        request = RequestOptions(self.service_root_url + "contextInfo")
+        request = RequestOptions(self.service_root_url() + "contextInfo")
         request.method = HttpMethod.Post
         response = self.execute_request_direct(request)
         json = response.json()
         json_format = JsonLightFormat()
         json_format.function_tag_name = "GetContextWebInformation"
-        self.get_pending_request().map_json(json, self._contextWebInformation, json_format)
+        self.pending_request().map_json(json, self._contextWebInformation, json_format)
 
     def clone(self, url, clear_queries=True):
         """
@@ -189,7 +189,7 @@ class ClientContext(ClientRuntimeContext):
 
         :type request: RequestOptions
         """
-        query = self.current_query
+        query = self.pending_request().current_query
 
         if request.method == HttpMethod.Post:
             self.ensure_form_digest(request)
@@ -224,6 +224,5 @@ class ClientContext(ClientRuntimeContext):
     def authentication_context(self):
         return self._auth_context
 
-    @property
     def service_root_url(self):
-        return '/'.join(s.strip('/') for s in [self._base_url, '_api']) + '/'
+        return "{0}/_api/".format(self.base_url)

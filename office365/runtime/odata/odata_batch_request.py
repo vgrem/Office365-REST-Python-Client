@@ -4,10 +4,10 @@ import uuid
 from email import message_from_bytes
 from email.message import Message
 
-from office365.runtime.client_query import ReadEntityQuery
+from office365.runtime.client_request import ClientRequest
+from office365.runtime.queries.client_query_collection import ClientQueryCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.odata.odata_request import ODataRequest
 
 
 def _create_boundary(prefix, compact=False):
@@ -20,24 +20,24 @@ def _create_boundary(prefix, compact=False):
         return prefix + str(uuid.uuid4())
 
 
-class ODataBatchRequest(ODataRequest):
+class ODataBatchRequest(ClientRequest):
 
-    def __init__(self, context, json_format):
-        """
-
-        :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
-        :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat
-        """
-        super(ODataBatchRequest, self).__init__(context, json_format)
+    def __init__(self, context):
+        super(ODataBatchRequest, self).__init__(context)
         media_type = "multipart/mixed"
         self._current_boundary = _create_boundary("batch_")
         self._content_type = "; ".join([media_type, "boundary={0}".format(self._current_boundary)])
-        self._get_requests = []
-        self._change_requests = []
-        self._get_queries = []
+
+    @property
+    def context(self):
+        """
+
+        :rtype:  office365.sharepoint.client_context.ClientContext
+        """
+        return self._context
 
     def build_request(self):
-        request_url = "{0}$batch".format(self.context.service_root_url)
+        request_url = "{0}$batch".format(self.context.service_root_url())
         request = RequestOptions(request_url)
         request.method = HttpMethod.Post
         request.ensure_header('Content-Type', self._content_type)
@@ -49,10 +49,12 @@ class ODataBatchRequest(ODataRequest):
 
         :type response: requests.Response
         """
+        content_id = 0
         for response_info in self._read_response(response):
             if response_info["content"] is not None:
-                qry = self._get_queries.pop(0)
-                self.map_json(response_info["content"], qry.return_type)
+                qry = self._current_query.queries[content_id]
+                self.context.pending_request().map_json(response_info["content"], qry.return_type)
+                content_id += 1
 
     def _read_response(self, response):
         """Parses a multipart/mixed response body from from the position defined by the context.
@@ -74,33 +76,28 @@ class ODataBatchRequest(ODataRequest):
 
     def _prepare_payload(self):
         """Serializes a batch request body."""
-
-        for qry in self.context.get_next_query():
-            request = self.context.build_request()
-            if isinstance(qry, ReadEntityQuery):
-                self._get_requests.append(request)
-                self._get_queries.append(qry)
-            else:
-                self._change_requests.append(request)
-
         main_message = Message()
         main_message.add_header("Content-Type", "multipart/mixed")
         main_message.set_boundary(self._current_boundary)
 
-        if len(self._change_requests) > 0:
+        if len(self._current_query.change_sets) > 0:
             change_set_message = Message()
             change_set_boundary = _create_boundary("changeset_", True)
             change_set_message.add_header("Content-Type", "multipart/mixed")
             change_set_message.set_boundary(change_set_boundary)
 
-            for request in self._change_requests:
-                part_message = self._serialize_request(request)
-                change_set_message.attach(part_message)
+            for qry in self._current_query.change_sets:
+                self.context.pending_request()._current_query = qry
+                request = self.context.build_request()
+                message = self._serialize_request(request)
+                change_set_message.attach(message)
             main_message.attach(change_set_message)
 
-        for request in self._get_requests:
-            part_message = self._serialize_request(request)
-            main_message.attach(part_message)
+        for qry in self._current_query.queries:
+            self.context.pending_request()._current_query = qry
+            request = self.context.build_request()
+            message = self._serialize_request(request)
+            main_message.attach(message)
 
         return main_message
 
@@ -155,3 +152,9 @@ class ODataBatchRequest(ODataRequest):
         message.add_header("Content-Transfer-Encoding", "binary")
         message.set_payload(payload)
         return message
+
+    def get_next_query(self):
+        queries = [qry for qry in self.context.pending_request().get_next_query()]
+        qry = ClientQueryCollection(queries)  # Aggregate requests into batch request
+        self._current_query = qry
+        yield qry

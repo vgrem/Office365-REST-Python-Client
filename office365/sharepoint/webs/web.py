@@ -1,4 +1,4 @@
-from office365.runtime.client_query import ClientQuery, DeleteEntityQuery, UpdateEntityQuery
+from office365.runtime.queries.client_query import ClientQuery, DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
@@ -540,5 +540,5 @@ class Web(SecurableObject):
     def resource_url(self):
         url = super(Web, self).resource_url
         if self._web_url is not None:
-            url = url.replace(self.context.service_root_url, self._web_url + '/_api/')
+            url = url.replace(self.context.service_root_url(), self._web_url + '/_api/')
         return url

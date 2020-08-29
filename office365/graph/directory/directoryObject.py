@@ -1,5 +1,5 @@
 from office365.graph.entity import Entity
-from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
+from office365.runtime.queries.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 
@@ -25,6 +25,7 @@ class DirectoryObject(Entity):
         """Updates the directory object."""
         qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
+        return qry
 
     def delete_object(self):
         """Deletes the directory object."""

@@ -1,4 +1,4 @@
-from office365.runtime.client_query import ClientQuery
+from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 
 

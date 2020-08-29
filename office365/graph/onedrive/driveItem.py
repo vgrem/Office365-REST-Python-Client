@@ -6,7 +6,7 @@ from office365.graph.onedrive.fileSystemInfo import FileSystemInfo
 from office365.graph.onedrive.folder import Folder
 from office365.graph.onedrive.listItem import ListItem
 from office365.graph.onedrive.uploadSession import UploadSession
-from office365.runtime.client_query import CreateEntityQuery
+from office365.runtime.queries.client_query import CreateEntityQuery
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath

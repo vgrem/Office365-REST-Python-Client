@@ -5,7 +5,7 @@ from office365.graph.teams.teamFunSettings import TeamFunSettings
 from office365.graph.teams.teamGuestSettings import TeamGuestSettings
 from office365.graph.teams.teamMemberSettings import TeamMemberSettings
 from office365.graph.teams.teamMessagingSettings import TeamMessagingSettings
-from office365.runtime.client_query import UpdateEntityQuery
+from office365.runtime.queries.client_query import UpdateEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 

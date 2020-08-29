@@ -1,6 +1,6 @@
 from office365.graph.directory.user import User
 from office365.runtime.auth.authentication_context import AuthenticationContext
-from office365.runtime.client_query import DeleteEntityQuery, UpdateEntityQuery
+from office365.runtime.queries.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.odata.odata_request import ODataRequest
@@ -18,8 +18,7 @@ class OutlookClient(ClientRuntimeContext):
         :type auth_context: AuthenticationContext
         """
         self._resource = "https://outlook.office365.com"
-        self.__service_root_url = "{resource}/api/v1.0/".format(resource=self._resource)
-        super(OutlookClient, self).__init__(self.__service_root_url, auth_context)
+        super(OutlookClient, self).__init__(auth_context)
         self._pendingRequest = ODataRequest(self, V4JsonFormat("minimal"))
         self._pendingRequest.beforeExecute += self._build_specific_query
 
@@ -41,11 +40,14 @@ class OutlookClient(ClientRuntimeContext):
         self._auth_context.acquire_token_func = _acquire_token
         return self
 
-    def get_pending_request(self):
+    def service_root_url(self):
+        return "{resource}/api/v1.0/".format(resource=self._resource)
+
+    def pending_request(self):
         return self._pendingRequest
 
     def _build_specific_query(self, request):
-        query = self.current_query
+        query = self.pending_request().current_query
         if isinstance(query, UpdateEntityQuery):
             request.method = HttpMethod.Patch
         elif isinstance(query, DeleteEntityQuery):

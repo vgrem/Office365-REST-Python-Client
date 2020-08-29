@@ -50,5 +50,4 @@ class DirectoryObjectCollection(ClientObjectCollection):
             :type request: RequestOptions
             """
             request.method = HttpMethod.Delete
-
         self.context.before_execute(_construct_remove_user_request)

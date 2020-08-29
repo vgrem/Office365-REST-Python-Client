@@ -1,6 +1,6 @@
 from office365.outlookservices.message import Message
 from office365.runtime.client_object_collection import ClientObjectCollection
-from office365.runtime.client_query import CreateEntityQuery
+from office365.runtime.queries.client_query import CreateEntityQuery
 
 
 class MessageCollection(ClientObjectCollection):

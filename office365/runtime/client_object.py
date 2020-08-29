@@ -4,6 +4,12 @@ from office365.runtime.client_value import ClientValue
 from office365.runtime.odata.odata_query_options import QueryOptions
 
 
+def check_authorization(self, f):
+    def wrapper(*args):
+        return self
+    return wrapper
+
+
 class ClientObject(object):
 
     def __init__(self, context, resource_path=None, properties=None, parent_collection=None):
@@ -25,6 +31,17 @@ class ClientObject(object):
         if properties is not None:
             for k, v in properties.items():
                 self.set_property(k, v, True)
+
+    def execute_query(self):
+        self.context.execute_query()
+        return self
+
+    def build_query(self):
+        return self.context.build_request()
+
+    def get(self):
+        self.context.load(self)
+        return self
 
     def is_property_available(self, name):
         """Returns a Boolean value that indicates whether the specified property has been retrieved or set.
@@ -81,22 +98,31 @@ class ClientObject(object):
     def to_json(self):
         return dict((k, v) for k, v in self.properties.items() if k in self._changed_properties)
 
-    def ensure_property(self, name_or_names, action):
+    def ensure_property(self, name, action):
         """
-        Ensures if property is loaded or list of properties are loaded
+        Ensures if property is loaded
 
         :type action: () -> None
-        :type name_or_names: str or list[str]
+        :type name: str
         """
-        names_to_include = []
-        if isinstance(name_or_names, list):
-            names_to_include = [n for n in name_or_names if not self.is_property_available(n)]
-        else:
-            if not self.is_property_available(name_or_names):
-                names_to_include.append(name_or_names)
+        names_to_include = [name]
+        self.ensure_properties(names_to_include, action)
 
+    def ensure_properties(self, names, action):
+        """
+        Ensure if list of properties are loaded
+
+        :type action: () -> None
+        :type names: str or list[str]
+        """
+        names_to_include = [n for n in names if not self.is_property_available(n)]
         if len(names_to_include) > 0:
-            self.context.load(self, names_to_include, action)
+            qry = self.context.load(self, names_to_include)
+            if callable(action):
+                def _process_query(current_query):
+                    if current_query.id == qry.id:
+                        action()
+                self.context.after_execute_query(_process_query)
         else:
             action()
 
@@ -115,7 +141,7 @@ class ClientObject(object):
     def resource_url(self):
         """Generate resource Url"""
         if self.resource_path:
-            url = self.context.service_root_url + self.resource_path.to_url()
+            url = self.context.service_root_url() + self.resource_path.to_url()
             if not self.query_options.is_empty:
                 url = url + "?" + self._query_options.to_url()
             return url

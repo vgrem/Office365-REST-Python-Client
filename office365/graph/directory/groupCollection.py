@@ -1,6 +1,6 @@
 from office365.graph.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.graph.directory.group import Group
-from office365.runtime.client_query import CreateEntityQuery
+from office365.runtime.queries.client_query import CreateEntityQuery
 
 
 class GroupCollection(DirectoryObjectCollection):

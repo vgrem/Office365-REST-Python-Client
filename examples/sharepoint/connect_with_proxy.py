@@ -13,7 +13,7 @@ ctx = ClientContext.connect_with_credentials(settings['url'],
                                              ClientCredential(settings['client_credentials']['client_id'],
                                                               settings['client_credentials']['client_secret']))
 
-ctx.get_pending_request().beforeExecute += set_proxy
+ctx.pending_request().beforeExecute += set_proxy
 
 target_web = ctx.web
 ctx.load(target_web)
