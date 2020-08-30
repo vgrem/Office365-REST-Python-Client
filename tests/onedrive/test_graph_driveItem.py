@@ -35,8 +35,7 @@ class TestDriveItem(GraphTestCase):
 
     def test1_create_folder(self):
         target_folder_name = "New_" + uuid.uuid4().hex
-        folder = self.target_drive.root.create_folder(target_folder_name)
-        self.client.execute_query()
+        folder = self.target_drive.root.create_folder(target_folder_name).execute_query()
         self.assertEqual(folder.properties["name"], target_folder_name)
         self.__class__.target_folder = folder
 

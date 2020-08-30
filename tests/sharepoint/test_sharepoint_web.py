@@ -21,9 +21,7 @@ class TestSharePointWeb(SPTestCase):
         super(TestSharePointWeb, cls).setUpClass()
 
     def test1_get_current_user(self):
-        current_user = self.client.web.currentUser
-        self.client.load(current_user)
-        self.client.execute_query()
+        current_user = self.client.web.currentUser.get().execute_query()
         self.assertIsNotNone(current_user.login_name)
         self.__class__.target_user = current_user
 

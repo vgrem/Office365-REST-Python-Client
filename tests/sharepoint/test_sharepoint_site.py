@@ -29,7 +29,5 @@ class TestSite(SPTestCase):
         self.assertIsNotNone(result.value)
 
     def test4_get_site_catalog(self):
-        catalog = self.client.site.get_catalog(ListTemplateType.AppDataCatalog)
-        self.client.load(catalog)
-        self.client.execute_query()
-        self.assertIsNotNone(catalog)
+        catalog = self.client.site.get_catalog(ListTemplateType.AppDataCatalog).get().execute_query()
+        self.assertIsNotNone(catalog.title)

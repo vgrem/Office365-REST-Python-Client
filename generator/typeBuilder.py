@@ -9,12 +9,15 @@ class TypeBuilder(object):
         self._schema = schema
         self._node = None
 
-    def build(self):
+    def build(self, options):
         if self._schema['state'] == 'attached':
             with open(self._schema['file']) as f:
                 self._node = ast.parse(f.read())
             return True
-        return False
+        else:
+            with open(options['complexTypeFile']) as f:
+                self._node = ast.parse(f.read())
+            return False
 
     def save(self):
         code = astunparse.unparse(self._node)

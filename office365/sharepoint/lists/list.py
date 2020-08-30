@@ -42,6 +42,7 @@ class List(SecurableObject):
         }
         qry = ServiceOperationQuery(self, "saveAsTemplate", None, payload, None, None)
         self.context.add_query(qry)
+        return self
 
     def get_item_by_unique_id(self, uniqueId):
         """

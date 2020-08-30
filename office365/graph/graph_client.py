@@ -6,7 +6,8 @@ from office365.graph.directory.groupCollection import GroupCollection
 from office365.graph.directory.groupSettingTemplateCollection import GroupSettingTemplateCollection
 from office365.graph.directory.user import User
 from office365.graph.directory.userCollection import UserCollection
-from office365.graph.one_drive_actions import DownloadContentQuery, ReplaceMethodQuery, SearchQuery, UploadContentQuery
+from office365.graph.actions.one_drive_actions import DownloadContentQuery, ReplaceMethodQuery, UploadContentQuery
+from office365.graph.actions.search_query import SearchQuery
 from office365.graph.onedrive.driveCollection import DriveCollection
 from office365.graph.onedrive.sharedDriveItemCollection import SharedDriveItemCollection
 from office365.graph.onedrive.siteCollection import SiteCollection

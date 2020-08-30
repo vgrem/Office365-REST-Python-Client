@@ -10,8 +10,10 @@ class Message(Item):
         saved in the Sent Items folder. """
         qry = ServiceOperationQuery(self, "reply")
         self.context.add_query(qry)
+        return self
 
     def move(self):
         """Move a message to a folder. This creates a new copy of the message in the destination folder. """
         qry = ServiceOperationQuery(self, "move")
         self.context.add_query(qry)
+        return self

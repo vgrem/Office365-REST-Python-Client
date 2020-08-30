@@ -20,7 +20,7 @@ class ODataBaseReader(object):
 
     def generate_model(self):
         model = ODataModel()
-        root = ET.parse(self._options['inputPath']).getroot()
+        root = ET.parse(self._options['metadataPath']).getroot()
         schema_node = root.find('edmx:DataServices/xmlns:Schema', self._options['namespaces'])
         for complex_type_node in schema_node.findall('xmlns:ComplexType', self._options['namespaces']):
             type_schema = {'namespace': schema_node.attrib['Namespace'],

@@ -28,6 +28,3 @@ class UploadContentQuery(ServiceOperationQuery):
         super(UploadContentQuery, self).__init__(return_type, "content", None, content, None, return_type)
 
 
-class SearchQuery(ServiceOperationQuery):
-    def __init__(self, entity_type, query_text, return_type):
-        super(SearchQuery, self).__init__(entity_type, "search", {"q": query_text}, None, None, return_type)

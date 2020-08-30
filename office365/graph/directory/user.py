@@ -22,6 +22,7 @@ class User(DirectoryObject):
         if permanent_delete:
             deleted_user = self.context.directory.deletedUsers[self.id]
             deleted_user.delete_object()
+        return self
 
     @property
     def drive(self):
@@ -60,6 +61,7 @@ class User(DirectoryObject):
         """Send a new message on the fly"""
         qry = ServiceOperationQuery(self, "sendmail", None, message)
         self.context.add_query(qry)
+        return self
 
     @property
     def joinedTeams(self):

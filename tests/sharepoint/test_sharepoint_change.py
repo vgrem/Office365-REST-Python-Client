@@ -16,6 +16,5 @@ class TestChange(SPTestCase):
         self.client.load(target_list)
         self.client.execute_query()
 
-        changes = target_list.get_changes(query=ChangeQuery(list_=True))
-        self.client.execute_query()
+        changes = target_list.get_changes(query=ChangeQuery(list_=True)).execute_query()
         self.assertIsInstance(changes, ChangeCollection)

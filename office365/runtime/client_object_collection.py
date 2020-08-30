@@ -67,7 +67,11 @@ class ClientObjectCollection(ClientObject):
         return len(self._data)
 
     def __getitem__(self, index):
-        # fetch only as much items as necessary
+        """
+
+        :type index: int
+        :rtype: ClientObject
+        """
         item_iterator = iter(self)
         while len(self._data) <= index:
             next(item_iterator)
@@ -83,6 +87,11 @@ class ClientObjectCollection(ClientObject):
         return self
 
     def order_by(self, value):
+        """
+        Sets OData $orderBy query option
+
+        :type value: int
+        """
         self.query_options.orderBy = value
         return self
 
@@ -96,6 +105,9 @@ class ClientObjectCollection(ClientObject):
         return self
 
     def top(self, value):
+        """
+        :type value: int
+        """
         self._paged_mode = False
         self.query_options.top = value
         return self

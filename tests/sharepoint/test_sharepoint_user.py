@@ -7,16 +7,14 @@ class TestSharePointUser(SPTestCase):
     target_user_name = None
 
     def test1_get_current_user(self):
-        user = self.client.web.currentUser
-        self.client.load(user)
-        self.client.execute_query()
+        user = self.client.web.currentUser.get().execute_query()
         self.assertIsNotNone(user.login_name, "Current user was not requested")
         self.assertIsInstance(user.id, int)
         self.__class__.target_user_name = user.login_name
 
     def test2_ensure_user(self):
-        self.client.web.ensure_user(self.__class__.target_user_name)
-        self.client.execute_query()
+        result_user = self.client.web.ensure_user(self.__class__.target_user_name).execute_query()
+        self.assertIsNotNone(result_user.user_id)
 
     def test3_get_user(self):
         target_user = self.client.web.siteUsers.get_by_login_name(self.__class__.target_user_name)

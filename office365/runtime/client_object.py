@@ -4,12 +4,6 @@ from office365.runtime.client_value import ClientValue
 from office365.runtime.odata.odata_query_options import QueryOptions
 
 
-def check_authorization(self, f):
-    def wrapper(*args):
-        return self
-    return wrapper
-
-
 class ClientObject(object):
 
     def __init__(self, context, resource_path=None, properties=None, parent_collection=None):

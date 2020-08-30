@@ -138,7 +138,7 @@ class DriveItem(BaseItem):
         a whole drive, or files shared with the current user.
 
         :type query_text: str"""
-        from office365.graph.graph_client import SearchQuery
+        from office365.graph.actions.search_query import SearchQuery
         result = ClientResult(None)
         qry = SearchQuery(self, query_text, result)
         self.context.add_query(qry)

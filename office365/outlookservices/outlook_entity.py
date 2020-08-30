@@ -9,16 +9,18 @@ class OutlookEntity(ClientObject):
     def update(self):
         qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
+        return self
 
     def delete_object(self):
         """Deletes the outlook entity."""
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
+        return self
 
     def set_property(self, name, value, persist_changes=True):
         super(OutlookEntity, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
-        if name == "Id":
+        if name.lower() == "id":
             self._resource_path = ResourcePath(
                 value,
                 self._parent_collection.resource_path)
