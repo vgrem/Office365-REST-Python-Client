@@ -12,9 +12,7 @@ class TestGraphUser(GraphTestCase):
     test_user = None  # type: User
 
     def test1_get_user_list(self):
-        users = self.client.users.top(1)
-        self.client.load(users)
-        self.client.execute_query()
+        users = self.client.users.top(1).get().execute_query()
         self.assertEqual(len(users), 1)
         for user in users:
             self.assertIsNotNone(user.id)
@@ -22,8 +20,7 @@ class TestGraphUser(GraphTestCase):
     def test2_create_user(self):
         password = "P@ssw0rd{0}".format(random_seed)
         profile = UserProfile("testuser{0}@{1}".format(random_seed, settings['tenant']), password)
-        new_user = self.client.users.add(profile)
-        self.client.execute_query()
+        new_user = self.client.users.add(profile).execute_query()
         self.assertIsNotNone(new_user.id)
         self.__class__.test_user = new_user
 
@@ -32,15 +29,11 @@ class TestGraphUser(GraphTestCase):
         prop_name = 'city'
         prop_val = 'Earth{0}'.format(random_seed)
         user_to_update.set_property(prop_name, prop_val)
-        user_to_update.update()
-        self.client.execute_query()
+        user_to_update.update().execute_query()
 
-        result = self.client.users.filter("{0} eq '{1}'".format(prop_name, prop_val))
-        self.client.load(result)
-        self.client.execute_query()
+        result = self.client.users.filter("{0} eq '{1}'".format(prop_name, prop_val)).get().execute_query()
         self.assertEqual(1, len(result))
 
     def test4_delete_user(self):
         user_to_delete = self.__class__.test_user
-        user_to_delete.delete_object(True)
-        self.client.execute_query()
+        user_to_delete.delete_object(True).execute_query()

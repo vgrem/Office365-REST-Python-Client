@@ -1,7 +1,7 @@
 from office365.graph.directory.identitySet import IdentitySet
 from office365.graph.entity import Entity
 from office365.graph.onedrive.itemReference import ItemReference
-from office365.runtime.queries.client_query import DeleteEntityQuery
+from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 
 
 class BaseItem(Entity):
@@ -13,6 +13,7 @@ class BaseItem(Entity):
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         self.remove_from_parent_collection()
+        return self
 
     @property
     def etag(self):

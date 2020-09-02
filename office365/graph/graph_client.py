@@ -1,24 +1,26 @@
 import adal
 
+from office365.graph.actions.download_content_query import DownloadContentQuery
+from office365.graph.actions.upload_content_query import UploadContentQuery
+from office365.graph.actions.search_query import SearchQuery
 from office365.graph.directory.directory import Directory
 from office365.graph.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.graph.directory.groupCollection import GroupCollection
 from office365.graph.directory.groupSettingTemplateCollection import GroupSettingTemplateCollection
 from office365.graph.directory.user import User
 from office365.graph.directory.userCollection import UserCollection
-from office365.graph.actions.one_drive_actions import DownloadContentQuery, ReplaceMethodQuery, UploadContentQuery
-from office365.graph.actions.search_query import SearchQuery
 from office365.graph.onedrive.driveCollection import DriveCollection
 from office365.graph.onedrive.sharedDriveItemCollection import SharedDriveItemCollection
 from office365.graph.onedrive.siteCollection import SiteCollection
 from office365.graph.teams.teamCollection import TeamCollection
 from office365.outlookservices.contact_collection import ContactCollection
-from office365.runtime.queries.client_query import DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.odata_request import ODataRequest
 from office365.runtime.odata.v4_json_format import V4JsonFormat
+from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
+from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 
 
@@ -60,8 +62,6 @@ class GraphClient(ClientRuntimeContext):
             request.method = HttpMethod.Get
         elif isinstance(query, UploadContentQuery):
             request.method = HttpMethod.Put
-        elif isinstance(query, ReplaceMethodQuery):
-            request.method = HttpMethod.Patch
         elif isinstance(query, SearchQuery):
             request.method = HttpMethod.Get
 

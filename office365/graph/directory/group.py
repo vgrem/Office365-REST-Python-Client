@@ -39,6 +39,7 @@ class Group(DirectoryObject):
         if permanent_delete:
             deleted_item = self.context.directory.deletedGroups[self.id]
             deleted_item.delete_object()
+        return self
 
     @property
     def members(self):

@@ -38,6 +38,7 @@ class DirectoryObjectCollection(ClientObjectCollection):
         }
         qry = ServiceOperationQuery(self, "$ref", None, payload)
         self.context.add_query(qry)
+        return self
 
     def remove(self, user_id):
         """Remove a user from the group."""
@@ -51,3 +52,4 @@ class DirectoryObjectCollection(ClientObjectCollection):
             """
             request.method = HttpMethod.Delete
         self.context.before_execute(_construct_remove_user_request)
+        return self

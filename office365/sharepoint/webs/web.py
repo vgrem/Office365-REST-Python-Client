@@ -1,6 +1,8 @@
-from office365.runtime.queries.client_query import ClientQuery, DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_result import ClientResult
+from office365.runtime.queries.client_query import ClientQuery
+from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.actions.getWebUrlFromPage import GetWebUrlFromPageUrlQuery
@@ -70,7 +72,7 @@ class Web(SecurableObject):
     def get_all_webs(self):
         """Returns a collection containing a flat list of all Web objects in the Web object."""
         result = ClientResult(self.webs)
-        qry = ClientQuery(self.webs, None, None, result)
+        qry = ClientQuery(self.context, self.webs, None, None, result)
         self.context.add_query(qry)
 
         def _load_sub_webs(resp):

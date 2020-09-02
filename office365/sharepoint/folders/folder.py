@@ -1,4 +1,6 @@
-from office365.runtime.queries.client_query import CreateEntityQuery, DeleteEntityQuery, UpdateEntityQuery
+from office365.runtime.queries.create_entity_query import CreateEntityQuery
+from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
+from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.base_entity import BaseEntity

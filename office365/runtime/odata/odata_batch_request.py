@@ -5,9 +5,9 @@ from email import message_from_bytes
 from email.message import Message
 
 from office365.runtime.client_request import ClientRequest
-from office365.runtime.queries.client_query_collection import ClientQueryCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
+from office365.runtime.queries.client_query_collection import ClientQueryCollection
 
 
 def _create_boundary(prefix, compact=False):
@@ -155,6 +155,6 @@ class ODataBatchRequest(ClientRequest):
 
     def get_next_query(self):
         queries = [qry for qry in self.context.pending_request().get_next_query()]
-        qry = ClientQueryCollection(queries)  # Aggregate requests into batch request
+        qry = ClientQueryCollection(self.context, queries)  # Aggregate requests into batch request
         self._current_query = qry
         yield qry

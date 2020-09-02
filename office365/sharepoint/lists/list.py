@@ -1,5 +1,5 @@
-from office365.runtime.queries.client_query import DeleteEntityQuery
 from office365.runtime.client_result import ClientResult
+from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation

@@ -1,5 +1,5 @@
 from office365.runtime.client_object import ClientObject
-from office365.runtime.queries.client_query import UpdateEntityQuery
+from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 
 
 class BaseEntity(ClientObject):

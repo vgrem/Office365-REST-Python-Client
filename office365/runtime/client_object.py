@@ -133,7 +133,10 @@ class ClientObject(object):
 
     @property
     def resource_url(self):
-        """Generate resource Url"""
+        """Generate resource Url
+
+        :rtype: str or None
+        """
         if self.resource_path:
             url = self.context.service_root_url() + self.resource_path.to_url()
             if not self.query_options.is_empty:

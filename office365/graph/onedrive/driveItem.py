@@ -6,8 +6,9 @@ from office365.graph.onedrive.fileSystemInfo import FileSystemInfo
 from office365.graph.onedrive.folder import Folder
 from office365.graph.onedrive.listItem import ListItem
 from office365.graph.onedrive.uploadSession import UploadSession
-from office365.runtime.queries.client_query import CreateEntityQuery
 from office365.runtime.client_result import ClientResult
+from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 
@@ -42,7 +43,7 @@ class DriveItem(BaseItem):
         :type content: str
         :rtype: DriveItem
         """
-        from office365.graph.graph_client import UploadContentQuery
+        from office365.graph.actions.upload_content_query import UploadContentQuery
         qry = UploadContentQuery(self, name, content)
         self.context.add_query(qry)
         return qry.return_type
@@ -118,19 +119,24 @@ class DriveItem(BaseItem):
         :type name: str
         :type parent_reference: ItemReference
         """
-        from office365.graph.graph_client import ReplaceMethodQuery
+
         result = ClientResult(None)
-        qry = ReplaceMethodQuery(self,
-                                 "move",
-                                 None,
-                                 {
-                                     "name": name,
-                                     "parentReference": parent_reference
-                                 },
-                                 None,
-                                 result
-                                 )
+        qry = ServiceOperationQuery(self,
+                                    "move",
+                                    None,
+                                    {
+                                        "name": name,
+                                        "parentReference": parent_reference
+                                    },
+                                    None,
+                                    result
+                                    )
         self.context.add_query(qry)
+
+        def _construct_request(request):
+            request.method = HttpMethod.Patch
+
+        self.context.before_execute(_construct_request)
         return result
 
     def search(self, query_text):

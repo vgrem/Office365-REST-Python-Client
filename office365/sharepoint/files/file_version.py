@@ -1,5 +1,5 @@
 from office365.runtime.client_object import ClientObject
-from office365.runtime.queries.client_query import DeleteEntityQuery
+from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 
 
 class FileVersion(ClientObject):

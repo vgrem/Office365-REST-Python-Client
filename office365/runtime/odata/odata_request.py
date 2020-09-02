@@ -1,6 +1,5 @@
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_object_collection import ClientObjectCollection
-from office365.runtime.queries.client_query import CreateEntityQuery, DeleteEntityQuery, UpdateEntityQuery
 from office365.runtime.client_request import ClientRequest
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value import ClientValue
@@ -9,7 +8,10 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
+from office365.runtime.queries.create_entity_query import CreateEntityQuery
+from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 
 
 class ODataRequest(ClientRequest):
@@ -44,18 +46,8 @@ class ODataRequest(ClientRequest):
 
     def build_request(self):
         qry = self.current_query
-        self.json_format.function_tag_name = None
-        if isinstance(qry, ServiceOperationQuery):
-            self.json_format.function_tag_name = qry.method_name
-            if qry.static:
-                request_url = self.context.service_root_url() + '.'.join(
-                    [qry.binding_type.entity_type_name, qry.method_url])
-            else:
-                request_url = '/'.join([qry.binding_type.resource_url, qry.method_url])
-        else:
-            request_url = qry.binding_type.resource_url
-        request = RequestOptions(request_url)
-
+        action_url = qry.build_url()
+        request = RequestOptions(action_url)
         # set method
         request.method = HttpMethod.Get
         if isinstance(qry, DeleteEntityQuery):
@@ -83,8 +75,15 @@ class ODataRequest(ClientRequest):
         self.map_json(response.json(), result_object, self.json_format)
 
     def map_json(self, json_payload, result_object, json_format=None):
-        if not json_format:
+        qry = self.current_query
+        if isinstance(qry, ServiceOperationQuery):
+            self.json_format.function_tag_name = qry.method_name
+        else:
+            self.json_format.function_tag_name = None
+
+        if json_format is None:
             json_format = self.json_format
+
         if json_payload and result_object is not None:
             for k, v in self._get_property(json_payload, json_format):
                 if isinstance(result_object, ClientObjectCollection) and k == json_format.collection_next_tag_name:

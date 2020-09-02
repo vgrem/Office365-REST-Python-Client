@@ -25,7 +25,7 @@ Use pip:
 pip install Office365-REST-Python-Client
 ```
 
-###Note 
+### Note 
 >
 >Since PyPI default index `Office365-REST-Python-Client` has not been updated for a while 
 > and the last version available from index is already considered _outdated_, 
@@ -210,7 +210,7 @@ for drive in drives:
 
 ```python
 # retrieve drive properties 
-drive = client.users[user_id_or_principal_name].drive
+drive = client.users["{user_id_or_principal_name}"].drive
 client.load(drive)
 client.execute_query()
 

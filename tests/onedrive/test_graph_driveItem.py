@@ -13,8 +13,7 @@ def create_list_drive(client):
         "displayName": "Lib_" + uuid.uuid4().hex,
         "list": {"template": "documentLibrary"}
     }
-    new_list = client.sites.root.lists.add(list_info)
-    client.execute_query()
+    new_list = client.sites.root.lists.add(list_info).execute_query()
     return new_list.drive
 
 
@@ -40,9 +39,7 @@ class TestDriveItem(GraphTestCase):
         self.__class__.target_folder = folder
 
     def test2_get_folder_permissions(self):
-        folder_perms = self.__class__.target_folder.permissions
-        self.client.load(folder_perms)
-        self.client.execute_query()
+        folder_perms = self.__class__.target_folder.permissions.get().execute_query()
         self.assertIsNotNone(folder_perms.resource_path)
 
     def test3_upload_file(self):
@@ -51,8 +48,7 @@ class TestDriveItem(GraphTestCase):
         with open(path, 'rb') as content_file:
             file_content = content_file.read()
         file_name = os.path.basename(path)
-        self.__class__.target_file = self.target_drive.root.upload(file_name, file_content)
-        self.client.execute_query()
+        self.__class__.target_file = self.target_drive.root.upload(file_name, file_content).execute_query()
         self.assertIsNotNone(self.target_file.web_url)
 
     def test4_upload_file_session(self):
@@ -73,18 +69,19 @@ class TestDriveItem(GraphTestCase):
         self.assertIsNotNone(result.value)
 
     def test7_copy_file(self):
-        copy_file_name = "Copied_{0}_SharePoint User Guide.docx".format(uuid.uuid4().hex)
-        result = self.__class__.target_file.copy(copy_file_name)
+        file_name = "Copied_{0}_SharePoint User Guide.docx".format(uuid.uuid4().hex)
+        result = self.__class__.target_file.copy(file_name)
         self.client.execute_query()
         self.assertIsNotNone(result.value)
 
-    def test8_delete_file(self):
-        items = self.target_drive.root.children
-        self.client.load(items)
-        self.client.execute_query()
-        before_count = len(items)
+    #def test8_move_file(self):
+    #    target_folder = self.__class__.target_folder.parentReference
+    #
+    #    file_name = "Movied_{0}_SharePoint User Guide.docx".format(uuid.uuid4().hex)
+    #    result = self.__class__.target_file.move(file_name, target_folder)
+    #    self.client.execute_query()
+    #    self.assertIsNotNone(result.value)
 
-        items[0].delete_object()
-        self.client.load(items)
-        self.client.execute_query()
-        self.assertEqual(before_count - 1, len(items))
+    def test9_delete_file(self):
+        items = self.target_drive.root.children.top(1).get().execute_query()
+        items[0].delete_object().execute_query()

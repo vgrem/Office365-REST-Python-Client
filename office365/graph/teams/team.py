@@ -5,8 +5,8 @@ from office365.graph.teams.teamFunSettings import TeamFunSettings
 from office365.graph.teams.teamGuestSettings import TeamGuestSettings
 from office365.graph.teams.teamMemberSettings import TeamMemberSettings
 from office365.graph.teams.teamMessagingSettings import TeamMessagingSettings
-from office365.runtime.queries.client_query import UpdateEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 
 
@@ -59,3 +59,4 @@ class Team(Entity):
         """Create a copy of a team. This operation also creates a copy of the corresponding group. """
         qry = ServiceOperationQuery(self, "clone")
         self.context.add_query(qry)
+        return self

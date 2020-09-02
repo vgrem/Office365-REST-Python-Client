@@ -1,8 +1,8 @@
 import abc
 from time import sleep
 
-from office365.runtime.queries.client_query import ReadEntityQuery
 from office365.runtime.client_request_exception import ClientRequestException
+from office365.runtime.queries.read_entity_query import ReadEntityQuery
 
 
 class ClientRuntimeContext(object):

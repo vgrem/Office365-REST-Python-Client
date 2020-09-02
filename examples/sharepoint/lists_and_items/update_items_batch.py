@@ -1,6 +1,7 @@
+from settings import settings
+
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
-from settings import settings
 
 ctx = ClientContext.connect_with_credentials("https://mediadev8.sharepoint.com/sites/team",
                                              ClientCredential(settings['client_credentials']['client_id'],
