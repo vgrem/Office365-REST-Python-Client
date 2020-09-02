@@ -24,6 +24,7 @@ class SPSiteManager(BaseEntity):
         }
         qry = ServiceOperationQuery(self, "Delete", None, payload)
         self.context.add_query(qry)
+        return self
 
     def get_status(self, site_url):
         """Get the status of a SharePoint site"""

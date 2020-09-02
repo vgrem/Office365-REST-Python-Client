@@ -23,13 +23,10 @@ class TestSPView(SPTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.target_list.delete_object()
-        cls.client.execute_query()
+        cls.target_list.delete_object().execute_query()
 
     def test1_get_all_views(self):
-        all_views = self.target_list.views
-        self.client.load(all_views)
-        self.client.execute_query()
+        all_views = self.target_list.views.get().execute_query()
         for cur_view in all_views:
             self.assertIsNotNone(cur_view.resource_path)
 
@@ -40,20 +37,15 @@ class TestSPView(SPTestCase):
         view_properties.Query = "<Where><Eq><FieldRef ID='AssignedTo' /><Value " \
                                 "Type='Integer'><UserID/></Value></Eq></Where> "
 
-        view_to_create = self.target_list.views.add(view_properties)
-        self.client.execute_query()
+        view_to_create = self.target_list.views.add(view_properties).execute_query()
         self.assertEqual(view_properties.Title, view_to_create.properties['Title'])
 
     def test3_read_view(self):
-        view_to_read = self.target_list.views.get_by_title(self.target_view_title)
-        self.client.load(view_to_read)
-        self.client.execute_query()
+        view_to_read = self.target_list.views.get_by_title(self.target_view_title).get().execute_query()
         self.assertEqual(self.target_view_title, view_to_read.properties['Title'])
 
     def test4_get_default_view_items(self):
-        view_items = self.target_list.defaultView.get_items()
-        self.client.load(view_items)
-        self.client.execute_query()
+        view_items = self.target_list.defaultView.get_items().get().execute_query()
         self.assertIsNotNone(view_items.resource_path)
 
     def test5_get_view_items(self):
@@ -65,12 +57,12 @@ class TestSPView(SPTestCase):
     def test6_update_view(self):
         view_to_update = self.target_list.views.get_by_title(self.target_view_title)
         view_to_update.set_property('Title', self.target_view_title_updated)
-        view_to_update.update()
-        self.client.execute_query()
+        view_to_update.update().execute_query().execute_query()
 
-        result = self.target_list.views.filter("Title eq '{0}'".format(self.target_view_title_updated))
-        self.client.load(result)
-        self.client.execute_query()
+        result = self.target_list.views\
+            .filter("Title eq '{0}'".format(self.target_view_title_updated))\
+            .get()\
+            .execute_query()
         self.assertEqual(len(result), 1)
 
     def test7_delete_view(self):

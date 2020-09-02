@@ -24,20 +24,15 @@ class TestOutlookCalendar(OutlookClientTestCase):
             ]
         }
 
-        event = self.client.me.events.add_from_json(event_payload)
-        self.client.execute_query()
+        event = self.client.me.events.add_from_json(event_payload).execute_query()
         self.assertIsNotNone(event.properties["Id"])
 
     def test2_get_events(self):
-        events = self.client.me.events
-        self.client.load(events)
-        self.client.execute_query()
+        events = self.client.me.events.get().execute_query()
         self.assertGreaterEqual(len(events), 1)
 
     def test3_update_event(self):
-        results = self.client.me.events.top(1)
-        self.client.load(results)
-        self.client.execute_query()
+        results = self.client.me.events.top(1).get().execute_query()
         if len(results) == 1:
             event = results[0]
             self.assertIsNotNone(event.properties["Subject"])
@@ -46,16 +41,12 @@ class TestOutlookCalendar(OutlookClientTestCase):
             self.client.execute_query()
 
     def test4_delete_event(self):
-        results = self.client.me.events.top(1)
-        self.client.load(results)
-        self.client.execute_query()
+        results = self.client.me.events.top(1).get().execute_query()
         if len(results) == 1:
             event = results[0]
             event.delete_object()
             self.client.execute_query()
             # verify
-            events = self.client.me.events
-            self.client.load(events)
-            self.client.execute_query()
+            events = self.client.me.events.get().execute_query()
             results = [e for e in events if e.properties["Id"] == event.properties["Id"]]
             self.assertEqual(len(results), 0)

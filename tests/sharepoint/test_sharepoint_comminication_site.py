@@ -45,5 +45,4 @@ class TestCommunicationSite(TestCase):
         self.assertTrue(response.SiteStatus != SiteStatus.Error)
 
     def test3_delete_site(self):
-        self.site_manager.delete(self.__class__.site_response.SiteId)
-        self.client.execute_query()
+        self.site_manager.delete(self.__class__.site_response.SiteId).execute_query()

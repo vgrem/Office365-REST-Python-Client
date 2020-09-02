@@ -11,7 +11,7 @@ class ClientObjectCollection(ClientObject):
 
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         :type item_type: type[ClientObject]
-        :type resource_path: ResourcePath
+        :type resource_path: office365.runtime.resource_path.ResourcePath
         """
         super(ClientObjectCollection, self).__init__(context, resource_path)
         self._data = []

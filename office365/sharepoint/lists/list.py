@@ -147,6 +147,7 @@ class List(SecurableObject):
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         self.remove_from_parent_collection()
+        return self
 
     @property
     def enable_folder_creation(self):

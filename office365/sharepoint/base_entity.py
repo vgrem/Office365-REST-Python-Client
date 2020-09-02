@@ -23,6 +23,7 @@ class BaseEntity(ClientObject):
         """Updates the resource."""
         qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
+        return self
 
     @property
     def context(self):

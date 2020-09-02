@@ -22,6 +22,7 @@ class ChannelCollection(ClientObjectCollection):
         :param str displayName: Channel name as it will appear to the user in Microsoft Teams.
         """
         new_channel = Channel(self.context)
+        self.add_child(new_channel)
         payload = {
             "displayName": displayName,
             "description": description,
