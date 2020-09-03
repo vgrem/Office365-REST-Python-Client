@@ -40,6 +40,5 @@ client = GraphClient(settings['tenant'], acquire_token)
 
 for idx in range(0, 5):
     user_profile = generate_user_profile()
-    user = client.users.add(user_profile)
-    client.execute_query()
+    user = client.users.add(user_profile).execute_query()
     print("{0} user has been created".format(user.properties['userPrincipalName']))

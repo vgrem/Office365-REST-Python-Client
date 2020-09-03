@@ -33,8 +33,7 @@ class TestSharePointWeb(SPTestCase):
 
     def test3_get_list_item_by_url(self):
         page_url = "{site_url}SitePages/Home.aspx".format(site_url=settings['url'])
-        target_item = self.client.web.get_list_item(page_url)
-        self.client.execute_query()
+        target_item = self.client.web.get_list_item(page_url).execute_query()
         self.assertIsNotNone(target_item.resource_path)
 
     def test4_does_user_has_perms(self):
@@ -54,8 +53,7 @@ class TestSharePointWeb(SPTestCase):
         creation_info = WebCreationInformation()
         creation_info.Url = target_web_name
         creation_info.Title = target_web_name
-        self.__class__.target_web = self.client.web.webs.add(creation_info)
-        self.client.execute_query()
+        self.__class__.target_web = self.client.web.webs.add(creation_info).execute_query()
 
         results = self.client.web.webs.filter("Title eq '{0}'".format(target_web_name))
         self.client.load(results)
@@ -72,22 +70,17 @@ class TestSharePointWeb(SPTestCase):
         """Test to update Web resource"""
         web_title_updated = self.__class__.target_web.properties["Title"] + "_updated"
         self.__class__.target_web.set_property("Title", web_title_updated)
-        self.__class__.target_web.update()
-        self.client.execute_query()
+        self.__class__.target_web.update().execute_query()
 
-        self.client.load(self.__class__.target_web)
-        self.client.execute_query()
-        self.assertEqual(web_title_updated, self.__class__.target_web.properties['Title'])
+        updated_web = self.__class__.target_web.get().execute_query()
+        self.assertEqual(web_title_updated, updated_web.properties['Title'])
 
     def test9_if_web_deleted(self):
         """Test to delete Web resource"""
         title = self.__class__.target_web.properties['Title']
-        self.__class__.target_web.delete_object()
-        self.client.execute_query()
+        self.__class__.target_web.delete_object().execute_query()
 
-        results = self.client.web.webs.filter("Title eq '{0}'".format(title))
-        self.client.load(results)
-        self.client.execute_query()
+        results = self.client.web.webs.filter("Title eq '{0}'".format(title)).get().execute_query()
         self.assertEqual(len(results), 0)
 
     def test_10_enum_all_webs(self):
@@ -97,9 +90,7 @@ class TestSharePointWeb(SPTestCase):
         self.assertTrue(len(result.value) > 0)
 
     def test_11_read_list(self):
-        site_pages = self.client.web.get_list("SitePages")
-        self.client.load(site_pages)
-        self.client.execute_query()
+        site_pages = self.client.web.get_list("SitePages").get().execute_query()
         self.assertIsNotNone(site_pages.properties['Title'])
 
     def test_12_get_user_perms(self):
@@ -109,13 +100,9 @@ class TestSharePointWeb(SPTestCase):
         self.assertGreater(len(result.value.permission_levels), 0)
 
     def test_13_get_user_by_id(self):
-        result_user = self.client.web.get_user_by_id(self.__class__.target_user.id)
-        self.client.load(result_user)
-        self.client.execute_query()
+        result_user = self.client.web.get_user_by_id(self.__class__.target_user.id).get().execute_query()
         self.assertEqual(result_user.login_name, self.__class__.target_user.login_name)
 
     def test_14_get_catalog(self):
-        catalog = self.client.web.get_catalog(ListTemplateType.MasterPageCatalog)
-        self.client.load(catalog)
-        self.client.execute_query()
+        catalog = self.client.web.get_catalog(ListTemplateType.MasterPageCatalog).get().execute_query()
         self.assertIsNotNone(catalog.title)

@@ -10,6 +10,13 @@ class UserCollection(DirectoryObjectCollection):
         super(UserCollection, self).__init__(context, resource_path)
         self._item_type = User
 
+    def __getitem__(self, key):
+        """
+
+        :rtype: User
+        """
+        return super(UserCollection, self).__getitem__(key)
+
     def add(self, user_properties):
         """Create a new user.
 

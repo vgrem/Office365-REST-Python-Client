@@ -25,6 +25,7 @@ class ServiceOperationQuery(ClientQuery):
 
     def build_url(self):
         method_path = ResourcePathServiceOperation(self.method_name, self.method_parameters)
+        self.binding_type.query_options.reset()
         if self.static:
             return self.context.service_root_url() + \
                           '.'.join([self.binding_type.entity_type_name, method_path.to_url()])

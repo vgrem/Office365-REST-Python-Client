@@ -1,11 +1,13 @@
 from office365.graph.base_item import BaseItem
 from office365.graph.directory.permission_collection import PermissionCollection
 from office365.graph.onedrive.conflictBehavior import ConflictBehavior
+from office365.graph.onedrive.driveItemVersionCollection import DriveItemVersionCollection
 from office365.graph.onedrive.file import File
 from office365.graph.onedrive.file_upload import ResumableFileUpload
 from office365.graph.onedrive.fileSystemInfo import FileSystemInfo
 from office365.graph.onedrive.folder import Folder
 from office365.graph.onedrive.listItem import ListItem
+from office365.graph.onedrive.publicationFacet import PublicationFacet
 from office365.graph.onedrive.uploadSession import UploadSession
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
@@ -17,6 +19,53 @@ from office365.runtime.resource_path import ResourcePath
 class DriveItem(BaseItem):
     """The driveItem resource represents a file, folder, or other item stored in a drive. All file system objects in
     OneDrive and SharePoint are returned as driveItem resources """
+
+    def follow(self):
+        """
+        Follow a driveItem.
+        """
+        qry = ServiceOperationQuery(self, "follow")
+        self.context.add_query(qry)
+        return self
+
+    def unfollow(self):
+        """
+        Unfollow a driveItem.
+        """
+        qry = ServiceOperationQuery(self, "unfollow")
+        self.context.add_query(qry)
+        return self
+
+    def checkout(self):
+        """
+        Check out a driveItem resource to prevent others from editing the document, and prevent your changes
+        from being visible until the documented is checked in.
+        """
+        qry = ServiceOperationQuery(self,
+                                    "checkout",
+                                    None
+                                    )
+        self.context.add_query(qry)
+        return self
+
+    def checkin(self, comment, checkInAs=""):
+        """
+        Check in a checked out driveItem resource, which makes the version of the document available to others.
+
+        :param str comment: comment to the new version of the file
+        :param str checkInAs: The status of the document after the check-in operation is complete.
+            Can be published or unspecified.
+        """
+        qry = ServiceOperationQuery(self,
+                                    "checkin",
+                                    None,
+                                    {
+                                        "comment": comment,
+                                        "checkInAs": checkInAs
+                                    }
+                                    )
+        self.context.add_query(qry)
+        return self
 
     def resumable_upload(self, source_path, chunk_size=1000000):
         """
@@ -155,7 +204,6 @@ class DriveItem(BaseItem):
 
         def _construct_request(request):
             request.method = HttpMethod.Patch
-
         self.context.before_execute(_construct_request)
         return result
 
@@ -238,6 +286,20 @@ class DriveItem(BaseItem):
             return self.properties['permissions']
         else:
             return PermissionCollection(self.context, ResourcePath("permissions", self.resource_path))
+
+    @property
+    def publication(self):
+        """Provides information about the published or checked-out state of an item,
+        in locations that support such actions. This property is not returned by default. Read-only."""
+        return self.properties.get('publication', PublicationFacet())
+
+    @property
+    def versions(self):
+        """The list of previous versions of the item. For more info, see getting previous versions.
+        Read-only. Nullable."""
+        return self.properties.get('versions',
+                                   DriveItemVersionCollection(self.context, ResourcePath("versions",
+                                                                                         self.resource_path)))
 
     def set_property(self, name, value, persist_changes=True):
         super(DriveItem, self).set_property(name, value, persist_changes)

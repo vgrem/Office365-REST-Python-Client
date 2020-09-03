@@ -4,6 +4,7 @@ from os.path import isfile, join
 from settings import settings
 
 from office365.graph.graph_client import GraphClient
+from office365.graph.onedrive.drive import Drive
 
 
 def get_token(auth_ctx):
@@ -30,15 +31,12 @@ def upload_files(remote_drive, local_root_path):
         if isfile(path):
             with open(path, 'rb') as local_file:
                 content = local_file.read()
-            uploaded_drive_item = remote_drive.root.upload(name, content)
-            remote_drive.context.execute_query()
+            uploaded_drive_item = remote_drive.root.upload(name, content).execute_query()
             print("File '{0}' uploaded into {1}".format(path, uploaded_drive_item.web_url), )
 
 
 # get target drive
 client = GraphClient(settings['tenant'], get_token)
-drive = client.users["jdoe@mediadev8.onmicrosoft.com"].drive
-client.load(drive)
-client.execute_query()
+target_drive = client.users["jdoe@mediadev8.onmicrosoft.com"].drive
 # import local files into OneDrive
-upload_files(drive, "../data")
+upload_files(target_drive, "../data")

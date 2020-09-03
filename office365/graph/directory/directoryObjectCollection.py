@@ -18,6 +18,7 @@ class DirectoryObjectCollection(ClientObjectCollection):
         :param key: key is used to address a DirectoryObject resource by either an index in collection
         or by resource id
         :type key: int or str
+        :rtype: DirectoryObject
         """
         if type(key) == int:
             return super(DirectoryObjectCollection, self).__getitem__(key)

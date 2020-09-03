@@ -95,12 +95,14 @@ class Web(SecurableObject):
         """Update a Web resource"""
         qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
+        return self
 
     def delete_object(self):
         """Delete a Web resource"""
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         self.remove_from_parent_collection()
+        return self
 
     @staticmethod
     def create_anonymous_link(context, url, is_edit_link):

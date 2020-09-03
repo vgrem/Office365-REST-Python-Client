@@ -67,8 +67,7 @@ class TestSPView(SPTestCase):
 
     def test7_delete_view(self):
         view_to_delete = self.target_list.views.get_by_title(self.target_view_title_updated)
-        view_to_delete.delete_object()
-        self.client.execute_query()
+        view_to_delete.delete_object().execute_query()
 
         result = self.client.web.lists.filter("Title eq '{0}'".format(self.target_view_title_updated))
         self.client.load(result)

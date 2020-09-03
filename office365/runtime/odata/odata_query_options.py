@@ -40,6 +40,14 @@ class QueryOptions(object):
         result = {k: v for (k, v) in self.__dict__.items() if v is not None and v}
         return not result
 
+    def reset(self):
+        self.select = []
+        self.expand = []
+        self.filter = None
+        self.orderBy = None
+        self.skip = None
+        self.top = None
+
     def to_url(self):
         """Convert query options to url
         :return: str
