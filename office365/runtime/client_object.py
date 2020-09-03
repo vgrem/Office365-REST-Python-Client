@@ -30,6 +30,10 @@ class ClientObject(object):
         self.context.execute_query()
         return self
 
+    def execute_query_retry(self):
+        self.context.execute_query_retry()
+        return self
+
     def build_query(self):
         return self.context.build_request()
 

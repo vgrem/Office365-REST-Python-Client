@@ -27,7 +27,7 @@ class ClientValue(object):
 
     @property
     def entity_type_name(self):
-        if self._namespace:
+        if self._namespace is not None:
             return ".".join([self._namespace, type(self).__name__])
         return type(self).__name__
 

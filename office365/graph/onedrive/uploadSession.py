@@ -6,6 +6,7 @@ class UploadSession(ClientValue):
     Business, or SharePoint document libraries. """
 
     def __init__(self):
+        super().__init__()
         self.expirationDateTime = None
         self.nextExpectedRanges = None
         self.uploadUrl = None

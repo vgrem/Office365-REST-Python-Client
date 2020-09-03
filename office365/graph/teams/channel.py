@@ -2,6 +2,7 @@ from urllib.parse import quote
 
 from office365.graph.entity import Entity
 from office365.graph.teams.chatMessageCollection import ChatMessageCollection
+from office365.graph.teams.teamsTabCollection import TeamsTabCollection
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.resource_path import ResourcePath
 
@@ -17,12 +18,16 @@ class Channel(Entity):
         return self
 
     @property
+    def tabs(self):
+        """A collection of all the tabs in the channel. A navigation property."""
+        return self.properties.get('tabs',
+                                   TeamsTabCollection(self.context, ResourcePath("tabs", self.resource_path)))
+
+    @property
     def messages(self):
         """A collection of all the messages in the channel. A navigation property. Nullable."""
-        if self.is_property_available("messages"):
-            return self.properties['messages']
-        else:
-            return ChatMessageCollection(self.context, ResourcePath("messages", self.resource_path))
+        return self.properties.get('messages',
+                                   ChatMessageCollection(self.context, ResourcePath("messages", self.resource_path)))
 
     @property
     def web_url(self):

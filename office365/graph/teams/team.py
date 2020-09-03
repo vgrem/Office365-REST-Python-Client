@@ -38,9 +38,10 @@ class Team(Entity):
             return Channel(self.context, ResourcePath("primaryChannel", self.resource_path))
 
     def update(self):
-        """Updates team."""
+        """Updates a Team."""
         qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
+        return self
 
     def archive(self):
         """Archive the specified team. When a team is archived, users can no longer send or like messages on any
@@ -48,12 +49,14 @@ class Team(Entity):
         the team. Membership changes to the team continue to be allowed. """
         qry = ServiceOperationQuery(self, "archive")
         self.context.add_query(qry)
+        return self
 
     def unarchive(self):
         """Restore an archived team. This restores users' ability to send messages and edit the team, abiding by
         tenant and team settings. """
         qry = ServiceOperationQuery(self, "unarchive")
         self.context.add_query(qry)
+        return self
 
     def clone(self):
         """Create a copy of a team. This operation also creates a copy of the corresponding group. """
@@ -66,3 +69,4 @@ class Team(Entity):
         # fallback: fix resource path
         if name == "id" and self._resource_path.segment == "team":
             self._resource_path = ResourcePath(value, ResourcePath("teams"))
+        return self

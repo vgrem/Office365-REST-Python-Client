@@ -15,6 +15,10 @@ class ClientRuntimeContext(object):
         """
         self._auth_context = auth_context
 
+    @property
+    def current_query(self):
+        return self.pending_request().current_query
+
     def execute_query_retry(self, max_retry=5, timeout_secs=5, on_success=None, on_failure=None):
         """
         Executes the current set of data retrieval queries and method invocations and retries it if needed.

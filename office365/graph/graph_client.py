@@ -1,8 +1,8 @@
 import adal
 
 from office365.graph.actions.download_content_query import DownloadContentQuery
-from office365.graph.actions.upload_content_query import UploadContentQuery
 from office365.graph.actions.search_query import SearchQuery
+from office365.graph.actions.upload_content_query import UploadContentQuery
 from office365.graph.directory.directory import Directory
 from office365.graph.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.graph.directory.groupCollection import GroupCollection

@@ -2,6 +2,7 @@ from office365.graph.base_item import BaseItem
 from office365.graph.directory.permission_collection import PermissionCollection
 from office365.graph.onedrive.conflictBehavior import ConflictBehavior
 from office365.graph.onedrive.file import File
+from office365.graph.onedrive.file_upload import ResumableFileUpload
 from office365.graph.onedrive.fileSystemInfo import FileSystemInfo
 from office365.graph.onedrive.folder import Folder
 from office365.graph.onedrive.listItem import ListItem
@@ -17,9 +18,28 @@ class DriveItem(BaseItem):
     """The driveItem resource represents a file, folder, or other item stored in a drive. All file system objects in
     OneDrive and SharePoint are returned as driveItem resources """
 
+    def resumable_upload(self, source_path, chunk_size=1000000):
+        """
+        Create an upload session to allow your app to upload files up to the maximum file size.
+        An upload session allows your app to upload ranges of the file in sequential API requests,
+        which allows the transfer to be resumed if a connection is dropped while the upload is in progress.
+
+        To upload a file using an upload session, there are two steps:
+            Create an upload session
+            Upload bytes to the upload session
+
+        :param str source_path: Local file path
+        :param int chunk_size: chunk size
+        """
+        uploader = ResumableFileUpload(self, source_path, chunk_size)
+        return uploader.drive_item
+
     def create_upload_session(self, item):
         """Creates a temporary storage location where the bytes of the file will be saved until the complete file is
-        uploaded. """
+        uploaded.
+
+        :type item: office365.graph.onedrive.driveItemUploadableProperties.DriveItemUploadableProperties
+        """
         result = ClientResult(UploadSession())
         qry = ServiceOperationQuery(self,
                                     "createUploadSession",
@@ -181,26 +201,17 @@ class DriveItem(BaseItem):
     @property
     def fileSystemInfo(self):
         """File system information on client."""
-        if self.is_property_available('fileSystemInfo'):
-            return self.properties['fileSystemInfo']
-        else:
-            return FileSystemInfo()
+        return self.properties.get('fileSystemInfo', FileSystemInfo())
 
     @property
     def folder(self):
         """Folder metadata, if the item is a folder."""
-        if self.is_property_available('folder'):
-            return self.properties['folder']
-        else:
-            return Folder()
+        return self.properties.get('folder', Folder())
 
     @property
     def file(self):
         """File metadata, if the item is a file."""
-        if self.is_property_available('file'):
-            return self.properties['file']
-        else:
-            return File()
+        return self.properties.get('file', File())
 
     @property
     def children(self):
