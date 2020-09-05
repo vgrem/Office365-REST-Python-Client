@@ -2,6 +2,7 @@ from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.contenttypes.content_type import ContentType
+from office365.sharepoint.contenttypes.contentTypeCreationInformation import ContentTypeCreationInformation
 
 
 class ContentTypeCollection(ClientObjectCollection):
@@ -22,8 +23,8 @@ class ContentTypeCollection(ClientObjectCollection):
     def add(self, contentTypeInfo):
         """Adds a new content type to the collection and returns a reference to the added SP.ContentType.
 
-        :param ContentTypeCreationInformation contentTypeInfo: Specifies properties that is to be used to construct
-           the new content type.
+        :param ContentTypeCreationInformation contentTypeInfo: Specifies properties that is to be used to
+           construct the new content type.
 
         """
         ct = ContentType(self.context)

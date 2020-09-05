@@ -31,8 +31,7 @@ class TestFieldValue(SPTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.target_list.delete_object()
-        cls.client.execute_query()
+        cls.target_list.delete_object().execute_query()
 
     def test_1_set_field_text_value(self):
         items = self.target_list.items

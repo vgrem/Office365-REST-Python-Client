@@ -13,9 +13,7 @@ class TestField(SPTestCase):
     target_field_name = "Title"
 
     def test_1_get_site_fields(self):
-        site_fields = self.client.site.rootWeb.fields
-        self.client.load(site_fields)
-        self.client.execute_query()
+        site_fields = self.client.site.rootWeb.fields.get().execute_query()
         self.assertGreater(len(site_fields), 0)
 
     def test_2_get_field(self):
@@ -37,7 +35,7 @@ class TestField(SPTestCase):
     def test_4_create_site_field(self):
         field_name = "Title_" + uuid.uuid4().hex
         create_field_info = FieldCreationInformation(field_name, FieldType.Text)
-        created_field = self.client.site.rootWeb.fields.add(create_field_info)
+        created_field = self.client.site.rootWeb.fields.add(create_field_info).execute_query()
         self.client.execute_query()
         self.assertEqual(created_field.properties["Title"], field_name)
         self.__class__.target_field = created_field
@@ -57,5 +55,4 @@ class TestField(SPTestCase):
 
     def test_6_delete_site_field(self):
         field_to_delete = self.__class__.target_field
-        field_to_delete.delete_object()
-        self.client.execute_query()
+        field_to_delete.delete_object().execute_query()

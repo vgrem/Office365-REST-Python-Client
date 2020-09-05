@@ -25,9 +25,7 @@ class BaseItem(Entity):
     @property
     def createdBy(self):
         """Identity of the user, device, or application which created the item."""
-        if self.is_property_available("createdBy"):
-            return self.properties['createdBy']
-        return IdentitySet()
+        return self.properties.get('createdBy', IdentitySet())
 
     @property
     def lastModifiedBy(self):
@@ -53,9 +51,7 @@ class BaseItem(Entity):
     @property
     def name(self):
         """The name of the item."""
-        if self.is_property_available("name"):
-            return self.properties['name']
-        return None
+        return self.properties.get('name', None)
 
     @name.setter
     def name(self, value):
@@ -82,9 +78,7 @@ class BaseItem(Entity):
     @property
     def parentReference(self):
         """Parent information, if the item has a parent."""
-        if self.is_property_available("parentReference"):
-            return self.properties['parentReference']
-        return ItemReference()
+        return self.properties.get('parentReference', ItemReference())
 
     @parentReference.setter
     def parentReference(self, value):

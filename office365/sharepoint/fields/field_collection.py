@@ -17,7 +17,7 @@ class FieldCollection(ClientObjectCollection):
     def add(self, field_creation_information):
         """Adds a fields to the fields collection.
 
-        :type field_creation_information: FieldCreationInformation
+        :type field_creation_information: office365.sharepoint.fields.field_creation_information.FieldCreationInformation
         """
         field = Field.create_field_from_type(self.context, field_creation_information.FieldTypeKind)
         self.add_child(field)

@@ -34,7 +34,7 @@ class ClientObject(object):
         self.context.execute_query_retry()
         return self
 
-    def build_query(self):
+    def build_request(self):
         return self.context.build_request()
 
     def get(self):

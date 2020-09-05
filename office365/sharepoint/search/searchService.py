@@ -35,7 +35,7 @@ class SearchService(BaseEntity):
     def query(self, search_request):
         """The operation is used to retrieve search results by using the HTTP protocol with the GET method.
 
-        :type search_request: SearchRequest
+        :type search_request: office365.sharepoint.search.searchRequest.SearchRequest
         """
         result = SearchResult()
         qry = ServiceOperationQuery(self, "query", search_request.to_json(), None, "query", result)

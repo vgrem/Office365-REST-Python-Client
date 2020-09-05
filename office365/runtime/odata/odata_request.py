@@ -30,24 +30,14 @@ class ODataRequest(ClientRequest):
         return self._json_format
 
     def execute_request_direct(self, request):
-        """
-        Executes request directly
-
-        :param RequestOptions request: request
-        :return: requests.Response
-        """
         self.ensure_media_type(request)
         return super(ODataRequest, self).execute_request_direct(request)
-
-    def ensure_media_type(self, request):
-        media_type = self.json_format.get_media_type()
-        request.ensure_header('Content-Type', media_type)
-        request.ensure_header('Accept', media_type)
 
     def build_request(self):
         qry = self.current_query
         action_url = qry.build_url()
         request = RequestOptions(action_url)
+        self.ensure_media_type(request)
         # set method
         request.method = HttpMethod.Get
         if isinstance(qry, DeleteEntityQuery):
@@ -57,6 +47,14 @@ class ODataRequest(ClientRequest):
             if qry.parameter_type is not None:
                 request.data = self._normalize_payload(qry.parameter_type)
         return request
+
+    def ensure_media_type(self, request):
+        """
+        :type request: RequestOptions
+        """
+        media_type = self.json_format.get_media_type()
+        request.ensure_header('Content-Type', media_type)
+        request.ensure_header('Accept', media_type)
 
     def process_response(self, response):
         """
@@ -123,7 +121,10 @@ class ODataRequest(ClientRequest):
 
     def _normalize_payload(self, value):
         """
+        Normalizes OData request payload
+
         :type value: ClientValue or ClientResult  or ClientObject
+        :rtype: dict
         """
         qry = self.current_query
         if isinstance(value, ClientValueCollection):

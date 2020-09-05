@@ -5,6 +5,7 @@ from requests import HTTPError
 
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.types.EventHandler import EventHandler
 
 
@@ -64,7 +65,7 @@ class ClientRequest(object):
 
     def execute_query(self):
         """Submit a pending request to the server"""
-        for _ in self.get_next_query():
+        for _ in self.next_query():
             try:
                 request = self.build_request()
                 self.beforeExecute.notify(request)
@@ -120,7 +121,7 @@ class ClientRequest(object):
                                   proxies=request_options.proxies)
         return result
 
-    def get_next_query(self):
+    def next_query(self):
         while self._queries:
             qry = self._queries.pop(0)
             self._current_query = qry

@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+from office365.runtime.http.request_options import RequestOptions
 from settings import settings
 from tests import random_seed
 
@@ -36,7 +37,12 @@ class TestSharePointClient(TestCase):
     def test4_connect_with_client_cert(self):
         pass
 
-    def test5_get_batch_request(self):
+    def test5_construct_get_request(self):
+        client = ClientContext(settings['url']).with_credentials(user_credentials)
+        request = client.web.currentUser.get().build_request()
+        self.assertIsInstance(request, RequestOptions)
+
+    def test7_execute_get_batch_request(self):
         client = ClientContext(settings['url']).with_credentials(user_credentials)
         current_user = client.web.currentUser
         client.load(current_user)
@@ -46,7 +52,7 @@ class TestSharePointClient(TestCase):
         self.assertIsNotNone(current_web.url)
         self.assertIsNotNone(current_user.user_id)
 
-    def test6_update_batch_request(self):
+    def test8_execute_update_batch_request(self):
         client = ClientContext(settings['url']).with_credentials(user_credentials)
         web = client.web
         new_web_title = "Site %s" % random_seed
@@ -59,7 +65,7 @@ class TestSharePointClient(TestCase):
         client.execute_query()
         self.assertEqual(updated_web.properties['Title'], new_web_title)
 
-    def test7_get_and_update_batch_request(self):
+    def test9_execute_get_and_update_batch_request(self):
         client = ClientContext(settings['url']).with_credentials(user_credentials)
         list_item = client.web.get_file_by_server_relative_url("/SitePages/Home.aspx").listItemAllFields
         new_title = "Page %s" % random_seed
@@ -72,10 +78,10 @@ class TestSharePointClient(TestCase):
         client.execute_query()
         self.assertEqual(updated_list_item.properties['Title'], new_title)
 
-    def test8_create_and_delete_batch_request(self):
+    def test_10_create_and_delete_batch_request(self):
         pass
 
-    def test9_get_and_delete_batch_request(self):
+    def test_11_get_and_delete_batch_request(self):
         file_name = "TestFile{0}.txt".format(random_seed)
         client = ClientContext(settings['url']).with_credentials(user_credentials)
         list_pages = client.web.lists.get_by_title("Documents")

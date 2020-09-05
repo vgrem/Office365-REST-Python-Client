@@ -1,3 +1,5 @@
+
+
 class ClientQuery(object):
     """Client query"""
 
@@ -19,6 +21,9 @@ class ClientQuery(object):
 
     def build_url(self):
         return self._binding_type.resource_url
+
+    def build_request(self):
+        return self.context.build_request()
 
     @property
     def context(self):

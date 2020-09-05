@@ -1,46 +1,26 @@
 import json
 import re
-import uuid
 from email import message_from_bytes
 from email.message import Message
 
 from office365.runtime.client_request import ClientRequest
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.queries.client_query_collection import ClientQueryCollection
-
-
-def _create_boundary(prefix, compact=False):
-    """Creates a string that can be used as a multipart request boundary.
-    :param str prefix: String to use as the start of the boundary string
-    """
-    if compact:
-        return prefix + str(uuid.uuid4())[:8]
-    else:
-        return prefix + str(uuid.uuid4())
+from office365.runtime.queries.batch_query import BatchQuery, create_boundary
 
 
 class ODataBatchRequest(ClientRequest):
 
     def __init__(self, context):
         super(ODataBatchRequest, self).__init__(context)
-        media_type = "multipart/mixed"
-        self._current_boundary = _create_boundary("batch_")
-        self._content_type = "; ".join([media_type, "boundary={0}".format(self._current_boundary)])
-
-    @property
-    def context(self):
-        """
-
-        :rtype:  office365.sharepoint.client_context.ClientContext
-        """
-        return self._context
 
     def build_request(self):
-        request_url = "{0}$batch".format(self.context.service_root_url())
-        request = RequestOptions(request_url)
+        url = "{0}$batch".format(self.context.service_root_url())
+        request = RequestOptions(url)
         request.method = HttpMethod.Post
-        request.ensure_header('Content-Type', self._content_type)
+        media_type = "multipart/mixed"
+        content_type = "; ".join([media_type, "boundary={0}".format(self._current_query.current_boundary)])
+        request.ensure_header('Content-Type', content_type)
         request.data = self._prepare_payload().as_bytes()
         return request
 
@@ -52,7 +32,7 @@ class ODataBatchRequest(ClientRequest):
         content_id = 0
         for response_info in self._read_response(response):
             if response_info["content"] is not None:
-                qry = self._current_query.queries[content_id]
+                qry = self._current_query.get(content_id)
                 self.context.pending_request().map_json(response_info["content"], qry.return_type)
                 content_id += 1
 
@@ -78,24 +58,22 @@ class ODataBatchRequest(ClientRequest):
         """Serializes a batch request body."""
         main_message = Message()
         main_message.add_header("Content-Type", "multipart/mixed")
-        main_message.set_boundary(self._current_boundary)
+        main_message.set_boundary(self._current_query.current_boundary)
 
-        if len(self._current_query.change_sets) > 0:
+        if self._current_query.has_change_sets:
             change_set_message = Message()
-            change_set_boundary = _create_boundary("changeset_", True)
+            change_set_boundary = create_boundary("changeset_", True)
             change_set_message.add_header("Content-Type", "multipart/mixed")
             change_set_message.set_boundary(change_set_boundary)
 
-            for qry in self._current_query.change_sets:
-                self.context.pending_request()._current_query = qry
-                request = self.context.build_request()
+            for qry in self._current_query.next_change_set():
+                request = qry.build_request()
                 message = self._serialize_request(request)
                 change_set_message.attach(message)
             main_message.attach(change_set_message)
 
-        for qry in self._current_query.queries:
-            self.context.pending_request()._current_query = qry
-            request = self.context.build_request()
+        for qry in self._current_query.next_get_query():
+            request = qry.build_request()
             message = self._serialize_request(request)
             main_message.attach(message)
 
@@ -103,7 +81,11 @@ class ODataBatchRequest(ClientRequest):
 
     @staticmethod
     def _normalize_headers(headers_raw):
-        return dict(kv.split(":") for kv in headers_raw)
+        headers = {}
+        for header_line in headers_raw:
+            k, v = header_line.split(":", 1)
+            headers[k] = v
+        return headers
 
     def _deserialize_response(self, raw_response):
         response = raw_response.get_payload(decode=True)
@@ -153,8 +135,8 @@ class ODataBatchRequest(ClientRequest):
         message.set_payload(payload)
         return message
 
-    def get_next_query(self):
-        queries = [qry for qry in self.context.pending_request().get_next_query()]
-        qry = ClientQueryCollection(self.context, queries)  # Aggregate requests into batch request
+    def next_query(self):
+        queries = [qry for qry in self.context.pending_request().next_query()]
+        qry = BatchQuery(self.context, queries)  # Aggregate requests into batch request
         self._current_query = qry
         yield qry

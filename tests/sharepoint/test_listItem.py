@@ -1,3 +1,4 @@
+from random import randint
 from time import sleep
 
 from tests import random_seed
@@ -17,8 +18,9 @@ class TestSharePointListItem(SPTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestSharePointListItem, cls).setUpClass()
+        target_list_title = "Tasks" + str(randint(0, 10000))
         cls.target_list = cls.ensure_list(cls.client.web,
-                                          ListCreationInformation("Tasks",
+                                          ListCreationInformation(target_list_title,
                                                                   None,
                                                                   ListTemplateType.Tasks)
                                           )
@@ -110,3 +112,15 @@ class TestSharePointListItem(SPTestCase):
         self.client.load(result)
         self.client.execute_query()
         self.assertEqual(0, len(result))
+
+    def test_10_create_multiple_items(self):
+        items_count = 3
+        for i in range(0, items_count):
+            item_properties = {'Title': f"Task {i}"}
+            self.target_list.add_item(item_properties)
+        self.client.execute_batch()
+        result = self.target_list.items.get().execute_query()
+        self.assertEqual(len(result), items_count)
+
+    def test_11_delete_multiple_items(self):
+        pass

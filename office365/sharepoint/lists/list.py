@@ -223,7 +223,7 @@ class List(SecurableObject):
         """Gets a value that specifies the number of list items in the list.
         :rtype: int or None
         """
-        return self.properties.get('itemCount', None)
+        return self.properties.get('ItemCount', None)
 
     @property
     def title(self):

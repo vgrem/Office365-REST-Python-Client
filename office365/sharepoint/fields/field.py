@@ -63,12 +63,14 @@ class Field(BaseEntity):
         """Sets the value of the ShowInNewForm property for this fields."""
         qry = ServiceOperationQuery(self, "setShowInNewForm", [flag])
         self.context.add_query(qry)
+        return self
 
     def delete_object(self):
         """Deletes the fields."""
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         self.remove_from_parent_collection()
+        return self
 
     @property
     def internal_name(self):

@@ -27,10 +27,11 @@ class ServiceOperationQuery(ClientQuery):
         method_path = ResourcePathServiceOperation(self.method_name, self.method_parameters)
         self.binding_type.query_options.reset()
         if self.static:
-            return self.context.service_root_url() + \
+            url = self.context.service_root_url() + \
                           '.'.join([self.binding_type.entity_type_name, method_path.to_url()])
         else:
-            return '/'.join([self.binding_type.resource_url, method_path.to_url()])
+            url = '/'.join([self.binding_type.resource_url, method_path.to_url()])
+        return url
 
     @property
     def method_name(self):

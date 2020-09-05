@@ -141,8 +141,7 @@ class ClientContext(ClientRuntimeContext):
 
     def build_request(self):
         request = super(ClientContext, self).build_request()
-        self.pending_request().ensure_media_type(request)
-        self.pending_request().beforeExecute.notify(request)
+        self._build_modification_query(request)
         return request
 
     def pending_request(self):
@@ -190,18 +189,18 @@ class ClientContext(ClientRuntimeContext):
 
         :type request: RequestOptions
         """
-        query = self.pending_request().current_query
+        query = self.current_query
 
         if request.method == HttpMethod.Post:
             self.ensure_form_digest(request)
         # set custom SharePoint control headers
         if isinstance(self._pendingRequest.json_format, JsonLightFormat):
             if isinstance(query, DeleteEntityQuery):
-                request.set_header("X-HTTP-Method", "DELETE")
-                request.set_header("IF-MATCH", '*')
+                request.ensure_header("X-HTTP-Method", "DELETE")
+                request.ensure_header("IF-MATCH", '*')
             elif isinstance(query, UpdateEntityQuery):
-                request.set_header("X-HTTP-Method", "MERGE")
-                request.set_header("IF-MATCH", '*')
+                request.ensure_header("X-HTTP-Method", "MERGE")
+                request.ensure_header("IF-MATCH", '*')
 
     @property
     def web(self):
