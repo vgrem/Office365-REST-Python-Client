@@ -5,6 +5,7 @@ from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.principal.user import User
+from office365.sharepoint.recyclebin.recycleBinItemCollection import RecycleBinItemCollection
 from office365.sharepoint.webs.web import Web
 
 
@@ -13,6 +14,16 @@ class Site(ClientObject):
 
     def __init__(self, context):
         super(Site, self).__init__(context, ResourcePath("Site", None))
+
+    def get_recycle_bin_items(self, pagingInfo=None, rowLimit=100, isAscending=True, orderBy=None, itemState=None):
+        result = RecycleBinItemCollection(self.context)
+        payload = {
+            "rowLimit": rowLimit,
+            "isAscending": isAscending
+        }
+        qry = ServiceOperationQuery(self, "GetRecycleBinItems", None, payload, None, result)
+        self.context.add_query(qry)
+        return result
 
     @staticmethod
     def get_url_by_id(context, site_id, stop_redirect=False):

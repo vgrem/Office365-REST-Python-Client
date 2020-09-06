@@ -1,8 +1,8 @@
 from office365.directory.permission import Permission
-from office365.runtime.client_object_collection import ClientObjectCollection
+from office365.entity_collection import EntityCollection
 
 
-class PermissionCollection(ClientObjectCollection):
+class PermissionCollection(EntityCollection):
     """Permission's collection"""
 
     def __init__(self, context, resource_path=None):

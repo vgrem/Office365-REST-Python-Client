@@ -1,15 +1,27 @@
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.changes.changeCollection import ChangeCollection
 from office365.sharepoint.files.file_creation_information import FileCreationInformation
 from office365.sharepoint.listitems.listitem import ListItem
 
 
 class Folder(BaseEntity):
     """Represents a folder in a SharePoint Web site."""
+
+    def get_list_item_changes(self, query):
+        """
+
+        :param office365.sharepoint.changeQuery.ChangeQuery query: Specifies which changes to return
+        """
+        changes = ChangeCollection(self.context)
+        qry = ServiceOperationQuery(self, "getListItemChanges", None, query, "query", changes)
+        self.context.add_query(qry)
+        return changes
 
     def add(self, name):
         """Adds the folder that is located under a current folder
@@ -36,12 +48,14 @@ class Folder(BaseEntity):
         item.set_property('FileLeafRef', name)
         qry = UpdateEntityQuery(item)
         self.context.add_query(qry)
+        return self
 
     def delete_object(self):
         """Deletes the folder."""
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         self.remove_from_parent_collection()
+        return self
 
     def upload_file(self, name, content):
         """Uploads a file into folder
@@ -69,6 +83,7 @@ class Folder(BaseEntity):
                 file.copyto(new_file_url, overwrite)
 
         self.ensure_property("Files", _copy_files)
+        return self
 
     def moveto(self, new_relative_url, flags):
         """Moves the folder with files to the destination URL.
@@ -85,6 +100,7 @@ class Folder(BaseEntity):
                 new_file_url = "/".join([new_relative_url, file.properties['Name']])
                 file.moveto(new_file_url, flags)
         self.ensure_property("Files", _move_folder_with_files)
+        return self
 
     @property
     def list_item_all_fields(self):
@@ -128,3 +144,4 @@ class Folder(BaseEntity):
                                                                    ResourcePath("Web"))
             elif name == "UniqueId":
                 self._resource_path = ResourcePathServiceOperation("getFolderById", [value], ResourcePath("Web"))
+        return self

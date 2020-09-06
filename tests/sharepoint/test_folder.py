@@ -1,5 +1,7 @@
 from random import randint
 
+from office365.sharepoint.changes.changeCollection import ChangeCollection
+from office365.sharepoint.changes.changeQuery import ChangeQuery
 from tests import random_seed
 from tests.sharepoint.sharepoint_case import SPTestCase
 
@@ -82,7 +84,7 @@ class TestSharePointFolder(SPTestCase):
         uploaded_file = folder_to_copy.upload_file("sample.txt", "Some content goes here...")
         self.client.load(folder_to_copy, ["Files"])
         self.client.execute_query()
-        self.assertIsNotNone(uploaded_file.properties['ServerRelativeUrl'])
+        self.assertIsNotNone(uploaded_file.serverRelativeUrl)
         self.assertGreater(len(folder_to_copy.files), 0)
 
         # 2.ensure a target folder exists
@@ -102,19 +104,22 @@ class TestSharePointFolder(SPTestCase):
         folder_name = "Move_" + str(randint(0, 1000))
         folder_to = self.__class__.target_list.rootFolder.add(folder_name)
         self.client.execute_query()
-        self.assertIsNotNone(folder_to.properties['ServerRelativeUrl'])
+        self.assertIsNotNone(folder_to.serverRelativeUrl)
 
         folder.moveto(folder_to.properties['ServerRelativeUrl'], MoveOperations.overwrite)
         self.client.execute_query()
-        self.assertIsNotNone(folder_to.properties['ServerRelativeUrl'])
+        self.assertIsNotNone(folder_to.serverRelativeUrl)
 
     def test7_delete_folder(self):
         folder_to_delete = self.__class__.target_list.rootFolder.folders.get_by_url(self.__class__.target_folder_name)
-        folder_to_delete.delete_object()
-        self.client.execute_query()
+        folder_to_delete.delete_object().execute_query()
 
         result = self.__class__.target_list.rootFolder.folders.filter(
             "Name eq '{0}'".format(self.__class__.target_folder_name))
         self.client.load(result)
         self.client.execute_query()
         self.assertEqual(len(result), 0)
+
+    def test8_get_changes(self):
+        changes = self.__class__.target_list.rootFolder.get_list_item_changes(ChangeQuery()).execute_query()
+        self.assertIsInstance(changes, ChangeCollection)

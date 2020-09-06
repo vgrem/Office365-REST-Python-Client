@@ -1,11 +1,13 @@
 import uuid
 
+from office365.directory.permission import Permission
 from office365.onedrive.driveItem import DriveItem
 from tests.graph_case import GraphTestCase
 
 
 class TestPermissions(GraphTestCase):
     target_drive_item = None  # type: DriveItem
+    target_permission = None  # type: Permission
 
     @classmethod
     def setUpClass(cls):
@@ -36,4 +38,17 @@ class TestPermissions(GraphTestCase):
         self.assertGreater(len(permissions), 0)
 
     def test5_get_permission(self):
-        pass
+        result = self.__class__.target_drive_item.permissions.get().top(1).execute_query()
+        self.assertEqual(len(result), 1)
+        perm_id = result[0].id
+        perm = self.__class__.target_drive_item.permissions[perm_id].get().execute_query()
+        self.assertIsNotNone(perm.resource_path)
+        self.__class__.target_permission = result[0]
+
+    def test6_update_permission(self):
+        perm_to_update = self.__class__.target_permission
+        perm_to_update.set_property("roles", ["read"]).update().execute_query()
+
+    def test7_delete_permission(self):
+        perm_to_delete = self.__class__.target_permission
+        perm_to_delete.delete_object().execute_query()
