@@ -3,8 +3,7 @@ import tempfile
 
 from settings import settings
 
-from office365.graph.graph_client import GraphClient
-from office365.graph.onedrive.driveItem import DriveItem
+from office365.graph_client import GraphClient
 
 
 def get_token(auth_ctx):
@@ -21,7 +20,7 @@ def get_token(auth_ctx):
 def download_files(remote_folder, local_path):
     """
 
-    :type remote_folder: DriveItem
+    :type remote_folder: office365.onedrive.driveItem.DriveItem
     :type local_path: str
     """
     drive_items = remote_folder.children.get().execute_query()

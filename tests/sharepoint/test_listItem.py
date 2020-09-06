@@ -25,6 +25,7 @@ class TestSharePointListItem(SPTestCase):
                                                                   ListTemplateType.Tasks)
                                           )
         cls.default_title = "Task %s" % random_seed
+        cls.batch_items_count = 3
 
     @classmethod
     def tearDownClass(cls):
@@ -114,13 +115,18 @@ class TestSharePointListItem(SPTestCase):
         self.assertEqual(0, len(result))
 
     def test_10_create_multiple_items(self):
-        items_count = 3
-        for i in range(0, items_count):
-            item_properties = {'Title': f"Task {i}"}
+        for i in range(0, self.batch_items_count):
+            item_properties = {'Title': "Task {0}".format(i)}
             self.target_list.add_item(item_properties)
         self.client.execute_batch()
         result = self.target_list.items.get().execute_query()
-        self.assertEqual(len(result), items_count)
+        self.assertEqual(len(result), self.batch_items_count)
 
     def test_11_delete_multiple_items(self):
-        pass
+        result = self.target_list.items.get().execute_query()  # get existing items
+        self.assertGreater(len(result), 0)
+        for item in result:
+            item.delete_object()
+        self.client.execute_batch()
+        result_after = self.target_list.items.get().execute_query()
+        self.assertEqual(len(result_after), 0)

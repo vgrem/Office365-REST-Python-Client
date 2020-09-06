@@ -19,27 +19,27 @@ class ClientRuntimeContext(object):
     def current_query(self):
         return self.pending_request().current_query
 
-    def execute_query_retry(self, max_retry=5, timeout_secs=5, on_success=None, on_failure=None):
+    def execute_query_retry(self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None):
         """
         Executes the current set of data retrieval queries and method invocations and retries it if needed.
 
         :param int max_retry: Number of times to retry the request
         :param int timeout_secs: Seconds to wait before retrying the request.
-        :param (ClientObject)-> None on_success:
-        :param (int)-> None on_failure:
+        :param (ClientObject)-> None success_callback:
+        :param (int)-> None failure_callback:
         """
 
         for retry in range(1, max_retry):
             try:
                 self.execute_query()
-                if callable(on_success):
-                    on_success(self.pending_request().current_query.return_type)
+                if callable(success_callback):
+                    success_callback(self.pending_request().current_query.return_type)
                 break
             except ClientRequestException:
                 self.add_query(self.pending_request().current_query, True)
                 sleep(timeout_secs)
-                if callable(on_failure):
-                    on_failure(retry)
+                if callable(failure_callback):
+                    failure_callback(retry)
 
     @abc.abstractmethod
     def pending_request(self):

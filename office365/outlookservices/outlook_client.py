@@ -1,4 +1,4 @@
-from office365.graph.directory.user import User
+from office365.directory.user import User
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod

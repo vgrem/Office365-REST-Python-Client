@@ -1,7 +1,6 @@
 from settings import settings
 
 from office365.runtime.auth.client_credential import ClientCredential
-from office365.sharepoint.listdatasvc.list_data_service import ListDataService
 
 site_url = settings.get('url')
 credentials = ClientCredential(settings.get('client_credentials').get('client_id'),
@@ -12,6 +11,6 @@ def create_folder():
     pass
 
 
-#ctx = ListDataService(site_url)
-#ctx = ClientContext(site_url).with_credentials(credentials)
-#ctx.execute_query()
+# ctx = ListDataService(site_url)
+# ctx = ClientContext(site_url).with_credentials(credentials)
+# ctx.execute_query()

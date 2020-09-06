@@ -1,6 +1,5 @@
 from unittest import TestCase
 
-from office365.runtime.http.request_options import RequestOptions
 from settings import settings
 from tests import random_seed
 
@@ -9,6 +8,7 @@ from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
 from office365.runtime.auth.providers.saml_token_provider import SamlTokenProvider
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.auth.user_credential import UserCredential
+from office365.runtime.http.request_options import RequestOptions
 from office365.sharepoint.client_context import ClientContext
 
 user_credentials = UserCredential(settings.get('user_credentials').get('username'),

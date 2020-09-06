@@ -5,7 +5,6 @@ from requests import HTTPError
 
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.types.EventHandler import EventHandler
 
 
@@ -79,7 +78,7 @@ class ClientRequest(object):
     def execute_request_direct(self, request_options):
         """Execute client request
 
-        :type request_options: RequestOptions
+        :type request_options: office365.runtime.http.request_options.RequestOptions
         """
         self.context.authenticate_request(request_options)
         if request_options.method == HttpMethod.Post:

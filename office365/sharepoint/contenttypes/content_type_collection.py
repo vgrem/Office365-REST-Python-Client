@@ -2,7 +2,6 @@ from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.contenttypes.content_type import ContentType
-from office365.sharepoint.contenttypes.contentTypeCreationInformation import ContentTypeCreationInformation
 
 
 class ContentTypeCollection(ClientObjectCollection):
@@ -20,16 +19,16 @@ class ContentTypeCollection(ClientObjectCollection):
         """
         return ContentType(self.context, ResourcePathServiceOperation("GetById", [contentTypeId], self.resource_path))
 
-    def add(self, contentTypeInfo):
+    def add(self, content_type_info):
         """Adds a new content type to the collection and returns a reference to the added SP.ContentType.
 
-        :param ContentTypeCreationInformation contentTypeInfo: Specifies properties that is to be used to
-           construct the new content type.
+        :param office365.sharepoint.contenttypes.contentTypeCreationInformation.ContentTypeCreationInformation content_type_info: Specifies properties that is to be used to
+            construct the new content type.
 
         """
         ct = ContentType(self.context)
         self.add_child(ct)
-        ct_json = contentTypeInfo.to_json()
+        ct_json = content_type_info.to_json()
         for k, v in ct_json.items():
             if k == "Id":
                 ct.set_property(k, {"StringValue": v}, True)

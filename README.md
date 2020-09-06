@@ -129,7 +129,7 @@ The example demonstrates how to send an email via [Microsoft Graph endpoint](htt
 > Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
 
 ```python
-from office365.graph.graph_client import GraphClient
+from office365.graph_client import GraphClient
 def get_token(auth_ctx):
     token = auth_ctx.acquire_token_with_client_credentials(
         "https://graph.microsoft.com",
@@ -186,7 +186,7 @@ which corresponds to [`list available drives` endpoint](https://docs.microsoft.c
 > Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
 
 ```python
-from office365.graph.graph_client import GraphClient
+from office365.graph_client import GraphClient
 def get_token(auth_ctx):
     """Acquire token via client credential flow (ADAL Python library is utilized)"""
     token = auth_ctx.acquire_token_with_client_credentials(
@@ -209,6 +209,8 @@ for drive in drives:
 ##### Example: download the contents of a DriveItem(folder facet)
 
 ```python
+from office365.graph_client import GraphClient
+client = GraphClient("{tenant_name}", get_token)
 # retrieve drive properties 
 drive = client.users["{user_id_or_principal_name}"].drive
 client.load(drive)
@@ -253,10 +255,10 @@ The example demonstrates how create a new team under a group
 which corresponds to [`Create team` endpoint](https://docs.microsoft.com/en-us/graph/api/team-put-teams?view=graph-rest-1.0&tabs=http)
 
 ```python
-from office365.graph.graph_client import GraphClient
+from office365.graph_client import GraphClient
 tenant_name = "contoso.onmicrosoft.com"
 client = GraphClient(tenant_name, get_token)
-new_team = client.groups[group_id].add_team()
+new_team = client.groups["{group_id}"].add_team()
 client.execute_query()
 ```
 
@@ -269,8 +271,8 @@ def get_token(auth_ctx):
     """
     token = auth_ctx.acquire_token_with_client_credentials(
         "https://graph.microsoft.com",
-        client_id,
-        client_secret)
+        "{client_id}",
+        "{client_secret}")
     return token
 ```
 

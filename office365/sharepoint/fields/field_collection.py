@@ -14,14 +14,14 @@ class FieldCollection(ClientObjectCollection):
         field = super(FieldCollection, self).create_typed_object(properties)
         return field
 
-    def add(self, field_creation_information):
+    def add(self, field_create_information):
         """Adds a fields to the fields collection.
 
-        :type field_creation_information: office365.sharepoint.fields.field_creation_information.FieldCreationInformation
+        :type field_create_information: office365.sharepoint.fields.field_creation_information.FieldCreationInformation
         """
-        field = Field.create_field_from_type(self.context, field_creation_information.FieldTypeKind)
+        field = Field.create_field_from_type(self.context, field_create_information.FieldTypeKind)
         self.add_child(field)
-        qry = CreateEntityQuery(self, field_creation_information, field)
+        qry = CreateEntityQuery(self, field_create_information, field)
         self.context.add_query(qry)
         return field
 

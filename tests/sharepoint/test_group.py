@@ -1,5 +1,6 @@
-from office365.sharepoint.principal.group import Group
 from tests.sharepoint.sharepoint_case import SPTestCase
+
+from office365.sharepoint.principal.group import Group
 
 
 class TestSharePointGroup(SPTestCase):

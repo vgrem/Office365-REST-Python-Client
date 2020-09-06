@@ -2,8 +2,8 @@ import uuid
 
 from settings import settings
 
-from office365.graph.directory.groupProfile import GroupProfile
-from office365.graph.graph_client import GraphClient
+from office365.directory.groupProfile import GroupProfile
+from office365.graph_client import GraphClient
 
 
 def acquire_token(auth_ctx):
@@ -36,7 +36,7 @@ client = GraphClient(settings['tenant'], acquire_token)
 
 group_name = "Team_" + uuid.uuid4().hex
 result = client.teams.create(group_name)
-client.execute_query_retry(max_retry=5, on_failure=print_failure)
+client.execute_query_retry(max_retry=5, failure_callback=print_failure)
 print("Team has been provisioned")
 
 channels = result.value.channels

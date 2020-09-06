@@ -1,6 +1,6 @@
 from settings import settings
 
-from office365.graph.graph_client import GraphClient
+from office365.graph_client import GraphClient
 
 
 def get_token_for_user(auth_ctx):
