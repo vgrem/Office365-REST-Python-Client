@@ -8,7 +8,26 @@ class Permission(Entity):
     @property
     def grantedTo(self):
         """For user type permissions, the details of the users & applications for this permission."""
-        if self.is_property_available('drive'):
-            return self.properties['drive']
-        else:
-            return IdentitySet()
+        return self.properties.get('grantedTo', IdentitySet())
+
+    @property
+    def roles(self):
+        """The type of permission, e.g. read. See below for the full list of roles. Read-only."""
+        return self.properties.get('roles', [])
+
+    @property
+    def shareId(self):
+        """A unique token that can be used to access this shared item via the shares API. Read-only.
+
+        :rtype: str
+        """
+        return self.properties.get('shareId', None)
+
+    @property
+    def hasPassword(self):
+        """This indicates whether password is set for this permission, it's only showing in response.
+        Optional and Read-only and for OneDrive Personal only.
+
+        :rtype: bool
+        """
+        return self.properties.get('hasPassword', None)

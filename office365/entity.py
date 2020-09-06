@@ -30,3 +30,4 @@ class Entity(ClientObject):
             self._resource_path = ResourcePath(
                 value,
                 self._parent_collection.resource_path)
+        return self

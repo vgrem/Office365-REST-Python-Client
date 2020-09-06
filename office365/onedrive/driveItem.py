@@ -1,5 +1,6 @@
 from office365.actions.search_query import SearchQuery
 from office365.base_item import BaseItem
+from office365.directory.permission import Permission
 from office365.directory.permission_collection import PermissionCollection
 from office365.onedrive.conflictBehavior import ConflictBehavior
 from office365.onedrive.driveItemVersionCollection import DriveItemVersionCollection
@@ -20,6 +21,33 @@ from office365.runtime.resource_path import ResourcePath
 class DriveItem(BaseItem):
     """The driveItem resource represents a file, folder, or other item stored in a drive. All file system objects in
     OneDrive and SharePoint are returned as driveItem resources """
+
+    def create_link(self, type_, scope="", expirationDateTime=None, password=None, message=""):
+        """
+        The createLink action will create a new sharing link if the specified link type doesn't already exist
+        for the calling application. If a sharing link of the specified type already exists for the app,
+        the existing sharing link will be returned.
+
+        :param str type_: The type of sharing link to create. Either view, edit, or embed.
+        :param str scope:  The scope of link to create. Either anonymous or organization.
+        :param str expirationDateTime: A String with format of yyyy-MM-ddTHH:mm:ssZ of DateTime indicates the expiration
+            time of the permission.
+        :param str password: The password of the sharing link that is set by the creator. Optional
+            and OneDrive Personal only.
+        :param str message:
+        """
+        payload = {
+            "type": type_,
+            "scope": scope,
+            "message": message
+        }
+        payload = {k: v for k, v in payload.items() if v is not None}
+
+        permission = Permission(self.context)
+        self.permissions.add_child(permission)
+        qry = ServiceOperationQuery(self, "createLink", None, payload, None, permission)
+        self.context.add_query(qry)
+        return permission
 
     def follow(self):
         """
@@ -131,6 +159,7 @@ class DriveItem(BaseItem):
 
         def _content_downloaded(resp):
             file_object.write(result.value)
+
         self.context.after_execute(_content_downloaded)
 
     def create_folder(self, name):
@@ -139,7 +168,7 @@ class DriveItem(BaseItem):
         :param str name: Folder name
         """
         drive_item = DriveItem(self.context, None)
-        drive_item._parent_collection = self.children
+        self.children.add_child(drive_item)
         payload = {
             "name": name,
             "folder": {},
@@ -205,6 +234,7 @@ class DriveItem(BaseItem):
 
         def _construct_request(request):
             request.method = HttpMethod.Patch
+
         self.context.before_execute(_construct_request)
         return result
 
@@ -307,8 +337,7 @@ class DriveItem(BaseItem):
             self._resource_path = ResourcePath(
                 value,
                 ResourcePath("items", self._parent_collection.resource_path.parent.parent))
-        # elif name == "id" and self._resource_path.parent.segment == "root":
-            # self._resource_path = ResourcePath(
-            #    value,
-            #    ResourcePath("items", self._resource_path.parent.parent))
+        #elif name == "id" and self._resource_path.parent.segment == "root":
+        #    self._resource_path = ResourcePath(value,
+        #                                       ResourcePath("items", self._resource_path.parent.parent))
         return self
