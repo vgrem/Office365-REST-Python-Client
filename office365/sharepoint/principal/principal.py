@@ -67,3 +67,4 @@ class Principal(BaseEntity):
             elif name == "LoginName":
                 self._resource_path = ResourcePathServiceOperation(
                     "GetByName", [value], self._parent_collection.resource_path)
+        return self

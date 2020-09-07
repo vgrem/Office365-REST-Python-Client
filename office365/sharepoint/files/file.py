@@ -99,6 +99,7 @@ class File(AbstractFile):
                                     },
                                     None)
         self.context.add_query(qry)
+        return self
 
     def moveto(self, new_relative_url, flag):
         """Moves the file to the specified destination URL.
@@ -114,6 +115,7 @@ class File(AbstractFile):
                                     },
                                     None)
         self.context.add_query(qry)
+        return self
 
     def publish(self, comment):
         """Submits the file for content approval with the specified comment.

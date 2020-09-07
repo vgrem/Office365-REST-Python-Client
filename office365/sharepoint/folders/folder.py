@@ -1,3 +1,4 @@
+from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
@@ -5,13 +6,21 @@ from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.changes.changeCollection import ChangeCollection
+from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.files.file_creation_information import FileCreationInformation
 from office365.sharepoint.listitems.listitem import ListItem
 
 
 class Folder(BaseEntity):
     """Represents a folder in a SharePoint Web site."""
+
+    def recycle(self):
+        """Moves the folder to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
+
+        result = ClientResult(None)
+        qry = ServiceOperationQuery(self, "Recycle", None, None, None, result)
+        self.context.add_query(qry)
+        return result
 
     def get_list_item_changes(self, query):
         """

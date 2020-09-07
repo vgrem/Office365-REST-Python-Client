@@ -21,9 +21,7 @@ class TestSharePointSharing(TestCase):
                                      password=settings['user_credentials']['password'])
         cls.client = ClientContext(settings['url']).with_credentials(credentials)
 
-        current_user = cls.client.web.currentUser
-        cls.client.load(current_user)
-        cls.client.execute_query()
+        current_user = cls.client.web.currentUser.get().execute_query()
         cls.target_user = current_user
 
     # def test1_get_role_def(self):
@@ -59,7 +57,7 @@ class TestSharePointSharing(TestCase):
         self.assertIsNone(result.errorMessage)
 
     def test6_share_web(self):
-        result = self.client.web.share(self.target_user.properties['UserPrincipalName'])
+        result = self.client.web.share(self.target_user.user_principal_name)
         self.client.execute_query()
         self.assertIsInstance(result, SharingResult)
 

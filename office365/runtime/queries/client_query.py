@@ -25,6 +25,10 @@ class ClientQuery(object):
     def build_request(self):
         return self.context.build_request()
 
+    def execute_query(self):
+        self.context.execute_query()
+        return self._return_type
+
     @property
     def context(self):
         return self._context

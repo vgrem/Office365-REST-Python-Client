@@ -1,7 +1,7 @@
 from tests.sharepoint.sharepoint_case import SPTestCase
 
-from office365.sharepoint.changes.changeCollection import ChangeCollection
-from office365.sharepoint.changes.changeQuery import ChangeQuery
+from office365.sharepoint.changes.change_collection import ChangeCollection
+from office365.sharepoint.changes.change_query import ChangeQuery
 
 
 class TestChange(SPTestCase):

@@ -3,7 +3,7 @@ from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.sharepoint.changes.changeCollection import ChangeCollection
+from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.fields.related_field_collection import RelatedFieldCollection

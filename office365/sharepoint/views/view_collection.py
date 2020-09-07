@@ -21,7 +21,7 @@ class ViewCollection(ClientObjectCollection):
         :type view_creation_information: office365.sharepoint.view_create_information.ViewCreationInformation
         """
         view = View(self.context, None, self._parent_list)
-        view._parent_collection = self
+        self.add_child(view)
         qry = ServiceOperationQuery(self, "Add", None, view_creation_information, "parameters", view)
         self.context.add_query(qry)
         return view

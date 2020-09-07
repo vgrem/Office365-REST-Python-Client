@@ -101,3 +101,4 @@ class View(BaseEntity):
             elif name == "Title":
                 self._resource_path = ResourcePathServiceOperation(
                     "GetByTitle", [value], self._parent_collection.resource_path)
+        return self

@@ -12,6 +12,13 @@ class FileCollection(ClientObjectCollection):
     def __init__(self, context, resource_path=None):
         super(FileCollection, self).__init__(context, File, resource_path)
 
+    def get(self):
+        """
+
+        :rtype: FileCollection
+        """
+        return super(FileCollection, self).get()
+
     def create_upload_session(self, source_path, chunk_size, chunk_uploaded=None):
         """Upload a file as multiple chunks
 

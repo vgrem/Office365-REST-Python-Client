@@ -1,7 +1,7 @@
 from random import randint
 
-from office365.sharepoint.changes.changeCollection import ChangeCollection
-from office365.sharepoint.changes.changeQuery import ChangeQuery
+from office365.sharepoint.changes.change_collection import ChangeCollection
+from office365.sharepoint.changes.change_query import ChangeQuery
 from tests import random_seed
 from tests.sharepoint.sharepoint_case import SPTestCase
 
@@ -16,6 +16,7 @@ class TestSharePointFolder(SPTestCase):
     target_folder_name = "Archive_" + str(randint(0, 1000))
     target_list = None  # type: List
     target_folder = None  # type: Folder
+    deleted_folder_guid = None
 
     @classmethod
     def setUpClass(cls):
@@ -110,7 +111,24 @@ class TestSharePointFolder(SPTestCase):
         self.client.execute_query()
         self.assertIsNotNone(folder_to.serverRelativeUrl)
 
-    def test7_delete_folder(self):
+    def test7_recycle_folder(self):
+        folder_to_recycle = self.__class__.target_list.rootFolder.folders.get_by_url(self.__class__.target_folder_name)
+        result = folder_to_recycle.recycle()
+        self.client.execute_query()
+        self.assertIsNotNone(result.value)
+        self.__class__.deleted_folder_guid = result.value
+
+    def test8_restore_folder(self):
+        recycle_item = self.client.web.recycleBin.get_by_id(self.__class__.deleted_folder_guid)
+        recycle_item.restore().execute_query()
+
+    def test_10_get_folder_changes(self):
+        folder = self.__class__.target_list.rootFolder.folders.get_by_url(self.__class__.target_folder_name)
+        changes = folder.list_item_all_fields.get_changes(ChangeQuery(item=True)).execute_query()
+        self.assertIsInstance(changes, ChangeCollection)
+        self.assertGreater(len(changes), 0)
+
+    def test_11_delete_folder(self):
         folder_to_delete = self.__class__.target_list.rootFolder.folders.get_by_url(self.__class__.target_folder_name)
         folder_to_delete.delete_object().execute_query()
 
@@ -119,7 +137,3 @@ class TestSharePointFolder(SPTestCase):
         self.client.load(result)
         self.client.execute_query()
         self.assertEqual(len(result), 0)
-
-    def test8_get_changes(self):
-        changes = self.__class__.target_list.rootFolder.get_list_item_changes(ChangeQuery()).execute_query()
-        self.assertIsInstance(changes, ChangeCollection)

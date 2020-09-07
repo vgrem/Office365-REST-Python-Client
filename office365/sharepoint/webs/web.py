@@ -6,7 +6,7 @@ from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.actions.getWebUrlFromPage import GetWebUrlFromPageUrlQuery
-from office365.sharepoint.changes.changeCollection import ChangeCollection
+from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.files.file import File
@@ -257,7 +257,7 @@ class Web(SecurableObject):
         """Returns the collection of all changes from the change log that have occurred within the scope of the site,
         based on the specified query.
 
-        :param office365.sharepoint.changeQuery.ChangeQuery query: Specifies which changes to return
+        :param office365.sharepoint.changes.change_query.ChangeQuery query: Specifies which changes to return
         """
         changes = ChangeCollection(self.context)
         qry = ServiceOperationQuery(self, "getChanges", None, query, "query", changes)

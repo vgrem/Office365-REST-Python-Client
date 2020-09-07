@@ -5,6 +5,7 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.fields.fieldLookupValue import FieldLookupValue
 from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupValue
 from office365.sharepoint.permissions.securable_object import SecurableObject
@@ -20,6 +21,17 @@ from office365.sharepoint.ui.applicationpages.clientPeoplePickerWebServiceInterf
 class ListItem(SecurableObject):
     """An individual entry within a SharePoint list. Each list item has a schema that maps to fields in the list
     that contains the item, depending on the content type of the item."""
+
+    def get_changes(self, query):
+        """Returns the collection of changes from the change log that have occurred within the ListItem,
+           based on the specified query.
+
+        :param office365.sharepoint.changeQuery.ChangeQuery query: Specifies which changes to return
+        """
+        changes = ChangeCollection(self.context)
+        qry = ServiceOperationQuery(self, "getChanges", None, query, "query", changes)
+        self.context.add_query(qry)
+        return changes
 
     def share(self, user_principal_name,
               shareOption=ExternalSharingSiteOption.View,
@@ -87,6 +99,7 @@ class ListItem(SecurableObject):
         self.ensure_type_name(self.parentList)
         qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
+        return self
 
     def validate_update_list_item(self, form_values, new_document_update):
         """Validates and sets the values of the specified collection of fields for the list item."""
@@ -98,23 +111,27 @@ class ListItem(SecurableObject):
                                         "bNewDocumentUpdate": new_document_update,
                                     })
         self.context.add_query(qry)
+        return self
 
     def system_update(self):
         """Update the list item."""
         qry = ServiceOperationQuery(self,
                                     "systemUpdate")
         self.context.add_query(qry)
+        return self
 
     def update_overwrite_version(self):
         """Update the list item."""
         qry = ServiceOperationQuery(self,
                                     "updateOverwriteVersion")
         self.context.add_query(qry)
+        return self
 
     def delete_object(self):
         """Deletes the ListItem."""
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
+        return self
 
     def parse_and_set_field_value(self, fieldName, value):
         """Sets the value of the field (2) for the list item based on an implementation-specific transformation

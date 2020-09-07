@@ -1,5 +1,6 @@
 import os
 
+from office365.sharepoint.changes.change_query import ChangeQuery
 from tests import random_seed
 from tests.sharepoint.sharepoint_case import SPTestCase
 
@@ -38,8 +39,7 @@ class TestSharePointFile(SPTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.target_list.delete_object()
-        cls.client.execute_query()
+        cls.target_list.delete_object().execute_query()
 
     def test1_upload_files(self):
         for entry in self.file_entries:
@@ -56,14 +56,11 @@ class TestSharePointFile(SPTestCase):
         path = "{0}/../data/big_buck_bunny.mp4".format(os.path.dirname(__file__))
         file_size = os.path.getsize(path)
         size_1mb = 1000000
-        result_file = self.__class__.target_list.rootFolder.files.create_upload_session(path, size_1mb)
-        self.client.execute_query()
+        result_file = self.__class__.target_list.rootFolder.files.create_upload_session(path, size_1mb).execute_query()
         self.assertEqual(file_size, int(result_file.length))
 
     def test3_get_first_file(self):
-        files = self.__class__.target_list.rootFolder.files.top(1)
-        self.client.load(files)
-        self.client.execute_query()
+        files = self.__class__.target_list.rootFolder.files.top(1).get().execute_query()
         self.assertEqual(len(files), 1)
         self.__class__.target_file = files[0]
 
@@ -78,50 +75,46 @@ class TestSharePointFile(SPTestCase):
         self.client.execute_query()
         self.assertIsNotNone(result.value)
 
-    def test6_file_metadata(self):
+    def test6_load_file_metadata(self):
+        list_item = self.__class__.target_file.listItemAllFields.expand(["File"]).get().execute_query()
+        self.assertIsInstance(list_item.file, File)
+
+    def test7_load_file_metadata_alt(self):
         list_item = self.__class__.target_file.listItemAllFields
         self.client.load(list_item, ["File"])
         self.client.execute_query()
-        self.assertIsNotNone(list_item.file)
+        self.assertIsInstance(list_item.file, File)
 
-    def test7_update_file_content(self):
+    def test8_update_file_content(self):
         """Test file upload operation"""
-        files = self.__class__.target_list.rootFolder.files
-        self.client.load(files)
-        self.client.execute_query()
+        files = self.__class__.target_list.rootFolder.files.get().execute_query()
         for file_upload in files:
             response = File.save_binary(self.client, file_upload.properties["ServerRelativeUrl"],
                                         self.content_placeholder)
             self.assertTrue(response.ok)
 
-    def test8_update_file_metadata(self):
+    def test9_update_file_metadata(self):
         """Test file update metadata"""
         list_item = self.__class__.target_file.listItemAllFields  # get metadata
         list_item.set_property('Title', 'Updated')
         list_item.update()
         self.client.execute_query()
 
-    def test9_get_file_versions(self):
+    def test_10_get_file_versions(self):
         """Test file update metadata"""
-        file_with_versions = self.__class__.target_file.expand(["Versions"])
-        self.client.load(file_with_versions)
-        self.client.execute_query()
+        file_with_versions = self.__class__.target_file.expand(["Versions"]).get().execute_query()
         self.assertGreater(len(file_with_versions.versions), 0)
 
-    def test_10_download_file(self):
+    def test_11_download_file(self):
         """Test file upload operation"""
-        files = self.__class__.target_list.rootFolder.files
-        self.client.load(files)
-        self.client.execute_query()
+        files = self.__class__.target_list.rootFolder.files.get().execute_query()
         for file_download in files:
             content = file_download.read()
             enc_content = normalize_response(content)
             self.assertEqual(enc_content, self.content_placeholder)
 
-    def test_11_copy_file(self):
-        files = self.__class__.target_list.rootFolder.files
-        self.client.load(files)
-        self.client.execute_query()
+    def test_12_copy_file(self):
+        files = self.__class__.target_list.rootFolder.files.get().execute_query()
         for cur_file in files:
             file_url = cur_file.properties["ServerRelativeUrl"]
             path, file_name = os.path.split(file_url)
@@ -129,61 +122,48 @@ class TestSharePointFile(SPTestCase):
             cur_file.copyto(new_file_url, True)
             self.client.execute_query()
 
-            moved_file = self.client.web.get_file_by_server_relative_url(new_file_url)
-            self.client.load(moved_file)
-            self.client.execute_query()
-            self.assertEqual(new_file_url, moved_file.properties["ServerRelativeUrl"])
+            moved_file = self.client.web.get_file_by_server_relative_url(new_file_url).get().execute_query()
+            self.assertEqual(new_file_url, moved_file.serverRelativeUrl)
 
-    def test_12_move_file(self):
-        files = self.__class__.target_list.rootFolder.files
-        self.client.load(files)
-        self.client.execute_query()
+    def test_13_move_file(self):
+        files = self.__class__.target_list.rootFolder.files.get().execute_query()
         for cur_file in files:
             file_url = cur_file.properties["ServerRelativeUrl"]
             path, file_name = os.path.split(file_url)
             new_file_url = '/'.join([path, "moved_" + file_name])
-            cur_file.moveto(new_file_url, 1)
-            self.client.execute_query()
+            cur_file.moveto(new_file_url, 1).execute_query()
 
-            moved_file = self.client.web.get_file_by_server_relative_url(new_file_url)
-            self.client.load(moved_file)
-            self.client.execute_query()
+            moved_file = self.client.web.get_file_by_server_relative_url(new_file_url).get().execute_query()
             self.assertEqual(new_file_url, moved_file.properties["ServerRelativeUrl"])
 
-    def test_13_recycle_first_file(self):
+    def test_14_recycle_first_file(self):
         """Test file upload operation"""
-        files = self.__class__.target_list.rootFolder.files
-        self.client.load(files)
-        self.client.execute_query()
+        files = self.__class__.target_list.rootFolder.files.get().execute_query()
         files_count = len(files)
         if files_count > 0:
             first_file = files[0]
             first_file.recycle()
-            self.client.execute_query()
-            files_after = self.__class__.target_list.rootFolder.files
-            self.client.load(files_after)
-            self.client.execute_query()
+            first_file.execute_query()
+            files_after = self.__class__.target_list.rootFolder.files.get().execute_query()
             self.assertEqual(len(files) - 1, len(files_after))
 
-    def test_14_create_template_file(self):
-        target_folder = self.__class__.target_list.rootFolder
-        self.client.load(target_folder)
-        self.client.execute_query()
+    def test_15_create_template_file(self):
+        target_folder = self.__class__.target_list.rootFolder.get().execute_query()
         file_url = '/'.join([target_folder.serverRelativeUrl, "WikiPage.aspx"])
         file_new = self.__class__.target_list.rootFolder.files.add_template_file(file_url, TemplateFileType.WikiPage)
         self.client.execute_query()
         self.assertEqual(file_new.serverRelativeUrl, file_url)
+        self.__class__.target_file = file_new
 
-    def test_15_delete_file(self):
-        files_to_delete = self.__class__.target_list.rootFolder.files
-        self.client.load(files_to_delete)
-        self.client.execute_query()
+    def test_16_get_folder_changes(self):
+        changes = self.__class__.target_file.listItemAllFields.get_changes(ChangeQuery(item=True)).execute_query()
+        self.assertGreater(len(changes), 0)
+
+    def test_17_delete_files(self):
+        files_to_delete = self.__class__.target_list.rootFolder.files.get().execute_query()
         for file_to_delete in files_to_delete:
-            file_to_delete.delete_object()
-            self.client.execute_query()
+            file_to_delete.delete_object().execute_query()
 
-        result = self.__class__.target_list.rootFolder.files
-        self.client.load(result)
-        self.client.execute_query()
+        result = self.__class__.target_list.rootFolder.files.get().execute_query()
         files_items = list(result)
         self.assertEqual(len(files_items), 0)

@@ -3,6 +3,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.recyclebin.recycleBinItemCollection import RecycleBinItemCollection
@@ -14,6 +15,17 @@ class Site(ClientObject):
 
     def __init__(self, context):
         super(Site, self).__init__(context, ResourcePath("Site", None))
+
+    def get_changes(self, query):
+        """Returns the collection of all changes from the change log that have occurred within the scope of the site,
+        based on the specified query.
+
+        :param office365.sharepoint.changes.change_query.ChangeQuery query: Specifies which changes to return
+        """
+        changes = ChangeCollection(self.context)
+        qry = ServiceOperationQuery(self, "getChanges", None, query, "query", changes)
+        self.context.add_query(qry)
+        return changes
 
     def get_recycle_bin_items(self, pagingInfo=None, rowLimit=100, isAscending=True, orderBy=None, itemState=None):
         result = RecycleBinItemCollection(self.context)
