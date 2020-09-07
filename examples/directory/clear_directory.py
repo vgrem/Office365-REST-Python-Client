@@ -18,11 +18,8 @@ def get_token_for_user(auth_ctx):
 
 client = GraphClient(settings['tenant'], get_token_for_user)
 
-deleted_groups = client.directory.deletedGroups
-client.load(deleted_groups)
-deleted_users = client.directory.deletedUsers
-client.load(deleted_users)
-client.execute_query()
+deleted_groups = client.directory.deletedGroups.get().execute_query()
+# deleted_users = client.directory.deletedUsers.get().execute_query()
 groups_count = len(deleted_groups)
 
 for index, deleted_grp in enumerate(deleted_groups):

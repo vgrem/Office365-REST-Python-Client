@@ -11,8 +11,7 @@ ctx = ClientContext(settings['url']).with_credentials(
                      settings['client_credentials']['client_secret']))
 
 # retrieve files from library
-source_folder = ctx.web.lists.get_by_title("Documents").rootFolder
-files = source_folder.files
+files = ctx.web.lists.get_by_title("Documents").rootFolder.files
 ctx.load(files)
 ctx.execute_query()
 download_path = tempfile.mkdtemp()

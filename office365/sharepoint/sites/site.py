@@ -78,3 +78,10 @@ class Site(ClientObject):
             return self.properties['owner']
         else:
             return User(self.context, ResourcePath("owner", self.resource_path))
+
+    @property
+    def recycleBin(self):
+        """Get recycle bin"""
+        return self.properties.get('RecycleBin',
+                                   RecycleBinItemCollection(self.context,
+                                                            ResourcePath("RecycleBin", self.resource_path)))

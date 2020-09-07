@@ -22,6 +22,7 @@ from office365.sharepoint.principal.group import Group
 from office365.sharepoint.principal.group_collection import GroupCollection
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.principal.user_collection import UserCollection
+from office365.sharepoint.recyclebin.recycleBinItemCollection import RecycleBinItemCollection
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
 from office365.sharepoint.sharing.objectSharingSettings import ObjectSharingSettings
 from office365.sharepoint.sharing.sharingResult import SharingResult
@@ -50,6 +51,7 @@ class Web(SecurableObject):
     @staticmethod
     def get_web_url_from_page_url(context, page_full_url):
         """Determine whether site exists
+
         :type context: office365.sharepoint.client_context.ClientContext
         :type page_full_url: str
         """
@@ -60,7 +62,9 @@ class Web(SecurableObject):
     def get_sub_webs_filtered_for_current_user(self, query):
         """Returns a collection of objects that contain metadata about subsites of the current site (2) in which the
         current user is a member.
-        :type query: SubwebQuery"""
+
+        :type query: office365.sharepoint.webs.subweb_query.SubwebQuery
+        """
         users = UserCollection(self.context)
         qry = ServiceOperationQuery(self, "getSubwebsFilteredForCurrentUser", {
             "nWebTemplateFilter": query.WebTemplateFilter,
@@ -68,6 +72,24 @@ class Web(SecurableObject):
         }, None, None, users)
         self.context.add_query(qry)
         return users
+
+    def get_recycle_bin_items(self, pagingInfo=None, rowLimit=100, isAscending=True, orderBy=None, itemState=None):
+        """
+
+        :param str pagingInfo:
+        :param int rowLimit:
+        :param bool isAscending:
+        :param orderBy: int
+        :param int itemState:
+        """
+        result = RecycleBinItemCollection(self.context)
+        payload = {
+            "rowLimit": rowLimit,
+            "isAscending": isAscending
+        }
+        qry = ServiceOperationQuery(self, "GetRecycleBinItems", None, payload, None, result)
+        self.context.add_query(qry)
+        return result
 
     def get_all_webs(self):
         """Returns a collection containing a flat list of all Web objects in the Web object."""
@@ -512,19 +534,17 @@ class Web(SecurableObject):
 
     @property
     def url(self):
-        """Gets the absolute URL for the website."""
-        if self.is_property_available('Url'):
-            return self.properties['Url']
-        else:
-            return None
+        """Gets the absolute URL for the website.
+        :rtype: str or None
+        """
+        return self.properties.get('Url', None)
 
     @property
     def web_template(self):
-        """Gets the name of the site definition or site template that was used to create the site."""
-        if self.is_property_available('WebTemplate'):
-            return self.properties['WebTemplate']
-        else:
-            return None
+        """Gets the name of the site definition or site template that was used to create the site.
+        :rtype: str or None
+        """
+        return self.properties.get('WebTemplate', None)
 
     @property
     def regional_settings(self):
@@ -534,11 +554,19 @@ class Web(SecurableObject):
         else:
             return RegionalSettings(self.context, ResourcePath("RegionalSettings", self.resource_path))
 
+    @property
+    def recycleBin(self):
+        """Get recycle bin"""
+        return self.properties.get('RecycleBin',
+                                   RecycleBinItemCollection(self.context,
+                                                            ResourcePath("RecycleBin", self.resource_path)))
+
     def set_property(self, name, value, persist_changes=True):
         super(Web, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "Url":
             self._web_url = value
+        return self
 
     @property
     def resource_url(self):

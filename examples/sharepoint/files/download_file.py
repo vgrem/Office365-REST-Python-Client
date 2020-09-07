@@ -15,7 +15,5 @@ ctx = ClientContext(site_url).with_credentials(credentials)
 file_url = '/sites/team/Shared Documents/big_buck_bunny.mp4'
 download_path = os.path.join(tempfile.mkdtemp(), os.path.basename(file_url))
 with open(download_path, "wb") as local_file:
-    source_file = ctx.web.get_file_by_server_relative_url(file_url)
-    source_file.download(local_file)
-    ctx.execute_query()
-    print("[Ok] file has been downloaded: {0}".format(download_path))
+    file = ctx.web.get_file_by_server_relative_url(file_url).download(local_file).execute_query()
+print("[Ok] file has been downloaded: {0}".format(download_path))

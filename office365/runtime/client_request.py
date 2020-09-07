@@ -60,6 +60,9 @@ class ClientRequest(object):
 
     @abstractmethod
     def process_response(self, response):
+        """
+        :type response: requests.Response
+        """
         pass
 
     def execute_query(self):

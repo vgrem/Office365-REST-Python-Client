@@ -22,6 +22,12 @@ class ClientObjectCollection(ClientObject):
         self._page_index = 0
         self.next_request_url = None
 
+    def get(self):
+        """
+        :rtype: ClientObjectCollection
+        """
+        return super(ClientObjectCollection, self).get()
+
     def clear(self):
         self._data = []
 
@@ -122,6 +128,7 @@ class ClientObjectCollection(ClientObject):
         def _calc_items_count(resp):
             list(iter(self))
             result.value = len(self)
+
         self.context.load(self)
         self.context.after_execute(_calc_items_count)
         return result

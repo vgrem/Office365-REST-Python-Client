@@ -33,6 +33,7 @@ class AbstractFile(BaseEntity):
         """Deletes the file."""
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
+        return self
 
 
 class File(AbstractFile):
@@ -51,6 +52,14 @@ class File(AbstractFile):
         file_relative_url = abs_url.replace(ctx.base_url, "")
         file = ctx.web.get_file_by_server_relative_url(file_relative_url)
         return file
+
+    def recycle(self):
+        """Moves the file to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
+
+        result = ClientResult(None)
+        qry = ServiceOperationQuery(self, "Recycle", None, None, None, result)
+        self.context.add_query(qry)
+        return result
 
     def approve(self, comment):
         """Approves the file submitted for content approval with the specified comment.
@@ -160,13 +169,6 @@ class File(AbstractFile):
         """Reverts an existing checkout for the file."""
         qry = ServiceOperationQuery(self,
                                     "undocheckout"
-                                    )
-        self.context.add_query(qry)
-
-    def recycle(self):
-        """Moves the file to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
-        qry = ServiceOperationQuery(self,
-                                    "recycle"
                                     )
         self.context.add_query(qry)
 

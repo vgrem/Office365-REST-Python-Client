@@ -15,6 +15,7 @@ class DownloadFileQuery(ServiceOperationQuery):
 
         def _construct_download_query(request):
             request.method = HttpMethod.Get
+            self.context.after_execute(_process_response)
 
         def _process_response(response):
             """
@@ -22,6 +23,5 @@ class DownloadFileQuery(ServiceOperationQuery):
             """
             file_object.write(response.content)
 
-        web.context.before_execute(_construct_download_query)
-        web.context.after_execute(_process_response)
         super(DownloadFileQuery, self).__init__(web, r"getFileByServerRelativeUrl('{0}')/\$value".format(file_url))
+        self.context.before_execute(_construct_download_query)
