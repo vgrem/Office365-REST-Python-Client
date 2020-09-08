@@ -1,5 +1,6 @@
 from random import randint
 
+from office365.sharepoint.changes.change_query import ChangeQuery
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.contenttypes.content_type import ContentType
@@ -24,11 +25,13 @@ class TestContentType(SPTestCase):
         self.assertIsNotNone(ct.name)
         self.__class__.target_ct = ct
 
-    def test_4_delete_content_type(self):
+    def test_5_delete_content_type(self):
         web_cts = self.client.site.rootWeb.contentTypes.get().execute_query()
         before_count = len(web_cts)
-        ct_to_delete = self.__class__.target_ct
-        ct_to_delete.delete_object().execute_query()
-
+        self.__class__.target_ct.delete_object().execute_query()
         web_cts = self.client.site.rootWeb.contentTypes.get().execute_query()
         self.assertTrue(before_count, len(web_cts) + 1)
+
+    def test_6_get_content_types_changes(self):
+        changes = self.client.web.get_changes(ChangeQuery(content_type=True)).execute_query()
+        self.assertGreater(len(changes), 0)

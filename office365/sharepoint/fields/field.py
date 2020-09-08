@@ -88,3 +88,4 @@ class Field(BaseEntity):
                 "getById", [value], self._parent_collection.resource_path)
         if name == "FieldTypeKind":
             self.__class__ = self.resolve_field_type(value)
+        return self

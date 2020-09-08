@@ -9,8 +9,12 @@ class ChangeQuery(ClientValue):
                  user=False, group=False,
                  view=False, content_type=False,
                  add=True, update=True, system_update=True, delete_object=True,
+                 role_assignment_add=True, role_assignment_delete=True,
                  change_token_start=None, change_token_end=None, fetch_limit=None):
         """
+        :param int fetch_limit:
+        :param role_assignment_delete: Specifies whether deleting role assignments is included in the query.
+        :param role_assignment_add: Specifies whether adding role assignments is included in the query.
         :param bool item: Gets or sets a value that specifies whether general changes to list items are included
              in the query.
         :param bool delete_object: Gets or sets a value that specifies whether delete changes are included in the query.
@@ -52,6 +56,8 @@ class ChangeQuery(ClientValue):
         self.ChangeTokenStart = change_token_start
         self.ChangeTokenEnd = change_token_end
         self.DeleteObject = delete_object
+        self.RoleAssignmentAdd = role_assignment_add
+        self.RoleAssignmentDelete = role_assignment_delete
         self.FetchLimit = fetch_limit
 
     @property

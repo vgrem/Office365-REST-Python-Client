@@ -12,6 +12,13 @@ class AttachmentFileCollection(ClientObjectCollection):
     def __init__(self, context, resource_path=None):
         super(AttachmentFileCollection, self).__init__(context, AttachmentFile, resource_path)
 
+    def get(self):
+        """
+
+        :rtype: AttachmentFileCollection
+        """
+        return super(AttachmentFileCollection, self).get()
+
     def add(self, attachment_file_information):
         """
         Creates an attachment

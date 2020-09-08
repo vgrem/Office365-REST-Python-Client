@@ -15,6 +15,9 @@ class ClientValueCollection(ClientValue):
         for item in self._data:
             yield item
 
+    def __len__(self):
+        return len(self._data)
+
     def to_json(self):
         return self._data
 
@@ -29,6 +32,9 @@ class ClientValueCollection(ClientValue):
 
     @property
     def entity_type_name(self):
+        """
+        Gets server type name
+        """
         primitive_types = {
             "bool": "Edm.Boolean",
             "int": "Edm.Int32",

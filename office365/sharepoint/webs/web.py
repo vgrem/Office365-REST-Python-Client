@@ -1,4 +1,5 @@
 from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
@@ -13,6 +14,7 @@ from office365.sharepoint.files.file import File
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.folders.folder_collection import FolderCollection
 from office365.sharepoint.listitems.listitem import ListItem
+from office365.sharepoint.lists.documentLibraryInformation import DocumentLibraryInformation
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.list_collection import ListCollection
 from office365.sharepoint.permissions.basePermissions import BasePermissions
@@ -310,6 +312,26 @@ class Web(SecurableObject):
             sharing_result.value = Web.unshare_object(self.context, self.url)
         self.ensure_property("Url", _web_initialized)
         return sharing_result.value
+
+    @staticmethod
+    def get_document_libraries(context, web_full_url):
+        """
+        Returns the document libraries of a SharePoint site, specifically a list of objects that represents
+        document library information. Document libraries that are private—picture library, catalog library,
+        asset library, application list, form template or libraries—for whom the user does not have permission to view
+        the items are not included.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param str web_full_url: The URL of the web.
+        """
+        result = ClientValueCollection(DocumentLibraryInformation())
+        payload = {
+            "webFullUrl": web_full_url
+        }
+        qry = ServiceOperationQuery(context.web, "GetDocumentLibraries", None, payload, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
 
     @staticmethod
     def _resolve_group_value(context, share_option, on_resolved):

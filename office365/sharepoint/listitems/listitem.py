@@ -22,6 +22,14 @@ class ListItem(SecurableObject):
     """An individual entry within a SharePoint list. Each list item has a schema that maps to fields in the list
     that contains the item, depending on the content type of the item."""
 
+    def recycle(self):
+        """Moves the listItem to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
+
+        result = ClientResult(None)
+        qry = ServiceOperationQuery(self, "Recycle", None, None, None, result)
+        self.context.add_query(qry)
+        return result
+
     def get_changes(self, query):
         """Returns the collection of changes from the change log that have occurred within the ListItem,
            based on the specified query.

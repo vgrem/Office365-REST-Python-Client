@@ -26,9 +26,7 @@ class TestField(SPTestCase):
         self.assertIsNotNone(title_field.max_length)
 
     def test_3_get_field_by_title(self):
-        title_field = self.client.site.rootWeb.fields.get_by_title(self.target_field_name)
-        self.client.load(title_field)
-        self.client.execute_query()
+        title_field = self.client.site.rootWeb.fields.get_by_title(self.target_field_name).get().execute_query()
         self.assertIsNotNone(title_field.internal_name)
         self.assertEqual(title_field.internal_name, self.target_field_name)
 
@@ -36,20 +34,15 @@ class TestField(SPTestCase):
         field_name = "Title_" + uuid.uuid4().hex
         create_field_info = FieldCreationInformation(field_name, FieldType.Text)
         created_field = self.client.site.rootWeb.fields.add(create_field_info).execute_query()
-        self.client.execute_query()
         self.assertEqual(created_field.properties["Title"], field_name)
         self.__class__.target_field = created_field
 
     def test_5_update_site_field(self):
         field_to_update = self.__class__.target_field
         updated_field_name = "Title_" + uuid.uuid4().hex
-        field_to_update.set_property('Title', updated_field_name)
-        field_to_update.update()
-        self.client.execute_query()
+        field_to_update.set_property('Title', updated_field_name).update().execute_query()
 
-        updated_field = self.client.site.rootWeb.fields.get_by_title(updated_field_name)
-        self.client.load(updated_field)
-        self.client.execute_query()
+        updated_field = self.client.site.rootWeb.fields.get_by_title(updated_field_name).get().execute_query()
         self.assertIsNotNone(updated_field.properties['Id'])
         self.assertEqual(updated_field.properties['Title'], updated_field_name)
 

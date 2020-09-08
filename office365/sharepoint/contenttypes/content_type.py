@@ -87,9 +87,10 @@ class ContentType(BaseEntity):
         if name == "StringId" and self._resource_path is None:
             self._resource_path = ResourcePathServiceOperation(
                 "getById", [value], self._parent_collection.resource_path)
+        return self
 
     def delete_object(self):
-        """Deletes the directory object."""
+        """Deletes the content type."""
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         self.remove_from_parent_collection()

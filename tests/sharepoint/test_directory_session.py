@@ -19,7 +19,7 @@ class TestDirectorySession(TestCase):
         cls.client = ClientContext(settings['url']).with_credentials(user_credentials)
         cls.session = DirectorySession(cls.client)
 
-    def test_1_load(self):
+    def test_1_init_session(self):
         session = self.__class__.session.get().execute_query()
         self.assertIsInstance(session, DirectorySession)
 

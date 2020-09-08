@@ -10,7 +10,7 @@ class TestChange(SPTestCase):
         changes = self.client.site.rootWeb.get_changes(query=ChangeQuery(web=True)).execute_query()
         self.assertIsInstance(changes, ChangeCollection)
 
-    def test_2_get_list_changes(self):
+    def test_2_get_site_changes(self):
         target_list = self.client.site.rootWeb.default_document_library()
-        changes = target_list.get_changes(query=ChangeQuery(list_=True)).execute_query()
+        changes = target_list.get_changes(query=ChangeQuery(site=True)).execute_query()
         self.assertIsInstance(changes, ChangeCollection)

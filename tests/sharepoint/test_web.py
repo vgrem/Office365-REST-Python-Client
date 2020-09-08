@@ -106,3 +106,8 @@ class TestSharePointWeb(SPTestCase):
     def test_14_get_catalog(self):
         catalog = self.client.web.get_catalog(ListTemplateType.MasterPageCatalog).get().execute_query()
         self.assertIsNotNone(catalog.title)
+
+    def test_15_get_catalog(self):
+        collection = Web.get_document_libraries(self.client, settings["url"])
+        self.client.execute_query()
+        self.assertGreater(len(collection), 0)

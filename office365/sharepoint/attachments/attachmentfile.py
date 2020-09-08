@@ -20,6 +20,7 @@ class AttachmentFile(AbstractFile):
             self.context.add_query(qry)
 
         self.ensure_property("ServerRelativeUrl", _download_inner)
+        return self
 
     def upload(self, file_object):
         """
@@ -31,6 +32,7 @@ class AttachmentFile(AbstractFile):
             self.context.add_query(qry)
 
         self.ensure_property("ServerRelativeUrl", _upload_inner)
+        return self
 
     @property
     def file_name(self):

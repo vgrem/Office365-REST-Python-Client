@@ -4,9 +4,11 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.changes.change_collection import ChangeCollection
+from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.fields.related_field_collection import RelatedFieldCollection
+from office365.sharepoint.files.checkedOutFileCollection import CheckedOutFileCollection
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.forms.formCollection import FormCollection
 from office365.sharepoint.listitems.caml.camlQuery import CamlQuery
@@ -124,16 +126,24 @@ class List(SecurableObject):
         view = View(self.context, ResourcePathServiceOperation("getView", [view_id], self.resource_path), self)
         return view
 
-    def get_changes(self, query):
+    def get_changes(self, query=None):
         """Returns the collection of changes from the change log that have occurred within the list,
            based on the specified query.
 
         :param office365.sharepoint.changeQuery.ChangeQuery query: Specifies which changes to return
         """
+        if query is None:
+            query = ChangeQuery(list_=True)
         changes = ChangeCollection(self.context)
         qry = ServiceOperationQuery(self, "getChanges", None, query, "query", changes)
         self.context.add_query(qry)
         return changes
+
+    def get_checked_out_files(self):
+        result = CheckedOutFileCollection(self.context)
+        qry = ServiceOperationQuery(self, "GetCheckedOutFiles", None, None, None, result)
+        self.context.add_query(qry)
+        return result
 
     def get_related_fields(self):
         """Returns a collection of lookup fields that use this list as a data source and
@@ -259,3 +269,4 @@ class List(SecurableObject):
             elif name == "Title":
                 self._resource_path = ResourcePathServiceOperation(
                     "GetByTitle", [value], self._parent_collection.resource_path)
+        return self

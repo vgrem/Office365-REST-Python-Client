@@ -13,8 +13,7 @@ class DirectoryObjectCollection(EntityCollection):
         super(DirectoryObjectCollection, self).__init__(context, DirectoryObject, resource_path)
 
     def get(self):
-        self.context.load(self)
-        return self
+        return super(DirectoryObjectCollection, self).get()
 
     def __getitem__(self, key):
         """

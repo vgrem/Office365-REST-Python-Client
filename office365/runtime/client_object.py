@@ -105,6 +105,7 @@ class ClientObject(object):
         """
         names_to_include = [name]
         self.ensure_properties(names_to_include, action)
+        return self
 
     def ensure_properties(self, names, action):
         """

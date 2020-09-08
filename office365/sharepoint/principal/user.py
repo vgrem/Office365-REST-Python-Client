@@ -7,6 +7,9 @@ from office365.sharepoint.principal.userIdInfo import UserIdInfo
 class User(Principal):
     """Represents a user in Microsoft SharePoint Foundation. A user is a type of SP.Principal."""
 
+    def get(self):
+        return super(User, self).get()
+
     @property
     def groups(self):
         """Gets a collection of group objects that represents all of the groups for the user."""
@@ -19,10 +22,7 @@ class User(Principal):
     @property
     def is_site_admin(self):
         """Gets or sets a Boolean value that specifies whether the user is a site collection administrator."""
-        if self.is_property_available('isSiteAdmin'):
-            return self.properties['isSiteAdmin']
-        else:
-            return None
+        return self.properties.get('isSiteAdmin', None)
 
     @property
     def user_id(self):
@@ -35,3 +35,4 @@ class User(Principal):
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         self.remove_from_parent_collection()
+        return self

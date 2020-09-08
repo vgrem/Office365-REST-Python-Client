@@ -40,6 +40,7 @@ class SecurableObject(BaseEntity):
             self.roleAssignments.add_role_assignment(principal.id, role_def.id)
 
         principal.ensure_property("Id", _principal_loaded)
+        return self
 
     def remove_role_assignment(self, principal, role_def):
         """Removes a role assignment from a securable resource.<81>
@@ -56,6 +57,7 @@ class SecurableObject(BaseEntity):
             role_def.ensure_property("Id", _role_def_loaded)
 
         principal.ensure_property("Id", _principal_loaded)
+        return self
 
     def break_role_inheritance(self, copyRoleAssignments=True, clearSubscopes=True):
         """Creates unique role assignments for the securable object. If the securable object already has
@@ -82,12 +84,14 @@ class SecurableObject(BaseEntity):
         }
         qry = ServiceOperationQuery(self, "breakRoleInheritance", None, payload, None, None)
         self.context.add_query(qry)
+        return self
 
     def reset_role_inheritance(self):
         """Resets the role inheritance for the securable object and inherits role assignments from
         the parent securable object."""
         qry = ServiceOperationQuery(self, "resetRoleInheritance", None, None, None, None)
         self.context.add_query(qry)
+        return self
 
     def get_user_effective_permissions(self, user_name):
         """
