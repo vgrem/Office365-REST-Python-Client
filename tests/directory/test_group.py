@@ -16,13 +16,7 @@ class TestGraphGroup(GraphTestCase):
     target_user = None   # type: User
     directory_quota_exceeded = False
 
-    def test1_get_group_list(self):
-        groups = self.client.groups.top(1).get().execute_query()
-        self.assertEqual(len(groups), 1)
-        for group in groups:
-            self.assertIsNotNone(group.properties['id'])
-
-    def test2_create_group(self):
+    def test1_create_group(self):
         try:
             grp_name = "Group_" + uuid.uuid4().hex
             properties = GroupProfile(grp_name)
@@ -42,6 +36,11 @@ class TestGraphGroup(GraphTestCase):
                     filter_expr = "displayName eq '{0}'".format(result.value[0])
                     result = self.client.groups.filter(filter_expr).get().execute_query()
                     self.__class__.target_group = result[0]
+
+    @unittest.skipIf(directory_quota_exceeded, "Skipping, group was not be created")
+    def test2_get_group_list(self):
+        groups = self.client.groups.top(1).get().execute_query()
+        self.assertEqual(len(groups), 1)
 
     @unittest.skipIf(directory_quota_exceeded, "Skipping, group was not be created")
     def test3_get_group(self):

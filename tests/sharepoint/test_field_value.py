@@ -38,7 +38,7 @@ class TestFieldValue(SPTestCase):
         create_info = {
             "Title": "Task1",
         }
-        self.__class__.target_item = self.target_list.add_item(create_info)
+        self.__class__.target_item = self.target_list.add_item(create_info).execute_query()
         self.client.load(items)
         self.client.execute_query()
         self.assertGreaterEqual(len(items), 1)
@@ -72,7 +72,7 @@ class TestFieldValue(SPTestCase):
         field_name = "TaskStatuses"
         create_field_info = FieldCreationInformation(field_name, FieldType.MultiChoice)
         [create_field_info.Choices.add(choice) for choice in ["Not Started", "In Progress", "Completed", "Deferred"]]
-        created_field = self.__class__.target_list.fields.add(create_field_info)
+        created_field = self.target_list.fields.add(create_field_info)
         self.client.execute_query()
         self.assertIsInstance(created_field, FieldMultiChoice)
         self.__class__.target_field = created_field

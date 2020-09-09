@@ -20,8 +20,7 @@ class TestTeamApps(GraphTestCase):
     @classmethod
     def tearDownClass(cls):
         group_id = cls.target_team.id
-        grp_to_delete = cls.client.groups[group_id]
-        grp_to_delete.delete_object().execute_query()
+        cls.client.groups[group_id].delete_object().execute_query()
 
     def test1_get_team_apps(self):
         apps = self.__class__.target_team.installedApps.get().execute_query()

@@ -93,6 +93,10 @@ class ListItem(SecurableObject):
         return result.value
 
     def get_sharing_information(self):
+        """
+
+        :rtype: ClientResult
+        """
         result = ClientResult(ObjectSharingInformation(self.context))
 
         def _item_resolved():

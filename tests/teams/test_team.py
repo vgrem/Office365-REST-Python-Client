@@ -56,8 +56,7 @@ class TestGraphTeam(GraphTestCase):
 
     def test5_archive_team(self):
         group_id = self.__class__.target_group.id
-        team_to_archive = self.client.teams[group_id]
-        team_to_archive.archive().execute_query()
+        self.client.teams[group_id].archive().execute_query()
 
     def test6_delete_group_with_team(self):
         grp_to_delete = self.__class__.target_group

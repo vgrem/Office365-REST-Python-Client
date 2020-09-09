@@ -23,9 +23,7 @@ class TestSearch(TestCase):
         cls.search = SearchService(cls.client)
 
     def test1_export_search_settings(self):
-        current_user = self.client.web.currentUser
-        self.client.load(current_user)
-        self.client.execute_query()
+        current_user = self.client.web.currentUser.get().execute_query()
 
         export_start_data = datetime.today() - timedelta(days=1)
         result = self.search.export(current_user.properties['UserPrincipalName'], export_start_data)

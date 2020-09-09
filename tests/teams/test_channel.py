@@ -27,8 +27,7 @@ class TestGraphChannel(GraphTestCase):
     @classmethod
     def tearDownClass(cls):
         group_id = cls.target_team.id
-        grp_to_delete = cls.client.groups[group_id]
-        grp_to_delete.delete_object().execute_query()
+        cls.client.groups[group_id].delete_object().execute_query()
 
     def test1_get_team(self):
         team = self.__class__.target_team.get().execute_query()
@@ -66,7 +65,6 @@ class TestGraphChannel(GraphTestCase):
 
     def test8_delete_channel(self):
         channels_before = self.__class__.target_team.channels.get().execute_query()
-        channel_to_delete = self.__class__.target_channel
-        channel_to_delete.delete_object().execute_query()
+        self.__class__.target_channel.delete_object().execute_query()
         channels_after = self.__class__.target_team.channels.get().execute_query()
         self.assertEqual(len(channels_before)-1, len(channels_after))
