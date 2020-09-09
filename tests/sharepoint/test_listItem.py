@@ -17,7 +17,7 @@ class TestSharePointListItem(SPTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestSharePointListItem, cls).setUpClass()
+        super().setUpClass()
         target_list_title = "Tasks" + str(randint(0, 10000))
         cls.target_list = cls.ensure_list(cls.client.web,
                                           ListCreationInformation(target_list_title,

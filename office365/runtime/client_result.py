@@ -2,7 +2,7 @@ from office365.runtime.client_object import ClientObject
 from office365.runtime.client_value import ClientValue
 
 
-class ClientResult(object):
+class ClientResult:
     """Client result"""
 
     def __init__(self, value):

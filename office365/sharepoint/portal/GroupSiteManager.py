@@ -7,7 +7,7 @@ from office365.sharepoint.portal.GroupSiteInfo import GroupSiteInfo
 
 class GroupSiteManager(ClientObject):
     def __init__(self, context):
-        super(GroupSiteManager, self).__init__(context, ResourcePath("GroupSiteManager"), None)
+        super().__init__(context, ResourcePath("GroupSiteManager"), None)
 
     def create_group_ex(self, display_name, alias, is_public, optional_params):
         """

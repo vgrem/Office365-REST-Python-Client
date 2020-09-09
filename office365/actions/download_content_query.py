@@ -13,4 +13,4 @@ class DownloadContentQuery(ServiceOperationQuery):
         action_name = "content"
         if format_name is not None:
             action_name = action_name + r"?format={0}".format(format_name)
-        super(DownloadContentQuery, self).__init__(entity_type, action_name, None, None, None, result)
+        super().__init__(entity_type, action_name, None, None, None, result)

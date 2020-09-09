@@ -8,7 +8,7 @@ class RecycleBinItemCollection(ClientObjectCollection):
     """Represents a collection of View resources."""
 
     def __init__(self, context, resource_path=None):
-        super(RecycleBinItemCollection, self).__init__(context, RecycleBinItem, resource_path)
+        super().__init__(context, RecycleBinItem, resource_path)
 
     def move_all_to_second_stage(self):
         qry = ServiceOperationQuery(self, "MoveAllToSecondStage")

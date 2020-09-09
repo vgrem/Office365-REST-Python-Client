@@ -16,7 +16,7 @@ class TestSearch(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestSearch, cls).setUpClass()
+        super().setUpClass()
         user_credentials = UserCredential(settings['user_credentials']['username'],
                                           settings['user_credentials']['password'])
         cls.client = ClientContext(settings['url']).with_credentials(user_credentials)

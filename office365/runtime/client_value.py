@@ -1,11 +1,11 @@
-class ClientValue(object):
+class ClientValue:
     """Represent complex type.
     Complex types consist of a list of properties with no key, and can therefore only exist as properties of a
     containing entity or as a temporary value
     """
 
     def __init__(self, namespace=None):
-        super(ClientValue, self).__init__()
+        super().__init__()
         self._namespace = namespace
 
     def set_property(self, k, v, persist_changes=True):

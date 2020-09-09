@@ -5,4 +5,4 @@ class PhysicalAddress(ClientObject):
     """The physical address of a contact."""
 
     def __init__(self, context):
-        super(PhysicalAddress, self).__init__(context)
+        super().__init__(context)

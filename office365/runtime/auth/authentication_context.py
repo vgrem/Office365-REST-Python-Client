@@ -13,7 +13,7 @@ class AuthenticationContext(BaseAuthenticationContext):
 
         :param str url:  authority url
         """
-        super(AuthenticationContext, self).__init__()
+        super().__init__()
         self.url = url
         self.provider = None
         self.acquire_token_func = None

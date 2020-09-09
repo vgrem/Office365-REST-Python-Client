@@ -5,7 +5,7 @@ from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.queries.read_entity_query import ReadEntityQuery
 
 
-class ClientRuntimeContext(object):
+class ClientRuntimeContext:
 
     def __init__(self, auth_context=None):
         """

@@ -12,7 +12,7 @@ class FieldCreationInformation(ClientValue):
 
         :type title: str
         """
-        super(FieldCreationInformation, self).__init__()
+        super().__init__()
         self.Title = title
         self.FieldTypeKind = field_type_kind
         self.Description = description

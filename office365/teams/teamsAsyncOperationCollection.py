@@ -6,4 +6,4 @@ class TeamsAsyncOperationCollection(ClientObjectCollection):
     """TeamsAsyncOperation's collection"""
 
     def __init__(self, context, resource_path=None):
-        super(TeamsAsyncOperationCollection, self).__init__(context, TeamsAsyncOperation, resource_path)
+        super().__init__(context, TeamsAsyncOperation, resource_path)

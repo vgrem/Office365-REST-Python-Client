@@ -18,7 +18,7 @@ class TestSharePointWeb(SPTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestSharePointWeb, cls).setUpClass()
+        super().setUpClass()
 
     def test1_get_current_user(self):
         current_user = self.client.web.currentUser.get().execute_query()

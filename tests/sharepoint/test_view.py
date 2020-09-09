@@ -15,7 +15,7 @@ class TestSPView(SPTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestSPView, cls).setUpClass()
+        super().setUpClass()
         cls.target_list = cls.ensure_list(cls.client.web,
                                           ListCreationInformation("Tasks",
                                                                   None,

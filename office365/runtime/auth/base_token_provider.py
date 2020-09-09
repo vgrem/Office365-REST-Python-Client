@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
 
-class BaseTokenProvider(object):
+class BaseTokenProvider:
     """ Base token provider"""
     __metaclass__ = ABCMeta
 

@@ -24,7 +24,7 @@ class TestDriveItem(GraphTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestDriveItem, cls).setUpClass()
+        super().setUpClass()
         cls.target_drive = create_list_drive(cls.client)
 
     @classmethod

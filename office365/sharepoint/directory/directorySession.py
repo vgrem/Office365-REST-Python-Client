@@ -6,7 +6,7 @@ from office365.sharepoint.directory.user import User
 
 class DirectorySession(BaseEntity):
     def __init__(self, context):
-        super(DirectorySession, self).__init__(context, ResourcePath("SP.Directory.DirectorySession"))
+        super().__init__(context, ResourcePath("SP.Directory.DirectorySession"))
 
     def me(self):
         """Create a modern site"""

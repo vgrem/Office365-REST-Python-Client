@@ -15,7 +15,7 @@ class TestCommunicationSite(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestCommunicationSite, cls).setUpClass()
+        super().setUpClass()
         ctx_auth = AuthenticationContext(url=settings['url'])
         ctx_auth.acquire_token_for_user(username=settings['user_credentials']['username'],
                                         password=settings['user_credentials']['password'])

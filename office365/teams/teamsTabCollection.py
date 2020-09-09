@@ -5,4 +5,4 @@ from office365.teams.teamsTab import TeamsTab
 class TeamsTabCollection(ClientObjectCollection):
 
     def __init__(self, context, resource_path=None):
-        super(TeamsTabCollection, self).__init__(context, TeamsTab, resource_path)
+        super().__init__(context, TeamsTab, resource_path)

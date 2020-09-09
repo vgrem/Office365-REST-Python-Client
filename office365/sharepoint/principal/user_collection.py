@@ -9,7 +9,7 @@ class UserCollection(ClientObjectCollection):
     """Represents a collection of User resources."""
 
     def __init__(self, context, resource_path=None):
-        super(UserCollection, self).__init__(context, User, resource_path)
+        super().__init__(context, User, resource_path)
 
     def add_user(self, login_name):
         """

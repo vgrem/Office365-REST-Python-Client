@@ -4,7 +4,7 @@ from office365.runtime.client_value import ClientValue
 from office365.runtime.odata.odata_query_options import QueryOptions
 
 
-class ClientObject(object):
+class ClientObject:
 
     def __init__(self, context, resource_path=None, properties=None, parent_collection=None):
         """

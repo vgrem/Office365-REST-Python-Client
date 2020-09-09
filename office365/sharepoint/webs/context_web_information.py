@@ -5,7 +5,7 @@ class ContextWebInformation(ClientValue):
     """The context information for a site."""
 
     def __init__(self):
-        super(ContextWebInformation, self).__init__()
+        super().__init__()
         self.FormDigestValue = None
         self.FormDigestTimeoutSeconds = None
         self.LibraryVersion = None

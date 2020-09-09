@@ -6,7 +6,7 @@ from office365.sharepoint.tenant.administration.siteProperties import SiteProper
 class SitePropertiesCollection(ClientObjectCollection):
     """CSiteProperties resource collection"""
     def __init__(self, context, resource_path=None):
-        super(SitePropertiesCollection, self).__init__(context, SiteProperties, resource_path)
+        super().__init__(context, SiteProperties, resource_path)
 
     def get_by_id(self, site_id):
         site_props = SiteProperties(self.context)

@@ -5,4 +5,4 @@ from office365.teams.teamsAppInstallation import TeamsAppInstallation
 class TeamsAppInstallationCollection(ClientObjectCollection):
 
     def __init__(self, context, resource_path=None):
-        super(TeamsAppInstallationCollection, self).__init__(context, TeamsAppInstallation, resource_path)
+        super().__init__(context, TeamsAppInstallation, resource_path)

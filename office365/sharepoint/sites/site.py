@@ -14,7 +14,7 @@ class Site(ClientObject):
     """Represents a collection of sites in a Web application, including a top-level website and all its subsites."""
 
     def __init__(self, context):
-        super(Site, self).__init__(context, ResourcePath("Site", None))
+        super().__init__(context, ResourcePath("Site", None))
 
     def get_changes(self, query):
         """Returns the collection of all changes from the change log that have occurred within the scope of the site,

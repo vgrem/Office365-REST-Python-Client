@@ -7,7 +7,7 @@ class GroupCollection(DirectoryObjectCollection):
     """Group's collection"""
 
     def __init__(self, context, resource_path=None):
-        super(GroupCollection, self).__init__(context, resource_path)
+        super().__init__(context, resource_path)
         self._item_type = Group
 
     def add(self, group_properties):

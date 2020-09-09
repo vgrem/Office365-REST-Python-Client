@@ -41,7 +41,7 @@ class ClientContext(ClientRuntimeContext):
         """
         if base_url.endswith("/"):
             base_url = base_url[:len(base_url) - 1]
-        super(ClientContext, self).__init__(auth_context)
+        super().__init__(auth_context)
         self.__web = None
         self.__site = None
         self._base_url = base_url
@@ -140,7 +140,7 @@ class ClientContext(ClientRuntimeContext):
         batch_request.execute_query()
 
     def build_request(self):
-        request = super(ClientContext, self).build_request()
+        request = super().build_request()
         self._build_modification_query(request)
         return request
 

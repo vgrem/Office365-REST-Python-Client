@@ -9,6 +9,6 @@ class Folder(ClientValue):
         :param int childCount:
         :param office365.onedrive.folderView.FolderView view:
         """
-        super(Folder, self).__init__()
+        super().__init__()
         self.childCount = childCount
         self.view = view

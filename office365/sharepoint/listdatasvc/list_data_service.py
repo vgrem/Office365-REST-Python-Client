@@ -19,7 +19,7 @@ class ListDataService(ClientRuntimeContext):
         if base_url.endswith("/"):
             base_url = base_url[:len(base_url) - 1]
         self._base_url = base_url
-        super(ListDataService, self).__init__(auth_context)
+        super().__init__(auth_context)
         self._pendingRequest = ODataRequest(self, JsonLightFormat(ODataMetadataLevel.Verbose))
 
     @classmethod

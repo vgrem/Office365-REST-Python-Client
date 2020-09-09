@@ -8,7 +8,7 @@ class DriveItemCollection(ClientObjectCollection):
     """Drive items's collection"""
 
     def __init__(self, context, resource_path=None):
-        super(DriveItemCollection, self).__init__(context, DriveItem, resource_path)
+        super().__init__(context, DriveItem, resource_path)
 
     def get_by_id(self, _id):
         """Retrieve DriveItem by id"""

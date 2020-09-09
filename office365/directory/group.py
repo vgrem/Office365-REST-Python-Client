@@ -35,7 +35,7 @@ class Group(DirectoryObject):
         :type permanent_delete: bool
 
         """
-        super(Group, self).delete_object()
+        super().delete_object()
         if permanent_delete:
             deleted_item = self.context.directory.deletedGroups[self.id]
             deleted_item.delete_object()
@@ -77,7 +77,7 @@ class Group(DirectoryObject):
                                   ResourcePath("sites", self.resource_path))
 
     def set_property(self, name, value, persist_changes=True):
-        super(Group, self).set_property(name, value, persist_changes)
+        super().set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "id":

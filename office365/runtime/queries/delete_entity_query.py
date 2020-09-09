@@ -8,4 +8,4 @@ class DeleteEntityQuery(ClientQuery):
 
         :type entity_to_delete: office365.runtime.client_object.ClientObject
         """
-        super(DeleteEntityQuery, self).__init__(entity_to_delete.context, entity_to_delete)
+        super().__init__(entity_to_delete.context, entity_to_delete)

@@ -23,7 +23,7 @@ class List(SecurableObject):
     """List resource"""
 
     def __init__(self, context, resource_path=None):
-        super(List, self).__init__(context, resource_path)
+        super().__init__(context, resource_path)
 
     def save_as_template(self, fileName, name, description, saveData):
         """
@@ -260,7 +260,7 @@ class List(SecurableObject):
         self.set_property('Description', val)
 
     def set_property(self, name, value, persist_changes=True):
-        super(List, self).set_property(name, value, persist_changes)
+        super().set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id":

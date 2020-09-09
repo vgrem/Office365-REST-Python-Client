@@ -39,7 +39,7 @@ class Channel(Entity):
         return self.properties.get('webUrl', None)
 
     def set_property(self, name, value, persist_changes=True):
-        super(Channel, self).set_property(name, value, persist_changes)
+        super().set_property(name, value, persist_changes)
         # fallback: fix resource path
         if name == "id":
             channel_id = quote(value)

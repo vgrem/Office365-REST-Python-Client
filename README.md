@@ -26,6 +26,7 @@ pip install Office365-REST-Python-Client
 ```
 
 ### Note 
+>This library requires python >= 3.6
 >
 >Since PyPI default index `Office365-REST-Python-Client` has not been updated for a while 
 > and the last version available from index is already considered _outdated_, 

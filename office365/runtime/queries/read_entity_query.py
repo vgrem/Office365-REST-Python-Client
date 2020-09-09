@@ -11,11 +11,11 @@ class ReadEntityQuery(ClientQuery):
         :type properties_to_include: list[str] or None
         :type entity_to_read: office365.runtime.client_object.ClientObject
         """
-        super(ReadEntityQuery, self).__init__(entity_to_read.context, entity_to_read, None, None, entity_to_read)
+        super().__init__(entity_to_read.context, entity_to_read, None, None, entity_to_read)
         self._properties_to_include = properties_to_include
 
     def build_url(self):
-        url = super(ReadEntityQuery, self).build_url()
+        url = super().build_url()
         if self._properties_to_include:
             url += "?" + self._build_query_url()
         return url

@@ -9,7 +9,7 @@ class TeamCollection(EntityCollection):
     """Team's collection"""
 
     def __init__(self, context, resource_path=None):
-        super(TeamCollection, self).__init__(context, Team, resource_path)
+        super().__init__(context, Team, resource_path)
 
     def __getitem__(self, key):
         if type(key) == int:

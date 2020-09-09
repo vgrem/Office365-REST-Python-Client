@@ -3,7 +3,7 @@ import json
 from office365.runtime.client_value import ClientValue
 
 
-class ODataPathParser(object):
+class ODataPathParser:
     @staticmethod
     def parse_path_string(string):
         pass

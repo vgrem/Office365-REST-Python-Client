@@ -4,7 +4,7 @@ from xml.etree import ElementTree as ET
 from office365.runtime.odata.odata_model import ODataModel
 
 
-class ODataBaseReader(object):
+class ODataBaseReader:
     """OData reader"""
 
     def __init__(self, options):

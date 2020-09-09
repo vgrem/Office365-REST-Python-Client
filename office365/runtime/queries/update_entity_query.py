@@ -8,8 +8,8 @@ class UpdateEntityQuery(ClientQuery):
 
         :type entity_to_update: office365.runtime.client_object.ClientObject
         """
-        super(UpdateEntityQuery, self).__init__(entity_to_update.context,
-                                                entity_to_update,
-                                                entity_to_update,
-                                                None,
-                                                None)
+        super().__init__(entity_to_update.context,
+                         entity_to_update,
+                         entity_to_update,
+                         None,
+                         None)

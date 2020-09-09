@@ -12,7 +12,7 @@ class UserProfile(ClientValue):
         :type display_name: str
         :type account_enabled: bool
         """
-        super(UserProfile, self).__init__()
+        super().__init__()
         self.userPrincipalName = principal_name
         self.passwordProfile = PasswordProfile(password)
         self.mailNickname = principal_name.split("@")[0]

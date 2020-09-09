@@ -10,10 +10,10 @@ class DirectoryObjectCollection(EntityCollection):
     """DirectoryObject's collection"""
 
     def __init__(self, context, resource_path=None):
-        super(DirectoryObjectCollection, self).__init__(context, DirectoryObject, resource_path)
+        super().__init__(context, DirectoryObject, resource_path)
 
     def get(self):
-        return super(DirectoryObjectCollection, self).get()
+        return super().get()
 
     def __getitem__(self, key):
         """
@@ -24,7 +24,7 @@ class DirectoryObjectCollection(EntityCollection):
         :rtype: DirectoryObject
         """
         if type(key) == int:
-            return super(DirectoryObjectCollection, self).__getitem__(key)
+            return super().__getitem__(key)
         return self._item_type(self.context,
                                ResourcePath(key, self.resource_path))
 

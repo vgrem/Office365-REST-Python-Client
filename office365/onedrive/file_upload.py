@@ -15,7 +15,7 @@ def read_in_chunks(file_object, chunk_size=1024):
         yield data
 
 
-class ResumableFileUpload(object):
+class ResumableFileUpload:
     """Create an upload session to allow your app to upload files up to the maximum file size. An upload session
     allows your app to upload ranges of the file in sequential API requests, which allows the transfer to be resumed
     if a connection is dropped while the upload is in progress. """

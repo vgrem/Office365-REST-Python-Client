@@ -33,7 +33,7 @@ class GraphClient(ClientRuntimeContext):
         :param (adal.AuthenticationContext) -> dict acquire_token_callback: Acquire token function
         :param str tenant: Tenant name
         """
-        super(GraphClient, self).__init__()
+        super().__init__()
         self._pending_request = ODataRequest(self, V4JsonFormat("minimal"))
         self._pending_request.beforeExecute += self._build_specific_query
         self._resource = "https://graph.microsoft.com"

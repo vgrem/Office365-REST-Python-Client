@@ -12,7 +12,7 @@ class TestDirectorySession(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestDirectorySession, cls).setUpClass()
+        super().setUpClass()
 
         user_credentials = UserCredential(settings['user_credentials']['username'],
                                           settings['user_credentials']['password'])

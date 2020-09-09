@@ -25,7 +25,7 @@ class Entity(ClientObject):
         return None
 
     def set_property(self, name, value, persist_changes=True):
-        super(Entity, self).set_property(name, value, persist_changes)
+        super().set_property(name, value, persist_changes)
         if name == "id" and self._resource_path is None:
             self._resource_path = ResourcePath(
                 value,

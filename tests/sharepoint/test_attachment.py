@@ -17,7 +17,7 @@ class TestListItemAttachment(SPTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestListItemAttachment, cls).setUpClass()
+        super().setUpClass()
         list_name = "Tasks" + str(randint(0, 10000))
         cls.target_list = cls.ensure_list(cls.client.web,
                                           ListCreationInformation(list_name,

@@ -1,4 +1,4 @@
-class UserRealmInfo(object):
+class UserRealmInfo:
 
     def __init__(self, auth_url, federated):
         """

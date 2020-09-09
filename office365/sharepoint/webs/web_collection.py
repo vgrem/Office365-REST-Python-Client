@@ -7,7 +7,7 @@ class WebCollection(ClientObjectCollection):
     """Web collection"""
 
     def __init__(self, context, resource_path=None, parent_web_url=None):
-        super(WebCollection, self).__init__(context, Web, resource_path)
+        super().__init__(context, Web, resource_path)
         self._parent_web_url = parent_web_url
 
     def add(self, web_creation_information):
@@ -19,7 +19,7 @@ class WebCollection(ClientObjectCollection):
 
     @property
     def resource_url(self):
-        url = super(WebCollection, self).resource_url
+        url = super().resource_url
         if self._parent_web_url is not None:
             url = url.replace(self.context.service_root_url(), self._parent_web_url + '/_api/')
         return url

@@ -19,7 +19,7 @@ class OutlookClient(ClientRuntimeContext):
         :type auth_context: AuthenticationContext
         """
         self._resource = "https://outlook.office365.com"
-        super(OutlookClient, self).__init__(auth_context)
+        super().__init__(auth_context)
         self._pendingRequest = ODataRequest(self, V4JsonFormat("minimal"))
         self._pendingRequest.beforeExecute += self._build_specific_query
 

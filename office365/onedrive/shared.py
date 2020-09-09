@@ -10,5 +10,5 @@ class Shared(ClientValue):
 
         :type owner: office365.directory.identitySet.IdentitySet
         """
-        super(Shared, self).__init__()
+        super().__init__()
         self.owner = owner

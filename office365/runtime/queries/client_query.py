@@ -1,6 +1,6 @@
 
 
-class ClientQuery(object):
+class ClientQuery:
     """Client query"""
 
     def __init__(self, context, binding_type=None, parameter_type=None, parameter_name=None, return_type=None):

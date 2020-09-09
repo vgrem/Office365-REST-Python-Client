@@ -6,7 +6,7 @@ from office365.teams.chatMessage import ChatMessage
 class ChatMessageCollection(ClientObjectCollection):
 
     def __init__(self, context, resource_path=None):
-        super(ChatMessageCollection, self).__init__(context, ChatMessage, resource_path)
+        super().__init__(context, ChatMessage, resource_path)
 
     def add(self, item_body):
         """Create a new chatMessage in the specified channel.

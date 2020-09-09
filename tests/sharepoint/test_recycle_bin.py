@@ -10,7 +10,7 @@ class TestSharePointRecycleBin(SPTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestSharePointRecycleBin, cls).setUpClass()
+        super().setUpClass()
         file_name = "Sample{0}.txt".format(str(randint(0, 10000)))
         target_file = cls.client.web.default_document_library().rootFolder \
             .upload_file(file_name, "--some content goes here--").execute_query()

@@ -8,7 +8,7 @@ class User(Principal):
     """Represents a user in Microsoft SharePoint Foundation. A user is a type of SP.Principal."""
 
     def get(self):
-        return super(User, self).get()
+        return super().get()
 
     @property
     def groups(self):

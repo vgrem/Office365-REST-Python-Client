@@ -6,7 +6,7 @@ class JsonLightFormat(ODataJsonFormat):
     """JSON Light format for SharePoint Online/One Drive for Business"""
 
     def __init__(self, metadata=ODataMetadataLevel.Verbose):
-        super(JsonLightFormat, self).__init__(metadata)
+        super().__init__(metadata)
         if self.metadata == ODataMetadataLevel.Verbose:
             self.security_tag_name = "d"
             self.collection_tag_name = "results"

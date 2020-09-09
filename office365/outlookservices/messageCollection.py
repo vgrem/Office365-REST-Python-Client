@@ -6,7 +6,7 @@ from office365.runtime.queries.create_entity_query import CreateEntityQuery
 class MessageCollection(ClientObjectCollection):
     """Message's collection"""
     def __init__(self, context, resource_path=None):
-        super(MessageCollection, self).__init__(context, Message, resource_path)
+        super().__init__(context, Message, resource_path)
 
     def add_from_json(self, message_creation_information):
         """Create a draft of a new message from JSON"""

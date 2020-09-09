@@ -18,7 +18,7 @@ class TestGraphChannel(GraphTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestGraphChannel, cls).setUpClass()
+        super().setUpClass()
         grp_name = "Group_" + uuid.uuid4().hex
         result = cls.client.teams.create(grp_name)
         cls.client.execute_query_retry()

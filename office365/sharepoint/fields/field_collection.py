@@ -8,10 +8,10 @@ class FieldCollection(ClientObjectCollection):
     """Represents a collection of Field resource."""
 
     def __init__(self, context, resource_path=None):
-        super(FieldCollection, self).__init__(context, Field, resource_path)
+        super().__init__(context, Field, resource_path)
 
     def create_typed_object(self, properties):
-        field = super(FieldCollection, self).create_typed_object(properties)
+        field = super().create_typed_object(properties)
         return field
 
     def add(self, field_create_information):

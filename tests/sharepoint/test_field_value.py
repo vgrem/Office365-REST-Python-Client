@@ -22,7 +22,7 @@ class TestFieldValue(SPTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestFieldValue, cls).setUpClass()
+        super().setUpClass()
         cls.target_list = cls.ensure_list(cls.client.web,
                                           ListCreationInformation(
                                               "Tasks N%s" % random_seed,

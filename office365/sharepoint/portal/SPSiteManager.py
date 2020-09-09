@@ -8,7 +8,7 @@ from office365.sharepoint.portal.SPSiteCreationResponse import SPSiteCreationRes
 class SPSiteManager(BaseEntity):
 
     def __init__(self, context):
-        super(SPSiteManager, self).__init__(context, ResourcePath("SPSiteManager"))
+        super().__init__(context, ResourcePath("SPSiteManager"))
 
     def create(self, request):
         """Create a modern site"""

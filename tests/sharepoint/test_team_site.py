@@ -15,7 +15,7 @@ class TestTeamSite(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestTeamSite, cls).setUpClass()
+        super().setUpClass()
 
         user_credentials = UserCredential(settings['user_credentials']['username'],
                                           settings['user_credentials']['password'])

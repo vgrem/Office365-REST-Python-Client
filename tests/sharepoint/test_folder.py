@@ -20,7 +20,7 @@ class TestSharePointFolder(SPTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestSharePointFolder, cls).setUpClass()
+        super().setUpClass()
         cls.target_list = cls.ensure_list(cls.client.web,
                                           ListCreationInformation(
                                               "Documents %s" % random_seed,

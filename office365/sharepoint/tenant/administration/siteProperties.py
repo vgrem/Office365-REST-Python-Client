@@ -7,7 +7,7 @@ class SiteProperties(BaseEntity):
         super().__init__(context)
 
     def set_property(self, name, value, persist_changes=True):
-        super(SiteProperties, self).set_property(name, value, persist_changes)
+        super().set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "Url" and self._resource_path is None:
             pass

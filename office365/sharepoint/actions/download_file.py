@@ -23,5 +23,5 @@ class DownloadFileQuery(ServiceOperationQuery):
             """
             file_object.write(response.content)
 
-        super(DownloadFileQuery, self).__init__(web, r"getFileByServerRelativeUrl('{0}')/\$value".format(file_url))
+        super().__init__(web, r"getFileByServerRelativeUrl('{0}')/\$value".format(file_url))
         self.context.before_execute(_construct_download_query)

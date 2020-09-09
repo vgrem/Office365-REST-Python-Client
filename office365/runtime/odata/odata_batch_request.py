@@ -12,7 +12,7 @@ from office365.runtime.queries.batch_query import BatchQuery, create_boundary
 class ODataBatchRequest(ClientRequest):
 
     def __init__(self, context):
-        super(ODataBatchRequest, self).__init__(context)
+        super().__init__(context)
 
     def build_request(self):
         url = "{0}$batch".format(self.context.service_root_url())

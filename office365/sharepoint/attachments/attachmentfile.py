@@ -56,7 +56,7 @@ class AttachmentFile(AbstractFile):
         return self._parent_collection
 
     def set_property(self, name, value, persist_changes=True):
-        super(AttachmentFile, self).set_property(name, value, persist_changes)
+        super().set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "ServerRelativeUrl":
             self._resource_path = ResourcePathServiceOperation(

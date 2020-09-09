@@ -4,7 +4,7 @@ def _normalize(key, value):
     return value
 
 
-class QueryOptions(object):
+class QueryOptions:
 
     def __init__(self, select=None, expand=None, filter_expr=None, orderBy=None, top=None, skip=None):
         """

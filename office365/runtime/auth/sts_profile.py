@@ -1,7 +1,7 @@
 import datetime
 
 
-class STSProfile(object):
+class STSProfile:
 
     def __init__(self, authority_url):
         """

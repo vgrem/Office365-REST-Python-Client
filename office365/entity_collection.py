@@ -13,7 +13,7 @@ class EntityCollection(ClientObjectCollection):
         :rtype: EntityCollection
         """
         if type(key) == int:
-            return super(EntityCollection, self).__getitem__(key)
+            return super().__getitem__(key)
         return self._item_type(self.context, ResourcePath(key, self.resource_path))
 
     @property

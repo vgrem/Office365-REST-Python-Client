@@ -13,7 +13,7 @@ class TestGraphTeam(GraphTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestGraphTeam, cls).setUpClass()
+        super().setUpClass()
         grp_name = "Group_" + uuid.uuid4().hex
         properties = GroupProfile(grp_name)
         properties.securityEnabled = False

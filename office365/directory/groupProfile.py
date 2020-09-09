@@ -7,7 +7,7 @@ class GroupProfile(ClientValue):
 
         :param str name: Group name
         """
-        super(GroupProfile, self).__init__()
+        super().__init__()
         self.mailNickname = name
         self.displayName = name
         self.description = None

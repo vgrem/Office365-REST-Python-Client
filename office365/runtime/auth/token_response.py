@@ -1,4 +1,4 @@
-class TokenResponse(object):
+class TokenResponse:
 
     def __init__(self, accessToken=None, tokenType=None, **kwargs):
         self.accessToken = accessToken

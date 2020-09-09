@@ -231,7 +231,7 @@ class ListItem(SecurableObject):
         return self.properties.get("CommentsDisabled", None)
 
     def set_property(self, name, value, persist_changes=True):
-        super(ListItem, self).set_property(name, value, persist_changes)
+        super().set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id" and self._parent_collection is not None:

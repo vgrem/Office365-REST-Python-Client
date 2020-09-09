@@ -12,7 +12,7 @@ class ViewCollection(ClientObjectCollection):
 
         :type parent_list: office365.sharepoint.list.List or None
         """
-        super(ViewCollection, self).__init__(context, View, resource_path)
+        super().__init__(context, View, resource_path)
         self._parent_list = parent_list
 
     def add(self, view_creation_information):

@@ -84,7 +84,7 @@ class Team(Entity):
         return self
 
     def set_property(self, name, value, persist_changes=True):
-        super(Team, self).set_property(name, value, persist_changes)
+        super().set_property(name, value, persist_changes)
         # fallback: fix resource path
         if name == "id" and self._resource_path.segment == "team":
             self._resource_path = ResourcePath(value, ResourcePath("teams"))

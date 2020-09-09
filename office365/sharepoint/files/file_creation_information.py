@@ -9,7 +9,7 @@ class FileCreationInformation(ClientValue):
 
         :type url: str
         """
-        super(FileCreationInformation, self).__init__()
+        super().__init__()
         self._url = url
         self._overwrite = overwrite
         self._content = content

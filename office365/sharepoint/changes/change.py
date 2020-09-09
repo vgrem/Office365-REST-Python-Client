@@ -33,7 +33,7 @@ class Change(BaseEntity):
         return self.properties.get("SiteId", None)
 
     def set_property(self, name, value, persist_changes=True):
-        super(Change, self).set_property(name, value, persist_changes)
+        super().set_property(name, value, persist_changes)
         #if name == "ChangeType":
         #    self.__class__ = self.resolve_change_type(value)
         return self

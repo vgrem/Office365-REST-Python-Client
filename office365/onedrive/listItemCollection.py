@@ -6,4 +6,4 @@ class ListItemCollection(ClientObjectCollection):
     """Drive list item's collection"""
 
     def __init__(self, context, resource_path=None):
-        super(ListItemCollection, self).__init__(context, ListItem, resource_path)
+        super().__init__(context, ListItem, resource_path)

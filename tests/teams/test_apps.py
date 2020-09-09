@@ -11,7 +11,7 @@ class TestTeamApps(GraphTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestTeamApps, cls).setUpClass()
+        super().setUpClass()
         team_name = "Team_" + uuid.uuid4().hex
         result = cls.client.teams.create(team_name)
         cls.client.execute_query_retry()
