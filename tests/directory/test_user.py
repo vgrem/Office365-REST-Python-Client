@@ -2,8 +2,8 @@ from settings import settings
 from tests import random_seed
 from tests.graph_case import GraphTestCase
 
-from office365.directory.userProfile import UserProfile
 from office365.directory.user import User
+from office365.directory.userProfile import UserProfile
 
 
 class TestGraphUser(GraphTestCase):

@@ -91,7 +91,7 @@ class TestDriveItem(GraphTestCase):
         self.client.execute_query()
         self.assertIsNotNone(result.value)
 
-    #def test_13_move_file(self):
+    # def test_13_move_file(self):
     #    target_folder = self.__class__.target_folder.parentReference
 
     #    file_name = "Moved_{0}_SharePoint User Guide.docx".format(uuid.uuid4().hex)

@@ -5,8 +5,8 @@ from office365.directory.permission_collection import PermissionCollection
 from office365.onedrive.conflictBehavior import ConflictBehavior
 from office365.onedrive.driveItemVersionCollection import DriveItemVersionCollection
 from office365.onedrive.file import File
-from office365.onedrive.fileSystemInfo import FileSystemInfo
 from office365.onedrive.file_upload import ResumableFileUpload
+from office365.onedrive.fileSystemInfo import FileSystemInfo
 from office365.onedrive.folder import Folder
 from office365.onedrive.listItem import ListItem
 from office365.onedrive.publicationFacet import PublicationFacet
@@ -337,7 +337,7 @@ class DriveItem(BaseItem):
             self._resource_path = ResourcePath(
                 value,
                 ResourcePath("items", self._parent_collection.resource_path.parent.parent))
-        #elif name == "id" and self._resource_path.parent.segment == "root":
+        # elif name == "id" and self._resource_path.parent.segment == "root":
         #    self._resource_path = ResourcePath(value,
         #                                       ResourcePath("items", self._resource_path.parent.parent))
         return self

@@ -22,7 +22,7 @@ class ContentTypeCollection(ClientObjectCollection):
     def add(self, content_type_info):
         """Adds a new content type to the collection and returns a reference to the added SP.ContentType.
 
-        :param office365.sharepoint.contenttypes.contentTypeCreationInformation.ContentTypeCreationInformation content_type_info: Specifies properties that is to be used to
+        :param ContentTypeCreationInformation content_type_info: Specifies properties that is to be used to
             construct the new content type.
 
         """

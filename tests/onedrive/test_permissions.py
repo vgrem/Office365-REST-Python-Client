@@ -1,8 +1,9 @@
 import uuid
 
+from tests.graph_case import GraphTestCase
+
 from office365.directory.permission import Permission
 from office365.onedrive.driveItem import DriveItem
-from tests.graph_case import GraphTestCase
 
 
 class TestPermissions(GraphTestCase):

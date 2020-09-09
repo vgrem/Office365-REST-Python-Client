@@ -1,7 +1,8 @@
 import uuid
 
-from office365.teams.team import Team
 from tests.graph_case import GraphTestCase
+
+from office365.teams.team import Team
 
 
 class TestTeamApps(GraphTestCase):

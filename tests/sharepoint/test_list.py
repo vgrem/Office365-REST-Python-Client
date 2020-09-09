@@ -1,11 +1,12 @@
 from random import randint
 
+from tests.sharepoint.sharepoint_case import SPTestCase
+
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.list_creation_information import ListCreationInformation
 from office365.sharepoint.lists.list_template_type import ListTemplateType
 from office365.sharepoint.permissions.basePermissions import BasePermissions
 from office365.sharepoint.sharing.roleType import RoleType
-from tests.sharepoint.sharepoint_case import SPTestCase
 
 
 class TestSPList(SPTestCase):
@@ -108,7 +109,7 @@ class TestSPList(SPTestCase):
         changes = self.__class__.target_list.get_changes().execute_query()
         self.assertGreater(len(changes), 0)
 
-    #def test_15_get_checked_out_files(self):
+    # def test_15_get_checked_out_files(self):
     #    result = self.__class__.target_list.get_checked_out_files().execute_query()
     #    self.assertIsNotNone(result.resource_path)
 

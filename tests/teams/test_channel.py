@@ -1,12 +1,11 @@
 import uuid
 
-from office365.teams.itemBody import ItemBody
-from office365.teams.team import Team
 from tests.graph_case import GraphTestCase
-
 
 from office365.teams.channel import Channel
 from office365.teams.chatMessage import ChatMessage
+from office365.teams.itemBody import ItemBody
+from office365.teams.team import Team
 
 
 class TestGraphChannel(GraphTestCase):
