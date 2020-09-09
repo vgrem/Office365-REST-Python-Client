@@ -1,7 +1,7 @@
 import json
 
-from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.directory.directoryObject import DirectoryObject
+from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.onedrive.driveCollection import DriveCollection
 from office365.onedrive.siteCollection import SiteCollection
 from office365.runtime.http.http_method import HttpMethod

@@ -11,6 +11,12 @@ class UserCollection(ClientObjectCollection):
     def __init__(self, context, resource_path=None):
         super().__init__(context, User, resource_path)
 
+    def get(self):
+        """
+        :rtype: UserCollection
+        """
+        return super(UserCollection, self).get()
+
     def add_user(self, login_name):
         """
         Adds a user

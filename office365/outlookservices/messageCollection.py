@@ -8,6 +8,12 @@ class MessageCollection(ClientObjectCollection):
     def __init__(self, context, resource_path=None):
         super().__init__(context, Message, resource_path)
 
+    def get(self):
+        """
+        :rtype: MessageCollection
+        """
+        return super(MessageCollection, self).get()
+
     def add_from_json(self, message_creation_information):
         """Create a draft of a new message from JSON"""
         message = Message(self.context)

@@ -1,9 +1,9 @@
-from office365.sharepoint.changes.change_query import ChangeQuery
-from office365.sharepoint.principal.user import User
 from settings import settings
 from tests.sharepoint.sharepoint_case import SPTestCase
 
+from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.permissions.basePermissions import BasePermissions
+from office365.sharepoint.principal.user import User
 
 
 class TestSharePointUser(SPTestCase):

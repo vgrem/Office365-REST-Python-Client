@@ -2,8 +2,8 @@ from settings import settings
 from tests import random_seed
 from tests.graph_case import GraphTestCase
 
-from office365.directory.userProfile import UserProfile
 from office365.directory.user import User
+from office365.directory.userProfile import UserProfile
 
 
 class TestGraphUser(GraphTestCase):
@@ -28,8 +28,7 @@ class TestGraphUser(GraphTestCase):
         user_to_update = self.__class__.test_user
         prop_name = 'city'
         prop_val = 'Earth{0}'.format(random_seed)
-        user_to_update.set_property(prop_name, prop_val)
-        user_to_update.update().execute_query()
+        user_to_update.set_property(prop_name, prop_val).update().execute_query()
 
         result = self.client.users.filter("{0} eq '{1}'".format(prop_name, prop_val)).get().execute_query()
         self.assertEqual(1, len(result))

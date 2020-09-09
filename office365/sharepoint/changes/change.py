@@ -4,12 +4,6 @@ from office365.sharepoint.changes.change_token import ChangeToken
 
 class Change(BaseEntity):
 
-    @staticmethod
-    def resolve_change_type(type_id):
-        mapping_types = {
-        }
-        return mapping_types.get(type_id, Change)
-
     @property
     def change_token(self):
         """
@@ -31,9 +25,3 @@ class Change(BaseEntity):
         Returns the Id of the site of the changed item
         """
         return self.properties.get("SiteId", None)
-
-    def set_property(self, name, value, persist_changes=True):
-        super().set_property(name, value, persist_changes)
-        #if name == "ChangeType":
-        #    self.__class__ = self.resolve_change_type(value)
-        return self
