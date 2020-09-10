@@ -11,7 +11,7 @@ from office365.sharepoint.fields.related_field_collection import RelatedFieldCol
 from office365.sharepoint.files.checkedOutFileCollection import CheckedOutFileCollection
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.forms.formCollection import FormCollection
-from office365.sharepoint.listitems.caml.camlQuery import CamlQuery
+from office365.sharepoint.listitems.caml.caml_query import CamlQuery
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.listitems.listItem_collection import ListItemCollection
 from office365.sharepoint.permissions.securable_object import SecurableObject
@@ -153,7 +153,10 @@ class List(SecurableObject):
                                       ResourcePathServiceOperation("getRelatedFields", [], self.resource_path))
 
     def delete_object(self):
-        """Deletes the list."""
+        """Deletes the list.
+
+        :rtype: List
+        """
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         self.remove_from_parent_collection()

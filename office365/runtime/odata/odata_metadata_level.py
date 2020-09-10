@@ -1,5 +1,5 @@
 class ODataMetadataLevel:
-    """The amount of metadata information to serialize in an OData response (for JSON light)."""
+    """The amount of metadata information to serialize in an OData response."""
     def __init__(self):
         pass
 

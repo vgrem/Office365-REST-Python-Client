@@ -4,7 +4,7 @@ from time import sleep
 from tests import random_seed
 from tests.sharepoint.sharepoint_case import SPTestCase
 
-from office365.sharepoint.listitems.caml.camlQuery import CamlQuery
+from office365.sharepoint.listitems.caml.caml_query import CamlQuery
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.list_creation_information import ListCreationInformation

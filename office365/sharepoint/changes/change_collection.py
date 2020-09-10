@@ -23,15 +23,18 @@ class ChangeCollection(ClientObjectCollection):
         from office365.sharepoint.changes.change_content_type import ChangeContentType
         from office365.sharepoint.changes.change_alert import ChangeAlert
         from office365.sharepoint.changes.change_field import ChangeField
+        from office365.sharepoint.changes.change_item import ChangeItem
 
-        if "WebId" in properties:
+        if "ListId" in properties and "WebId" in properties:
+            self._item_type = ChangeList
+        elif "ItemId" in properties and "ListId" in properties:
+            self._item_type = ChangeItem
+        elif "WebId" in properties:
             self._item_type = ChangeWeb
         elif "UserId" in properties:
             self._item_type = ChangeUser
         elif "GroupId" in properties:
             self._item_type = ChangeGroup
-        elif "ListId" in properties:
-            self._item_type = ChangeList
         elif "ContentTypeId" in properties:
             self._item_type = ChangeContentType
         elif "AlertId" in properties:

@@ -4,7 +4,7 @@ from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
-from office365.sharepoint.listitems.caml.camlQuery import CamlQuery
+from office365.sharepoint.listitems.caml.caml_query import CamlQuery
 from office365.sharepoint.views.view_field_collection import ViewFieldCollection
 
 

@@ -115,8 +115,7 @@ class TestSPList(SPTestCase):
 
     def test_15_delete_list(self):
         list_title = self.target_list_title + "_updated"
-        list_to_delete = self.client.web.lists.get_by_title(list_title)
-        list_to_delete.delete_object().execute_query()
+        self.client.web.lists.get_by_title(list_title).delete_object().execute_query()
 
         result = self.client.web.lists.filter("Title eq '{0}'".format(list_title)).get().execute_query()
         self.assertEqual(len(result), 0)

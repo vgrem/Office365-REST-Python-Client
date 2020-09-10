@@ -6,6 +6,7 @@ from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.changes.change_collection import ChangeCollection
+from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.fields.fieldLookupValue import FieldLookupValue
 from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupValue
 from office365.sharepoint.permissions.securable_object import SecurableObject
@@ -30,12 +31,14 @@ class ListItem(SecurableObject):
         self.context.add_query(qry)
         return result
 
-    def get_changes(self, query):
+    def get_changes(self, query=None):
         """Returns the collection of changes from the change log that have occurred within the ListItem,
            based on the specified query.
 
         :param office365.sharepoint.changeQuery.ChangeQuery query: Specifies which changes to return
         """
+        if query is None:
+            query = ChangeQuery(item=True)
         changes = ChangeCollection(self.context)
         qry = ServiceOperationQuery(self, "getChanges", None, query, "query", changes)
         self.context.add_query(qry)
