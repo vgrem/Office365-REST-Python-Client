@@ -20,5 +20,5 @@ class TokenResponse(object):
                 return key_parts[0] + "".join(names)
             return name
 
-        token_json = {_normalize_key(k): v for k, v in value.items()}
-        return TokenResponse(**token_json)
+        json = {_normalize_key(k): v for k, v in value.items()}
+        return TokenResponse(**json)

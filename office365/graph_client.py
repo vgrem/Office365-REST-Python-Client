@@ -11,6 +11,7 @@ from office365.onedrive.driveCollection import DriveCollection
 from office365.onedrive.sharedDriveItemCollection import SharedDriveItemCollection
 from office365.onedrive.siteCollection import SiteCollection
 from office365.outlookservices.contact_collection import ContactCollection
+from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
@@ -68,10 +69,9 @@ class GraphClient(ClientRuntimeContext):
 
         :type request: RequestOptions
         """
-        # authority_url = self._authority_host_url + '/' + self._tenant
-        # auth_ctx = adal.AuthenticationContext(authority_url)
-        token = self._acquire_token_callback()
-        request.set_header('Authorization', 'Bearer {0}'.format(token["accessToken"]))
+        token_json = self._acquire_token_callback()
+        token = TokenResponse.from_json(token_json)
+        request.set_header('Authorization', 'Bearer {0}'.format(token.accessToken))
 
     def execute_request(self, url_or_options):
         """
