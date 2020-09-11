@@ -1,13 +1,13 @@
+import adal
+
 from settings import settings
 
 from office365.graph_client import GraphClient
 
 
-def get_token_for_user(auth_ctx):
-    """
-
-    :type auth_ctx: adal.AuthenticationContext
-    """
+def get_token_for_user():
+    authority_url = 'https://login.microsoftonline.com/{0}'.format(settings['tenant'])
+    auth_ctx = adal.AuthenticationContext(authority_url)
     token = auth_ctx.acquire_token_with_username_password(
         'https://graph.microsoft.com',
         settings['user_credentials']['username'],

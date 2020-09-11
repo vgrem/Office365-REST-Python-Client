@@ -17,8 +17,8 @@ class Team(Entity):
     """A team in Microsoft Teams is a collection of channel objects. A channel represents a topic, and therefore a
     logical isolation of discussion, within a team. """
 
-    def __init__(self, context, resource_path=None):
-        super().__init__(context, resource_path)
+    def __init__(self, context, resource_path=None, properties=None):
+        super().__init__(context, resource_path, properties)
         self.memberSettings = TeamMemberSettings()
         self.guestSettings = TeamGuestSettings()
         self.messagingSettings = TeamMessagingSettings()

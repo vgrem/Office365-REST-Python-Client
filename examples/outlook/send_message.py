@@ -1,10 +1,14 @@
+import adal
+
 from settings import settings
 
 from office365.graph_client import GraphClient
 
 
-def get_token(auth_ctx):
+def get_token():
     """Acquire token via client credential flow (ADAL Python library is utilized)"""
+    authority_url = 'https://login.microsoftonline.com/{0}'.format(settings['tenant'])
+    auth_ctx = adal.AuthenticationContext(authority_url)
     token = auth_ctx.acquire_token_with_client_credentials(
         "https://graph.microsoft.com",
         settings['client_credentials']['client_id'],

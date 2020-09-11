@@ -2,7 +2,7 @@ from faker import Faker
 from settings import settings
 from tests import random_seed
 
-from office365.directory import UserProfile
+from office365.directory.userProfile import UserProfile
 from office365.graph_client import GraphClient
 
 

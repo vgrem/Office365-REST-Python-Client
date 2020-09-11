@@ -24,7 +24,9 @@ class TeamCollection(EntityCollection):
         def _process_response(resp):
             for grp in groups:
                 if "Team" in grp.properties["resourceProvisioningOptions"]:
-                    self.add_child(Team(self.context, ResourcePath(grp.properties["id"], self.resource_path)))
+                    new_team = Team(self.context, ResourcePath(grp.properties["id"], self.resource_path))
+                    new_team.set_property("id", grp.properties["id"])
+                    self.add_child(new_team)
         self.context.after_execute(_process_response)
         return self
 

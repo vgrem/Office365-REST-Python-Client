@@ -1,4 +1,4 @@
-from generator.type_builder import TypeBuilder
+from generator.builders.type_builder import TypeBuilder
 
 from office365.runtime.odata.odata_v3_reader import ODataV3Reader
 from office365.runtime.odata.odata_v4_reader import ODataV4Reader

@@ -1,5 +1,4 @@
 flake8
 isort
 nose2
-Faker~=4.1.1
 astunparse~=1.6.3

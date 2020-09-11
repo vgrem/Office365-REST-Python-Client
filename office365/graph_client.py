@@ -1,5 +1,3 @@
-import adal
-
 from office365.actions.download_content_query import DownloadContentQuery
 from office365.actions.search_query import SearchQuery
 from office365.actions.upload_content_query import UploadContentQuery
@@ -30,7 +28,7 @@ class GraphClient(ClientRuntimeContext):
     def __init__(self, tenant, acquire_token_callback):
         """
 
-        :param (adal.AuthenticationContext) -> dict acquire_token_callback: Acquire token function
+        :param () -> dict acquire_token_callback: Acquire token function
         :param str tenant: Tenant name
         """
         super(GraphClient, self).__init__()
@@ -70,9 +68,9 @@ class GraphClient(ClientRuntimeContext):
 
         :type request: RequestOptions
         """
-        authority_url = self._authority_host_url + '/' + self._tenant
-        auth_ctx = adal.AuthenticationContext(authority_url)
-        token = self._acquire_token_callback(auth_ctx)
+        # authority_url = self._authority_host_url + '/' + self._tenant
+        # auth_ctx = adal.AuthenticationContext(authority_url)
+        token = self._acquire_token_callback()
         request.set_header('Authorization', 'Bearer {0}'.format(token["accessToken"]))
 
     def execute_request(self, url_or_options):

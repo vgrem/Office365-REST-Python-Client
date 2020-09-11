@@ -20,9 +20,7 @@ class Entity(ClientObject):
         """The unique identifier of the drive.
         :rtype: str or None
         """
-        if self.is_property_available("id"):
-            return self.properties['id']
-        return None
+        return self.properties.get('id', None)
 
     def set_property(self, name, value, persist_changes=True):
         super(Entity, self).set_property(name, value, persist_changes)

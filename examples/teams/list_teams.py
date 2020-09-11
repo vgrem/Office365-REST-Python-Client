@@ -1,16 +1,10 @@
-from unittest import TestCase
-
 import adal
 
 from settings import settings
-
 from office365.graph_client import GraphClient
 
 
-def get_token():
-    """
-    Get token
-    """
+def acquire_token():
     authority_url = 'https://login.microsoftonline.com/{0}'.format(settings['tenant'])
     auth_ctx = adal.AuthenticationContext(authority_url)
     token = auth_ctx.acquire_token_with_username_password(
@@ -21,10 +15,7 @@ def get_token():
     return token
 
 
-class GraphTestCase(TestCase):
-    """Microsoft Graph specific test case base class"""
-    client = None  # type: GraphClient
-
-    @classmethod
-    def setUpClass(cls):
-        cls.client = GraphClient(settings['tenant'], get_token)
+client = GraphClient(settings['tenant'], acquire_token)
+teams = client.teams.get_all().execute_query()
+for team in teams:
+    print(team.id)
