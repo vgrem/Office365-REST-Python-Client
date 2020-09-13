@@ -27,4 +27,4 @@ class GraphTestCase(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.client = GraphClient(settings['tenant'], get_token)
+        cls.client = GraphClient(get_token)

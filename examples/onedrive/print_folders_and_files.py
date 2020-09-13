@@ -30,6 +30,6 @@ def enum_folders_and_files(root_folder):
             enum_folders_and_files(drive_item)
 
 
-client = GraphClient(settings['tenant'], get_token_for_user)
+client = GraphClient(get_token_for_user)
 root = client.me.drive.root
 enum_folders_and_files(root)

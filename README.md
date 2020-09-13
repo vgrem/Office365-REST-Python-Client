@@ -112,9 +112,57 @@ the following clients are available:
 
 #### Authentication
 
-[ADAL Python](https://adal-python.readthedocs.io/en/latest/#) 
-library is utilized to authenticate users to Active Directory (AD) and obtain tokens
+In terms of Microsoft Graph API authentication, there is no any dependency to any particular library implementation, 
+the following libraries are supported at least:
 
+> Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
+> in the provided examples
+
+[Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/)
+
+```python
+import msal
+from office365.graph_client import GraphClient
+
+def acquire_token():
+    """
+    Acquire token via MSAL
+    """
+    authority_url = 'https://login.microsoftonline.com/{tenant_id_or_name}'
+    app = msal.ConfidentialClientApplication(
+        authority=authority_url,
+        client_id='{client_id}',
+        client_credential='{client_secret}'
+    )
+    result = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
+    return result
+
+
+client = GraphClient(acquire_token)
+
+```
+
+
+[ADAL Python](https://adal-python.readthedocs.io/en/latest/#)
+
+Usage
+
+```python
+import adal
+from office365.graph_client import GraphClient
+
+def get_token():
+    authority_url = 'https://login.microsoftonline.com/{tenant_id_or_name}'
+    auth_ctx = adal.AuthenticationContext(authority_url)
+    token = auth_ctx.acquire_token_with_client_credentials(
+        "https://graph.microsoft.com",
+        "{client_id}",
+        "{client_secret}")
+    return token
+
+client = GraphClient(get_token)
+
+```
 
 #### Example
 
@@ -123,17 +171,19 @@ The example demonstrates how to send an email via [Microsoft Graph endpoint](htt
 > Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
 
 ```python
+import adal
 from office365.graph_client import GraphClient
-def get_token(auth_ctx):
+
+def get_token():
+    authority_url = 'https://login.microsoftonline.com/{tenant_id_or_name}'
+    auth_ctx = adal.AuthenticationContext(authority_url)
     token = auth_ctx.acquire_token_with_client_credentials(
         "https://graph.microsoft.com",
         "{client_id}",
         "{client_secret}")
     return token
 
-
-tenant_name = "{your-tenant-prefix}.onmicrosoft.com"
-client = GraphClient(tenant_name, get_token)
+client = GraphClient(get_token)
 
 message_json = {
     "Message": {
@@ -191,7 +241,7 @@ def get_token(auth_ctx):
 
 
 tenant_name = "contoso.onmicrosoft.com"
-client = GraphClient(tenant_name, get_token)
+client = GraphClient(get_token)
 drives = client.drives
 client.load(drives)
 client.execute_query()
@@ -204,7 +254,7 @@ for drive in drives:
 
 ```python
 from office365.graph_client import GraphClient
-client = GraphClient("{tenant_name}", get_token)
+client = GraphClient(get_token)
 # retrieve drive properties 
 drive = client.users["{user_id_or_principal_name}"].drive
 client.load(drive)

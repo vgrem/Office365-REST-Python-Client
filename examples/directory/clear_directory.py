@@ -16,7 +16,7 @@ def get_token_for_user():
     return token
 
 
-client = GraphClient(settings['tenant'], get_token_for_user)
+client = GraphClient(get_token_for_user)
 
 deleted_groups = client.directory.deletedGroups.get().execute_query()
 # deleted_users = client.directory.deletedUsers.get().execute_query()

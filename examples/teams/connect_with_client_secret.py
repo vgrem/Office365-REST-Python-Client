@@ -19,7 +19,7 @@ def acquire_token_msal():
     return result
 
 
-client = GraphClient(settings['tenant'], acquire_token_msal)
+client = GraphClient(acquire_token_msal)
 teams = client.teams.get_all().execute_query()
 for team in teams:
     print(team.id)

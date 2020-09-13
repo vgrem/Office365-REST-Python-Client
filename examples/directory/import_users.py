@@ -36,7 +36,7 @@ def generate_user_profile():
     return UserProfile(**user_json)
 
 
-client = GraphClient(settings['tenant'], acquire_token)
+client = GraphClient(acquire_token)
 
 for idx in range(0, 5):
     user_profile = generate_user_profile()

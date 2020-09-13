@@ -41,7 +41,7 @@ def download_files(remote_folder, local_path):
 # --------------------------------------------------------------------------
 
 # connect
-client = GraphClient(settings['tenant'], get_token)
+client = GraphClient(get_token)
 
 # load drive properties
 drive = client.users["jdoe@mediadev8.onmicrosoft.com"].drive

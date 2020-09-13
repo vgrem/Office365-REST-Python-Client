@@ -26,18 +26,16 @@ from office365.teams.teamCollection import TeamCollection
 class GraphClient(ClientRuntimeContext):
     """Graph client"""
 
-    def __init__(self, tenant, acquire_token_callback):
+    def __init__(self, acquire_token_callback):
         """
 
         :param () -> dict acquire_token_callback: Acquire token function
-        :param str tenant: Tenant name
         """
         super(GraphClient, self).__init__()
         self._pending_request = ODataRequest(self, V4JsonFormat("minimal"))
         self._pending_request.beforeExecute += self._build_specific_query
         self._resource = "https://graph.microsoft.com"
         self._authority_host_url = "https://login.microsoftonline.com"
-        self._tenant = tenant
         self._acquire_token_callback = acquire_token_callback
 
     def pending_request(self):

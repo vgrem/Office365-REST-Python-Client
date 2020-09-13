@@ -16,7 +16,7 @@ def get_token():
     return token
 
 
-client = GraphClient(settings['tenant'], get_token)
+client = GraphClient(get_token)
 message_json = {
     "Message": {
         "Subject": "Meet for lunch?",

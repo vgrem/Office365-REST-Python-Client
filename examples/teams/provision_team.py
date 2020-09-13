@@ -32,7 +32,7 @@ def print_failure(retry_number):
     print(f"{retry_number}: trying to create a team...")
 
 
-client = GraphClient(settings['tenant'], acquire_token)
+client = GraphClient(acquire_token)
 
 group_name = "Team_" + uuid.uuid4().hex
 result = client.teams.create(group_name)

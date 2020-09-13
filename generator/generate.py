@@ -7,16 +7,18 @@ from office365.runtime.odata.odata_v4_reader import ODataV4Reader
 def generate_files(model, options):
     for name in model.types:
         type_schema = model.types[name]
-        builder = TypeBuilder(type_schema)
-        if builder.build(options):
-            builder.save()
+        builder = TypeBuilder(options)
+        result = builder.build(type_schema)
+        if result["status"] == "created":
+            builder.save(result)
 
 
 def generate_sharepoint_model():
     generator_options = {
         'namespace': 'office365.sharepoint',
         'metadataPath': './metadata/SharePoint.xml',
-        'outputPath': '/office365/sharepoint'
+        'outputPath': '/office365/sharepoint',
+        'templatePath': '/generator/templates',
     }
     reader = ODataV3Reader(generator_options)
     model = reader.generate_model()
@@ -27,9 +29,8 @@ def generate_graph_model():
     options = {
         'namespace': 'office365',
         'metadataPath': './metadata/MicrosoftGraph.xml',
-        'outputPath': '/office365',
-        'entityTypeFile': 'office365/graph/base_item.py',
-        'complexTypeFile': '../office365/runtime/client_value.py'
+        'outputPath': '../office365',
+        'templatePath': '../generator/templates',
     }
     reader = ODataV4Reader(options)
     model = reader.generate_model()
