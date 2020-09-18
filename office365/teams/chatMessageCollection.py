@@ -8,6 +8,12 @@ class ChatMessageCollection(ClientObjectCollection):
     def __init__(self, context, resource_path=None):
         super(ChatMessageCollection, self).__init__(context, ChatMessage, resource_path)
 
+    def get(self):
+        """
+        :rtype: ChatMessageCollection
+        """
+        return super(ChatMessageCollection, self).get()
+
     def add(self, item_body):
         """Create a new chatMessage in the specified channel.
 

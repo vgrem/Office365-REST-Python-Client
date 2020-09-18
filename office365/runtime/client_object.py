@@ -86,7 +86,10 @@ class ClientObject(object):
         if hasattr(self, safe_name) and value is not None:
             prop_type = getattr(self, safe_name)
             if isinstance(prop_type, ClientObject) or isinstance(prop_type, ClientValue):
-                [prop_type.set_property(k, v, persist_changes) for k, v in value.items()]
+                if isinstance(value, list):
+                    [prop_type.set_property(i, v, persist_changes) for i, v in enumerate(value)]
+                else:
+                    [prop_type.set_property(k, v, persist_changes) for k, v in value.items()]
                 self._properties[name] = prop_type
             else:
                 self._properties[name] = value

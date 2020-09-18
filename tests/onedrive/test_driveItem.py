@@ -100,5 +100,5 @@ class TestDriveItem(GraphTestCase):
     #    self.assertIsNotNone(result.value)
 
     def test_14_delete_file(self):
-        items = self.target_drive.root.children.top(1).get().execute_query()
-        items[0].delete_object().execute_query()
+        items = self.target_drive.root.children.top(2).get().execute_query()
+        items[1].delete_object().execute_query()

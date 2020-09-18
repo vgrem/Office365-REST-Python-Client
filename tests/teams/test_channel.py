@@ -51,18 +51,22 @@ class TestGraphChannel(GraphTestCase):
         primary_channel = self.__class__.target_team.primaryChannel.get().execute_query()
         self.assertIsNotNone(primary_channel.resource_path)
 
-    def test6_send_message(self):
+    #def test6_get_channel_files_location(self):
+    #    drive_item = self.__class__.target_channel.filesFolder.get().execute_query()
+    #    self.assertIsNotNone(drive_item.resource_path)
+
+    def test7_send_message(self):
         item_body = ItemBody("Hello world!")
         message = self.__class__.target_channel.messages.add(item_body).execute_query()
         self.assertIsNotNone(message.id)
         self.__class__.target_message = message
 
-    def test7_reply_to_message(self):
+    def test8_reply_to_message(self):
         item_body = ItemBody("Hello world back!")
         reply = self.__class__.target_message.replies.add(item_body).execute_query()
         self.assertIsNotNone(reply.id)
 
-    def test8_delete_channel(self):
+    def test9_delete_channel(self):
         channels_before = self.__class__.target_team.channels.get().execute_query()
         self.__class__.target_channel.delete_object().execute_query()
         channels_after = self.__class__.target_team.channels.get().execute_query()

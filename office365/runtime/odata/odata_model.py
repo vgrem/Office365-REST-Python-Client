@@ -4,7 +4,7 @@ from pydoc import locate
 class ODataModel(object):
     """OData model"""
     _types = {}
-    _namespaces = ['principal', 'onedrive', 'outlookservices', 'teams']
+    _namespaces = ['directory', 'onedrive', 'outlookservices', 'teams']
 
     @property
     def types(self):
@@ -12,7 +12,7 @@ class ODataModel(object):
 
     def resolve_type(self, schema):
         type_alias = schema['name']
-        types = [locate("office365.graph.{0}.{1}".format(ns, type_alias)) for ns in self._namespaces]
+        types = [locate("office365.{0}.{1}".format(ns, type_alias)) for ns in self._namespaces]
         found_modules = [t for t in types if t is not None]
         if any(found_modules):
             schema['state'] = 'attached'

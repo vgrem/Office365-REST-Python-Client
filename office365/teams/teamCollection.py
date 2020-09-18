@@ -16,6 +16,12 @@ class TeamCollection(EntityCollection):
             return self._data[key]
         return Team(self.context, ResourcePath(key, self.resource_path))
 
+    def get(self):
+        """
+        :rtype: TeamCollection
+        """
+        return super(TeamCollection, self).get()
+
     def get_all(self):
         """List all teams in Microsoft Teams for an organization"""
         groups = self.context.groups.select(["id", "resourceProvisioningOptions"])

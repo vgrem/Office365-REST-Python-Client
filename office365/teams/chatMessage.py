@@ -1,8 +1,15 @@
 from office365.entity import Entity
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.resource_path import ResourcePath
+from office365.teams.chatMessageAttachment import ChatMessageAttachment
 
 
 class ChatMessage(Entity):
+
+    @property
+    def attachments(self):
+        """The collection of replies."""
+        return self.properties.get("attachments", ClientValueCollection(ChatMessageAttachment()))
 
     @property
     def replies(self):

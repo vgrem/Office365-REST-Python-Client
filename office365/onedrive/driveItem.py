@@ -109,8 +109,9 @@ class DriveItem(BaseItem):
         :param str source_path: Local file path
         :param int chunk_size: chunk size
         """
-        uploader = ResumableFileUpload(self, source_path, chunk_size)
-        return uploader.drive_item
+        upload_query = ResumableFileUpload(self, source_path, chunk_size)
+        self.context.add_query(upload_query)
+        return upload_query.return_type
 
     def create_upload_session(self, item):
         """Creates a temporary storage location where the bytes of the file will be saved until the complete file is

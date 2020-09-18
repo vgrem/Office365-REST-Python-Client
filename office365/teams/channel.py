@@ -1,6 +1,7 @@
 from urllib.parse import quote
 
 from office365.entity import Entity
+from office365.onedrive.driveItem import DriveItem
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.teams.chatMessageCollection import ChatMessageCollection
@@ -16,6 +17,12 @@ class Channel(Entity):
         self.context.add_query(qry)
         self.remove_from_parent_collection()
         return self
+
+    @property
+    def filesFolder(self):
+        """Get the metadata for the location where the files of a channel are stored."""
+        return self.properties.get('filesFolder',
+                                   DriveItem(self.context, ResourcePath("filesFolder", self.resource_path)))
 
     @property
     def tabs(self):

@@ -1,5 +1,5 @@
-from office365.entity import Entity
+from office365.onedrive.baseItemVersion import BaseItemVersion
 
 
-class DriveItemVersion(Entity):
+class DriveItemVersion(BaseItemVersion):
     pass
