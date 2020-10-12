@@ -1,11 +1,12 @@
 import os
 import tempfile
 
+
 from settings import settings
 
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.listitems.caml import CamlQuery
+from office365.sharepoint.listitems.caml.caml_query import CamlQuery
 
 download_path = tempfile.mkdtemp()
 
@@ -14,7 +15,10 @@ client_creds = ClientCredential(settings['client_credentials']['client_id'],
 ctx = ClientContext(settings['url']).with_credentials(client_creds)
 
 list_obj = ctx.web.lists.get_by_title("Tasks123")
-items = list_obj.get_items(CamlQuery.create_all_items_query())
+#items = list_obj.get_items(CamlQuery.create_all_items_query())
+#items = list_obj.get_items()
+items = list_obj.items
+ctx.load(items, ["ID", "UniqueId", "FileRef", "LinkFilename", "Title", "Attachments"])
 ctx.execute_query()
 for item in items:
     if item.properties['Attachments']:  # 1. determine whether ListItem contains attachments
@@ -28,3 +32,4 @@ for item in items:
             with open(download_file_name, 'wb') as fh:
                 content = attachment_file.read()
                 fh.write(content)
+                print(f"{attachment_file.server_relative_url} has been downloaded")

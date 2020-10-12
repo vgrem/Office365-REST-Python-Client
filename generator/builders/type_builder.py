@@ -19,7 +19,7 @@ class TypeBuilder(ast.NodeTransformer):
     def build(self, schema):
         result = dict(status=None, output_file=None, source_tree=None)
         if schema['state'] == 'attached':
-            result.output_file = schema['file']
+            result["output_file"] = schema['file']
             with open(schema['file']) as f:
                 result["source_tree"] = ast.parse(f.read())
             result["status"] = "updated"

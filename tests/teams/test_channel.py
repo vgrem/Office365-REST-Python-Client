@@ -51,7 +51,7 @@ class TestGraphChannel(GraphTestCase):
         primary_channel = self.__class__.target_team.primaryChannel.get().execute_query()
         self.assertIsNotNone(primary_channel.resource_path)
 
-    #def test6_get_channel_files_location(self):
+    # def test6_get_channel_files_location(self):
     #    drive_item = self.__class__.target_channel.filesFolder.get().execute_query()
     #    self.assertIsNotNone(drive_item.resource_path)
 
