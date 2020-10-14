@@ -21,7 +21,7 @@ class ProfileLoader(ClientObject):
         return result
 
     def get_user_profile(self):
-        result = UserProfile(self.context)
+        result = UserProfile(self.context, ResourcePath("GetUserProfile", self.resource_path))
         qry = ServiceOperationQuery(self, "GetUserProfile", None, None, None, result)
         self.context.add_query(qry)
         return result
