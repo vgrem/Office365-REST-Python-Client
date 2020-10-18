@@ -112,13 +112,15 @@ the following clients are available:
 
 #### Authentication
 
-In terms of Microsoft Graph API authentication, there is no any dependency to any particular library implementation, 
-the following libraries are supported at least:
+[The Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/) which comes as a dependency 
+is used as a default library to obtain token to call Microsoft Graph API. But in terms of Microsoft Graph API 
+authentication, another Microsoft Authentication Client compliant libraries such [adal](https://github.com/AzureAD/azure-activedirectory-library-for-python) 
+as are supported as well.   
 
 > Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
 > in the provided examples
 
-[Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/)
+Using [Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/)
 
 ```python
 import msal
@@ -134,8 +136,8 @@ def acquire_token():
         client_id='{client_id}',
         client_credential='{client_secret}'
     )
-    result = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
-    return result
+    token = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
+    return token
 
 
 client = GraphClient(acquire_token)
@@ -143,7 +145,7 @@ client = GraphClient(acquire_token)
 ```
 
 
-[ADAL Python](https://adal-python.readthedocs.io/en/latest/#)
+Using [ADAL Python](https://adal-python.readthedocs.io/en/latest/#)
 
 Usage
 
@@ -151,7 +153,7 @@ Usage
 import adal
 from office365.graph_client import GraphClient
 
-def get_token():
+def acquire_token():
     authority_url = 'https://login.microsoftonline.com/{tenant_id_or_name}'
     auth_ctx = adal.AuthenticationContext(authority_url)
     token = auth_ctx.acquire_token_with_client_credentials(
@@ -160,7 +162,7 @@ def get_token():
         "{client_secret}")
     return token
 
-client = GraphClient(get_token)
+client = GraphClient(acquire_token)
 
 ```
 
@@ -171,19 +173,9 @@ The example demonstrates how to send an email via [Microsoft Graph endpoint](htt
 > Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
 
 ```python
-import adal
 from office365.graph_client import GraphClient
 
-def get_token():
-    authority_url = 'https://login.microsoftonline.com/{tenant_id_or_name}'
-    auth_ctx = adal.AuthenticationContext(authority_url)
-    token = auth_ctx.acquire_token_with_client_credentials(
-        "https://graph.microsoft.com",
-        "{client_id}",
-        "{client_secret}")
-    return token
-
-client = GraphClient(get_token)
+client = GraphClient(acquire_token)
 
 message_json = {
     "Message": {
@@ -217,8 +209,26 @@ client.execute_query()
 
 #### Authentication
 
-[ADAL Python](https://adal-python.readthedocs.io/en/latest/#) 
-library is utilized to authenticate users to Active Directory (AD) and obtain tokens  
+[The Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/) which comes as a dependency 
+is used to obtain token
+
+```python
+import msal
+
+def acquire_token():
+    """
+    Acquire token via MSAL
+    """
+    authority_url = 'https://login.microsoftonline.com/{tenant_id_or_name}'
+    app = msal.ConfidentialClientApplication(
+        authority=authority_url,
+        client_id='{client_id}',
+        client_credential='{client_secret}'
+    )
+    token = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
+    return token
+``` 
+
 
 #### Examples 
 
@@ -231,17 +241,9 @@ which corresponds to [`list available drives` endpoint](https://docs.microsoft.c
 
 ```python
 from office365.graph_client import GraphClient
-def get_token(auth_ctx):
-    """Acquire token via client credential flow (ADAL Python library is utilized)"""
-    token = auth_ctx.acquire_token_with_client_credentials(
-        "https://graph.microsoft.com",
-        "{client_id}",
-        "{client_secret}")
-    return token
-
 
 tenant_name = "contoso.onmicrosoft.com"
-client = GraphClient(get_token)
+client = GraphClient(acquire_token)
 drives = client.drives
 client.load(drives)
 client.execute_query()
@@ -254,7 +256,7 @@ for drive in drives:
 
 ```python
 from office365.graph_client import GraphClient
-client = GraphClient(get_token)
+client = GraphClient(acquire_token)
 # retrieve drive properties 
 drive = client.users["{user_id_or_principal_name}"].drive
 client.load(drive)
@@ -288,8 +290,8 @@ Refer [OneDrive examples section](examples/onedrive) for a more examples.
 
 #### Authentication
 
-[ADAL Python](https://adal-python.readthedocs.io/en/latest/#) 
-library is utilized to authenticate users to Active Directory (AD) and obtain tokens  
+[The Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/) which comes as a dependency 
+is used to obtain token  
 
 #### Examples 
 
@@ -301,30 +303,16 @@ which corresponds to [`Create team` endpoint](https://docs.microsoft.com/en-us/g
 ```python
 from office365.graph_client import GraphClient
 tenant_name = "contoso.onmicrosoft.com"
-client = GraphClient(tenant_name, get_token)
+client = GraphClient(tenant_name, acquire_token)
 new_team = client.groups["{group_id}"].add_team()
 client.execute_query()
-```
-
-where
-
-```python
-def get_token(auth_ctx):
-    """Acquire token via client credential flow (ADAL Python library is utilized)
-    :type auth_ctx: adal.AuthenticationContext
-    """
-    token = auth_ctx.acquire_token_with_client_credentials(
-        "https://graph.microsoft.com",
-        "{client_id}",
-        "{client_secret}")
-    return token
 ```
 
 
 # Third Party Libraries and Dependencies
 The following libraries will be installed when you install the client library:
 * [requests](https://github.com/kennethreitz/requests)
-* [adal](https://github.com/AzureAD/azure-activedirectory-library-for-python)
+* [Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/)
 
 
 
