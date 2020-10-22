@@ -1,8 +1,6 @@
 requests~=2.24.0
 requests_ntlm [NTLMAuthentication]
-setuptools~=50.3.0
+setuptools~=50.3.2
 
-adal~=1.2.4
 msal~=1.5.0
-Faker~=4.1.2
 astunparse~=1.6.3

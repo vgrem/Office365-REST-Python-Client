@@ -113,14 +113,12 @@ the following clients are available:
 #### Authentication
 
 [The Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/) which comes as a dependency 
-is used as a default library to obtain token to call Microsoft Graph API. But in terms of Microsoft Graph API 
-authentication, another Microsoft Authentication Client compliant libraries such [adal](https://github.com/AzureAD/azure-activedirectory-library-for-python) 
-as are supported as well.   
+is used as a default library to obtain tokens to call Microsoft Graph API. 
+
+Using [Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/)
 
 > Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
 > in the provided examples
-
-Using [Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/)
 
 ```python
 import msal
@@ -144,6 +142,9 @@ client = GraphClient(acquire_token)
 
 ```
 
+But in terms of Microsoft Graph API authentication, another Microsoft Authentication Client compliant libraries 
+such as [adal](https://github.com/AzureAD/azure-activedirectory-library-for-python) 
+are supported as well.   
 
 Using [ADAL Python](https://adal-python.readthedocs.io/en/latest/#)
 

@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.userprofiles.userProfilePropertiesForUser import UserProfilePropertiesForUser
+from office365.sharepoint.userprofiles.peopleManager import PeopleManager
 from settings import settings
 
 
@@ -31,9 +31,16 @@ class TestUserProfile(TestCase):
         up = user_profile.create_personal_site_enque(True).execute_query()
         self.assertIsNotNone(up.properties['PublicUrl'])
 
-    # def test4_get_user_props(self):
-    #    account_name = settings['user_credentials']['username']
-    #    props = UserProfilePropertiesForUser(self.my_client, account_name, ['PublicUrl'])
-    #    self.my_client.load(props)
-    #    self.my_client.execute_query()
-    #    self.assertIsNotNone(props)
+    def test4_get_user_props(self):
+        me = self.my_client.web.currentUser.get().execute_query()
+        people_manager = PeopleManager(self.my_client)
+        result = people_manager.get_user_profile_properties(me.login_name)
+        self.my_client.execute_query()
+        self.assertIsNotNone(result.value)
+
+    def test5_get_default_document_library(self):
+        me = self.my_client.web.currentUser.get().execute_query()
+        people_manager = PeopleManager(self.my_client)
+        result = people_manager.get_default_document_library(me.login_name)
+        self.my_client.execute_query()
+        self.assertIsNotNone(result.value)

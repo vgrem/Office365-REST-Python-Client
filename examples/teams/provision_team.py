@@ -38,7 +38,3 @@ group_name = "Team_" + uuid.uuid4().hex
 result = client.teams.create(group_name)
 client.execute_query_retry(max_retry=5, failure_callback=print_failure)
 print("Team has been provisioned")
-
-channels = result.value.channels
-client.load(channels)
-client.execute_query()

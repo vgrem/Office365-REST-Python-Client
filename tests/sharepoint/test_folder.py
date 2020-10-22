@@ -29,54 +29,41 @@ class TestSharePointFolder(SPTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.target_list.delete_object()
-        cls.client.execute_query()
+        cls.target_list.delete_object().execute_query()
 
     def test1_enum_folders_and_files(self):
-        parent_folder = self.__class__.target_list.rootFolder
-        self.client.load(parent_folder)
-        self.client.execute_query()
+        parent_folder = self.__class__.target_list.rootFolder.get().execute_query()
         self.assertIsNotNone(parent_folder.serverRelativeUrl)
 
         folder_url = parent_folder.serverRelativeUrl
-        folder_object = self.client.web.get_folder_by_server_relative_url(folder_url)
-        self.client.load(folder_object)
-        self.client.execute_query()
+        folder_object = self.client.web.get_folder_by_server_relative_url(folder_url).get().execute_query()
         self.assertTrue(folder_object.properties["ServerRelativeUrl"], folder_url)
-        folders = folder_object.folders
-        self.client.load(folders)
-        self.client.execute_query()
+        folders = folder_object.folders.get().execute_query()
         for child_folder in folders:
             self.assertIsNotNone(child_folder.resource_path)
-            self.assertIsNotNone(child_folder.resource_path)
-            files = child_folder.files
-            self.client.load(files)
-            self.client.execute_query()
+            files = child_folder.files.get().execute_query()
             for file_in_folder in files:
                 self.assertIsNotNone(file_in_folder.resource_path)
 
     def test2_create_folder(self):
-        folder_new = self.__class__.target_list.rootFolder.folders.add(self.__class__.target_folder_name)
-        self.client.execute_query()
+        folder_new = self.__class__.target_list.rootFolder.folders.add(self.__class__.target_folder_name).execute_query()
         self.assertTrue(folder_new.properties["Exists"])
         self.__class__.target_folder = folder_new
 
     def test3_get_folder_by_id(self):
         folder_id = self.__class__.target_folder.properties['UniqueId']
-        folder = self.client.web.get_folder_by_id(folder_id)
-        self.client.execute_query()
+        folder = self.client.web.get_folder_by_id(folder_id).execute_query()
         self.assertIsNotNone(folder.resource_path)
 
     def test4_update_folder(self):
         folder_to_update = self.__class__.target_list.rootFolder.folders.get_by_url(self.__class__.target_folder_name)
         self.__class__.target_folder_name = "_Archive_" + str(randint(0, 1000))
-        folder_to_update.rename(self.__class__.target_folder_name)
-        self.client.execute_query()
+        folder_to_update.rename(self.__class__.target_folder_name).execute_query()
 
-        result = self.__class__.target_list.rootFolder.folders.filter(
-            "Name eq '{0}'".format(self.__class__.target_folder_name))
-        self.client.load(result)
-        self.client.execute_query()
+        result = self.__class__.target_list.rootFolder.folders\
+            .filter("Name eq '{0}'".format(self.__class__.target_folder_name))\
+            .get()\
+            .execute_query()
         self.assertEqual(len(result), 1)
 
     def test5_copy_folder(self):
@@ -132,8 +119,8 @@ class TestSharePointFolder(SPTestCase):
         folder_to_delete = self.__class__.target_list.rootFolder.folders.get_by_url(self.__class__.target_folder_name)
         folder_to_delete.delete_object().execute_query()
 
-        result = self.__class__.target_list.rootFolder.folders.filter(
-            "Name eq '{0}'".format(self.__class__.target_folder_name))
-        self.client.load(result)
-        self.client.execute_query()
+        result = self.__class__.target_list.rootFolder.folders\
+            .filter("Name eq '{0}'".format(self.__class__.target_folder_name))\
+            .get()\
+            .execute_query()
         self.assertEqual(len(result), 0)
