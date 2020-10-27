@@ -38,9 +38,22 @@ class TestUserProfile(TestCase):
         self.my_client.execute_query()
         self.assertIsNotNone(result.value)
 
-    def test5_get_default_document_library(self):
+    def test5_get_properties_for(self):
+        me = self.my_client.web.currentUser.get().execute_query()
+        people_manager = PeopleManager(self.my_client)
+        result = people_manager.get_properties_for(me.login_name)
+        self.my_client.execute_query()
+        self.assertIsNotNone(result)
+
+    def test6_get_default_document_library(self):
         me = self.my_client.web.currentUser.get().execute_query()
         people_manager = PeopleManager(self.my_client)
         result = people_manager.get_default_document_library(me.login_name)
         self.my_client.execute_query()
         self.assertIsNotNone(result.value)
+
+    def test7_get_people_followed_by(self):
+        me = self.my_client.web.currentUser.get().execute_query()
+        people_manager = PeopleManager(self.my_client)
+        result = people_manager.get_people_followed_by(me.login_name).execute_query()
+        self.assertIsNotNone(result)
