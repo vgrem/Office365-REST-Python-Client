@@ -1,7 +1,6 @@
 import uuid
 
 import adal
-
 from settings import settings
 
 from office365.directory.groupProfile import GroupProfile

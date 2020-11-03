@@ -1,7 +1,6 @@
-import uuid
+from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.fields.field import Field
-from tests.sharepoint.sharepoint_case import SPTestCase
 
 
 class TestSPTaxonomy(SPTestCase):

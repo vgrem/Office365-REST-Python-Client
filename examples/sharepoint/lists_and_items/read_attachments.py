@@ -1,23 +1,22 @@
 import os
 import tempfile
 
-
 from settings import settings
 
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.listitems.caml.caml_query import CamlQuery
+
+creds = ClientCredential(settings.get('client_credentials').get('client_id'),
+                         settings.get('client_credentials').get('client_secret'))
+ctx = ClientContext(settings['url']).with_credentials(creds)
 
 download_path = tempfile.mkdtemp()
 
-client_creds = ClientCredential(settings['client_credentials']['client_id'],
-                                settings['client_credentials']['client_secret'])
-ctx = ClientContext(settings['url']).with_credentials(client_creds)
-
-list_obj = ctx.web.lists.get_by_title("Tasks123")
-#items = list_obj.get_items(CamlQuery.create_all_items_query())
-#items = list_obj.get_items()
-items = list_obj.items
+list_title = "Tasks"
+source_list = ctx.web.lists.get_by_title(list_title)
+# items = list_obj.get_items(CamlQuery.create_all_items_query())
+# items = list_obj.get_items()
+items = source_list.items
 ctx.load(items, ["ID", "UniqueId", "FileRef", "LinkFilename", "Title", "Attachments"])
 ctx.execute_query()
 for item in items:

@@ -2,7 +2,6 @@ import os
 from os.path import isfile, join
 
 import adal
-
 from settings import settings
 
 from office365.graph_client import GraphClient

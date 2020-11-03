@@ -19,17 +19,21 @@ def resolve_base_url(url):
     return parts[0] + '://' + host_name
 
 
+def xml_escape(s_val):
+    s_val = s_val.replace("&", "&amp;")
+    s_val = s_val.replace("<", "&lt;")
+    s_val = s_val.replace(">", "&gt;")
+    s_val = s_val.replace("\"", "&quot;")
+    return s_val
+
+
 class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
 
-    def __init__(self, url, username, password):
+    def __init__(self, url):
         """SAML Security Token Service provider
 
-        :type password: str
-        :type username: str
         :type url: str
         """
-        self.__username = username
-        self.__password = password
         # Security Token Service info
         self.__sts_profile = STSProfile(resolve_base_url(url))
         # Last occurred error
@@ -62,11 +66,13 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
 
         try:
             logger.debug("Acquiring Access Token..")
-            user_realm = self._get_user_realm(self.__username)
+            username = kwargs.get("username")
+            password = xml_escape(kwargs.get("password"))
+            user_realm = self._get_user_realm(username)
             if user_realm.IsFederated:
-                token = self.acquire_service_token_from_adfs(user_realm.STSAuthUrl, self.__username, self.__password)
+                token = self.acquire_service_token_from_adfs(user_realm.STSAuthUrl, username, password)
             else:
-                token = self._acquire_service_token(self.__username, self.__password)
+                token = self._acquire_service_token(username, password)
             return self._acquire_authentication_cookie(token, user_realm.IsFederated)
         except requests.exceptions.RequestException as e:
             self.error = "Error: {}".format(e)
@@ -118,7 +124,7 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
                 '{0}Body/{1}RequestSecurityTokenResponse/{1}RequestedSecurityToken/{2}Assertion'.format(
                     self.__ns_prefixes['s'], self.__ns_prefixes['wst'], self.__ns_prefixes['saml']))
             if assertion_node is None:
-                self.error = 'Cannot get security assertion for user {0} from {1}'.format(self.__username, adfs_url)
+                self.error = 'Cannot get security assertion for user {0} from {1}'.format(username, adfs_url)
                 logger.error(self.error)
                 return None
             # 2. prepare & submit token request

@@ -1,11 +1,10 @@
 from unittest import TestCase
 
+from settings import settings
+
 from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.userprofiles.peopleManager import PeopleManager
-from settings import settings
-
-
 from office365.sharepoint.userprofiles.profileLoader import ProfileLoader
 
 

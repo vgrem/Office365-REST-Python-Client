@@ -2,7 +2,6 @@ import os
 import tempfile
 
 import adal
-
 from settings import settings
 
 from office365.graph_client import GraphClient

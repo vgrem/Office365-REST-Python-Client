@@ -1,7 +1,6 @@
 import msal
-
-from office365.teams.itemBody import ItemBody
 from settings import settings
+
 from office365.graph_client import GraphClient
 
 
@@ -29,6 +28,6 @@ if len(teams_result) > 0:
     messages = target_team.primaryChannel.messages.get().execute_query()
     print(messages)
 
-    #item_body = ItemBody("Hello world!")
-    #message = target_team.primaryChannel.messages.add(item_body).execute_query()
-    #print(message.web_url)
+    # item_body = ItemBody("Hello world!")
+    # message = target_team.primaryChannel.messages.add(item_body).execute_query()
+    # print(message.web_url)

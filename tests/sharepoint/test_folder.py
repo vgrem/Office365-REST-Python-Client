@@ -46,7 +46,8 @@ class TestSharePointFolder(SPTestCase):
                 self.assertIsNotNone(file_in_folder.resource_path)
 
     def test2_create_folder(self):
-        folder_new = self.__class__.target_list.rootFolder.folders.add(self.__class__.target_folder_name).execute_query()
+        folder_new = self.__class__.target_list.rootFolder.folders.add(self.__class__.target_folder_name)\
+            .execute_query()
         self.assertTrue(folder_new.properties["Exists"])
         self.__class__.target_folder = folder_new
 

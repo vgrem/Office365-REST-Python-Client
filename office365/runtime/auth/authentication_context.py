@@ -33,15 +33,15 @@ class AuthenticationContext(BaseAuthenticationContext):
         :type password: str
         :type username: str
         """
-        self.provider = SamlTokenProvider(self.url, username, password)
-        if not self.provider.acquire_token():
+        self.provider = SamlTokenProvider(self.url)
+        if not self.provider.acquire_token(username=username, password=password):
             raise ValueError('Acquire token failed: {0}'.format(self.provider.error))
         return True
 
     def acquire_token_for_app(self, client_id, client_secret):
         """Acquire token via client credentials (SharePoint App Principal)"""
-        self.provider = ACSTokenProvider(self.url, client_id, client_secret)
-        if not self.provider.acquire_token():
+        self.provider = ACSTokenProvider(self.url)
+        if not self.provider.acquire_token(client_id=client_id, client_secret=client_secret):
             raise ValueError('Acquire token failed: {0}'.format(self.provider.error))
         return True
 

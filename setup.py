@@ -10,7 +10,7 @@ with io.open("README.md", mode='r', encoding='utf-8') as fh:
 
 setup(
     name="Office365-REST-Python-Client",
-    version="2.2.1.1",
+    version="2.2.2",
     author="Vadim Gremyachev",
     author_email="vvgrem@gmail.com",
     maintainer="Konrad Gądek",
@@ -19,7 +19,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/vgrem/Office365-REST-Python-Client",
-    install_requires=['requests', 'adal'],
+    install_requires=['requests', 'msal'],
     extras_require={
         'NTLMAuthentication': ["requests_ntlm"]
     },
@@ -44,6 +44,7 @@ setup(
     ],
     packages=setuptools.find_packages(),
     package_data={
-        'office365': ["runtime/auth/providers/templates/SAML.xml", "runtime/auth/providers/templates/RST2.xml", "runtime/auth/providers/templates/FederatedSAML.xml"]
+        'office365': ["runtime/auth/providers/templates/SAML.xml", "runtime/auth/providers/templates/RST2.xml",
+                      "runtime/auth/providers/templates/FederatedSAML.xml"]
     }
 )
