@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-import adal
+import msal
 from settings import settings
 
 from office365.graph_client import GraphClient
@@ -8,16 +8,18 @@ from office365.graph_client import GraphClient
 
 def get_token():
     """
-    Get token
+    Acquire token via MSAL ROPC flow!
+
     """
     authority_url = 'https://login.microsoftonline.com/{0}'.format(settings['tenant'])
-    auth_ctx = adal.AuthenticationContext(authority_url)
-    token = auth_ctx.acquire_token_with_username_password(
-        'https://graph.microsoft.com',
-        settings['user_credentials']['username'],
-        settings['user_credentials']['password'],
-        settings['client_credentials']['client_id'])
-    return token
+    app = msal.PublicClientApplication(
+        authority=authority_url,
+        client_id=settings.get('client_credentials').get('client_id')
+    )
+    result = app.acquire_token_by_username_password(username=settings.get('user_credentials').get('username'),
+                                                    password=settings.get('user_credentials').get('password'),
+                                                    scopes=["https://graph.microsoft.com/.default"])
+    return result
 
 
 class GraphTestCase(TestCase):
