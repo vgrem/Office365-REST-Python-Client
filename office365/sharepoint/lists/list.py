@@ -197,7 +197,7 @@ class List(SecurableObject):
         if self.is_property_available('Fields'):
             return self.properties['Fields']
         else:
-            return FieldCollection(self.context, ResourcePath("Fields", self.resource_path))
+            return FieldCollection(self.context, ResourcePath("Fields", self.resource_path), self)
 
     @property
     def views(self):
@@ -230,6 +230,13 @@ class List(SecurableObject):
         """Gets a value that specifies the collection of all list forms in the list."""
         return self.properties.get('Forms',
                                    FormCollection(self.context, ResourcePath("forms", self.resource_path)))
+
+    @property
+    def parentWeb(self):
+        """Gets a value that specifies the web where list resides."""
+        from office365.sharepoint.webs.web import Web
+        return self.properties.get('ParentWeb',
+                                   Web(self.context, ResourcePath("parentWeb", self.resource_path)))
 
     @property
     def item_count(self):

@@ -6,11 +6,11 @@ class BaseEntity(ClientObject):
 
     def __init__(self, context, resource_path=None, namespace="SP", parent_collection=None):
         """
-        SharePoint base entity
+        SharePoint entity
 
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
-        :param ResourcePath resource_path:
-        :param str namespace:
+        :param ResourcePath resource_path: Resource Path
+        :param str namespace:  default namespace
         """
         super().__init__(context, resource_path, None, parent_collection)
         self._namespace = namespace

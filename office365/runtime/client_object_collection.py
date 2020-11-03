@@ -6,16 +6,16 @@ from office365.runtime.types.EventHandler import EventHandler
 
 class ClientObjectCollection(ClientObject):
 
-    def __init__(self, context, item_type, resource_path=None):
+    def __init__(self, context, child_item_type, resource_path=None):
         """Client object collection
 
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
-        :type item_type: type[ClientObject]
+        :type child_item_type: type[ClientObject]
         :type resource_path: office365.runtime.resource_path.ResourcePath
         """
         super(ClientObjectCollection, self).__init__(context, resource_path)
         self._data = []
-        self._item_type = item_type
+        self._item_type = child_item_type
         self.page_loaded = EventHandler(False)
         self._default_page_size = 100
         self._paged_mode = True

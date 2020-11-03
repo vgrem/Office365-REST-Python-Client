@@ -2,7 +2,7 @@ from settings import settings
 
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.file_system_object_type import FileSystemObjectType
+from office365.sharepoint.files.file_system_object_type import FileSystemObjectType
 
 
 def print_progress(items_read):
