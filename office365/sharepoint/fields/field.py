@@ -12,7 +12,7 @@ class Field(BaseEntity):
         super().__init__(context, resource_path)
 
     @staticmethod
-    def resolve_field_type(type_id):
+    def resolve_field_type(type_id_or_name):
         from office365.sharepoint.fields.field_calculated import FieldCalculated
         from office365.sharepoint.fields.field_choice import FieldChoice
         from office365.sharepoint.fields.field_computed import FieldComputed
@@ -24,7 +24,8 @@ class Field(BaseEntity):
         from office365.sharepoint.fields.field_text import FieldText
         from office365.sharepoint.fields.field_url import FieldUrl
         from office365.sharepoint.fields.field_user import FieldUser
-        field_types = {
+        from office365.sharepoint.taxonomy.taxonomyField import TaxonomyField
+        field_known_types = {
             FieldType.Text: FieldText,
             FieldType.Calculated: FieldCalculated,
             FieldType.Choice: FieldChoice,
@@ -37,7 +38,10 @@ class Field(BaseEntity):
             FieldType.Currency: FieldCurrency,
             FieldType.Note: FieldMultiLineText
         }
-        return field_types.get(type_id, Field)
+        if isinstance(type_id_or_name, int):
+            return field_known_types.get(type_id_or_name, Field)
+        else:
+            return TaxonomyField if type_id_or_name == "TaxonomyFieldType" else Field
 
     @staticmethod
     def create_field_from_type(context, field_type):
@@ -51,6 +55,7 @@ class Field(BaseEntity):
         """
         qry = ServiceOperationQuery(self, "setShowInDisplayForm", [flag])
         self.context.add_query(qry)
+        return self
 
     def set_show_in_edit_form(self, flag):
         """Sets the value of the ShowInEditForm property for this fields.
@@ -87,5 +92,7 @@ class Field(BaseEntity):
             self._resource_path = ResourcePathServiceOperation(
                 "getById", [value], self._parent_collection.resource_path)
         if name == "FieldTypeKind":
+            self.__class__ = self.resolve_field_type(value)
+        elif name == "TypeAsString" and self.properties.get('FieldTypeKind', 0) == 0:
             self.__class__ = self.resolve_field_type(value)
         return self

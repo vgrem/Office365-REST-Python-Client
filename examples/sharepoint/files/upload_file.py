@@ -5,9 +5,9 @@ from settings import settings
 from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 
-ctx = ClientContext.connect_with_credentials(settings['url'],
-                                             UserCredential(settings['user_credentials']['username'],
-                                                            settings['user_credentials']['password']))
+credentials = UserCredential(settings.get('user_credentials').get('username'),
+                             settings.get('user_credentials').get('password'))
+ctx = ClientContext(settings.get('url')).with_credentials(credentials)
 
 path = "../../../tests/data/SharePoint User Guide.docx"
 with open(path, 'rb') as content_file:

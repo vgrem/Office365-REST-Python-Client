@@ -44,29 +44,47 @@ class FieldCollection(BaseEntityCollection):
             "web_id": web_id,
             "target_field": target_field
         }
-
         if field_id is None:
             field_params["field_id"] = str(uuid.uuid1())
 
-        from office365.sharepoint.lists.list import List
-        if isinstance(self._parent, List):
-            parent_list = self._parent
+        def _create_taxonomy_field_inner():
+            from office365.sharepoint.lists.list import List
+            if isinstance(self._parent, List):
+                parent_list = self._parent
 
-            def _list_loaded():
-                field_params["web_id"] = parent_list.parentWeb.properties["Id"]
-                field_params["list_id"] = parent_list.properties["Id"]
-                self._create_taxonomy_field_query(**field_params)
-            self._parent.ensure_properties(["Id", "ParentWeb"], _list_loaded)
+                def _list_loaded():
+                    field_params["web_id"] = parent_list.parentWeb.properties["Id"]
+                    field_params["list_id"] = parent_list.properties["Id"]
+                    self._build_taxonomy_field_query(**field_params)
+                self._parent.ensure_properties(["Id", "ParentWeb"], _list_loaded)
+            else:
+
+                def _web_loaded():
+                    field_params["web_id"] = self.context.web.properties["Id"]
+                    self._build_taxonomy_field_query(**field_params)
+                self.context.web.ensure_property("Id", _web_loaded)
+
+        if text_field_id is None:
+            text_field_name = f"{uuid.uuid4().hex}"
+            text_field_schema = f'''
+            <Field Type="Note" DisplayName="{name}_0" Hidden="TRUE" CanBeDeleted="TRUE" ShowInViewForms="FALSE"
+                   StaticName="{text_field_name}" Name="{text_field_name}">
+            </Field>
+            '''
+            text_field = self.create_field_as_xml(text_field_schema)
+
+            def _after_text_field_created(resp):
+                field_params["text_field_id"] = text_field.properties["Id"]
+                _create_taxonomy_field_inner()
+            self.context.after_execute(_after_text_field_created, True)
         else:
-            def _web_loaded():
-                field_params["web_id"] = self.context.web.properties["Id"]
-                self._create_taxonomy_field_query(**field_params)
-            self.context.web.ensure_property("Id", _web_loaded)
+            _create_taxonomy_field_inner()
+
         return target_field
 
-    def _create_taxonomy_field_query(self, name, ssp_id, term_set_id, anchor_id,
-                                     field_id=None, text_field_id=None, web_id=None, list_id=None,
-                                     target_field=None):
+    def _build_taxonomy_field_query(self, name, ssp_id, term_set_id, anchor_id,
+                                    field_id=None, text_field_id=None, web_id=None, list_id=None,
+                                    target_field=None):
         """
 
         :param str text_field_id: Text Field Id
@@ -199,6 +217,7 @@ class FieldCollection(BaseEntityCollection):
         self.add_child(field)
         qry = ServiceOperationQuery(self, "CreateFieldAsXml", None, schema_xml, "parameters", field)
         self.context.add_query(qry)
+        return field
 
     def get_by_id(self, _id):
         """Gets the fields with the specified ID."""

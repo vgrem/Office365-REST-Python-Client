@@ -17,9 +17,8 @@ class TestField(SPTestCase):
         self.assertGreater(len(site_fields), 0)
 
     def test_2_get_field(self):
-        title_field = self.client.site.rootWeb.fields.get_by_internal_name_or_title(self.target_field_name)
-        self.client.load(title_field)
-        self.client.execute_query()
+        title_field = self.client.site.rootWeb.fields.\
+            get_by_internal_name_or_title(self.target_field_name).get().execute_query()
         self.assertIsNotNone(title_field.internal_name)
         self.assertEqual(title_field.internal_name, self.target_field_name)
         self.assertIsInstance(title_field, FieldText)

@@ -11,6 +11,8 @@ class FieldCreationInformation(ClientValue):
         Represents metadata about fields creation.
 
         :type title: str
+        :type field_type_kind: int
+        :type description: str or None
         """
         super(FieldCreationInformation, self).__init__()
         self.Title = title
