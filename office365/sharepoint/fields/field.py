@@ -24,7 +24,7 @@ class Field(BaseEntity):
         from office365.sharepoint.fields.field_text import FieldText
         from office365.sharepoint.fields.field_url import FieldUrl
         from office365.sharepoint.fields.field_user import FieldUser
-        from office365.sharepoint.taxonomy.taxonomyField import TaxonomyField
+        from office365.sharepoint.taxonomy.taxonomy_field import TaxonomyField
         field_known_types = {
             FieldType.Text: FieldText,
             FieldType.Calculated: FieldCalculated,

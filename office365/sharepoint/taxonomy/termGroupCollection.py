@@ -1,5 +1,5 @@
 from office365.runtime.client_object_collection import ClientObjectCollection
-from office365.sharepoint.taxonomy.termGroup import TermGroup
+from office365.sharepoint.taxonomy.term_group import TermGroup
 
 
 class TermGroupCollection(ClientObjectCollection):
