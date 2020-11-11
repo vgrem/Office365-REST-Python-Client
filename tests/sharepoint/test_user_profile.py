@@ -1,5 +1,7 @@
 from unittest import TestCase
 
+from office365.sharepoint.userprofiles.personPropertiesCollection import PersonPropertiesCollection
+
 from settings import settings
 
 from office365.runtime.auth.user_credential import UserCredential
@@ -10,6 +12,7 @@ from office365.sharepoint.userprofiles.profileLoader import ProfileLoader
 
 class TestUserProfile(TestCase):
     profile_loader = None  # type: ProfileLoader
+    target_account_name = "mdoe@mediadev8.onmicrosoft.com"
 
     @classmethod
     def setUpClass(cls):
@@ -56,3 +59,22 @@ class TestUserProfile(TestCase):
         people_manager = PeopleManager(self.my_client)
         result = people_manager.get_people_followed_by(me.login_name).execute_query()
         self.assertIsNotNone(result)
+
+    def test7_start_stop_following(self):
+        people_manager = PeopleManager(self.my_client)
+        target_user = self.my_client.web.ensure_user(self.__class__.target_account_name).execute_query()
+
+        result = people_manager.ami_following(target_user.login_name)
+        people_manager.execute_query()
+
+        if result.value:
+            people_manager.stop_following(target_user.login_name).execute_query()
+        else:
+            people_manager.follow(target_user.login_name)
+
+    def test8_get_followers(self):
+        people_manager = PeopleManager(self.my_client)
+        target_user = self.my_client.web.ensure_user(self.__class__.target_account_name).execute_query()
+        result = people_manager.get_followers_for(target_user.login_name)
+        people_manager.execute_query()
+        self.assertIsInstance(result.value, PersonPropertiesCollection)

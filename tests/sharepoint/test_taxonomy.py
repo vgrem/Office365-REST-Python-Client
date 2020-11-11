@@ -1,4 +1,6 @@
 from office365.sharepoint.taxonomy.taxonomyField import TaxonomyField
+from office365.sharepoint.taxonomy.taxonomyService import TaxonomyService
+from office365.sharepoint.taxonomy.termStore import TermStore
 
 from tests.sharepoint.sharepoint_case import SPTestCase
 
@@ -16,7 +18,13 @@ class TestSPTaxonomy(SPTestCase):
     def tearDownClass(cls):
         pass
 
-    def test1_create_list_tax_field(self):
+    def test1_get_term_store(self):
+        tax_session = TaxonomyService(self.client)
+        term_store = tax_session.term_store.get().execute_query()
+        self.assertIsInstance(term_store, TermStore)
+        self.assertIsNotNone(term_store.name)
+
+    def test2_create_list_tax_field(self):
         ssp_id = "f02be691-d551-462f-aaae-e1c89168cd0b"
         term_set_id = "b49f64b3-4722-4336-9a5c-56c326b344d4"
         text_field_id = "cd790052-00e3-4317-a090-365cd85795b6"
@@ -30,7 +38,7 @@ class TestSPTaxonomy(SPTestCase):
         self.assertIsNotNone(tax_field.resource_path)
         self.__class__.target_field = tax_field
 
-    def test2_get_tax_field(self):
+    def test3_get_tax_field(self):
         existing_field = self.__class__.target_field.get().execute_query()
         self.assertTrue(existing_field.properties.get('TypeAsString'), 'TaxonomyFieldType')
         self.assertIsInstance(existing_field, TaxonomyField)
@@ -44,7 +52,7 @@ class TestSPTaxonomy(SPTestCase):
         self.client.execute_batch()
         self.assertIsNotNone(text_field.internal_name)
 
-    def test3_delete_tax_field(self):
+    def test4_delete_tax_field(self):
         self.__class__.target_field.delete_object().execute_query()
 
         # text_field_id = self.__class__.target_field.properties.get('TextField')
