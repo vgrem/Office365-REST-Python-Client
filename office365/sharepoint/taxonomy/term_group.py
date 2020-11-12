@@ -7,7 +7,7 @@ class TermGroup(BaseEntity):
     """Represents the top-level container in a TermStore object."""
 
     @property
-    def termSets(self):
+    def term_sets(self):
         return self.properties.get("termSets",
                                    TermSetCollection(self.context, ResourcePath("termSets", self.resource_path)))
 

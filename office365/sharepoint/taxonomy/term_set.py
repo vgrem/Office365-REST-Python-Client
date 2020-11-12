@@ -1,8 +1,14 @@
 from office365.runtime.client_object import ClientObject
 from office365.runtime.resource_path import ResourcePath
+from office365.sharepoint.taxonomy.term_collection import TermCollection
 
 
 class TermSet(ClientObject):
+
+    @property
+    def terms(self):
+        return self.properties.get("terms",
+                                   TermCollection(self.context, ResourcePath("terms", self.resource_path)))
 
     def set_property(self, name, value, persist_changes=True):
         super(TermSet, self).set_property(name, value, persist_changes)
