@@ -6,8 +6,8 @@ from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 
 
-def print_upload_progress(offset):
-    print("Uploaded '{0}' bytes...".format(offset))
+def print_upload_progress(offset, total_size):
+    print("Uploaded '{}' bytes from '{}'...[{}%]".format(offset, total_size, round(offset/total_size*100, 2)))
 
 
 credentials = UserCredential(settings['user_credentials']['username'],
@@ -18,7 +18,7 @@ target_url = "/Shared Documents"
 target_folder = ctx.web.get_folder_by_server_relative_url(target_url)
 size_chunk = 1000000
 local_path = "../../../tests/data/big_buck_bunny.mp4"
-# local_path = "../../../tests/data/SharePoint User Guide.docx"
+
 file_size = os.path.getsize(local_path)
 
 if file_size > size_chunk:
