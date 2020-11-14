@@ -19,15 +19,16 @@ class FileCollection(ClientObjectCollection):
         """
         return super(FileCollection, self).get()
 
-    def create_upload_session(self, source_path, chunk_size, chunk_uploaded=None):
+    def create_upload_session(self, source_path, chunk_size, chunk_uploaded=None, *chunk_func_args):
         """Upload a file as multiple chunks
 
         :param str source_path: path where file to upload resides
         :param int chunk_size: upload chunk size
         :param (long)->None or None chunk_uploaded: uploaded event
+        :param chunk_func_args: arguments to pass to chunk_uploaded function
         :return: office365.sharepoint.files.file.File
         """
-        qry = UploadSessionQuery(self, source_path, chunk_size, chunk_uploaded)
+        qry = UploadSessionQuery(self, source_path, chunk_size, chunk_uploaded, chunk_func_args)
         self.context.add_query(qry)
         return qry.file
 
