@@ -1,0 +1,44 @@
+from office365.sharepoint.publishing.primary_city_time import PrimaryCityTime
+from office365.sharepoint.publishing.site_page_metadata_collection import SitePageMetadataCollection
+from office365.sharepoint.publishing.site_page_service import SitePageService
+from tests.sharepoint.sharepoint_case import SPTestCase
+
+
+class TestSPPublishing(SPTestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(TestSPPublishing, cls).setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+    def test1_init_site_page_service(self):
+        svc = SitePageService(self.client).get().execute_query()
+        self.assertIsNotNone(svc.resource_path)
+
+    def test2_get_site_pages(self):
+        svc = SitePageService(self.client)
+        pages = svc.pages().get().execute_query()
+        self.assertIsInstance(pages, SitePageMetadataCollection)
+
+    def test3_get_time_zone(self):
+        time_zone = SitePageService.get_time_zone(self.client, "Moscow").execute_query()
+        self.assertIsInstance(time_zone, PrimaryCityTime)
+        self.assertEqual(time_zone.properties.get("Location"), "Moscow, Russia")
+
+    def test4_compute_file_name(self):
+        result = SitePageService.compute_file_name(self.client, "Test page")
+        self.client.execute_query()
+        self.assertIsNotNone(result.value)
+
+    def test5_file_picker_tab_options(self):
+        result = SitePageService.file_picker_tab_options(self.client)
+        self.client.execute_query()
+        self.assertIsNotNone(result)
+
+    def test6_org_assets(self):
+        result = SitePageService.org_assets(self.client)
+        self.client.execute_query()
+        self.assertIsNotNone(result)

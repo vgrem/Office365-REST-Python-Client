@@ -42,8 +42,8 @@ class TestField(SPTestCase):
         field_to_update.set_property('Title', updated_field_name).update().execute_query()
 
         updated_field = self.client.site.rootWeb.fields.get_by_title(updated_field_name).get().execute_query()
-        self.assertIsNotNone(updated_field.properties['Id'])
-        self.assertEqual(updated_field.properties['Title'], updated_field_name)
+        self.assertIsNotNone(updated_field.id)
+        self.assertEqual(updated_field.title, updated_field_name)
 
     def test_6_delete_site_field(self):
         field_to_delete = self.__class__.target_field

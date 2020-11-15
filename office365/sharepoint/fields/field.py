@@ -78,6 +78,22 @@ class Field(BaseEntity):
         return self
 
     @property
+    def id(self):
+        """Gets a value that specifies the field identifier.
+
+        :rtype: str or None
+        """
+        return self.properties.get('Id', None)
+
+    @property
+    def title(self):
+        """Gets or sets a value that specifies the display name of the field.
+
+        :rtype: str or None
+        """
+        return self.properties.get('Title', None)
+
+    @property
     def internal_name(self):
         """Gets a value that specifies the field internal name.
 
