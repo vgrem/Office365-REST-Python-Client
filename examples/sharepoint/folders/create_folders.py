@@ -15,7 +15,7 @@ ctx.execute_query()  # have to execute
 
 # create relative folder tree, no execution required
 target_folder = "/Shared Documents/test_folder/20201116/1133/test"
-target_folder = ctx.web.create_folder_tree(target_folder)
+target_folder = ctx.web.ensure_folder_path(target_folder)
 
 
 

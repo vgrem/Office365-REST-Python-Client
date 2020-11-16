@@ -199,14 +199,14 @@ class Web(SecurableObject):
             ResourcePathServiceOperation("getFolderByServerRelativeUrl", [url], self.resource_path)
         )
 
-    def create_folder_tree(self, url):
+    def ensure_folder_path(self, path):
         """
             Function to create folder tree
-            :type url: string
-            :param url: relative server URL
+            :type path: string
+            :param path: relative server URL (path) to a folder
         """
 
-        url_component = os.path.normpath(url).split(os.path.sep)
+        url_component = os.path.normpath(path).split(os.path.sep)
         url_component = [part for part in url_component if part]  # ensure no empty elements
         if not url_component:
             raise NotADirectoryError("Wrong relative URL provided")
