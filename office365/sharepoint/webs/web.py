@@ -1,3 +1,5 @@
+import os
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.client_query import ClientQuery
@@ -189,10 +191,32 @@ class Web(SecurableObject):
         """Returns the folder object located at the specified server-relative URL.
         :type url: str
         """
+        if url.startswith("/"):
+            url = url[1:]
+
         return Folder(
             self.context,
             ResourcePathServiceOperation("getFolderByServerRelativeUrl", [url], self.resource_path)
         )
+
+    def create_folder_tree(self, url):
+        """
+            Function to create folder tree
+            :type url: string
+            :param url: relative server URL
+        """
+
+        url_component = os.path.normpath(url).split(os.path.sep)
+        url_component = [part for part in url_component if part]  # ensure no empty elements
+        if not url_component:
+            raise NotADirectoryError("Wrong relative URL provided")
+
+        folder = self.get_folder_by_server_relative_url(url_component[0])
+        for url_part in url_component[1:]:
+            folder = folder.add(url_part)
+
+        self.context.execute_query()  # need to execute now, otherwise folders are created in "after_execute_query"
+        return folder
 
     def ensure_user(self, login_name):
         """Checks whether the specified logon name belongs to a valid user of the website, and if the logon name does
