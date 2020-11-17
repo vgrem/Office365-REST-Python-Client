@@ -25,9 +25,12 @@ class GroupCollection(ClientObjectCollection):
         return group
 
     def get_by_name(self, group_name):
-        """Returns a cross-site group from the collection based on the name of the group."""
+        """Returns a cross-site group from the collection based on the name of the group.
+
+        :type group_name: str
+        """
         return Group(self.context,
-                     ResourcePathServiceOperation("getbyname", [group_name], self.resource_path))
+                     ResourcePathServiceOperation("getByName", [group_name], self.resource_path))
 
     def remove_by_id(self, group_id):
         """Removes the group with the specified member ID from the collection."""

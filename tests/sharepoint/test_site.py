@@ -15,7 +15,7 @@ class TestSite(SPTestCase):
         self.__class__.target_site = site
 
     def test2_if_site_exists(self):
-        site_url = self.__class__.target_site.properties['Url']
+        site_url = self.__class__.target_site.url
         result = Site.exists(self.client, site_url)
         self.client.execute_query()
         self.assertIsNotNone(result.value)
@@ -29,3 +29,12 @@ class TestSite(SPTestCase):
     def test4_get_site_catalog(self):
         catalog = self.client.site.get_catalog(ListTemplateType.AppDataCatalog).get().execute_query()
         self.assertIsNotNone(catalog.title)
+
+    def test5_get_web_templates(self):
+        web_templates = self.client.site.get_web_templates().execute_query()
+        self.assertIsNotNone(web_templates)
+
+    def test6_get_web_template_by_name(self):
+        template_name = "GLOBAL#0"
+        web_template = self.client.site.get_web_templates().get_by_name(template_name).get().execute_query()
+        self.assertIsNotNone(web_template)

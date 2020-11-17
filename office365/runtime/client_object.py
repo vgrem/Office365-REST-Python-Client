@@ -75,6 +75,7 @@ class ClientObject(object):
 
     def set_property(self, name, value, persist_changes=True):
         """Sets Property value
+
         :param str name: Property name
         :param any value: Property value
         :param bool persist_changes: Persist changes
@@ -95,6 +96,7 @@ class ClientObject(object):
                 self._properties[name] = value
         else:
             self._properties[name] = value
+        return self
 
     def to_json(self):
         return dict((k, v) for k, v in self.properties.items() if k in self._changed_properties)
@@ -106,9 +108,7 @@ class ClientObject(object):
         :type action: () -> None
         :type name: str
         """
-        names_to_include = [name]
-        self.ensure_properties(names_to_include, action)
-        return self
+        return self.ensure_properties([name], action)
 
     def ensure_properties(self, names, action):
         """
@@ -127,6 +127,7 @@ class ClientObject(object):
                 self.context.after_execute_query(_process_query)
         else:
             action()
+        return self
 
     def clone_object(self):
         result = copy.deepcopy(self)

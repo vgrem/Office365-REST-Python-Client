@@ -27,7 +27,10 @@ class SPSiteManager(BaseEntity):
         return self
 
     def get_status(self, site_url):
-        """Get the status of a SharePoint site"""
+        """Get the status of a SharePoint site
+
+        :type site_url: str
+        """
         response = SPSiteCreationResponse()
         qry = ServiceOperationQuery(self, "Status", None, {'url': site_url}, None, response)
         self.context.add_query(qry)
