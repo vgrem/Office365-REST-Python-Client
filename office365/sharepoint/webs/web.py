@@ -208,18 +208,7 @@ class Web(SecurableObject):
             :type path: string
             :param path: relative server URL (path) to a folder
         """
-
-        url_component = os.path.normpath(path).split(os.path.sep)
-        url_component = [part for part in url_component if part]  # ensure no empty elements
-        if not url_component:
-            raise NotADirectoryError("Wrong relative URL provided")
-
-        folder = self.get_folder_by_server_relative_url(url_component[0])
-        for url_part in url_component[1:]:
-            folder = folder.add(url_part)
-
-        self.context.execute_query()  # need to execute now, otherwise folders are created in "after_execute_query"
-        return folder
+        return self.root_folder.folders.ensure_folder_path(path)
 
     def ensure_user(self, login_name):
         """Checks whether the specified logon name belongs to a valid user of the website, and if the logon name does
@@ -678,6 +667,11 @@ class Web(SecurableObject):
         return self.properties.get('RecycleBin',
                                    RecycleBinItemCollection(self.context,
                                                             ResourcePath("RecycleBin", self.resource_path)))
+
+    @property
+    def root_folder(self):
+        """Get a root folder"""
+        return self.properties.get("RootFolder", Folder(self.context, ResourcePath("RootFolder", self.resource_path)))
 
     def set_property(self, name, value, persist_changes=True):
         super(Web, self).set_property(name, value, persist_changes)

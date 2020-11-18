@@ -128,3 +128,10 @@ class TestSharePointWeb(SPTestCase):
     def test_19_get_custom_list_templates(self):
         templates = self.client.web.get_custom_list_templates().execute_query()
         self.assertGreaterEqual(len(templates), 0)
+
+    def test20_ensure_folder_path(self):
+        folder_path = "/Shared Documents/Archive/2020/12"
+        folder_new_nested = self.client.web.ensure_folder_path(folder_path).execute_query()
+        folder_new_nested = self.client.web.get_folder_by_server_relative_url(folder_path).get().execute_query()
+        self.assertTrue(folder_new_nested.properties["Exists"])
+

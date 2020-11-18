@@ -20,7 +20,7 @@ class Tenant(BaseEntity):
 
     def get_site_secondary_administrators(self, site_id):
         """
-        Returns the current site collection administrators
+        Gets site collection administrators
 
         :type site_id: str
         """
@@ -30,6 +30,20 @@ class Tenant(BaseEntity):
                                     "secondaryAdministratorsFieldsData", return_type)
         self.context.add_query(qry)
         return return_type
+
+    def set_site_secondary_administrators(self, site_id, emails, names):
+        """
+        Sets site collection administrators
+
+        :type names: list[str]
+        :type emails: list[str]
+        :type site_id: str
+        """
+        payload = SecondaryAdministratorsFieldsData(emails, names, site_id)
+        qry = ServiceOperationQuery(self, "SetSiteSecondaryAdministrators", None, payload,
+                                    "secondaryAdministratorsFieldsData", None)
+        self.context.add_query(qry)
+        return self
 
     def register_hub_site(self, site_url):
         """
@@ -82,13 +96,6 @@ class Tenant(BaseEntity):
         pass
 
     def restore_deleted_site(self, site_url):
-        pass
-
-    def set_site_secondary_administrators(self, data):
-        """
-
-        :type data: SecondaryAdministratorsFieldsData
-        """
         pass
 
     def get_site_properties_by_url(self, url, include_detail):

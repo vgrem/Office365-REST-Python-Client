@@ -48,7 +48,14 @@ class TestTenant(TestCase):
         self.client.execute_query()
         self.assertIsNotNone(result)
 
-    # def test5_create_site(self):
+    # def test5_set_site_secondary_administrators(self):
+    #    target_site = self.client.site.get()
+    #    target_user = self.client.web.ensure_user("jdoe@mediadev8.onmicrosoft.com")
+    #    self.client.execute_batch()
+    #    self.tenant.set_site_secondary_administrators(target_site.id, [target_user.login_name],[target_user.login_name])
+    #    self.client.execute_query()
+
+    # def test6_create_site(self):
     #    current_user = self.client.web.currentUser
     #    self.client.load(current_user)
     #    self.client.execute_query()
@@ -58,20 +65,20 @@ class TestTenant(TestCase):
     #    self.client.execute_query()
     #    self.assertIsNotNone(site_props)
 
-    # def test6_get_site_by_url(self):
+    # def test7_get_site_by_url(self):
     #    site_props = self.tenant.get_site_properties_by_url(self.__class__.target_site_url, False)
     #    self.client.execute_query()
     #    self.assertIsNotNone(site_props.properties['SiteUrl'], self.__class__.target_site_url)
     #    self.__class__.target_site_props = site_props
 
-    # def test7_update_site(self):
+    # def test8_update_site(self):
     #    site_props_to_update = self.__class__.target_site_props
     #    site_props_to_update.set_property('SharingCapability', SharingCapabilities.ExternalUserAndGuestSharing)
     #    site_props_to_update.update()
     #    self.client.execute_query()
     #    self.assertTrue(site_props_to_update.properties['Status'], 'Active')
 
-    # def test8_delete_site(self):
+    # def test9_delete_site(self):
     #    site_url = self.__class__.target_site_props.properties['SiteUrl']
     #    self.tenant.remove_site(site_url)
     #    self.client.execute_query()

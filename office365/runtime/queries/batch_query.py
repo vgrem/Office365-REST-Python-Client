@@ -1,9 +1,7 @@
 import uuid
 
 from office365.runtime.queries.client_query import ClientQuery
-from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.read_entity_query import ReadEntityQuery
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 
 
 def create_boundary(prefix, compact=False):
@@ -41,10 +39,13 @@ class BatchQuery(ClientQuery):
         self._queries.append(query)
 
     def get(self, index):
-        result = [qry for qry in self._queries
-                  if isinstance(qry, ReadEntityQuery)
-                  or isinstance(qry, CreateEntityQuery)
-                  or isinstance(qry, ServiceOperationQuery)]
+        result = [qry for qry in self.change_sets if qry.return_type is not None] + \
+                 [qry for qry in self._queries if isinstance(qry, ReadEntityQuery)]
+
+        # result = [qry for qry in self._queries
+        #          if isinstance(qry, ReadEntityQuery)
+        #          or isinstance(qry, CreateEntityQuery)
+        #          or isinstance(qry, ServiceOperationQuery)]
         return result[index]
 
     @property
