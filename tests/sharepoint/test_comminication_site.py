@@ -2,6 +2,7 @@ import uuid
 from unittest import TestCase
 
 from office365.runtime.auth.user_credential import UserCredential
+from office365.sharepoint.tenant.administration.tenant import Tenant
 from settings import settings
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.portal.SiteStatus import SiteStatus
@@ -36,5 +37,18 @@ class TestCommunicationSite(TestCase):
         self.assertIsNotNone(response.SiteStatus)
         self.assertTrue(response.SiteStatus != SiteStatus.Error)
 
-    def test4_delete_site(self):
+    def test3_register_hub_site(self):
+        admin_site_url = "https://mediadev8-admin.sharepoint.com/"
+        client_admin = ClientContext(admin_site_url).with_credentials(self.user_credentials)
+        tenant = Tenant(client_admin)
+        props = tenant.register_hub_site(self.__class__.site_response.SiteUrl).execute_query()
+        self.assertIsNotNone(props)
+
+    def test4_unregister_hub_site(self):
+        admin_site_url = "https://mediadev8-admin.sharepoint.com/"
+        client_admin = ClientContext(admin_site_url).with_credentials(self.user_credentials)
+        tenant = Tenant(client_admin)
+        tenant.unregister_hub_site(self.__class__.site_response.SiteUrl).execute_query()
+
+    def test5_delete_site(self):
         self.site_manager.delete(self.__class__.site_response.SiteId).execute_query()

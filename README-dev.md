@@ -17,11 +17,12 @@ export Office365_Python_Sdk_SecureVars='{username};{password};{client_id};{clien
 export COMPANY={your_company}
 ```
 
-Your password cannot contain ';'!
-
 This file is in .gitignore, so it will never be committed.
 
 ```bash
 $ . .env   # source it to export the variable
 $ nose2 ...  # run the test(s) you need...
 ```
+
+# Configure Tenant
+

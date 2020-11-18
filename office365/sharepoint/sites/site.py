@@ -77,6 +77,19 @@ class Site(ClientObject):
         self.context.add_query(qry)
         return return_type
 
+    def join_hub_site(self, hubSiteId, approvalToken, approvalCorrelationId):
+        params = {
+            "hubSiteId": hubSiteId,
+            "approvalToken": approvalToken,
+            "approvalCorrelationId": approvalCorrelationId
+        }
+        return_type = WebTemplateCollection(self.context,
+                                            ResourcePathServiceOperation("GetWebTemplates", params, self.resource_path))
+
+        qry = ServiceOperationQuery(self, "JoinHubSite", params, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     @staticmethod
     def get_url_by_id(context, site_id, stop_redirect=False):
         """Gets Site Url By Id
@@ -138,6 +151,13 @@ class Site(ClientObject):
     @property
     def url(self):
         return self.properties.get('Url', None)
+
+    @property
+    def id(self):
+        """
+        :rtype: str
+        """
+        return self.properties.get("Id", None)
 
     @property
     def recycleBin(self):

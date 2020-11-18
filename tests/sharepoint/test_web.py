@@ -107,7 +107,24 @@ class TestSharePointWeb(SPTestCase):
         catalog = self.client.web.get_catalog(ListTemplateType.MasterPageCatalog).get().execute_query()
         self.assertIsNotNone(catalog.title)
 
-    def test_15_get_catalog(self):
+    def test_15_get_document_libraries(self):
         collection = Web.get_document_libraries(self.client, settings["url"])
         self.client.execute_query()
         self.assertGreater(len(collection), 0)
+
+    def test_16_get_document_and_media_libraries(self):
+        collection = Web.get_document_and_media_libraries(self.client, settings["url"], True)
+        self.client.execute_query()
+        self.assertGreater(len(collection), 0)
+
+    def test_17_get_available_web_templates(self):
+        templates = self.client.web.get_available_web_templates().execute_query()
+        self.assertGreater(len(templates), 0)
+
+    def test_18_get_list_templates(self):
+        templates = self.client.web.list_templates.get().execute_query()
+        self.assertGreater(len(templates), 0)
+
+    def test_19_get_custom_list_templates(self):
+        templates = self.client.web.get_custom_list_templates().execute_query()
+        self.assertGreaterEqual(len(templates), 0)

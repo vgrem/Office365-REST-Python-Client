@@ -16,9 +16,10 @@ from office365.sharepoint.files.file import File
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.folders.folder_collection import FolderCollection
 from office365.sharepoint.listitems.listitem import ListItem
-from office365.sharepoint.lists.documentLibraryInformation import DocumentLibraryInformation
+from office365.sharepoint.lists.document_library_information import DocumentLibraryInformation
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.list_collection import ListCollection
+from office365.sharepoint.lists.list_template_collection import ListTemplateCollection
 from office365.sharepoint.permissions.basePermissions import BasePermissions
 from office365.sharepoint.permissions.roleDefinitionCollection import RoleDefinitionCollection
 from office365.sharepoint.permissions.securable_object import SecurableObject
@@ -35,6 +36,7 @@ from office365.sharepoint.ui.applicationpages.clientPeoplePickerWebServiceInterf
     ClientPeoplePickerWebServiceInterface,
 )
 from office365.sharepoint.webs.regional_settings import RegionalSettings
+from office365.sharepoint.webs.web_template_collection import WebTemplateCollection
 
 
 class Web(SecurableObject):
@@ -103,6 +105,7 @@ class Web(SecurableObject):
 
         def _load_sub_webs(resp):
             self._load_sub_webs_inner(result.value)
+
         self.context.after_execute(_load_sub_webs)
         return result
 
@@ -290,6 +293,47 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return changes
 
+    def get_available_web_templates(self, lcid=1033, doIncludeCrossLanguage=False):
+        """
+        Returns a collection of site templates available for the site.
+
+        :param int lcid: Specifies the LCID of the site templates to be retrieved.
+        :param bool doIncludeCrossLanguage: Specifies whether to include language-neutral site templates.
+        :return:
+        """
+        params = {
+            "lcid": lcid,
+            "doIncludeCrossLanguage": doIncludeCrossLanguage
+        }
+        return_type = WebTemplateCollection(self.context,
+                                            ResourcePathServiceOperation("GetAvailableWebTemplates ", params,
+                                                                         self.resource_path))
+
+        qry = ServiceOperationQuery(self, "GetAvailableWebTemplates", params, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def apply_web_template(self, webTemplate):
+        """
+        Applies the specified site definition or site template to the website that has no template applied to it.
+
+        :param str webTemplate: The name of the site definition or the file name of the site template to be applied.
+        :return:
+        """
+        qry = ServiceOperationQuery(self, "ApplyWebTemplate", {"webTemplate": webTemplate})
+        self.context.add_query(qry)
+        return self
+
+    def get_custom_list_templates(self):
+        """
+        Specifies the collection of custom list templates for a given site.
+
+        """
+        return_type = ListTemplateCollection(self.context)
+        qry = ServiceOperationQuery(self, "GetCustomListTemplates", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def share(self, user_principal_name,
               shareOption=ExternalSharingSiteOption.View,
               sendEmail=True, emailSubject=None, emailBody=None):
@@ -334,6 +378,7 @@ class Web(SecurableObject):
 
         def _web_initialized():
             sharing_result.value = Web.unshare_object(self.context, self.url)
+
         self.ensure_property("Url", _web_initialized)
         return sharing_result.value
 
@@ -358,6 +403,24 @@ class Web(SecurableObject):
         return result
 
     @staticmethod
+    def get_document_and_media_libraries(context, web_full_url, include_page_libraries):
+        """
+
+        :param context:
+        :param str web_full_url:
+        :param bool include_page_libraries:
+        """
+        result = ClientValueCollection(DocumentLibraryInformation())
+        payload = {
+            "webFullUrl": web_full_url,
+            "includePageLibraries": include_page_libraries
+        }
+        qry = ServiceOperationQuery(context.web, "GetDocumentAndMediaLibraries", None, payload, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
+
+    @staticmethod
     def _resolve_group_value(context, share_option, on_resolved):
         """
 
@@ -376,6 +439,7 @@ class Web(SecurableObject):
         def _group_resolved(resp):
             role_value = "group:{groupId}".format(groupId=grp.properties["Id"])
             on_resolved(role_value)
+
         context.after_execute(_group_resolved)
 
     @staticmethod
@@ -584,6 +648,14 @@ class Web(SecurableObject):
         :rtype: str or None
         """
         return self.properties.get('Url', None)
+
+    @property
+    def list_templates(self):
+        """Gets a value that specifies the collection of list definitions and list templates available for creating
+            lists on the site."""
+        return self.properties.get('ListTemplates',
+                                   ListTemplateCollection(self.context,
+                                                          ResourcePath("ListTemplates", self.resource_path)))
 
     @property
     def web_template(self):

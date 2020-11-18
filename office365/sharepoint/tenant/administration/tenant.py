@@ -1,7 +1,12 @@
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.tenant.administration.siteProperties import SiteProperties
+from office365.sharepoint.tenant.administration.hubSiteProperties import HubSiteProperties
+from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
+    SecondaryAdministratorsFieldsData
+from office365.sharepoint.tenant.administration.secondary_administrators_info import SecondaryAdministratorsInfo
+from office365.sharepoint.tenant.administration.site_properties import SiteProperties
 from office365.sharepoint.tenant.administration.sitePropertiesCollection import SitePropertiesCollection
 from office365.sharepoint.tenant.administration.sitePropertiesEnumerableFilter import SitePropertiesEnumerableFilter
 from office365.sharepoint.tenant.administration.spoOperation import SpoOperation
@@ -12,6 +17,44 @@ class Tenant(BaseEntity):
     def __init__(self, context):
         super().__init__(context, ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant"),
                          "Microsoft.Online.SharePoint.TenantAdministration")
+
+    def get_site_secondary_administrators(self, site_id):
+        """
+        Returns the current site collection administrators
+
+        :type site_id: str
+        """
+        return_type = ClientValueCollection(SecondaryAdministratorsInfo())
+        payload = SecondaryAdministratorsFieldsData(None, None, site_id)
+        qry = ServiceOperationQuery(self, "GetSiteSecondaryAdministrators", None, payload,
+                                    "secondaryAdministratorsFieldsData", return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def register_hub_site(self, site_url):
+        """
+        Registers an existing site as a hub site.
+
+        :param str site_url:
+        :return:
+        """
+        return_type = HubSiteProperties(self.context)
+        params = {"siteUrl": site_url}
+        qry = ServiceOperationQuery(self, "RegisterHubSite", None, params, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def unregister_hub_site(self, siteUrl):
+        """
+        Unregisters a hub site so that it is no longer a hub site.
+
+        :param str siteUrl:
+        :return:
+        """
+        params = {"siteUrl": siteUrl}
+        qry = ServiceOperationQuery(self, "UnregisterHubSite", None, params, None, None)
+        self.context.add_query(qry)
+        return self
 
     def create_site(self, site_create_props):
         """Queues a site collection for creation with the specified properties.

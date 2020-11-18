@@ -6,7 +6,7 @@ from settings import settings
 
 from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.tenant.administration.siteProperties import SiteProperties
+from office365.sharepoint.tenant.administration.site_properties import SiteProperties
 from office365.sharepoint.tenant.administration.sitePropertiesCollection import SitePropertiesCollection
 from office365.sharepoint.tenant.administration.tenant import Tenant
 from office365.sharepoint.tenant.tenant_settings import TenantSettings
@@ -42,7 +42,13 @@ class TestTenant(TestCase):
         self.client.execute_query()
         self.assertIsInstance(sites, SitePropertiesCollection)
 
-    # def test4_create_site(self):
+    def test4_get_site_secondary_administrators(self):
+        target_site = self.client.site.select(["Id"]).get().execute_query()
+        result = self.tenant.get_site_secondary_administrators(target_site.id)
+        self.client.execute_query()
+        self.assertIsNotNone(result)
+
+    # def test5_create_site(self):
     #    current_user = self.client.web.currentUser
     #    self.client.load(current_user)
     #    self.client.execute_query()
@@ -52,20 +58,20 @@ class TestTenant(TestCase):
     #    self.client.execute_query()
     #    self.assertIsNotNone(site_props)
 
-    # def test4_get_site_by_url(self):
+    # def test6_get_site_by_url(self):
     #    site_props = self.tenant.get_site_properties_by_url(self.__class__.target_site_url, False)
     #    self.client.execute_query()
     #    self.assertIsNotNone(site_props.properties['SiteUrl'], self.__class__.target_site_url)
     #    self.__class__.target_site_props = site_props
 
-    # def test5_update_site(self):
+    # def test7_update_site(self):
     #    site_props_to_update = self.__class__.target_site_props
     #    site_props_to_update.set_property('SharingCapability', SharingCapabilities.ExternalUserAndGuestSharing)
     #    site_props_to_update.update()
     #    self.client.execute_query()
     #    self.assertTrue(site_props_to_update.properties['Status'], 'Active')
 
-    # def test6_delete_site(self):
+    # def test8_delete_site(self):
     #    site_url = self.__class__.target_site_props.properties['SiteUrl']
     #    self.tenant.remove_site(site_url)
     #    self.client.execute_query()
