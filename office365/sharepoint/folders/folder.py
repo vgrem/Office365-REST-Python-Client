@@ -79,7 +79,7 @@ class Folder(BaseEntity):
         target_file = self.files.add(info)
         return target_file
 
-    def copyto(self, new_relative_url, overwrite):
+    def copy_to(self, new_relative_url, overwrite):
         """Copies the folder with files to the destination URL.
 
         :type new_relative_url: str
@@ -94,7 +94,7 @@ class Folder(BaseEntity):
         self.ensure_property("Files", _copy_files)
         return self
 
-    def moveto(self, new_relative_url, flags):
+    def move_to(self, new_relative_url, flags):
         """Moves the folder with files to the destination URL.
 
         :type new_relative_url: str
@@ -127,6 +127,43 @@ class Folder(BaseEntity):
         else:
             from office365.sharepoint.files.file_collection import FileCollection
             return FileCollection(self.context, ResourcePath("Files", self.resource_path))
+
+    @property
+    def unique_id(self):
+        """Gets the unique ID of the folder.
+        :rtype: str or None
+        """
+        return self.properties.get("UniqueId", None)
+
+    @property
+    def exists(self):
+        """Gets a Boolean value that indicates whether the folder exists.
+        :rtype: bool or None
+        """
+        return self.properties.get("Exists", None)
+
+    @property
+    def welcome_page(self):
+        """Specifies the server-relative URL for the list folder Welcome page.
+        :rtype: str or None
+        """
+        return self.properties.get("WelcomePage", None)
+
+    @property
+    def unique_content_type_order(self):
+        """Specifies the content type order for the list folder.
+
+        :rtype: office365.sharepoint.contenttypes.content_type_id.ContentTypeId or None
+        """
+        return self.properties.get("UniqueContentTypeOrder", None)
+
+    @property
+    def time_last_modified(self):
+        """Gets the last time this folder or a direct child was modified in UTC.
+
+        :rtype: str or None
+        """
+        return self.properties.get("TimeLastModified", None)
 
     @property
     def serverRelativeUrl(self):

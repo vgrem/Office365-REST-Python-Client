@@ -1,3 +1,9 @@
+import uuid
+
+from office365.sharepoint.fields.field import Field
+from office365.sharepoint.fields.field_creation_information import FieldCreationInformation
+from office365.sharepoint.fields.field_type import FieldType
+from office365.sharepoint.views.view_field_collection import ViewFieldCollection
 from tests import random_seed
 from tests.sharepoint.sharepoint_case import SPTestCase
 
@@ -12,6 +18,8 @@ from office365.sharepoint.views.view_create_information import ViewCreationInfor
 class TestSPView(SPTestCase):
     target_list = None  # type: List
     target_view = None  # type: View
+    target_field = None  # type: Field
+    view_fields_count = None
 
     @classmethod
     def setUpClass(cls):
@@ -21,6 +29,9 @@ class TestSPView(SPTestCase):
                                                                   None,
                                                                   ListTemplateType.Tasks)
                                           )
+
+        field_info = FieldCreationInformation("TaskComment_" + uuid.uuid4().hex, FieldType.Note)
+        cls.target_field = cls.target_list.fields.add(field_info).execute_query()
 
     @classmethod
     def tearDownClass(cls):
@@ -62,10 +73,31 @@ class TestSPView(SPTestCase):
         result = self.target_list.views.filter("Title eq '{0}'".format(target_view_title_updated)).get().execute_query()
         self.assertEqual(len(result), 1)
 
-    def test7_get_view_changes(self):
+    def test7_get_view_fields(self):
+        view = self.__class__.target_view.expand(["ViewFields"]).get().execute_query()
+        self.assertIsNotNone(view.view_fields)
+        self.assertIsInstance(view.view_fields, ViewFieldCollection)
+        self.__class__.view_fields_count = len(view.view_fields)
+
+    def test8_add_view_field(self):
+        field_name = self.__class__.target_field.internal_name
+        self.__class__.target_view.view_fields.add_view_field(field_name).execute_query()
+        after_view_fields = self.__class__.target_view.view_fields.get().execute_query()
+        self.assertEqual(self.__class__.view_fields_count + 1, len(after_view_fields))
+
+    def test9_move_view_field_to(self):
+        pass
+
+    def test_10_remove_view_field(self):
+        pass
+
+    def test_11_remove_all_view_fields(self):
+        pass
+
+    def test_12_get_view_changes(self):
         changes = self.client.site.get_changes(ChangeQuery(view=True)).execute_query()
         self.assertGreater(len(changes), 0)
 
-    def test8_delete_view(self):
+    def test_13_delete_view(self):
         view_to_delete = self.__class__.target_view
         view_to_delete.delete_object().execute_query()

@@ -1,5 +1,5 @@
 from office365.runtime.client_value import ClientValue
-from office365.sharepoint.views.viewScope import ViewScope
+from office365.sharepoint.views.view_scope import ViewScope
 
 
 class CamlQuery(ClientValue):

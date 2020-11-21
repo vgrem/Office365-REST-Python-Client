@@ -25,7 +25,7 @@ class FolderCollection(ClientObjectCollection):
         """
 
         url_component = os.path.normpath(path).split(os.path.sep)
-        url_component = [part for part in url_component if part]  # ensure no empty elements
+        url_component = [part for part in url_component if part]
         if not url_component:
             raise NotADirectoryError("Wrong relative URL provided")
         child_folder = self

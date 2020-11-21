@@ -342,7 +342,7 @@ class File(AbstractFile):
         return self.properties.get("Name", None)
 
     @property
-    def siteId(self):
+    def site_id(self):
         """Gets the GUID that identifies the site collection containing the file.
 
         :rtype: str or None
@@ -350,7 +350,7 @@ class File(AbstractFile):
         return self.properties.get("SiteId", None)
 
     @property
-    def webId(self):
+    def web_id(self):
         """Gets the GUID for the site containing the file.
 
         :rtype: str or None
@@ -358,7 +358,7 @@ class File(AbstractFile):
         return self.properties.get("WebId", None)
 
     @property
-    def timeLastModified(self):
+    def time_last_modified(self):
         """Specifies when the file was last modified.
 
         :rtype: str or None
@@ -379,3 +379,4 @@ class File(AbstractFile):
                     "GetFileById",
                     [value],
                     ResourcePath("Web"))
+        return self

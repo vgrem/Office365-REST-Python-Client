@@ -37,7 +37,7 @@ class TestSharePointFolder(SPTestCase):
 
         folder_url = parent_folder.serverRelativeUrl
         folder_object = self.client.web.get_folder_by_server_relative_url(folder_url).get().execute_query()
-        self.assertTrue(folder_object.properties["ServerRelativeUrl"], folder_url)
+        self.assertTrue(folder_object.serverRelativeUrl, folder_url)
         folders = folder_object.folders.get().execute_query()
         for child_folder in folders:
             self.assertIsNotNone(child_folder.resource_path)
@@ -48,11 +48,11 @@ class TestSharePointFolder(SPTestCase):
     def test2_create_folder(self):
         folder_new = self.__class__.target_list.rootFolder.folders.add(self.__class__.target_folder_name)\
             .execute_query()
-        self.assertTrue(folder_new.properties["Exists"])
+        self.assertTrue(folder_new.exists)
         self.__class__.target_folder = folder_new
 
     def test3_get_folder_by_id(self):
-        folder_id = self.__class__.target_folder.properties['UniqueId']
+        folder_id = self.__class__.target_folder.unique_id
         folder = self.client.web.get_folder_by_id(folder_id).execute_query()
         self.assertIsNotNone(folder.resource_path)
 
@@ -83,7 +83,7 @@ class TestSharePointFolder(SPTestCase):
         self.assertIsNotNone(folder_to.serverRelativeUrl)
 
         # 3. copy folder with files
-        folder_to_copy.copyto(folder_to.properties['ServerRelativeUrl'], True)
+        folder_to_copy.copy_to(folder_to.properties['ServerRelativeUrl'], True)
         self.client.load(folder_to, ["Files"])
         self.client.execute_query()
         self.assertGreater(len(folder_to.files), 0)
@@ -95,7 +95,7 @@ class TestSharePointFolder(SPTestCase):
         self.client.execute_query()
         self.assertIsNotNone(folder_to.serverRelativeUrl)
 
-        folder.moveto(folder_to.properties['ServerRelativeUrl'], MoveOperations.overwrite)
+        folder.move_to(folder_to.properties['ServerRelativeUrl'], MoveOperations.overwrite)
         self.client.execute_query()
         self.assertIsNotNone(folder_to.serverRelativeUrl)
 

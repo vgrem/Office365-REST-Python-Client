@@ -41,11 +41,6 @@ class BatchQuery(ClientQuery):
     def get(self, index):
         result = [qry for qry in self.change_sets if qry.return_type is not None] + \
                  [qry for qry in self._queries if isinstance(qry, ReadEntityQuery)]
-
-        # result = [qry for qry in self._queries
-        #          if isinstance(qry, ReadEntityQuery)
-        #          or isinstance(qry, CreateEntityQuery)
-        #          or isinstance(qry, ServiceOperationQuery)]
         return result[index]
 
     @property
