@@ -1,8 +1,9 @@
 from unittest import TestCase
 
+from office365.runtime.auth.client_credential import ClientCredential
 from office365.sharepoint.userprofiles.personPropertiesCollection import PersonPropertiesCollection
 
-from settings import settings
+from settings import settings, tenant_prefix
 
 from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
@@ -12,13 +13,13 @@ from office365.sharepoint.userprofiles.profileLoader import ProfileLoader
 
 class TestUserProfile(TestCase):
     profile_loader = None  # type: ProfileLoader
-    target_account_name = "mdoe@mediadev8.onmicrosoft.com"
+    target_account_name = f"mdoe@{tenant_prefix}.onmicrosoft.com"
 
     @classmethod
     def setUpClass(cls):
         credentials = UserCredential(settings['user_credentials']['username'],
                                      settings['user_credentials']['password'])
-        cls.my_client = ClientContext(settings['url']).with_credentials(credentials)
+        cls.my_client = ClientContext(settings.get('team_site_url')).with_credentials(credentials)
 
     def test1_get_profile_loader(self):
         profile_loader = ProfileLoader.get_profile_loader(self.my_client).execute_query()
@@ -34,9 +35,9 @@ class TestUserProfile(TestCase):
         self.assertIsNotNone(up.properties['PublicUrl'])
 
     def test4_get_user_props(self):
-        me = self.my_client.web.currentUser.get().execute_query()
+        target_user = self.my_client.web.ensure_user(self.target_account_name).execute_query()
         people_manager = PeopleManager(self.my_client)
-        result = people_manager.get_user_profile_properties(me.login_name)
+        result = people_manager.get_user_profile_properties(target_user.login_name)
         self.my_client.execute_query()
         self.assertIsNotNone(result.value)
 

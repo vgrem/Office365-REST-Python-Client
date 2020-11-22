@@ -382,7 +382,7 @@ class Web(SecurableObject):
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
         :param str web_full_url: The URL of the web.
         """
-        result = ClientValueCollection(DocumentLibraryInformation())
+        result = ClientValueCollection(DocumentLibraryInformation)
         payload = {
             "webFullUrl": web_full_url
         }
@@ -399,7 +399,7 @@ class Web(SecurableObject):
         :param str web_full_url:
         :param bool include_page_libraries:
         """
-        result = ClientValueCollection(DocumentLibraryInformation())
+        result = ClientValueCollection(DocumentLibraryInformation)
         payload = {
             "webFullUrl": web_full_url,
             "includePageLibraries": include_page_libraries

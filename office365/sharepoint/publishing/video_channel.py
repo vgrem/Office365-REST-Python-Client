@@ -1,5 +1,5 @@
-from office365.runtime.client_object import ClientObject
+from office365.sharepoint.base_entity import BaseEntity
 
 
-class VideoChannel(ClientObject):
+class VideoChannel(BaseEntity):
     pass

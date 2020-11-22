@@ -48,8 +48,8 @@ class ViewFieldCollection(ClientObjectCollection):
         :param int index: Specifies the new position for the field (2). The first position is 0.
 
         """
-        params = {"name": name, "index": index}
-        qry = ServiceOperationQuery(self, "MoveViewFieldTo", params)
+        params = {"field": name, "index": index}
+        qry = ServiceOperationQuery(self, "MoveViewFieldTo", None, params)
         self.context.add_query(qry)
         return self
 

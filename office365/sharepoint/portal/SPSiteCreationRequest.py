@@ -4,6 +4,7 @@ from office365.runtime.client_value import ClientValue
 class SPSiteCreationRequest(ClientValue):
 
     def __init__(self, title, url, owner=None):
+        super().__init__()
         self.Title = title
         self.Url = url
         self.WebTemplate = "SITEPAGEPUBLISHING#0"

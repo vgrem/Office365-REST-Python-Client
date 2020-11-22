@@ -43,7 +43,8 @@ def download_files(remote_folder, local_path):
 client = GraphClient(get_token)
 
 # load drive properties
-drive = client.users["jdoe@mediadev8.onmicrosoft.com"].drive
+target_user_name = settings.get('test_accounts')[1]
+drive = client.users[target_user_name].drive
 # download files from OneDrive
 with tempfile.TemporaryDirectory() as path:
     download_files(drive.root, path)

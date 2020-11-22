@@ -112,7 +112,7 @@ class TestSharePointFolder(SPTestCase):
 
     def test_10_get_folder_changes(self):
         folder = self.__class__.target_list.rootFolder.folders.get_by_url(self.__class__.target_folder_name)
-        changes = folder.list_item_all_fields.get_changes(ChangeQuery(item=True)).execute_query()
+        changes = folder.get_changes(ChangeQuery(item=True)).execute_query()
         self.assertIsInstance(changes, ChangeCollection)
         self.assertGreater(len(changes), 0)
 

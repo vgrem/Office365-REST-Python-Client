@@ -48,7 +48,7 @@ def get_items(target_list):
     print("Item at index: {0}".format(items[index].properties))
 
 
-ctx = ClientContext.connect_with_credentials("https://mediadev8.sharepoint.com/sites/team",
+ctx = ClientContext(settings.get('team_site_url')).with_credentials(
                                              ClientCredential(settings['client_credentials']['client_id'],
                                                               settings['client_credentials']['client_secret']))
 

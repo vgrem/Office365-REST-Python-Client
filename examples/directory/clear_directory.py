@@ -21,8 +21,10 @@ deleted_groups = client.directory.deletedGroups.get().execute_query()
 # deleted_users = client.directory.deletedUsers.get().execute_query()
 groups_count = len(deleted_groups)
 
-for index, deleted_grp in enumerate(deleted_groups):
-    print("({0} of {1}) Deleting {2} group ...".format(index + 1, groups_count, deleted_grp.properties['displayName']))
-    deleted_grp.delete_object()
-    client.execute_query()
+index = 0
+while len(deleted_groups) > 0:
+    cur_grp = deleted_groups[0]
+    print("({0} of {1}) Deleting {2} group ...".format(index + 1, groups_count, cur_grp.properties['displayName']))
+    cur_grp.delete_object().execute_query()
     print("Group deleted.")
+    index += 1

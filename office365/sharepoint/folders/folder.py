@@ -7,6 +7,7 @@ from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.change_collection import ChangeCollection
+from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.files.file_creation_information import FileCreationInformation
 from office365.sharepoint.listitems.listitem import ListItem
 
@@ -21,6 +22,29 @@ class Folder(BaseEntity):
         qry = ServiceOperationQuery(self, "Recycle", None, None, None, result)
         self.context.add_query(qry)
         return result
+
+    def recycle_with_parameters(self, parameters):
+        """
+
+        :type parameters: office365.sharepoint.folders.folder_delete_parameters.FolderDeleteParameters
+        """
+        result = ClientResult(None)
+        qry = ServiceOperationQuery(self, "RecycleWithParameters", None, parameters, "parameters", result)
+        self.context.add_query(qry)
+        return result
+
+    def get_changes(self, query=None):
+        """Returns the collection of changes from the change log that have occurred within the folder,
+           based on the specified query.
+
+        :param office365.sharepoint.changeQuery.ChangeQuery query: Specifies which changes to return
+        """
+        if query is None:
+            query = ChangeQuery(folder=True)
+        changes = ChangeCollection(self.context)
+        qry = ServiceOperationQuery(self, "getChanges", None, query, "query", changes)
+        self.context.add_query(qry)
+        return changes
 
     def get_list_item_changes(self, query):
         """

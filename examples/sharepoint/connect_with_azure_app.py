@@ -1,9 +1,10 @@
 import os
 
 from office365.sharepoint.client_context import ClientContext
+from settings import settings
 
 app_settings = {
-    'url': 'https://mediadev8.sharepoint.com/sites/team',
+    'url': settings.get('team_site_url'),
     'client_id': '51d03106-4726-442c-86db-70b32fa7547f',
     'thumbprint': "6B36FBFC86FB1C019EB6496494B9195E6D179DDB",
     'certificate_path': '{0}/selfsigncert.pem'.format(os.path.dirname(__file__))

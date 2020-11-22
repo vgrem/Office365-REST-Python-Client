@@ -24,22 +24,22 @@ class Tenant(BaseEntity):
 
         :type site_id: str
         """
-        return_type = ClientValueCollection(SecondaryAdministratorsInfo())
-        payload = SecondaryAdministratorsFieldsData(None, None, site_id)
+        return_type = ClientValueCollection(SecondaryAdministratorsInfo)
+        payload = SecondaryAdministratorsFieldsData(site_id)
         qry = ServiceOperationQuery(self, "GetSiteSecondaryAdministrators", None, payload,
                                     "secondaryAdministratorsFieldsData", return_type)
         self.context.add_query(qry)
         return return_type
 
-    def set_site_secondary_administrators(self, site_id, emails, names):
+    def set_site_secondary_administrators(self, site_id, emails, names=None):
         """
         Sets site collection administrators
 
-        :type names: list[str]
+        :type names: list[str] or None
         :type emails: list[str]
         :type site_id: str
         """
-        payload = SecondaryAdministratorsFieldsData(emails, names, site_id)
+        payload = SecondaryAdministratorsFieldsData(site_id, emails, names)
         qry = ServiceOperationQuery(self, "SetSiteSecondaryAdministrators", None, payload,
                                     "secondaryAdministratorsFieldsData", None)
         self.context.add_query(qry)
@@ -129,6 +129,14 @@ class Tenant(BaseEntity):
                                     site_props_col)
         self.context.add_query(qry)
         return site_props_col
+
+    @property
+    def root_site_url(self):
+        """
+
+        :rtype: str or None
+        """
+        return self.properties.get('RootSiteUrl', None)
 
     @property
     def _sites(self):

@@ -1,5 +1,6 @@
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.contenttypes.content_type import ContentType
 
@@ -45,7 +46,11 @@ class ContentTypeCollection(ClientObjectCollection):
             collection. It MUST exist in the web's available content types.
 
         """
-        pass
+        ct = ContentType(self.context)
+        self.add_child(ct)
+        qry = ServiceOperationQuery(self, "AddAvailableContentType", [contentTypeId], None, None, ct)
+        self.context.add_query(qry)
+        return ct
 
     def add_existing_content_type(self, contentType):
         """Adds an existing content type to the collection. The name of the given content type MUST NOT be the same

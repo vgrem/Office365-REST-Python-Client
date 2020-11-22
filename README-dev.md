@@ -10,11 +10,12 @@ $ pip install -r requirements-dev.txt
 
 # Running tests
 
-Most of the tests are end-to-end - connecting to real sites (not mocked). So one has to configure his/her office/sharepoint credentials. To do so, create a file ```.env``` like this (replace the bracketed values by your values):
+Most of the tests are end-to-end - operations are invoked against actual tenant (not mocked). 
+So one has to configure his/her office/sharepoint credentials. 
+To do so, create a file ```.env``` like this (replace the bracketed values by your values):
 
 ```
-export Office365_Python_Sdk_SecureVars='{username};{password};{client_id};{client_password}'
-export COMPANY={your_company}
+export office365_python_sdk_securevars='{username};{password};{client_id};{client_password}'
 ```
 
 This file is in .gitignore, so it will never be committed.
@@ -24,5 +25,13 @@ $ . .env   # source it to export the variable
 $ nose2 ...  # run the test(s) you need...
 ```
 
-# Configure Tenant
+#### Configure Tenant
 
+Roles:
+
+- Global reader
+- Groups admin
+- Search admin
+- SharePoint admin
+- Teams service admin
+- Users admin

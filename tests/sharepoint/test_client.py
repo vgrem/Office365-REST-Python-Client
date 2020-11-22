@@ -1,5 +1,8 @@
 from unittest import TestCase
 
+from office365.runtime.client_value_collection import ClientValueCollection
+from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
+    SecondaryAdministratorsFieldsData
 from settings import settings
 from tests import random_seed
 
@@ -98,3 +101,17 @@ class TestSharePointClient(TestCase):
         client.load(files_after)
         client.execute_batch()
         self.assertTrue(len(files_after), files_count_before)
+
+    def test_12_get_entity_type_name(self):
+        str_col = ClientValueCollection(str, [])
+        self.assertEqual(str_col.entity_type_name, "Collection(Edm.String)")
+
+        self.assertEqual(SecondaryAdministratorsFieldsData._entity_type_name,
+                         "Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsFieldsData")
+
+        type_item = SecondaryAdministratorsFieldsData(None, [])
+        self.assertEqual(type_item.entity_type_name,
+                         "Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsFieldsData")
+
+        type_col = ClientValueCollection(SecondaryAdministratorsFieldsData)
+        self.assertEqual(type_col.entity_type_name, "Collection(Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsFieldsData)")

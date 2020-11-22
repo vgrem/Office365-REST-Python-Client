@@ -5,7 +5,7 @@ from tests.sharepoint.sharepoint_case import SPTestCase
 from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.contenttypes.content_type import ContentType
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
-from office365.sharepoint.contenttypes.contentTypeCreationInformation import ContentTypeCreationInformation
+from office365.sharepoint.contenttypes.content_type_creation_information import ContentTypeCreationInformation
 
 
 class TestContentType(SPTestCase):
@@ -24,6 +24,12 @@ class TestContentType(SPTestCase):
         ct = self.client.site.rootWeb.contentTypes.add(cti).execute_query()
         self.assertIsNotNone(ct.name)
         self.__class__.target_ct = ct
+
+    def test_4_update_content_type(self):
+        ct_to_update = self.__class__.target_ct
+        ct_to_update.description = "New desc"
+        ct_to_update.update(True).execute_query()
+        self.assertIsNotNone(ct_to_update.description)
 
     def test_5_delete_content_type(self):
         web_cts = self.client.site.rootWeb.contentTypes.get().execute_query()

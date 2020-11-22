@@ -1,4 +1,3 @@
-import os
 from random import randint
 from unittest import TestCase
 
@@ -19,18 +18,16 @@ class TestTenant(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        tenant = os.environ.get('office365_python_sdk_tenant', 'mediadev8')
-        admin_site_url = "https://{0}-admin.sharepoint.com/".format(tenant)
         credentials = UserCredential(settings['user_credentials']['username'],
                                      settings['user_credentials']['password'])
 
-        cls.client = ClientContext(admin_site_url).with_credentials(credentials)
+        cls.client = ClientContext(settings.get("admin_site_url")).with_credentials(credentials)
         cls.tenant = Tenant(cls.client)
 
     def test1_get_tenant(self):
         self.client.load(self.tenant)
         self.client.execute_query()
-        self.assertIsNotNone(self.tenant.properties['RootSiteUrl'])
+        self.assertIsNotNone(self.tenant.root_site_url)
 
     def test2_get_tenant_settings(self):
         tenant_settings = TenantSettings.current(self.client)
@@ -48,11 +45,12 @@ class TestTenant(TestCase):
         self.client.execute_query()
         self.assertIsNotNone(result)
 
-    # def test5_set_site_secondary_administrators(self):
+    #def test5_set_site_secondary_administrators(self):
     #    target_site = self.client.site.get()
     #    target_user = self.client.web.ensure_user("jdoe@mediadev8.onmicrosoft.com")
     #    self.client.execute_batch()
-    #    self.tenant.set_site_secondary_administrators(target_site.id, [target_user.login_name],[target_user.login_name])
+    #    #self.tenant.set_site_secondary_administrators(target_site.id, [target_user.login_name], [target_user.login_name])
+    #    self.tenant.set_site_secondary_administrators(target_site.id, [target_user.user_principal_name])
     #    self.client.execute_query()
 
     # def test6_create_site(self):

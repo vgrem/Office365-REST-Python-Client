@@ -21,7 +21,8 @@ def acquire_token():
 
 
 client = GraphClient(acquire_token)
-target_drive = client.users["jdoe@mediadev8.onmicrosoft.com"].drive
+user_name = settings.get('test_accounts')[1]
+target_drive = client.users[user_name].drive
 
 local_path = "../../tests/data/SharePoint User Guide.docx"
 with open(local_path, 'rb') as f:

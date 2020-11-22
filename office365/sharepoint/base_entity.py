@@ -19,7 +19,7 @@ class BaseEntity(ClientObject):
         self.context.with_credentials(credentials)
         return self
 
-    def update(self):
+    def update(self, *args):
         """Updates the resource."""
         qry = UpdateEntityQuery(self)
         self.context.add_query(qry)

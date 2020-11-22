@@ -38,14 +38,14 @@ class TestCommunicationSite(TestCase):
         self.assertTrue(response.SiteStatus != SiteStatus.Error)
 
     def test3_register_hub_site(self):
-        admin_site_url = "https://mediadev8-admin.sharepoint.com/"
+        admin_site_url = settings.get('admin_site_url')
         client_admin = ClientContext(admin_site_url).with_credentials(self.user_credentials)
         tenant = Tenant(client_admin)
         props = tenant.register_hub_site(self.__class__.site_response.SiteUrl).execute_query()
         self.assertIsNotNone(props)
 
     def test4_unregister_hub_site(self):
-        admin_site_url = "https://mediadev8-admin.sharepoint.com/"
+        admin_site_url = settings.get('admin_site_url')
         client_admin = ClientContext(admin_site_url).with_credentials(self.user_credentials)
         tenant = Tenant(client_admin)
         tenant.unregister_hub_site(self.__class__.site_response.SiteUrl).execute_query()

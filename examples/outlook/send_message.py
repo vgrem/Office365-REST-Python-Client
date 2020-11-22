@@ -26,7 +26,7 @@ message_json = {
         "ToRecipients": [
             {
                 "EmailAddress": {
-                    "Address": "vgrem@mediadev8.onmicrosoft.com"
+                    "Address": settings.get('test_accounts')[1]
                 }
             }
         ]
@@ -34,6 +34,6 @@ message_json = {
     "SaveToSentItems": "false"
 }
 
-login_name = "mdoe@mediadev8.onmicrosoft.com"
-client.users[login_name].send_mail(message_json)
+user_name = settings.get('test_accounts')[0]
+client.users[user_name].send_mail(message_json)
 client.execute_query()

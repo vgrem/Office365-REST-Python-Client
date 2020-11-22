@@ -76,7 +76,7 @@ def generate_contacts(context):
 
 
 if __name__ == '__main__':
-    ctx = ClientContext.connect_with_credentials("https://mediadev8.sharepoint.com/sites/team",
+    ctx = ClientContext(settings.get('team_site_url')).with_credentials(
                                                  UserCredential(settings['user_credentials']['username'],
                                                                 settings['user_credentials']['password']))
     # generate_contacts(ctx)

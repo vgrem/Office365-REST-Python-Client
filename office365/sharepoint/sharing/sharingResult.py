@@ -33,11 +33,11 @@ class SharingResult(BaseEntity):
 
     @property
     def invited_users(self):
-        return self.properties.get("InvitedUsers", ClientValueCollection(SPInvitationCreationResult()))
+        return self.properties.get("InvitedUsers", ClientValueCollection(SPInvitationCreationResult))
 
     @property
     def uniquelyPermissionedUsers(self):
-        return self.properties.get("UniquelyPermissionedUsers", ClientValueCollection(UserSharingResult()))
+        return self.properties.get("UniquelyPermissionedUsers", ClientValueCollection(UserSharingResult))
 
     @property
     def groupsSharedWith(self):

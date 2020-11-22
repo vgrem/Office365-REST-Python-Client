@@ -17,7 +17,7 @@ class ListItemCreationInformation(ClientValue):
 
 
         """
-        super().__init__("SP")
+        super().__init__()
         self.FolderUrl = folderUrl
         self.LeafName = leafName
         self.UnderlyingObjectType = underlyingObjectType

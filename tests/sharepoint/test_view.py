@@ -86,13 +86,21 @@ class TestSPView(SPTestCase):
         self.assertEqual(self.__class__.view_fields_count + 1, len(after_view_fields))
 
     def test9_move_view_field_to(self):
-        pass
+        field_name = self.__class__.target_field.internal_name
+        self.__class__.target_view.view_fields.move_view_field_to(field_name, 2).execute_query()
+        after_view_fields = self.__class__.target_view.view_fields.get().execute_query()
+        self.assertEqual(after_view_fields[2], field_name)
 
     def test_10_remove_view_field(self):
-        pass
+        field_name = self.__class__.target_field.internal_name
+        self.__class__.target_view.view_fields.remove_view_field(field_name).execute_query()
+        after_view_fields = self.__class__.target_view.view_fields.get().execute_query()
+        self.assertEqual(self.__class__.view_fields_count, len(after_view_fields))
 
     def test_11_remove_all_view_fields(self):
-        pass
+        self.__class__.target_view.view_fields.remove_all_view_fields().execute_query()
+        after_view_fields = self.__class__.target_view.view_fields.get().execute_query()
+        self.assertEqual(0, len(after_view_fields))
 
     def test_12_get_view_changes(self):
         changes = self.client.site.get_changes(ChangeQuery(view=True)).execute_query()

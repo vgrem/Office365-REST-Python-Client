@@ -1,3 +1,4 @@
+from settings import settings
 from tests.graph_case import GraphTestCase
 
 
@@ -14,7 +15,7 @@ class TestGraphMail(GraphTestCase):
                 "ToRecipients": [
                     {
                         "EmailAddress": {
-                            "Address": "vgrem@mediadev8.onmicrosoft.com"
+                            "Address": settings.get('test_accounts')[0]
                         }
                     }
                 ],

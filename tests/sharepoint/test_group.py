@@ -9,7 +9,7 @@ class TestSharePointGroup(SPTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestSharePointGroup, cls).setUpClass()
-        cls.target_user_name = "i:0#.f|membership|mdoe@mediadev8.onmicrosoft.com"
+        cls.target_user = cls.client.web.ensure_user(cls.test_user_names[0]).execute_query()
         cls.target_group = cls.client.web.associatedMemberGroup
 
     def test1_get_current_user_groups(self):
@@ -17,7 +17,7 @@ class TestSharePointGroup(SPTestCase):
         self.assertGreaterEqual(len(groups), 0)
 
     def test2_add_user_to_group(self):
-        target_user = self.target_group.users.add_user(self.target_user_name).execute_query()
+        target_user = self.target_group.users.add_user(self.target_user.login_name).execute_query()
         self.assertIsNotNone(target_user.properties['Id'])
 
     def test3_delete_user_from_group(self):
