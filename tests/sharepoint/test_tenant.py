@@ -6,7 +6,7 @@ from settings import settings
 from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.tenant.administration.site_properties import SiteProperties
-from office365.sharepoint.tenant.administration.sitePropertiesCollection import SitePropertiesCollection
+from office365.sharepoint.tenant.administration.site_properties_collection import SitePropertiesCollection
 from office365.sharepoint.tenant.administration.tenant import Tenant
 from office365.sharepoint.tenant.tenant_settings import TenantSettings
 

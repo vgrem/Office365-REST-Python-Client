@@ -7,9 +7,9 @@ from office365.sharepoint.tenant.administration.secondary_administrators_fields_
     SecondaryAdministratorsFieldsData
 from office365.sharepoint.tenant.administration.secondary_administrators_info import SecondaryAdministratorsInfo
 from office365.sharepoint.tenant.administration.site_properties import SiteProperties
-from office365.sharepoint.tenant.administration.sitePropertiesCollection import SitePropertiesCollection
+from office365.sharepoint.tenant.administration.site_properties_collection import SitePropertiesCollection
 from office365.sharepoint.tenant.administration.sitePropertiesEnumerableFilter import SitePropertiesEnumerableFilter
-from office365.sharepoint.tenant.administration.spoOperation import SpoOperation
+from office365.sharepoint.tenant.administration.spo_operation import SpoOperation
 
 
 class Tenant(BaseEntity):

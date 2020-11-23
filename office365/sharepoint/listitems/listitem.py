@@ -244,6 +244,7 @@ class ListItem(SecurableObject):
             if name == "Id" and self._parent_collection is not None:
                 self._resource_path = ResourcePathServiceOperation(
                     "getItemById", [value], self._parent_collection.resource_path.parent)
+        return self
 
     def ensure_type_name(self, target_list):
         """

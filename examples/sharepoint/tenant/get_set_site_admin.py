@@ -17,8 +17,8 @@ tenant = Tenant(admin_client)
 admins = tenant.get_site_secondary_administrators(site_id=target_site.id)
 admin_client.execute_query()
 
-#emails = settings.get("test_accounts")
-#tenant.set_site_secondary_administrators(site_id=target_site.id, emails=emails).execute_query()
+emails = settings.get("test_accounts")
+tenant.set_site_secondary_administrators(site_id=target_site.id, emails=emails).execute_query()
 
 for admin in admins:  # type: SecondaryAdministratorsInfo
     print(admin.get_property('loginName'))

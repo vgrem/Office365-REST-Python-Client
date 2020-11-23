@@ -14,6 +14,12 @@ class FileCreationInformation(ClientValue):
         self._overwrite = overwrite
         self._content = content
 
+    def to_json(self):
+        return {
+            "overwrite": self.overwrite,
+            "url": self.url
+        }
+
     @property
     def content(self):
         """Gets the binary content of the file."""

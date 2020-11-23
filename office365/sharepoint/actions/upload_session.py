@@ -31,7 +31,7 @@ class UploadSessionQuery(CreateFileQuery):
         :type files: office365.sharepoint.files.file_collection.FileCollection
         :type source_path: str
         :type chunk_size: int
-        :type chunk_uploaded: (int)->None
+        :type chunk_uploaded: (int, *)->None
         """
 
         super().__init__(files, _create_empty_file(source_path))

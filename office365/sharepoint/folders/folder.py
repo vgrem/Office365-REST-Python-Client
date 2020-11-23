@@ -5,9 +5,11 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.actions.create_file import CreateFileQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.changes.change_query import ChangeQuery
+from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.files.file_creation_information import FileCreationInformation
 from office365.sharepoint.listitems.listitem import ListItem
 
@@ -68,6 +70,7 @@ class Folder(BaseEntity):
             new_folder.set_property("ServerRelativeUrl", new_folder_url)
             qry = CreateEntityQuery(self.folders, new_folder, new_folder)
             self.context.add_query(qry)
+
         self.ensure_property("ServerRelativeUrl", _add_sub_folder)
         return new_folder
 
@@ -90,18 +93,17 @@ class Folder(BaseEntity):
         self.remove_from_parent_collection()
         return self
 
-    def upload_file(self, name, content):
+    def upload_file(self, file_name, content):
         """Uploads a file into folder
 
-        :type name: str
+        :type file_name: str
         :type content: str
+        :rtype: office365.sharepoint.files.file.File
         """
-        info = FileCreationInformation()
-        info.content = content
-        info.url = name
-        info.overwrite = True
-        target_file = self.files.add(info)
-        return target_file
+        info = FileCreationInformation(url=file_name, overwrite=True, content=content)
+        qry = CreateFileQuery(self.files, info)
+        self.context.add_query(qry)
+        return qry.return_type
 
     def copy_to(self, new_relative_url, overwrite):
         """Copies the folder with files to the destination URL.
@@ -132,16 +134,15 @@ class Folder(BaseEntity):
             for file in self.files:
                 new_file_url = "/".join([new_relative_url, file.properties['Name']])
                 file.moveto(new_file_url, flags)
+
         self.ensure_property("Files", _move_folder_with_files)
         return self
 
     @property
     def list_item_all_fields(self):
         """Specifies the list item fields (2) values for the list item corresponding to the folder."""
-        if self.is_property_available('ListItemAllFields'):
-            return self.properties["ListItemAllFields"]
-        else:
-            return ListItem(self.context, ResourcePath("ListItemAllFields", self.resource_path))
+        return self.properties.get("ListItemAllFields",
+                                   ListItem(self.context, ResourcePath("ListItemAllFields", self.resource_path)))
 
     @property
     def files(self):
@@ -151,6 +152,28 @@ class Folder(BaseEntity):
         else:
             from office365.sharepoint.files.file_collection import FileCollection
             return FileCollection(self.context, ResourcePath("Files", self.resource_path))
+
+    @property
+    def folders(self):
+        """Specifies the collection of list folders contained within the list folder.
+        """
+        from office365.sharepoint.folders.folder_collection import FolderCollection
+        return self.properties.get("Folders",
+                                   FolderCollection(self.context, ResourcePath("Folders", self.resource_path)))
+
+    @property
+    def parent_folder(self):
+        """Specifies the list folder.
+        """
+        return self.properties.get("ParentFolder",
+                                   Folder(self.context, ResourcePath("ParentFolder", self.resource_path)))
+
+    @property
+    def name(self):
+        """Specifies the list folder name.
+        :rtype: str or None
+        """
+        return self.properties.get("Name", None)
 
     @property
     def unique_id(self):
@@ -182,6 +205,14 @@ class Folder(BaseEntity):
         return self.properties.get("UniqueContentTypeOrder", None)
 
     @property
+    def content_type_order(self):
+        """Specifies the content type order for the list folder.
+
+        :rtype: office365.sharepoint.contenttypes.content_type_id.ContentTypeId or None
+        """
+        return self.properties.get("ContentTypeOrder", ContentTypeId())
+
+    @property
     def time_last_modified(self):
         """Gets the last time this folder or a direct child was modified in UTC.
 
@@ -196,22 +227,23 @@ class Folder(BaseEntity):
         """
         return self.properties.get("ServerRelativeUrl", None)
 
-    @property
-    def folders(self):
-        """Get a folder collection"""
-        if self.is_property_available('Folders'):
-            return self.properties["Folders"]
+    def get_property(self, name):
+        property_mapping = {
+            "ListItemAllFields": self.list_item_all_fields,
+            "ParentFolder": self.parent_folder
+        }
+        if name in property_mapping:
+            return property_mapping[name]
         else:
-            from office365.sharepoint.folders.folder_collection import FolderCollection
-            return FolderCollection(self.context, ResourcePath("Folders", self.resource_path))
+            return super(Folder, self).get_property(name)
 
     def set_property(self, name, value, persist_changes=True):
         super(Folder, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
-        if self._resource_path is None:
-            if name == "ServerRelativeUrl":
-                self._resource_path = ResourcePathServiceOperation("getFolderByServerRelativeUrl", [value],
-                                                                   ResourcePath("Web"))
-            elif name == "UniqueId":
-                self._resource_path = ResourcePathServiceOperation("getFolderById", [value], ResourcePath("Web"))
+        # if self._resource_path is None:
+        if name == "ServerRelativeUrl":
+            self._resource_path = ResourcePathServiceOperation("getFolderByServerRelativeUrl", [value],
+                                                               ResourcePath("Web"))
+        elif name == "UniqueId":
+            self._resource_path = ResourcePathServiceOperation("getFolderById", [value], ResourcePath("Web"))
         return self
