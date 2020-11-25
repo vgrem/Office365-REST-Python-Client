@@ -37,7 +37,7 @@ def upload_files(remote_drive, local_root_path):
 
 # get target drive
 client = GraphClient(get_token)
-user_name = settings.get('test_accounts')[1]
+user_name = settings.get('test_alt_account_name')
 target_drive = client.users[user_name].drive
 # import local files into OneDrive
 upload_files(target_drive, "../data")

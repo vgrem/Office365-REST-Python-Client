@@ -286,6 +286,31 @@ class File(AbstractFile):
         def _download_inner():
             qry = DownloadFileQuery(self.context.web, self.serverRelativeUrl, file_object)
             self.context.add_query(qry)
+
+        self.ensure_property("ServerRelativeUrl", _download_inner)
+        return self
+
+    def download_session(self, file_object, chunk_downloaded=None, chunk_size=1024 * 1024):
+        """
+        :type file_object: typing.IO
+        :type chunk_downloaded: (int)->None or None
+        :type chunk_size: int
+        """
+
+        def _download_inner():
+            request = RequestOptions(
+                r"{0}web/getFileByServerRelativeUrl('{1}')/\$value".format(self.context.service_root_url(),
+                                                                           self.serverRelativeUrl))
+            request.stream = True
+            response = self.context.execute_request_direct(request)
+            response.raise_for_status()
+            bytes_read = 0
+            for chunk in response.iter_content(chunk_size=chunk_size):
+                bytes_read += len(chunk)
+                if callable(chunk_downloaded):
+                    chunk_downloaded(bytes_read)
+                file_object.write(chunk)
+
         self.ensure_property("ServerRelativeUrl", _download_inner)
         return self
 

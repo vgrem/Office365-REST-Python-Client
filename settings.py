@@ -17,6 +17,6 @@ settings = {
         'client_id': secure_vars[2],
         'client_secret': secure_vars[3],
     },
-    "test_accounts": ["mdoe@{0}.onmicrosoft.com".format(tenant_prefix),
-                      "jdoe@{0}.onmicrosoft.com".format(tenant_prefix)]
+    "test_account_name": "jdoe2@{0}.onmicrosoft.com".format(tenant_prefix),
+    "test_alt_account_name": "mdoe@{0}.onmicrosoft.com".format(tenant_prefix)
 }

@@ -9,7 +9,7 @@ class TestSharePointGroup(SPTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestSharePointGroup, cls).setUpClass()
-        cls.target_user = cls.client.web.ensure_user(cls.test_user_names[0]).execute_query()
+        cls.target_user = cls.client.web.ensure_user(cls.test_user_name).execute_query()
         cls.target_group = cls.client.web.associatedMemberGroup
 
     def test1_get_current_user_groups(self):
@@ -18,14 +18,14 @@ class TestSharePointGroup(SPTestCase):
 
     def test2_add_user_to_group(self):
         target_user = self.target_group.users.add_user(self.target_user.login_name).execute_query()
-        self.assertIsNotNone(target_user.properties['Id'])
+        self.assertIsNotNone(target_user.id)
 
     def test3_delete_user_from_group(self):
         target_users = self.target_group.users.get().execute_query()
         users_count_before = len(target_users)
         self.assertGreater(users_count_before, 0)
 
-        user_id = target_users[0].properties['Id']
+        user_id = target_users[0].id
         target_users.remove_by_id(user_id)
         self.client.load(target_users)
         self.client.execute_query()

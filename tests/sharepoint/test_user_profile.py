@@ -1,6 +1,5 @@
 from unittest import TestCase
 
-from office365.runtime.auth.client_credential import ClientCredential
 from office365.sharepoint.userprofiles.personPropertiesCollection import PersonPropertiesCollection
 
 from settings import settings, tenant_prefix
@@ -13,7 +12,7 @@ from office365.sharepoint.userprofiles.profileLoader import ProfileLoader
 
 class TestUserProfile(TestCase):
     profile_loader = None  # type: ProfileLoader
-    target_account_name = f"mdoe@{tenant_prefix}.onmicrosoft.com"
+    target_account_name = settings.get('test_account_name')
 
     @classmethod
     def setUpClass(cls):

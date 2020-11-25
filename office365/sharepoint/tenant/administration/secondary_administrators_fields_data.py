@@ -13,13 +13,5 @@ class SecondaryAdministratorsFieldsData(ClientValue):
         """
         super().__init__()
         self.secondaryAdministratorEmails = ClientValueCollection(str, emails)
-        self.secondaryAdministratorLoginNames = names
+        self.secondaryAdministratorLoginNames = ClientValueCollection(str, names)
         self.siteId = site_id
-
-    #@property
-    #def entity_type_name(self):
-    #    return "Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsFieldsData"
-
-
-
-

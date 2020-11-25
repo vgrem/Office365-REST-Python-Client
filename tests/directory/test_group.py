@@ -51,7 +51,7 @@ class TestGraphGroup(GraphTestCase):
 
     @unittest.skipIf(directory_quota_exceeded, "Skipping, group was not be created")
     def test4_add_group_owner(self):
-        test_account_name = settings.get('test_accounts')[0]
+        test_account_name = settings.get('test_account_name')
         users = self.client.users.filter(f"mail eq '{test_account_name}'").get().execute_query()
         self.assertEqual(len(users), 1)
 

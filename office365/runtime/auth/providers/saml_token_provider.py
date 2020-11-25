@@ -2,9 +2,6 @@ import os
 import uuid
 from xml.etree import ElementTree
 import xml.dom.minidom as minidom
-from urllib.parse import urlparse
-
-from datetime import datetime, timezone, timedelta
 
 
 import requests
@@ -112,18 +109,14 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
     def acquire_service_token_from_adfs(self, adfs_url, username, password):
         logger = self.logger(self.acquire_service_token_from_adfs.__name__)
 
-        now = datetime.now(tz=timezone.utc)
-        created = now.astimezone(timezone.utc).isoformat('T')[:-9]+'Z'
-        expires = (now + timedelta(minutes=10)).astimezone(timezone.utc).isoformat('T')[:-9]+'Z'
-
         payload = self._prepare_request_from_template('FederatedSAML.xml', {
             'auth_url': adfs_url,
             'message_id': str(uuid.uuid4()),
             'username': username,
             'password': password,
-            'created': created,
-            'expires': expires,
-            'issuer': self.__sts_profile.federationTokenIssuer
+            'created': self.__sts_profile.created,
+            'expires': self.__sts_profile.expires,
+            'issuer': self.__sts_profile.tokenIssuer
         })
 
         response = requests.post(adfs_url, data=payload,
@@ -132,15 +125,13 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
         assertion_node = dom.getElementsByTagNameNS("urn:oasis:names:tc:SAML:1.0:assertion", 'Assertion')[0].toxml()
 
         try:
-            self.tenant = urlparse(self.__sts_profile.authorityUrl).netloc
-
             payload = self._prepare_request_from_template('RST2.xml', {
-                'auth_url': self.tenant,
+                'auth_url': self.__sts_profile.tenant,
                 'serviceTokenUrl': self.__sts_profile.security_token_service_url,
                 'assertion_node': assertion_node
             })
 
-            # 3. get token
+            # 3. get security token
             response = requests.post(self.__sts_profile.security_token_service_url, data=payload,
                                      headers={'Content-Type': 'application/soap+xml'})
             token = self._process_service_token_response(response)
@@ -154,6 +145,7 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
     def _acquire_service_token(self, username, password, service_target=None, service_policy=None):
         """Retrieve service token"""
         logger = self.logger(self._acquire_service_token.__name__)
+
         payload = self._prepare_request_from_template('SAML.xml', {
             'auth_url': self.__sts_profile.authorityUrl,
             'username': username,
@@ -161,7 +153,7 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
             'message_id': str(uuid.uuid4()),
             'created': self.__sts_profile.created,
             'expires': self.__sts_profile.expires,
-            'issuer': self.__sts_profile.federationTokenIssuer
+            'issuer': self.__sts_profile.tokenIssuer
         })
         logger.debug_secrets('options: %s', payload)
         response = requests.post(self.__sts_profile.security_token_service_url, data=payload,
@@ -217,14 +209,11 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
         logger.debug_secrets("session: %s\nsession.post(%s, data=%s)", session, self.__sts_profile.signin_page_url,
                              security_token)
         if not federated:
-            self._auth_cookies['FedAuth'] = None
-            self._auth_cookies['rtFa'] = None
             session.post(self.__sts_profile.signin_page_url, data=security_token,
                          headers={'Content-Type': 'application/x-www-form-urlencoded'})
         else:
-            self._auth_cookies['SPOIDCRL'] = None
-            idcrlEndpoint = "https://{}/_vti_bin/idcrl.svc/".format(self.tenant)
-            session.get(idcrlEndpoint,
+            idcrl_endpoint = "https://{}/_vti_bin/idcrl.svc/".format(self.__sts_profile.tenant)
+            session.get(idcrl_endpoint,
                         headers={
                             'User-Agent': 'Office365 Python Client',
                             'X-IDCRL_ACCEPTED': 't',
@@ -238,8 +227,7 @@ class SamlTokenProvider(BaseTokenProvider, office365.logger.LoggerContext):
                 self.__sts_profile.signin_page_url)
             logger.error(self.error)
             return False
-        for name in self._auth_cookies.keys():
-            self._auth_cookies[name] = cookies[name]
+        self._auth_cookies = cookies
         return True
 
     @staticmethod

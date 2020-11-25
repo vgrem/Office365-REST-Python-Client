@@ -31,7 +31,7 @@ class Tenant(BaseEntity):
         self.context.add_query(qry)
         return return_type
 
-    def set_site_secondary_administrators(self, site_id, emails, names=None):
+    def set_site_secondary_administrators(self, site_id, emails=None, names=None):
         """
         Sets site collection administrators
 

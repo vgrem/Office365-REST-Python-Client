@@ -15,7 +15,7 @@ class TestGraphMail(GraphTestCase):
                 "ToRecipients": [
                     {
                         "EmailAddress": {
-                            "Address": settings.get('test_accounts')[0]
+                            "Address": settings.get('test_account_name')
                         }
                     }
                 ],
