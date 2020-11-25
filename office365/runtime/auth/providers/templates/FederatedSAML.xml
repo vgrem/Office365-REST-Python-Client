@@ -4,11 +4,21 @@
         <wsa:Action s:mustUnderstand="1">http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue</wsa:Action>
         <wsa:To s:mustUnderstand="1">{auth_url}</wsa:To>
         <wsa:MessageID>{message_id}</wsa:MessageID>
+        <ps:AuthInfo xmlns:ps="http://schemas.microsoft.com/Passport/SoapServices/PPCRL" Id="PPAuthInfo">
+            <ps:HostingApp>Managed IDCRL</ps:HostingApp>
+            <ps:BinaryVersion>6</ps:BinaryVersion>
+            <ps:UIVersion>1</ps:UIVersion>
+            <ps:Cookies></ps:Cookies>
+            <ps:RequestParams>AQAAAAIAAABsYwQAAAAxMDMz</ps:RequestParams>
+        </ps:AuthInfo>
         <wsse:Security>
             <wsse:UsernameToken wsu:Id="user">
                 <wsse:Username>{username}</wsse:Username>
                 <wsse:Password>{password}</wsse:Password>
             </wsse:UsernameToken>
+            <wsu:Timestamp Id="Timestamp">
+                <wsu:Created>{created}</wsu:Created><wsu:Expires>{expires}</wsu:Expires>
+            </wsu:Timestamp>
         </wsse:Security>
     </s:Header>
     <s:Body>
@@ -16,7 +26,7 @@
             <wst:RequestType>http://schemas.xmlsoap.org/ws/2005/02/trust/Issue</wst:RequestType>
             <wsp:AppliesTo>
                 <wsa:EndpointReference>
-                    <wsa:Address>urn:federation:MicrosoftOnline</wsa:Address>
+                    <wsa:Address>{issuer}</wsa:Address>
                 </wsa:EndpointReference>
             </wsp:AppliesTo>
             <wst:KeyType>http://schemas.xmlsoap.org/ws/2005/05/identity/NoProofKey</wst:KeyType>
