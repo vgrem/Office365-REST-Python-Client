@@ -3,7 +3,7 @@ import uuid
 import adal
 from settings import settings
 
-from office365.directory.groupProfile import GroupProfile
+from office365.directory.group_profile import GroupProfile
 from office365.graph_client import GraphClient
 
 

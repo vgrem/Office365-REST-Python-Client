@@ -23,14 +23,13 @@ class TestSharePointClient(TestCase):
     def test1_connect_with_app_principal(self):
         credentials = ClientCredential(settings.get('client_credentials').get('client_id'),
                                        settings.get('client_credentials').get('client_secret'))
-        ctx = ClientContext.connect_with_credentials(settings['url'], credentials)
-        self.assertIsInstance(ctx.authentication_context.provider, ACSTokenProvider)
-        self.assertIsInstance(ctx.authentication_context.provider.token, TokenResponse)
-        self.assertTrue(ctx.authentication_context.provider.token.is_valid)
+        ctx = ClientContext(settings['url']).with_credentials(credentials)
+        self.assertIsInstance(ctx.authentication_context._provider, ACSTokenProvider)
+        # self.assertIsInstance(ctx.authentication_context.provider.token, TokenResponse)
 
     def test2_connect_with_user_credentials(self):
-        ctx = ClientContext.connect_with_credentials(settings['url'], user_credentials)
-        self.assertIsInstance(ctx.authentication_context.provider, SamlTokenProvider)
+        ctx = ClientContext(settings['url']).with_credentials(user_credentials)
+        self.assertIsInstance(ctx.authentication_context._provider, SamlTokenProvider)
 
     def test3_init_from_url(self):
         ctx = ClientContext.from_url(settings['url']).with_credentials(user_credentials)

@@ -5,7 +5,7 @@ from settings import settings
 from tests.graph_case import GraphTestCase
 
 from office365.directory.group import Group
-from office365.directory.groupProfile import GroupProfile
+from office365.directory.group_profile import GroupProfile
 from office365.directory.user import User
 from office365.runtime.client_request_exception import ClientRequestException
 
@@ -51,8 +51,8 @@ class TestGraphGroup(GraphTestCase):
 
     @unittest.skipIf(directory_quota_exceeded, "Skipping, group was not be created")
     def test4_add_group_owner(self):
-        test_account_name = settings.get('test_account_name')
-        users = self.client.users.filter(f"mail eq '{test_account_name}'").get().execute_query()
+        account_name = settings.get('first_account_name')
+        users = self.client.users.filter(f"mail eq '{account_name}'").get().execute_query()
         self.assertEqual(len(users), 1)
 
         owner_id = users[0].id

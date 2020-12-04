@@ -7,7 +7,5 @@ ctx = ClientContext(settings["url"]).with_credentials(
                                              UserCredential(settings.get('user_credentials').get('username'),
                                                             settings.get('user_credentials').get('password')))
 
-web = ctx.web
-ctx.load(web)
-ctx.execute_query()
+web = ctx.web.get().execute_query()
 print(web.properties["Url"])

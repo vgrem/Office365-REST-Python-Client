@@ -1,57 +1,25 @@
-import requests
-
-from office365.runtime.auth.base_token_provider import BaseTokenProvider
-from office365.runtime.auth.token_response import TokenResponse
+from office365.runtime.auth.authentication_provider import AuthenticationProvider
 
 
-class OAuthTokenProvider(BaseTokenProvider):
+class OAuthTokenProvider(AuthenticationProvider):
     """ OAuth token provider for AAD"""
 
-    def __init__(self, tenant):
-        self.authority_url = "https://login.microsoftonline.com/{tenant}".format(tenant=tenant)
-        self.version = "v1.0"
-        self.error = None
-        self.token = TokenResponse()
+    def __init__(self, token_func=None):
+        self._error = None
+        self._token_func = token_func
+        self._cached_token = None
 
-    def acquire_token(self, parameters):
-        try:
-            token_url = "{authority}/oauth2/token".format(authority=self.authority_url)
-            response = requests.post(url=token_url,
-                                     headers={'Content-Type': 'application/x-www-form-urlencoded'},
-                                     data=parameters)
-            self.token = TokenResponse.from_json(response.json())
-            return self.token.is_valid
-        except requests.exceptions.RequestException as e:
-            self.error = "Error: {0}".format(e)
-            return False
-
-    def is_authenticated(self):
-        return self.token and self.token.is_valid
-
-    def get_authorization_header(self):
-        return '{token_type} {access_token}'.format(
-            token_type=self.token.tokenType,
-            access_token=self.token.accessToken)
-
-    def acquire_token_password_type(self, resource, client_id, user_credentials, scope):
+    def authenticate_request(self, request):
         """
-        Gets a token for a given resource via user credentials
-
-        :param list[str] scope:
-        :param str resource:
-        :param str client_id:
-        :param UserCredential user_credentials:
-        :return: bool
+        :type request: office365.runtime.http.request_options.RequestOptions
         """
-        token_parameters = {
-            'grant_type': 'password',
-            'client_id': client_id,
-            'username': user_credentials.userName,
-            'password': user_credentials.password,
-            'scope': " ".join(scope),
-            'resource': resource
-        }
-        return self.acquire_token(token_parameters)
+        if self._cached_token is None:
+            self._cached_token = self._token_func()
+        request.set_header('Authorization', self._get_authorization_header())
+
+    def _get_authorization_header(self):
+        return '{token_type} {access_token}'.format(token_type=self._cached_token.tokenType,
+                                                    access_token=self._cached_token.accessToken)
 
     def get_last_error(self):
-        return self.error
+        return self._error

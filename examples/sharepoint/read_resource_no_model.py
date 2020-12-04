@@ -8,9 +8,8 @@ from office365.sharepoint.client_context import ClientContext
 
 if __name__ == '__main__':
     """Demonstrates how to construct and submit requests without model involved"""
-    ctx = ClientContext.connect_with_credentials(settings['url'],
-                                                 UserCredential(settings['user_credentials']['username'],
-                                                                settings['user_credentials']['password']))
+    ctx = ClientContext(settings['url']).with_credentials(UserCredential(settings['user_credentials']['username'],
+                                                                         settings['user_credentials']['password']))
 
     request = RequestOptions("{0}/_api/web/".format(settings['url']))
     response = ctx.execute_request_direct(request)

@@ -14,7 +14,7 @@ class SPTestCase(TestCase):
     client_secret = settings.get('client_credentials').get('client_secret')
     client_credentials = ClientCredential(client_id, client_secret)
     site_url = settings.get('url')
-    test_user_name = settings.get('test_account_name')
+    test_user_name = settings.get('first_account_name')
 
     @classmethod
     def setUpClass(cls):

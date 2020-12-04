@@ -5,9 +5,8 @@ from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.search.searchRequest import SearchRequest
 from office365.sharepoint.search.searchService import SearchService
 
-ctx = ClientContext.connect_with_credentials(settings['url'],
-                                             UserCredential(settings['user_credentials']['username'],
-                                                            settings['user_credentials']['password']))
+ctx = ClientContext(settings['url']).with_credentials(UserCredential(settings['user_credentials']['username'],
+                                                                     settings['user_credentials']['password']))
 
 search = SearchService(ctx)
 request = SearchRequest("IsDocument:1")

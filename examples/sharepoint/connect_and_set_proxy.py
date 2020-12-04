@@ -9,9 +9,8 @@ def set_proxy(request):
     request.proxies = proxies
 
 
-ctx = ClientContext.connect_with_credentials(settings['url'],
-                                             ClientCredential(settings['client_credentials']['client_id'],
-                                                              settings['client_credentials']['client_secret']))
+ctx = ClientContext(settings['url']).with_credentials(ClientCredential(settings['client_credentials']['client_id'],
+                                                                       settings['client_credentials']['client_secret']))
 
 ctx.pending_request().beforeExecute += set_proxy
 

@@ -3,7 +3,7 @@ import uuid
 from tests.graph_case import GraphTestCase
 
 from office365.directory.group import Group
-from office365.directory.groupProfile import GroupProfile
+from office365.directory.group_profile import GroupProfile
 
 
 class TestGraphTeam(GraphTestCase):

@@ -12,7 +12,7 @@ from office365.sharepoint.userprofiles.profileLoader import ProfileLoader
 
 class TestUserProfile(TestCase):
     profile_loader = None  # type: ProfileLoader
-    target_account_name = settings.get('test_account_name')
+    target_account_name = settings.get('first_account_name')
 
     @classmethod
     def setUpClass(cls):

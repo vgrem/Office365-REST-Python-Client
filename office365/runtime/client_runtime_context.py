@@ -7,13 +7,10 @@ from office365.runtime.queries.read_entity_query import ReadEntityQuery
 
 class ClientRuntimeContext(object):
 
-    def __init__(self, auth_context=None):
+    def __init__(self):
         """
-        Client runtime context for services
-
-        :type auth_context: office365.runtime.auth.authentication_context.AuthenticationContext or None
+        Client runtime context
         """
-        self._auth_context = auth_context
 
     @property
     def current_query(self):
@@ -52,18 +49,19 @@ class ClientRuntimeContext(object):
     def service_root_url(self):
         pass
 
+    @abc.abstractmethod
+    def authenticate_request(self, request):
+        """
+        :type request: office365.runtime.http.request_options.RequestOptions
+        """
+        pass
+
     @property
     def has_pending_request(self):
         return len(self.pending_request().queries) > 0
 
     def build_request(self):
         return self.pending_request().build_request()
-
-    def authenticate_request(self, request):
-        """
-        :type request: office365.runtime.http.request_options.RequestOptions
-        """
-        self._auth_context.authenticate_request(request)
 
     def load(self, client_object, properties_to_retrieve=None):
         """Prepare retrieval query

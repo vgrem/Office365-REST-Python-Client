@@ -1,4 +1,4 @@
-from office365.runtime.auth.network_credential_context import NetworkCredentialContext
+from office365.runtime.auth.authentication_provider import AuthenticationProvider
 
 try:
     from requests_ntlm import HttpNtlmAuth
@@ -6,7 +6,7 @@ except ImportError:
     raise ImportError("To use NTLM authentication the package 'requests_ntlm' needs to be installed.")
 
 
-class NTLMAuthenticationContext(NetworkCredentialContext):
+class NtlmProvider(AuthenticationProvider):
 
     def __init__(self, username, password):
         """
@@ -19,8 +19,8 @@ class NTLMAuthenticationContext(NetworkCredentialContext):
             :type username: str
             :type password: str
         """
-        super(NTLMAuthenticationContext, self).__init__(username, password)
-        self.auth = HttpNtlmAuth(*self.userCredentials)
+        super(NtlmProvider, self).__init__()
+        self.auth = HttpNtlmAuth(username, password)
 
-    def authenticate_request(self, request_options):
-        request_options.auth = self.auth
+    def authenticate_request(self, request):
+        request.auth = self.auth

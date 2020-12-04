@@ -1,12 +1,12 @@
 from office365.directory.directoryObject import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.onedrive.drive import Drive
-from office365.outlookservices.contact_collection import ContactCollection
-from office365.outlookservices.event_collection import EventCollection
-from office365.outlookservices.messageCollection import MessageCollection
+from office365.outlook.contact_collection import ContactCollection
+from office365.outlook.event_collection import EventCollection
+from office365.outlook.message_collection import MessageCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
-from office365.teams.teamCollection import TeamCollection
+from office365.teams.team_collection import TeamCollection
 
 
 class User(DirectoryObject):

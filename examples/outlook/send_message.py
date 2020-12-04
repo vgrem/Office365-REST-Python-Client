@@ -26,7 +26,7 @@ message_json = {
         "ToRecipients": [
             {
                 "EmailAddress": {
-                    "Address": settings.get('test_account_name')
+                    "Address": settings.get('first_account_name')
                 }
             }
         ]
@@ -34,6 +34,6 @@ message_json = {
     "SaveToSentItems": "false"
 }
 
-user_name = settings.get('test_account_name')
+user_name = settings.get('first_account_name')
 client.users[user_name].send_mail(message_json)
 client.execute_query()

@@ -6,11 +6,5 @@ from office365.sharepoint.client_context import ClientContext
 credentials = ClientCredential(settings.get('client_credentials').get('client_id'),
                                settings.get('client_credentials').get('client_secret'))
 ctx = ClientContext(settings['url']).with_credentials(credentials)
-if not ctx.authentication_context.acquire_token_func():
-    print("Acquire token failed")
-
-
-target_web = ctx.web
-ctx.load(target_web)
-ctx.execute_query()
+target_web = ctx.web.get().execute_query()
 print(target_web.url)
