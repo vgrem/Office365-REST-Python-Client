@@ -1,5 +1,4 @@
 import copy
-
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.providers.saml_token_provider import resolve_base_url
@@ -56,20 +55,33 @@ class ClientContext(ClientRuntimeContext):
         ctx.after_execute(_init_context_for_web)
         return ctx
 
-    def with_client_certificate(self, client_id, thumbprint, cert_path):
+    def with_client_certificate(self, tenant, client_id, thumbprint, cert_path):
         """Creates authenticated SharePoint context via certificate credentials
 
+        :param str tenant: Tenant name
         :param str cert_path: Path to A PEM encoded certificate private key.
         :param str thumbprint: Hex encoded thumbprint of the certificate.
         :param str client_id: The OAuth client id of the calling application.
         """
-        pass
+        self.authentication_context.with_client_certificate(tenant, client_id, thumbprint, cert_path)
+        return self
 
     def with_access_token(self, token_func):
         """
         :type token_func: () -> TokenResponse
         """
         self.authentication_context.register_provider(token_func)
+        return self
+
+    def with_user_credentials(self, username, password, allow_ntlm=False):
+        """
+        Assigns credentials
+
+        :type username: str
+        :type password: str
+        :type allow_ntlm: bool
+        """
+        self.authentication_context.register_provider(UserCredential(username, password), allow_ntlm=allow_ntlm)
         return self
 
     def with_credentials(self, credentials):

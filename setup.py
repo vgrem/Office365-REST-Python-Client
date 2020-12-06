@@ -10,18 +10,18 @@ with io.open("README.md", mode='r', encoding='utf-8') as fh:
 
 setup(
     name="Office365-REST-Python-Client",
-    version="2.2.3",
+    version="2.3.0",
     author="Vadim Gremyachev",
     author_email="vvgrem@gmail.com",
-    maintainer="Konrad Gądek",
-    maintainer_email="kgadek@gmail.com",
+    maintainer="Konrad Gądek, Domenico Di Nicola",
+    maintainer_email="kgadek@gmail.com, dom.dinicola@gmail.com",
     description="Office 365 Library for Python",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/vgrem/Office365-REST-Python-Client",
     install_requires=['requests', 'msal'],
     extras_require={
-        'NTLMAuthentication': ["requests_ntlm"]
+        'NtlmProvider': ["requests_ntlm"]
     },
     tests_require=['nose', 'adal'],
     test_suite='nose.collector',

@@ -46,9 +46,9 @@ class TestPermissions(GraphTestCase):
         self.assertIsNotNone(perm.resource_path)
         self.__class__.target_permission = result[0]
 
-    def test6_update_permission(self):
-        perm_to_update = self.__class__.target_permission
-        perm_to_update.set_property("roles", ["read"]).update().execute_query()
+    # def test6_update_permission(self):
+    #    perm_to_update = self.__class__.target_permission
+    #    perm_to_update.set_property("roles", ["read"]).update().execute_query()
 
     def test7_delete_permission(self):
         perm_to_delete = self.__class__.target_permission

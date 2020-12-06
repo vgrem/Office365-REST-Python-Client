@@ -44,9 +44,32 @@ The list of supported API versions:
 
 The following auth flows are supported:
 
-- app principals flow: `AuthenticationContext.ctx_auth.acquire_token_for_app(client_id, client_secret)`  (refer [Granting access using SharePoint App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs) for a details) 
-- user credentials flow:`AuthenticationContext.ctx_auth.acquire_token_for_user(username, password)`
-- certificate credentials flow `ClientContext.connect_with_certificate(site_url, client_id,thumbprint, certificate_path)`
+- app principals flow: 
+  `ClientContext.with_credentials(client_credentials)`
+  
+  Usage:
+  ``` 
+  client_credentials = ClientCredential('{client_id}'),'{client_secret}')
+  ctx = ClientContext('{url}').with_credentials(client_credentials)
+  ```
+  Documentation: refer [Granting access using SharePoint App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs) for a details  
+  
+  Example: [connect_with_app_principal.py](Office365-REST-Python-Client/blob/master/examples/sharepoint/connect_with_app_principal.py)
+  
+- user credentials flow: `ClientContext.with_credentials(user_credentials)`
+
+  Usage:
+  ``` 
+  user_credentials = UserCredential('{username}'),'{password}')
+  ctx = ClientContext('{url}').with_credentials(user_credentials)
+  ```
+  Example: [connect_with_user_credential.py](Office365-REST-Python-Client/blob/master/examples/sharepoint/connect_with_user_credential.py)
+  
+- certificate credentials flow: `ClientContext.with_certificate(tenant, client_id, thumbprint, cert_path)`
+
+  Documentation: [Granting access via Azure AD App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread)  
+  
+  Example: [connect_with_client_certificate.py](Office365-REST-Python-Client/blob/master/examples/sharepoint/connect_with_client_certificate.py)
 
 #### Examples
  
@@ -95,6 +118,19 @@ print("Web title: {0}".format(web_title))
 ```
 
 
+The list of examples:
+
+- Working with files
+  - [download a file](Office365-REST-Python-Client/blob/master/examples/sharepoint/files/download_file.py) 
+  - [upload a file](Office365-REST-Python-Client/blob/master/examples/sharepoint/files/upload_file.py)
+
+- Working with lists and list items
+  -  [create a list item](Office365-REST-Python-Client/blob/master/examples/sharepoint/lists_and_items/data_generator.py)
+  -  [read a list item](Office365-REST-Python-Client/blob/master/examples/sharepoint/lists_and_items/read_large_list.py)   
+  -  [update a list item](Office365-REST-Python-Client/blob/master/examples/sharepoint/lists_and_items/update_items_batch.py)
+  -  delete a list item 
+  
+
 # Working with Outlook API
 
 The list of supported APIs:
@@ -107,7 +143,7 @@ Since Outlook REST APIs are available in both Microsoft Graph and the Outlook AP
 the following clients are available:
 
 - `GraphClient` which targets Outlook API `v2.0` version (*preferable* nowadays, refer [transition to Microsoft Graph-based Outlook REST API](https://docs.microsoft.com/en-us/outlook/rest/compare-graph-outlook) for a details)   
-- `OutlookClient` which targets Outlook API `v1.0` version (not recommended for usage since `v1.0` version is being deprecated.)
+~~- `OutlookClient` which targets Outlook API `v1.0` version (not recommended for usage since `v1.0` version is being deprecated.)~~
 
 
 #### Authentication
