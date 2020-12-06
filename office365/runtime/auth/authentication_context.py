@@ -2,7 +2,6 @@ import msal
 
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
-from office365.runtime.auth.providers.ntlm_provider import NtlmProvider
 from office365.runtime.auth.providers.oauth_token_provider import OAuthTokenProvider
 from office365.runtime.auth.providers.saml_token_provider import SamlTokenProvider
 from office365.runtime.auth.token_response import TokenResponse
@@ -53,6 +52,7 @@ class AuthenticationContext(object):
         elif isinstance(credentials_or_token_func, UserCredential):
             allow_ntlm = kwargs.get('allow_ntlm', False)
             if allow_ntlm:
+                from office365.runtime.auth.providers.ntlm_provider import NtlmProvider
                 self._provider = NtlmProvider(credentials_or_token_func.userName,
                                               credentials_or_token_func.password)
             else:

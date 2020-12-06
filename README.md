@@ -54,7 +54,7 @@ The following auth flows are supported:
   ```
   Documentation: refer [Granting access using SharePoint App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs) for a details  
   
-  Example: [connect_with_app_principal.py](Office365-REST-Python-Client/blob/master/examples/sharepoint/connect_with_app_principal.py)
+  Example: [connect_with_app_principal.py](examples/sharepoint/connect_with_app_principal.py)
   
 - user credentials flow: `ClientContext.with_credentials(user_credentials)`
 
@@ -63,13 +63,13 @@ The following auth flows are supported:
   user_credentials = UserCredential('{username}'),'{password}')
   ctx = ClientContext('{url}').with_credentials(user_credentials)
   ```
-  Example: [connect_with_user_credential.py](Office365-REST-Python-Client/blob/master/examples/sharepoint/connect_with_user_credential.py)
+  Example: [connect_with_user_credential.py](examples/sharepoint/connect_with_user_credential.py)
   
 - certificate credentials flow: `ClientContext.with_certificate(tenant, client_id, thumbprint, cert_path)`
 
   Documentation: [Granting access via Azure AD App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread)  
   
-  Example: [connect_with_client_certificate.py](Office365-REST-Python-Client/blob/master/examples/sharepoint/connect_with_client_certificate.py)
+  Example: [connect_with_client_certificate.py](examples/sharepoint/connect_with_client_certificate.py)
 
 #### Examples
  
@@ -121,13 +121,13 @@ print("Web title: {0}".format(web_title))
 The list of examples:
 
 - Working with files
-  - [download a file](Office365-REST-Python-Client/blob/master/examples/sharepoint/files/download_file.py) 
-  - [upload a file](Office365-REST-Python-Client/blob/master/examples/sharepoint/files/upload_file.py)
+  - [download a file](examples/sharepoint/files/download_file.py) 
+  - [upload a file](examples/sharepoint/files/upload_file.py)
 
 - Working with lists and list items
-  -  [create a list item](Office365-REST-Python-Client/blob/master/examples/sharepoint/lists_and_items/data_generator.py)
-  -  [read a list item](Office365-REST-Python-Client/blob/master/examples/sharepoint/lists_and_items/read_large_list.py)   
-  -  [update a list item](Office365-REST-Python-Client/blob/master/examples/sharepoint/lists_and_items/update_items_batch.py)
+  -  [create a list item](examples/sharepoint/lists_and_items/data_generator.py)
+  -  [read a list item](examples/sharepoint/lists_and_items/read_large_list.py)   
+  -  [update a list item](examples/sharepoint/lists_and_items/update_items_batch.py)
   -  delete a list item 
   
 
