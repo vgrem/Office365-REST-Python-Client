@@ -29,6 +29,8 @@ class ClientContext(ClientRuntimeContext):
             base_url = base_url[:len(base_url) - 1]
         if auth_context is None:
             self._auth_context = AuthenticationContext(url=base_url)
+        else:
+            self._auth_context = auth_context
         super(ClientContext, self).__init__()
         self.__web = None
         self.__site = None
