@@ -240,7 +240,6 @@ class Folder(BaseEntity):
     def set_property(self, name, value, persist_changes=True):
         super(Folder, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
-        # if self._resource_path is None:
         if name == "ServerRelativeUrl":
             self._resource_path = ResourcePathServiceOperation("getFolderByServerRelativeUrl", [value],
                                                                ResourcePath("Web"))

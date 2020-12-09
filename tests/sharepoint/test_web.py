@@ -129,9 +129,18 @@ class TestSharePointWeb(SPTestCase):
         templates = self.client.web.get_custom_list_templates().execute_query()
         self.assertGreaterEqual(len(templates), 0)
 
-    def test20_ensure_folder_path(self):
+    def test_20_ensure_folder_path(self):
         folder_path = "/Shared Documents/Archive/2020/12"
         folder_new_nested = self.client.web.ensure_folder_path(folder_path).execute_query()
         folder_new_nested = self.client.web.get_folder_by_server_relative_url(folder_path).get().execute_query()
         self.assertTrue(folder_new_nested.properties["Exists"])
 
+    def test_21_get_context_web_theme_data(self):
+        result = Web.get_context_web_theme_data(self.client)
+        self.client.execute_query()
+        self.assertIsNotNone(result.value)
+
+    def test_22_get_regional_datetime_schema(self):
+        result = self.client.web.get_regional_datetime_schema()
+        self.client.execute_query()
+        self.assertIsNotNone(result.value)

@@ -269,6 +269,10 @@ class List(SecurableObject):
         """Sets the description for the list."""
         self.set_property('Description', val)
 
+    @property
+    def parent_web_path(self):
+        return self.properties.get('ParentWebPath', None)
+
     def set_property(self, name, value, persist_changes=True):
         super(List, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path

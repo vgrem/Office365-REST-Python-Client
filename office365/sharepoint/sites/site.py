@@ -1,9 +1,10 @@
-from office365.runtime.client_object import ClientObject
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.change_collection import ChangeCollection
+from office365.sharepoint.features.feature_collection import FeatureCollection
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.recyclebin.recycleBinItemCollection import RecycleBinItemCollection
@@ -12,8 +13,8 @@ from office365.sharepoint.webs.web import Web
 from office365.sharepoint.webs.web_template_collection import WebTemplateCollection
 
 
-class Site(ClientObject):
-    """Represents a collection of sites in a Web application, including a top-level website and all its subsites."""
+class Site(BaseEntity):
+    """Represents a collection of sites in a Web application, including a top-level website and all its sub sites."""
 
     def __init__(self, context):
         super(Site, self).__init__(context, ResourcePath("Site", None))
@@ -23,6 +24,7 @@ class Site(ClientObject):
 
         def _site_loaded():
             SPHSite.is_valid_home_site(self.context, self.url, result)
+
         self.ensure_property("Url", _site_loaded)
         return result
 
@@ -31,6 +33,7 @@ class Site(ClientObject):
 
         def _site_loaded():
             self.result = SPHSite.set_as_home_site(self.context, self.url, result)
+
         self.ensure_property("Url", _site_loaded)
         return result
 
@@ -165,3 +168,10 @@ class Site(ClientObject):
         return self.properties.get('RecycleBin',
                                    RecycleBinItemCollection(self.context,
                                                             ResourcePath("RecycleBin", self.resource_path)))
+
+    @property
+    def features(self):
+        """Get features"""
+        return self.properties.get('Features',
+                                   FeatureCollection(self.context,
+                                                     ResourcePath("Features", self.resource_path), self))

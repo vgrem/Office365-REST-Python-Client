@@ -24,7 +24,7 @@ class TestSPList(SPTestCase):
         self.assertFalse(default_lib.has_unique_role_assignments)
 
     def test3_has_library_unique_perms_chaining(self):
-        default_lib = self.client.web.default_document_library()\
+        default_lib = self.client.web.default_document_library() \
             .select(["HasUniqueRoleAssignments"]).get().execute_query()
         self.assertFalse(default_lib.has_unique_role_assignments)
 
@@ -78,7 +78,7 @@ class TestSPList(SPTestCase):
         self.assertEqual(self.target_list_title, list_to_read.properties['Title'])
 
     def test_10_read_list_by_id(self):
-        list_to_read = self.client.web.lists.get_by_id(self.__class__.target_list.properties['Id'])\
+        list_to_read = self.client.web.lists.get_by_id(self.__class__.target_list.properties['Id']) \
             .get().execute_query()
         self.assertEqual(self.target_list.properties['Id'], list_to_read.properties['Id'])
 
@@ -89,8 +89,7 @@ class TestSPList(SPTestCase):
     def test_12_update_list(self):
         list_to_update = self.__class__.target_list
         self.target_list_title += "_updated"
-        list_to_update.set_property('Title', self.target_list_title)
-        list_to_update.update().execute_query()
+        list_to_update.set_property('Title', self.target_list_title).update().execute_query()
 
         result = self.client.web.lists.filter("Title eq '{0}'".format(self.target_list_title))
         self.client.load(result)
@@ -119,3 +118,7 @@ class TestSPList(SPTestCase):
 
         result = self.client.web.lists.filter("Title eq '{0}'".format(list_title)).get().execute_query()
         self.assertEqual(len(result), 0)
+
+    def test_16_get_list_using_path(self):
+        pages_list = self.client.web.get_list_using_path("SitePages").execute_query()
+        self.assertIsNotNone(pages_list.resource_path)

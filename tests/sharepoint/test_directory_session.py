@@ -4,7 +4,7 @@ from settings import settings
 
 from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.directory.directorySession import DirectorySession
+from office365.sharepoint.directory.directory_session import DirectorySession
 
 
 class TestDirectorySession(TestCase):

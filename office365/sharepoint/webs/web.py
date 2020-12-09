@@ -1,5 +1,3 @@
-import os
-
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.client_query import ClientQuery
@@ -20,6 +18,7 @@ from office365.sharepoint.lists.document_library_information import DocumentLibr
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.list_collection import ListCollection
 from office365.sharepoint.lists.list_template_collection import ListTemplateCollection
+from office365.sharepoint.navigation.navigation import Navigation
 from office365.sharepoint.permissions.basePermissions import BasePermissions
 from office365.sharepoint.permissions.roleDefinitionCollection import RoleDefinitionCollection
 from office365.sharepoint.permissions.securable_object import SecurableObject
@@ -120,6 +119,21 @@ class Web(SecurableObject):
                 result.add_child(web)
             self._load_sub_webs_inner(sub_webs, result)
 
+    def get_list_using_path(self, decoded_url):
+        return_list = List(self.context)
+        self.lists.add_child(return_list)
+        from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
+        res_path = SPResPath(decoded_url)
+        qry = ServiceOperationQuery(self, "GetListUsingPath", res_path, None, None, return_list)
+        self.context.add_query(qry)
+        return return_list
+
+    def get_regional_datetime_schema(self):
+        return_type = ClientResult(str)
+        qry = ServiceOperationQuery(self, "GetRegionalDateTimeSchema", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def update(self):
         """Update a Web resource"""
         qry = UpdateEntityQuery(self)
@@ -132,6 +146,18 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         self.remove_from_parent_collection()
         return self
+
+    @staticmethod
+    def get_context_web_theme_data(context):
+        """
+
+        :type context: office365.sharepoint.client_context.ClientContext
+        """
+        result = ClientResult(str)
+        qry = ServiceOperationQuery(context.web, "GetContextWebThemeData", None, None, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
 
     @staticmethod
     def create_anonymous_link(context, url, is_edit_link):
@@ -667,6 +693,13 @@ class Web(SecurableObject):
         return self.properties.get('RecycleBin',
                                    RecycleBinItemCollection(self.context,
                                                             ResourcePath("RecycleBin", self.resource_path)))
+
+    @property
+    def navigation(self):
+        """Gets a web site navigation."""
+        return self.properties.get('Navigation',
+                                   Navigation(self.context,
+                                              ResourcePath("Navigation", self.resource_path)))
 
     @property
     def root_folder(self):

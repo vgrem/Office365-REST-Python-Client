@@ -7,7 +7,7 @@ class DocumentSharingManager(BaseEntity):
     """Specifies document sharing related methods."""
 
     def get_role_definition(self, role):
-        """his method returns a role definition in the current web that is associated with a given Role
+        """This method returns a role definition in the current web that is associated with a given Role
         (section 3.2.5.188) value.
 
         :param int role: A Role value for which to obtain the associated role definition object.
