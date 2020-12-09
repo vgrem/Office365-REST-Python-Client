@@ -25,12 +25,16 @@ class TestNavigation(SPTestCase):
         self.assertIsNotNone(new_node.resource_path)
         self.__class__.target_node = new_node
 
-    def test_3_get_navigation_node(self):
+    def test_3_get_navigation_node_by_id(self):
         node_id = self.__class__.target_node.properties.get('Id')
         existing_node = self.client.web.navigation.quick_launch.get_by_id(node_id).get().execute_query()
         self.assertIsNotNone(existing_node.resource_path)
 
-    def test_4_delete_navigation_node(self):
+    def test_4_get_navigation_node_by_index(self):
+        existing_node = self.client.web.navigation.quick_launch.get_by_index(0).get().execute_query()
+        self.assertIsNotNone(existing_node.resource_path)
+
+    def test_5_delete_navigation_node(self):
         node_to_del = self.__class__.target_node
         node_to_del.delete_object().execute_query()
 

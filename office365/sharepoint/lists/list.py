@@ -12,11 +12,13 @@ from office365.sharepoint.files.checkedOutFileCollection import CheckedOutFileCo
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.forms.form_collection import FormCollection
 from office365.sharepoint.listitems.caml.caml_query import CamlQuery
+from office365.sharepoint.listitems.listItem_creation_information_using_path import ListItemCreationInformationUsingPath
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.listitems.listItem_collection import ListItemCollection
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.views.view import View
 from office365.sharepoint.views.view_collection import ViewCollection
+from office365.sharepoint.webhooks.subscription_collection import SubscriptionCollection
 
 
 class List(SecurableObject):
@@ -110,6 +112,22 @@ class List(SecurableObject):
             self.rootFolder.ensure_property("ServerRelativeUrl", _resolve_folder_url)
         return item
 
+    def add_item_using_path(self, leaf_name, object_type, folder_url):
+        """
+        :type leaf_name: str
+        :type object_type: int
+        :type folder_url: str
+        """
+        from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
+        parameters = ListItemCreationInformationUsingPath(leaf_name, object_type, folder_path=SPResPath(folder_url))
+        item = ListItem(self.context)
+        qry = ServiceOperationQuery(self, "AddItemUsingPath", None, parameters, "parameters", item)
+        self.context.add_query(qry)
+        return item
+
+    def add_validate_update_item(self):
+        pass
+
     def get_item_by_id(self, item_id):
         """Returns the list item with the specified list item identifier.
 
@@ -198,6 +216,13 @@ class List(SecurableObject):
             return self.properties['Fields']
         else:
             return FieldCollection(self.context, ResourcePath("Fields", self.resource_path), self)
+
+    @property
+    def subscriptions(self):
+        """Gets one or more webhook subscriptions on a SharePoint list."""
+        return self.properties.get('Subscriptions',
+                                   SubscriptionCollection(self.context,
+                                                          ResourcePath("Subscriptions", self.resource_path)))
 
     @property
     def views(self):

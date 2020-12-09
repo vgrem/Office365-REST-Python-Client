@@ -9,6 +9,28 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
         super().__init__(context)
 
     @staticmethod
+    def get_search_results(context, searchPattern, providerID=None, hierarchyNodeID=None, entityTypes=None):
+        """
+        :type context: office365.sharepoint.client_context.ClientContext
+        :type searchPattern: str
+        :type providerID: str
+        :type hierarchyNodeID: str
+        :type entityTypes: str
+        """
+        result = ClientResult(str)
+        payload = {
+            "searchPattern": searchPattern,
+            "providerID": providerID,
+            "hierarchyNodeID": hierarchyNodeID,
+            "entityTypes": entityTypes
+        }
+        svc = ClientPeoplePickerWebServiceInterface(context)
+        qry = ServiceOperationQuery(svc, "GetSearchResults", None, payload, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
+
+    @staticmethod
     def client_people_picker_resolve_user(context, query_params, on_resolved=None):
         """
         Resolves the principals to a string of JSON representing users in people picker format.
@@ -29,6 +51,7 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
             result.value = "[{0}]".format(result.value)
             if callable(on_resolved):
                 on_resolved(result.value)
+
         context.after_execute(_process_result)
         return result
 
