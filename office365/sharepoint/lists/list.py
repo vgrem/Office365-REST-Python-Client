@@ -16,6 +16,7 @@ from office365.sharepoint.listitems.listItem_creation_information_using_path imp
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.listitems.listItem_collection import ListItemCollection
 from office365.sharepoint.permissions.securable_object import SecurableObject
+from office365.sharepoint.usercustomactions.user_custom_action_collection import UserCustomActionCollection
 from office365.sharepoint.views.view import View
 from office365.sharepoint.views.view_collection import ViewCollection
 from office365.sharepoint.webhooks.subscription_collection import SubscriptionCollection
@@ -26,6 +27,16 @@ class List(SecurableObject):
 
     def __init__(self, context, resource_path=None):
         super(List, self).__init__(context, resource_path)
+
+    def get_list_item_changes_since_token(self, query):
+        """
+
+        :type query: office365.sharepoint.changes.change_log_item_query.ChangeLogItemQuery
+        """
+        result = ClientResult(str)
+        qry = ServiceOperationQuery(self, "getListItemChangesSinceToken", None, query, "query", result)
+        self.context.add_query(qry)
+        return result
 
     def save_as_template(self, fileName, name, description, saveData):
         """
@@ -98,7 +109,7 @@ class List(SecurableObject):
             self.context.add_query(qry)
         else:
             def _resolve_folder_url():
-                list_item_creation_information.FolderUrl = self.context.base_url + self.rootFolder.serverRelativeUrl
+                list_item_creation_information.FolderUrl = self.context.base_url + self.root_folder.serverRelativeUrl
                 add_item_qry = ServiceOperationQuery(
                     self,
                     "addItem",
@@ -109,7 +120,7 @@ class List(SecurableObject):
                 )
                 self.context.add_query(add_item_qry)
 
-            self.rootFolder.ensure_property("ServerRelativeUrl", _resolve_folder_url)
+            self.root_folder.ensure_property("ServerRelativeUrl", _resolve_folder_url)
         return item
 
     def add_item_using_path(self, leaf_name, object_type, folder_url):
@@ -180,6 +191,17 @@ class List(SecurableObject):
         self.remove_from_parent_collection()
         return self
 
+    @staticmethod
+    def get_list_data_as_stream(context, listFullUrl, parameters):
+        """
+
+        :type context: ClientContext
+        :type listFullUrl: str
+        :type parameters: RenderListDataParameters
+        :return:
+        """
+        pass
+
     @property
     def enable_folder_creation(self):
         """
@@ -202,7 +224,7 @@ class List(SecurableObject):
             return ListItemCollection(self.context, ResourcePath("items", self.resource_path))
 
     @property
-    def rootFolder(self):
+    def root_folder(self):
         """Get a root folder"""
         if self.is_property_available('RootFolder'):
             return self.properties["RootFolder"]
@@ -234,21 +256,24 @@ class List(SecurableObject):
             return ViewCollection(self.context, ResourcePath("views", self.resource_path), self)
 
     @property
-    def defaultView(self):
+    def default_view(self):
         """Gets or sets a value that specifies whether the list view is the default list view."""
-        if self.is_property_available('DefaultView'):
-            return self.properties['DefaultView']
-        else:
-            return View(self.context, ResourcePath("DefaultView", self.resource_path), self)
+        return self.properties.get('DefaultView',
+                                   View(self.context, ResourcePath("DefaultView", self.resource_path), self))
 
     @property
-    def contentTypes(self):
+    def content_types(self):
         """Gets the content types that are associated with the list."""
-        if self.is_property_available('ContentTypes'):
-            return self.properties['ContentTypes']
-        else:
-            return ContentTypeCollection(self.context,
-                                         ResourcePath("contenttypes", self.resource_path))
+        return self.properties.get('ContentTypes',
+                                   ContentTypeCollection(self.context,
+                                                         ResourcePath("ContentTypes", self.resource_path)))
+
+    @property
+    def user_custom_actions(self):
+        """Gets the User Custom Actions that are associated with the list."""
+        return self.properties.get('UserCustomActions',
+                                   UserCustomActionCollection(self.context,
+                                                              ResourcePath("UserCustomActions", self.resource_path)))
 
     @property
     def forms(self):
@@ -257,7 +282,7 @@ class List(SecurableObject):
                                    FormCollection(self.context, ResourcePath("forms", self.resource_path)))
 
     @property
-    def parentWeb(self):
+    def parent_web(self):
         """Gets a value that specifies the web where list resides."""
         from office365.sharepoint.webs.web import Web
         return self.properties.get('ParentWeb',
@@ -297,6 +322,20 @@ class List(SecurableObject):
     @property
     def parent_web_path(self):
         return self.properties.get('ParentWebPath', None)
+
+    def get_property(self, name):
+        if name == "UserCustomActions":
+            return self.user_custom_actions
+        elif name == "ParentWeb":
+            return self.parent_web
+        elif name == "RootFolder":
+            return self.root_folder
+        elif name == "ContentTypes":
+            return self.content_types
+        elif name == "DefaultView":
+            return self.default_view
+        else:
+            return super(List, self).get_property(name)
 
     def set_property(self, name, value, persist_changes=True):
         super(List, self).set_property(name, value, persist_changes)

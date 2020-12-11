@@ -31,7 +31,7 @@ class TestSharePointFolder(SPTestCase):
         cls.target_list.delete_object().execute_query()
 
     def test1_enum_folders_and_files(self):
-        parent_folder = self.__class__.target_list.rootFolder.get().execute_query()
+        parent_folder = self.__class__.target_list.root_folder.get().execute_query()
         self.assertIsNotNone(parent_folder.serverRelativeUrl)
 
         folder_url = parent_folder.serverRelativeUrl
@@ -45,7 +45,7 @@ class TestSharePointFolder(SPTestCase):
                 self.assertIsNotNone(file_in_folder.resource_path)
 
     def test2_create_folder(self):
-        folder_new = self.__class__.target_list.rootFolder.folders.add(self.__class__.target_folder_name)\
+        folder_new = self.__class__.target_list.root_folder.folders.add(self.__class__.target_folder_name)\
             .execute_query()
         self.assertTrue(folder_new.exists)
         self.__class__.target_folder = folder_new
@@ -73,7 +73,7 @@ class TestSharePointFolder(SPTestCase):
     def test8_copy_folder(self):
         # ensure a target folder exists
         folder_name = "Copy_" + str(randint(0, 1000))
-        folder_to = self.__class__.target_list.rootFolder.add(folder_name)
+        folder_to = self.__class__.target_list.root_folder.add(folder_name)
         self.client.execute_query()
         self.assertIsNotNone(folder_to.serverRelativeUrl)
 
@@ -90,43 +90,53 @@ class TestSharePointFolder(SPTestCase):
         self.assertEqual(target_folder.name, self.__class__.target_folder_name)
 
     def test_10_find_folder(self):
-        result = self.__class__.target_list.rootFolder.folders \
+        result = self.__class__.target_list.root_folder.folders \
             .filter("Name eq '{0}'".format(self.__class__.target_folder_name)) \
             .get() \
             .execute_query()
         self.assertEqual(len(result), 1)
 
     def test_11_move_folder(self):
-        folder = self.__class__.target_list.rootFolder.folders.get_by_url(self.__class__.target_folder_name)
+        folder = self.__class__.target_list.root_folder.folders.get_by_url(self.__class__.target_folder_name)
         folder_name = "Move_" + str(randint(0, 1000))
-        folder_to = self.__class__.target_list.rootFolder.add(folder_name).execute_query()
+        folder_to = self.__class__.target_list.root_folder.add(folder_name).execute_query()
         self.assertIsNotNone(folder_to.serverRelativeUrl)
         folder.move_to(folder_to.properties['ServerRelativeUrl'], MoveOperations.overwrite).execute_query()
         self.assertIsNotNone(folder_to.serverRelativeUrl)
 
     def test_12_recycle_folder(self):
-        folder_to_recycle = self.__class__.target_list.rootFolder.folders.get_by_url(self.__class__.target_folder_name)
+        folder_to_recycle = self.__class__.target_list.root_folder.folders.get_by_url(self.__class__.target_folder_name)
         result = folder_to_recycle.recycle()
         self.client.execute_query()
         self.assertIsNotNone(result.value)
         self.__class__.deleted_folder_guid = result.value
 
     def test_13_restore_folder(self):
-        recycle_item = self.client.web.recycleBin.get_by_id(self.__class__.deleted_folder_guid)
+        recycle_item = self.client.web.recycle_bin.get_by_id(self.__class__.deleted_folder_guid)
         recycle_item.restore().execute_query()
 
     def test_14_get_folder_changes(self):
-        folder = self.__class__.target_list.rootFolder.folders.get_by_url(self.__class__.target_folder_name)
+        folder = self.__class__.target_list.root_folder.folders.get_by_url(self.__class__.target_folder_name)
         changes = folder.get_changes().execute_query()
         self.assertIsInstance(changes, ChangeCollection)
         self.assertGreaterEqual(len(changes), 0)
 
     def test_15_delete_folder(self):
-        folder_to_delete = self.__class__.target_list.rootFolder.folders.get_by_url(self.__class__.target_folder_name)
+        folder_to_delete = self.__class__.target_list.root_folder.folders.get_by_url(self.__class__.target_folder_name)
         folder_to_delete.delete_object().execute_query()
 
-        result = self.__class__.target_list.rootFolder.folders\
+        result = self.__class__.target_list.root_folder.folders\
             .filter("Name eq '{0}'".format(self.__class__.target_folder_name))\
             .get()\
             .execute_query()
         self.assertEqual(len(result), 0)
+
+    def test_16_add_using_path(self):
+        new_folder = self.__class__.target_list.root_folder.folders\
+            .add_using_path(self.target_folder_name, True).execute_query()
+        self.assertIsNotNone(new_folder.resource_path)
+        self.__class__.target_folder = new_folder
+
+    def test_17_get_by_path(self):
+        folder = self.__class__.target_list.root_folder.folders.get_by_path(self.target_folder_name).execute_query()
+        self.assertIsNotNone(folder.resource_path)

@@ -1,6 +1,7 @@
 from office365.sharepoint.publishing.primary_city_time import PrimaryCityTime
 from office365.sharepoint.publishing.site_page_metadata_collection import SitePageMetadataCollection
 from office365.sharepoint.publishing.site_page_service import SitePageService
+from office365.sharepoint.publishing.video_service_discoverer import VideoServiceDiscoverer
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 
@@ -42,3 +43,7 @@ class TestSPPublishing(SPTestCase):
         result = SitePageService.org_assets(self.client)
         self.client.execute_query()
         self.assertIsNotNone(result)
+
+    def test7_get_video_service_manager(self):
+        discoverer = VideoServiceDiscoverer(self.client).get().execute_query()
+        self.assertIsNotNone(discoverer.resource_path)

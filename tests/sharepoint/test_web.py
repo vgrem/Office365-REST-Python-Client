@@ -4,8 +4,8 @@ from settings import settings
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.lists.list_template_type import ListTemplateType
-from office365.sharepoint.permissions.basePermissions import BasePermissions
-from office365.sharepoint.permissions.permissionKind import PermissionKind
+from office365.sharepoint.permissions.base_permissions import BasePermissions
+from office365.sharepoint.permissions.permission_kind import PermissionKind
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.webs.subweb_query import SubwebQuery
 from office365.sharepoint.webs.web import Web
@@ -21,7 +21,7 @@ class TestSharePointWeb(SPTestCase):
         super(TestSharePointWeb, cls).setUpClass()
 
     def test1_get_current_user(self):
-        current_user = self.client.web.currentUser.get().execute_query()
+        current_user = self.client.web.current_user.get().execute_query()
         self.assertIsNotNone(current_user.login_name)
         self.__class__.target_user = current_user
 

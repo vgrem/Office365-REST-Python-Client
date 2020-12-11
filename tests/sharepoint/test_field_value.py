@@ -59,7 +59,7 @@ class TestFieldValue(SPTestCase):
         self.assertGreaterEqual(len(items), 1)
 
     def test_3_set_field_multi_user_value(self):
-        current_user = self.client.web.currentUser
+        current_user = self.client.web.current_user
         multi_user_value = FieldMultiUserValue()
         multi_user_value.add(FieldUserValue.from_user(current_user))
 

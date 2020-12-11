@@ -33,7 +33,7 @@ def generate_documents(context):
     for idx in range(0, total_amount):
         # 1. Create a folder
         folder_name = fake.date()
-        target_folder = lib.rootFolder.add(folder_name)
+        target_folder = lib.root_folder.add(folder_name)
         context.execute_query()
         print("({0} of {1}) Folder '{2}' has been created".format(idx, total_amount, target_folder.serverRelativeUrl))
 

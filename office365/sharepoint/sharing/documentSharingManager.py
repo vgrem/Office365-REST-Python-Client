@@ -1,6 +1,6 @@
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.permissions.roleDefinition import RoleDefinition
+from office365.sharepoint.permissions.role_definition import RoleDefinition
 
 
 class DocumentSharingManager(BaseEntity):

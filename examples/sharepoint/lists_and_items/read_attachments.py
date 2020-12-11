@@ -22,7 +22,7 @@ ctx.execute_query()
 for item in items:
     if item.properties['Attachments']:  # 1. determine whether ListItem contains attachments
         # 2. Explicitly load attachments for ListItem
-        attachment_files = item.attachmentFiles
+        attachment_files = item.attachment_files
         ctx.load(attachment_files)
         ctx.execute_query()
         # 3. Enumerate and save attachments

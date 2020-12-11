@@ -47,12 +47,12 @@ class TestSharePointClient(TestCase):
 
     def test7_construct_get_request(self):
         client = ClientContext(settings['url']).with_credentials(user_credentials)
-        request = client.web.currentUser.get().build_request()
+        request = client.web.current_user.get().build_request()
         self.assertIsInstance(request, RequestOptions)
 
     def test8_execute_get_batch_request(self):
         client = ClientContext(settings['url']).with_credentials(user_credentials)
-        current_user = client.web.currentUser
+        current_user = client.web.current_user
         client.load(current_user)
         current_web = client.web
         client.load(current_web)
@@ -93,16 +93,16 @@ class TestSharePointClient(TestCase):
         file_name = "TestFile{0}.txt".format(random_seed)
         client = ClientContext(settings['url']).with_credentials(user_credentials)
         list_pages = client.web.lists.get_by_title("Documents")
-        files = list_pages.rootFolder.files
+        files = list_pages.root_folder.files
         client.load(files)
         client.execute_query()
         files_count_before = len(files)
-        new_file = list_pages.rootFolder.upload_file(file_name, "-some content goes here-")
+        new_file = list_pages.root_folder.upload_file(file_name, "-some content goes here-")
         client.execute_query()
         self.assertTrue(new_file.name, file_name)
 
         new_file.delete_object()
-        files_after = list_pages.rootFolder.files
+        files_after = list_pages.root_folder.files
         client.load(files_after)
         client.execute_batch()
         self.assertTrue(len(files_after), files_count_before)

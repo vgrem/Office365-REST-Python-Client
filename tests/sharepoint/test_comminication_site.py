@@ -5,9 +5,9 @@ from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.tenant.administration.tenant import Tenant
 from settings import settings
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.portal.SiteStatus import SiteStatus
-from office365.sharepoint.portal.SPSiteCreationRequest import SPSiteCreationRequest
-from office365.sharepoint.portal.SPSiteManager import SPSiteManager
+from office365.sharepoint.portal.site_status import SiteStatus
+from office365.sharepoint.portal.site_creation_request import SPSiteCreationRequest
+from office365.sharepoint.portal.site_manager import SPSiteManager
 
 
 class TestCommunicationSite(TestCase):
@@ -23,7 +23,7 @@ class TestCommunicationSite(TestCase):
         cls.site_manager = SPSiteManager(cls.client)
 
     def test1_create_site(self):
-        current_user = self.client.web.currentUser.get().execute_query()
+        current_user = self.client.web.current_user.get().execute_query()
         site_url = "{0}sites/{1}".format(settings["url"], uuid.uuid4().hex)
         request = SPSiteCreationRequest("CommSite123", site_url, current_user.user_principal_name)
         response = self.site_manager.create(request)

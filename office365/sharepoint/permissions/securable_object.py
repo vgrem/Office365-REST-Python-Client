@@ -2,8 +2,8 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.permissions.basePermissions import BasePermissions
-from office365.sharepoint.permissions.roleAssignment import RoleAssignment
+from office365.sharepoint.permissions.base_permissions import BasePermissions
+from office365.sharepoint.permissions.role_assignment import RoleAssignment
 from office365.sharepoint.permissions.roleAssignmentCollection import RoleAssignmentCollection
 
 
@@ -27,7 +27,7 @@ class SecurableObject(BaseEntity):
     def add_role_assignment(self, principal, role_def):
         """Adds a role assignment to securable resource.<81>
 
-        :param office365.sharepoint.permissions.roleDefinition.RoleDefinition role_def: Specifies the role definition
+        :param office365.sharepoint.permissions.role_definition.RoleDefinition role_def: Specifies the role definition
         of the role assignment.
         :param office365.sharepoint.principal.principal.Principal principal: Specifies the user or group of the
         role assignment.
@@ -45,7 +45,7 @@ class SecurableObject(BaseEntity):
     def remove_role_assignment(self, principal, role_def):
         """Removes a role assignment from a securable resource.<81>
 
-        :param office365.sharepoint.permissions.roleDefinition.RoleDefinition role_def: Specifies the role definition
+        :param office365.sharepoint.permissions.role_definition.RoleDefinition role_def: Specifies the role definition
         of the role assignment.
         :param office365.sharepoint.principal.principal.Principal principal: Specifies the user or group of the
         role assignment.

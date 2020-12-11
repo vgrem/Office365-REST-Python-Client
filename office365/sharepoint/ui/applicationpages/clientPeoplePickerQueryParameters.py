@@ -1,6 +1,6 @@
 from office365.runtime.client_value import ClientValue
-from office365.sharepoint.principal.principalSource import PrincipalSource
-from office365.sharepoint.principal.principalType import PrincipalType
+from office365.sharepoint.principal.principal_source import PrincipalSource
+from office365.sharepoint.principal.principal_type import PrincipalType
 
 
 class ClientPeoplePickerQueryParameters(ClientValue):

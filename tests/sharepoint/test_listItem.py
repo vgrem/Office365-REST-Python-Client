@@ -47,7 +47,7 @@ class TestSharePointListItem(SPTestCase):
         self.target_list.ensure_property("EnableFolderCreation", _init_list).execute_query()
 
     def test3_create_folder_in_list(self):
-        new_folder = self.target_list.rootFolder.add("Archive").execute_query()
+        new_folder = self.target_list.root_folder.add("Archive").execute_query()
         self.assertIsNotNone(new_folder.serverRelativeUrl)
 
     def test4_get_list_item(self):
@@ -94,13 +94,21 @@ class TestSharePointListItem(SPTestCase):
         item_to_update.update_overwrite_version()
         self.client.execute_query()
 
-    def test9_recycle_item(self):
+    def test9_set_comments_disabled(self):
+        comments = self.__class__.target_item.set_comments_disabled(False).execute_query()
+        self.assertIsNotNone(comments.resource_path)
+
+    # def test_10_get_comments(self):
+    #    comments = self.__class__.target_item.get_comments().execute_query()
+    #    self.assertIsNotNone(comments.resource_path)
+
+    def test_11_recycle_item(self):
         pass
 
-    def test_10_restore_item(self):
+    def test_12_restore_item(self):
         pass
 
-    def test_11_delete_list_item(self):
+    def test_13_delete_list_item(self):
         item_id = self.__class__.target_item.properties["Id"]
         item_to_delete = self.__class__.target_item
         item_to_delete.delete_object().execute_query()
@@ -108,7 +116,7 @@ class TestSharePointListItem(SPTestCase):
         result = self.target_list.items.filter("Id eq {0}".format(item_id)).get().execute_query()
         self.assertEqual(0, len(result))
 
-    def test_12_create_multiple_items(self):
+    def test_14_create_multiple_items(self):
         for i in range(0, self.batch_items_count):
             item_properties = {'Title': "Task {0}".format(i)}
             self.target_list.add_item(item_properties)
@@ -116,7 +124,7 @@ class TestSharePointListItem(SPTestCase):
         result = self.target_list.items.get().execute_query()
         self.assertEqual(len(result), self.batch_items_count)
 
-    def test_13_delete_multiple_items(self):
+    def test_15_delete_multiple_items(self):
         result = self.target_list.items.get().execute_query()  # get existing items
         self.assertGreater(len(result), 0)
         for item in result:

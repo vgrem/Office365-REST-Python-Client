@@ -13,7 +13,7 @@ class TestSharePointGroup(SPTestCase):
         cls.target_group = cls.client.web.associatedMemberGroup
 
     def test1_get_current_user_groups(self):
-        groups = self.client.web.currentUser.groups.get().execute_query()
+        groups = self.client.web.current_user.groups.get().execute_query()
         self.assertGreaterEqual(len(groups), 0)
 
     def test2_add_user_to_group(self):

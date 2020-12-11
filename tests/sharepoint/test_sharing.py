@@ -21,7 +21,7 @@ class TestSharePointSharing(TestCase):
                                      password=settings['user_credentials']['password'])
         cls.client = ClientContext(settings['url']).with_credentials(credentials)
 
-        current_user = cls.client.web.currentUser.get().execute_query()
+        current_user = cls.client.web.current_user.get().execute_query()
         cls.target_user = current_user
 
     # def test1_get_role_def(self):

@@ -5,9 +5,9 @@ from settings import settings
 
 from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.portal.GroupSiteInfo import GroupSiteInfo
-from office365.sharepoint.portal.GroupSiteManager import GroupSiteManager
-from office365.sharepoint.portal.SiteStatus import SiteStatus
+from office365.sharepoint.portal.group_site_info import GroupSiteInfo
+from office365.sharepoint.portal.group_site_manager import GroupSiteManager
+from office365.sharepoint.portal.site_status import SiteStatus
 
 
 class TestTeamSite(TestCase):

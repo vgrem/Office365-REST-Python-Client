@@ -46,8 +46,17 @@ class NavigationNode(BaseEntity):
 
     @property
     def is_visible(self):
-        """Gets a value that specifies the anchor text for the navigation node link."""
-        return self.properties.get('Title', None)
+        """Gets a value that specifies the anchor text for the navigation node link.
+        :rtype: bool or None
+        """
+        return self.properties.get('isVisible', None)
+
+    @property
+    def is_external(self):
+        """
+        :rtype: bool or None
+        """
+        return self.properties.get('isExternal', None)
 
     def set_property(self, name, value, persist_changes=True):
         super(NavigationNode, self).set_property(name, value, persist_changes)

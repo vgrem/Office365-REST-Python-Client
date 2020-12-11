@@ -7,6 +7,7 @@ from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.actions.getWebUrlFromPage import GetWebUrlFromPageUrlQuery
+from office365.sharepoint.alerts.alert_collection import AlertCollection
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
@@ -19,7 +20,7 @@ from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.list_collection import ListCollection
 from office365.sharepoint.lists.list_template_collection import ListTemplateCollection
 from office365.sharepoint.navigation.navigation import Navigation
-from office365.sharepoint.permissions.basePermissions import BasePermissions
+from office365.sharepoint.permissions.base_permissions import BasePermissions
 from office365.sharepoint.permissions.roleDefinitionCollection import RoleDefinitionCollection
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.principal.group import Group
@@ -35,6 +36,7 @@ from office365.sharepoint.ui.applicationpages.clientPeoplePickerWebServiceInterf
     ClientPeoplePickerWebServiceInterface,
 )
 from office365.sharepoint.webs.regional_settings import RegionalSettings
+from office365.sharepoint.webs.web_information_collection import WebInformationCollection
 from office365.sharepoint.webs.web_template_collection import WebTemplateCollection
 
 
@@ -70,8 +72,8 @@ class Web(SecurableObject):
 
         :type query: office365.sharepoint.webs.subweb_query.SubwebQuery
         """
-        users = UserCollection(self.context)
-        qry = ServiceOperationQuery(self, "getSubwebsFilteredForCurrentUser", {
+        users = WebInformationCollection(self.context)
+        qry = ServiceOperationQuery(self, "getSubWebsFilteredForCurrentUser", {
             "nWebTemplateFilter": query.WebTemplateFilter,
             "nConfigurationFilter": query.ConfigurationFilter
         }, None, None, users)
@@ -594,7 +596,7 @@ class Web(SecurableObject):
             return GroupCollection(self.context, ResourcePath("siteGroups", self.resource_path))
 
     @property
-    def currentUser(self):
+    def current_user(self):
         """Gets the current user."""
         if self.is_property_available('CurrentUser'):
             return self.properties['CurrentUser']
@@ -642,7 +644,7 @@ class Web(SecurableObject):
             return FieldCollection(self.context, ResourcePath("Fields", self.resource_path))
 
     @property
-    def contentTypes(self):
+    def content_types(self):
         """Gets the collection of content types for the Web site."""
         if self.is_property_available('ContentTypes'):
             return self.properties['ContentTypes']
@@ -650,7 +652,7 @@ class Web(SecurableObject):
             return ContentTypeCollection(self.context, ResourcePath("ContentTypes", self.resource_path))
 
     @property
-    def roleDefinitions(self):
+    def role_definitions(self):
         """Gets the collection of role definitions for the Web site."""
         return self.properties.get("RoleDefinitions",
                                    RoleDefinitionCollection(self.context,
@@ -688,7 +690,7 @@ class Web(SecurableObject):
             return RegionalSettings(self.context, ResourcePath("RegionalSettings", self.resource_path))
 
     @property
-    def recycleBin(self):
+    def recycle_bin(self):
         """Get recycle bin"""
         return self.properties.get('RecycleBin',
                                    RecycleBinItemCollection(self.context,
@@ -705,6 +707,28 @@ class Web(SecurableObject):
     def root_folder(self):
         """Get a root folder"""
         return self.properties.get("RootFolder", Folder(self.context, ResourcePath("RootFolder", self.resource_path)))
+
+    @property
+    def alerts(self):
+        return self.properties.get('Alerts',
+                                   AlertCollection(self.context,
+                                                   ResourcePath("Alerts", self.resource_path)))
+
+    def get_property(self, name):
+        if name == "ContentTypes":
+            return self.content_types
+        elif name == "RootFolder":
+            return self.root_folder
+        elif name == "RegionalSettings":
+            return self.regional_settings
+        elif name == "RoleDefinitions":
+            return self.role_definitions
+        elif name == "RecycleBin":
+            return self.recycle_bin
+        elif name == "CurrentUser":
+            return self.current_user
+        else:
+            return super(Web, self).get_property(name)
 
     def set_property(self, name, value, persist_changes=True):
         super(Web, self).set_property(name, value, persist_changes)

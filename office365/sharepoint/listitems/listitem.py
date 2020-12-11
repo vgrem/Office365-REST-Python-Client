@@ -7,6 +7,7 @@ from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.changes.change_query import ChangeQuery
+from office365.sharepoint.comments.comment_collection import CommentCollection
 from office365.sharepoint.fields.fieldLookupValue import FieldLookupValue
 from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupValue
 from office365.sharepoint.permissions.securable_object import SecurableObject
@@ -104,14 +105,14 @@ class ListItem(SecurableObject):
 
         def _item_resolved():
             result.value = ObjectSharingInformation.get_list_item_sharing_information(
-                self.context, self.parentList.properties["Id"], self.properties["Id"])
+                self.context, self.parent_list.properties["Id"], self.properties["Id"])
 
         self.ensure_properties(["Id", "ParentList"], _item_resolved)
         return result.value
 
     def update(self):
         """Update the list item."""
-        self.ensure_type_name(self.parentList)
+        self.ensure_type_name(self.parent_list)
         qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
         return self
@@ -148,6 +149,20 @@ class ListItem(SecurableObject):
         self.context.add_query(qry)
         return self
 
+    def set_comments_disabled(self, value):
+        """
+        :type value: bool
+        """
+        qry = ServiceOperationQuery(self, "SetCommentsDisabled", [value])
+        self.context.add_query(qry)
+        return self
+
+    def get_comments(self):
+        comments = CommentCollection(self.context)
+        qry = ServiceOperationQuery(self, "getComments", [], None, None, comments)
+        self.context.add_query(qry)
+        return comments
+
     def parse_and_set_field_value(self, fieldName, value):
         """Sets the value of the field (2) for the list item based on an implementation-specific transformation
            of the value..
@@ -164,7 +179,7 @@ class ListItem(SecurableObject):
         self.context.add_query(qry)
 
     @property
-    def displayName(self):
+    def display_name(self):
         """Specifies the display name of the list item.
 
         :rtype: str or None
@@ -172,7 +187,7 @@ class ListItem(SecurableObject):
         return self.properties.get("DisplayName", None)
 
     @property
-    def parentList(self):
+    def parent_list(self):
         """Get parent List"""
         if self.is_property_available("ParentList"):
             return self.properties["ParentList"]
@@ -199,7 +214,7 @@ class ListItem(SecurableObject):
             return Folder(self.context, ResourcePath("Folder", self.resource_path))
 
     @property
-    def attachmentFiles(self):
+    def attachment_files(self):
         """Specifies the collection of attachments that are associated with the list item.<62>"""
         if self.is_property_available('AttachmentFiles'):
             return self.properties["AttachmentFiles"]
@@ -209,7 +224,7 @@ class ListItem(SecurableObject):
                                             ResourcePath("AttachmentFiles", self.resource_path))
 
     @property
-    def contentType(self):
+    def content_type(self):
         """Gets a value that specifies the content type of the list item."""
         from office365.sharepoint.contenttypes.content_type import ContentType
         return self.properties.get("ContentType",
@@ -218,10 +233,10 @@ class ListItem(SecurableObject):
                                    )
 
     @property
-    def effectiveBasePermissions(self):
+    def effective_base_permissions(self):
         """Gets a value that specifies the effective permissions on the list item that are assigned
            to the current user."""
-        from office365.sharepoint.permissions.basePermissions import BasePermissions
+        from office365.sharepoint.permissions.base_permissions import BasePermissions
         return self.properties.get("EffectiveBasePermissions",
                                    BasePermissions())
 
@@ -236,6 +251,18 @@ class ListItem(SecurableObject):
         :rtype: bool or None
         """
         return self.properties.get("CommentsDisabled", None)
+
+    def get_property(self, name):
+        if name == "ContentType":
+            return self.content_type
+        elif name == "ParentList":
+            return self.parent_list
+        elif name == "EffectiveBasePermissions":
+            return self.effective_base_permissions
+        elif name == "AttachmentFiles":
+            return self.attachment_files
+        else:
+            return super(ListItem, self).get_property(name)
 
     def set_property(self, name, value, persist_changes=True):
         super(ListItem, self).set_property(name, value, persist_changes)

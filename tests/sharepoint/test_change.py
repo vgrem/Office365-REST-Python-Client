@@ -1,3 +1,4 @@
+from office365.sharepoint.changes.change_log_item_query import ChangeLogItemQuery
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.changes.change_collection import ChangeCollection
@@ -14,3 +15,10 @@ class TestChange(SPTestCase):
         target_list = self.client.site.rootWeb.default_document_library()
         changes = target_list.get_changes(query=ChangeQuery(site=True)).execute_query()
         self.assertIsInstance(changes, ChangeCollection)
+
+    #def test_3_get_list_item_changes_since_token(self):
+    #    target_list = self.client.site.rootWeb.default_document_library()
+    #    query = ChangeLogItemQuery(row_limit="100")
+    #    result = target_list.get_list_item_changes_since_token(query)
+    #    self.client.execute_query()
+    #    self.assertIsNotNone(result.value)

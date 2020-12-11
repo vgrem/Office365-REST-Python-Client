@@ -1,5 +1,5 @@
 from office365.runtime.client_value import ClientValue
-from office365.sharepoint.permissions.basePermissions import BasePermissions
+from office365.sharepoint.permissions.base_permissions import BasePermissions
 
 
 class RoleDefinitionCreationInformation(ClientValue):

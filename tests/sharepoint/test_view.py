@@ -57,7 +57,7 @@ class TestSPView(SPTestCase):
         self.assertIsNotNone(view_to_read.resource_path)
 
     def test4_get_default_view_items(self):
-        view_items = self.target_list.defaultView.get_items().get().execute_query()
+        view_items = self.target_list.default_view.get_items().get().execute_query()
         self.assertIsNotNone(view_items.resource_path)
 
     def test5_get_view_items(self):

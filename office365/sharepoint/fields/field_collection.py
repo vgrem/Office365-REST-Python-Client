@@ -53,7 +53,7 @@ class FieldCollection(BaseEntityCollection):
                 parent_list = self._parent
 
                 def _list_loaded():
-                    field_params["web_id"] = parent_list.parentWeb.properties["Id"]
+                    field_params["web_id"] = parent_list.parent_web.properties["Id"]
                     field_params["list_id"] = parent_list.properties["Id"]
                     self._build_taxonomy_field_query(**field_params)
                 self._parent.ensure_properties(["Id", "ParentWeb"], _list_loaded)

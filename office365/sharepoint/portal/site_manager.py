@@ -2,7 +2,7 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.portal.SPSiteCreationResponse import SPSiteCreationResponse
+from office365.sharepoint.portal.site_creation_response import SPSiteCreationResponse
 
 
 class SPSiteManager(BaseEntity):

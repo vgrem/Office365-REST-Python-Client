@@ -48,7 +48,7 @@ class Site(BaseEntity):
         self.context.add_query(qry)
         return changes
 
-    def get_recycle_bin_items(self, pagingInfo=None, rowLimit=100, isAscending=True, orderBy=None, itemState=None):
+    def get_recycle_bin_items(self, rowLimit=100, isAscending=True):
         result = RecycleBinItemCollection(self.context)
         payload = {
             "rowLimit": rowLimit,
@@ -163,7 +163,7 @@ class Site(BaseEntity):
         return self.properties.get("Id", None)
 
     @property
-    def recycleBin(self):
+    def recycle_bin(self):
         """Get recycle bin"""
         return self.properties.get('RecycleBin',
                                    RecycleBinItemCollection(self.context,
@@ -175,3 +175,9 @@ class Site(BaseEntity):
         return self.properties.get('Features',
                                    FeatureCollection(self.context,
                                                      ResourcePath("Features", self.resource_path), self))
+
+    def get_property(self, name):
+        if name == "RecycleBin":
+            return self.recycle_bin
+        else:
+            return super(Site, self).get_property(name)

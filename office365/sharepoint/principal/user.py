@@ -1,7 +1,8 @@
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.resource_path import ResourcePath
+from office365.sharepoint.alerts.alert_collection import AlertCollection
 from office365.sharepoint.principal.principal import Principal
-from office365.sharepoint.principal.userIdInfo import UserIdInfo
+from office365.sharepoint.principal.user_id_info import UserIdInfo
 
 
 class User(Principal):
@@ -18,6 +19,12 @@ class User(Principal):
         else:
             from office365.sharepoint.principal.group_collection import GroupCollection
             return GroupCollection(self.context, ResourcePath("Groups", self.resource_path))
+
+    @property
+    def alerts(self):
+        return self.properties.get('Alerts',
+                                   AlertCollection(self.context,
+                                                   ResourcePath("Alerts", self.resource_path)))
 
     @property
     def is_site_admin(self):

@@ -2,6 +2,7 @@ import os
 
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.folders.folder import Folder
 
@@ -16,6 +17,27 @@ class FolderCollection(ClientObjectCollection):
         :rtype: FolderCollection
         """
         return super(FolderCollection, self).get()
+
+    def add_using_path(self, decoded_url, overwrite):
+        """
+        :type decoded_url: str
+        :type overwrite:  bool
+        """
+        parameters = {
+            "DecodedUrl": decoded_url,
+            "Overwrite": overwrite
+        }
+        target_folder = Folder(self.context)
+        qry = ServiceOperationQuery(self, "AddUsingPath", parameters, None, None, target_folder)
+        self.context.add_query(qry)
+        return target_folder
+
+    def get_by_path(self, decoded_url):
+        from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
+        target_folder = Folder(self.context)
+        qry = ServiceOperationQuery(self, "GetByPath", SPResPath(decoded_url), None, "parameters", target_folder)
+        self.context.add_query(qry)
+        return target_folder
 
     def ensure_folder_path(self, path):
         """
