@@ -2,4 +2,15 @@ from office365.runtime.client_value import ClientValue
 
 
 class SecondaryAdministratorsInfo(ClientValue):
-    pass
+
+    def __init__(self, email=None, loginName=None, userPrincipalName=None):
+        """
+
+        :param str email:
+        :param str loginName:
+        :param str userPrincipalName:
+        """
+        super().__init__()
+        self.email = email
+        self.loginName = loginName
+        self.userPrincipalName = userPrincipalName

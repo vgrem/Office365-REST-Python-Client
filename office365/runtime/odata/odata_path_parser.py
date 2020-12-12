@@ -26,10 +26,10 @@ class ODataPathParser(object):
             url += "("
             if isinstance(method_parameters, dict):
                 url += ','.join(['%s=%s' % (key, ODataPathParser.encode_method_value(value)) for (key, value) in
-                                 method_parameters.items()])
+                                 method_parameters.items() if value is not None])
             else:
                 url += ','.join(['%s' % (ODataPathParser.encode_method_value(value)) for (i, value) in
-                                 enumerate(method_parameters)])
+                                 enumerate(method_parameters) if value is not None])
             url += ")"
         return url
 

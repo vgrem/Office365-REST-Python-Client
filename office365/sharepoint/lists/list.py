@@ -12,7 +12,7 @@ from office365.sharepoint.files.checkedOutFileCollection import CheckedOutFileCo
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.forms.form_collection import FormCollection
 from office365.sharepoint.listitems.caml.caml_query import CamlQuery
-from office365.sharepoint.listitems.listItem_creation_information_using_path import ListItemCreationInformationUsingPath
+from office365.sharepoint.listitems.creation_information_using_path import ListItemCreationInformationUsingPath
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.listitems.listItem_collection import ListItemCollection
 from office365.sharepoint.permissions.securable_object import SecurableObject
@@ -27,6 +27,16 @@ class List(SecurableObject):
 
     def __init__(self, context, resource_path=None):
         super(List, self).__init__(context, resource_path)
+
+    def get_lookup_field_choices(self, targetFieldName, pagingInfo=None):
+        result = ClientResult(str)
+        params = {
+            "targetFieldName": targetFieldName,
+            "pagingInfo": pagingInfo
+        }
+        qry = ServiceOperationQuery(self, "GetLookupFieldChoices", params, None, None, result)
+        self.context.add_query(qry)
+        return result
 
     def get_list_item_changes_since_token(self, query):
         """

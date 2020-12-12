@@ -62,7 +62,7 @@ class ODataRequest(ClientRequest):
         """
         qry = self.current_query
         result_object = qry.return_type
-        if isinstance(result_object, ClientObjectCollection):
+        if isinstance(result_object, ClientObject):
             result_object.clear()
 
         if response.headers.get('Content-Type', '').lower().split(';')[0] != 'application/json':

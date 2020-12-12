@@ -8,7 +8,7 @@ from office365.runtime.resource_path_service_operation import ResourcePathServic
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.comments.comment_collection import CommentCollection
-from office365.sharepoint.fields.fieldLookupValue import FieldLookupValue
+from office365.sharepoint.fields.field_lookup_value import FieldLookupValue
 from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupValue
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
@@ -266,6 +266,7 @@ class ListItem(SecurableObject):
 
     def set_property(self, name, value, persist_changes=True):
         super(ListItem, self).set_property(name, value, persist_changes)
+
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id" and self._parent_collection is not None:
@@ -295,7 +296,7 @@ class ListItem(SecurableObject):
                 [collection.add(lv.LookupId) for lv in v]
                 payload["{name}Id".format(name=k)] = collection
             elif isinstance(v, FieldLookupValue):
-                payload["{name}Id".format(name=k)] = v
+                payload["{name}Id".format(name=k)] = v.LookupId
             else:
                 payload[k] = v
         return payload

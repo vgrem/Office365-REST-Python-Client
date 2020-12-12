@@ -17,11 +17,11 @@ tenant = Tenant(admin_client)
 admins = tenant.get_site_secondary_administrators(site_id=target_site.id)
 admin_client.execute_query()
 
-existing_admin_names = [admin.get_property('loginName') for admin in admins]
+existing_admin_names = [admin.loginName for admin in admins]
 
-target_user = target_site.rootWeb.ensure_user(f"mdoe@{tenant_prefix}.onmicrosoft.com").execute_query()
+target_user = target_site.root_web.ensure_user(f"mdoe@{tenant_prefix}.onmicrosoft.com").execute_query()
 names = existing_admin_names + [target_user.login_name]
 tenant.set_site_secondary_administrators(site_id=target_site.id, names=names).execute_query()
 
 for admin in admins:  # type: SecondaryAdministratorsInfo
-    print(admin.get_property('loginName'))
+    print(admin.loginName)

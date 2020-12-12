@@ -19,12 +19,13 @@ class Field(BaseEntity):
         from office365.sharepoint.fields.field_currency import FieldCurrency
         from office365.sharepoint.fields.field_guid import FieldGuid
         from office365.sharepoint.fields.field_lookup import FieldLookup
-        from office365.sharepoint.fields.fieldMultiChoice import FieldMultiChoice
-        from office365.sharepoint.fields.fieldMultiLineText import FieldMultiLineText
+        from office365.sharepoint.fields.field_multi_choice import FieldMultiChoice
+        from office365.sharepoint.fields.field_multi_line_text import FieldMultiLineText
         from office365.sharepoint.fields.field_text import FieldText
         from office365.sharepoint.fields.field_url import FieldUrl
         from office365.sharepoint.fields.field_user import FieldUser
         from office365.sharepoint.taxonomy.taxonomy_field import TaxonomyField
+        from office365.sharepoint.fields.field_date_time import FieldDateTime
         field_known_types = {
             FieldType.Text: FieldText,
             FieldType.Calculated: FieldCalculated,
@@ -36,7 +37,8 @@ class Field(BaseEntity):
             FieldType.URL: FieldUrl,
             FieldType.Guid: FieldGuid,
             FieldType.Currency: FieldCurrency,
-            FieldType.Note: FieldMultiLineText
+            FieldType.Note: FieldMultiLineText,
+            FieldType.DateTime: FieldDateTime
         }
         if isinstance(type_id_or_name, int):
             return field_known_types.get(type_id_or_name, Field)
@@ -44,9 +46,18 @@ class Field(BaseEntity):
             return TaxonomyField if type_id_or_name == "TaxonomyFieldType" else Field
 
     @staticmethod
-    def create_field_from_type(context, field_type):
-        field_type = Field.resolve_field_type(field_type)
-        return field_type(context)
+    def create_field_from_type(context, field_parameters):
+        """
+
+        :type context: ClientContext
+        :type field_parameters: office365.sharepoint.fields.field_creation_information.FieldCreationInformation
+        :return: Field
+        """
+        field_type = Field.resolve_field_type(field_parameters.FieldTypeKind)
+        field = field_type(context)
+        for n, v in field_parameters.to_json().items():
+            field.set_property(n, v)
+        return field
 
     def set_show_in_display_form(self, flag):
         """Sets the value of the ShowInDisplayForm property for this fields.
@@ -86,12 +97,44 @@ class Field(BaseEntity):
         return self.properties.get('Id', None)
 
     @property
+    def type_as_string(self):
+        """Gets a value that specifies the type of the field..
+
+        :rtype: str or None
+        """
+        return self.properties.get('TypeAsString', None)
+
+    @property
     def title(self):
-        """Gets or sets a value that specifies the display name of the field.
+        """Gets a value that specifies the display name of the field.
 
         :rtype: str or None
         """
         return self.properties.get('Title', None)
+
+    @title.setter
+    def title(self, val):
+        """Sets a value that specifies the display name of the field.
+
+        :rtype: str or None
+        """
+        self.set_property("Title", val)
+
+    @property
+    def group(self):
+        """Gets a value that specifies the field group.
+
+        :rtype: str or None
+        """
+        return self.properties.get('Group', None)
+
+    @group.setter
+    def group(self, val):
+        """Sets a value that specifies the field group.
+
+        :rtype: str or None
+        """
+        self.set_property("Group", val)
 
     @property
     def internal_name(self):

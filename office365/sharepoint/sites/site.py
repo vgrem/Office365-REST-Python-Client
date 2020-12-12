@@ -136,7 +136,7 @@ class Site(BaseEntity):
         return List(self.context, ResourcePathServiceOperation("getCatalog", [type_catalog], self.resource_path))
 
     @property
-    def rootWeb(self):
+    def root_web(self):
         """Get root web"""
         if self.is_property_available('RootWeb'):
             return self.properties['RootWeb']
@@ -179,5 +179,7 @@ class Site(BaseEntity):
     def get_property(self, name):
         if name == "RecycleBin":
             return self.recycle_bin
+        elif name == "RootWeb":
+            return self.root_web
         else:
             return super(Site, self).get_property(name)

@@ -26,6 +26,9 @@ class ClientObject(object):
             for k, v in properties.items():
                 self.set_property(k, v, True)
 
+    def clear(self):
+        self._changed_properties = []
+
     def execute_query(self):
         self.context.execute_query()
         return self

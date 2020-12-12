@@ -714,6 +714,12 @@ class Web(SecurableObject):
                                    AlertCollection(self.context,
                                                    ResourcePath("Alerts", self.resource_path)))
 
+    @property
+    def available_fields(self):
+        return self.properties.get('AvailableFields',
+                                   FieldCollection(self.context,
+                                                   ResourcePath("AvailableFields", self.resource_path)))
+
     def get_property(self, name):
         if name == "ContentTypes":
             return self.content_types
@@ -727,6 +733,8 @@ class Web(SecurableObject):
             return self.recycle_bin
         elif name == "CurrentUser":
             return self.current_user
+        elif name == "AvailableFields":
+            return self.available_fields
         else:
             return super(Web, self).get_property(name)
 
