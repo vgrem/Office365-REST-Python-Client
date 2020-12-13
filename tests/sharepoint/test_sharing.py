@@ -6,8 +6,8 @@ from settings import settings
 from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.principal.user import User
-from office365.sharepoint.sharing.objectSharingInformation import ObjectSharingInformation
-from office365.sharepoint.sharing.sharingResult import SharingResult
+from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
+from office365.sharepoint.sharing.sharing_result import SharingResult
 from office365.sharepoint.webs.web import Web
 
 

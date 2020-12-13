@@ -59,6 +59,12 @@ class Field(BaseEntity):
             field.set_property(n, v)
         return field
 
+    def enable_index(self):
+        pass
+
+    def disable_index(self):
+        pass
+
     def set_show_in_display_form(self, flag):
         """Sets the value of the ShowInDisplayForm property for this fields.
 
@@ -95,6 +101,21 @@ class Field(BaseEntity):
         :rtype: str or None
         """
         return self.properties.get('Id', None)
+
+    @property
+    def schema_xml(self):
+        """Gets a value that specifies the XML schema that defines the field.
+
+        :rtype: str or None
+        """
+        return self.properties.get('SchemaXml', None)
+
+    @schema_xml.setter
+    def schema_xml(self, val):
+        """Sets a value that specifies the XML schema that defines the field.
+
+        """
+        self.set_property('SchemaXml', val)
 
     @property
     def type_as_string(self):

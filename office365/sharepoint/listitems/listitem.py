@@ -12,8 +12,8 @@ from office365.sharepoint.fields.field_lookup_value import FieldLookupValue
 from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupValue
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
-from office365.sharepoint.sharing.objectSharingInformation import ObjectSharingInformation
-from office365.sharepoint.sharing.sharingResult import SharingResult
+from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
+from office365.sharepoint.sharing.sharing_result import SharingResult
 from office365.sharepoint.ui.applicationpages.clientPeoplePickerQueryParameters import ClientPeoplePickerQueryParameters
 from office365.sharepoint.ui.applicationpages.clientPeoplePickerWebServiceInterface import (
     ClientPeoplePickerWebServiceInterface,

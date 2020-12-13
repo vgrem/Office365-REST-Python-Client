@@ -5,6 +5,8 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.fields.field import Field
+from office365.sharepoint.fields.field_creation_information import FieldCreationInformation
+from office365.sharepoint.fields.field_type import FieldType
 from office365.sharepoint.fields.xmlSchemaFieldCreationInformation import XmlSchemaFieldCreationInformation
 
 
@@ -17,6 +19,59 @@ class FieldCollection(BaseEntityCollection):
     def create_typed_object(self, properties):
         field = super(FieldCollection, self).create_typed_object(properties)
         return field
+
+    def add_url_field(self, title, description=None):
+        """
+        Adds Url field
+
+        :param str title:
+        :param str or None description:
+        :return:
+        """
+        create_field_info = FieldCreationInformation(title=title,
+                                                     description=description,
+                                                     field_type_kind=FieldType.URL)
+        return self.add(create_field_info)
+
+    def add_lookup_field(self, title, lookup_list_id, lookup_field_name, allow_multiple_values=False):
+        """
+        Adds Lookup field
+
+        :param bool allow_multiple_values:
+        :param str lookup_field_name:
+        :param str lookup_list_id:
+        :param str title:
+        """
+        if allow_multiple_values:
+            field_schema = f'''
+                        <Field Type="LookupMulti" Mult="TRUE" DisplayName="{title}" Required="FALSE" Hidden="TRUE" \
+                        ShowField="{lookup_field_name}" List="{{{lookup_list_id}}}" StaticName="{title}" Name="{title}">
+                        </Field>
+                        '''
+            target_field = self.create_field_as_xml(field_schema)
+        else:
+            create_field_info = FieldCreationInformation(title=title,
+                                                         lookup_list_id=lookup_list_id,
+                                                         lookup_field_name=lookup_field_name,
+                                                         field_type_kind=FieldType.Lookup)
+            target_field = self.add_field(create_field_info)
+        return target_field
+
+    def add_choice_field(self, title, values, multiple_values=False):
+        """
+        Adds Choice field
+
+        :param bool multiple_values:
+        :param list[str] values:
+        :param str title:
+        """
+        fld_type = FieldType.MultiChoice if multiple_values else FieldType.Choice
+        create_field_info = FieldCreationInformation(title, fld_type)
+        [create_field_info.Choices.add(choice) for choice in values]
+        return self.add_field(create_field_info)
+
+    def add_user_field(self):
+        pass
 
     def add(self, field_create_information):
         """Adds a fields to the fields collection.

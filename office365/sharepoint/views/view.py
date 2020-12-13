@@ -1,3 +1,4 @@
+from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
@@ -44,6 +45,12 @@ class View(BaseEntity):
         self.context.add_query(qry)
         self.remove_from_parent_collection()
         return self
+
+    def render_as_html(self):
+        result = ClientResult(str)
+        qry = ServiceOperationQuery(self, "RenderAsHtml", None, None, None, result)
+        self.context.add_query(qry)
+        return result
 
     @property
     def content_type_id(self):
@@ -95,6 +102,11 @@ class View(BaseEntity):
     def view_query(self):
         """Gets or sets a value that specifies the query that is used by the list view."""
         return self.properties.get('ViewQuery', None)
+
+    @property
+    def base_view_id(self):
+        """Gets a value that specifies the base view identifier of the list view."""
+        return self.properties.get('BaseViewId', None)
 
     def set_property(self, name, value, persist_changes=True):
         super(View, self).set_property(name, value, persist_changes)

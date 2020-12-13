@@ -1,9 +1,12 @@
+import os
+
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.actions.create_file import CreateFileQuery
 from office365.sharepoint.actions.upload_session import UploadSessionQuery
 from office365.sharepoint.files.file import File
+from office365.sharepoint.files.file_creation_information import FileCreationInformation
 
 
 class FileCollection(ClientObjectCollection):
@@ -28,9 +31,18 @@ class FileCollection(ClientObjectCollection):
         :param chunk_func_args: arguments to pass to chunk_uploaded function
         :return: office365.sharepoint.files.file.File
         """
-        qry = UploadSessionQuery(self, source_path, chunk_size, chunk_uploaded, chunk_func_args)
-        self.context.add_query(qry)
-        return qry.file
+        file_size = os.path.getsize(source_path)
+        if file_size > chunk_size:
+            qry = UploadSessionQuery(self, source_path, chunk_size, chunk_uploaded, chunk_func_args)
+            self.context.add_query(qry)
+            return qry.file
+        else:
+            with open(source_path, 'rb') as content_file:
+                file_content = content_file.read()
+            info = FileCreationInformation(url=os.path.basename(source_path), overwrite=True, content=file_content)
+            qry = CreateFileQuery(self, info)
+            self.context.add_query(qry)
+            return qry.return_type
 
     def add(self, file_creation_information):
         """Creates a File resource

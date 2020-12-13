@@ -24,7 +24,8 @@ class FieldCreationInformation(ClientValue):
         self.Title = title
         self.FieldTypeKind = field_type_kind
         self.Description = description
-        self.Choices = ClientValueCollection(str) if field_type_kind == FieldType.MultiChoice else None
+        self.Choices = ClientValueCollection(str) \
+            if field_type_kind == FieldType.MultiChoice or field_type_kind == FieldType.Choice else None
         self.LookupListId = lookup_list_id
         self.LookupFieldName = lookup_field_name
         self.LookupWebId = lookup_web_id

@@ -1,7 +1,9 @@
+from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
 from office365.sharepoint.tenant.administration.hubSiteProperties import HubSiteProperties
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
     SecondaryAdministratorsFieldsData
@@ -17,6 +19,26 @@ class Tenant(BaseEntity):
     def __init__(self, context):
         super().__init__(context, ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant"),
                          "Microsoft.Online.SharePoint.TenantAdministration")
+
+    def check_tenant_licenses(self, licenses):
+        """
+        Checks whether a tenant has the specified licenses.
+
+        :param list[str] licenses: The list of licenses to check for.
+        :return:
+        """
+        result = ClientResult(bool)
+        params = ClientValueCollection(str, licenses)
+        qry = ServiceOperationQuery(self, "CheckTenantLicenses", None, params, "licenses", result)
+        self.context.add_query(qry)
+        return result
+
+    def get_site_health_status(self, sourceUrl):
+        result = ClientResult(PortalHealthStatus)
+        params = {"sourceUrl": sourceUrl}
+        qry = ServiceOperationQuery(self, "GetSiteHealthStatus", None, params, None, result)
+        self.context.add_query(qry)
+        return result
 
     def get_site_secondary_administrators(self, site_id):
         """

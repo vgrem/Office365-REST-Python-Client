@@ -1,6 +1,6 @@
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.sharing.objectSharingInformation import ObjectSharingInformation
+from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
 
 
 class ObjectSharingSettings(BaseEntity):

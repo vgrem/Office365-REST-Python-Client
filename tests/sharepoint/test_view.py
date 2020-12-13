@@ -56,56 +56,60 @@ class TestSPView(SPTestCase):
         view_to_read = self.__class__.target_view.get().execute_query()
         self.assertIsNotNone(view_to_read.resource_path)
 
-    def test4_get_default_view_items(self):
+    def test4_render_as_html(self):
+        result = self.__class__.target_view.render_as_html()
+        self.client.execute_query()
+        self.assertIsNotNone(result.value)
+
+    def test5_get_default_view_items(self):
         view_items = self.target_list.default_view.get_items().get().execute_query()
         self.assertIsNotNone(view_items.resource_path)
 
-    def test5_get_view_items(self):
+    def test6_get_view_items(self):
         view_items = self.__class__.target_view.get_items().get().execute_query()
         self.assertIsNotNone(view_items.resource_path)
 
-    def test6_update_view(self):
-        target_view_title_updated = self.__class__.target_view.properties["Title"] + "_updated"
+    def test7_update_view(self):
+        title_updated = self.__class__.target_view.properties["Title"] + "_updated"
         view_to_update = self.__class__.target_view
-        view_to_update.set_property('Title', target_view_title_updated)
-        view_to_update.update().execute_query().execute_query()
+        view_to_update.set_property('Title', title_updated).update().execute_query()
 
-        result = self.target_list.views.filter("Title eq '{0}'".format(target_view_title_updated)).get().execute_query()
+        result = self.target_list.views.filter("Title eq '{0}'".format(title_updated)).get().execute_query()
         self.assertEqual(len(result), 1)
 
-    def test7_get_view_fields(self):
+    def test8_get_view_fields(self):
         view = self.__class__.target_view.expand(["ViewFields"]).get().execute_query()
         self.assertIsNotNone(view.view_fields)
         self.assertIsInstance(view.view_fields, ViewFieldCollection)
         self.__class__.view_fields_count = len(view.view_fields)
 
-    def test8_add_view_field(self):
+    def test9_add_view_field(self):
         field_name = self.__class__.target_field.internal_name
         self.__class__.target_view.view_fields.add_view_field(field_name).execute_query()
         after_view_fields = self.__class__.target_view.view_fields.get().execute_query()
         self.assertEqual(self.__class__.view_fields_count + 1, len(after_view_fields))
 
-    def test9_move_view_field_to(self):
+    def test_10_move_view_field_to(self):
         field_name = self.__class__.target_field.internal_name
         self.__class__.target_view.view_fields.move_view_field_to(field_name, 2).execute_query()
         after_view_fields = self.__class__.target_view.view_fields.get().execute_query()
         self.assertEqual(after_view_fields[2], field_name)
 
-    def test_10_remove_view_field(self):
+    def test_11_remove_view_field(self):
         field_name = self.__class__.target_field.internal_name
         self.__class__.target_view.view_fields.remove_view_field(field_name).execute_query()
         after_view_fields = self.__class__.target_view.view_fields.get().execute_query()
         self.assertEqual(self.__class__.view_fields_count, len(after_view_fields))
 
-    def test_11_remove_all_view_fields(self):
+    def test_12_remove_all_view_fields(self):
         self.__class__.target_view.view_fields.remove_all_view_fields().execute_query()
         after_view_fields = self.__class__.target_view.view_fields.get().execute_query()
         self.assertEqual(0, len(after_view_fields))
 
-    def test_12_get_view_changes(self):
+    def test_13_get_view_changes(self):
         changes = self.client.site.get_changes(ChangeQuery(view=True)).execute_query()
         self.assertGreater(len(changes), 0)
 
-    def test_13_delete_view(self):
+    def test_14_delete_view(self):
         view_to_delete = self.__class__.target_view
         view_to_delete.delete_object().execute_query()

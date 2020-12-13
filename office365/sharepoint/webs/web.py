@@ -30,7 +30,7 @@ from office365.sharepoint.principal.user_collection import UserCollection
 from office365.sharepoint.recyclebin.recycleBinItemCollection import RecycleBinItemCollection
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
 from office365.sharepoint.sharing.objectSharingSettings import ObjectSharingSettings
-from office365.sharepoint.sharing.sharingResult import SharingResult
+from office365.sharepoint.sharing.sharing_result import SharingResult
 from office365.sharepoint.ui.applicationpages.clientPeoplePickerQueryParameters import ClientPeoplePickerQueryParameters
 from office365.sharepoint.ui.applicationpages.clientPeoplePickerWebServiceInterface import (
     ClientPeoplePickerWebServiceInterface,

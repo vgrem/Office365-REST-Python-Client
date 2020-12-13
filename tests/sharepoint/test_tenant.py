@@ -1,6 +1,7 @@
 from random import randint
 from unittest import TestCase
 
+from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
 from settings import settings
 
 from office365.runtime.auth.user_credential import UserCredential
@@ -34,18 +35,30 @@ class TestTenant(TestCase):
         self.client.execute_query()
         self.assertIsNotNone(tenant_settings.properties)
 
-    def test3_list_sites(self):
+    # def test3_check_tenant_licenses(self):
+    #    result = self.tenant.check_tenant_licenses(["SharePoint"])
+    #    self.tenant.execute_query()
+    #    self.assertIsNotNone(result.value)
+
+    def test4_get_site_health_status(self):
+        site_url = settings.get("team_site_url")
+        result = self.tenant.get_site_health_status(site_url)
+        self.tenant.execute_query()
+        self.assertIsNotNone(result.value)
+        # self.assertIsInstance(result.value, PortalHealthStatus)
+
+    def test5_list_sites(self):
         sites = self.tenant.get_site_properties_from_sharepoint_by_filters("", 0, False)
         self.client.execute_query()
         self.assertIsInstance(sites, SitePropertiesCollection)
 
-    def test4_get_site_secondary_administrators(self):
+    def test6_get_site_secondary_administrators(self):
         target_site = self.client.site.select(["Id"]).get().execute_query()
         result = self.tenant.get_site_secondary_administrators(target_site.id)
         self.client.execute_query()
         self.assertIsNotNone(result)
 
-    #def test5_set_site_secondary_administrators(self):
+    #def test7_set_site_secondary_administrators(self):
     #    target_site = self.client.site.get()
     #    target_user = self.client.web.ensure_user("jdoe@mediadev8.onmicrosoft.com")
     #    self.client.execute_batch()
@@ -53,7 +66,7 @@ class TestTenant(TestCase):
     #    self.tenant.set_site_secondary_administrators(target_site.id, [target_user.user_principal_name])
     #    self.client.execute_query()
 
-    # def test6_create_site(self):
+    # def test8_create_site(self):
     #    current_user = self.client.web.currentUser
     #    self.client.load(current_user)
     #    self.client.execute_query()
@@ -63,20 +76,20 @@ class TestTenant(TestCase):
     #    self.client.execute_query()
     #    self.assertIsNotNone(site_props)
 
-    # def test7_get_site_by_url(self):
+    # def test9_get_site_by_url(self):
     #    site_props = self.tenant.get_site_properties_by_url(self.__class__.target_site_url, False)
     #    self.client.execute_query()
     #    self.assertIsNotNone(site_props.properties['SiteUrl'], self.__class__.target_site_url)
     #    self.__class__.target_site_props = site_props
 
-    # def test8_update_site(self):
+    # def test_10_update_site(self):
     #    site_props_to_update = self.__class__.target_site_props
     #    site_props_to_update.set_property('SharingCapability', SharingCapabilities.ExternalUserAndGuestSharing)
     #    site_props_to_update.update()
     #    self.client.execute_query()
     #    self.assertTrue(site_props_to_update.properties['Status'], 'Active')
 
-    # def test9_delete_site(self):
+    # def test_11_delete_site(self):
     #    site_url = self.__class__.target_site_props.properties['SiteUrl']
     #    self.tenant.remove_site(site_url)
     #    self.client.execute_query()
