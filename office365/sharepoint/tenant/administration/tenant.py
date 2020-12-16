@@ -4,7 +4,7 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
-from office365.sharepoint.tenant.administration.hubSiteProperties import HubSiteProperties
+from office365.sharepoint.tenant.administration.hubsite_properties import HubSiteProperties
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
     SecondaryAdministratorsFieldsData
 from office365.sharepoint.tenant.administration.secondary_administrators_info import SecondaryAdministratorsInfo
@@ -19,6 +19,12 @@ class Tenant(BaseEntity):
     def __init__(self, context):
         super().__init__(context, ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant"),
                          "Microsoft.Online.SharePoint.TenantAdministration")
+
+    def hubsites(self, siteUrl):
+        pass
+
+    def connect_site_to_hubsite_by_id(self, siteUrl, hubSiteId):
+        pass
 
     def check_tenant_licenses(self, licenses):
         """

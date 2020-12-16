@@ -41,9 +41,9 @@ class FolderCollection(ClientObjectCollection):
 
     def ensure_folder_path(self, path):
         """
-        Function to create a folder
-        :type path: string
-        :param path: relative server URL (path) to a folder
+        Creates a nested folder structure
+
+        :param str path: relative server URL (path) to a folder
         """
 
         url_component = os.path.normpath(path).split(os.path.sep)

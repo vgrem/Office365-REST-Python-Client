@@ -29,7 +29,7 @@ def xml_escape(s_val):
 
 
 def is_valid_auth_cookies(values):
-    return any(values) and values.get('FedAuth', None) is not None
+    return any(values) and (values.get('FedAuth', None) is not None or values.get('SPOIDCRL', None) is not None)
 
 
 class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):

@@ -135,6 +135,20 @@ class Site(BaseEntity):
         :type type_catalog: int"""
         return List(self.context, ResourcePathServiceOperation("getCatalog", [type_catalog], self.resource_path))
 
+    def register_hub_site(self, creationInformation):
+        """Registers an existing site as a hub site.
+
+        :type creationInformation: HubSiteCreationInformation
+        """
+        qry = ServiceOperationQuery(self, "RegisterHubSite", None, creationInformation, "creationInformation", None)
+        self.context.add_query(qry)
+        return self
+
+    def unregister_hub_site(self):
+        qry = ServiceOperationQuery(self, "UnRegisterHubSite", None, None, None, None)
+        self.context.add_query(qry)
+        return self
+
     @property
     def root_web(self):
         """Get root web"""
@@ -161,6 +175,13 @@ class Site(BaseEntity):
         :rtype: str
         """
         return self.properties.get("Id", None)
+
+    @property
+    def is_hub_site(self):
+        """
+        :rtype: bool
+        """
+        return self.properties.get("IsHubSite", None)
 
     @property
     def recycle_bin(self):

@@ -232,9 +232,9 @@ class Web(SecurableObject):
 
     def ensure_folder_path(self, path):
         """
-            Function to create folder tree
-            :type path: string
-            :param path: relative server URL (path) to a folder
+        Creates a nested folder structure
+
+        :param str path: relative server URL (path) to a folder
         """
         return self.root_folder.folders.ensure_folder_path(path)
 
