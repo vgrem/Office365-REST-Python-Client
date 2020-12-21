@@ -79,7 +79,7 @@ class ClientObject(object):
         :param str name: property name
         """
         normalized_name = name[0].lower() + name[1:]
-        return getattr(self, normalized_name, self._properties.get(normalized_name, None))
+        return getattr(self, normalized_name, self._properties.get(name, None))
 
     def set_property(self, name, value, persist_changes=True):
         """Sets property value
