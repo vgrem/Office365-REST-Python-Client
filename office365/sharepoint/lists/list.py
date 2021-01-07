@@ -1,4 +1,5 @@
 from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
@@ -9,17 +10,21 @@ from office365.sharepoint.contenttypes.content_type_collection import ContentTyp
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.fields.related_field_collection import RelatedFieldCollection
 from office365.sharepoint.files.checkedOutFileCollection import CheckedOutFileCollection
+from office365.sharepoint.files.file import File
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.forms.form_collection import FormCollection
 from office365.sharepoint.listitems.caml.caml_query import CamlQuery
 from office365.sharepoint.listitems.creation_information_using_path import ListItemCreationInformationUsingPath
+from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateValue
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.listitems.listItem_collection import ListItemCollection
+from office365.sharepoint.pages.wiki_page_creation_information import WikiPageCreationInformation
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.usercustomactions.user_custom_action_collection import UserCustomActionCollection
 from office365.sharepoint.views.view import View
 from office365.sharepoint.views.view_collection import ViewCollection
 from office365.sharepoint.webhooks.subscription_collection import SubscriptionCollection
+from office365.sharepoint.utilities.utility import Utility
 
 
 class List(SecurableObject):
@@ -27,6 +32,46 @@ class List(SecurableObject):
 
     def __init__(self, context, resource_path=None):
         super(List, self).__init__(context, resource_path)
+
+    @staticmethod
+    def get_list_data_as_stream(context, list_full_url, parameters=None):
+        """
+
+        :param office365.sharepoint.client_context.ClientContext context:
+        :param str list_full_url:
+        :param RenderListDataParameters parameters:
+        """
+        result = ClientResult(None)
+        payload = {
+            "listFullUrl": list_full_url,
+            "parameters": parameters,
+        }
+        target_list = context.web.get_list(list_full_url)
+        qry = ServiceOperationQuery(target_list, "GetListDataAsStream", None, payload, None, result)
+        context.add_query(qry)
+        return result
+
+    def bulk_validate_update_list_items(self, item_ids, form_values, new_document_update=True,
+                                        checkin_comment=None, folder_path=None):
+        """
+
+        :param list[int] item_ids:
+        :param dict form_values:
+        :param bool new_document_update:
+        :param str checkin_comment:
+        :param str folder_path:
+        """
+        result = ClientValueCollection(ListItemFormUpdateValue)
+        params = {
+            "itemIds": item_ids,
+            "formValues": ClientValueCollection(ListItemFormUpdateValue, form_values),
+            "bNewDocumentUpdate": new_document_update,
+            "checkInComment": checkin_comment,
+            "folderPath": folder_path
+        }
+        qry = ServiceOperationQuery(self, "BulkValidateUpdateListItems", None, params, None, result)
+        self.context.add_query(qry)
+        return result
 
     def get_lookup_field_choices(self, targetFieldName, pagingInfo=None):
         result = ClientResult(str)
@@ -133,6 +178,21 @@ class List(SecurableObject):
             self.root_folder.ensure_property("ServerRelativeUrl", _resolve_folder_url)
         return item
 
+    def create_wiki_page(self, page_name, page_content):
+        """
+        :param str page_name:
+        :param str page_content:
+        """
+        result = ClientResult(File)
+
+        def _list_loaded():
+            page_url = self.root_folder.serverRelativeUrl + "/" + page_name
+            wiki_props = WikiPageCreationInformation(page_url, page_content)
+            result.value = Utility.create_wiki_page_in_context_web(self.context, wiki_props)
+        self.ensure_property("RootFolder", _list_loaded)
+
+        return result
+
     def add_item_using_path(self, leaf_name, object_type, folder_url):
         """
         :type leaf_name: str
@@ -200,17 +260,6 @@ class List(SecurableObject):
         self.context.add_query(qry)
         self.remove_from_parent_collection()
         return self
-
-    @staticmethod
-    def get_list_data_as_stream(context, listFullUrl, parameters):
-        """
-
-        :type context: ClientContext
-        :type listFullUrl: str
-        :type parameters: RenderListDataParameters
-        :return:
-        """
-        pass
 
     @property
     def enable_folder_creation(self):

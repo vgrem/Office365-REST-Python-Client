@@ -12,6 +12,7 @@ from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.files.file_creation_information import FileCreationInformation
 from office365.sharepoint.listitems.listitem import ListItem
+from office365.sharepoint.storagemetrics.storage_metrics import StorageMetrics
 
 
 class Folder(BaseEntity):
@@ -137,6 +138,11 @@ class Folder(BaseEntity):
 
         self.ensure_property("Files", _move_folder_with_files)
         return self
+
+    @property
+    def storage_metrics(self):
+        return self.properties.get("StorageMetrics",
+                                   StorageMetrics(self.context, ResourcePath("StorageMetrics", self.resource_path)))
 
     @property
     def list_item_all_fields(self):

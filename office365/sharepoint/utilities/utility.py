@@ -3,6 +3,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.files.file import File
 
 
 class Utility(BaseEntity):
@@ -58,6 +59,19 @@ class Utility(BaseEntity):
         qry.static = True
         context.add_query(qry)
         return result
+
+    @staticmethod
+    def create_wiki_page_in_context_web(context, parameters):
+        """
+        :type context: office365.sharepoint.client_context.ClientContext
+        :type parameters: office365.sharepoint.pages.wiki_page_creation_information.WikiPageCreationInformation
+        """
+        return_file = File(context)
+        utility = Utility(context)
+        qry = ServiceOperationQuery(utility, "CreateWikiPageInContextWeb", None, parameters, "parameters", return_file)
+        qry.static = True
+        context.add_query(qry)
+        return return_file
 
     @staticmethod
     def send_email(context, properties):

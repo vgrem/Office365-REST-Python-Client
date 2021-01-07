@@ -126,3 +126,7 @@ class TestSPList(SPTestCase):
     def test_17_ensure_events_list(self):
         events_list = self.client.web.lists.ensure_events_list().execute_query()
         self.assertIsNotNone(events_list.resource_path)
+
+    def test_18_get_list_by_server_relative_url(self):
+        pages_list = self.client.web.get_list("SitePages").get().execute_query()
+        self.assertIsNotNone(pages_list.resource_path)

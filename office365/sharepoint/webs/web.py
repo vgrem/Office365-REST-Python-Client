@@ -57,7 +57,7 @@ class Web(SecurableObject):
 
     @staticmethod
     def get_web_url_from_page_url(context, page_full_url):
-        """Determine whether site exists
+        """Gets Web from page url
 
         :type context: office365.sharepoint.client_context.ClientContext
         :type page_full_url: str
@@ -222,9 +222,6 @@ class Web(SecurableObject):
         """Returns the folder object located at the specified server-relative URL.
         :type url: str
         """
-        if url.startswith("/"):
-            url = url[1:]
-
         return Folder(
             self.context,
             ResourcePathServiceOperation("getFolderByServerRelativeUrl", [url], self.resource_path)
