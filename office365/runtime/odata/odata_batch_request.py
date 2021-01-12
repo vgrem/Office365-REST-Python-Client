@@ -66,13 +66,13 @@ class ODataBatchRequest(ClientRequest):
             change_set_message.add_header("Content-Type", "multipart/mixed")
             change_set_message.set_boundary(change_set_boundary)
 
-            for qry in self._current_query.next_change_set():
+            for qry in self._current_query.change_sets:
                 request = qry.build_request()
                 message = self._serialize_request(request)
                 change_set_message.attach(message)
             main_message.attach(change_set_message)
 
-        for qry in self._current_query.next_get_query():
+        for qry in self._current_query.get_queries:
             request = qry.build_request()
             message = self._serialize_request(request)
             main_message.attach(message)
@@ -135,8 +135,10 @@ class ODataBatchRequest(ClientRequest):
         message.set_payload(payload)
         return message
 
-    def next_query(self):
-        queries = [qry for qry in self.context.pending_request().next_query()]
-        qry = BatchQuery(self.context, queries)  # Aggregate requests into batch request
-        self._current_query = qry
-        yield qry
+    def __iter__(self):
+        queries = [qry for qry in self.context.pending_request()]
+        if len(queries) > 0:
+            batch_qry = BatchQuery(self.context, queries)  # Aggregate requests into batch request
+            self.context.clear_queries()
+            self._queries = [batch_qry]
+            yield batch_qry

@@ -50,7 +50,17 @@ class TestSharePointClient(TestCase):
         request = client.web.current_user.get().build_request()
         self.assertIsInstance(request, RequestOptions)
 
-    def test8_execute_get_batch_request(self):
+    def test8_execute_multiple_queries(self):
+        client = ClientContext(settings['url']).with_credentials(user_credentials)
+        current_user = client.web.current_user
+        client.load(current_user)
+        current_web = client.web
+        client.load(current_web)
+        client.execute_query()
+        self.assertIsNotNone(current_web.url)
+        self.assertIsNotNone(current_user.user_id)
+
+    def test9_execute_get_batch_request(self):
         client = ClientContext(settings['url']).with_credentials(user_credentials)
         current_user = client.web.current_user
         client.load(current_user)
@@ -60,7 +70,7 @@ class TestSharePointClient(TestCase):
         self.assertIsNotNone(current_web.url)
         self.assertIsNotNone(current_user.user_id)
 
-    def test9_execute_update_batch_request(self):
+    def test_10_execute_update_batch_request(self):
         client = ClientContext(settings['url']).with_credentials(user_credentials)
         web = client.web
         new_web_title = "Site %s" % random_seed
@@ -73,7 +83,7 @@ class TestSharePointClient(TestCase):
         client.execute_query()
         self.assertEqual(updated_web.properties['Title'], new_web_title)
 
-    def test_10_execute_get_and_update_batch_request(self):
+    def test_11_execute_get_and_update_batch_request(self):
         client = ClientContext(settings['url']).with_credentials(user_credentials)
         list_item = client.web.get_file_by_server_relative_url("/SitePages/Home.aspx").listItemAllFields
         new_title = "Page %s" % random_seed
@@ -86,10 +96,10 @@ class TestSharePointClient(TestCase):
         client.execute_query()
         self.assertEqual(updated_list_item.properties['Title'], new_title)
 
-    def test_11_create_and_delete_batch_request(self):
+    def test_12_create_and_delete_batch_request(self):
         pass
 
-    def test_12_get_and_delete_batch_request(self):
+    def test_13_get_and_delete_batch_request(self):
         file_name = "TestFile{0}.txt".format(random_seed)
         client = ClientContext(settings['url']).with_credentials(user_credentials)
         list_pages = client.web.lists.get_by_title("Documents")
@@ -107,7 +117,7 @@ class TestSharePointClient(TestCase):
         client.execute_batch()
         self.assertTrue(len(files_after), files_count_before)
 
-    def test_13_get_entity_type_name(self):
+    def test_14_get_entity_type_name(self):
         str_col = ClientValueCollection(str, [])
         self.assertEqual(str_col.entity_type_name, "Collection(Edm.String)")
 

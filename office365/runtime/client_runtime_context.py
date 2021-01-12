@@ -56,10 +56,6 @@ class ClientRuntimeContext(object):
         """
         pass
 
-    @property
-    def has_pending_request(self):
-        return len(self.pending_request().queries) > 0
-
     def build_request(self):
         return self.pending_request().build_request()
 
@@ -134,8 +130,7 @@ class ClientRuntimeContext(object):
         return self.pending_request().execute_request_direct(request)
 
     def execute_query(self):
-        if self.has_pending_request:
-            self.pending_request().execute_query()
+        self.pending_request().execute_query()
 
     def add_query(self, query, to_begin=False):
         """
@@ -145,6 +140,9 @@ class ClientRuntimeContext(object):
         :type query: ClientQuery
         """
         self.pending_request().add_query(query, to_begin)
+
+    def remove_query(self, query):
+        self.pending_request().remove_query(query)
 
     def clear_queries(self):
         self.pending_request().queries.clear()
