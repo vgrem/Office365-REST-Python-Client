@@ -16,6 +16,7 @@ from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.odata_request import ODataRequest
+from office365.runtime.odata.odata_v4_batch_request import ODataV4BatchRequest
 from office365.runtime.odata.v4_json_format import V4JsonFormat
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
@@ -37,6 +38,11 @@ class GraphClient(ClientRuntimeContext):
         self._resource = "https://graph.microsoft.com"
         self._authority_host_url = "https://login.microsoftonline.com"
         self._acquire_token_callback = acquire_token_callback
+
+    def execute_batch(self):
+        """Construct and submit a batch request"""
+        batch_request = ODataV4BatchRequest(self)
+        batch_request.execute_query()
 
     def pending_request(self):
         return self._pending_request

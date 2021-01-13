@@ -51,6 +51,10 @@ class BatchQuery(ClientQuery):
         return [qry for qry in self._queries if not isinstance(qry, ReadEntityQuery)]
 
     @property
+    def queries(self):
+        return self._queries
+
+    @property
     def get_queries(self):
         return [qry for qry in self._queries if isinstance(qry, ReadEntityQuery)]
 
