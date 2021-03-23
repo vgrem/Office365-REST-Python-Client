@@ -25,6 +25,7 @@ def xml_escape(s_val):
     s_val = s_val.replace("<", "&lt;")
     s_val = s_val.replace(">", "&gt;")
     s_val = s_val.replace("\"", "&quot;")
+    s_val = s_val.replace("'", "&apos;")
     return s_val
 
 
@@ -159,8 +160,8 @@ class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
 
         payload = self._prepare_request_from_template('SAML.xml', {
             'auth_url': self._sts_profile.authorityUrl,
-            'username': self._username,
-            'password': self._password,
+            'username': xml_escape(self._username),
+            'password': xml_escape(self._password),
             'message_id': str(uuid.uuid4()),
             'created': self._sts_profile.created,
             'expires': self._sts_profile.expires,
