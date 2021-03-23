@@ -33,6 +33,10 @@ class FolderCollection(ClientObjectCollection):
         return target_folder
 
     def get_by_path(self, decoded_url):
+        """
+
+        :type decoded_url: str
+        """
         from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
         target_folder = Folder(self.context)
         qry = ServiceOperationQuery(self, "GetByPath", SPResPath(decoded_url), None, "parameters", target_folder)
@@ -41,7 +45,7 @@ class FolderCollection(ClientObjectCollection):
 
     def ensure_folder_path(self, path):
         """
-        Creates a nested folder structure
+        Ensures a nested folder hierarchy exist
 
         :param str path: relative server URL (path) to a folder
         """

@@ -229,7 +229,7 @@ class Web(SecurableObject):
 
     def ensure_folder_path(self, path):
         """
-        Creates a nested folder structure
+        Ensures a nested folder hierarchy exist
 
         :param str path: relative server URL (path) to a folder
         """

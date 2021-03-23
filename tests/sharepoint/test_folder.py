@@ -4,7 +4,6 @@ from tests import random_seed
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.changes.change_collection import ChangeCollection
-from office365.sharepoint.files.move_operations import MoveOperations
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.list_creation_information import ListCreationInformation
@@ -71,14 +70,13 @@ class TestSharePointFolder(SPTestCase):
         self.assertGreater(len(folder.files), 0)
 
     def test8_copy_folder(self):
-        # ensure a target folder exists
-        folder_name = "Copy_" + str(randint(0, 1000))
-        folder_to = self.__class__.target_list.root_folder.add(folder_name)
-        self.client.execute_query()
-        self.assertIsNotNone(folder_to.serverRelativeUrl)
+
+        folder_name = "Copy_" + str(randint(0, 10000))
+        parent_folder = self.__class__.target_folder.get().execute_query()
+        folder_to_url = "/".join([parent_folder.serverRelativeUrl, folder_name])
 
         # 3. copy folder with files
-        self.__class__.target_folder.copy_to(folder_to.serverRelativeUrl, True)
+        folder_to = self.__class__.target_folder.copy_to(folder_to_url)
         self.client.load(folder_to, ["Files"])
         self.client.execute_query()
         self.assertGreater(len(folder_to.files), 0)
@@ -97,15 +95,15 @@ class TestSharePointFolder(SPTestCase):
         self.assertEqual(len(result), 1)
 
     def test_11_move_folder(self):
-        folder = self.__class__.target_list.root_folder.folders.get_by_url(self.__class__.target_folder_name)
+        folder_from = self.__class__.target_folder.get().execute_query()
         folder_name = "Move_" + str(randint(0, 1000))
         folder_to = self.__class__.target_list.root_folder.add(folder_name).execute_query()
-        self.assertIsNotNone(folder_to.serverRelativeUrl)
-        folder.move_to(folder_to.properties['ServerRelativeUrl'], MoveOperations.overwrite).execute_query()
+
+        folder_to = folder_from.move_to(folder_to.serverRelativeUrl).get().execute_query()
         self.assertIsNotNone(folder_to.serverRelativeUrl)
 
     def test_12_recycle_folder(self):
-        folder_to_recycle = self.__class__.target_list.root_folder.folders.get_by_url(self.__class__.target_folder_name)
+        folder_to_recycle = self.__class__.target_folder
         result = folder_to_recycle.recycle()
         self.client.execute_query()
         self.assertIsNotNone(result.value)
@@ -116,13 +114,13 @@ class TestSharePointFolder(SPTestCase):
         recycle_item.restore().execute_query()
 
     def test_14_get_folder_changes(self):
-        folder = self.__class__.target_list.root_folder.folders.get_by_url(self.__class__.target_folder_name)
+        folder = self.__class__.target_folder
         changes = folder.get_changes().execute_query()
         self.assertIsInstance(changes, ChangeCollection)
         self.assertGreaterEqual(len(changes), 0)
 
     def test_15_delete_folder(self):
-        folder_to_delete = self.__class__.target_list.root_folder.folders.get_by_url(self.__class__.target_folder_name)
+        folder_to_delete = self.__class__.target_folder
         folder_to_delete.delete_object().execute_query()
 
         result = self.__class__.target_list.root_folder.folders\

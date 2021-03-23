@@ -92,10 +92,26 @@ class File(AbstractFile):
         :type overwrite: bool
         """
         qry = ServiceOperationQuery(self,
-                                    "copyto",
+                                    "CopyTo",
                                     {
                                         "strNewUrl": new_relative_url,
                                         "boverwrite": overwrite
+                                    },
+                                    None)
+        self.context.add_query(qry)
+        return self
+
+    def copyto_using_path(self, decoded_url, overwrite):
+        """Copies the file to the destination URL.
+
+        :type decoded_url: str
+        :type overwrite: bool
+        """
+        qry = ServiceOperationQuery(self,
+                                    "CopyToUsingPath",
+                                    {
+                                        "DecodedUrl": decoded_url,
+                                        "bOverWrite": overwrite
                                     },
                                     None)
         self.context.add_query(qry)

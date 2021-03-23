@@ -13,10 +13,24 @@ from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.files.file_creation_information import FileCreationInformation
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.storagemetrics.storage_metrics import StorageMetrics
+from office365.sharepoint.utilities.move_copy_options import MoveCopyOptions
+from office365.sharepoint.utilities.move_copy_util import MoveCopyUtil
 
 
 class Folder(BaseEntity):
     """Represents a folder in a SharePoint Web site."""
+
+    @staticmethod
+    def from_url(abs_url):
+        """
+        Addresses a Folder by absolute url
+
+        :type abs_url: str
+        """
+        from office365.sharepoint.client_context import ClientContext
+        ctx = ClientContext.from_url(abs_url)
+        relative_url = abs_url.replace(ctx.base_url, "")
+        return ctx.web.get_folder_by_server_relative_url(relative_url)
 
     def recycle(self):
         """Moves the folder to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
@@ -106,38 +120,42 @@ class Folder(BaseEntity):
         self.context.add_query(qry)
         return qry.return_type
 
-    def copy_to(self, new_relative_url, overwrite):
+    def copy_to(self, new_relative_url, keep_both=False, reset_author_and_created=False):
         """Copies the folder with files to the destination URL.
 
         :type new_relative_url: str
-        :type overwrite: bool
+        :type keep_both: bool
+        :type reset_author_and_created: bool
         """
 
-        def _copy_files():
-            for file in self.files:
-                new_file_url = "/".join([new_relative_url, file.properties['Name']])
-                file.copyto(new_file_url, overwrite)
+        def _build_full_url(rel_url):
+            return self.context.base_url + rel_url
 
-        self.ensure_property("Files", _copy_files)
-        return self
+        def _copy_folder():
+            opts = MoveCopyOptions(keep_both=keep_both, reset_author_and_created_on_copy=reset_author_and_created)
+            MoveCopyUtil.copy_folder(self.context, _build_full_url(self.serverRelativeUrl),
+                                     _build_full_url(new_relative_url), opts)
 
-    def move_to(self, new_relative_url, flags):
+        self.ensure_property("ServerRelativeUrl", _copy_folder)
+        return self.context.web.get_folder_by_server_relative_url(new_relative_url)
+
+    def move_to(self, new_relative_url, retain_editor_and_modified=False):
         """Moves the folder with files to the destination URL.
 
         :type new_relative_url: str
-        :type flags: int
+        :type retain_editor_and_modified: bool
         """
-        if flags:
-            pass
 
-        def _move_folder_with_files():
-            """Moves folder with files"""
-            for file in self.files:
-                new_file_url = "/".join([new_relative_url, file.properties['Name']])
-                file.moveto(new_file_url, flags)
+        def _build_full_url(rel_url):
+            return self.context.base_url + rel_url
 
-        self.ensure_property("Files", _move_folder_with_files)
-        return self
+        def _move_folder():
+            MoveCopyUtil.move_folder(self.context, _build_full_url(self.serverRelativeUrl),
+                                     _build_full_url(new_relative_url),
+                                     MoveCopyOptions(retain_editor_and_modified_on_move=retain_editor_and_modified))
+
+        self.ensure_property("ServerRelativeUrl", _move_folder)
+        return self.context.web.get_folder_by_server_relative_url(new_relative_url)
 
     @property
     def storage_metrics(self):
