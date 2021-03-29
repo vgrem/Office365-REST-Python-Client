@@ -19,6 +19,7 @@ class TestSPList(SPTestCase):
 
     def test2_has_library_unique_perms(self):
         default_lib = self.client.web.default_document_library()
+        default_lib.reset_role_inheritance()
         self.client.load(default_lib, ["HasUniqueRoleAssignments"])
         self.client.execute_query()
         self.assertFalse(default_lib.has_unique_role_assignments)

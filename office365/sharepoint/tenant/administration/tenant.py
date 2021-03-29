@@ -20,10 +20,13 @@ class Tenant(BaseEntity):
         super().__init__(context, ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant"),
                          "Microsoft.Online.SharePoint.TenantAdministration")
 
-    def hubsites(self, siteUrl):
+    def get_lock_state_by_id(self, site_id):
+        return self._sites.get_lock_state_by_id(site_id)
+
+    def hub_sites(self, siteUrl):
         pass
 
-    def connect_site_to_hubsite_by_id(self, siteUrl, hubSiteId):
+    def connect_site_to_hub_site_by_id(self, siteUrl, hubSiteId):
         pass
 
     def check_tenant_licenses(self, licenses):
