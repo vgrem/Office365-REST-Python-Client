@@ -1,27 +1,9 @@
-import adal
-from settings import settings
-
 from office365.graph_client import GraphClient
-
-
-def get_token_for_user():
-    """
-    Acquire token via user credentials
-    """
-    authority_url = 'https://login.microsoftonline.com/{0}'.format(settings['tenant'])
-    auth_ctx = adal.AuthenticationContext(authority_url)
-    token = auth_ctx.acquire_token_with_username_password(
-        'https://graph.microsoft.com',
-        settings['user_credentials']['username'],
-        settings['user_credentials']['password'],
-        settings['client_credentials']['client_id'])
-    return token
+from tests import acquire_token_by_username_password
 
 
 def enum_folders_and_files(root_folder):
-    drive_items = root_folder.children
-    client.load(drive_items)
-    client.execute_query()
+    drive_items = root_folder.children.get().execute_query()
     for drive_item in drive_items:
         item_type = drive_item.folder.is_server_object_null and "file" or "folder"
         print("Type: {0} Name: {1}".format(item_type, drive_item.name))
@@ -29,6 +11,6 @@ def enum_folders_and_files(root_folder):
             enum_folders_and_files(drive_item)
 
 
-client = GraphClient(get_token_for_user)
+client = GraphClient(acquire_token_by_username_password)
 root = client.me.drive.root
 enum_folders_and_files(root)

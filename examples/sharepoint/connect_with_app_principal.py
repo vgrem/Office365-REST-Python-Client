@@ -1,10 +1,7 @@
-from settings import settings
 
-from office365.runtime.auth.client_credential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
+from tests import test_client_credentials, test_site_url
 
-credentials = ClientCredential(settings.get('client_credentials').get('client_id'),
-                               settings.get('client_credentials').get('client_secret'))
-ctx = ClientContext(settings['url']).with_credentials(credentials)
+ctx = ClientContext(test_site_url).with_credentials(test_client_credentials)
 target_web = ctx.web.get().execute_query()
 print(target_web.url)

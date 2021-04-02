@@ -20,6 +20,12 @@ class Tenant(BaseEntity):
         super().__init__(context, ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant"),
                          "Microsoft.Online.SharePoint.TenantAdministration")
 
+    @staticmethod
+    def from_url(admin_site_url):
+        from office365.sharepoint.client_context import ClientContext
+        admin_client = ClientContext(admin_site_url)
+        return Tenant(admin_client)
+
     def get_lock_state_by_id(self, site_id):
         return self._sites.get_lock_state_by_id(site_id)
 

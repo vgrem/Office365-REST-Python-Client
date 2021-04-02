@@ -1,9 +1,8 @@
 import unittest
 import uuid
 
-from settings import settings
+from tests import test_user_principal_name
 from tests.graph_case import GraphTestCase
-
 from office365.directory.group import Group
 from office365.directory.group_profile import GroupProfile
 from office365.directory.user import User
@@ -51,8 +50,7 @@ class TestGraphGroup(GraphTestCase):
 
     @unittest.skipIf(directory_quota_exceeded, "Skipping, group was not be created")
     def test4_add_group_owner(self):
-        account_name = settings.get('first_account_name')
-        users = self.client.users.filter(f"mail eq '{account_name}'").get().execute_query()
+        users = self.client.users.filter(f"mail eq '{test_user_principal_name}'").get().execute_query()
         self.assertEqual(len(users), 1)
 
         owner_id = users[0].id
@@ -60,25 +58,29 @@ class TestGraphGroup(GraphTestCase):
         grp.owners.add(owner_id).execute_query()
         self.__class__.target_user = users[0]
 
+    def test5_list_group_owners(self):
+        owners = self.__class__.target_group.owners.get().execute_query()
+        self.assertGreater(len(owners), 0)
+
     @unittest.skipIf(directory_quota_exceeded, "Skipping, group was not created")
-    def test5_remove_group_owner(self):
+    def test6_remove_group_owner(self):
         owner_id = self.__class__.target_user.id
         grp = self.__class__.target_group
         grp.owners.remove(owner_id).execute_query()
 
     @unittest.skipIf(directory_quota_exceeded, "Skipping, group was created")
-    def test6_add_group_member(self):
+    def test7_add_group_member(self):
         member_id = self.__class__.target_user.properties["id"]
         grp = self.__class__.target_group
         grp.members.add(member_id).execute_query()
 
     @unittest.skipIf(directory_quota_exceeded, "Skipping, group was not created")
-    def test7_remove_group_member(self):
+    def test8_remove_group_member(self):
         member_id = self.__class__.target_user.id
         grp = self.__class__.target_group
         grp.members.remove(member_id).execute_query()
 
     @unittest.skipIf(directory_quota_exceeded, "Skipping, group was not created")
-    def test8_delete_group(self):
+    def test9_delete_group(self):
         grp_to_delete = self.__class__.target_group
         grp_to_delete.delete_object(True).execute_query()

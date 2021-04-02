@@ -2,16 +2,12 @@ import csv
 import os
 import tempfile
 
-from settings import settings
-
-from office365.runtime.auth.client_credential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
+from tests import test_team_site_url, test_client_credentials
 
 "Demonstrates how to export a List data as csv"
 
-ctx = ClientContext(settings.get('team_site_url')).with_credentials(
-                                             ClientCredential(settings['client_credentials']['client_id'],
-                                                              settings['client_credentials']['client_secret']))
+ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 # 1.retrieve list data
 list_title = "Contacts_Large"
 list_to_export = ctx.web.lists.get_by_title(list_title)

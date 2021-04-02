@@ -1,22 +1,8 @@
 from faker import Faker
-from settings import settings
-from tests import random_seed
-
 from office365.directory.userProfile import UserProfile
 from office365.graph_client import GraphClient
-
-
-def acquire_token(auth_ctx):
-    """
-
-    :type auth_ctx: adal.AuthenticationContext
-    """
-    token = auth_ctx.acquire_token_with_username_password(
-        'https://graph.microsoft.com',
-        settings['user_credentials']['username'],
-        settings['user_credentials']['password'],
-        settings['client_credentials']['client_id'])
-    return token
+from tests import test_tenant, create_unique_name
+from tests.graph_case import acquire_token_by_username_password
 
 
 def generate_user_profile():
@@ -29,14 +15,14 @@ def generate_user_profile():
         'officeLocation': fake.street_address(),
         'city': fake.city(),
         'country': fake.country(),
-        'principalName': "{0}@{1}".format(fake.user_name(), settings['tenant']),
-        'password': "P@ssw0rd{0}".format(random_seed),
+        'principalName': "{0}@{1}".format(fake.user_name(), test_tenant),
+        'password': create_unique_name("P@ssw0rd"),
         'accountEnabled': True
     }
     return UserProfile(**user_json)
 
 
-client = GraphClient(acquire_token)
+client = GraphClient(acquire_token_by_username_password)
 
 for idx in range(0, 5):
     user_profile = generate_user_profile()

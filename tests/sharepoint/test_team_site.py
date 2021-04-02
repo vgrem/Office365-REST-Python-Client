@@ -1,13 +1,11 @@
 import uuid
 from unittest import TestCase
 
-from settings import settings
-
-from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.portal.group_site_info import GroupSiteInfo
 from office365.sharepoint.portal.group_site_manager import GroupSiteManager
 from office365.sharepoint.portal.site_status import SiteStatus
+from tests import test_site_url, test_user_credentials
 
 
 class TestTeamSite(TestCase):
@@ -16,10 +14,7 @@ class TestTeamSite(TestCase):
     @classmethod
     def setUpClass(cls):
         super(TestTeamSite, cls).setUpClass()
-
-        user_credentials = UserCredential(settings['user_credentials']['username'],
-                                          settings['user_credentials']['password'])
-        cls.client = ClientContext(settings['url']).with_credentials(user_credentials)
+        cls.client = ClientContext(test_site_url).with_credentials(test_user_credentials)
         cls.site_manager = GroupSiteManager(cls.client)
 
     def test1_create_site(self):

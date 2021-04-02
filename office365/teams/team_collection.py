@@ -22,16 +22,19 @@ class TeamCollection(EntityCollection):
         """
         return super(TeamCollection, self).get()
 
-    def get_all(self):
+    def get_all(self, include_properties=None):
         """List all teams in Microsoft Teams for an organization"""
-        groups = self.context.groups.select(["id", "resourceProvisioningOptions"])
+        if include_properties is None:
+            include_properties = []
+        include_properties = include_properties + ["id", "resourceProvisioningOptions"]
+        groups = self.context.groups.select(include_properties)
         self.context.load(groups)
 
         def _process_response(resp):
             for grp in groups:
                 if "Team" in grp.properties["resourceProvisioningOptions"]:
-                    new_team = Team(self.context, ResourcePath(grp.properties["id"], self.resource_path))
-                    new_team.set_property("id", grp.properties["id"])
+                    new_team = Team(self.context, ResourcePath(grp.properties["id"], self.resource_path),
+                                    grp.properties)
                     self.add_child(new_team)
         self.context.after_execute(_process_response)
         return self

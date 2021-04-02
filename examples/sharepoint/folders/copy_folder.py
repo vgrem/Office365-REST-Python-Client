@@ -1,11 +1,7 @@
-from settings import settings
-
-from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
+from tests import test_site_url, test_user_credentials
 
-credentials = UserCredential(settings['user_credentials']['username'],
-                             settings['user_credentials']['password'])
-ctx = ClientContext(settings['url']).with_credentials(credentials)
+ctx = ClientContext(test_site_url).with_credentials(test_user_credentials)
 
 source_folder_url = "/Shared Documents/Archive"
 target_folder_url = "/Docs/Archive/2012"

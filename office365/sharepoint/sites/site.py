@@ -19,6 +19,12 @@ class Site(BaseEntity):
     def __init__(self, context):
         super(Site, self).__init__(context, ResourcePath("Site", None))
 
+    @staticmethod
+    def from_url(url):
+        from office365.sharepoint.client_context import ClientContext
+        client = ClientContext(url)
+        return client.site
+
     def is_valid_home_site(self):
         result = ClientResult(None)
 

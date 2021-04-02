@@ -25,6 +25,39 @@ class Team(Entity):
         self.funSettings = TeamFunSettings()
 
     @property
+    def displayName(self):
+        """The name of the team."""
+        return self.properties.get('displayName', None)
+
+    @property
+    def description(self):
+        """An optional description for the team."""
+        return self.properties.get('description', None)
+
+    @property
+    def classification(self):
+        """An optional label. Typically describes the data or business sensitivity of the team.
+        Must match one of a pre-configured set in the tenant's directory."""
+        return self.properties.get('classification', None)
+
+    @property
+    def visibility(self):
+        """The visibility of the group and team. Defaults to Public."""
+        return self.properties.get('visibility', None)
+
+    @property
+    def webUrl(self):
+        """A hyperlink that will go to the team in the Microsoft Teams client. This is the URL that you get when
+        you right-click a team in the Microsoft Teams client and select Get link to team. This URL should be treated
+        as an opaque blob, and not parsed."""
+        return self.properties.get('webUrl', None)
+
+    @property
+    def createdDateTime(self):
+        """Timestamp at which the team was created."""
+        return self.properties.get('createdDateTime', None)
+
+    @property
     def channels(self):
         """The collection of channels & messages associated with the team."""
         return self.properties.get('channels',

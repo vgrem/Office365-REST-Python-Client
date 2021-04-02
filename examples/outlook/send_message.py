@@ -1,21 +1,8 @@
-import adal
-from settings import settings
-
+from examples import acquire_token_client_credentials
 from office365.graph_client import GraphClient
+from tests import test_user_principal_name, test_user_principal_name_alt
 
-
-def get_token():
-    """Acquire token via client credential flow (ADAL Python library is utilized)"""
-    authority_url = 'https://login.microsoftonline.com/{0}'.format(settings['tenant'])
-    auth_ctx = adal.AuthenticationContext(authority_url)
-    token = auth_ctx.acquire_token_with_client_credentials(
-        "https://graph.microsoft.com",
-        settings['client_credentials']['client_id'],
-        settings['client_credentials']['client_secret'])
-    return token
-
-
-client = GraphClient(get_token)
+client = GraphClient(acquire_token_client_credentials)
 message_json = {
     "Message": {
         "Subject": "Meet for lunch?",
@@ -26,7 +13,7 @@ message_json = {
         "ToRecipients": [
             {
                 "EmailAddress": {
-                    "Address": settings.get('first_account_name')
+                    "Address": test_user_principal_name_alt
                 }
             }
         ]
@@ -34,6 +21,5 @@ message_json = {
     "SaveToSentItems": "false"
 }
 
-user_name = settings.get('first_account_name')
-client.users[user_name].send_mail(message_json)
+client.users[test_user_principal_name].send_mail(message_json)
 client.execute_query()

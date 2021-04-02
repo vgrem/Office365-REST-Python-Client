@@ -1,19 +1,14 @@
 import os
 import tempfile
 
-from settings import settings
-
-from office365.runtime.auth.client_credential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
+from tests import test_site_url, test_client_credentials
 
-ctx = ClientContext(settings['url']).with_credentials(
-    ClientCredential(settings['client_credentials']['client_id'],
-                     settings['client_credentials']['client_secret']))
+ctx = ClientContext(test_site_url).with_credentials(test_client_credentials)
 
-# retrieve files from library
-files = ctx.web.lists.get_by_title("Documents").root_folder.files
-ctx.load(files)
-ctx.execute_query()
+# 1. retrieve file collection metadata from library root folder
+files = ctx.web.lists.get_by_title("Documents").root_folder.files.get().execute_query()
+# 2. start download process (per file)
 download_path = tempfile.mkdtemp()
 for file in files:
     print("Downloading file: {0} ...".format(file.properties["ServerRelativeUrl"]))

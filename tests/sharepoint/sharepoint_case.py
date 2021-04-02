@@ -1,24 +1,18 @@
 from unittest import TestCase
 
-from settings import settings
-
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
+from tests import test_site_url, test_client_credentials
 
 
 class SPTestCase(TestCase):
     """SharePoint specific test case base class"""
 
     client = None  # type: ClientContext
-    client_id = settings.get('client_credentials').get('client_id')
-    client_secret = settings.get('client_credentials').get('client_secret')
-    client_credentials = ClientCredential(client_id, client_secret)
-    site_url = settings.get('url')
-    test_user_name = settings.get('first_account_name')
 
     @classmethod
     def setUpClass(cls):
-        cls.client = ClientContext(settings['url']).with_credentials(cls.client_credentials)
+        cls.client = ClientContext(test_site_url).with_credentials(test_client_credentials)
 
     @staticmethod
     def ensure_list(web, list_properties):

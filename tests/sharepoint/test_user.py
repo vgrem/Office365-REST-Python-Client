@@ -1,4 +1,4 @@
-from settings import settings
+from tests import test_tenant
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.changes.change_query import ChangeQuery
@@ -26,7 +26,7 @@ class TestSharePointUser(SPTestCase):
 
     def test4_update_user(self):
         user_to_update = self.__class__.target_user
-        user_to_update.set_property("Email", "support@{0}".format(settings["tenant"])).update().execute_query()
+        user_to_update.set_property("Email", "support@{0}".format(test_tenant)).update().execute_query()
 
     def test5_get_user_permissions(self):
         perms_result = self.client.web.get_user_effective_permissions(self.__class__.target_user.login_name)

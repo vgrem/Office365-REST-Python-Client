@@ -1,6 +1,6 @@
 import os
 
-from tests import random_seed
+from tests import random_seed, test_client_credentials
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.changes.change_query import ChangeQuery
@@ -66,7 +66,7 @@ class TestSharePointFile(SPTestCase):
 
     def test4_get_file_from_absolute_url(self):
         file_abs_url = self.client.base_url + self.__class__.target_file.serverRelativeUrl
-        file = File.from_url(file_abs_url).with_credentials(self.client_credentials).get().execute_query()
+        file = File.from_url(file_abs_url).with_credentials(test_client_credentials).get().execute_query()
         self.assertIsNotNone(file.serverRelativeUrl)
 
     def test5_create_file_anon_link(self):

@@ -1,4 +1,4 @@
-from office365.outlook.item import Item
+from office365.mail.item import Item
 
 
 class Event(Item):

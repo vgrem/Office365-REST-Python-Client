@@ -1,25 +1,21 @@
 import urllib.parse
 from unittest import TestCase
 
-from settings import settings
-
-from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
 from office365.sharepoint.sharing.sharing_result import SharingResult
 from office365.sharepoint.webs.web import Web
+from tests import test_site_url, test_user_credentials
 
 
 class TestSharePointSharing(TestCase):
     target_user = None  # type: User
-    target_file_url = urllib.parse.urljoin(settings['url'], "/SitePages/Home.aspx")
+    target_file_url = urllib.parse.urljoin(test_site_url, "/SitePages/Home.aspx")
 
     @classmethod
     def setUpClass(cls):
-        credentials = UserCredential(user_name=settings['user_credentials']['username'],
-                                     password=settings['user_credentials']['password'])
-        cls.client = ClientContext(settings['url']).with_credentials(credentials)
+        cls.client = ClientContext(test_site_url).with_credentials(test_user_credentials)
 
         current_user = cls.client.web.current_user.get().execute_query()
         cls.target_user = current_user

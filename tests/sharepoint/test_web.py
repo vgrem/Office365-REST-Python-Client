@@ -1,8 +1,7 @@
 from random import randint
 
-from settings import settings
+from tests import test_site_url
 from tests.sharepoint.sharepoint_case import SPTestCase
-
 from office365.sharepoint.lists.list_template_type import ListTemplateType
 from office365.sharepoint.permissions.base_permissions import BasePermissions
 from office365.sharepoint.permissions.permission_kind import PermissionKind
@@ -26,13 +25,13 @@ class TestSharePointWeb(SPTestCase):
         self.__class__.target_user = current_user
 
     def test2_get_web_from_page_url(self):
-        page_url = "{site_url}SitePages/Home.aspx".format(site_url=settings['url'])
+        page_url = "{site_url}SitePages/Home.aspx".format(site_url=test_site_url)
         result = Web.get_web_url_from_page_url(self.client, page_url)
         self.client.execute_query()
         self.assertIsNotNone(result.value)
 
     def test3_get_list_item_by_url(self):
-        page_url = "{site_url}SitePages/Home.aspx".format(site_url=settings['url'])
+        page_url = "{site_url}SitePages/Home.aspx".format(site_url=test_site_url)
         target_item = self.client.web.get_list_item(page_url).execute_query()
         self.assertIsNotNone(target_item.resource_path)
 
@@ -108,12 +107,12 @@ class TestSharePointWeb(SPTestCase):
         self.assertIsNotNone(catalog.title)
 
     def test_15_get_document_libraries(self):
-        collection = Web.get_document_libraries(self.client, settings["url"])
+        collection = Web.get_document_libraries(self.client, test_site_url)
         self.client.execute_query()
         self.assertGreater(len(collection), 0)
 
     def test_16_get_document_and_media_libraries(self):
-        collection = Web.get_document_and_media_libraries(self.client, settings["url"], True)
+        collection = Web.get_document_and_media_libraries(self.client, test_site_url, True)
         self.client.execute_query()
         self.assertGreater(len(collection), 0)
 

@@ -1,6 +1,6 @@
 from office365.sharepoint.utilities.email_properties import EmailProperties
 from office365.sharepoint.utilities.utility import Utility
-from settings import settings
+from tests import test_user_principal_name
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 
@@ -22,6 +22,6 @@ class TestUtility(SPTestCase):
 
     def test3_send_email(self):
         email_props = EmailProperties("The new cafeteria is open.", "Meet for lunch?",
-                                      [settings.get('first_account_name')])
+                                      [test_user_principal_name])
         Utility.send_email(self.client, email_props)
         self.client.execute_query()

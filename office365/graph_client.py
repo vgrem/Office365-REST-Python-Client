@@ -1,16 +1,18 @@
 from office365.actions.download_content_query import DownloadContentQuery
 from office365.actions.search_query import SearchQuery
 from office365.actions.upload_content_query import UploadContentQuery
+from office365.directory.applicationCollection import ApplicationCollection
 from office365.directory.directory import Directory
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.directory.group_collection import GroupCollection
 from office365.directory.groupSettingTemplateCollection import GroupSettingTemplateCollection
+from office365.directory.identityProviderCollection import IdentityProviderCollection
 from office365.directory.user import User
 from office365.directory.userCollection import UserCollection
 from office365.onedrive.driveCollection import DriveCollection
 from office365.onedrive.sharedDriveItemCollection import SharedDriveItemCollection
 from office365.onedrive.siteCollection import SiteCollection
-from office365.outlook.contact_collection import ContactCollection
+from office365.mail.contact_collection import ContactCollection
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
@@ -141,3 +143,13 @@ class GraphClient(ClientRuntimeContext):
     def directory(self):
         """Represents a deleted item in the directory"""
         return Directory(self, ResourcePath("directory"))
+
+    @property
+    def identityProviders(self):
+        """Represents a deleted item in the directory"""
+        return IdentityProviderCollection(self, ResourcePath("identityProviders"))
+
+    @property
+    def applications(self):
+        """Get the list of applications in this organization."""
+        return ApplicationCollection(self, ResourcePath("applications"))

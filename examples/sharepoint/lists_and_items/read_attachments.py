@@ -1,14 +1,10 @@
 import os
 import tempfile
 
-from settings import settings
-
-from office365.runtime.auth.client_credential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
+from tests import test_client_credentials, test_site_url
 
-creds = ClientCredential(settings.get('client_credentials').get('client_id'),
-                         settings.get('client_credentials').get('client_secret'))
-ctx = ClientContext(settings['url']).with_credentials(creds)
+ctx = ClientContext(test_site_url).with_credentials(test_client_credentials)
 
 download_path = tempfile.mkdtemp()
 

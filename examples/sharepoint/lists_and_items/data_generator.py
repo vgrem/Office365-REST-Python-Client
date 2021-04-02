@@ -1,12 +1,11 @@
 import os
 
 from faker import Faker
-from settings import settings
 
-from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.lists.list_creation_information import ListCreationInformation
 from office365.sharepoint.lists.list_template_type import ListTemplateType
+from tests import test_team_site_url, test_user_credentials
 
 
 def ensure_list(web, list_properties):
@@ -56,7 +55,7 @@ def generate_contacts(context):
                                 )
 
     fake = Faker()
-    total_amount = 200
+    total_amount = 2
     for idx in range(0, total_amount):
         contact_properties = {
             'Title': fake.name(),
@@ -70,14 +69,11 @@ def generate_contacts(context):
             'WorkCountry': fake.country(),
             'WebPage': {'Url': fake.url()}
         }
-        contact_item = contacts_list.add_item(contact_properties)
-        context.execute_query()
+        contact_item = contacts_list.add_item(contact_properties).execute_query()
         print("({0} of {1}) Contact '{2}' has been created".format(idx, total_amount, contact_item.properties["Title"]))
 
 
 if __name__ == '__main__':
-    ctx = ClientContext(settings.get('team_site_url')).with_credentials(
-                                                 UserCredential(settings['user_credentials']['username'],
-                                                                settings['user_credentials']['password']))
+    ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
     # generate_contacts(ctx)
     generate_documents(ctx)

@@ -1,17 +1,12 @@
-from office365.runtime.auth.client_credential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.fields.field_multi_user_value import FieldMultiUserValue
 from office365.sharepoint.fields.field_user_value import FieldUserValue
 from office365.sharepoint.lists.list_creation_information import ListCreationInformation
 from office365.sharepoint.lists.list_template_type import ListTemplateType
-from settings import settings
-from tests import random_seed
+from tests import create_unique_name, test_site_url, test_client_credentials
 
-credentials = ClientCredential(settings['client_credentials']['client_id'],
-                               settings['client_credentials']['client_secret'])
-ctx = ClientContext(settings.get('url')).with_credentials(credentials)
-
-list_title = "Tasks N%s" % random_seed
+ctx = ClientContext(test_site_url).with_credentials(test_client_credentials)
+list_title = create_unique_name("Tasks N")
 list_create_info = ListCreationInformation(list_title,
                                            None,
                                            ListTemplateType.TasksWithTimelineAndHierarchy)

@@ -1,8 +1,8 @@
-from office365.outlook.event import Event
+from office365.calendar.event import Event
 from tests.graph_case import GraphTestCase
 
 
-class TestOutlookCalendar(GraphTestCase):
+class TestOutlookEvent(GraphTestCase):
     target_event = None  # type: Event
 
     def test1_create_event(self):

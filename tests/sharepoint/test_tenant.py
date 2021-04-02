@@ -1,27 +1,22 @@
 from random import randint
 from unittest import TestCase
 
-from settings import settings
-
-from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.tenant.administration.site_properties import SiteProperties
 from office365.sharepoint.tenant.administration.site_properties_collection import SitePropertiesCollection
 from office365.sharepoint.tenant.administration.tenant import Tenant
 from office365.sharepoint.tenant.tenant_settings import TenantSettings
+from tests import test_site_url, test_admin_site_url, test_user_credentials, test_team_site_url
 
 
 class TestTenant(TestCase):
     target_site_props = None  # type: SiteProperties
-    target_site_url = "{base_url}sites/{site_name}".format(base_url=settings['url'],
+    target_site_url = "{base_url}sites/{site_name}".format(base_url=test_site_url,
                                                            site_name="Site_" + str(randint(0, 10000)))
 
     @classmethod
     def setUpClass(cls):
-        credentials = UserCredential(settings['user_credentials']['username'],
-                                     settings['user_credentials']['password'])
-
-        cls.client = ClientContext(settings.get("admin_site_url")).with_credentials(credentials)
+        cls.client = ClientContext(test_admin_site_url).with_credentials(test_user_credentials)
         cls.tenant = Tenant(cls.client)
 
     def test1_get_tenant(self):
@@ -40,8 +35,7 @@ class TestTenant(TestCase):
     #    self.assertIsNotNone(result.value)
 
     def test4_get_site_health_status(self):
-        site_url = settings.get("team_site_url")
-        result = self.tenant.get_site_health_status(site_url)
+        result = self.tenant.get_site_health_status(test_team_site_url)
         self.tenant.execute_query()
         self.assertIsNotNone(result.value)
         # self.assertIsInstance(result.value, PortalHealthStatus)

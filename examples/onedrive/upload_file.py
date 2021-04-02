@@ -1,26 +1,10 @@
 import os
 
-import msal
-
+from examples import acquire_token_client_credentials
 from office365.graph_client import GraphClient
-from settings import settings
+from tests import settings
 
-
-def acquire_token():
-    """
-    Acquire token (MSAL)
-    """
-    authority_url = 'https://login.microsoftonline.com/{0}'.format(settings.get('tenant'))
-    app = msal.ConfidentialClientApplication(
-        authority=authority_url,
-        client_id=settings.get('client_credentials').get('client_id'),
-        client_credential=settings.get('client_credentials').get('client_secret')
-    )
-    result = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
-    return result
-
-
-client = GraphClient(acquire_token)
+client = GraphClient(acquire_token_client_credentials)
 user_name = settings.get('first_account_name')
 target_drive = client.users[user_name].drive
 

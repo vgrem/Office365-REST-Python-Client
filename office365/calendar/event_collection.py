@@ -1,9 +1,9 @@
-from office365.outlook.event import Event
-from office365.runtime.client_object_collection import ClientObjectCollection
+from office365.calendar.event import Event
+from office365.entity_collection import EntityCollection
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 
 
-class EventCollection(ClientObjectCollection):
+class EventCollection(EntityCollection):
     """Event's collection"""
     def __init__(self, context, resource_path=None):
         super(EventCollection, self).__init__(context, Event, resource_path)

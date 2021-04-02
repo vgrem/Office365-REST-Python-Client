@@ -31,9 +31,8 @@ from office365.sharepoint.recyclebin.recycleBinItemCollection import RecycleBinI
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
 from office365.sharepoint.sharing.objectSharingSettings import ObjectSharingSettings
 from office365.sharepoint.sharing.sharing_result import SharingResult
-from office365.sharepoint.ui.applicationpages.clientPeoplePickerQueryParameters import ClientPeoplePickerQueryParameters
-from office365.sharepoint.ui.applicationpages.clientPeoplePickerWebServiceInterface import (
-    ClientPeoplePickerWebServiceInterface,
+from office365.sharepoint.ui.applicationpages.client_people_picker import (
+    ClientPeoplePickerWebServiceInterface, ClientPeoplePickerQueryParameters
 )
 from office365.sharepoint.webs.regional_settings import RegionalSettings
 from office365.sharepoint.webs.web_information_collection import WebInformationCollection
@@ -65,6 +64,12 @@ class Web(SecurableObject):
         qry = GetWebUrlFromPageUrlQuery(context, page_full_url)
         context.add_query(qry)
         return qry.return_type
+
+    def get_all_client_side_components(self):
+        result = ClientResult(None)
+        qry = ServiceOperationQuery(self, "getAllClientSideComponents", None, None, None, result)
+        self.context.add_query(qry)
+        return result
 
     def get_sub_webs_filtered_for_current_user(self, query):
         """Returns a collection of objects that contain metadata about subsites of the current site (2) in which the

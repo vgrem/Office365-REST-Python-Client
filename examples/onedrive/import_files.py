@@ -1,22 +1,9 @@
 import os
 from os.path import isfile, join
 
-import adal
-from settings import settings
-
+from examples import acquire_token_client_credentials
 from office365.graph_client import GraphClient
-
-
-def get_token():
-    """Acquire token via client credential flow
-    """
-    authority_url = 'https://login.microsoftonline.com/{0}'.format(settings['tenant'])
-    auth_ctx = adal.AuthenticationContext(authority_url)
-    token = auth_ctx.acquire_token_with_client_credentials(
-        "https://graph.microsoft.com",
-        settings['client_credentials']['client_id'],
-        settings['client_credentials']['client_secret'])
-    return token
+from tests import load_settings
 
 
 def upload_files(remote_drive, local_root_path):
@@ -35,9 +22,9 @@ def upload_files(remote_drive, local_root_path):
             print("File '{0}' uploaded into {1}".format(path, uploaded_drive_item.web_url), )
 
 
-# get target drive
-client = GraphClient(get_token)
+settings = load_settings()
+client = GraphClient(acquire_token_client_credentials)
 user_name = settings.get('test_alt_account_name')
-target_drive = client.users[user_name].drive
+target_drive = client.users[user_name].drive  # get target drive
 # import local files into OneDrive
 upload_files(target_drive, "../data")

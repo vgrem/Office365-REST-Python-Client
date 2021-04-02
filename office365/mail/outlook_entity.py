@@ -13,7 +13,7 @@ class OutlookEntity(ClientObject):
         return self
 
     def delete_object(self):
-        """Deletes the outlook entity."""
+        """Deletes the mail entity."""
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         return self

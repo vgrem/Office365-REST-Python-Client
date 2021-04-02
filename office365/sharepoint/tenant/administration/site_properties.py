@@ -19,5 +19,13 @@ class SiteProperties(BaseEntity):
             #    "getById", [target_site.properties['Id']], self._parent_collection.resource_path)
 
     @property
+    def url(self):
+        return self.properties.get('Url', None)
+
+    @property
+    def compatibilityLevel(self):
+        return self.properties.get('CompatibilityLevel', None)
+
+    @property
     def entity_type_name(self):
         return "Microsoft.Online.SharePoint.TenantAdministration.SiteProperties"

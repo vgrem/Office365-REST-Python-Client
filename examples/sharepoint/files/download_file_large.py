@@ -1,21 +1,15 @@
 import os
 import tempfile
 
-from settings import settings
-
-from office365.runtime.auth.client_credential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
+from tests import test_team_site_url, test_client_credentials
 
 
 def print_download_progress(offset):
     print("Downloaded '{0}' bytes...".format(offset))
 
 
-site_url = settings.get('url') + "/sites/team"
-credentials = ClientCredential(settings.get('client_credentials').get('client_id'),
-                               settings.get('client_credentials').get('client_secret'))
-ctx = ClientContext(site_url).with_credentials(credentials)
-
+ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 file_url = '/sites/team/Shared Documents/big_buck_bunny.mp4'
 source_file = ctx.web.get_file_by_server_relative_url(file_url)
 local_file_name = os.path.join(tempfile.mkdtemp(), os.path.basename(file_url))
