@@ -1,7 +1,7 @@
 from office365.sharepoint.fields.field_choice import FieldChoice
 from office365.sharepoint.fields.field_geolocation_value import FieldGeolocationValue
 from office365.sharepoint.fields.field_url_value import FieldUrlValue
-from tests import random_seed
+from tests import create_unique_name
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.fields.field_creation_information import FieldCreationInformation
@@ -35,7 +35,7 @@ class TestFieldValue(SPTestCase):
         cls.lookup_field_name = "RelatedDocuments"
         cls.target_list = cls.ensure_list(cls.client.web,
                                           ListCreationInformation(
-                                              "Tasks N%s" % random_seed,
+                                              create_unique_name("Tasks N"),
                                               None,
                                               ListTemplateType.TasksWithTimelineAndHierarchy))
         cls.lookup_list = cls.client.web.default_document_library().get().execute_query()

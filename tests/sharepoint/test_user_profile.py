@@ -66,9 +66,14 @@ class TestUserProfile(TestCase):
         else:
             people_manager.follow(target_user.login_name)
 
-    def test8_get_followers(self):
+    def test8_get_followers_for(self):
         people_manager = PeopleManager(self.my_client)
         target_user = self.my_client.web.ensure_user(test_user_principal_name).execute_query()
         result = people_manager.get_followers_for(target_user.login_name)
         people_manager.execute_query()
         self.assertIsInstance(result.value, PersonPropertiesCollection)
+
+    def test9_get_my_followers(self):
+        people_manager = PeopleManager(self.my_client)
+        result = people_manager.get_my_followers().execute_query()
+        self.assertIsInstance(result., PersonPropertiesCollection)

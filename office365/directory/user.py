@@ -1,6 +1,7 @@
 from office365.calendar.calendar import Calendar
 from office365.calendar.calendar_collection import CalendarCollection
 from office365.calendar.calendar_group_collection import CalendarGroupCollection
+from office365.calendar.meeting_time_suggestions_result import MeetingTimeSuggestionsResult
 from office365.directory.directoryObject import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.directory.objectIdentity import ObjectIdentity
@@ -10,6 +11,7 @@ from office365.mail.contact_collection import ContactCollection
 from office365.calendar.event_collection import EventCollection
 from office365.mail.message_collection import MessageCollection
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.teams.team_collection import TeamCollection
@@ -23,6 +25,45 @@ class User(DirectoryObject):
         qry = ServiceOperationQuery(self, "sendmail", None, message)
         self.context.add_query(qry)
         return self
+
+    def find_meeting_times(self):
+        """
+        Suggest meeting times and locations based on organizer and attendee availability, and time or location
+        constraints specified as parameters.
+
+        If findMeetingTimes cannot return any meeting suggestions, the response would indicate a reason in the
+        emptySuggestionsReason property. Based on this value, you can better adjust the parameters
+        and call findMeetingTimes again.
+
+        The algorithm used to suggest meeting times and locations undergoes fine-tuning from time to time.
+        In scenarios like test environments where the input parameters and calendar data remain static, expect
+        that the suggested results may differ over time.
+
+        """
+        result = MeetingTimeSuggestionsResult()
+        qry = ServiceOperationQuery(self, "findMeetingTimes", None, None, None, result)
+        self.context.add_query(qry)
+        return result
+
+    def get_calendar_view(self, start_dt, end_dt):
+        """Get the occurrences, exceptions, and single instances of events in a calendar view defined by a time range,
+           from the user's default calendar, or from some other calendar of the user's.
+
+        :param datetime.datetime end_dt: The end date and time of the time range, represented in ISO 8601 format.
+             For example, "2019-11-08T20:00:00-08:00".
+        :param datetime.datetime start_dt: The start date and time of the time range, represented in ISO 8601 format.
+            For example, "2019-11-08T19:00:00-08:00".
+
+        """
+        result = EventCollection(self.context, ResourcePath("calendarView", self.resource_path))
+        qry = ServiceOperationQuery(self, "calendarView", None, None, None, result)
+        self.context.add_query(qry)
+
+        def _construct_request(request):
+            request.method = HttpMethod.Get
+            request.url += "?startDateTime={0}&endDateTime={1}".format(start_dt.isoformat(), end_dt.isoformat())
+        self.context.before_execute(_construct_request)
+        return result
 
     def delete_object(self, permanent_delete=False):
         """

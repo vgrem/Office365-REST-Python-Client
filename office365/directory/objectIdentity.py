@@ -27,4 +27,3 @@ class ObjectIdentity(ClientValue):
         self.signInType = signInType
         self.issuer = issuer
         self.issuerAssignedId = issuerAssignedId
-

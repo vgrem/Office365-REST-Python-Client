@@ -4,7 +4,8 @@ from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
     SecondaryAdministratorsFieldsData
-from tests import random_seed, test_site_url, test_client_credentials, test_user_credentials, settings
+from tests import test_site_url, test_client_credentials, test_user_credentials, settings, create_unique_name, \
+    create_unique_file_name
 from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
 from office365.runtime.auth.providers.saml_token_provider import SamlTokenProvider
 from office365.runtime.http.request_options import RequestOptions
@@ -64,7 +65,7 @@ class TestSharePointClient(TestCase):
     def test_10_execute_update_batch_request(self):
         client = ClientContext(test_site_url).with_credentials(test_user_credentials)
         web = client.web
-        new_web_title = "Site %s" % random_seed
+        new_web_title = create_unique_name("Site")
         web.set_property("Title", new_web_title)
         web.update()
         client.execute_batch()
@@ -77,7 +78,7 @@ class TestSharePointClient(TestCase):
     def test_11_execute_get_and_update_batch_request(self):
         client = ClientContext(test_site_url).with_credentials(test_user_credentials)
         list_item = client.web.get_file_by_server_relative_url("/SitePages/Home.aspx").listItemAllFields
-        new_title = "Page %s" % random_seed
+        new_title = create_unique_name("Page")
         list_item.set_property("Title", new_title)
         list_item.update()
         client.execute_batch()
@@ -91,15 +92,12 @@ class TestSharePointClient(TestCase):
         pass
 
     def test_13_get_and_delete_batch_request(self):
-        file_name = "TestFile{0}.txt".format(random_seed)
+        file_name = create_unique_file_name("TestFile", "txt")
         client = ClientContext(test_site_url).with_credentials(test_user_credentials)
         list_pages = client.web.lists.get_by_title("Documents")
-        files = list_pages.root_folder.files
-        client.load(files)
-        client.execute_query()
+        files = list_pages.root_folder.files.get().execute_query()
         files_count_before = len(files)
-        new_file = list_pages.root_folder.upload_file(file_name, "-some content goes here-")
-        client.execute_query()
+        new_file = list_pages.root_folder.upload_file(file_name, "-some content goes here-").execute_query()
         self.assertTrue(new_file.name, file_name)
 
         new_file.delete_object()

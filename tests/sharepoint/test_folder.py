@@ -1,6 +1,6 @@
 from random import randint
 
-from tests import random_seed
+from tests import create_unique_name
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.changes.change_collection import ChangeCollection
@@ -21,7 +21,7 @@ class TestSharePointFolder(SPTestCase):
         super(TestSharePointFolder, cls).setUpClass()
         cls.target_list = cls.ensure_list(cls.client.web,
                                           ListCreationInformation(
-                                              "Documents %s" % random_seed,
+                                              create_unique_name("Documents"),
                                               None,
                                               ListTemplateType.DocumentLibrary))
 

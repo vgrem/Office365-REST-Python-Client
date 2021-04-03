@@ -23,6 +23,17 @@ class ListItem(SecurableObject):
     """An individual entry within a SharePoint list. Each list item has a schema that maps to fields in the list
     that contains the item, depending on the content type of the item."""
 
+    def get_wopi_frame_url(self, action):
+        """
+        Gets the full URL to the SharePoint frame page that initiates the SPWOPIAction object with the WOPI
+            application associated with the list item.
+        :param int action:
+        """
+        result = ClientResult(None)
+        qry = ServiceOperationQuery(self, "GetWOPIFrameUrl", [action], None, None, result)
+        self.context.add_query(qry)
+        return result
+
     def recycle(self):
         """Moves the listItem to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
 
@@ -188,29 +199,20 @@ class ListItem(SecurableObject):
     @property
     def parent_list(self):
         """Get parent List"""
-        if self.is_property_available("ParentList"):
-            return self.properties["ParentList"]
-        else:
-            from office365.sharepoint.lists.list import List
-            return List(self.context, ResourcePath("ParentList", self.resource_path))
+        from office365.sharepoint.lists.list import List
+        return self.properties.get("ParentList", List(self.context, ResourcePath("ParentList", self.resource_path)))
 
     @property
     def file(self):
         """Get file"""
-        if self.is_property_available("File"):
-            return self.properties["File"]
-        else:
-            from office365.sharepoint.files.file import File
-            return File(self.context, ResourcePath("File", self.resource_path))
+        from office365.sharepoint.files.file import File
+        return self.properties.get("File", File(self.context, ResourcePath("File", self.resource_path)))
 
     @property
     def folder(self):
         """Get folder"""
-        if self.is_property_available("Folder"):
-            return self.properties["Folder"]
-        else:
-            from office365.sharepoint.folders.folder import Folder
-            return Folder(self.context, ResourcePath("Folder", self.resource_path))
+        from office365.sharepoint.folders.folder import Folder
+        return self.properties.get("Folder", Folder(self.context, ResourcePath("Folder", self.resource_path)))
 
     @property
     def attachment_files(self):
@@ -226,10 +228,8 @@ class ListItem(SecurableObject):
     def content_type(self):
         """Gets a value that specifies the content type of the list item."""
         from office365.sharepoint.contenttypes.content_type import ContentType
-        return self.properties.get("ContentType",
-                                   ContentType(self.context,
-                                               ResourcePath("ContentType", self.resource_path))
-                                   )
+        return self.properties.get("ContentType", ContentType(self.context,
+                                                              ResourcePath("ContentType", self.resource_path)))
 
     @property
     def effective_base_permissions(self):
@@ -250,6 +250,22 @@ class ListItem(SecurableObject):
         :rtype: bool or None
         """
         return self.properties.get("CommentsDisabled", None)
+
+    @property
+    def file_system_object_type(self):
+        """
+        Gets a value that specifies whether the list item is a file or a list folder.
+        :rtype: str or None
+        """
+        return self.properties.get("FileSystemObjectType", None)
+
+    @property
+    def id(self):
+        """
+        Gets a value that specifies the list item identifier.
+        :rtype: int
+        """
+        return self.properties.get("Id", None)
 
     def get_property(self, name):
         if name == "ContentType":

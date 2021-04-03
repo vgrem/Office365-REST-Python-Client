@@ -333,18 +333,14 @@ class File(AbstractFile):
     @property
     def listItemAllFields(self):
         """Gets a value that specifies the list item fields values for the list item corresponding to the file."""
-        if self.is_property_available('ListItemAllFields'):
-            return self.properties['ListItemAllFields']
-        else:
-            return ListItem(self.context, ResourcePath("listItemAllFields", self.resource_path))
+        return self.properties.get('ListItemAllFields',
+                                   ListItem(self.context, ResourcePath("listItemAllFields", self.resource_path)))
 
     @property
     def versions(self):
         """Gets a value that returns a collection of file version objects that represent the versions of the file."""
-        if self.is_property_available('Versions'):
-            return self.properties['Versions']
-        else:
-            return FileVersionCollection(self.context, ResourcePath("versions", self.resource_path))
+        return self.properties.get('Versions',
+                                   FileVersionCollection(self.context, ResourcePath("versions", self.resource_path)))
 
     @property
     def serverRelativeUrl(self):

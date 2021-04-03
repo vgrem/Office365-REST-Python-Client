@@ -115,3 +115,9 @@ class PeopleManager(BaseEntity):
         qry = ServiceOperationQuery(self, "GetPeopleFollowedBy", params, None, None, result)
         self.context.add_query(qry)
         return result
+
+    def get_my_followers(self):
+        result = PersonPropertiesCollection(self.context)
+        qry = ServiceOperationQuery(self, "GetMyFollowers", None, None, None, result)
+        self.context.add_query(qry)
+        return result

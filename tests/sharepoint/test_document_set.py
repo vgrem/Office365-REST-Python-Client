@@ -1,4 +1,4 @@
-from tests import random_seed
+from tests import create_unique_name
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.documentmanagement.document_set import DocumentSet
@@ -15,7 +15,7 @@ class TestSharePointDocumentSet(SPTestCase):
         super(TestSharePointDocumentSet, cls).setUpClass()
         cls.target_lib = cls.ensure_list(cls.client.web,
                                          ListCreationInformation(
-                                             "Archive Documents N%s" % random_seed,
+                                             create_unique_name("Archive Documents"),
                                              None,
                                              ListTemplateType.DocumentLibrary))
 

@@ -4,7 +4,7 @@ from office365.sharepoint.fields.field import Field
 from office365.sharepoint.fields.field_creation_information import FieldCreationInformation
 from office365.sharepoint.fields.field_type import FieldType
 from office365.sharepoint.views.view_field_collection import ViewFieldCollection
-from tests import random_seed
+from tests import create_unique_name
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.changes.change_query import ChangeQuery
@@ -43,7 +43,7 @@ class TestSPView(SPTestCase):
 
     def test2_create_view(self):
         view_properties = ViewCreationInformation()
-        view_properties.Title = "My Tasks %s" % random_seed
+        view_properties.Title = create_unique_name("My Tasks")
         view_properties.PersonalView = True
         view_properties.Query = "<Where><Eq><FieldRef ID='AssignedTo' /><Value " \
                                 "Type='Integer'><UserID/></Value></Eq></Where> "

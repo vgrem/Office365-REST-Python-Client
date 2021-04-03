@@ -6,11 +6,13 @@ from configparser import BasicInterpolation, ConfigParser
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.user_credential import UserCredential
 
-random_seed = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
-
 
 def create_unique_name(prefix):
     return prefix + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+
+
+def create_unique_file_name(prefix, ext):
+    return ".".join([create_unique_name(prefix), ext])
 
 
 class SecEnvInterpolation(BasicInterpolation):

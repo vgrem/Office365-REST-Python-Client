@@ -2,4 +2,4 @@ requests==2.25.1
 requests_ntlm [NTLMAuthentication]
 setuptools==54.2.0
 msal==1.5.1
-
+pytz==2021.1

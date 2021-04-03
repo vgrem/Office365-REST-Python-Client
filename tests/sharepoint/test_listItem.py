@@ -1,9 +1,9 @@
 from random import randint
 from time import sleep
 
-from tests import random_seed
+from office365.sharepoint.types.wopi_action import SPWOPIAction
+from tests import create_unique_name
 from tests.sharepoint.sharepoint_case import SPTestCase
-
 from office365.sharepoint.listitems.caml.caml_query import CamlQuery
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.list import List
@@ -24,7 +24,7 @@ class TestSharePointListItem(SPTestCase):
                                                                   None,
                                                                   ListTemplateType.Tasks)
                                           )
-        cls.default_title = "Task %s" % random_seed
+        cls.default_title = create_unique_name("Task")
         cls.batch_items_count = 3
 
     @classmethod
@@ -51,23 +51,28 @@ class TestSharePointListItem(SPTestCase):
         self.assertIsNotNone(new_folder.serverRelativeUrl)
 
     def test4_get_list_item(self):
-        item_id = self.__class__.target_item.properties["Id"]
+        item_id = self.__class__.target_item.id
         item = self.target_list.get_item_by_id(item_id).get().execute_query()
-        self.assertIsNotNone(item.properties["Id"])
+        self.assertIsNotNone(item.id)
 
     def test5_get_list_item_via_caml(self):
-        item_id = self.__class__.target_item.properties["Id"]
+        item_id = self.__class__.target_item.id
         caml_query = CamlQuery.parse(
             "<Where><Eq><FieldRef Name='ID' /><Value Type='Counter'>{0}</Value></Eq></Where>".format(item_id))
         result = self.target_list.get_items(caml_query).execute_query()
         self.assertEqual(len(result), 1)
 
-    def test6_update_listItem(self):
+    def test6_get_wopi_frame_url(self):
+        result = self.__class__.target_item.get_wopi_frame_url(SPWOPIAction.default)
+        self.client.execute_query()
+        self.assertIsNotNone(result.value)
+
+    def test7_update_listItem(self):
         item_to_update = self.__class__.target_item.get().execute_query()
         last_updated = item_to_update.properties['Modified']
 
         sleep(1)
-        new_title = "Task item %s" % random_seed
+        new_title = create_unique_name("Task item")
         item_to_update.set_property('Title', new_title)
         item_to_update.update()
         self.client.load(item_to_update)  # retrieve updated
@@ -75,13 +80,13 @@ class TestSharePointListItem(SPTestCase):
         self.assertNotEqual(item_to_update.properties["Modified"], last_updated)
         self.assertNotEqual(self.default_title, new_title)
 
-    def test7_systemUpdate_listItem(self):
+    def test8_systemUpdate_listItem(self):
         item_to_update = self.__class__.target_item
         self.client.load(item_to_update)
         self.client.execute_query()
         last_updated = item_to_update.properties['Modified']
 
-        new_title = "Task item %s" % random_seed
+        new_title = create_unique_name("Task item %s")
         item_to_update.set_property('Title', new_title)
         item_to_update.system_update()
         self.client.load(item_to_update)  # retrieve updated
@@ -89,12 +94,12 @@ class TestSharePointListItem(SPTestCase):
         self.assertEqual(item_to_update.properties["Modified"], last_updated)
         self.assertNotEqual(self.default_title, new_title)
 
-    def test8_update_overwrite_version(self):
+    def test9_update_overwrite_version(self):
         item_to_update = self.__class__.target_item
         item_to_update.update_overwrite_version()
         self.client.execute_query()
 
-    def test9_set_comments_disabled(self):
+    def test_10_set_comments_disabled(self):
         comments = self.__class__.target_item.set_comments_disabled(False).execute_query()
         self.assertIsNotNone(comments.resource_path)
 
