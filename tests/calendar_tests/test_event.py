@@ -38,7 +38,7 @@ class TestOutlookEvent(GraphTestCase):
         self.assertIsNotNone(event.id)
         self.__class__.target_event = event
 
-    def test2_get_events(self):
+    def test2_list_my_events(self):
         events = self.client.me.events.get().execute_query()
         self.assertGreaterEqual(len(events), 1)
 

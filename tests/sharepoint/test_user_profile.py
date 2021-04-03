@@ -76,4 +76,4 @@ class TestUserProfile(TestCase):
     def test9_get_my_followers(self):
         people_manager = PeopleManager(self.my_client)
         result = people_manager.get_my_followers().execute_query()
-        self.assertIsInstance(result., PersonPropertiesCollection)
+        self.assertIsInstance(result, PersonPropertiesCollection)

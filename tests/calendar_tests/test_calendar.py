@@ -43,6 +43,13 @@ class TestCalendar(GraphTestCase):
         events = self.client.me.get_calendar_view(start_dt=start_time, end_dt=end_time).execute_query()
         self.assertIsNotNone(events.resource_path)
 
+    def test4_get_reminder_view(self):
+        end_time = datetime.utcnow()
+        start_time = end_time - timedelta(days=14)
+        reminders = self.client.me.get_reminder_view(start_dt=start_time, end_dt=end_time)
+        self.client.execute_query()
+        self.assertIsNotNone(reminders)
+
     def test5_list_events(self):
         events = self.client.me.calendar.events.get().execute_query()
         self.assertIsNotNone(events.resource_path)

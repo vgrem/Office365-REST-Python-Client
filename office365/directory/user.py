@@ -2,6 +2,7 @@ from office365.calendar.calendar import Calendar
 from office365.calendar.calendar_collection import CalendarCollection
 from office365.calendar.calendar_group_collection import CalendarGroupCollection
 from office365.calendar.meeting_time_suggestions_result import MeetingTimeSuggestionsResult
+from office365.calendar.reminder import Reminder
 from office365.directory.directoryObject import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.directory.objectIdentity import ObjectIdentity
@@ -62,6 +63,28 @@ class User(DirectoryObject):
         def _construct_request(request):
             request.method = HttpMethod.Get
             request.url += "?startDateTime={0}&endDateTime={1}".format(start_dt.isoformat(), end_dt.isoformat())
+        self.context.before_execute(_construct_request)
+        return result
+
+    def get_reminder_view(self, start_dt, end_dt):
+        """Get the occurrences, exceptions, and single instances of events in a calendar view defined by a time range,
+                   from the user's default calendar, or from some other calendar of the user's.
+
+        :param datetime.datetime end_dt: The end date and time of the event for which the reminder is set up.
+            The value is represented in ISO 8601 format, for example, "2015-11-08T20:00:00.0000000"..
+        :param datetime.datetime start_dt: The start date and time of the event for which the reminder is set up.
+            The value is represented in ISO 8601 format, for example, "2015-11-08T19:00:00.0000000".
+        """
+        result = ClientValueCollection(Reminder)
+        params = {
+            "startDateTime": start_dt.isoformat(),
+            "endDateTime": end_dt.isoformat(),
+        }
+        qry = ServiceOperationQuery(self, "reminderView", params, None, None, result)
+        self.context.add_query(qry)
+
+        def _construct_request(request):
+            request.method = HttpMethod.Get
         self.context.before_execute(_construct_request)
         return result
 
