@@ -6,7 +6,7 @@ class BaseEntity(ClientObject):
 
     def __init__(self, context, resource_path=None, namespace="SP", parent_collection=None):
         """
-        SharePoint entity
+        SharePoint base entity
 
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
         :param ResourcePath resource_path: Resource Path

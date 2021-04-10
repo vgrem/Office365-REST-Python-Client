@@ -32,9 +32,6 @@ class Tenant(BaseEntity):
     def hub_sites(self, siteUrl):
         pass
 
-    def connect_site_to_hub_site_by_id(self, siteUrl, hubSiteId):
-        pass
-
     def check_tenant_licenses(self, licenses):
         """
         Checks whether a tenant has the specified licenses.
@@ -166,6 +163,21 @@ class Tenant(BaseEntity):
                                     site_props_col)
         self.context.add_query(qry)
         return site_props_col
+
+    def connect_site_to_hub_site_by_id(self, site_url, hub_site_id):
+        """
+
+        :param str site_url:
+        :param str hub_site_id:
+        :return:
+        """
+        params = {
+            "siteUrl": site_url,
+            "hubSiteId": hub_site_id
+        }
+        qry = ServiceOperationQuery(self, "ConnectSiteToHubSiteById", None, params, None, None)
+        self.context.add_query(qry)
+        return self
 
     @property
     def root_site_url(self):

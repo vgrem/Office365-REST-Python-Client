@@ -10,6 +10,7 @@ from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.comments.comment_collection import CommentCollection
 from office365.sharepoint.fields.field_lookup_value import FieldLookupValue
 from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupValue
+from office365.sharepoint.likes.likedByInformation import LikedByInformation
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
 from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
@@ -266,6 +267,16 @@ class ListItem(SecurableObject):
         :rtype: int
         """
         return self.properties.get("Id", None)
+
+    @property
+    def liked_by_information(self):
+        """
+        Gets a value that specifies the list item identifier.
+        :rtype: int
+        """
+        return self.properties.get("LikedByInformation",
+                                   LikedByInformation(self.context,
+                                                      ResourcePath("likedByInformation", self.resource_path)))
 
     def get_property(self, name):
         if name == "ContentType":

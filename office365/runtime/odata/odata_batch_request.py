@@ -94,6 +94,10 @@ class ODataBatchRequest(ClientRequest):
         status_result = re.match(response_status_regex, lines[0])
         status_info = status_result.groups()
 
+        # validate for errors
+        if int(status_info[0]) >= 400:
+            raise ValueError(response)
+
         if status_info[1] == "No Content" or len(lines) < 3:
             headers_raw = lines[1:]
             return {

@@ -2,6 +2,7 @@ from office365.sharepoint.base_entity import BaseEntity
 
 
 class SiteProperties(BaseEntity):
+    """Contains a property bag of information about a site."""
 
     def __init__(self, context):
         super().__init__(context)
@@ -20,11 +21,29 @@ class SiteProperties(BaseEntity):
 
     @property
     def url(self):
+        """
+
+        :rtype: str
+        """
         return self.properties.get('Url', None)
 
     @property
     def compatibilityLevel(self):
+        """
+        Gets the compatibility level of the site.
+
+        :rtype: str
+        """
         return self.properties.get('CompatibilityLevel', None)
+
+    @property
+    def lock_state(self):
+        """
+        Gets or sets the lock state of the site.
+
+        :rtype: str
+        """
+        return self.properties.get('LockState', None)
 
     @property
     def entity_type_name(self):

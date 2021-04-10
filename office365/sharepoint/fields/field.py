@@ -1,3 +1,4 @@
+from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
@@ -60,10 +61,16 @@ class Field(BaseEntity):
         return field
 
     def enable_index(self):
-        pass
+        result = ClientResult(int)
+        qry = ServiceOperationQuery(self, "enableIndex", None, None, None, result)
+        self.context.add_query(qry)
+        return result
 
     def disable_index(self):
-        pass
+        result = ClientResult(int)
+        qry = ServiceOperationQuery(self, "disableIndex", None, None, None, result)
+        self.context.add_query(qry)
+        return result
 
     def set_show_in_display_form(self, flag):
         """Sets the value of the ShowInDisplayForm property for this fields.
@@ -101,6 +108,13 @@ class Field(BaseEntity):
         :rtype: str or None
         """
         return self.properties.get('Id', None)
+
+    @property
+    def default_formula(self):
+        """
+        :rtype: str or None
+        """
+        return self.properties.get('DefaultFormula', None)
 
     @property
     def schema_xml(self):
@@ -164,6 +178,38 @@ class Field(BaseEntity):
         :rtype: str or None
         """
         return self.properties.get('InternalName', None)
+
+    @property
+    def can_be_deleted(self):
+        """Gets a value that specifies whether the field can be deleted
+
+        :rtype: bool or None
+        """
+        return self.properties.get('CanBeDeleted', None)
+
+    @property
+    def client_side_component_id(self):
+        """
+        :rtype: str or None
+        """
+        return self.properties.get('ClientSideComponentId', None)
+
+    @property
+    def client_side_component_properties(self):
+        """
+        :rtype: str or None
+        """
+        return self.properties.get('ClientSideComponentProperties', None)
+
+    @property
+    def js_link(self):
+        """
+        When implemented in a derived class, gets or sets the name of an external JavaScript file that contains
+        any client rendering logic for fields of the derived type.
+
+        :rtype: str or None
+        """
+        return self.properties.get('JSLink', None)
 
     def set_property(self, name, value, persist_changes=True):
         super(Field, self).set_property(name, value, persist_changes)

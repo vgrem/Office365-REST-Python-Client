@@ -7,6 +7,7 @@ from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.actions.download_file import DownloadFileQuery
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.directory.user import User
 from office365.sharepoint.files.file_version_collection import FileVersionCollection
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.webparts.limited_webpart_manager import LimitedWebPartManager
@@ -343,6 +344,24 @@ class File(AbstractFile):
                                    FileVersionCollection(self.context, ResourcePath("versions", self.resource_path)))
 
     @property
+    def modified_by(self):
+        """
+        Gets a value that returns the user who last modified the file.
+
+        :rtype: office365.sharepoint.directory.user.User or None
+        """
+        return self.properties.get("ModifiedBy", User(self.context, ResourcePath("ModifiedBy", self.resource_path)))
+
+    @property
+    def locked_by_user(self):
+        """
+        Gets a value that returns the user that owns the current lock on the file.
+
+        :rtype: office365.sharepoint.directory.user.User or None
+        """
+        return self.properties.get("LockedByUser", User(self.context, ResourcePath("LockedByUser", self.resource_path)))
+
+    @property
     def serverRelativeUrl(self):
         """Gets the relative URL of the file based on the URL for the server.
 
@@ -379,6 +398,14 @@ class File(AbstractFile):
         return self.properties.get("Name", None)
 
     @property
+    def list_id(self):
+        """Gets the GUID that identifies the List containing the file.
+
+        :rtype: str or None
+        """
+        return self.properties.get("ListId", None)
+
+    @property
     def site_id(self):
         """Gets the GUID that identifies the site collection containing the file.
 
@@ -395,12 +422,47 @@ class File(AbstractFile):
         return self.properties.get("WebId", None)
 
     @property
+    def time_created(self):
+        """Gets a value that specifies when the file was created.
+
+        :rtype: str or None
+        """
+        return self.properties.get("TimeCreated", None)
+
+    @property
     def time_last_modified(self):
         """Specifies when the file was last modified.
 
         :rtype: str or None
         """
         return self.properties.get("TimeLastModified", None)
+
+    @property
+    def minor_version(self):
+        """
+        Gets a value that specifies the minor version of the file.
+
+        :rtype: int or None
+        """
+        return self.properties.get("MinorVersion", None)
+
+    @property
+    def major_version(self):
+        """
+        Gets a value that specifies the major version of the file.
+
+        :rtype: int or None
+        """
+        return self.properties.get("MajorVersion", None)
+
+    @property
+    def unique_id(self):
+        """
+        Gets a value that specifies the a file unique identifier
+
+        :rtype: str or None
+        """
+        return self.properties.get("UniqueId", None)
 
     def set_property(self, name, value, persist_changes=True):
         super(File, self).set_property(name, value, persist_changes)

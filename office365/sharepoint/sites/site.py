@@ -4,6 +4,7 @@ from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.change_collection import ChangeCollection
+from office365.sharepoint.eventreceivers.event_receiver_definition import EventReceiverDefinitionCollection
 from office365.sharepoint.features.feature_collection import FeatureCollection
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.principal.user import User
@@ -55,6 +56,11 @@ class Site(BaseEntity):
         return changes
 
     def get_recycle_bin_items(self, rowLimit=100, isAscending=True):
+        """
+
+        :param int rowLimit:
+        :param bool isAscending:
+        """
         result = RecycleBinItemCollection(self.context)
         payload = {
             "rowLimit": rowLimit,
@@ -158,18 +164,12 @@ class Site(BaseEntity):
     @property
     def root_web(self):
         """Get root web"""
-        if self.is_property_available('RootWeb'):
-            return self.properties['RootWeb']
-        else:
-            return Web(self.context, ResourcePath("RootWeb", self.resource_path))
+        return self.properties.get('RootWeb', Web(self.context, ResourcePath("RootWeb", self.resource_path)))
 
     @property
     def owner(self):
         """Gets or sets the owner of the site collection. (Read-only in sandboxed solutions.)"""
-        if self.is_property_available('owner'):
-            return self.properties['owner']
-        else:
-            return User(self.context, ResourcePath("owner", self.resource_path))
+        return self.properties.get('owner', User(self.context, ResourcePath("owner", self.resource_path)))
 
     @property
     def url(self):
@@ -203,10 +203,20 @@ class Site(BaseEntity):
                                    FeatureCollection(self.context,
                                                      ResourcePath("Features", self.resource_path), self))
 
+    @property
+    def event_receivers(self):
+        """Get Event receivers"""
+        return self.properties.get('EventReceivers',
+                                   EventReceiverDefinitionCollection(self.context,
+                                                                     ResourcePath("eventReceivers", self.resource_path),
+                                                                     self))
+
     def get_property(self, name):
         if name == "RecycleBin":
             return self.recycle_bin
         elif name == "RootWeb":
             return self.root_web
+        elif name == "EventReceivers":
+            return self.event_receivers
         else:
             return super(Site, self).get_property(name)

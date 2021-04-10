@@ -10,6 +10,7 @@ from office365.sharepoint.actions.getWebUrlFromPage import GetWebUrlFromPageUrlQ
 from office365.sharepoint.alerts.alert_collection import AlertCollection
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
+from office365.sharepoint.eventreceivers.event_receiver_definition import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.files.file import File
 from office365.sharepoint.folders.folder import Folder
@@ -562,32 +563,25 @@ class Web(SecurableObject):
             if self.is_property_available('Url'):
                 parent_web_url = self.properties['Url']
             return WebCollection(self.context,
-                                 ResourcePath("webs", self.resource_path),
-                                 parent_web_url)
+                                 ResourcePath("webs", self.resource_path), parent_web_url)
 
     @property
     def folders(self):
         """Get folder resources"""
-        if self.is_property_available('Folders'):
-            return self.properties['Folders']
-        else:
-            return FolderCollection(self.context, ResourcePath("folders", self.resource_path))
+        return self.properties.get('Folders',
+                                   FolderCollection(self.context, ResourcePath("folders", self.resource_path)))
 
     @property
     def lists(self):
         """Get web list collection"""
-        if self.is_property_available('Lists'):
-            return self.properties['Lists']
-        else:
-            return ListCollection(self.context, ResourcePath("lists", self.resource_path))
+        return self.properties.get('Lists',
+                                   ListCollection(self.context, ResourcePath("lists", self.resource_path)))
 
     @property
     def siteUsers(self):
         """Get site users"""
-        if self.is_property_available('SiteUsers'):
-            return self.properties['SiteUsers']
-        else:
-            return UserCollection(self.context, ResourcePath("siteUsers", self.resource_path))
+        return self.properties.get('SiteUsers',
+                                   UserCollection(self.context, ResourcePath("siteUsers", self.resource_path)))
 
     @property
     def siteGroups(self):
@@ -600,10 +594,8 @@ class Web(SecurableObject):
     @property
     def current_user(self):
         """Gets the current user."""
-        if self.is_property_available('CurrentUser'):
-            return self.properties['CurrentUser']
-        else:
-            return User(self.context, ResourcePath("CurrentUser", self.resource_path))
+        return self.properties.get('CurrentUser',
+                                   User(self.context, ResourcePath("CurrentUser", self.resource_path)))
 
     @property
     def parentWeb(self):
@@ -662,11 +654,40 @@ class Web(SecurableObject):
                                                                          self.resource_path)))
 
     @property
+    def event_receivers(self):
+        """Get Event receivers"""
+        return self.properties.get('EventReceivers',
+                                   EventReceiverDefinitionCollection(self.context,
+                                                                     ResourcePath("eventReceivers", self.resource_path),
+                                                                     self))
+
+    @property
     def url(self):
         """Gets the absolute URL for the website.
         :rtype: str or None
         """
         return self.properties.get('Url', None)
+
+    @property
+    def quick_launch_enabled(self):
+        """Gets a value that specifies whether the Quick Launch area is enabled on the site.
+        :rtype: bool or None
+        """
+        return self.properties.get('QuickLaunchEnabled', None)
+
+    @quick_launch_enabled.setter
+    def quick_launch_enabled(self, value):
+        """Sets a value that specifies whether the Quick Launch area is enabled on the site.
+        :type value: bool
+        """
+        self.set_property('QuickLaunchEnabled', value)
+
+    @property
+    def site_logo_url(self):
+        """Gets a value that specifies Site logo url.
+        :rtype: str or None
+        """
+        return self.properties.get('SiteLogoUrl', None)
 
     @property
     def list_templates(self):
@@ -686,10 +707,8 @@ class Web(SecurableObject):
     @property
     def regional_settings(self):
         """Gets the regional settings that are currently implemented on the website."""
-        if self.is_property_available('RegionalSettings'):
-            return self.properties['RegionalSettings']
-        else:
-            return RegionalSettings(self.context, ResourcePath("RegionalSettings", self.resource_path))
+        return self.properties.get('RegionalSettings',
+                                   RegionalSettings(self.context, ResourcePath("RegionalSettings", self.resource_path)))
 
     @property
     def recycle_bin(self):

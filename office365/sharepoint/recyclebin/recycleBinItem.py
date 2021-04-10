@@ -7,6 +7,7 @@ from office365.sharepoint.principal.user import User
 
 
 class RecycleBinItem(BaseEntity):
+    """Represents a Recycle Bin item in the Recycle Bin of a site or a site collection."""
 
     def delete_object(self):
         """Permanently deletes the Recycle Bin item."""
@@ -30,6 +31,23 @@ class RecycleBinItem(BaseEntity):
     def id(self):
         """Gets a value that specifies the identifier of the Recycle Bin item."""
         return self.properties.get('Id', None)
+
+    @property
+    def size(self):
+        """Gets a value that specifies the size of the Recycle Bin item in bytes.
+
+        :rtype: long or None
+        """
+        return self.properties.get('Size', None)
+
+    @property
+    def author(self):
+        """
+        Gets a value that specifies the user who created the Recycle Bin item.
+
+        :rtype: office365.sharepoint.directory.user.User or None
+        """
+        return self.properties.get("Author", User(self.context, ResourcePath("Author", self.resource_path)))
 
     @property
     def deleted_by(self):

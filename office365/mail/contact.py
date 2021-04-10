@@ -6,6 +6,4 @@ class Contact(Item):
 
     @property
     def id(self):
-        if self.is_property_available('id'):
-            return self.properties["id"]
-        return None
+        return self.properties.get("id", None)

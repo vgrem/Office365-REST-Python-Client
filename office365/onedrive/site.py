@@ -55,9 +55,7 @@ class Site(BaseItem):
     @property
     def sharepointids(self):
         """Returns identifiers useful for SharePoint REST compatibility."""
-        if self.is_property_available("sharepointIds"):
-            return self.properties['sharepointIds']
-        return None
+        return self.properties.get('sharepointIds', None)
 
     @property
     def sites(self):

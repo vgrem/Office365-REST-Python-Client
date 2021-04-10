@@ -7,6 +7,7 @@ from office365.runtime.resource_path_service_operation import ResourcePathServic
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
+from office365.sharepoint.eventreceivers.event_receiver_definition import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.fields.related_field_collection import RelatedFieldCollection
 from office365.sharepoint.files.checkedOutFileCollection import CheckedOutFileCollection
@@ -28,7 +29,7 @@ from office365.sharepoint.utilities.utility import Utility
 
 
 class List(SecurableObject):
-    """List resource"""
+    """Represents a list on a SharePoint Web site."""
 
     def __init__(self, context, resource_path=None):
         super(List, self).__init__(context, resource_path)
@@ -346,6 +347,14 @@ class List(SecurableObject):
         from office365.sharepoint.webs.web import Web
         return self.properties.get('ParentWeb',
                                    Web(self.context, ResourcePath("parentWeb", self.resource_path)))
+
+    @property
+    def event_receivers(self):
+        """Get Event receivers"""
+        return self.properties.get('EventReceivers',
+                                   EventReceiverDefinitionCollection(self.context,
+                                                                     ResourcePath("eventReceivers", self.resource_path),
+                                                                     self))
 
     @property
     def item_count(self):

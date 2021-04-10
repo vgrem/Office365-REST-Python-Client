@@ -25,3 +25,10 @@ class Change(BaseEntity):
         Returns the Id of the site of the changed item
         """
         return self.properties.get("SiteId", None)
+
+    @property
+    def time(self):
+        """
+        Gets a value that specifies the time that the object was modified.
+        """
+        return self.properties.get("Time", None)

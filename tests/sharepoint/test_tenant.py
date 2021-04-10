@@ -75,10 +75,10 @@ class TestTenant(TestCase):
     #    self.client.execute_query()
     #    self.assertIsNotNone(site_props)
 
-    # def test_10_get_site_by_url(self):
-    #    site_props = self.tenant.get_site_properties_by_url(self.__class__.target_site_url, False)
-    #    self.client.execute_query()
-    #    self.assertIsNotNone(site_props.properties['SiteUrl'], self.__class__.target_site_url)
+    def test_10_get_site_by_url(self):
+        site_props = self.tenant.get_site_properties_by_url(test_site_url, True)
+        self.client.execute_query()
+        self.assertIsNotNone(site_props.url)
     #    self.__class__.target_site_props = site_props
 
     # def test_11_update_site(self):
