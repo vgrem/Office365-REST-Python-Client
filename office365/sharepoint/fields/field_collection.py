@@ -73,6 +73,26 @@ class FieldCollection(BaseEntityCollection):
     def add_user_field(self):
         pass
 
+    def add_dependent_lookup_field(self, displayName, primaryLookupField, lookupField):
+        """Adds a secondary lookup field to a field (2) collection.
+        A reference (3) to the SP.Field that was added is returned.
+        :param str lookupField: Name of the field (2) from the target list (1) to include data from.
+        :param Field primaryLookupField: Main lookup field to associate the dependent lookup field with.
+            A dependent lookup field will include data from the list item referred to from the instance of the main
+            lookup field.
+        :param str displayName: Title of the added field
+        """
+        return_field = Field(self.context)
+        self.add_child(return_field)
+        parameters = {
+            "displayName": displayName,
+            "primaryLookupField": primaryLookupField,
+            "lookupField": lookupField
+        }
+        qry = ServiceOperationQuery(self, "AddDependentLookupField", None, parameters, None, return_field)
+        self.context.add_query(qry)
+        return return_field
+
     def add(self, field_create_information):
         """Adds a fields to the fields collection.
 
@@ -122,12 +142,14 @@ class FieldCollection(BaseEntityCollection):
                     field_params["web_id"] = parent_list.parent_web.properties["Id"]
                     field_params["list_id"] = parent_list.properties["Id"]
                     self._build_taxonomy_field_query(**field_params)
+
                 self._parent.ensure_properties(["Id", "ParentWeb"], _list_loaded)
             else:
 
                 def _web_loaded():
                     field_params["web_id"] = self.context.web.properties["Id"]
                     self._build_taxonomy_field_query(**field_params)
+
                 self.context.web.ensure_property("Id", _web_loaded)
 
         if text_field_id is None:
@@ -142,6 +164,7 @@ class FieldCollection(BaseEntityCollection):
             def _after_text_field_created(resp):
                 field_params["text_field_id"] = text_field.properties["Id"]
                 _create_taxonomy_field_inner()
+
             self.context.after_execute(_after_text_field_created, True)
         else:
             _create_taxonomy_field_inner()

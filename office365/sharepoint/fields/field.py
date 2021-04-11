@@ -211,6 +211,56 @@ class Field(BaseEntity):
         """
         return self.properties.get('JSLink', None)
 
+    @property
+    def hidden(self):
+        """
+        Gets a value that specifies whether the field is hidden in list views and list forms.
+
+        :rtype: bool or None
+        """
+        return self.properties.get('Hidden', None)
+
+    @hidden.setter
+    def hidden(self, val):
+        """
+        Sets a value that specifies whether the field is hidden in list views and list forms.
+        """
+        self.set_property("Hidden", val)
+
+    @property
+    def default_value(self):
+        """
+        Gets  a value that specifies the default value for the field.
+
+        :rtype: str or None
+        """
+        return self.properties.get('DefaultValue', None)
+
+    @default_value.setter
+    def default_value(self, val):
+        """
+        Sets a value that specifies the default value for the field.
+        """
+        self.set_property("DefaultValue", val)
+
+    @property
+    def type_display_name(self):
+        """
+        Gets a value that specifies the display name for the type of the field.
+
+        :rtype: str or None
+        """
+        return self.properties.get('TypeDisplayName', None)
+
+    @property
+    def type_short_description(self):
+        """
+        Gets a value that specifies the description for the type of the field.
+
+        :rtype: str or None
+        """
+        return self.properties.get('TypeShortDescription', None)
+
     def set_property(self, name, value, persist_changes=True):
         super(Field, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path

@@ -28,12 +28,11 @@ class ODataV4BatchRequest(ClientRequest):
             sub_qry = self._current_query.get(int(resp["id"]))
             self.context.pending_request().map_json(resp["body"], sub_qry.return_type)
 
-    def __iter__(self):
-        queries = [qry for qry in self.context.pending_request()]
+    def next_query(self):
+        queries = [qry for qry in self.context.pending_request().next_query()]
         if len(queries) > 0:
             batch_qry = BatchQuery(self.context, queries)  # Aggregate requests into batch request
-            self.context.clear_queries()
-            self._queries = [batch_qry]
+            self._current_query = batch_qry
             yield batch_qry
 
     def _prepare_payload(self):

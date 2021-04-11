@@ -22,10 +22,6 @@ class ClientRequest(object):
         self.beforeExecute = EventHandler()
         self.afterExecute = EventHandler()
 
-    def __iter__(self):
-        for qry in self._queries:
-            yield qry
-
     @property
     def context(self):
         return self._context
@@ -75,7 +71,7 @@ class ClientRequest(object):
 
     def execute_query(self):
         """Submit a pending request to the server"""
-        while self.next_query():
+        for _ in self.next_query():
             try:
                 request = self.build_request()
                 self.beforeExecute.notify(request)
@@ -132,9 +128,7 @@ class ClientRequest(object):
         return result
 
     def next_query(self):
-        list(iter(self))
-        if len(self._queries) == 0:
-            self._current_query = None
-        else:
-            self._current_query = self._queries.pop(0)
-        return self._current_query is not None
+        while len(self._queries) > 0:
+            qry = self._queries.pop(0)
+            self._current_query = qry
+            yield qry

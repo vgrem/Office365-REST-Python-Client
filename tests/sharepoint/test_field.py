@@ -13,7 +13,7 @@ class TestField(SPTestCase):
     target_field_name = "Title"
 
     def test_1_get_site_fields(self):
-        site_fields = self.client.site.root_web.fields.get().execute_query()
+        site_fields = self.client.site.root_web.fields.top(2).get().execute_query()
         self.assertGreater(len(site_fields), 0)
 
     def test_2_get_field(self):

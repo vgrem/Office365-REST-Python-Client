@@ -8,6 +8,21 @@ class FieldMultiLineText(Field):
         super().__init__(context)
 
     @property
+    def allow_hyperlink(self):
+        """
+        Gets a value that specifies whether a hyperlink is allowed as a value of the field.
+        :rtype: bool or None
+        """
+        return self.properties.get("AllowHyperlink", None)
+
+    @allow_hyperlink.setter
+    def allow_hyperlink(self, val):
+        """
+        Sets a value that specifies whether a hyperlink is allowed as a value of the field.
+        """
+        self.set_property("AllowHyperlink", val)
+
+    @property
     def number_of_lines(self):
         """
         Gets the number of lines to display in the field.

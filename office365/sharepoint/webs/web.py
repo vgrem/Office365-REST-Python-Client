@@ -354,6 +354,24 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
+    def get_file_by_guest_url(self, guestUrl):
+        """
+        :type guestUrl: str
+        """
+        return_type = File(self.context)
+        qry = ServiceOperationQuery(self, "GetFileByGuestUrl", [guestUrl], None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_folder_by_guest_url(self, guestUrl):
+        """
+        :type guestUrl: str
+        """
+        return_type = File(self.context)
+        qry = ServiceOperationQuery(self, "GetFolderByGuestUrl", [guestUrl], None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def share(self, user_principal_name,
               shareOption=ExternalSharingSiteOption.View,
               sendEmail=True, emailSubject=None, emailBody=None):

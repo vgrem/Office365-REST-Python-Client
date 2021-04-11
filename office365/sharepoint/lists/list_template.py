@@ -1,3 +1,5 @@
+from office365.runtime.client_result import ClientResult
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.base_entity import BaseEntity
 
@@ -17,6 +19,12 @@ class ListTemplate(BaseEntity):
 
         """
         super().__init__(context, resource_path)
+
+    def get_global_schema_xml(self):
+        result = ClientResult(None)
+        qry = ServiceOperationQuery(self, "GetGlobalSchemaXml", None, None, None, result)
+        self.context.add_query(qry)
+        return result
 
     @property
     def internal_name(self):

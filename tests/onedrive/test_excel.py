@@ -31,5 +31,5 @@ class TestExcel(GraphTestCase):
         cls.target_item.delete_object().execute_query()
 
     def test1_get_workbook(self):
-        workbook = self.__class__.target_item.workbook.names.get().execute_query()
+        workbook = self.__class__.target_item.workbook.get().execute_query()
         self.assertIsNotNone(workbook.resource_path)

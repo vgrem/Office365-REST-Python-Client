@@ -139,10 +139,9 @@ class ODataBatchRequest(ClientRequest):
         message.set_payload(payload)
         return message
 
-    def __iter__(self):
-        queries = [qry for qry in self.context.pending_request()]
+    def next_query(self):
+        queries = [qry for qry in self.context.pending_request().next_query()]
         if len(queries) > 0:
             batch_qry = BatchQuery(self.context, queries)  # Aggregate requests into batch request
-            self.context.clear_queries()
-            self._queries = [batch_qry]
+            self._current_query = batch_qry
             yield batch_qry
