@@ -1,10 +1,17 @@
+from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.tenant.administration.siteProperties import SiteProperties
-from office365.sharepoint.tenant.administration.sitePropertiesCollection import SitePropertiesCollection
+from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
+from office365.sharepoint.tenant.administration.hubsite_properties import HubSiteProperties
+from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
+    SecondaryAdministratorsFieldsData
+from office365.sharepoint.tenant.administration.secondary_administrators_info import SecondaryAdministratorsInfo
+from office365.sharepoint.tenant.administration.site_properties import SiteProperties
+from office365.sharepoint.tenant.administration.site_properties_collection import SitePropertiesCollection
 from office365.sharepoint.tenant.administration.sitePropertiesEnumerableFilter import SitePropertiesEnumerableFilter
-from office365.sharepoint.tenant.administration.spoOperation import SpoOperation
+from office365.sharepoint.tenant.administration.spo_operation import SpoOperation
 
 
 class Tenant(BaseEntity):
@@ -12,6 +19,90 @@ class Tenant(BaseEntity):
     def __init__(self, context):
         super().__init__(context, ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant"),
                          "Microsoft.Online.SharePoint.TenantAdministration")
+
+    @staticmethod
+    def from_url(admin_site_url):
+        from office365.sharepoint.client_context import ClientContext
+        admin_client = ClientContext(admin_site_url)
+        return Tenant(admin_client)
+
+    def get_lock_state_by_id(self, site_id):
+        return self._sites.get_lock_state_by_id(site_id)
+
+    def hub_sites(self, siteUrl):
+        pass
+
+    def check_tenant_licenses(self, licenses):
+        """
+        Checks whether a tenant has the specified licenses.
+
+        :param list[str] licenses: The list of licenses to check for.
+        :return:
+        """
+        result = ClientResult(bool)
+        params = ClientValueCollection(str, licenses)
+        qry = ServiceOperationQuery(self, "CheckTenantLicenses", None, params, "licenses", result)
+        self.context.add_query(qry)
+        return result
+
+    def get_site_health_status(self, sourceUrl):
+        result = ClientResult(PortalHealthStatus)
+        params = {"sourceUrl": sourceUrl}
+        qry = ServiceOperationQuery(self, "GetSiteHealthStatus", None, params, None, result)
+        self.context.add_query(qry)
+        return result
+
+    def get_site_secondary_administrators(self, site_id):
+        """
+        Gets site collection administrators
+
+        :type site_id: str
+        """
+        return_type = ClientValueCollection(SecondaryAdministratorsInfo)
+        payload = SecondaryAdministratorsFieldsData(site_id)
+        qry = ServiceOperationQuery(self, "GetSiteSecondaryAdministrators", None, payload,
+                                    "secondaryAdministratorsFieldsData", return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def set_site_secondary_administrators(self, site_id, emails=None, names=None):
+        """
+        Sets site collection administrators
+
+        :type names: list[str] or None
+        :type emails: list[str]
+        :type site_id: str
+        """
+        payload = SecondaryAdministratorsFieldsData(site_id, emails, names)
+        qry = ServiceOperationQuery(self, "SetSiteSecondaryAdministrators", None, payload,
+                                    "secondaryAdministratorsFieldsData", None)
+        self.context.add_query(qry)
+        return self
+
+    def register_hub_site(self, site_url):
+        """
+        Registers an existing site as a hub site.
+
+        :param str site_url:
+        :return:
+        """
+        return_type = HubSiteProperties(self.context)
+        params = {"siteUrl": site_url}
+        qry = ServiceOperationQuery(self, "RegisterHubSite", None, params, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def unregister_hub_site(self, siteUrl):
+        """
+        Unregisters a hub site so that it is no longer a hub site.
+
+        :param str siteUrl:
+        :return:
+        """
+        params = {"siteUrl": siteUrl}
+        qry = ServiceOperationQuery(self, "UnregisterHubSite", None, params, None, None)
+        self.context.add_query(qry)
+        return self
 
     def create_site(self, site_create_props):
         """Queues a site collection for creation with the specified properties.
@@ -39,13 +130,6 @@ class Tenant(BaseEntity):
         pass
 
     def restore_deleted_site(self, site_url):
-        pass
-
-    def set_site_secondary_administrators(self, data):
-        """
-
-        :type data: SecondaryAdministratorsFieldsData
-        """
         pass
 
     def get_site_properties_by_url(self, url, include_detail):
@@ -79,6 +163,29 @@ class Tenant(BaseEntity):
                                     site_props_col)
         self.context.add_query(qry)
         return site_props_col
+
+    def connect_site_to_hub_site_by_id(self, site_url, hub_site_id):
+        """
+
+        :param str site_url:
+        :param str hub_site_id:
+        :return:
+        """
+        params = {
+            "siteUrl": site_url,
+            "hubSiteId": hub_site_id
+        }
+        qry = ServiceOperationQuery(self, "ConnectSiteToHubSiteById", None, params, None, None)
+        self.context.add_query(qry)
+        return self
+
+    @property
+    def root_site_url(self):
+        """
+
+        :rtype: str or None
+        """
+        return self.properties.get('RootSiteUrl', None)
 
     @property
     def _sites(self):

@@ -4,6 +4,7 @@ from office365.directory.directoryObject import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.onedrive.driveCollection import DriveCollection
 from office365.onedrive.siteCollection import SiteCollection
+from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
@@ -12,6 +13,21 @@ from office365.teams.team import Team
 
 class Group(DirectoryObject):
     """Represents an Azure Active Directory (Azure AD) group, which can be an Office 365 group, or a security group."""
+
+    def check_member_groups(self, group_ids):
+        """Check for membership in the specified list of groups. Returns from the list those groups of which
+        the specified group has a direct or transitive membership.
+
+        You can check up to a maximum of 20 groups per request. This function supports Microsoft 365 and other types
+        of groups provisioned in Azure AD. Note that Microsoft 365 groups cannot contain groups.
+        So membership in a Microsoft 365 group is always direct.
+
+        :type group_ids: list
+        """
+        result = ClientResult(None)
+        qry = ServiceOperationQuery(self, "checkMemberGroups", None, group_ids, None, result)
+        self.context.add_query(qry)
+        return result
 
     def add_team(self):
         """Create a new team under a group."""
@@ -75,12 +91,3 @@ class Group(DirectoryObject):
         else:
             return SiteCollection(self.context,
                                   ResourcePath("sites", self.resource_path))
-
-    def set_property(self, name, value, persist_changes=True):
-        super(Group, self).set_property(name, value, persist_changes)
-        # fallback: create a new resource path
-        if self._resource_path is None:
-            if name == "id":
-                self._resource_path = ResourcePath(
-                    value,
-                    self._parent_collection.resource_path)

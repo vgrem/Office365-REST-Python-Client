@@ -11,6 +11,7 @@ from office365.onedrive.folder import Folder
 from office365.onedrive.listItem import ListItem
 from office365.onedrive.publicationFacet import PublicationFacet
 from office365.onedrive.uploadSession import UploadSession
+from office365.onedrive.workbook import Workbook
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
@@ -160,7 +161,6 @@ class DriveItem(BaseItem):
 
         def _content_downloaded(resp):
             file_object.write(result.value)
-
         self.context.after_execute(_content_downloaded)
 
     def create_folder(self, name):
@@ -305,18 +305,18 @@ class DriveItem(BaseItem):
     @property
     def listItem(self):
         """For drives in SharePoint, the associated document library list item."""
-        if self.is_property_available('listItem'):
-            return self.properties['listItem']
-        else:
-            return ListItem(self.context, ResourcePath("listItem", self.resource_path))
+        return self.properties.get('listItem', ListItem(self.context, ResourcePath("listItem", self.resource_path)))
+
+    @property
+    def workbook(self):
+        """For files that are Excel spreadsheets, accesses the workbook API to work with the spreadsheet's contents. """
+        return self.properties.get('workbook', Workbook(self.context, ResourcePath("workbook", self.resource_path)))
 
     @property
     def permissions(self):
         """The set of permissions for the item. Read-only. Nullable."""
-        if self.is_property_available('permissions'):
-            return self.properties['permissions']
-        else:
-            return PermissionCollection(self.context, ResourcePath("permissions", self.resource_path))
+        return self.properties.get('permissions',
+                                   PermissionCollection(self.context, ResourcePath("permissions", self.resource_path)))
 
     @property
     def publication(self):

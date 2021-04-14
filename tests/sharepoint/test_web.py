@@ -1,11 +1,10 @@
 from random import randint
 
-from settings import settings
+from tests import test_site_url
 from tests.sharepoint.sharepoint_case import SPTestCase
-
 from office365.sharepoint.lists.list_template_type import ListTemplateType
-from office365.sharepoint.permissions.basePermissions import BasePermissions
-from office365.sharepoint.permissions.permissionKind import PermissionKind
+from office365.sharepoint.permissions.base_permissions import BasePermissions
+from office365.sharepoint.permissions.permission_kind import PermissionKind
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.webs.subweb_query import SubwebQuery
 from office365.sharepoint.webs.web import Web
@@ -21,18 +20,18 @@ class TestSharePointWeb(SPTestCase):
         super(TestSharePointWeb, cls).setUpClass()
 
     def test1_get_current_user(self):
-        current_user = self.client.web.currentUser.get().execute_query()
+        current_user = self.client.web.current_user.get().execute_query()
         self.assertIsNotNone(current_user.login_name)
         self.__class__.target_user = current_user
 
     def test2_get_web_from_page_url(self):
-        page_url = "{site_url}SitePages/Home.aspx".format(site_url=settings['url'])
+        page_url = "{site_url}SitePages/Home.aspx".format(site_url=test_site_url)
         result = Web.get_web_url_from_page_url(self.client, page_url)
         self.client.execute_query()
         self.assertIsNotNone(result.value)
 
     def test3_get_list_item_by_url(self):
-        page_url = "{site_url}SitePages/Home.aspx".format(site_url=settings['url'])
+        page_url = "{site_url}SitePages/Home.aspx".format(site_url=test_site_url)
         target_item = self.client.web.get_list_item(page_url).execute_query()
         self.assertIsNotNone(target_item.resource_path)
 
@@ -107,7 +106,40 @@ class TestSharePointWeb(SPTestCase):
         catalog = self.client.web.get_catalog(ListTemplateType.MasterPageCatalog).get().execute_query()
         self.assertIsNotNone(catalog.title)
 
-    def test_15_get_catalog(self):
-        collection = Web.get_document_libraries(self.client, settings["url"])
+    def test_15_get_document_libraries(self):
+        collection = Web.get_document_libraries(self.client, test_site_url)
         self.client.execute_query()
         self.assertGreater(len(collection), 0)
+
+    def test_16_get_document_and_media_libraries(self):
+        collection = Web.get_document_and_media_libraries(self.client, test_site_url, True)
+        self.client.execute_query()
+        self.assertGreater(len(collection), 0)
+
+    def test_17_get_available_web_templates(self):
+        templates = self.client.web.get_available_web_templates().execute_query()
+        self.assertGreater(len(templates), 0)
+
+    def test_18_get_list_templates(self):
+        templates = self.client.web.list_templates.get().execute_query()
+        self.assertGreater(len(templates), 0)
+
+    def test_19_get_custom_list_templates(self):
+        templates = self.client.web.get_custom_list_templates().execute_query()
+        self.assertGreaterEqual(len(templates), 0)
+
+    def test_20_ensure_folder_path(self):
+        folder_path = "/Shared Documents/Archive/2020/12"
+        folder_new_nested = self.client.web.ensure_folder_path(folder_path).execute_query()
+        folder_new_nested = self.client.web.get_folder_by_server_relative_url(folder_path).get().execute_query()
+        self.assertTrue(folder_new_nested.properties["Exists"])
+
+    def test_21_get_context_web_theme_data(self):
+        result = Web.get_context_web_theme_data(self.client)
+        self.client.execute_query()
+        self.assertIsNotNone(result.value)
+
+    def test_22_get_regional_datetime_schema(self):
+        result = self.client.web.get_regional_datetime_schema()
+        self.client.execute_query()
+        self.assertIsNotNone(result.value)

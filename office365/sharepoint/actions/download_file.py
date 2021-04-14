@@ -1,4 +1,5 @@
 from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.odata.odata_path_parser import ODataPathParser
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 
 
@@ -23,5 +24,9 @@ class DownloadFileQuery(ServiceOperationQuery):
             """
             file_object.write(response.content)
 
-        super(DownloadFileQuery, self).__init__(web, r"getFileByServerRelativeUrl('{0}')/\$value".format(file_url))
+        # Sharepoint Endpoint bug: https://github.com/SharePoint/sp-dev-docs/issues/2630
+        file_url = ODataPathParser.encode_method_value(file_url)
+                
+        super(DownloadFileQuery, self).__init__(web, r"getFileByServerRelativePath(decodedurl={0})/$value".format(file_url))
+    
         self.context.before_execute(_construct_download_query)

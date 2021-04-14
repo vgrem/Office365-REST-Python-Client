@@ -28,9 +28,10 @@ class ServiceOperationQuery(ClientQuery):
         self.binding_type.query_options.reset()
         if self.static:
             url = self.context.service_root_url() + \
-                          '.'.join([self.binding_type.entity_type_name, method_path.to_url()])
+                  '.'.join([self.binding_type.entity_type_name, method_path.to_url()])
         else:
-            url = '/'.join([self.binding_type.resource_url, method_path.to_url()])
+            delimiter = self.binding_type.resource_path.delimiter
+            url = delimiter.join([self.binding_type.resource_url, method_path.to_url()])
         return url
 
     @property

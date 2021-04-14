@@ -7,7 +7,8 @@ class CreateEntityQuery(ClientQuery):
         Create entity query
 
         :type entity_to_create: office365.runtime.client_object.ClientObject
-        :type parameters: ClientObject or ClientValue or dict
+        :type parameters: office365.runtime.client_object.ClientObject or office365.runtime.client_value.ClientValue
+            or dict
         :type parent_entity: office365.runtime.client_object.ClientObject
         """
         super(CreateEntityQuery, self).__init__(parent_entity.context,

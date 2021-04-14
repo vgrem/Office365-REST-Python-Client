@@ -7,6 +7,7 @@ from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.actions.download_file import DownloadFileQuery
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.directory.user import User
 from office365.sharepoint.files.file_version_collection import FileVersionCollection
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.webparts.limited_webpart_manager import LimitedWebPartManager
@@ -92,10 +93,26 @@ class File(AbstractFile):
         :type overwrite: bool
         """
         qry = ServiceOperationQuery(self,
-                                    "copyto",
+                                    "CopyTo",
                                     {
                                         "strNewUrl": new_relative_url,
                                         "boverwrite": overwrite
+                                    },
+                                    None)
+        self.context.add_query(qry)
+        return self
+
+    def copyto_using_path(self, decoded_url, overwrite):
+        """Copies the file to the destination URL.
+
+        :type decoded_url: str
+        :type overwrite: bool
+        """
+        qry = ServiceOperationQuery(self,
+                                    "CopyToUsingPath",
+                                    {
+                                        "DecodedUrl": decoded_url,
+                                        "bOverWrite": overwrite
                                     },
                                     None)
         self.context.add_query(qry)
@@ -286,24 +303,63 @@ class File(AbstractFile):
         def _download_inner():
             qry = DownloadFileQuery(self.context.web, self.serverRelativeUrl, file_object)
             self.context.add_query(qry)
+
+        self.ensure_property("ServerRelativeUrl", _download_inner)
+        return self
+
+    def download_session(self, file_object, chunk_downloaded=None, chunk_size=1024 * 1024):
+        """
+        :type file_object: typing.IO
+        :type chunk_downloaded: (int)->None or None
+        :type chunk_size: int
+        """
+
+        def _download_inner():
+            request = RequestOptions(
+                r"{0}web/getFileByServerRelativeUrl('{1}')/\$value".format(self.context.service_root_url(),
+                                                                           self.serverRelativeUrl))
+            request.stream = True
+            response = self.context.execute_request_direct(request)
+            response.raise_for_status()
+            bytes_read = 0
+            for chunk in response.iter_content(chunk_size=chunk_size):
+                bytes_read += len(chunk)
+                if callable(chunk_downloaded):
+                    chunk_downloaded(bytes_read)
+                file_object.write(chunk)
+
         self.ensure_property("ServerRelativeUrl", _download_inner)
         return self
 
     @property
     def listItemAllFields(self):
         """Gets a value that specifies the list item fields values for the list item corresponding to the file."""
-        if self.is_property_available('ListItemAllFields'):
-            return self.properties['ListItemAllFields']
-        else:
-            return ListItem(self.context, ResourcePath("listItemAllFields", self.resource_path))
+        return self.properties.get('ListItemAllFields',
+                                   ListItem(self.context, ResourcePath("listItemAllFields", self.resource_path)))
 
     @property
     def versions(self):
         """Gets a value that returns a collection of file version objects that represent the versions of the file."""
-        if self.is_property_available('Versions'):
-            return self.properties['Versions']
-        else:
-            return FileVersionCollection(self.context, ResourcePath("versions", self.resource_path))
+        return self.properties.get('Versions',
+                                   FileVersionCollection(self.context, ResourcePath("versions", self.resource_path)))
+
+    @property
+    def modified_by(self):
+        """
+        Gets a value that returns the user who last modified the file.
+
+        :rtype: office365.sharepoint.directory.user.User or None
+        """
+        return self.properties.get("ModifiedBy", User(self.context, ResourcePath("ModifiedBy", self.resource_path)))
+
+    @property
+    def locked_by_user(self):
+        """
+        Gets a value that returns the user that owns the current lock on the file.
+
+        :rtype: office365.sharepoint.directory.user.User or None
+        """
+        return self.properties.get("LockedByUser", User(self.context, ResourcePath("LockedByUser", self.resource_path)))
 
     @property
     def serverRelativeUrl(self):
@@ -342,7 +398,15 @@ class File(AbstractFile):
         return self.properties.get("Name", None)
 
     @property
-    def siteId(self):
+    def list_id(self):
+        """Gets the GUID that identifies the List containing the file.
+
+        :rtype: str or None
+        """
+        return self.properties.get("ListId", None)
+
+    @property
+    def site_id(self):
         """Gets the GUID that identifies the site collection containing the file.
 
         :rtype: str or None
@@ -350,7 +414,7 @@ class File(AbstractFile):
         return self.properties.get("SiteId", None)
 
     @property
-    def webId(self):
+    def web_id(self):
         """Gets the GUID for the site containing the file.
 
         :rtype: str or None
@@ -358,12 +422,47 @@ class File(AbstractFile):
         return self.properties.get("WebId", None)
 
     @property
-    def timeLastModified(self):
+    def time_created(self):
+        """Gets a value that specifies when the file was created.
+
+        :rtype: str or None
+        """
+        return self.properties.get("TimeCreated", None)
+
+    @property
+    def time_last_modified(self):
         """Specifies when the file was last modified.
 
         :rtype: str or None
         """
         return self.properties.get("TimeLastModified", None)
+
+    @property
+    def minor_version(self):
+        """
+        Gets a value that specifies the minor version of the file.
+
+        :rtype: int or None
+        """
+        return self.properties.get("MinorVersion", None)
+
+    @property
+    def major_version(self):
+        """
+        Gets a value that specifies the major version of the file.
+
+        :rtype: int or None
+        """
+        return self.properties.get("MajorVersion", None)
+
+    @property
+    def unique_id(self):
+        """
+        Gets a value that specifies the a file unique identifier
+
+        :rtype: str or None
+        """
+        return self.properties.get("UniqueId", None)
 
     def set_property(self, name, value, persist_changes=True):
         super(File, self).set_property(name, value, persist_changes)
@@ -379,3 +478,4 @@ class File(AbstractFile):
                     "GetFileById",
                     [value],
                     ResourcePath("Web"))
+        return self

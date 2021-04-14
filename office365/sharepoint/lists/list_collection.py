@@ -27,6 +27,13 @@ class ListCollection(ClientObjectCollection):
         return List(self.context,
                     ResourcePathServiceOperation("GetById", [list_id], self.resource_path))
 
+    def ensure_events_list(self):
+        events_list = List(self.context)
+        self.add_child(events_list)
+        qry = ServiceOperationQuery(self, "EnsureEventsList", None, None, None, events_list)
+        self.context.add_query(qry)
+        return events_list
+
     def ensure_site_assets_library(self):
         """Gets a list that is the default asset location for images or other files, which the users
         upload to their wiki pages."""

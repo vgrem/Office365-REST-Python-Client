@@ -11,8 +11,7 @@ Office 365 & Microsoft Graph library for Python
 
 
 ## Status
-
-[![Downloads](https://pepy.tech/badge/office365-rest-python-client)](https://pepy.tech/project/office365-rest-python-client)
+[![Downloads](https://pepy.tech/badge/office365-rest-python-client/month)](https://pepy.tech/project/office365-rest-python-client)
 [![PyPI](https://img.shields.io/pypi/v/Office365-REST-Python-Client.svg)](https://pypi.python.org/pypi/Office365-REST-Python-Client)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/Office365-REST-Python-Client.svg)](https://pypi.python.org/pypi/Office365-REST-Python-Client/)
 [![Build Status](https://travis-ci.org/vgrem/Office365-REST-Python-Client.svg?branch=master)](https://travis-ci.org/vgrem/Office365-REST-Python-Client)
@@ -44,9 +43,32 @@ The list of supported API versions:
 
 The following auth flows are supported:
 
-- app principals flow: `AuthenticationContext.ctx_auth.acquire_token_for_app(client_id, client_secret)`  (refer [Granting access using SharePoint App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs) for a details) 
-- user credentials flow:`AuthenticationContext.ctx_auth.acquire_token_for_user(username, password)`
-- certificate credentials flow `ClientContext.connect_with_certificate(site_url, client_id,thumbprint, certificate_path)`
+- app principals flow: 
+  `ClientContext.with_credentials(client_credentials)`
+  
+  Usage:
+  ``` 
+  client_credentials = ClientCredential('{client_id}'),'{client_secret}')
+  ctx = ClientContext('{url}').with_credentials(client_credentials)
+  ```
+  Documentation: refer [Granting access using SharePoint App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs) for a details  
+  
+  Example: [connect_with_app_principal.py](examples/sharepoint/connect_with_app_principal.py)
+  
+- user credentials flow: `ClientContext.with_credentials(user_credentials)`
+
+  Usage:
+  ``` 
+  user_credentials = UserCredential('{username}'),'{password}')
+  ctx = ClientContext('{url}').with_credentials(user_credentials)
+  ```
+  Example: [connect_with_user_credential.py](examples/sharepoint/connect_with_user_credential.py)
+  
+- certificate credentials flow: `ClientContext.with_certificate(tenant, client_id, thumbprint, cert_path)`
+
+  Documentation: [Granting access via Azure AD App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread)  
+  
+  Example: [connect_with_client_certificate.py](examples/sharepoint/connect_with_client_certificate.py)
 
 #### Examples
  
@@ -95,6 +117,19 @@ print("Web title: {0}".format(web_title))
 ```
 
 
+The list of examples:
+
+- Working with files
+  - [download a file](examples/sharepoint/files/download_file.py) 
+  - [upload a file](examples/sharepoint/files/upload_file.py)
+
+- Working with lists and list items
+  -  [create a list item](examples/sharepoint/lists_and_items/data_generator.py)
+  -  [read a list item](examples/sharepoint/lists_and_items/read_large_list.py)   
+  -  [update a list item](examples/sharepoint/lists_and_items/update_items_batch.py)
+  -  delete a list item 
+  
+
 # Working with Outlook API
 
 The list of supported APIs:
@@ -107,18 +142,18 @@ Since Outlook REST APIs are available in both Microsoft Graph and the Outlook AP
 the following clients are available:
 
 - `GraphClient` which targets Outlook API `v2.0` version (*preferable* nowadays, refer [transition to Microsoft Graph-based Outlook REST API](https://docs.microsoft.com/en-us/outlook/rest/compare-graph-outlook) for a details)   
-- `OutlookClient` which targets Outlook API `v1.0` version (not recommended for usage since `v1.0` version is being deprecated.)
+~~- `OutlookClient` which targets Outlook API `v1.0` version (not recommended for usage since `v1.0` version is being deprecated.)~~
 
 
 #### Authentication
 
-In terms of Microsoft Graph API authentication, there is no any dependency to any particular library implementation, 
-the following libraries are supported at least:
+[The Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/) which comes as a dependency 
+is used as a default library to obtain tokens to call Microsoft Graph API. 
+
+Using [Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/)
 
 > Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
 > in the provided examples
-
-[Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/)
 
 ```python
 import msal
@@ -134,16 +169,19 @@ def acquire_token():
         client_id='{client_id}',
         client_credential='{client_secret}'
     )
-    result = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
-    return result
+    token = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
+    return token
 
 
 client = GraphClient(acquire_token)
 
 ```
 
+But in terms of Microsoft Graph API authentication, another Microsoft Authentication Client compliant libraries 
+such as [adal](https://github.com/AzureAD/azure-activedirectory-library-for-python) 
+are supported as well.   
 
-[ADAL Python](https://adal-python.readthedocs.io/en/latest/#)
+Using [ADAL Python](https://adal-python.readthedocs.io/en/latest/#)
 
 Usage
 
@@ -151,7 +189,7 @@ Usage
 import adal
 from office365.graph_client import GraphClient
 
-def get_token():
+def acquire_token():
     authority_url = 'https://login.microsoftonline.com/{tenant_id_or_name}'
     auth_ctx = adal.AuthenticationContext(authority_url)
     token = auth_ctx.acquire_token_with_client_credentials(
@@ -160,7 +198,7 @@ def get_token():
         "{client_secret}")
     return token
 
-client = GraphClient(get_token)
+client = GraphClient(acquire_token)
 
 ```
 
@@ -171,19 +209,9 @@ The example demonstrates how to send an email via [Microsoft Graph endpoint](htt
 > Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
 
 ```python
-import adal
 from office365.graph_client import GraphClient
 
-def get_token():
-    authority_url = 'https://login.microsoftonline.com/{tenant_id_or_name}'
-    auth_ctx = adal.AuthenticationContext(authority_url)
-    token = auth_ctx.acquire_token_with_client_credentials(
-        "https://graph.microsoft.com",
-        "{client_id}",
-        "{client_secret}")
-    return token
-
-client = GraphClient(get_token)
+client = GraphClient(acquire_token)
 
 message_json = {
     "Message": {
@@ -217,8 +245,26 @@ client.execute_query()
 
 #### Authentication
 
-[ADAL Python](https://adal-python.readthedocs.io/en/latest/#) 
-library is utilized to authenticate users to Active Directory (AD) and obtain tokens  
+[The Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/) which comes as a dependency 
+is used to obtain token
+
+```python
+import msal
+
+def acquire_token():
+    """
+    Acquire token via MSAL
+    """
+    authority_url = 'https://login.microsoftonline.com/{tenant_id_or_name}'
+    app = msal.ConfidentialClientApplication(
+        authority=authority_url,
+        client_id='{client_id}',
+        client_credential='{client_secret}'
+    )
+    token = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
+    return token
+``` 
+
 
 #### Examples 
 
@@ -231,17 +277,9 @@ which corresponds to [`list available drives` endpoint](https://docs.microsoft.c
 
 ```python
 from office365.graph_client import GraphClient
-def get_token(auth_ctx):
-    """Acquire token via client credential flow (ADAL Python library is utilized)"""
-    token = auth_ctx.acquire_token_with_client_credentials(
-        "https://graph.microsoft.com",
-        "{client_id}",
-        "{client_secret}")
-    return token
-
 
 tenant_name = "contoso.onmicrosoft.com"
-client = GraphClient(get_token)
+client = GraphClient(acquire_token)
 drives = client.drives
 client.load(drives)
 client.execute_query()
@@ -254,7 +292,7 @@ for drive in drives:
 
 ```python
 from office365.graph_client import GraphClient
-client = GraphClient(get_token)
+client = GraphClient(acquire_token)
 # retrieve drive properties 
 drive = client.users["{user_id_or_principal_name}"].drive
 client.load(drive)
@@ -288,8 +326,8 @@ Refer [OneDrive examples section](examples/onedrive) for a more examples.
 
 #### Authentication
 
-[ADAL Python](https://adal-python.readthedocs.io/en/latest/#) 
-library is utilized to authenticate users to Active Directory (AD) and obtain tokens  
+[The Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/) which comes as a dependency 
+is used to obtain token  
 
 #### Examples 
 
@@ -301,30 +339,16 @@ which corresponds to [`Create team` endpoint](https://docs.microsoft.com/en-us/g
 ```python
 from office365.graph_client import GraphClient
 tenant_name = "contoso.onmicrosoft.com"
-client = GraphClient(tenant_name, get_token)
+client = GraphClient(tenant_name, acquire_token)
 new_team = client.groups["{group_id}"].add_team()
 client.execute_query()
-```
-
-where
-
-```python
-def get_token(auth_ctx):
-    """Acquire token via client credential flow (ADAL Python library is utilized)
-    :type auth_ctx: adal.AuthenticationContext
-    """
-    token = auth_ctx.acquire_token_with_client_credentials(
-        "https://graph.microsoft.com",
-        "{client_id}",
-        "{client_secret}")
-    return token
 ```
 
 
 # Third Party Libraries and Dependencies
 The following libraries will be installed when you install the client library:
 * [requests](https://github.com/kennethreitz/requests)
-* [adal](https://github.com/AzureAD/azure-activedirectory-library-for-python)
+* [Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/)
 
 
 

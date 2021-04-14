@@ -1,5 +1,4 @@
-from settings import settings
-from tests import random_seed
+from tests import create_unique_name, test_tenant
 from tests.graph_case import GraphTestCase
 
 from office365.directory.user import User
@@ -18,8 +17,9 @@ class TestGraphUser(GraphTestCase):
             self.assertIsNotNone(user.id)
 
     def test2_create_user(self):
-        password = "P@ssw0rd{0}".format(random_seed)
-        profile = UserProfile("testuser{0}@{1}".format(random_seed, settings['tenant']), password)
+        login = create_unique_name("testuser")
+        password = create_unique_name("P@ssw0rd")
+        profile = UserProfile("{0}@{1}".format(login, test_tenant), password)
         new_user = self.client.users.add(profile).execute_query()
         self.assertIsNotNone(new_user.id)
         self.__class__.test_user = new_user
@@ -27,7 +27,7 @@ class TestGraphUser(GraphTestCase):
     def test3_update_user(self):
         user_to_update = self.__class__.test_user
         prop_name = 'city'
-        prop_val = 'Earth{0}'.format(random_seed)
+        prop_val = create_unique_name("city_")
         user_to_update.set_property(prop_name, prop_val).update().execute_query()
 
         result = self.client.users.filter("{0} eq '{1}'".format(prop_name, prop_val)).get().execute_query()

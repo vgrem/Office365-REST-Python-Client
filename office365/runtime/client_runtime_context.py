@@ -7,13 +7,10 @@ from office365.runtime.queries.read_entity_query import ReadEntityQuery
 
 class ClientRuntimeContext(object):
 
-    def __init__(self, auth_context=None):
+    def __init__(self):
         """
-        Client runtime context for services
-
-        :type auth_context: office365.runtime.auth.authentication_context.AuthenticationContext or None
+        Client runtime context
         """
-        self._auth_context = auth_context
 
     @property
     def current_query(self):
@@ -52,18 +49,15 @@ class ClientRuntimeContext(object):
     def service_root_url(self):
         pass
 
-    @property
-    def has_pending_request(self):
-        return len(self.pending_request().queries) > 0
-
-    def build_request(self):
-        return self.pending_request().build_request()
-
+    @abc.abstractmethod
     def authenticate_request(self, request):
         """
         :type request: office365.runtime.http.request_options.RequestOptions
         """
-        self._auth_context.authenticate_request(request)
+        pass
+
+    def build_request(self):
+        return self.pending_request().build_request()
 
     def load(self, client_object, properties_to_retrieve=None):
         """Prepare retrieval query
@@ -136,8 +130,7 @@ class ClientRuntimeContext(object):
         return self.pending_request().execute_request_direct(request)
 
     def execute_query(self):
-        if self.has_pending_request:
-            self.pending_request().execute_query()
+        self.pending_request().execute_query()
 
     def add_query(self, query, to_begin=False):
         """
@@ -147,6 +140,9 @@ class ClientRuntimeContext(object):
         :type query: ClientQuery
         """
         self.pending_request().add_query(query, to_begin)
+
+    def remove_query(self, query):
+        self.pending_request().remove_query(query)
 
     def clear_queries(self):
         self.pending_request().queries.clear()

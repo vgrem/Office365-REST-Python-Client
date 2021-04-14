@@ -1,4 +1,6 @@
 import datetime
+from datetime import datetime, timezone, timedelta
+from urllib.parse import urlparse
 
 
 class STSProfile(object):
@@ -12,10 +14,15 @@ class STSProfile(object):
         self.serviceUrl = 'https://login.microsoftonline.com'
         self.securityTokenServicePath = 'extSTS.srf'
         self.userRealmServicePath = 'GetUserRealm.srf'
-        self.federationTokenIssuer = 'urn:federation:MicrosoftOnline'
-        self.created = datetime.datetime.now()
-        self.expires = self.created + datetime.timedelta(minutes=10)
+        self.tokenIssuer = 'urn:federation:MicrosoftOnline'
+        now = datetime.now(tz=timezone.utc)
+        self.created = now.astimezone(timezone.utc).isoformat('T')[:-9] + 'Z'
+        self.expires = (now + timedelta(minutes=10)).astimezone(timezone.utc).isoformat('T')[:-9] + 'Z'
         self.signInPage = '_forms/default.aspx?wa=wsignin1.0'
+
+    @property
+    def tenant(self):
+        return urlparse(self.authorityUrl).netloc
 
     @property
     def security_token_service_url(self):

@@ -1,4 +1,5 @@
 from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
@@ -6,24 +7,92 @@ from office365.runtime.resource_path_service_operation import ResourcePathServic
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
+from office365.sharepoint.eventreceivers.event_receiver_definition import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.fields.related_field_collection import RelatedFieldCollection
 from office365.sharepoint.files.checkedOutFileCollection import CheckedOutFileCollection
+from office365.sharepoint.files.file import File
 from office365.sharepoint.folders.folder import Folder
-from office365.sharepoint.forms.formCollection import FormCollection
+from office365.sharepoint.forms.form_collection import FormCollection
 from office365.sharepoint.listitems.caml.caml_query import CamlQuery
+from office365.sharepoint.listitems.creation_information_using_path import ListItemCreationInformationUsingPath
+from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateValue
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.listitems.listItem_collection import ListItemCollection
+from office365.sharepoint.pages.wiki_page_creation_information import WikiPageCreationInformation
 from office365.sharepoint.permissions.securable_object import SecurableObject
+from office365.sharepoint.usercustomactions.user_custom_action_collection import UserCustomActionCollection
 from office365.sharepoint.views.view import View
 from office365.sharepoint.views.view_collection import ViewCollection
+from office365.sharepoint.webhooks.subscription_collection import SubscriptionCollection
+from office365.sharepoint.utilities.utility import Utility
 
 
 class List(SecurableObject):
-    """List resource"""
+    """Represents a list on a SharePoint Web site."""
 
     def __init__(self, context, resource_path=None):
         super(List, self).__init__(context, resource_path)
+
+    @staticmethod
+    def get_list_data_as_stream(context, list_full_url, parameters=None):
+        """
+
+        :param office365.sharepoint.client_context.ClientContext context:
+        :param str list_full_url:
+        :param RenderListDataParameters parameters:
+        """
+        result = ClientResult(None)
+        payload = {
+            "listFullUrl": list_full_url,
+            "parameters": parameters,
+        }
+        target_list = context.web.get_list(list_full_url)
+        qry = ServiceOperationQuery(target_list, "GetListDataAsStream", None, payload, None, result)
+        context.add_query(qry)
+        return result
+
+    def bulk_validate_update_list_items(self, item_ids, form_values, new_document_update=True,
+                                        checkin_comment=None, folder_path=None):
+        """
+
+        :param list[int] item_ids:
+        :param dict form_values:
+        :param bool new_document_update:
+        :param str checkin_comment:
+        :param str folder_path:
+        """
+        result = ClientValueCollection(ListItemFormUpdateValue)
+        params = {
+            "itemIds": item_ids,
+            "formValues": ClientValueCollection(ListItemFormUpdateValue, form_values),
+            "bNewDocumentUpdate": new_document_update,
+            "checkInComment": checkin_comment,
+            "folderPath": folder_path
+        }
+        qry = ServiceOperationQuery(self, "BulkValidateUpdateListItems", None, params, None, result)
+        self.context.add_query(qry)
+        return result
+
+    def get_lookup_field_choices(self, targetFieldName, pagingInfo=None):
+        result = ClientResult(str)
+        params = {
+            "targetFieldName": targetFieldName,
+            "pagingInfo": pagingInfo
+        }
+        qry = ServiceOperationQuery(self, "GetLookupFieldChoices", params, None, None, result)
+        self.context.add_query(qry)
+        return result
+
+    def get_list_item_changes_since_token(self, query):
+        """
+
+        :type query: office365.sharepoint.changes.change_log_item_query.ChangeLogItemQuery
+        """
+        result = ClientResult(str)
+        qry = ServiceOperationQuery(self, "getListItemChangesSinceToken", None, query, "query", result)
+        self.context.add_query(qry)
+        return result
 
     def save_as_template(self, fileName, name, description, saveData):
         """
@@ -96,7 +165,7 @@ class List(SecurableObject):
             self.context.add_query(qry)
         else:
             def _resolve_folder_url():
-                list_item_creation_information.FolderUrl = self.context.base_url + self.rootFolder.serverRelativeUrl
+                list_item_creation_information.FolderUrl = self.context.base_url + self.root_folder.serverRelativeUrl
                 add_item_qry = ServiceOperationQuery(
                     self,
                     "addItem",
@@ -107,8 +176,39 @@ class List(SecurableObject):
                 )
                 self.context.add_query(add_item_qry)
 
-            self.rootFolder.ensure_property("ServerRelativeUrl", _resolve_folder_url)
+            self.root_folder.ensure_property("ServerRelativeUrl", _resolve_folder_url)
         return item
+
+    def create_wiki_page(self, page_name, page_content):
+        """
+        :param str page_name:
+        :param str page_content:
+        """
+        result = ClientResult(File)
+
+        def _list_loaded():
+            page_url = self.root_folder.serverRelativeUrl + "/" + page_name
+            wiki_props = WikiPageCreationInformation(page_url, page_content)
+            result.value = Utility.create_wiki_page_in_context_web(self.context, wiki_props)
+        self.ensure_property("RootFolder", _list_loaded)
+
+        return result
+
+    def add_item_using_path(self, leaf_name, object_type, folder_url):
+        """
+        :type leaf_name: str
+        :type object_type: int
+        :type folder_url: str
+        """
+        from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
+        parameters = ListItemCreationInformationUsingPath(leaf_name, object_type, folder_path=SPResPath(folder_url))
+        item = ListItem(self.context)
+        qry = ServiceOperationQuery(self, "AddItemUsingPath", None, parameters, "parameters", item)
+        self.context.add_query(qry)
+        return item
+
+    def add_validate_update_item(self):
+        pass
 
     def get_item_by_id(self, item_id):
         """Returns the list item with the specified list item identifier.
@@ -184,7 +284,7 @@ class List(SecurableObject):
             return ListItemCollection(self.context, ResourcePath("items", self.resource_path))
 
     @property
-    def rootFolder(self):
+    def root_folder(self):
         """Get a root folder"""
         if self.is_property_available('RootFolder'):
             return self.properties["RootFolder"]
@@ -197,7 +297,14 @@ class List(SecurableObject):
         if self.is_property_available('Fields'):
             return self.properties['Fields']
         else:
-            return FieldCollection(self.context, ResourcePath("Fields", self.resource_path))
+            return FieldCollection(self.context, ResourcePath("Fields", self.resource_path), self)
+
+    @property
+    def subscriptions(self):
+        """Gets one or more webhook subscriptions on a SharePoint list."""
+        return self.properties.get('Subscriptions',
+                                   SubscriptionCollection(self.context,
+                                                          ResourcePath("Subscriptions", self.resource_path)))
 
     @property
     def views(self):
@@ -209,27 +316,45 @@ class List(SecurableObject):
             return ViewCollection(self.context, ResourcePath("views", self.resource_path), self)
 
     @property
-    def defaultView(self):
+    def default_view(self):
         """Gets or sets a value that specifies whether the list view is the default list view."""
-        if self.is_property_available('DefaultView'):
-            return self.properties['DefaultView']
-        else:
-            return View(self.context, ResourcePath("DefaultView", self.resource_path), self)
+        return self.properties.get('DefaultView',
+                                   View(self.context, ResourcePath("DefaultView", self.resource_path), self))
 
     @property
-    def contentTypes(self):
+    def content_types(self):
         """Gets the content types that are associated with the list."""
-        if self.is_property_available('ContentTypes'):
-            return self.properties['ContentTypes']
-        else:
-            return ContentTypeCollection(self.context,
-                                         ResourcePath("contenttypes", self.resource_path))
+        return self.properties.get('ContentTypes',
+                                   ContentTypeCollection(self.context,
+                                                         ResourcePath("ContentTypes", self.resource_path)))
+
+    @property
+    def user_custom_actions(self):
+        """Gets the User Custom Actions that are associated with the list."""
+        return self.properties.get('UserCustomActions',
+                                   UserCustomActionCollection(self.context,
+                                                              ResourcePath("UserCustomActions", self.resource_path)))
 
     @property
     def forms(self):
         """Gets a value that specifies the collection of all list forms in the list."""
         return self.properties.get('Forms',
                                    FormCollection(self.context, ResourcePath("forms", self.resource_path)))
+
+    @property
+    def parent_web(self):
+        """Gets a value that specifies the web where list resides."""
+        from office365.sharepoint.webs.web import Web
+        return self.properties.get('ParentWeb',
+                                   Web(self.context, ResourcePath("parentWeb", self.resource_path)))
+
+    @property
+    def event_receivers(self):
+        """Get Event receivers"""
+        return self.properties.get('EventReceivers',
+                                   EventReceiverDefinitionCollection(self.context,
+                                                                     ResourcePath("eventReceivers", self.resource_path),
+                                                                     self))
 
     @property
     def item_count(self):
@@ -261,6 +386,24 @@ class List(SecurableObject):
     def description(self, val):
         """Sets the description for the list."""
         self.set_property('Description', val)
+
+    @property
+    def parent_web_path(self):
+        return self.properties.get('ParentWebPath', None)
+
+    def get_property(self, name):
+        if name == "UserCustomActions":
+            return self.user_custom_actions
+        elif name == "ParentWeb":
+            return self.parent_web
+        elif name == "RootFolder":
+            return self.root_folder
+        elif name == "ContentTypes":
+            return self.content_types
+        elif name == "DefaultView":
+            return self.default_view
+        else:
+            return super(List, self).get_property(name)
 
     def set_property(self, name, value, persist_changes=True):
         super(List, self).set_property(name, value, persist_changes)

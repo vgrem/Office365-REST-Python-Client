@@ -1,5 +1,5 @@
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.sharepoint.fields.fieldLookupValue import FieldLookupValue
+from office365.sharepoint.fields.field_lookup_value import FieldLookupValue
 
 
 class FieldMultiLookupValue(ClientValueCollection):

@@ -1,9 +1,9 @@
 import os
 
+from office365.actions.upload_content_query import UploadContentQuery
 from office365.onedrive.driveItemUploadableProperties import DriveItemUploadableProperties
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
-from office365.actions.upload_content_query import UploadContentQuery
 
 
 def read_in_chunks(file_object, chunk_size=1024):

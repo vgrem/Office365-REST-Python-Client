@@ -1,8 +1,10 @@
 from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.search.query.popularTenantQuery import PopularTenantQuery
 from office365.sharepoint.search.query.querySuggestionResults import QuerySuggestionResults
 from office365.sharepoint.search.searchResult import SearchResult
 
@@ -31,6 +33,15 @@ class SearchService(BaseEntity):
     def export_manual_suggestions(self):
         """"""
         pass
+
+    def export_popular_tenant_queries(self, count):
+        result = ClientValueCollection(PopularTenantQuery)
+        payload = {
+            "count": count,
+        }
+        qry = ServiceOperationQuery(self, "exportpopulartenantqueries", None, payload, None, result)
+        self.context.add_query(qry)
+        return result
 
     def query(self, search_request):
         """The operation is used to retrieve search results by using the HTTP protocol with the GET method.
@@ -85,3 +96,6 @@ class SearchService(BaseEntity):
         qry = ServiceOperationQuery(self, "suggest", None, payload, None, result)
         self.context.add_query(qry)
         return result
+
+    def auto_completions(self):
+        pass

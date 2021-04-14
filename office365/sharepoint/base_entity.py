@@ -9,8 +9,8 @@ class BaseEntity(ClientObject):
         SharePoint base entity
 
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
-        :param ResourcePath resource_path:
-        :param str namespace:
+        :param ResourcePath resource_path: Resource Path
+        :param str namespace:  default namespace
         """
         super().__init__(context, resource_path, None, parent_collection)
         self._namespace = namespace
@@ -19,7 +19,7 @@ class BaseEntity(ClientObject):
         self.context.with_credentials(credentials)
         return self
 
-    def update(self):
+    def update(self, *args):
         """Updates the resource."""
         qry = UpdateEntityQuery(self)
         self.context.add_query(qry)

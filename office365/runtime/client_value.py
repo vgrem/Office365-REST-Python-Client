@@ -3,19 +3,19 @@ class ClientValue(object):
     Complex types consist of a list of properties with no key, and can therefore only exist as properties of a
     containing entity or as a temporary value
     """
+    _entity_type_name = None
 
-    def __init__(self, namespace=None):
+    def __init__(self):
         super(ClientValue, self).__init__()
-        self._namespace = namespace
 
     def set_property(self, k, v, persist_changes=True):
-        if hasattr(self, k):
-            prop_type = getattr(self, k)
-            if isinstance(prop_type, ClientValue) and v is not None:
-                [prop_type.set_property(k, v, persist_changes) for k, v in v.items()]
-                setattr(self, k, prop_type)
+        prop_type = getattr(self, k, None)
+        if isinstance(prop_type, ClientValue) and v is not None:
+            if isinstance(v, list):
+                [prop_type.set_property(i, p_v, persist_changes) for i, p_v in enumerate(v)]
             else:
-                setattr(self, k, v)
+                [prop_type.set_property(k, p_v, persist_changes) for k, p_v in v.items()]
+            setattr(self, k, prop_type)
         else:
             setattr(self, k, v)
 
@@ -23,12 +23,12 @@ class ClientValue(object):
         return getattr(self, k)
 
     def to_json(self):
-        return dict((k, v) for k, v in vars(self).items() if v is not None and k != "_namespace")
+        return dict((k, v) for k, v in vars(self).items() if v is not None)
 
     @property
     def entity_type_name(self):
-        if self._namespace is not None:
-            return ".".join([self._namespace, type(self).__name__])
+        if self._entity_type_name is not None:
+            return self._entity_type_name
         return type(self).__name__
 
     @property

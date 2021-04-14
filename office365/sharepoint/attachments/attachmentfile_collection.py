@@ -43,6 +43,9 @@ class AttachmentFileCollection(ClientObjectCollection):
         self.context.add_query(qry)
         return target_file
 
+    def add_using_path(self):
+        pass
+
     def get_by_filename(self, filename):
         """Retrieve Attachment file object by filename
 

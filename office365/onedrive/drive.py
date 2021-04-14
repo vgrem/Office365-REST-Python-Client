@@ -12,31 +12,21 @@ class Drive(BaseItem):
     @property
     def sharedWithMe(self):
         """Retrieve a collection of DriveItem resources that have been shared with the owner of the Drive."""
-        if self.is_property_available("sharedWithMe"):
-            return self.properties['sharedWithMe']
-        else:
-            return DriveItemCollection(self.context, ResourcePath("sharedWithMe", self.resource_path))
+        return self.properties.get('sharedWithMe',
+                                   DriveItemCollection(self.context, ResourcePath("sharedWithMe", self.resource_path)))
 
     @property
     def root(self):
         """The root folder of the drive."""
-        if self.is_property_available("root"):
-            return self.properties['root']
-        else:
-            return DriveItem(self.context, ResourcePath("root", self.resource_path))
+        return self.properties.get('root', DriveItem(self.context, ResourcePath("root", self.resource_path)))
 
     @property
     def list(self):
         """For drives in SharePoint, the underlying document library list."""
-        if self.is_property_available("list"):
-            return self.properties['list']
-        else:
-            return List(self.context, ResourcePath("list", self.resource_path))
+        return self.properties.get('list', List(self.context, ResourcePath("list", self.resource_path)))
 
     @property
     def items(self):
         """All items contained in the drive."""
-        if self.is_property_available("items"):
-            return self.properties['items']
-        else:
-            return DriveItemCollection(self.context, ResourcePath("items", self.resource_path))
+        return self.properties.get('items',
+                                   DriveItemCollection(self.context, ResourcePath("items", self.resource_path)))

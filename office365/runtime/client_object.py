@@ -26,12 +26,18 @@ class ClientObject(object):
             for k, v in properties.items():
                 self.set_property(k, v, True)
 
+    def clear(self):
+        self._changed_properties = []
+
     def execute_query(self):
         self.context.execute_query()
         return self
 
-    def execute_query_retry(self):
-        self.context.execute_query_retry()
+    def execute_query_retry(self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None):
+        self.context.execute_query_retry(max_retry=max_retry,
+                                         timeout_secs=timeout_secs,
+                                         success_callback=success_callback,
+                                         failure_callback=failure_callback)
         return self
 
     def build_request(self):
@@ -59,6 +65,11 @@ class ClientObject(object):
         return self
 
     def select(self, names):
+        """
+
+        :param list[str] names:
+        :return:
+        """
         self.query_options.select = names
         return self
 
@@ -68,13 +79,17 @@ class ClientObject(object):
         self._parent_collection.remove_child(self)
 
     def get_property(self, name):
-        getter_name = name[0].lower() + name[1:]
-        if hasattr(self, getter_name):
-            return getattr(self, getter_name)
-        return self._properties.get(name, None)
+        """
+        Gets property value
+
+        :param str name: property name
+        """
+        normalized_name = name[0].lower() + name[1:]
+        return getattr(self, normalized_name, self._properties.get(name, None))
 
     def set_property(self, name, value, persist_changes=True):
-        """Sets Property value
+        """Sets property value
+
         :param str name: Property name
         :param any value: Property value
         :param bool persist_changes: Persist changes
@@ -82,19 +97,16 @@ class ClientObject(object):
         if persist_changes:
             self._changed_properties.append(name)
 
-        safe_name = name[0].lower() + name[1:]
-        if hasattr(self, safe_name) and value is not None:
-            prop_type = getattr(self, safe_name)
-            if isinstance(prop_type, ClientObject) or isinstance(prop_type, ClientValue):
-                if isinstance(value, list):
-                    [prop_type.set_property(i, v, persist_changes) for i, v in enumerate(value)]
-                else:
-                    [prop_type.set_property(k, v, persist_changes) for k, v in value.items()]
-                self._properties[name] = prop_type
+        prop_type = self.get_property(name)
+        if isinstance(prop_type, ClientObject) or isinstance(prop_type, ClientValue) and value is not None:
+            if isinstance(value, list):
+                [prop_type.set_property(i, v, persist_changes) for i, v in enumerate(value)]
             else:
-                self._properties[name] = value
+                [prop_type.set_property(k, v, persist_changes) for k, v in value.items()]
+            self._properties[name] = prop_type
         else:
             self._properties[name] = value
+        return self
 
     def to_json(self):
         return dict((k, v) for k, v in self.properties.items() if k in self._changed_properties)
@@ -106,9 +118,7 @@ class ClientObject(object):
         :type action: () -> None
         :type name: str
         """
-        names_to_include = [name]
-        self.ensure_properties(names_to_include, action)
-        return self
+        return self.ensure_properties([name], action)
 
     def ensure_properties(self, names, action):
         """
@@ -124,9 +134,11 @@ class ClientObject(object):
                 def _process_query(current_query):
                     if current_query.id == qry.id:
                         action()
+
                 self.context.after_execute_query(_process_query)
         else:
             action()
+        return self
 
     def clone_object(self):
         result = copy.deepcopy(self)

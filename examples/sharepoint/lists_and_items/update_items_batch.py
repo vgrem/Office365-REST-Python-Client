@@ -1,17 +1,13 @@
 from random import randint
 
-from settings import settings
-
-from office365.runtime.auth.client_credential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
+from tests import test_team_site_url, test_client_credentials
 
-ctx = ClientContext.connect_with_credentials("https://mediadev8.sharepoint.com/sites/team",
-                                             ClientCredential(settings['client_credentials']['client_id'],
-                                                              settings['client_credentials']['client_secret']))
+ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 
 # 1. Load existing list items
 list_tasks = ctx.web.lists.get_by_title("Tasks")
-items = list_tasks.items.get().execute_query()
+items = list_tasks.items.get().top(5).execute_query()
 # 2. Update list items via Batch mode
 for task_id, item in enumerate(items):
     task_prefix = str(randint(0, 10000))

@@ -7,17 +7,21 @@ from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.actions.getWebUrlFromPage import GetWebUrlFromPageUrlQuery
+from office365.sharepoint.alerts.alert_collection import AlertCollection
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
+from office365.sharepoint.eventreceivers.event_receiver_definition import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.files.file import File
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.folders.folder_collection import FolderCollection
 from office365.sharepoint.listitems.listitem import ListItem
-from office365.sharepoint.lists.documentLibraryInformation import DocumentLibraryInformation
+from office365.sharepoint.lists.document_library_information import DocumentLibraryInformation
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.list_collection import ListCollection
-from office365.sharepoint.permissions.basePermissions import BasePermissions
+from office365.sharepoint.lists.list_template_collection import ListTemplateCollection
+from office365.sharepoint.navigation.navigation import Navigation
+from office365.sharepoint.permissions.base_permissions import BasePermissions
 from office365.sharepoint.permissions.roleDefinitionCollection import RoleDefinitionCollection
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.principal.group import Group
@@ -27,12 +31,13 @@ from office365.sharepoint.principal.user_collection import UserCollection
 from office365.sharepoint.recyclebin.recycleBinItemCollection import RecycleBinItemCollection
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
 from office365.sharepoint.sharing.objectSharingSettings import ObjectSharingSettings
-from office365.sharepoint.sharing.sharingResult import SharingResult
-from office365.sharepoint.ui.applicationpages.clientPeoplePickerQueryParameters import ClientPeoplePickerQueryParameters
-from office365.sharepoint.ui.applicationpages.clientPeoplePickerWebServiceInterface import (
-    ClientPeoplePickerWebServiceInterface,
+from office365.sharepoint.sharing.sharing_result import SharingResult
+from office365.sharepoint.ui.applicationpages.client_people_picker import (
+    ClientPeoplePickerWebServiceInterface, ClientPeoplePickerQueryParameters
 )
 from office365.sharepoint.webs.regional_settings import RegionalSettings
+from office365.sharepoint.webs.web_information_collection import WebInformationCollection
+from office365.sharepoint.webs.web_template_collection import WebTemplateCollection
 
 
 class Web(SecurableObject):
@@ -52,7 +57,7 @@ class Web(SecurableObject):
 
     @staticmethod
     def get_web_url_from_page_url(context, page_full_url):
-        """Determine whether site exists
+        """Gets Web from page url
 
         :type context: office365.sharepoint.client_context.ClientContext
         :type page_full_url: str
@@ -61,14 +66,20 @@ class Web(SecurableObject):
         context.add_query(qry)
         return qry.return_type
 
+    def get_all_client_side_components(self):
+        result = ClientResult(None)
+        qry = ServiceOperationQuery(self, "getAllClientSideComponents", None, None, None, result)
+        self.context.add_query(qry)
+        return result
+
     def get_sub_webs_filtered_for_current_user(self, query):
         """Returns a collection of objects that contain metadata about subsites of the current site (2) in which the
         current user is a member.
 
         :type query: office365.sharepoint.webs.subweb_query.SubwebQuery
         """
-        users = UserCollection(self.context)
-        qry = ServiceOperationQuery(self, "getSubwebsFilteredForCurrentUser", {
+        users = WebInformationCollection(self.context)
+        qry = ServiceOperationQuery(self, "getSubWebsFilteredForCurrentUser", {
             "nWebTemplateFilter": query.WebTemplateFilter,
             "nConfigurationFilter": query.ConfigurationFilter
         }, None, None, users)
@@ -101,6 +112,7 @@ class Web(SecurableObject):
 
         def _load_sub_webs(resp):
             self._load_sub_webs_inner(result.value)
+
         self.context.after_execute(_load_sub_webs)
         return result
 
@@ -115,6 +127,21 @@ class Web(SecurableObject):
                 result.add_child(web)
             self._load_sub_webs_inner(sub_webs, result)
 
+    def get_list_using_path(self, decoded_url):
+        return_list = List(self.context)
+        self.lists.add_child(return_list)
+        from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
+        res_path = SPResPath(decoded_url)
+        qry = ServiceOperationQuery(self, "GetListUsingPath", res_path, None, None, return_list)
+        self.context.add_query(qry)
+        return return_list
+
+    def get_regional_datetime_schema(self):
+        return_type = ClientResult(str)
+        qry = ServiceOperationQuery(self, "GetRegionalDateTimeSchema", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def update(self):
         """Update a Web resource"""
         qry = UpdateEntityQuery(self)
@@ -127,6 +154,18 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         self.remove_from_parent_collection()
         return self
+
+    @staticmethod
+    def get_context_web_theme_data(context):
+        """
+
+        :type context: office365.sharepoint.client_context.ClientContext
+        """
+        result = ClientResult(str)
+        qry = ServiceOperationQuery(context.web, "GetContextWebThemeData", None, None, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
 
     @staticmethod
     def create_anonymous_link(context, url, is_edit_link):
@@ -193,6 +232,14 @@ class Web(SecurableObject):
             self.context,
             ResourcePathServiceOperation("getFolderByServerRelativeUrl", [url], self.resource_path)
         )
+
+    def ensure_folder_path(self, path):
+        """
+        Ensures a nested folder hierarchy exist
+
+        :param str path: relative server URL (path) to a folder
+        """
+        return self.root_folder.folders.ensure_folder_path(path)
 
     def ensure_user(self, login_name):
         """Checks whether the specified logon name belongs to a valid user of the website, and if the logon name does
@@ -266,6 +313,65 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return changes
 
+    def get_available_web_templates(self, lcid=1033, doIncludeCrossLanguage=False):
+        """
+        Returns a collection of site templates available for the site.
+
+        :param int lcid: Specifies the LCID of the site templates to be retrieved.
+        :param bool doIncludeCrossLanguage: Specifies whether to include language-neutral site templates.
+        :return:
+        """
+        params = {
+            "lcid": lcid,
+            "doIncludeCrossLanguage": doIncludeCrossLanguage
+        }
+        return_type = WebTemplateCollection(self.context,
+                                            ResourcePathServiceOperation("GetAvailableWebTemplates ", params,
+                                                                         self.resource_path))
+
+        qry = ServiceOperationQuery(self, "GetAvailableWebTemplates", params, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def apply_web_template(self, webTemplate):
+        """
+        Applies the specified site definition or site template to the website that has no template applied to it.
+
+        :param str webTemplate: The name of the site definition or the file name of the site template to be applied.
+        :return:
+        """
+        qry = ServiceOperationQuery(self, "ApplyWebTemplate", {"webTemplate": webTemplate})
+        self.context.add_query(qry)
+        return self
+
+    def get_custom_list_templates(self):
+        """
+        Specifies the collection of custom list templates for a given site.
+
+        """
+        return_type = ListTemplateCollection(self.context)
+        qry = ServiceOperationQuery(self, "GetCustomListTemplates", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_file_by_guest_url(self, guestUrl):
+        """
+        :type guestUrl: str
+        """
+        return_type = File(self.context)
+        qry = ServiceOperationQuery(self, "GetFileByGuestUrl", [guestUrl], None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_folder_by_guest_url(self, guestUrl):
+        """
+        :type guestUrl: str
+        """
+        return_type = File(self.context)
+        qry = ServiceOperationQuery(self, "GetFolderByGuestUrl", [guestUrl], None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def share(self, user_principal_name,
               shareOption=ExternalSharingSiteOption.View,
               sendEmail=True, emailSubject=None, emailBody=None):
@@ -310,6 +416,7 @@ class Web(SecurableObject):
 
         def _web_initialized():
             sharing_result.value = Web.unshare_object(self.context, self.url)
+
         self.ensure_property("Url", _web_initialized)
         return sharing_result.value
 
@@ -324,11 +431,29 @@ class Web(SecurableObject):
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
         :param str web_full_url: The URL of the web.
         """
-        result = ClientValueCollection(DocumentLibraryInformation())
+        result = ClientValueCollection(DocumentLibraryInformation)
         payload = {
             "webFullUrl": web_full_url
         }
         qry = ServiceOperationQuery(context.web, "GetDocumentLibraries", None, payload, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
+
+    @staticmethod
+    def get_document_and_media_libraries(context, web_full_url, include_page_libraries):
+        """
+
+        :param context:
+        :param str web_full_url:
+        :param bool include_page_libraries:
+        """
+        result = ClientValueCollection(DocumentLibraryInformation)
+        payload = {
+            "webFullUrl": web_full_url,
+            "includePageLibraries": include_page_libraries
+        }
+        qry = ServiceOperationQuery(context.web, "GetDocumentAndMediaLibraries", None, payload, None, result)
         qry.static = True
         context.add_query(qry)
         return result
@@ -352,6 +477,7 @@ class Web(SecurableObject):
         def _group_resolved(resp):
             role_value = "group:{groupId}".format(groupId=grp.properties["Id"])
             on_resolved(role_value)
+
         context.after_execute(_group_resolved)
 
     @staticmethod
@@ -455,32 +581,25 @@ class Web(SecurableObject):
             if self.is_property_available('Url'):
                 parent_web_url = self.properties['Url']
             return WebCollection(self.context,
-                                 ResourcePath("webs", self.resource_path),
-                                 parent_web_url)
+                                 ResourcePath("webs", self.resource_path), parent_web_url)
 
     @property
     def folders(self):
         """Get folder resources"""
-        if self.is_property_available('Folders'):
-            return self.properties['Folders']
-        else:
-            return FolderCollection(self.context, ResourcePath("folders", self.resource_path))
+        return self.properties.get('Folders',
+                                   FolderCollection(self.context, ResourcePath("folders", self.resource_path)))
 
     @property
     def lists(self):
         """Get web list collection"""
-        if self.is_property_available('Lists'):
-            return self.properties['Lists']
-        else:
-            return ListCollection(self.context, ResourcePath("lists", self.resource_path))
+        return self.properties.get('Lists',
+                                   ListCollection(self.context, ResourcePath("lists", self.resource_path)))
 
     @property
     def siteUsers(self):
         """Get site users"""
-        if self.is_property_available('SiteUsers'):
-            return self.properties['SiteUsers']
-        else:
-            return UserCollection(self.context, ResourcePath("siteUsers", self.resource_path))
+        return self.properties.get('SiteUsers',
+                                   UserCollection(self.context, ResourcePath("siteUsers", self.resource_path)))
 
     @property
     def siteGroups(self):
@@ -491,12 +610,10 @@ class Web(SecurableObject):
             return GroupCollection(self.context, ResourcePath("siteGroups", self.resource_path))
 
     @property
-    def currentUser(self):
+    def current_user(self):
         """Gets the current user."""
-        if self.is_property_available('CurrentUser'):
-            return self.properties['CurrentUser']
-        else:
-            return User(self.context, ResourcePath("CurrentUser", self.resource_path))
+        return self.properties.get('CurrentUser',
+                                   User(self.context, ResourcePath("CurrentUser", self.resource_path)))
 
     @property
     def parentWeb(self):
@@ -539,7 +656,7 @@ class Web(SecurableObject):
             return FieldCollection(self.context, ResourcePath("Fields", self.resource_path))
 
     @property
-    def contentTypes(self):
+    def content_types(self):
         """Gets the collection of content types for the Web site."""
         if self.is_property_available('ContentTypes'):
             return self.properties['ContentTypes']
@@ -547,7 +664,7 @@ class Web(SecurableObject):
             return ContentTypeCollection(self.context, ResourcePath("ContentTypes", self.resource_path))
 
     @property
-    def roleDefinitions(self):
+    def role_definitions(self):
         """Gets the collection of role definitions for the Web site."""
         return self.properties.get("RoleDefinitions",
                                    RoleDefinitionCollection(self.context,
@@ -555,11 +672,48 @@ class Web(SecurableObject):
                                                                          self.resource_path)))
 
     @property
+    def event_receivers(self):
+        """Get Event receivers"""
+        return self.properties.get('EventReceivers',
+                                   EventReceiverDefinitionCollection(self.context,
+                                                                     ResourcePath("eventReceivers", self.resource_path),
+                                                                     self))
+
+    @property
     def url(self):
         """Gets the absolute URL for the website.
         :rtype: str or None
         """
         return self.properties.get('Url', None)
+
+    @property
+    def quick_launch_enabled(self):
+        """Gets a value that specifies whether the Quick Launch area is enabled on the site.
+        :rtype: bool or None
+        """
+        return self.properties.get('QuickLaunchEnabled', None)
+
+    @quick_launch_enabled.setter
+    def quick_launch_enabled(self, value):
+        """Sets a value that specifies whether the Quick Launch area is enabled on the site.
+        :type value: bool
+        """
+        self.set_property('QuickLaunchEnabled', value)
+
+    @property
+    def site_logo_url(self):
+        """Gets a value that specifies Site logo url.
+        :rtype: str or None
+        """
+        return self.properties.get('SiteLogoUrl', None)
+
+    @property
+    def list_templates(self):
+        """Gets a value that specifies the collection of list definitions and list templates available for creating
+            lists on the site."""
+        return self.properties.get('ListTemplates',
+                                   ListTemplateCollection(self.context,
+                                                          ResourcePath("ListTemplates", self.resource_path)))
 
     @property
     def web_template(self):
@@ -571,17 +725,57 @@ class Web(SecurableObject):
     @property
     def regional_settings(self):
         """Gets the regional settings that are currently implemented on the website."""
-        if self.is_property_available('RegionalSettings'):
-            return self.properties['RegionalSettings']
-        else:
-            return RegionalSettings(self.context, ResourcePath("RegionalSettings", self.resource_path))
+        return self.properties.get('RegionalSettings',
+                                   RegionalSettings(self.context, ResourcePath("RegionalSettings", self.resource_path)))
 
     @property
-    def recycleBin(self):
+    def recycle_bin(self):
         """Get recycle bin"""
         return self.properties.get('RecycleBin',
                                    RecycleBinItemCollection(self.context,
                                                             ResourcePath("RecycleBin", self.resource_path)))
+
+    @property
+    def navigation(self):
+        """Gets a web site navigation."""
+        return self.properties.get('Navigation',
+                                   Navigation(self.context,
+                                              ResourcePath("Navigation", self.resource_path)))
+
+    @property
+    def root_folder(self):
+        """Get a root folder"""
+        return self.properties.get("RootFolder", Folder(self.context, ResourcePath("RootFolder", self.resource_path)))
+
+    @property
+    def alerts(self):
+        return self.properties.get('Alerts',
+                                   AlertCollection(self.context,
+                                                   ResourcePath("Alerts", self.resource_path)))
+
+    @property
+    def available_fields(self):
+        return self.properties.get('AvailableFields',
+                                   FieldCollection(self.context,
+                                                   ResourcePath("AvailableFields", self.resource_path)))
+
+    def get_property(self, name):
+        if name == "ContentTypes":
+            return self.content_types
+        elif name == "RootFolder":
+            return self.root_folder
+        elif name == "RegionalSettings":
+            return self.regional_settings
+        elif name == "RoleDefinitions":
+            return self.role_definitions
+        elif name == "RecycleBin":
+            return self.recycle_bin
+        elif name == "CurrentUser":
+            return self.current_user
+        elif name == "AvailableFields":
+            return self.available_fields
+        else:
+            return super(Web, self).get_property(name)
 
     def set_property(self, name, value, persist_changes=True):
         super(Web, self).set_property(name, value, persist_changes)

@@ -51,6 +51,10 @@ class ClientRequest(object):
             self._queries.append(query)
         self._current_query = query
 
+    def remove_query(self, query):
+        self._queries.remove(query)
+        self._current_query = None
+
     @abstractmethod
     def build_request(self):
         """
@@ -124,7 +128,7 @@ class ClientRequest(object):
         return result
 
     def next_query(self):
-        while self._queries:
+        while len(self._queries) > 0:
             qry = self._queries.pop(0)
             self._current_query = qry
             yield qry

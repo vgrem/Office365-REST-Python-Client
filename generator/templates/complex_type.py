@@ -2,4 +2,6 @@ from office365.runtime.client_value import ClientValue
 
 
 class ComplexType(ClientValue):
-    pass
+
+    def __init__(self):
+        super().__init__()

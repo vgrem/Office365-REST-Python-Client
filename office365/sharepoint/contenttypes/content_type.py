@@ -1,13 +1,43 @@
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
+from office365.sharepoint.contenttypes.field_link_collection import FieldLinkCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 
 
 class ContentType(BaseEntity):
     """Specifies a content type."""
+
+    def reorder_fields(self, field_names):
+        """
+        The ReorderFields method is called to change the order in which fields appear in a content type.
+
+        :param list[str] field_names:
+        """
+        qry = ServiceOperationQuery(self, "ReorderFields", field_names)
+        self.context.add_query(qry)
+        return self
+
+    def update(self, update_children):
+        """
+        Updates the content type, and any child objects  of the content type if specified,
+        with any changes made to the content type.
+
+        :param bool update_children:
+        """
+        qry = ServiceOperationQuery(self, "Update", [update_children])
+        self.context.add_query(qry)
+        return self
+
+    def delete_object(self):
+        """Deletes the content type."""
+        qry = DeleteEntityQuery(self)
+        self.context.add_query(qry)
+        self.remove_from_parent_collection()
+        return self
 
     @property
     def id(self):
@@ -15,6 +45,13 @@ class ContentType(BaseEntity):
         :rtype: ContentTypeId
         """
         return self.properties.get("Id", ContentTypeId())
+
+    @property
+    def string_id(self):
+        """A string representation of the value of the Id
+        :rtype: str
+        """
+        return self.properties.get("StringId", None)
 
     @property
     def name(self):
@@ -59,7 +96,7 @@ class ContentType(BaseEntity):
         self.set_property("Group", value)
 
     @property
-    def schemaXml(self):
+    def schema_xml(self):
         """Specifies the XML schema that represents the content type.
         :rtype: str or None
         """
@@ -81,17 +118,22 @@ class ContentType(BaseEntity):
         else:
             return ContentType(self.context, ResourcePath("Parent", self.resource_path))
 
+    @property
+    def field_links(self):
+        """Specifies the collection of field links for the content type."""
+        return self.properties.get('FieldLinks',
+                                   FieldLinkCollection(self.context, ResourcePath("FieldLinks", self.resource_path)))
+
+    def get_property(self, name):
+        if name == "FieldLinks":
+            return self.field_links
+        else:
+            return super(ContentType, self).get_property(name)
+
     def set_property(self, name, value, persist_changes=True):
         super(ContentType, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "StringId" and self._resource_path is None:
             self._resource_path = ResourcePathServiceOperation(
                 "getById", [value], self._parent_collection.resource_path)
-        return self
-
-    def delete_object(self):
-        """Deletes the content type."""
-        qry = DeleteEntityQuery(self)
-        self.context.add_query(qry)
-        self.remove_from_parent_collection()
         return self

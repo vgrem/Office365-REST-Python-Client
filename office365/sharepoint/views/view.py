@@ -1,3 +1,4 @@
+from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
@@ -15,6 +16,14 @@ class View(BaseEntity):
         super(View, self).__init__(context, resource_path)
         self._parent_list = parent_list
 
+    def get_property(self, name):
+        if name == "ViewFields":
+            return self.view_fields
+        elif name == "DefaultView":
+            return self.default_view
+        else:
+            return super(View, self).get_property(name)
+
     def get_items(self):
         """Get list items per a view
 
@@ -22,7 +31,7 @@ class View(BaseEntity):
         """
 
         def _get_items_inner():
-            caml_query = CamlQuery.parse(self.viewQuery)
+            caml_query = CamlQuery.parse(self.view_query)
             qry = ServiceOperationQuery(self._parent_list, "GetItems", None, caml_query, "query",
                                         self._parent_list.items)
             self.context.add_query(qry)
@@ -37,15 +46,21 @@ class View(BaseEntity):
         self.remove_from_parent_collection()
         return self
 
+    def render_as_html(self):
+        result = ClientResult(str)
+        qry = ServiceOperationQuery(self, "RenderAsHtml", None, None, None, result)
+        self.context.add_query(qry)
+        return result
+
     @property
-    def contentTypeId(self):
+    def content_type_id(self):
         """Gets the identifier of the content type with which the view is associated.
         :rtype: ContentTypeId
         """
         return self.properties.get("ContentTypeId", ContentTypeId())
 
-    @contentTypeId.setter
-    def contentTypeId(self, value):
+    @content_type_id.setter
+    def content_type_id(self, value):
         """Sets the identifier of the content type with which the view is associated."""
         self.set_property("ContentTypeId", value)
 
@@ -63,20 +78,20 @@ class View(BaseEntity):
         self.set_property("Hidden", value)
 
     @property
-    def defaultView(self):
+    def default_view(self):
         """Gets whether the list view is the default list view.
         :rtype: bool or None
         """
         return self.properties.get("DefaultView", None)
 
-    @defaultView.setter
-    def defaultView(self, value):
+    @default_view.setter
+    def default_view(self, value):
         """Sets whether the list view is the default list view.
         """
         self.set_property("DefaultView", value)
 
     @property
-    def viewFields(self):
+    def view_fields(self):
         """Gets a value that specifies the collection of fields in the list view."""
         if self.is_property_available('ViewFields'):
             return self.properties['ViewFields']
@@ -84,12 +99,14 @@ class View(BaseEntity):
             return ViewFieldCollection(self.context, ResourcePath("ViewFields", self.resource_path))
 
     @property
-    def viewQuery(self):
+    def view_query(self):
         """Gets or sets a value that specifies the query that is used by the list view."""
-        if self.is_property_available('ViewQuery'):
-            return self.properties['ViewQuery']
-        else:
-            return None
+        return self.properties.get('ViewQuery', None)
+
+    @property
+    def base_view_id(self):
+        """Gets a value that specifies the base view identifier of the list view."""
+        return self.properties.get('BaseViewId', None)
 
     def set_property(self, name, value, persist_changes=True):
         super(View, self).set_property(name, value, persist_changes)

@@ -10,16 +10,11 @@ class ListItem(BaseItem):
     @property
     def fields(self):
         """The values of the columns set on this list item."""
-        if self.is_property_available('fields'):
-            return self.properties['fields']
-        else:
-            return FieldValueSet(self.context, ResourcePath("fields", self.resource_path))
+        return self.properties.get('fields',
+                                   FieldValueSet(self.context, ResourcePath("fields", self.resource_path)))
 
     @property
     def driveItem(self):
         """For document libraries, the driveItem relationship exposes the listItem as a driveItem."""
-        if self.is_property_available('driveItem'):
-            return self.properties['driveItem']
-        else:
-            from office365.onedrive.driveItem import DriveItem
-            return DriveItem(self.context, ResourcePath("driveItem", self.resource_path))
+        from office365.onedrive.driveItem import DriveItem
+        return self.properties.get('driveItem', DriveItem(self.context, ResourcePath("driveItem", self.resource_path)))

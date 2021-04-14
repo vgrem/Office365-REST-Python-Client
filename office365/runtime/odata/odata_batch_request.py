@@ -66,13 +66,13 @@ class ODataBatchRequest(ClientRequest):
             change_set_message.add_header("Content-Type", "multipart/mixed")
             change_set_message.set_boundary(change_set_boundary)
 
-            for qry in self._current_query.next_change_set():
+            for qry in self._current_query.change_sets:
                 request = qry.build_request()
                 message = self._serialize_request(request)
                 change_set_message.attach(message)
             main_message.attach(change_set_message)
 
-        for qry in self._current_query.next_get_query():
+        for qry in self._current_query.get_queries:
             request = qry.build_request()
             message = self._serialize_request(request)
             main_message.attach(message)
@@ -93,6 +93,10 @@ class ODataBatchRequest(ClientRequest):
         response_status_regex = "^HTTP/1\\.\\d (\\d{3}) (.*)$"
         status_result = re.match(response_status_regex, lines[0])
         status_info = status_result.groups()
+
+        # validate for errors
+        if int(status_info[0]) >= 400:
+            raise ValueError(response)
 
         if status_info[1] == "No Content" or len(lines) < 3:
             headers_raw = lines[1:]
@@ -137,6 +141,7 @@ class ODataBatchRequest(ClientRequest):
 
     def next_query(self):
         queries = [qry for qry in self.context.pending_request().next_query()]
-        qry = BatchQuery(self.context, queries)  # Aggregate requests into batch request
-        self._current_query = qry
-        yield qry
+        if len(queries) > 0:
+            batch_qry = BatchQuery(self.context, queries)  # Aggregate requests into batch request
+            self._current_query = batch_qry
+            yield batch_qry

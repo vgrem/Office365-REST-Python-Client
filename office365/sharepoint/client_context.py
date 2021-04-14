@@ -1,11 +1,7 @@
 import copy
-
-import adal
-
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.providers.saml_token_provider import resolve_base_url
-from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.auth.user_credential import UserCredential
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
@@ -21,16 +17,6 @@ from office365.sharepoint.webs.context_web_information import ContextWebInformat
 from office365.sharepoint.webs.web import Web
 
 
-def get_tenant_info(url):
-    parts = url.split('://')
-    host_name = parts[1].split("/")[0]
-    tenant_name = "{0}.onmicrosoft.com".format(host_name.split(".")[0])
-    return {
-        "base_url": "{0}://{1}".format(parts[0], host_name),
-        "name": tenant_name
-    }
-
-
 class ClientContext(ClientRuntimeContext):
     """SharePoint client context"""
 
@@ -41,7 +27,11 @@ class ClientContext(ClientRuntimeContext):
         """
         if base_url.endswith("/"):
             base_url = base_url[:len(base_url) - 1]
-        super(ClientContext, self).__init__(auth_context)
+        if auth_context is None:
+            self._auth_context = AuthenticationContext(url=base_url)
+        else:
+            self._auth_context = auth_context
+        super(ClientContext, self).__init__()
         self.__web = None
         self.__site = None
         self._base_url = base_url
@@ -67,45 +57,34 @@ class ClientContext(ClientRuntimeContext):
         ctx.after_execute(_init_context_for_web)
         return ctx
 
-    @staticmethod
-    def connect_with_credentials(base_url, credentials):
-        """
-        Creates authenticated SharePoint context via user or client credentials
-
-        :param str base_url: Url to Site or Web
-        :param ClientCredential or UserCredential credentials: Credentials object """
-        ctx = ClientContext(base_url).with_credentials(credentials)
-        ctx.authentication_context.acquire_token_func()
-        return ctx
-
-    @staticmethod
-    def connect_with_certificate(base_url, client_id, thumbprint, cert_path):
+    def with_client_certificate(self, tenant, client_id, thumbprint, cert_path):
         """Creates authenticated SharePoint context via certificate credentials
 
+        :param str tenant: Tenant name
         :param str cert_path: Path to A PEM encoded certificate private key.
         :param str thumbprint: Hex encoded thumbprint of the certificate.
         :param str client_id: The OAuth client id of the calling application.
-        :param str base_url: Url to Site or Web
         """
+        self.authentication_context.with_client_certificate(tenant, client_id, thumbprint, cert_path)
+        return self
 
-        def acquire_token():
-            tenant_info = get_tenant_info(base_url)
-            authority_url = 'https://login.microsoftonline.com/{0}'.format(tenant_info['name'])
-            auth_ctx = adal.AuthenticationContext(authority_url)
-            resource = tenant_info['base_url']
-            with open(cert_path, 'r') as file:
-                key = file.read()
-            json_token = auth_ctx.acquire_token_with_client_certificate(
-                resource,
-                client_id,
-                key,
-                thumbprint)
-            return TokenResponse(**json_token)
+    def with_access_token(self, token_func):
+        """
+        :type token_func: () -> TokenResponse
+        """
+        self.authentication_context.register_provider(token_func)
+        return self
 
-        ctx_auth = AuthenticationContext(url=base_url)
-        ctx_auth.set_token(acquire_token())
-        ctx = ClientContext(base_url, ctx_auth)
-        return ctx
+    def with_user_credentials(self, username, password, allow_ntlm=False):
+        """
+        Assigns credentials
+
+        :type username: str
+        :type password: str
+        :type allow_ntlm: bool
+        """
+        self.authentication_context.register_provider(UserCredential(username, password), allow_ntlm=allow_ntlm)
+        return self
 
     def with_credentials(self, credentials):
         """
@@ -113,20 +92,7 @@ class ClientContext(ClientRuntimeContext):
 
         :type credentials: UserCredential or ClientCredential
         """
-        self._auth_context = AuthenticationContext(url=self._base_url)
-
-        def _acquire_token():
-            if not self.authentication_context.is_authenticated:
-                if isinstance(credentials, ClientCredential):
-                    return self.authentication_context.acquire_token_for_app(credentials.clientId,
-                                                                             credentials.clientSecret)
-                elif isinstance(credentials, UserCredential):
-                    return self.authentication_context.acquire_token_for_user(credentials.userName,
-                                                                              credentials.password)
-                else:
-                    raise ValueError("Unknown credential type")
-
-        self._auth_context.acquire_token_func = _acquire_token
+        self.authentication_context.register_provider(credentials)
         return self
 
     def execute_batch(self):
@@ -182,6 +148,9 @@ class ClientContext(ClientRuntimeContext):
         if clear_queries:
             ctx.clear_queries()
         return ctx
+
+    def authenticate_request(self, request):
+        self._auth_context.authenticate_request(request)
 
     def _build_modification_query(self, request):
         """

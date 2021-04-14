@@ -25,13 +25,13 @@ def _create_empty_file(path):
 
 
 class UploadSessionQuery(CreateFileQuery):
-    def __init__(self, files, source_path, chunk_size, chunk_uploaded):
+    def __init__(self, files, source_path, chunk_size, chunk_uploaded, chunk_func_args):
         """
 
         :type files: office365.sharepoint.files.file_collection.FileCollection
         :type source_path: str
         :type chunk_size: int
-        :type chunk_uploaded: (int)->None
+        :type chunk_uploaded: (int, *)->None
         """
 
         super().__init__(files, _create_empty_file(source_path))
@@ -39,6 +39,7 @@ class UploadSessionQuery(CreateFileQuery):
         self._upload_id = str(uuid.uuid4())
         self._source_path = source_path
         self._chunk_uploaded = chunk_uploaded
+        self._chunk_func_args = chunk_func_args
         self._uploaded_bytes = 0
         self._upload_results = []
         self.file.context.after_execute(self._build_upload_session_query)
@@ -70,7 +71,7 @@ class UploadSessionQuery(CreateFileQuery):
             self.file.context.after_execute(self._process_chunk_upload)
         elif isinstance(self._return_type, File):
             self._uploaded_bytes = qry.return_type.length
-        self._chunk_uploaded(self._uploaded_bytes)
+        self._chunk_uploaded(self._uploaded_bytes, *self._chunk_func_args)
 
     @property
     def file(self):

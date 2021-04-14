@@ -1,23 +1,8 @@
 import os
 import tempfile
 
-import adal
-
-from settings import settings
-
+from examples import acquire_token_client_credentials
 from office365.graph_client import GraphClient
-
-
-def get_token():
-    """Acquire token via client credential flow (ADAL Python library is utilized)
-    """
-    authority_url = 'https://login.microsoftonline.com/{0}'.format(settings['tenant'])
-    auth_ctx = adal.AuthenticationContext(authority_url)
-    token = auth_ctx.acquire_token_with_client_credentials(
-        "https://graph.microsoft.com",
-        settings['client_credentials']['client_id'],
-        settings['client_credentials']['client_secret'])
-    return token
 
 
 def download_files(remote_folder, local_path):
@@ -41,10 +26,11 @@ def download_files(remote_folder, local_path):
 # --------------------------------------------------------------------------
 
 # connect
-client = GraphClient(get_token)
+client = GraphClient(acquire_token_client_credentials)
 
 # load drive properties
-drive = client.users["jdoe@mediadev8.onmicrosoft.com"].drive
+target_user_name = settings.get('first_account_name')
+drive = client.users[target_user_name].drive
 # download files from OneDrive
 with tempfile.TemporaryDirectory() as path:
     download_files(drive.root, path)

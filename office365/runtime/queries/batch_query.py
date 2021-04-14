@@ -1,9 +1,7 @@
 import uuid
 
 from office365.runtime.queries.client_query import ClientQuery
-from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.read_entity_query import ReadEntityQuery
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 
 
 def create_boundary(prefix, compact=False):
@@ -41,10 +39,7 @@ class BatchQuery(ClientQuery):
         self._queries.append(query)
 
     def get(self, index):
-        result = [qry for qry in self._queries
-                  if isinstance(qry, ReadEntityQuery)
-                  or isinstance(qry, CreateEntityQuery)
-                  or isinstance(qry, ServiceOperationQuery)]
+        result = [qry for qry in self.change_sets if qry.return_type is not None] + self.get_queries
         return result[index]
 
     @property
@@ -56,16 +51,13 @@ class BatchQuery(ClientQuery):
         return [qry for qry in self._queries if not isinstance(qry, ReadEntityQuery)]
 
     @property
+    def queries(self):
+        return self._queries
+
+    @property
+    def get_queries(self):
+        return [qry for qry in self._queries if isinstance(qry, ReadEntityQuery)]
+
+    @property
     def has_change_sets(self):
         return len(self.change_sets) > 0
-
-    def next_get_query(self):
-        for qry in self._queries:
-            if isinstance(qry, ReadEntityQuery):
-                self.context.pending_request()._current_query = qry
-                yield qry
-
-    def next_change_set(self):
-        for qry in self.change_sets:
-            self.context.pending_request()._current_query = qry
-            yield qry

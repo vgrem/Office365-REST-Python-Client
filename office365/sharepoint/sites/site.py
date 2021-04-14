@@ -1,20 +1,48 @@
-from office365.runtime.client_object import ClientObject
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.change_collection import ChangeCollection
+from office365.sharepoint.eventreceivers.event_receiver_definition import EventReceiverDefinitionCollection
+from office365.sharepoint.features.feature_collection import FeatureCollection
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.recyclebin.recycleBinItemCollection import RecycleBinItemCollection
+from office365.sharepoint.sites.sph_site import SPHSite
 from office365.sharepoint.webs.web import Web
+from office365.sharepoint.webs.web_template_collection import WebTemplateCollection
 
 
-class Site(ClientObject):
-    """Represents a collection of sites in a Web application, including a top-level website and all its subsites."""
+class Site(BaseEntity):
+    """Represents a collection of sites in a Web application, including a top-level website and all its sub sites."""
 
     def __init__(self, context):
         super(Site, self).__init__(context, ResourcePath("Site", None))
+
+    @staticmethod
+    def from_url(url):
+        from office365.sharepoint.client_context import ClientContext
+        client = ClientContext(url)
+        return client.site
+
+    def is_valid_home_site(self):
+        result = ClientResult(None)
+
+        def _site_loaded():
+            SPHSite.is_valid_home_site(self.context, self.url, result)
+
+        self.ensure_property("Url", _site_loaded)
+        return result
+
+    def set_as_home_site(self):
+        result = ClientResult(None)
+
+        def _site_loaded():
+            self.result = SPHSite.set_as_home_site(self.context, self.url, result)
+
+        self.ensure_property("Url", _site_loaded)
+        return result
 
     def get_changes(self, query):
         """Returns the collection of all changes from the change log that have occurred within the scope of the site,
@@ -27,7 +55,12 @@ class Site(ClientObject):
         self.context.add_query(qry)
         return changes
 
-    def get_recycle_bin_items(self, pagingInfo=None, rowLimit=100, isAscending=True, orderBy=None, itemState=None):
+    def get_recycle_bin_items(self, rowLimit=100, isAscending=True):
+        """
+
+        :param int rowLimit:
+        :param bool isAscending:
+        """
         result = RecycleBinItemCollection(self.context)
         payload = {
             "rowLimit": rowLimit,
@@ -36,6 +69,41 @@ class Site(ClientObject):
         qry = ServiceOperationQuery(self, "GetRecycleBinItems", None, payload, None, result)
         self.context.add_query(qry)
         return result
+
+    def get_web_templates(self, lcid=1033, override_compat_level=0):
+        """
+        Returns the collection of site definitions that are available for creating
+            Web sites within the site collection.<99>
+
+        :param int lcid: A 32-bit unsigned integer that specifies the language of the site definitions that are
+            returned from the site collection.
+        :param int override_compat_level: Specifies the compatibility level of the site (2)
+            to return from the site collection. If this value is 0, the compatibility level of the site (2) is used.
+        :return:
+        """
+        params = {
+            "LCID": lcid,
+            "overrideCompatLevel": override_compat_level
+        }
+        return_type = WebTemplateCollection(self.context,
+                                            ResourcePathServiceOperation("GetWebTemplates", params, self.resource_path))
+
+        qry = ServiceOperationQuery(self, "GetWebTemplates", params, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def join_hub_site(self, hubSiteId, approvalToken, approvalCorrelationId):
+        params = {
+            "hubSiteId": hubSiteId,
+            "approvalToken": approvalToken,
+            "approvalCorrelationId": approvalCorrelationId
+        }
+        return_type = WebTemplateCollection(self.context,
+                                            ResourcePathServiceOperation("GetWebTemplates", params, self.resource_path))
+
+        qry = ServiceOperationQuery(self, "JoinHubSite", params, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     @staticmethod
     def get_url_by_id(context, site_id, stop_redirect=False):
@@ -53,6 +121,10 @@ class Site(ClientObject):
         qry.static = True
         context.add_query(qry)
         return result
+
+    @staticmethod
+    def get_url_by_id_for_web(context):
+        pass
 
     @staticmethod
     def exists(context, url):
@@ -75,25 +147,76 @@ class Site(ClientObject):
         :type type_catalog: int"""
         return List(self.context, ResourcePathServiceOperation("getCatalog", [type_catalog], self.resource_path))
 
+    def register_hub_site(self, creationInformation):
+        """Registers an existing site as a hub site.
+
+        :type creationInformation: HubSiteCreationInformation
+        """
+        qry = ServiceOperationQuery(self, "RegisterHubSite", None, creationInformation, "creationInformation", None)
+        self.context.add_query(qry)
+        return self
+
+    def unregister_hub_site(self):
+        qry = ServiceOperationQuery(self, "UnRegisterHubSite", None, None, None, None)
+        self.context.add_query(qry)
+        return self
+
     @property
-    def rootWeb(self):
+    def root_web(self):
         """Get root web"""
-        if self.is_property_available('RootWeb'):
-            return self.properties['RootWeb']
-        else:
-            return Web(self.context, ResourcePath("RootWeb", self.resource_path))
+        return self.properties.get('RootWeb', Web(self.context, ResourcePath("RootWeb", self.resource_path)))
 
     @property
     def owner(self):
         """Gets or sets the owner of the site collection. (Read-only in sandboxed solutions.)"""
-        if self.is_property_available('owner'):
-            return self.properties['owner']
-        else:
-            return User(self.context, ResourcePath("owner", self.resource_path))
+        return self.properties.get('owner', User(self.context, ResourcePath("owner", self.resource_path)))
 
     @property
-    def recycleBin(self):
+    def url(self):
+        return self.properties.get('Url', None)
+
+    @property
+    def id(self):
+        """
+        :rtype: str
+        """
+        return self.properties.get("Id", None)
+
+    @property
+    def is_hub_site(self):
+        """
+        :rtype: bool
+        """
+        return self.properties.get("IsHubSite", None)
+
+    @property
+    def recycle_bin(self):
         """Get recycle bin"""
         return self.properties.get('RecycleBin',
                                    RecycleBinItemCollection(self.context,
                                                             ResourcePath("RecycleBin", self.resource_path)))
+
+    @property
+    def features(self):
+        """Get features"""
+        return self.properties.get('Features',
+                                   FeatureCollection(self.context,
+                                                     ResourcePath("Features", self.resource_path), self))
+
+    @property
+    def event_receivers(self):
+        """Get Event receivers"""
+        return self.properties.get('EventReceivers',
+                                   EventReceiverDefinitionCollection(self.context,
+                                                                     ResourcePath("eventReceivers", self.resource_path),
+                                                                     self))
+
+    def get_property(self, name):
+        if name == "RecycleBin":
+            return self.recycle_bin
+        elif name == "RootWeb":
+            return self.root_web
+        elif name == "EventReceivers":
+            return self.event_receivers
+        else:
+            return super(Site, self).get_property(name)

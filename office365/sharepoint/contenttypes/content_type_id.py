@@ -9,5 +9,5 @@ class ContentTypeId(ClientValue):
 
         :param str string_value: Hexadecimal string value of content type identifier. String value MUST start with "0x".
         """
-        super().__init__("SP")
+        super().__init__()
         self.StringValue = string_value

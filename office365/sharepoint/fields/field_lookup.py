@@ -8,6 +8,19 @@ class FieldLookup(Field):
         super().__init__(context)
 
     @property
+    def allow_multiple_values(self):
+        """Gets a value that specifies whether the lookup field allows multiple values.
+        :rtype: bool or None
+        """
+        return self.properties.get('AllowMultipleValues', None)
+
+    @allow_multiple_values.setter
+    def allow_multiple_values(self, value):
+        """Sets a value that specifies whether the lookup field allows multiple values.
+        """
+        self.set_property('AllowMultipleValues', value)
+
+    @property
     def lookup_web_id(self):
         """Gets the ID of the Web site that contains the list that is the source of this field's value.
         :rtype: str or None

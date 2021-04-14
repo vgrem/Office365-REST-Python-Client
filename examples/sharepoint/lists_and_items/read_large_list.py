@@ -1,8 +1,6 @@
-from settings import settings
-
-from office365.runtime.auth.client_credential import ClientCredential
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.file_system_object_type import FileSystemObjectType
+from office365.sharepoint.files.file_system_object_type import FileSystemObjectType
+from tests import test_client_credentials, test_team_site_url
 
 
 def print_progress(items_read):
@@ -48,9 +46,7 @@ def get_items(target_list):
     print("Item at index: {0}".format(items[index].properties))
 
 
-ctx = ClientContext.connect_with_credentials("https://mediadev8.sharepoint.com/sites/team",
-                                             ClientCredential(settings['client_credentials']['client_id'],
-                                                              settings['client_credentials']['client_secret']))
+ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 
 # list_source = ctx.web.lists.get_by_title("Contacts_Large")
 list_source = ctx.web.lists.get_by_title("Documents_Archive")
