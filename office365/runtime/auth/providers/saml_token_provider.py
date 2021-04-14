@@ -35,15 +35,18 @@ def is_valid_auth_cookies(values):
 
 class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
 
-    def __init__(self, url, username, password):
+    def __init__(self, url, username, password, browser_mode):
         """SAML Security Token Service provider
 
         :type url: str
         :type username: str
         :type password: str
+        :type browser_mode: str
         """
         # Security Token Service info
         self._sts_profile = STSProfile(resolve_base_url(url))
+        # Obtain authentication cookies, using the browser mode
+        self._browser_mode = browser_mode
         # Last occurred error
         self.error = ''
         self._username = username
@@ -220,9 +223,11 @@ class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         session = requests.session()
         logger.debug_secrets("session: %s\nsession.post(%s, data=%s)", session, self._sts_profile.signin_page_url,
                              security_token)
-        if not federated:
-            session.post(self._sts_profile.signin_page_url, data=security_token,
-                         headers={'Content-Type': 'application/x-www-form-urlencoded'})
+        if not federated or self._browser_mode:
+            headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+            if self._browser_mode:
+                headers['User-Agent'] = 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)'
+            session.post(self._sts_profile.signin_page_url, data=security_token, headers=headers)
         else:
             idcrl_endpoint = "https://{}/_vti_bin/idcrl.svc/".format(self._sts_profile.tenant)
             session.get(idcrl_endpoint,

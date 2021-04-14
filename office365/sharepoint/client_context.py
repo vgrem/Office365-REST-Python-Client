@@ -75,15 +75,17 @@ class ClientContext(ClientRuntimeContext):
         self.authentication_context.register_provider(token_func)
         return self
 
-    def with_user_credentials(self, username, password, allow_ntlm=False):
+    def with_user_credentials(self, username, password, allow_ntlm=False, browser_mode=False):
         """
         Assigns credentials
 
         :type username: str
         :type password: str
         :type allow_ntlm: bool
+        :type browser_mode: bool
         """
-        self.authentication_context.register_provider(UserCredential(username, password), allow_ntlm=allow_ntlm)
+        self.authentication_context.register_provider(UserCredential(username, password), allow_ntlm=allow_ntlm,
+                                                      browser_mode=browser_mode)
         return self
 
     def with_credentials(self, credentials):

@@ -56,19 +56,22 @@ class AuthenticationContext(object):
                 self._provider = NtlmProvider(credentials_or_token_func.userName,
                                               credentials_or_token_func.password)
             else:
+                browser_mode = kwargs.get('browser_mode', False)
                 self._provider = SamlTokenProvider(self.url, credentials_or_token_func.userName,
-                                                   credentials_or_token_func.password)
+                                                   credentials_or_token_func.password, browser_mode)
         else:
             raise ValueError("Unknown credential type")
 
-    def acquire_token_for_user(self, username, password):
+    def acquire_token_for_user(self, username, password, browser_mode=False):
         """Acquire token via user credentials
         Status: deprecated!
 
         :type password: str
         :type username: str
+        :type browser_mode: str
         """
-        self._provider = SamlTokenProvider(url=self.url, username=username, password=password)
+        self._provider = SamlTokenProvider(url=self.url, username=username, password=password,
+                                           browser_mode=browser_mode)
         return self._provider.ensure_authentication_cookie()
 
     def acquire_token_for_app(self, client_id, client_secret):
