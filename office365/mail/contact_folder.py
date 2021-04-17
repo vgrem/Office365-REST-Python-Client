@@ -1,5 +1,5 @@
-from office365.runtime.client_object import ClientObject
+from office365.entity import Entity
 
 
-class ContactFolder(ClientObject):
+class ContactFolder(Entity):
     """A folder that contains contacts."""

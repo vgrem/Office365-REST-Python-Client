@@ -1,6 +1,6 @@
-from office365.runtime.client_object import ClientObject
+from office365.entity import Entity
 
 
-class GroupSetting(ClientObject):
+class GroupSetting(Entity):
     """Group settings control behaviors such as blocked word lists for group display names or whether guest users are
     allowed to be group owners. """

@@ -1,5 +1,6 @@
 import json
 
+from office365.calendar.event_collection import EventCollection
 from office365.directory.directoryObject import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.onedrive.driveCollection import DriveCollection
@@ -13,6 +14,12 @@ from office365.teams.team import Team
 
 class Group(DirectoryObject):
     """Represents an Azure Active Directory (Azure AD) group, which can be an Office 365 group, or a security group."""
+
+    def subscribe_by_mail(self):
+        pass
+
+    def unsubscribe_by_mail(self):
+        pass
 
     def check_member_groups(self, group_ids):
         """Check for membership in the specified list of groups. Returns from the list those groups of which
@@ -60,11 +67,8 @@ class Group(DirectoryObject):
     @property
     def members(self):
         """Users and groups that are members of this group."""
-        if self.is_property_available('members'):
-            return self.properties['members']
-        else:
-            return DirectoryObjectCollection(self.context,
-                                             ResourcePath("members", self.resource_path))
+        return self.properties.get('members',
+                                   DirectoryObjectCollection(self.context, ResourcePath("members", self.resource_path)))
 
     @property
     def owners(self):
@@ -86,8 +90,10 @@ class Group(DirectoryObject):
     @property
     def sites(self):
         """The list of SharePoint sites in this group. Access the default site with /sites/root."""
-        if self.is_property_available('sites'):
-            return self.properties['sites']
-        else:
-            return SiteCollection(self.context,
-                                  ResourcePath("sites", self.resource_path))
+        return self.properties.get('sites',
+                                   SiteCollection(self.context, ResourcePath("sites", self.resource_path)))
+
+    @property
+    def events(self):
+        """Get an event collection or an event."""
+        return self.properties.get('events', EventCollection(self.context, ResourcePath("events", self.resource_path)))

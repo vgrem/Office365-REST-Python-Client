@@ -32,6 +32,21 @@ class NavigationService(BaseEntity):
         self.context.add_query(qry)
         return return_type
 
+    def global_nav_enabled(self):
+        result = ClientResult(None)
+        qry = ServiceOperationQuery(self, "GlobalNavEnabled", None, None, None, result)
+        self.context.add_query(qry)
+        return result
+
+    def set_global_nav_enabled(self, is_enabled):
+        """
+        :param bool is_enabled:
+        :return:
+        """
+        qry = ServiceOperationQuery(self, "SetGlobalNavEnabled", None, {"isEnabled": is_enabled}, None)
+        self.context.add_query(qry)
+        return self
+
     def menu_node_key(self, currentUrl):
         pass
 

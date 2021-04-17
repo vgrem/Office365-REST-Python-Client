@@ -1,4 +1,6 @@
 from office365.directory.directoryObject import DirectoryObject
+from office365.directory.keyCredential import KeyCredential
+from office365.runtime.client_value_collection import ClientValueCollection
 
 
 class Application(DirectoryObject):
@@ -9,4 +11,9 @@ class Application(DirectoryObject):
     the URI to identify your application, and more. For more information, see Basics of Registering
     an Application in Azure AD
     """
-    pass
+
+    @property
+    def key_credentials(self):
+        """The collection of key credentials associated with the application. Not nullable.
+        """
+        return self.properties.get('keyCredentials', ClientValueCollection(KeyCredential))

@@ -7,6 +7,7 @@ from office365.runtime.resource_path_service_operation import ResourcePathServic
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
+from office365.sharepoint.customactions.custom_action_element import CustomActionElement
 from office365.sharepoint.eventreceivers.event_receiver_definition import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.fields.related_field_collection import RelatedFieldCollection
@@ -310,10 +311,8 @@ class List(SecurableObject):
     def views(self):
         """Gets a value that specifies the collection of all public views on the list and personal views
         of the current user on the list."""
-        if self.is_property_available('Views'):
-            return self.properties['Views']
-        else:
-            return ViewCollection(self.context, ResourcePath("views", self.resource_path), self)
+        return self.properties.get('Views',
+                                   ViewCollection(self.context, ResourcePath("views", self.resource_path), self))
 
     @property
     def default_view(self):
@@ -334,6 +333,11 @@ class List(SecurableObject):
         return self.properties.get('UserCustomActions',
                                    UserCustomActionCollection(self.context,
                                                               ResourcePath("UserCustomActions", self.resource_path)))
+
+    @property
+    def custom_action_elements(self):
+        return self.properties.get('CustomActionElements',
+                                   ClientValueCollection(CustomActionElement))
 
     @property
     def forms(self):

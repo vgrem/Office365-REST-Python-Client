@@ -1,6 +1,5 @@
 from office365.calendar.calendar import Calendar
 from office365.entity_collection import EntityCollection
-from office365.runtime.queries.create_entity_query import CreateEntityQuery
 
 
 class CalendarCollection(EntityCollection):
@@ -14,9 +13,4 @@ class CalendarCollection(EntityCollection):
         :type name: str
         :rtype: Calendar
         """
-        cal = Calendar(self.context)
-        cal.set_property("Name", name)
-        self.add_child(cal)
-        qry = CreateEntityQuery(self, cal, cal)
-        self.context.add_query(qry)
-        return cal
+        return self.add_from_json({"Name": name})

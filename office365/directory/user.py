@@ -3,8 +3,10 @@ from office365.calendar.calendar_collection import CalendarCollection
 from office365.calendar.calendar_group_collection import CalendarGroupCollection
 from office365.calendar.meeting_time_suggestions_result import MeetingTimeSuggestionsResult
 from office365.calendar.reminder import Reminder
+from office365.directory.assignedLicense import AssignedLicense
 from office365.directory.directoryObject import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
+from office365.directory.licenseDetails import LicenseDetailsCollection
 from office365.directory.objectIdentity import ObjectIdentity
 from office365.directory.profilePhoto import ProfilePhoto
 from office365.onedrive.drive import Drive
@@ -24,6 +26,21 @@ class User(DirectoryObject):
     def send_mail(self, message):
         """Send a new message on the fly"""
         qry = ServiceOperationQuery(self, "sendmail", None, message)
+        self.context.add_query(qry)
+        return self
+
+    def export_personal_data(self, storage_location):
+        """
+        Submit a data policy operation request from a company administrator or an application to
+        export an organizational user's data.
+
+        If successful, this method returns a 202 Accepted response code.
+        It does not return anything in the response body. The response contains the following response headers.
+
+        :param str storage_location: This is a shared access signature (SAS) URL to an Azure Storage account,
+            to where data should be exported.
+        """
+        qry = ServiceOperationQuery(self, "exportPersonalData", None, {"storage_location": storage_location})
         self.context.add_query(qry)
         return self
 
@@ -101,6 +118,10 @@ class User(DirectoryObject):
         return self
 
     @property
+    def account_enabled(self):
+        return self.properties.get('accountEnabled', None)
+
+    @property
     def creationType(self):
         """Indicates whether the user account was created as a regular school or work account (null),
         an external account (Invitation), a local account for an Azure Active Directory B2C tenant (LocalAccount)
@@ -132,6 +153,11 @@ class User(DirectoryObject):
         """
         return self.properties.get('identities',
                                    ClientValueCollection(ObjectIdentity))
+
+    @property
+    def assigned_licenses(self):
+        return self.properties.get('assignedLicenses',
+                                   ClientValueCollection(AssignedLicense))
 
     @property
     def photo(self):
@@ -169,37 +195,35 @@ class User(DirectoryObject):
                                                            ResourcePath("calendarGroups", self.resource_path)))
 
     @property
+    def licenseDetails(self):
+        """Retrieve the properties and relationships of a Drive resource."""
+        return self.properties.get('licenseDetails',
+                                   LicenseDetailsCollection(self.context,
+                                                            ResourcePath("licenseDetails", self.resource_path)))
+
+    @property
     def drive(self):
         """Retrieve the properties and relationships of a Drive resource."""
-        if self.is_property_available('drive'):
-            return self.properties['drive']
-        else:
-            return Drive(self.context, ResourcePath("drive", self.resource_path))
+        return self.properties.get('drive',
+                                   Drive(self.context, ResourcePath("drive", self.resource_path)))
 
     @property
     def contacts(self):
         """Get a contact collection from the default Contacts folder of the signed-in user (.../me/contacts),
         or from the specified contact folder."""
-        if self.is_property_available('contacts'):
-            return self.properties['contacts']
-        else:
-            return ContactCollection(self.context, ResourcePath("contacts", self.resource_path))
+        return self.properties.get('contacts',
+                                   ContactCollection(self.context, ResourcePath("contacts", self.resource_path)))
 
     @property
     def events(self):
         """Get an event collection or an event."""
-        if self.is_property_available('events'):
-            return self.properties['events']
-        else:
-            return EventCollection(self.context, ResourcePath("events", self.resource_path))
+        return self.properties.get('events', EventCollection(self.context, ResourcePath("events", self.resource_path)))
 
     @property
     def messages(self):
         """Get an event collection or an event."""
-        if self.is_property_available('messages'):
-            return self.properties['messages']
-        else:
-            return MessageCollection(self.context, ResourcePath("messages", self.resource_path))
+        return self.properties.get('messages',
+                                   MessageCollection(self.context, ResourcePath("messages", self.resource_path)))
 
     @property
     def joinedTeams(self):
@@ -218,10 +242,9 @@ class User(DirectoryObject):
     def transitiveMemberOf(self):
         """Get groups, directory roles that the user is a member of. This API request is transitive, and will also
         return all groups the user is a nested member of. """
-        if self.is_property_available('transitiveMemberOf'):
-            return self.properties['transitiveMemberOf']
-        else:
-            return DirectoryObjectCollection(self.context, ResourcePath("transitiveMemberOf", self.resource_path))
+        return self.properties.get('transitiveMemberOf',
+                                   DirectoryObjectCollection(self.context,
+                                                             ResourcePath("transitiveMemberOf", self.resource_path)))
 
     def set_property(self, name, value, persist_changes=True):
         super(User, self).set_property(name, value, persist_changes)

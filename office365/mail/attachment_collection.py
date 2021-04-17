@@ -1,8 +1,8 @@
+from office365.entity_collection import EntityCollection
 from office365.mail.attachment import Attachment
-from office365.runtime.client_object_collection import ClientObjectCollection
 
 
-class AttachmentCollection(ClientObjectCollection):
+class AttachmentCollection(EntityCollection):
     """Attachment collection"""
 
     def __init__(self, context, resource_path=None):

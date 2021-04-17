@@ -9,6 +9,7 @@ from office365.runtime.resource_path_service_operation import ResourcePathServic
 from office365.sharepoint.actions.getWebUrlFromPage import GetWebUrlFromPageUrlQuery
 from office365.sharepoint.alerts.alert_collection import AlertCollection
 from office365.sharepoint.changes.change_collection import ChangeCollection
+from office365.sharepoint.clientsidecomponent.types import SPClientSideComponentQueryResult
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
 from office365.sharepoint.eventreceivers.event_receiver_definition import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
@@ -31,6 +32,7 @@ from office365.sharepoint.principal.user_collection import UserCollection
 from office365.sharepoint.recyclebin.recycleBinItemCollection import RecycleBinItemCollection
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
 from office365.sharepoint.sharing.objectSharingSettings import ObjectSharingSettings
+from office365.sharepoint.sharing.sharingLinkData import SharingLinkData
 from office365.sharepoint.sharing.sharing_result import SharingResult
 from office365.sharepoint.ui.applicationpages.client_people_picker import (
     ClientPeoplePickerWebServiceInterface, ClientPeoplePickerQueryParameters
@@ -71,6 +73,21 @@ class Web(SecurableObject):
         qry = ServiceOperationQuery(self, "getAllClientSideComponents", None, None, None, result)
         self.context.add_query(qry)
         return result
+
+    def get_client_side_web_parts(self, project, includeErrors=False):
+        result = ClientValueCollection(SPClientSideComponentQueryResult)
+        params = {
+            "includeErrors": includeErrors,
+            "project": project
+        }
+        qry = ServiceOperationQuery(self, "getClientSideWebParts", None, params, None, result)
+        self.context.add_query(qry)
+        return result
+
+    def add_supported_ui_language(self, lcid):
+        qry = ServiceOperationQuery(self, "getSubWebsFilteredForCurrentUser", {"lcid": lcid}, None, None, None)
+        self.context.add_query(qry)
+        return self
 
     def get_sub_webs_filtered_for_current_user(self, query):
         """Returns a collection of objects that contain metadata about subsites of the current site (2) in which the
@@ -141,6 +158,12 @@ class Web(SecurableObject):
         qry = ServiceOperationQuery(self, "GetRegionalDateTimeSchema", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
+
+    def get_sharing_link_data(self, linkUrl):
+        result = SharingLinkData()
+        qry = ServiceOperationQuery(self, "GetSharingLinkData", [linkUrl], None, None, result)
+        self.context.add_query(qry)
+        return result
 
     def update(self):
         """Update a Web resource"""
@@ -479,6 +502,19 @@ class Web(SecurableObject):
             on_resolved(role_value)
 
         context.after_execute(_group_resolved)
+
+    @staticmethod
+    def get_sharing_link_kind(context, fileUrl):
+        """
+
+        :param office365.sharepoint.client_context.ClientContext context:
+        :param str fileUrl:
+        """
+        result = ClientResult(None)
+        qry = ServiceOperationQuery(context.web, "GetSharingLinkKind", None, {"fileUrl": fileUrl}, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
 
     @staticmethod
     def share_object(context, url, peoplePickerInput,

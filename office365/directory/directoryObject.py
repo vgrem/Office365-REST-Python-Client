@@ -22,19 +22,6 @@ class DirectoryObject(Entity):
         self.context.add_query(qry)
         return result
 
-    def update(self):
-        """Updates the directory object."""
-        qry = UpdateEntityQuery(self)
-        self.context.add_query(qry)
-        return self
-
-    def delete_object(self):
-        """Deletes the directory object."""
-        qry = DeleteEntityQuery(self)
-        self.context.add_query(qry)
-        self.remove_from_parent_collection()
-        return self
-
     @property
     def deletedDateTime(self):
         """ETag for the item."""

@@ -3,7 +3,9 @@ from unittest import TestCase
 
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.principal.user import User
+from office365.sharepoint.sharing.documentSharingManager import DocumentSharingManager
 from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
+from office365.sharepoint.sharing.role_type import RoleType
 from office365.sharepoint.sharing.sharing_result import SharingResult
 from office365.sharepoint.webs.web import Web
 from tests import test_site_url, test_user_credentials
@@ -20,12 +22,10 @@ class TestSharePointSharing(TestCase):
         current_user = cls.client.web.current_user.get().execute_query()
         cls.target_user = current_user
 
-    # def test1_get_role_def(self):
-    #    dsm = DocumentSharingManager(self.client)
-    #    role_def = dsm.get_role_definition(RoleType.View)
-    #    self.client.execute_query()
-    #    self.assertIsInstance(role_def, RoleDefinition)
-    #    self.assertTrue(role_def.name, "Read")
+    def test1_get_role_def(self):
+        dsm = DocumentSharingManager(self.client)
+        role_def = dsm.get_role_definition(RoleType.Contributor).execute_query()
+        self.assertTrue(role_def.name, "Full Control")
 
     def test2_get_object_sharing_settings(self):
         result = Web.get_object_sharing_settings(self.client, self.target_file_url, 0, True)
