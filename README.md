@@ -48,7 +48,7 @@ The following auth flows are supported:
   
   Usage:
   ``` 
-  client_credentials = ClientCredential('{client_id}'),'{client_secret}')
+  client_credentials = ClientCredential('{client_id}','{client_secret}')
   ctx = ClientContext('{url}').with_credentials(client_credentials)
   ```
   Documentation: refer [Granting access using SharePoint App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs) for a details  
@@ -59,7 +59,7 @@ The following auth flows are supported:
 
   Usage:
   ``` 
-  user_credentials = UserCredential('{username}'),'{password}')
+  user_credentials = UserCredential('{username}','{password}')
   ctx = ClientContext('{url}').with_credentials(user_credentials)
   ```
   Example: [connect_with_user_credential.py](examples/sharepoint/connect_with_user_credential.py)
