@@ -118,7 +118,7 @@ class Team(Entity):
 
     def set_property(self, name, value, persist_changes=True):
         super(Team, self).set_property(name, value, persist_changes)
-        # fallback: fix resource path
+        # fallback: determine whether resource path is resolved
         if name == "id" and self._resource_path.segment == "team":
             self._resource_path = ResourcePath(value, ResourcePath("teams"))
         return self

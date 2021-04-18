@@ -33,3 +33,7 @@ class TestExcel(GraphTestCase):
     def test1_get_workbook(self):
         workbook = self.__class__.target_item.workbook.get().execute_query()
         self.assertIsNotNone(workbook.resource_path)
+
+    def test2_list_workbook_tables(self):
+        tables = self.__class__.target_item.workbook.tables.get().execute_query()
+        self.assertIsNotNone(tables.resource_path)

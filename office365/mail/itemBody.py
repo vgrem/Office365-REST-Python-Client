@@ -2,8 +2,9 @@ from office365.runtime.client_value import ClientValue
 
 
 class ItemBody(ClientValue):
+    """"""
 
-    def __init__(self, content, contentType=None):
+    def __init__(self, content, contentType="Text"):
         """
 
         :type content: str

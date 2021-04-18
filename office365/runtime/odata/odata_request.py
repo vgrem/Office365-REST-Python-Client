@@ -131,6 +131,11 @@ class ODataRequest(ClientRequest):
             if isinstance(self._json_format,
                           JsonLightFormat) and self._json_format.metadata == ODataMetadataLevel.Verbose:
                 value = {"results": value.to_json()}
+            else:
+                json = value.to_json()
+                for i, v in enumerate(json):
+                    json[i] = self._normalize_payload(v)
+                return json
         elif isinstance(value, ClientObject) or isinstance(value, ClientValue):
             json = value.to_json()
             for k, v in json.items():

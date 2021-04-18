@@ -4,9 +4,7 @@ from office365.calendar.event_collection import EventCollection
 from office365.calendar.schedule_information import ScheduleInformation
 from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 
 
@@ -38,19 +36,6 @@ class Calendar(Entity):
         qry = ServiceOperationQuery(self, "getSchedule", None, payload, None, result)
         self.context.add_query(qry)
         return result
-
-    def update(self):
-        """Updates a Calendar."""
-        qry = UpdateEntityQuery(self)
-        self.context.add_query(qry)
-        return self
-
-    def delete_object(self):
-        """Deletes the calendar."""
-        qry = DeleteEntityQuery(self)
-        self.context.add_query(qry)
-        self.remove_from_parent_collection()
-        return self
 
     @property
     def name(self):

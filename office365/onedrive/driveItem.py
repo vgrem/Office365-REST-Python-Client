@@ -11,7 +11,7 @@ from office365.onedrive.folder import Folder
 from office365.onedrive.listItem import ListItem
 from office365.onedrive.publicationFacet import PublicationFacet
 from office365.onedrive.uploadSession import UploadSession
-from office365.onedrive.workbook import Workbook
+from office365.excel.workbook import Workbook
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.create_entity_query import CreateEntityQuery

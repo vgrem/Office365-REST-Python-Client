@@ -18,9 +18,10 @@ class EntityCollection(ClientObjectCollection):
         return self._item_type(self.context, ResourcePath(key, self.resource_path))
 
     def add_from_json(self, params):
-        """Creates a Event resource from JSON
+        """Creates a Entity resource from JSON
 
         :type params: dict
+        :rtype: office365.entity.Entity
         """
         entity_object = self._item_type(self.context)
         self.add_child(entity_object)
