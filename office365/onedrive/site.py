@@ -13,28 +13,22 @@ class Site(BaseItem):
     @property
     def columns(self):
         """The collection of columns under this site."""
-        if self.is_property_available('columns'):
-            return self.properties['columns']
-        else:
-            return ColumnDefinitionCollection(self.context,
-                                              ResourcePath("columns", self.resource_path))
+        return self.properties.get('columns',
+                                   ColumnDefinitionCollection(self.context,
+                                                              ResourcePath("columns", self.resource_path)))
 
     @property
     def contentTypes(self):
         """The collection of content types under this site."""
-        if self.is_property_available('contentTypes'):
-            return self.properties['contentTypes']
-        else:
-            return ContentTypeCollection(self.context,
-                                         ResourcePath("contentTypes", self.resource_path))
+        return self.properties.get('contentTypes',
+                                   ContentTypeCollection(self.context,
+                                                         ResourcePath("contentTypes", self.resource_path)))
 
     @property
     def lists(self):
         """The collection of lists under this site."""
-        if self.is_property_available('lists'):
-            return self.properties['lists']
-        else:
-            return ListCollection(self.context, ResourcePath("lists", self.resource_path))
+        return self.properties.get('lists',
+                                   ListCollection(self.context, ResourcePath("lists", self.resource_path)))
 
     @property
     def drive(self):

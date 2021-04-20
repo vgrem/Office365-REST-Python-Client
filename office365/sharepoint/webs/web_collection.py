@@ -11,6 +11,11 @@ class WebCollection(ClientObjectCollection):
         self._parent_web_url = parent_web_url
 
     def add(self, web_creation_information):
+        """
+        Create web site
+
+        :type web_creation_information: office365.sharepoint.webs.web_creation_information.WebCreationInformation
+        """
         target_web = Web(self.context)
         self.add_child(target_web)
         qry = ServiceOperationQuery(self, "add", None, web_creation_information, "parameters", target_web)

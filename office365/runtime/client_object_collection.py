@@ -22,6 +22,11 @@ class ClientObjectCollection(ClientObject):
         self._page_index = 0
         self.next_request_url = None
 
+    @property
+    def entity_type_name(self):
+        name = super(ClientObjectCollection, self).entity_type_name
+        return "Collection({0})".format(name)
+
     def get(self):
         """
         :rtype: ClientObjectCollection

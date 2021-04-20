@@ -1,6 +1,5 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.administration.org_assets import OrgAssets
 from office365.sharepoint.base_entity import BaseEntity
@@ -110,8 +109,3 @@ class SitePageService(BaseEntity):
         qry.static = True
         self.context.add_query(qry)
         return return_type
-
-    def update(self):
-        qry = UpdateEntityQuery(self)
-        self.context.add_query(qry)
-        return self

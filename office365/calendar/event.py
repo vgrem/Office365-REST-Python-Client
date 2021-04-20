@@ -1,13 +1,13 @@
+from office365.calendar.attendee import Attendee
+from office365.mail.attachment_collection import AttachmentCollection
 from office365.mail.item import Item
+from office365.mail.location import Location
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.resource_path import ResourcePath
 
 
 class Event(Item):
     """An event in a user calendar, or the default calendar of a Microsoft 365 group."""
-
-    @property
-    def id(self):
-        return self.properties.get("id", None)
 
     @property
     def body_preview(self):
@@ -24,6 +24,13 @@ class Event(Item):
         :rtype: str or None
         """
         return self.properties.get("subject", None)
+
+    @property
+    def location(self):
+        """
+        The location of the event.
+        """
+        return self.properties.get("location", Location())
 
     @property
     def web_link(self):
@@ -45,3 +52,15 @@ class Event(Item):
         from office365.calendar.calendar import Calendar
         return self.properties.get('calendar',
                                    Calendar(self.context, ResourcePath("calendar", self.resource_path)))
+
+    @property
+    def attendees(self):
+        """The collection of attendees for the event."""
+        return self.properties.get('attendees',
+                                   ClientValueCollection(Attendee))
+
+    @property
+    def attachments(self):
+        """The collection of fileAttachment and itemAttachment attachments for the event. """
+        return self.properties.get('attachments',
+                                   AttachmentCollection(self.context, ResourcePath("attachments", self.resource_path)))

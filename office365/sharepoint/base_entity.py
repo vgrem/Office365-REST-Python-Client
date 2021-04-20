@@ -12,8 +12,7 @@ class BaseEntity(ClientObject):
         :param ResourcePath resource_path: Resource Path
         :param str namespace:  default namespace
         """
-        super().__init__(context, resource_path, None, parent_collection)
-        self._namespace = namespace
+        super().__init__(context, resource_path, parent_collection, namespace)
 
     def with_credentials(self, credentials):
         self.context.with_credentials(credentials)

@@ -6,14 +6,14 @@ from office365.runtime.odata.odata_query_options import QueryOptions
 
 class ClientObject(object):
 
-    def __init__(self, context, resource_path=None, properties=None, parent_collection=None):
+    def __init__(self, context, resource_path=None, parent_collection=None, namespace=None):
         """
         Base client object which define named properties and relationships of an entity
 
         :type parent_collection: office365.runtime.client_object_collection.ClientObjectCollection or None
-        :type properties: dict or None
         :type resource_path: office365.runtime.resource_path.ResourcePath or None
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
+        :type namespace: str
         """
         self._properties = {}
         self._changed_properties = []
@@ -22,9 +22,7 @@ class ClientObject(object):
         self._parent_collection = parent_collection
         self._context = context
         self._resource_path = resource_path
-        if properties is not None:
-            for k, v in properties.items():
-                self.set_property(k, v, True)
+        self._namespace = namespace
 
     def clear(self):
         self._changed_properties = []
@@ -148,7 +146,10 @@ class ClientObject(object):
     @property
     def entity_type_name(self):
         if self._entity_type_name is None:
-            self._entity_type_name = "SP." + type(self).__name__
+            if self._namespace is None:
+                self._entity_type_name = type(self).__name__
+            else:
+                self._entity_type_name = ".".join([self._namespace, type(self).__name__])
         return self._entity_type_name
 
     @property

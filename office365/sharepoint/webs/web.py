@@ -640,10 +640,8 @@ class Web(SecurableObject):
     @property
     def siteGroups(self):
         """Gets the collection of groups for the site collection."""
-        if self.is_property_available('SiteGroups'):
-            return self.properties['SiteGroups']
-        else:
-            return GroupCollection(self.context, ResourcePath("siteGroups", self.resource_path))
+        return self.properties.get('SiteGroups',
+                                   GroupCollection(self.context, ResourcePath("siteGroups", self.resource_path)))
 
     @property
     def current_user(self):
@@ -654,18 +652,14 @@ class Web(SecurableObject):
     @property
     def parentWeb(self):
         """Gets the parent website of the specified website."""
-        if self.is_property_available('ParentWeb'):
-            return self.properties['ParentWeb']
-        else:
-            return User(self.context, ResourcePath("ParentWeb", self.resource_path))
+        return self.properties.get('ParentWeb',
+                                   Web(self.context, ResourcePath("ParentWeb", self.resource_path)))
 
     @property
     def associatedVisitorGroup(self):
         """Gets or sets the associated visitor group of the Web site."""
-        if self.is_property_available('AssociatedVisitorGroup'):
-            return self.properties['AssociatedVisitorGroup']
-        else:
-            return Group(self.context, ResourcePath("AssociatedVisitorGroup", self.resource_path))
+        return self.properties.get('AssociatedVisitorGroup',
+                                   Group(self.context, ResourcePath("AssociatedVisitorGroup", self.resource_path)))
 
     @property
     def associatedOwnerGroup(self):
@@ -686,18 +680,15 @@ class Web(SecurableObject):
     @property
     def fields(self):
         """Specifies the collection of all the fields (2) in the site (2)."""
-        if self.is_property_available('Fields'):
-            return self.properties['Fields']
-        else:
-            return FieldCollection(self.context, ResourcePath("Fields", self.resource_path))
+        return self.properties.get('Fields',
+                                   FieldCollection(self.context, ResourcePath("Fields", self.resource_path)))
 
     @property
     def content_types(self):
         """Gets the collection of content types for the Web site."""
-        if self.is_property_available('ContentTypes'):
-            return self.properties['ContentTypes']
-        else:
-            return ContentTypeCollection(self.context, ResourcePath("ContentTypes", self.resource_path))
+        return self.properties.get('ContentTypes',
+                                   ContentTypeCollection(self.context,
+                                                         ResourcePath("ContentTypes", self.resource_path)))
 
     @property
     def role_definitions(self):

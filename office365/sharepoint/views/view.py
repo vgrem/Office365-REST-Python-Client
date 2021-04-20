@@ -93,10 +93,8 @@ class View(BaseEntity):
     @property
     def view_fields(self):
         """Gets a value that specifies the collection of fields in the list view."""
-        if self.is_property_available('ViewFields'):
-            return self.properties['ViewFields']
-        else:
-            return ViewFieldCollection(self.context, ResourcePath("ViewFields", self.resource_path))
+        return self.properties.get('ViewFields',
+                                   ViewFieldCollection(self.context, ResourcePath("ViewFields", self.resource_path)))
 
     @property
     def view_query(self):
@@ -107,6 +105,9 @@ class View(BaseEntity):
     def base_view_id(self):
         """Gets a value that specifies the base view identifier of the list view."""
         return self.properties.get('BaseViewId', None)
+
+
+
 
     def set_property(self, name, value, persist_changes=True):
         super(View, self).set_property(name, value, persist_changes)

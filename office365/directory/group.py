@@ -73,19 +73,14 @@ class Group(DirectoryObject):
     @property
     def owners(self):
         """The owners of the group."""
-        if self.is_property_available('owners'):
-            return self.properties['owners']
-        else:
-            return DirectoryObjectCollection(self.context,
-                                             ResourcePath("owners", self.resource_path))
+        return self.properties.get('owners',
+                                   DirectoryObjectCollection(self.context, ResourcePath("owners", self.resource_path)))
 
     @property
     def drives(self):
         """The group's drives. Read-only."""
-        if self.is_property_available('drives'):
-            return self.properties['drives']
-        else:
-            return DriveCollection(self.context, ResourcePath("drives", self.resource_path))
+        return self.properties.get('drives',
+                                   DriveCollection(self.context, ResourcePath("drives", self.resource_path)))
 
     @property
     def sites(self):

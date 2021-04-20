@@ -36,3 +36,4 @@ class TestSharePointUser(SPTestCase):
     def test6_get_user_changes(self):
         changes = self.client.site.get_changes(ChangeQuery(user=True)).execute_query()
         self.assertGreater(len(changes), 0)
+        # self.assertEqual(changes.entity_type_name, "Collection(SP.Change)")

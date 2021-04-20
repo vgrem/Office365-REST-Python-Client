@@ -1,4 +1,4 @@
-from office365.mail.emailAddress import EmailAddress
+from office365.calendar.emailAddress import EmailAddress
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
 
@@ -6,7 +6,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 class Recipient(ClientValue):
     """Represents information about a user in the sending or receiving end of an event, message or group post."""
 
-    def __init__(self, emailAddress=None):
+    def __init__(self, emailAddress=EmailAddress()):
         """
 
         :param EmailAddress emailAddress: The recipient's email address.

@@ -35,6 +35,19 @@ class List(SecurableObject):
     def __init__(self, context, resource_path=None):
         super(List, self).__init__(context, resource_path)
 
+    def render_list_data(self, viewXml):
+        """
+
+        :param str viewXml: View xml
+        """
+        result = ClientResult(None)
+        payload = {
+            "viewXml": viewXml
+        }
+        qry = ServiceOperationQuery(self, "RenderListData", None, payload, None, result)
+        self.context.add_query(qry)
+        return result
+
     @staticmethod
     def get_list_data_as_stream(context, list_full_url, parameters=None):
         """
@@ -279,26 +292,20 @@ class List(SecurableObject):
     @property
     def items(self):
         """Get list items"""
-        if self.is_property_available('Items'):
-            return self.properties["Items"]
-        else:
-            return ListItemCollection(self.context, ResourcePath("items", self.resource_path))
+        return self.properties.get("Items",
+                                   ListItemCollection(self.context, ResourcePath("items", self.resource_path)))
 
     @property
     def root_folder(self):
         """Get a root folder"""
-        if self.is_property_available('RootFolder'):
-            return self.properties["RootFolder"]
-        else:
-            return Folder(self.context, ResourcePath("RootFolder", self.resource_path))
+        return self.properties.get("RootFolder",
+                                   Folder(self.context, ResourcePath("RootFolder", self.resource_path)))
 
     @property
     def fields(self):
         """Gets a value that specifies the collection of all fields in the list."""
-        if self.is_property_available('Fields'):
-            return self.properties['Fields']
-        else:
-            return FieldCollection(self.context, ResourcePath("Fields", self.resource_path), self)
+        return self.properties.get('Fields',
+                                   FieldCollection(self.context, ResourcePath("Fields", self.resource_path), self))
 
     @property
     def subscriptions(self):

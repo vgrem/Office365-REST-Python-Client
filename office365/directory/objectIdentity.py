@@ -6,7 +6,7 @@ class ObjectIdentity(ClientValue):
     Represents an identity used to sign in to a user account.
     """
 
-    def __init__(self, signInType, issuer, issuerAssignedId):
+    def __init__(self, signInType=None, issuer=None, issuerAssignedId=None):
         """
 
         :param str signInType: Specifies the user sign-in types in your directory, such as emailAddress, userName

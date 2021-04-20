@@ -1,8 +1,8 @@
-from office365.runtime.client_object_collection import ClientObjectCollection
+from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.changes.change import Change
 
 
-class ChangeCollection(ClientObjectCollection):
+class ChangeCollection(BaseEntityCollection):
 
     def __init__(self, context, resource_path=None):
         super(ChangeCollection, self).__init__(context, Change, resource_path)
