@@ -33,18 +33,14 @@ class Site(BaseItem):
     @property
     def drive(self):
         """The default drive (document library) for this site."""
-        if self.is_property_available('drive'):
-            return self.properties['drive']
-        else:
-            return Drive(self.context, ResourcePath("drive", self.resource_path))
+        return self.properties.get('drive',
+                                   Drive(self.context, ResourcePath("drive", self.resource_path)))
 
     @property
     def drives(self):
         """The collection of drives under this site."""
-        if self.is_property_available('drives'):
-            return self.properties['drives']
-        else:
-            return DriveCollection(self.context, ResourcePath("drives", self.resource_path))
+        return self.properties.get('drives',
+                                   DriveCollection(self.context, ResourcePath("drives", self.resource_path)))
 
     @property
     def sharepointids(self):

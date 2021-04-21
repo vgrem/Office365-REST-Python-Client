@@ -7,6 +7,7 @@ from office365.directory.directoryObjectCollection import DirectoryObjectCollect
 from office365.directory.group_collection import GroupCollection
 from office365.directory.groupSettingTemplateCollection import GroupSettingTemplateCollection
 from office365.directory.identityProviderCollection import IdentityProviderCollection
+from office365.directory.servicePrincipal import ServicePrincipalCollection
 from office365.directory.user import User
 from office365.directory.userCollection import UserCollection
 from office365.onedrive.driveCollection import DriveCollection
@@ -145,7 +146,7 @@ class GraphClient(ClientRuntimeContext):
         return Directory(self, ResourcePath("directory"))
 
     @property
-    def identityProviders(self):
+    def identity_providers(self):
         """Represents a deleted item in the directory"""
         return IdentityProviderCollection(self, ResourcePath("identityProviders"))
 
@@ -153,3 +154,8 @@ class GraphClient(ClientRuntimeContext):
     def applications(self):
         """Get the list of applications in this organization."""
         return ApplicationCollection(self, ResourcePath("applications"))
+
+    @property
+    def service_principals(self):
+        """Retrieve a list of servicePrincipal objects."""
+        return ServicePrincipalCollection(self, ResourcePath("servicePrincipals"))

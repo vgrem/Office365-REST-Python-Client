@@ -35,6 +35,7 @@ class View(BaseEntity):
             qry = ServiceOperationQuery(self._parent_list, "GetItems", None, caml_query, "query",
                                         self._parent_list.items)
             self.context.add_query(qry)
+
         self.ensure_property("viewQuery", _get_items_inner)
         return self._parent_list.items
 
@@ -47,10 +48,30 @@ class View(BaseEntity):
         return self
 
     def render_as_html(self):
+        """
+        Returns the list view as HTML.
+        """
         result = ClientResult(str)
         qry = ServiceOperationQuery(self, "RenderAsHtml", None, None, None, result)
         self.context.add_query(qry)
         return result
+
+    def set_view_xml(self, view_xml):
+        """
+        :type view_xml: str
+        """
+        qry = ServiceOperationQuery(self, "SetViewXml", None, {"viewXml": view_xml})
+        self.context.add_query(qry)
+        return self
+
+    @property
+    def js_link(self):
+        """
+        Specifies the JavaScript files used for the view.
+
+        :rtype: str or None
+        """
+        return self.properties.get('JSLink', None)
 
     @property
     def content_type_id(self):
@@ -105,9 +126,6 @@ class View(BaseEntity):
     def base_view_id(self):
         """Gets a value that specifies the base view identifier of the list view."""
         return self.properties.get('BaseViewId', None)
-
-
-
 
     def set_property(self, name, value, persist_changes=True):
         super(View, self).set_property(name, value, persist_changes)

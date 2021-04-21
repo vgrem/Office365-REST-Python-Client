@@ -1,4 +1,5 @@
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.alerts.alert_collection import AlertCollection
 from office365.sharepoint.principal.principal import Principal
@@ -14,11 +15,9 @@ class User(Principal):
     @property
     def groups(self):
         """Gets a collection of group objects that represents all of the groups for the user."""
-        if self.is_property_available('Groups'):
-            return self.properties['Groups']
-        else:
-            from office365.sharepoint.principal.group_collection import GroupCollection
-            return GroupCollection(self.context, ResourcePath("Groups", self.resource_path))
+        from office365.sharepoint.principal.group_collection import GroupCollection
+        return self.properties.get('Groups',
+                                   GroupCollection(self.context, ResourcePath("Groups", self.resource_path)))
 
     @property
     def alerts(self):
@@ -42,4 +41,9 @@ class User(Principal):
         qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         self.remove_from_parent_collection()
+        return self
+
+    def expire(self):
+        qry = ServiceOperationQuery(self, "Expire")
+        self.context.add_query(qry)
         return self

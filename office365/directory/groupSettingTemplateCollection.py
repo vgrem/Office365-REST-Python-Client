@@ -1,10 +1,8 @@
-from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.directory.groupSettingTemplate import GroupSettingTemplate
+from office365.entity_collection import EntityCollection
 
 
-class GroupSettingTemplateCollection(DirectoryObjectCollection):
-    """User's collection"""
+class GroupSettingTemplateCollection(EntityCollection):
 
     def __init__(self, context, resource_path=None):
-        super(GroupSettingTemplateCollection, self).__init__(context, resource_path)
-        self._item_type = GroupSettingTemplate
+        super(GroupSettingTemplateCollection, self).__init__(context, GroupSettingTemplate, resource_path)

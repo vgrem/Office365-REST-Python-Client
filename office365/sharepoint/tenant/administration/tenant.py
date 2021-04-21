@@ -1,8 +1,8 @@
+from office365.runtime.client_object import ClientObject
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
 from office365.sharepoint.tenant.administration.hubsite_properties import HubSiteProperties
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
@@ -14,14 +14,17 @@ from office365.sharepoint.tenant.administration.sitePropertiesEnumerableFilter i
 from office365.sharepoint.tenant.administration.spo_operation import SpoOperation
 
 
-class Tenant(BaseEntity):
+class Tenant(ClientObject):
 
     def __init__(self, context):
-        super().__init__(context, ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant"),
+        super().__init__(context, ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant"), None,
                          "Microsoft.Online.SharePoint.TenantAdministration")
 
     @staticmethod
     def from_url(admin_site_url):
+        """
+        :type admin_site_url: str
+        """
         from office365.sharepoint.client_context import ClientContext
         admin_client = ClientContext(admin_site_url)
         return Tenant(admin_client)
@@ -127,10 +130,24 @@ class Tenant(BaseEntity):
         return result
 
     def remove_deleted_site(self, site_url):
-        pass
+        """Permanently removes the specified deleted site from the recycle bin.
+
+        :param str site_url: A string representing the URL of the site.
+        """
+        result = SpoOperation(self.context)
+        qry = ServiceOperationQuery(self, "RemoveDeletedSite", [site_url], None, None, result)
+        self.context.add_query(qry)
+        return result
 
     def restore_deleted_site(self, site_url):
-        pass
+        """Restores deleted site with the specified URL
+
+        :param str site_url: A string representing the URL of the site.
+        """
+        result = SpoOperation(self.context)
+        qry = ServiceOperationQuery(self, "RestoreDeletedSite", [site_url], None, None, result)
+        self.context.add_query(qry)
+        return result
 
     def get_site_properties_by_url(self, url, include_detail):
         """
@@ -190,7 +207,5 @@ class Tenant(BaseEntity):
     @property
     def _sites(self):
         """Gets a collection of sites."""
-        if self.is_property_available('sites'):
-            return self.properties['sites']
-        else:
-            return SitePropertiesCollection(self.context, ResourcePath("sites", self.resource_path))
+        return self.properties.get('sites',
+                                   SitePropertiesCollection(self.context, ResourcePath("sites", self.resource_path)))

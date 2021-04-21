@@ -1,8 +1,15 @@
-from office365.entity import Entity
+from office365.directory.directoryObject import DirectoryObject
 from office365.entity_collection import EntityCollection
 
 
-class ServicePrincipal(Entity):
+class ServicePrincipal(DirectoryObject):
+    """Represents an instance of an application in a directory."""
+
+    @property
+    def app_display_name(self):
+        """The collection of key credentials associated with the application. Not nullable.
+        """
+        return self.properties.get('appDisplayName', None)
 
     def add_key(self, keyCredential, passwordCredential, proof):
         pass
@@ -12,7 +19,6 @@ class ServicePrincipal(Entity):
 
 
 class ServicePrincipalCollection(EntityCollection):
-    """User's collection"""
 
     def __init__(self, context, resource_path=None):
         super(ServicePrincipalCollection, self).__init__(context, ServicePrincipal, resource_path)

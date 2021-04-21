@@ -1,11 +1,11 @@
-from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.principal.user import User
 
 
-class UserCollection(ClientObjectCollection):
+class UserCollection(BaseEntityCollection):
     """Represents a collection of User resources."""
 
     def __init__(self, context, resource_path=None):

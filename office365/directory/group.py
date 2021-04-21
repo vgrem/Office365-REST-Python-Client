@@ -1,6 +1,7 @@
 import json
 
 from office365.calendar.event_collection import EventCollection
+from office365.directory.appRoleAssignment import AppRoleAssignmentCollection
 from office365.directory.directoryObject import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.onedrive.driveCollection import DriveCollection
@@ -16,10 +17,18 @@ class Group(DirectoryObject):
     """Represents an Azure Active Directory (Azure AD) group, which can be an Office 365 group, or a security group."""
 
     def subscribe_by_mail(self):
-        pass
+        """Calling this method will enable the current user to receive email notifications for this group,
+        about new posts, events, and files in that group. Supported for Microsoft 365 groups only."""
+        qry = ServiceOperationQuery(self, "subscribeByMail")
+        self.context.add_query(qry)
+        return self
 
     def unsubscribe_by_mail(self):
-        pass
+        """Calling this method will prevent the current user from receiving email notifications for this group
+        about new posts, events, and files in that group. Supported for Microsoft 365 groups only."""
+        qry = ServiceOperationQuery(self, "unsubscribeByMail")
+        self.context.add_query(qry)
+        return self
 
     def check_member_groups(self, group_ids):
         """Check for membership in the specified list of groups. Returns from the list those groups of which
@@ -49,6 +58,7 @@ class Group(DirectoryObject):
                 request.method = HttpMethod.Put
                 request.set_header('Content-Type', "application/json")
                 request.data = json.dumps(request.data)
+
         self.context.before_execute(_construct_create_team_request, False)
         return team
 
@@ -60,7 +70,7 @@ class Group(DirectoryObject):
         """
         super(Group, self).delete_object()
         if permanent_delete:
-            deleted_item = self.context.directory.deletedGroups[self.id]
+            deleted_item = self.context.directory.deleted_groups[self.id]
             deleted_item.delete_object()
         return self
 
@@ -92,3 +102,10 @@ class Group(DirectoryObject):
     def events(self):
         """Get an event collection or an event."""
         return self.properties.get('events', EventCollection(self.context, ResourcePath("events", self.resource_path)))
+
+    @property
+    def appRoleAssignments(self):
+        """Get an event collection or an appRoleAssignments."""
+        return self.properties.get('appRoleAssignments',
+                                   AppRoleAssignmentCollection(self.context,
+                                                               ResourcePath("appRoleAssignments", self.resource_path)))

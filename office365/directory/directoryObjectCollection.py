@@ -20,16 +20,10 @@ class DirectoryObjectCollection(EntityCollection):
 
     def __getitem__(self, key):
         """
-
-        :param key: key is used to address a DirectoryObject resource by either an index in collection
-        or by resource id
         :type key: int or str
         :rtype: DirectoryObject
         """
-        if type(key) == int:
-            return super(DirectoryObjectCollection, self).__getitem__(key)
-        return self._item_type(self.context,
-                               ResourcePath(key, self.resource_path))
+        return super(DirectoryObjectCollection, self).__getitem__(key)
 
     def getByIds(self, ids):
         """Returns the directory objects specified in a list of IDs."""

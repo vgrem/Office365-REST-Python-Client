@@ -35,6 +35,13 @@ class List(SecurableObject):
     def __init__(self, context, resource_path=None):
         super(List, self).__init__(context, resource_path)
 
+    def recycle(self):
+        """Moves the list to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
+        result = ClientResult(None)
+        qry = ServiceOperationQuery(self, "Recycle", None, None, None, result)
+        self.context.add_query(qry)
+        return result
+
     def render_list_data(self, viewXml):
         """
 
@@ -284,6 +291,15 @@ class List(SecurableObject):
         :rtype: bool or None
         """
         return self.properties.get("EnableFolderCreation", None)
+
+    @property
+    def default_edit_form_url(self):
+        """
+        Gets a value that specifies the URL of the edit form to use for list items in the list.
+
+        :rtype: str or None
+        """
+        return self.properties.get("DefaultEditFormUrl", None)
 
     @enable_folder_creation.setter
     def enable_folder_creation(self, value):

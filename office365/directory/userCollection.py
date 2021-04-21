@@ -1,14 +1,13 @@
-from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.directory.user import User
+from office365.entity_collection import EntityCollection
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 
 
-class UserCollection(DirectoryObjectCollection):
+class UserCollection(EntityCollection):
     """User's collection"""
 
     def __init__(self, context, resource_path=None):
-        super(UserCollection, self).__init__(context, resource_path)
-        self._item_type = User
+        super(UserCollection, self).__init__(context, User, resource_path)
 
     def __getitem__(self, key):
         """
