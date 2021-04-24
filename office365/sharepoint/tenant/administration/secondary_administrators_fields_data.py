@@ -3,7 +3,6 @@ from office365.runtime.client_value_collection import ClientValueCollection
 
 
 class SecondaryAdministratorsFieldsData(ClientValue):
-    _entity_type_name = "Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsFieldsData"
 
     def __init__(self, site_id, emails=None, names=None):
         """
@@ -15,3 +14,7 @@ class SecondaryAdministratorsFieldsData(ClientValue):
         self.secondaryAdministratorEmails = ClientValueCollection(str, emails)
         self.secondaryAdministratorLoginNames = ClientValueCollection(str, names)
         self.siteId = site_id
+
+    @property
+    def entity_type_name(self):
+        return "Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsFieldsData"

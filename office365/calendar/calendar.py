@@ -38,6 +38,17 @@ class Calendar(Entity):
         return result
 
     @property
+    def can_edit(self):
+        """
+        true if the user can write to the calendar, false otherwise.
+        This property is true for the user who created the calendar.
+        This property is also true for a user who has been shared a calendar and granted write access.
+
+        :rtype: bool or None
+        """
+        return self.properties.get('canEdit', None)
+
+    @property
     def name(self):
         """
         The calendar name.
@@ -59,7 +70,7 @@ class Calendar(Entity):
                                    EventCollection(self.context, ResourcePath("events", self.resource_path)))
 
     @property
-    def calendarView(self):
+    def calendar_view(self):
         """The calendar view for the calendar. Navigation property. Read-only."""
         return self.properties.get('calendarView',
                                    EventCollection(self.context, ResourcePath("calendarView", self.resource_path)))

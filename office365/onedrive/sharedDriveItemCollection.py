@@ -1,8 +1,8 @@
+from office365.entity_collection import EntityCollection
 from office365.onedrive.sharedDriveItem import SharedDriveItem
-from office365.runtime.client_object_collection import ClientObjectCollection
 
 
-class SharedDriveItemCollection(ClientObjectCollection):
+class SharedDriveItemCollection(EntityCollection):
     """sharedDriveItem's collection"""
 
     def __init__(self, context, resource_path=None):

@@ -34,7 +34,7 @@ class TestCalendar(GraphTestCase):
         self.assertIsNotNone(schedule)
 
     def test3_get_calendar_groups(self):
-        cal_groups = self.client.me.calendarGroups.get().execute_query()
+        cal_groups = self.client.me.calendar_groups.get().execute_query()
         self.assertIsNotNone(cal_groups.resource_path)
 
     def test4_list_calendar_view(self):

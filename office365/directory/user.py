@@ -13,6 +13,7 @@ from office365.onedrive.drive import Drive
 from office365.mail.contact_collection import ContactCollection
 from office365.calendar.event_collection import EventCollection
 from office365.mail.message_collection import MessageCollection
+from office365.onedrive.siteCollection import SiteCollection
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
@@ -22,6 +23,32 @@ from office365.teams.team_collection import TeamCollection
 
 class User(DirectoryObject):
     """Represents an Azure AD user account. Inherits from directoryObject."""
+
+    def assign_license(self, addLicenses, removeLicenses):
+        """
+        Add or remove licenses on the user.
+        :param list[str] removeLicenses: A collection of skuIds that identify the licenses to remove.
+        :param ClientValueCollection addLicenses: A collection of assignedLicense objects that specify
+             the licenses to add.
+        """
+        params = {
+            "addLicenses": addLicenses,
+            "removeLicenses": removeLicenses
+        }
+        qry = ServiceOperationQuery(self, "assignLicense", None, params, None, self)
+        self.context.add_query(qry)
+        return self
+
+    def change_password(self, currentPassword, newPassword):
+        """
+
+        :param str currentPassword:
+        :param str newPassword:
+        """
+        qry = ServiceOperationQuery(self, "changePassword", None,
+                                    {"currentPassword": currentPassword, "newPassword": newPassword})
+        self.context.add_query(qry)
+        return self
 
     def send_mail(self, message):
         """Send a new message on the fly"""
@@ -80,6 +107,7 @@ class User(DirectoryObject):
         def _construct_request(request):
             request.method = HttpMethod.Get
             request.url += "?startDateTime={0}&endDateTime={1}".format(start_dt.isoformat(), end_dt.isoformat())
+
         self.context.before_execute(_construct_request)
         return result
 
@@ -102,6 +130,7 @@ class User(DirectoryObject):
 
         def _construct_request(request):
             request.method = HttpMethod.Get
+
         self.context.before_execute(_construct_request)
         return result
 
@@ -113,7 +142,7 @@ class User(DirectoryObject):
         """
         super(User, self).delete_object()
         if permanent_delete:
-            deleted_user = self.context.directory.deleted_users[self.id]
+            deleted_user = self.context.directory.deletedUsers[self.id]
             deleted_user.delete_object()
         return self
 
@@ -122,7 +151,7 @@ class User(DirectoryObject):
         return self.properties.get('accountEnabled', None)
 
     @property
-    def creationType(self):
+    def creation_type(self):
         """Indicates whether the user account was created as a regular school or work account (null),
         an external account (Invitation), a local account for an Azure Active Directory B2C tenant (LocalAccount)
         or self-service sign-up using email verification (EmailVerified). Read-only.
@@ -137,7 +166,7 @@ class User(DirectoryObject):
         return self.properties.get('mail', None)
 
     @property
-    def otherMails(self):
+    def other_mails(self):
         """A list of additional email addresses for the user;
         for example: ["bob@contoso.com", "Robert@fabrikam.com"]. Supports $filter.
         """
@@ -158,6 +187,11 @@ class User(DirectoryObject):
     def assigned_licenses(self):
         return self.properties.get('assignedLicenses',
                                    ClientValueCollection(AssignedLicense))
+
+    @property
+    def followed_sites(self):
+        return self.properties.get('followedSites',
+                                   SiteCollection(self.context, ResourcePath("followedSites", self.resource_path)))
 
     @property
     def photo(self):
@@ -188,14 +222,14 @@ class User(DirectoryObject):
                                    CalendarCollection(self.context, ResourcePath("calendars", self.resource_path)))
 
     @property
-    def calendarGroups(self):
+    def calendar_groups(self):
         """The user's calendar groups. Read-only. Nullable."""
         return self.properties.get('calendarGroups',
                                    CalendarGroupCollection(self.context,
                                                            ResourcePath("calendarGroups", self.resource_path)))
 
     @property
-    def licenseDetails(self):
+    def license_details(self):
         """Retrieve the properties and relationships of a Drive resource."""
         return self.properties.get('licenseDetails',
                                    LicenseDetailsCollection(self.context,
@@ -226,25 +260,35 @@ class User(DirectoryObject):
                                    MessageCollection(self.context, ResourcePath("messages", self.resource_path)))
 
     @property
-    def joinedTeams(self):
+    def joined_teams(self):
         """Get the teams in Microsoft Teams that the user is a direct member of."""
         return self.properties.get('joinedTeams',
                                    TeamCollection(self.context, ResourcePath("joinedTeams", self.resource_path)))
 
     @property
-    def memberOf(self):
+    def member_of(self):
         """Get groups and directory roles that the user is a direct member of."""
         return self.properties.get('memberOf',
                                    DirectoryObjectCollection(self.context,
                                                              ResourcePath("memberOf", self.resource_path)))
 
     @property
-    def transitiveMemberOf(self):
+    def transitive_member_of(self):
         """Get groups, directory roles that the user is a member of. This API request is transitive, and will also
         return all groups the user is a nested member of. """
         return self.properties.get('transitiveMemberOf',
                                    DirectoryObjectCollection(self.context,
                                                              ResourcePath("transitiveMemberOf", self.resource_path)))
+
+    def get_property(self, name):
+        if name == "transitiveMemberOf":
+            return self.transitive_member_of
+        elif name == "joinedTeams":
+            return self.joined_teams
+        elif name == "assignedLicenses":
+            return self.assigned_licenses
+        else:
+            return super(User, self).get_property(name)
 
     def set_property(self, name, value, persist_changes=True):
         super(User, self).set_property(name, value, persist_changes)

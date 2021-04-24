@@ -7,7 +7,9 @@ from office365.directory.directoryObjectCollection import DirectoryObjectCollect
 from office365.directory.group_collection import GroupCollection
 from office365.directory.groupSettingTemplateCollection import GroupSettingTemplateCollection
 from office365.directory.identityProviderCollection import IdentityProviderCollection
+from office365.directory.organization import Organization
 from office365.directory.servicePrincipal import ServicePrincipalCollection
+from office365.directory.subscribedSku import SubscribedSkuCollection
 from office365.directory.user import User
 from office365.directory.userCollection import UserCollection
 from office365.onedrive.driveCollection import DriveCollection
@@ -159,3 +161,12 @@ class GraphClient(ClientRuntimeContext):
     def service_principals(self):
         """Retrieve a list of servicePrincipal objects."""
         return ServicePrincipalCollection(self, ResourcePath("servicePrincipals"))
+
+    @property
+    def organization(self):
+        return Organization(self, ResourcePath("organization"))
+
+    @property
+    def subscribed_skus(self):
+        """Retrieve a list of servicePrincipal objects."""
+        return SubscribedSkuCollection(self, ResourcePath("subscribedSkus"))

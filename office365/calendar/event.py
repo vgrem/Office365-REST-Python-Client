@@ -1,4 +1,5 @@
 from office365.calendar.attendee import Attendee
+from office365.directory.extension import ExtensionCollection
 from office365.mail.attachment_collection import AttachmentCollection
 from office365.mail.item import Item
 from office365.mail.location import Location
@@ -64,3 +65,16 @@ class Event(Item):
         """The collection of fileAttachment and itemAttachment attachments for the event. """
         return self.properties.get('attachments',
                                    AttachmentCollection(self.context, ResourcePath("attachments", self.resource_path)))
+
+    @property
+    def extensions(self):
+        """The collection of open extensions defined for the event. Nullable."""
+        return self.properties.get('extensions',
+                                   ExtensionCollection(self.context, ResourcePath("extensions", self.resource_path)))
+
+    @property
+    def instances(self):
+        """The collection of open extensions defined for the event. Nullable."""
+        from office365.calendar.event_collection import EventCollection
+        return self.properties.get('instances',
+                                   EventCollection(self.context, ResourcePath("instances", self.resource_path)))

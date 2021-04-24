@@ -4,6 +4,10 @@ from office365.runtime.client_value import ClientValue
 class ClientValueCollection(ClientValue):
 
     def __init__(self, item_type, initial_values=None):
+        """
+        :type item_type: any
+        :type initial_values: any
+        """
         super().__init__()
         if initial_values is None:
             initial_values = []
@@ -49,7 +53,8 @@ class ClientValueCollection(ClientValue):
         if is_primitive:
             item_type_name = primitive_types[self._item_type]
         elif issubclass(self._item_type, ClientValue):
-            item_type_name = self._item_type._entity_type_name
+            item_type_name = self._item_type.entity_type_name.fget(self)
+
         if item_type_name is not None:
             return "Collection({0})".format(item_type_name)
         else:

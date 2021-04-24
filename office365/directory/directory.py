@@ -8,7 +8,7 @@ class Directory(Entity):
     "container". Deleted items will remain available to restore for up to 30 days. After 30 days, the items are
     permanently deleted. """
 
-    def deleted_items(self, entity_type=None):
+    def deletedItems(self, entity_type=None):
         """Recently deleted items. Read-only. Nullable."""
         if entity_type:
             return DirectoryObjectCollection(self.context, ResourcePath(entity_type,
@@ -20,16 +20,16 @@ class Directory(Entity):
                                                                  ResourcePath("deletedItems", self.resource_path)))
 
     @property
-    def deleted_groups(self):
+    def deletedGroups(self):
         """Recently deleted groups"""
-        return self.deleted_items("microsoft.graph.group")
+        return self.deletedItems("microsoft.graph.group")
 
     @property
-    def deleted_users(self):
+    def deletedUsers(self):
         """Recently deleted users"""
-        return self.deleted_items("microsoft.graph.user")
+        return self.deletedItems("microsoft.graph.user")
 
     @property
-    def deleted_applications(self):
+    def deletedApplications(self):
         """Recently deleted applications"""
-        return self.deleted_items("microsoft.graph.application")
+        return self.deletedItems("microsoft.graph.application")

@@ -110,9 +110,6 @@ class TestSharePointClient(TestCase):
         str_col = ClientValueCollection(str, [])
         self.assertEqual(str_col.entity_type_name, "Collection(Edm.String)")
 
-        self.assertEqual(SecondaryAdministratorsFieldsData._entity_type_name,
-                         "Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsFieldsData")
-
         type_item = SecondaryAdministratorsFieldsData(None, [])
         self.assertEqual(type_item.entity_type_name,
                          "Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsFieldsData")

@@ -43,19 +43,16 @@ class Site(BaseItem):
                                    DriveCollection(self.context, ResourcePath("drives", self.resource_path)))
 
     @property
-    def sharepointids(self):
+    def sharepoint_ids(self):
         """Returns identifiers useful for SharePoint REST compatibility."""
         return self.properties.get('sharepointIds', None)
 
     @property
     def sites(self):
         """The collection of sites under this site."""
-        if self.is_property_available('sites'):
-            return self.properties['sites']
-        else:
-            from office365.onedrive.siteCollection import SiteCollection
-            return SiteCollection(self.context,
-                                  ResourcePath("sites", self.resource_path))
+        from office365.onedrive.siteCollection import SiteCollection
+        return self.properties.get('sites',
+                                   SiteCollection(self.context, ResourcePath("sites", self.resource_path)))
 
     def set_property(self, name, value, persist_changes=True):
         super(Site, self).set_property(name, value, persist_changes)

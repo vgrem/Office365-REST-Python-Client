@@ -296,11 +296,9 @@ class DriveItem(BaseItem):
     def children(self):
         """Collection containing Item objects for the immediate children of Item. Only items representing folders
         have children."""
-        if self.is_property_available('children'):
-            return self.properties['children']
-        else:
-            from office365.onedrive.driveItemCollection import DriveItemCollection
-            return DriveItemCollection(self.context, ResourcePath("children", self.resource_path))
+        from office365.onedrive.driveItemCollection import DriveItemCollection
+        return self.properties.get('children',
+                                   DriveItemCollection(self.context, ResourcePath("children", self.resource_path)))
 
     @property
     def listItem(self):

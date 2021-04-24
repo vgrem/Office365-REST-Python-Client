@@ -34,7 +34,7 @@ class TestGraphTeam(GraphTestCase):
         self.assertGreater(len(teams), 0)
 
     def test4_get_joined_teams(self):
-        my_teams = self.client.me.joinedTeams.get().execute_query()
+        my_teams = self.client.me.joined_teams.get().execute_query()
         self.assertIsNotNone(my_teams.resource_path)
         self.assertGreater(len(my_teams), 0)
 

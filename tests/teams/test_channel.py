@@ -48,7 +48,7 @@ class TestGraphChannel(GraphTestCase):
         self.assertEqual(existing_channel.id, channel_id)
 
     def test5_get_primary_channel(self):
-        primary_channel = self.__class__.target_team.primaryChannel.get().execute_query()
+        primary_channel = self.__class__.target_team.primary_channel.get().execute_query()
         self.assertIsNotNone(primary_channel.resource_path)
 
     # def test6_get_channel_files_location(self):

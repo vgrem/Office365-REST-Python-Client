@@ -3,7 +3,6 @@ class ClientValue(object):
     Complex types consist of a list of properties with no key, and can therefore only exist as properties of a
     containing entity or as a temporary value
     """
-    _entity_type_name = None
 
     def __init__(self):
         super(ClientValue, self).__init__()
@@ -27,8 +26,6 @@ class ClientValue(object):
 
     @property
     def entity_type_name(self):
-        if self._entity_type_name is not None:
-            return self._entity_type_name
         return type(self).__name__
 
     @property

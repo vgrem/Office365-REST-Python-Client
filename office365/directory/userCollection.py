@@ -11,7 +11,6 @@ class UserCollection(EntityCollection):
 
     def __getitem__(self, key):
         """
-
         :rtype: User
         """
         return super(UserCollection, self).__getitem__(key)

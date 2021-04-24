@@ -34,9 +34,12 @@ from office365.sharepoint.sharing.externalSharingSiteOption import ExternalShari
 from office365.sharepoint.sharing.objectSharingSettings import ObjectSharingSettings
 from office365.sharepoint.sharing.sharingLinkData import SharingLinkData
 from office365.sharepoint.sharing.sharing_result import SharingResult
+from office365.sharepoint.sites.site_types import SiteCollectionCorporateCatalogAccessor
+from office365.sharepoint.tenant.administration.tenant_types import TenantCorporateCatalogAccessor
 from office365.sharepoint.ui.applicationpages.client_people_picker import (
     ClientPeoplePickerWebServiceInterface, ClientPeoplePickerQueryParameters
 )
+from office365.sharepoint.webparts.client_web_part_collection import ClientWebPartCollection
 from office365.sharepoint.webs.regional_settings import RegionalSettings
 from office365.sharepoint.webs.web_information_collection import WebInformationCollection
 from office365.sharepoint.webs.web_template_collection import WebTemplateCollection
@@ -664,18 +667,14 @@ class Web(SecurableObject):
     @property
     def associatedOwnerGroup(self):
         """Gets or sets the associated owner group of the Web site."""
-        if self.is_property_available('AssociatedOwnerGroup'):
-            return self.properties['AssociatedOwnerGroup']
-        else:
-            return Group(self.context, ResourcePath("AssociatedOwnerGroup", self.resource_path))
+        return self.properties.get('AssociatedOwnerGroup',
+                                   Group(self.context, ResourcePath("AssociatedOwnerGroup", self.resource_path)))
 
     @property
     def associatedMemberGroup(self):
         """Gets or sets the group of users who have been given contribute permissions to the Web site."""
-        if self.is_property_available('AssociatedMemberGroup'):
-            return self.properties['AssociatedMemberGroup']
-        else:
-            return Group(self.context, ResourcePath("AssociatedMemberGroup", self.resource_path))
+        return self.properties.get('AssociatedMemberGroup',
+                                   Group(self.context, ResourcePath("AssociatedMemberGroup", self.resource_path)))
 
     @property
     def fields(self):
@@ -705,6 +704,26 @@ class Web(SecurableObject):
                                    EventReceiverDefinitionCollection(self.context,
                                                                      ResourcePath("eventReceivers", self.resource_path),
                                                                      self))
+
+    @property
+    def client_web_parts(self):
+        """Client Web Parts"""
+        return self.properties.get('ClientWebParts',
+                                   ClientWebPartCollection(self.context,
+                                                           ResourcePath("ClientWebParts", self.resource_path)))
+
+    @property
+    def tenant_app_catalog(self):
+        return self.properties.get('TenantAppCatalog',
+                                   TenantCorporateCatalogAccessor(self.context,
+                                                                  ResourcePath("TenantAppCatalog", self.resource_path)))
+
+    @property
+    def site_collection_app_catalog(self):
+        return self.properties.get('SiteCollectionAppCatalog',
+                                   SiteCollectionCorporateCatalogAccessor(self.context,
+                                                                          ResourcePath("SiteCollectionAppCatalog",
+                                                                                       self.resource_path)))
 
     @property
     def url(self):
@@ -785,6 +804,23 @@ class Web(SecurableObject):
         return self.properties.get('AvailableFields',
                                    FieldCollection(self.context,
                                                    ResourcePath("AvailableFields", self.resource_path)))
+
+    @property
+    def welcome_page(self):
+        return self.properties.get('WelcomePage', None)
+
+    @property
+    def supported_ui_language_ids(self):
+        """Specifies the language code identifiers (LCIDs) of the languages that are enabled for the site."""
+        return self.properties.get('SupportedUILanguageIds', ClientValueCollection(int))
+
+    @property
+    def ui_version(self):
+        """
+        Gets or sets the user interface (UI) version of the Web site.
+        :rtype: int or None
+        """
+        return self.properties.get('UIVersion', None)
 
     def get_property(self, name):
         if name == "ContentTypes":

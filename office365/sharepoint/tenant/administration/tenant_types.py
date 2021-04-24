@@ -1,5 +1,7 @@
 from office365.runtime.client_value import ClientValue
+from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.sites.site_types import SiteCollectionAppCatalogAllowedItems
 
 
 class TenantWebTemplate(ClientValue):
@@ -14,3 +16,14 @@ class TenantWebTemplate(ClientValue):
 
 class TenantAdminEndpoints(BaseEntity):
     pass
+
+
+class TenantCorporateCatalogAccessor(BaseEntity):
+
+    @property
+    def site_collection_app_catalogs_sites(self):
+        """Get recycle bin"""
+        return self.properties.get('SiteCollectionAppCatalogsSites',
+                                   SiteCollectionAppCatalogAllowedItems(self.context,
+                                                                        ResourcePath("SiteCollectionAppCatalogsSites",
+                                                                                     self.resource_path)))

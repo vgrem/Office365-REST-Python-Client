@@ -2,11 +2,13 @@ import json
 
 from office365.calendar.event_collection import EventCollection
 from office365.directory.appRoleAssignment import AppRoleAssignmentCollection
+from office365.directory.assignedLicense import AssignedLicense
 from office365.directory.directoryObject import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.onedrive.driveCollection import DriveCollection
 from office365.onedrive.siteCollection import SiteCollection
 from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
@@ -70,7 +72,7 @@ class Group(DirectoryObject):
         """
         super(Group, self).delete_object()
         if permanent_delete:
-            deleted_item = self.context.directory.deleted_groups[self.id]
+            deleted_item = self.context.directory.deletedGroups[self.id]
             deleted_item.delete_object()
         return self
 
@@ -109,3 +111,8 @@ class Group(DirectoryObject):
         return self.properties.get('appRoleAssignments',
                                    AppRoleAssignmentCollection(self.context,
                                                                ResourcePath("appRoleAssignments", self.resource_path)))
+
+    @property
+    def assigned_licenses(self):
+        return self.properties.get('assignedLicenses',
+                                   ClientValueCollection(AssignedLicense))

@@ -64,7 +64,7 @@ class Team(Entity):
                                    ChannelCollection(self.context, ResourcePath("channels", self.resource_path)))
 
     @property
-    def primaryChannel(self):
+    def primary_channel(self):
         """The general channel for the team."""
         return self.properties.get('primaryChannel',
                                    Channel(self.context, ResourcePath("primaryChannel", self.resource_path)))
@@ -88,12 +88,6 @@ class Team(Entity):
         return self.properties.get('operations',
                                    TeamsAsyncOperationCollection(self.context,
                                                                  ResourcePath("installedApps", self.resource_path)))
-
-    def update(self):
-        """Updates a Team."""
-        qry = UpdateEntityQuery(self)
-        self.context.add_query(qry)
-        return self
 
     def archive(self):
         """Archive the specified team. When a team is archived, users can no longer send or like messages on any

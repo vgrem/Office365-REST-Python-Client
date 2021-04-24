@@ -9,8 +9,11 @@ class DirectorySession(BaseEntity):
         super(DirectorySession, self).__init__(context, ResourcePath("SP.Directory.DirectorySession"))
 
     def me(self):
-        """Create a modern site"""
         user = User(self.context, ResourcePath("me", self.resource_path))
         qry = ServiceOperationQuery(self, "me", None, None, None, user)
         self.context.add_query(qry)
         return user
+
+    @property
+    def entity_type_name(self):
+        return "SP.Directory.DirectorySession"

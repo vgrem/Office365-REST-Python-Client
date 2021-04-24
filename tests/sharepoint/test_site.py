@@ -1,3 +1,5 @@
+from office365.sharepoint.web_application.webApplication import WebApplication
+from tests import test_site_url
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.lists.list_template_type import ListTemplateType
@@ -5,7 +7,6 @@ from office365.sharepoint.sites.site import Site
 
 
 class TestSite(SPTestCase):
-
     target_site = None  # type: Site
 
     def test1_if_site_loaded(self):

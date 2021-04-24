@@ -1,9 +1,9 @@
+from office365.entity_collection import EntityCollection
 from office365.onedrive.contentType import ContentType
-from office365.runtime.client_object_collection import ClientObjectCollection
 
 
-class ContentTypeCollection(ClientObjectCollection):
-    """Drive column's collection"""
+class ContentTypeCollection(EntityCollection):
+    """Content Type's collection"""
 
     def __init__(self, context, resource_path=None):
         super(ContentTypeCollection, self).__init__(context, ContentType, resource_path)
