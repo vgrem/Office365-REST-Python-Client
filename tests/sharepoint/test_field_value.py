@@ -107,8 +107,7 @@ class TestFieldValue(SPTestCase):
         item_to_update.update().execute_query()
 
     def test_10_get_lookup_field_choices(self):
-        result = self.target_list.get_lookup_field_choices(self.multi_choice_field_name)
-        self.client.execute_query()
+        result = self.target_list.get_lookup_field_choices(self.multi_choice_field_name).execute_query()
         self.assertIsNotNone(result.value)
 
     def test_11_create_list_url_field(self):

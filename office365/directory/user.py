@@ -14,6 +14,7 @@ from office365.mail.contact_collection import ContactCollection
 from office365.calendar.event_collection import EventCollection
 from office365.mail.message_collection import MessageCollection
 from office365.onedrive.siteCollection import SiteCollection
+from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
@@ -85,7 +86,7 @@ class User(DirectoryObject):
         that the suggested results may differ over time.
 
         """
-        result = MeetingTimeSuggestionsResult()
+        result = ClientResult(self.context, MeetingTimeSuggestionsResult())
         qry = ServiceOperationQuery(self, "findMeetingTimes", None, None, None, result)
         self.context.add_query(qry)
         return result
@@ -120,7 +121,7 @@ class User(DirectoryObject):
         :param datetime.datetime start_dt: The start date and time of the event for which the reminder is set up.
             The value is represented in ISO 8601 format, for example, "2015-11-08T19:00:00.0000000".
         """
-        result = ClientValueCollection(Reminder)
+        result = ClientResult(self.context, ClientValueCollection(Reminder))
         params = {
             "startDateTime": start_dt.isoformat(),
             "endDateTime": end_dt.isoformat(),

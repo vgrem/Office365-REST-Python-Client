@@ -34,14 +34,12 @@ class TestSPPublishing(SPTestCase):
         self.assertIsNotNone(result.value)
 
     def test5_file_picker_tab_options(self):
-        result = SitePageService.file_picker_tab_options(self.client)
-        self.client.execute_query()
-        self.assertIsNotNone(result)
+        result = SitePageService.file_picker_tab_options(self.client).execute_query()
+        self.assertIsNotNone(result.value)
 
     def test6_org_assets(self):
-        result = SitePageService.org_assets(self.client)
-        self.client.execute_query()
-        self.assertIsNotNone(result)
+        result = SitePageService.org_assets(self.client).execute_query()
+        self.assertIsNotNone(result.value)
 
     def test7_get_video_service_manager(self):
         discoverer = VideoServiceDiscoverer(self.client).get().execute_query()

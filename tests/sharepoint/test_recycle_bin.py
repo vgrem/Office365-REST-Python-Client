@@ -22,8 +22,7 @@ class TestSharePointRecycleBin(SPTestCase):
         pass
 
     def test1_recycle_file(self):
-        result = self.__class__.target_file.recycle()
-        self.client.execute_query()
+        result = self.__class__.target_file.recycle().execute_query()
         self.assertIsNotNone(result.value)
 
     def test2_find_removed_file(self):

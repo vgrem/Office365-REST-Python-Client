@@ -64,12 +64,12 @@ class Tenant(ClientObject):
 
         :type site_id: str
         """
-        return_type = ClientValueCollection(SecondaryAdministratorsInfo)
+        result = ClientResult(self.context,ClientValueCollection(SecondaryAdministratorsInfo))
         payload = SecondaryAdministratorsFieldsData(site_id)
         qry = ServiceOperationQuery(self, "GetSiteSecondaryAdministrators", None, payload,
-                                    "secondaryAdministratorsFieldsData", return_type)
+                                    "secondaryAdministratorsFieldsData", result)
         self.context.add_query(qry)
-        return return_type
+        return result
 
     def set_site_secondary_administrators(self, site_id, emails=None, names=None):
         """

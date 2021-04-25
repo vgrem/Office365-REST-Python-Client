@@ -32,7 +32,7 @@ class SPSiteManager(BaseEntity):
 
         :type site_url: str
         """
-        response = SPSiteCreationResponse()
+        response = ClientResult(self.context, SPSiteCreationResponse())
         qry = ServiceOperationQuery(self, "Status", None, {'url': site_url}, None, response)
         self.context.add_query(qry)
 

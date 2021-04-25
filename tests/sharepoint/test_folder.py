@@ -104,8 +104,7 @@ class TestSharePointFolder(SPTestCase):
 
     def test_12_recycle_folder(self):
         folder_to_recycle = self.__class__.target_folder
-        result = folder_to_recycle.recycle()
-        self.client.execute_query()
+        result = folder_to_recycle.recycle().execute_query()
         self.assertIsNotNone(result.value)
         self.__class__.deleted_folder_guid = result.value
 

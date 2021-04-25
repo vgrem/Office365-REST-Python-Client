@@ -34,7 +34,7 @@ class TestDriveItem(GraphTestCase):
     def test1_create_folder(self):
         target_folder_name = "New_" + uuid.uuid4().hex
         folder = self.target_drive.root.create_folder(target_folder_name).execute_query()
-        self.assertEqual(folder.properties["name"], target_folder_name)
+        self.assertEqual(folder.name, target_folder_name)
         self.__class__.target_folder = folder
 
     def test2_get_folder_permissions(self):
@@ -75,24 +75,20 @@ class TestDriveItem(GraphTestCase):
     def test9_upload_file_session(self):
         file_name = "big_buck_bunny.mp4"
         local_path = "{0}/../data/{1}".format(os.path.dirname(__file__), file_name)
-        target_file = self.target_drive.root.resumable_upload(local_path)
-        self.client.execute_query()
+        target_file = self.target_drive.root.resumable_upload(local_path).execute_query()
         self.assertIsNotNone(target_file.web_url)
 
     def test_10_download_file(self):
-        result = self.__class__.target_file.get_content()
-        self.client.execute_query()
+        result = self.__class__.target_file.get_content().execute_query()
         self.assertIsNotNone(result.value)
 
     def test_11_convert_file(self):
-        result = self.__class__.target_file.convert('pdf')
-        self.client.execute_query()
+        result = self.__class__.target_file.convert('pdf').execute_query()
         self.assertIsNotNone(result.value)
 
     def test_12_copy_file(self):
         file_name = "Copied_{0}_SharePoint User Guide.docx".format(uuid.uuid4().hex)
-        result = self.__class__.target_file.copy(file_name)
-        self.client.execute_query()
+        result = self.__class__.target_file.copy(file_name).execute_query()
         self.assertIsNotNone(result.value)
 
     # def test_13_move_file(self):

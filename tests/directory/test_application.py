@@ -19,14 +19,12 @@ class TestApplication(GraphTestCase):
         self.__class__.target_app = new_app
 
     def test3_add_password(self):
-        password = self.__class__.target_app.add_password("New password")
-        self.client.execute_query()
-        self.assertIsNotNone(password.secretText)
-        self.__class__.target_password = password
+        result = self.__class__.target_app.add_password("New password").execute_query()
+        self.assertIsNotNone(result.value.secretText)
+        self.__class__.target_password = result.value
 
     def test4_remove_password(self):
-        self.__class__.target_app.remove_password(self.__class__.target_password.keyId)
-        self.client.execute_query()
+        self.__class__.target_app.remove_password(self.__class__.target_password.keyId).execute_query()
 
     def test5_delete_app(self):
         app_to_del = self.__class__.target_app

@@ -1,11 +1,11 @@
-from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.lists.list import List
 
 
-class ListCollection(ClientObjectCollection):
+class ListCollection(BaseEntityCollection):
     """Lists collection"""
 
     def __init__(self, context, resource_path=None):
@@ -54,7 +54,7 @@ class ListCollection(ClientObjectCollection):
     def add(self, list_creation_information):
         """Creates a List resource
 
-        :type list_creation_information: ListCreationInformation
+        :type list_creation_information: office365.sharepoint.lists.list_creation_information.ListCreationInformation
         """
         target_list = List(self.context)
         self.add_child(target_list)

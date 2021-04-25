@@ -57,8 +57,7 @@ class TestSPView(SPTestCase):
         self.assertIsNotNone(view_to_read.resource_path)
 
     def test4_render_as_html(self):
-        result = self.__class__.target_view.render_as_html()
-        self.client.execute_query()
+        result = self.__class__.target_view.render_as_html().execute_query()
         self.assertIsNotNone(result.value)
 
     def test5_get_default_view_items(self):

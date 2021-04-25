@@ -25,8 +25,7 @@ class TestTenant(TestCase):
         self.assertIsNotNone(self.tenant.root_site_url)
 
     def test2_get_tenant_settings(self):
-        tenant_settings = TenantSettings.current(self.client)
-        self.client.execute_query()
+        tenant_settings = TenantSettings.current(self.client).execute_query()
         self.assertIsNotNone(tenant_settings.properties)
 
     # def test3_check_tenant_licenses(self):
@@ -47,15 +46,13 @@ class TestTenant(TestCase):
         self.assertIsNotNone(result.value)
 
     def test6_list_sites(self):
-        sites = self.tenant.get_site_properties_from_sharepoint_by_filters("", 0, False)
-        self.client.execute_query()
+        sites = self.tenant.get_site_properties_from_sharepoint_by_filters("", 0, False).execute_query()
         self.assertIsInstance(sites, SitePropertiesCollection)
 
     def test7_get_site_secondary_administrators(self):
         target_site = self.client.site.select(["Id"]).get().execute_query()
-        result = self.tenant.get_site_secondary_administrators(target_site.id)
-        self.client.execute_query()
-        self.assertIsNotNone(result)
+        result = self.tenant.get_site_secondary_administrators(target_site.id).execute_query()
+        self.assertIsNotNone(result.value)
 
     # def test8_set_site_secondary_administrators(self):
     #    target_site = self.client.site.get()
@@ -76,8 +73,7 @@ class TestTenant(TestCase):
     #    self.assertIsNotNone(site_props)
 
     def test_10_get_site_by_url(self):
-        site_props = self.tenant.get_site_properties_by_url(test_site_url, True)
-        self.client.execute_query()
+        site_props = self.tenant.get_site_properties_by_url(test_site_url, True).execute_query()
         self.assertIsNotNone(site_props.url)
     #    self.__class__.target_site_props = site_props
 

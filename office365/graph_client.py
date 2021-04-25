@@ -123,7 +123,7 @@ class GraphClient(ClientRuntimeContext):
         return SharedDriveItemCollection(self, ResourcePath("shares"))
 
     @property
-    def directoryObjects(self):
+    def directory_objects(self):
         """Get Directory Objects"""
         return DirectoryObjectCollection(self, ResourcePath("directoryObjects"))
 

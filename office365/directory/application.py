@@ -1,6 +1,7 @@
 from office365.directory.directoryObject import DirectoryObject
 from office365.directory.keyCredential import KeyCredential
 from office365.directory.passwordCredential import PasswordCredential
+from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 
@@ -18,10 +19,11 @@ class Application(DirectoryObject):
         """Adds a strong password to an application.
         :param str display_name: App display name
         """
-        return_type = PasswordCredential(displayName=display_name)
-        qry = ServiceOperationQuery(self, "addPassword", None, return_type, None, return_type)
+        params = PasswordCredential(displayName=display_name)
+        result = ClientResult(self.context, params)
+        qry = ServiceOperationQuery(self, "addPassword", None, params, None, result)
         self.context.add_query(qry)
-        return return_type
+        return result
 
     def remove_password(self, keyId):
         """Remove a password from an application."""

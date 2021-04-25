@@ -63,8 +63,7 @@ class TestSharePointListItem(SPTestCase):
         self.assertEqual(len(result), 1)
 
     def test6_get_wopi_frame_url(self):
-        result = self.__class__.target_item.get_wopi_frame_url(SPWOPIAction.default)
-        self.client.execute_query()
+        result = self.__class__.target_item.get_wopi_frame_url(SPWOPIAction.default).execute_query()
         self.assertIsNotNone(result.value)
 
     def test7_update_listItem(self):
@@ -73,22 +72,18 @@ class TestSharePointListItem(SPTestCase):
 
         sleep(1)
         new_title = create_unique_name("Task item")
-        item_to_update.set_property('Title', new_title)
-        item_to_update.update()
+        item_to_update.set_property('Title', new_title).update()
         self.client.load(item_to_update)  # retrieve updated
         self.client.execute_query()
         self.assertNotEqual(item_to_update.properties["Modified"], last_updated)
         self.assertNotEqual(self.default_title, new_title)
 
     def test8_systemUpdate_listItem(self):
-        item_to_update = self.__class__.target_item
-        self.client.load(item_to_update)
-        self.client.execute_query()
+        item_to_update = self.__class__.target_item.get().execute_query()
         last_updated = item_to_update.properties['Modified']
 
         new_title = create_unique_name("Task item %s")
-        item_to_update.set_property('Title', new_title)
-        item_to_update.system_update()
+        item_to_update.set_property('Title', new_title).system_update()
         self.client.load(item_to_update)  # retrieve updated
         self.client.execute_query()
         self.assertEqual(item_to_update.properties["Modified"], last_updated)
@@ -96,8 +91,7 @@ class TestSharePointListItem(SPTestCase):
 
     def test9_update_overwrite_version(self):
         item_to_update = self.__class__.target_item
-        item_to_update.update_overwrite_version()
-        self.client.execute_query()
+        item_to_update.update_overwrite_version().execute_query()
 
     def test_10_set_comments_disabled(self):
         comments = self.__class__.target_item.set_comments_disabled(False).execute_query()

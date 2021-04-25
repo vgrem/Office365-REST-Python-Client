@@ -59,6 +59,21 @@ class Web(SecurableObject):
         self._web_url = None
 
     @staticmethod
+    def create_organization_sharing_link(context, url, is_edit_link):
+        """
+
+        :param office365.sharepoint.client_context.ClientContext context:
+        :param str url:
+        :param bool is_edit_link:
+        """
+        result = ClientResult(context)
+        params = {"url": url, "isEditLink": is_edit_link}
+        qry = ServiceOperationQuery(context.web, "CreateOrganizationSharingLink", None, params, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
+
+    @staticmethod
     def get_web_url_from_page_url(context, page_full_url):
         """Gets Web from page url
 
@@ -393,7 +408,7 @@ class Web(SecurableObject):
         :param bool sendEmail: A flag to determine if an email notification SHOULD be sent (if email is configured).
         :param str emailSubject: The email subject.
         :param str emailBody: The email subject.
-        :return: SharingResult
+        :rtype: SharingResult
         """
 
         picker_result = ClientResult(self.context)
@@ -420,7 +435,7 @@ class Web(SecurableObject):
         """
         Unshare a Web
 
-        :return: SharingResult
+        :rtype: SharingResult
         """
         result = ClientResult(self.context)
 
@@ -440,7 +455,7 @@ class Web(SecurableObject):
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
         :param str web_full_url: The URL of the web.
         """
-        result = ClientValueCollection(DocumentLibraryInformation)
+        result = ClientResult(context, ClientValueCollection(DocumentLibraryInformation))
         payload = {
             "webFullUrl": web_full_url
         }
@@ -453,11 +468,11 @@ class Web(SecurableObject):
     def get_document_and_media_libraries(context, web_full_url, include_page_libraries):
         """
 
-        :param context:
+        :param office365.sharepoint.client_context.ClientContext context:
         :param str web_full_url:
         :param bool include_page_libraries:
         """
-        result = ClientValueCollection(DocumentLibraryInformation)
+        result = ClientResult(context, ClientValueCollection(DocumentLibraryInformation))
         payload = {
             "webFullUrl": web_full_url,
             "includePageLibraries": include_page_libraries
@@ -787,6 +802,11 @@ class Web(SecurableObject):
         return self.properties.get('AvailableFields',
                                    FieldCollection(self.context,
                                                    ResourcePath("AvailableFields", self.resource_path)))
+
+    @property
+    def site_user_info_list(self):
+        return self.properties.get('SiteUserInfoList',
+                                   List(self.context, ResourcePath("SiteUserInfoList", self.resource_path)))
 
     @property
     def welcome_page(self):

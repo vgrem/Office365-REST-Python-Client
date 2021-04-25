@@ -108,6 +108,7 @@ class Site(BaseEntity):
     @staticmethod
     def get_url_by_id(context, site_id, stop_redirect=False):
         """Gets Site Url By Id
+
         :type context: office365.sharepoint.client_context.ClientContext
         :type site_id: str
         :type stop_redirect: bool

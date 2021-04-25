@@ -35,7 +35,7 @@ class SearchService(BaseEntity):
         pass
 
     def export_popular_tenant_queries(self, count):
-        result = ClientValueCollection(PopularTenantQuery)
+        result = ClientResult(self.context, ClientValueCollection(PopularTenantQuery))
         payload = {
             "count": count,
         }
@@ -48,7 +48,7 @@ class SearchService(BaseEntity):
 
         :type search_request: office365.sharepoint.search.searchRequest.SearchRequest
         """
-        result = SearchResult()
+        result = ClientResult(self.context, SearchResult())
         qry = ServiceOperationQuery(self, "query", search_request.to_json(), None, "query", result)
         self.context.add_query(qry)
 
@@ -66,7 +66,7 @@ class SearchService(BaseEntity):
         with method type POST.
 
         :type request: SearchRequest"""
-        result = SearchResult()
+        result = ClientResult(self.context, SearchResult())
         qry = ServiceOperationQuery(self, "postquery", None, request, "request", result)
         self.context.add_query(qry)
         return result
@@ -89,7 +89,7 @@ class SearchService(BaseEntity):
         pass
 
     def suggest(self, query_text):
-        result = QuerySuggestionResults()
+        result = ClientResult(self.context, QuerySuggestionResults())
         payload = {
             "querytext": query_text
         }

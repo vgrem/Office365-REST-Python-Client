@@ -26,8 +26,7 @@ class TestSharePointWeb(SPTestCase):
 
     def test2_get_web_from_page_url(self):
         page_url = "{site_url}SitePages/Home.aspx".format(site_url=test_site_url)
-        result = Web.get_web_url_from_page_url(self.client, page_url)
-        self.client.execute_query()
+        result = Web.get_web_url_from_page_url(self.client, page_url).execute_query()
         self.assertIsNotNone(result.value)
 
     def test3_get_list_item_by_url(self):
@@ -38,13 +37,11 @@ class TestSharePointWeb(SPTestCase):
     def test4_does_user_has_perms(self):
         perms = BasePermissions()
         perms.set(PermissionKind.ManageWeb)
-        result = self.client.web.does_user_have_permissions(perms)
-        self.client.execute_query()
+        result = self.client.web.does_user_have_permissions(perms).execute_query()
         self.assertIsInstance(result.value, bool)
 
     def test5_get_user_permissions(self):
-        result = self.client.web.get_user_effective_permissions(self.__class__.target_user.login_name)
-        self.client.execute_query()
+        result = self.client.web.get_user_effective_permissions(self.__class__.target_user.login_name).execute_query()
         self.assertIsInstance(result.value, BasePermissions)
 
     def test6_can_create_web(self):
@@ -54,15 +51,12 @@ class TestSharePointWeb(SPTestCase):
         creation_info.Title = target_web_name
         self.__class__.target_web = self.client.web.webs.add(creation_info).execute_query()
 
-        results = self.client.web.webs.filter("Title eq '{0}'".format(target_web_name))
-        self.client.load(results)
-        self.client.execute_query()
+        results = self.client.web.webs.filter("Title eq '{0}'".format(target_web_name)).get().execute_query()
         self.assertEqual(len(results), 1)
         self.assertIsNotNone(results[0].resource_path)
 
     def test7_get_sub_web(self):
-        sub_webs = self.client.web.get_sub_webs_filtered_for_current_user(SubwebQuery())
-        self.client.execute_query()
+        sub_webs = self.client.web.get_sub_webs_filtered_for_current_user(SubwebQuery()).execute_query()
         self.assertGreater(len(sub_webs), 0)
 
     def test8_if_web_updated(self):
@@ -84,8 +78,7 @@ class TestSharePointWeb(SPTestCase):
 
     def test_10_enum_all_webs(self):
         """Test to enumerate all webs within site"""
-        result = self.client.web.get_all_webs()
-        self.client.execute_query()
+        result = self.client.web.get_all_webs().execute_query()
         self.assertTrue(len(result.value) > 0)
 
     def test_11_read_list(self):
@@ -93,8 +86,7 @@ class TestSharePointWeb(SPTestCase):
         self.assertIsNotNone(site_pages.properties['Title'])
 
     def test_12_get_user_perms(self):
-        result = self.client.web.get_user_effective_permissions(self.__class__.target_user.login_name)
-        self.client.execute_query()
+        result = self.client.web.get_user_effective_permissions(self.__class__.target_user.login_name).execute_query()
         self.assertIsInstance(result.value, BasePermissions)
         self.assertGreater(len(result.value.permission_levels), 0)
 
@@ -107,14 +99,12 @@ class TestSharePointWeb(SPTestCase):
         self.assertIsNotNone(catalog.title)
 
     def test_15_get_document_libraries(self):
-        collection = Web.get_document_libraries(self.client, test_site_url)
-        self.client.execute_query()
-        self.assertGreater(len(collection), 0)
+        result = Web.get_document_libraries(self.client, test_site_url).execute_query()
+        self.assertGreater(len(result.value), 0)
 
     def test_16_get_document_and_media_libraries(self):
-        collection = Web.get_document_and_media_libraries(self.client, test_site_url, True)
-        self.client.execute_query()
-        self.assertGreater(len(collection), 0)
+        result = Web.get_document_and_media_libraries(self.client, test_site_url, True).execute_query()
+        self.assertGreater(len(result.value), 0)
 
     def test_17_get_available_web_templates(self):
         templates = self.client.web.get_available_web_templates().execute_query()
@@ -135,11 +125,9 @@ class TestSharePointWeb(SPTestCase):
         self.assertTrue(folder_new_nested.properties["Exists"])
 
     def test_21_get_context_web_theme_data(self):
-        result = Web.get_context_web_theme_data(self.client)
-        self.client.execute_query()
+        result = Web.get_context_web_theme_data(self.client).execute_query()
         self.assertIsNotNone(result.value)
 
     def test_22_get_regional_datetime_schema(self):
-        result = self.client.web.get_regional_datetime_schema()
-        self.client.execute_query()
+        result = self.client.web.get_regional_datetime_schema().execute_query()
         self.assertIsNotNone(result.value)

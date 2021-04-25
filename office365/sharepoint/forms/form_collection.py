@@ -1,8 +1,8 @@
-from office365.runtime.client_object_collection import ClientObjectCollection
+from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.forms.form import Form
 
 
-class FormCollection(ClientObjectCollection):
+class FormCollection(BaseEntityCollection):
 
     def __init__(self, context, resource_path=None):
         super(FormCollection, self).__init__(context, Form, resource_path)

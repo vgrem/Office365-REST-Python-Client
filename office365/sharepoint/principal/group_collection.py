@@ -1,25 +1,31 @@
-from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.principal.group import Group
 
 
-class GroupCollection(ClientObjectCollection):
+class GroupCollection(BaseEntityCollection):
     """Represents a collection of Group resources."""
     def __init__(self, context, resource_path=None):
         super(GroupCollection, self).__init__(context, Group, resource_path)
 
     def add(self, group_creation_information):
-        """Creates a Group resource"""
+        """Creates a Group resource
+
+        :type group_creation_information: any
+        """
         group = Group(self.context)
         self.add_child(group)
-        qry = CreateEntityQuery(self, group_creation_information)
+        qry = CreateEntityQuery(self, group_creation_information, group)
         self.context.add_query(qry)
         return group
 
     def get_by_id(self, group_id):
-        """Returns the list item with the specified list item identifier."""
+        """Returns the list item with the specified list item identifier.
+
+        :type group_id: str
+        """
         group = Group(self.context,
                       ResourcePathServiceOperation("getbyid", [group_id], self.resource_path))
         return group
@@ -33,11 +39,17 @@ class GroupCollection(ClientObjectCollection):
                      ResourcePathServiceOperation("getByName", [group_name], self.resource_path))
 
     def remove_by_id(self, group_id):
-        """Removes the group with the specified member ID from the collection."""
-        qry = ServiceOperationQuery(self, "removebyid", [group_id])
+        """Removes the group with the specified member ID from the collection.
+
+        :type group_id: str
+        """
+        qry = ServiceOperationQuery(self, "removeById", [group_id])
         self.context.add_query(qry)
 
     def remove_by_login_name(self, group_name):
-        """Removes the cross-site group with the specified name from the collection."""
-        qry = ServiceOperationQuery(self, "removebyloginname", [group_name])
+        """Removes the cross-site group with the specified name from the collection.
+
+        :type group_name: str
+        """
+        qry = ServiceOperationQuery(self, "removeByLoginName", [group_name])
         self.context.add_query(qry)

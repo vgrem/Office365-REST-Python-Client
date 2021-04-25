@@ -42,7 +42,7 @@ class TestSharePointClient(TestCase):
         request = client.web.current_user.get().build_request()
         self.assertIsInstance(request, RequestOptions)
 
-    def test8_execute_multiple_queries(self):
+    def test8_execute_multiple_queries_sequentially(self):
         client = ClientContext(test_site_url).with_credentials(test_user_credentials)
         current_user = client.web.current_user
         client.load(current_user)
@@ -70,9 +70,7 @@ class TestSharePointClient(TestCase):
         web.update()
         client.execute_batch()
 
-        updated_web = client.web
-        client.load(updated_web)
-        client.execute_query()
+        updated_web = client.web.get().execute_query()
         self.assertEqual(updated_web.properties['Title'], new_web_title)
 
     def test_11_execute_get_and_update_batch_request(self):

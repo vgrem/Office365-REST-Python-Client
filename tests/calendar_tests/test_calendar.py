@@ -20,18 +20,16 @@ class TestCalendar(GraphTestCase):
         pass
 
     def test1_find_meeting_times(self):
-        meeting_times = self.client.me.find_meeting_times()
-        self.client.execute_query()
-        self.assertIsNotNone(meeting_times.meetingTimeSuggestions)
+        result = self.client.me.find_meeting_times().execute_query()
+        self.assertIsNotNone(result.value.meetingTimeSuggestions)
 
     def test2_get_schedule(self):
         end_time = datetime.utcnow()
         start_time = end_time - timedelta(days=7)
-        schedule = self.client.me.calendar.get_schedule(schedules=[test_user_principal_name],
-                                                        startTime=start_time,
-                                                        endTime=end_time)
-        self.client.execute_query()
-        self.assertIsNotNone(schedule)
+        result = self.client.me.calendar.get_schedule(schedules=[test_user_principal_name],
+                                                      startTime=start_time,
+                                                      endTime=end_time).execute_query()
+        self.assertIsNotNone(result.value)
 
     def test3_get_calendar_groups(self):
         cal_groups = self.client.me.calendar_groups.get().execute_query()
@@ -46,9 +44,8 @@ class TestCalendar(GraphTestCase):
     def test4_get_reminder_view(self):
         end_time = datetime.utcnow()
         start_time = end_time - timedelta(days=14)
-        reminders = self.client.me.get_reminder_view(start_dt=start_time, end_dt=end_time)
-        self.client.execute_query()
-        self.assertIsNotNone(reminders)
+        result = self.client.me.get_reminder_view(start_dt=start_time, end_dt=end_time).execute_query()
+        self.assertIsNotNone(result.value)
 
     def test5_list_events(self):
         events = self.client.me.calendar.events.get().execute_query()

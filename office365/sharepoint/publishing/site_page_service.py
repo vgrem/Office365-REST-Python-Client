@@ -73,12 +73,12 @@ class SitePageService(BaseEntity):
 
         :param office365.sharepoint.client_context.ClientContext context: Client context
         """
-        return_type = OrgAssets()
+        result = ClientResult(context, OrgAssets())
         svc = SitePageService(context)
-        qry = ServiceOperationQuery(svc, "OrgAssets", None, None, None, return_type)
+        qry = ServiceOperationQuery(svc, "OrgAssets", None, None, None, result)
         qry.static = True
         context.add_query(qry)
-        return return_type
+        return result
 
     @staticmethod
     def file_picker_tab_options(context):
@@ -86,12 +86,12 @@ class SitePageService(BaseEntity):
 
         :param office365.sharepoint.client_context.ClientContext context: Client context
         """
-        return_type = FilePickerOptions()
+        result = ClientResult(context, FilePickerOptions())
         svc = SitePageService(context)
-        qry = ServiceOperationQuery(svc, "FilePickerTabOptions", None, None, None, return_type)
+        qry = ServiceOperationQuery(svc, "FilePickerTabOptions", None, None, None, result)
         qry.static = True
         context.add_query(qry)
-        return return_type
+        return result
 
     def add_image(self, page_name, image_file_name, image_stream):
         """

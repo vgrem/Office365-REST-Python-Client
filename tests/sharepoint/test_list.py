@@ -40,22 +40,19 @@ class TestSPList(SPTestCase):
         target_role_def = self.client.web.role_definitions.get_by_type(RoleType.Contributor)
         target_user = self.client.web.current_user
         target_lib = self.client.web.default_document_library()
-        target_lib.add_role_assignment(target_user, target_role_def)
-        self.client.execute_query()
+        target_lib.add_role_assignment(target_user, target_role_def).execute_query()
 
     def test6_library_get_unique_perms(self):
         target_lib = self.client.web.default_document_library()
         target_user = self.client.web.current_user
-        assignment = target_lib.get_role_assignment(target_user)
-        self.client.execute_query()
+        assignment = target_lib.get_role_assignment(target_user).execute_query()
         self.assertIsNotNone(assignment)
 
     def test6_library_remove_unique_perms(self):
         target_role_def = self.client.web.role_definitions.get_by_type(RoleType.Contributor)
         target_user = self.client.web.current_user
         target_lib = self.client.web.default_document_library()
-        target_lib.remove_role_assignment(target_user, target_role_def)
-        self.client.execute_query()
+        target_lib.remove_role_assignment(target_user, target_role_def).execute_query()
 
     def test7_library_reset_role_inheritance(self):
         default_lib = self.client.web.default_document_library()
@@ -69,8 +66,7 @@ class TestSPList(SPTestCase):
         list_properties.AllowContentTypes = True
         list_properties.BaseTemplate = ListTemplateType.TasksWithTimelineAndHierarchy
         list_properties.Title = self.target_list_title
-        list_to_create = self.client.web.lists.add(list_properties)
-        self.client.execute_query()
+        list_to_create = self.client.web.lists.add(list_properties).execute_query()
         self.assertEqual(list_properties.Title, list_to_create.properties['Title'])
         self.__class__.target_list = list_to_create
 
@@ -100,9 +96,7 @@ class TestSPList(SPTestCase):
     def test_13_get_list_permissions(self):
         current_user = self.client.web.current_user.get().execute_query()
         self.assertIsNotNone(current_user.login_name)
-
-        result = self.__class__.target_list.get_user_effective_permissions(current_user.login_name)
-        self.client.execute_query()
+        result = self.__class__.target_list.get_user_effective_permissions(current_user.login_name).execute_query()
         self.assertIsInstance(result.value, BasePermissions)
 
     def test_14_get_list_changes(self):

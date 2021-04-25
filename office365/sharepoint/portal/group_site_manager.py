@@ -1,4 +1,5 @@
 from office365.runtime.client_object import ClientObject
+from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
@@ -18,7 +19,6 @@ class GroupSiteManager(ClientObject):
         :param str alias:
         :param bool is_public:
         :param office365.sharepoint.portal.group_creation_params.GroupCreationParams or None optional_params:
-        :return: GroupSiteInfo
         """
         if optional_params is None:
             optional_params = GroupCreationParams()
@@ -28,10 +28,10 @@ class GroupSiteManager(ClientObject):
             "isPublic": is_public,
             "optionalParams": optional_params
         }
-        group_site_info = GroupSiteInfo()
-        qry = ServiceOperationQuery(self, "CreateGroupEx", None, payload, None, group_site_info)
+        result = ClientResult(self.context, GroupSiteInfo())
+        qry = ServiceOperationQuery(self, "CreateGroupEx", None, payload, None, result)
         self.context.add_query(qry)
-        return group_site_info
+        return result
 
     def delete(self, site_url):
         """
@@ -44,14 +44,15 @@ class GroupSiteManager(ClientObject):
         }
         qry = ServiceOperationQuery(self, "Delete", None, payload)
         self.context.add_query(qry)
+        return self
 
     def get_status(self, group_id):
         """Get the status of a SharePoint site
 
         :type group_id: str
         """
-        group_site_info = GroupSiteInfo()
-        qry = ServiceOperationQuery(self, "GetSiteStatus", None, {'groupId': group_id}, None, group_site_info)
+        result = ClientResult(self.context, GroupSiteInfo())
+        qry = ServiceOperationQuery(self, "GetSiteStatus", None, {'groupId': group_id}, None, result)
         self.context.add_query(qry)
 
         def _construct_status_request(request):
@@ -59,4 +60,4 @@ class GroupSiteManager(ClientObject):
             request.url += "?groupId='{0}'".format(group_id)
 
         self.context.before_execute(_construct_status_request)
-        return group_site_info
+        return result

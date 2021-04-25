@@ -50,7 +50,10 @@ class ClientQuery(object):
 
     @property
     def parameter_type(self):
-        return self._parameter_type
+        if isinstance(self._parameter_type, dict):
+            return {k: v for k, v in self._parameter_type.items() if v is not None}
+        else:
+            return self._parameter_type
 
     @property
     def return_type(self):

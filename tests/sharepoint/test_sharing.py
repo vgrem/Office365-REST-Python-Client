@@ -18,7 +18,6 @@ class TestSharePointSharing(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.client = ClientContext(test_site_url).with_credentials(test_user_credentials)
-
         current_user = cls.client.web.current_user.get().execute_query()
         cls.target_user = current_user
 
@@ -28,36 +27,30 @@ class TestSharePointSharing(TestCase):
         self.assertTrue(role_def.name, "Full Control")
 
     def test2_get_object_sharing_settings(self):
-        result = Web.get_object_sharing_settings(self.client, self.target_file_url, 0, True)
-        self.client.execute_query()
+        result = Web.get_object_sharing_settings(self.client, self.target_file_url, 0, True).execute_query()
         self.assertIsNotNone(result.web_url)
 
     def test3_get_file_sharing_info(self):
         list_item = self.client.web.get_list_item("/SitePages/Home.aspx")
-        sharing_info = list_item.get_sharing_information()
-        self.client.execute_query()
+        sharing_info = list_item.get_sharing_information().execute_query()
         self.assertIsNotNone(list_item.resource_path)
         self.assertIsInstance(sharing_info, ObjectSharingInformation)
 
     def test4_share_file(self):
         target_file_item = self.client.web.get_list_item("/SitePages/Home.aspx")
-        result = target_file_item.share(self.target_user.properties['UserPrincipalName'])
-        self.client.execute_query()
+        result = target_file_item.share(self.target_user.user_principal_name).execute_query()
         self.assertIsInstance(result, SharingResult)
 
     def test5_unshare_file(self):
         target_file_item = self.client.web.get_list_item("/SitePages/Home.aspx")
-        result = target_file_item.unshare()
-        self.client.execute_query()
+        result = target_file_item.unshare().execute_query()
         self.assertIsInstance(result, SharingResult)
         self.assertIsNone(result.error_message)
 
     def test6_share_web(self):
-        result = self.client.web.share(self.target_user.user_principal_name)
-        self.client.execute_query()
+        result = self.client.web.share(self.target_user.user_principal_name).execute_query()
         self.assertIsInstance(result, SharingResult)
 
     def test7_unshare_web(self):
-        result = self.client.web.unshare()
-        self.client.execute_query()
+        result = self.client.web.unshare().execute_query()
         self.assertIsInstance(result, SharingResult)

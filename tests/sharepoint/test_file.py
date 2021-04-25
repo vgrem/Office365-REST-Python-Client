@@ -48,9 +48,9 @@ class TestSharePointFile(SPTestCase):
                 file_content = self.read_file_as_binary(path)
             else:
                 file_content = self.read_file_as_text(path)
-            uploaded_file = self.__class__.target_list.root_folder.upload_file(entry["Name"], file_content)
-            self.client.execute_query()
-            self.assertEqual(uploaded_file.properties["Name"], entry["Name"])
+            target_folder = self.__class__.target_list.root_folder
+            uploaded_file = target_folder.upload_file(entry["Name"], file_content).execute_query()
+            self.assertEqual(uploaded_file.name, entry["Name"])
 
     def test2_upload_large_file(self):
         path = "{0}/../data/big_buck_bunny.mp4".format(os.path.dirname(__file__))
@@ -71,8 +71,7 @@ class TestSharePointFile(SPTestCase):
 
     def test5_create_file_anon_link(self):
         file_url = self.__class__.target_file.serverRelativeUrl
-        result = Web.create_anonymous_link(self.client, file_url, False)
-        self.client.execute_query()
+        result = Web.create_anonymous_link(self.client, file_url, False).execute_query()
         self.assertIsNotNone(result.value)
 
     def test6_load_file_metadata(self):
@@ -97,8 +96,7 @@ class TestSharePointFile(SPTestCase):
         """Test file update metadata"""
         list_item = self.__class__.target_file.listItemAllFields  # get metadata
         list_item.set_property('Title', 'Updated')
-        list_item.update()
-        self.client.execute_query()
+        list_item.update().execute_query()
 
     def test_10_list_file_versions(self):
         """Test file update metadata"""

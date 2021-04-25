@@ -10,7 +10,7 @@ class List(BaseItem):
     including template and field definitions. """
 
     @property
-    def sharepointids(self):
+    def sharepoint_ids(self):
         """Returns identifiers useful for SharePoint REST compatibility."""
         return self.properties.get('sharepointIds', None)
 
@@ -29,7 +29,7 @@ class List(BaseItem):
                                                               ResourcePath("columns", self.resource_path)))
 
     @property
-    def contentTypes(self):
+    def content_types(self):
         """The collection of content types under this site."""
         return self.properties.get('contentTypes',
                                    ContentTypeCollection(self.context,

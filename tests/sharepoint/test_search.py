@@ -21,35 +21,29 @@ class TestSearch(TestCase):
     def test1_export_search_settings(self):
         current_user = self.client.web.current_user.get().execute_query()
         export_start_data = datetime.today() - timedelta(days=1)
-        result = self.search.export(current_user.user_principal_name, export_start_data)
-        self.client.execute_query()
+        result = self.search.export(current_user.user_principal_name, export_start_data).execute_query()
         self.assertIsNotNone(result.value)
 
     def test2_export_popular_tenant_queries(self):
-        result = self.search.export_popular_tenant_queries(10)
-        self.client.execute_query()
-        self.assertIsNotNone(result)
+        result = self.search.export_popular_tenant_queries(10).execute_query()
+        self.assertIsNotNone(result.value)
 
     def test3_get_search_center_url(self):
-        result = self.search.search_center_url()
-        self.client.execute_query()
+        result = self.search.search_center_url().execute_query()
         self.assertIsNotNone(result.value)
 
     def test4_search_post_query(self):
         request = SearchRequest("filename:guide.docx")
-        result = self.search.post_query(request)
-        self.client.execute_query()
-        self.assertIsInstance(result, SearchResult)
-        self.assertIsInstance(result.PrimaryQueryResult, QueryResult)
+        result = self.search.post_query(request).execute_query()
+        self.assertIsInstance(result.value, SearchResult)
+        self.assertIsInstance(result.value.PrimaryQueryResult, QueryResult)
 
     def test5_search_get_query(self):
         request = SearchRequest("guide.docx")
-        result = self.search.query(request)
-        self.client.execute_query()
-        self.assertIsInstance(result, SearchResult)
-        self.assertIsInstance(result.PrimaryQueryResult, QueryResult)
+        result = self.search.query(request).execute_query()
+        self.assertIsInstance(result.value, SearchResult)
+        self.assertIsInstance(result.value.PrimaryQueryResult, QueryResult)
 
     def test6_search_suggest(self):
-        result = self.search.suggest("guide.docx")
-        self.client.execute_query()
-        self.assertIsInstance(result, QuerySuggestionResults)
+        result = self.search.suggest("guide.docx").execute_query()
+        self.assertIsInstance(result.value, QuerySuggestionResults)

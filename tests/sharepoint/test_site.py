@@ -17,14 +17,12 @@ class TestSite(SPTestCase):
 
     def test2_if_site_exists(self):
         site_url = self.__class__.target_site.url
-        result = Site.exists(self.client, site_url)
-        self.client.execute_query()
+        result = Site.exists(self.client, site_url).execute_query()
         self.assertIsNotNone(result.value)
 
     def test3_get_site_by_id(self):
         site_id = self.__class__.target_site.properties['Id']
-        result = Site.get_url_by_id(self.client, site_id)
-        self.client.execute_query()
+        result = Site.get_url_by_id(self.client, site_id).execute_query()
         self.assertIsNotNone(result.value)
 
     def test4_get_site_catalog(self):

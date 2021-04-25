@@ -65,7 +65,7 @@ class ListItem(SecurableObject):
         :param bool sendEmail: A flag to determine if an email notification SHOULD be sent (if email is configured).
         :param str emailSubject: The email subject.
         :param str emailBody: The email subject.
-        :return: SharingResult
+        :rtype: SharingResult
         """
 
         result = ClientResult(self.context, SharingResult(self.context))
@@ -93,7 +93,9 @@ class ListItem(SecurableObject):
 
     def unshare(self):
         """
-                Share a ListItem (file or folder facet)
+        Unshare a ListItem (file or folder facet)
+
+        :rtype: SharingResult
         """
         result = ClientResult(self.context, SharingResult(self.context))
 
@@ -108,7 +110,7 @@ class ListItem(SecurableObject):
     def get_sharing_information(self):
         """
 
-        :rtype: ClientResult
+        :rtype: ObjectSharingInformation
         """
         result = ClientResult(self.context, ObjectSharingInformation(self.context))
 

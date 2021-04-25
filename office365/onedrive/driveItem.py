@@ -23,27 +23,27 @@ class DriveItem(BaseItem):
     """The driveItem resource represents a file, folder, or other item stored in a drive. All file system objects in
     OneDrive and SharePoint are returned as driveItem resources """
 
-    def create_link(self, type_, scope="", expirationDateTime=None, password=None, message=""):
+    def create_link(self, link_type, scope="", expiration_datetime=None, password=None, message=""):
         """
         The createLink action will create a new sharing link if the specified link type doesn't already exist
         for the calling application. If a sharing link of the specified type already exists for the app,
         the existing sharing link will be returned.
 
-        :param str type_: The type of sharing link to create. Either view, edit, or embed.
+        :param str link_type: The type of sharing link to create. Either view, edit, or embed.
         :param str scope:  The scope of link to create. Either anonymous or organization.
-        :param str expirationDateTime: A String with format of yyyy-MM-ddTHH:mm:ssZ of DateTime indicates the expiration
+        :param str expiration_datetime: A String with format of yyyy-MM-ddTHH:mm:ssZ of DateTime indicates the expiration
             time of the permission.
         :param str password: The password of the sharing link that is set by the creator. Optional
             and OneDrive Personal only.
         :param str message:
         """
         payload = {
-            "type": type_,
+            "type": link_type,
             "scope": scope,
-            "message": message
+            "message": message,
+            "expirationDateTime": expiration_datetime,
+            "password": password
         }
-        payload = {k: v for k, v in payload.items() if v is not None}
-
         permission = Permission(self.context)
         self.permissions.add_child(permission)
         qry = ServiceOperationQuery(self, "createLink", None, payload, None, permission)
@@ -165,6 +165,7 @@ class DriveItem(BaseItem):
         def _content_downloaded(resp):
             file_object.write(result.value)
         self.context.after_execute(_content_downloaded)
+        return self
 
     def create_folder(self, name):
         """Create a new folder or DriveItem in a Drive with a specified parent item or path.
@@ -337,9 +338,7 @@ class DriveItem(BaseItem):
         super(DriveItem, self).set_property(name, value, persist_changes)
         if name == "id" and self._resource_path.parent.segment == "children":
             self._resource_path = ResourcePath(
-                value,
-                ResourcePath("items", self._parent_collection.resource_path.parent.parent))
-        # elif name == "id" and self._resource_path.parent.segment == "root":
-        #    self._resource_path = ResourcePath(value,
-        #                                       ResourcePath("items", self._resource_path.parent.parent))
+                value, ResourcePath("items", self._parent_collection.resource_path.parent.parent))
+        elif name == "id" and self._resource_path.parent.segment == "root":
+            self._resource_path = ResourcePath(value, ResourcePath("items", self._resource_path.parent.parent))
         return self

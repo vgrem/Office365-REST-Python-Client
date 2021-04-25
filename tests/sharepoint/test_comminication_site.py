@@ -27,10 +27,9 @@ class TestCommunicationSite(TestCase):
         self.__class__.site_response = result.value
 
     def test2_get_site_status(self):
-        response = self.site_manager.get_status(self.__class__.site_response.SiteUrl)
-        self.client.execute_query()
-        self.assertIsNotNone(response.SiteStatus)
-        self.assertTrue(response.SiteStatus != SiteStatus.Error)
+        result = self.site_manager.get_status(self.__class__.site_response.SiteUrl).execute_query()
+        self.assertIsNotNone(result.value.SiteStatus)
+        self.assertTrue(result.value.SiteStatus != SiteStatus.Error)
 
     def test3_register_hub_site(self):
         client_admin = ClientContext(test_admin_site_url).with_credentials(test_user_credentials)

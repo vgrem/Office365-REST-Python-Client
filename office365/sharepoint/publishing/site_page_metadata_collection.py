@@ -1,8 +1,8 @@
-from office365.runtime.client_object_collection import ClientObjectCollection
+from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.publishing.site_page_metadata import SitePageMetadata
 
 
-class SitePageMetadataCollection(ClientObjectCollection):
+class SitePageMetadataCollection(BaseEntityCollection):
 
     def __init__(self, context, resource_path=None):
         """Specifies a collection of site pages."""

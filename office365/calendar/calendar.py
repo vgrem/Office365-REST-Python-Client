@@ -3,6 +3,7 @@ from office365.calendar.emailAddress import EmailAddress
 from office365.calendar.event_collection import EventCollection
 from office365.calendar.schedule_information import ScheduleInformation
 from office365.entity import Entity
+from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
@@ -32,7 +33,7 @@ class Calendar(Entity):
             "endTime": DateTimeTimeZone.parse(endTime),
             "availabilityViewInterval": availabilityViewInterval
         }
-        result = ClientValueCollection(ScheduleInformation)
+        result = ClientResult(self.context, ClientValueCollection(ScheduleInformation))
         qry = ServiceOperationQuery(self, "getSchedule", None, payload, None, result)
         self.context.add_query(qry)
         return result

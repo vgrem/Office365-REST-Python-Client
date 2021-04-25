@@ -189,7 +189,7 @@ Usage
 import adal
 from office365.graph_client import GraphClient
 
-def acquire_token():
+def acquire_token_func():
     authority_url = 'https://login.microsoftonline.com/{tenant_id_or_name}'
     auth_ctx = adal.AuthenticationContext(authority_url)
     token = auth_ctx.acquire_token_with_client_credentials(
@@ -211,7 +211,7 @@ The example demonstrates how to send an email via [Microsoft Graph endpoint](htt
 ```python
 from office365.graph_client import GraphClient
 
-client = GraphClient(acquire_token)
+client = GraphClient(acquire_token_func)
 
 message_json = {
     "Message": {
@@ -232,8 +232,7 @@ message_json = {
 }
 
 login_name = "mdoe@contoso.onmicrosoft.com"
-client.users[login_name].send_mail(message_json)
-client.execute_query()
+client.users[login_name].send_mail(message_json).execute_query()
 ```
 
 
@@ -251,7 +250,7 @@ is used to obtain token
 ```python
 import msal
 
-def acquire_token():
+def acquire_token_func():
     """
     Acquire token via MSAL
     """
@@ -279,10 +278,8 @@ which corresponds to [`list available drives` endpoint](https://docs.microsoft.c
 from office365.graph_client import GraphClient
 
 tenant_name = "contoso.onmicrosoft.com"
-client = GraphClient(acquire_token)
-drives = client.drives
-client.load(drives)
-client.execute_query()
+client = GraphClient(acquire_token_func)
+drives = client.drives.get().execute_query()
 for drive in drives:
     print("Drive url: {0}".format(drive.web_url))
 ```
@@ -292,12 +289,9 @@ for drive in drives:
 
 ```python
 from office365.graph_client import GraphClient
-client = GraphClient(acquire_token)
+client = GraphClient(acquire_token_func)
 # retrieve drive properties 
-drive = client.users["{user_id_or_principal_name}"].drive
-client.load(drive)
-client.execute_query()
-
+drive = client.users["{user_id_or_principal_name}"].drive.get().execute_query()
 # download files from OneDrive into local folder 
 with tempfile.TemporaryDirectory() as path:
     download_files(drive.root, path)
@@ -307,15 +301,12 @@ where
 
 ```python
 def download_files(remote_folder, local_path):
-    drive_items = remote_folder.children
-    client.load(drive_items)
-    client.execute_query()
+    drive_items = remote_folder.children.get().execute_query()
     for drive_item in drive_items:
         if not drive_item.file.is_server_object_null:  # is file?
             # download file content
             with open(os.path.join(local_path, drive_item.name), 'wb') as local_file:
-                drive_item.download(local_file)
-                client.execute_query()
+                drive_item.download(local_file).execute_query()
 ```
 
 
@@ -339,9 +330,8 @@ which corresponds to [`Create team` endpoint](https://docs.microsoft.com/en-us/g
 ```python
 from office365.graph_client import GraphClient
 tenant_name = "contoso.onmicrosoft.com"
-client = GraphClient(tenant_name, acquire_token)
-new_team = client.groups["{group_id}"].add_team()
-client.execute_query()
+client = GraphClient(tenant_name, acquire_token_func)
+new_team = client.groups["{group_id}"].add_team().execute_query_retry()
 ```
 
 
