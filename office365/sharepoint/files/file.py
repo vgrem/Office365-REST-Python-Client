@@ -1,7 +1,6 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
@@ -30,12 +29,6 @@ class AbstractFile(BaseEntity):
             self.context, self.properties["ServerRelativeUrl"], content)
         return response
 
-    def delete_object(self):
-        """Deletes the file."""
-        qry = DeleteEntityQuery(self)
-        self.context.add_query(qry)
-        return self
-
 
 class File(AbstractFile):
     """Represents a file in a SharePoint Web site that can be a Web Part Page, an item in a document library,
@@ -57,7 +50,7 @@ class File(AbstractFile):
     def recycle(self):
         """Moves the file to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
 
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "Recycle", None, None, None, result)
         self.context.add_query(qry)
         return result
@@ -73,6 +66,7 @@ class File(AbstractFile):
                                         "comment": comment
                                     })
         self.context.add_query(qry)
+        return self
 
     def deny(self, comment):
         """Denies approval for a file that was submitted for content approval.
@@ -85,6 +79,7 @@ class File(AbstractFile):
                                         "comment": comment
                                     })
         self.context.add_query(qry)
+        return self
 
     def copyto(self, new_relative_url, overwrite):
         """Copies the file to the destination URL.
@@ -157,6 +152,7 @@ class File(AbstractFile):
                                     }
                                     )
         self.context.add_query(qry)
+        return self
 
     def checkout(self):
         """Checks out the file from a document library based on the check-out type."""
@@ -164,6 +160,7 @@ class File(AbstractFile):
                                     "checkout",
                                     )
         self.context.add_query(qry)
+        return self
 
     def checkin(self, comment, checkin_type):
         """
@@ -183,6 +180,7 @@ class File(AbstractFile):
                                     }
                                     )
         self.context.add_query(qry)
+        return self
 
     def undocheckout(self):
         """Reverts an existing checkout for the file."""
@@ -190,6 +188,7 @@ class File(AbstractFile):
                                     "undocheckout"
                                     )
         self.context.add_query(qry)
+        return self
 
     def get_limited_webpart_manager(self, scope):
         """Specifies the control set used to access, modify, or add Web Parts associated with this Web Part Page and
@@ -207,7 +206,7 @@ class File(AbstractFile):
         :param bytes content: File content
         :param str upload_id: Upload session id
         """
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self,
                                     "startUpload",
                                     {
@@ -228,7 +227,7 @@ class File(AbstractFile):
         :param int file_offset: File offset
         :param bytes content: File content
         """
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self,
                                     "continueUpload",
                                     {
@@ -470,12 +469,8 @@ class File(AbstractFile):
         if self._resource_path is None:
             if name == "ServerRelativeUrl":
                 self._resource_path = ResourcePathServiceOperation(
-                    "GetFileByServerRelativeUrl",
-                    [value],
-                    ResourcePath("Web"))
+                    "GetFileByServerRelativeUrl", [value], ResourcePath("Web"))
             elif name == "UniqueId":
                 self._resource_path = ResourcePathServiceOperation(
-                    "GetFileById",
-                    [value],
-                    ResourcePath("Web"))
+                    "GetFileById", [value], ResourcePath("Web"))
         return self

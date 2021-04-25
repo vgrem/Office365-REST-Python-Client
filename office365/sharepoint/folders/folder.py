@@ -1,6 +1,5 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
-from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
@@ -35,7 +34,7 @@ class Folder(BaseEntity):
     def recycle(self):
         """Moves the folder to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
 
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "Recycle", None, None, None, result)
         self.context.add_query(qry)
         return result
@@ -45,7 +44,7 @@ class Folder(BaseEntity):
 
         :type parameters: office365.sharepoint.folders.folder_delete_parameters.FolderDeleteParameters
         """
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "RecycleWithParameters", None, parameters, "parameters", result)
         self.context.add_query(qry)
         return result
@@ -99,13 +98,6 @@ class Folder(BaseEntity):
         item.set_property('FileLeafRef', name)
         qry = UpdateEntityQuery(item)
         self.context.add_query(qry)
-        return self
-
-    def delete_object(self):
-        """Deletes the folder."""
-        qry = DeleteEntityQuery(self)
-        self.context.add_query(qry)
-        self.remove_from_parent_collection()
         return self
 
     def upload_file(self, file_name, content):

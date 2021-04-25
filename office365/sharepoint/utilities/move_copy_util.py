@@ -14,7 +14,7 @@ class MoveCopyUtil(BaseEntity):
         :param str destUrl:
         :param office365.sharepoint.client_context.ClientContext context: client context
         """
-        res = ClientResult(None)
+        res = ClientResult(context)
         util = MoveCopyUtil(context)
         payload = {
             "srcUrl": srcUrl,

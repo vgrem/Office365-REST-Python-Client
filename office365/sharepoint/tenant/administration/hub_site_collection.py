@@ -1,8 +1,8 @@
-from office365.runtime.client_object_collection import ClientObjectCollection
+from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.tenant.administration.hub_site import HubSite
 
 
-class HubSiteCollection(ClientObjectCollection):
+class HubSiteCollection(BaseEntityCollection):
     """Represents a collection of HubSite resources."""
 
     def __init__(self, context, resource_path=None):

@@ -1,8 +1,6 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.changes.change_collection import ChangeCollection
@@ -30,7 +28,7 @@ class ListItem(SecurableObject):
             application associated with the list item.
         :param int action:
         """
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "GetWOPIFrameUrl", [action], None, None, result)
         self.context.add_query(qry)
         return result
@@ -38,7 +36,7 @@ class ListItem(SecurableObject):
     def recycle(self):
         """Moves the listItem to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
 
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "Recycle", None, None, None, result)
         self.context.add_query(qry)
         return result
@@ -70,8 +68,8 @@ class ListItem(SecurableObject):
         :return: SharingResult
         """
 
-        result = ClientResult(SharingResult(self.context))
-        file_result = ClientResult(str)
+        result = ClientResult(self.context, SharingResult(self.context))
+        file_result = ClientResult(self.context)
 
         role_values = {
             ExternalSharingSiteOption.View: "role:1073741826",
@@ -97,7 +95,7 @@ class ListItem(SecurableObject):
         """
                 Share a ListItem (file or folder facet)
         """
-        result = ClientResult(SharingResult(self.context))
+        result = ClientResult(self.context, SharingResult(self.context))
 
         def _property_resolved():
             abs_url = self.get_property("EncodedAbsUrl")
@@ -112,7 +110,7 @@ class ListItem(SecurableObject):
 
         :rtype: ClientResult
         """
-        result = ClientResult(ObjectSharingInformation(self.context))
+        result = ClientResult(self.context, ObjectSharingInformation(self.context))
 
         def _item_resolved():
             result.value = ObjectSharingInformation.get_list_item_sharing_information(
@@ -120,13 +118,6 @@ class ListItem(SecurableObject):
 
         self.ensure_properties(["Id", "ParentList"], _item_resolved)
         return result.value
-
-    def update(self):
-        """Update the list item."""
-        self.ensure_type_name(self.parent_list)
-        qry = UpdateEntityQuery(self)
-        self.context.add_query(qry)
-        return self
 
     def validate_update_list_item(self, form_values, new_document_update):
         """Validates and sets the values of the specified collection of fields for the list item."""
@@ -151,12 +142,6 @@ class ListItem(SecurableObject):
         """Update the list item."""
         qry = ServiceOperationQuery(self,
                                     "updateOverwriteVersion")
-        self.context.add_query(qry)
-        return self
-
-    def delete_object(self):
-        """Deletes the ListItem."""
-        qry = DeleteEntityQuery(self)
         self.context.add_query(qry)
         return self
 
@@ -285,6 +270,8 @@ class ListItem(SecurableObject):
             return self.effective_base_permissions
         elif name == "AttachmentFiles":
             return self.attachment_files
+        elif name == "LikedByInformation":
+            return self.liked_by_information
         else:
             return super(ListItem, self).get_property(name)
 

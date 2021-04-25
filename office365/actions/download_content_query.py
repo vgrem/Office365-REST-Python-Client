@@ -9,7 +9,7 @@ class DownloadContentQuery(ServiceOperationQuery):
         :type entity_type: office365.runtime.client_object.ClientObject
         :type format_name: str or None
         """
-        result = ClientResult(None)
+        result = ClientResult(entity_type.context)
         action_name = "content"
         if format_name is not None:
             action_name = action_name + r"?format={0}".format(format_name)

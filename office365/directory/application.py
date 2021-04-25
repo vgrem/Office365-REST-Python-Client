@@ -37,7 +37,7 @@ class Application(DirectoryObject):
         """
         super(Application, self).delete_object()
         if permanent_delete:
-            deleted_item = self.context.directory.deletedApplications[self.id]
+            deleted_item = self.context.directory.deleted_applications[self.id]
             deleted_item.delete_object()
         return self
 

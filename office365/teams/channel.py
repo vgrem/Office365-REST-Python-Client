@@ -11,13 +11,6 @@ from office365.teams.teamsTabCollection import TeamsTabCollection
 class Channel(Entity):
     """Teams are made up of channels, which are the conversations you have with your teammates"""
 
-    def delete_object(self):
-        """Deletes the channel."""
-        qry = DeleteEntityQuery(self)
-        self.context.add_query(qry)
-        self.remove_from_parent_collection()
-        return self
-
     @property
     def filesFolder(self):
         """Get the metadata for the location where the files of a channel are stored."""

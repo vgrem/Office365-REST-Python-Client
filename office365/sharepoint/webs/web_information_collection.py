@@ -1,8 +1,8 @@
-from office365.runtime.client_object_collection import ClientObjectCollection
+from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.webs.web_information import WebInformation
 
 
-class WebInformationCollection(ClientObjectCollection):
+class WebInformationCollection(BaseEntityCollection):
     """Web Information collection"""
 
     def __init__(self, context, resource_path=None):

@@ -1,4 +1,3 @@
-from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.alerts.alert_collection import AlertCollection
@@ -10,6 +9,9 @@ class User(Principal):
     """Represents a user in Microsoft SharePoint Foundation. A user is a type of SP.Principal."""
 
     def get(self):
+        """
+        :rtype: User
+        """
         return super(User, self).get()
 
     @property
@@ -35,13 +37,6 @@ class User(Principal):
         """Gets the information of the user that contains the user's name identifier and the issuer of the
          user's name identifier."""
         return self.properties.get('UserId', UserIdInfo())
-
-    def delete_object(self):
-        """Deletes the user."""
-        qry = DeleteEntityQuery(self)
-        self.context.add_query(qry)
-        self.remove_from_parent_collection()
-        return self
 
     def expire(self):
         qry = ServiceOperationQuery(self, "Expire")

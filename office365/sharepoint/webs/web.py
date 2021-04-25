@@ -1,9 +1,7 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.client_query import ClientQuery
-from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.actions.getWebUrlFromPage import GetWebUrlFromPageUrlQuery
@@ -72,7 +70,7 @@ class Web(SecurableObject):
         return qry.return_type
 
     def get_all_client_side_components(self):
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "getAllClientSideComponents", None, None, None, result)
         self.context.add_query(qry)
         return result
@@ -126,7 +124,7 @@ class Web(SecurableObject):
 
     def get_all_webs(self):
         """Returns a collection containing a flat list of all Web objects in the Web object."""
-        result = ClientResult(self.webs)
+        result = ClientResult(self.context, self.webs)
         qry = ClientQuery(self.context, self.webs, None, None, result)
         self.context.add_query(qry)
 
@@ -151,13 +149,12 @@ class Web(SecurableObject):
         return_list = List(self.context)
         self.lists.add_child(return_list)
         from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
-        res_path = SPResPath(decoded_url)
-        qry = ServiceOperationQuery(self, "GetListUsingPath", res_path, None, None, return_list)
+        qry = ServiceOperationQuery(self, "GetListUsingPath", SPResPath(decoded_url), None, None, return_list)
         self.context.add_query(qry)
         return return_list
 
     def get_regional_datetime_schema(self):
-        return_type = ClientResult(str)
+        return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "GetRegionalDateTimeSchema", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
@@ -168,26 +165,13 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return result
 
-    def update(self):
-        """Update a Web resource"""
-        qry = UpdateEntityQuery(self)
-        self.context.add_query(qry)
-        return self
-
-    def delete_object(self):
-        """Delete a Web resource"""
-        qry = DeleteEntityQuery(self)
-        self.context.add_query(qry)
-        self.remove_from_parent_collection()
-        return self
-
     @staticmethod
     def get_context_web_theme_data(context):
         """
 
         :type context: office365.sharepoint.client_context.ClientContext
         """
-        result = ClientResult(str)
+        result = ClientResult(context)
         qry = ServiceOperationQuery(context.web, "GetContextWebThemeData", None, None, None, result)
         qry.static = True
         context.add_query(qry)
@@ -202,7 +186,7 @@ class Web(SecurableObject):
         string parameters
         :param office365.sharepoint.client_context.ClientContext context: client context
         """
-        result = ClientResult(bool)
+        result = ClientResult(context)
         payload = {
             "url": context.base_url + url,
             "isEditLink": is_edit_link
@@ -282,7 +266,7 @@ class Web(SecurableObject):
         """Gets the effective permissions that the specified user has within the current application scope.
         :type user_name: str
         """
-        result = ClientResult(BasePermissions())
+        result = ClientResult(self.context, BasePermissions())
         qry = ServiceOperationQuery(self, "GetUserEffectivePermissions", [user_name], None, None, result)
         self.context.add_query(qry)
         return result
@@ -292,7 +276,7 @@ class Web(SecurableObject):
 
         :type permission_mask: BasePermissions
         """
-        result = ClientResult(bool)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "doesUserHavePermissions", permission_mask, None, None, result)
         self.context.add_query(qry)
         return result
@@ -412,8 +396,8 @@ class Web(SecurableObject):
         :return: SharingResult
         """
 
-        picker_result = ClientResult(str)
-        sharing_result = ClientResult(SharingResult(self.context))
+        picker_result = ClientResult(self.context)
+        sharing_result = ClientResult(self.context, SharingResult(self.context))
 
         def _picker_value_resolved(picker_value):
             picker_result.value = picker_value
@@ -438,13 +422,12 @@ class Web(SecurableObject):
 
         :return: SharingResult
         """
-        sharing_result = ClientResult(SharingResult(self.context))
+        result = ClientResult(self.context)
 
         def _web_initialized():
-            sharing_result.value = Web.unshare_object(self.context, self.url)
-
+            result.value = Web.unshare_object(self.context, self.url)
         self.ensure_property("Url", _web_initialized)
-        return sharing_result.value
+        return result.value
 
     @staticmethod
     def get_document_libraries(context, web_full_url):
@@ -513,7 +496,7 @@ class Web(SecurableObject):
         :param office365.sharepoint.client_context.ClientContext context:
         :param str fileUrl:
         """
-        result = ClientResult(None)
+        result = ClientResult(context)
         qry = ServiceOperationQuery(context.web, "GetSharingLinkKind", None, {"fileUrl": fileUrl}, None, result)
         qry.static = True
         context.add_query(qry)

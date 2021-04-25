@@ -21,7 +21,7 @@ class SearchService(BaseEntity):
 
         :param datetime.datetime start_time: The timestamp of the oldest query log entry returned.
         :param str user_name: The name of the user that issued the queries."""
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         payload = {
             "userName": user_name,
             "startTime": start_time.isoformat()
@@ -78,7 +78,7 @@ class SearchService(BaseEntity):
     def search_center_url(self):
         """The operation is used to get the URI address of the search center by using the HTTP protocol
         with the GET method. The operation returns the URI of the of the search center."""
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "searchCenterUrl", None, None, None, result)
         self.context.add_query(qry)
         return result

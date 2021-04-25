@@ -1,9 +1,8 @@
-from office365.runtime.client_object import ClientObject
-from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.base_entity import BaseEntity
 
 
-class FileVersion(ClientObject):
+class FileVersion(BaseEntity):
     """Represents a version of a File object."""
 
     @property
@@ -25,13 +24,6 @@ class FileVersion(ClientObject):
     def checkin_comment(self):
         """Gets a value that specifies the check-in comment."""
         return self.properties.get("CheckInComment", None)
-
-    def delete_object(self):
-        """Deletes the fields."""
-        qry = DeleteEntityQuery(self)
-        self.context.add_query(qry)
-        self.remove_from_parent_collection()
-        return self
 
     def set_property(self, name, value, persist_changes=True):
         super(FileVersion, self).set_property(name, value, persist_changes)

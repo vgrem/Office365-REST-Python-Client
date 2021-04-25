@@ -1,9 +1,9 @@
-from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.lists.list_template import ListTemplate
 
 
-class ListTemplateCollection(ClientObjectCollection):
+class ListTemplateCollection(BaseEntityCollection):
 
     def __init__(self, context, resource_path=None):
         super(ListTemplateCollection, self).__init__(context, ListTemplate, resource_path)

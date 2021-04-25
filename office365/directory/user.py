@@ -142,7 +142,7 @@ class User(DirectoryObject):
         """
         super(User, self).delete_object()
         if permanent_delete:
-            deleted_user = self.context.directory.deletedUsers[self.id]
+            deleted_user = self.context.directory.deleted_users[self.id]
             deleted_user.delete_object()
         return self
 

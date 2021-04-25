@@ -8,11 +8,8 @@ from office365.sharepoint.sharing.userSharingResult import UserSharingResult
 
 class SharingResult(BaseEntity):
 
-    def __init__(self, context):
-        super().__init__(context)
-
     @property
-    def errorMessage(self):
+    def error_message(self):
         return self.properties.get("ErrorMessage", None)
 
     @property
@@ -20,7 +17,7 @@ class SharingResult(BaseEntity):
         return self.properties.get("Name", None)
 
     @property
-    def iconUrl(self):
+    def icon_url(self):
         return self.properties.get("IconUrl", None)
 
     @property
@@ -28,7 +25,7 @@ class SharingResult(BaseEntity):
         return self.properties.get("StatusCode", None)
 
     @property
-    def permissionsPageRelativeUrl(self):
+    def permissions_page_relative_url(self):
         return self.properties.get("PermissionsPageRelativeUrl", None)
 
     @property
@@ -36,10 +33,10 @@ class SharingResult(BaseEntity):
         return self.properties.get("InvitedUsers", ClientValueCollection(SPInvitationCreationResult))
 
     @property
-    def uniquelyPermissionedUsers(self):
+    def uniquely_permissioned_users(self):
         return self.properties.get("UniquelyPermissionedUsers", ClientValueCollection(UserSharingResult))
 
     @property
-    def groupsSharedWith(self):
+    def groups_shared_with(self):
         return self.properties.get("GroupsSharedWith",
                                    GroupCollection(self.context, ResourcePath("GroupsSharedWith", self.resource_path)))

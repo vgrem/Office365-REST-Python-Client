@@ -1,6 +1,8 @@
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
+from office365.sharepoint.sharing.sharePointSharingSettings import SharePointSharingSettings
+from office365.sharepoint.sharing.sharingPermissionInformation import SharingPermissionInformation
 
 
 class ObjectSharingSettings(BaseEntity):
@@ -43,3 +45,15 @@ class ObjectSharingSettings(BaseEntity):
                                    ObjectSharingInformation(self.context,
                                                             ResourcePath("ObjectSharingInformation",
                                                                          self.resource_path)))
+
+    @property
+    def sharepoint_settings(self):
+        return self.properties.get("SharePointSettings",
+                                   SharePointSharingSettings(self.context,
+                                                             ResourcePath("SharePointSettings", self.resource_path)))
+
+    @property
+    def sharing_permissions(self):
+        return self.properties.get("SharingPermissions",
+                                   SharingPermissionInformation(self.context,
+                                                                ResourcePath("SharingPermissions", self.resource_path)))

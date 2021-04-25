@@ -1,4 +1,3 @@
-from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
@@ -8,13 +7,6 @@ from office365.sharepoint.principal.user import User
 
 class RecycleBinItem(BaseEntity):
     """Represents a Recycle Bin item in the Recycle Bin of a site or a site collection."""
-
-    def delete_object(self):
-        """Permanently deletes the Recycle Bin item."""
-        qry = DeleteEntityQuery(self)
-        self.context.add_query(qry)
-        self.remove_from_parent_collection()
-        return self
 
     def restore(self):
         """Restores the Recycle Bin item to its original location."""

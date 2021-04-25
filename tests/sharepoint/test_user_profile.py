@@ -30,22 +30,19 @@ class TestUserProfile(TestCase):
     def test4_get_user_props(self):
         target_user = self.my_client.web.ensure_user(test_user_principal_name).execute_query()
         people_manager = PeopleManager(self.my_client)
-        result = people_manager.get_user_profile_properties(target_user.login_name)
-        self.my_client.execute_query()
+        result = people_manager.get_user_profile_properties(target_user.login_name).execute_query()
         self.assertIsNotNone(result.value)
 
     def test5_get_properties_for(self):
         me = self.my_client.web.current_user.get().execute_query()
         people_manager = PeopleManager(self.my_client)
-        result = people_manager.get_properties_for(me.login_name)
-        self.my_client.execute_query()
+        result = people_manager.get_properties_for(me.login_name).execute_query()
         self.assertIsNotNone(result)
 
     def test6_get_default_document_library(self):
         me = self.my_client.web.current_user.get().execute_query()
         people_manager = PeopleManager(self.my_client)
-        result = people_manager.get_default_document_library(me.login_name)
-        self.my_client.execute_query()
+        result = people_manager.get_default_document_library(me.login_name).execute_query()
         self.assertIsNotNone(result.value)
 
     def test7_get_people_followed_by(self):
@@ -57,10 +54,7 @@ class TestUserProfile(TestCase):
     def test7_start_stop_following(self):
         people_manager = PeopleManager(self.my_client)
         target_user = self.my_client.web.ensure_user(test_user_principal_name).execute_query()
-
-        result = people_manager.ami_following(target_user.login_name)
-        people_manager.execute_query()
-
+        result = people_manager.am_i_following(target_user.login_name).execute_query()
         if result.value:
             people_manager.stop_following(target_user.login_name).execute_query()
         else:
@@ -69,8 +63,7 @@ class TestUserProfile(TestCase):
     def test8_get_followers_for(self):
         people_manager = PeopleManager(self.my_client)
         target_user = self.my_client.web.ensure_user(test_user_principal_name).execute_query()
-        result = people_manager.get_followers_for(target_user.login_name)
-        people_manager.execute_query()
+        result = people_manager.get_followers_for(target_user.login_name).execute_query()
         self.assertIsInstance(result.value, PersonPropertiesCollection)
 
     def test9_get_my_followers(self):

@@ -1,8 +1,8 @@
+from office365.entity_collection import EntityCollection
 from office365.onedrive.columnDefinition import ColumnDefinition
-from office365.runtime.client_object_collection import ClientObjectCollection
 
 
-class ColumnDefinitionCollection(ClientObjectCollection):
+class ColumnDefinitionCollection(EntityCollection):
     """Drive column's collection"""
 
     def __init__(self, context, resource_path=None):

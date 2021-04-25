@@ -5,7 +5,7 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 class GetWebUrlFromPageUrlQuery(ServiceOperationQuery):
 
     def __init__(self, context, page_full_url):
-        result = ClientResult(str)
+        result = ClientResult(context)
         payload = {
             "pageFullUrl": page_full_url
         }

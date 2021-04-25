@@ -1,6 +1,5 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
@@ -37,7 +36,7 @@ class List(SecurableObject):
 
     def recycle(self):
         """Moves the list to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "Recycle", None, None, None, result)
         self.context.add_query(qry)
         return result
@@ -47,7 +46,7 @@ class List(SecurableObject):
 
         :param str viewXml: View xml
         """
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         payload = {
             "viewXml": viewXml
         }
@@ -63,7 +62,7 @@ class List(SecurableObject):
         :param str list_full_url:
         :param RenderListDataParameters parameters:
         """
-        result = ClientResult(None)
+        result = ClientResult(context)
         payload = {
             "listFullUrl": list_full_url,
             "parameters": parameters,
@@ -96,7 +95,7 @@ class List(SecurableObject):
         return result
 
     def get_lookup_field_choices(self, targetFieldName, pagingInfo=None):
-        result = ClientResult(str)
+        result = ClientResult(self.context)
         params = {
             "targetFieldName": targetFieldName,
             "pagingInfo": pagingInfo
@@ -110,7 +109,7 @@ class List(SecurableObject):
 
         :type query: office365.sharepoint.changes.change_log_item_query.ChangeLogItemQuery
         """
-        result = ClientResult(str)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "getListItemChangesSinceToken", None, query, "query", result)
         self.context.add_query(qry)
         return result
@@ -152,7 +151,7 @@ class List(SecurableObject):
         :return: ClientResult
         """
 
-        result = ClientResult(str)
+        result = ClientResult(self.context)
         payload = {
             "sourceUrl": source_url
         }
@@ -205,7 +204,7 @@ class List(SecurableObject):
         :param str page_name:
         :param str page_content:
         """
-        result = ClientResult(File)
+        result = ClientResult(self.context, File(self.context))
 
         def _list_loaded():
             page_url = self.root_folder.serverRelativeUrl + "/" + page_name
@@ -272,16 +271,6 @@ class List(SecurableObject):
         """
         return RelatedFieldCollection(self.context,
                                       ResourcePathServiceOperation("getRelatedFields", [], self.resource_path))
-
-    def delete_object(self):
-        """Deletes the list.
-
-        :rtype: List
-        """
-        qry = DeleteEntityQuery(self)
-        self.context.add_query(qry)
-        self.remove_from_parent_collection()
-        return self
 
     @property
     def enable_folder_creation(self):

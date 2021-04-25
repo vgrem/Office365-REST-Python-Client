@@ -10,13 +10,6 @@ class NavigationNode(BaseEntity):
     manipulating the ordering of the navigation node in a navigation node collection.
     """
 
-    def delete_object(self):
-        """Deletes the navigation node."""
-        qry = DeleteEntityQuery(self)
-        self.context.add_query(qry)
-        self.remove_from_parent_collection()
-        return self
-
     @property
     def children(self):
         """Gets the collection of child nodes of the navigation node."""

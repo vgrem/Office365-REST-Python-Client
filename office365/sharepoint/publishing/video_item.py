@@ -14,7 +14,7 @@ class VideoItem(BaseEntity):
         :type showInfo: bool
         :type makeResponsive: bool
         """
-        return_type = ClientResult(str)
+        return_type = ClientResult(self.context)
         params = {"width": width, "height": height, "autoplay": autoplay,
                   "showInfo": showInfo, "makeResponsive": makeResponsive}
         qry = ServiceOperationQuery(self, "GetVideoEmbedCode", params, None, None, return_type)

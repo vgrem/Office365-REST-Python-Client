@@ -125,7 +125,7 @@ class ClientRuntimeContext(object):
 
     def execute_request_direct(self, request):
         """
-        :type request: RequestOptions
+        :type request: office365.runtime.http.request_options.RequestOptions
         """
         return self.pending_request().execute_request_direct(request)
 

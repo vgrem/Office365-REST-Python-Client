@@ -13,14 +13,14 @@ class PeopleManager(BaseEntity):
     def __init__(self, context):
         super().__init__(context, ResourcePath("SP.UserProfiles.PeopleManager"))
 
-    def ami_following(self, account_name):
+    def am_i_following(self, account_name):
         """
         Checks whether the current user is following the specified user.
 
         :param str account_name:
         :return:
         """
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         params = {"accountName": account_name}
         qry = ServiceOperationQuery(self, "AmIFollowing", params, None, None, result)
         self.context.add_query(qry)
@@ -33,7 +33,7 @@ class PeopleManager(BaseEntity):
         :param str account_name:
         :return:
         """
-        result = ClientResult(PersonPropertiesCollection(self.context))
+        result = ClientResult(self.context, PersonPropertiesCollection(self.context))
         params = {"accountName": account_name}
         qry = ServiceOperationQuery(self, "GetFollowersFor", params, None, None, result)
         self.context.add_query(qry)
@@ -68,7 +68,7 @@ class PeopleManager(BaseEntity):
         :type accountName: str
         :return: dict
         """
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         payload = {"accountName": accountName}
         qry = ServiceOperationQuery(self, "GetUserProfileProperties", payload, None, None, result)
         self.context.add_query(qry)
@@ -96,7 +96,7 @@ class PeopleManager(BaseEntity):
         :param int siteCreationPriority:
         :return:
         """
-        result = ClientResult(str)
+        result = ClientResult(self.context)
         params = {"accountName": accountName,
                   "createSiteIfNotExists": createSiteIfNotExists,
                   "siteCreationPriority": siteCreationPriority}
@@ -104,19 +104,21 @@ class PeopleManager(BaseEntity):
         self.context.add_query(qry)
         return result
 
-    def get_people_followed_by(self, accountName):
+    def get_people_followed_by(self, account_name):
         """
 
-        :type accountName: str
+        :type account_name: str
         :return: PersonPropertiesCollection
         """
         result = PersonPropertiesCollection(self.context)
-        params = {"accountName": accountName}
+        params = {"accountName": account_name}
         qry = ServiceOperationQuery(self, "GetPeopleFollowedBy", params, None, None, result)
         self.context.add_query(qry)
         return result
 
     def get_my_followers(self):
+        """
+        """
         result = PersonPropertiesCollection(self.context)
         qry = ServiceOperationQuery(self, "GetMyFollowers", None, None, None, result)
         self.context.add_query(qry)

@@ -47,7 +47,7 @@ class SitePageService(BaseEntity):
         :param office365.sharepoint.client_context.ClientContext context: Client context
         :param str title: The title of the page.
         """
-        return_type = ClientResult(None)
+        return_type = ClientResult(context)
         svc = SitePageService(context)
         params = {"title": title}
         qry = ServiceOperationQuery(svc, "ComputeFileName", params, None, None, return_type)

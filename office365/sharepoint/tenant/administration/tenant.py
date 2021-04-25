@@ -42,15 +42,18 @@ class Tenant(ClientObject):
         :param list[str] licenses: The list of licenses to check for.
         :return:
         """
-        result = ClientResult(bool)
+        result = ClientResult(self.context)
         params = ClientValueCollection(str, licenses)
         qry = ServiceOperationQuery(self, "CheckTenantLicenses", None, params, "licenses", result)
         self.context.add_query(qry)
         return result
 
-    def get_site_health_status(self, sourceUrl):
-        result = ClientResult(PortalHealthStatus)
-        params = {"sourceUrl": sourceUrl}
+    def get_site_health_status(self, source_url):
+        """
+        :type source_url: str
+        """
+        result = ClientResult(self.context, PortalHealthStatus())
+        params = {"sourceUrl": source_url}
         qry = ServiceOperationQuery(self, "GetSiteHealthStatus", None, params, None, result)
         self.context.add_query(qry)
         return result

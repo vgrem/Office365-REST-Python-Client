@@ -1,5 +1,4 @@
 from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.base_entity import BaseEntity
@@ -61,13 +60,13 @@ class Field(BaseEntity):
         return field
 
     def enable_index(self):
-        result = ClientResult(int)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "enableIndex", None, None, None, result)
         self.context.add_query(qry)
         return result
 
     def disable_index(self):
-        result = ClientResult(int)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "disableIndex", None, None, None, result)
         self.context.add_query(qry)
         return result
@@ -92,13 +91,6 @@ class Field(BaseEntity):
         """Sets the value of the ShowInNewForm property for this fields."""
         qry = ServiceOperationQuery(self, "setShowInNewForm", [flag])
         self.context.add_query(qry)
-        return self
-
-    def delete_object(self):
-        """Deletes the fields."""
-        qry = DeleteEntityQuery(self)
-        self.context.add_query(qry)
-        self.remove_from_parent_collection()
         return self
 
     @property

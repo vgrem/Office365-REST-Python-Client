@@ -120,7 +120,7 @@ class DriveItem(BaseItem):
 
         :type item: office365.graph.onedrive.driveItemUploadableProperties.DriveItemUploadableProperties
         """
-        result = ClientResult(UploadSession())
+        result = ClientResult(self.context, UploadSession())
         qry = ServiceOperationQuery(self,
                                     "createUploadSession",
                                     None,
@@ -157,6 +157,9 @@ class DriveItem(BaseItem):
         return qry.return_type
 
     def download(self, file_object):
+        """
+        :type file_object: typing.IO
+        """
         result = self.get_content()
 
         def _content_downloaded(resp):
@@ -198,7 +201,7 @@ class DriveItem(BaseItem):
         :type name: str
         :type parent_reference: ItemReference or None
         """
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self,
                                     "copy",
                                     None,
@@ -220,7 +223,7 @@ class DriveItem(BaseItem):
         :type parent_reference: ItemReference
         """
 
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self,
                                     "move",
                                     None,
@@ -244,7 +247,7 @@ class DriveItem(BaseItem):
         a whole drive, or files shared with the current user.
 
         :type query_text: str"""
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         qry = SearchQuery(self, query_text, result)
         self.context.add_query(qry)
         return result

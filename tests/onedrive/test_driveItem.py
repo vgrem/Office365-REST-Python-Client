@@ -60,12 +60,16 @@ class TestDriveItem(GraphTestCase):
         target_item = self.__class__.target_file.get().select(["publication"]).execute_query()
         self.assertEqual(target_item.publication.level, 'published')
 
-    # def test6_list_versions(self):
-    #    versions = self.__class__.target_file.versions.get().execute_query()
-    #    self.assertGreater(len(versions), 1)
+    def test6_list_versions(self):
+        versions = self.__class__.target_file.versions.get().execute_query()
+        self.assertGreater(len(versions), 1)
 
-    # def test7_follow(self):
+    #def test7_follow(self):
     #    target_item = self.__class__.target_file.follow().execute_query()
+    #    self.assertIsNotNone(target_item.resource_path)
+
+    #def test8_unfollow(self):
+    #    target_item = self.__class__.target_file.unfollow().execute_query()
     #    self.assertIsNotNone(target_item.resource_path)
 
     def test9_upload_file_session(self):

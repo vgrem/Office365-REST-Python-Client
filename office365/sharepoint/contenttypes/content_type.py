@@ -1,4 +1,3 @@
-from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
@@ -30,13 +29,6 @@ class ContentType(BaseEntity):
         """
         qry = ServiceOperationQuery(self, "Update", [update_children])
         self.context.add_query(qry)
-        return self
-
-    def delete_object(self):
-        """Deletes the content type."""
-        qry = DeleteEntityQuery(self)
-        self.context.add_query(qry)
-        self.remove_from_parent_collection()
         return self
 
     @property

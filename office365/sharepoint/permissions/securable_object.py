@@ -17,7 +17,7 @@ class SecurableObject(BaseEntity):
         role assignment.
         :return: RoleAssignment
         """
-        result = ClientResult(RoleAssignment(self.context))
+        result = ClientResult(self.context, RoleAssignment(self.context))
 
         def _principal_loaded():
             result.value = self.roleAssignments.get_by_principal_id(principal.id)
@@ -99,7 +99,7 @@ class SecurableObject(BaseEntity):
 
         :param str user_name: Specifies the user login name.
         """
-        result = ClientResult(BasePermissions())
+        result = ClientResult(self.context, BasePermissions())
         qry = ServiceOperationQuery(self, "getUserEffectivePermissions", [user_name], None, None, result)
         self.context.add_query(qry)
         return result

@@ -15,7 +15,7 @@ class LogExport(BaseEntity):
         pass
 
     def get_log_types(self):
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "GetLogTypes")
         self.context.add_query(qry)
         return result

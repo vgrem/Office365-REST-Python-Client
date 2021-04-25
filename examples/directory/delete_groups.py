@@ -13,7 +13,7 @@ while len(groups) > 0:
     print("Group deleted.")
     index += 1
 
-deleted_groups = client.directory.deletedGroups.get().execute_query()
+deleted_groups = client.directory.deleted_groups.get().execute_query()
 groups_count = len(deleted_groups)
 index = 0
 while len(deleted_groups) > 0:

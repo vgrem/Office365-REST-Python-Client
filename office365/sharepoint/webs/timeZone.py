@@ -15,7 +15,7 @@ class TimeZone(BaseEntity):
         :param datetime.datetime date: The local date and time value to convert.
         :return:
         """
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "LocalTimeToUTC", [date], None, None, result)
         self.context.add_query(qry)
         return result

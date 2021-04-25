@@ -30,8 +30,7 @@ class TestSPPublishing(SPTestCase):
         self.assertEqual(time_zone.properties.get("Location"), "Moscow, Russia")
 
     def test4_compute_file_name(self):
-        result = SitePageService.compute_file_name(self.client, "Test page")
-        self.client.execute_query()
+        result = SitePageService.compute_file_name(self.client, "Test page").execute_query()
         self.assertIsNotNone(result.value)
 
     def test5_file_picker_tab_options(self):

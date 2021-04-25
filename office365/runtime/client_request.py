@@ -52,6 +52,9 @@ class ClientRequest(object):
         self._current_query = query
 
     def remove_query(self, query):
+        """
+        :type query: office365.runtime.queries.client_query.ClientQuery
+        """
         self._queries.remove(query)
         self._current_query = None
 

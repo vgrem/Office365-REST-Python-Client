@@ -51,7 +51,7 @@ class TeamCollection(EntityCollection):
         grp_properties.mailEnabled = True
         grp_properties.groupTypes = ["Unified"]
         target_group = self.context.groups.add(grp_properties)
-        result = ClientResult(Team(self.context))
+        result = ClientResult(self.context, Team(self.context))
 
         def _group_created(resp):
             result.value = target_group.add_team()

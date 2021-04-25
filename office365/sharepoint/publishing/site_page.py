@@ -57,9 +57,3 @@ class SitePage(SitePageMetadata):
 
     def share_page_preview_by_email(self, message, recipient_emails):
         pass
-
-    def update(self):
-        """Updates the Site page."""
-        qry = UpdateEntityQuery(self)
-        self.context.add_query(qry)
-        return self

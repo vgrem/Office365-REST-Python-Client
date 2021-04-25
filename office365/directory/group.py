@@ -42,7 +42,7 @@ class Group(DirectoryObject):
 
         :type group_ids: list
         """
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "checkMemberGroups", None, group_ids, None, result)
         self.context.add_query(qry)
         return result
@@ -72,7 +72,7 @@ class Group(DirectoryObject):
         """
         super(Group, self).delete_object()
         if permanent_delete:
-            deleted_item = self.context.directory.deletedGroups[self.id]
+            deleted_item = self.context.directory.deleted_groups[self.id]
             deleted_item.delete_object()
         return self
 
@@ -106,7 +106,7 @@ class Group(DirectoryObject):
         return self.properties.get('events', EventCollection(self.context, ResourcePath("events", self.resource_path)))
 
     @property
-    def appRoleAssignments(self):
+    def app_role_assignments(self):
         """Get an event collection or an appRoleAssignments."""
         return self.properties.get('appRoleAssignments',
                                    AppRoleAssignmentCollection(self.context,

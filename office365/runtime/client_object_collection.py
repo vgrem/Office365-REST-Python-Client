@@ -47,6 +47,11 @@ class ClientObjectCollection(ClientObject):
         return client_object
 
     def set_property(self, name, value, persist_changes=False):
+        """
+        :type name: str
+        :type value: any
+        :type persist_changes: bool
+        """
         child_client_object = self.create_typed_object(value)
         self.add_child(child_client_object)
 
@@ -60,7 +65,10 @@ class ClientObjectCollection(ClientObject):
         self._data.append(client_object)
 
     def remove_child(self, client_object):
-        self._data.remove(client_object)
+        """
+        :type client_object: ClientObject
+        """
+        self._data = [item for item in self._data if item != client_object]
 
     def __iter__(self):
         """
@@ -128,7 +136,7 @@ class ClientObjectCollection(ClientObject):
         Gets total items count
         :return: ClientResult
         """
-        result = ClientResult(None)
+        result = ClientResult(self.context)
 
         def _calc_items_count(resp):
             list(iter(self))

@@ -130,9 +130,9 @@ class TestSharePointListItem(SPTestCase):
         self.assertEqual(len(result), self.batch_items_count)
 
     def test_15_delete_multiple_items(self):
-        result = self.target_list.items.get().execute_query()  # get existing items
-        self.assertGreater(len(result), 0)
-        for item in result:
+        items = self.target_list.items.get().execute_query()  # get existing items
+        self.assertGreater(len(items), 0)
+        for item in items:
             item.delete_object()
         self.client.execute_batch()
         result_after = self.target_list.items.get().execute_query()

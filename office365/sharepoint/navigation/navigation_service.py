@@ -20,7 +20,7 @@ class NavigationService(BaseEntity):
             if mapProviderName is not specified.
         :return:
         """
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         params = {"mapProviderName": mapProviderName}
         qry = ServiceOperationQuery(self, "GetPublishingNavigationProviderType", params, None, None, result)
         self.context.add_query(qry)
@@ -33,7 +33,7 @@ class NavigationService(BaseEntity):
         return return_type
 
     def global_nav_enabled(self):
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "GlobalNavEnabled", None, None, None, result)
         self.context.add_query(qry)
         return result

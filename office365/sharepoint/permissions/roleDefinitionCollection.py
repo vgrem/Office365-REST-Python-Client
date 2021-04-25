@@ -1,9 +1,9 @@
-from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.permissions.role_definition import RoleDefinition
 
 
-class RoleDefinitionCollection(ClientObjectCollection):
+class RoleDefinitionCollection(BaseEntityCollection):
 
     def __init__(self, context, resource_path=None):
         super(RoleDefinitionCollection, self).__init__(context, RoleDefinition, resource_path)

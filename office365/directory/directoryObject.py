@@ -1,5 +1,6 @@
 from office365.entity import Entity
 from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 
 
@@ -12,7 +13,7 @@ class DirectoryObject(Entity):
         This function is transitive.
 
         :type security_enabled_only: bool"""
-        result = ClientResult(None)
+        result = ClientResult(self.context, ClientValueCollection(str))
         payload = {
             "securityEnabledOnly": security_enabled_only
         }
@@ -25,7 +26,7 @@ class DirectoryObject(Entity):
         transitive.
 
         :type security_enabled_only: bool"""
-        result = ClientResult(None)
+        result = ClientResult(self.context)
         payload = {
             "securityEnabledOnly": security_enabled_only
         }

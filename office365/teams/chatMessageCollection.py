@@ -1,9 +1,9 @@
-from office365.runtime.client_object_collection import ClientObjectCollection
+from office365.entity_collection import EntityCollection
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.teams.chatMessage import ChatMessage
 
 
-class ChatMessageCollection(ClientObjectCollection):
+class ChatMessageCollection(EntityCollection):
 
     def __init__(self, context, resource_path=None):
         super(ChatMessageCollection, self).__init__(context, ChatMessage, resource_path)

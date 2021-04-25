@@ -8,26 +8,13 @@ from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 class Permission(Entity):
     """The Permission resource provides information about a sharing permission granted for a DriveItem resource."""
 
-    def update(self):
-        """Updates the Permission entity."""
-        qry = UpdateEntityQuery(self)
-        self.context.add_query(qry)
-        return self
-
-    def delete_object(self):
-        """Deletes the Permission entity."""
-        qry = DeleteEntityQuery(self)
-        self.context.add_query(qry)
-        self.remove_from_parent_collection()
-        return self
-
     @property
     def invitation(self):
         """For user type permissions, the details of the users & applications for this permission."""
         return self.properties.get('invitation', SharingInvitation())
 
     @property
-    def grantedTo(self):
+    def granted_to(self):
         """For user type permissions, the details of the users & applications for this permission."""
         return self.properties.get('grantedTo', IdentitySet())
 
@@ -37,7 +24,7 @@ class Permission(Entity):
         return self.properties.get('roles', [])
 
     @property
-    def shareId(self):
+    def share_id(self):
         """A unique token that can be used to access this shared item via the shares API. Read-only.
 
         :rtype: str
@@ -45,7 +32,7 @@ class Permission(Entity):
         return self.properties.get('shareId', None)
 
     @property
-    def hasPassword(self):
+    def has_password(self):
         """This indicates whether password is set for this permission, it's only showing in response.
         Optional and Read-only and for OneDrive Personal only.
 

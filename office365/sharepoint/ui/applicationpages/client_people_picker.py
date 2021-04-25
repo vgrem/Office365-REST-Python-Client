@@ -72,7 +72,7 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
         :type hierarchyNodeID: str
         :type entityTypes: str
         """
-        result = ClientResult(str)
+        result = ClientResult(context)
         payload = {
             "searchPattern": searchPattern,
             "providerID": providerID,
@@ -96,7 +96,7 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
         :param office365.sharepoint.client_context.ClientContext context:
 
         """
-        result = ClientResult(str)
+        result = ClientResult(context)
         svc = ClientPeoplePickerWebServiceInterface(context)
         qry = ServiceOperationQuery(svc, "ClientPeoplePickerResolveUser", None, query_params, "queryParams", result)
         qry.static = True
@@ -118,7 +118,7 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
         :param office365.sharepoint.ui.applicationpages.picker_entity_types.PickerEntityInformationRequest request:
 
         """
-        result = ClientResult(PickerEntityInformation)
+        result = ClientResult(context, PickerEntityInformation(context))
         svc = ClientPeoplePickerWebServiceInterface(context)
         qry = ServiceOperationQuery(svc, "GetPickerEntityInformation",
                                     None,

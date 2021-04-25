@@ -17,7 +17,7 @@ class Utility(BaseEntity):
 
         :type context: office365.sharepoint.client_context.ClientContext
         """
-        result = ClientResult(str)
+        result = ClientResult(context)
         utility = Utility(context)
         qry = ServiceOperationQuery(utility, "GetCurrentUserEmailAddresses", None, None, None, result)
         qry.static = True
@@ -29,7 +29,7 @@ class Utility(BaseEntity):
         """
         :type context: office365.sharepoint.client_context.ClientContext
         """
-        result = ClientResult(ClientValueCollection(str))
+        result = ClientResult(context, ClientValueCollection(str))
         utility = Utility(context)
         qry = ServiceOperationQuery(utility, "GetUserPermissionLevels", None, None, None, result)
         qry.static = True
@@ -46,7 +46,7 @@ class Utility(BaseEntity):
         :type groupName: str or None
         :type context: office365.sharepoint.client_context.ClientContext
         """
-        result = ClientResult(ClientValueCollection(str))
+        result = ClientResult(context, ClientValueCollection(str))
         utility = Utility(context)
         params = {
             "input": s_input,

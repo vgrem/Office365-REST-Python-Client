@@ -29,8 +29,7 @@ class TestGraphGroup(GraphTestCase):
         except ClientRequestException as e:
             if e.code == 'Directory_QuotaExceeded':
                 self.directory_quota_exceeded = True
-                result = self.client.me.get_member_groups()
-                self.client.execute_query()
+                result = self.client.me.get_member_groups().execute_query()
                 if result.value:
                     self.assertIsNotNone(result.value)
                     filter_expr = "displayName eq '{0}'".format(result.value[0])

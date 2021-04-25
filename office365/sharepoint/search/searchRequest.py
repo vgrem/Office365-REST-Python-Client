@@ -4,6 +4,7 @@ from office365.runtime.client_value import ClientValue
 class SearchRequest(ClientValue):
 
     def __init__(self, query_text, **kwargs):
+        super().__init__()
         self.Querytext = query_text
         self.ClientType = None
         self.CollapseSpecification = None

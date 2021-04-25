@@ -30,6 +30,10 @@ class ODataRequest(ClientRequest):
         return self._json_format
 
     def execute_request_direct(self, request):
+        """
+
+        :type request: office365.runtime.http.request_options.RequestOptions
+        """
         self.ensure_media_type(request)
         return super(ODataRequest, self).execute_request_direct(request)
 
@@ -68,28 +72,40 @@ class ODataRequest(ClientRequest):
         if response.headers.get('Content-Type', '').lower().split(';')[0] != 'application/json':
             if isinstance(result_object, ClientResult):
                 result_object.value = response.content
-            return
+        else:
+            if isinstance(qry, ServiceOperationQuery):
+                self.json_format.function_tag_name = qry.method_name
+            else:
+                self.json_format.function_tag_name = None
 
-        self.map_json(response.json(), result_object, self.json_format)
+            if isinstance(result_object, ClientResult):
+                if isinstance(result_object.value, ClientValue) or isinstance(result_object.value, ClientObject):
+                    result_object = result_object.value
+            self.map_json(response.json(), result_object, self.json_format)
 
     def map_json(self, json_payload, result_object, json_format=None):
-        qry = self.current_query
-        if isinstance(qry, ServiceOperationQuery):
-            self.json_format.function_tag_name = qry.method_name
-        else:
-            self.json_format.function_tag_name = None
-
+        """
+        :type json_payload: any
+        :type result_object: ClientValue or ClientResult  or ClientObject
+        :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat
+        """
         if json_format is None:
             json_format = self.json_format
 
         if json_payload and result_object is not None:
-            for k, v in self._get_property(json_payload, json_format):
-                if isinstance(result_object, ClientObjectCollection) and k == json_format.collection_next_tag_name:
+            for k, v in self._next_property(json_payload, json_format):
+                if isinstance(result_object, ClientResult):
+                    result_object.value = v
+                elif isinstance(result_object, ClientObjectCollection) and k == json_format.collection_next_tag_name:
                     result_object.next_request_url = v
                 else:
                     result_object.set_property(k, v, False)
 
-    def _get_property(self, json, data_format):
+    def _next_property(self, json, data_format):
+        """
+        :type json: any
+        :type data_format: office365.runtime.odata.odata_json_format.ODataJsonFormat
+        """
         if isinstance(data_format, JsonLightFormat):
             json = json.get(data_format.security_tag_name, json)
             json = json.get(data_format.function_tag_name, json)
@@ -105,7 +121,7 @@ class ODataRequest(ClientRequest):
             if isinstance(json, list):
                 for index, item in enumerate(json):
                     if isinstance(item, dict):
-                        item = {k: v for k, v in self._get_property(item, data_format)}
+                        item = {k: v for k, v in self._next_property(item, data_format)}
                     yield index, item
             else:
                 for name, value in json.items():
@@ -116,7 +132,7 @@ class ODataRequest(ClientRequest):
 
                     if is_valid:
                         if isinstance(value, dict):
-                            value = {k: v for k, v in self._get_property(value, data_format)}
+                            value = {k: v for k, v in self._next_property(value, data_format)}
                         yield name, value
 
     def _normalize_payload(self, value):

@@ -27,7 +27,7 @@ class Site(BaseEntity):
         return client.site
 
     def is_valid_home_site(self):
-        result = ClientResult(None)
+        result = ClientResult(self.context)
 
         def _site_loaded():
             SPHSite.is_valid_home_site(self.context, self.url, result)
@@ -36,7 +36,7 @@ class Site(BaseEntity):
         return result
 
     def set_as_home_site(self):
-        result = ClientResult(None)
+        result = ClientResult(self.context)
 
         def _site_loaded():
             self.result = SPHSite.set_as_home_site(self.context, self.url, result)
@@ -112,7 +112,7 @@ class Site(BaseEntity):
         :type site_id: str
         :type stop_redirect: bool
         """
-        result = ClientResult(str)
+        result = ClientResult(context)
         payload = {
             "id": site_id,
             "stopRedirect": stop_redirect
@@ -132,7 +132,7 @@ class Site(BaseEntity):
         :type context: office365.sharepoint.client_context.ClientContext
         :type url: str
         """
-        result = ClientResult(bool)
+        result = ClientResult(context)
         payload = {
             "url": url
         }

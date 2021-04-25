@@ -22,10 +22,9 @@ class TestCommunicationSite(TestCase):
         current_user = self.client.web.current_user.get().execute_query()
         site_url = "{0}sites/{1}".format(test_site_url, uuid.uuid4().hex)
         request = SPSiteCreationRequest("CommSite123", site_url, current_user.user_principal_name)
-        response = self.site_manager.create(request)
-        self.client.execute_query()
-        self.assertIsNotNone(response.SiteStatus)
-        self.__class__.site_response = response
+        result = self.site_manager.create(request).execute_query()
+        self.assertIsNotNone(result.value.SiteStatus)
+        self.__class__.site_response = result.value
 
     def test2_get_site_status(self):
         response = self.site_manager.get_status(self.__class__.site_response.SiteUrl)

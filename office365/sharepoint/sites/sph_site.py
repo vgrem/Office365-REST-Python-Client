@@ -20,7 +20,7 @@ class SPHSite(BaseEntity):
         """
 
         if return_value is None:
-            return_value = ClientResult(None)
+            return_value = ClientResult(context)
         sph = SPHSite(context)
         params = {"siteUrl": site_url}
         qry = ServiceOperationQuery(sph, "IsValidHomeSite", params, None, None, return_value)
@@ -38,7 +38,7 @@ class SPHSite(BaseEntity):
         """
 
         if return_value is None:
-            return_value = ClientResult(None)
+            return_value = ClientResult(context)
         sph = SPHSite(context)
         params = {"siteUrl": site_url}
         qry = ServiceOperationQuery(sph, "SetSPHSite", params, None, None, return_value)

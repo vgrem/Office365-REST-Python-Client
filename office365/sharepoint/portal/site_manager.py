@@ -1,3 +1,4 @@
+from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
@@ -12,10 +13,10 @@ class SPSiteManager(BaseEntity):
 
     def create(self, request):
         """Create a modern site"""
-        response = SPSiteCreationResponse()
-        qry = ServiceOperationQuery(self, "Create", None, request, "request", response)
+        result = ClientResult(self.context, SPSiteCreationResponse())
+        qry = ServiceOperationQuery(self, "Create", None, request, "request", result)
         self.context.add_query(qry)
-        return response
+        return result
 
     def delete(self, site_id):
         """Deletes a SharePoint site"""

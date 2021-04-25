@@ -50,7 +50,7 @@ class TestSharePointSharing(TestCase):
         result = target_file_item.unshare()
         self.client.execute_query()
         self.assertIsInstance(result, SharingResult)
-        self.assertIsNone(result.errorMessage)
+        self.assertIsNone(result.error_message)
 
     def test6_share_web(self):
         result = self.client.web.share(self.target_user.user_principal_name)
