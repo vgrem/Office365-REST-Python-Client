@@ -249,6 +249,17 @@ class Web(SecurableObject):
             ResourcePathServiceOperation("getFileByServerRelativeUrl", [url], self.resource_path)
         )
 
+    def get_file_by_server_relative_path(self, decoded_url):
+        """Returns the file object located at the specified server-relative path.
+        Prefer this method over get_folder_by_server_relative_url since it supports % and # symbols in names
+
+        :type decoded_url: str
+        """
+        return File(
+            self.context,
+            ResourcePathServiceOperation("getFileByServerRelativePath", {"DecodedUrl": decoded_url}, self.resource_path)
+        )
+
     def get_folder_by_server_relative_url(self, url):
         """Returns the folder object located at the specified server-relative URL.
         :type url: str
@@ -256,6 +267,19 @@ class Web(SecurableObject):
         return Folder(
             self.context,
             ResourcePathServiceOperation("getFolderByServerRelativeUrl", [url], self.resource_path)
+        )
+
+    def get_folder_by_server_relative_path(self, decoded_url):
+        """Returns the folder object located at the specified server-relative URL.
+        Prefer this method over get_folder_by_server_relative_url since it supports % and # symbols
+        Details: https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/supporting-and-in-file-and-folder-with-the-resourcepath-api
+
+        :type decoded_url: str
+        """
+        params = {"DecodedUrl": decoded_url}
+        return File(
+            self.context,
+            ResourcePathServiceOperation("getFolderByServerRelativePath", params, self.resource_path)
         )
 
     def ensure_folder_path(self, path):

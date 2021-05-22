@@ -270,7 +270,7 @@ class File(AbstractFile):
         :type server_relative_url: str
         :type content: str
         """
-        url = r"{0}web/getFileByServerRelativeUrl('{1}')/\$value".format(
+        url = r"{0}web/getFileByServerRelativePath(DecodedUrl='{1}')/\$value".format(
             ctx.service_root_url(), server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Post
@@ -288,7 +288,8 @@ class File(AbstractFile):
         :type server_relative_url: str
         :return Response
         """
-        url = r"{0}web/getfilebyserverrelativeurl('{1}')/\$value".format(ctx.service_root_url(), server_relative_url)
+        url = r"{0}web/getFileByServerRelativePath(DecodedUrl='{1}')/\$value".format(ctx.service_root_url(),
+                                                                                     server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Get
         response = ctx.execute_request_direct(request)

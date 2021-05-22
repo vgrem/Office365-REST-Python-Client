@@ -3,7 +3,7 @@ from office365.graph_client import GraphClient
 
 client = GraphClient(acquire_token_by_username_password)
 
-groups = client.groups.get().top(100).execute_query()
+groups = client.groups.get().top(500).execute_query()
 deletedCount = 0
 groups_count = len(groups)
 while len(groups) > 0:

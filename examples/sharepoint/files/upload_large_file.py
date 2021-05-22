@@ -1,11 +1,11 @@
 import os
 
 from office365.sharepoint.client_context import ClientContext
-from tests import test_site_url, test_user_credentials
+from tests import test_site_url, test_user_credentials, test_team_site_url
 
-ctx = ClientContext(test_site_url).with_credentials(test_user_credentials)
+ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
 
-target_url = "/Shared Documents"
+target_url = "/sites/team/Shared Documents"
 target_folder = ctx.web.get_folder_by_server_relative_url(target_url)
 size_chunk = 1000000
 local_path = "../../../tests/data/big_buck_bunny.mp4"
