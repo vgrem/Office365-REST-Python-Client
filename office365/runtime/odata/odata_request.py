@@ -3,11 +3,9 @@ from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_request import ClientRequest
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value import ClientValue
-from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.json_light_format import JsonLightFormat
-from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
@@ -37,19 +35,22 @@ class ODataRequest(ClientRequest):
         self.ensure_media_type(request)
         return super(ODataRequest, self).execute_request_direct(request)
 
-    def build_request(self):
-        qry = self.current_query
-        action_url = qry.build_url()
+    def build_request(self, query):
+        """
+
+        :type query: office365.runtime.queries.client_query.ClientQuery
+        """
+        action_url = query.build_url()
         request = RequestOptions(action_url)
         self.ensure_media_type(request)
         # set method
         request.method = HttpMethod.Get
-        if isinstance(qry, DeleteEntityQuery):
+        if isinstance(query, DeleteEntityQuery):
             request.method = HttpMethod.Post
-        elif isinstance(qry, (CreateEntityQuery, UpdateEntityQuery, ServiceOperationQuery)):
+        elif isinstance(query, (CreateEntityQuery, UpdateEntityQuery, ServiceOperationQuery)):
             request.method = HttpMethod.Post
-            if qry.parameter_type is not None:
-                request.data = self._normalize_payload(qry.parameter_type)
+            if query.parameter_type is not None:
+                request.data = self._normalize_payload(query)
         return request
 
     def ensure_media_type(self, request):
@@ -60,46 +61,46 @@ class ODataRequest(ClientRequest):
         request.ensure_header('Content-Type', media_type)
         request.ensure_header('Accept', media_type)
 
-    def process_response(self, response):
+    def process_response(self, response, query):
         """
         :type response: requests.Response
+        :type query: office365.runtime.queries.client_query.ClientQuery
         """
-        qry = self.current_query
-        result_object = qry.return_type
-        if isinstance(result_object, ClientObject):
-            result_object.clear()
+        return_type = query.return_type
+        if isinstance(return_type, ClientObject):
+            return_type.clear()
 
         if response.headers.get('Content-Type', '').lower().split(';')[0] != 'application/json':
-            if isinstance(result_object, ClientResult):
-                result_object.value = response.content
+            if isinstance(return_type, ClientResult):
+                return_type.value = response.content
         else:
-            if isinstance(qry, ServiceOperationQuery):
-                self.json_format.function_tag_name = qry.method_name
+            if isinstance(query, ServiceOperationQuery):
+                self.json_format.function_tag_name = query.method_name
             else:
                 self.json_format.function_tag_name = None
 
-            if isinstance(result_object, ClientResult):
-                if isinstance(result_object.value, ClientValue) or isinstance(result_object.value, ClientObject):
-                    result_object = result_object.value
-            self.map_json(response.json(), result_object, self.json_format)
+            if isinstance(return_type, ClientResult):
+                if isinstance(return_type.value, ClientValue) or isinstance(return_type.value, ClientObject):
+                    return_type = return_type.value
+            self.map_json(response.json(), return_type, self.json_format)
 
-    def map_json(self, json_payload, result_object, json_format=None):
+    def map_json(self, json, return_type, json_format=None):
         """
-        :type json_payload: any
-        :type result_object: ClientValue or ClientResult  or ClientObject
+        :type json: any
+        :type return_type: ClientValue or ClientResult  or ClientObject
         :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat
         """
         if json_format is None:
             json_format = self.json_format
 
-        if json_payload and result_object is not None:
-            for k, v in self._next_property(json_payload, json_format):
-                if isinstance(result_object, ClientResult):
-                    result_object.value = v
-                elif isinstance(result_object, ClientObjectCollection) and k == json_format.collection_next_tag_name:
-                    result_object.next_request_url = v
+        if json and return_type is not None:
+            for k, v in self._next_property(json, json_format):
+                if isinstance(return_type, ClientResult):
+                    return_type.value = v
+                elif isinstance(return_type, ClientObjectCollection) and k == json_format.collection_next_tag_name:
+                    return_type.next_request_url = v
                 else:
-                    result_object.set_property(k, v, False)
+                    return_type.set_property(k, v, False)
 
     def _next_property(self, json, data_format):
         """
@@ -135,37 +136,23 @@ class ODataRequest(ClientRequest):
                             value = {k: v for k, v in self._next_property(value, data_format)}
                         yield name, value
 
-    def _normalize_payload(self, value):
+    def _normalize_payload(self, query):
         """
         Normalizes OData request payload
 
-        :type value: ClientValue or ClientResult  or ClientObject
+        :type query: office365.runtime.queries.client_query.ClientQuery
         :rtype: dict
         """
-        qry = self.current_query
-        if isinstance(value, ClientValueCollection):
-            if isinstance(self._json_format,
-                          JsonLightFormat) and self._json_format.metadata == ODataMetadataLevel.Verbose:
-                value = {"results": value.to_json()}
-            else:
-                json = value.to_json()
-                for i, v in enumerate(json):
-                    json[i] = self._normalize_payload(v)
-                return json
-        elif isinstance(value, ClientObject) or isinstance(value, ClientValue):
-            json = value.to_json()
-            for k, v in json.items():
-                json[k] = self._normalize_payload(v)
-
-            if isinstance(self._json_format,
-                          JsonLightFormat) and self._json_format.metadata == ODataMetadataLevel.Verbose:
-                json[self._json_format.metadata_type_tag_name] = {'type': value.entity_type_name}
-
-            if isinstance(qry,
-                          ServiceOperationQuery) and qry.parameter_name is not None:
-                json = {qry.parameter_name: json}
+        if isinstance(query.parameter_type, ClientObject) or isinstance(query.parameter_type, ClientValue):
+            json = query.parameter_type.to_json(self._json_format)
+            if isinstance(query, ServiceOperationQuery) and query.parameter_name is not None:
+                return {query.parameter_name: json}
             return json
-        elif isinstance(value, dict):
-            for k, v in value.items():
-                value[k] = self._normalize_payload(v)
-        return value
+        elif isinstance(query.parameter_type, dict):
+            json = query.parameter_type
+            for k, v in json.items():
+                if isinstance(v, ClientObject) or isinstance(v, ClientValue):
+                    json[k] = v.to_json(self._json_format)
+            return json
+        else:
+            return query.parameter_type

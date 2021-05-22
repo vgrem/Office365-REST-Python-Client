@@ -303,7 +303,7 @@ where
 def download_files(remote_folder, local_path):
     drive_items = remote_folder.children.get().execute_query()
     for drive_item in drive_items:
-        if not drive_item.file.is_server_object_null:  # is file?
+        if drive_item.file is not None:  # is file?
             # download file content
             with open(os.path.join(local_path, drive_item.name), 'wb') as local_file:
                 drive_item.download(local_file).execute_query()

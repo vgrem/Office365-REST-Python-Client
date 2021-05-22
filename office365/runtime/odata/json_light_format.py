@@ -12,8 +12,13 @@ class JsonLightFormat(ODataJsonFormat):
             self.collection_tag_name = "results"
             self.collection_next_tag_name = "__next"
             self.metadata_type_tag_name = "__metadata"
+            self.binding_parameter_tag_name = None
         else:
             self.collection_next_tag_name = "value"
 
     def get_media_type(self):
         return 'application/json;odata={0}'.format(self.metadata)
+
+    @property
+    def is_verbose(self):
+        return self.metadata == ODataMetadataLevel.Verbose

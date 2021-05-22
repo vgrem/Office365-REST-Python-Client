@@ -66,8 +66,7 @@ class TestSharePointClient(TestCase):
         client = ClientContext(test_site_url).with_credentials(test_user_credentials)
         web = client.web
         new_web_title = create_unique_name("Site")
-        web.set_property("Title", new_web_title)
-        web.update()
+        web.set_property("Title", new_web_title).update()
         client.execute_batch()
 
         updated_web = client.web.get().execute_query()
@@ -77,8 +76,7 @@ class TestSharePointClient(TestCase):
         client = ClientContext(test_site_url).with_credentials(test_user_credentials)
         list_item = client.web.get_file_by_server_relative_url("/SitePages/Home.aspx").listItemAllFields
         new_title = create_unique_name("Page")
-        list_item.set_property("Title", new_title)
-        list_item.update()
+        list_item.set_property("Title", new_title).update()
         client.execute_batch()
 
         updated_list_item = client.web.get_file_by_server_relative_url("/SitePages/Home.aspx").listItemAllFields

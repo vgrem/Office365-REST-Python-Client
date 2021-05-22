@@ -13,6 +13,7 @@ from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
 from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
 from office365.sharepoint.sharing.sharing_result import SharingResult
+from office365.sharepoint.taxonomy.taxonomy_field_value import TaxonomyFieldValueCollection
 from office365.sharepoint.ui.applicationpages.client_people_picker import (
     ClientPeoplePickerWebServiceInterface, ClientPeoplePickerQueryParameters
 )
@@ -21,6 +22,17 @@ from office365.sharepoint.ui.applicationpages.client_people_picker import (
 class ListItem(SecurableObject):
     """An individual entry within a SharePoint list. Each list item has a schema that maps to fields in the list
     that contains the item, depending on the content type of the item."""
+
+    def __init__(self, context, resource_path=None, parent_list=None):
+        """
+
+        :type context: office365.sharepoint.client_context.ClientContext
+        :type resource_path: ResourcePath or None
+        :type parent_list: office365.sharepoint.lists.list.List or None
+        """
+        super().__init__(context, resource_path)
+        if parent_list is not None:
+            self.properties["ParentList"] = parent_list
 
     def get_wopi_frame_url(self, action):
         """
@@ -275,10 +287,31 @@ class ListItem(SecurableObject):
         elif name == "LikedByInformation":
             return self.liked_by_information
         else:
-            return super(ListItem, self).get_property(name)
+            value = super(ListItem, self).get_property(name)
+            if self.is_property_available(name[:-2]):
+                lookup_value = super(ListItem, self).get_property(name[:-2])
+                if isinstance(lookup_value, FieldMultiLookupValue):
+                    return ClientValueCollection(int, [v.LookupId for v in lookup_value])
+                elif isinstance(lookup_value, FieldLookupValue):
+                    return lookup_value.LookupId
+            return value
 
     def set_property(self, name, value, persist_changes=True):
-        super(ListItem, self).set_property(name, value, persist_changes)
+
+        if persist_changes:
+            if isinstance(value, TaxonomyFieldValueCollection):
+                self._set_taxonomy_field_value(name, value)
+            elif isinstance(value, FieldMultiLookupValue):
+                collection = ClientValueCollection(int, [v.LookupId for v in value])
+                super(ListItem, self).set_property(f"{name}Id", collection)
+                super(ListItem, self).set_property(name, value, False)
+            elif isinstance(value, FieldLookupValue):
+                super(ListItem, self).set_property(f"{name}Id", value.LookupId)
+                super(ListItem, self).set_property(name, value, False)
+            else:
+                super(ListItem, self).set_property(name, value, persist_changes)
+        else:
+            super(ListItem, self).set_property(name, value, persist_changes)
 
         # fallback: create a new resource path
         if self._resource_path is None:
@@ -286,6 +319,19 @@ class ListItem(SecurableObject):
                 self._resource_path = ResourcePathServiceOperation(
                     "getItemById", [value], self._parent_collection.resource_path.parent)
         return self
+
+    def _set_taxonomy_field_value(self, name, value):
+        tax_field = self.parent_list.fields.get_by_internal_name_or_title(name)
+
+        def _tax_field_loaded():
+            tax_text_field = self.parent_list.fields.get_by_id(tax_field.properties["TextField"])
+
+            def _tax_text_field_loaded():
+                self.set_property(tax_text_field.properties["StaticName"], str(value)).update()
+
+            tax_text_field.ensure_property("StaticName", _tax_text_field_loaded)
+
+        tax_field.ensure_property("TextField", _tax_field_loaded)
 
     def ensure_type_name(self, target_list):
         """
@@ -299,17 +345,3 @@ class ListItem(SecurableObject):
 
         if not self._entity_type_name:
             target_list.ensure_property("ListItemEntityTypeFullName", _init_item_type)
-
-    def to_json(self):
-        payload_orig = super(ListItem, self).to_json()
-        payload = {}
-        for k, v in payload_orig.items():
-            if isinstance(v, FieldMultiLookupValue):
-                collection = ClientValueCollection(int)
-                [collection.add(lv.LookupId) for lv in v]
-                payload["{name}Id".format(name=k)] = collection
-            elif isinstance(v, FieldLookupValue):
-                payload["{name}Id".format(name=k)] = v.LookupId
-            else:
-                payload[k] = v
-        return payload

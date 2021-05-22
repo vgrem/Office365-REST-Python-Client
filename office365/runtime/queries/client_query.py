@@ -23,14 +23,11 @@ class ClientQuery(object):
         return self._binding_type.resource_url
 
     def build_request(self):
-        self.context.add_query(self)
-        request = self.context.build_request()
-        self.context.remove_query(self)
-        return request
+        return self.context.build_single_request(self)
 
     def execute_query(self):
         self.context.execute_query()
-        return self._return_type
+        return self.return_type
 
     @property
     def context(self):

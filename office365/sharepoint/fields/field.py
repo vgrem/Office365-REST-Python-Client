@@ -43,7 +43,10 @@ class Field(BaseEntity):
         if isinstance(type_id_or_name, int):
             return field_known_types.get(type_id_or_name, Field)
         else:
-            return TaxonomyField if type_id_or_name == "TaxonomyFieldType" else Field
+            if type_id_or_name == "TaxonomyFieldType" or type_id_or_name == "TaxonomyFieldTypeMulti":
+                return TaxonomyField
+            else:
+                return Field
 
     @staticmethod
     def create_field_from_type(context, field_parameters):

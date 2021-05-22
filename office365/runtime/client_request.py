@@ -18,20 +18,12 @@ class ClientRequest(object):
         """
         self._context = context
         self._queries = []
-        self._current_query = None
         self.beforeExecute = EventHandler()
         self.afterExecute = EventHandler()
 
     @property
     def context(self):
         return self._context
-
-    @property
-    def current_query(self):
-        """
-        :rtype: office365.runtime.queries.client_query.ClientQuery
-        """
-        return self._current_query
 
     @property
     def queries(self):
@@ -49,41 +41,43 @@ class ClientRequest(object):
             self._queries.insert(0, query)
         else:
             self._queries.append(query)
-        self._current_query = query
 
     def remove_query(self, query):
         """
         :type query: office365.runtime.queries.client_query.ClientQuery
         """
         self._queries.remove(query)
-        self._current_query = None
 
     @abstractmethod
-    def build_request(self):
+    def build_request(self, query):
         """
+        :type query: office365.runtime.queries.client_query.ClientQuery
         :rtype: office365.runtime.http.request_options.RequestOptions
         """
         pass
 
     @abstractmethod
-    def process_response(self, response):
+    def process_response(self, response, query):
         """
         :type response: requests.Response
+        :type query: office365.runtime.queries.client_query.ClientQuery
         """
         pass
 
-    def execute_query(self):
-        """Submit a pending request to the server"""
-        for _ in self.next_query():
-            try:
-                request = self.build_request()
-                self.beforeExecute.notify(request)
-                response = self.execute_request_direct(request)
-                response.raise_for_status()
-                self.process_response(response)
-                self.afterExecute.notify(response)
-            except HTTPError as e:
-                raise ClientRequestException(*e.args, response=e.response)
+    def execute_query(self, query):
+        """Submit a pending request to the server
+
+        :type query: office365.runtime.queries.client_query.ClientQuery
+        """
+        try:
+            request = self.build_request(query)
+            self.beforeExecute.notify(request)
+            response = self.execute_request_direct(request)
+            response.raise_for_status()
+            self.process_response(response, query)
+            self.afterExecute.notify(response)
+        except HTTPError as e:
+            raise ClientRequestException(*e.args, response=e.response)
 
     def execute_request_direct(self, request_options):
         """Execute client request
@@ -130,8 +124,7 @@ class ClientRequest(object):
                                   proxies=request_options.proxies)
         return result
 
-    def next_query(self):
+    def __iter__(self):
         while len(self._queries) > 0:
             qry = self._queries.pop(0)
-            self._current_query = qry
             yield qry

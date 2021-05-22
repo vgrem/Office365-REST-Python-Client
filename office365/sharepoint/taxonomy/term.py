@@ -1,5 +1,5 @@
-from office365.runtime.client_object import ClientObject
+from office365.sharepoint.taxonomy.taxonomy_item import TaxonomyItem
 
 
-class Term(ClientObject):
+class Term(TaxonomyItem):
     pass

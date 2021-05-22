@@ -1,4 +1,5 @@
 from office365.runtime.client_value import ClientValue
+from office365.runtime.odata.json_light_format import JsonLightFormat
 
 
 class ClientValueCollection(ClientValue):
@@ -24,8 +25,20 @@ class ClientValueCollection(ClientValue):
     def __len__(self):
         return len(self._data)
 
-    def to_json(self):
-        return self._data
+    def to_json(self, json_format=None):
+        """
+        :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat or None
+        """
+        json_items = [item for item in self._data]
+        for i, v in enumerate(json_items):
+            if isinstance(v, ClientValue):
+                json_items[i] = v.to_json(json_format)
+        if isinstance(json_format, JsonLightFormat) and json_format.is_verbose:
+            json = {json_format.collection_tag_name: json_items,
+                    json_format.metadata_type_tag_name: {'type': self.entity_type_name}}
+
+            return json
+        return json_items
 
     def set_property(self, index, value, persist_changes=False):
         child_value = self._item_type()

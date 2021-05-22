@@ -175,7 +175,7 @@ class List(SecurableObject):
          as shown in ListItemCollection request examples.
 
          :type list_item_creation_information: ListItemCreationInformation or dict"""
-        item = ListItem(self.context)
+        item = ListItem(self.context, None, self)
         if isinstance(list_item_creation_information, dict):
             for k, v in list_item_creation_information.items():
                 item.set_property(k, v, True)

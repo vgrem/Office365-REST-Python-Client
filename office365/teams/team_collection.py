@@ -12,8 +12,9 @@ class TeamCollection(EntityCollection):
         super(TeamCollection, self).__init__(context, Team, resource_path)
 
     def __getitem__(self, key):
-        if type(key) == int:
-            return self._data[key]
+        """
+        :rtype: Team
+        """
         return Team(self.context, ResourcePath(key, self.resource_path))
 
     def get(self):
@@ -33,8 +34,9 @@ class TeamCollection(EntityCollection):
         def _process_response(resp):
             for grp in groups:
                 if "Team" in grp.properties["resourceProvisioningOptions"]:
-                    new_team = Team(self.context, ResourcePath(grp.properties["id"], self.resource_path),
-                                    grp.properties)
+                    new_team = Team(self.context, ResourcePath(grp.properties["id"], self.resource_path))
+                    for k, v in grp.properties.items():
+                        new_team.set_property(k, v)
                     self.add_child(new_team)
         self.context.after_execute(_process_response)
         return self

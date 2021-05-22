@@ -1,7 +1,7 @@
 import os
 from os.path import isfile, join
 
-from examples import acquire_token_client_credentials
+from examples import acquire_token_by_client_credentials
 from office365.graph_client import GraphClient
 from tests import load_settings
 
@@ -23,7 +23,7 @@ def upload_files(remote_drive, local_root_path):
 
 
 settings = load_settings()
-client = GraphClient(acquire_token_client_credentials)
+client = GraphClient(acquire_token_by_client_credentials)
 user_name = settings.get('test_alt_account_name')
 target_drive = client.users[user_name].drive  # get target drive
 # import local files into OneDrive

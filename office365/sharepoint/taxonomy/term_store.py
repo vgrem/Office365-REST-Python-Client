@@ -1,11 +1,11 @@
-from office365.runtime.client_object import ClientObject
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
-from office365.sharepoint.taxonomy.termGroupCollection import TermGroupCollection
-from office365.sharepoint.taxonomy.term_collection import TermCollection
+from office365.sharepoint.taxonomy.taxonomy_item import TaxonomyItem, TaxonomyItemCollection
+from office365.sharepoint.taxonomy.term import Term
+from office365.sharepoint.taxonomy.term_group import TermGroup
 
 
-class TermStore(ClientObject):
+class TermStore(TaxonomyItem):
     """Represents a hierarchical or flat set of Term objects known as a 'TermSet'."""
 
     def search_term(self, label, setId, parentTermId=None, languageTag=None):
@@ -17,11 +17,19 @@ class TermStore(ClientObject):
         :param str or None languageTag:
         :return:
         """
-        return_type = TermCollection(self.context)
+        return_type = TaxonomyItemCollection(self.context, Term, self.resource_path)
         # params = {"label": label, "setId": setId, "parentTermId": parentTermId, "languageTag": languageTag}
         params = {"label": label, "setId": setId}
         qry = ServiceOperationQuery(self, "searchTerm", params, None, None, return_type)
         self.context.add_query(qry)
+
+        def _construct_request(request):
+            """
+            :type request: office365.runtime.http.request_options.RequestOptions
+            """
+            pass
+
+        self.context.before_execute(_construct_request)
         return return_type
 
     @property
@@ -55,5 +63,6 @@ class TermStore(ClientObject):
     @property
     def term_groups(self):
         return self.properties.get("termGroups",
-                                   TermGroupCollection(self.context, ResourcePath("termGroups", self.resource_path)))
+                                   TaxonomyItemCollection(self.context, TermGroup,
+                                                          ResourcePath("termGroups", self.resource_path)))
 

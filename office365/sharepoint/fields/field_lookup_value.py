@@ -15,3 +15,7 @@ class FieldLookupValue(ClientValue):
         super().__init__()
         self.LookupId = lookup_id
         self.LookupValue = lookup_value
+
+    @property
+    def entity_type_name(self):
+        return "SP.FieldLookupValue"

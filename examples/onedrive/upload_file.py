@@ -1,10 +1,10 @@
 import os
 
-from examples import acquire_token_client_credentials
+from examples import acquire_token_by_client_credentials
 from office365.graph_client import GraphClient
 from tests import settings
 
-client = GraphClient(acquire_token_client_credentials)
+client = GraphClient(acquire_token_by_client_credentials)
 user_name = settings.get('first_account_name')
 target_drive = client.users[user_name].drive
 

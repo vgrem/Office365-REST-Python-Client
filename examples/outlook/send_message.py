@@ -1,8 +1,8 @@
-from examples import acquire_token_client_credentials
+from examples import acquire_token_by_client_credentials
 from office365.graph_client import GraphClient
 from tests import test_user_principal_name, test_user_principal_name_alt
 
-client = GraphClient(acquire_token_client_credentials)
+client = GraphClient(acquire_token_by_client_credentials)
 message_json = {
     "Message": {
         "Subject": "Meet for lunch?",

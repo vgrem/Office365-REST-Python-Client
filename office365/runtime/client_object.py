@@ -1,6 +1,7 @@
 import copy
 
 from office365.runtime.client_value import ClientValue
+from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_query_options import QueryOptions
 
 
@@ -106,10 +107,7 @@ class ClientObject(object):
             self._properties[name] = value
         return self
 
-    def to_json(self):
-        return dict((k, v) for k, v in self.properties.items() if k in self._changed_properties)
-
-    def ensure_property(self, name, action):
+    def ensure_property(self, name, action=None):
         """
         Ensures if property is loaded
 
@@ -128,14 +126,19 @@ class ClientObject(object):
         names_to_include = [n for n in names if not self.is_property_available(n)]
         if len(names_to_include) > 0:
             qry = self.context.load(self, names_to_include)
-            if callable(action):
-                def _process_query(current_query):
-                    if current_query.id == qry.id:
-                        action()
 
-                self.context.after_execute_query(_process_query)
+            def _process_query(resp):
+                current_query = self.context.current_query
+                if current_query.id == qry.id:
+                    if callable(action):
+                        action()
+                else:
+                    self.context.after_execute(_process_query, True)
+
+            self.context.after_execute(_process_query, True)
         else:
-            action()
+            if callable(action):
+                action()
         return self
 
     def clone_object(self):
@@ -184,3 +187,16 @@ class ClientObject(object):
     @property
     def parent_collection(self):
         return self._parent_collection
+
+    def to_json(self, json_format=None):
+        """
+        :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat or None
+        """
+        json = dict((k, self.get_property(k)) for k in self.properties if k in self._changed_properties)
+        for k, v in json.items():
+            if isinstance(v, ClientObject) or isinstance(v, ClientValue):
+                json[k] = v.to_json(json_format)
+
+        if isinstance(json_format, JsonLightFormat) and json_format.is_verbose and self.entity_type_name is not None:
+            json[json_format.metadata_type_tag_name] = {'type': self.entity_type_name}
+        return json

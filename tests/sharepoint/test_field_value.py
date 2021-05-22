@@ -67,7 +67,7 @@ class TestFieldValue(SPTestCase):
 
     def test4_set_field_multi_lookup_value(self):
         item_to_update = self.__class__.target_item
-        lookup_id = item_to_update.properties['Id']
+        lookup_id = item_to_update.id
         field_value = FieldMultiLookupValue()
         field_value.add(FieldLookupValue(lookup_id))
         updated = item_to_update.set_property(self.multi_lookup_field_name, field_value).update().get().execute_query()

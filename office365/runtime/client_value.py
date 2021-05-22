@@ -1,3 +1,6 @@
+from office365.runtime.odata.json_light_format import JsonLightFormat
+
+
 class ClientValue(object):
     """Represent complex type.
     Complex types consist of a list of properties with no key, and can therefore only exist as properties of a
@@ -21,13 +24,20 @@ class ClientValue(object):
     def get_property(self, k):
         return getattr(self, k)
 
-    def to_json(self):
-        return dict((k, v) for k, v in vars(self).items() if v is not None)
+    def to_json(self, json_format=None):
+        """
+        :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat or None
+        """
+        json = dict((k, v) for k, v in vars(self).items() if v is not None)
+        for n, v in json.items():
+            if isinstance(v, ClientValue):
+                json[n] = v.to_json(json_format)
+
+        if isinstance(json_format, JsonLightFormat) and json_format.is_verbose and self.entity_type_name is not None:
+            json[json_format.metadata_type_tag_name] = {'type': self.entity_type_name}
+
+        return json
 
     @property
     def entity_type_name(self):
         return type(self).__name__
-
-    @property
-    def is_server_object_null(self):
-        return not self.to_json()

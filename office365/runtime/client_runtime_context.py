@@ -11,10 +11,27 @@ class ClientRuntimeContext(object):
         """
         Client runtime context
         """
+        self._current_query = None
+
+    def build_single_request(self, query):
+        """
+
+        :type: office365.runtime.queries.client_query.ClientQuery
+        """
+        self._current_query = query
+        return self.pending_request().build_request(query)
+
+    def build_request(self):
+        if self._current_query is None:
+            self._current_query = next(iter(self.pending_request()))
+        return self.build_single_request(self.current_query)
 
     @property
     def current_query(self):
-        return self.pending_request().current_query
+        """
+        :rtype: office365.runtime.queries.client_query.ClientQuery
+        """
+        return self._current_query
 
     def execute_query_retry(self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None):
         """
@@ -30,10 +47,10 @@ class ClientRuntimeContext(object):
             try:
                 self.execute_query()
                 if callable(success_callback):
-                    success_callback(self.pending_request().current_query.return_type)
+                    success_callback(self.current_query.return_type)
                 break
             except ClientRequestException:
-                self.add_query(self.pending_request().current_query, True)
+                self.add_query(self.current_query, True)
                 sleep(timeout_secs)
                 if callable(failure_callback):
                     failure_callback(retry)
@@ -55,9 +72,6 @@ class ClientRuntimeContext(object):
         :type request: office365.runtime.http.request_options.RequestOptions
         """
         pass
-
-    def build_request(self):
-        return self.pending_request().build_request()
 
     def load(self, client_object, properties_to_retrieve=None):
         """Prepare retrieval query
@@ -91,7 +105,7 @@ class ClientRuntimeContext(object):
         :return: None
         """
         def _prepare_request(request):
-            qry = self.pending_request().current_query
+            qry = self.current_query
             action(qry)
         self.pending_request().beforeExecute += _prepare_request
 
@@ -103,7 +117,7 @@ class ClientRuntimeContext(object):
         :return: None
         """
         def _process_response(response):
-            qry = self.pending_request().current_query
+            qry = self.current_query
             action(qry)
         self.pending_request().afterExecute += _process_response
 
@@ -130,7 +144,9 @@ class ClientRuntimeContext(object):
         return self.pending_request().execute_request_direct(request)
 
     def execute_query(self):
-        self.pending_request().execute_query()
+        for qry in self.pending_request():
+            self._current_query = qry
+            self.pending_request().execute_query(qry)
 
     def add_query(self, query, to_begin=False):
         """

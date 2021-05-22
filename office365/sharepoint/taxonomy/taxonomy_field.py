@@ -13,3 +13,13 @@ class TaxonomyField(FieldLookup):
     def is_anchor_valid(self):
         """Gets a Boolean value that specifies whether the Term object identified by the AnchorId property is valid."""
         return self.properties.get('IsAnchorValid', None)
+
+    @property
+    def text_field(self):
+        """Gets the GUID that identifies the hidden text field in an item."""
+        return self.properties.get('TextField', None)
+
+    @text_field.setter
+    def text_field(self, value):
+        """Sets the GUID that identifies the hidden text field in an item."""
+        self.set_property("TextField", value)

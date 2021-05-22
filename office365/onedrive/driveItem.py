@@ -2,8 +2,9 @@ from office365.actions.search_query import SearchQuery
 from office365.base_item import BaseItem
 from office365.directory.permission import Permission
 from office365.directory.permission_collection import PermissionCollection
+from office365.entity_collection import EntityCollection
 from office365.onedrive.conflictBehavior import ConflictBehavior
-from office365.onedrive.driveItemVersionCollection import DriveItemVersionCollection
+from office365.onedrive.driveItemVersion import DriveItemVersion
 from office365.onedrive.file import File
 from office365.onedrive.file_upload import ResumableFileUpload
 from office365.onedrive.fileSystemInfo import FileSystemInfo
@@ -23,7 +24,7 @@ class DriveItem(BaseItem):
     """The driveItem resource represents a file, folder, or other item stored in a drive. All file system objects in
     OneDrive and SharePoint are returned as driveItem resources """
 
-    def create_link(self, link_type, scope="", expiration_datetime=None, password=None, message=""):
+    def create_link(self, link_type, scope="", expiration_datetime=None, password=None, message=None):
         """
         The createLink action will create a new sharing link if the specified link type doesn't already exist
         for the calling application. If a sharing link of the specified type already exists for the app,
@@ -331,8 +332,8 @@ class DriveItem(BaseItem):
         """The list of previous versions of the item. For more info, see getting previous versions.
         Read-only. Nullable."""
         return self.properties.get('versions',
-                                   DriveItemVersionCollection(self.context, ResourcePath("versions",
-                                                                                         self.resource_path)))
+                                   EntityCollection(self.context, DriveItemVersion,
+                                                    ResourcePath("versions", self.resource_path)))
 
     def set_property(self, name, value, persist_changes=True):
         super(DriveItem, self).set_property(name, value, persist_changes)

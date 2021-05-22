@@ -3,7 +3,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
-from office365.sharepoint.portal.group_creation_params import GroupCreationParams
+from office365.sharepoint.portal.group_creation_params import GroupCreationInformation
 from office365.sharepoint.portal.group_site_info import GroupSiteInfo
 
 
@@ -20,14 +20,7 @@ class GroupSiteManager(ClientObject):
         :param bool is_public:
         :param office365.sharepoint.portal.group_creation_params.GroupCreationParams or None optional_params:
         """
-        if optional_params is None:
-            optional_params = GroupCreationParams()
-        payload = {
-            "displayName": display_name,
-            "alias": alias,
-            "isPublic": is_public,
-            "optionalParams": optional_params
-        }
+        payload = GroupCreationInformation(display_name, alias, is_public, optional_params)
         result = ClientResult(self.context, GroupSiteInfo())
         qry = ServiceOperationQuery(self, "CreateGroupEx", None, payload, None, result)
         self.context.add_query(qry)

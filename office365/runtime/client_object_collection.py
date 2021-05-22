@@ -96,6 +96,9 @@ class ClientObjectCollection(ClientObject):
             next(item_iterator)
         return self._data[index]
 
+    def to_json(self, json_format=None):
+        return [item.to_json(json_format) for item in self._data]
+
     def filter(self, expression):
         """
         Sets OData $filter query option

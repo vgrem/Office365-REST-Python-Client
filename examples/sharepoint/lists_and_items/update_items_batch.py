@@ -7,7 +7,7 @@ ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials
 
 # 1. Load existing list items
 list_tasks = ctx.web.lists.get_by_title("Tasks")
-items = list_tasks.items.get().top(5).execute_query()
+items = list_tasks.items.get().top(50).execute_query()
 # 2. Update list items via Batch mode
 for task_id, item in enumerate(items):
     task_prefix = str(randint(0, 10000))

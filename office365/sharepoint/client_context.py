@@ -10,6 +10,7 @@ from office365.runtime.odata.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_batch_request import ODataBatchRequest
 from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
 from office365.runtime.odata.odata_request import ODataRequest
+from office365.runtime.queries.batch_query import BatchQuery
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.sharepoint.sites.site import Site
@@ -101,14 +102,17 @@ class ClientContext(ClientRuntimeContext):
         """Construct and submit a batch request"""
         batch_request = ODataBatchRequest(self)
 
+        queries = [qry for qry in self.pending_request()]
+        batch_qry = BatchQuery(self, queries)
+
         def _prepare_batch_request(request):
             self.ensure_form_digest(request)
 
         batch_request.beforeExecute += _prepare_batch_request
-        batch_request.execute_query()
+        batch_request.execute_query(batch_qry)
 
-    def build_request(self):
-        request = super(ClientContext, self).build_request()
+    def build_single_request(self, query):
+        request = super(ClientContext, self).build_single_request(query)
         self._build_modification_query(request)
         return request
 
