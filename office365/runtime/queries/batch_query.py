@@ -52,6 +52,9 @@ class BatchQuery(ClientQuery):
 
     @property
     def queries(self):
+        """
+        :rtype: list[ClientQuery]
+        """
         return self._queries
 
     @property

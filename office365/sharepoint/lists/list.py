@@ -337,7 +337,7 @@ class List(SecurableObject):
         """Gets the content types that are associated with the list."""
         return self.properties.get('ContentTypes',
                                    ContentTypeCollection(self.context,
-                                                         ResourcePath("ContentTypes", self.resource_path)))
+                                                         ResourcePath("ContentTypes", self.resource_path), self))
 
     @property
     def user_custom_actions(self):

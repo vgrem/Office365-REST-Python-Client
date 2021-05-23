@@ -9,14 +9,11 @@ from tests import test_team_site_url, test_user_credentials
 
 
 def ensure_list(web, list_properties):
-    lists = web.lists.filter("Title eq '{0}'".format(list_properties.Title))
-    ctx.load(lists)
-    ctx.execute_query()
+    lists = web.lists.filter("Title eq '{0}'".format(list_properties.Title)).get().execute_query()
     if len(lists) == 1:
         return lists[0]
-    target_list = web.lists.add(list_properties)
-    ctx.execute_query()
-    return target_list
+    else:
+        return web.lists.add(list_properties).execute_query()
 
 
 def generate_documents(context):

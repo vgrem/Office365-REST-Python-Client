@@ -1,12 +1,12 @@
 import os
 
-from examples import acquire_token_by_client_credentials
+from examples import acquire_token_by_client_credentials, test_user_principal_name
 from office365.graph_client import GraphClient
-from tests import settings
+
 
 client = GraphClient(acquire_token_by_client_credentials)
-user_name = settings.get('first_account_name')
-target_drive = client.users[user_name].drive
+
+target_drive = client.users[test_user_principal_name].drive
 
 local_path = "../../tests/data/SharePoint User Guide.docx"
 with open(local_path, 'rb') as f:

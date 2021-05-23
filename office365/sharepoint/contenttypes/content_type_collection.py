@@ -8,8 +8,8 @@ from office365.sharepoint.contenttypes.content_type import ContentType
 class ContentTypeCollection(BaseEntityCollection):
     """Content Type resource collection"""
 
-    def __init__(self, context, resource_path=None):
-        super(ContentTypeCollection, self).__init__(context, ContentType, resource_path)
+    def __init__(self, context, resource_path=None, parent=None):
+        super(ContentTypeCollection, self).__init__(context, ContentType, resource_path, parent)
 
     def get_by_id(self, contentTypeId):
         """

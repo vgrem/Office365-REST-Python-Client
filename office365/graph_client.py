@@ -45,6 +45,14 @@ class GraphClient(ClientRuntimeContext):
         self._authority_host_url = "https://login.microsoftonline.com"
         self._acquire_token_callback = acquire_token_callback
 
+    def build_single_request(self, query):
+        """
+        :type: office365.runtime.queries.client_query.ClientQuery
+        """
+        request = super(GraphClient, self).build_single_request(query)
+        self._build_specific_query(request)
+        return request
+
     def execute_batch(self):
         """Construct and submit a batch request"""
         batch_request = ODataV4BatchRequest(self)

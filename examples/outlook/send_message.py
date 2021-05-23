@@ -20,5 +20,5 @@ message_json = {
     },
     "SaveToSentItems": "false"
 }
-target_user = client.users[test_user_principal_name]
-target_user.send_mail(message_json).execute_query()
+client.users[test_user_principal_name].send_mail(message_json).execute_query()
+

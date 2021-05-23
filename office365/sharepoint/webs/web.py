@@ -709,7 +709,7 @@ class Web(SecurableObject):
         """Gets the collection of content types for the Web site."""
         return self.properties.get('ContentTypes',
                                    ContentTypeCollection(self.context,
-                                                         ResourcePath("ContentTypes", self.resource_path)))
+                                                         ResourcePath("ContentTypes", self.resource_path), self))
 
     @property
     def role_definitions(self):

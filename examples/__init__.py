@@ -3,6 +3,9 @@ import msal
 from tests import settings
 
 
+test_user_principal_name = settings.get('users', 'test_user1')
+
+
 def acquire_token_by_client_credentials():
     authority_url = 'https://login.microsoftonline.com/{0}'.format(settings.get('default', 'tenant'))
     app = msal.ConfidentialClientApplication(
