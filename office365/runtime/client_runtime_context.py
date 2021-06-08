@@ -12,6 +12,7 @@ class ClientRuntimeContext(object):
         Client runtime context
         """
         self._current_query = None
+        self._prev_query = None
 
     def build_single_request(self, query):
         """
@@ -50,7 +51,9 @@ class ClientRuntimeContext(object):
                     success_callback(self.current_query.return_type)
                 break
             except ClientRequestException:
-                self.add_query(self.current_query, True)
+                self._prev_query = self.current_query
+                self.add_query(self.current_query)
+                self._prev_query = None
                 sleep(timeout_secs)
                 if callable(failure_callback):
                     failure_callback(retry)
@@ -109,17 +112,25 @@ class ClientRuntimeContext(object):
             action(qry)
         self.pending_request().beforeExecute += _prepare_request
 
-    def after_execute_query(self, action):
+    def execute_after_query(self, query, action):
         """
         Attach an event handler which is triggered after query is submitted to server
 
-        :param (RequestOptions) -> None action:
+        :type query: office365.runtime.queries.client_query.ClientQuery
+        :type action: () -> None
         :return: None
         """
-        def _process_response(response):
-            qry = self.current_query
-            action(qry)
-        self.pending_request().afterExecute += _process_response
+
+        def _process_query(resp):
+            current_query = self.current_query
+            if current_query.id == query.id:
+                self._prev_query = query
+                action()
+                self._prev_query = None
+            else:
+                self.after_execute(_process_query, True)
+
+        self.after_execute(_process_query, True)
 
     def after_execute(self, action, once=True):
         """
@@ -148,14 +159,13 @@ class ClientRuntimeContext(object):
             self._current_query = qry
             self.pending_request().execute_query(qry)
 
-    def add_query(self, query, to_begin=False):
+    def add_query(self, query):
         """
         Adds query to internal queue
 
-        :type to_begin: bool
         :type query: ClientQuery
         """
-        self.pending_request().add_query(query, to_begin)
+        self.pending_request().add_query(query, self._prev_query is not None)
 
     def remove_query(self, query):
         self.pending_request().remove_query(query)

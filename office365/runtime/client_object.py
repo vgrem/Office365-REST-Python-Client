@@ -123,22 +123,16 @@ class ClientObject(object):
         :type action: () -> None
         :type names: str or list[str]
         """
+        def _exec_action():
+            if callable(action):
+                action()
+
         names_to_include = [n for n in names if not self.is_property_available(n)]
         if len(names_to_include) > 0:
             qry = self.context.load(self, names_to_include)
-
-            def _process_query(resp):
-                current_query = self.context.current_query
-                if current_query.id == qry.id:
-                    if callable(action):
-                        action()
-                else:
-                    self.context.after_execute(_process_query, True)
-
-            self.context.after_execute(_process_query, True)
+            self.context.execute_after_query(qry, _exec_action)
         else:
-            if callable(action):
-                action()
+            _exec_action()
         return self
 
     def clone_object(self):

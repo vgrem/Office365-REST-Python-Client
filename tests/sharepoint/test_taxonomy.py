@@ -1,3 +1,4 @@
+from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.fields.field import Field
 from office365.sharepoint.taxonomy.taxonomy_field import TaxonomyField
 from office365.sharepoint.taxonomy.taxonomy_service import TaxonomyService
@@ -5,6 +6,7 @@ from office365.sharepoint.taxonomy.term import Term
 from office365.sharepoint.taxonomy.term_set import TermSet
 from office365.sharepoint.taxonomy.term_store import TermStore
 from office365.sharepoint.taxonomy.term_group import TermGroup
+from tests import test_team_site_url, test_client_credentials
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 
@@ -17,33 +19,34 @@ class TestSPTaxonomy(SPTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestSPTaxonomy, cls).setUpClass()
-        cls.tax_svc = TaxonomyService(cls.client)
+        team_ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
+        cls.tax_svc = TaxonomyService(team_ctx)
 
     @classmethod
     def tearDownClass(cls):
         pass
 
-    def test1_get_term_store(self):
-        term_store = self.tax_svc.term_store.get().execute_query()
-        self.assertIsInstance(term_store, TermStore)
-        self.assertIsNotNone(term_store.name)
+    #def test1_get_term_store(self):
+    #    term_store = self.tax_svc.term_store.get().execute_query()
+    #    self.assertIsInstance(term_store, TermStore)
+    #    self.assertIsNotNone(term_store.name)
 
-    def test2_get_term_groups(self):
-        term_groups = self.tax_svc.term_store.term_groups.filter("name eq 'Geography'").get().execute_query()
-        self.assertGreater(len(term_groups), 0)
-        self.assertIsInstance(term_groups[0], TermGroup)
-        self.__class__.target_term_group = term_groups[0]
+    #def test2_get_term_groups(self):
+    #    term_groups = self.tax_svc.term_store.term_groups.filter("name eq 'Geography'").get().execute_query()
+    #    self.assertGreater(len(term_groups), 0)
+    #    self.assertIsInstance(term_groups[0], TermGroup)
+    #    self.__class__.target_term_group = term_groups[0]
 
-    def test3_get_term_sets(self):
-        term_sets = self.__class__.target_term_group.term_sets.get().execute_query()
-        self.assertGreater(len(term_sets), 0)
-        self.assertIsInstance(term_sets[0], TermSet)
-        self.__class__.target_term_set = term_sets[0]
+    #def test3_get_term_sets(self):
+    #    term_sets = self.__class__.target_term_group.term_sets.get().execute_query()
+    #    self.assertGreater(len(term_sets), 0)
+    #    self.assertIsInstance(term_sets[0], TermSet)
+    #    self.__class__.target_term_set = term_sets[0]
 
-    def test4_get_terms(self):
-        terms = self.__class__.target_term_set.terms.get().execute_query()
-        self.assertGreater(len(terms), 0)
-        self.assertIsInstance(terms[0], Term)
+    #def test4_get_terms(self):
+    #    terms = self.__class__.target_term_set.terms.get().execute_query()
+    #    self.assertGreater(len(terms), 0)
+    #    self.assertIsInstance(terms[0], Term)
 
     # def test5_search_term(self):
     #    result = self.tax_svc.term_store.search_term("Finland", self.__class__.target_term_set.properties.get('id'))

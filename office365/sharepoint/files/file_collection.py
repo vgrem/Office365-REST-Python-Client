@@ -26,7 +26,7 @@ class FileCollection(BaseEntityCollection):
         """Upload a file as multiple chunks
 
         :param str source_path: path where file to upload resides
-        :param int chunk_size: upload chunk size
+        :param int chunk_size: upload chunk size (in bytes)
         :param (long)->None or None chunk_uploaded: uploaded event
         :param chunk_func_args: arguments to pass to chunk_uploaded function
         :return: office365.sharepoint.files.file.File

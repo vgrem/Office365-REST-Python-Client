@@ -18,6 +18,5 @@ def print_upload_progress(offset):
     print("Uploaded '{}' bytes from '{}'...[{}%]".format(offset, file_size, round(offset / file_size * 100, 2)))
 
 
-uploaded_file = target_folder.files.create_upload_session(local_path, size_chunk, print_upload_progress)
-ctx.execute_query()
+uploaded_file = target_folder.files.create_upload_session(local_path, size_chunk, print_upload_progress).execute_query()
 print('File {0} has been uploaded successfully'.format(uploaded_file.serverRelativeUrl))

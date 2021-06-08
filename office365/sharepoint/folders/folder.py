@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
@@ -120,16 +121,15 @@ class Folder(BaseEntity):
         :type reset_author_and_created: bool
         """
 
-        def _build_full_url(rel_url):
-            return self.context.base_url + rel_url
+        target_folder = Folder(self.context)
+        target_folder.set_property("ServerRelativeUrl", new_relative_url)
 
         def _copy_folder():
             opts = MoveCopyOptions(keep_both=keep_both, reset_author_and_created_on_copy=reset_author_and_created)
-            MoveCopyUtil.copy_folder(self.context, _build_full_url(self.serverRelativeUrl),
-                                     _build_full_url(new_relative_url), opts)
-
+            MoveCopyUtil.copy_folder(self.context, self._build_full_url(self.serverRelativeUrl),
+                                     self._build_full_url(new_relative_url), opts)
         self.ensure_property("ServerRelativeUrl", _copy_folder)
-        return self.context.web.get_folder_by_server_relative_url(new_relative_url)
+        return target_folder
 
     def move_to(self, new_relative_url, retain_editor_and_modified=False):
         """Moves the folder with files to the destination URL.
@@ -137,17 +137,16 @@ class Folder(BaseEntity):
         :type new_relative_url: str
         :type retain_editor_and_modified: bool
         """
-
-        def _build_full_url(rel_url):
-            return self.context.base_url + rel_url
+        target_folder = Folder(self.context)
+        target_folder.set_property("ServerRelativeUrl", new_relative_url)
 
         def _move_folder():
-            MoveCopyUtil.move_folder(self.context, _build_full_url(self.serverRelativeUrl),
-                                     _build_full_url(new_relative_url),
+            MoveCopyUtil.move_folder(self.context, self._build_full_url(self.serverRelativeUrl),
+                                     self._build_full_url(new_relative_url),
                                      MoveCopyOptions(retain_editor_and_modified_on_move=retain_editor_and_modified))
 
         self.ensure_property("ServerRelativeUrl", _move_folder)
-        return self.context.web.get_folder_by_server_relative_url(new_relative_url)
+        return target_folder
 
     @property
     def storage_metrics(self):
@@ -262,3 +261,10 @@ class Folder(BaseEntity):
         elif name == "UniqueId":
             self._resource_path = ResourcePathServiceOperation("getFolderById", [value], ResourcePath("Web"))
         return self
+
+    def _build_full_url(self, rel_url):
+        """
+        :type rel_url: str
+        """
+        site_path = urlparse(self.context.base_url).path
+        return self.context.base_url.replace(site_path, "") + rel_url

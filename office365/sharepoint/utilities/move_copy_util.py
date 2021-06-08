@@ -14,17 +14,17 @@ class MoveCopyUtil(BaseEntity):
         :param str destUrl:
         :param office365.sharepoint.client_context.ClientContext context: client context
         """
-        res = ClientResult(context)
+        result = ClientResult(context)
         util = MoveCopyUtil(context)
         payload = {
             "srcUrl": srcUrl,
             "destUrl": destUrl,
             "options": options
         }
-        qry = ServiceOperationQuery(util, "CopyFolder", None, payload, None, res)
+        qry = ServiceOperationQuery(util, "CopyFolder", None, payload, None, result)
         qry.static = True
         context.add_query(qry)
-        return res
+        return result
 
     @staticmethod
     def move_folder(context, srcUrl, destUrl, options):
