@@ -100,9 +100,12 @@ class ClientObject(object):
         if isinstance(prop_type, ClientObject) or isinstance(prop_type, ClientValue) and value is not None:
             if isinstance(value, list):
                 [prop_type.set_property(i, v, persist_changes) for i, v in enumerate(value)]
-            else:
+                self._properties[name] = prop_type
+            elif isinstance(value, dict):
                 [prop_type.set_property(k, v, persist_changes) for k, v in value.items()]
-            self._properties[name] = prop_type
+                self._properties[name] = prop_type
+            else:
+                self._properties[name] = value
         else:
             self._properties[name] = value
         return self

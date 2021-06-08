@@ -10,6 +10,7 @@ from office365.sharepoint.directory.user import User
 from office365.sharepoint.files.file_version_collection import FileVersionCollection
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.webparts.limited_webpart_manager import LimitedWebPartManager
+from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
 class AbstractFile(BaseEntity):
@@ -370,6 +371,13 @@ class File(AbstractFile):
         return self.properties.get("ServerRelativeUrl", None)
 
     @property
+    def server_relative_path(self):
+        """Gets the server-relative Path of the list folder.
+        :rtype: SPResPath or None
+        """
+        return self.properties.get("ServerRelativePath", SPResPath(None))
+
+    @property
     def length(self):
         """Gets the file size.
 
@@ -471,6 +479,9 @@ class File(AbstractFile):
             if name == "ServerRelativeUrl":
                 self._resource_path = ResourcePathServiceOperation(
                     "GetFileByServerRelativeUrl", [value], ResourcePath("Web"))
+            elif name == "ServerRelativePath":
+                self._resource_path = ResourcePathServiceOperation("getFolderByServerRelativePath", [value],
+                                                                   ResourcePath("Web"))
             elif name == "UniqueId":
                 self._resource_path = ResourcePathServiceOperation(
                     "GetFileById", [value], ResourcePath("Web"))

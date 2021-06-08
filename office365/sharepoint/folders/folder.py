@@ -15,6 +15,7 @@ from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.storagemetrics.storage_metrics import StorageMetrics
 from office365.sharepoint.utilities.move_copy_options import MoveCopyOptions
 from office365.sharepoint.utilities.move_copy_util import MoveCopyUtil
+from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
 class Folder(BaseEntity):
@@ -128,7 +129,27 @@ class Folder(BaseEntity):
             opts = MoveCopyOptions(keep_both=keep_both, reset_author_and_created_on_copy=reset_author_and_created)
             MoveCopyUtil.copy_folder(self.context, self._build_full_url(self.serverRelativeUrl),
                                      self._build_full_url(new_relative_url), opts)
+
         self.ensure_property("ServerRelativeUrl", _copy_folder)
+        return target_folder
+
+    def copy_to_by_path(self, new_relative_path, keep_both=False, reset_author_and_created=False):
+        """Copies the folder with files to the destination Path.
+
+        :type new_relative_path: str
+        :type keep_both: bool
+        :type reset_author_and_created: bool
+        """
+
+        target_folder = Folder(self.context)
+        target_folder.set_property("ServerRelativePath", SPResPath(new_relative_path))
+
+        def _copy_folder():
+            opts = MoveCopyOptions(keep_both=keep_both, reset_author_and_created_on_copy=reset_author_and_created)
+            MoveCopyUtil.copy_folder_by_path(self.context, self._build_full_url(self.server_relative_path.DecodedUrl),
+                                             self._build_full_url(new_relative_path), opts)
+
+        self.ensure_property("ServerRelativePath", _copy_folder)
         return target_folder
 
     def move_to(self, new_relative_url, retain_editor_and_modified=False):
@@ -148,6 +169,24 @@ class Folder(BaseEntity):
         self.ensure_property("ServerRelativeUrl", _move_folder)
         return target_folder
 
+    def move_to_by_path(self, new_relative_path, retain_editor_and_modified=False):
+        """Moves the folder with files to the destination Path.
+
+        :type new_relative_path: str
+        :type retain_editor_and_modified: bool
+        """
+        target_folder = Folder(self.context)
+        target_folder.set_property("ServerRelativePath", SPResPath(new_relative_path))
+
+        def _move_folder():
+            MoveCopyUtil.move_folder_by_path(self.context, self._build_full_url(self.server_relative_path.DecodedUrl),
+                                             self._build_full_url(new_relative_path),
+                                             MoveCopyOptions(
+                                                 retain_editor_and_modified_on_move=retain_editor_and_modified))
+
+        self.ensure_property("ServerRelativePath", _move_folder)
+        return target_folder
+
     @property
     def storage_metrics(self):
         return self.properties.get("StorageMetrics",
@@ -162,11 +201,9 @@ class Folder(BaseEntity):
     @property
     def files(self):
         """Get a file collection"""
-        if self.is_property_available('Files'):
-            return self.properties["Files"]
-        else:
-            from office365.sharepoint.files.file_collection import FileCollection
-            return FileCollection(self.context, ResourcePath("Files", self.resource_path))
+        from office365.sharepoint.files.file_collection import FileCollection
+        return self.properties.get("Files",
+                                   FileCollection(self.context, ResourcePath("Files", self.resource_path)))
 
     @property
     def folders(self):
@@ -242,10 +279,18 @@ class Folder(BaseEntity):
         """
         return self.properties.get("ServerRelativeUrl", None)
 
+    @property
+    def server_relative_path(self):
+        """Gets the server-relative Path of the list folder.
+        :rtype: SPResPath or None
+        """
+        return self.properties.get("ServerRelativePath", SPResPath(None))
+
     def get_property(self, name):
         property_mapping = {
             "ListItemAllFields": self.list_item_all_fields,
-            "ParentFolder": self.parent_folder
+            "ParentFolder": self.parent_folder,
+            "ServerRelativePath": self.server_relative_path
         }
         if name in property_mapping:
             return property_mapping[name]
@@ -257,6 +302,9 @@ class Folder(BaseEntity):
         # fallback: create a new resource path
         if name == "ServerRelativeUrl":
             self._resource_path = ResourcePathServiceOperation("getFolderByServerRelativeUrl", [value],
+                                                               ResourcePath("Web"))
+        elif name == "ServerRelativePath":
+            self._resource_path = ResourcePathServiceOperation("getFolderByServerRelativePath", [value],
                                                                ResourcePath("Web"))
         elif name == "UniqueId":
             self._resource_path = ResourcePathServiceOperation("getFolderById", [value], ResourcePath("Web"))

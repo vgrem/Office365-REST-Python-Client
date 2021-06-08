@@ -6,6 +6,7 @@ from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.listitems.caml.caml_query import CamlQuery
 from office365.sharepoint.views.view_field_collection import ViewFieldCollection
+from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
 class View(BaseEntity):
@@ -110,15 +111,31 @@ class View(BaseEntity):
         """Gets a value that specifies the base view identifier of the list view."""
         return self.properties.get('BaseViewId', None)
 
+    @property
+    def server_relative_path(self):
+        """Gets the server-relative Path of the View.
+        :rtype: SPResPath or None
+        """
+        return self.properties.get("ServerRelativePath", SPResPath(None))
+
     def get_property(self, name):
-        if name == "ViewFields":
-            return self.view_fields
-        elif name == "DefaultView":
-            return self.default_view
+        property_mapping = {
+            "ViewFields": self.view_fields,
+            "DefaultView": self.default_view,
+            "ServerRelativePath": self.server_relative_path
+        }
+        if name in property_mapping:
+            return property_mapping[name]
         else:
             return super(View, self).get_property(name)
 
     def set_property(self, name, value, persist_changes=True):
+        """
+
+        :type name: str
+        :type value: any
+        :type persist_changes: bool
+        """
         super(View, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:

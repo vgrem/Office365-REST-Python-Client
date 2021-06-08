@@ -41,6 +41,7 @@ from office365.sharepoint.webparts.client_web_part_collection import ClientWebPa
 from office365.sharepoint.webs.regional_settings import RegionalSettings
 from office365.sharepoint.webs.web_information_collection import WebInformationCollection
 from office365.sharepoint.webs.web_template_collection import WebTemplateCollection
+from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
 class Web(SecurableObject):
@@ -848,6 +849,13 @@ class Web(SecurableObject):
         :rtype: int or None
         """
         return self.properties.get('UIVersion', None)
+
+    @property
+    def server_relative_path(self):
+        """Gets the server-relative Path of the Web.
+        :rtype: SPResPath or None
+        """
+        return self.properties.get("ServerRelativePath", SPResPath(None))
 
     def get_property(self, name):
         if name == "ContentTypes":

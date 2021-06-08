@@ -12,6 +12,7 @@ from office365.sharepoint.recyclebin.recycleBinItemCollection import RecycleBinI
 from office365.sharepoint.sites.sph_site import SPHSite
 from office365.sharepoint.webs.web import Web
 from office365.sharepoint.webs.web_template_collection import WebTemplateCollection
+from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
 class Site(BaseEntity):
@@ -189,6 +190,13 @@ class Site(BaseEntity):
         :rtype: bool
         """
         return self.properties.get("IsHubSite", None)
+
+    @property
+    def server_relative_path(self):
+        """Gets the server-relative Path of the Site.
+        :rtype: SPResPath or None
+        """
+        return self.properties.get("ServerRelativePath", SPResPath(None))
 
     @property
     def recycle_bin(self):

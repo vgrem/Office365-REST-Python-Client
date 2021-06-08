@@ -26,7 +26,7 @@ class TestGraphTeam(GraphTestCase):
 
     def test1_ensure_team(self):
         self.__class__.target_group = _create_group(self.client).execute_query()
-        new_team = self.__class__.target_group.add_team().execute_query_retry()
+        new_team = self.__class__.target_group.add_team().execute_query_retry(max_retry=6, timeout_secs=5)
         self.assertIsNotNone(new_team.id)
 
     def test3_get_all_teams(self):
