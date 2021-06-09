@@ -1,4 +1,3 @@
-from urllib.parse import urlparse
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
@@ -16,6 +15,7 @@ from office365.sharepoint.storagemetrics.storage_metrics import StorageMetrics
 from office365.sharepoint.utilities.move_copy_options import MoveCopyOptions
 from office365.sharepoint.utilities.move_copy_util import MoveCopyUtil
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
+from office365.runtime.compat import urlparse
 
 
 class Folder(BaseEntity):

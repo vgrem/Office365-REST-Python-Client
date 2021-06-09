@@ -1,6 +1,6 @@
 import datetime
-from datetime import datetime, timezone, timedelta
-from urllib.parse import urlparse
+from datetime import datetime, timedelta
+from office365.runtime.compat import urlparse, timezone
 
 
 class STSProfile(object):

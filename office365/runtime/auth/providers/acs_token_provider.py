@@ -3,6 +3,7 @@ import requests
 import office365.logger
 from office365.runtime.auth.authentication_provider import AuthenticationProvider
 from office365.runtime.auth.token_response import TokenResponse
+from office365.runtime.compat import urlparse
 
 
 class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
@@ -38,10 +39,6 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
     def get_app_only_access_token(self):
         try:
             realm = self._get_realm_from_target_url()
-            try:
-                from urlparse import urlparse  # Python 2.X
-            except ImportError:
-                from urllib.parse import urlparse  # Python 3+
             url_info = urlparse(self.url)
             return self._get_app_only_access_token(url_info.hostname, realm)
         except requests.exceptions.RequestException as e:
