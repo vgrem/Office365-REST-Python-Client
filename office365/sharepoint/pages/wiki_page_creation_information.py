@@ -9,7 +9,7 @@ class WikiPageCreationInformation(ClientValue):
         :param str server_relative_url:
         :param str content:
         """
-        super().__init__()
+        super(WikiPageCreationInformation, self).__init__()
         self.ServerRelativeUrl = server_relative_url
         self.WikiHtmlContent = content
 

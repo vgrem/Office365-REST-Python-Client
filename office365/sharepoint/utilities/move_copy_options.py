@@ -7,7 +7,7 @@ class MoveCopyOptions(ClientValue):
                  reset_author_and_created_on_copy=False,
                  retain_editor_and_modified_on_move=False,
                  should_bypass_shared_locks=False):
-        super().__init__()
+        super(MoveCopyOptions, self).__init__()
         self.KeepBoth = keep_both
         self.ResetAuthorAndCreatedOnCopy = reset_author_and_created_on_copy
         self.RetainEditorAndModifiedOnMove = retain_editor_and_modified_on_move

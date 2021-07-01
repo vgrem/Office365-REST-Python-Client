@@ -25,7 +25,7 @@ class BatchQuery(ClientQuery):
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         :type queries: list[]
         """
-        super().__init__(context)
+        super(BatchQuery, self).__init__(context)
         self._current_boundary = create_boundary("batch_")
         if queries is None:
             queries = []

@@ -8,7 +8,7 @@ class ODataV4BatchRequest(ClientRequest):
     """ JSON batch request """
 
     def __init__(self, context):
-        super().__init__(context)
+        super(ODataV4BatchRequest, self).__init__(context)
 
     def build_request(self, query):
         """

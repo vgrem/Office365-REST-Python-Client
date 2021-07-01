@@ -11,14 +11,14 @@ class Recipient(ClientValue):
 
         :param EmailAddress emailAddress: The recipient's email address.
         """
-        super().__init__()
+        super(Recipient, self).__init__()
         self.emailAddress = emailAddress
 
 
 class RecipientCollection(ClientValueCollection):
 
     def __init__(self, default_values=None):
-        super().__init__(Recipient, default_values)
+        super(RecipientCollection,self).__init__(Recipient, default_values)
 
     @staticmethod
     def from_emails(values):

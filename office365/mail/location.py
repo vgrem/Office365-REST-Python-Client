@@ -9,5 +9,5 @@ class Location(ClientValue):
 
         :param str displayName: The name associated with the location.
         """
-        super().__init__()
+        super(Location, self).__init__()
         self.displayName = displayName

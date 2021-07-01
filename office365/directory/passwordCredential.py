@@ -6,7 +6,7 @@ class PasswordCredential(ClientValue):
     The passwordCredentials property of the application entity is a collection of passwordCredential objects."""
 
     def __init__(self, displayName=None, keyId=None):
-        super().__init__()
+        super(PasswordCredential, self).__init__()
         self.displayName = displayName
         self.secretText = None
         self.keyId = keyId

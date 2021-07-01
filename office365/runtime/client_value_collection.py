@@ -9,7 +9,7 @@ class ClientValueCollection(ClientValue):
         :type item_type: any
         :type initial_values: any
         """
-        super().__init__()
+        super(ClientValueCollection, self).__init__()
         if initial_values is None:
             initial_values = []
         self._data = initial_values

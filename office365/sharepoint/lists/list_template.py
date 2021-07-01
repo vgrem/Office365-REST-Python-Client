@@ -18,7 +18,7 @@ class ListTemplate(BaseEntity):
             list template from the collection.
 
         """
-        super().__init__(context, resource_path)
+        super(ListTemplate, self).__init__(context, resource_path)
 
     def get_global_schema_xml(self):
         result = ClientResult(self.context)

@@ -9,7 +9,7 @@ class Field(BaseEntity):
     """A container for metadata within a SharePoint list and associated list items."""
 
     def __init__(self, context, resource_path=None):
-        super().__init__(context, resource_path)
+        super(Field, self).__init__(context, resource_path)
 
     @staticmethod
     def resolve_field_type(type_id_or_name):

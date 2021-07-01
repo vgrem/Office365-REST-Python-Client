@@ -9,7 +9,7 @@ from office365.sharepoint.files.file import File
 class Utility(BaseEntity):
 
     def __init__(self, context):
-        super().__init__(context, ResourcePath("SP.Utilities.Utility"))
+        super(Utility, self).__init__(context, ResourcePath("SP.Utilities.Utility"))
 
     @staticmethod
     def get_current_user_email_addresses(context):

@@ -10,4 +10,4 @@ class UserProfilePropertiesForUser(ClientObject):
             "propertyNames": property_names
         }
 
-        super().__init__(context, ResourcePathServiceOperation("SP.UserProfiles.UserProfilePropertiesForUser", params))
+        super(UserProfilePropertiesForUser, self).__init__(context, ResourcePathServiceOperation("SP.UserProfiles.UserProfilePropertiesForUser", params))

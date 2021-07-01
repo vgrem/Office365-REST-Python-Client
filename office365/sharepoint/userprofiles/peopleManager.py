@@ -11,7 +11,7 @@ class PeopleManager(BaseEntity):
     """Provides methods for operations related to people."""
 
     def __init__(self, context):
-        super().__init__(context, ResourcePath("SP.UserProfiles.PeopleManager"))
+        super(PeopleManager, self).__init__(context, ResourcePath("SP.UserProfiles.PeopleManager"))
 
     def am_i_following(self, account_name):
         """

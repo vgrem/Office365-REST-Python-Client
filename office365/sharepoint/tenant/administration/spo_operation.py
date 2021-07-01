@@ -4,7 +4,7 @@ from office365.runtime.client_object import ClientObject
 class SpoOperation(ClientObject):
 
     def __init__(self, context):
-        super().__init__(context)
+        super(SpoOperation, self).__init__(context)
 
     @property
     def is_complete(self):

@@ -9,7 +9,7 @@ class PickerEntityInformation(ClientObject):
 class PickerEntityInformationRequest(ClientValue):
 
     def __init__(self, EmailAddress=None, GroupId=None, Key=None, PrincipalType=None):
-        super().__init__()
+        super(PickerEntityInformationRequest, self).__init__()
         self.EmailAddress = EmailAddress
         self.GroupId = GroupId
         self.Key = Key

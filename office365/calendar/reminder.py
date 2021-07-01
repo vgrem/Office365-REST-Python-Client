@@ -9,5 +9,5 @@ class Reminder(ClientValue):
 
         :param str eventId: The unique ID of the event. Read only.
         """
-        super().__init__()
+        super(Reminder, self).__init__()
         self.eventId = eventId

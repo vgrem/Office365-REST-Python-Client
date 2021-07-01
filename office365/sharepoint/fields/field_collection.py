@@ -43,11 +43,11 @@ class FieldCollection(BaseEntityCollection):
         :param str title:
         """
         if allow_multiple_values:
-            field_schema = f'''
+            field_schema = '''
                         <Field Type="LookupMulti" Mult="TRUE" DisplayName="{title}" Required="FALSE" Hidden="TRUE" \
                         ShowField="{lookup_field_name}" List="{{{lookup_list_id}}}" StaticName="{title}" Name="{title}">
                         </Field>
-                        '''
+                        '''.format(title=title, lookup_field_name=lookup_field_name, lookup_list_id=lookup_list_id)
             target_field = self.create_field_as_xml(field_schema)
         else:
             create_field_info = FieldCreationInformation(title=title,
@@ -153,12 +153,12 @@ class FieldCollection(BaseEntityCollection):
                 self.context.web.ensure_property("Id", _web_loaded)
 
         if text_field_id is None:
-            text_field_name = f"{uuid.uuid4().hex}"
-            text_field_schema = f'''
+            text_field_name = "{name}".format(name=uuid.uuid4().hex)
+            text_field_schema = '''
             <Field Type="Note" DisplayName="{name}_0" Hidden="TRUE" CanBeDeleted="TRUE" ShowInViewForms="FALSE"
                    StaticName="{text_field_name}" Name="{text_field_name}">
             </Field>
-            '''
+            '''.format(name=name, text_field_name=text_field_name)
             text_field = self.create_field_as_xml(text_field_schema)
 
             def _after_text_field_created(resp):
@@ -187,9 +187,9 @@ class FieldCollection(BaseEntityCollection):
         :type target_field: Field
         """
 
-        list_attr = f'List="{{{list_id}}}"' if list_id is not None else ""
+        list_attr = 'List="{{{list_id}}}"'.format(list_id=list_id) if list_id is not None else ""
 
-        schema_xml = f'''
+        schema_xml = '''
 <Field Type="TaxonomyFieldType" DisplayName="{name}" {list_attr}
        WebId="{web_id}" Required="FALSE" EnforceUniqueValues="FALSE"
        ID="{{{field_id}}}" StaticName="{name}" Name="{name}">
@@ -284,7 +284,8 @@ class FieldCollection(BaseEntityCollection):
         </ArrayOfProperty>
     </Customization>
 </Field>
-'''
+'''.format(list_id=list_id, name=name, list_attr=list_attr, web_id=web_id, field_id=field_id, ssp_id=ssp_id,
+           term_set_id=term_set_id, anchor_id=anchor_id, text_field_id=text_field_id)
 
         field_schema = XmlSchemaFieldCreationInformation(schema_xml)
         self._create_field_as_xml_query(field_schema, target_field)

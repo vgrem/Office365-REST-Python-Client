@@ -12,7 +12,7 @@ class DateTimeTimeZone(ClientValue):
         :param str dateTime: A single point of time in a combined date and time representation ({date}T{time};
             for example, 2017-08-29T04:00:00.0000000).
         """
-        super().__init__()
+        super(DateTimeTimeZone, self).__init__()
         self.dateTime = dateTime
         self.timeZone = timeZone
 

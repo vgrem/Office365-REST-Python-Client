@@ -5,7 +5,7 @@ class ODataV3Reader(ODataBaseReader):
     """OData v3 reader"""
 
     def __init__(self, options):
-        super().__init__(options)
+        super(ODataV3Reader,self).__init__(options)
         self._options['namespaces'] = {
             'xmlns': 'http://schemas.microsoft.com/ado/2009/11/edm',
             'edmx': 'http://schemas.microsoft.com/ado/2007/06/edmx',

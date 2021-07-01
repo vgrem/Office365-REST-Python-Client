@@ -28,7 +28,7 @@ class ResumableFileUpload(UploadContentQuery):
         :type source_path: str
         :type chunk_size: int
         """
-        super().__init__(target_folder, os.path.basename(source_path), "")
+        super(ResumableFileUpload, self).__init__(target_folder, os.path.basename(source_path), "")
         self._chunk_size = chunk_size
         self._source_path = source_path
         self._file_name = os.path.basename(self._source_path)

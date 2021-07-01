@@ -8,7 +8,7 @@ class SiteCreationProperties(ClientValue):
         :type owner: str
         :type url: str
         """
-        super().__init__()
+        super(SiteCreationProperties, self).__init__()
         self.Url = url
         self.Owner = owner
         self.Title = None

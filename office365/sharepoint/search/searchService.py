@@ -12,7 +12,7 @@ from office365.sharepoint.search.searchResult import SearchResult
 class SearchService(BaseEntity):
 
     def __init__(self, context):
-        super().__init__(context, ResourcePath("Microsoft.Office.Server.Search.REST.SearchService"))
+        super(SearchService, self).__init__(context, ResourcePath("Microsoft.Office.Server.Search.REST.SearchService"))
 
     def export(self, user_name, start_time):
         """

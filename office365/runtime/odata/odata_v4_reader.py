@@ -6,7 +6,7 @@ class ODataV4Reader(ODataBaseReader):
     _options = None
 
     def __init__(self, options):
-        super().__init__(options)
+        super(ODataV4Reader, self).__init__(options)
         self._options['namespaces'] = {
             'xmlns': 'http://docs.oasis-open.org/odata/ns/edm',
             'edmx': 'http://docs.oasis-open.org/odata/ns/edmx'

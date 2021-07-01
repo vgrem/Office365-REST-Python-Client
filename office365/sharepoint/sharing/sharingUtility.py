@@ -7,7 +7,7 @@ from office365.sharepoint.sharing.userDirectoryInfo import UserDirectoryInfo
 class SharingUtility(BaseEntity):
 
     def __init__(self, context):
-        super().__init__(context, ResourcePath("SharingUtility"))
+        super(SharingUtility, self).__init__(context, ResourcePath("SharingUtility"))
 
     @staticmethod
     def get_user_directory_info_by_email(context, email):

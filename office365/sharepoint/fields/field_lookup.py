@@ -2,10 +2,7 @@ from office365.sharepoint.fields.field import Field
 
 
 class FieldLookup(Field):
-
-    def __init__(self, context):
-        """Specifies a lookup field."""
-        super().__init__(context)
+    """Specifies a lookup field."""
 
     @property
     def allow_multiple_values(self):

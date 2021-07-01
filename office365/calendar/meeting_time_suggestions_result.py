@@ -17,7 +17,7 @@ class MeetingTimeSuggestionsResult(ClientValue):
             organizerUnavailable, or unknown. This property is an empty string if the meetingTimeSuggestions property
             does include any meeting suggestions.
         """
-        super().__init__()
+        super(MeetingTimeSuggestionsResult, self).__init__()
         self.meetingTimeSuggestions = ClientValueCollection(MeetingTimeSuggestion) if meetingTimeSuggestions is None \
             else meetingTimeSuggestions
         self.emptySuggestionsReason = emptySuggestionsReason

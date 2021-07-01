@@ -38,7 +38,7 @@ class ClientPeoplePickerQueryParameters(ClientValue):
         :param bool allowEmailAddresses: Specifies whether the principal query can return a resolved principal
         matching an unverified e-mail address when unable to resolve to a known principal.
         """
-        super().__init__()
+        super(ClientPeoplePickerQueryParameters, self).__init__()
         self.QueryString = queryString
         self.AllowEmailAddresses = allowEmailAddresses
         self.AllowMultipleEntities = allowMultipleEntities
@@ -61,7 +61,7 @@ class ClientPeoplePickerQueryParameters(ClientValue):
 class ClientPeoplePickerWebServiceInterface(BaseEntity):
 
     def __init__(self, context):
-        super().__init__(context)
+        super(ClientPeoplePickerWebServiceInterface, self).__init__(context)
 
     @staticmethod
     def get_search_results(context, searchPattern, providerID=None, hierarchyNodeID=None, entityTypes=None):

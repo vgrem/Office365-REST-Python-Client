@@ -5,7 +5,7 @@ class FieldUserValue(FieldLookupValue):
 
     def __init__(self, user_id):
         """Represents the value of a user fields for a list item."""
-        super().__init__(user_id)
+        super(FieldUserValue, self).__init__(user_id)
 
     @staticmethod
     def from_user(user):

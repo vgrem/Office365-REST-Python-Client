@@ -17,8 +17,9 @@ from office365.sharepoint.tenant.administration.spo_operation import SpoOperatio
 class Tenant(ClientObject):
 
     def __init__(self, context):
-        super().__init__(context, ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant"), None,
-                         "Microsoft.Online.SharePoint.TenantAdministration")
+        super(Tenant, self).__init__(context, ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant"),
+                                     None,
+                                     "Microsoft.Online.SharePoint.TenantAdministration")
 
     @staticmethod
     def from_url(admin_site_url):
@@ -64,7 +65,7 @@ class Tenant(ClientObject):
 
         :type site_id: str
         """
-        result = ClientResult(self.context,ClientValueCollection(SecondaryAdministratorsInfo))
+        result = ClientResult(self.context, ClientValueCollection(SecondaryAdministratorsInfo))
         payload = SecondaryAdministratorsFieldsData(site_id)
         qry = ServiceOperationQuery(self, "GetSiteSecondaryAdministrators", None, payload,
                                     "secondaryAdministratorsFieldsData", result)

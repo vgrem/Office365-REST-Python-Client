@@ -5,7 +5,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 class GroupCreationInformation(ClientValue):
 
     def __init__(self, display_name, alias, is_public, optional_params=None):
-        super().__init__()
+        super(GroupCreationInformation, self).__init__()
         if optional_params is None:
             optional_params = GroupCreationParams()
         self.displayName = display_name

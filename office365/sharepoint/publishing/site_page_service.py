@@ -13,7 +13,7 @@ class SitePageService(BaseEntity):
 
     def __init__(self, context):
         """Represents a set of APIs to use for managing site pages."""
-        super().__init__(context, ResourcePath("SP.Publishing.SitePageService"))
+        super(SitePageService, self).__init__(context, ResourcePath("SP.Publishing.SitePageService"))
 
     def pages(self):
         return self.properties.get("pages",

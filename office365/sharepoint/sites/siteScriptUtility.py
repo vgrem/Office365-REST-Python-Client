@@ -7,8 +7,9 @@ from office365.sharepoint.sites.siteDesignPrincipal import SiteDesignPrincipalCo
 class SiteScriptUtility(BaseEntity):
 
     def __init__(self, context):
-        super().__init__(context,
-                         ResourcePath("Microsoft.SharePoint.Utilities.WebTemplateExtensions.SiteScriptUtility"))
+        super(SiteScriptUtility, self).__init__(context,
+                                                ResourcePath(
+                                                    "Microsoft.SharePoint.Utilities.WebTemplateExtensions.SiteScriptUtility"))
 
     @staticmethod
     def get_site_design_rights(context, _id):

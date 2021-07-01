@@ -8,7 +8,7 @@ class SharingLinkInfo(ClientValue):
         Specifies the information about the tokenized sharing link.
 
         """
-        super().__init__()
+        super(SharingLinkInfo, self).__init__()
         self.AllowsAnonymousAccess = None
         self.ApplicationId = None
         self.CreatedBy = None

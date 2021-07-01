@@ -10,7 +10,7 @@ class SecondaryAdministratorsInfo(ClientValue):
         :param str loginName:
         :param str userPrincipalName:
         """
-        super().__init__()
+        super(SecondaryAdministratorsInfo, self).__init__()
         self.email = email
         self.loginName = loginName
         self.userPrincipalName = userPrincipalName

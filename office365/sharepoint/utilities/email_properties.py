@@ -15,7 +15,7 @@ class EmailProperties(ClientValue):
         :param list[str] or None bcc:
         :param dict or None additional_headers:
         """
-        super().__init__()
+        super(EmailProperties, self).__init__()
         self.Body = body
         self.Subject = subject
         self.From = from_address

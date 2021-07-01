@@ -49,7 +49,7 @@ class TestGraphGroup(GraphTestCase):
 
     @unittest.skipIf(directory_quota_exceeded, "Skipping, group was not be created")
     def test4_add_group_owner(self):
-        users = self.client.users.filter(f"mail eq '{test_user_principal_name}'").get().execute_query()
+        users = self.client.users.filter("mail eq '{mail}'".format(mail=test_user_principal_name)).get().execute_query()
         self.assertEqual(len(users), 1)
 
         owner_id = users[0].id

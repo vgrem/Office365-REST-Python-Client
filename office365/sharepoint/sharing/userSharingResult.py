@@ -5,7 +5,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 class UserSharingResult(ClientValue):
 
     def __init__(self):
-        super().__init__("SP.Sharing")
+        super(UserSharingResult, self).__init__()
         self.AllowedRoles = ClientValueCollection(int)
         self.CurrentRole = None
         self.DisplayName = None
@@ -15,3 +15,7 @@ class UserSharingResult(ClientValue):
         self.Message = None
         self.Status = None
         self.User = None
+
+    @property
+    def entity_type_name(self):
+        return "SP.Sharing"

@@ -1,8 +1,7 @@
-from urllib.parse import quote
+from office365.runtime.compat import quote
 
 from office365.entity import Entity
 from office365.onedrive.driveItem import DriveItem
-from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.teams.chatMessageCollection import ChatMessageCollection
 from office365.teams.teamsTabCollection import TeamsTabCollection

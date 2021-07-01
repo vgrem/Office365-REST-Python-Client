@@ -7,7 +7,7 @@ from office365.sharepoint.tenant.administration.hub_site_collection import HubSi
 class SPHubSitesUtility(BaseEntity):
 
     def __init__(self, context):
-        super().__init__(context, ResourcePath("Microsoft.SharePoint.Portal.SPHubSitesUtility"))
+        super(SPHubSitesUtility, self).__init__(context, ResourcePath("Microsoft.SharePoint.Portal.SPHubSitesUtility"))
 
     def get_hub_sites(self):
         hub_sites = HubSiteCollection(self.context)

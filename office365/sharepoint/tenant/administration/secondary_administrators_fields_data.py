@@ -10,7 +10,7 @@ class SecondaryAdministratorsFieldsData(ClientValue):
         :type names: List[str] or None
         :type site_id: str or None
         """
-        super().__init__()
+        super(SecondaryAdministratorsFieldsData, self).__init__()
         self.secondaryAdministratorEmails = ClientValueCollection(str, emails)
         self.secondaryAdministratorLoginNames = ClientValueCollection(str, names)
         self.siteId = site_id

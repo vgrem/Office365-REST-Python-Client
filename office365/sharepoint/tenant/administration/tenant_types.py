@@ -7,7 +7,7 @@ from office365.sharepoint.sites.site_types import SiteCollectionAppCatalogAllowe
 class TenantWebTemplate(ClientValue):
 
     def __init__(self):
-        super().__init__()
+        super(TenantWebTemplate, self).__init__()
 
     @property
     def entity_type_name(self):

@@ -5,7 +5,7 @@ from office365.sharepoint.search.queryResult import QueryResult
 class SearchResult(ClientValue):
 
     def __init__(self):
-        super().__init__()
+        super(SearchResult, self).__init__()
         self.PrimaryQueryResult = QueryResult()
         self.ElapsedTime = None
         self.Properties = None

@@ -17,7 +17,7 @@ class Team(Entity):
     logical isolation of discussion, within a team. """
 
     def __init__(self, context, resource_path=None, properties=None):
-        super().__init__(context, resource_path, properties)
+        super(Team, self).__init__(context, resource_path, properties)
         self.memberSettings = TeamMemberSettings()
         self.guestSettings = TeamGuestSettings()
         self.messagingSettings = TeamMessagingSettings()

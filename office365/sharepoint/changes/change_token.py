@@ -6,5 +6,5 @@ class ChangeToken(ClientValue):
     change token as a starting point for retrieving changes."""
 
     def __init__(self):
-        super().__init__()
+        super(ChangeToken, self).__init__()
         self.StringValue = None

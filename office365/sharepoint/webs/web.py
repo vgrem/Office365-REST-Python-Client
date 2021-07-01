@@ -1,10 +1,11 @@
+# coding=utf-8
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.sharepoint.actions.getWebUrlFromPage import GetWebUrlFromPageUrlQuery
+from office365.sharepoint.actions.getWebUrlFromPage import create_get_web_url_from_page_url_query
 from office365.sharepoint.alerts.alert_collection import AlertCollection
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.clientsidecomponent.types import SPClientSideComponentQueryResult
@@ -81,7 +82,7 @@ class Web(SecurableObject):
         :type context: office365.sharepoint.client_context.ClientContext
         :type page_full_url: str
         """
-        qry = GetWebUrlFromPageUrlQuery(context, page_full_url)
+        qry = create_get_web_url_from_page_url_query(context, page_full_url)
         context.add_query(qry)
         return qry.return_type
 

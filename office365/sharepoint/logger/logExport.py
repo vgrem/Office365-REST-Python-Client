@@ -9,7 +9,7 @@ class LogExport(BaseEntity):
     def __init__(self, context):
         """This is the primary class that should be instantiated to obtain metadata about the
         logs that you can download."""
-        super().__init__(context, ResourcePath("Microsoft.Online.SharePoint.SPLogger.LogExport"))
+        super(LogExport, self).__init__(context, ResourcePath("Microsoft.Online.SharePoint.SPLogger.LogExport"))
 
     def get_files(self, partitionId, logType):
         pass

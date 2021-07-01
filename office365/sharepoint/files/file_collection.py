@@ -2,7 +2,7 @@ import os
 
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.sharepoint.actions.create_file import CreateFileQuery
+from office365.sharepoint.actions.create_file import create_file_query
 from office365.sharepoint.actions.upload_session import UploadSessionQuery
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.files.file import File
@@ -40,7 +40,7 @@ class FileCollection(BaseEntityCollection):
             with open(source_path, 'rb') as content_file:
                 file_content = content_file.read()
             info = FileCreationInformation(url=os.path.basename(source_path), overwrite=True, content=file_content)
-            qry = CreateFileQuery(self, info)
+            qry = create_file_query(self, info)
             self.context.add_query(qry)
             return qry.return_type
 
@@ -50,7 +50,7 @@ class FileCollection(BaseEntityCollection):
         :type file_creation_information: office365.sharepoint.files.file_creation_information.FileCreationInformation
         :rtype: office365.sharepoint.files.file.File
         """
-        qry = CreateFileQuery(self, file_creation_information)
+        qry = create_file_query(self, file_creation_information)
         self.context.add_query(qry)
         return qry.return_type
 

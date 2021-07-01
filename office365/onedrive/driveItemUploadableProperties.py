@@ -5,7 +5,7 @@ class DriveItemUploadableProperties(ClientValue):
     """The driveItemUploadableProperties resource represents an item being uploaded when creating an upload session."""
 
     def __init__(self):
-        super().__init__()
+        super(DriveItemUploadableProperties, self).__init__()
         self.fileSystemInfo = None
         self.name = None
         self.description = None

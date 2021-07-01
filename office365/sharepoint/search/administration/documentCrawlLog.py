@@ -7,8 +7,9 @@ from office365.sharepoint.search.simpleDataTable import SimpleDataTable
 class DocumentCrawlLog(BaseEntity):
 
     def __init__(self, site):
-        super().__init__(site.context,
-                         ResourcePath("Microsoft.SharePoint.Client.Search.Administration.DocumentCrawlLog"))
+        super(DocumentCrawlLog, self).__init__(site.context,
+                                               ResourcePath(
+                                                   "Microsoft.SharePoint.Client.Search.Administration.DocumentCrawlLog"))
 
     def get_crawled_urls(self, getCountOnly=False):
         """

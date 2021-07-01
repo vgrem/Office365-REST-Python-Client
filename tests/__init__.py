@@ -19,7 +19,7 @@ class SecEnvInterpolation(BasicInterpolation):
     secure_vars = os.environ['office365_python_sdk_securevars'].split(';')
 
     def before_get(self, parser, section, option, value, defaults):
-        value = super().before_get(parser, section, option, value, defaults)
+        value = super(SecEnvInterpolation, self).before_get(parser, section, option, value, defaults)
         if option == "password":
             return self.secure_vars[1]
         elif option == "client_secret":

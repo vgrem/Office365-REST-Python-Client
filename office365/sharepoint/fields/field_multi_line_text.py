@@ -5,7 +5,7 @@ class FieldMultiLineText(Field):
 
     def __init__(self, context):
         """Represents a text field that can contain multiple lines."""
-        super().__init__(context)
+        super(FieldMultiLineText, self).__init__(context)
 
     @property
     def allow_hyperlink(self):

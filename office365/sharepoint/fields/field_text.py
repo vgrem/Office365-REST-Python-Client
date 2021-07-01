@@ -4,7 +4,7 @@ from office365.sharepoint.fields.field import Field
 class FieldText(Field):
 
     def __init__(self, context):
-        super().__init__(context)
+        super(FieldText, self).__init__(context)
 
     @property
     def max_length(self):

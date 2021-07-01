@@ -23,7 +23,7 @@ class ScheduleInformation(ClientValue):
         :param str scheduleId: An SMTP address of the user, distribution list, or resource, identifying an instance
             of scheduleInformation.
         """
-        super().__init__()
+        super(ScheduleInformation, self).__init__()
         self.scheduleItems = ClientValueCollection(ScheduleItem) if scheduleItems is None else scheduleItems
         self.scheduleId = scheduleId
         self.availabilityView = availabilityView

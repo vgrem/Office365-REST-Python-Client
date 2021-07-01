@@ -10,7 +10,7 @@ class ListItemCreationInformationUsingPath(ClientValue):
         :type object_type: int
         :type folder_path: office365.sharepoint.types.resource_path.ResourcePath
         """
-        super().__init__()
+        super(ListItemCreationInformationUsingPath, self).__init__()
         self.FolderPath = folder_path
         self.LeafName = leaf_name
         self.UnderlyingObjectType = object_type

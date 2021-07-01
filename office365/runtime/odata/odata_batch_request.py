@@ -1,6 +1,6 @@
 import json
 import re
-from email import message_from_bytes
+from office365.runtime.compat import message_from_bytes_or_string, message_as_bytes_or_string
 from email.message import Message
 
 from office365.runtime.client_request import ClientRequest
@@ -25,7 +25,7 @@ class ODataBatchRequest(ClientRequest):
         media_type = "multipart/mixed"
         content_type = "; ".join([media_type, "boundary={0}".format(query.current_boundary)])
         request.ensure_header('Content-Type', content_type)
-        request.data = self._prepare_payload(query).as_bytes()
+        request.data = self._prepare_payload(query)
         return request
 
     def process_response(self, response, query):
@@ -54,7 +54,7 @@ class ODataBatchRequest(ClientRequest):
             + response.content
         )
 
-        message = message_from_bytes(http_body)  # type: Message
+        message = message_from_bytes_or_string(http_body)  # type: Message
         for raw_response in message.get_payload():
             if raw_response.get_content_type() == "application/http":
                 yield self._deserialize_response(raw_response)
@@ -85,7 +85,7 @@ class ODataBatchRequest(ClientRequest):
             message = self._serialize_request(request)
             main_message.attach(message)
 
-        return main_message
+        return message_as_bytes_or_string(main_message)
 
     @staticmethod
     def _normalize_headers(headers_raw):
@@ -114,7 +114,9 @@ class ODataBatchRequest(ClientRequest):
                 "content": None
             }
         else:
-            *headers_raw, content = lines[1:]
+            #*headers_raw, content = lines[1:]
+            headers_raw = lines[1:-1]
+            content = lines[-1]
             content = json.loads(content)
             return {
                 "status": status_info,
@@ -133,13 +135,13 @@ class ODataBatchRequest(ClientRequest):
         method = request.method
         if "X-HTTP-Method" in request.headers:
             method = request.headers["X-HTTP-Method"]
-        lines = ["{method} {url} HTTP/1.1".format(method=method, url=request.url),
-                 *[':'.join(h) for h in request.headers.items()]]
+        lines = ["{method} {url} HTTP/1.1".format(method=method, url=request.url)] + \
+                [':'.join(h) for h in request.headers.items()]
         if request.data:
             lines.append(eol)
             lines.append(json.dumps(request.data))
-        buffer = eol + eol.join(lines) + eol
-        payload = buffer.encode('utf-8').lstrip()
+        raw_content = eol + eol.join(lines) + eol
+        payload = raw_content.encode('utf-8').lstrip()
 
         message = Message()
         message.add_header("Content-Type", "application/http")

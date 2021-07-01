@@ -6,4 +6,4 @@ class SiteCollectionManagementService(ClientObject):
 
     def __init__(self, context):
         fqn = "Microsoft.Online.SharePoint.TenantAdministration.SiteCollectionManagementService"
-        super().__init__(context, ResourcePath(fqn))
+        super(SiteCollectionManagementService, self).__init__(context, ResourcePath(fqn))

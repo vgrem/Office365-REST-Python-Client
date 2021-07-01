@@ -7,7 +7,7 @@ from office365.sharepoint.userprofiles.userProfile import UserProfile
 class ProfileLoader(ClientObject):
 
     def __init__(self, context):
-        super().__init__(context, ResourcePath("SP.UserProfiles.ProfileLoader.GetProfileLoader"))
+        super(ProfileLoader, self).__init__(context, ResourcePath("SP.UserProfiles.ProfileLoader.GetProfileLoader"))
 
     @staticmethod
     def get_profile_loader(context):

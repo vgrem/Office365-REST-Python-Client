@@ -4,7 +4,7 @@ from office365.runtime.client_value import ClientValue
 class FieldUrlValue(ClientValue):
 
     def __init__(self, Url=None, Description=None):
-        super().__init__()
+        super(FieldUrlValue, self).__init__()
         self.Url = Url
         self.Description = Description
 

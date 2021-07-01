@@ -10,6 +10,6 @@ class ItemBody(ClientValue):
         :type content: str
         :type contentType: str
         """
-        super().__init__()
+        super(ItemBody, self).__init__()
         self.content = content
         self.contentType = contentType

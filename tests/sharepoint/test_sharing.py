@@ -1,4 +1,4 @@
-import urllib.parse
+from office365.runtime.compat import urljoin
 from unittest import TestCase
 
 from office365.sharepoint.client_context import ClientContext
@@ -13,7 +13,7 @@ from tests import test_site_url, test_user_credentials
 
 class TestSharePointSharing(TestCase):
     target_user = None  # type: User
-    target_file_url = urllib.parse.urljoin(test_site_url, "/SitePages/Home.aspx")
+    target_file_url = urljoin(test_site_url, "/SitePages/Home.aspx")
 
     @classmethod
     def setUpClass(cls):

@@ -4,7 +4,7 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.sharepoint.actions.create_file import CreateFileQuery
+from office365.sharepoint.actions.create_file import create_file_query
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.changes.change_query import ChangeQuery
@@ -110,7 +110,7 @@ class Folder(BaseEntity):
         :rtype: office365.sharepoint.files.file.File
         """
         info = FileCreationInformation(url=file_name, overwrite=True, content=content)
-        qry = CreateFileQuery(self.files, info)
+        qry = create_file_query(self.files, info)
         self.context.add_query(qry)
         return qry.return_type
 

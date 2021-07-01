@@ -1,5 +1,3 @@
-import msal
-
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
 from office365.runtime.auth.providers.oauth_token_provider import OAuthTokenProvider
@@ -30,8 +28,9 @@ class AuthenticationContext(object):
 
         def _acquire_token_for_client_certificate():
             authority_url = 'https://login.microsoftonline.com/{0}'.format(tenant)
-            scopes = [f"{self.url}/.default"]
+            scopes = ["{url}/.default".format(url=self.url)]
             credentials = {"thumbprint": thumbprint, "private_key": open(cert_path).read()}
+            import msal
             app = msal.ConfidentialClientApplication(
                 client_id,
                 authority=authority_url,

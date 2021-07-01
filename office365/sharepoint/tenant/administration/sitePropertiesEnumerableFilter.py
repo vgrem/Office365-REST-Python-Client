@@ -4,7 +4,7 @@ from office365.runtime.client_value import ClientValue
 class SitePropertiesEnumerableFilter(ClientValue):
 
     def __init__(self, _filter, start_index, include_detail):
-        super().__init__()
+        super(SitePropertiesEnumerableFilter, self).__init__()
         self.Filter = _filter
         # self.GroupIdDefined = None
         # self.IncludeDetail = include_detail

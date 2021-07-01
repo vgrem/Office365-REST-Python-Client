@@ -7,7 +7,7 @@ from office365.sharepoint.base_entity import BaseEntity
 class SPHSite(BaseEntity):
 
     def __init__(self, context):
-        super().__init__(context, ResourcePath("SP.SPHSite"))
+        super(SPHSite, self).__init__(context, ResourcePath("SP.SPHSite"))
 
     @staticmethod
     def is_valid_home_site(context, site_url, return_value=None):

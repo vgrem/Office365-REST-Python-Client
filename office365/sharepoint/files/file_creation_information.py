@@ -14,7 +14,7 @@ class FileCreationInformation(ClientValue):
         self._overwrite = overwrite
         self._content = content
 
-    def to_json(self):
+    def to_json(self, json_format=None):
         return {
             "overwrite": self.overwrite,
             "url": self.url

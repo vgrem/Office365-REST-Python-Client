@@ -5,7 +5,7 @@ class SiteProperties(BaseEntity):
     """Contains a property bag of information about a site."""
 
     def __init__(self, context):
-        super().__init__(context)
+        super(SiteProperties, self).__init__(context)
 
     def set_property(self, name, value, persist_changes=True):
         super(SiteProperties, self).set_property(name, value, persist_changes)

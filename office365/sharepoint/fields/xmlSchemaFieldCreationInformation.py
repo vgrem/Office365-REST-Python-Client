@@ -8,7 +8,7 @@ class XmlSchemaFieldCreationInformation(ClientValue):
         :type schemaXml: str
         :type options: int or None
         """
-        super().__init__()
+        super(XmlSchemaFieldCreationInformation, self).__init__()
         self.SchemaXml = schemaXml
         self.Options = options
 

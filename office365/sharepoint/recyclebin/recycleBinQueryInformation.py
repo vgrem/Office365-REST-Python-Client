@@ -13,7 +13,7 @@ class RecycleBinQueryInformation(ClientValue):
         :type item_state: int
         :type is_ascending: bool
         """
-        super().__init__()
+        super(RecycleBinQueryInformation, self).__init__()
         self.IsAscending = is_ascending
         self.ItemState = item_state
         self.OrderBy = order_by

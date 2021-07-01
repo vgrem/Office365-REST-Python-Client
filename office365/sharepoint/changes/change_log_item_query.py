@@ -10,7 +10,7 @@ class ChangeLogItemQuery(ClientValue):
         :type contains: str
         :type row_limit: str
         """
-        super().__init__()
+        super(ChangeLogItemQuery, self).__init__()
         self.ChangeToken = change_token
         self.Contains = contains
         self.RowLimit = row_limit

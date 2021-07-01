@@ -30,7 +30,7 @@ class ListItem(SecurableObject):
         :type resource_path: ResourcePath or None
         :type parent_list: office365.sharepoint.lists.list.List or None
         """
-        super().__init__(context, resource_path)
+        super(ListItem, self).__init__(context, resource_path)
         if parent_list is not None:
             self.properties["ParentList"] = parent_list
 
@@ -303,10 +303,10 @@ class ListItem(SecurableObject):
                 self._set_taxonomy_field_value(name, value)
             elif isinstance(value, FieldMultiLookupValue):
                 collection = ClientValueCollection(int, [v.LookupId for v in value])
-                super(ListItem, self).set_property(f"{name}Id", collection)
+                super(ListItem, self).set_property("{name}Id".format(name=name), collection)
                 super(ListItem, self).set_property(name, value, False)
             elif isinstance(value, FieldLookupValue):
-                super(ListItem, self).set_property(f"{name}Id", value.LookupId)
+                super(ListItem, self).set_property("{name}Id".format(name=name), value.LookupId)
                 super(ListItem, self).set_property(name, value, False)
             else:
                 super(ListItem, self).set_property(name, value, persist_changes)

@@ -12,7 +12,7 @@ class UploadFileQuery(ServiceOperationQuery):
         :type web: office365.sharepoint.webs.web.Web
         :type file_object: typing.IO
         """
-        super().__init__(web)
+        super(UploadFileQuery, self).__init__(web)
 
         def _process_response(response):
             """
