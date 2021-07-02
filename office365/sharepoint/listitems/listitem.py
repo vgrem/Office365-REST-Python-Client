@@ -145,6 +145,11 @@ class ListItem(SecurableObject):
         self.context.add_query(qry)
         return self
 
+    def update(self):
+        self.ensure_type_name(self.parent_list)
+        super(ListItem, self).update()
+        return self
+
     def system_update(self):
         """Update the list item."""
         qry = ServiceOperationQuery(self,
