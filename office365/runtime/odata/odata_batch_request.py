@@ -114,7 +114,6 @@ class ODataBatchRequest(ClientRequest):
                 "content": None
             }
         else:
-            #*headers_raw, content = lines[1:]
             headers_raw = lines[1:-1]
             content = lines[-1]
             content = json.loads(content)

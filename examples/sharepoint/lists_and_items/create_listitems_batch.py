@@ -5,6 +5,6 @@ ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials
 list_tasks = ctx.web.lists.get_by_title("Tasks")
 
 
-task_items = [list_tasks.add_item({"Title": create_unique_name("Task")}) for idx in range(0, 20)]
+task_items = [list_tasks.add_item({"Title": create_unique_name("Task")}) for idx in range(0, 99)]
 ctx.execute_batch()
-print(f" {len(task_items)} task items created")
+print(" {0} task items created".format(len(task_items)))

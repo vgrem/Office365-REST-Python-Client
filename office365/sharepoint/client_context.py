@@ -16,6 +16,7 @@ from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.sharepoint.sites.site import Site
 from office365.sharepoint.webs.context_web_information import ContextWebInformation
 from office365.sharepoint.webs.web import Web
+from office365.runtime.compat import range_or_xrange
 
 
 class ClientContext(ClientRuntimeContext):
@@ -98,18 +99,26 @@ class ClientContext(ClientRuntimeContext):
         self.authentication_context.register_provider(credentials)
         return self
 
-    def execute_batch(self):
-        """Construct and submit a batch request"""
+    def execute_batch(self, items_per_bulk=100):
+        """
+        Construct and submit a batch request
+
+        :param int items_per_bulk: Maximum to be selected for bulk operation
+        """
         batch_request = ODataBatchRequest(self)
 
-        queries = [qry for qry in self.pending_request()]
-        batch_qry = BatchQuery(self, queries)
+        all_queries = [qry for qry in self.pending_request()]
+        # batch_qry = BatchQuery(self, all_queries)
 
         def _prepare_batch_request(request):
             self.ensure_form_digest(request)
 
         batch_request.beforeExecute += _prepare_batch_request
-        batch_request.execute_query(batch_qry)
+
+        for i in range_or_xrange(0, len(all_queries), items_per_bulk):
+            queries = all_queries[i:i + items_per_bulk]
+            batch_qry = BatchQuery(self, queries)
+            batch_request.execute_query(batch_qry)
 
     def build_single_request(self, query):
         """
