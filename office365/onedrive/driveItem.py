@@ -1,4 +1,4 @@
-from office365.actions.search_query import SearchQuery
+from office365.actions.search_query import create_search_query
 from office365.base_item import BaseItem
 from office365.directory.permission import Permission
 from office365.directory.permission_collection import PermissionCollection
@@ -248,11 +248,12 @@ class DriveItem(BaseItem):
         """Search the hierarchy of items for items matching a query. You can search within a folder hierarchy,
         a whole drive, or files shared with the current user.
 
-        :type query_text: str"""
-        result = ClientResult(self.context)
-        qry = SearchQuery(self, query_text, result)
+        :type query_text: str
+        :rtype: ClientResult
+        """
+        qry = create_search_query(self, query_text)
         self.context.add_query(qry)
-        return result
+        return qry.return_type
 
     def invite(self, recipients, message, require_sign_in=True, send_invitation=True, roles=None):
         """Sends a sharing invitation for a driveItem. A sharing invitation provides permissions to the recipients

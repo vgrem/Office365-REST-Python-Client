@@ -1,0 +1,2 @@
+class ODataMethod(object):
+    pass

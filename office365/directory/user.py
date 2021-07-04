@@ -106,6 +106,9 @@ class User(DirectoryObject):
         self.context.add_query(qry)
 
         def _construct_request(request):
+            """
+            :type request: office365.runtime.http.request_options.RequestOptions
+            """
             request.method = HttpMethod.Get
             request.url += "?startDateTime={0}&endDateTime={1}".format(start_dt.isoformat(), end_dt.isoformat())
 

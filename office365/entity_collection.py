@@ -17,17 +17,17 @@ class EntityCollection(ClientObjectCollection):
             return super(EntityCollection, self).__getitem__(key)
         return self._item_type(self.context, ResourcePath(key, self.resource_path))
 
-    def add_from_json(self, params):
+    def add_from_json(self, json):
         """Creates a Entity resource from JSON
 
-        :type params: dict
+        :type json: dict
         :rtype: office365.entity.Entity
         """
-        entity_object = self._item_type(self.context)
-        self.add_child(entity_object)
-        qry = CreateEntityQuery(self, params, entity_object)
+        entity = self._item_type(self.context)
+        self.add_child(entity)
+        qry = CreateEntityQuery(self, json, entity)
         self.context.add_query(qry)
-        return entity_object
+        return entity
 
     @property
     def context(self):

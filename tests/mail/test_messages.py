@@ -23,7 +23,7 @@ class TestGraphMail(GraphTestCase):
                 ],
                 "Attachments": [
                     {
-                        "@odata.type": "#Microsoft.OutlookServices.FileAttachment",
+                        "@odata.type": "#microsoft.graph.fileAttachment",
                         "Name": "menu.txt",
                         "ContentBytes": "bWFjIGFuZCBjaGVlc2UgdG9kYXk="
                     }

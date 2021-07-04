@@ -1,5 +1,4 @@
 from office365.actions.download_content_query import DownloadContentQuery
-from office365.actions.search_query import SearchQuery
 from office365.actions.upload_content_query import UploadContentQuery
 from office365.directory.applicationCollection import ApplicationCollection
 from office365.directory.directory import Directory
@@ -81,8 +80,6 @@ class GraphClient(ClientRuntimeContext):
             request.method = HttpMethod.Get
         elif isinstance(query, UploadContentQuery):
             request.method = HttpMethod.Put
-        elif isinstance(query, SearchQuery):
-            request.method = HttpMethod.Get
 
     def authenticate_request(self, request):
         """

@@ -23,7 +23,7 @@ class Entity(ClientObject):
     @property
     def context(self):
         """
-        :rtype: office365.graph.graph_client.GraphClient
+        :rtype: office365.graph_client.GraphClient
         """
         return self._context
 

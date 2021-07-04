@@ -1,0 +1,2 @@
+class ODataParameter(object):
+    pass
