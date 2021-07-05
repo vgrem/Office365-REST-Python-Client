@@ -1,6 +1,6 @@
 from office365.entity_collection import EntityCollection
+from office365.onedrive.root_resource_path import RootResourcePath
 from office365.onedrive.site import Site
-from office365.runtime.resource_path import ResourcePath
 
 
 class SiteCollection(EntityCollection):
@@ -13,7 +13,7 @@ class SiteCollection(EntityCollection):
     def root(self):
         """If present, indicates that this is a root site collection in SharePoint."""
         root_site = self.properties.get('root',
-                                        Site(self.context, ResourcePath("root", self.resource_path)))
+                                        Site(self.context, RootResourcePath(self.resource_path)))
 
         root_site.ensure_property("id")
         return root_site

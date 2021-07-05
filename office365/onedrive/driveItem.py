@@ -3,6 +3,7 @@ from office365.base_item import BaseItem
 from office365.directory.permission import Permission
 from office365.directory.permission_collection import PermissionCollection
 from office365.entity_collection import EntityCollection
+from office365.onedrive.children_resource_path import ChildrenResourcePath
 from office365.onedrive.conflictBehavior import ConflictBehavior
 from office365.onedrive.driveItemVersion import DriveItemVersion
 from office365.onedrive.file import File
@@ -11,6 +12,7 @@ from office365.onedrive.fileSystemInfo import FileSystemInfo
 from office365.onedrive.folder import Folder
 from office365.onedrive.listItem import ListItem
 from office365.onedrive.publicationFacet import PublicationFacet
+from office365.onedrive.root_resource_path import RootResourcePath
 from office365.onedrive.uploadSession import UploadSession
 from office365.excel.workbook import Workbook
 from office365.runtime.client_result import ClientResult
@@ -165,6 +167,7 @@ class DriveItem(BaseItem):
 
         def _content_downloaded(resp):
             file_object.write(result.value)
+
         self.context.after_execute(_content_downloaded)
         return self
 
@@ -299,12 +302,20 @@ class DriveItem(BaseItem):
         return self.properties.get('file', File())
 
     @property
+    def is_folder(self):
+        return self.is_property_available("folder")
+
+    @property
+    def is_folder(self):
+        return self.is_property_available("folder")
+
+    @property
     def children(self):
         """Collection containing Item objects for the immediate children of Item. Only items representing folders
         have children."""
         from office365.onedrive.driveItemCollection import DriveItemCollection
         return self.properties.get('children',
-                                   DriveItemCollection(self.context, ResourcePath("children", self.resource_path)))
+                                   DriveItemCollection(self.context, ChildrenResourcePath(self.resource_path)))
 
     @property
     def listItem(self):
@@ -337,10 +348,16 @@ class DriveItem(BaseItem):
                                                     ResourcePath("versions", self.resource_path)))
 
     def set_property(self, name, value, persist_changes=True):
+        if self._resource_path is None and name == "id":
+            col_path = self.parent_collection.resource_path
+            if isinstance(col_path, ChildrenResourcePath):
+                parent_path = col_path.parent
+                if parent_path.segment == "root":
+                    self._resource_path = ResourcePath(value, ResourcePath("items", parent_path.parent))
+                elif parent_path.parent and parent_path.parent.segment == "items":
+                    self._resource_path = ResourcePath(value, parent_path.parent)
+
+            elif isinstance(col_path, RootResourcePath):
+                self._resource_path = ResourcePath(value, ResourcePath("items", col_path.parent))
         super(DriveItem, self).set_property(name, value, persist_changes)
-        if name == "id" and self._resource_path.parent.segment == "children":
-            self._resource_path = ResourcePath(
-                value, ResourcePath("items", self._parent_collection.resource_path.parent.parent))
-        elif name == "id" and self._resource_path.parent.segment == "root":
-            self._resource_path = ResourcePath(value, ResourcePath("items", self._resource_path.parent.parent))
         return self

@@ -44,7 +44,7 @@ class BaseItem(Entity):
     @property
     def description(self):
         """Provides a user-visible description of the item."""
-        return self.properties.get('description',None)
+        return self.properties.get('description', None)
 
     @description.setter
     def description(self, value):
@@ -63,3 +63,7 @@ class BaseItem(Entity):
     @parentReference.setter
     def parentReference(self, value):
         self.properties['parentReference'] = value
+
+    def set_property(self, name, value, persist_changes=True):
+        super(BaseItem, self).set_property(name, value, persist_changes)
+        return self

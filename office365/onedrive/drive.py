@@ -2,6 +2,7 @@ from office365.base_item import BaseItem
 from office365.onedrive.driveItem import DriveItem
 from office365.onedrive.driveItemCollection import DriveItemCollection
 from office365.onedrive.list import List
+from office365.onedrive.root_resource_path import RootResourcePath
 from office365.runtime.resource_path import ResourcePath
 
 
@@ -18,7 +19,7 @@ class Drive(BaseItem):
     @property
     def root(self):
         """The root folder of the drive."""
-        return self.properties.get('root', DriveItem(self.context, ResourcePath("root", self.resource_path)))
+        return self.properties.get('root', DriveItem(self.context, RootResourcePath(self.resource_path)))
 
     @property
     def list(self):
