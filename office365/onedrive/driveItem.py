@@ -1,4 +1,5 @@
 from office365.actions.search_query import create_search_query
+from office365.actions.upload_content_query import create_upload_content_query
 from office365.base_item import BaseItem
 from office365.directory.permission import Permission
 from office365.directory.permission_collection import PermissionCollection
@@ -7,7 +8,6 @@ from office365.onedrive.children_resource_path import ChildrenResourcePath
 from office365.onedrive.conflictBehavior import ConflictBehavior
 from office365.onedrive.driveItemVersion import DriveItemVersion
 from office365.onedrive.file import File
-from office365.onedrive.file_upload import ResumableFileUpload
 from office365.onedrive.fileSystemInfo import FileSystemInfo
 from office365.onedrive.folder import Folder
 from office365.onedrive.listItem import ListItem
@@ -15,6 +15,7 @@ from office365.onedrive.publicationFacet import PublicationFacet
 from office365.onedrive.root_resource_path import RootResourcePath
 from office365.onedrive.uploadSession import UploadSession
 from office365.excel.workbook import Workbook
+from office365.resource_path_url import ResourcePathUrl
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
@@ -25,6 +26,14 @@ from office365.runtime.resource_path import ResourcePath
 class DriveItem(BaseItem):
     """The driveItem resource represents a file, folder, or other item stored in a drive. All file system objects in
     OneDrive and SharePoint are returned as driveItem resources """
+
+    def get_by_path(self, url_path):
+        """
+        Retrieve DriveItem by path
+
+        :type url_path: str
+        """
+        return DriveItem(self.context, ResourcePathUrl(url_path, self.resource_path))
 
     def create_link(self, link_type, scope="", expiration_datetime=None, password=None, message=None):
         """
@@ -100,7 +109,7 @@ class DriveItem(BaseItem):
         self.context.add_query(qry)
         return self
 
-    def resumable_upload(self, source_path, chunk_size=1000000):
+    def resumable_upload(self, source_path, chunk_size=1000000, chunk_uploaded=None):
         """
         Create an upload session to allow your app to upload files up to the maximum file size.
         An upload session allows your app to upload ranges of the file in sequential API requests,
@@ -110,12 +119,14 @@ class DriveItem(BaseItem):
             Create an upload session
             Upload bytes to the upload session
 
+        :param chunk_uploaded:
         :param str source_path: Local file path
         :param int chunk_size: chunk size
         """
-        upload_query = ResumableFileUpload(self, source_path, chunk_size)
+        from office365.onedrive.file_upload import ResumableFileUpload
+        upload_query = ResumableFileUpload(self, source_path, chunk_size, chunk_uploaded)
         self.context.add_query(upload_query)
-        return upload_query.return_type
+        return upload_query.return_type.get()
 
     def create_upload_session(self, item):
         """Creates a temporary storage location where the bytes of the file will be saved until the complete file is
@@ -146,8 +157,7 @@ class DriveItem(BaseItem):
         :type content: str
         :rtype: DriveItem
         """
-        from office365.actions.upload_content_query import UploadContentQuery
-        qry = UploadContentQuery(self, name, content)
+        qry = create_upload_content_query(self, name, content)
         self.context.add_query(qry)
         return qry.return_type
 
@@ -306,8 +316,8 @@ class DriveItem(BaseItem):
         return self.is_property_available("folder")
 
     @property
-    def is_folder(self):
-        return self.is_property_available("folder")
+    def is_file(self):
+        return self.is_property_available("file")
 
     @property
     def children(self):
@@ -349,15 +359,18 @@ class DriveItem(BaseItem):
 
     def set_property(self, name, value, persist_changes=True):
         if self._resource_path is None and name == "id":
-            col_path = self.parent_collection.resource_path
-            if isinstance(col_path, ChildrenResourcePath):
-                parent_path = col_path.parent
-                if parent_path.segment == "root":
-                    self._resource_path = ResourcePath(value, ResourcePath("items", parent_path.parent))
-                elif parent_path.parent and parent_path.parent.segment == "items":
-                    self._resource_path = ResourcePath(value, parent_path.parent)
-
-            elif isinstance(col_path, RootResourcePath):
-                self._resource_path = ResourcePath(value, ResourcePath("items", col_path.parent))
+            self._resource_path = self._resolve_path(value)
         super(DriveItem, self).set_property(name, value, persist_changes)
         return self
+
+    def _resolve_path(self, item_id):
+        path = None
+        parent_path = self.parent_collection.resource_path
+        while path is None:
+            if isinstance(parent_path, ChildrenResourcePath) or isinstance(parent_path, ResourcePathUrl) or isinstance(parent_path, RootResourcePath):
+                parent_path = parent_path.parent
+            elif parent_path.segment == "items":
+                path = ResourcePath(item_id, parent_path)
+            else:
+                path = ResourcePath(item_id, ResourcePath("items", parent_path))
+        return path

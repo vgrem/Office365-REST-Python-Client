@@ -14,3 +14,7 @@ class ResourcePathUrl(ResourcePath):
     @property
     def delimiter_precedence(self):
         return 2
+
+    @property
+    def require_closing_delimiter(self):
+        return True

@@ -15,7 +15,7 @@ class ODataV4BatchRequest(ClientRequest):
 
         :type query: BatchQuery
         """
-        url = "{0}$batch".format(self.context.service_root_url())
+        url = "{0}/$batch".format(self.context.service_root_url())
         request = RequestOptions(url)
         request.method = HttpMethod.Post
         request.ensure_header('Content-Type', "application/json")
@@ -65,5 +65,5 @@ class ODataV4BatchRequest(ClientRequest):
         json["id"] = _id
         if depends_on is not None:
             json["dependsOn"] = depends_on
-        json["url"] = json["url"].replace(self.context.service_root_url(), "/")
+        json["url"] = json["url"].replace(self.context.service_root_url(), "")
         return json

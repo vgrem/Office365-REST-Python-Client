@@ -17,13 +17,20 @@ class ResourcePath(object):
         """
         current = self
         segments = []
+        if self.require_closing_delimiter:
+            segments.insert(0, current.delimiter)
+
         while current:
             segments.insert(0, current.segment)
             if current.parent:
-                if current.parent.delimiter_precedence > current.delimiter_precedence:
+                if current.delimiter_precedence == current.parent.delimiter_precedence:
+                    segments.insert(0, "/")
+                elif current.delimiter_precedence < current.parent.delimiter_precedence:
                     segments.insert(0, current.parent.delimiter)
                 else:
                     segments.insert(0, current.delimiter)
+            else:
+                segments.insert(0, current.delimiter)
             current = current.parent
         return "".join(segments)
 
@@ -42,3 +49,7 @@ class ResourcePath(object):
     @property
     def delimiter_precedence(self):
         return 1
+
+    @property
+    def require_closing_delimiter(self):
+        return False

@@ -19,7 +19,7 @@ class ODataBatchRequest(ClientRequest):
 
         :type query: office365.runtime.queries.client_query.BatchQuery
         """
-        url = "{0}$batch".format(self.context.service_root_url())
+        url = "{0}/$batch".format(self.context.service_root_url())
         request = RequestOptions(url)
         request.method = HttpMethod.Post
         media_type = "multipart/mixed"
@@ -147,3 +147,4 @@ class ODataBatchRequest(ClientRequest):
         message.add_header("Content-Transfer-Encoding", "binary")
         message.set_payload(payload)
         return message
+

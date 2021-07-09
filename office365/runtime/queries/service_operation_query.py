@@ -2,6 +2,12 @@ from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 
 
+def _save_url(url):
+    if url.endswith("/"):
+        return url
+    return url + "/"
+
+
 class ServiceOperationQuery(ClientQuery):
     def __init__(self, binding_type,
                  method_name=None,
@@ -27,11 +33,10 @@ class ServiceOperationQuery(ClientQuery):
         method_path = ResourcePathServiceOperation(self.method_name, self.method_parameters)
         self.binding_type.query_options.reset()
         if self.static:
-            url = self.context.service_root_url() + \
+            url = _save_url(self.context.service_root_url()) + \
                   '.'.join([self.binding_type.entity_type_name, method_path.to_url()])
         else:
-            delimiter = self.binding_type.resource_path.delimiter
-            url = delimiter.join([self.binding_type.resource_url, method_path.to_url()])
+            url = "".join([_save_url(self.binding_type.resource_url), method_path.to_url()])
         return url
 
     @property

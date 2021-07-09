@@ -7,7 +7,6 @@ class Attachment(Entity):
     @property
     def content_type(self):
         """
-
         :rtype: str or None
         """
         return self.properties.get("contentType", None)

@@ -107,14 +107,11 @@ class ClientContext(ClientRuntimeContext):
         """
         batch_request = ODataBatchRequest(self)
 
-        all_queries = [qry for qry in self.pending_request()]
-        # batch_qry = BatchQuery(self, all_queries)
-
         def _prepare_batch_request(request):
             self.ensure_form_digest(request)
-
         batch_request.beforeExecute += _prepare_batch_request
 
+        all_queries = [qry for qry in self.pending_request()]
         for i in range_or_xrange(0, len(all_queries), items_per_bulk):
             queries = all_queries[i:i + items_per_bulk]
             batch_qry = BatchQuery(self, queries)
@@ -145,7 +142,7 @@ class ClientContext(ClientRuntimeContext):
 
     def request_form_digest(self):
         """Request Form Digest"""
-        request = RequestOptions(self.service_root_url() + "contextInfo")
+        request = RequestOptions(self.service_root_url() + "/contextInfo")
         request.method = HttpMethod.Post
         response = self.execute_request_direct(request)
         json = response.json()
@@ -212,4 +209,4 @@ class ClientContext(ClientRuntimeContext):
         return self._auth_context
 
     def service_root_url(self):
-        return "{0}/_api/".format(self.base_url)
+        return "{0}/_api".format(self.base_url)

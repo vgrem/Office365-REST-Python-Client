@@ -15,3 +15,7 @@ class ResourcePathServiceOperation(ResourcePath):
         """
         super(ResourcePathServiceOperation, self).__init__(ODataPathParser.from_method(method_name, method_parameters),
                                                            parent)
+
+    @property
+    def delimiter(self):
+        return ""

@@ -1,9 +1,24 @@
 from office365.resource_path_url import ResourcePathUrl
+from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 
 
-class UploadContentQuery(ServiceOperationQuery):
-    def __init__(self, parent_entity, name, content):
-        from office365.onedrive.driveItem import DriveItem
-        return_type = DriveItem(parent_entity.context, ResourcePathUrl(name, parent_entity.resource_path))
-        super(UploadContentQuery, self).__init__(return_type, "content", None, content, None, return_type)
+def create_upload_content_query(folder_item, name, content=None):
+    """
+
+    :param office365.onedrive.driveItem.DriveItem folder_item: Folder (container)
+    :param str name: File name
+    :param str content: File content
+    """
+    from office365.onedrive.driveItem import DriveItem
+    file_item = DriveItem(folder_item.context, ResourcePathUrl(name, folder_item.resource_path))
+    qry = ServiceOperationQuery(file_item, "content", None, content, None, file_item)
+
+    def _modify_query(request):
+        """
+        :type request: office365.runtime.http.request_options.RequestOptions
+        """
+        request.method = HttpMethod.Put
+    folder_item.context.before_execute(_modify_query)
+    return qry
+

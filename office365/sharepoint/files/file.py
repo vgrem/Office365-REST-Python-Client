@@ -271,7 +271,7 @@ class File(AbstractFile):
         :type server_relative_url: str
         :type content: str
         """
-        url = r"{0}web/getFileByServerRelativePath(DecodedUrl='{1}')/\$value".format(
+        url = r"{0}/web/getFileByServerRelativePath(DecodedUrl='{1}')/\$value".format(
             ctx.service_root_url(), server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Post
@@ -289,8 +289,8 @@ class File(AbstractFile):
         :type server_relative_url: str
         :return Response
         """
-        url = r"{0}web/getFileByServerRelativePath(DecodedUrl='{1}')/\$value".format(ctx.service_root_url(),
-                                                                                     server_relative_url)
+        url = r"{0}/web/getFileByServerRelativePath(DecodedUrl='{1}')/\$value".format(ctx.service_root_url(),
+                                                                                      server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Get
         response = ctx.execute_request_direct(request)
@@ -317,8 +317,8 @@ class File(AbstractFile):
 
         def _download_inner():
             request = RequestOptions(
-                r"{0}web/getFileByServerRelativeUrl('{1}')/\$value".format(self.context.service_root_url(),
-                                                                           self.serverRelativeUrl))
+                r"{0}/web/getFileByServerRelativeUrl('{1}')/\$value".format(self.context.service_root_url(),
+                                                                            self.serverRelativeUrl))
             request.stream = True
             response = self.context.execute_request_direct(request)
             response.raise_for_status()

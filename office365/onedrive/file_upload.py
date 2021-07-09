@@ -1,9 +1,11 @@
 import os
 
-from office365.actions.upload_content_query import UploadContentQuery
+from office365.onedrive.driveItem import DriveItem
 from office365.onedrive.driveItemUploadableProperties import DriveItemUploadableProperties
+from office365.resource_path_url import ResourcePathUrl
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
+from office365.runtime.queries.client_query import ClientQuery
 
 
 def read_in_chunks(file_object, chunk_size=1024):
@@ -16,7 +18,7 @@ def read_in_chunks(file_object, chunk_size=1024):
         yield data
 
 
-class ResumableFileUpload(UploadContentQuery):
+class ResumableFileUpload(ClientQuery):
     """Create an upload session to allow your app to upload files up to the maximum file size. An upload session
     allows your app to upload ranges of the file in sequential API requests, which allows the transfer to be resumed
     if a connection is dropped while the upload is in progress. """
@@ -24,23 +26,24 @@ class ResumableFileUpload(UploadContentQuery):
     def __init__(self, target_folder, source_path, chunk_size=1024, chunk_uploaded=None):
         """
 
-        :type target_folder: office365.graph.onedrive.driveItem.DriveItem
+        :type target_folder: office365.onedrive.driveItem.DriveItem
         :type source_path: str
         :type chunk_size: int
         """
-        super(ResumableFileUpload, self).__init__(target_folder, os.path.basename(source_path), "")
+        super(ResumableFileUpload, self).__init__(target_folder.context, target_folder)
         self._chunk_size = chunk_size
-        self._source_path = source_path
-        self._file_name = os.path.basename(self._source_path)
         self._chunk_uploaded = chunk_uploaded
-        self._return_type.context.after_execute(self._execute_upload_session, True)
+        self._source_path = source_path
+        self._session_result = self._create_upload_session()
 
-    def _execute_upload_session(self, resp):
+    def _create_upload_session(self):
         item = DriveItemUploadableProperties()
-        item.name = self._file_name
-        self._session_result = self._return_type.create_upload_session(item)
-        self.context.execute_query()
+        item.name = self.file_name
+        result = self.return_type.create_upload_session(item)
+        self.context.after_execute(self._start_upload_session)
+        return result
 
+    def _start_upload_session(self, resp):
         fh = open(self._source_path, 'rb')
         st = os.stat(self._source_path)
         f_pos = 0
@@ -51,7 +54,17 @@ class ResumableFileUpload(UploadContentQuery):
             req.set_header('Content-Range', 'bytes {0}-{1}/{2}'.format(f_pos, (f_pos + len(piece) - 1), st.st_size))
             req.set_header('Accept', '*/*')
             req.data = piece
-            self.context.execute_request_direct(req)
+            resp = self.context.execute_request_direct(req)
+            # validate resp
+
             f_pos += len(piece)
             if callable(self._chunk_uploaded):
                 self._chunk_uploaded(f_pos)
+
+    @property
+    def file_name(self):
+        return os.path.basename(self._source_path)
+
+    @property
+    def return_type(self):
+        return DriveItem(self.context, ResourcePathUrl(self.file_name, self.binding_type.resource_path))

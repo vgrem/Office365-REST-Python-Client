@@ -1,5 +1,4 @@
 from office365.actions.download_content_query import DownloadContentQuery
-from office365.actions.upload_content_query import UploadContentQuery
 from office365.directory.applicationCollection import ApplicationCollection
 from office365.directory.directory import Directory
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
@@ -63,7 +62,7 @@ class GraphClient(ClientRuntimeContext):
         return self._pending_request
 
     def service_root_url(self):
-        return "https://graph.microsoft.com/v1.0/"
+        return "https://graph.microsoft.com/v1.0"
 
     def _build_specific_query(self, request):
         """
@@ -78,8 +77,6 @@ class GraphClient(ClientRuntimeContext):
             request.method = HttpMethod.Delete
         if isinstance(query, DownloadContentQuery):
             request.method = HttpMethod.Get
-        elif isinstance(query, UploadContentQuery):
-            request.method = HttpMethod.Put
 
     def authenticate_request(self, request):
         """

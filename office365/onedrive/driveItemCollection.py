@@ -1,6 +1,5 @@
 from office365.entity_collection import EntityCollection
 from office365.onedrive.driveItem import DriveItem
-from office365.resource_path_url import ResourcePathUrl
 from office365.runtime.resource_path import ResourcePath
 
 
@@ -13,7 +12,3 @@ class DriveItemCollection(EntityCollection):
     def get_by_id(self, _id):
         """Retrieve DriveItem by id"""
         return DriveItem(self.context, ResourcePath(_id, self.resource_path))
-
-    def get_by_url(self, url):
-        """Retrieve DriveItem by url"""
-        return DriveItem(self.context, ResourcePathUrl(url, self.resource_path))
