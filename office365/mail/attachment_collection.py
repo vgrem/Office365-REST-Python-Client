@@ -4,7 +4,6 @@ from office365.entity_collection import EntityCollection
 from office365.mail.attachment import Attachment
 from office365.mail.attachment_item import AttachmentItem
 from office365.mail.attachment_type import AttachmentType
-from office365.onedrive.file_upload import ResumableFileUpload
 from office365.onedrive.uploadSession import UploadSession
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery

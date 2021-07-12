@@ -87,42 +87,42 @@ class ClientRequest(object):
         self.context.authenticate_request(request_options)
         if request_options.method == HttpMethod.Post:
             if request_options.is_bytes or request_options.is_file:
-                result = requests.post(url=request_options.url,
-                                       headers=request_options.headers,
-                                       data=request_options.data,
-                                       auth=request_options.auth,
-                                       verify=request_options.verify)
+                response = requests.post(url=request_options.url,
+                                         headers=request_options.headers,
+                                         data=request_options.data,
+                                         auth=request_options.auth,
+                                         verify=request_options.verify)
             else:
-                result = requests.post(url=request_options.url,
+                response = requests.post(url=request_options.url,
+                                         headers=request_options.headers,
+                                         json=request_options.data,
+                                         auth=request_options.auth,
+                                         verify=request_options.verify)
+        elif request_options.method == HttpMethod.Patch:
+            response = requests.patch(url=request_options.url,
+                                      headers=request_options.headers,
+                                      json=request_options.data,
+                                      auth=request_options.auth,
+                                      verify=request_options.verify)
+        elif request_options.method == HttpMethod.Delete:
+            response = requests.delete(url=request_options.url,
                                        headers=request_options.headers,
-                                       json=request_options.data,
                                        auth=request_options.auth,
                                        verify=request_options.verify)
-        elif request_options.method == HttpMethod.Patch:
-            result = requests.patch(url=request_options.url,
+        elif request_options.method == HttpMethod.Put:
+            response = requests.put(url=request_options.url,
+                                    data=request_options.data,
                                     headers=request_options.headers,
-                                    json=request_options.data,
                                     auth=request_options.auth,
                                     verify=request_options.verify)
-        elif request_options.method == HttpMethod.Delete:
-            result = requests.delete(url=request_options.url,
-                                     headers=request_options.headers,
-                                     auth=request_options.auth,
-                                     verify=request_options.verify)
-        elif request_options.method == HttpMethod.Put:
-            result = requests.put(url=request_options.url,
-                                  data=request_options.data,
-                                  headers=request_options.headers,
-                                  auth=request_options.auth,
-                                  verify=request_options.verify)
         else:
-            result = requests.get(url=request_options.url,
-                                  headers=request_options.headers,
-                                  auth=request_options.auth,
-                                  verify=request_options.verify,
-                                  stream=request_options.stream,
-                                  proxies=request_options.proxies)
-        return result
+            response = requests.get(url=request_options.url,
+                                    headers=request_options.headers,
+                                    auth=request_options.auth,
+                                    verify=request_options.verify,
+                                    stream=request_options.stream,
+                                    proxies=request_options.proxies)
+        return response
 
     def __iter__(self):
         while len(self._queries) > 0:

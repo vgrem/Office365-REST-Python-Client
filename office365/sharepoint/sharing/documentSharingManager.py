@@ -21,6 +21,7 @@ class DocumentSharingManager(BaseEntity):
         :param int role: A Role value for which to obtain the associated role definition object.
         """
         role_def = RoleDefinition(self.context)
+        self.context.web.role_definitions.add_child(role_def)
         qry = ServiceOperationQuery(self, "GetRoleDefinition", [role], None, None, role_def)
         qry.static = True
         self.context.add_query(qry)

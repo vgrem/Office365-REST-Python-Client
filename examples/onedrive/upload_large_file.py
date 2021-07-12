@@ -8,8 +8,8 @@ folder_item = client.me.drive.root.get_by_path("archive")
 local_path = "../../tests/data/big_buck_bunny.mp4"
 
 
-def print_progress(pos):
-    print("{0} bytes uploaded".format(pos))
+def print_progress(range_pos):
+    print("{0} bytes uploaded".format(range_pos))
 
 
 # upload a file

@@ -15,6 +15,7 @@ class RoleDefinitionCollection(BaseEntityCollection):
         """
 
         role_def = RoleDefinition(self.context)
+        self.add_child(role_def)
         qry = ServiceOperationQuery(self, "GetByType", [role_type], None, None, role_def)
         self.context.add_query(qry)
         return role_def

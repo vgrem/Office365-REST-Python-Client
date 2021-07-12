@@ -4,18 +4,7 @@ from office365.onedrive.driveItem import DriveItem
 from office365.onedrive.driveItemUploadableProperties import DriveItemUploadableProperties
 from office365.resource_path_url import ResourcePathUrl
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.queries.client_query import ClientQuery
-
-
-def read_in_chunks(file_object, chunk_size=1024):
-    """Lazy function (generator) to read a file piece by piece.
-    Default chunk size: 1k."""
-    while True:
-        data = file_object.read(chunk_size)
-        if not data:
-            break
-        yield data
 
 
 class ResumableFileUpload(ClientQuery):
@@ -31,35 +20,63 @@ class ResumableFileUpload(ClientQuery):
         :type chunk_size: int
         """
         super(ResumableFileUpload, self).__init__(target_folder.context, target_folder)
+        self._file_handle = None
         self._chunk_size = chunk_size
+        self._range_start = 0
+        self._range_end = 0
+        self._range_data = None
         self._chunk_uploaded = chunk_uploaded
         self._source_path = source_path
         self._session_result = self._create_upload_session()
+        self._range_queries = []
+        self._read_completed = False
 
     def _create_upload_session(self):
         item = DriveItemUploadableProperties()
         item.name = self.file_name
         result = self.return_type.create_upload_session(item)
-        self.context.after_execute(self._start_upload_session)
+        self.context.after_execute(self._create_next_range_query)
         return result
 
-    def _start_upload_session(self, resp):
-        fh = open(self._source_path, 'rb')
-        st = os.stat(self._source_path)
-        f_pos = 0
-        for piece in read_in_chunks(fh, chunk_size=self._chunk_size):
-            req = RequestOptions(self._session_result.value.uploadUrl)
-            req.method = HttpMethod.Put
-            req.set_header('Content-Length', str(len(piece)))
-            req.set_header('Content-Range', 'bytes {0}-{1}/{2}'.format(f_pos, (f_pos + len(piece) - 1), st.st_size))
-            req.set_header('Accept', '*/*')
-            req.data = piece
-            resp = self.context.execute_request_direct(req)
-            # validate resp
+    def _create_next_range_query(self, resp):
+        if self._read_next_chunk():
+            qry = ClientQuery(self.context, self.return_type)
+            self.context.before_execute(self._construct_range_request)
+            self.context.after_execute(self._create_next_range_query)
+            self.context.after_execute(self._notify_after_uploaded)
+            self.context.add_query(qry, True)
 
-            f_pos += len(piece)
-            if callable(self._chunk_uploaded):
-                self._chunk_uploaded(f_pos)
+    def _construct_range_request(self, request):
+        request.url = self._session_result.value.uploadUrl
+        request.method = HttpMethod.Put
+        request.set_header('Content-Length', str(len(self._range_data)))
+        request.set_header('Content-Range', 'bytes {0}-{1}/{2}'.format(self._range_start, self._range_end - 1, self.file_size))
+        request.set_header('Accept', '*/*')
+        request.data = self._range_data
+
+    def _notify_after_uploaded(self, response):
+        response.raise_for_status()
+        if callable(self._chunk_uploaded):
+            self._chunk_uploaded(self._range_end)
+
+    def _read_next_chunk(self):
+        if self._read_completed:
+            return False
+        if self._file_handle is None:
+            self._file_handle = open(self._source_path, 'rb')
+        self._range_start = self._file_handle.tell()
+        self._range_data = self._file_handle.read(self._chunk_size)
+        if not self._range_data:
+            return False
+        self._range_end = self._file_handle.tell()
+        if self._range_end >= self.file_size:
+            self._file_handle.close()
+            self._read_completed = True
+        return True
+
+    @property
+    def file_size(self):
+        return os.stat(self._source_path).st_size
 
     @property
     def file_name(self):

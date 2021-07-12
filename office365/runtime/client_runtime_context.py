@@ -12,7 +12,6 @@ class ClientRuntimeContext(object):
         Client runtime context
         """
         self._current_query = None
-        self._prev_query = None
 
     def build_single_request(self, query):
         """
@@ -51,9 +50,7 @@ class ClientRuntimeContext(object):
                     success_callback(self.current_query.return_type)
                 break
             except ClientRequestException:
-                self._prev_query = self.current_query
-                self.add_query(self.current_query)
-                self._prev_query = None
+                self.add_query(self.current_query, True)
                 sleep(timeout_secs)
                 if callable(failure_callback):
                     failure_callback(retry)
@@ -83,60 +80,62 @@ class ClientRuntimeContext(object):
         :type client_object: office365.runtime.client_object.ClientObject
         """
         qry = ReadEntityQuery(client_object, properties_to_retrieve)
-        self.pending_request().add_query(qry)
+        self.add_query(qry)
         return qry
 
-    def before_execute(self, action, once=True):
+    def before_execute(self, action, once=True, *args, **kwargs):
         """
         Attach an event handler which is triggered before request is submitted to server
 
-        :param (RequestOptions) -> None action:
+        :param (RequestOptions, any) -> None action:
         :param bool once:
         :return: None
         """
         def _process_request(request):
             if once:
                 self.pending_request().beforeExecute -= _process_request
-            action(request)
+            action(request, *args, **kwargs)
         self.pending_request().beforeExecute += _process_request
 
-    def before_execute_query(self, action):
+    def before_query_execute(self, query, action, *args, **kwargs):
         """
         Attach an event handler which is triggered before query is submitted to server
 
-        :param (RequestOptions) -> None action:
+        :type query: office365.runtime.queries.client_query.ClientQuery
+        :type action: (Response, Any) -> None
         :return: None
         """
-        def _prepare_request(request):
-            qry = self.current_query
-            action(qry)
-        self.pending_request().beforeExecute += _prepare_request
 
-    def execute_after_query(self, query, action):
+        def _process_request(req):
+            if self.current_query.id == query.id:
+                action(*args, **kwargs)
+            else:
+                self.before_execute(_process_request, True)
+
+        self.before_execute(_process_request, True)
+
+    def after_query_execute(self, query, action, *args, **kwargs):
         """
         Attach an event handler which is triggered after query is submitted to server
 
         :type query: office365.runtime.queries.client_query.ClientQuery
-        :type action: () -> None
+        :type action: (Response, Any) -> None
         :return: None
         """
 
-        def _process_query(resp):
-            current_query = self.current_query
-            if current_query.id == query.id:
-                self._prev_query = query
-                action()
-                self._prev_query = None
+        def _process_response(resp):
+            if self.current_query.id == query.id:
+                action(*args, **kwargs)
             else:
-                self.after_execute(_process_query, True)
+                self.after_execute(_process_response, True)
 
-        self.after_execute(_process_query, True)
+        self.after_execute(_process_response, True)
 
-    def after_execute(self, action, once=True):
+    def after_execute(self, action, once=True, *args, **kwargs):
         """
         Attach an event handler which is triggered after request is submitted to server
 
-        :param (RequestOptions) -> None action:
+        :param (RequestOptions, any) -> None action:
         :param bool once:
         :return: None
         """
@@ -144,7 +143,7 @@ class ClientRuntimeContext(object):
         def _process_response(response):
             if once:
                 self.pending_request().afterExecute -= _process_response
-            action(response)
+            action(response, *args, **kwargs)
 
         self.pending_request().afterExecute += _process_response
 
@@ -159,13 +158,14 @@ class ClientRuntimeContext(object):
             self._current_query = qry
             self.pending_request().execute_query(qry)
 
-    def add_query(self, query):
+    def add_query(self, query, to_begin=False):
         """
         Adds query to internal queue
 
         :type query: ClientQuery
+        :type to_begin: bool
         """
-        self.pending_request().add_query(query, self._prev_query is not None)
+        self.pending_request().add_query(query, to_begin)
 
     def remove_query(self, query):
         self.pending_request().remove_query(query)

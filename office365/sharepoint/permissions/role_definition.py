@@ -1,3 +1,4 @@
+from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.base_entity import BaseEntity
 
 
@@ -35,3 +36,10 @@ class RoleDefinition(BaseEntity):
     def description(self, value):
         """Gets or sets a value that specifies the description of the role definition."""
         self.set_property('Description', value)
+
+    def set_property(self, name, value, persist_changes=True):
+        if self.resource_path is None:
+            if name == "Id":
+                self._resource_path = ResourcePathServiceOperation(
+                    "GetById", [value], self._parent_collection.resource_path)
+        return super(RoleDefinition, self).set_property(name, value, persist_changes)
