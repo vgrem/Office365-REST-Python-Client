@@ -55,8 +55,8 @@ class GraphClient(ClientRuntimeContext):
         """Construct and submit a batch request"""
         batch_request = ODataV4BatchRequest(self)
         queries = [qry for qry in self.pending_request()]
-        batch_qry = BatchQuery(self, queries)  # Aggregate requests into batch request
-        batch_request.execute_query(batch_qry)
+        batch_request.add_query(BatchQuery(self, queries))  # Aggregate requests into batch request
+        batch_request.execute_query()
 
     def pending_request(self):
         return self._pending_request

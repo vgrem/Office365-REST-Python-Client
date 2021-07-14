@@ -12,12 +12,13 @@ class ClientRequest(object):
 
     def __init__(self, context):
         """
-        Base request for OData/REST service
+        Abstract request client for OData/REST/CSOM services
 
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         """
         self._context = context
         self._queries = []
+        self._current_query = None
         self.beforeExecute = EventHandler()
         self.afterExecute = EventHandler()
 
@@ -32,49 +33,56 @@ class ClientRequest(object):
         """
         return self._queries
 
+    @property
+    def current_query(self):
+        """
+        :rtype: office365.runtime.queries.client_query.ClientQuery
+        """
+        return self._current_query
+
     def add_query(self, query, to_begin=False):
         """
         :type to_begin: bool
         :type query: office365.runtime.queries.client_query.ClientQuery
         """
+        self._current_query = query
         if to_begin:
             self._queries.insert(0, query)
         else:
             self._queries.append(query)
 
-    def remove_query(self, query):
+    def build_single_request(self, query):
         """
-        :type query: office365.runtime.queries.client_query.ClientQuery
+
+        :type: office365.runtime.queries.client_query.ClientQuery
         """
-        self._queries.remove(query)
+        self._current_query = query
+        return self.build_request()
 
     @abstractmethod
-    def build_request(self, query):
+    def build_request(self):
         """
-        :type query: office365.runtime.queries.client_query.ClientQuery
         :rtype: office365.runtime.http.request_options.RequestOptions
         """
         pass
 
     @abstractmethod
-    def process_response(self, response, query):
+    def process_response(self, response):
         """
         :type response: requests.Response
-        :type query: office365.runtime.queries.client_query.ClientQuery
         """
         pass
 
-    def execute_query(self, query):
-        """Submit a pending request to the server
-
-        :type query: office365.runtime.queries.client_query.ClientQuery
+    def execute_query(self):
+        """
+        Submit a pending request to the server
         """
         try:
-            request = self.build_request(query)
+            request = self.build_request()
             self.beforeExecute.notify(request)
             response = self.execute_request_direct(request)
             response.raise_for_status()
-            self.process_response(response, query)
+            self.process_response(response)
             self.afterExecute.notify(response)
         except HTTPError as e:
             raise ClientRequestException(*e.args, response=e.response)
@@ -127,4 +135,5 @@ class ClientRequest(object):
     def __iter__(self):
         while len(self._queries) > 0:
             qry = self._queries.pop(0)
+            self._current_query = qry
             yield qry

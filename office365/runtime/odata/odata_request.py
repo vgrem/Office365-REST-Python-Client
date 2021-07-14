@@ -35,11 +35,8 @@ class ODataRequest(ClientRequest):
         self.ensure_media_type(request)
         return super(ODataRequest, self).execute_request_direct(request)
 
-    def build_request(self, query):
-        """
-
-        :type query: office365.runtime.queries.client_query.ClientQuery
-        """
+    def build_request(self):
+        query = self.context.current_query
         action_url = query.build_url()
         request = RequestOptions(action_url)
         self.ensure_media_type(request)
@@ -61,11 +58,11 @@ class ODataRequest(ClientRequest):
         request.ensure_header('Content-Type', media_type)
         request.ensure_header('Accept', media_type)
 
-    def process_response(self, response, query):
+    def process_response(self, response):
         """
         :type response: requests.Response
-        :type query: office365.runtime.queries.client_query.ClientQuery
         """
+        query = self.context.current_query
         return_type = query.return_type
         if isinstance(return_type, ClientObject):
             return_type.clear()

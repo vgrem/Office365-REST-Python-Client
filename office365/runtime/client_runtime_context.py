@@ -7,31 +7,15 @@ from office365.runtime.queries.read_entity_query import ReadEntityQuery
 
 class ClientRuntimeContext(object):
 
-    def __init__(self):
-        """
-        Client runtime context
-        """
-        self._current_query = None
+    def build_request(self):
+        return self.pending_request().build_request()
 
     def build_single_request(self, query):
         """
 
         :type: office365.runtime.queries.client_query.ClientQuery
         """
-        self._current_query = query
-        return self.pending_request().build_request(query)
-
-    def build_request(self):
-        if self._current_query is None:
-            self._current_query = next(iter(self.pending_request()))
-        return self.build_single_request(self.current_query)
-
-    @property
-    def current_query(self):
-        """
-        :rtype: office365.runtime.queries.client_query.ClientQuery
-        """
-        return self._current_query
+        return self.pending_request().build_single_request(query)
 
     def execute_query_retry(self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None):
         """
@@ -155,20 +139,17 @@ class ClientRuntimeContext(object):
 
     def execute_query(self):
         for qry in self.pending_request():
-            self._current_query = qry
-            self.pending_request().execute_query(qry)
+            self.pending_request().execute_query()
 
     def add_query(self, query, to_begin=False):
-        """
-        Adds query to internal queue
-
-        :type query: ClientQuery
-        :type to_begin: bool
-        """
         self.pending_request().add_query(query, to_begin)
-
-    def remove_query(self, query):
-        self.pending_request().remove_query(query)
 
     def clear_queries(self):
         self.pending_request().queries.clear()
+
+    @property
+    def current_query(self):
+        """
+        :rtype: office365.runtime.queries.client_query.ClientQuery
+        """
+        return self.pending_request().current_query
