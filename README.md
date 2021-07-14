@@ -127,7 +127,7 @@ The list of examples:
   -  [create a list item](examples/sharepoint/lists_and_items/data_generator.py)
   -  [read a list item](examples/sharepoint/lists_and_items/read_large_list.py)   
   -  [update a list item](examples/sharepoint/lists_and_items/update_items_batch.py)
-  -  delete a list item 
+  -  [delete a list item](examples/sharepoint/lists_and_items/delete_list_item.py) 
   
 
 # Working with Outlook API
