@@ -110,34 +110,31 @@ class ClientObject(object):
             self._properties[name] = value
         return self
 
-    def ensure_property(self, name, action=None):
+    def ensure_property(self, name, action, *args, **kwargs):
         """
         Ensures if property is loaded
 
         :type action: () -> None
         :type name: str
         """
-        return self.ensure_properties([name], action)
+        return self.ensure_properties([name], action, *args, **kwargs)
 
-    def ensure_properties(self, names, action):
+    def ensure_properties(self, names, action, *args, **kwargs):
         """
         Ensure if list of properties are loaded
 
-        :type action: () -> None
+        :type action: (any) -> None
         :type names: str or list[str]
         """
-        def _exec_action():
-            if callable(action):
-                action()
 
         names_to_include = [n for n in names if not self.is_property_available(n)]
         if len(names_to_include) > 0:
             from office365.runtime.queries.read_entity_query import ReadEntityQuery
             qry = ReadEntityQuery(self, names_to_include)
             self.context.add_query(qry)
-            self.context.after_query_execute(qry, _exec_action)
+            self.context.after_query_execute(qry, action, *args, **kwargs)
         else:
-            _exec_action()
+            action(*args, **kwargs)
         return self
 
     def clone_object(self):

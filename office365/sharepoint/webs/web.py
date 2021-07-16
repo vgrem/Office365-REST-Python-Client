@@ -1,11 +1,9 @@
 # coding=utf-8
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.sharepoint.actions.getWebUrlFromPage import create_get_web_url_from_page_url_query
 from office365.sharepoint.alerts.alert_collection import AlertCollection
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.clientsidecomponent.types import SPClientSideComponentQueryResult
@@ -82,9 +80,14 @@ class Web(SecurableObject):
         :type context: office365.sharepoint.client_context.ClientContext
         :type page_full_url: str
         """
-        qry = create_get_web_url_from_page_url_query(context, page_full_url)
+        result = ClientResult(context)
+        payload = {
+            "pageFullUrl": page_full_url
+        }
+        qry = ServiceOperationQuery(context.web, "GetWebUrlFromPageUrl", None, payload, None, result)
+        qry.static = True
         context.add_query(qry)
-        return qry.return_type
+        return result
 
     def get_all_client_side_components(self):
         result = ClientResult(self.context)
@@ -92,10 +95,10 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return result
 
-    def get_client_side_web_parts(self, project, includeErrors=False):
+    def get_client_side_web_parts(self, project, include_errors=False):
         result = ClientValueCollection(SPClientSideComponentQueryResult)
         params = {
-            "includeErrors": includeErrors,
+            "includeErrors": include_errors,
             "project": project
         }
         qry = ServiceOperationQuery(self, "getClientSideWebParts", None, params, None, result)
@@ -140,29 +143,33 @@ class Web(SecurableObject):
         return result
 
     def get_all_webs(self):
-        """Returns a collection containing a flat list of all Web objects in the Web object."""
-        result = ClientResult(self.context, self.webs)
-        qry = ClientQuery(self.context, self.webs, None, None, result)
-        self.context.add_query(qry)
+        """Returns a collection containing a flat list of all Web objects in the Web."""
+        from office365.sharepoint.webs.web_collection import WebCollection
+        result = ClientResult(self.context, WebCollection(self.context, self.webs.resource_path))
 
-        def _load_sub_webs(resp):
-            self._load_sub_webs_inner(result.value)
+        def _webs_loaded():
+            self._load_sub_webs_inner(self.webs, result)
 
-        self.context.after_execute(_load_sub_webs)
+        self.ensure_property("Webs", _webs_loaded)
         return result
 
-    def _load_sub_webs_inner(self, webs, result=None):
-        if result is None:
-            result = webs
-        for parent_web in webs:
-            sub_webs = parent_web.webs
-            self.context.load(sub_webs)
-            self.context.execute_query()
-            for web in sub_webs:
-                result.add_child(web)
-            self._load_sub_webs_inner(sub_webs, result)
+    def _load_sub_webs_inner(self, webs, result):
+        """
+        :type webs: office365.sharepoint.webs.web_collection.WebCollection
+        :type result: ClientResult
+        """
+        for cur_web in webs:  # type: Web
+            result.value.add_child(cur_web)
+
+            def _webs_loaded(web):
+                if len(web.webs) > 0:
+                    self._load_sub_webs_inner(web.webs, result)
+            cur_web.ensure_property("Webs", _webs_loaded, cur_web)
 
     def get_list_using_path(self, decoded_url):
+        """
+        :type decoded_url: str
+        """
         return_list = List(self.context)
         self.lists.add_child(return_list)
         from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
@@ -176,9 +183,12 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
-    def get_sharing_link_data(self, linkUrl):
+    def get_sharing_link_data(self, link_url):
+        """
+        :type link_url: str
+        """
         result = SharingLinkData()
-        qry = ServiceOperationQuery(self, "GetSharingLinkData", [linkUrl], None, None, result)
+        qry = ServiceOperationQuery(self, "GetSharingLinkData", [link_url], None, None, result)
         self.context.add_query(qry)
         return result
 
@@ -467,6 +477,7 @@ class Web(SecurableObject):
 
         def _web_initialized():
             result.value = Web.unshare_object(self.context, self.url)
+
         self.ensure_property("Url", _web_initialized)
         return result.value
 

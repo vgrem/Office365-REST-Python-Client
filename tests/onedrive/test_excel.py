@@ -28,12 +28,12 @@ class TestExcel(GraphTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.target_item.delete_object().execute_query()
+        cls.target_item.delete_object().execute_query_retry()
 
     def test1_get_workbook(self):
-        workbook = self.__class__.target_item.workbook.get().execute_query()
+        workbook = self.__class__.target_item.workbook.get().execute_query_retry()
         self.assertIsNotNone(workbook.resource_path)
 
     def test2_list_workbook_tables(self):
-        tables = self.__class__.target_item.workbook.tables.get().execute_query()
+        tables = self.__class__.target_item.workbook.tables.get().execute_query_retry()
         self.assertIsNotNone(tables.resource_path)

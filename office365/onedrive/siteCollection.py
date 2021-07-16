@@ -14,6 +14,4 @@ class SiteCollection(EntityCollection):
         """If present, indicates that this is a root site collection in SharePoint."""
         root_site = self.properties.get('root',
                                         Site(self.context, RootResourcePath(self.resource_path)))
-
-        root_site.ensure_property("id")
         return root_site
