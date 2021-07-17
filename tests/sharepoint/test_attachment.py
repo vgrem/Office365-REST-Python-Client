@@ -11,7 +11,7 @@ from office365.sharepoint.lists.list_template_type import ListTemplateType
 
 
 class TestListItemAttachment(SPTestCase):
-    attachment_file_name = "SharePoint User Guide.docx"
+    attachment_file_name = "Sample.txt"
     target_item = None  # type: ListItem
     attachment_path = "{0}/../data/{1}".format(os.path.dirname(__file__), attachment_file_name)
 

@@ -1,8 +1,6 @@
 from office365.directory.identitySet import IdentitySet
 from office365.entity import Entity
 from office365.onedrive.sharingInvitation import SharingInvitation
-from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
-from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 
 
 class Permission(Entity):

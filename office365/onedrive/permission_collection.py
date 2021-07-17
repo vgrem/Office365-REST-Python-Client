@@ -1,4 +1,4 @@
-from office365.directory.permission import Permission
+from office365.onedrive.permission import Permission
 from office365.entity_collection import EntityCollection
 
 

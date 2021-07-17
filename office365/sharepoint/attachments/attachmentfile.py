@@ -1,7 +1,7 @@
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.actions.download_file import DownloadFileQuery
-from office365.sharepoint.actions.upload_file import UploadFileQuery
+from office365.sharepoint.actions.upload_file import create_upload_file_query
 from office365.sharepoint.files.file import AbstractFile
 
 
@@ -28,7 +28,8 @@ class AttachmentFile(AbstractFile):
         """
 
         def _upload_inner():
-            qry = UploadFileQuery(self.context.web, self.server_relative_url, file_object)
+            target_file = self.context.web.get_file_by_server_relative_url(self.server_relative_url)
+            qry = create_upload_file_query(target_file, file_object)
             self.context.add_query(qry)
 
         self.ensure_property("ServerRelativeUrl", _upload_inner)

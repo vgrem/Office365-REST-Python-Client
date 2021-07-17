@@ -135,7 +135,7 @@ class GraphClient(ClientRuntimeContext):
         return TeamCollection(self, ResourcePath("teams"))
 
     @property
-    def groupSettingTemplates(self):
+    def group_setting_templates(self):
         """Get teams"""
         return GroupSettingTemplateCollection(self, ResourcePath("groupSettingTemplates"))
 

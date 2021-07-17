@@ -4,11 +4,19 @@ from office365.onedrive.contentTypeCollection import ContentTypeCollection
 from office365.onedrive.drive import Drive
 from office365.onedrive.driveCollection import DriveCollection
 from office365.onedrive.listCollection import ListCollection
+from office365.onedrive.listItemCollection import ListItemCollection
+from office365.onedrive.permission_collection import PermissionCollection
 from office365.runtime.resource_path import ResourcePath
 
 
 class Site(BaseItem):
     """The site resource provides metadata and relationships for a SharePoint site. """
+
+    @property
+    def items(self):
+        """Used to address any item contained in this site. This collection cannot be enumerated."""
+        return self.properties.get('items',
+                                   ListItemCollection(self.context, ResourcePath("items", self.resource_path)))
 
     @property
     def columns(self):
@@ -18,7 +26,7 @@ class Site(BaseItem):
                                                               ResourcePath("columns", self.resource_path)))
 
     @property
-    def contentTypes(self):
+    def content_types(self):
         """The collection of content types under this site."""
         return self.properties.get('contentTypes',
                                    ContentTypeCollection(self.context,
@@ -29,6 +37,12 @@ class Site(BaseItem):
         """The collection of lists under this site."""
         return self.properties.get('lists',
                                    ListCollection(self.context, ResourcePath("lists", self.resource_path)))
+
+    @property
+    def permissions(self):
+        """The collection of lists under this site."""
+        return self.properties.get('permissions',
+                                   PermissionCollection(self.context, ResourcePath("permissions", self.resource_path)))
 
     @property
     def drive(self):
