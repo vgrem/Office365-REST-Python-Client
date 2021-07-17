@@ -1,4 +1,3 @@
-from office365.actions.download_content_query import DownloadContentQuery
 from office365.directory.applicationCollection import ApplicationCollection
 from office365.directory.directory import Directory
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
@@ -75,8 +74,6 @@ class GraphClient(ClientRuntimeContext):
             request.method = HttpMethod.Patch
         elif isinstance(query, DeleteEntityQuery):
             request.method = HttpMethod.Delete
-        if isinstance(query, DownloadContentQuery):
-            request.method = HttpMethod.Get
 
     def authenticate_request(self, request):
         """

@@ -1,5 +1,5 @@
 from office365.actions.search_query import create_search_query
-from office365.actions.upload_content_query import create_upload_content_query
+from office365.onedrive.actions.upload_content_query import create_upload_content_query
 from office365.base_item import BaseItem
 from office365.directory.permission import Permission
 from office365.directory.permission_collection import PermissionCollection
@@ -164,8 +164,8 @@ class DriveItem(BaseItem):
     def get_content(self):
         """Download the contents of the primary stream (file) of a DriveItem. Only driveItems with the file property
         can be downloaded. """
-        from office365.graph_client import DownloadContentQuery
-        qry = DownloadContentQuery(self)
+        from office365.onedrive.actions.download_content_query import create_download_content_query
+        qry = create_download_content_query(self)
         self.context.add_query(qry)
         return qry.return_type
 
@@ -204,8 +204,8 @@ class DriveItem(BaseItem):
         :type format_name: str
         :rtype: ClientResult
         """
-        from office365.graph_client import DownloadContentQuery
-        qry = DownloadContentQuery(self, format_name)
+        from office365.onedrive.actions.download_content_query import create_download_content_query
+        qry = create_download_content_query(self, format_name)
         self.context.add_query(qry)
         return qry.return_type
 
