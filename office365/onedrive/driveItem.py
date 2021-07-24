@@ -1,6 +1,7 @@
-from office365.actions.search_query import create_search_query
+from office365.onedrive.actions.search_query import create_search_query
 from office365.onedrive.actions.upload_content_query import create_upload_content_query
 from office365.base_item import BaseItem
+from office365.onedrive.itemAnalytics import ItemAnalytics
 from office365.onedrive.permission import Permission
 from office365.onedrive.permission_collection import PermissionCollection
 from office365.entity_collection import EntityCollection
@@ -123,7 +124,7 @@ class DriveItem(BaseItem):
         :param str source_path: Local file path
         :param int chunk_size: chunk size
         """
-        from office365.onedrive.file_upload import ResumableFileUpload
+        from office365.onedrive.actions.file_upload_query import ResumableFileUpload
         upload_query = ResumableFileUpload(self, source_path, chunk_size, chunk_uploaded)
         self.context.add_query(upload_query)
         return upload_query.return_type.get()
@@ -356,6 +357,12 @@ class DriveItem(BaseItem):
         return self.properties.get('versions',
                                    EntityCollection(self.context, DriveItemVersion,
                                                     ResourcePath("versions", self.resource_path)))
+
+    @property
+    def analytics(self):
+        """Analytics about the view activities that took place on this item."""
+        return self.properties.get('analytics',
+                                   ItemAnalytics(self.context, ResourcePath("analytics", self.resource_path)))
 
     def set_property(self, name, value, persist_changes=True):
         if self._resource_path is None and name == "id":

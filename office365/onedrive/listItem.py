@@ -1,6 +1,8 @@
 from office365.base_item import BaseItem
 from office365.entity_collection import EntityCollection
+from office365.onedrive.contentTypeInfo import ContentTypeInfo
 from office365.onedrive.fieldValueSet import FieldValueSet
+from office365.onedrive.itemAnalytics import ItemAnalytics
 from office365.onedrive.listItemVersion import ListItemVersion
 from office365.runtime.resource_path import ResourcePath
 
@@ -27,3 +29,15 @@ class ListItem(BaseItem):
         """For document libraries, the driveItem relationship exposes the listItem as a driveItem."""
         from office365.onedrive.driveItem import DriveItem
         return self.properties.get('driveItem', DriveItem(self.context, ResourcePath("driveItem", self.resource_path)))
+
+    @property
+    def content_type(self):
+        """The content type of this list item"""
+        return self.properties.get("contentType", ContentTypeInfo())
+
+    @property
+    def analytics(self):
+        """Analytics about the view activities that took place on this item."""
+        return self.properties.get('analytics',
+                                   ItemAnalytics(self.context, ResourcePath("analytics", self.resource_path)))
+

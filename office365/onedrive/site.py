@@ -3,6 +3,7 @@ from office365.onedrive.columnDefinitionCollection import ColumnDefinitionCollec
 from office365.onedrive.contentTypeCollection import ContentTypeCollection
 from office365.onedrive.drive import Drive
 from office365.onedrive.driveCollection import DriveCollection
+from office365.onedrive.itemAnalytics import ItemAnalytics
 from office365.onedrive.listCollection import ListCollection
 from office365.onedrive.listItemCollection import ListItemCollection
 from office365.onedrive.permission_collection import PermissionCollection
@@ -67,6 +68,12 @@ class Site(BaseItem):
         from office365.onedrive.siteCollection import SiteCollection
         return self.properties.get('sites',
                                    SiteCollection(self.context, ResourcePath("sites", self.resource_path)))
+
+    @property
+    def analytics(self):
+        """Analytics about the view activities that took place on this site."""
+        return self.properties.get('analytics',
+                                   ItemAnalytics(self.context, ResourcePath("analytics", self.resource_path)))
 
     def set_property(self, name, value, persist_changes=True):
         super(Site, self).set_property(name, value, persist_changes)

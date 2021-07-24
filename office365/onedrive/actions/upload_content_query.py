@@ -7,8 +7,8 @@ def create_upload_content_query(folder_item, name, content=None):
     """
 
     :param office365.onedrive.driveItem.DriveItem folder_item: Folder (container)
-    :param str name: File name
-    :param str content: File content
+    :param str name: a file name
+    :param str content: a file content
     """
     from office365.onedrive.driveItem import DriveItem
     file_item = DriveItem(folder_item.context, ResourcePathUrl(name, folder_item.resource_path))
