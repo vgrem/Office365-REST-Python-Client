@@ -17,7 +17,7 @@ class ClientObject(object):
         :type namespace: str
         """
         self._properties = {}
-        self._changed_properties = []
+        self._metadata_properties = {}
         self._entity_type_name = None
         self._query_options = QueryOptions()
         self._parent_collection = parent_collection
@@ -26,7 +26,7 @@ class ClientObject(object):
         self._namespace = namespace
 
     def clear(self):
-        self._changed_properties = []
+        self._metadata_properties = {}
 
     def execute_query(self):
         self.context.execute_query()
@@ -93,8 +93,9 @@ class ClientObject(object):
         :param any value: Property value
         :param bool persist_changes: Persist changes
         """
+        self._metadata_properties[name] = {}
         if persist_changes:
-            self._changed_properties.append(name)
+            self._metadata_properties[name]["persist"] = True
 
         prop_type = self.get_property(name)
         if isinstance(prop_type, ClientObject) or isinstance(prop_type, ClientValue) and value is not None:
@@ -188,7 +189,8 @@ class ClientObject(object):
         """
         :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat or None
         """
-        json = dict((k, self.get_property(k)) for k in self.properties if k in self._changed_properties)
+        ser_prop_names = [n for n, p in self._metadata_properties.items() if p.get("persist", False) is True]
+        json = dict((k, self.get_property(k)) for k in self.properties if k in ser_prop_names)
         for k, v in json.items():
             if isinstance(v, ClientObject) or isinstance(v, ClientValue):
                 json[k] = v.to_json(json_format)
