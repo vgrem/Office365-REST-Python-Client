@@ -1,6 +1,7 @@
 from office365.onedrive.actions.search_query import create_search_query
 from office365.onedrive.actions.upload_content_query import create_upload_content_query
 from office365.base_item import BaseItem
+from office365.onedrive.itemActivityStat import ItemActivityStat
 from office365.onedrive.itemAnalytics import ItemAnalytics
 from office365.onedrive.permission import Permission
 from office365.onedrive.permission_collection import PermissionCollection
@@ -14,6 +15,7 @@ from office365.onedrive.folder import Folder
 from office365.onedrive.listItem import ListItem
 from office365.onedrive.publicationFacet import PublicationFacet
 from office365.onedrive.root_resource_path import RootResourcePath
+from office365.onedrive.thumbnailSet import ThumbnailSet
 from office365.onedrive.uploadSession import UploadSession
 from office365.excel.workbook import Workbook
 from office365.resource_path_url import ResourcePathUrl
@@ -126,8 +128,9 @@ class DriveItem(BaseItem):
         """
         from office365.onedrive.actions.file_upload_query import ResumableFileUpload
         upload_query = ResumableFileUpload(self, source_path, chunk_size, chunk_uploaded)
+        self.children.add_child(upload_query.return_type)
         self.context.add_query(upload_query)
-        return upload_query.return_type.get()
+        return upload_query.return_type
 
     def create_upload_session(self, item):
         """Creates a temporary storage location where the bytes of the file will be saved until the complete file is
@@ -159,6 +162,7 @@ class DriveItem(BaseItem):
         :rtype: DriveItem
         """
         qry = create_upload_content_query(self, name, content)
+        self.children.add_child(qry.return_type)
         self.context.add_query(qry)
         return qry.return_type
 
@@ -297,6 +301,30 @@ class DriveItem(BaseItem):
         self.context.add_query(qry)
         return permissions
 
+    def get_activities_by_interval(self, start_dt, end_dt, interval):
+        """
+        Get a collection of itemActivityStats resources for the activities that took place on this resource
+        within the specified time interval.
+
+        :param datetime.datetime start_dt: The start time over which to aggregate activities.
+        :param datetime.datetime end_dt: The end time over which to aggregate activities.
+        :param str interval: The aggregation interval.
+        """
+        params = {
+            "startDateTime":  start_dt.strftime('%m-%d-%Y'),
+            "endDateTime": end_dt.strftime('%m-%d-%Y'),
+            "interval": interval
+        }
+        result = EntityCollection(self.context, ItemActivityStat)
+        qry = ServiceOperationQuery(self, "getActivitiesByInterval", params, None, None, result)
+        self.context.add_query(qry)
+
+        def _construct_request(request):
+            request.method = HttpMethod.Get
+
+        self.context.before_execute(_construct_request)
+        return result
+
     @property
     def fileSystemInfo(self):
         """File system information on client."""
@@ -359,14 +387,26 @@ class DriveItem(BaseItem):
                                                     ResourcePath("versions", self.resource_path)))
 
     @property
+    def thumbnails(self):
+        """Collection containing ThumbnailSet objects associated with the item. For more info, see getting thumbnails.
+        Read-only. Nullable."""
+        return self.properties.get('thumbnails',
+                                   EntityCollection(self.context, ThumbnailSet,
+                                                    ResourcePath("thumbnails", self.resource_path)))
+
+    @property
     def analytics(self):
         """Analytics about the view activities that took place on this item."""
         return self.properties.get('analytics',
                                    ItemAnalytics(self.context, ResourcePath("analytics", self.resource_path)))
 
     def set_property(self, name, value, persist_changes=True):
-        if self._resource_path is None and name == "id":
-            self._resource_path = self._resolve_path(value)
+        # if self._resource_path is None and name == "id":
+        if name == "id":
+            if self._resource_path is None:
+                self._resource_path = self._resolve_path(value)
+            elif isinstance(self._resource_path, ResourcePathUrl):
+                self._resource_path = self._resolve_path(value)
         super(DriveItem, self).set_property(name, value, persist_changes)
         return self
 

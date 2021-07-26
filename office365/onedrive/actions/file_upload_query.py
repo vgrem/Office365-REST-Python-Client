@@ -31,6 +31,9 @@ class ResumableFileUpload(ClientQuery):
         self._range_queries = []
         self._read_completed = False
 
+    def build_request(self):
+        return super(ResumableFileUpload, self).build_request()
+
     def _create_upload_session(self):
         item = DriveItemUploadableProperties()
         item.name = self.file_name
@@ -84,4 +87,6 @@ class ResumableFileUpload(ClientQuery):
 
     @property
     def return_type(self):
-        return DriveItem(self.context, ResourcePathUrl(self.file_name, self.binding_type.resource_path))
+        if self._return_type is None:
+            self._return_type = DriveItem(self.context, ResourcePathUrl(self.file_name, self.binding_type.resource_path))
+        return self._return_type

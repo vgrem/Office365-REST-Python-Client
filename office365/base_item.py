@@ -39,7 +39,7 @@ class BaseItem(Entity):
 
     @name.setter
     def name(self, value):
-        self.properties['name'] = value
+        self.set_property('name', value)
 
     @property
     def description(self):
@@ -48,7 +48,7 @@ class BaseItem(Entity):
 
     @description.setter
     def description(self, value):
-        self.properties['description'] = value
+        self.set_property('description', value)
 
     @property
     def web_url(self):

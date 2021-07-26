@@ -1,5 +1,6 @@
 import os
 import uuid
+from datetime import datetime, timedelta
 
 from tests.graph_case import GraphTestCase
 
@@ -99,6 +100,13 @@ class TestDriveItem(GraphTestCase):
     #    self.client.execute_query()
     #    self.assertIsNotNone(result.value)
 
-    def test_14_delete_file(self):
+    def test_14_get_activities_by_interval(self):
+        end_time = datetime.utcnow()
+        start_time = end_time - timedelta(days=14)
+        result = self.__class__.target_file.get_activities_by_interval(start_dt=start_time, end_dt=end_time, interval='day')
+        self.client.execute_query()
+        self.assertIsNotNone(result)
+
+    def test_15_delete_file(self):
         items = self.target_drive.root.children.top(2).get().execute_query()
         items[1].delete_object().execute_query()
