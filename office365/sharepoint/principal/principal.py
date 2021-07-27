@@ -23,7 +23,7 @@ class Principal(BaseEntity):
 
     @title.setter
     def title(self, value):
-        self.properties['Title'] = value
+        self.set_property('Title', value)
 
     @property
     def login_name(self):

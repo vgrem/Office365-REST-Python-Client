@@ -32,7 +32,7 @@ class ListItem(SecurableObject):
         """
         super(ListItem, self).__init__(context, resource_path)
         if parent_list is not None:
-            self.properties["ParentList"] = parent_list
+            self.set_property("ParentList", parent_list, False)
 
     def get_wopi_frame_url(self, action):
         """

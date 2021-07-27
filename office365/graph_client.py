@@ -1,6 +1,7 @@
 from office365.directory.applicationCollection import ApplicationCollection
 from office365.directory.directory import Directory
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
+from office365.directory.groupLifecyclePolicy import GroupLifecyclePolicy
 from office365.directory.group_collection import GroupCollection
 from office365.directory.groupSettingTemplateCollection import GroupSettingTemplateCollection
 from office365.directory.identityProviderCollection import IdentityProviderCollection
@@ -9,6 +10,7 @@ from office365.directory.servicePrincipal import ServicePrincipalCollection
 from office365.directory.subscribedSku import SubscribedSkuCollection
 from office365.directory.user import User
 from office365.directory.userCollection import UserCollection
+from office365.entity_collection import EntityCollection
 from office365.onedrive.driveCollection import DriveCollection
 from office365.onedrive.sharedDriveItemCollection import SharedDriveItemCollection
 from office365.onedrive.siteCollection import SiteCollection
@@ -24,6 +26,7 @@ from office365.runtime.queries.batch_query import BatchQuery
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
+from office365.teams.chat import Chat
 from office365.teams.team_collection import TeamCollection
 
 
@@ -135,6 +138,11 @@ class GraphClient(ClientRuntimeContext):
         return TeamCollection(self, ResourcePath("teams"))
 
     @property
+    def chats(self):
+        """Get teams"""
+        return EntityCollection(self, Chat, ResourcePath("chats"))
+
+    @property
     def group_setting_templates(self):
         """Get teams"""
         return GroupSettingTemplateCollection(self, ResourcePath("groupSettingTemplates"))
@@ -172,3 +180,7 @@ class GraphClient(ClientRuntimeContext):
     def subscribed_skus(self):
         """Retrieve a list of servicePrincipal objects."""
         return SubscribedSkuCollection(self, ResourcePath("subscribedSkus"))
+
+    @property
+    def group_lifecycle_policies(self):
+        return EntityCollection(self, GroupLifecyclePolicy, ResourcePath("groupLifecyclePolicies"))

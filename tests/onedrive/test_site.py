@@ -21,12 +21,15 @@ class TestSite(GraphTestCase):
         root_site = self.target_site.get().execute_query()
         assert root_site.id is not None
 
-    def test2_list_followed_sites(self):
+    def test2_get_site_by_path(self):
+        pass
+
+    def test3_list_followed_sites(self):
         sites = self.client.me.followed_sites.get().execute_query()
         self.followed_sites_count = len(sites)
 
-    def test3_follow(self):
+    def test4_follow(self):
         pass
 
-    def test4_unfollow(self):
+    def test5_unfollow(self):
         pass

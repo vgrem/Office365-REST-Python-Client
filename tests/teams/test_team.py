@@ -44,11 +44,11 @@ class TestGraphTeam(GraphTestCase):
         self.assertIsNotNone(existing_team.resource_url)
         self.assertIsNotNone(existing_team.messagingSettings)
 
-        if existing_team.properties["isArchived"]:
+        if existing_team.is_archived:
             existing_team.unarchive()
             self.client.load(existing_team)
             self.client.execute_query()
-            self.assertFalse(existing_team.properties["isArchived"])
+            self.assertFalse(existing_team.is_archived)
 
     def test6_update_team(self):
         team_id = self.__class__.target_group.properties['id']

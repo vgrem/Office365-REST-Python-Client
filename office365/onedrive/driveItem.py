@@ -301,7 +301,7 @@ class DriveItem(BaseItem):
         self.context.add_query(qry)
         return permissions
 
-    def get_activities_by_interval(self, start_dt, end_dt, interval):
+    def get_activities_by_interval(self, start_dt=None, end_dt=None, interval=None):
         """
         Get a collection of itemActivityStats resources for the activities that took place on this resource
         within the specified time interval.
@@ -311,7 +311,7 @@ class DriveItem(BaseItem):
         :param str interval: The aggregation interval.
         """
         params = {
-            "startDateTime":  start_dt.strftime('%m-%d-%Y'),
+            "startDateTime": start_dt.strftime('%m-%d-%Y'),
             "endDateTime": end_dt.strftime('%m-%d-%Y'),
             "interval": interval
         }
@@ -324,6 +324,9 @@ class DriveItem(BaseItem):
 
         self.context.before_execute(_construct_request)
         return result
+
+    def preview(self):
+        pass
 
     @property
     def fileSystemInfo(self):
@@ -400,6 +403,14 @@ class DriveItem(BaseItem):
         return self.properties.get('analytics',
                                    ItemAnalytics(self.context, ResourcePath("analytics", self.resource_path)))
 
+    @property
+    def delta(self):
+        """This method allows your app to track changes to a drive and its children over time."""
+        from office365.onedrive.driveItemCollection import DriveItemCollection
+        return self.properties.get('delta',
+                                   DriveItemCollection(self.context,
+                                                       ResourcePath("delta", self.resource_path)))
+
     def set_property(self, name, value, persist_changes=True):
         # if self._resource_path is None and name == "id":
         if name == "id":
@@ -414,7 +425,8 @@ class DriveItem(BaseItem):
         path = None
         parent_path = self.parent_collection.resource_path
         while path is None:
-            if isinstance(parent_path, ChildrenResourcePath) or isinstance(parent_path, ResourcePathUrl) or isinstance(parent_path, RootResourcePath):
+            if isinstance(parent_path, ChildrenResourcePath) or isinstance(parent_path, ResourcePathUrl) or isinstance(
+                parent_path, RootResourcePath):
                 parent_path = parent_path.parent
             elif parent_path.segment == "items":
                 path = ResourcePath(item_id, parent_path)

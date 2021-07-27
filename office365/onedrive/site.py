@@ -7,11 +7,33 @@ from office365.onedrive.itemAnalytics import ItemAnalytics
 from office365.onedrive.listCollection import ListCollection
 from office365.onedrive.listItemCollection import ListItemCollection
 from office365.onedrive.permission_collection import PermissionCollection
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 
 
 class Site(BaseItem):
     """The site resource provides metadata and relationships for a SharePoint site. """
+
+    def get_by_path(self, path):
+        """
+        Retrieve properties and relationships for a site resource. A site resource represents a team site in SharePoint.
+
+            In addition to retrieving a site by ID you can retrieve a site based on server-relative URL path.
+
+            Site collection hostname (contoso.sharepoint.com)
+            Site path, relative to server hostname.
+            There is also a reserved site identifier, root, which always references the root site for a given target,
+            as follows:
+
+            /sites/root: The tenant root site.
+            /groups/{group-id}/sites/root: The group's team site.
+
+        :type path: str
+        """
+        return_site = Site(self.context)
+        qry = ServiceOperationQuery(self, "GetByPath", [path], None, None, return_site)
+        self.context.add_query(qry)
+        return return_site
 
     @property
     def items(self):
