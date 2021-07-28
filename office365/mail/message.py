@@ -1,7 +1,9 @@
 from office365.directory.extension import ExtensionCollection
 from office365.mail.attachment_collection import AttachmentCollection
 from office365.mail.item import Item
-from office365.mail.recipient import RecipientCollection
+from office365.mail.itemBody import ItemBody
+from office365.mail.recipient import Recipient
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 
@@ -51,14 +53,15 @@ class Message(Item):
         self.context.add_query(qry)
         return self
 
-    def forward(self, to_recipients_emails, comment=""):
+    def forward(self, to_recipients, comment=""):
         """
         Forward a message. The message is saved in the Sent Items folder.
-        :param list[str] to_recipients_emails: The list of recipients.
+        :param list[str] to_recipients: The list of recipients.
         :param str comment: A comment to include. Can be an empty string.
         """
         payload = {
-            "ToRecipients": RecipientCollection.from_emails(to_recipients_emails),
+            "ToRecipients": ClientValueCollection(Recipient,
+                                                  [Recipient.from_email(v) for v in to_recipients]),
             "Comment": comment
         }
         qry = ServiceOperationQuery(self, "forward", None, payload)
@@ -88,3 +91,45 @@ class Message(Item):
         """The collection of open extensions defined for the message. Nullable."""
         return self.properties.get('extensions',
                                    ExtensionCollection(self.context, ResourcePath("extensions", self.resource_path)))
+
+    @property
+    def body(self):
+        """The body of the message. It can be in HTML or text format."""
+        return self.properties.get("body", ItemBody())
+
+    @body.setter
+    def body(self, value):
+        """The body of the message. It can be in HTML or text format.
+
+        :type value: str or ItemBody
+        """
+        if not isinstance(value, ItemBody):
+            value = ItemBody(value)
+        self.set_property("body", value)
+
+    @property
+    def subject(self):
+        """The subject of the message."""
+        return self.properties.get("subject", None)
+
+    @subject.setter
+    def subject(self, value):
+        """The subject of the message.
+
+        :type value: str
+        """
+        self.set_property("subject", value)
+
+    @property
+    def to_recipients(self):
+        """The To: recipients for the message."""
+        return self.properties.get('toRecipients', ClientValueCollection(Recipient))
+
+    @to_recipients.setter
+    def to_recipients(self, value):
+        """
+        The To: recipients for the message.
+        :type value: list[str]
+        """
+        col = ClientValueCollection(Recipient, [Recipient.from_email(email) for email in value])
+        self.set_property('toRecipients', col)

@@ -51,9 +51,17 @@ class User(DirectoryObject):
         self.context.add_query(qry)
         return self
 
-    def send_mail(self, message):
-        """Send a new message on the fly"""
-        qry = ServiceOperationQuery(self, "sendmail", None, message)
+    def send_mail(self, message, save_to_sent_items=False):
+        """Send a new message on the fly
+
+        :type message: office365.mail.message.Message
+        :type save_to_sent_items: bool
+        """
+        payload = {
+            "message": message,
+            "saveToSentItems": save_to_sent_items
+        }
+        qry = ServiceOperationQuery(self, "sendmail", None, payload)
         self.context.add_query(qry)
         return self
 

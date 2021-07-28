@@ -17,6 +17,9 @@ class EntityCollection(ClientObjectCollection):
             return super(EntityCollection, self).__getitem__(key)
         return self._item_type(self.context, ResourcePath(key, self.resource_path))
 
+    def new(self):
+        return self.create_typed_object({})
+
     def add_from_json(self, json):
         """Creates a Entity resource from JSON
 

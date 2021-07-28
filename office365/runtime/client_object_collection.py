@@ -37,6 +37,10 @@ class ClientObjectCollection(ClientObject):
         self._data = []
 
     def create_typed_object(self, properties):
+        """
+        :type properties: dict
+        :rtype: ClientObject
+        """
         if self._item_type is None:
             raise AttributeError("No class for object type '{0}' found".format(self._item_type))
 

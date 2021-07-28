@@ -6,33 +6,6 @@ from tests.graph_case import GraphTestCase
 class TestGraphMail(GraphTestCase):
     target_message = None  # type: Message
 
-    def test_1_send_mail_json(self):
-        message_json = {
-            "Message": {
-                "Subject": "Meet for lunch?",
-                "Body": {
-                    "ContentType": "Text",
-                    "Content": "The new cafeteria is open."
-                },
-                "ToRecipients": [
-                    {
-                        "EmailAddress": {
-                            "Address": test_user_principal_name
-                        }
-                    }
-                ],
-                "Attachments": [
-                    {
-                        "@odata.type": "#microsoft.graph.fileAttachment",
-                        "Name": "menu.txt",
-                        "ContentBytes": "bWFjIGFuZCBjaGVlc2UgdG9kYXk="
-                    }
-                ]
-            },
-            "SaveToSentItems": "false"
-        }
-        self.client.me.send_mail(message_json).execute_query()
-
     def test2_create_draft_message(self):
         draft_message = self.client.me.messages.add("Meet for lunch?",
                                                     "The new cafeteria is open.",

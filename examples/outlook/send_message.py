@@ -1,24 +1,15 @@
-from examples import acquire_token_by_client_credentials
+from examples import acquire_token_by_username_password
 from office365.graph_client import GraphClient
-from tests import test_user_principal_name, test_user_principal_name_alt
+from office365.mail.message import Message
 
-client = GraphClient(acquire_token_by_client_credentials)
-message_json = {
-    "Message": {
-        "Subject": "Meet for lunch?",
-        "Body": {
-            "ContentType": "Text",
-            "Content": "The new cafeteria is open."
-        },
-        "ToRecipients": [
-            {
-                "EmailAddress": {
-                    "Address": test_user_principal_name_alt
-                }
-            }
-        ]
-    },
-    "SaveToSentItems": "false"
-}
-client.users[test_user_principal_name].send_mail(message_json).execute_query()
+# The example is adapted from https://docs.microsoft.com/en-us/graph/api/user-sendmail?view=graph-rest-1.0
 
+client = GraphClient(acquire_token_by_username_password)
+
+message = client.me.messages.new()  # type: Message
+message.subject = "Meet for lunch?"
+message.body = "The new cafeteria is open."
+message.to_recipients = ["fannyd@contoso.onmicrosoft.com"]
+
+json = message.to_json(client.pending_request().json_format)
+client.me.send_mail(message).execute_query()
