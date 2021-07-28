@@ -869,23 +869,22 @@ class Web(SecurableObject):
         """
         return self.properties.get("ServerRelativePath", SPResPath(None))
 
-    def get_property(self, name):
+    def get_property(self, name, default_value=None):
         if name == "ContentTypes":
-            return self.content_types
+            default_value = self.content_types
         elif name == "RootFolder":
-            return self.root_folder
+            default_value = self.root_folder
         elif name == "RegionalSettings":
-            return self.regional_settings
+            default_value = self.regional_settings
         elif name == "RoleDefinitions":
-            return self.role_definitions
+            default_value = self.role_definitions
         elif name == "RecycleBin":
-            return self.recycle_bin
+            default_value = self.recycle_bin
         elif name == "CurrentUser":
-            return self.current_user
+            default_value = self.current_user
         elif name == "AvailableFields":
-            return self.available_fields
-        else:
-            return super(Web, self).get_property(name)
+            default_value = self.available_fields
+        return super(Web, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
         super(Web, self).set_property(name, value, persist_changes)

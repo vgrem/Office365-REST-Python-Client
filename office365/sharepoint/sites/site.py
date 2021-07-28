@@ -220,12 +220,11 @@ class Site(BaseEntity):
                                                                      ResourcePath("eventReceivers", self.resource_path),
                                                                      self))
 
-    def get_property(self, name):
+    def get_property(self, name, default_value=None):
         if name == "RecycleBin":
-            return self.recycle_bin
+            default_value = self.recycle_bin
         elif name == "RootWeb":
-            return self.root_web
+            default_value = self.root_web
         elif name == "EventReceivers":
-            return self.event_receivers
-        else:
-            return super(Site, self).get_property(name)
+            default_value = self.event_receivers
+        return super(Site, self).get_property(name, default_value)

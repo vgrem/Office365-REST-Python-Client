@@ -284,15 +284,14 @@ class User(DirectoryObject):
                                    DirectoryObjectCollection(self.context,
                                                              ResourcePath("transitiveMemberOf", self.resource_path)))
 
-    def get_property(self, name):
+    def get_property(self, name, default_value=None):
         if name == "transitiveMemberOf":
-            return self.transitive_member_of
+            default_value = self.transitive_member_of
         elif name == "joinedTeams":
-            return self.joined_teams
+            default_value = self.joined_teams
         elif name == "assignedLicenses":
-            return self.assigned_licenses
-        else:
-            return super(User, self).get_property(name)
+            default_value = self.assigned_licenses
+        return super(User, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
         super(User, self).set_property(name, value, persist_changes)

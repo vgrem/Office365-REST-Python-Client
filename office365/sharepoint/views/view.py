@@ -118,16 +118,15 @@ class View(BaseEntity):
         """
         return self.properties.get("ServerRelativePath", SPResPath(None))
 
-    def get_property(self, name):
+    def get_property(self, name, default_value=None):
         property_mapping = {
             "ViewFields": self.view_fields,
             "DefaultView": self.default_view,
             "ServerRelativePath": self.server_relative_path
         }
         if name in property_mapping:
-            return property_mapping[name]
-        else:
-            return super(View, self).get_property(name)
+            default_value = property_mapping[name]
+        return super(View, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
         """

@@ -286,16 +286,15 @@ class Folder(BaseEntity):
         """
         return self.properties.get("ServerRelativePath", SPResPath(None))
 
-    def get_property(self, name):
+    def get_property(self, name, default_value=None):
         property_mapping = {
             "ListItemAllFields": self.list_item_all_fields,
             "ParentFolder": self.parent_folder,
             "ServerRelativePath": self.server_relative_path
         }
         if name in property_mapping:
-            return property_mapping[name]
-        else:
-            return super(Folder, self).get_property(name)
+            default_value = property_mapping[name]
+        return super(Folder, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
         super(Folder, self).set_property(name, value, persist_changes)

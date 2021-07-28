@@ -112,11 +112,10 @@ class ContentType(BaseEntity):
         return self.properties.get('FieldLinks',
                                    FieldLinkCollection(self.context, ResourcePath("FieldLinks", self.resource_path)))
 
-    def get_property(self, name):
+    def get_property(self, name, default_value=None):
         if name == "FieldLinks":
-            return self.field_links
-        else:
-            return super(ContentType, self).get_property(name)
+            default_value = self.field_links
+        return super(ContentType, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
         super(ContentType, self).set_property(name, value, persist_changes)

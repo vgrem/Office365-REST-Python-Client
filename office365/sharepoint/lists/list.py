@@ -407,19 +407,18 @@ class List(SecurableObject):
     def parent_web_path(self):
         return self.properties.get('ParentWebPath', None)
 
-    def get_property(self, name):
+    def get_property(self, name, default_value=None):
         if name == "UserCustomActions":
-            return self.user_custom_actions
+            default_value = self.user_custom_actions
         elif name == "ParentWeb":
-            return self.parent_web
+            default_value = self.parent_web
         elif name == "RootFolder":
-            return self.root_folder
+            default_value = self.root_folder
         elif name == "ContentTypes":
-            return self.content_types
+            default_value = self.content_types
         elif name == "DefaultView":
-            return self.default_view
-        else:
-            return super(List, self).get_property(name)
+            default_value = self.default_view
+        return super(List, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
         super(List, self).set_property(name, value, persist_changes)

@@ -17,7 +17,7 @@ class ClientObject(object):
         :type namespace: str
         """
         self._properties = {}
-        self._metadata_properties = {}
+        self._properties_metadata = {}
         self._entity_type_name = None
         self._query_options = QueryOptions()
         self._parent_collection = parent_collection
@@ -25,8 +25,16 @@ class ClientObject(object):
         self._resource_path = resource_path
         self._namespace = namespace
 
+    def set_metadata(self, name, group, value):
+        if name not in self._properties_metadata:
+            self._properties_metadata[name] = {}
+        self._properties_metadata[name][group] = value
+
+    def get_metadata(self, name, group, default_value=None):
+        return self._properties_metadata.get(name, {}).get(group, default_value)
+
     def clear(self):
-        self._metadata_properties = {}
+        self._properties_metadata = {}
 
     def execute_query(self):
         self.context.execute_query()
@@ -77,14 +85,17 @@ class ClientObject(object):
             return
         self._parent_collection.remove_child(self)
 
-    def get_property(self, name):
+    def get_property(self, name, default_value=None):
         """
         Gets property value
 
         :param str name: property name
+        :param any default_value: property value
         """
-        normalized_name = name[0].lower() + name[1:]
-        return getattr(self, normalized_name, self._properties.get(name, None))
+        if default_value is None:
+            normalized_name = name[0].lower() + name[1:]
+            default_value = getattr(self, normalized_name, None)
+        return self._properties.get(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
         """Sets property value
@@ -93,9 +104,9 @@ class ClientObject(object):
         :param any value: Property value
         :param bool persist_changes: Persist changes
         """
-        self._metadata_properties[name] = {}
+        self._properties_metadata[name] = {}
         if persist_changes:
-            self._metadata_properties[name]["persist"] = True
+            self.set_metadata(name, "persist", True)
 
         prop_type = self.get_property(name)
         if isinstance(prop_type, ClientObject) or isinstance(prop_type, ClientValue) and value is not None:
@@ -189,7 +200,7 @@ class ClientObject(object):
         """
         :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat or None
         """
-        ser_prop_names = [n for n, p in self._metadata_properties.items() if p.get("persist", False) is True]
+        ser_prop_names = [n for n, p in self._properties_metadata.items() if p.get("persist", False) is True]
         json = dict((k, self.get_property(k)) for k in self.properties if k in ser_prop_names)
         for k, v in json.items():
             if isinstance(v, ClientObject) or isinstance(v, ClientValue):

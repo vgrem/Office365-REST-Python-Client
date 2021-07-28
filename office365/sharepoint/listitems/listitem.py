@@ -280,26 +280,26 @@ class ListItem(SecurableObject):
                                    LikedByInformation(self.context,
                                                       ResourcePath("likedByInformation", self.resource_path)))
 
-    def get_property(self, name):
+    def get_property(self, name, default_value=None):
         if name == "ContentType":
-            return self.content_type
+            default_value = self.content_type
         elif name == "ParentList":
-            return self.parent_list
+            default_value = self.parent_list
         elif name == "EffectiveBasePermissions":
-            return self.effective_base_permissions
+            default_value = self.effective_base_permissions
         elif name == "AttachmentFiles":
-            return self.attachment_files
+            default_value = self.attachment_files
         elif name == "LikedByInformation":
-            return self.liked_by_information
-        else:
-            value = super(ListItem, self).get_property(name)
-            if self.is_property_available(name[:-2]):
-                lookup_value = super(ListItem, self).get_property(name[:-2])
-                if isinstance(lookup_value, FieldMultiLookupValue):
-                    return ClientValueCollection(int, [v.LookupId for v in lookup_value])
-                elif isinstance(lookup_value, FieldLookupValue):
-                    return lookup_value.LookupId
-            return value
+            default_value = self.liked_by_information
+
+        value = super(ListItem, self).get_property(name, default_value)
+        if self.is_property_available(name[:-2]):
+            lookup_value = super(ListItem, self).get_property(name[:-2], default_value)
+            if isinstance(lookup_value, FieldMultiLookupValue):
+                return ClientValueCollection(int, [v.LookupId for v in lookup_value])
+            elif isinstance(lookup_value, FieldLookupValue):
+                return lookup_value.LookupId
+        return value
 
     def set_property(self, name, value, persist_changes=True):
 
