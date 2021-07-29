@@ -40,13 +40,15 @@ class ClientRequest(object):
         """
         return self._current_query
 
-    def add_query(self, query, to_begin=False):
+    def add_query(self, query, execute_first=False, set_as_current=True):
         """
-        :type to_begin: bool
         :type query: office365.runtime.queries.client_query.ClientQuery
+        :type execute_first: bool
+        :type set_as_current: bool
         """
-        self._current_query = query
-        if to_begin:
+        if set_as_current:
+            self._current_query = query
+        if execute_first:
             self._queries.insert(0, query)
         else:
             self._queries.append(query)
@@ -77,15 +79,16 @@ class ClientRequest(object):
         """
         Submit a pending request to the server
         """
-        try:
-            request = self.build_request()
-            self.beforeExecute.notify(request)
-            response = self.execute_request_direct(request)
-            response.raise_for_status()
-            self.process_response(response)
-            self.afterExecute.notify(response)
-        except HTTPError as e:
-            raise ClientRequestException(*e.args, response=e.response)
+        for _ in self.get_next_query():
+            try:
+                request = self.build_request()
+                self.beforeExecute.notify(request)
+                response = self.execute_request_direct(request)
+                response.raise_for_status()
+                self.process_response(response)
+                self.afterExecute.notify(response)
+            except HTTPError as e:
+                raise ClientRequestException(*e.args, response=e.response)
 
     def execute_request_direct(self, request_options):
         """Execute client request
@@ -132,7 +135,7 @@ class ClientRequest(object):
                                     proxies=request_options.proxies)
         return response
 
-    def __iter__(self):
+    def get_next_query(self):
         while len(self._queries) > 0:
             qry = self._queries.pop(0)
             self._current_query = qry

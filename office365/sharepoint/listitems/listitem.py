@@ -239,8 +239,7 @@ class ListItem(SecurableObject):
         """Gets a value that specifies the effective permissions on the list item that are assigned
            to the current user."""
         from office365.sharepoint.permissions.base_permissions import BasePermissions
-        return self.properties.get("EffectiveBasePermissions",
-                                   BasePermissions())
+        return self.properties.get("EffectiveBasePermissions", BasePermissions())
 
     @property
     def field_values(self):
@@ -332,7 +331,7 @@ class ListItem(SecurableObject):
             tax_text_field = self.parent_list.fields.get_by_id(tax_field.properties["TextField"])
 
             def _tax_text_field_loaded():
-                self.set_property(tax_text_field.properties["StaticName"], str(value)).update()
+                self.set_property(tax_text_field.properties["StaticName"], str(value))
 
             tax_text_field.ensure_property("StaticName", _tax_text_field_loaded)
 
@@ -342,7 +341,7 @@ class ListItem(SecurableObject):
         """
         Determine metadata annotation for ListItem entity
 
-        :param office365.sharepoint.lists.list.List target_list: List entity
+        :param office365.sharepoint.lists.list.List target_list: List resource
         """
 
         def _init_item_type():

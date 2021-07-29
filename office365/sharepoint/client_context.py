@@ -99,11 +99,11 @@ class ClientContext(ClientRuntimeContext):
         self.authentication_context.register_provider(credentials)
         return self
 
-    def execute_batch(self, items_per_bulk=100):
+    def execute_batch(self, items_per_batch=100):
         """
         Construct and submit a batch request
 
-        :param int items_per_bulk: Maximum to be selected for bulk operation
+        :param int items_per_batch: Maximum to be selected for bulk operation
         """
         batch_request = ODataBatchRequest(self)
 
@@ -111,9 +111,9 @@ class ClientContext(ClientRuntimeContext):
             self.ensure_form_digest(request)
         batch_request.beforeExecute += _prepare_batch_request
 
-        all_queries = [qry for qry in self.pending_request()]
-        for i in range_or_xrange(0, len(all_queries), items_per_bulk):
-            queries = all_queries[i:i + items_per_bulk]
+        all_queries = [qry for qry in self.pending_request().get_next_query()]
+        for i in range_or_xrange(0, len(all_queries), items_per_batch):
+            queries = all_queries[i:i + items_per_batch]
             batch_request.add_query(BatchQuery(self, queries))
             batch_request.execute_query()
 

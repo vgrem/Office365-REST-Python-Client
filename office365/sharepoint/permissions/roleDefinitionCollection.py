@@ -1,4 +1,4 @@
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.permissions.role_definition import RoleDefinition
 
@@ -13,9 +13,5 @@ class RoleDefinitionCollection(BaseEntityCollection):
 
         :param int role_type: Specifies the role type. Role type MUST NOT be None.
         """
-
-        role_def = RoleDefinition(self.context)
-        self.add_child(role_def)
-        qry = ServiceOperationQuery(self, "GetByType", [role_type], None, None, role_def)
-        self.context.add_query(qry)
-        return role_def
+        return RoleDefinition(self.context,
+                              ResourcePathServiceOperation("GetByType", [role_type], self.resource_path))

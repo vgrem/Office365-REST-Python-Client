@@ -81,23 +81,6 @@ class ClientRuntimeContext(object):
             action(request, *args, **kwargs)
         self.pending_request().beforeExecute += _process_request
 
-    def before_query_execute(self, query, action, *args, **kwargs):
-        """
-        Attach an event handler which is triggered before query is submitted to server
-
-        :type query: office365.runtime.queries.client_query.ClientQuery
-        :type action: (Response, Any) -> None
-        :return: None
-        """
-
-        def _process_request(req):
-            if self.current_query.id == query.id:
-                action(*args, **kwargs)
-            else:
-                self.before_execute(_process_request, True)
-
-        self.before_execute(_process_request, True)
-
     def after_query_execute(self, query, action, *args, **kwargs):
         """
         Attach an event handler which is triggered after query is submitted to server
@@ -110,10 +93,8 @@ class ClientRuntimeContext(object):
         def _process_response(resp):
             if self.current_query.id == query.id:
                 action(*args, **kwargs)
-            else:
-                self.after_execute(_process_response, True)
-
-        self.after_execute(_process_response, True)
+                self.pending_request().afterExecute -= _process_response
+        self.pending_request().afterExecute += _process_response
 
     def after_execute(self, action, once=True, *args, **kwargs):
         """
@@ -138,11 +119,15 @@ class ClientRuntimeContext(object):
         return self.pending_request().execute_request_direct(request)
 
     def execute_query(self):
-        for qry in self.pending_request():
-            self.pending_request().execute_query()
+        self.pending_request().execute_query()
 
-    def add_query(self, query, to_begin=False):
-        self.pending_request().add_query(query, to_begin)
+    def add_query(self, query, execute_first=False, set_as_current=True):
+        """
+        :type query: office365.runtime.queries.client_query.ClientQuery
+        :type execute_first: bool
+        :type set_as_current: bool
+        """
+        self.pending_request().add_query(query, execute_first, set_as_current)
 
     def clear_queries(self):
         self.pending_request().queries.clear()
