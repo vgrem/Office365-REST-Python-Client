@@ -11,7 +11,7 @@ class Drive(BaseItem):
     SharePoint. """
 
     @property
-    def sharedWithMe(self):
+    def shared_with_me(self):
         """Retrieve a collection of DriveItem resources that have been shared with the owner of the Drive."""
         return self.properties.get('sharedWithMe',
                                    DriveItemCollection(self.context, ResourcePath("sharedWithMe", self.resource_path)))

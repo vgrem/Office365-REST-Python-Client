@@ -4,7 +4,7 @@ from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.sharepoint.actions.download_file import DownloadFileQuery
+from office365.sharepoint.actions.download_file import create_download_file_query
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.directory.user import User
 from office365.sharepoint.files.file_version_collection import FileVersionCollection
@@ -302,10 +302,10 @@ class File(AbstractFile):
         """
 
         def _download_inner():
-            qry = DownloadFileQuery(self.context.web, self.serverRelativeUrl, file_object)
+            qry = create_download_file_query(self, file_object)
             self.context.add_query(qry)
 
-        self.ensure_property("ServerRelativeUrl", _download_inner)
+        self.ensure_property("ServerRelativePath", _download_inner)
         return self
 
     def download_session(self, file_object, chunk_downloaded=None, chunk_size=1024 * 1024):

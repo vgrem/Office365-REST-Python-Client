@@ -5,6 +5,10 @@ from office365.runtime.client_value_collection import ClientValueCollection
 class TaxonomyFieldValue(ClientValue):
 
     def __init__(self, label=None, term_guid=None, wss_id=-1):
+        """
+        :type label: str
+        :type term_guid: str
+        """
         super(TaxonomyFieldValue, self).__init__()
         self.Label = label
         self.TermGuid = term_guid

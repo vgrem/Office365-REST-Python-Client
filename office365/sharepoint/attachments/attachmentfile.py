@@ -1,6 +1,6 @@
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.sharepoint.actions.download_file import DownloadFileQuery
+from office365.sharepoint.actions.download_file import create_download_file_query
 from office365.sharepoint.actions.upload_file import create_upload_file_query
 from office365.sharepoint.files.file import AbstractFile
 
@@ -14,12 +14,12 @@ class AttachmentFile(AbstractFile):
         :type file_object: typing.IO
         """
 
-        def _download_inner():
-            url = self.server_relative_url
-            qry = DownloadFileQuery(self.context.web, url, file_object)
+        def _download_file():
+            source_file = self.context.web.get_file_by_server_relative_path(self.server_relative_url)
+            qry = create_download_file_query(source_file, file_object)
             self.context.add_query(qry)
 
-        self.ensure_property("ServerRelativeUrl", _download_inner)
+        self.ensure_property("ServerRelativeUrl", _download_file)
         return self
 
     def upload(self, file_object):
@@ -27,12 +27,12 @@ class AttachmentFile(AbstractFile):
         :type file_object: typing.IO
         """
 
-        def _upload_inner():
+        def _upload_file():
             target_file = self.context.web.get_file_by_server_relative_url(self.server_relative_url)
             qry = create_upload_file_query(target_file, file_object)
             self.context.add_query(qry)
 
-        self.ensure_property("ServerRelativeUrl", _upload_inner)
+        self.ensure_property("ServerRelativeUrl", _upload_file)
         return self
 
     @property
@@ -59,6 +59,7 @@ class AttachmentFile(AbstractFile):
     def set_property(self, name, value, persist_changes=True):
         super(AttachmentFile, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
+
         if name == "ServerRelativeUrl":
             self._resource_path = ResourcePathServiceOperation(
-                "GetFileByServerRelativeUrl", [value], ResourcePath("Web"))
+                "getFileByServerRelativeUrl", [value], ResourcePath("Web"))

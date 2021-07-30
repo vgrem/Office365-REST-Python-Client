@@ -51,7 +51,7 @@ class Team(Entity):
         return self.properties.get('visibility', None)
 
     @property
-    def webUrl(self):
+    def web_url(self):
         """A hyperlink that will go to the team in the Microsoft Teams client. This is the URL that you get when
         you right-click a team in the Microsoft Teams client and select Get link to team. This URL should be treated
         as an opaque blob, and not parsed."""

@@ -27,7 +27,6 @@ def create_tasks_list(client):
 ctx = ClientContext(test_site_url).with_credentials(test_client_credentials)
 tasks_list = create_tasks_list(ctx)
 
-#user = ctx.web.current_user.get().execute_query()
 user = ctx.web.ensure_user(test_user_principal_name)
 multi_user_value = FieldMultiUserValue()
 multi_user_value.add(FieldUserValue.from_user(user))

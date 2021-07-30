@@ -65,7 +65,7 @@ class SearchService(BaseEntity):
         """The operation is used to retrieve search results through the use of the HTTP protocol
         with method type POST.
 
-        :type request: SearchRequest"""
+        :type request: office365.sharepoint.search.searchRequest.SearchRequest"""
         result = ClientResult(self.context, SearchResult())
         qry = ServiceOperationQuery(self, "postquery", None, request, "request", result)
         self.context.add_query(qry)

@@ -9,5 +9,5 @@ target_folder_url = "/sites/team/Shared Documents/Archive2013"
 
 source_folder = ctx.web.get_folder_by_server_relative_url(source_folder_url)
 target_folder = source_folder.move_to_by_path(target_folder_url).get().execute_query()
-print(f"File copied into {target_folder.server_relative_path.DecodedUrl}")
+print(f"File copied into {target_folder.serverRelativeUrl}")
 
