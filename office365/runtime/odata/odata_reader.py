@@ -16,6 +16,16 @@ class ODataReader(object):
         self._metadata_path = metadata_path
         self._xml_namespaces = xml_namespaces
 
+    def format_file(self):
+        import xml.dom.minidom
+        with open(self._metadata_path, 'r') as in_file:
+            metadata_content = in_file.read()
+
+        formatted_metadata_content = xml.dom.minidom.parseString(metadata_content).toprettyxml()
+
+        with open(self._metadata_path, "w", encoding="utf8") as out_file:
+            out_file.write(formatted_metadata_content)
+
     def process_schema_node(self, model):
         """
         :type model: ODataModel

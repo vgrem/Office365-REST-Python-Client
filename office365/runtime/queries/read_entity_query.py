@@ -24,7 +24,7 @@ class ReadEntityQuery(ClientQuery):
         query = QueryOptions()
         for n in self._properties_to_include:
             prop_val = self._binding_type.get_property(n)
-            if isinstance(prop_val, ClientObject):
+            if isinstance(prop_val, ClientObject) or n == "Properties":
                 query.expand.append(n)
             query.select.append(n)
         return query.to_url()

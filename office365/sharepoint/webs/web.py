@@ -647,21 +647,15 @@ class Web(SecurableObject):
     @property
     def webs(self):
         """Get child webs"""
-        if self.is_property_available('Webs'):
-            return self.properties['Webs']
-        else:
-            from office365.sharepoint.webs.web_collection import WebCollection
-            parent_web_url = None
-            if self.is_property_available('Url'):
-                parent_web_url = self.properties['Url']
-            return WebCollection(self.context,
-                                 ResourcePath("webs", self.resource_path), parent_web_url)
+        from office365.sharepoint.webs.web_collection import WebCollection
+        return self.properties.get("Webs",
+                                   WebCollection(self.context, ResourcePath("webs", self.resource_path), self))
 
     @property
     def folders(self):
         """Get folder resources"""
         return self.properties.get('Folders',
-                                   FolderCollection(self.context, ResourcePath("folders", self.resource_path)))
+                                   FolderCollection(self.context, ResourcePath("folders", self.resource_path), self))
 
     @property
     def lists(self):

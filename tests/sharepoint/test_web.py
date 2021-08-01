@@ -83,7 +83,7 @@ class TestSharePointWeb(SPTestCase):
 
     def test_11_read_list(self):
         site_pages = self.client.web.get_list("SitePages").get().execute_query()
-        self.assertIsNotNone(site_pages.properties['Title'])
+        self.assertIsNotNone(site_pages.title)
 
     def test_12_get_user_perms(self):
         result = self.client.web.get_user_effective_permissions(self.__class__.target_user.login_name).execute_query()

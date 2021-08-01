@@ -1,32 +1,47 @@
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
-from office365.sharepoint.base_entity import BaseEntity
+from office365.runtime.resource_path import ResourcePath
+from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.folders.folder import Folder
 
 
-class DocumentSet(BaseEntity):
+class DocumentSet(Folder):
 
     @staticmethod
-    def create(context, parentFolder, name, ctid="0x0120D520"):
+    def create(context, parent_folder, name, ct_id="0x0120D520"):
         """Creates a new DocumentSet object.
 
         :type context: office365.sharepoint.client_context.ClientContext
-        :type parentFolder: office365.sharepoint.folders.folder.Folder
+        :type parent_folder: office365.sharepoint.folders.folder.Folder
         :type name: str
-        :type ctid: office365.sharepoint.contenttypes.content_type_id.ContentTypeId
+        :type ct_id: office365.sharepoint.contenttypes.content_type_id.ContentTypeId
         """
-        result = DocumentSet(context)
 
-        def _create_doc_set():
+        return_type = DocumentSet(context)
 
-            url = r"{0}/_vti_bin/listdata.svc/{1}".format(context.base_url,
-                                                          parentFolder.properties["Name"].replace(" ", ""))
-            request = RequestOptions(url)
+        def _get_list_details():
+            custom_props = parent_folder.get_property("Properties")
+            list_id = custom_props.get('vti_x005f_listname')
+            target_list = context.web.lists.get_by_id(list_id)
+            target_list.ensure_property("Title", _create_doc_set, target_list=target_list)
+
+        def _create_doc_set(target_list):
+            list_name = target_list.title.replace(" ", "")
+            request_url = r"{0}/_vti_bin/listdata.svc/{1}".format(context.base_url, list_name)
+            request = RequestOptions(request_url)
             request.method = HttpMethod.Post
-            folder_url = parentFolder.serverRelativeUrl + '/' + name
-            request.set_header('Slug', '{0}|{1}'.format(folder_url, ctid))
+            folder_url = parent_folder.serverRelativeUrl + '/' + name
+            return_type._resource_path = ResourcePathServiceOperation("getFolderByServerRelativeUrl", [folder_url],
+                                                                      ResourcePath("Web"))
+            request.set_header('Slug', '{0}|{1}'.format(folder_url, ct_id))
             response = context.execute_request_direct(request)
+            response.raise_for_status()
             json = response.json()
-            context.pending_request().map_json(json, result)
+            context.pending_request().map_json(json, return_type)
 
-        parentFolder.ensure_properties(["ServerRelativeUrl", "Name"], _create_doc_set)
-        return result
+        parent_folder.ensure_properties(["Properties", "ServerRelativeUrl"], _get_list_details)
+        return return_type
+
+    def set_property(self, name, value, persist_changes=True):
+        super(Folder, self).set_property(name, value, persist_changes)
+        return self

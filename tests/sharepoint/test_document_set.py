@@ -9,6 +9,7 @@ from office365.sharepoint.lists.list_template_type import ListTemplateType
 
 class TestSharePointDocumentSet(SPTestCase):
     target_lib = None  # type: List
+    target_doc_set = None  # type: DocumentSet
 
     @classmethod
     def setUpClass(cls):
@@ -24,7 +25,10 @@ class TestSharePointDocumentSet(SPTestCase):
         cls.target_lib.delete_object().execute_query()
 
     def test1_create_document_set(self):
-        name = "DocSet"
-        doc_set = DocumentSet.create(self.client, self.target_lib.root_folder, name)
-        self.client.execute_query()
-        self.assertEqual(doc_set.properties["Name"], name)
+        doc_set_title = create_unique_name("DocSet N")
+        doc_set = DocumentSet.create(self.client, self.target_lib.root_folder, doc_set_title).execute_query()
+        self.assertEqual(doc_set.name, doc_set_title)
+        self.__class__.target_doc_set = doc_set
+
+    def test2_delete_document_set(self):
+        self.__class__.target_doc_set.delete_object().execute_query()

@@ -19,7 +19,7 @@ def upload_files(remote_drive, local_root_path):
             with open(path, 'rb') as local_file:
                 content = local_file.read()
             uploaded_drive_item = remote_drive.root.upload(name, content).execute_query()
-            print("File '{0}' uploaded into {1}".format(path, uploaded_drive_item.web_url), )
+            print("File '{0}' uploaded into {1}".format(path, uploaded_drive_item.web_url), path)
 
 
 settings = load_settings()

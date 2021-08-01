@@ -254,7 +254,7 @@ class Folder(BaseEntity):
 
         :rtype: office365.sharepoint.contenttypes.content_type_id.ContentTypeId or None
         """
-        return self.properties.get("UniqueContentTypeOrder", None)
+        return self.properties.get("UniqueContentTypeOrder", ContentTypeId())
 
     @property
     def content_type_order(self):

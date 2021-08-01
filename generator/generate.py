@@ -20,6 +20,7 @@ def generate_files(model, options):
 
 def generate_sharepoint_model(settings):
     reader = ODataV3Reader(settings.get('sharepoint', 'metadataPath'))
+    reader.format_file()
     model = reader.generate_model()
     generate_files(model, settings)
 
