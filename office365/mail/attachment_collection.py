@@ -1,9 +1,6 @@
-import os
-
 from office365.entity_collection import EntityCollection
+from office365.mail.actions.attachment_upload_query import AttachmentUploadQuery
 from office365.mail.attachment import Attachment
-from office365.mail.attachment_item import AttachmentItem
-from office365.mail.attachment_type import AttachmentType
 from office365.onedrive.uploadSession import UploadSession
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
@@ -24,13 +21,9 @@ class AttachmentCollection(EntityCollection):
         :param str source_path: Local file path
         :param int chunk_size: chunk size
         """
-        file_size = os.path.getsize(source_path)
-        file_name = os.path.basename(source_path)
-        attachment_item = AttachmentItem(attachmentType=AttachmentType.file, name=file_name, size=file_size)
-        #upload_session = self.create_upload_session(attachment_item)
-        #upload_query = ResumableFileUpload(self, source_path, chunk_size)
-        #self.context.add_query(upload_query)
-        #return upload_query.return_type
+        upload_query = AttachmentUploadQuery(self, source_path, chunk_size)
+        self.context.add_query(upload_query)
+        return upload_query.return_type
 
     def create_upload_session(self, attachment_item):
         """

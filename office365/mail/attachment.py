@@ -11,6 +11,13 @@ class Attachment(Entity):
         """
         return self.properties.get("contentType", None)
 
+    @content_type.setter
+    def content_type(self, value):
+        """
+        :type: value: str
+        """
+        self.set_property("contentType", value)
+
     @property
     def size(self):
         """

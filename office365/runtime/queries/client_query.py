@@ -19,7 +19,7 @@ class ClientQuery(object):
         self._return_type = return_type
 
     def build_url(self):
-        return self._binding_type.resource_url
+        return self.binding_type.resource_url
 
     def build_request(self):
         return self.context.build_single_request(self)

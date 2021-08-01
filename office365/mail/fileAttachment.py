@@ -28,3 +28,10 @@ class FileAttachment(Attachment):
         :rtype: str or None
         """
         return self.properties.get("contentBytes", None)
+
+    @content_bytes.setter
+    def content_bytes(self, value):
+        """
+        Sets the base64-encoded contents of the file.
+        """
+        self.set_property("contentBytes", value)

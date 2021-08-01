@@ -425,8 +425,8 @@ class DriveItem(BaseItem):
         path = None
         parent_path = self.parent_collection.resource_path
         while path is None:
-            if isinstance(parent_path, ChildrenResourcePath) or isinstance(parent_path, ResourcePathUrl) or isinstance(
-                parent_path, RootResourcePath):
+            if isinstance(parent_path, ChildrenResourcePath) or isinstance(parent_path, ResourcePathUrl) \
+                or isinstance(parent_path, RootResourcePath):
                 parent_path = parent_path.parent
             elif parent_path.segment == "items":
                 path = ResourcePath(item_id, parent_path)

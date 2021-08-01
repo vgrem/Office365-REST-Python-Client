@@ -4,14 +4,14 @@ from office365.runtime.queries.client_query import ClientQuery
 
 
 class ReadEntityQuery(ClientQuery):
-    def __init__(self, entity_to_read, properties_to_include=None):
+    def __init__(self, entity, properties_to_include=None):
         """
         Read entity query
 
         :type properties_to_include: list[str] or None
-        :type entity_to_read: office365.runtime.client_object.ClientObject
+        :type entity: office365.runtime.client_object.ClientObject
         """
-        super(ReadEntityQuery, self).__init__(entity_to_read.context, entity_to_read, None, None, entity_to_read)
+        super(ReadEntityQuery, self).__init__(entity.context, entity, None, None, entity)
         self._properties_to_include = properties_to_include
 
     def build_url(self):

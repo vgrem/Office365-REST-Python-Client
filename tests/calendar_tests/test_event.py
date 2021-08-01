@@ -57,7 +57,7 @@ class TestOutlookEvent(GraphTestCase):
 
     def test4_update_event(self):
         event = self.__class__.target_event
-        event.set_property("subject", "Discuss the Calendar REST API (updated)")
+        event.set_property("subject", "Let's go for lunch (updated)")
         event.update().execute_query()
 
     def test5_delete_event(self):
