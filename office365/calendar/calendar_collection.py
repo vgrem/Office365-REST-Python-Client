@@ -13,4 +13,4 @@ class CalendarCollection(EntityCollection):
         :type name: str
         :rtype: Calendar
         """
-        return self.add_from_json({"Name": name})
+        return super(CalendarCollection, self).add(name=name)

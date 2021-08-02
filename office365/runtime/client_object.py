@@ -2,6 +2,7 @@ import copy
 
 from office365.runtime.client_value import ClientValue
 from office365.runtime.odata.json_light_format import JsonLightFormat
+from office365.runtime.odata.odata_json_format import ODataJsonFormat
 from office365.runtime.odata.odata_query_options import QueryOptions
 
 
@@ -206,6 +207,9 @@ class ClientObject(object):
             if isinstance(v, ClientObject) or isinstance(v, ClientValue):
                 json[k] = v.to_json(json_format)
 
-        if isinstance(json_format, JsonLightFormat) and json_format.is_verbose and self.entity_type_name is not None:
-            json[json_format.metadata_type_tag_name] = {'type': self.entity_type_name}
+        if json and self.entity_type_name is not None:
+            if isinstance(json_format, JsonLightFormat) and json_format.is_verbose:
+                json[json_format.metadata_type_tag_name] = {'type': self.entity_type_name}
+            elif isinstance(json_format, ODataJsonFormat) and json_format.metadata == "minimal":
+                json[json_format.metadata_type_tag_name] = "#" + self.entity_type_name
         return json

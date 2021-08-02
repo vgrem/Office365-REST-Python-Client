@@ -9,6 +9,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 
 class EventCollection(EntityCollection):
     """Event's collection"""
+
     def __init__(self, context, resource_path=None):
         super(EventCollection, self).__init__(context, Event, resource_path)
 
@@ -23,11 +24,11 @@ class EventCollection(EntityCollection):
         :param str subject: The text of the event's subject line.
         :rtype: Event
         """
-        payload = {
-            "subject": subject,
-            "body": ItemBody(body, "HTML"),
-            "start": DateTimeTimeZone.parse(start),
-            "end": DateTimeTimeZone.parse(end),
-            "attendees": ClientValueCollection(Attendee, [Attendee(EmailAddress(email), attendee_type="required") for email in attendees])
-        }
-        return self.add_from_json(payload)
+        return super(EventCollection, self).add(
+            subject=subject,
+            body=ItemBody(body, "HTML"),
+            start=DateTimeTimeZone.parse(start),
+            end=DateTimeTimeZone.parse(end),
+            attendees=
+            ClientValueCollection(Attendee, [Attendee(EmailAddress(v), attendee_type="required") for v in attendees])
+        )

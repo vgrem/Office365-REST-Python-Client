@@ -60,9 +60,9 @@ class Message(Item):
         :param str comment: A comment to include. Can be an empty string.
         """
         payload = {
-            "ToRecipients": ClientValueCollection(Recipient,
+            "toRecipients": ClientValueCollection(Recipient,
                                                   [Recipient.from_email(v) for v in to_recipients]),
-            "Comment": comment
+            "comment": comment
         }
         qry = ServiceOperationQuery(self, "forward", None, payload)
         self.context.add_query(qry)
@@ -85,6 +85,16 @@ class Message(Item):
         """The fileAttachment and itemAttachment attachments for the message."""
         return self.properties.get('attachments',
                                    AttachmentCollection(self.context, ResourcePath("attachments", self.resource_path)))
+
+    @attachments.setter
+    def attachments(self, value):
+        """
+        Sets the fileAttachment and itemAttachment attachments for the message.
+        :type value list[office365.mail.attachment.Attachment]
+        """
+        col = AttachmentCollection(self.context, ResourcePath("attachments", self.resource_path))
+        [col.add_child(item) for item in value]
+        self.set_property('attachments', col)
 
     @property
     def extensions(self):
@@ -131,5 +141,5 @@ class Message(Item):
         The To: recipients for the message.
         :type value: list[str]
         """
-        col = ClientValueCollection(Recipient, [Recipient.from_email(email) for email in value])
-        self.set_property('toRecipients', col)
+        self.set_property('toRecipients',
+                          ClientValueCollection(Recipient, [Recipient.from_email(email) for email in value]))

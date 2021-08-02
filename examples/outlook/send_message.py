@@ -11,5 +11,4 @@ message.subject = "Meet for lunch?"
 message.body = "The new cafeteria is open."
 message.to_recipients = ["fannyd@contoso.onmicrosoft.com"]
 
-json = message.to_json(client.pending_request().json_format)
 client.me.send_mail(message).execute_query()

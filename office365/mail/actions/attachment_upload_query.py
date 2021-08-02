@@ -9,5 +9,5 @@ class AttachmentUploadQuery(UploadSessionQuery):
     if a connection is dropped while the upload is in progress. """
 
     def create_upload_session(self):
-        attachment_item = AttachmentItem(attachmentType=AttachmentType.file, name="flower", size=3483322)
+        attachment_item = AttachmentItem(attachment_type=AttachmentType.file, name=self.file_name, size=self.file_size)
         return self.binding_type.create_upload_session(attachment_item)

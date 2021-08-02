@@ -20,15 +20,14 @@ class EntityCollection(ClientObjectCollection):
     def new(self):
         return self.create_typed_object({})
 
-    def add_from_json(self, json):
-        """Creates a Entity resource from JSON
+    def add(self, **kwargs):
+        """Creates an entity resource
 
-        :type json: dict
         :rtype: office365.entity.Entity
         """
-        entity = self._item_type(self.context)
+        entity = self.new()
         self.add_child(entity)
-        qry = CreateEntityQuery(self, json, entity)
+        qry = CreateEntityQuery(self, kwargs, entity)
         self.context.add_query(qry)
         return entity
 

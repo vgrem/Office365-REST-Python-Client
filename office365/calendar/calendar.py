@@ -1,8 +1,10 @@
+from office365.calendar.calendar_permission import CalendarPermission
 from office365.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.calendar.emailAddress import EmailAddress
 from office365.calendar.event_collection import EventCollection
 from office365.calendar.schedule_information import ScheduleInformation
 from office365.entity import Entity
+from office365.entity_collection import EntityCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
@@ -75,3 +77,10 @@ class Calendar(Entity):
         """The calendar view for the calendar. Navigation property. Read-only."""
         return self.properties.get('calendarView',
                                    EventCollection(self.context, ResourcePath("calendarView", self.resource_path)))
+
+    @property
+    def calendar_permissions(self):
+        """The permissions of the users with whom the calendar is shared."""
+        return self.properties.get('calendarPermissions',
+                                   EntityCollection(self.context, CalendarPermission,
+                                                    ResourcePath("calendarPermissions", self.resource_path)))

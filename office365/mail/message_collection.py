@@ -23,17 +23,9 @@ class MessageCollection(EntityCollection):
         :param list[str] to_recipients:
         :rtype: Message
         """
-
-        payload = {
-            "subject": subject,
-            "importance": importance,
-            "body": ItemBody(body, BodyType.html),
-            "toRecipients": ClientValueCollection(Recipient, [Recipient.from_email(v) for v in to_recipients]),
-        }
-        return self.add_from_json(payload)
-
-    def get(self):
-        """
-        :rtype: MessageCollection
-        """
-        return super(MessageCollection, self).get()
+        return super(MessageCollection, self).add(
+            subject=subject,
+            importance=importance,
+            body=ItemBody(body, BodyType.html),
+            toRecipients=ClientValueCollection(Recipient, [Recipient.from_email(v) for v in to_recipients])
+        )

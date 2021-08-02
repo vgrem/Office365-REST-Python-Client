@@ -21,6 +21,6 @@ class TestAttachments(GraphTestCase):
 
     def test1_create_upload_session(self):
         message_id = self.__class__.target_message.id
-        attachment_item = AttachmentItem(attachmentType=AttachmentType.file, name="flower", size=3483322)
+        attachment_item = AttachmentItem(attachment_type=AttachmentType.file, name="flower", size=3483322)
         result = self.client.me.messages[message_id].attachments.create_upload_session(attachment_item).execute_query()
         self.assertIsNotNone(result.value)

@@ -15,7 +15,7 @@ file_attachment = FileAttachment(client)
 file_attachment.content_bytes = "SGVsbG8gV29ybGQh"
 file_attachment.name = "attachment.txt"
 file_attachment.content_type = "text/plain"
-message.attachments.add_child(file_attachment)
+message.attachments = [file_attachment]
 
 json = message.to_json(client.pending_request().json_format)
 client.me.send_mail(message).execute_query()

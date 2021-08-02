@@ -14,6 +14,7 @@ class ODataJsonFormat(object):
         self.function_tag_name = None
         self.collection_tag_name = None
         self.collection_next_tag_name = None
+        self.metadata_type_tag_name = None
 
     __metaclass__ = ABCMeta
 

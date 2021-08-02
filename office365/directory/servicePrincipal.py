@@ -11,7 +11,7 @@ class ServicePrincipal(DirectoryObject):
         """
         return self.properties.get('appDisplayName', None)
 
-    def add_key(self, keyCredential, passwordCredential, proof):
+    def add_key(self, key_credential, password_credential, proof):
         pass
 
     def add_password(self):
@@ -24,4 +24,4 @@ class ServicePrincipalCollection(EntityCollection):
         super(ServicePrincipalCollection, self).__init__(context, ServicePrincipal, resource_path)
 
     def add(self, app_id):
-        return self.add_from_json({"appId": app_id})
+        return super(ServicePrincipalCollection, self).add(appId=app_id)

@@ -7,9 +7,9 @@ class ApplicationCollection(EntityCollection):
     def __init__(self, context, resource_path=None):
         super(ApplicationCollection, self).__init__(context, Application, resource_path)
 
-    def add(self, displayName):
+    def add(self, display_name):
         """
         Create a new application object.
-        :type displayName: str
+        :type display_name: str
         """
-        return self.add_from_json({"displayName": displayName})
+        return super(ApplicationCollection, self).add(displayName=display_name)

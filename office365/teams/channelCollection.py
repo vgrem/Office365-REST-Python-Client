@@ -8,15 +8,14 @@ class ChannelCollection(EntityCollection):
     def __init__(self, context, resource_path=None):
         super(ChannelCollection, self).__init__(context, Channel, resource_path)
 
-    def add(self, displayName, description=None):
+    def add(self, display_name, description=None):
         """Create a new channel in a Microsoft Team, as specified in the request body.
 
         :param str description: Optional textual description for the channel.
-        :param str displayName: Channel name as it will appear to the user in Microsoft Teams.
+        :param str display_name: Channel name as it will appear to the user in Microsoft Teams.
         :rtype: Channel
         """
-        payload = {
-            "displayName": displayName,
-            "description": description,
-        }
-        return self.add_from_json(payload)
+        return super(ChannelCollection, self).add(
+            displayName=display_name,
+            description=description
+        )

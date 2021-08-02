@@ -9,8 +9,10 @@ from office365.directory.directoryObjectCollection import DirectoryObjectCollect
 from office365.directory.licenseDetails import LicenseDetailsCollection
 from office365.directory.objectIdentity import ObjectIdentity
 from office365.directory.profilePhoto import ProfilePhoto
+from office365.entity_collection import EntityCollection
+from office365.mail.contact import Contact
+from office365.mail.mailFolder import MailFolder
 from office365.onedrive.drive import Drive
-from office365.mail.contact_collection import ContactCollection
 from office365.calendar.event_collection import EventCollection
 from office365.mail.message_collection import MessageCollection
 from office365.onedrive.siteCollection import SiteCollection
@@ -258,7 +260,7 @@ class User(DirectoryObject):
         """Get a contact collection from the default Contacts folder of the signed-in user (.../me/contacts),
         or from the specified contact folder."""
         return self.properties.get('contacts',
-                                   ContactCollection(self.context, ResourcePath("contacts", self.resource_path)))
+                                   EntityCollection(self.context, Contact, ResourcePath("contacts", self.resource_path)))
 
     @property
     def events(self):
@@ -292,13 +294,21 @@ class User(DirectoryObject):
                                    DirectoryObjectCollection(self.context,
                                                              ResourcePath("transitiveMemberOf", self.resource_path)))
 
+    @property
+    def mail_folders(self):
+        """Get the mail folder collection under the root folder of the signed-in user. """
+        return self.properties.get('mailFolders',
+                                   EntityCollection(self.context, MailFolder,
+                                                    ResourcePath("mailFolders", self.resource_path)))
+
     def get_property(self, name, default_value=None):
-        if name == "transitiveMemberOf":
-            default_value = self.transitive_member_of
-        elif name == "joinedTeams":
-            default_value = self.joined_teams
-        elif name == "assignedLicenses":
-            default_value = self.assigned_licenses
+        property_mapping = {
+            "transitiveMemberOf": self.transitive_member_of,
+            "joinedTeams": self.joined_teams,
+            "assignedLicenses":  self.assigned_licenses,
+            "mailFolders": self.mail_folders
+        }
+        default_value = property_mapping.get(name, None)
         return super(User, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
@@ -306,7 +316,5 @@ class User(DirectoryObject):
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "id" or name == "userPrincipalName":
-                self._resource_path = ResourcePath(
-                    value,
-                    self._parent_collection.resource_path)
+                self._resource_path = ResourcePath(value, self._parent_collection.resource_path)
         return self

@@ -12,7 +12,7 @@ class ClientRequest(object):
 
     def __init__(self, context):
         """
-        Abstract request client for OData/REST/CSOM services
+        Abstract request client for OData/CSOM services
 
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         """

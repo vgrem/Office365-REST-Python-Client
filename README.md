@@ -213,26 +213,13 @@ from office365.graph_client import GraphClient
 
 client = GraphClient(acquire_token_func)
 
-message_json = {
-    "Message": {
-        "Subject": "Meet for lunch?",
-        "Body": {
-            "ContentType": "Text",
-            "Content": "The new cafeteria is open."
-        },
-        "ToRecipients": [
-            {
-                "EmailAddress": {
-                    "Address": "jdoe@contoso.onmicrosoft.com"
-                }
-            }
-        ]
-    },
-    "SaveToSentItems": "false"
-}
+message = client.me.messages.new()  # type: Message
+message.subject = "Meet for lunch?"
+message.body = "The new cafeteria is open."
+message.to_recipients = ["fannyd@contoso.onmicrosoft.com"]
 
-login_name = "mdoe@contoso.onmicrosoft.com"
-client.users[login_name].send_mail(message_json).execute_query()
+client.me.send_mail(message).execute_query()
+
 ```
 
 

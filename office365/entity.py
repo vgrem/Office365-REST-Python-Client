@@ -29,11 +29,12 @@ class Entity(ClientObject):
 
     @property
     def entity_type_name(self):
-        return "microsoft.graph." + type(self).__name__
+        name = type(self).__name__
+        return "microsoft.graph." + name[0].lower() + name[1:]
 
     @property
     def id(self):
-        """The unique identifier of the drive.
+        """The unique identifier of the entity.
         :rtype: str or None
         """
         return self.properties.get('id', None)
