@@ -1,12 +1,13 @@
 from office365.base_item import BaseItem
+from office365.entity_collection import EntityCollection
 from office365.onedrive.columnDefinitionCollection import ColumnDefinitionCollection
-from office365.onedrive.contentTypeCollection import ContentTypeCollection
+from office365.onedrive.contentType import ContentType
 from office365.onedrive.drive import Drive
 from office365.onedrive.driveCollection import DriveCollection
 from office365.onedrive.itemAnalytics import ItemAnalytics
 from office365.onedrive.listCollection import ListCollection
 from office365.onedrive.listItemCollection import ListItemCollection
-from office365.onedrive.permission_collection import PermissionCollection
+from office365.onedrive.permission import Permission
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 
@@ -52,8 +53,8 @@ class Site(BaseItem):
     def content_types(self):
         """The collection of content types under this site."""
         return self.properties.get('contentTypes',
-                                   ContentTypeCollection(self.context,
-                                                         ResourcePath("contentTypes", self.resource_path)))
+                                   EntityCollection(self.context, ContentType,
+                                                    ResourcePath("contentTypes", self.resource_path)))
 
     @property
     def lists(self):
@@ -65,7 +66,8 @@ class Site(BaseItem):
     def permissions(self):
         """The collection of lists under this site."""
         return self.properties.get('permissions',
-                                   PermissionCollection(self.context, ResourcePath("permissions", self.resource_path)))
+                                   EntityCollection(self.context, Permission,
+                                                    ResourcePath("permissions", self.resource_path)))
 
     @property
     def drive(self):

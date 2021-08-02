@@ -1,6 +1,7 @@
 from office365.base_item import BaseItem
+from office365.entity_collection import EntityCollection
 from office365.onedrive.columnDefinitionCollection import ColumnDefinitionCollection
-from office365.onedrive.contentTypeCollection import ContentTypeCollection
+from office365.onedrive.contentType import ContentType
 from office365.onedrive.listItemCollection import ListItemCollection
 from office365.runtime.client_value import ClientValue
 from office365.runtime.resource_path import ResourcePath
@@ -8,10 +9,10 @@ from office365.runtime.resource_path import ResourcePath
 
 class ListInfo(ClientValue):
 
-    def __init__(self, template=None, contentTypesEnabled=False, hidden=False):
+    def __init__(self, template=None, content_types_enabled=False, hidden=False):
         super(ListInfo, self).__init__()
         self.template = template
-        self.contentTypesEnabled = contentTypesEnabled
+        self.contentTypesEnabled = content_types_enabled
         self.hidden = hidden
 
 
@@ -47,8 +48,8 @@ class List(BaseItem):
     def content_types(self):
         """The collection of content types under this site."""
         return self.properties.get('contentTypes',
-                                   ContentTypeCollection(self.context,
-                                                         ResourcePath("contentTypes", self.resource_path)))
+                                   EntityCollection(self.context, ContentType,
+                                                    ResourcePath("contentTypes", self.resource_path)))
 
     @property
     def items(self):

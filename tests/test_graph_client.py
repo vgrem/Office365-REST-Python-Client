@@ -1,4 +1,4 @@
-from office365.resource_path_url import ResourcePathUrl
+from office365.onedrive.internal.resource_path_url import ResourcePathUrl
 from office365.runtime.resource_path import ResourcePath
 from tests.graph_case import GraphTestCase
 

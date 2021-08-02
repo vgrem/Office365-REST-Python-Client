@@ -1,5 +1,5 @@
-from office365.mail.message import Message
-from tests import test_user_principal_name, test_user_principal_name_alt
+from office365.outlook.mail.message import Message
+from tests import test_user_principal_name
 from tests.graph_case import GraphTestCase
 
 

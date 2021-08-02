@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
-from office365.calendar.calendar import Calendar
-from office365.calendar.emailAddress import EmailAddress
+from office365.outlook.calendar.calendar import Calendar
+from office365.outlook.calendar.emailAddress import EmailAddress
 from tests import create_unique_name, test_user_principal_name
 from tests.graph_case import GraphTestCase
 

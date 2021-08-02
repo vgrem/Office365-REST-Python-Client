@@ -1,4 +1,4 @@
-from office365.mail.contact import Contact
+from office365.outlook.contacts.contact import Contact
 from tests.graph_case import GraphTestCase
 
 

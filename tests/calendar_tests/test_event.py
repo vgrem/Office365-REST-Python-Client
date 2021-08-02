@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from office365.calendar.event import Event
+from office365.outlook.calendar.event import Event
 from tests import test_user_principal_name
 from tests.graph_case import GraphTestCase
 

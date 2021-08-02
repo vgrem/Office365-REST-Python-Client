@@ -1,8 +1,9 @@
-from office365.calendar.calendar import Calendar
-from office365.calendar.calendar_collection import CalendarCollection
-from office365.calendar.calendar_group_collection import CalendarGroupCollection
-from office365.calendar.meeting_time_suggestions_result import MeetingTimeSuggestionsResult
-from office365.calendar.reminder import Reminder
+from office365.outlook.calendar.calendar import Calendar
+from office365.outlook.calendar.calendar_collection import CalendarCollection
+from office365.outlook.calendar.calendar_group_collection import CalendarGroupCollection
+from office365.outlook.calendar.event_collection import EventCollection
+from office365.outlook.calendar.meeting_time_suggestions_result import MeetingTimeSuggestionsResult
+from office365.outlook.calendar.reminder import Reminder
 from office365.directory.assignedLicense import AssignedLicense
 from office365.directory.directoryObject import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
@@ -10,12 +11,12 @@ from office365.directory.licenseDetails import LicenseDetailsCollection
 from office365.directory.objectIdentity import ObjectIdentity
 from office365.directory.profilePhoto import ProfilePhoto
 from office365.entity_collection import EntityCollection
-from office365.mail.contact import Contact
-from office365.mail.mailFolder import MailFolder
+from office365.outlook.contacts.contact import Contact
+from office365.outlook.mail.mailFolder import MailFolder
 from office365.onedrive.drive import Drive
-from office365.calendar.event_collection import EventCollection
-from office365.mail.message_collection import MessageCollection
+from office365.outlook.mail.message_collection import MessageCollection
 from office365.onedrive.siteCollection import SiteCollection
+from office365.outlook.outlook_user import OutlookUser
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
@@ -300,6 +301,12 @@ class User(DirectoryObject):
         return self.properties.get('mailFolders',
                                    EntityCollection(self.context, MailFolder,
                                                     ResourcePath("mailFolders", self.resource_path)))
+
+    @property
+    def outlook(self):
+        """Represents the Outlook services available to a user."""
+        return self.properties.get('outlook',
+                                   OutlookUser(self.context, ResourcePath("outlook", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         property_mapping = {

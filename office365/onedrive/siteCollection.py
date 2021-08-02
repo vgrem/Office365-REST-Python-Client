@@ -1,5 +1,5 @@
 from office365.entity_collection import EntityCollection
-from office365.onedrive.root_resource_path import RootResourcePath
+from office365.onedrive.internal.root_resource_path import RootResourcePath
 from office365.onedrive.site import Site
 
 

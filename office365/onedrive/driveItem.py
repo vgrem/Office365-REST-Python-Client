@@ -1,12 +1,11 @@
-from office365.onedrive.actions.search_query import create_search_query
-from office365.onedrive.actions.upload_content_query import create_upload_content_query
+from office365.onedrive.internal.search_query import create_search_query
+from office365.onedrive.internal.upload_content_query import create_upload_content_query
 from office365.base_item import BaseItem
 from office365.onedrive.itemActivityStat import ItemActivityStat
 from office365.onedrive.itemAnalytics import ItemAnalytics
 from office365.onedrive.permission import Permission
-from office365.onedrive.permission_collection import PermissionCollection
 from office365.entity_collection import EntityCollection
-from office365.onedrive.children_resource_path import ChildrenResourcePath
+from office365.onedrive.internal.children_resource_path import ChildrenResourcePath
 from office365.onedrive.conflictBehavior import ConflictBehavior
 from office365.onedrive.driveItemVersion import DriveItemVersion
 from office365.onedrive.file import File
@@ -14,11 +13,11 @@ from office365.onedrive.fileSystemInfo import FileSystemInfo
 from office365.onedrive.folder import Folder
 from office365.onedrive.listItem import ListItem
 from office365.onedrive.publicationFacet import PublicationFacet
-from office365.onedrive.root_resource_path import RootResourcePath
+from office365.onedrive.internal.root_resource_path import RootResourcePath
 from office365.onedrive.thumbnailSet import ThumbnailSet
 from office365.onedrive.uploadSession import UploadSession
 from office365.excel.workbook import Workbook
-from office365.resource_path_url import ResourcePathUrl
+from office365.onedrive.internal.resource_path_url import ResourcePathUrl
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
@@ -126,7 +125,7 @@ class DriveItem(BaseItem):
         :param str source_path: Local file path
         :param int chunk_size: chunk size
         """
-        from office365.onedrive.actions.file_upload_query import ResumableFileUpload
+        from office365.onedrive.internal.file_upload_query import ResumableFileUpload
         upload_query = ResumableFileUpload(self, source_path, chunk_size, chunk_uploaded)
         self.children.add_child(upload_query.return_type)
         self.context.add_query(upload_query)
@@ -169,7 +168,7 @@ class DriveItem(BaseItem):
     def get_content(self):
         """Download the contents of the primary stream (file) of a DriveItem. Only driveItems with the file property
         can be downloaded. """
-        from office365.onedrive.actions.download_content_query import create_download_content_query
+        from office365.onedrive.internal.download_content_query import create_download_content_query
         qry = create_download_content_query(self)
         self.context.add_query(qry)
         return qry.return_type
@@ -209,7 +208,7 @@ class DriveItem(BaseItem):
         :type format_name: str
         :rtype: ClientResult
         """
-        from office365.onedrive.actions.download_content_query import create_download_content_query
+        from office365.onedrive.internal.download_content_query import create_download_content_query
         qry = create_download_content_query(self, format_name)
         self.context.add_query(qry)
         return qry.return_type
@@ -289,7 +288,7 @@ class DriveItem(BaseItem):
         """
         if roles is None:
             roles = ["read"]
-        permissions = PermissionCollection(self.context)
+        permissions = EntityCollection(self.context, Permission)
         payload = {
             "requireSignIn": require_sign_in,
             "sendInvitation": send_invitation,
@@ -355,9 +354,8 @@ class DriveItem(BaseItem):
     def children(self):
         """Collection containing Item objects for the immediate children of Item. Only items representing folders
         have children."""
-        from office365.onedrive.driveItemCollection import DriveItemCollection
         return self.properties.get('children',
-                                   DriveItemCollection(self.context, ChildrenResourcePath(self.resource_path)))
+                                   EntityCollection(self.context, DriveItem, ChildrenResourcePath(self.resource_path)))
 
     @property
     def listItem(self):
@@ -373,7 +371,8 @@ class DriveItem(BaseItem):
     def permissions(self):
         """The set of permissions for the item. Read-only. Nullable."""
         return self.properties.get('permissions',
-                                   PermissionCollection(self.context, ResourcePath("permissions", self.resource_path)))
+                                   EntityCollection(self.context, Permission,
+                                                    ResourcePath("permissions", self.resource_path)))
 
     @property
     def publication(self):
@@ -406,10 +405,8 @@ class DriveItem(BaseItem):
     @property
     def delta(self):
         """This method allows your app to track changes to a drive and its children over time."""
-        from office365.onedrive.driveItemCollection import DriveItemCollection
         return self.properties.get('delta',
-                                   DriveItemCollection(self.context,
-                                                       ResourcePath("delta", self.resource_path)))
+                                   EntityCollection(self.context, DriveItem, ResourcePath("delta", self.resource_path)))
 
     def set_property(self, name, value, persist_changes=True):
         # if self._resource_path is None and name == "id":

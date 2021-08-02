@@ -11,7 +11,7 @@ from office365.directory.subscribedSku import SubscribedSkuCollection
 from office365.directory.user import User
 from office365.directory.userCollection import UserCollection
 from office365.entity_collection import EntityCollection
-from office365.mail.contact import Contact
+from office365.outlook.contacts.contact import Contact
 from office365.onedrive.driveCollection import DriveCollection
 from office365.onedrive.sharedDriveItemCollection import SharedDriveItemCollection
 from office365.onedrive.siteCollection import SiteCollection
