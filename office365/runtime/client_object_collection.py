@@ -36,18 +36,21 @@ class ClientObjectCollection(ClientObject):
     def clear(self):
         self._data = []
 
-    def create_typed_object(self, properties):
+    def create_typed_object(self, properties=None, persist_changes=False):
         """
         :type properties: dict
+        :type persist_changes: bool
         :rtype: ClientObject
         """
+        if properties is None:
+            properties = {}
         if self._item_type is None:
             raise AttributeError("No class for object type '{0}' found".format(self._item_type))
 
         client_object = self._item_type(self.context)
         client_object._parent_collection = self
         for k, v in properties.items():
-            client_object.set_property(k, v, False)
+            client_object.set_property(k, v, persist_changes)
         return client_object
 
     def set_property(self, name, value, persist_changes=False):

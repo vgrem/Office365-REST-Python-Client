@@ -1,4 +1,4 @@
-from office365.outlook.calendar.attendeeBase import AttendeeBase
+from office365.outlook.calendar.attendee_base import AttendeeBase
 from office365.outlook.calendar.emailAddress import EmailAddress
 
 

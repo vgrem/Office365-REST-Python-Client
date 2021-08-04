@@ -7,16 +7,24 @@ class TestGraphMail(GraphTestCase):
     target_message = None  # type: Message
 
     def test2_create_draft_message(self):
-        draft_message = self.client.me.messages.add("Meet for lunch?",
-                                                    "The new cafeteria is open.",
-                                                    [test_user_principal_name]).execute_query()
+        draft_message = self.client.me.messages.add(
+            subject="Meet for lunch?",
+            body={
+                "contentType": "Text",
+                "content": "The new cafeteria is open."
+            }
+        ).execute_query()
         self.assertIsNotNone(draft_message.id)
         self.__class__.target_message = draft_message
 
     def test3_send_message(self):
-        self.__class__.target_message.send().execute_query()
+        message = self.__class__.target_message
+        message.to_recipients = [test_user_principal_name]
+        message.body = "The new cafeteria is open."
+        message.update()
+        message.send().execute_query()
 
-    #def test4_forward_message(self):
+    # def test4_forward_message(self):
     #    self.__class__.target_message.forward([test_user_principal_name_alt]).execute_query()
 
     def test_5_get_my_messages(self):

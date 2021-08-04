@@ -1,6 +1,6 @@
 from office365.base_item import BaseItem
 from office365.entity_collection import EntityCollection
-from office365.onedrive.columnDefinitionCollection import ColumnDefinitionCollection
+from office365.onedrive.columnDefinition import ColumnDefinition
 from office365.onedrive.contentType import ContentType
 from office365.onedrive.drive import Drive
 from office365.onedrive.driveCollection import DriveCollection
@@ -46,8 +46,8 @@ class Site(BaseItem):
     def columns(self):
         """The collection of columns under this site."""
         return self.properties.get('columns',
-                                   ColumnDefinitionCollection(self.context,
-                                                              ResourcePath("columns", self.resource_path)))
+                                   EntityCollection(self.context, ColumnDefinition,
+                                                    ResourcePath("columns", self.resource_path)))
 
     @property
     def content_types(self):

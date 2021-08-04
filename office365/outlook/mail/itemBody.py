@@ -2,13 +2,13 @@ from office365.runtime.client_value import ClientValue
 
 
 class ItemBody(ClientValue):
-    """"""
+    """Represents properties of the body of an item, such as a message, event or group post."""
 
     def __init__(self, content=None, content_type="Text"):
         """
 
-        :type content: str
-        :type content_type: str
+        :param str content: The content of the item.
+        :param str content_type: The type of the content. Possible values are text and html.
         """
         super(ItemBody, self).__init__()
         self.content = content

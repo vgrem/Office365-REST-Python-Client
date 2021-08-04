@@ -20,8 +20,9 @@ class TestOutlookContacts(GraphTestCase):
                 }
             ],
             businessPhones=["+1 732 555 0102"]
-        ).execute_query()
-        self.assertIsNotNone(new_contact.properties["givenName"])
+        )
+        self.client.execute_query()
+        self.assertEqual(new_contact.email_addresses[0].name, "Pavel Bansky")
         self.__class__.target_contact = new_contact
 
     def test2_list_contacts(self):

@@ -105,7 +105,7 @@ class Message(Item):
     @property
     def body(self):
         """The body of the message. It can be in HTML or text format."""
-        return self.properties.get("body", ItemBody())
+        return self.get_property("body", ItemBody())
 
     @body.setter
     def body(self, value):
@@ -143,3 +143,11 @@ class Message(Item):
         """
         self.set_property('toRecipients',
                           ClientValueCollection(Recipient, [Recipient.from_email(email) for email in value]))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_type_mapping = {
+                "toRecipients": self.to_recipients
+            }
+            default_value = property_type_mapping.get(name, None)
+        return super(Message, self).get_property(name, default_value)

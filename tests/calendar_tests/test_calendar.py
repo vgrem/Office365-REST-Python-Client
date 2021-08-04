@@ -56,7 +56,7 @@ class TestCalendar(GraphTestCase):
         self.assertIsNotNone(cals.resource_path)
 
     def test7_create_calendar(self):
-        new_cal = self.client.me.calendars.add(self.cal_name).execute_query()
+        new_cal = self.client.me.calendars.add(name=self.cal_name).execute_query()
         self.assertIsNotNone(new_cal.resource_path)
         self.__class__.target_cal = new_cal
 

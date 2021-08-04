@@ -1,7 +1,6 @@
 from office365.outlook.calendar.calendar import Calendar
-from office365.outlook.calendar.calendar_collection import CalendarCollection
-from office365.outlook.calendar.calendar_group_collection import CalendarGroupCollection
-from office365.outlook.calendar.event_collection import EventCollection
+from office365.outlook.calendar.calendar_group import CalendarGroup
+from office365.outlook.calendar.event import Event
 from office365.outlook.calendar.meeting_time_suggestions_result import MeetingTimeSuggestionsResult
 from office365.outlook.calendar.reminder import Reminder
 from office365.directory.assignedLicense import AssignedLicense
@@ -14,7 +13,7 @@ from office365.entity_collection import EntityCollection
 from office365.outlook.contacts.contact import Contact
 from office365.outlook.mail.mailFolder import MailFolder
 from office365.onedrive.drive import Drive
-from office365.outlook.mail.message_collection import MessageCollection
+from office365.outlook.mail.message import Message
 from office365.onedrive.siteCollection import SiteCollection
 from office365.outlook.outlook_user import OutlookUser
 from office365.runtime.client_result import ClientResult
@@ -112,8 +111,8 @@ class User(DirectoryObject):
             For example, "2019-11-08T19:00:00-08:00".
 
         """
-        result = EventCollection(self.context, ResourcePath("calendarView", self.resource_path))
-        qry = ServiceOperationQuery(self, "calendarView", None, None, None, result)
+        return_type = EntityCollection(self.context, Event, ResourcePath("calendarView", self.resource_path))
+        qry = ServiceOperationQuery(self, "calendarView", None, None, None, return_type)
         self.context.add_query(qry)
 
         def _construct_request(request):
@@ -124,7 +123,7 @@ class User(DirectoryObject):
             request.url += "?startDateTime={0}&endDateTime={1}".format(start_dt.isoformat(), end_dt.isoformat())
 
         self.context.before_execute(_construct_request)
-        return result
+        return return_type
 
     def get_reminder_view(self, start_dt, end_dt):
         """Get the occurrences, exceptions, and single instances of events in a calendar view defined by a time range,
@@ -234,14 +233,15 @@ class User(DirectoryObject):
     def calendars(self):
         """The user's calendar groups. Read-only. Nullable."""
         return self.properties.get('calendars',
-                                   CalendarCollection(self.context, ResourcePath("calendars", self.resource_path)))
+                                   EntityCollection(self.context, Calendar,
+                                                    ResourcePath("calendars", self.resource_path)))
 
     @property
     def calendar_groups(self):
         """The user's calendar groups. Read-only. Nullable."""
         return self.properties.get('calendarGroups',
-                                   CalendarGroupCollection(self.context,
-                                                           ResourcePath("calendarGroups", self.resource_path)))
+                                   EntityCollection(self.context, CalendarGroup,
+                                                    ResourcePath("calendarGroups", self.resource_path)))
 
     @property
     def license_details(self):
@@ -261,18 +261,21 @@ class User(DirectoryObject):
         """Get a contact collection from the default Contacts folder of the signed-in user (.../me/contacts),
         or from the specified contact folder."""
         return self.properties.get('contacts',
-                                   EntityCollection(self.context, Contact, ResourcePath("contacts", self.resource_path)))
+                                   EntityCollection(self.context, Contact,
+                                                    ResourcePath("contacts", self.resource_path)))
 
     @property
     def events(self):
         """Get an event collection or an event."""
-        return self.properties.get('events', EventCollection(self.context, ResourcePath("events", self.resource_path)))
+        return self.properties.get('events', EntityCollection(self.context, Event,
+                                                              ResourcePath("events", self.resource_path)))
 
     @property
     def messages(self):
         """Get an event collection or an event."""
         return self.properties.get('messages',
-                                   MessageCollection(self.context, ResourcePath("messages", self.resource_path)))
+                                   EntityCollection(self.context, Message,
+                                                    ResourcePath("messages", self.resource_path)))
 
     @property
     def joined_teams(self):
@@ -312,7 +315,7 @@ class User(DirectoryObject):
         property_mapping = {
             "transitiveMemberOf": self.transitive_member_of,
             "joinedTeams": self.joined_teams,
-            "assignedLicenses":  self.assigned_licenses,
+            "assignedLicenses": self.assigned_licenses,
             "mailFolders": self.mail_folders
         }
         default_value = property_mapping.get(name, None)

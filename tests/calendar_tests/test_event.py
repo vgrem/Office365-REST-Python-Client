@@ -9,13 +9,13 @@ class TestOutlookEvent(GraphTestCase):
     target_event = None  # type: Event
 
     def test2_create_event(self):
-        start_time = datetime.utcnow() + timedelta(days=1)
-        end_time = start_time + timedelta(hours=1)
-        new_event = self.client.me.events.add("Let's go for lunch",
-                                              "Does mid month work for you?",
-                                              start_time,
-                                              end_time,
-                                              [test_user_principal_name]).execute_query()
+        new_event = self.client.me.events.add()  # type: Event
+        new_event.subject = "Let's go for lunch"
+        new_event.body = "Does mid month work for you?"
+        new_event.start = datetime.utcnow() + timedelta(days=1)
+        new_event.end = datetime.utcnow() + timedelta(days=1) + timedelta(hours=1)
+        new_event.attendees = [test_user_principal_name]
+        self.client.execute_query()
         self.assertIsNotNone(new_event.id)
         self.__class__.target_event = new_event
 
@@ -25,7 +25,7 @@ class TestOutlookEvent(GraphTestCase):
 
     def test4_update_event(self):
         event = self.__class__.target_event
-        event.set_property("subject", "Let's go for lunch (updated)")
+        event.subject = "Let's go for lunch (updated)"
         event.update().execute_query()
 
     def test5_delete_event(self):

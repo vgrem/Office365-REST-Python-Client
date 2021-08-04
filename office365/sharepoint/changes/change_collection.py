@@ -7,9 +7,9 @@ class ChangeCollection(BaseEntityCollection):
     def __init__(self, context, resource_path=None):
         super(ChangeCollection, self).__init__(context, Change, resource_path)
 
-    def create_typed_object(self, properties):
-        self.resolve_change_type(properties)
-        return super(ChangeCollection, self).create_typed_object(properties)
+    def set_property(self, name, value, persist_changes=False):
+        self.resolve_change_type(value)
+        super(ChangeCollection, self).set_property(name, value)
 
     def resolve_change_type(self, properties):
         """

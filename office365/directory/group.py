@@ -4,9 +4,10 @@ from office365.directory.appRoleAssignment import AppRoleAssignmentCollection
 from office365.directory.assignedLicense import AssignedLicense
 from office365.directory.directoryObject import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
+from office365.entity_collection import EntityCollection
 from office365.onedrive.driveCollection import DriveCollection
 from office365.onedrive.siteCollection import SiteCollection
-from office365.outlook.calendar.event_collection import EventCollection
+from office365.outlook.calendar.event import Event
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
@@ -103,7 +104,8 @@ class Group(DirectoryObject):
     @property
     def events(self):
         """Get an event collection or an event."""
-        return self.properties.get('events', EventCollection(self.context, ResourcePath("events", self.resource_path)))
+        return self.properties.get('events', EntityCollection(self.context, Event,
+                                                              ResourcePath("events", self.resource_path)))
 
     @property
     def app_role_assignments(self):

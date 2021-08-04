@@ -1,5 +1,5 @@
 from office365.entity_collection import EntityCollection
-from office365.outlook.actions.attachment_upload_query import AttachmentUploadQuery
+from office365.outlook.attachment_upload_query import AttachmentUploadQuery
 from office365.outlook.mail.attachment import Attachment
 from office365.onedrive.uploadSession import UploadSession
 from office365.runtime.client_result import ClientResult

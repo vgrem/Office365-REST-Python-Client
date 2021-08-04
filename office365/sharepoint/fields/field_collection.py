@@ -16,10 +16,6 @@ class FieldCollection(BaseEntityCollection):
     def __init__(self, context, resource_path=None, parent=None):
         super(FieldCollection, self).__init__(context, Field, resource_path, parent)
 
-    def create_typed_object(self, properties):
-        field = super(FieldCollection, self).create_typed_object(properties)
-        return field
-
     def add_url_field(self, title, description=None):
         """
         Adds Url field

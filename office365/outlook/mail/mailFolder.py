@@ -1,5 +1,6 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
+from office365.outlook.mail.message import Message
 from office365.outlook.mail.message_rule import MessageRule
 from office365.runtime.resource_path import ResourcePath
 
@@ -29,6 +30,6 @@ class MailFolder(Entity):
     @property
     def messages(self):
         """The collection of messages in the mailFolder."""
-        from office365.outlook.mail.message_collection import MessageCollection
         return self.properties.get('messages',
-                                   MessageCollection(self.context, ResourcePath("messages", self.resource_path)))
+                                   EntityCollection(self.context, Message,
+                                                    ResourcePath("messages", self.resource_path)))

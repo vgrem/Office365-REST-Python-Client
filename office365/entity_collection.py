@@ -17,19 +17,19 @@ class EntityCollection(ClientObjectCollection):
             return super(EntityCollection, self).__getitem__(key)
         return self._item_type(self.context, ResourcePath(key, self.resource_path))
 
-    def new(self):
-        return self.create_typed_object({})
+    def new(self, **kwargs):
+        return self.create_typed_object(properties=kwargs, persist_changes=True)
 
     def add(self, **kwargs):
-        """Creates an entity resource
+        """Creates a resource
 
         :rtype: office365.entity.Entity
         """
-        entity = self.new()
-        self.add_child(entity)
-        qry = CreateEntityQuery(self, kwargs, entity)
+        return_type = self.new()
+        self.add_child(return_type)
+        qry = CreateEntityQuery(self, kwargs, return_type)
         self.context.add_query(qry)
-        return entity
+        return return_type
 
     @property
     def context(self):

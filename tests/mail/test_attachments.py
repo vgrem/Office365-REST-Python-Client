@@ -1,7 +1,6 @@
 from office365.outlook.mail.attachment_item import AttachmentItem
 from office365.outlook.mail.attachment_type import AttachmentType
 from office365.outlook.mail.message import Message
-from tests import test_user_principal_name
 from tests.graph_case import GraphTestCase
 
 
@@ -11,9 +10,20 @@ class TestAttachments(GraphTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestAttachments, cls).setUpClass()
-        cls.target_message = cls.client.me.messages.add("Meet for lunch?",
-                                                        "The new cafeteria is open.",
-                                                        [test_user_principal_name]).execute_query()
+        cls.target_message = cls.client.me.messages.add(
+            subject="Meet for lunch?",
+            body={
+                "contentType": "Text",
+                "content": "The new cafeteria is open."
+            },
+            toRecipients=[
+                {
+                    "emailAddress": {
+                        "address": "fannyd@contoso.onmicrosoft.com"
+                    }
+                }
+            ]
+        ).execute_query()
 
     @classmethod
     def tearDownClass(cls):

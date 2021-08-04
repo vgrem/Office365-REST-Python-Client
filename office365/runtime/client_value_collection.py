@@ -7,7 +7,7 @@ class ClientValueCollection(ClientValue):
     def __init__(self, item_type, initial_values=None):
         """
         :type item_type: any
-        :type initial_values: any
+        :type initial_values: [] or None
         """
         super(ClientValueCollection, self).__init__()
         if initial_values is None:
@@ -17,6 +17,14 @@ class ClientValueCollection(ClientValue):
 
     def add(self, value):
         self._data.append(value)
+
+    def __getitem__(self, index):
+        """
+
+        :type index: int
+        :rtype: ClientValue
+        """
+        return self._data[index]
 
     def __iter__(self):
         for item in self._data:
