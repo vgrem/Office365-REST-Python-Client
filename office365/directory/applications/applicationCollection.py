@@ -1,4 +1,4 @@
-from office365.directory.application import Application
+from office365.directory.applications.application import Application
 from office365.entity_collection import EntityCollection
 
 

@@ -1,8 +1,8 @@
 import json
 
-from office365.directory.appRoleAssignment import AppRoleAssignmentCollection
+from office365.directory.applications.appRoleAssignment import AppRoleAssignmentCollection
 from office365.directory.assignedLicense import AssignedLicense
-from office365.directory.directoryObject import DirectoryObject
+from office365.directory.directory_object import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.entity_collection import EntityCollection
 from office365.onedrive.driveCollection import DriveCollection

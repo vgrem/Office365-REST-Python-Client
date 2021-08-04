@@ -1,4 +1,4 @@
-from office365.directory.directoryObject import DirectoryObject
+from office365.directory.directory_object import DirectoryObject
 from office365.directory.keyCredential import KeyCredential
 from office365.directory.passwordCredential import PasswordCredential
 from office365.runtime.client_result import ClientResult

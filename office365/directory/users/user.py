@@ -4,7 +4,7 @@ from office365.outlook.calendar.event import Event
 from office365.outlook.calendar.meeting_time_suggestions_result import MeetingTimeSuggestionsResult
 from office365.outlook.calendar.reminder import Reminder
 from office365.directory.assignedLicense import AssignedLicense
-from office365.directory.directoryObject import DirectoryObject
+from office365.directory.directory_object import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.directory.licenseDetails import LicenseDetailsCollection
 from office365.directory.objectIdentity import ObjectIdentity

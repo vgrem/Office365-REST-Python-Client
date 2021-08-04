@@ -2,8 +2,8 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from tests import create_unique_name, test_tenant
 from tests.graph_case import GraphTestCase
 
-from office365.directory.user import User
-from office365.directory.userProfile import UserProfile
+from office365.directory.users.user import User
+from office365.directory.users.userProfile import UserProfile
 
 
 class TestGraphUser(GraphTestCase):

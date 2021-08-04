@@ -1,5 +1,5 @@
-from office365.directory.group import Group
-from office365.directory.group_profile import GroupProfile
+from office365.directory.groups.group import Group
+from office365.directory.groups.group_profile import GroupProfile
 from office365.entity_collection import EntityCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.resource_path import ResourcePath
