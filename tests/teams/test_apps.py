@@ -24,5 +24,5 @@ class TestTeamApps(GraphTestCase):
         cls.client.groups[group_id].delete_object().execute_query()
 
     def test1_get_team_apps(self):
-        apps = self.__class__.target_team.installedApps.get().execute_query()
+        apps = self.__class__.target_team.installed_apps.get().execute_query()
         self.assertIsNotNone(apps.resource_path)

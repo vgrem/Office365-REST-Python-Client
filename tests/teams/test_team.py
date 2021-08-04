@@ -1,33 +1,23 @@
 import uuid
 
+from office365.teams.team import Team
 from tests.graph_case import GraphTestCase
-
-from office365.directory.group import Group
-from office365.directory.group_profile import GroupProfile
-
-
-def _create_group(client):
-    grp_name = "Group_" + uuid.uuid4().hex
-    properties = GroupProfile(grp_name)
-    properties.securityEnabled = False
-    properties.mailEnabled = True
-    properties.groupTypes = ["Unified"]
-    return client.groups.add(properties)
 
 
 class TestGraphTeam(GraphTestCase):
     """Tests for teams"""
 
-    target_group = None  # type: Group
+    target_team = None  # type: Team
 
     @classmethod
     def setUpClass(cls):
         super(TestGraphTeam, cls).setUpClass()
 
     def test1_ensure_team(self):
-        self.__class__.target_group = _create_group(self.client).execute_query()
-        new_team = self.__class__.target_group.add_team().execute_query_retry(max_retry=6, timeout_secs=5)
-        self.assertIsNotNone(new_team.id)
+        grp_name = "Group_" + uuid.uuid4().hex
+        result = self.client.teams.create(grp_name).execute_query_retry(max_retry=6, timeout_secs=5)
+        self.assertIsNotNone(result.value.id)
+        self.__class__.target_team = result.value
 
     def test3_get_all_teams(self):
         teams = self.client.teams.get_all().execute_query()
@@ -39,7 +29,7 @@ class TestGraphTeam(GraphTestCase):
         self.assertGreater(len(my_teams), 0)
 
     def test5_get_team(self):
-        group_id = self.__class__.target_group.id
+        group_id = self.__class__.target_team.id
         existing_team = self.client.teams[group_id].get().execute_query()
         self.assertIsNotNone(existing_team.resource_url)
         self.assertIsNotNone(existing_team.messagingSettings)
@@ -51,15 +41,15 @@ class TestGraphTeam(GraphTestCase):
             self.assertFalse(existing_team.is_archived)
 
     def test6_update_team(self):
-        team_id = self.__class__.target_group.properties['id']
+        team_id = self.__class__.target_team.id
         team_to_update = self.client.teams[team_id]
         team_to_update.funSettings.allowGiphy = False
         team_to_update.update().execute_query()
 
     def test7_archive_team(self):
-        group_id = self.__class__.target_group.id
-        self.client.teams[group_id].archive().execute_query()
+        team_id = self.__class__.target_team.id
+        self.client.teams[team_id].archive().execute_query()
 
     def test8_delete_team(self):
-        grp_to_delete = self.__class__.target_group
-        grp_to_delete.delete_object(True).execute_query()
+        grp_to_delete = self.__class__.target_team
+        grp_to_delete.delete_object().execute_query()

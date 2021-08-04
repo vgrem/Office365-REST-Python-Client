@@ -1,3 +1,4 @@
+from office365.directory.group import Group
 from office365.directory.group_profile import GroupProfile
 from office365.entity_collection import EntityCollection
 from office365.runtime.client_result import ClientResult
@@ -28,16 +29,16 @@ class TeamCollection(EntityCollection):
         if include_properties is None:
             include_properties = []
         include_properties = include_properties + ["id", "resourceProvisioningOptions"]
-        groups = self.context.groups.select(include_properties)
-        self.context.load(groups)
+        groups = self.context.groups.select(include_properties).get()
 
         def _process_response(resp):
-            for grp in groups:
+            for grp in groups:  # type: Group
                 if "Team" in grp.properties["resourceProvisioningOptions"]:
-                    new_team = Team(self.context, ResourcePath(grp.properties["id"], self.resource_path))
+                    new_team = Team(self.context, ResourcePath(grp.id, self.resource_path))
                     for k, v in grp.properties.items():
                         new_team.set_property(k, v)
                     self.add_child(new_team)
+
         self.context.after_execute(_process_response)
         return self
 
@@ -57,5 +58,6 @@ class TeamCollection(EntityCollection):
 
         def _group_created(resp):
             result.value = target_group.add_team()
+
         self.context.after_execute(_group_created)
         return result

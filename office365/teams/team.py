@@ -1,4 +1,5 @@
 from office365.entity import Entity
+from office365.entity_collection import EntityCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.teams.channel import Channel
@@ -8,8 +9,8 @@ from office365.teams.teamFunSettings import TeamFunSettings
 from office365.teams.teamGuestSettings import TeamGuestSettings
 from office365.teams.teamMemberSettings import TeamMemberSettings
 from office365.teams.teamMessagingSettings import TeamMessagingSettings
-from office365.teams.teamsAppInstallationCollection import TeamsAppInstallationCollection
-from office365.teams.teamsAsyncOperationCollection import TeamsAsyncOperationCollection
+from office365.teams.teamsAppInstallation import TeamsAppInstallation
+from office365.teams.teamsAsyncOperation import TeamsAsyncOperation
 from office365.teams.teamsTemplate import TeamsTemplate
 
 
@@ -24,8 +25,15 @@ class Team(Entity):
         self.messagingSettings = TeamMessagingSettings()
         self.funSettings = TeamFunSettings()
 
+    def delete_object(self):
+        def _team_loaded():
+            group = self.context.groups[self.id]
+            group.delete_object(False)
+        self.ensure_property("id", _team_loaded)
+        return self
+
     @property
-    def displayName(self):
+    def display_name(self):
         """The name of the team."""
         return self.properties.get('displayName', None)
 
@@ -58,7 +66,7 @@ class Team(Entity):
         return self.properties.get('webUrl', None)
 
     @property
-    def createdDateTime(self):
+    def created_datetime(self):
         """Timestamp at which the team was created."""
         return self.properties.get('createdDateTime', None)
 
@@ -81,24 +89,24 @@ class Team(Entity):
                                    Schedule(self.context, ResourcePath("schedule", self.resource_path)))
 
     @property
-    def installedApps(self):
+    def installed_apps(self):
         """The apps installed in this team."""
         return self.properties.get('installedApps',
-                                   TeamsAppInstallationCollection(self.context,
-                                                                  ResourcePath("installedApps", self.resource_path)))
+                                   EntityCollection(self.context, TeamsAppInstallation,
+                                                    ResourcePath("installedApps", self.resource_path)))
 
     @property
     def operations(self):
         """The async operations that ran or are running on this team."""
-        return self.properties.get('operations',
-                                   TeamsAsyncOperationCollection(self.context,
-                                                                 ResourcePath("installedApps", self.resource_path)))
+        return self.get_property('operations',
+                                 EntityCollection(self.context, TeamsAsyncOperation,
+                                                  ResourcePath("installedApps", self.resource_path)))
 
     @property
     def template(self):
         """The template this team was created from"""
-        return self.properties.get('template',
-                                   TeamsTemplate(self.context, ResourcePath("template", self.resource_path)))
+        return self.get_property('template',
+                                 TeamsTemplate(self.context, ResourcePath("template", self.resource_path)))
 
     def archive(self):
         """Archive the specified team. When a team is archived, users can no longer send or like messages on any
@@ -120,6 +128,15 @@ class Team(Entity):
         qry = ServiceOperationQuery(self, "clone")
         self.context.add_query(qry)
         return self
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "installedApps": self.installed_apps,
+                "primaryChannel": self.primary_channel
+            }
+            default_value = property_mapping.get(name, None)
+        return super(Team, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
         super(Team, self).set_property(name, value, persist_changes)

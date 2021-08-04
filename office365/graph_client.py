@@ -27,6 +27,7 @@ from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.teams.chat import Chat
+from office365.teams.cloudCommunication import CloudCommunication
 from office365.teams.team_collection import TeamCollection
 
 
@@ -184,3 +185,7 @@ class GraphClient(ClientRuntimeContext):
     @property
     def group_lifecycle_policies(self):
         return EntityCollection(self, GroupLifecyclePolicy, ResourcePath("groupLifecyclePolicies"))
+
+    @property
+    def communications(self):
+        return EntityCollection(self, CloudCommunication, ResourcePath("communications"))

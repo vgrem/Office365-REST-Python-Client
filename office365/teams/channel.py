@@ -1,10 +1,11 @@
+from office365.entity_collection import EntityCollection
 from office365.runtime.compat import quote
 
 from office365.entity import Entity
 from office365.onedrive.driveItem import DriveItem
 from office365.runtime.resource_path import ResourcePath
 from office365.teams.chatMessageCollection import ChatMessageCollection
-from office365.teams.teamsTabCollection import TeamsTabCollection
+from office365.teams.teamsTab import TeamsTab
 
 
 class Channel(Entity):
@@ -20,7 +21,7 @@ class Channel(Entity):
     def tabs(self):
         """A collection of all the tabs in the channel. A navigation property."""
         return self.properties.get('tabs',
-                                   TeamsTabCollection(self.context, ResourcePath("tabs", self.resource_path)))
+                                   EntityCollection(self.context, TeamsTab, ResourcePath("tabs", self.resource_path)))
 
     @property
     def messages(self):
