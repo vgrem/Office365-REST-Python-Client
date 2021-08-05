@@ -35,7 +35,7 @@ class FileCollection(BaseEntityCollection):
         if file_size > chunk_size:
             qry = UploadSessionQuery(self, source_path, chunk_size, chunk_uploaded, chunk_func_args)
             self.context.add_query(qry)
-            return qry.file
+            return qry.return_type
         else:
             with open(source_path, 'rb') as content_file:
                 file_content = content_file.read()

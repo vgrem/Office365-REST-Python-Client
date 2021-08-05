@@ -1,25 +1,11 @@
 import os
 import uuid
-from functools import partial
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.sharepoint.actions.create_file import create_file_query
 from office365.sharepoint.files.file import File
 from office365.sharepoint.files.file_creation_information import FileCreationInformation
-
-
-def read_in_chunks(file_object, size=1024):
-    """Lazy function (generator) to read a file piece by piece.
-
-    :type size: int
-    :type file_object: typing.IO
-    """
-    while True:
-        data = file_object.read(size)
-        if not data:
-            break
-        yield data
 
 
 class UploadSessionQuery(ServiceOperationQuery):
@@ -38,79 +24,79 @@ class UploadSessionQuery(ServiceOperationQuery):
         self._source_path = source_path
         self._chunk_uploaded = chunk_uploaded
         self._chunk_func_args = chunk_func_args
-        self._uploaded_bytes = 0
-        self._upload_results = []
-        self._query = self._build_empty_file_query(files, source_path)
+        self._bytes_read = 0
+        self._upload_result = None
+        self._file_handle = None
+        self._file_query = self._build_empty_file_query(files)
 
     def build_url(self):
-        return self._query.build_url()
+        return self._file_query.build_url()
 
-    def build_request(self):
-        return self._query.build_request()
-
-    def _build_empty_file_query(self, files, path):
-        """
-        :type files: office365.sharepoint.files.file_collection.FileCollection
-        :type path: str
-        """
-        file_name = os.path.basename(path)
+    def _build_empty_file_query(self, files):
         info = FileCreationInformation()
-        info.url = file_name
+        info.url = self.file_name
         info.overwrite = True
 
         qry = create_file_query(files, info)
         self.context.after_execute(self._build_upload_session_query)
         return qry
 
+    def _read_next_chunk(self):
+        data = self._file_handle.read(self._chunk_size)
+        self._bytes_read = self._file_handle.tell()
+        return data
+
+    def _has_pending_read(self):
+        if self._bytes_read >= self.file_size:
+            if self._file_handle is not None:
+                self._file_handle.close()
+            return False
+        if self._file_handle is None:
+            self._file_handle = open(self._source_path, 'rb')
+        return True
+
     def _build_upload_session_query(self, response):
         """
         :type response: requests.Response
         """
-        st = os.stat(self._source_path)
-        if callable(self._chunk_uploaded):
-            self.context.after_execute(self._process_chunk_upload)
-        # upload a file in chunks
-        f_pos = 0
-        with open(self._source_path, 'rb') as fh:
-            for piece in iter(partial(fh.read, self._chunk_size), b''):
-                if f_pos == 0:
-                    upload_result = self.file.start_upload(self._upload_id, piece)
-                    self._upload_results.append(upload_result)
-                elif f_pos + len(piece) < st.st_size:
-                    upload_result = self.file.continue_upload(self._upload_id, f_pos, piece)
-                    self._upload_results.append(upload_result)
-                else:
-                    self._return_type = self.file.finish_upload(self._upload_id, f_pos, piece)
-                f_pos += len(piece)
+        response.raise_for_status()
 
-                self.context.execute_query()
-
-    def _process_chunk_upload(self, resp):
-        """
-        :type resp: requests.Response
-        """
         qry = self.context.current_query
+        uploaded_bytes = 0
         if isinstance(qry.return_type, ClientResult):
-            self._uploaded_bytes = int(qry.return_type.value)
-            self.file.context.after_execute(self._process_chunk_upload)
-        elif isinstance(self._return_type, File):
-            self._uploaded_bytes = qry.return_type.length
-        self._chunk_uploaded(self._uploaded_bytes, *self._chunk_func_args)
+            uploaded_bytes = int(qry.return_type.value)
+        elif isinstance(qry.return_type, File):
+            uploaded_bytes = qry.return_type.length
+
+        if callable(self._chunk_uploaded):
+            self._chunk_uploaded(uploaded_bytes, *self._chunk_func_args)
+
+        if self._has_pending_read():
+            piece = self._read_next_chunk()
+            if uploaded_bytes == 0:
+                self._upload_result = self.return_type.start_upload(self._upload_id, piece)
+            elif uploaded_bytes + len(piece) < self.file_size:
+                self._upload_result = self.return_type.continue_upload(self._upload_id, uploaded_bytes, piece)
+            else:
+                self._return_type = self.return_type.finish_upload(self._upload_id, uploaded_bytes, piece)
+            self.context.after_execute(self._build_upload_session_query)
 
     @property
     def return_type(self):
         """
         :rtype: File
         """
-        return self._query.return_type
+        return self._file_query.return_type
 
     @property
     def binding_type(self):
-        return self._query.binding_type
+        return self._file_query.binding_type
 
     @property
-    def file(self):
-        """
-        :rtype: File
-        """
-        return self.return_type
+    def file_name(self):
+        return os.path.basename(self._source_path)
+
+    @property
+    def file_size(self):
+        st = os.stat(self._source_path)
+        return st.st_size
