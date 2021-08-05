@@ -8,11 +8,12 @@ from office365.directory.identityProvider import IdentityProvider
 from office365.directory.organization import Organization
 from office365.directory.servicePrincipal import ServicePrincipalCollection
 from office365.directory.subscribedSku import SubscribedSkuCollection
+from office365.directory.subscription import Subscription
 from office365.directory.users.user import User
 from office365.directory.users.userCollection import UserCollection
 from office365.entity_collection import EntityCollection
+from office365.onedrive.drive import Drive
 from office365.outlook.contacts.contact import Contact
-from office365.onedrive.driveCollection import DriveCollection
 from office365.onedrive.sharedDriveItemCollection import SharedDriveItemCollection
 from office365.onedrive.siteCollection import SiteCollection
 from office365.runtime.auth.token_response import TokenResponse
@@ -106,7 +107,7 @@ class GraphClient(ClientRuntimeContext):
     @property
     def drives(self):
         """Get one drives"""
-        return DriveCollection(self, ResourcePath("drives"))
+        return EntityCollection(self, Drive, ResourcePath("drives"))
 
     @property
     def users(self):
@@ -189,3 +190,11 @@ class GraphClient(ClientRuntimeContext):
     @property
     def communications(self):
         return EntityCollection(self, CloudCommunication, ResourcePath("communications"))
+
+    @property
+    def subscriptions(self):
+        """
+        Retrieve the properties and relationships of webhook subscriptions,
+        based on the app ID, the user, and the user's role with a tenant.
+        """
+        return EntityCollection(self, Subscription, ResourcePath("subscriptions"))

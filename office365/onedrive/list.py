@@ -1,8 +1,9 @@
 from office365.base_item import BaseItem
+from office365.directory.subscription import Subscription
 from office365.entity_collection import EntityCollection
 from office365.onedrive.columnDefinition import ColumnDefinition
 from office365.onedrive.contentType import ContentType
-from office365.onedrive.listItemCollection import ListItemCollection
+from office365.onedrive.listItem import ListItem
 from office365.runtime.client_value import ClientValue
 from office365.runtime.resource_path import ResourcePath
 
@@ -47,12 +48,20 @@ class List(BaseItem):
     @property
     def content_types(self):
         """The collection of content types under this site."""
-        return self.properties.get('contentTypes',
-                                   EntityCollection(self.context, ContentType,
-                                                    ResourcePath("contentTypes", self.resource_path)))
+        return self.get_property('contentTypes',
+                                 EntityCollection(self.context, ContentType,
+                                                  ResourcePath("contentTypes", self.resource_path)))
 
     @property
     def items(self):
         """All items contained in the list."""
-        return self.properties.get('items',
-                                   ListItemCollection(self.context, ResourcePath("items", self.resource_path)))
+        return self.get_property('items',
+                                 EntityCollection(self.context, ListItem, ResourcePath("items", self.resource_path)))
+
+    @property
+    def subscriptions(self):
+        """The set of subscriptions on the list."""
+        return self.get_property('subscriptions',
+                                 EntityCollection(self.context, Subscription,
+                                                  ResourcePath("subscriptions", self.resource_path)))
+

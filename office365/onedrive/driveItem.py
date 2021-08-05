@@ -1,3 +1,4 @@
+from office365.directory.subscription import Subscription
 from office365.onedrive.internal.search_query import create_search_query
 from office365.onedrive.internal.upload_content_query import create_upload_content_query
 from office365.base_item import BaseItem
@@ -408,6 +409,13 @@ class DriveItem(BaseItem):
         return self.properties.get('delta',
                                    EntityCollection(self.context, DriveItem, ResourcePath("delta", self.resource_path)))
 
+    @property
+    def subscriptions(self):
+        """The set of subscriptions on the driveItem."""
+        return self.get_property('subscriptions',
+                                 EntityCollection(self.context, Subscription,
+                                                  ResourcePath("subscriptions", self.resource_path)))
+
     def set_property(self, name, value, persist_changes=True):
         # if self._resource_path is None and name == "id":
         if name == "id":
@@ -419,14 +427,17 @@ class DriveItem(BaseItem):
         return self
 
     def _resolve_path(self, item_id):
-        path = None
+        resolved = False
         parent_path = self.parent_collection.resource_path
-        while path is None:
-            if isinstance(parent_path, ChildrenResourcePath) or isinstance(parent_path, ResourcePathUrl) \
-                or isinstance(parent_path, RootResourcePath):
+        while not resolved:
+            if isinstance(parent_path, ChildrenResourcePath) or \
+               isinstance(parent_path, ResourcePathUrl) or \
+               isinstance(parent_path, RootResourcePath):
                 parent_path = parent_path.parent
-            elif parent_path.segment == "items":
-                path = ResourcePath(item_id, parent_path)
             else:
-                path = ResourcePath(item_id, ResourcePath("items", parent_path))
-        return path
+                if parent_path.parent is not None and parent_path.parent.segment == "items":
+                    parent_path = parent_path.parent
+                else:
+                    parent_path = ResourcePath("items", parent_path)
+                resolved = True
+        return ResourcePath(item_id, parent_path)
