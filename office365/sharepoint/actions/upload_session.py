@@ -1,5 +1,6 @@
 import os
 import uuid
+from functools import partial
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
@@ -66,23 +67,23 @@ class UploadSessionQuery(ServiceOperationQuery):
         :type response: requests.Response
         """
         st = os.stat(self._source_path)
-        # upload a file in chunks
-        f_pos = 0
-        fh = open(self._source_path, 'rb')
-        for piece in read_in_chunks(fh, size=self._chunk_size):
-            if f_pos == 0:
-                upload_result = self.file.start_upload(self._upload_id, piece)
-                self._upload_results.append(upload_result)
-            elif f_pos + len(piece) < st.st_size:
-                upload_result = self.file.continue_upload(self._upload_id, f_pos, piece)
-                self._upload_results.append(upload_result)
-            else:
-                self._return_type = self.file.finish_upload(self._upload_id, f_pos, piece)
-            f_pos += len(piece)
-        fh.close()
-
         if callable(self._chunk_uploaded):
             self.context.after_execute(self._process_chunk_upload)
+        # upload a file in chunks
+        f_pos = 0
+        with open(self._source_path, 'rb') as fh:
+            for piece in iter(partial(fh.read, self._chunk_size), b''):
+                if f_pos == 0:
+                    upload_result = self.file.start_upload(self._upload_id, piece)
+                    self._upload_results.append(upload_result)
+                elif f_pos + len(piece) < st.st_size:
+                    upload_result = self.file.continue_upload(self._upload_id, f_pos, piece)
+                    self._upload_results.append(upload_result)
+                else:
+                    self._return_type = self.file.finish_upload(self._upload_id, f_pos, piece)
+                f_pos += len(piece)
+
+                self.context.execute_query()
 
     def _process_chunk_upload(self, resp):
         """
