@@ -1,4 +1,4 @@
-from office365.directory.identity import Identity
+from office365.directory.identities.identity import Identity
 from office365.runtime.client_value import ClientValue
 
 

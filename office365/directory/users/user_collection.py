@@ -9,12 +9,6 @@ class UserCollection(EntityCollection):
     def __init__(self, context, resource_path=None):
         super(UserCollection, self).__init__(context, User, resource_path)
 
-    def __getitem__(self, key):
-        """
-        :rtype: User
-        """
-        return super(UserCollection, self).__getitem__(key)
-
     def add(self, user_properties):
         """Create a new user.
 

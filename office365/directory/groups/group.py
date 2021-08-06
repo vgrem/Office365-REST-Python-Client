@@ -1,6 +1,6 @@
 import json
 
-from office365.directory.applications.appRoleAssignment import AppRoleAssignmentCollection
+from office365.directory.applications.app_role_assignment import AppRoleAssignmentCollection
 from office365.directory.assignedLicense import AssignedLicense
 from office365.directory.directory_object import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
@@ -80,14 +80,14 @@ class Group(DirectoryObject):
     @property
     def members(self):
         """Users and groups that are members of this group."""
-        return self.properties.get('members',
-                                   DirectoryObjectCollection(self.context, ResourcePath("members", self.resource_path)))
+        return self.get_property('members',
+                                 DirectoryObjectCollection(self.context, ResourcePath("members", self.resource_path)))
 
     @property
     def owners(self):
         """The owners of the group."""
-        return self.properties.get('owners',
-                                   DirectoryObjectCollection(self.context, ResourcePath("owners", self.resource_path)))
+        return self.get_property('owners',
+                                 DirectoryObjectCollection(self.context, ResourcePath("owners", self.resource_path)))
 
     @property
     def drives(self):
@@ -116,5 +116,4 @@ class Group(DirectoryObject):
 
     @property
     def assigned_licenses(self):
-        return self.properties.get('assignedLicenses',
-                                   ClientValueCollection(AssignedLicense))
+        return self.properties.get('assignedLicenses', ClientValueCollection(AssignedLicense))

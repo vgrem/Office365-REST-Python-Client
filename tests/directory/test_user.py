@@ -3,7 +3,7 @@ from tests import create_unique_name, test_tenant
 from tests.graph_case import GraphTestCase
 
 from office365.directory.users.user import User
-from office365.directory.users.userProfile import UserProfile
+from office365.directory.users.user_profile import UserProfile
 
 
 class TestGraphUser(GraphTestCase):

@@ -1,4 +1,4 @@
-from office365.directory.passwordProfile import PasswordProfile
+from office365.directory.users.password_profile import PasswordProfile
 from office365.runtime.client_value import ClientValue
 
 

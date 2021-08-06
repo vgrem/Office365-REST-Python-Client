@@ -1,5 +1,5 @@
 from faker import Faker
-from office365.directory.users.userProfile import UserProfile
+from office365.directory.users.user_profile import UserProfile
 from office365.graph_client import GraphClient
 from tests import test_tenant, create_unique_name
 from tests.graph_case import acquire_token_by_username_password

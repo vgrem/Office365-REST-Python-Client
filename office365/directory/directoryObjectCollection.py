@@ -24,7 +24,7 @@ class DirectoryObjectCollection(EntityCollection):
         """
         return super(DirectoryObjectCollection, self).__getitem__(key)
 
-    def getByIds(self, ids):
+    def get_by_ids(self, ids):
         """Returns the directory objects specified in a list of IDs."""
         result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "getByIds", None, None, None, result)

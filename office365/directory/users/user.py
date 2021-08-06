@@ -7,7 +7,7 @@ from office365.directory.assignedLicense import AssignedLicense
 from office365.directory.directory_object import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.directory.licenseDetails import LicenseDetailsCollection
-from office365.directory.objectIdentity import ObjectIdentity
+from office365.directory.identities.object_identity import ObjectIdentity
 from office365.directory.profilePhoto import ProfilePhoto
 from office365.entity_collection import EntityCollection
 from office365.outlook.contacts.contact import Contact
