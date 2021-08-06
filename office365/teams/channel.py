@@ -2,7 +2,7 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.compat import quote
 
 from office365.entity import Entity
-from office365.onedrive.driveItem import DriveItem
+from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.runtime.resource_path import ResourcePath
 from office365.teams.chatMessageCollection import ChatMessageCollection
 from office365.teams.teamsTab import TeamsTab

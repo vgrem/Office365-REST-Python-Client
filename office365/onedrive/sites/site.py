@@ -1,12 +1,12 @@
 from office365.base_item import BaseItem
 from office365.entity_collection import EntityCollection
-from office365.onedrive.columnDefinition import ColumnDefinition
-from office365.onedrive.contentType import ContentType
-from office365.onedrive.drive import Drive
+from office365.onedrive.columns.column_definition import ColumnDefinition
+from office365.onedrive.contenttypes.content_type import ContentType
+from office365.onedrive.drives.drive import Drive
 from office365.onedrive.itemAnalytics import ItemAnalytics
-from office365.onedrive.listCollection import ListCollection
-from office365.onedrive.listItem import ListItem
-from office365.onedrive.permission import Permission
+from office365.onedrive.lists.list_collection import ListCollection
+from office365.onedrive.listitems.listItem import ListItem
+from office365.onedrive.permissions.permission import Permission
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 
@@ -88,7 +88,7 @@ class Site(BaseItem):
     @property
     def sites(self):
         """The collection of sites under this site."""
-        from office365.onedrive.siteCollection import SiteCollection
+        from office365.onedrive.sites.site_collection import SiteCollection
         return self.properties.get('sites',
                                    SiteCollection(self.context, ResourcePath("sites", self.resource_path)))
 

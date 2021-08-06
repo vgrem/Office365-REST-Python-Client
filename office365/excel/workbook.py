@@ -1,8 +1,9 @@
 from office365.entity import Entity
-from office365.excel.workbookFunctions import WorkbookFunctions
-from office365.excel.workbookNamedItem import WorkbookNamedItemCollection
-from office365.excel.workbookTable import WorkbookTableCollection
-from office365.excel.workbookWorksheet import WorkbookWorksheetCollection
+from office365.entity_collection import EntityCollection
+from office365.excel.functions.workbookFunctions import WorkbookFunctions
+from office365.excel.names.workbookNamedItem import WorkbookNamedItem
+from office365.excel.tables.workbookTable import WorkbookTableCollection
+from office365.excel.worksheets.workbookWorksheet import WorkbookWorksheetCollection
 from office365.runtime.resource_path import ResourcePath
 
 
@@ -24,7 +25,8 @@ class Workbook(Entity):
     def names(self):
         """Represents a collection of workbook scoped named items (named ranges and constants). Read-only."""
         return self.properties.get('names',
-                                   WorkbookNamedItemCollection(self.context, ResourcePath("names", self.resource_path)))
+                                   EntityCollection(self.context, WorkbookNamedItem,
+                                                    ResourcePath("names", self.resource_path)))
 
     @property
     def worksheets(self):

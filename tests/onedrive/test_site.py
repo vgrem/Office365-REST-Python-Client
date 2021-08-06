@@ -1,4 +1,4 @@
-from office365.onedrive.site import Site
+from office365.onedrive.sites.site import Site
 from tests.graph_case import GraphTestCase
 
 

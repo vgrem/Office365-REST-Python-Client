@@ -1,6 +1,6 @@
 from office365.actions.upload_session_query import UploadSessionQuery
-from office365.onedrive.driveItem import DriveItem
-from office365.onedrive.driveItemUploadableProperties import DriveItemUploadableProperties
+from office365.onedrive.driveitems.driveItem import DriveItem
+from office365.onedrive.driveitems.driveItemUploadableProperties import DriveItemUploadableProperties
 from office365.onedrive.internal.resource_path_url import ResourcePathUrl
 
 

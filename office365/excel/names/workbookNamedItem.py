@@ -1,6 +1,6 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
-from office365.excel.workbookWorksheet import WorkbookWorksheet
+from office365.excel.worksheets.workbookWorksheet import WorkbookWorksheet
 from office365.runtime.resource_path import ResourcePath
 
 
@@ -32,8 +32,3 @@ class WorkbookNamedItem(Entity):
         return self.properties.get('worksheet',
                                    WorkbookWorksheet(self.context, ResourcePath("worksheet", self.resource_path)))
 
-
-class WorkbookNamedItemCollection(EntityCollection):
-
-    def __init__(self, context, resource_path=None):
-        super(WorkbookNamedItemCollection, self).__init__(context, WorkbookNamedItem, resource_path)

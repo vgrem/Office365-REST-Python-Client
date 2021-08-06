@@ -1,6 +1,6 @@
 from office365.directory.identities.identity_set import IdentitySet
 from office365.entity import Entity
-from office365.onedrive.itemReference import ItemReference
+from office365.onedrive.listitems.itemReference import ItemReference
 
 
 class BaseItem(Entity):

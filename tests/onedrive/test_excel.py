@@ -2,7 +2,7 @@ import os
 
 from tests.graph_case import GraphTestCase
 
-from office365.onedrive.driveItem import DriveItem
+from office365.onedrive.driveitems.driveItem import DriveItem
 
 
 def upload_excel(target_drive):

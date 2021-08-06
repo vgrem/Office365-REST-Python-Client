@@ -13,9 +13,9 @@ from office365.directory.profile_photo import ProfilePhoto
 from office365.entity_collection import EntityCollection
 from office365.outlook.contacts.contact import Contact
 from office365.outlook.mail.mailFolder import MailFolder
-from office365.onedrive.drive import Drive
+from office365.onedrive.drives.drive import Drive
 from office365.outlook.mail.message import Message
-from office365.onedrive.siteCollection import SiteCollection
+from office365.onedrive.sites.site_collection import SiteCollection
 from office365.outlook.outlook_user import OutlookUser
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -28,29 +28,29 @@ from office365.teams.team_collection import TeamCollection
 class User(DirectoryObject):
     """Represents an Azure AD user account. Inherits from directoryObject."""
 
-    def assign_license(self, addLicenses, removeLicenses):
+    def assign_license(self, add_licenses, remove_licenses):
         """
         Add or remove licenses on the user.
-        :param list[str] removeLicenses: A collection of skuIds that identify the licenses to remove.
-        :param ClientValueCollection addLicenses: A collection of assignedLicense objects that specify
+        :param list[str] remove_licenses: A collection of skuIds that identify the licenses to remove.
+        :param ClientValueCollection add_licenses: A collection of assignedLicense objects that specify
              the licenses to add.
         """
         params = {
-            "addLicenses": addLicenses,
-            "removeLicenses": removeLicenses
+            "addLicenses": add_licenses,
+            "removeLicenses": remove_licenses
         }
         qry = ServiceOperationQuery(self, "assignLicense", None, params, None, self)
         self.context.add_query(qry)
         return self
 
-    def change_password(self, currentPassword, newPassword):
+    def change_password(self, current_password, new_password):
         """
 
-        :param str currentPassword:
-        :param str newPassword:
+        :param str current_password:
+        :param str new_password:
         """
         qry = ServiceOperationQuery(self, "changePassword", None,
-                                    {"currentPassword": currentPassword, "newPassword": newPassword})
+                                    {"currentPassword": current_password, "newPassword": new_password})
         self.context.add_query(qry)
         return self
 
@@ -320,13 +320,14 @@ class User(DirectoryObject):
                                                   ResourcePath("extensions", self.resource_path)))
 
     def get_property(self, name, default_value=None):
-        property_mapping = {
-            "transitiveMemberOf": self.transitive_member_of,
-            "joinedTeams": self.joined_teams,
-            "assignedLicenses": self.assigned_licenses,
-            "mailFolders": self.mail_folders
-        }
-        default_value = property_mapping.get(name, None)
+        if default_value is None:
+            property_mapping = {
+                "transitiveMemberOf": self.transitive_member_of,
+                "joinedTeams": self.joined_teams,
+                "assignedLicenses": self.assigned_licenses,
+                "mailFolders": self.mail_folders
+            }
+            default_value = property_mapping.get(name, None)
         return super(User, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):

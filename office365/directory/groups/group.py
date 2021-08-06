@@ -5,8 +5,8 @@ from office365.directory.licenses.assigned_license import AssignedLicense
 from office365.directory.directory_object import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.entity_collection import EntityCollection
-from office365.onedrive.drive import Drive
-from office365.onedrive.siteCollection import SiteCollection
+from office365.onedrive.drives.drive import Drive
+from office365.onedrive.sites.site_collection import SiteCollection
 from office365.outlook.calendar.event import Event
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection

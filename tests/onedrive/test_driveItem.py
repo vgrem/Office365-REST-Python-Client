@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 
 from tests.graph_case import GraphTestCase
 
-from office365.onedrive.drive import Drive
-from office365.onedrive.driveItem import DriveItem
+from office365.onedrive.drives.drive import Drive
+from office365.onedrive.driveitems.driveItem import DriveItem
 
 
 def create_list_drive(client):

@@ -10,7 +10,7 @@ def create_upload_content_query(folder_item, name, content=None):
     :param str name: a file name
     :param str content: a file content
     """
-    from office365.onedrive.driveItem import DriveItem
+    from office365.onedrive.driveitems.driveItem import DriveItem
     file_item = DriveItem(folder_item.context, ResourcePathUrl(name, folder_item.resource_path))
     qry = ServiceOperationQuery(file_item, "content", None, content, None, file_item)
 

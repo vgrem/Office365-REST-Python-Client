@@ -13,10 +13,10 @@ from office365.directory.subscription import Subscription
 from office365.directory.users.user import User
 from office365.directory.users.user_collection import UserCollection
 from office365.entity_collection import EntityCollection
-from office365.onedrive.drive import Drive
+from office365.onedrive.drives.drive import Drive
+from office365.onedrive.shared.sharedDriveItem import SharedDriveItem
 from office365.outlook.contacts.contact import Contact
-from office365.onedrive.sharedDriveItemCollection import SharedDriveItemCollection
-from office365.onedrive.siteCollection import SiteCollection
+from office365.onedrive.sites.site_collection import SiteCollection
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
@@ -128,7 +128,7 @@ class GraphClient(ClientRuntimeContext):
     @property
     def shares(self):
         """Get shares"""
-        return SharedDriveItemCollection(self, ResourcePath("shares"))
+        return EntityCollection(self, SharedDriveItem, ResourcePath("shares"))
 
     @property
     def directory_objects(self):
