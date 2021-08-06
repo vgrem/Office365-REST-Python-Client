@@ -2,5 +2,5 @@ from office365.entity import Entity
 
 
 class Participant(Entity):
-    """Represents the participant type."""
+    """Represents a participant in a call."""
     pass

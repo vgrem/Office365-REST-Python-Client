@@ -41,7 +41,10 @@ class ClientObject(object):
         self.context.execute_query()
         return self
 
-    def execute_query_retry(self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None):
+    def execute_query_retry(self, max_retry=5,
+                            timeout_secs=5,
+                            success_callback=None,
+                            failure_callback=None):
         self.context.execute_query_retry(max_retry=max_retry,
                                          timeout_secs=timeout_secs,
                                          success_callback=success_callback,

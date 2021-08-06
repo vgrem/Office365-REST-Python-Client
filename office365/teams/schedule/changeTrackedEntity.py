@@ -1,4 +1,4 @@
-from office365.directory import IdentitySet
+from office365.directory.identities.identity_set import IdentitySet
 from office365.sharepoint.base_entity import BaseEntity
 
 

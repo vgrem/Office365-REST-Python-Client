@@ -1,6 +1,7 @@
 from office365.entity import Entity
+from office365.entity_collection import EntityCollection
 from office365.runtime.resource_path import ResourcePath
-from office365.teams.chatMessageCollection import ChatMessageCollection
+from office365.teams.messages.chat_message import ChatMessage
 
 
 class Chat(Entity):
@@ -9,5 +10,5 @@ class Chat(Entity):
     @property
     def messages(self):
         """A collection of all the messages in the chat. Nullable."""
-        return self.properties.get('messages',
-                                   ChatMessageCollection(self.context, ResourcePath("messages", self.resource_path)))
+        return self.properties.get('messages', EntityCollection(self.context, ChatMessage,
+                                                                ResourcePath("messages", self.resource_path)))

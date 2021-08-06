@@ -1,10 +1,15 @@
 from office365.entity import Entity
+from office365.entity_collection import EntityCollection
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.resource_path import ResourcePath
-from office365.teams.chatMessageAttachment import ChatMessageAttachment
+from office365.teams.messages.chat_message_attachment import ChatMessageAttachment
 
 
 class ChatMessage(Entity):
+    """
+    Represents an individual chat message within a channel or chat.
+    The message can be a root message or part of a thread that is defined by the replyToId property in the message.
+    """
 
     @property
     def attachments(self):
@@ -13,17 +18,16 @@ class ChatMessage(Entity):
 
     @property
     def replies(self):
-        """The collection of replies."""
-        if self.is_property_available("replies"):
-            return self.properties['replies']
-        else:
-            from office365.teams.chatMessageCollection import ChatMessageCollection
-            return ChatMessageCollection(self.context, ResourcePath("replies", self.resource_path))
+        """
+        The collection of replies.
+        """
+        return self.properties.get("replies",
+                                   EntityCollection(self.context, ChatMessage,
+                                                    ResourcePath("replies", self.resource_path)))
 
     @property
     def web_url(self):
         """
-
         :rtype: str
         """
         return self.properties.get("webUrl", None)

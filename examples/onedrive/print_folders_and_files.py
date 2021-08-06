@@ -5,7 +5,7 @@ from tests.graph_case import acquire_token_by_username_password
 
 def enum_folders_and_files(root_folder):
     """
-    :type root_folder: office365.onedrive.driveItem.DriveItem
+    :type root_folder: office365.onedrive.driveitems.driveItem.DriveItem
     """
     drive_items = root_folder.children.get().execute_query()
     for drive_item in drive_items:  # type: DriveItem

@@ -4,15 +4,15 @@ from office365.runtime.compat import quote
 from office365.entity import Entity
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.runtime.resource_path import ResourcePath
-from office365.teams.chatMessageCollection import ChatMessageCollection
-from office365.teams.teamsTab import TeamsTab
+from office365.teams.messages.chat_message import ChatMessage
+from office365.teams.tabs.teams_tab import TeamsTab
 
 
 class Channel(Entity):
     """Teams are made up of channels, which are the conversations you have with your teammates"""
 
     @property
-    def filesFolder(self):
+    def files_folder(self):
         """Get the metadata for the location where the files of a channel are stored."""
         return self.properties.get('filesFolder',
                                    DriveItem(self.context, ResourcePath("filesFolder", self.resource_path)))
@@ -25,9 +25,12 @@ class Channel(Entity):
 
     @property
     def messages(self):
-        """A collection of all the messages in the channel. A navigation property. Nullable."""
+        """
+        A collection of all the messages in the channel. A navigation property. Nullable.
+        """
         return self.properties.get('messages',
-                                   ChatMessageCollection(self.context, ResourcePath("messages", self.resource_path)))
+                                   EntityCollection(self.context, ChatMessage,
+                                                    ResourcePath("messages", self.resource_path)))
 
     @property
     def web_url(self):
@@ -44,3 +47,4 @@ class Channel(Entity):
         if name == "id":
             channel_id = quote(value)
             self._resource_path = ResourcePath(channel_id, self.resource_path.parent)
+        return self

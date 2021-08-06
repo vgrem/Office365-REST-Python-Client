@@ -1,5 +1,5 @@
 from office365.entity_collection import EntityCollection
-from office365.teams.channel import Channel
+from office365.teams.channels.channel import Channel
 
 
 class ChannelCollection(EntityCollection):

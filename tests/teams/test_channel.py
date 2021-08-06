@@ -2,8 +2,8 @@ import uuid
 
 from tests.graph_case import GraphTestCase
 
-from office365.teams.channel import Channel
-from office365.teams.chatMessage import ChatMessage
+from office365.teams.channels.channel import Channel
+from office365.teams.messages.chat_message import ChatMessage
 from office365.outlook.mail.itemBody import ItemBody
 from office365.teams.team import Team
 
@@ -57,13 +57,13 @@ class TestGraphChannel(GraphTestCase):
 
     def test7_send_message(self):
         item_body = ItemBody("Hello world!")
-        message = self.__class__.target_channel.messages.add(item_body).execute_query()
+        message = self.__class__.target_channel.messages.add(body=item_body).execute_query()
         self.assertIsNotNone(message.id)
         self.__class__.target_message = message
 
     def test8_reply_to_message(self):
         item_body = ItemBody("Hello world back!")
-        reply = self.__class__.target_message.replies.add(item_body).execute_query()
+        reply = self.__class__.target_message.replies.add(body=item_body).execute_query()
         self.assertIsNotNone(reply.id)
 
     def test9_delete_channel(self):

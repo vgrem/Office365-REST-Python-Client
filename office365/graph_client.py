@@ -14,7 +14,7 @@ from office365.directory.users.user import User
 from office365.directory.users.user_collection import UserCollection
 from office365.entity_collection import EntityCollection
 from office365.onedrive.drives.drive import Drive
-from office365.onedrive.shared.sharedDriveItem import SharedDriveItem
+from office365.onedrive.shares.sharedDriveItem import SharedDriveItem
 from office365.outlook.contacts.contact import Contact
 from office365.onedrive.sites.site_collection import SiteCollection
 from office365.runtime.auth.token_response import TokenResponse
@@ -28,8 +28,8 @@ from office365.runtime.queries.batch_query import BatchQuery
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
-from office365.teams.chat import Chat
-from office365.teams.cloudCommunication import CloudCommunication
+from office365.teams.chats.chat import Chat
+from office365.communications.cloud_communication import CloudCommunication
 from office365.teams.team_collection import TeamCollection
 
 

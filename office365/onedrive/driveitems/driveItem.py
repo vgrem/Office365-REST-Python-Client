@@ -354,9 +354,11 @@ class DriveItem(BaseItem):
     @property
     def children(self):
         """Collection containing Item objects for the immediate children of Item. Only items representing folders
-        have children."""
-        return self.properties.get('children',
-                                   EntityCollection(self.context, DriveItem, ChildrenResourcePath(self.resource_path)))
+        have children.
+        :rtype: EntityCollection
+        """
+        return self.get_property('children',
+                                 EntityCollection(self.context, DriveItem, ChildrenResourcePath(self.resource_path)))
 
     @property
     def listItem(self):
@@ -417,7 +419,6 @@ class DriveItem(BaseItem):
                                                   ResourcePath("subscriptions", self.resource_path)))
 
     def set_property(self, name, value, persist_changes=True):
-        # if self._resource_path is None and name == "id":
         if name == "id":
             if self._resource_path is None:
                 self._resource_path = self._resolve_path(value)
@@ -431,8 +432,8 @@ class DriveItem(BaseItem):
         parent_path = self.parent_collection.resource_path
         while not resolved:
             if isinstance(parent_path, ChildrenResourcePath) or \
-               isinstance(parent_path, ResourcePathUrl) or \
-               isinstance(parent_path, RootResourcePath):
+                isinstance(parent_path, ResourcePathUrl) or \
+                isinstance(parent_path, RootResourcePath):
                 parent_path = parent_path.parent
             else:
                 if parent_path.parent is not None and parent_path.parent.segment == "items":

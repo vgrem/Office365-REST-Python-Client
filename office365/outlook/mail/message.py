@@ -141,7 +141,8 @@ class Message(Item):
     def to_recipients(self, value):
         """
         The To: recipients for the message.
-        :type value: list[str]
+
+        :type value: list[str] or list[Recipient]
         """
         self.set_property('toRecipients',
                           ClientValueCollection(Recipient, [Recipient.from_email(email) for email in value]))
