@@ -1,4 +1,5 @@
-from office365.directory.extension import ExtensionCollection
+from office365.directory.extensions.extension import Extension
+from office365.entity_collection import EntityCollection
 from office365.outlook.mail.attachment_collection import AttachmentCollection
 from office365.outlook.mail.item import Item
 from office365.outlook.mail.itemBody import ItemBody
@@ -100,7 +101,8 @@ class Message(Item):
     def extensions(self):
         """The collection of open extensions defined for the message. Nullable."""
         return self.properties.get('extensions',
-                                   ExtensionCollection(self.context, ResourcePath("extensions", self.resource_path)))
+                                   EntityCollection(self.context, Extension,
+                                                    ResourcePath("extensions", self.resource_path)))
 
     @property
     def body(self):

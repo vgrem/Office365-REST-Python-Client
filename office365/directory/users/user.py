@@ -1,14 +1,15 @@
+from office365.directory.extensions.extension import Extension
 from office365.outlook.calendar.calendar import Calendar
 from office365.outlook.calendar.calendar_group import CalendarGroup
 from office365.outlook.calendar.event import Event
 from office365.outlook.calendar.meeting_time_suggestions_result import MeetingTimeSuggestionsResult
 from office365.outlook.calendar.reminder import Reminder
-from office365.directory.assignedLicense import AssignedLicense
+from office365.directory.licenses.assigned_license import AssignedLicense
 from office365.directory.directory_object import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
-from office365.directory.licenseDetails import LicenseDetailsCollection
+from office365.directory.licenses.license_details import LicenseDetails
 from office365.directory.identities.object_identity import ObjectIdentity
-from office365.directory.profilePhoto import ProfilePhoto
+from office365.directory.profile_photo import ProfilePhoto
 from office365.entity_collection import EntityCollection
 from office365.outlook.contacts.contact import Contact
 from office365.outlook.mail.mailFolder import MailFolder
@@ -246,15 +247,15 @@ class User(DirectoryObject):
     @property
     def license_details(self):
         """Retrieve the properties and relationships of a Drive resource."""
-        return self.properties.get('licenseDetails',
-                                   LicenseDetailsCollection(self.context,
-                                                            ResourcePath("licenseDetails", self.resource_path)))
+        return self.get_property('licenseDetails',
+                                 EntityCollection(self.context, LicenseDetails,
+                                                  ResourcePath("licenseDetails", self.resource_path)))
 
     @property
     def drive(self):
         """Retrieve the properties and relationships of a Drive resource."""
-        return self.properties.get('drive',
-                                   Drive(self.context, ResourcePath("drive", self.resource_path)))
+        return self.get_property('drive',
+                                 Drive(self.context, ResourcePath("drive", self.resource_path)))
 
     @property
     def contacts(self):
@@ -310,6 +311,13 @@ class User(DirectoryObject):
         """Represents the Outlook services available to a user."""
         return self.properties.get('outlook',
                                    OutlookUser(self.context, ResourcePath("outlook", self.resource_path)))
+
+    @property
+    def extensions(self):
+        """The collection of open extensions defined for the user. Nullable."""
+        return self.get_property('extensions',
+                                 EntityCollection(self.context, Extension,
+                                                  ResourcePath("extensions", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         property_mapping = {

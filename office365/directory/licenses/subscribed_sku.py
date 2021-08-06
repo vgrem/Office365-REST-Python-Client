@@ -1,6 +1,5 @@
-from office365.directory.servicePlanInfo import ServicePlanInfo
+from office365.directory.licenses.service_plan_info import ServicePlanInfo
 from office365.entity import Entity
-from office365.entity_collection import EntityCollection
 from office365.runtime.client_value_collection import ClientValueCollection
 
 

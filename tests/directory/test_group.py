@@ -37,7 +37,7 @@ class TestGraphGroup(GraphTestCase):
                     self.__class__.target_group = result[0]
 
     @unittest.skipIf(directory_quota_exceeded, "Skipping, group was not be created")
-    def test2_get_group_list(self):
+    def test2_list_groups(self):
         groups = self.client.groups.top(1).get().execute_query()
         self.assertEqual(len(groups), 1)
 

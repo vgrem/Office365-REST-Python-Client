@@ -1,5 +1,6 @@
-from office365.directory.extension import ExtensionCollection
-from office365.directory.profilePhoto import ProfilePhoto
+from office365.directory.extensions.extension import Extension
+from office365.directory.profile_photo import ProfilePhoto
+from office365.entity_collection import EntityCollection
 from office365.outlook.calendar.emailAddress import EmailAddress
 from office365.outlook.mail.item import Item
 from office365.outlook.mail.physical_address import PhysicalAddress
@@ -60,7 +61,8 @@ class Contact(Item):
     def extensions(self):
         """The collection of open extensions defined for the contact. Nullable."""
         return self.get_property('extensions',
-                                 ExtensionCollection(self.context, ResourcePath("extensions", self.resource_path)))
+                                 EntityCollection(self.context, Extension,
+                                                  ResourcePath("extensions", self.resource_path)))
 
     @property
     def photo(self):

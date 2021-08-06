@@ -6,9 +6,9 @@ from office365.directory.groups.group_lifecycle_policy import GroupLifecyclePoli
 from office365.directory.groups.group_setting_template import GroupSettingTemplate
 from office365.directory.groups.group_collection import GroupCollection
 from office365.directory.identities.identity_provider import IdentityProvider
-from office365.directory.organization import Organization
-from office365.directory.servicePrincipal import ServicePrincipalCollection
-from office365.directory.subscribedSku import SubscribedSku
+from office365.directory.organizations.organization import Organization
+from office365.directory.applications.service_principal import ServicePrincipal
+from office365.directory.licenses.subscribed_sku import SubscribedSku
 from office365.directory.subscription import Subscription
 from office365.directory.users.user import User
 from office365.directory.users.user_collection import UserCollection
@@ -173,7 +173,7 @@ class GraphClient(ClientRuntimeContext):
     @property
     def service_principals(self):
         """Retrieve a list of servicePrincipal objects."""
-        return ServicePrincipalCollection(self, ResourcePath("servicePrincipals"))
+        return EntityCollection(self, ServicePrincipal, ResourcePath("servicePrincipals"))
 
     @property
     def organization(self):

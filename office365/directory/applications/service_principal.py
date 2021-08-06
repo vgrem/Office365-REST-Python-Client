@@ -1,5 +1,4 @@
 from office365.directory.directory_object import DirectoryObject
-from office365.entity_collection import EntityCollection
 
 
 class ServicePrincipal(DirectoryObject):
@@ -16,12 +15,3 @@ class ServicePrincipal(DirectoryObject):
 
     def add_password(self):
         pass
-
-
-class ServicePrincipalCollection(EntityCollection):
-
-    def __init__(self, context, resource_path=None):
-        super(ServicePrincipalCollection, self).__init__(context, ServicePrincipal, resource_path)
-
-    def add(self, app_id):
-        return super(ServicePrincipalCollection, self).add(appId=app_id)

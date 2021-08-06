@@ -1,6 +1,6 @@
 from office365.entity_collection import EntityCollection
 from office365.outlook.calendar.attendee import Attendee
-from office365.directory.extension import ExtensionCollection
+from office365.directory.extensions.extension import Extension
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.outlook.calendar.emailAddress import EmailAddress
 from office365.outlook.mail.attachment_collection import AttachmentCollection
@@ -134,7 +134,8 @@ class Event(Item):
     def extensions(self):
         """The collection of open extensions defined for the event. Nullable."""
         return self.get_property('extensions',
-                                 ExtensionCollection(self.context, ResourcePath("extensions", self.resource_path)))
+                                 EntityCollection(self.context, Extension,
+                                                  ResourcePath("extensions", self.resource_path)))
 
     @property
     def instances(self):

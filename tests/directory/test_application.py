@@ -1,5 +1,5 @@
 from office365.directory.applications.application import Application
-from office365.directory.passwordCredential import PasswordCredential
+from office365.directory.password_credential import PasswordCredential
 from tests import create_unique_name
 from tests.graph_case import GraphTestCase
 

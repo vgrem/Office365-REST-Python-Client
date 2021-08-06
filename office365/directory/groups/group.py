@@ -1,7 +1,7 @@
 import json
 
 from office365.directory.applications.app_role_assignment import AppRoleAssignmentCollection
-from office365.directory.assignedLicense import AssignedLicense
+from office365.directory.licenses.assigned_license import AssignedLicense
 from office365.directory.directory_object import DirectoryObject
 from office365.directory.directoryObjectCollection import DirectoryObjectCollection
 from office365.entity_collection import EntityCollection
@@ -18,6 +18,16 @@ from office365.teams.team import Team
 
 class Group(DirectoryObject):
     """Represents an Azure Active Directory (Azure AD) group, which can be an Office 365 group, or a security group."""
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "transitiveMembers": self.transitive_members,
+                "transitiveMemberOf": self.transitive_member_of,
+                "appRoleAssignments": self.app_role_assignments
+            }
+            default_value = property_mapping.get(name, None)
+        return super(Group, self).get_property(name, default_value)
 
     def subscribe_by_mail(self):
         """Calling this method will enable the current user to receive email notifications for this group,
@@ -84,6 +94,27 @@ class Group(DirectoryObject):
                                  DirectoryObjectCollection(self.context, ResourcePath("members", self.resource_path)))
 
     @property
+    def transitive_members(self):
+        """
+        Get a list of the group's members. A group can have users, devices, organizational contacts,
+        and other groups as members. This operation is transitive and returns a flat list of all nested members.
+        """
+        return self.get_property('transitiveMembers',
+                                 DirectoryObjectCollection(self.context,
+                                                           ResourcePath("transitiveMembers", self.resource_path)))
+
+    @property
+    def transitive_member_of(self):
+        """
+        Get groups that the group is a member of. This operation is transitive and will also include all groups that
+        this groups is a nested member of. Unlike getting a user's Microsoft 365 groups, this returns all
+        types of groups, not just Microsoft 365 groups.
+        """
+        return self.get_property('transitiveMemberOf',
+                                 DirectoryObjectCollection(self.context,
+                                                           ResourcePath("transitiveMemberOf", self.resource_path)))
+
+    @property
     def owners(self):
         """The owners of the group."""
         return self.get_property('owners',
@@ -92,28 +123,28 @@ class Group(DirectoryObject):
     @property
     def drives(self):
         """The group's drives. Read-only."""
-        return self.properties.get('drives',
-                                   EntityCollection(self.context, Drive, ResourcePath("drives", self.resource_path)))
+        return self.get_property('drives',
+                                 EntityCollection(self.context, Drive, ResourcePath("drives", self.resource_path)))
 
     @property
     def sites(self):
         """The list of SharePoint sites in this group. Access the default site with /sites/root."""
-        return self.properties.get('sites',
-                                   SiteCollection(self.context, ResourcePath("sites", self.resource_path)))
+        return self.get_property('sites',
+                                 SiteCollection(self.context, ResourcePath("sites", self.resource_path)))
 
     @property
     def events(self):
         """Get an event collection or an event."""
-        return self.properties.get('events', EntityCollection(self.context, Event,
-                                                              ResourcePath("events", self.resource_path)))
+        return self.get_property('events', EntityCollection(self.context, Event,
+                                                            ResourcePath("events", self.resource_path)))
 
     @property
     def app_role_assignments(self):
         """Get an event collection or an appRoleAssignments."""
-        return self.properties.get('appRoleAssignments',
-                                   AppRoleAssignmentCollection(self.context,
-                                                               ResourcePath("appRoleAssignments", self.resource_path)))
+        return self.get_property('appRoleAssignments',
+                                 AppRoleAssignmentCollection(self.context,
+                                                             ResourcePath("appRoleAssignments", self.resource_path)))
 
     @property
     def assigned_licenses(self):
-        return self.properties.get('assignedLicenses', ClientValueCollection(AssignedLicense))
+        return self.get_property('assignedLicenses', ClientValueCollection(AssignedLicense))

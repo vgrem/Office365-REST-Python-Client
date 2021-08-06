@@ -1,6 +1,6 @@
 from office365.directory.directory_object import DirectoryObject
 from office365.directory.keyCredential import KeyCredential
-from office365.directory.passwordCredential import PasswordCredential
+from office365.directory.password_credential import PasswordCredential
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
@@ -25,9 +25,9 @@ class Application(DirectoryObject):
         self.context.add_query(qry)
         return result
 
-    def remove_password(self, keyId):
+    def remove_password(self, key_id):
         """Remove a password from an application."""
-        qry = ServiceOperationQuery(self, "removePassword", None, {"keyId": keyId})
+        qry = ServiceOperationQuery(self, "removePassword", None, {"keyId": key_id})
         self.context.add_query(qry)
         return self
 

@@ -1,4 +1,5 @@
 from office365.directory.audit.directory_audit import DirectoryAudit
+from office365.directory.audit.provisioningObjectSummary import ProvisioningObjectSummary
 from office365.directory.audit.signIn import SignIn
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
@@ -32,6 +33,16 @@ class AuditLogRoot(Entity):
         """
         return self.get_property('signIns',
                                  EntityCollection(self.context, SignIn, ResourcePath("signIns", self.resource_path)))
+
+    @property
+    def provisioning(self):
+        """
+        Get all provisioning events that occurred in your tenant, such as the deletion of a group in
+        a target application or the creation of a user when provisioning user accounts from your HR system.
+        """
+        return self.get_property('provisioning',
+                                 EntityCollection(self.context, ProvisioningObjectSummary,
+                                                  ResourcePath("provisioning", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:
