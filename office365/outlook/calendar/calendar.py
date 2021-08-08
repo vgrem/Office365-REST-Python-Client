@@ -74,7 +74,10 @@ class Calendar(Entity):
 
     @property
     def calendar_view(self):
-        """The calendar view for the calendar. Navigation property. Read-only."""
+        """The calendar view for the calendar. Navigation property. Read-only.
+
+        :rtype: EntityCollection
+        """
         return self.get_property('calendarView',
                                  EntityCollection(self.context, Event,
                                                   ResourcePath("calendarView", self.resource_path)))

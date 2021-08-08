@@ -112,6 +112,7 @@ class Team(Entity):
     @property
     def operations(self):
         """The async operations that ran or are running on this team.
+
         :rtype: EntityCollection
         """
         return self.get_property('operations',
@@ -121,6 +122,7 @@ class Team(Entity):
     @property
     def template(self):
         """The template this team was created from
+
         :rtype: TeamsTemplate
         """
         return self.get_property('template',

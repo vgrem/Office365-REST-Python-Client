@@ -89,7 +89,10 @@ class Group(DirectoryObject):
 
     @property
     def members(self):
-        """Users and groups that are members of this group."""
+        """Users and groups that are members of this group.
+
+        :rtype: DirectoryObjectCollection
+        """
         return self.get_property('members',
                                  DirectoryObjectCollection(self.context, ResourcePath("members", self.resource_path)))
 
@@ -98,6 +101,8 @@ class Group(DirectoryObject):
         """
         Get a list of the group's members. A group can have users, devices, organizational contacts,
         and other groups as members. This operation is transitive and returns a flat list of all nested members.
+
+        :rtype: DirectoryObjectCollection
         """
         return self.get_property('transitiveMembers',
                                  DirectoryObjectCollection(self.context,
@@ -109,6 +114,8 @@ class Group(DirectoryObject):
         Get groups that the group is a member of. This operation is transitive and will also include all groups that
         this groups is a nested member of. Unlike getting a user's Microsoft 365 groups, this returns all
         types of groups, not just Microsoft 365 groups.
+
+        :rtype: DirectoryObjectCollection
         """
         return self.get_property('transitiveMemberOf',
                                  DirectoryObjectCollection(self.context,
@@ -116,35 +123,44 @@ class Group(DirectoryObject):
 
     @property
     def owners(self):
-        """The owners of the group."""
+        """The owners of the group.
+
+        :rtype: DirectoryObjectCollection
+        """
         return self.get_property('owners',
                                  DirectoryObjectCollection(self.context, ResourcePath("owners", self.resource_path)))
 
     @property
     def drives(self):
-        """The group's drives. Read-only."""
+        """The group's drives. Read-only.
+
+        :rtype: EntityCollection
+        """
         return self.get_property('drives',
                                  EntityCollection(self.context, Drive, ResourcePath("drives", self.resource_path)))
 
     @property
     def sites(self):
-        """The list of SharePoint sites in this group. Access the default site with /sites/root."""
+        """The list of SharePoint sites in this group. Access the default site with /sites/root.
+
+        :rtype: SiteCollection
+        """
         return self.get_property('sites',
                                  SiteCollection(self.context, ResourcePath("sites", self.resource_path)))
 
     @property
     def events(self):
         """Get an event collection or an event."""
-        return self.get_property('events', EntityCollection(self.context, Event,
-                                                            ResourcePath("events", self.resource_path)))
+        return self.properties.get('events', EntityCollection(self.context, Event,
+                                                              ResourcePath("events", self.resource_path)))
 
     @property
     def app_role_assignments(self):
         """Get an event collection or an appRoleAssignments."""
-        return self.get_property('appRoleAssignments',
-                                 AppRoleAssignmentCollection(self.context,
-                                                             ResourcePath("appRoleAssignments", self.resource_path)))
+        return self.properties.get('appRoleAssignments',
+                                   AppRoleAssignmentCollection(self.context,
+                                                               ResourcePath("appRoleAssignments", self.resource_path)))
 
     @property
     def assigned_licenses(self):
-        return self.get_property('assignedLicenses', ClientValueCollection(AssignedLicense))
+        return self.properties.get('assignedLicenses', ClientValueCollection(AssignedLicense))

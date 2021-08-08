@@ -7,7 +7,10 @@ class DirectoryRole(DirectoryObject):
 
     @property
     def members(self):
-        """Users that are members of this directory role. HTTP Methods: GET, POST, DELETE. Read-only. Nullable."""
+        """Users that are members of this directory role. HTTP Methods: GET, POST, DELETE. Read-only. Nullable.
+
+        :rtype: DirectoryObjectCollection
+        """
         from office365.directory.directoryObjectCollection import DirectoryObjectCollection
         return self.get_property('members',
                                  DirectoryObjectCollection(self.context, ResourcePath("members", self.resource_path)))

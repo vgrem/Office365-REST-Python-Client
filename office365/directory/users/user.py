@@ -247,13 +247,16 @@ class User(DirectoryObject):
     @property
     def license_details(self):
         """Retrieve the properties and relationships of a Drive resource."""
-        return self.get_property('licenseDetails',
-                                 EntityCollection(self.context, LicenseDetails,
-                                                  ResourcePath("licenseDetails", self.resource_path)))
+        return self.properties.get('licenseDetails',
+                                   EntityCollection(self.context, LicenseDetails,
+                                                    ResourcePath("licenseDetails", self.resource_path)))
 
     @property
     def drive(self):
-        """Retrieve the properties and relationships of a Drive resource."""
+        """Retrieve the properties and relationships of a Drive resource.
+
+        :rtype: Drive
+        """
         return self.get_property('drive',
                                  Drive(self.context, ResourcePath("drive", self.resource_path)))
 
@@ -314,7 +317,10 @@ class User(DirectoryObject):
 
     @property
     def extensions(self):
-        """The collection of open extensions defined for the user. Nullable."""
+        """The collection of open extensions defined for the user. Nullable.
+
+        :rtype: EntityCollection
+        """
         return self.get_property('extensions',
                                  EntityCollection(self.context, Extension,
                                                   ResourcePath("extensions", self.resource_path)))

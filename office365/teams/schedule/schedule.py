@@ -20,14 +20,20 @@ class Schedule(Entity):
 
     @property
     def shifts(self):
-        """The shifts in the schedule."""
+        """The shifts in the schedule.
+
+        :rtype: EntityCollection
+        """
         return self.get_property('shifts',
                                  EntityCollection(self.context, Shift,
                                                   ResourcePath("shifts", self.resource_path)))
 
     @property
     def scheduling_group(self):
-        """The logical grouping of users in the schedule (usually by role)."""
+        """The logical grouping of users in the schedule (usually by role).
+
+        :rtype: EntityCollection
+        """
         return self.get_property('schedulingGroups',
                                  EntityCollection(self.context, SchedulingGroup,
                                                   ResourcePath("schedulingGroups", self.resource_path)))

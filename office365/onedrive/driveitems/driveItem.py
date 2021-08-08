@@ -355,6 +355,7 @@ class DriveItem(BaseItem):
     def children(self):
         """Collection containing Item objects for the immediate children of Item. Only items representing folders
         have children.
+
         :rtype: EntityCollection
         """
         return self.get_property('children',
@@ -413,7 +414,10 @@ class DriveItem(BaseItem):
 
     @property
     def subscriptions(self):
-        """The set of subscriptions on the driveItem."""
+        """The set of subscriptions on the driveItem.
+
+        :rtype: EntityCollection
+        """
         return self.get_property('subscriptions',
                                  EntityCollection(self.context, Subscription,
                                                   ResourcePath("subscriptions", self.resource_path)))

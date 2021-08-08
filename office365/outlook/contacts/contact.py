@@ -45,12 +45,12 @@ class Contact(Item):
 
     @property
     def home_address(self):
-        return self.get_property("homeAddress", PhysicalAddress())
+        return self.properties.get("homeAddress", PhysicalAddress())
 
     @property
     def email_addresses(self):
         """The contact's email addresses."""
-        return self.get_property("emailAddresses", ClientValueCollection(EmailAddress))
+        return self.properties.get("emailAddresses", ClientValueCollection(EmailAddress))
 
     @email_addresses.setter
     def email_addresses(self, value):
@@ -59,14 +59,20 @@ class Contact(Item):
 
     @property
     def extensions(self):
-        """The collection of open extensions defined for the contact. Nullable."""
+        """The collection of open extensions defined for the contact. Nullable.
+
+        :rtype: EntityCollection
+        """
         return self.get_property('extensions',
                                  EntityCollection(self.context, Extension,
                                                   ResourcePath("extensions", self.resource_path)))
 
     @property
     def photo(self):
-        """Optional contact picture. You can get or set a photo for a contact."""
+        """Optional contact picture. You can get or set a photo for a contact.
+
+        :rtype: EntityCollection
+        """
         return self.get_property('photo',
                                  ProfilePhoto(self.context, ResourcePath("photo", self.resource_path)))
 

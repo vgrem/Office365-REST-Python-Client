@@ -13,12 +13,18 @@ class Call(Entity):
 
     @property
     def participants(self):
+        """
+        :rtype: EntityCollection
+        """
         return self.get_property('participants',
                                  EntityCollection(self.context, Participant,
                                                   ResourcePath("participants", self.resource_path)))
 
     @property
     def operations(self):
+        """
+        :rtype: EntityCollection
+        """
         return self.get_property('operations',
                                  EntityCollection(self.context, CommsOperation,
                                                   ResourcePath("operations", self.resource_path)))

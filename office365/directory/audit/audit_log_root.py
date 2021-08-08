@@ -18,6 +18,8 @@ class AuditLogRoot(Entity):
         by various services within Azure AD, including user, app, device and group Management,
         privileged identity management (PIM), access reviews, terms of use, identity protection,
         password management (self-service and admin password resets), and self- service group management, and so on.
+
+        :rtype: EntityCollection
         """
         return self.get_property('directoryAudits',
                                  EntityCollection(self.context, DirectoryAudit,
@@ -30,6 +32,8 @@ class AuditLogRoot(Entity):
         (where a username/password is passed as part of auth token) and successful federated sign-ins are currently
         included in the sign-in logs. The maximum and default page size is 1,000 objects and by default,
         the most recent sign-ins are returned first.
+
+        :rtype: EntityCollection
         """
         return self.get_property('signIns',
                                  EntityCollection(self.context, SignIn, ResourcePath("signIns", self.resource_path)))
@@ -39,6 +43,8 @@ class AuditLogRoot(Entity):
         """
         Get all provisioning events that occurred in your tenant, such as the deletion of a group in
         a target application or the creation of a user when provisioning user accounts from your HR system.
+
+        :rtype: EntityCollection
         """
         return self.get_property('provisioning',
                                  EntityCollection(self.context, ProvisioningObjectSummary,

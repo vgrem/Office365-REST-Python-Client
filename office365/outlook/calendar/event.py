@@ -18,6 +18,8 @@ class Event(Item):
     def start(self):
         """
         The date, time, and time zone that the event starts. By default, the start time is in UTC.
+
+        :rtype: DateTimeTimeZone
         """
         return self.get_property("start", DateTimeTimeZone())
 
@@ -32,6 +34,8 @@ class Event(Item):
     def end(self):
         """
         The date, time, and time zone that the event starts. By default, the start time is in UTC.
+
+        :rtype: DateTimeTimeZone
         """
         return self.get_property("end", DateTimeTimeZone())
 
@@ -105,13 +109,13 @@ class Event(Item):
     def calendar(self):
         """The calendar that contains the event. Navigation property. Read-only."""
         from office365.outlook.calendar.calendar import Calendar
-        return self.get_property('calendar',
+        return self.properties.get('calendar',
                                  Calendar(self.context, ResourcePath("calendar", self.resource_path)))
 
     @property
     def attendees(self):
         """The collection of attendees for the event."""
-        return self.get_property('attendees',
+        return self.properties.get('attendees',
                                  ClientValueCollection(Attendee))
 
     @attendees.setter
@@ -127,18 +131,18 @@ class Event(Item):
     @property
     def attachments(self):
         """The collection of fileAttachment and itemAttachment attachments for the event. """
-        return self.get_property('attachments',
-                                 AttachmentCollection(self.context, ResourcePath("attachments", self.resource_path)))
+        return self.properties.get('attachments',
+                                   AttachmentCollection(self.context, ResourcePath("attachments", self.resource_path)))
 
     @property
     def extensions(self):
         """The collection of open extensions defined for the event. Nullable."""
-        return self.get_property('extensions',
-                                 EntityCollection(self.context, Extension,
-                                                  ResourcePath("extensions", self.resource_path)))
+        return self.properties.get('extensions',
+                                   EntityCollection(self.context, Extension,
+                                                    ResourcePath("extensions", self.resource_path)))
 
     @property
     def instances(self):
         """The collection of open extensions defined for the event. Nullable."""
-        return self.get_property('instances',
-                                 EntityCollection(self.context, Event, ResourcePath("instances", self.resource_path)))
+        return self.properties.get('instances',
+                                   EntityCollection(self.context, Event, ResourcePath("instances", self.resource_path)))
