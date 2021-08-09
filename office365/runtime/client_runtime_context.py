@@ -4,7 +4,6 @@ from time import sleep
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.queries.read_entity_query import ReadEntityQuery
 
-
 class ClientRuntimeContext(object):
 
     def build_request(self):
@@ -23,7 +22,7 @@ class ClientRuntimeContext(object):
 
         :param int max_retry: Number of times to retry the request
         :param int timeout_secs: Seconds to wait before retrying the request.
-        :param (ClientObject)-> None success_callback:
+        :param (office365.runtime.client_object.ClientObject)-> None success_callback:
         :param (int)-> None failure_callback:
         """
 

@@ -5,25 +5,18 @@ from office365.runtime.resource_path import ResourcePath
 from office365.teams.channels.channel import Channel
 from office365.teams.channels.channel_collection import ChannelCollection
 from office365.teams.schedule.schedule import Schedule
-from office365.teams.teamFunSettings import TeamFunSettings
-from office365.teams.teamGuestSettings import TeamGuestSettings
-from office365.teams.teamMemberSettings import TeamMemberSettings
-from office365.teams.teamMessagingSettings import TeamMessagingSettings
-from office365.teams.apps.teamsAppInstallation import TeamsAppInstallation
-from office365.teams.operations.teamsAsyncOperation import TeamsAsyncOperation
+from office365.teams.team_fun_settings import TeamFunSettings
+from office365.teams.team_guest_settings import TeamGuestSettings
+from office365.teams.team_member_settings import TeamMemberSettings
+from office365.teams.team_messaging_settings import TeamMessagingSettings
+from office365.teams.apps.teams_app_installation import TeamsAppInstallation
+from office365.teams.operations.teams_async_operation import TeamsAsyncOperation
 from office365.teams.teams_template import TeamsTemplate
 
 
 class Team(Entity):
     """A team in Microsoft Teams is a collection of channel objects. A channel represents a topic, and therefore a
     logical isolation of discussion, within a team. """
-
-    def __init__(self, context, resource_path=None, properties=None):
-        super(Team, self).__init__(context, resource_path, properties)
-        self.memberSettings = TeamMemberSettings()
-        self.guestSettings = TeamGuestSettings()
-        self.messagingSettings = TeamMessagingSettings()
-        self.funSettings = TeamFunSettings()
 
     def delete_object(self):
         def _team_loaded():
@@ -34,19 +27,49 @@ class Team(Entity):
         return self
 
     @property
+    def fun_settings(self):
+        """Settings to configure use of Giphy, memes, and stickers in the team."""
+        return self.properties.get('funSettings', TeamFunSettings())
+
+    @property
+    def member_settings(self):
+        """Settings to configure whether members can perform certain actions, for example,
+        create channels and add bots, in the team."""
+        return self.properties.get('memberSettings', TeamMemberSettings())
+
+    @property
+    def guest_settings(self):
+        """Settings to configure whether guests can create, update, or delete channels in the team."""
+        return self.properties.get('guestSettings', TeamGuestSettings())
+
+    @property
+    def messaging_settings(self):
+        """Settings to configure messaging and mentions in the team."""
+        return self.properties.get('guestSettings', TeamMessagingSettings())
+
+    @property
     def display_name(self):
-        """The name of the team."""
+        """The name of the team.
+
+        :rtype: str or None
+        """
         return self.properties.get('displayName', None)
 
     @property
     def description(self):
-        """An optional description for the team."""
+        """An optional description for the team.
+
+        :rtype: str or None
+        """
         return self.properties.get('description', None)
 
     @property
     def classification(self):
         """An optional label. Typically describes the data or business sensitivity of the team.
-        Must match one of a pre-configured set in the tenant's directory."""
+        Must match one of a pre-configured set in the tenant's directory.
+
+        :rtype: str or None
+        """
         return self.properties.get('classification', None)
 
     @property

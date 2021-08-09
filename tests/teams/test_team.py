@@ -13,7 +13,7 @@ class TestGraphTeam(GraphTestCase):
     def setUpClass(cls):
         super(TestGraphTeam, cls).setUpClass()
 
-    def test1_ensure_team(self):
+    def test1_create_team_from_group(self):
         grp_name = "Group_" + uuid.uuid4().hex
         result = self.client.teams.create(grp_name).execute_query_retry(max_retry=6, timeout_secs=5)
         self.assertIsNotNone(result.value.id)
@@ -32,7 +32,7 @@ class TestGraphTeam(GraphTestCase):
         group_id = self.__class__.target_team.id
         existing_team = self.client.teams[group_id].get().execute_query()
         self.assertIsNotNone(existing_team.resource_url)
-        self.assertIsNotNone(existing_team.messagingSettings)
+        self.assertIsNotNone(existing_team.messaging_settings)
 
         if existing_team.is_archived:
             existing_team.unarchive()
@@ -43,7 +43,7 @@ class TestGraphTeam(GraphTestCase):
     def test6_update_team(self):
         team_id = self.__class__.target_team.id
         team_to_update = self.client.teams[team_id]
-        team_to_update.funSettings.allowGiphy = False
+        team_to_update.fun_settings.allowGiphy = False
         team_to_update.update().execute_query()
 
     def test7_archive_team(self):

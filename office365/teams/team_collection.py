@@ -57,6 +57,9 @@ class TeamCollection(EntityCollection):
         result = ClientResult(self.context, Team(self.context))
 
         def _group_created(resp):
+            """
+            :type resp: requests.Response
+            """
             result.value = target_group.add_team()
 
         self.context.after_execute(_group_created)

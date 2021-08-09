@@ -34,6 +34,9 @@ class UploadSessionQuery(ClientQuery):
         pass
 
     def _create_next_range_query(self, resp):
+        """
+        :type resp: requests.Response
+        """
         if self._has_pending_read():
             qry = ClientQuery(self.context, self.return_type)
             self.context.before_execute(self._construct_range_request)
