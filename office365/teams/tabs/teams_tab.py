@@ -10,7 +10,7 @@ class TeamsTab(Entity):
     """
 
     @property
-    def teamsApp(self):
+    def teams_app(self):
         """The application that is linked to the tab. This cannot be changed after tab creation."""
         return self.properties.get('teamsApp',
                                    TeamsApp(self.context, ResourcePath("teamsApp", self.resource_path)))

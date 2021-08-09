@@ -2,7 +2,7 @@ from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.excel.functions.workbookFunctions import WorkbookFunctions
 from office365.excel.names.workbookNamedItem import WorkbookNamedItem
-from office365.excel.tables.workbookTable import WorkbookTableCollection
+from office365.excel.tables.workbook_table import WorkbookTable
 from office365.excel.worksheets.workbookWorksheet import WorkbookWorksheetCollection
 from office365.runtime.resource_path import ResourcePath
 
@@ -19,7 +19,8 @@ class Workbook(Entity):
     def tables(self):
         """Represents a collection of tables associated with the workbook. Read-only."""
         return self.properties.get('tables',
-                                   WorkbookTableCollection(self.context, ResourcePath("tables", self.resource_path)))
+                                   EntityCollection(self.context, WorkbookTable,
+                                                    ResourcePath("tables", self.resource_path)))
 
     @property
     def names(self):

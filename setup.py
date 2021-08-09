@@ -10,7 +10,7 @@ with io.open("README.md", mode='r', encoding='utf-8') as fh:
 
 setup(
     name="Office365-REST-Python-Client",
-    version="2.3.5",
+    version="2.3.6",
     author="Vadim Gremyachev",
     author_email="vvgrem@gmail.com",
     maintainer="Konrad Gądek, Domenico Di Nicola",
@@ -43,7 +43,9 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9'
     ],
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(exclude=['tests', 'tests.*',
+                                               'generator', 'generator.*',
+                                               'examples', 'examples.*']),
     package_data={
         'office365': ["runtime/auth/providers/templates/SAML.xml", "runtime/auth/providers/templates/RST2.xml",
                       "runtime/auth/providers/templates/FederatedSAML.xml"]

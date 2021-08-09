@@ -27,8 +27,8 @@ class TestCalendar(GraphTestCase):
         end_time = datetime.utcnow()
         start_time = end_time - timedelta(days=7)
         result = self.client.me.calendar.get_schedule(schedules=[test_user_principal_name],
-                                                      startTime=start_time,
-                                                      endTime=end_time).execute_query()
+                                                      start_time=start_time,
+                                                      end_time=end_time).execute_query()
         self.assertIsNotNone(result.value)
 
     def test3_get_calendar_groups(self):
