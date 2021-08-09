@@ -1,6 +1,6 @@
 from examples import acquire_token_by_username_password
 from office365.graph_client import GraphClient
-from office365.outlook.mail.fileAttachment import FileAttachment
+from office365.outlook.mail.file_attachment import FileAttachment
 from office365.outlook.mail.message import Message
 
 # The example is adapted from https://docs.microsoft.com/en-us/graph/api/user-sendmail?view=graph-rest-1.0

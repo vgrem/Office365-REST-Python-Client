@@ -1,7 +1,7 @@
 from office365.directory.applications.application import Application
 from office365.directory.audit.audit_log_root import AuditLogRoot
 from office365.directory.directory import Directory
-from office365.directory.directoryObjectCollection import DirectoryObjectCollection
+from office365.directory.directory_object_collection import DirectoryObjectCollection
 from office365.directory.groups.group_lifecycle_policy import GroupLifecyclePolicy
 from office365.directory.groups.group_setting_template import GroupSettingTemplate
 from office365.directory.groups.group_collection import GroupCollection
@@ -14,7 +14,7 @@ from office365.directory.users.user import User
 from office365.directory.users.user_collection import UserCollection
 from office365.entity_collection import EntityCollection
 from office365.onedrive.drives.drive import Drive
-from office365.onedrive.shares.sharedDriveItem import SharedDriveItem
+from office365.onedrive.shares.shared_drive_item import SharedDriveItem
 from office365.outlook.contacts.contact import Contact
 from office365.onedrive.sites.site_collection import SiteCollection
 from office365.runtime.auth.token_response import TokenResponse

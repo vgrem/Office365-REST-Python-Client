@@ -1,5 +1,5 @@
 from office365.directory.audit.directory_audit import DirectoryAudit
-from office365.directory.audit.provisioningObjectSummary import ProvisioningObjectSummary
+from office365.directory.audit.provisioning_object_summary import ProvisioningObjectSummary
 from office365.directory.audit.signIn import SignIn
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection

@@ -54,7 +54,10 @@ class Contact(Item):
 
     @email_addresses.setter
     def email_addresses(self, value):
-        """Sets contact's email addresses."""
+        """Sets contact's email addresses.
+
+        :type value: list[str]
+        """
         self.set_property("emailAddresses", value)
 
     @property

@@ -3,6 +3,7 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.resource_path import ResourcePath
 
 
 class DirectoryObjectCollection(EntityCollection):
@@ -39,6 +40,21 @@ class DirectoryObjectCollection(EntityCollection):
         qry = ServiceOperationQuery(self, "$ref", None, payload)
         self.context.add_query(qry)
         return self
+
+    def get_available_extension_properties(self, is_synced_from_on_premises=None):
+        """
+        Return all or a filtered list of the directory extension properties that have been registered in a directory.
+        The following entities support extension properties: user, group, organization, device, application,
+        and servicePrincipal.
+        """
+        from office365.directory.extensions.extension_property import ExtensionProperty
+        return_type = EntityCollection(self.context, ExtensionProperty, self.context.directory_objects.resource_path)
+        payload = {
+            "isSyncedFromOnPremises": is_synced_from_on_premises
+        }
+        qry = ServiceOperationQuery(self, "getAvailableExtensionProperties", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def remove(self, user_id):
         """Remove a user from the group."""

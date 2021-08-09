@@ -1,4 +1,5 @@
 from office365.directory.extensions.extension import Extension
+from office365.directory.licenses.assigned_plan import AssignedPlan
 from office365.outlook.calendar.calendar import Calendar
 from office365.outlook.calendar.calendar_group import CalendarGroup
 from office365.outlook.calendar.event import Event
@@ -6,7 +7,7 @@ from office365.outlook.calendar.meeting_time_suggestions_result import MeetingTi
 from office365.outlook.calendar.reminder import Reminder
 from office365.directory.licenses.assigned_license import AssignedLicense
 from office365.directory.directory_object import DirectoryObject
-from office365.directory.directoryObjectCollection import DirectoryObjectCollection
+from office365.directory.directory_object_collection import DirectoryObjectCollection
 from office365.directory.licenses.license_details import LicenseDetails
 from office365.directory.identities.object_identity import ObjectIdentity
 from office365.directory.profile_photo import ProfilePhoto
@@ -14,6 +15,7 @@ from office365.entity_collection import EntityCollection
 from office365.outlook.contacts.contact import Contact
 from office365.outlook.mail.mailFolder import MailFolder
 from office365.onedrive.drives.drive import Drive
+from office365.outlook.mail.mailbox_settings import MailboxSettings
 from office365.outlook.mail.message import Message
 from office365.onedrive.sites.site_collection import SiteCollection
 from office365.outlook.outlook_user import OutlookUser
@@ -166,6 +168,11 @@ class User(DirectoryObject):
         return self.properties.get('accountEnabled', None)
 
     @property
+    def assigned_plans(self):
+        """The plans that are assigned to the user."""
+        return self.properties.get('assignedPlans', ClientValueCollection(AssignedPlan))
+
+    @property
     def creation_type(self):
         """Indicates whether the user account was created as a regular school or work account (null),
         an external account (Invitation), a local account for an Azure Active Directory B2C tenant (LocalAccount)
@@ -200,11 +207,15 @@ class User(DirectoryObject):
 
     @property
     def assigned_licenses(self):
+        """The licenses that are assigned to the user, including inherited (group-based) licenses. """
         return self.properties.get('assignedLicenses',
                                    ClientValueCollection(AssignedLicense))
 
     @property
     def followed_sites(self):
+        """
+
+        """
         return self.properties.get('followedSites',
                                    SiteCollection(self.context, ResourcePath("followedSites", self.resource_path)))
 
@@ -223,6 +234,24 @@ class User(DirectoryObject):
         """
         return self.properties.get('manager',
                                    DirectoryObject(self.context, ResourcePath("manager", self.resource_path)))
+
+    @property
+    def preferred_language(self):
+        """
+        The preferred language for the user. Should follow ISO 639-1 Code; for example en-US.
+
+        :rtype: str or None
+        """
+        return self.properties.get('preferredLanguage', None)
+
+    @property
+    def mailbox_settings(self):
+        """
+        Get the user's mailboxSettings.
+
+        :rtype: str or None
+        """
+        return self.properties.get('mailboxSettings', MailboxSettings())
 
     @property
     def calendar(self):
@@ -331,7 +360,8 @@ class User(DirectoryObject):
                 "transitiveMemberOf": self.transitive_member_of,
                 "joinedTeams": self.joined_teams,
                 "assignedLicenses": self.assigned_licenses,
-                "mailFolders": self.mail_folders
+                "mailFolders": self.mail_folders,
+                "mailboxSettings": self.mailbox_settings
             }
             default_value = property_mapping.get(name, None)
         return super(User, self).get_property(name, default_value)

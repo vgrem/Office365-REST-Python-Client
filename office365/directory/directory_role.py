@@ -11,6 +11,6 @@ class DirectoryRole(DirectoryObject):
 
         :rtype: DirectoryObjectCollection
         """
-        from office365.directory.directoryObjectCollection import DirectoryObjectCollection
+        from office365.directory.directory_object_collection import DirectoryObjectCollection
         return self.get_property('members',
                                  DirectoryObjectCollection(self.context, ResourcePath("members", self.resource_path)))

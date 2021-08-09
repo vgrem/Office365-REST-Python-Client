@@ -3,7 +3,7 @@ import json
 from office365.directory.applications.app_role_assignment import AppRoleAssignmentCollection
 from office365.directory.licenses.assigned_license import AssignedLicense
 from office365.directory.directory_object import DirectoryObject
-from office365.directory.directoryObjectCollection import DirectoryObjectCollection
+from office365.directory.directory_object_collection import DirectoryObjectCollection
 from office365.entity_collection import EntityCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.sites.site_collection import SiteCollection
@@ -18,16 +18,6 @@ from office365.teams.team import Team
 
 class Group(DirectoryObject):
     """Represents an Azure Active Directory (Azure AD) group, which can be an Office 365 group, or a security group."""
-
-    def get_property(self, name, default_value=None):
-        if default_value is None:
-            property_mapping = {
-                "transitiveMembers": self.transitive_members,
-                "transitiveMemberOf": self.transitive_member_of,
-                "appRoleAssignments": self.app_role_assignments
-            }
-            default_value = property_mapping.get(name, None)
-        return super(Group, self).get_property(name, default_value)
 
     def subscribe_by_mail(self):
         """Calling this method will enable the current user to receive email notifications for this group,
@@ -164,3 +154,13 @@ class Group(DirectoryObject):
     @property
     def assigned_licenses(self):
         return self.properties.get('assignedLicenses', ClientValueCollection(AssignedLicense))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "transitiveMembers": self.transitive_members,
+                "transitiveMemberOf": self.transitive_member_of,
+                "appRoleAssignments": self.app_role_assignments
+            }
+            default_value = property_mapping.get(name, None)
+        return super(Group, self).get_property(name, default_value)
