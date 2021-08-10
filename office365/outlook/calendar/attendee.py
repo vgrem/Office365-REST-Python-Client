@@ -1,5 +1,5 @@
 from office365.outlook.calendar.attendee_base import AttendeeBase
-from office365.outlook.calendar.emailAddress import EmailAddress
+from office365.outlook.calendar.email_address import EmailAddress
 
 
 class Attendee(AttendeeBase):

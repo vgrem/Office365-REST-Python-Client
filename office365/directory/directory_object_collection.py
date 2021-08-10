@@ -3,7 +3,6 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path import ResourcePath
 
 
 class DirectoryObjectCollection(EntityCollection):
@@ -26,14 +25,25 @@ class DirectoryObjectCollection(EntityCollection):
         return super(DirectoryObjectCollection, self).__getitem__(key)
 
     def get_by_ids(self, ids):
-        """Returns the directory objects specified in a list of IDs."""
+        """
+        Returns the directory objects specified in a list of IDs.
+
+        :type ids: list[str]
+        """
         result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "getByIds", None, None, None, result)
+        params = {
+            "ids": ids
+        }
+        qry = ServiceOperationQuery(self, "getByIds", params, None, None, result)
         self.context.add_query(qry)
         return result
 
     def add(self, user_id):
-        """Add a user to the group."""
+        """
+        Add a user to the group.
+
+        :type user_id: str
+        """
         payload = {
             "@odata.id": "https://graph.microsoft.com/v1.0/users/{0}".format(user_id)
         }

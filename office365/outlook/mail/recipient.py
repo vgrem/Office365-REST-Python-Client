@@ -1,4 +1,4 @@
-from office365.outlook.calendar.emailAddress import EmailAddress
+from office365.outlook.calendar.email_address import EmailAddress
 from office365.runtime.client_value import ClientValue
 
 

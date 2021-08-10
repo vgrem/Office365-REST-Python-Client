@@ -2,7 +2,7 @@ from office365.entity_collection import EntityCollection
 from office365.outlook.calendar.attendee import Attendee
 from office365.directory.extensions.extension import Extension
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
-from office365.outlook.calendar.emailAddress import EmailAddress
+from office365.outlook.calendar.email_address import EmailAddress
 from office365.outlook.mail.attachment_collection import AttachmentCollection
 from office365.outlook.mail.item import Item
 from office365.outlook.mail.itemBody import ItemBody

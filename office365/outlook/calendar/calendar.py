@@ -1,6 +1,6 @@
 from office365.outlook.calendar.calendar_permission import CalendarPermission
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
-from office365.outlook.calendar.emailAddress import EmailAddress
+from office365.outlook.calendar.email_address import EmailAddress
 from office365.outlook.calendar.event import Event
 from office365.outlook.calendar.schedule_information import ScheduleInformation
 from office365.entity import Entity

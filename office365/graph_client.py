@@ -1,10 +1,12 @@
 from office365.directory.applications.application import Application
+from office365.directory.applications.application_template import ApplicationTemplate
 from office365.directory.audit.audit_log_root import AuditLogRoot
 from office365.directory.directory import Directory
 from office365.directory.directory_object_collection import DirectoryObjectCollection
 from office365.directory.groups.group_lifecycle_policy import GroupLifecyclePolicy
 from office365.directory.groups.group_setting_template import GroupSettingTemplate
 from office365.directory.groups.group_collection import GroupCollection
+from office365.directory.identities.identity_container import IdentityContainer
 from office365.directory.identities.identity_provider import IdentityProvider
 from office365.directory.organizations.organization import Organization
 from office365.directory.applications.service_principal import ServicePrincipal
@@ -163,8 +165,16 @@ class GraphClient(ClientRuntimeContext):
 
     @property
     def identity_providers(self):
-        """Represents a deleted item in the directory"""
         return EntityCollection(self, IdentityProvider, ResourcePath("identityProviders"))
+
+    @property
+    def identity(self):
+        return IdentityContainer(self, ResourcePath("identity"))
+
+    @property
+    def application_templates(self):
+        """Get the list of application templates in this organization."""
+        return EntityCollection(self, ApplicationTemplate, ResourcePath("applicationTemplates"))
 
     @property
     def applications(self):

@@ -9,9 +9,12 @@ class TestApplication(GraphTestCase):
     target_password = None  # type: PasswordCredential
     app_name = create_unique_name("App")
 
-    def test1_list_apps(self):
+    def test1_list_apps_and_templates(self):
         apps = self.client.applications.get().execute_query()
         self.assertIsNotNone(apps.resource_path)
+
+        templates = self.client.application_templates.get().execute_query()
+        self.assertIsNotNone(templates.resource_path)
 
     def test2_create_app(self):
         new_app = self.client.applications.add(displayName=self.app_name).execute_query()

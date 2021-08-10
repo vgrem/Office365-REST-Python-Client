@@ -1,4 +1,4 @@
-from office365.directory import DirectoryObject
+from office365.directory.directory_object import DirectoryObject
 
 
 class DirectoryRoleTemplate(DirectoryObject):
