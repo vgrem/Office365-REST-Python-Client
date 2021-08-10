@@ -1,5 +1,6 @@
 from office365.base_item import BaseItem
 from office365.entity_collection import EntityCollection
+from office365.onedrive.analytics.item_activity_stat import ItemActivityStat
 from office365.onedrive.columns.column_definition import ColumnDefinition
 from office365.onedrive.contenttypes.content_type import ContentType
 from office365.onedrive.drives.drive import Drive
@@ -9,6 +10,7 @@ from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.permissions.permission import Permission
 from office365.onedrive.sharepoint_ids import SharePointIds
 from office365.onedrive.sites.site_collection import SiteCollection
+from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 
@@ -36,6 +38,30 @@ class Site(BaseItem):
         qry = ServiceOperationQuery(self, "GetByPath", [path], None, None, return_site)
         self.context.add_query(qry)
         return return_site
+
+    def get_activities_by_interval(self, start_dt=None, end_dt=None, interval=None):
+        """
+        Get a collection of itemActivityStats resources for the activities that took place on this resource
+        within the specified time interval.
+
+        :param datetime.datetime start_dt: The start time over which to aggregate activities.
+        :param datetime.datetime end_dt: The end time over which to aggregate activities.
+        :param str interval: The aggregation interval.
+        """
+        params = {
+            "startDateTime": start_dt.strftime('%m-%d-%Y') if start_dt else None,
+            "endDateTime": end_dt.strftime('%m-%d-%Y') if end_dt else None,
+            "interval": interval
+        }
+        return_type = EntityCollection(self.context, ItemActivityStat)
+        qry = ServiceOperationQuery(self, "getActivitiesByInterval", params, None, None, return_type)
+        self.context.add_query(qry)
+
+        def _construct_request(request):
+            request.method = HttpMethod.Get
+
+        self.context.before_execute(_construct_request)
+        return return_type
 
     @property
     def site_collection(self):

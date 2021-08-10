@@ -24,12 +24,16 @@ class TestSite(GraphTestCase):
     def test2_get_site_by_path(self):
         pass
 
-    def test3_list_followed_sites(self):
+    def test3_get_activities_by_interval(self):
+        col = self.target_site.get_activities_by_interval().execute_query()
+        self.assertIsNotNone(col)
+
+    def test4_list_followed_sites(self):
         sites = self.client.me.followed_sites.get().execute_query()
         self.followed_sites_count = len(sites)
 
-    def test4_follow(self):
+    def test5_follow(self):
         pass
 
-    def test5_unfollow(self):
+    def test6_unfollow(self):
         pass

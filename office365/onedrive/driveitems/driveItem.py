@@ -1,4 +1,5 @@
 from office365.directory.subscription import Subscription
+from office365.onedrive.driveitems.item_preview_info import ItemPreviewInfo
 from office365.onedrive.internal.search_query import create_search_query
 from office365.onedrive.internal.upload_content_query import create_upload_content_query
 from office365.base_item import BaseItem
@@ -158,7 +159,7 @@ class DriveItem(BaseItem):
         :param name: The contents of the request body should be the binary stream of the file to be uploaded.
         :type name: str
         :param content: The contents of the request body should be the binary stream of the file to be uploaded.
-        :type content: str
+        :type content: str or bytes
         :rtype: DriveItem
         """
         qry = create_upload_content_query(self, name, content)
@@ -191,16 +192,16 @@ class DriveItem(BaseItem):
 
         :param str name: Folder name
         """
-        drive_item = DriveItem(self.context, None)
-        self.children.add_child(drive_item)
+        return_type = DriveItem(self.context, None)
+        self.children.add_child(return_type)
         payload = {
             "name": name,
             "folder": {},
             "@microsoft.graph.conflictBehavior": ConflictBehavior.Rename
         }
-        qry = CreateEntityQuery(self.children, payload, drive_item)
+        qry = CreateEntityQuery(self.children, payload, return_type)
         self.context.add_query(qry)
-        return drive_item
+        return return_type
 
     def convert(self, format_name):
         """Converts the contents of an item in a specific format
@@ -219,7 +220,7 @@ class DriveItem(BaseItem):
         new name.
 
         :type name: str
-        :type parent_reference: ItemReference or None
+        :type parent_reference: office365.onedrive.listitems.item_reference.ItemReference or None
         """
         result = ClientResult(self.context)
         qry = ServiceOperationQuery(self,
@@ -240,7 +241,7 @@ class DriveItem(BaseItem):
         to move.
 
         :type name: str
-        :type parent_reference: ItemReference
+        :type parent_reference: office365.onedrive.listitems.item_reference.ItemReference
         """
 
         result = ClientResult(self.context)
@@ -289,7 +290,7 @@ class DriveItem(BaseItem):
         """
         if roles is None:
             roles = ["read"]
-        permissions = EntityCollection(self.context, Permission)
+        return_type = EntityCollection(self.context, Permission)
         payload = {
             "requireSignIn": require_sign_in,
             "sendInvitation": send_invitation,
@@ -297,9 +298,9 @@ class DriveItem(BaseItem):
             "recipients": recipients,
             "message": message
         }
-        qry = ServiceOperationQuery(self, "invite", payload, None, None, permissions)
+        qry = ServiceOperationQuery(self, "invite", payload, None, None, return_type)
         self.context.add_query(qry)
-        return permissions
+        return return_type
 
     def get_activities_by_interval(self, start_dt=None, end_dt=None, interval=None):
         """
@@ -315,21 +316,69 @@ class DriveItem(BaseItem):
             "endDateTime": end_dt.strftime('%m-%d-%Y'),
             "interval": interval
         }
-        result = EntityCollection(self.context, ItemActivityStat)
-        qry = ServiceOperationQuery(self, "getActivitiesByInterval", params, None, None, result)
+        return_type = EntityCollection(self.context, ItemActivityStat)
+        qry = ServiceOperationQuery(self, "getActivitiesByInterval", params, None, None, return_type)
         self.context.add_query(qry)
 
         def _construct_request(request):
             request.method = HttpMethod.Get
 
         self.context.before_execute(_construct_request)
+        return return_type
+
+    def restore(self, parent_reference, name):
+        """
+        Restore a driveItem that has been deleted and is currently in the recycle bin.
+        NOTE: This functionality is currently only available for OneDrive Personal.
+
+        :type name: str
+        :type parent_reference: office365.onedrive.listitems.item_reference.ItemReference or None
+        """
+        payload = {
+            "name": name,
+            "parentReference": parent_reference
+        }
+        return_type = DriveItem(self.context)
+        self.children.add_child(return_type)
+        qry = ServiceOperationQuery(self, "restore", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def preview(self, page, zoom=None):
+        """
+        This action allows you to obtain a short-lived embeddable URL for an item in order
+        to render a temporary preview.
+
+        :param str or int page: Optional. Page number of document to start at, if applicable.
+            Specified as string for future use cases around file types such as ZIP.
+        :param int zoom: Optional. Zoom level to start at, if applicable.
+
+        """
+        payload = {
+            "page": page,
+            "zoom": zoom
+        }
+        result = ClientResult(self.context, ItemPreviewInfo())
+        qry = ServiceOperationQuery(self, "preview", None, payload, None, result)
+        self.context.add_query(qry)
         return result
 
-    def preview(self):
-        pass
+    def validate_permission(self, challenge_token, password):
+        """
+        :type challenge_token: str
+        :type password: str
+        """
+        payload = {
+            "challengeToken": challenge_token,
+            "password": password
+        }
+        result = ClientResult(self.context, ItemPreviewInfo())
+        qry = ServiceOperationQuery(self, "validatePermission", None, payload, None, result)
+        self.context.add_query(qry)
+        return self
 
     @property
-    def fileSystemInfo(self):
+    def file_system_info(self):
         """File system information on client."""
         return self.properties.get('fileSystemInfo', FileSystemInfo())
 
@@ -408,7 +457,7 @@ class DriveItem(BaseItem):
 
     @property
     def delta(self):
-        """This method allows your app to track changes to a drive and its children over time."""
+        """This method allows your app to track changes to a drive item and its children over time."""
         return self.properties.get('delta',
                                    EntityCollection(self.context, DriveItem, ResourcePath("delta", self.resource_path)))
 

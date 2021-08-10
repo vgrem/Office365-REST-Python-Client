@@ -9,6 +9,9 @@ from office365.onedrive.driveitems.driveItem import DriveItem
 
 
 def create_list_drive(client):
+    """
+    :type client: GraphClient
+    """
     list_info = {
         "displayName": "Lib_" + uuid.uuid4().hex,
         "list": {"template": "documentLibrary"}
@@ -51,48 +54,52 @@ class TestDriveItem(GraphTestCase):
         self.__class__.target_file = self.target_drive.root.upload(file_name, file_content).execute_query()
         self.assertIsNotNone(self.target_file.web_url)
 
-    def test4_checkout(self):
+    def test4_preview_file(self):
+        result = self.__class__.target_file.preview("1").execute_query()
+        self.assertIsNotNone(result.value)
+
+    def test5_checkout(self):
         self.__class__.target_file.checkout().execute_query()
         target_item = self.__class__.target_file.get().select(["publication"]).execute_query()
         self.assertEqual(target_item.publication.level, 'checkout')
 
-    def test5_checkin(self):
+    def test6_checkin(self):
         self.__class__.target_file.checkin("").execute_query()
         target_item = self.__class__.target_file.get().select(["publication"]).execute_query()
         self.assertEqual(target_item.publication.level, 'published')
 
-    def test6_list_versions(self):
+    def test7_list_versions(self):
         versions = self.__class__.target_file.versions.get().execute_query()
         self.assertGreater(len(versions), 1)
 
-    #def test7_follow(self):
+    #def test8_follow(self):
     #    target_item = self.__class__.target_file.follow().execute_query()
     #    self.assertIsNotNone(target_item.resource_path)
 
-    #def test8_unfollow(self):
+    #def test9_unfollow(self):
     #    target_item = self.__class__.target_file.unfollow().execute_query()
     #    self.assertIsNotNone(target_item.resource_path)
 
-    def test9_upload_file_session(self):
+    def test_10_upload_file_session(self):
         file_name = "big_buck_bunny.mp4"
         local_path = "{0}/../data/{1}".format(os.path.dirname(__file__), file_name)
         target_file = self.target_drive.root.resumable_upload(local_path).execute_query()
         self.assertIsNotNone(target_file.web_url)
 
-    def test_10_download_file(self):
+    def test_11_download_file(self):
         result = self.__class__.target_file.get_content().execute_query()
         self.assertIsNotNone(result.value)
 
-    def test_11_convert_file(self):
+    def test_12_convert_file(self):
         result = self.__class__.target_file.convert('pdf').execute_query()
         self.assertIsNotNone(result.value)
 
-    def test_12_copy_file(self):
+    def test_13_copy_file(self):
         file_name = "Copied_{0}_SharePoint User Guide.docx".format(uuid.uuid4().hex)
         result = self.__class__.target_file.copy(file_name).execute_query()
         self.assertIsNotNone(result.value)
 
-    # def test_13_move_file(self):
+    # def test_14_move_file(self):
     #    target_folder = self.__class__.target_folder.parentReference
 
     #    file_name = "Moved_{0}_SharePoint User Guide.docx".format(uuid.uuid4().hex)

@@ -1,6 +1,7 @@
 from office365.directory.identities.identity_set import IdentitySet
 from office365.entity import Entity
 from office365.onedrive.permissions.sharing_invitation import SharingInvitation
+from office365.runtime.client_value_collection import ClientValueCollection
 
 
 class Permission(Entity):
@@ -19,7 +20,7 @@ class Permission(Entity):
     @property
     def roles(self):
         """The type of permission, e.g. read. See below for the full list of roles. Read-only."""
-        return self.properties.get('roles', [])
+        return self.properties.get('roles', ClientValueCollection(str))
 
     @property
     def share_id(self):
