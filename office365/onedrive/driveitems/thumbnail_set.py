@@ -1,5 +1,5 @@
 from office365.entity import Entity
-from office365.onedrive.thumbnail import Thumbnail
+from office365.onedrive.driveitems.thumbnail import Thumbnail
 
 
 class ThumbnailSet(Entity):

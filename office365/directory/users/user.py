@@ -1,5 +1,6 @@
 from office365.directory.extensions.extension import Extension
 from office365.directory.licenses.assigned_plan import AssignedPlan
+from office365.onedrive.sites.site import Site
 from office365.outlook.calendar.calendar import Calendar
 from office365.outlook.calendar.calendar_group import CalendarGroup
 from office365.outlook.calendar.event import Event
@@ -217,7 +218,8 @@ class User(DirectoryObject):
 
         """
         return self.properties.get('followedSites',
-                                   SiteCollection(self.context, ResourcePath("followedSites", self.resource_path)))
+                                   EntityCollection(self.context, Site,
+                                                    ResourcePath("followedSites", self.resource_path)))
 
     @property
     def photo(self):

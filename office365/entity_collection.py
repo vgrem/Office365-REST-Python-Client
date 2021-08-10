@@ -4,7 +4,7 @@ from office365.runtime.resource_path import ResourcePath
 
 
 class EntityCollection(ClientObjectCollection):
-    """Microsoft Graph entity"""
+    """Microsoft Graph entity set"""
 
     def __getitem__(self, key):
         """

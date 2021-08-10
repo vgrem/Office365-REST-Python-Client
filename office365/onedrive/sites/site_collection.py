@@ -1,17 +1,21 @@
-from office365.entity_collection import EntityCollection
-from office365.onedrive.internal.root_resource_path import RootResourcePath
-from office365.onedrive.sites.site import Site
+from office365.runtime.client_value import ClientValue
 
 
-class SiteCollection(EntityCollection):
-    """Drive site's collection"""
+class SiteCollection(ClientValue):
+    """The siteCollection resource provides more information about a site collection."""
 
-    def __init__(self, context, resource_path=None):
-        super(SiteCollection, self).__init__(context, Site, resource_path)
+    def __init__(self, root=None, hostname=None, data_location_code=None):
+        """
 
-    @property
-    def root(self):
-        """If present, indicates that this is a root site collection in SharePoint."""
-        root_site = self.properties.get('root',
-                                        Site(self.context, RootResourcePath(self.resource_path)))
-        return root_site
+        :param office365.onedrive.root.Root root: The hostname for the site collection.
+        :param str hostname: The hostname for the site collection.
+        :param str data_location_code: The geographic region code for where this site collection resides
+        """
+        super(SiteCollection, self).__init__()
+        self.root = root
+        self.hostname = hostname
+        self.dataLocationCode = data_location_code
+
+
+
+

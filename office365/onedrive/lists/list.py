@@ -3,7 +3,7 @@ from office365.directory.subscription import Subscription
 from office365.entity_collection import EntityCollection
 from office365.onedrive.columns.column_definition import ColumnDefinition
 from office365.onedrive.contenttypes.content_type import ContentType
-from office365.onedrive.listitems.listItem import ListItem
+from office365.onedrive.listitems.list_item import ListItem
 from office365.runtime.client_value import ClientValue
 from office365.runtime.resource_path import ResourcePath
 

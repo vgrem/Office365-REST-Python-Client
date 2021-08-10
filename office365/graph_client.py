@@ -17,6 +17,8 @@ from office365.directory.users.user_collection import UserCollection
 from office365.entity_collection import EntityCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.shares.shared_drive_item import SharedDriveItem
+from office365.onedrive.sites.site import Site
+from office365.onedrive.sites.sites_with_root import SitesWithRoot
 from office365.outlook.contacts.contact import Contact
 from office365.onedrive.sites.site_collection import SiteCollection
 from office365.runtime.auth.token_response import TokenResponse
@@ -126,7 +128,7 @@ class GraphClient(ClientRuntimeContext):
     @property
     def sites(self):
         """Get sites"""
-        return SiteCollection(self, ResourcePath("sites"))
+        return SitesWithRoot(self, ResourcePath("sites"))
 
     @property
     def shares(self):

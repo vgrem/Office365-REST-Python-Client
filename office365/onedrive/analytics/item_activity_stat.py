@@ -1,6 +1,6 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
-from office365.onedrive.itemActivity import ItemActivity
+from office365.onedrive.analytics.item_activity import ItemActivity
 from office365.runtime.resource_path import ResourcePath
 
 

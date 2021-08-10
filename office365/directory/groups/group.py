@@ -6,7 +6,6 @@ from office365.directory.directory_object import DirectoryObject
 from office365.directory.directory_object_collection import DirectoryObjectCollection
 from office365.entity_collection import EntityCollection
 from office365.onedrive.drives.drive import Drive
-from office365.onedrive.sites.site_collection import SiteCollection
 from office365.outlook.calendar.event import Event
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -135,8 +134,9 @@ class Group(DirectoryObject):
 
         :rtype: SiteCollection
         """
+        from office365.onedrive.sites.sites_with_root import SitesWithRoot
         return self.get_property('sites',
-                                 SiteCollection(self.context, ResourcePath("sites", self.resource_path)))
+                                 SitesWithRoot(self.context, ResourcePath("sites", self.resource_path)))
 
     @property
     def events(self):

@@ -13,37 +13,46 @@ class BaseItem(Entity):
         return self.properties.get('eTag', None)
 
     @property
-    def createdBy(self):
+    def created_by(self):
         """Identity of the user, device, or application which created the item."""
         return self.properties.get('createdBy', IdentitySet())
 
     @property
-    def lastModifiedBy(self):
+    def last_modified_by(self):
         """Identity of the user, device, and application which last modified the item."""
         return self.properties.get('lastModifiedBy', IdentitySet())
 
     @property
-    def createdDateTime(self):
-        """Date and time of item creation."""
+    def created_datetime(self):
+        """Gets date and time of item creation."""
         return self.properties.get('createdDateTime', None)
 
     @property
-    def lastModifiedDateTime(self):
-        """Date and time the item was last modified."""
+    def last_modified_datetime(self):
+        """Gets date and time the item was last modified."""
         return self.properties.get('lastModifiedDateTime', None)
 
     @property
     def name(self):
-        """The name of the item."""
+        """Gets the name of the item."""
         return self.properties.get('name', None)
 
     @name.setter
     def name(self, value):
+        """
+        Sets the name of the item.
+
+        :type value: str
+        """
         self.set_property('name', value)
 
     @property
     def description(self):
-        """Provides a user-visible description of the item."""
+        """
+        Provides a user-visible description of the item.
+
+        :rtype: str or None
+        """
         return self.properties.get('description', None)
 
     @description.setter
@@ -52,18 +61,19 @@ class BaseItem(Entity):
 
     @property
     def web_url(self):
-        """URL that displays the resource in the browser."""
+        """
+        URL that displays the resource in the browser.
+
+        :rtype: str or None
+        """
         return self.properties.get('webUrl', None)
 
     @property
-    def parentReference(self):
+    def parent_reference(self):
         """Parent information, if the item has a parent."""
         return self.properties.get('parentReference', ItemReference())
 
-    @parentReference.setter
-    def parentReference(self, value):
-        self.properties['parentReference'] = value
+    @parent_reference.setter
+    def parent_reference(self, value):
+        self.set_property('parentReference', value, False)
 
-    def set_property(self, name, value, persist_changes=True):
-        super(BaseItem, self).set_property(name, value, persist_changes)
-        return self

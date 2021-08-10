@@ -3,7 +3,7 @@ from office365.entity_collection import EntityCollection
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.lists.list import List
 from office365.onedrive.internal.root_resource_path import RootResourcePath
-from office365.onedrive.system_facet import SystemFacet
+from office365.onedrive.driveitems.system_facet import SystemFacet
 from office365.runtime.resource_path import ResourcePath
 
 

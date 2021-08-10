@@ -7,6 +7,15 @@ from office365.onedrive.columns.default_column_value import DefaultColumnValue
 class ColumnDefinition(BaseItem):
 
     @property
+    def enforce_unique_values(self):
+        """
+        If true, no two list items may have the same value for this column.
+
+        :rtype: bool or None
+        """
+        return self.properties.get('enforceUniqueValues', None)
+
+    @property
     def indexed(self):
         """Specifies whether the column values can used for sorting and searching."""
         return self.properties.get('indexed', None)
