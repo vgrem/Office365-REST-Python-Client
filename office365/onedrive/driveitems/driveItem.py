@@ -1,5 +1,10 @@
 from office365.directory.subscription import Subscription
+from office365.onedrive.driveitems.audio import Audio
+from office365.onedrive.driveitems.geo_coordinates import GeoCoordinates
+from office365.onedrive.driveitems.image import Image
 from office365.onedrive.driveitems.item_preview_info import ItemPreviewInfo
+from office365.onedrive.driveitems.photo import Photo
+from office365.onedrive.driveitems.special_folder import SpecialFolder
 from office365.onedrive.internal.search_query import create_search_query
 from office365.onedrive.internal.upload_content_query import create_upload_content_query
 from office365.base_item import BaseItem
@@ -9,6 +14,7 @@ from office365.onedrive.permissions.permission import Permission
 from office365.entity_collection import EntityCollection
 from office365.onedrive.internal.children_resource_path import ChildrenResourcePath
 from office365.onedrive.driveitems.conflict_behavior import ConflictBehavior
+from office365.onedrive.shares.shared import Shared
 from office365.onedrive.versions.drive_item_version import DriveItemVersion
 from office365.onedrive.files.file import File
 from office365.onedrive.files.fileSystemInfo import FileSystemInfo
@@ -312,8 +318,8 @@ class DriveItem(BaseItem):
         :param str interval: The aggregation interval.
         """
         params = {
-            "startDateTime": start_dt.strftime('%m-%d-%Y'),
-            "endDateTime": end_dt.strftime('%m-%d-%Y'),
+            "startDateTime": start_dt.strftime('%m-%d-%Y') if start_dt else None,
+            "endDateTime": end_dt.strftime('%m-%d-%Y') if end_dt else None,
             "interval": interval
         }
         return_type = EntityCollection(self.context, ItemActivityStat)
@@ -378,6 +384,34 @@ class DriveItem(BaseItem):
         return self
 
     @property
+    def audio(self):
+        """
+        Audio metadata, if the item is an audio file. Read-only.
+        """
+        return self.properties.get("audio", Audio())
+
+    @property
+    def image(self):
+        """
+        Image metadata, if the item is an image. Read-only.
+        """
+        return self.properties.get("image", Image())
+
+    @property
+    def photo(self):
+        """
+        Photo metadata, if the item is a photo. Read-only.
+        """
+        return self.properties.get("photo", Photo())
+
+    @property
+    def location(self):
+        """
+        Location metadata, if the item has location data. Read-only.
+        """
+        return self.properties.get("location", GeoCoordinates())
+
+    @property
     def file_system_info(self):
         """File system information on client."""
         return self.properties.get('fileSystemInfo', FileSystemInfo())
@@ -394,11 +428,28 @@ class DriveItem(BaseItem):
 
     @property
     def is_folder(self):
+        """Determines whether the provided drive item is folder facet"""
         return self.is_property_available("folder")
 
     @property
     def is_file(self):
+        """Determines whether the provided drive item is file facet"""
         return self.is_property_available("file")
+
+    @property
+    def shared(self):
+        """Indicates that the item has been shared with others and provides information about the shared state
+        of the item. Read-only."""
+        return self.properties.get('shared', Shared())
+
+    @property
+    def web_dav_url(self):
+        """
+        WebDAV compatible URL for the item.
+
+        :rtype: str or None
+        """
+        return self.properties.get("webDavUrl", None)
 
     @property
     def children(self):
@@ -432,6 +483,11 @@ class DriveItem(BaseItem):
         """Provides information about the published or checked-out state of an item,
         in locations that support such actions. This property is not returned by default. Read-only."""
         return self.properties.get('publication', PublicationFacet())
+
+    @property
+    def special_folder(self):
+        """If the current item is also available as a special folder, this facet is returned. Read-only."""
+        return self.properties.get('specialFolder', SpecialFolder())
 
     @property
     def versions(self):
@@ -470,6 +526,14 @@ class DriveItem(BaseItem):
         return self.get_property('subscriptions',
                                  EntityCollection(self.context, Subscription,
                                                   ResourcePath("subscriptions", self.resource_path)))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "fileSystemInfo": self.file_system_info,
+            }
+            default_value = property_mapping.get(name, None)
+        return super(DriveItem, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
         if name == "id":

@@ -28,3 +28,7 @@ class TestDrive(GraphTestCase):
     def test4_get_site(self):
         site = self.client.sites.root.get().execute_query()
         self.assertIsNotNone(site.resource_path)
+
+    def test5_get_recent(self):
+        items = self.client.me.drive.recent().execute_query()
+        self.assertIsNotNone(items.resource_path)

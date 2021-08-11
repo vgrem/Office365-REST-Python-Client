@@ -4,12 +4,30 @@ from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.lists.list import List
 from office365.onedrive.internal.root_resource_path import RootResourcePath
 from office365.onedrive.driveitems.system_facet import SystemFacet
+from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 
 
 class Drive(BaseItem):
     """The drive resource is the top level object representing a user's OneDrive or a document library in
     SharePoint. """
+
+    def recent(self):
+        """
+        List a set of items that have been recently used by the signed in user.
+        This collection includes items that are in the user's drive as well as items
+        they have access to from other drives.
+        """
+        return_type = EntityCollection(self.context, DriveItem, ResourcePath("items", self.resource_path))
+        qry = ServiceOperationQuery(self, "recent", None, None, None, return_type)
+        self.context.add_query(qry)
+
+        def _construct_request(request):
+            request.method = HttpMethod.Get
+
+        self.context.before_execute(_construct_request)
+        return return_type
 
     @property
     def system(self):

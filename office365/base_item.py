@@ -77,3 +77,13 @@ class BaseItem(Entity):
     def parent_reference(self, value):
         self.set_property('parentReference', value, False)
 
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "createdBy": self.created_by,
+                "lastModifiedBy": self.last_modified_by,
+                "parentReference": self.parent_reference
+            }
+            default_value = property_mapping.get(name, None)
+        return super(BaseItem, self).get_property(name, default_value)
+

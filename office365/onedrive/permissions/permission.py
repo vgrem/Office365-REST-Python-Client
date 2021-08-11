@@ -1,5 +1,6 @@
 from office365.directory.identities.identity_set import IdentitySet
 from office365.entity import Entity
+from office365.onedrive.listitems.item_reference import ItemReference
 from office365.onedrive.permissions.sharing_invitation import SharingInvitation
 from office365.runtime.client_value_collection import ClientValueCollection
 
@@ -38,3 +39,11 @@ class Permission(Entity):
         :rtype: bool
         """
         return self.properties.get('hasPassword', None)
+
+    @property
+    def inherited_from(self):
+        """
+        If this content type is inherited from another scope (like a site),
+        provides a reference to the item where the content type is defined.
+        """
+        return self.properties.get("inheritedFrom", ItemReference())
