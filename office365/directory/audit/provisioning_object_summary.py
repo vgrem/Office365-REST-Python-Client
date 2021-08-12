@@ -1,4 +1,4 @@
-from generator.templates.entity_type import EntityType
+from office365.generator.templates.entity_type import EntityType
 
 
 class ProvisioningObjectSummary(EntityType):
