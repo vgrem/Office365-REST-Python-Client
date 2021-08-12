@@ -17,7 +17,8 @@ class ClientRuntimeContext(object):
         """
         return self.pending_request().build_single_request(query)
 
-    def execute_query_retry(self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None):
+    def execute_query_retry(self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None,
+                            exceptions=(ClientRequestException,)):
         """
         Executes the current set of data retrieval queries and method invocations and retries it if needed.
 
@@ -25,6 +26,7 @@ class ClientRuntimeContext(object):
         :param int timeout_secs: Seconds to wait before retrying the request.
         :param (office365.runtime.client_object.ClientObject)-> None success_callback:
         :param (int)-> None failure_callback:
+        :param exceptions: tuple of exceptions that we retry
         """
 
         for retry in range(1, max_retry):
@@ -33,11 +35,11 @@ class ClientRuntimeContext(object):
                 if callable(success_callback):
                     success_callback(self.current_query.return_type)
                 break
-            except ClientRequestException:
+            except exceptions as e:
                 self.add_query(self.current_query, True)
                 sleep(timeout_secs)
                 if callable(failure_callback):
-                    failure_callback(retry)
+                    failure_callback(retry, e)
 
     @abc.abstractmethod
     def pending_request(self):
