@@ -5,6 +5,9 @@ from tests import settings
 
 test_user_principal_name = settings.get('users', 'test_user1')
 
+tenant_prefix = settings.get('default', 'tenant_prefix')
+tenant_name = settings.get('default', 'tenant')
+
 
 def acquire_token_by_client_credentials():
     authority_url = 'https://login.microsoftonline.com/{0}'.format(settings.get('default', 'tenant'))

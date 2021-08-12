@@ -1,4 +1,5 @@
 from office365.base_item import BaseItem
+from office365.directory.identities.identity_set import IdentitySet
 from office365.entity_collection import EntityCollection
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.lists.list import List
@@ -12,6 +13,21 @@ from office365.runtime.resource_path import ResourcePath
 class Drive(BaseItem):
     """The drive resource is the top level object representing a user's OneDrive or a document library in
     SharePoint. """
+
+    def search(self, query_text):
+        """Search the hierarchy of items for items matching a query.
+
+        :type query_text: str
+        """
+        return_type = EntityCollection(self.context, DriveItem, ResourcePath("items", self.resource_path))
+        qry = ServiceOperationQuery(self, "search", {"q": query_text}, None, None, return_type)
+        self.context.add_query(qry)
+
+        def _construct_request(request):
+            request.method = HttpMethod.Get
+
+        self.context.before_execute(_construct_request)
+        return return_type
 
     def recent(self):
         """
@@ -30,9 +46,29 @@ class Drive(BaseItem):
         return return_type
 
     @property
+    def drive_type(self):
+        """
+        Describes the type of drive represented by this resource. OneDrive personal drives will return personal.
+        OneDrive for Business will return business. SharePoint document libraries will return documentLibrary.
+
+        :rtype: str or None
+        """
+        return self.properties.get("driveType", None)
+
+    @property
+    def sharepoint_ids(self):
+        """Returns identifiers useful for SharePoint REST compatibility."""
+        return self.properties.get('sharepointIds', None)
+
+    @property
     def system(self):
-        """If present, indicates that this is a system-managed drive. Read-only."""
+        """Optional. The user account that owns the drive. Read-only."""
         return self.properties.get('system', SystemFacet())
+
+    @property
+    def owner(self):
+        """If present, indicates that this is a system-managed drive. Read-only."""
+        return self.properties.get('owner', IdentitySet())
 
     @property
     def shared_with_me(self):

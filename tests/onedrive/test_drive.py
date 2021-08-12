@@ -32,3 +32,7 @@ class TestDrive(GraphTestCase):
     def test5_get_recent(self):
         items = self.client.me.drive.recent().execute_query()
         self.assertIsNotNone(items.resource_path)
+
+    def test4_search_drive(self):
+        items = self.client.me.drive.search("Guide.docx").execute_query()
+        self.assertIsNotNone(items.resource_path)

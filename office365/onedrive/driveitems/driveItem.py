@@ -5,7 +5,6 @@ from office365.onedrive.driveitems.image import Image
 from office365.onedrive.driveitems.item_preview_info import ItemPreviewInfo
 from office365.onedrive.driveitems.photo import Photo
 from office365.onedrive.driveitems.special_folder import SpecialFolder
-from office365.onedrive.internal.search_query import create_search_query
 from office365.onedrive.internal.upload_content_query import create_upload_content_query
 from office365.base_item import BaseItem
 from office365.onedrive.analytics.item_activity_stat import ItemActivityStat
@@ -274,11 +273,19 @@ class DriveItem(BaseItem):
         a whole drive, or files shared with the current user.
 
         :type query_text: str
-        :rtype: ClientResult
         """
-        qry = create_search_query(self, query_text)
+        return_type = EntityCollection(self.context, DriveItem, ResourcePath("items", self.resource_path))
+        qry = ServiceOperationQuery(self, "search", {"q": query_text}, None, None, return_type)
+
+        def _construct_query(request):
+            """
+            :type request: office365.runtime.http.request_options.RequestOptions
+            """
+            request.method = HttpMethod.Get
+
+        self.context.before_execute(_construct_query)
         self.context.add_query(qry)
-        return qry.return_type
+        return return_type
 
     def invite(self, recipients, message, require_sign_in=True, send_invitation=True, roles=None):
         """Sends a sharing invitation for a driveItem. A sharing invitation provides permissions to the recipients

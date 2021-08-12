@@ -4,6 +4,7 @@ from time import sleep
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.queries.read_entity_query import ReadEntityQuery
 
+
 class ClientRuntimeContext(object):
 
     def build_request(self):
@@ -74,10 +75,12 @@ class ClientRuntimeContext(object):
         :param bool once:
         :return: None
         """
+
         def _process_request(request):
             if once:
                 self.pending_request().beforeExecute -= _process_request
             action(request, *args, **kwargs)
+
         self.pending_request().beforeExecute += _process_request
 
     def after_query_execute(self, query, action, *args, **kwargs):
@@ -93,6 +96,7 @@ class ClientRuntimeContext(object):
             if self.current_query.id == query.id:
                 action(*args, **kwargs)
                 self.pending_request().afterExecute -= _process_response
+
         self.pending_request().afterExecute += _process_response
 
     def after_execute(self, action, once=True, *args, **kwargs):

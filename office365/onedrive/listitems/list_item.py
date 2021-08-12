@@ -41,3 +41,12 @@ class ListItem(BaseItem):
         return self.properties.get('analytics',
                                    ItemAnalytics(self.context, ResourcePath("analytics", self.resource_path)))
 
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "contentType": self.content_type,
+                "driveItem": self.drive_item
+            }
+            default_value = property_mapping.get(name, None)
+        super(ListItem, self).get_property(name, default_value)
+

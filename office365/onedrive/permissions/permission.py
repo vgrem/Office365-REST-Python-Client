@@ -8,6 +8,12 @@ from office365.runtime.client_value_collection import ClientValueCollection
 class Permission(Entity):
     """The Permission resource provides information about a sharing permission granted for a DriveItem resource."""
 
+    def grant(self):
+        """
+        Grant users access to a link represented by a permission.
+        """
+        pass
+
     @property
     def invitation(self):
         """For user type permissions, the details of the users & applications for this permission."""

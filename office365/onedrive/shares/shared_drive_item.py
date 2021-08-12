@@ -49,3 +49,12 @@ class SharedDriveItem(BaseItem):
         """Used to access the permission representing the underlying sharing link"""
         return self.properties.get('permission',
                                    Permission(self.context, ResourcePath("permission", self.resource_path)))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "driveItem": self.drive_item,
+                "listItem": self.list_item
+            }
+            default_value = property_mapping.get(name, None)
+        super(SharedDriveItem, self).get_property(name, default_value)
