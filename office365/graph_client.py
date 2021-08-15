@@ -94,16 +94,6 @@ class GraphClient(ClientRuntimeContext):
         token = TokenResponse.from_json(token_json)
         request.set_header('Authorization', 'Bearer {0}'.format(token.accessToken))
 
-    def execute_request(self, url_or_options):
-        """
-        Constructs and submits request directly
-
-        :type url_or_options: str or RequestOptions
-        """
-        if not isinstance(url_or_options, RequestOptions):
-            url_or_options = RequestOptions("{0}/{1}".format(self.service_root_url(), url_or_options))
-        return self.execute_request_direct(url_or_options)
-
     @property
     def me(self):
         """The Me endpoint is provided as a shortcut for specifying the current user"""

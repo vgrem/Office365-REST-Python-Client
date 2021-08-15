@@ -10,6 +10,7 @@ from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.permissions.permission import Permission
 from office365.onedrive.sharepoint_ids import SharePointIds
 from office365.onedrive.sites.site_collection import SiteCollection
+from office365.onenote.onenote import Onenote
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
@@ -66,7 +67,7 @@ class Site(BaseItem):
     @property
     def site_collection(self):
         """Provides details about the site's site collection. Available only on the root site."""
-        return self.properties.get("", SiteCollection())
+        return self.properties.get("siteCollection", SiteCollection())
 
     @property
     def sharepoint_ids(self):
@@ -129,6 +130,20 @@ class Site(BaseItem):
         """Analytics about the view activities that took place on this site."""
         return self.properties.get('analytics',
                                    ItemAnalytics(self.context, ResourcePath("analytics", self.resource_path)))
+
+    @property
+    def onenote(self):
+        """Represents the Onenote services available to a site."""
+        return self.properties.get('onenote',
+                                   Onenote(self.context, ResourcePath("onenote", self.resource_path)))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "contentTypes": self.content_types
+            }
+            default_value = property_mapping.get(name, None)
+        return super(Site, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
         super(Site, self).set_property(name, value, persist_changes)

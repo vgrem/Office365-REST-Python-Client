@@ -2,6 +2,8 @@ import abc
 from time import sleep
 
 from office365.runtime.client_request_exception import ClientRequestException
+from office365.runtime.compat import is_absolute_url
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.queries.read_entity_query import ReadEntityQuery
 
 
@@ -25,7 +27,7 @@ class ClientRuntimeContext(object):
         :param int max_retry: Number of times to retry the request
         :param int timeout_secs: Seconds to wait before retrying the request.
         :param (office365.runtime.client_object.ClientObject)-> None success_callback:
-        :param (int)-> None failure_callback:
+        :param (int, requests.exceptions.RequestException)-> None failure_callback:
         :param exceptions: tuple of exceptions that we retry
         """
 
@@ -119,9 +121,9 @@ class ClientRuntimeContext(object):
 
     def execute_request_direct(self, request):
         """
-        :type request: office365.runtime.http.request_options.RequestOptions
+        :type request: office365.runtime.http.request_options.RequestOptions or str
         """
-        return self.pending_request().execute_request_direct(request)
+        return self.pending_request().execute_request_direct(self._normalize_request(request))
 
     def execute_query(self):
         self.pending_request().execute_query()
@@ -143,3 +145,18 @@ class ClientRuntimeContext(object):
         :rtype: office365.runtime.queries.client_query.ClientQuery
         """
         return self.pending_request().current_query
+
+    def _normalize_request(self, request):
+        """
+        :type request: office365.runtime.http.request_options.RequestOptions or str
+        """
+        if not isinstance(request, RequestOptions):
+            request = RequestOptions(request)
+
+        if not is_absolute_url(request.url):
+            url_parts = [self.service_root_url()]
+            if not request.url.startswith("/"):
+                url_parts.append("/")
+            url_parts.append(request.url)
+            request.url = "".join(url_parts)
+        return request

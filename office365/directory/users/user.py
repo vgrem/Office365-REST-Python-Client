@@ -1,6 +1,7 @@
 from office365.directory.extensions.extension import Extension
 from office365.directory.licenses.assigned_plan import AssignedPlan
 from office365.onedrive.sites.site import Site
+from office365.onenote.onenote import Onenote
 from office365.outlook.calendar.calendar import Calendar
 from office365.outlook.calendar.calendar_group import CalendarGroup
 from office365.outlook.calendar.event import Event
@@ -18,7 +19,6 @@ from office365.outlook.mail.mailFolder import MailFolder
 from office365.onedrive.drives.drive import Drive
 from office365.outlook.mail.mailbox_settings import MailboxSettings
 from office365.outlook.mail.message import Message
-from office365.onedrive.sites.site_collection import SiteCollection
 from office365.outlook.outlook_user import OutlookUser
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -347,6 +347,12 @@ class User(DirectoryObject):
                                    OutlookUser(self.context, ResourcePath("outlook", self.resource_path)))
 
     @property
+    def onenote(self):
+        """Represents the Onenote services available to a user."""
+        return self.properties.get('onenote',
+                                   Onenote(self.context, ResourcePath("onenote", self.resource_path)))
+
+    @property
     def extensions(self):
         """The collection of open extensions defined for the user. Nullable.
 
@@ -359,6 +365,9 @@ class User(DirectoryObject):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "calendarGroups": self.calendar_groups,
+                "licenseDetails": self.license_details,
+                "member_of": self.member_of,
                 "transitiveMemberOf": self.transitive_member_of,
                 "joinedTeams": self.joined_teams,
                 "assignedLicenses": self.assigned_licenses,

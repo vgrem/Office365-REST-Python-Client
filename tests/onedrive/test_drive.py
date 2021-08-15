@@ -11,7 +11,7 @@ class TestDrive(GraphTestCase):
             self.assertIsNotNone(drive.web_url)
 
     def test2_get_drives_alt(self):
-        resp = self.client.execute_request("/drives?$top=2")
+        resp = self.client.execute_request_direct("drives?$top=2")
         drives = resp.json()['value']
         self.assertLessEqual(len(drives), 2)
         for drive in drives:

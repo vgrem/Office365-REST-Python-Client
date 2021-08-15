@@ -41,3 +41,7 @@ def is_string_type(value):
         return isinstance(value, basestring)
     else:
         return type(value) is str
+
+
+def is_absolute_url(url):
+    return bool(urlparse(url).netloc)
