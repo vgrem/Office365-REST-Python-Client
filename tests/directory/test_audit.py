@@ -4,17 +4,7 @@ import msal
 
 from office365.graph_client import GraphClient
 from tests import load_settings
-
-
-def acquire_token_by_client_credentials():
-    settings = load_settings()
-    authority_url = 'https://login.microsoftonline.com/{0}'.format(settings.get('default', 'tenant'))
-    app = msal.ConfidentialClientApplication(
-        authority=authority_url,
-        client_id=settings.get('client_credentials', 'client_id'),
-        client_credential=settings.get('client_credentials', 'client_secret')
-    )
-    return app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
+from tests.graph_case import acquire_token_by_client_credentials
 
 
 class TestAudit(TestCase):

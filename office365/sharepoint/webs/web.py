@@ -164,6 +164,7 @@ class Web(SecurableObject):
             def _webs_loaded(web):
                 if len(web.webs) > 0:
                     self._load_sub_webs_inner(web.webs, result)
+
             cur_web.ensure_property("Webs", _webs_loaded, cur_web)
 
     def get_list_using_path(self, decoded_url):
@@ -864,25 +865,21 @@ class Web(SecurableObject):
         return self.properties.get("ServerRelativePath", SPResPath(None))
 
     def get_property(self, name, default_value=None):
-        if name == "ContentTypes":
-            default_value = self.content_types
-        elif name == "RootFolder":
-            default_value = self.root_folder
-        elif name == "RegionalSettings":
-            default_value = self.regional_settings
-        elif name == "RoleDefinitions":
-            default_value = self.role_definitions
-        elif name == "RecycleBin":
-            default_value = self.recycle_bin
-        elif name == "CurrentUser":
-            default_value = self.current_user
-        elif name == "AvailableFields":
-            default_value = self.available_fields
+        if default_value is None:
+            property_mapping = {
+                "ContentTypes": self.content_types,
+                "RootFolder": self.root_folder,
+                "RegionalSettings": self.regional_settings,
+                "RoleDefinitions": self.role_definitions,
+                "RecycleBin": self.recycle_bin,
+                "CurrentUser": self.current_user,
+                "AvailableFields": self.available_fields
+            }
+            default_value = property_mapping.get(name, None)
         return super(Web, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
         super(Web, self).set_property(name, value, persist_changes)
-        # fallback: create a new resource path
         if name == "Url":
             self._web_url = value
         return self

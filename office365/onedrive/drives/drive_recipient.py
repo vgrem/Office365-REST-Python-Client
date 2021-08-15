@@ -7,8 +7,12 @@ class DriveRecipient(ClientValue):
     share with using the invite action.
     """
 
-    def __init__(self):
+    def __init__(self, alias=None, email=None, object_id=None):
         super(DriveRecipient, self).__init__()
-        self.alias = None
-        self.email = None
-        self.objectId = None
+        self.alias = alias
+        self.email = email
+        self.objectId = object_id
+
+    @staticmethod
+    def from_email(value):
+        return DriveRecipient(email=value)
