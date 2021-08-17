@@ -8,6 +8,7 @@ from office365.entity_collection import EntityCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onenote.onenote import Onenote
 from office365.outlook.calendar.event import Event
+from office365.planner.planner_group import PlannerGroup
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
@@ -157,6 +158,12 @@ class Group(DirectoryObject):
         """Represents the Onenote services available to a group."""
         return self.properties.get('onenote',
                                    Onenote(self.context, ResourcePath("onenote", self.resource_path)))
+
+    @property
+    def planner(self):
+        """The plannerGroup resource provide access to Planner resources for a group."""
+        return self.properties.get('planner',
+                                   PlannerGroup(self.context, ResourcePath("planner", self.resource_path)))
 
     @property
     def assigned_licenses(self):

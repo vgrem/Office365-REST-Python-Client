@@ -23,7 +23,7 @@ from office365.onedrive.driveitems.publication_facet import PublicationFacet
 from office365.onedrive.internal.root_resource_path import RootResourcePath
 from office365.onedrive.driveitems.thumbnail_set import ThumbnailSet
 from office365.onedrive.upload_session import UploadSession
-from office365.excel.workbook import Workbook
+from office365.onedrive.workbooks.workbook import Workbook
 from office365.onedrive.internal.resource_path_url import ResourcePathUrl
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
@@ -42,7 +42,7 @@ class DriveItem(BaseItem):
 
         :type url_path: str
         """
-        return DriveItem(self.context, ResourcePathUrl(url_path, self.resource_path))
+        return DriveItem(self.context, ResourcePathUrl(url_path, self.resource_path), self.children)
 
     def create_link(self, link_type, scope="", expiration_datetime=None, password=None, message=None):
         """

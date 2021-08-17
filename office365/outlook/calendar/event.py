@@ -110,13 +110,12 @@ class Event(Item):
         """The calendar that contains the event. Navigation property. Read-only."""
         from office365.outlook.calendar.calendar import Calendar
         return self.properties.get('calendar',
-                                 Calendar(self.context, ResourcePath("calendar", self.resource_path)))
+                                   Calendar(self.context, ResourcePath("calendar", self.resource_path)))
 
     @property
     def attendees(self):
         """The collection of attendees for the event."""
-        return self.properties.get('attendees',
-                                 ClientValueCollection(Attendee))
+        return self.properties.get('attendees', ClientValueCollection(Attendee))
 
     @attendees.setter
     def attendees(self, value):

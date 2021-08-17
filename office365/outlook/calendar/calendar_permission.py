@@ -1,4 +1,5 @@
 from office365.entity import Entity
+from office365.outlook.calendar.email_address import EmailAddress
 
 
 class CalendarPermission(Entity):
@@ -16,4 +17,11 @@ class CalendarPermission(Entity):
     object and create another sharee or delegate in an Outlook client.
 
     """
-    pass
+
+    @property
+    def email_address(self):
+        """
+        Represents a sharee or delegate who has access to the calendar.
+        For the "My Organization" sharee, the address property is null. Read-only.
+        """
+        return self.properties.get("emailAddress", EmailAddress())

@@ -1,9 +1,9 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
-from office365.excel.functions.workbookFunctions import WorkbookFunctions
-from office365.excel.names.workbookNamedItem import WorkbookNamedItem
-from office365.excel.tables.workbook_table import WorkbookTable
-from office365.excel.worksheets.workbookWorksheet import WorkbookWorksheetCollection
+from office365.onedrive.workbooks.functions.functions import WorkbookFunctions
+from office365.onedrive.workbooks.names.workbookNamedItem import WorkbookNamedItem
+from office365.onedrive.workbooks.tables.workbook_table import WorkbookTable
+from office365.onedrive.workbooks.worksheets.worksheet import WorkbookWorksheetCollection
 from office365.runtime.resource_path import ResourcePath
 
 

@@ -1,6 +1,5 @@
 from office365.entity import Entity
-from office365.entity_collection import EntityCollection
-from office365.excel.worksheets.workbookWorksheet import WorkbookWorksheet
+from office365.onedrive.workbooks.worksheets.worksheet import WorkbookWorksheet
 from office365.runtime.resource_path import ResourcePath
 
 

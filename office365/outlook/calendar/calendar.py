@@ -88,3 +88,12 @@ class Calendar(Entity):
         return self.properties.get('calendarPermissions',
                                    EntityCollection(self.context, CalendarPermission,
                                                     ResourcePath("calendarPermissions", self.resource_path)))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "calendarView": self.calendar_view,
+                "calendarPermissions": self.calendar_permissions
+            }
+            default_value = property_mapping.get(name, None)
+        return super(Calendar, self).get_property(name, default_value)

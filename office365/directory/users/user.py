@@ -15,11 +15,13 @@ from office365.directory.identities.object_identity import ObjectIdentity
 from office365.directory.profile_photo import ProfilePhoto
 from office365.entity_collection import EntityCollection
 from office365.outlook.contacts.contact import Contact
+from office365.outlook.contacts.contact_folder import ContactFolder
 from office365.outlook.mail.mailFolder import MailFolder
 from office365.onedrive.drives.drive import Drive
 from office365.outlook.mail.mailbox_settings import MailboxSettings
 from office365.outlook.mail.message import Message
 from office365.outlook.outlook_user import OutlookUser
+from office365.planner.planner_user import PlannerUser
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
@@ -300,6 +302,13 @@ class User(DirectoryObject):
                                                     ResourcePath("contacts", self.resource_path)))
 
     @property
+    def contact_folders(self):
+        """Get the contact folder collection in the default Contacts folder of the signed-in user."""
+        return self.properties.get('contactFolders',
+                                   EntityCollection(self.context, ContactFolder,
+                                                    ResourcePath("contactFolders", self.resource_path)))
+
+    @property
     def events(self):
         """Get an event collection or an event."""
         return self.properties.get('events', EntityCollection(self.context, Event,
@@ -353,6 +362,12 @@ class User(DirectoryObject):
                                    Onenote(self.context, ResourcePath("onenote", self.resource_path)))
 
     @property
+    def planner(self):
+        """The plannerUser resource provide access to Planner resources for a user."""
+        return self.properties.get('planner',
+                                   PlannerUser(self.context, ResourcePath("planner", self.resource_path)))
+
+    @property
     def extensions(self):
         """The collection of open extensions defined for the user. Nullable.
 
@@ -366,8 +381,9 @@ class User(DirectoryObject):
         if default_value is None:
             property_mapping = {
                 "calendarGroups": self.calendar_groups,
+                "contactFolders": self.contact_folders,
                 "licenseDetails": self.license_details,
-                "member_of": self.member_of,
+                "memberOf": self.member_of,
                 "transitiveMemberOf": self.transitive_member_of,
                 "joinedTeams": self.joined_teams,
                 "assignedLicenses": self.assigned_licenses,

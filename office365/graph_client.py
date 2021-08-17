@@ -20,6 +20,7 @@ from office365.onedrive.drives.drive import Drive
 from office365.onedrive.shares.shares_collection import SharesCollection
 from office365.onedrive.sites.sites_with_root import SitesWithRoot
 from office365.outlook.contacts.contact import Contact
+from office365.planner.planner import Planner
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
@@ -222,3 +223,11 @@ class GraphClient(ClientRuntimeContext):
         Get the list of teams templates.
         """
         return EntityCollection(self, TeamsTemplate, ResourcePath("teamsTemplates"))
+
+    @property
+    def planner(self):
+        """
+        The planner resource is the entry point for the Planner object model.
+        It returns a singleton planner resource. It doesn't contain any usable properties.
+        """
+        return Planner(self, ResourcePath("planner"))
