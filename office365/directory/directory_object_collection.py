@@ -79,3 +79,29 @@ class DirectoryObjectCollection(EntityCollection):
             request.method = HttpMethod.Delete
         self.context.before_execute(_construct_remove_user_request)
         return self
+
+    def validate_properties(self, entity_type=None, display_name=None, mail_nickname=None, on_behalf_of_userid=None):
+        """
+        Validate that a Microsoft 365 group's display name or mail nickname complies with naming policies.
+        Clients can use this API to determine whether a display name or mail nickname is valid before trying to
+        create a Microsoft 365 group. To validate the properties of an existing group, use the group:
+        validateProperties function.
+
+        :param str entity_type: Group is the only supported entity type.
+        :param str display_name: The display name of the group to validate. The property is not individually required.
+             However, at least one property (displayName or mailNickname) is required.
+        :param str mail_nickname: The mail nickname of the group to validate.
+             The property is not individually required. However, at least one property (displayName or mailNickname)
+             is required.
+        :param str on_behalf_of_userid: The ID of the user to impersonate when calling the API. The validation results are for the
+            onBehalfOfUserId's attributes and roles.
+        """
+        payload = {
+            "entityType": entity_type,
+            "displayName": display_name,
+            "mailNickname": mail_nickname,
+            "onBehalfOfUserId": on_behalf_of_userid
+        }
+        qry = ServiceOperationQuery(self, "validateProperties", None, payload)
+        self.context.add_query(qry)
+        return self

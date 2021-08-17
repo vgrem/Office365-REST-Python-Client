@@ -41,7 +41,7 @@ class Group(DirectoryObject):
         of groups provisioned in Azure AD. Note that Microsoft 365 groups cannot contain groups.
         So membership in a Microsoft 365 group is always direct.
 
-        :type group_ids: list
+        :type group_ids: list[str]
         """
         result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "checkMemberGroups", None, group_ids, None, result)

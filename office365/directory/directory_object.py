@@ -1,5 +1,4 @@
 from office365.entity import Entity
-from office365.entity_collection import EntityCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
@@ -34,6 +33,11 @@ class DirectoryObject(Entity):
         qry = ServiceOperationQuery(self, "getMemberGroups", None, payload, None, result)
         self.context.add_query(qry)
         return result
+
+    def restore(self):
+        qry = ServiceOperationQuery(self, "restore")
+        self.context.add_query(qry)
+        return self
 
     @property
     def deleted_datetime(self):
