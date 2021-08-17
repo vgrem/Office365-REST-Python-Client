@@ -313,20 +313,33 @@ class File(AbstractFile):
         :type chunk_size: int
         """
 
-        def _download_inner():
-            request = RequestOptions(
-                r"web/getFileByServerRelativeUrl('{0}')/\$value".format(self.serverRelativeUrl))
-            request.stream = True
-            response = self.context.execute_request_direct(request)
-            response.raise_for_status()
-            bytes_read = 0
-            for chunk in response.iter_content(chunk_size=chunk_size):
-                bytes_read += len(chunk)
-                if callable(chunk_downloaded):
-                    chunk_downloaded(bytes_read)
-                file_object.write(chunk)
+        def _download_as_stream():
+            qry = ServiceOperationQuery(self, "$value")
 
-        self.ensure_property("ServerRelativeUrl", _download_inner)
+            def _construct_download_request(request):
+                """
+                :type request: office365.runtime.http.request_options.RequestOptions
+                """
+                request.stream = True
+                request.method = HttpMethod.Get
+            self.context.before_execute(_construct_download_request)
+
+            def _process_download_response(response):
+                """
+                :type response: requests.Response
+                """
+                response.raise_for_status()
+                bytes_read = 0
+                for chunk in response.iter_content(chunk_size=chunk_size):
+                    bytes_read += len(chunk)
+                    if callable(chunk_downloaded):
+                        chunk_downloaded(bytes_read)
+                    file_object.write(chunk)
+            self.context.after_execute(_process_download_response)
+
+            self.context.add_query(qry)
+
+        self.ensure_property("ServerRelativeUrl", _download_as_stream)
         return self
 
     @property

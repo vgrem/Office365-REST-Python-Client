@@ -92,11 +92,14 @@ class ClientRuntimeContext(object):
         Attach an event handler which is triggered after query is submitted to server
 
         :type query: office365.runtime.queries.client_query.ClientQuery
-        :type action: (Response, Any) -> None
+        :type action: (Response, *args, **kwargs) -> None
         :return: None
         """
 
         def _process_response(resp):
+            """
+            :type resp: requests.Response
+            """
             if self.current_query.id == query.id:
                 action(*args, **kwargs)
                 self.pending_request().afterExecute -= _process_response
@@ -107,7 +110,7 @@ class ClientRuntimeContext(object):
         """
         Attach an event handler which is triggered after request is submitted to server
 
-        :param (RequestOptions, any) -> None action:
+        :param (RequestOptions, *args, **kwargs) -> None action:
         :param bool once:
         :return: None
         """

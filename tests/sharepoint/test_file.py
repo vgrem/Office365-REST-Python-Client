@@ -119,12 +119,11 @@ class TestSharePointFile(SPTestCase):
 
     def test_13_copy_file(self):
         files = self.__class__.target_list.root_folder.files.get().execute_query()
-        for cur_file in files:
-            file_url = cur_file.properties["ServerRelativeUrl"]
+        for cur_file in files:  # type: File
+            file_url = cur_file.serverRelativeUrl
             path, file_name = os.path.split(file_url)
             new_file_url = '/'.join([path, "copied_" + file_name])
-            cur_file.copyto(new_file_url, True)
-            self.client.execute_query()
+            cur_file.copyto(new_file_url, True).execute_query()
 
             moved_file = self.client.web.get_file_by_server_relative_url(new_file_url).get().execute_query()
             self.assertEqual(new_file_url, moved_file.serverRelativeUrl)
@@ -165,9 +164,8 @@ class TestSharePointFile(SPTestCase):
 
     def test_18_delete_files(self):
         files_to_delete = self.__class__.target_list.root_folder.files.get().execute_query()
-        for file_to_delete in files_to_delete:
+        for file_to_delete in files_to_delete:  # type: File
             file_to_delete.delete_object().execute_query()
 
-        result = self.__class__.target_list.root_folder.files.get().execute_query()
-        files_items = list(result)
-        self.assertEqual(len(files_items), 0)
+        file_col = self.__class__.target_list.root_folder.files.get().execute_query()
+        self.assertEqual(len(file_col), 0)

@@ -187,6 +187,10 @@ class DriveItem(BaseItem):
         result = self.get_content()
 
         def _content_downloaded(resp):
+            """
+            :type resp: requests.Response
+            """
+            resp.raise_for_status()
             file_object.write(result.value)
 
         self.context.after_execute(_content_downloaded)
