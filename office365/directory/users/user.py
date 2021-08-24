@@ -1,3 +1,4 @@
+from office365.communications.presences.presence import Presence
 from office365.directory.extensions.extension import Extension
 from office365.directory.licenses.assigned_plan import AssignedPlan
 from office365.onedrive.sites.site import Site
@@ -390,6 +391,12 @@ class User(DirectoryObject):
         return self.get_property('extensions',
                                  EntityCollection(self.context, Extension,
                                                   ResourcePath("extensions", self.resource_path)))
+
+    @property
+    def presence(self):
+        """Get a user's presence information."""
+        return self.properties.get('presence',
+                                   Presence(self.context, ResourcePath("presence", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:

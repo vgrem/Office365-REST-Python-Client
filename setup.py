@@ -15,7 +15,7 @@ setup(
     author_email="vvgrem@gmail.com",
     maintainer="Konrad Gądek, Domenico Di Nicola",
     maintainer_email="kgadek@gmail.com, dom.dinicola@gmail.com",
-    description="Office 365 Library for Python",
+    description="Microsoft 365 & Microsoft Graph Library for Python",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/vgrem/Office365-REST-Python-Client",

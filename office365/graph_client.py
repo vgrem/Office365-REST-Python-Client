@@ -33,7 +33,7 @@ from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.teams.chats.chat import Chat
-from office365.communications.cloud_communication import CloudCommunication
+from office365.communications.cloud_communications import CloudCommunications
 from office365.teams.team_collection import TeamCollection
 from office365.teams.teams_template import TeamsTemplate
 
@@ -193,7 +193,7 @@ class GraphClient(ClientRuntimeContext):
 
     @property
     def communications(self):
-        return EntityCollection(self, CloudCommunication, ResourcePath("communications"))
+        return CloudCommunications(self, ResourcePath("communications"))
 
     @property
     def subscriptions(self):
