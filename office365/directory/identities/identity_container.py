@@ -1,4 +1,4 @@
-from office365.directory.identities.b2x_identity_user_flow import B2XIdentityUserFlow
+from office365.directory.identities.userflows.b2x_identity_user_flow import B2XIdentityUserFlow
 from office365.directory.identities.identity_provider_base import IdentityProviderBase
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection

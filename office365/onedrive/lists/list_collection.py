@@ -10,7 +10,10 @@ class ListCollection(EntityCollection):
         super(ListCollection, self).__init__(context, List, resource_path)
 
     def add(self, list_creation_information):
-        """Creates a Drive list resource"""
+        """
+        Creates a Drive list resource
+
+        """
         target_list = List(self.context)
         self.add_child(target_list)
         qry = CreateEntityQuery(self, list_creation_information, target_list)

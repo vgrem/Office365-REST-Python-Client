@@ -20,6 +20,38 @@ from office365.teams.team import Team
 class Group(DirectoryObject):
     """Represents an Azure Active Directory (Azure AD) group, which can be an Office 365 group, or a security group."""
 
+    def renew(self):
+        """
+        Renews a group's expiration. When a group is renewed, the group expiration is extended by the number
+        of days defined in the policy.
+        """
+        qry = ServiceOperationQuery(self, "renew")
+        self.context.add_query(qry)
+        return self
+
+    def add_favorite(self):
+        """Add the group to the list of the current user's favorite groups. Supported for Microsoft 365 groups only."""
+        qry = ServiceOperationQuery(self, "addFavorite")
+        self.context.add_query(qry)
+        return self
+
+    def remove_favorite(self):
+        """
+        Remove the group from the list of the current user's favorite groups. Supported for Microsoft 365 groups only.
+        """
+        qry = ServiceOperationQuery(self, "removeFavorite")
+        self.context.add_query(qry)
+        return self
+
+    def reset_unseen_count(self):
+        """
+        Reset the unseenCount of all the posts that the current user has not seen since their last visit.
+        Supported for Microsoft 365 groups only.
+        """
+        qry = ServiceOperationQuery(self, "resetUnseenCount")
+        self.context.add_query(qry)
+        return self
+
     def subscribe_by_mail(self):
         """Calling this method will enable the current user to receive email notifications for this group,
         about new posts, events, and files in that group. Supported for Microsoft 365 groups only."""

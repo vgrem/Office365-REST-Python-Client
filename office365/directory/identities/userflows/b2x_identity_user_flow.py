@@ -1,4 +1,4 @@
-from office365.directory.identities.identity_user_flow import IdentityUserFlow
+from office365.directory.identities.userflows.identity_user_flow import IdentityUserFlow
 
 
 class B2XIdentityUserFlow(IdentityUserFlow):

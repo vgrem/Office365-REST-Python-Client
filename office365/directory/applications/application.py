@@ -47,6 +47,66 @@ class Application(DirectoryObject):
             deleted_item.delete_object()
         return self
 
+    def set_verified_publisher(self, verified_publisher_id):
+        """Set the verifiedPublisher on an application.
+        For more information, including prerequisites to setting a verified publisher, see Publisher verification.
+
+        :param str verified_publisher_id: The Microsoft Partner Network ID (MPNID) of the verified publisher
+        to be set on the application, from the publisher's Partner Center account.
+        """
+        qry = ServiceOperationQuery(self, "setVerifiedPublisher", None, {"verifiedPublisherId": verified_publisher_id})
+        self.context.add_query(qry)
+        return self
+
+    def unset_verified_publisher(self):
+        """Unset the verifiedPublisher previously set on an application, removing all verified publisher properties.
+        For more information, see Publisher verification.
+        """
+        qry = ServiceOperationQuery(self, "unsetVerifiedPublisher")
+        self.context.add_query(qry)
+        return self
+
+    def add_key(self, key_credential, password_credential, proof):
+        """
+        Add a key credential to an application. This method, along with removeKey can be used by an application
+        to automate rolling its expiring keys.
+
+        :param KeyCredential key_credential: The new application key credential to add.
+            The type, usage and key are required properties for this usage. Supported key types are:
+                AsymmetricX509Cert: The usage must be Verify.
+                X509CertAndPassword: The usage must be Sign
+        :param PasswordCredential password_credential: Only secretText is required to be set which should contain the password
+             for the key. This property is required only for keys of type X509CertAndPassword. Set it to null otherwise.
+        :param str proof: A self-signed JWT token used as a proof of possession of the existing keys
+        """
+        payload = {
+            "keyCredential": key_credential,
+            "passwordCredential": password_credential,
+            "proof": proof,
+        }
+        return_type = ClientResult(self.context, KeyCredential())
+        qry = ServiceOperationQuery(self, "addKey", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def remove_key(self, keyId, proof):
+        """
+        Remove a key credential from an application.
+        This method along with addKey can be used by an application to automate rolling its expiring keys.
+
+        :param str keyId: The unique identifier for the password.
+        :param str proof: A self-signed JWT token used as a proof of possession of the existing keys.
+             This JWT token must be signed using the private key of one of the application's existing
+             valid certificates. The token should contain the following claims:
+                 aud - Audience needs to be 00000002-0000-0000-c000-000000000000.
+                 iss - Issuer needs to be the id of the application that is making the call.
+                 nbf - Not before time.
+                 exp - Expiration time should be "nbf" + 10 mins.
+        """
+        qry = ServiceOperationQuery(self, "removeKey", None, {"keyId": keyId, "proof": proof})
+        self.context.add_query(qry)
+        return self
+
     @property
     def key_credentials(self):
         """The collection of key credentials associated with the application. Not nullable.

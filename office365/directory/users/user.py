@@ -37,12 +37,12 @@ class User(DirectoryObject):
         """
         Add or remove licenses on the user.
         :param list[str] remove_licenses: A collection of skuIds that identify the licenses to remove.
-        :param ClientValueCollection add_licenses: A collection of assignedLicense objects that specify
+        :param list[AssignedLicense] add_licenses: A collection of assignedLicense objects that specify
              the licenses to add.
         """
         params = {
-            "addLicenses": add_licenses,
-            "removeLicenses": remove_licenses
+            "addLicenses": ClientValueCollection(AssignedLicense, add_licenses),
+            "removeLicenses": ClientValueCollection(str, remove_licenses)
         }
         qry = ServiceOperationQuery(self, "assignLicense", None, params, None, self)
         self.context.add_query(qry)
@@ -165,6 +165,20 @@ class User(DirectoryObject):
             deleted_user = self.context.directory.deleted_users[self.id]
             deleted_user.delete_object()
         return self
+
+    def revoke_signin_sessions(self):
+        """
+        Invalidates all the refresh tokens issued to applications for a user
+        (as well as session cookies in a user's browser), by resetting the signInSessionsValidFromDateTime user
+        property to the current date-time. Typically, this operation is performed (by the user or an administrator)
+        if the user has a lost or stolen device. This operation prevents access to the organization's data through
+        applications on the device by requiring the user to sign in again to all applications that they have previously
+        consented to, independent of device.
+        """
+        result = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "revokeSignInSessions", None, None, None, result)
+        self.context.add_query(qry)
+        return result
 
     @property
     def account_enabled(self):
