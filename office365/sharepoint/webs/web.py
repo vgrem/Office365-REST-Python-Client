@@ -323,7 +323,7 @@ class Web(SecurableObject):
         :type decoded_url: str
         """
         params = {"DecodedUrl": decoded_url}
-        return File(
+        return Folder(
             self.context,
             ResourcePathServiceOperation("getFolderByServerRelativePath", params, self.resource_path)
         )
