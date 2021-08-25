@@ -54,8 +54,11 @@ class ClientContext(ClientRuntimeContext):
         result = Web.get_web_url_from_page_url(ctx, abs_url)
 
         def _init_context_for_web(resp):
+            """
+            :type resp: requests.Response
+            """
+            resp.raise_for_status()
             ctx._base_url = result.value
-
         ctx.after_execute(_init_context_for_web)
         return ctx
 
