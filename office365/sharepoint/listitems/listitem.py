@@ -178,19 +178,18 @@ class ListItem(SecurableObject):
         self.context.add_query(qry)
         return comments
 
-    def parse_and_set_field_value(self, fieldName, value):
+    def parse_and_set_field_value(self, field_name, value):
         """Sets the value of the field (2) for the list item based on an implementation-specific transformation
            of the value..
-           :param str fieldName: Specifies the field internal name.
+           :param str field_name: Specifies the field internal name.
            :param str value: Specifies the new value for the field (2).
 
         """
         payload = {
-            "fieldName": fieldName,
+            "fieldName": field_name,
             "value": value
         }
-        qry = ServiceOperationQuery(self,
-                                    "ParseAndSetFieldValue", None, payload, None, None)
+        qry = ServiceOperationQuery(self, "ParseAndSetFieldValue", None, payload)
         self.context.add_query(qry)
 
     @property
@@ -280,16 +279,15 @@ class ListItem(SecurableObject):
                                                       ResourcePath("likedByInformation", self.resource_path)))
 
     def get_property(self, name, default_value=None):
-        if name == "ContentType":
-            default_value = self.content_type
-        elif name == "ParentList":
-            default_value = self.parent_list
-        elif name == "EffectiveBasePermissions":
-            default_value = self.effective_base_permissions
-        elif name == "AttachmentFiles":
-            default_value = self.attachment_files
-        elif name == "LikedByInformation":
-            default_value = self.liked_by_information
+        if default_value is None:
+            property_mapping = {
+                "ContentType": self.content_type,
+                "ParentList": self.parent_list,
+                "EffectiveBasePermissions": self.effective_base_permissions,
+                "AttachmentFiles": self.attachment_files,
+                "LikedByInformation": self.liked_by_information
+            }
+            default_value = property_mapping.get(name, None)
 
         value = super(ListItem, self).get_property(name, default_value)
         if self.is_property_available(name[:-2]):

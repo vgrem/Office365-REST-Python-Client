@@ -11,7 +11,7 @@ class TestSharePointGroup(SPTestCase):
     def setUpClass(cls):
         super(TestSharePointGroup, cls).setUpClass()
         cls.target_user = cls.client.web.ensure_user(test_user_principal_name).execute_query()
-        cls.target_group = cls.client.web.associatedMemberGroup
+        cls.target_group = cls.client.web.associated_member_group
 
     def test1_get_current_user_groups(self):
         groups = self.client.web.current_user.groups.get().execute_query()

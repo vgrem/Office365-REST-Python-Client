@@ -11,6 +11,7 @@ from office365.sharepoint.contenttypes.content_type_collection import ContentTyp
 from office365.sharepoint.eventreceivers.event_receiver_definition import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.files.file import File
+from office365.sharepoint.flows.flow_synchronization_result import FlowSynchronizationResult
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.folders.folder_collection import FolderCollection
 from office365.sharepoint.listitems.listitem import ListItem
@@ -88,6 +89,38 @@ class Web(SecurableObject):
         qry.static = True
         context.add_query(qry)
         return result
+
+    def create_group_based_environment(self):
+        return_type = FlowSynchronizationResult(self.context)
+        qry = ServiceOperationQuery(self, "CreateGroupBasedEnvironment", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_group_based_environment(self):
+        return_type = FlowSynchronizationResult(self.context)
+        qry = ServiceOperationQuery(self, "GetGroupBasedEnvironment", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def sync_flow_instances(self, target_web_url):
+        """
+        :param str target_web_url:
+        """
+        return_type = FlowSynchronizationResult(self.context)
+        payload = {"targetWebUrl": target_web_url}
+        qry = ServiceOperationQuery(self, "SyncFlowInstances", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def sync_flow_templates(self, category):
+        """
+        :param str category:
+        """
+        return_type = FlowSynchronizationResult(self.context)
+        payload = {"category": category}
+        qry = ServiceOperationQuery(self, "SyncFlowTemplates", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def get_all_client_side_components(self):
         result = ClientResult(self.context)
@@ -529,9 +562,9 @@ class Web(SecurableObject):
         :param (str) -> None on_resolved:
         """
         options = {
-            ExternalSharingSiteOption.View: context.web.associatedVisitorGroup,
-            ExternalSharingSiteOption.Edit: context.web.associatedMemberGroup,
-            ExternalSharingSiteOption.Owner: context.web.associatedOwnerGroup,
+            ExternalSharingSiteOption.View: context.web.associated_visitor_group,
+            ExternalSharingSiteOption.Edit: context.web.associated_member_group,
+            ExternalSharingSiteOption.Owner: context.web.associated_owner_group,
         }
         grp = options[share_option]
         context.load(grp)
@@ -689,19 +722,19 @@ class Web(SecurableObject):
                                    Web(self.context, ResourcePath("ParentWeb", self.resource_path)))
 
     @property
-    def associatedVisitorGroup(self):
+    def associated_visitor_group(self):
         """Gets or sets the associated visitor group of the Web site."""
         return self.properties.get('AssociatedVisitorGroup',
                                    Group(self.context, ResourcePath("AssociatedVisitorGroup", self.resource_path)))
 
     @property
-    def associatedOwnerGroup(self):
+    def associated_owner_group(self):
         """Gets or sets the associated owner group of the Web site."""
         return self.properties.get('AssociatedOwnerGroup',
                                    Group(self.context, ResourcePath("AssociatedOwnerGroup", self.resource_path)))
 
     @property
-    def associatedMemberGroup(self):
+    def associated_member_group(self):
         """Gets or sets the group of users who have been given contribute permissions to the Web site."""
         return self.properties.get('AssociatedMemberGroup',
                                    Group(self.context, ResourcePath("AssociatedMemberGroup", self.resource_path)))
@@ -873,7 +906,10 @@ class Web(SecurableObject):
                 "RoleDefinitions": self.role_definitions,
                 "RecycleBin": self.recycle_bin,
                 "CurrentUser": self.current_user,
-                "AvailableFields": self.available_fields
+                "AvailableFields": self.available_fields,
+                "AssociatedOwnerGroup": self.associated_owner_group,
+                "AssociatedMemberGroup": self.associated_member_group,
+                "AssociatedVisitorGroup": self.associated_visitor_group
             }
             default_value = property_mapping.get(name, None)
         return super(Web, self).get_property(name, default_value)

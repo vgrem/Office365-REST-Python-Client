@@ -12,6 +12,7 @@ from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.fields.related_field_collection import RelatedFieldCollection
 from office365.sharepoint.files.checkedOutFileCollection import CheckedOutFileCollection
 from office365.sharepoint.files.file import File
+from office365.sharepoint.flows.flow_synchronization_result import FlowSynchronizationResult
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.forms.form_collection import FormCollection
 from office365.sharepoint.listitems.caml.caml_query import CamlQuery
@@ -34,6 +35,64 @@ class List(SecurableObject):
     def __init__(self, context, resource_path=None):
         super(List, self).__init__(context, resource_path)
 
+    def get_business_app_operation_status(self):
+        return_type = FlowSynchronizationResult(self.context)
+        qry = ServiceOperationQuery(self, "GetBusinessAppOperationStatus", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def sync_flow_callback_url(self, flow_id):
+        """
+        :param str flow_id:
+        """
+        return_type = FlowSynchronizationResult(self.context)
+        qry = ServiceOperationQuery(self, "SyncFlowCallbackUrl", None, {"flowId": flow_id}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def sync_flow_instance(self, flow_id):
+        """
+        :param str flow_id:
+        """
+        return_type = FlowSynchronizationResult(self.context)
+        qry = ServiceOperationQuery(self, "SyncFlowInstance", None, {"flowId": flow_id}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def sync_flow_instances(self, retrieve_group_flows):
+        """
+        :param bool retrieve_group_flows:
+        """
+        return_type = FlowSynchronizationResult(self.context)
+        payload = {"retrieveGroupFlows": retrieve_group_flows}
+        qry = ServiceOperationQuery(self, "SyncFlowInstances", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def sync_flow_templates(self, category):
+        """
+        :param str category:
+        """
+        return_type = FlowSynchronizationResult(self.context)
+        payload = {"category": category}
+        qry = ServiceOperationQuery(self, "SyncFlowTemplates", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def create_document_with_default_name(self, folder_path, extension):
+        """
+        :param str folder_path:
+        :param str extension:
+        """
+        return_type = FlowSynchronizationResult(self.context)
+        payload = {
+            "folderPath": folder_path,
+            "extension": extension
+        }
+        qry = ServiceOperationQuery(self, "CreateDocumentWithDefaultName", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def recycle(self):
         """Moves the list to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
         result = ClientResult(self.context)
@@ -41,14 +100,14 @@ class List(SecurableObject):
         self.context.add_query(qry)
         return result
 
-    def render_list_data(self, viewXml):
+    def render_list_data(self, view_xml):
         """
 
-        :param str viewXml: View xml
+        :param str view_xml: View xml
         """
         result = ClientResult(self.context)
         payload = {
-            "viewXml": viewXml
+            "viewXml": view_xml
         }
         qry = ServiceOperationQuery(self, "RenderListData", None, payload, None, result)
         self.context.add_query(qry)
@@ -95,6 +154,9 @@ class List(SecurableObject):
         return result
 
     def get_lookup_field_choices(self, targetFieldName, pagingInfo=None):
+        """
+
+        """
         result = ClientResult(self.context)
         params = {
             "targetFieldName": targetFieldName,
