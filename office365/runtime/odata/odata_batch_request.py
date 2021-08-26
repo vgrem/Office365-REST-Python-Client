@@ -1,5 +1,9 @@
 import json
 import re
+
+import requests
+from requests.structures import CaseInsensitiveDict
+
 from office365.runtime.compat import message_from_bytes_or_string, message_as_bytes_or_string
 from email.message import Message
 
@@ -27,17 +31,18 @@ class ODataBatchRequest(ClientRequest):
         request.data = self._prepare_payload()
         return request
 
-    def process_response(self, response):
+    def process_response(self, batch_response):
         """
         Parses an HTTP response.
 
-        :type response: requests.Response
+        :type batch_response: requests.Response
         """
         content_id = 0
-        for response_info in self._read_response(response):
-            if response_info["content"] is not None:
-                qry = self.current_query.get(content_id)
-                self.context.pending_request().map_json(response_info["content"], qry.return_type)
+        for response in self._read_response(batch_response):
+            response.raise_for_status()
+            if response.text:
+                self.context.pending_request()._current_query = self.current_query.get(content_id)
+                self.context.pending_request().process_response(response)
                 content_id += 1
 
     def _read_response(self, response):
@@ -87,39 +92,34 @@ class ODataBatchRequest(ClientRequest):
 
     @staticmethod
     def _normalize_headers(headers_raw):
+        """
+        :type headers_raw: list[str]
+        """
         headers = {}
         for header_line in headers_raw:
             k, v = header_line.split(":", 1)
-            headers[k] = v
-        return headers
+            headers[k.title()] = v.strip()
+        return CaseInsensitiveDict(headers)
 
     def _deserialize_response(self, raw_response):
+        """
+        :type raw_response: Message
+        """
         response = raw_response.get_payload(decode=True)
         lines = list(filter(None, response.decode("utf-8").split("\r\n")))
         response_status_regex = "^HTTP/1\\.\\d (\\d{3}) (.*)$"
         status_result = re.match(response_status_regex, lines[0])
         status_info = status_result.groups()
 
-        # validate for errors
-        if int(status_info[0]) >= 400:
-            raise ValueError(response)
-
+        resp = requests.Response()
+        resp.status_code = int(status_info[0])
         if status_info[1] == "No Content" or len(lines) < 3:
-            headers_raw = lines[1:]
-            return {
-                "status": status_info,
-                "headers": self._normalize_headers(headers_raw),
-                "content": None
-            }
+            resp.headers = self._normalize_headers(lines[1:])
+            resp._content = bytes(str("").encode("utf-8"))
         else:
-            headers_raw = lines[1:-1]
-            content = lines[-1]
-            content = json.loads(content)
-            return {
-                "status": status_info,
-                "headers": self._normalize_headers(headers_raw),
-                "content": content
-            }
+            resp._content = bytes(str(lines[-1]).encode("utf-8"))
+            resp.headers = self._normalize_headers(lines[1:-1])
+        return resp
 
     @staticmethod
     def _serialize_request(request):

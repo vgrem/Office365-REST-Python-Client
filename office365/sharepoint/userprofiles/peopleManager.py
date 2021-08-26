@@ -119,7 +119,7 @@ class PeopleManager(BaseEntity):
     def get_my_followers(self):
         """
         """
-        result = PersonPropertiesCollection(self.context)
-        qry = ServiceOperationQuery(self, "GetMyFollowers", None, None, None, result)
+        return_type = PersonPropertiesCollection(self.context)
+        qry = ServiceOperationQuery(self, "GetMyFollowers", None, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
