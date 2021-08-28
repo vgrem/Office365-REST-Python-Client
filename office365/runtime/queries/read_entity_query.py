@@ -1,5 +1,5 @@
 from office365.runtime.client_object import ClientObject
-from office365.runtime.odata.odata_query_options import QueryOptions
+from office365.runtime.odata.query_options import QueryOptions
 from office365.runtime.queries.client_query import ClientQuery
 
 

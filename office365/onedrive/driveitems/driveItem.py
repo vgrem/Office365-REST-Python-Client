@@ -5,13 +5,13 @@ from office365.onedrive.driveitems.image import Image
 from office365.onedrive.driveitems.item_preview_info import ItemPreviewInfo
 from office365.onedrive.driveitems.photo import Photo
 from office365.onedrive.driveitems.special_folder import SpecialFolder
-from office365.onedrive.internal.upload_content_query import create_upload_content_query
+from office365.onedrive.internal.queries.upload_content_query import create_upload_content_query
 from office365.base_item import BaseItem
 from office365.onedrive.analytics.item_activity_stat import ItemActivityStat
 from office365.onedrive.analytics.item_analytics import ItemAnalytics
 from office365.onedrive.permissions.permission import Permission
 from office365.entity_collection import EntityCollection
-from office365.onedrive.internal.children_resource_path import ChildrenResourcePath
+from office365.onedrive.internal.resourcepaths.children_resource_path import ChildrenResourcePath
 from office365.onedrive.driveitems.conflict_behavior import ConflictBehavior
 from office365.onedrive.shares.shared import Shared
 from office365.onedrive.versions.drive_item_version import DriveItemVersion
@@ -20,11 +20,11 @@ from office365.onedrive.files.fileSystemInfo import FileSystemInfo
 from office365.onedrive.folders.folder import Folder
 from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.driveitems.publication_facet import PublicationFacet
-from office365.onedrive.internal.root_resource_path import RootResourcePath
+from office365.onedrive.internal.resourcepaths.root_resource_path import RootResourcePath
 from office365.onedrive.driveitems.thumbnail_set import ThumbnailSet
 from office365.onedrive.upload_session import UploadSession
 from office365.onedrive.workbooks.workbook import Workbook
-from office365.onedrive.internal.resource_path_url import ResourcePathUrl
+from office365.onedrive.internal.resourcepaths.resource_path_url import ResourcePathUrl
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
@@ -132,7 +132,7 @@ class DriveItem(BaseItem):
         :param str source_path: Local file path
         :param int chunk_size: chunk size
         """
-        from office365.onedrive.internal.file_upload_query import ResumableFileUpload
+        from office365.onedrive.internal.queries.file_upload_query import ResumableFileUpload
         upload_query = ResumableFileUpload(self, source_path, chunk_size, chunk_uploaded)
         self.children.add_child(upload_query.return_type)
         self.context.add_query(upload_query)
@@ -175,7 +175,7 @@ class DriveItem(BaseItem):
     def get_content(self):
         """Download the contents of the primary stream (file) of a DriveItem. Only driveItems with the file property
         can be downloaded. """
-        from office365.onedrive.internal.download_content_query import create_download_content_query
+        from office365.onedrive.internal.queries.download_content_query import create_download_content_query
         qry = create_download_content_query(self)
         self.context.add_query(qry)
         return qry.return_type
@@ -219,7 +219,7 @@ class DriveItem(BaseItem):
         :type format_name: str
         :rtype: ClientResult
         """
-        from office365.onedrive.internal.download_content_query import create_download_content_query
+        from office365.onedrive.internal.queries.download_content_query import create_download_content_query
         qry = create_download_content_query(self, format_name)
         self.context.add_query(qry)
         return qry.return_type

@@ -1,5 +1,5 @@
 from office365.runtime.client_value import ClientValue
-from office365.runtime.odata.json_light_format import JsonLightFormat
+from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 
 
 class ClientValueCollection(ClientValue):

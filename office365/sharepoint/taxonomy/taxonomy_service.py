@@ -1,6 +1,6 @@
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.odata.odata_request import ODataRequest
-from office365.runtime.odata.v4_json_format import V4JsonFormat
+from office365.runtime.odata.v4.json_format import V4JsonFormat
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.taxonomy.term_store import TermStore
 

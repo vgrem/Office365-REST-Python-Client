@@ -37,15 +37,16 @@ class ODataBatchRequest(ClientRequest):
 
         :type batch_response: requests.Response
         """
-        content_id = 0
-        for response in self._read_response(batch_response):
+        query_id = 0
+        for response in self._extract_response(batch_response):
             response.raise_for_status()
-            if response.text:
-                self.context.pending_request()._current_query = self.current_query.get(content_id)
-                self.context.pending_request().process_response(response)
-                content_id += 1
+            qry = self.current_query.ordered_queries[query_id]
+            self.context.pending_request().add_query(qry, reset_queue=True)
+            self.context.pending_request().process_response(response)
+            query_id += 1
+        self.context.pending_request().clear()
 
-    def _read_response(self, response):
+    def _extract_response(self, response):
         """Parses a multipart/mixed response body from from the position defined by the context.
 
         :type response: requests.Response

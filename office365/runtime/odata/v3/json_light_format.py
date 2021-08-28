@@ -1,5 +1,5 @@
 from office365.runtime.odata.odata_json_format import ODataJsonFormat
-from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
+from office365.runtime.odata.v3.metadata_level import ODataMetadataLevel
 
 
 class JsonLightFormat(ODataJsonFormat):

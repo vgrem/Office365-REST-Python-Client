@@ -1,3 +1,8 @@
+import json
+
+import requests
+from requests.structures import CaseInsensitiveDict
+
 from office365.runtime.client_request import ClientRequest
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
@@ -18,20 +23,29 @@ class ODataV4BatchRequest(ClientRequest):
         request.data = self._prepare_payload()
         return request
 
-    def process_response(self, response):
+    def process_response(self, batch_response):
         """Parses an HTTP response.
 
-        :type response: requests.Response
+        :type batch_response: requests.Response
         """
-        json = response.json()
-        for resp in json["responses"]:
-            self._validate_response(resp)
-            sub_qry = self.current_query.get(int(resp["id"]))
-            self.context.pending_request().map_json(resp["body"], sub_qry.return_type)
+        for query_id, resp in self._extract_response(batch_response):
+            resp.raise_for_status()
+            sub_qry = self.current_query.ordered_queries[query_id]
+            self.context.pending_request().add_query(sub_qry)
+            self.context.pending_request().process_response(resp)
+        self.context.pending_request().clear()
 
-    def _validate_response(self, json):
-        if int(json['status']) >= 400:
-            raise ValueError(json['body'])
+    def _extract_response(self, batch_response):
+        """
+        type batch_response: requests.Response
+        """
+        json_responses = batch_response.json()
+        for json_resp in json_responses["responses"]:
+            resp = requests.Response()
+            resp.status_code = int(json_resp['status'])
+            resp.headers = CaseInsensitiveDict(json_resp['headers'])
+            resp._content = json.dumps(json_resp["body"]).encode('utf-8')
+            yield int(json_resp["id"]), resp
 
     def _prepare_payload(self):
         """

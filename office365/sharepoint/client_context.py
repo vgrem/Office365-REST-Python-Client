@@ -6,9 +6,9 @@ from office365.runtime.auth.user_credential import UserCredential
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.odata.json_light_format import JsonLightFormat
-from office365.runtime.odata.odata_batch_request import ODataBatchRequest
-from office365.runtime.odata.odata_metadata_level import ODataMetadataLevel
+from office365.runtime.odata.v3.json_light_format import JsonLightFormat
+from office365.runtime.odata.v3.batch_request import ODataBatchRequest
+from office365.runtime.odata.v3.metadata_level import ODataMetadataLevel
 from office365.runtime.odata.odata_request import ODataRequest
 from office365.runtime.queries.batch_query import BatchQuery
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
@@ -89,8 +89,10 @@ class ClientContext(ClientRuntimeContext):
         :type allow_ntlm: bool
         :type browser_mode: bool
         """
-        self.authentication_context.register_provider(UserCredential(username, password), allow_ntlm=allow_ntlm,
-                                                      browser_mode=browser_mode)
+        self.authentication_context.register_provider(
+            UserCredential(username, password),
+            allow_ntlm=allow_ntlm,
+            browser_mode=browser_mode)
         return self
 
     def with_credentials(self, credentials):
@@ -114,7 +116,7 @@ class ClientContext(ClientRuntimeContext):
             self.ensure_form_digest(request)
         batch_request.beforeExecute += _prepare_batch_request
 
-        all_queries = [qry for qry in self.pending_request().get_next_query()]
+        all_queries = [qry for qry in self.pending_request().next_query()]
         for i in range_or_xrange(0, len(all_queries), items_per_batch):
             queries = all_queries[i:i + items_per_batch]
             batch_request.add_query(BatchQuery(self, queries))

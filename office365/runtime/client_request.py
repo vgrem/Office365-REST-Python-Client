@@ -12,7 +12,7 @@ class ClientRequest(object):
 
     def __init__(self, context):
         """
-        Abstract request client for OData/CSOM services
+        Abstract request client
 
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         """
@@ -40,18 +40,25 @@ class ClientRequest(object):
         """
         return self._current_query
 
-    def add_query(self, query, execute_first=False, set_as_current=True):
+    def add_query(self, query, execute_first=False, set_as_current=True, reset_queue=False):
         """
         :type query: office365.runtime.queries.client_query.ClientQuery
         :type execute_first: bool
         :type set_as_current: bool
+        :type reset_queue: bool
         """
+        if reset_queue:
+            self._queries = []
         if set_as_current:
             self._current_query = query
         if execute_first:
             self._queries.insert(0, query)
         else:
             self._queries.append(query)
+
+    def clear(self):
+        self._current_query = None
+        self._queries = []
 
     def build_single_request(self, query):
         """
@@ -79,7 +86,7 @@ class ClientRequest(object):
         """
         Submit a pending request to the server
         """
-        for _ in self.get_next_query():
+        for _ in self.next_query():
             try:
                 request = self.build_request()
                 self.beforeExecute.notify(request)
@@ -135,7 +142,7 @@ class ClientRequest(object):
                                     proxies=request_options.proxies)
         return response
 
-    def get_next_query(self):
+    def next_query(self):
         while len(self._queries) > 0:
             qry = self._queries.pop(0)
             self._current_query = qry

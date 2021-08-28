@@ -23,7 +23,7 @@ class BatchQuery(ClientQuery):
         """
 
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
-        :type queries: list[]
+        :type queries: list[ClientQuery]
         """
         super(BatchQuery, self).__init__(context)
         self._current_boundary = create_boundary("batch_")
@@ -38,9 +38,9 @@ class BatchQuery(ClientQuery):
         """
         self._queries.append(query)
 
-    def get(self, index):
-        result = [qry for qry in self.change_sets if qry.return_type is not None] + self.get_queries
-        return result[index]
+    @property
+    def ordered_queries(self):
+        return self.change_sets + self.get_queries
 
     @property
     def current_boundary(self):

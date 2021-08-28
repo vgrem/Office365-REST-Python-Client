@@ -3,7 +3,7 @@ from office365.directory.identities.identity_set import IdentitySet
 from office365.entity_collection import EntityCollection
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.lists.list import List
-from office365.onedrive.internal.root_resource_path import RootResourcePath
+from office365.onedrive.internal.resourcepaths.root_resource_path import RootResourcePath
 from office365.onedrive.driveitems.system_facet import SystemFacet
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery

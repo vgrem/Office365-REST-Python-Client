@@ -1,4 +1,4 @@
-from office365.onedrive.internal.resource_path_url import ResourcePathUrl
+from office365.onedrive.internal.resourcepaths.resource_path_url import ResourcePathUrl
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 
@@ -21,4 +21,3 @@ def create_upload_content_query(folder_item, name, content=None):
         request.method = HttpMethod.Put
     folder_item.context.before_execute(_modify_query)
     return qry
-

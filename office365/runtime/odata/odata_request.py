@@ -5,7 +5,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value import ClientValue
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.odata.json_light_format import JsonLightFormat
+from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
@@ -64,6 +64,9 @@ class ODataRequest(ClientRequest):
         """
         query = self.context.current_query
         return_type = query.return_type
+        if return_type is None:
+            return
+
         if isinstance(return_type, ClientObject):
             return_type.clear()
 
