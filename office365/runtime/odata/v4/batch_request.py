@@ -68,12 +68,12 @@ class ODataV4BatchRequest(ClientRequest):
         :type depends_on:  list[str] or None
         """
         allowed_props = ["id", "method", "headers", "url", "body"]
-        json = dict((k, v) for k, v in vars(request).items() if v is not None and k in allowed_props)
-        json["id"] = _id
+        request_json = dict((k, v) for k, v in vars(request).items() if v is not None and k in allowed_props)
+        request_json["id"] = _id
         if depends_on is not None:
-            json["dependsOn"] = depends_on
-        json["url"] = json["url"].replace(self.context.service_root_url(), "")
-        return json
+            request_json["dependsOn"] = depends_on
+        request_json["url"] = request_json["url"].replace(self.context.service_root_url(), "")
+        return request_json
 
     @property
     def current_query(self):
