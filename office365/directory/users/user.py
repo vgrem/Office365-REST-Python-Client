@@ -393,6 +393,17 @@ class User(DirectoryObject):
                                                   ResourcePath("extensions", self.resource_path)))
 
     @property
+    def direct_reports(self):
+        """
+        Get a user's direct reports.
+
+        :rtype: EntityCollection
+        """
+        return self.get_property('directReports',
+                                 DirectoryObjectCollection(self.context,
+                                                           ResourcePath("directReports", self.resource_path)))
+
+    @property
     def presence(self):
         """Get a user's presence information."""
         return self.properties.get('presence',
@@ -409,7 +420,8 @@ class User(DirectoryObject):
                 "joinedTeams": self.joined_teams,
                 "assignedLicenses": self.assigned_licenses,
                 "mailFolders": self.mail_folders,
-                "mailboxSettings": self.mailbox_settings
+                "mailboxSettings": self.mailbox_settings,
+                "directReports": self.direct_reports
             }
             default_value = property_mapping.get(name, None)
         return super(User, self).get_property(name, default_value)

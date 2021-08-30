@@ -11,7 +11,7 @@ from office365.directory.identities.identity_provider import IdentityProvider
 from office365.directory.organizations.organization import Organization
 from office365.directory.applications.service_principal import ServicePrincipal
 from office365.directory.licenses.subscribed_sku import SubscribedSku
-from office365.directory.reports.reports_root import ReportsRoot
+from office365.reports.report_root import ReportRoot
 from office365.directory.subscription import Subscription
 from office365.directory.users.user import User
 from office365.directory.users.user_collection import UserCollection
@@ -215,7 +215,7 @@ class GraphClient(ClientRuntimeContext):
         """
         The resource that represents an instance of History Reports.
         """
-        return ReportsRoot(self, ResourcePath("reports"))
+        return ReportRoot(self, ResourcePath("reports"))
 
     @property
     def teams_templates(self):
