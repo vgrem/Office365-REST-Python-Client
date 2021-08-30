@@ -335,6 +335,14 @@ class List(SecurableObject):
                                       ResourcePathServiceOperation("getRelatedFields", [], self.resource_path))
 
     @property
+    def id(self):
+        """
+        Gets a value that specifies the list identifier.
+        :rtype: str
+        """
+        return self.properties.get("Id", None)
+
+    @property
     def enable_folder_creation(self):
         """
         Specifies whether new list folders can be added to the list.

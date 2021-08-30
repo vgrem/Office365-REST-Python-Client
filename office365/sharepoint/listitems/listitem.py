@@ -10,6 +10,7 @@ from office365.sharepoint.fields.field_lookup_value import FieldLookupValue
 from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupValue
 from office365.sharepoint.likes.likedByInformation import LikedByInformation
 from office365.sharepoint.permissions.securable_object import SecurableObject
+from office365.sharepoint.reputationmodel.reputation import Reputation
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
 from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
 from office365.sharepoint.sharing.sharing_result import SharingResult
@@ -33,6 +34,28 @@ class ListItem(SecurableObject):
         super(ListItem, self).__init__(context, resource_path)
         if parent_list is not None:
             self.set_property("ParentList", parent_list, False)
+
+    def set_rating(self, value):
+        """
+        :type value: int
+        """
+        return_value = ClientResult(self.context)
+
+        def _list_item_loaded():
+            Reputation.set_rating(self.context, self.parent_list.id, self.id, value, return_value)
+        self.parent_list.ensure_properties(["Id", "ParentList"], _list_item_loaded)
+        return return_value
+
+    def set_like(self, value):
+        """
+        :type value: bool
+        """
+        return_value = ClientResult(self.context)
+
+        def _list_item_loaded():
+            Reputation.set_like(self.context, self.parent_list.id, self.id, value, return_value)
+        self.parent_list.ensure_properties(["Id", "ParentList"], _list_item_loaded)
+        return return_value
 
     def get_wopi_frame_url(self, action):
         """

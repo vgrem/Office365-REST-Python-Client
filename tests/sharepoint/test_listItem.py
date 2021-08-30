@@ -107,7 +107,11 @@ class TestSharePointListItem(SPTestCase):
     def test_12_restore_item(self):
         pass
 
-    def test_13_delete_list_item(self):
+    def test_13_set_rating(self):
+        result = self.__class__.target_item.set_rating(1).execute_query()
+        self.assertIsNotNone(result.value)
+
+    def test_14_delete_list_item(self):
         item_id = self.__class__.target_item.properties["Id"]
         item_to_delete = self.__class__.target_item
         item_to_delete.delete_object().execute_query()
@@ -115,7 +119,7 @@ class TestSharePointListItem(SPTestCase):
         result = self.target_list.items.filter("Id eq {0}".format(item_id)).get().execute_query()
         self.assertEqual(0, len(result))
 
-    def test_14_create_multiple_items(self):
+    def test_15_create_multiple_items(self):
         for i in range(0, self.batch_items_count):
             item_properties = {'Title': "Task {0}".format(i)}
             self.target_list.add_item(item_properties)
@@ -123,7 +127,7 @@ class TestSharePointListItem(SPTestCase):
         result = self.target_list.items.get().execute_query()
         self.assertEqual(len(result), self.batch_items_count)
 
-    def test_15_delete_multiple_items(self):
+    def test_16_delete_multiple_items(self):
         items = self.target_list.items.get().execute_query()  # get existing items
         self.assertGreater(len(items), 0)
         for item in items:

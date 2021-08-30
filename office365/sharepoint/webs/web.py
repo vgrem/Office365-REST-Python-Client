@@ -428,14 +428,14 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
-    def apply_web_template(self, webTemplate):
+    def apply_web_template(self, web_template):
         """
         Applies the specified site definition or site template to the website that has no template applied to it.
 
-        :param str webTemplate: The name of the site definition or the file name of the site template to be applied.
+        :param str web_template: The name of the site definition or the file name of the site template to be applied.
         :return:
         """
-        qry = ServiceOperationQuery(self, "ApplyWebTemplate", {"webTemplate": webTemplate})
+        qry = ServiceOperationQuery(self, "ApplyWebTemplate", {"webTemplate": web_template})
         self.context.add_query(qry)
         return self
 
@@ -449,21 +449,21 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
-    def get_file_by_guest_url(self, guestUrl):
+    def get_file_by_guest_url(self, guest_url):
         """
-        :type guestUrl: str
+        :type guest_url: str
         """
         return_type = File(self.context)
-        qry = ServiceOperationQuery(self, "GetFileByGuestUrl", [guestUrl], None, None, return_type)
+        qry = ServiceOperationQuery(self, "GetFileByGuestUrl", [guest_url], None, None, return_type)
         self.context.add_query(qry)
         return return_type
 
-    def get_folder_by_guest_url(self, guestUrl):
+    def get_folder_by_guest_url(self, guest_url):
         """
-        :type guestUrl: str
+        :type guest_url: str
         """
         return_type = File(self.context)
-        qry = ServiceOperationQuery(self, "GetFolderByGuestUrl", [guestUrl], None, None, return_type)
+        qry = ServiceOperationQuery(self, "GetFolderByGuestUrl", [guest_url], None, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -716,7 +716,7 @@ class Web(SecurableObject):
                                    User(self.context, ResourcePath("CurrentUser", self.resource_path)))
 
     @property
-    def parentWeb(self):
+    def parent_web(self):
         """Gets the parent website of the specified website."""
         return self.properties.get('ParentWeb',
                                    Web(self.context, ResourcePath("ParentWeb", self.resource_path)))
@@ -909,7 +909,8 @@ class Web(SecurableObject):
                 "AvailableFields": self.available_fields,
                 "AssociatedOwnerGroup": self.associated_owner_group,
                 "AssociatedMemberGroup": self.associated_member_group,
-                "AssociatedVisitorGroup": self.associated_visitor_group
+                "AssociatedVisitorGroup": self.associated_visitor_group,
+                "ParentWeb": self.parent_web
             }
             default_value = property_mapping.get(name, None)
         return super(Web, self).get_property(name, default_value)
