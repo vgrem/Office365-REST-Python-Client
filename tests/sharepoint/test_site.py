@@ -1,5 +1,3 @@
-from office365.sharepoint.web_application.webApplication import WebApplication
-from tests import test_site_url
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.lists.list_template_type import ListTemplateType
@@ -37,3 +35,8 @@ class TestSite(SPTestCase):
         template_name = "GLOBAL#0"
         web_template = self.client.site.get_web_templates().get_by_name(template_name).get().execute_query()
         self.assertIsNotNone(web_template)
+
+    def test7_get_site_logo(self):
+        result = self.client.site.get_site_logo().execute_query()
+        self.assertIsNotNone(result.value)
+

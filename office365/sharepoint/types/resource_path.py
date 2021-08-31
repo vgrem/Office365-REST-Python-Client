@@ -3,7 +3,7 @@ from office365.runtime.client_value import ClientValue
 
 class ResourcePath(ClientValue):
 
-    def __init__(self, decoded_url):
+    def __init__(self, decoded_url=None):
         super(ResourcePath, self).__init__()
         self.DecodedUrl = decoded_url
 

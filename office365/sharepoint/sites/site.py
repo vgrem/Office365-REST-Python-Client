@@ -7,6 +7,7 @@ from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.eventreceivers.event_receiver_definition import EventReceiverDefinitionCollection
 from office365.sharepoint.features.feature_collection import FeatureCollection
 from office365.sharepoint.lists.list import List
+from office365.sharepoint.portal.site_icon_manager import SiteIconManager
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.recyclebin.recycleBinItemCollection import RecycleBinItemCollection
 from office365.sharepoint.sites.sph_site import SPHSite
@@ -23,18 +24,41 @@ class Site(BaseEntity):
 
     @staticmethod
     def from_url(url):
+        """Construct and return a site instance
+
+        :type url: str
+        """
         from office365.sharepoint.client_context import ClientContext
         client = ClientContext(url)
         return client.site
 
-    def is_valid_home_site(self):
-        result = ClientResult(self.context)
+    def get_site_logo(self):
+        """
+        Downloads a site logo
+        """
+        return_type = ClientResult(self.context)
 
         def _site_loaded():
-            SPHSite.is_valid_home_site(self.context, self.url, result)
+            site_manager = SiteIconManager(self.context)
+            site_manager.get_site_logo(self.url, return_type=return_type)
 
         self.ensure_property("Url", _site_loaded)
-        return result
+        return return_type
+
+    def set_site_logo(self, relative_logo_url):
+        """Uploads a site logo"""
+        site_manager = SiteIconManager(self.context)
+        site_manager.set_site_logo(relative_logo_url=relative_logo_url)
+        return self
+
+    def is_valid_home_site(self):
+        return_type = ClientResult(self.context)
+
+        def _site_loaded():
+            SPHSite.is_valid_home_site(self.context, self.url, return_type)
+
+        self.ensure_property("Url", _site_loaded)
+        return return_type
 
     def set_as_home_site(self):
         result = ClientResult(self.context)
@@ -56,16 +80,16 @@ class Site(BaseEntity):
         self.context.add_query(qry)
         return changes
 
-    def get_recycle_bin_items(self, rowLimit=100, isAscending=True):
+    def get_recycle_bin_items(self, row_limit=100, is_ascending=True):
         """
 
-        :param int rowLimit:
-        :param bool isAscending:
+        :param int row_limit:
+        :param bool is_ascending:
         """
         result = RecycleBinItemCollection(self.context)
         payload = {
-            "rowLimit": rowLimit,
-            "isAscending": isAscending
+            "rowLimit": row_limit,
+            "isAscending": is_ascending
         }
         qry = ServiceOperationQuery(self, "GetRecycleBinItems", None, payload, None, result)
         self.context.add_query(qry)
@@ -149,12 +173,12 @@ class Site(BaseEntity):
         :type type_catalog: int"""
         return List(self.context, ResourcePathServiceOperation("getCatalog", [type_catalog], self.resource_path))
 
-    def register_hub_site(self, creationInformation):
+    def register_hub_site(self, create_info):
         """Registers an existing site as a hub site.
 
-        :type creationInformation: HubSiteCreationInformation
+        :type create_info: HubSiteCreationInformation
         """
-        qry = ServiceOperationQuery(self, "RegisterHubSite", None, creationInformation, "creationInformation", None)
+        qry = ServiceOperationQuery(self, "RegisterHubSite", None, create_info, "creationInformation", None)
         self.context.add_query(qry)
         return self
 
@@ -196,7 +220,7 @@ class Site(BaseEntity):
         """Gets the server-relative Path of the Site.
         :rtype: SPResPath or None
         """
-        return self.properties.get("ServerRelativePath", SPResPath(None))
+        return self.properties.get("ServerRelativePath", SPResPath())
 
     @property
     def recycle_bin(self):
@@ -221,10 +245,11 @@ class Site(BaseEntity):
                                                                      self))
 
     def get_property(self, name, default_value=None):
-        if name == "RecycleBin":
-            default_value = self.recycle_bin
-        elif name == "RootWeb":
-            default_value = self.root_web
-        elif name == "EventReceivers":
-            default_value = self.event_receivers
+        if default_value is None:
+            property_mapping = {
+                "RecycleBin": self.recycle_bin,
+                "RootWeb": self.root_web,
+                "EventReceivers": self.event_receivers
+            }
+            default_value = property_mapping.get(name, None)
         return super(Site, self).get_property(name, default_value)
