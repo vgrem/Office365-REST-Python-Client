@@ -1,4 +1,4 @@
-from office365.directory.subscription import Subscription
+from office365.directory.subscriptions.subscription import Subscription
 from office365.onedrive.driveitems.audio import Audio
 from office365.onedrive.driveitems.geo_coordinates import GeoCoordinates
 from office365.onedrive.driveitems.image import Image

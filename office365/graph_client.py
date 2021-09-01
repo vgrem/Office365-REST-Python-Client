@@ -8,18 +8,18 @@ from office365.directory.groups.group_setting_template import GroupSettingTempla
 from office365.directory.groups.group_collection import GroupCollection
 from office365.directory.identities.identity_container import IdentityContainer
 from office365.directory.identities.identity_provider import IdentityProvider
+from office365.directory.organizations.org_contact import OrgContact
 from office365.directory.organizations.organization import Organization
 from office365.directory.applications.service_principal import ServicePrincipal
 from office365.directory.licenses.subscribed_sku import SubscribedSku
 from office365.reports.report_root import ReportRoot
-from office365.directory.subscription import Subscription
+from office365.directory.subscriptions.subscription import Subscription
 from office365.directory.users.user import User
 from office365.directory.users.user_collection import UserCollection
 from office365.entity_collection import EntityCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.shares.shares_collection import SharesCollection
 from office365.onedrive.sites.sites_with_root import SitesWithRoot
-from office365.outlook.contacts.contact import Contact
 from office365.planner.planner import Planner
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.client_runtime_context import ClientRuntimeContext
@@ -88,6 +88,7 @@ class GraphClient(ClientRuntimeContext):
 
     def authenticate_request(self, request):
         """
+        Authenticate request
 
         :type request: RequestOptions
         """
@@ -147,8 +148,8 @@ class GraphClient(ClientRuntimeContext):
 
     @property
     def contacts(self):
-        """o get all the contacts in a user's mailbox"""
-        return EntityCollection(self, Contact, ResourcePath("contacts"))
+        """Get the list of organizational contacts for this organization."""
+        return EntityCollection(self, OrgContact, ResourcePath("contacts"))
 
     @property
     def directory(self):
