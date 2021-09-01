@@ -15,6 +15,7 @@ class SitePageService(BaseEntity):
         """Represents a set of APIs to use for managing site pages."""
         super(SitePageService, self).__init__(context, ResourcePath("SP.Publishing.SitePageService"))
 
+    @property
     def pages(self):
         return self.properties.get("pages",
                                    SitePageMetadataCollection(self.context, ResourcePath("pages", self.resource_path)))
@@ -22,6 +23,21 @@ class SitePageService(BaseEntity):
     @property
     def entity_type_name(self):
         return "SP.Publishing.SitePageService"
+
+    @staticmethod
+    def can_create_promoted_page(context):
+        """
+        Checks if the current user has permission to create a site page on the site pages document library.
+        MUST return true if the user has permission to create a site page, otherwise MUST return false.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        """
+        return_type = ClientResult(context)
+        svc = SitePageService(context)
+        qry = ServiceOperationQuery(svc, "CanCreatePromotedPage", None, None, None, return_type)
+        qry.static = True
+        context.add_query(qry)
+        return return_type
 
     @staticmethod
     def get_time_zone(context, city_name):

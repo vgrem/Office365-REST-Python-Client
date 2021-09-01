@@ -21,7 +21,7 @@ class TestSPPublishing(SPTestCase):
 
     def test2_get_site_pages(self):
         svc = SitePageService(self.client)
-        pages = svc.pages().get().execute_query()
+        pages = svc.pages.get().execute_query()
         self.assertIsInstance(pages, SitePageMetadataCollection)
 
     def test3_get_time_zone(self):

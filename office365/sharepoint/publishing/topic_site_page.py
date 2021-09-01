@@ -1,10 +1,12 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.publishing.site_page import SitePage
 
 
-class TopicSitePage(BaseEntity):
+class TopicSitePage(SitePage):
 
-    def check_out(self):
-        pass
+    @property
+    def entity_id(self):
+        return self.properties.get("EntityId", None)
 
-    def is_content_type_available(self):
-        pass
+    @property
+    def entity_type(self):
+        return self.properties.get("EntityType", None)

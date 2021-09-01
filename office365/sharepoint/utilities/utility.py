@@ -4,6 +4,7 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.files.file import File
+from office365.sharepoint.utilities.principal_info import PrincipalInfo
 
 
 class Utility(BaseEntity):
@@ -83,6 +84,43 @@ class Utility(BaseEntity):
         qry = ServiceOperationQuery(utility, "SendEmail", None, properties, "properties")
         qry.static = True
         context.add_query(qry)
+        return utility
+
+    @staticmethod
+    def expand_groups_to_principals(context, inputs, max_count=None, return_type=None):
+        """
+        :type context: office365.sharepoint.client_context.ClientContext
+        :type inputs: list[str]
+        :type max_count: int
+        :type return_type: ClientResult
+        """
+        utility = Utility(context)
+        payload = {
+            "inputs": inputs,
+            "maxCount": max_count
+        }
+        if return_type is None:
+            return_type = ClientResult(context, ClientValueCollection(PrincipalInfo))
+        qry = ServiceOperationQuery(utility, "ExpandGroupsToPrincipals", None, payload, None, return_type)
+        qry.static = True
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
+    def log_custom_app_error(context, error):
+        """
+        :type context: office365.sharepoint.client_context.ClientContext
+        :type error: str
+        """
+        utility = Utility(context)
+        payload = {
+            "error": error,
+        }
+        return_type = ClientResult(context)
+        qry = ServiceOperationQuery(utility, "LogCustomAppError", None, payload, None, return_type)
+        qry.static = True
+        context.add_query(qry)
+        return return_type
 
     @property
     def entity_type_name(self):

@@ -1,0 +1,2 @@
+class ThemeProperties(BaseEntity):
+    pass
