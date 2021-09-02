@@ -1,7 +1,9 @@
 from office365.runtime.client_object_collection import ClientObjectCollection
+from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.tenant.administration.users_results import GetExternalUsersResults, RemoveExternalUsersResults
 from office365.sharepoint.tenant.administration.theme_properties import ThemeProperties
 
 
@@ -13,33 +15,72 @@ class Office365Tenant(BaseEntity):
             ResourcePath("Microsoft.Online.SharePoint.TenantManagement.Office365Tenant")
         )
 
-    @staticmethod
-    def get_all_tenant_themes(context):
+    def get_external_users(self, position=0, page_size=10, _filter=None, sort_order=0):
+        """
+
+        :param int position:
+        :param int page_size:
+        :param str _filter:
+        :param int sort_order:
+        """
+        return_type = GetExternalUsersResults(self.context)
+        payload = {
+            "position": position,
+            "pageSize": page_size,
+            "filter": _filter,
+            "sortOrder": sort_order
+        }
+        qry = ServiceOperationQuery(self, "GetExternalUsers", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def remove_external_users(self, unique_ids=None):
+        """
+
+        :param list[str] unique_ids:
+        """
+        payload = {
+            "uniqueIds": unique_ids,
+        }
+        return_type = RemoveExternalUsersResults(self.context)
+        qry = ServiceOperationQuery(self, "RemoveExternalUsers", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_all_tenant_themes(self):
+        """
+        Get all themes from tenant
+        """
+        return_type = ClientObjectCollection(self.context, ThemeProperties)
+        qry = ServiceOperationQuery(self, "GetAllTenantThemes", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def add_tenant_theme(self, name, theme_json):
+        """
+        Adds a new theme to a tenant.
+
+        :param str name:
+        :param str theme_json:
+        """
+        return_type = ClientResult(self.context)
+        payload = {
+            "name": name,
+            "themeJson": theme_json,
+        }
+        qry = ServiceOperationQuery(self, "AddTenantTheme", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def delete_tenant_theme(self, name):
         """
         Removes a theme from tenant
 
-        :type context: office365.sharepoint.client_context.ClientContext
-        """
-        tenant = Office365Tenant(context)
-        return_type = ClientObjectCollection(context, ThemeProperties)
-        qry = ServiceOperationQuery(tenant, "GetAllTenantThemes", None, None, None, return_type)
-        qry.static = True
-        context.add_query(qry)
-        return tenant
-
-    @staticmethod
-    def delete_tenant_theme(context, name):
-        """
-        Removes a theme from tenant
-
-        :type context: office365.sharepoint.client_context.ClientContext
         :type name: str
         """
         payload = {
             "name": name,
         }
-        tenant = Office365Tenant(context)
-        qry = ServiceOperationQuery(tenant, "DeleteTenantTheme", None, payload)
-        qry.static = True
-        context.add_query(qry)
-        return tenant
+        qry = ServiceOperationQuery(self, "DeleteTenantTheme", None, payload)
+        self.context.add_query(qry)
+        return self

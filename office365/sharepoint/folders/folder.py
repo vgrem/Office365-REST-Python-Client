@@ -4,7 +4,7 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.sharepoint.actions.create_file import create_file_query
+from office365.sharepoint.internal.create_file import create_file_query
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.changes.change_query import ChangeQuery

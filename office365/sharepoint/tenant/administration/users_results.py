@@ -1,0 +1,9 @@
+from office365.sharepoint.base_entity import BaseEntity
+
+
+class GetExternalUsersResults(BaseEntity):
+    pass
+
+
+class RemoveExternalUsersResults(BaseEntity):
+    pass

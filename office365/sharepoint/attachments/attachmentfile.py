@@ -1,7 +1,7 @@
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.sharepoint.actions.download_file import create_download_file_query
-from office365.sharepoint.actions.upload_file import create_upload_file_query
+from office365.sharepoint.internal.download_file import create_download_file_query
+from office365.sharepoint.internal.upload_file import create_upload_file_query
 from office365.sharepoint.files.file import AbstractFile
 
 

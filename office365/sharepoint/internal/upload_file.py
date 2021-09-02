@@ -17,5 +17,3 @@ def create_upload_file_query(file, file_object):
         request.set_header('X-HTTP-Method', 'PUT')
     file.context.before_execute(_construct_upload_request)
     return qry
-
-

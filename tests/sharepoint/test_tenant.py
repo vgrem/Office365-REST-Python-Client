@@ -2,6 +2,7 @@ from random import randint
 from unittest import TestCase
 
 from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.tenant.administration.office365_tenant import Office365Tenant
 from office365.sharepoint.tenant.administration.site_properties import SiteProperties
 from office365.sharepoint.tenant.administration.site_properties_collection import SitePropertiesCollection
 from office365.sharepoint.tenant.administration.tenant import Tenant
@@ -16,8 +17,9 @@ class TestTenant(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.client = ClientContext(test_admin_site_url).with_credentials(test_user_credentials)
-        cls.tenant = Tenant(cls.client)
+        client = ClientContext(test_admin_site_url).with_credentials(test_user_credentials)
+        cls.tenant = Tenant(client)
+        cls.client = client
 
     def test1_get_tenant(self):
         self.client.load(self.tenant)
@@ -75,6 +77,7 @@ class TestTenant(TestCase):
     def test_10_get_site_by_url(self):
         site_props = self.tenant.get_site_properties_by_url(test_site_url, True).execute_query()
         self.assertIsNotNone(site_props.url)
+
     #    self.__class__.target_site_props = site_props
 
     # def test_11_update_site(self):
@@ -88,3 +91,13 @@ class TestTenant(TestCase):
     #    site_url = self.__class__.target_site_props.properties['SiteUrl']
     #    self.tenant.remove_site(site_url)
     #    self.client.execute_query()
+
+    def test_13_get_all_tenant_themes(self):
+        tenant = Office365Tenant(self.client)
+        result = tenant.get_all_tenant_themes().execute_query()
+        self.assertIsNotNone(result)
+
+    def test_14_get_external_users(self):
+        tenant = Office365Tenant(self.client)
+        result = tenant.get_external_users().execute_query()
+        self.assertIsNotNone(result)
