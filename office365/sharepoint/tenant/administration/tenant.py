@@ -15,11 +15,15 @@ from office365.sharepoint.tenant.administration.spo_operation import SpoOperatio
 
 
 class Tenant(ClientObject):
+    """Represents a SharePoint tenant."""
 
     def __init__(self, context):
-        super(Tenant, self).__init__(context, ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant"),
-                                     None,
-                                     "Microsoft.Online.SharePoint.TenantAdministration")
+        super(Tenant, self).__init__(
+            context,
+            ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant"),
+            None,
+            "Microsoft.Online.SharePoint.TenantAdministration"
+            )
 
     @staticmethod
     def from_url(admin_site_url):
@@ -99,14 +103,14 @@ class Tenant(ClientObject):
         self.context.add_query(qry)
         return return_type
 
-    def unregister_hub_site(self, siteUrl):
+    def unregister_hub_site(self, site_url):
         """
         Unregisters a hub site so that it is no longer a hub site.
 
-        :param str siteUrl:
+        :param str site_url:
         :return:
         """
-        params = {"siteUrl": siteUrl}
+        params = {"siteUrl": site_url}
         qry = ServiceOperationQuery(self, "UnregisterHubSite", None, params, None, None)
         self.context.add_query(qry)
         return self

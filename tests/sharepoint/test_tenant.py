@@ -1,8 +1,9 @@
 from random import randint
 from unittest import TestCase
 
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.tenant.administration.office365_tenant import Office365Tenant
+from office365.sharepoint.tenant.management.office365_tenant import Office365Tenant
 from office365.sharepoint.tenant.administration.site_properties import SiteProperties
 from office365.sharepoint.tenant.administration.site_properties_collection import SitePropertiesCollection
 from office365.sharepoint.tenant.administration.tenant import Tenant
@@ -101,3 +102,13 @@ class TestTenant(TestCase):
         tenant = Office365Tenant(self.client)
         result = tenant.get_external_users().execute_query()
         self.assertIsNotNone(result)
+
+    def test_15_get_tenant_cdn_enabled(self):
+        tenant = Office365Tenant(self.client)
+        result = tenant.get_tenant_cdn_enabled(0).execute_query()
+        self.assertIsInstance(result.value, bool)
+
+    def test_16_get_tenant_cdn_policies(self):
+        tenant = Office365Tenant(self.client)
+        result = tenant.get_tenant_cdn_policies(0).execute_query()
+        self.assertIsInstance(result.value, ClientValueCollection)

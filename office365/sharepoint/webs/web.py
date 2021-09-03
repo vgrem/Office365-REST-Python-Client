@@ -5,6 +5,7 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 from office365.sharepoint.alerts.alert_collection import AlertCollection
+from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.clientsidecomponent.types import SPClientSideComponentQueryResult
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
@@ -27,6 +28,7 @@ from office365.sharepoint.principal.group import Group
 from office365.sharepoint.principal.group_collection import GroupCollection
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.principal.user_collection import UserCollection
+from office365.sharepoint.pushnotifications.push_notification_subscriber import PushNotificationSubscriber
 from office365.sharepoint.recyclebin.recycleBinItemCollection import RecycleBinItemCollection
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
 from office365.sharepoint.sharing.objectSharingSettings import ObjectSharingSettings
@@ -58,6 +60,26 @@ class Web(SecurableObject):
             resource_path = ResourcePath("Web")
         super(Web, self).__init__(context, resource_path)
         self._web_url = None
+
+    def get_push_notification_subscribers_by_user(self, user_or_username):
+        """
+
+        :param str or User user_or_username:
+        """
+        return_type = BaseEntityCollection(self.context, PushNotificationSubscriber)
+
+        if isinstance(user_or_username, User):
+            def _user_loaded():
+                next_qry = ServiceOperationQuery(self, "GetPushNotificationSubscribersByUser",
+                                                 [user_or_username.login_name], None, None, return_type)
+                self.context.add_query(next_qry)
+
+            user_or_username.ensure_property("LoginName", _user_loaded)
+        else:
+            qry = ServiceOperationQuery(self, "GetPushNotificationSubscribersByUser", [user_or_username], None,
+                                        None, return_type)
+            self.context.add_query(qry)
+        return return_type
 
     @staticmethod
     def create_organization_sharing_link(context, url, is_edit_link):
@@ -339,6 +361,7 @@ class Web(SecurableObject):
     def ensure_user(self, login_name):
         """Checks whether the specified logon name belongs to a valid user of the website, and if the logon name does
         not already exist, adds it to the website.
+
         :type login_name: str
         """
         target_user = User(self.context)
@@ -852,6 +875,13 @@ class Web(SecurableObject):
                                               ResourcePath("Navigation", self.resource_path)))
 
     @property
+    def push_notification_subscribers(self):
+        return self.properties.get('PushNotificationSubscribers',
+                                   BaseEntityCollection(self.context, PushNotificationSubscriber,
+                                                        ResourcePath("PushNotificationSubscribers",
+                                                                     self.resource_path)))
+
+    @property
     def root_folder(self):
         """Get a root folder"""
         return self.properties.get("RootFolder", Folder(self.context, ResourcePath("RootFolder", self.resource_path)))
@@ -900,17 +930,18 @@ class Web(SecurableObject):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
-                "ContentTypes": self.content_types,
-                "RootFolder": self.root_folder,
-                "RegionalSettings": self.regional_settings,
-                "RoleDefinitions": self.role_definitions,
-                "RecycleBin": self.recycle_bin,
-                "CurrentUser": self.current_user,
                 "AvailableFields": self.available_fields,
                 "AssociatedOwnerGroup": self.associated_owner_group,
                 "AssociatedMemberGroup": self.associated_member_group,
                 "AssociatedVisitorGroup": self.associated_visitor_group,
-                "ParentWeb": self.parent_web
+                "ContentTypes": self.content_types,
+                "ClientWebParts": self.client_web_parts,
+                "CurrentUser": self.current_user,
+                "ParentWeb": self.parent_web,
+                "RootFolder": self.root_folder,
+                "RegionalSettings": self.regional_settings,
+                "RoleDefinitions": self.role_definitions,
+                "RecycleBin": self.recycle_bin
             }
             default_value = property_mapping.get(name, None)
         return super(Web, self).get_property(name, default_value)

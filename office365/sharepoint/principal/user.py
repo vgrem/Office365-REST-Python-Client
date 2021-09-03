@@ -39,6 +39,7 @@ class User(Principal):
         return self.properties.get('UserId', UserIdInfo())
 
     def expire(self):
+        """"""
         qry = ServiceOperationQuery(self, "Expire")
         self.context.add_query(qry)
         return self
