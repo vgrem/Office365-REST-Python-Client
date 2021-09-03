@@ -40,3 +40,8 @@ class TestSite(SPTestCase):
         result = self.client.site.get_site_logo().execute_query()
         self.assertIsNotNone(result.value)
 
+    def test8_open_web_by_id(self):
+        web = self.client.web.get().execute_query()
+        sub_site = self.client.site.open_web_by_id(web.id).execute_query()
+        self.assertIsNotNone(sub_site.id)
+

@@ -179,19 +179,23 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return users
 
-    def get_recycle_bin_items(self, pagingInfo=None, rowLimit=100, isAscending=True, orderBy=None, itemState=None):
+    def get_recycle_bin_items(self, paging_info=None, row_limit=100, is_ascending=True, order_by=None, item_state=None):
         """
+        Gets the recycle bin items that are based on the specified query.
 
-        :param str pagingInfo:
-        :param int rowLimit:
-        :param bool isAscending:
-        :param orderBy: int
-        :param int itemState:
+        :param str paging_info: an Object that is used to obtain the next set of rows in a paged view of the Recycle Bin
+        :param int row_limit: a limit for the number of items returned in the query per page.
+        :param bool is_ascending: a Boolean value that specifies whether to sort in ascending order.
+        :param int order_by: the column by which to order the Recycle Bin query.
+        :param int item_state: Recycle Bin stage of items to return in the query.
         """
         result = RecycleBinItemCollection(self.context)
         payload = {
-            "rowLimit": rowLimit,
-            "isAscending": isAscending
+            "rowLimit": row_limit,
+            "isAscending": is_ascending,
+            "pagingInfo": paging_info,
+            "orderBy": order_by,
+            "itemState": item_state
         }
         qry = ServiceOperationQuery(self, "GetRecycleBinItems", None, payload, None, result)
         self.context.add_query(qry)
@@ -228,7 +232,6 @@ class Web(SecurableObject):
         """
         return_list = List(self.context)
         self.lists.add_child(return_list)
-        from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
         qry = ServiceOperationQuery(self, "GetListUsingPath", SPResPath(decoded_url), None, None, return_list)
         self.context.add_query(qry)
         return return_list
@@ -431,17 +434,17 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return changes
 
-    def get_available_web_templates(self, lcid=1033, doIncludeCrossLanguage=False):
+    def get_available_web_templates(self, lcid=1033, do_include_cross_language=False):
         """
         Returns a collection of site templates available for the site.
 
         :param int lcid: Specifies the LCID of the site templates to be retrieved.
-        :param bool doIncludeCrossLanguage: Specifies whether to include language-neutral site templates.
+        :param bool do_include_cross_language: Specifies whether to include language-neutral site templates.
         :return:
         """
         params = {
             "lcid": lcid,
-            "doIncludeCrossLanguage": doIncludeCrossLanguage
+            "doIncludeCrossLanguage": do_include_cross_language
         }
         return_type = WebTemplateCollection(self.context,
                                             ResourcePathServiceOperation("GetAvailableWebTemplates ", params,
@@ -491,16 +494,16 @@ class Web(SecurableObject):
         return return_type
 
     def share(self, user_principal_name,
-              shareOption=ExternalSharingSiteOption.View,
-              sendEmail=True, emailSubject=None, emailBody=None):
+              share_option=ExternalSharingSiteOption.View,
+              send_email=True, email_subject=None, email_body=None):
         """
         Share a Web with user
 
         :param str user_principal_name: User identifier
-        :param ExternalSharingSiteOption shareOption: The sharing type of permission to grant on the object.
-        :param bool sendEmail: A flag to determine if an email notification SHOULD be sent (if email is configured).
-        :param str emailSubject: The email subject.
-        :param str emailBody: The email subject.
+        :param ExternalSharingSiteOption share_option: The sharing type of permission to grant on the object.
+        :param bool send_email: A flag to determine if an email notification SHOULD be sent (if email is configured).
+        :param str email_subject: The email subject.
+        :param str email_body: The email subject.
         :rtype: SharingResult
         """
 
@@ -514,14 +517,14 @@ class Web(SecurableObject):
             def _web_loaded():
                 sharing_result.value = Web.share_object(self.context, self.url, picker_result.value, role_value,
                                                         0,
-                                                        False, sendEmail, False, emailSubject, emailBody)
+                                                        False, send_email, False, email_subject, email_body)
 
             self.ensure_property("Url", _web_loaded)
 
         params = ClientPeoplePickerQueryParameters(user_principal_name)
         ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(self.context, params,
                                                                                 _picker_value_resolved)
-        Web._resolve_group_value(self.context, shareOption, _grp_resolved)
+        Web._resolve_group_value(self.context, share_option, _grp_resolved)
         return sharing_result.value
 
     def unshare(self):
@@ -599,14 +602,14 @@ class Web(SecurableObject):
         context.after_execute(_group_resolved)
 
     @staticmethod
-    def get_sharing_link_kind(context, fileUrl):
+    def get_sharing_link_kind(context, file_url):
         """
 
         :param office365.sharepoint.client_context.ClientContext context:
-        :param str fileUrl:
+        :param str file_url:
         """
         result = ClientResult(context)
-        qry = ServiceOperationQuery(context.web, "GetSharingLinkKind", None, {"fileUrl": fileUrl}, None, result)
+        qry = ServiceOperationQuery(context.web, "GetSharingLinkKind", None, {"fileUrl": file_url}, None, result)
         qry.static = True
         context.add_query(qry)
         return result
@@ -702,6 +705,29 @@ class Web(SecurableObject):
         return List(self.context, ResourcePathServiceOperation("getCatalog", [type_catalog], self.resource_path))
 
     @property
+    def allow_rss_feeds(self):
+        """Gets a Boolean value that specifies whether the site collection allows RSS feeds.
+
+        :rtype: str
+        """
+        return self.properties.get("AllowRssFeeds", None)
+
+    @property
+    def alternate_css_url(self):
+        """Gets the URL for an alternate cascading style sheet (CSS) to use in the website.
+
+        :rtype: str
+        """
+        return self.properties.get("AlternateCssUrl", None)
+
+    @property
+    def id(self):
+        """
+        :rtype: str
+        """
+        return self.properties.get("Id", None)
+
+    @property
     def webs(self):
         """Get child webs"""
         from office365.sharepoint.webs.web_collection import WebCollection
@@ -727,7 +753,7 @@ class Web(SecurableObject):
                                    UserCollection(self.context, ResourcePath("siteUsers", self.resource_path)))
 
     @property
-    def siteGroups(self):
+    def site_groups(self):
         """Gets the collection of groups for the site collection."""
         return self.properties.get('SiteGroups',
                                    GroupCollection(self.context, ResourcePath("siteGroups", self.resource_path)))
@@ -941,7 +967,8 @@ class Web(SecurableObject):
                 "RootFolder": self.root_folder,
                 "RegionalSettings": self.regional_settings,
                 "RoleDefinitions": self.role_definitions,
-                "RecycleBin": self.recycle_bin
+                "RecycleBin": self.recycle_bin,
+                "SiteGroups": self.site_groups
             }
             default_value = property_mapping.get(name, None)
         return super(Web, self).get_property(name, default_value)

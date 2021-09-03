@@ -15,12 +15,13 @@ class SecurableObject(BaseEntity):
 
         :param office365.sharepoint.principal.principal.Principal principal: Specifies the user or group of the
         role assignment.
+
         :return: RoleAssignment
         """
         result = ClientResult(self.context, RoleAssignment(self.context))
 
         def _principal_loaded():
-            result.value = self.roleAssignments.get_by_principal_id(principal.id)
+            result.value = self.role_assignments.get_by_principal_id(principal.id)
         principal.ensure_property("Id", _principal_loaded)
         return result.value
 
@@ -37,7 +38,7 @@ class SecurableObject(BaseEntity):
             role_def.ensure_property("Id", _role_def_loaded)
 
         def _role_def_loaded():
-            self.roleAssignments.add_role_assignment(principal.id, role_def.id)
+            self.role_assignments.add_role_assignment(principal.id, role_def.id)
 
         principal.ensure_property("Id", _principal_loaded)
         return self
@@ -53,17 +54,17 @@ class SecurableObject(BaseEntity):
 
         def _principal_loaded():
             def _role_def_loaded():
-                self.roleAssignments.remove_role_assignment(principal.id, role_def.id)
+                self.role_assignments.remove_role_assignment(principal.id, role_def.id)
             role_def.ensure_property("Id", _role_def_loaded)
 
         principal.ensure_property("Id", _principal_loaded)
         return self
 
-    def break_role_inheritance(self, copyRoleAssignments=True, clearSubscopes=True):
+    def break_role_inheritance(self, copy_role_assignments=True, clear_sub_scopes=True):
         """Creates unique role assignments for the securable object. If the securable object already has
         unique role assignments, the protocol server MUST NOT alter any role assignments.
 
-        :param bool clearSubscopes:  If the securable object is a site (2), and the clearSubscopes parameter is "true",
+        :param bool clear_sub_scopes:  If the securable object is a site (2), and the clearSubscopes parameter is "true",
         the role assignments for all child securable objects in the current site (2) and in the sites (2) that inherit
         role assignments from the current site (2) MUST be cleared and those securable objects inherit role assignments
         from the current site (2) after this call. If the securable object is a site (2), and the clearSubscopes
@@ -73,14 +74,14 @@ class SecurableObject(BaseEntity):
         those securable objects inherit role assignments from the current securable object after this call. If the
         securable object is not a site (2), and the clearSubscopes parameter is "false", the role assignments for all
         child securable objects that do not inherit role assignments from their parent object (1) MUST remain unchanged.
-        :param bool copyRoleAssignments: Specifies whether to copy the role assignments from
+        :param bool copy_role_assignments: Specifies whether to copy the role assignments from
         the parent securable object.If the value is "false", the collection of role assignments MUST contain
         only 1 role assignment containing the current user after the operation.
 
         """
         payload = {
-            "copyRoleAssignments": copyRoleAssignments,
-            "clearSubscopes": clearSubscopes
+            "copyRoleAssignments": copy_role_assignments,
+            "clearSubscopes": clear_sub_scopes
         }
         qry = ServiceOperationQuery(self, "breakRoleInheritance", None, payload, None, None)
         self.context.add_query(qry)
@@ -115,7 +116,7 @@ class SecurableObject(BaseEntity):
         return self.properties.get("HasUniqueRoleAssignments", None)
 
     @property
-    def firstUniqueAncestorSecurableObject(self):
+    def first_unique_ancestor_securable_object(self):
         """Specifies the object where role assignments for this object are defined.<85>."""
         return self.properties.get("FirstUniqueAncestorSecurableObject",
                                    SecurableObject(self.context,
@@ -123,8 +124,17 @@ class SecurableObject(BaseEntity):
                                                                 self.resource_path)))
 
     @property
-    def roleAssignments(self):
+    def role_assignments(self):
         """The role assignments for the securable object."""
         return self.properties.get("RoleAssignments",
                                    RoleAssignmentCollection(self.context,
                                                             ResourcePath("RoleAssignments", self.resource_path)))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "FirstUniqueAncestorSecurableObject": self.first_unique_ancestor_securable_object,
+                "RoleAssignments": self.role_assignments
+            }
+            default_value = property_mapping.get(name, None)
+        return super(SecurableObject, self).get_property(name, default_value)
