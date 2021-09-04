@@ -93,7 +93,11 @@ class TestSharePointListItem(SPTestCase):
         item_to_update = self.__class__.target_item
         item_to_update.update_overwrite_version().execute_query()
 
-    def test_10_set_comments_disabled(self):
+    def test_11_get_versions(self):
+        versions = self.__class__.target_item.versions.get().execute_query()
+        self.assertIsNotNone(versions.resource_path)
+
+    def test_12_set_comments_disabled(self):
         comments = self.__class__.target_item.set_comments_disabled(False).execute_query()
         self.assertIsNotNone(comments.resource_path)
 
@@ -101,17 +105,17 @@ class TestSharePointListItem(SPTestCase):
     #    comments = self.__class__.target_item.get_comments().execute_query()
     #    self.assertIsNotNone(comments.resource_path)
 
-    def test_11_recycle_item(self):
+    def test_13_recycle_item(self):
         pass
 
-    def test_12_restore_item(self):
+    def test_14_restore_item(self):
         pass
 
-    def test_13_set_rating(self):
+    def test_15_set_rating(self):
         result = self.__class__.target_item.set_rating(1).execute_query()
         self.assertIsNotNone(result.value)
 
-    def test_14_delete_list_item(self):
+    def test_16_delete_list_item(self):
         item_id = self.__class__.target_item.properties["Id"]
         item_to_delete = self.__class__.target_item
         item_to_delete.delete_object().execute_query()
@@ -119,7 +123,7 @@ class TestSharePointListItem(SPTestCase):
         result = self.target_list.items.filter("Id eq {0}".format(item_id)).get().execute_query()
         self.assertEqual(0, len(result))
 
-    def test_15_create_multiple_items(self):
+    def test_17_create_multiple_items(self):
         for i in range(0, self.batch_items_count):
             item_properties = {'Title': "Task {0}".format(i)}
             self.target_list.add_item(item_properties)
@@ -127,7 +131,7 @@ class TestSharePointListItem(SPTestCase):
         result = self.target_list.items.get().execute_query()
         self.assertEqual(len(result), self.batch_items_count)
 
-    def test_16_delete_multiple_items(self):
+    def test_18_delete_multiple_items(self):
         items = self.target_list.items.get().execute_query()  # get existing items
         self.assertGreater(len(items), 0)
         for item in items:

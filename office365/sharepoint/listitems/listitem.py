@@ -3,12 +3,14 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.comments.comment_collection import CommentCollection
 from office365.sharepoint.fields.field_lookup_value import FieldLookupValue
 from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupValue
 from office365.sharepoint.likes.likedByInformation import LikedByInformation
+from office365.sharepoint.listitems.list_item_version import ListItemVersion
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.reputationmodel.reputation import Reputation
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
@@ -90,16 +92,16 @@ class ListItem(SecurableObject):
         return changes
 
     def share(self, user_principal_name,
-              shareOption=ExternalSharingSiteOption.View,
-              sendEmail=True, emailSubject=None, emailBody=None):
+              share_option=ExternalSharingSiteOption.View,
+              send_email=True, email_subject=None, email_body=None):
         """
         Share a ListItem (file or folder facet)
 
         :param str user_principal_name: User identifier
-        :param ExternalSharingSiteOption shareOption: The sharing type of permission to grant on the object.
-        :param bool sendEmail: A flag to determine if an email notification SHOULD be sent (if email is configured).
-        :param str emailSubject: The email subject.
-        :param str emailBody: The email subject.
+        :param ExternalSharingSiteOption share_option: The sharing type of permission to grant on the object.
+        :param bool send_email: A flag to determine if an email notification SHOULD be sent (if email is configured).
+        :param str email_subject: The email subject.
+        :param str email_body: The email subject.
         :rtype: SharingResult
         """
 
@@ -116,9 +118,9 @@ class ListItem(SecurableObject):
 
         def _picker_value_resolved(picker_value):
             from office365.sharepoint.webs.web import Web
-            result.value = Web.share_object(self.context, file_result.value, picker_value, role_values[shareOption],
+            result.value = Web.share_object(self.context, file_result.value, picker_value, role_values[share_option],
                                             0,
-                                            False, sendEmail, False, emailSubject, emailBody)
+                                            False, send_email, False, email_subject, email_body)
 
         self.ensure_property("EncodedAbsUrl", _property_resolved)
         params = ClientPeoplePickerQueryParameters(user_principal_name)
@@ -295,20 +297,27 @@ class ListItem(SecurableObject):
     def liked_by_information(self):
         """
         Gets a value that specifies the list item identifier.
-        :rtype: int
+        :rtype: LikedByInformation
         """
         return self.properties.get("LikedByInformation",
                                    LikedByInformation(self.context,
                                                       ResourcePath("likedByInformation", self.resource_path)))
 
+    @property
+    def versions(self):
+        """Gets the collection of item version objects that represent the versions of the item."""
+        return self.properties.get('Versions',
+                                   BaseEntityCollection(self.context, ListItemVersion,
+                                                        ResourcePath("versions", self.resource_path)))
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
-                "ContentType": self.content_type,
-                "ParentList": self.parent_list,
-                "EffectiveBasePermissions": self.effective_base_permissions,
                 "AttachmentFiles": self.attachment_files,
-                "LikedByInformation": self.liked_by_information
+                "ContentType": self.content_type,
+                "EffectiveBasePermissions": self.effective_base_permissions,
+                "LikedByInformation": self.liked_by_information,
+                "ParentList": self.parent_list,
             }
             default_value = property_mapping.get(name, None)
 
@@ -322,7 +331,6 @@ class ListItem(SecurableObject):
         return value
 
     def set_property(self, name, value, persist_changes=True):
-
         if persist_changes:
             if isinstance(value, TaxonomyFieldValueCollection):
                 self._set_taxonomy_field_value(name, value)

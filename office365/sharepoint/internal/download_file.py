@@ -13,11 +13,15 @@ def create_download_file_query(source_file, file_object):
 
     def _process_response(response):
         """
-        :type response: RequestOptions
+        :type response: requests.Response
         """
+        response.raise_for_status()
         file_object.write(response.content)
 
     def _construct_download_query(request):
+        """
+        :type request: office365.runtime.http.request_options.RequestOptions
+        """
         request.method = HttpMethod.Get
         source_file.context.after_execute(_process_response)
 

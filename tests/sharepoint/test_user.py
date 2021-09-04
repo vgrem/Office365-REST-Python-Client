@@ -20,7 +20,7 @@ class TestSharePointUser(SPTestCase):
         self.assertIsNotNone(result_user.user_id)
 
     def test3_get_user(self):
-        target_user = self.client.web.siteUsers.get_by_login_name(self.__class__.target_user.login_name)\
+        target_user = self.client.web.site_users.get_by_login_name(self.__class__.target_user.login_name)\
             .get().execute_query()
         self.assertIsNotNone(target_user.id)
 

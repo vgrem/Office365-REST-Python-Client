@@ -295,7 +295,9 @@ class File(AbstractFile):
         return response
 
     def download(self, file_object):
-        """Download a file content
+        """
+        Download a file content
+
         :type file_object: typing.IO
         """
 
@@ -393,10 +395,7 @@ class File(AbstractFile):
 
         :rtype: int or None
         """
-        if self.is_property_available('Length'):
-            return int(self.properties["Length"])
-        else:
-            return None
+        return int(self.properties.get("Length", -1))
 
     @property
     def exists(self):
@@ -459,10 +458,8 @@ class File(AbstractFile):
     def minor_version(self):
         """
         Gets a value that specifies the minor version of the file.
-
-        :rtype: int or None
         """
-        return self.properties.get("MinorVersion", None)
+        return int(self.properties.get("MinorVersion", -1))
 
     @property
     def major_version(self):
@@ -471,7 +468,7 @@ class File(AbstractFile):
 
         :rtype: int or None
         """
-        return self.properties.get("MajorVersion", None)
+        return int(self.properties.get("MajorVersion", -1))
 
     @property
     def unique_id(self):
@@ -482,17 +479,25 @@ class File(AbstractFile):
         """
         return self.properties.get("UniqueId", None)
 
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "LockedByUser": self.locked_by_user,
+                "ModifiedBy": self.modified_by
+            }
+            default_value = property_mapping.get(name, None)
+        return super(File, self).get_property(name, default_value)
+
     def set_property(self, name, value, persist_changes=True):
         super(File, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "ServerRelativeUrl":
-                self._resource_path = ResourcePathServiceOperation(
-                    "GetFileByServerRelativeUrl", [value], ResourcePath("Web"))
+                self._resource_path = ResourcePathServiceOperation("GetFileByServerRelativeUrl", [value],
+                                                                   ResourcePath("Web"))
             elif name == "ServerRelativePath":
                 self._resource_path = ResourcePathServiceOperation("getFolderByServerRelativePath", [value],
                                                                    ResourcePath("Web"))
             elif name == "UniqueId":
-                self._resource_path = ResourcePathServiceOperation(
-                    "GetFileById", [value], ResourcePath("Web"))
+                self._resource_path = ResourcePathServiceOperation("GetFileById", [value], ResourcePath("Web"))
         return self

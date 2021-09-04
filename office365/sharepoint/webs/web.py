@@ -368,7 +368,7 @@ class Web(SecurableObject):
         :type login_name: str
         """
         target_user = User(self.context)
-        self.siteUsers.add_child(target_user)
+        self.site_users.add_child(target_user)
         qry = ServiceOperationQuery(self, "ensureUser", [login_name], None, None, target_user)
         self.context.add_query(qry)
         return target_user
@@ -747,7 +747,7 @@ class Web(SecurableObject):
                                    ListCollection(self.context, ResourcePath("lists", self.resource_path)))
 
     @property
-    def siteUsers(self):
+    def site_users(self):
         """Get site users"""
         return self.properties.get('SiteUsers',
                                    UserCollection(self.context, ResourcePath("siteUsers", self.resource_path)))
@@ -968,7 +968,8 @@ class Web(SecurableObject):
                 "RegionalSettings": self.regional_settings,
                 "RoleDefinitions": self.role_definitions,
                 "RecycleBin": self.recycle_bin,
-                "SiteGroups": self.site_groups
+                "SiteGroups": self.site_groups,
+                "SiteUsers": self.site_users
             }
             default_value = property_mapping.get(name, None)
         return super(Web, self).get_property(name, default_value)
