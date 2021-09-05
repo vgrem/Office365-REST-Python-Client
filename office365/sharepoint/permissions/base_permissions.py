@@ -35,7 +35,6 @@ class BasePermissions(ClientValue):
 
     def has(self, perm):
         """Determines whether the current instance has the specified permission.
-
         """
         if perm == PermissionKind.EmptyMask:
             return True
@@ -56,7 +55,7 @@ class BasePermissions(ClientValue):
         self.Low = 0
         self.High = 0
 
-    def to_json(self):
+    def to_json(self, json_format=None):
         return {'Low': str(self.High), 'High': str(self.Low)}
 
     @property

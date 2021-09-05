@@ -189,6 +189,7 @@ class Folder(BaseEntity):
 
     @property
     def storage_metrics(self):
+        """"""
         return self.properties.get("StorageMetrics",
                                    StorageMetrics(self.context, ResourcePath("StorageMetrics", self.resource_path)))
 
@@ -226,6 +227,15 @@ class Folder(BaseEntity):
         :rtype: str or None
         """
         return self.properties.get("Name", None)
+
+    @property
+    def is_wopi_enabled(self):
+        return self.properties.get("IsWOPIEnabled", None)
+
+    @property
+    def prog_id(self):
+        """Gets the identifier (ID) of the application in which the folder was created."""
+        return self.properties.get("ProgID", None)
 
     @property
     def unique_id(self):
@@ -293,7 +303,8 @@ class Folder(BaseEntity):
                 "UniqueContentTypeOrder": self.unique_content_type_order,
                 "ListItemAllFields": self.list_item_all_fields,
                 "ParentFolder": self.parent_folder,
-                "ServerRelativePath": self.server_relative_path
+                "ServerRelativePath": self.server_relative_path,
+                "StorageMetrics": self.storage_metrics
             }
             default_value = property_mapping.get(name, None)
         return super(Folder, self).get_property(name, default_value)

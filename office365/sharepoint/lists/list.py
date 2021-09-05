@@ -176,33 +176,33 @@ class List(SecurableObject):
         self.context.add_query(qry)
         return result
 
-    def save_as_template(self, fileName, name, description, saveData):
+    def save_as_template(self, file_name, name, description, save_data):
         """
         Saves the list as a template in the list template gallery and includes the option of saving with or
         without the data that is contained in the current list.
 
-        :param bool saveData: true to save the data of the original list along with the list template; otherwise, false.
+        :param bool save_data: true to save the data of the original list along with the list template; otherwise, false.
         :param str description: A string that contains the description for the list template.
         :param str name: A string that contains the title for the list template.
-        :param str fileName: A string that contains the file name for the list template with an .stp extension.
+        :param str file_name: A string that contains the file name for the list template with an .stp extension.
         :return:
         """
         payload = {
-            "strFileName": fileName,
+            "strFileName": file_name,
             "strName": name,
             "strDescription": description,
-            "bSaveData": saveData
+            "bSaveData": save_data
         }
         qry = ServiceOperationQuery(self, "saveAsTemplate", None, payload, None, None)
         self.context.add_query(qry)
         return self
 
-    def get_item_by_unique_id(self, uniqueId):
+    def get_item_by_unique_id(self, unique_id):
         """
         Returns the list item with the specified ID.
 
-        :param str uniqueId:"""
-        item = ListItem(self.context, ResourcePathServiceOperation("getItemByUniqueId", [uniqueId], self.resource_path))
+        :param str unique_id:"""
+        item = ListItem(self.context, ResourcePathServiceOperation("getItemByUniqueId", [unique_id], self.resource_path))
         return item
 
     def get_web_dav_url(self, source_url):
@@ -478,16 +478,15 @@ class List(SecurableObject):
         return self.properties.get('ParentWebPath', None)
 
     def get_property(self, name, default_value=None):
-        if name == "UserCustomActions":
-            default_value = self.user_custom_actions
-        elif name == "ParentWeb":
-            default_value = self.parent_web
-        elif name == "RootFolder":
-            default_value = self.root_folder
-        elif name == "ContentTypes":
-            default_value = self.content_types
-        elif name == "DefaultView":
-            default_value = self.default_view
+        if default_value is None:
+            property_mapping = {
+                "ContentTypes": self.content_types,
+                "DefaultView": self.default_view,
+                "ParentWeb": self.parent_web,
+                "RootFolder": self.root_folder,
+                "UserCustomActions": self.user_custom_actions
+            }
+            default_value = property_mapping.get(name, None)
         return super(List, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):

@@ -52,11 +52,11 @@ class ContentTypeCollection(BaseEntityCollection):
         self.context.add_query(qry)
         return ct
 
-    def add_existing_content_type(self, contentType):
+    def add_existing_content_type(self, content_type):
         """Adds an existing content type to the collection. The name of the given content type MUST NOT be the same
         as any of the content types in the collection. A reference to the SP.ContentType that was added is returned.
 
-        :param ContentType contentType: Specifies the content type to be added to the collection
+        :param ContentType content_type: Specifies the content type to be added to the collection
 
         """
         pass

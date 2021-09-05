@@ -61,6 +61,13 @@ class Web(SecurableObject):
         super(Web, self).__init__(context, resource_path)
         self._web_url = None
 
+    def get_push_notification_subscriber(self, device_app_instance_id):
+        return_type = PushNotificationSubscriber(self.context)
+        qry = ServiceOperationQuery(self, "GetPushNotificationSubscriber", [device_app_instance_id], None,
+                                    None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def get_push_notification_subscribers_by_user(self, user_or_username):
         """
 
@@ -369,7 +376,7 @@ class Web(SecurableObject):
         """
         target_user = User(self.context)
         self.site_users.add_child(target_user)
-        qry = ServiceOperationQuery(self, "ensureUser", [login_name], None, None, target_user)
+        qry = ServiceOperationQuery(self, "EnsureUser", [login_name], None, None, target_user)
         self.context.add_query(qry)
         return target_user
 
@@ -388,7 +395,7 @@ class Web(SecurableObject):
         :type permission_mask: BasePermissions
         """
         result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "doesUserHavePermissions", permission_mask, None, None, result)
+        qry = ServiceOperationQuery(self, "DoesUserHavePermissions", permission_mask, None, None, result)
         self.context.add_query(qry)
         return result
 
@@ -398,7 +405,7 @@ class Web(SecurableObject):
         :type unique_id: str
         """
         folder = Folder(self.context)
-        qry = ServiceOperationQuery(self, "getFolderById", [unique_id], None, None, folder)
+        qry = ServiceOperationQuery(self, "GetFolderById", [unique_id], None, None, folder)
         self.context.add_query(qry)
         return folder
 
@@ -481,6 +488,15 @@ class Web(SecurableObject):
         """
         return_type = File(self.context)
         qry = ServiceOperationQuery(self, "GetFileByGuestUrl", [guest_url], None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_file_by_wopi_frame_url(self, wopi_frame_url):
+        """
+        :param str wopi_frame_url:
+        """
+        return_type = File(self.context)
+        qry = ServiceOperationQuery(self, "GetFileByWOPIFrameUrl", [wopi_frame_url], None, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -615,8 +631,8 @@ class Web(SecurableObject):
         return result
 
     @staticmethod
-    def share_object(context, url, peoplePickerInput,
-                     roleValue=None,
+    def share_object(context, url, people_picker_input,
+                     role_value=None,
                      groupId=0, propagateAcl=False,
                      sendEmail=True, includeAnonymousLinkInEmail=False, emailSubject=None, emailBody=None,
                      useSimplifiedRoles=True):
@@ -627,8 +643,8 @@ class Web(SecurableObject):
 
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
         :param str url: The URL of the website with the path of an object in SharePoint query string parameters.
-        :param str roleValue: The sharing role value for the type of permission to grant on the object.
-        :param str peoplePickerInput: A string of JSON representing users in people picker format.
+        :param str role_value: The sharing role value for the type of permission to grant on the object.
+        :param str people_picker_input: A string of JSON representing users in people picker format.
         :param int groupId: The ID of the group to be added. Zero if not adding to a permissions group.
         :param bool propagateAcl:  A flag to determine if permissions SHOULD be pushed to items with unique permissions.
         :param bool sendEmail: A flag to determine if an email notification SHOULD be sent (if email is configured).
@@ -644,8 +660,8 @@ class Web(SecurableObject):
         payload = {
             "url": url,
             "groupId": groupId,
-            "peoplePickerInput": peoplePickerInput,
-            "roleValue": roleValue,
+            "peoplePickerInput": people_picker_input,
+            "roleValue": role_value,
             "includeAnonymousLinkInEmail": includeAnonymousLinkInEmail,
             "propagateAcl": propagateAcl,
             "sendEmail": sendEmail,
@@ -694,8 +710,7 @@ class Web(SecurableObject):
         for example, "/sites/MySite/Shared Documents/MyDocument.docx".
         :return: ListItem
         """
-        return_item = ListItem(self.context, ResourcePathServiceOperation("GetListItem", [str_url], self.resource_path))
-        return return_item
+        return ListItem(self.context, ResourcePathServiceOperation("GetListItem", [str_url], self.resource_path))
 
     def get_catalog(self, type_catalog):
         """Gets the list template gallery, site template gallery, or Web Part gallery for the Web site.
@@ -703,6 +718,20 @@ class Web(SecurableObject):
         :param int type_catalog: The type of the gallery.
         """
         return List(self.context, ResourcePathServiceOperation("getCatalog", [type_catalog], self.resource_path))
+
+    def page_context_info(self, include_odb_settings, emit_navigation_info):
+        """
+        :param bool include_odb_settings:
+        :param bool emit_navigation_info:
+        """
+        return_type = ClientResult(self.context)
+        payload = {
+            "includeODBSettings": include_odb_settings,
+            "emitNavigationInfo": emit_navigation_info
+        }
+        qry = ServiceOperationQuery(self, "PageContextInfo", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     @property
     def allow_rss_feeds(self):

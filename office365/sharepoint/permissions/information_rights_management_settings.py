@@ -2,6 +2,7 @@ from office365.sharepoint.base_entity import BaseEntity
 
 
 class InformationRightsManagementSettings(BaseEntity):
+    """Represents the Information Rights Management (IRM) settings of a list in Microsoft SharePoint Foundation."""
 
     @property
     def policy_title(self):

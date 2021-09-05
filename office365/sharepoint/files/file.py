@@ -4,11 +4,14 @@ from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.files.file_version_event import FileVersionEvent
 from office365.sharepoint.internal.download_file import create_download_file_query
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.directory.user import User
 from office365.sharepoint.files.file_version_collection import FileVersionCollection
 from office365.sharepoint.listitems.listitem import ListItem
+from office365.sharepoint.permissions.information_rights_management_settings import InformationRightsManagementSettings
 from office365.sharepoint.webparts.limited_webpart_manager import LimitedWebPartManager
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
@@ -47,6 +50,38 @@ class File(AbstractFile):
         file_relative_url = abs_url.replace(ctx.base_url, "")
         file = ctx.web.get_file_by_server_relative_url(file_relative_url)
         return file
+
+    def get_image_preview_uri(self, width, height, client_type=None):
+        """
+        :param int width:
+        :param int height:
+        :param str client_type:
+        """
+        result = ClientResult(self.context)
+        payload = {
+            "width": width,
+            "height": height,
+            "clientType": client_type
+        }
+        qry = ServiceOperationQuery(self, "GetImagePreviewUri", None, payload, None, result)
+        self.context.add_query(qry)
+        return result
+
+    def get_image_preview_url(self, width, height, client_type=None):
+        """
+        :param int width:
+        :param int height:
+        :param str client_type:
+        """
+        result = ClientResult(self.context)
+        payload = {
+            "width": width,
+            "height": height,
+            "clientType": client_type
+        }
+        qry = ServiceOperationQuery(self, "GetImagePreviewUrl", None, payload, None, result)
+        self.context.add_query(qry)
+        return result
 
     def recycle(self):
         """Moves the file to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
@@ -201,6 +236,51 @@ class File(AbstractFile):
                                          self.resource_path
                                      ))
 
+    def open_binary_stream(self):
+        """Opens the file as a stream."""
+        return_stream = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "OpenBinaryStream", None, None, None, return_stream)
+        self.context.add_query(qry)
+        return return_stream
+
+    def save_binary_stream(self, stream):
+        """Saves the file."""
+        qry = ServiceOperationQuery(self, "SaveBinaryStream", None, {"file": stream})
+        self.context.add_query(qry)
+        return self
+
+    def get_upload_status(self, upload_id):
+        payload = {
+            "uploadId": upload_id,
+        }
+        qry = ServiceOperationQuery(self, "GetUploadStatus", None, payload)
+        self.context.add_query(qry)
+        return self
+
+    def upload_with_checksum(self, upload_id, checksum, stream):
+        """
+        :param str upload_id:
+        :param str checksum:
+        :param bytes stream:
+        """
+        return_type = File(self.context)
+        payload = {
+            "uploadId": upload_id,
+            "checksum": checksum,
+            "stream": stream
+        }
+        qry = ServiceOperationQuery(self, "UploadWithChecksum", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def cancel_upload(self, upload_id):
+        payload = {
+            "uploadId": upload_id,
+        }
+        qry = ServiceOperationQuery(self, "CancelUpload", None, payload)
+        self.context.add_query(qry)
+        return self
+
     def start_upload(self, upload_id, content):
         """Starts a new chunk upload session and uploads the first fragment.
 
@@ -324,6 +404,7 @@ class File(AbstractFile):
                 """
                 request.stream = True
                 request.method = HttpMethod.Get
+
             self.context.before_execute(_construct_download_request)
 
             def _process_download_response(response):
@@ -337,12 +418,34 @@ class File(AbstractFile):
                     if callable(chunk_downloaded):
                         chunk_downloaded(bytes_read)
                     file_object.write(chunk)
+
             self.context.after_execute(_process_download_response)
 
             self.context.add_query(qry)
 
         self.ensure_property("ServerRelativeUrl", _download_as_stream)
         return self
+
+    @property
+    def checked_out_by_user(self):
+        """Gets an object that represents the user who has checked out the file."""
+        return self.properties.get('CheckedOutByUser',
+                                   User(self.context, ResourcePath("CheckedOutByUser", self.resource_path)))
+
+    @property
+    def version_events(self):
+        return self.properties.get("VersionEvents",
+                                   BaseEntityCollection(self.context,
+                                                        FileVersionEvent,
+                                                        ResourcePath("VersionEvents", self.resource_path)))
+
+    @property
+    def information_rights_management_settings(self):
+        return self.properties.get('InformationRightsManagementSettings',
+                                   InformationRightsManagementSettings(self.context,
+                                                                       ResourcePath(
+                                                                           "InformationRightsManagementSettings",
+                                                                           self.resource_path)))
 
     @property
     def listItemAllFields(self):
@@ -387,7 +490,7 @@ class File(AbstractFile):
         """Gets the server-relative Path of the list folder.
         :rtype: SPResPath or None
         """
-        return self.properties.get("ServerRelativePath", SPResPath(None))
+        return self.properties.get("ServerRelativePath", SPResPath())
 
     @property
     def length(self):
@@ -482,6 +585,9 @@ class File(AbstractFile):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "CheckedOutByUser": self.checked_out_by_user,
+                "VersionEvents": self.version_events,
+                "InformationRightsManagementSettings": self.information_rights_management_settings,
                 "LockedByUser": self.locked_by_user,
                 "ModifiedBy": self.modified_by
             }

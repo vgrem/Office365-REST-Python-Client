@@ -5,6 +5,7 @@ from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.permissions.base_permissions import BasePermissions
 from office365.sharepoint.permissions.role_assignment import RoleAssignment
 from office365.sharepoint.permissions.roleAssignmentCollection import RoleAssignmentCollection
+from office365.sharepoint.principal.user import User
 
 
 class SecurableObject(BaseEntity):
@@ -14,7 +15,7 @@ class SecurableObject(BaseEntity):
         """
 
         :param office365.sharepoint.principal.principal.Principal principal: Specifies the user or group of the
-        role assignment.
+            role assignment.
 
         :return: RoleAssignment
         """
@@ -83,26 +84,34 @@ class SecurableObject(BaseEntity):
             "copyRoleAssignments": copy_role_assignments,
             "clearSubscopes": clear_sub_scopes
         }
-        qry = ServiceOperationQuery(self, "breakRoleInheritance", None, payload, None, None)
+        qry = ServiceOperationQuery(self, "BreakRoleInheritance", None, payload, None, None)
         self.context.add_query(qry)
         return self
 
     def reset_role_inheritance(self):
         """Resets the role inheritance for the securable object and inherits role assignments from
         the parent securable object."""
-        qry = ServiceOperationQuery(self, "resetRoleInheritance", None, None, None, None)
+        qry = ServiceOperationQuery(self, "ResetRoleInheritance", None, None, None, None)
         self.context.add_query(qry)
         return self
 
-    def get_user_effective_permissions(self, user_name):
+    def get_user_effective_permissions(self, user_or_name):
         """
         Returns the user permissions for this list.
 
-        :param str user_name: Specifies the user login name.
+        :param str or User user_or_name: Specifies the user login name or User object.
         """
         result = ClientResult(self.context, BasePermissions())
-        qry = ServiceOperationQuery(self, "getUserEffectivePermissions", [user_name], None, None, result)
-        self.context.add_query(qry)
+
+        if isinstance(user_or_name, User):
+            def _user_loaded():
+                next_qry = ServiceOperationQuery(self, "GetUserEffectivePermissions", [user_or_name.login_name],
+                                                 None, None, result)
+                self.context.add_query(next_qry)
+            user_or_name.ensure_property("LoginName", _user_loaded)
+        else:
+            qry = ServiceOperationQuery(self, "GetUserEffectivePermissions", [user_or_name], None, None, result)
+            self.context.add_query(qry)
         return result
 
     @property
