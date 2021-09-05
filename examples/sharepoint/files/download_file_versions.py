@@ -14,3 +14,10 @@ for version in file_versions:  # type: FileVersion
         file = version.download(local_file).execute_query()
     print("[Ok] file version {0} has been downloaded into: {1}".format(version.url, download_path))
 
+
+version = ctx.web.get_file_by_server_relative_path(file_url).versions.get_by_id(512)
+download_path = os.path.join(tempfile.mkdtemp(),  os.path.basename(file_url))
+with open(download_path, "wb") as local_file:
+    file = version.download(local_file).execute_query()
+print("[Ok] file version {0} has been downloaded into: {1}".format(version.url, download_path))
+
