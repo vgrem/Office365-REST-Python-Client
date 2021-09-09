@@ -4,7 +4,7 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.runtime.resource_path import ResourcePath
 from office365.teams.channels.channel import Channel
 from office365.teams.channels.channel_collection import ChannelCollection
-from office365.teams.schedule.schedule import Schedule
+from office365.teams.shifts.schedule import Schedule
 from office365.teams.team_fun_settings import TeamFunSettings
 from office365.teams.team_guest_settings import TeamGuestSettings
 from office365.teams.team_member_settings import TeamMemberSettings
@@ -104,6 +104,12 @@ class Team(Entity):
                                  ChannelCollection(self.context, ResourcePath("channels", self.resource_path)))
 
     @property
+    def group(self):
+        """"""
+        from office365.directory.groups.group import Group
+        return self.properties.get("group", Group(self.context, ResourcePath("group", self.resource_path)))
+
+    @property
     def primary_channel(self):
         """
         The general channel for the team.
@@ -115,12 +121,12 @@ class Team(Entity):
 
     @property
     def schedule(self):
-        """The schedule of shifts for this team.
+        """The shifts of shifts for this team.
 
         :rtype: Schedule
         """
-        return self.get_property('schedule',
-                                 Schedule(self.context, ResourcePath("schedule", self.resource_path)))
+        return self.get_property('shifts',
+                                 Schedule(self.context, ResourcePath("shifts", self.resource_path)))
 
     @property
     def installed_apps(self):
@@ -169,6 +175,26 @@ class Team(Entity):
     def clone(self):
         """Create a copy of a team. This operation also creates a copy of the corresponding group. """
         qry = ServiceOperationQuery(self, "clone")
+        self.context.add_query(qry)
+        return self
+
+    def send_activity_notification(self, topic, activity_type, chain_id, preview_text, template_parameters, recipient):
+        """
+        Send an activity feed notification in the scope of a team.
+        For more details about sending notifications and the requirements for doing so,
+        see sending Teams activity notifications:
+        https://docs.microsoft.com/en-us/graph/teams-send-activityfeednotifications
+
+        """
+        payload = {
+            "topic": topic,
+            "activityType": activity_type,
+            "chainId": chain_id,
+            "previewText": preview_text,
+            "templateParameters": template_parameters,
+            "recipient": recipient
+        }
+        qry = ServiceOperationQuery(self, "sendActivityNotification", None, payload)
         self.context.add_query(qry)
         return self
 

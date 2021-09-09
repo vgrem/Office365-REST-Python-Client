@@ -1,8 +1,8 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.resource_path import ResourcePath
-from office365.teams.schedule.scheduling_group import SchedulingGroup
-from office365.teams.schedule.shift import Shift
+from office365.teams.shifts.scheduling_group import SchedulingGroup
+from office365.teams.shifts.shift import Shift
 
 
 class Schedule(Entity):
@@ -11,7 +11,7 @@ class Schedule(Entity):
 
     @property
     def time_zone(self):
-        """Indicates the time zone of the schedule team using tz database format. Required."""
+        """Indicates the time zone of the shifts team using tz database format. Required."""
         return self.properties.get('timeZone', None)
 
     @time_zone.setter
@@ -20,7 +20,7 @@ class Schedule(Entity):
 
     @property
     def shifts(self):
-        """The shifts in the schedule.
+        """The shifts in the shifts.
 
         :rtype: EntityCollection
         """
@@ -30,10 +30,18 @@ class Schedule(Entity):
 
     @property
     def scheduling_group(self):
-        """The logical grouping of users in the schedule (usually by role).
+        """The logical grouping of users in the shifts (usually by role).
 
         :rtype: EntityCollection
         """
         return self.get_property('schedulingGroups',
                                  EntityCollection(self.context, SchedulingGroup,
                                                   ResourcePath("schedulingGroups", self.resource_path)))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "schedulingGroups": self.scheduling_group,
+            }
+            default_value = property_mapping.get(name, None)
+        return super(Schedule, self).get_property(name, default_value)

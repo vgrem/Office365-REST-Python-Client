@@ -52,6 +52,14 @@ class Channel(Entity):
         :rtype: str or None """
         return self.properties.get('webUrl', None)
 
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "filesFolder": self.files_folder,
+            }
+            default_value = property_mapping.get(name, None)
+        return super(Channel, self).get_property(name, default_value)
+
     def set_property(self, name, value, persist_changes=True):
         super(Channel, self).set_property(name, value, persist_changes)
         # fallback: fix resource path

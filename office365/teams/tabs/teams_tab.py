@@ -22,3 +22,11 @@ class TeamsTab(Entity):
         :rtype: TeamsTabConfiguration
         """
         return self.properties.get("configuration", TeamsTabConfiguration())
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "teamsApp": self.teams_app,
+            }
+            default_value = property_mapping.get(name, None)
+        return super(TeamsTab, self).get_property(name, default_value)

@@ -27,6 +27,8 @@ class Event(Item):
     def start(self, value):
         """
         Sets the date, time, and time zone that the event starts. By default, the start time is in UTC.
+
+        :type value: datetime.datetime
         """
         self.set_property("start", DateTimeTimeZone.parse(value))
 
@@ -43,6 +45,8 @@ class Event(Item):
     def end(self, value):
         """
         Sets the date, time, and time zone that the event starts. By default, the start time is in UTC.
+
+        :type value: datetime.datetime
         """
         self.set_property("end", DateTimeTimeZone.parse(value))
 

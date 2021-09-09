@@ -67,7 +67,10 @@ class DirectoryObjectCollection(EntityCollection):
         return return_type
 
     def remove(self, user_id):
-        """Remove a user from the group."""
+        """Remove a user from the group.
+
+        :type user_id: str
+        """
 
         qry = ServiceOperationQuery(self, "{0}/$ref".format(user_id))
         self.context.add_query(qry)
