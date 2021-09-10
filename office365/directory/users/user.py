@@ -17,10 +17,10 @@ from office365.directory.profile_photo import ProfilePhoto
 from office365.entity_collection import EntityCollection
 from office365.outlook.contacts.contact import Contact
 from office365.outlook.contacts.contact_folder import ContactFolder
-from office365.outlook.mail.mailFolder import MailFolder
+from office365.outlook.mail.mail_folder import MailFolder
 from office365.onedrive.drives.drive import Drive
 from office365.outlook.mail.mailbox_settings import MailboxSettings
-from office365.outlook.mail.message import Message
+from office365.outlook.mail.messages.message import Message
 from office365.outlook.outlook_user import OutlookUser
 from office365.planner.planner_user import PlannerUser
 from office365.runtime.client_result import ClientResult

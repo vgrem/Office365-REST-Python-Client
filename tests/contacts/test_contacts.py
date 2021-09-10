@@ -1,13 +1,8 @@
-from office365.outlook.calendar.calendar import Calendar
-from tests import create_unique_name
 from tests.graph_case import GraphTestCase
 
 
 class TestContacts(GraphTestCase):
-    """Tests for Calendar"""
-
-    cal_name = create_unique_name("Volunteer")
-    target_cal = None  # type: Calendar
+    """Tests for Contacts"""
 
     @classmethod
     def setUpClass(cls):

@@ -1,18 +1,76 @@
+from office365.directory.extensions.extended_property import SingleValueLegacyExtendedProperty
 from office365.entity_collection import EntityCollection
 from office365.outlook.calendar.attendee import Attendee
 from office365.directory.extensions.extension import Extension
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.outlook.calendar.email_address import EmailAddress
-from office365.outlook.mail.attachment_collection import AttachmentCollection
+from office365.outlook.mail.attachments.attachment_collection import AttachmentCollection
 from office365.outlook.mail.item import Item
 from office365.outlook.mail.itemBody import ItemBody
 from office365.outlook.mail.location import Location
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 
 
 class Event(Item):
     """An event in a user calendar, or the default calendar of a Microsoft 365 group."""
+
+    def accept(self, send_response, comment=None):
+        """
+        Accept the specified event in a user calendar.
+
+        :param bool send_response: true if a response is to be sent to the organizer; otherwise, false.
+        :param str comment: Text included in the response.
+        """
+        payload = {
+            "SendResponse": send_response,
+            "Comment": comment
+        }
+        qry = ServiceOperationQuery(self, "accept", None, payload)
+        self.context.add_query(qry)
+        return self
+
+    def cancel(self, comment=None):
+        """
+        This action allows the organizer of a meeting to send a cancellation message and cancel the event.
+
+        The action moves the event to the Deleted Items folder. The organizer can also cancel an occurrence
+        of a recurring meeting by providing the occurrence event ID.
+        An attendee calling this action gets an error (HTTP 400 Bad Request), with the following error message:
+            Your request can't be completed. You need to be an organizer to cancel a meeting.
+
+        :param str comment: Text included in the response.
+        """
+        payload = {
+            "Comment": comment
+        }
+        qry = ServiceOperationQuery(self, "cancel", None, payload)
+        self.context.add_query(qry)
+        return self
+
+    def decline(self, proposed_new_time=None, send_response=True, comment=None):
+        """
+        Decline invitation to the specified event in a user calendar.
+
+        If the event allows proposals for new times, on declining the event, an invitee can choose to suggest
+        an alternative time by including the proposedNewTime parameter. For more information on how to propose a time,
+        and how to receive and accept a new time proposal, see Propose new meeting times.
+
+        :param office365.outlook.calendar.time_slot.TimeSlot proposed_new_time: An alternate date/time proposed by an
+            invitee for a meeting request to start and end. Valid only for events that allow new time proposals.
+            Setting this parameter requires setting sendResponse to true. Optional.
+        :param bool send_response: true if a response is to be sent to the organizer; otherwise, false.
+        :param str comment: Text included in the response.
+        """
+        payload = {
+            "ProposedNewTime": proposed_new_time,
+            "SendResponse": send_response,
+            "Comment": comment
+        }
+        qry = ServiceOperationQuery(self, "decline", None, payload)
+        self.context.add_query(qry)
+        return self
 
     @property
     def start(self):
@@ -49,6 +107,16 @@ class Event(Item):
         :type value: datetime.datetime
         """
         self.set_property("end", DateTimeTimeZone.parse(value))
+
+    @property
+    def single_value_extended_properties(self):
+        """The collection of single-value extended properties defined for the event.
+
+        :rtype: EntityCollection
+        """
+        return self.get_property('singleValueExtendedProperties',
+                                 EntityCollection(self.context, SingleValueLegacyExtendedProperty,
+                                                  ResourcePath("operations", self.resource_path)))
 
     @property
     def body(self):
@@ -149,3 +217,11 @@ class Event(Item):
         """The collection of open extensions defined for the event. Nullable."""
         return self.properties.get('instances',
                                    EntityCollection(self.context, Event, ResourcePath("instances", self.resource_path)))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "singleValueExtendedProperties": self.single_value_extended_properties
+            }
+            default_value = property_mapping.get(name, None)
+        return super(Event, self).get_property(name, default_value)

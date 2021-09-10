@@ -1,6 +1,10 @@
 from office365.directory.extensions.extension import Extension
 from office365.entity_collection import EntityCollection
-from office365.outlook.mail.attachment_collection import AttachmentCollection
+from office365.outlook.mail.attachments.attachment_collection import AttachmentCollection
+from office365.outlook.mail.attachments.attachment_type import AttachmentType
+from office365.outlook.mail.attachments.file_attachment import FileAttachment
+from office365.outlook.mail.attachments.item_attachment import ItemAttachment
+from office365.outlook.mail.attachments.reference_attachment import ReferenceAttachment
 from office365.outlook.mail.item import Item
 from office365.outlook.mail.itemBody import ItemBody
 from office365.outlook.mail.recipient import Recipient
@@ -11,6 +15,17 @@ from office365.runtime.resource_path import ResourcePath
 
 class Message(Item):
     """A message in a mailbox folder."""
+
+    def add_attachment(self, attachment_type=AttachmentType.file):
+        attachment_known_types = {
+            AttachmentType.file: FileAttachment,
+            AttachmentType.item: ItemAttachment,
+            AttachmentType.reference: ReferenceAttachment,
+        }
+        attachment = attachment_known_types.get(attachment_type)(self.context)
+        self.attachments.add_child(attachment)
+        self.set_property('attachments', attachment.parent_collection, True)
+        return attachment
 
     def send(self):
         """
@@ -86,16 +101,6 @@ class Message(Item):
         """The fileAttachment and itemAttachment attachments for the message."""
         return self.properties.get('attachments',
                                    AttachmentCollection(self.context, ResourcePath("attachments", self.resource_path)))
-
-    @attachments.setter
-    def attachments(self, value):
-        """
-        Sets the fileAttachment and itemAttachment attachments for the message.
-        :type value list[office365.mail.attachment.Attachment]
-        """
-        col = AttachmentCollection(self.context, ResourcePath("attachments", self.resource_path))
-        [col.add_child(item) for item in value]
-        self.set_property('attachments', col)
 
     @property
     def extensions(self):

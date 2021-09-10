@@ -1,4 +1,4 @@
-from office365.outlook.mail.attachment import Attachment
+from office365.outlook.mail.attachments.attachment import Attachment
 
 
 class ReferenceAttachment(Attachment):

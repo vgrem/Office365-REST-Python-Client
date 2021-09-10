@@ -23,6 +23,7 @@ class Contact(Item):
     def manager(self, value):
         """
         Sets name of the contact's manager.
+
         :type value: str
         """
         self.set_property("manager", value)

@@ -50,4 +50,3 @@ class Attachment(Entity):
         :rtype: int or None
         """
         return self.properties.get("lastModifiedDateTime", None)
-

@@ -1,4 +1,4 @@
-from office365.outlook.mail.message import Message
+from office365.outlook.mail.messages.message import Message
 from tests import test_user_principal_name
 from tests.graph_case import GraphTestCase
 
