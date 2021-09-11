@@ -3,12 +3,12 @@ Office 365 & Microsoft Graph library for Python
 
 # Usage
 
-1.   [Installation](#Installation)
-1.   [Working with SharePoint API](#Working-with-SharePoint-API) 
-2.   [Working with Outlook API](#Working-with-Outlook-API) 
-3.   [Working with OneDrive API](#Working-with-OneDrive-API)
-4.   [Working with Microsoft Teams API](#Working-with-Microsoft-Teams-API)    
-
+1. [Installation](#Installation)
+2. [Working with SharePoint API](#Working-with-SharePoint-API) 
+3. [Working with Outlook API](#Working-with-Outlook-API) 
+4. [Working with OneDrive API](#Working-with-OneDrive-API)
+5. [Working with Teams API](#Working-with-Microsoft-Teams-API)    
+6. [Working with Planner API](#Working-with-Microsoft-Planner-API)  
 
 ## Status
 [![Downloads](https://pepy.tech/badge/office365-rest-python-client/month)](https://pepy.tech/project/office365-rest-python-client)
@@ -129,6 +129,7 @@ The list of examples:
   -  [update a list item](examples/sharepoint/lists_and_items/update_items_batch.py)
   -  [delete a list item](examples/sharepoint/lists_and_items/delete_list_item.py) 
   
+Refer [examples section](examples/sharepoint) for another scenarios
 
 # Working with Outlook API
 
@@ -177,7 +178,7 @@ client = GraphClient(acquire_token)
 
 ```
 
-But in terms of Microsoft Graph API authentication, another Microsoft Authentication Client compliant libraries 
+But in terms of Microsoft Graph API authentication, another OAuth spec compliant libraries 
 such as [adal](https://github.com/AzureAD/azure-activedirectory-library-for-python) 
 are supported as well.   
 
@@ -321,12 +322,12 @@ client = GraphClient(tenant_name, acquire_token_func)
 new_team = client.groups["{group_id}"].add_team().execute_query_retry()
 ```
 
+# Working with Microsoft Planner API
 
 # Third Party Libraries and Dependencies
 The following libraries will be installed when you install the client library:
 * [requests](https://github.com/kennethreitz/requests)
 * [Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/)
-
 
 
 

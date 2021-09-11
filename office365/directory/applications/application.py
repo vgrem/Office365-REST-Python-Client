@@ -21,6 +21,7 @@ class Application(DirectoryObject):
 
     def add_password(self, display_name):
         """Adds a strong password to an application.
+
         :param str display_name: App display name
         """
         params = PasswordCredential(displayName=display_name)
@@ -30,7 +31,10 @@ class Application(DirectoryObject):
         return result
 
     def remove_password(self, key_id):
-        """Remove a password from an application."""
+        """Remove a password from an application.
+
+        :param str key_id: The unique identifier for the password.
+        """
         qry = ServiceOperationQuery(self, "removePassword", None, {"keyId": key_id})
         self.context.add_query(qry)
         return self
@@ -89,12 +93,12 @@ class Application(DirectoryObject):
         self.context.add_query(qry)
         return return_type
 
-    def remove_key(self, keyId, proof):
+    def remove_key(self, key_id, proof):
         """
         Remove a key credential from an application.
         This method along with addKey can be used by an application to automate rolling its expiring keys.
 
-        :param str keyId: The unique identifier for the password.
+        :param str key_id: The unique identifier for the password.
         :param str proof: A self-signed JWT token used as a proof of possession of the existing keys.
              This JWT token must be signed using the private key of one of the application's existing
              valid certificates. The token should contain the following claims:
@@ -103,7 +107,7 @@ class Application(DirectoryObject):
                  nbf - Not before time.
                  exp - Expiration time should be "nbf" + 10 mins.
         """
-        qry = ServiceOperationQuery(self, "removeKey", None, {"keyId": keyId, "proof": proof})
+        qry = ServiceOperationQuery(self, "removeKey", None, {"keyId": key_id, "proof": proof})
         self.context.add_query(qry)
         return self
 

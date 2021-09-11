@@ -116,7 +116,7 @@ class Event(Item):
         """
         return self.get_property('singleValueExtendedProperties',
                                  EntityCollection(self.context, SingleValueLegacyExtendedProperty,
-                                                  ResourcePath("operations", self.resource_path)))
+                                                  ResourcePath("singleValueExtendedProperties", self.resource_path)))
 
     @property
     def body(self):

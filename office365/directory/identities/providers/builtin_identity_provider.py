@@ -1,4 +1,4 @@
-from office365.directory.identities.identity_provider_base import IdentityProviderBase
+from office365.directory.identities.providers.identity_provider_base import IdentityProviderBase
 
 
 class BuiltInIdentityProvider(IdentityProviderBase):

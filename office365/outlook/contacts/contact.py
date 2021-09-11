@@ -1,3 +1,4 @@
+from office365.directory.extensions.extended_property import SingleValueLegacyExtendedProperty
 from office365.directory.extensions.extension import Extension
 from office365.directory.profile_photo import ProfilePhoto
 from office365.entity_collection import EntityCollection
@@ -80,11 +81,21 @@ class Contact(Item):
         return self.get_property('photo',
                                  ProfilePhoto(self.context, ResourcePath("photo", self.resource_path)))
 
+    @property
+    def single_value_extended_properties(self):
+        """The collection of single-value extended properties defined for the contact.
+
+        :rtype: EntityCollection
+        """
+        return self.get_property('singleValueExtendedProperties',
+                                 EntityCollection(self.context, SingleValueLegacyExtendedProperty,
+                                                  ResourcePath("singleValueExtendedProperties", self.resource_path)))
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "emailAddresses": self.email_addresses,
+                "singleValueExtendedProperties": self.single_value_extended_properties
             }
             default_value = property_mapping.get(name, None)
         return super(Contact, self).get_property(name, default_value)
-

@@ -1,3 +1,5 @@
+from office365.directory.extensions.extended_property import SingleValueLegacyExtendedProperty, \
+    MultiValueLegacyExtendedProperty
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.outlook.mail.messages.message import Message
@@ -33,3 +35,34 @@ class MailFolder(Entity):
         return self.properties.get('messages',
                                    EntityCollection(self.context, Message,
                                                     ResourcePath("messages", self.resource_path)))
+
+    @property
+    def multi_value_extended_properties(self):
+        """The collection of multi-value extended properties defined for the MailFolder.
+
+        :rtype: EntityCollection
+        """
+        return self.get_property('multiValueExtendedProperties',
+                                 EntityCollection(self.context, MultiValueLegacyExtendedProperty,
+                                                  ResourcePath("multiValueExtendedProperties", self.resource_path)))
+
+    @property
+    def single_value_extended_properties(self):
+        """The collection of single-value extended properties defined for the MailFolder.
+
+        :rtype: EntityCollection
+        """
+        return self.get_property('singleValueExtendedProperties',
+                                 EntityCollection(self.context, SingleValueLegacyExtendedProperty,
+                                                  ResourcePath("singleValueExtendedProperties", self.resource_path)))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "childFolders": self.child_folders,
+                "messageRules": self.message_rules,
+                "multiValueExtendedProperties": self.multi_value_extended_properties,
+                "singleValueExtendedProperties": self.single_value_extended_properties
+            }
+            default_value = property_mapping.get(name, None)
+        return super(MailFolder, self).get_property(name, default_value)
