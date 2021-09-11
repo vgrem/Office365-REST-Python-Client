@@ -1,3 +1,4 @@
+from office365.communications.onlinemeetings.online_meeting_collection import OnlineMeetingCollection
 from office365.communications.presences.presence import Presence
 from office365.directory.extensions.extension import Extension
 from office365.directory.licenses.assigned_plan import AssignedPlan
@@ -29,6 +30,7 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.teams.team_collection import TeamCollection
+from office365.teams.user_teamwork import UserTeamwork
 
 
 class User(DirectoryObject):
@@ -404,10 +406,27 @@ class User(DirectoryObject):
                                                            ResourcePath("directReports", self.resource_path)))
 
     @property
+    def online_meetings(self):
+        """
+        Get a user's online meetings.
+
+        :rtype: OnlineMeetingCollection
+        """
+        return self.get_property('onlineMeetings',
+                                 OnlineMeetingCollection(self.context,
+                                                         ResourcePath("onlineMeetings", self.resource_path)))
+
+    @property
     def presence(self):
         """Get a user's presence information."""
         return self.properties.get('presence',
                                    Presence(self.context, ResourcePath("presence", self.resource_path)))
+
+    @property
+    def teamwork(self):
+        """A container for the range of Microsoft Teams functionalities that are available per user in the tenant."""
+        return self.properties.get('teamwork',
+                                   UserTeamwork(self.context, ResourcePath("teamwork", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:
