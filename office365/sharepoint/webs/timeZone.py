@@ -20,6 +20,14 @@ class TimeZone(BaseEntity):
         self.context.add_query(qry)
         return result
 
+    def set_id(self, _id):
+        """
+        :type _id: int
+        """
+        qry = ServiceOperationQuery(self, "SetId", [_id], None, None, None)
+        self.context.add_query(qry)
+        return self
+
     @property
     def id(self):
         """Gets the identifier of the time zone."""

@@ -1,5 +1,5 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.runtime.client_value import ClientValue
 
 
-class SPListRule(BaseEntity):
+class SPListRule(ClientValue):
     pass

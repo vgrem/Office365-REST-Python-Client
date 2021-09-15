@@ -4,12 +4,10 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.sharepoint.internal.create_file import create_file_query
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
-from office365.sharepoint.files.file_creation_information import FileCreationInformation
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.storagemetrics.storage_metrics import StorageMetrics
 from office365.sharepoint.utilities.move_copy_options import MoveCopyOptions
@@ -109,10 +107,7 @@ class Folder(BaseEntity):
         :type content: str
         :rtype: office365.sharepoint.files.file.File
         """
-        info = FileCreationInformation(url=file_name, overwrite=True, content=content)
-        qry = create_file_query(self.files, info)
-        self.context.add_query(qry)
-        return qry.return_type
+        return self.files.upload(file_name, content)
 
     def copy_to(self, new_relative_url, keep_both=False, reset_author_and_created=False):
         """Copies the folder with files to the destination URL.

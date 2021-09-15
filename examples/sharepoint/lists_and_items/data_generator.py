@@ -39,8 +39,7 @@ def generate_documents(context):
             with open(path, 'rb') as content_file:
                 file_content = content_file.read()
             name = os.path.basename(path)
-            target_file = target_folder.upload_file(name, file_content)
-            context.execute_query()
+            target_file = target_folder.upload_file(name, file_content).execute_query()
             print("File '{0}' has been uploaded".format(target_file.serverRelativeUrl))
 
 

@@ -24,8 +24,7 @@ class User(Principal):
     @property
     def alerts(self):
         return self.properties.get('Alerts',
-                                   AlertCollection(self.context,
-                                                   ResourcePath("Alerts", self.resource_path)))
+                                   AlertCollection(self.context, ResourcePath("Alerts", self.resource_path)))
 
     @property
     def is_site_admin(self):
@@ -39,7 +38,6 @@ class User(Principal):
         return self.properties.get('UserId', UserIdInfo())
 
     def expire(self):
-        """"""
         qry = ServiceOperationQuery(self, "Expire")
         self.context.add_query(qry)
         return self

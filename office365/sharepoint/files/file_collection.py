@@ -22,6 +22,18 @@ class FileCollection(BaseEntityCollection):
         """
         return super(FileCollection, self).get()
 
+    def upload(self, file_name, content):
+        """Uploads a file into folder
+
+        :type file_name: str
+        :type content: bytes or str
+        :rtype: office365.sharepoint.files.file.File
+        """
+        info = FileCreationInformation(url=file_name, overwrite=True, content=content)
+        qry = create_file_query(self, info)
+        self.context.add_query(qry)
+        return qry.return_type
+
     def create_upload_session(self, source_path, chunk_size, chunk_uploaded=None, *chunk_func_args):
         """Upload a file as multiple chunks
 
@@ -39,10 +51,7 @@ class FileCollection(BaseEntityCollection):
         else:
             with open(source_path, 'rb') as content_file:
                 file_content = content_file.read()
-            info = FileCreationInformation(url=os.path.basename(source_path), overwrite=True, content=file_content)
-            qry = create_file_query(self, info)
-            self.context.add_query(qry)
-            return qry.return_type
+            return self.upload(os.path.basename(source_path), file_content)
 
     def add(self, file_creation_information):
         """Creates a File resource

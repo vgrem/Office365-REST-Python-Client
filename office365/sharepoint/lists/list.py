@@ -20,6 +20,7 @@ from office365.sharepoint.listitems.creation_information_using_path import ListI
 from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateValue
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.listitems.listItem_collection import ListItemCollection
+from office365.sharepoint.lists.list_rule import SPListRule
 from office365.sharepoint.pages.wiki_page_creation_information import WikiPageCreationInformation
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.usercustomactions.user_custom_action_collection import UserCustomActionCollection
@@ -34,6 +35,12 @@ class List(SecurableObject):
 
     def __init__(self, context, resource_path=None):
         super(List, self).__init__(context, resource_path)
+
+    def get_all_rules(self):
+        return_type = ClientResult(self.context, ClientValueCollection(SPListRule))
+        qry = ServiceOperationQuery(self, "GetAllRules", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def get_business_app_operation_status(self):
         return_type = FlowSynchronizationResult(self.context)
@@ -153,14 +160,14 @@ class List(SecurableObject):
         self.context.add_query(qry)
         return result
 
-    def get_lookup_field_choices(self, targetFieldName, pagingInfo=None):
+    def get_lookup_field_choices(self, target_field_name, paging_info=None):
         """
 
         """
         result = ClientResult(self.context)
         params = {
-            "targetFieldName": targetFieldName,
-            "pagingInfo": pagingInfo
+            "targetFieldName": target_field_name,
+            "pagingInfo": paging_info
         }
         qry = ServiceOperationQuery(self, "GetLookupFieldChoices", params, None, None, result)
         self.context.add_query(qry)
@@ -181,7 +188,7 @@ class List(SecurableObject):
         Saves the list as a template in the list template gallery and includes the option of saving with or
         without the data that is contained in the current list.
 
-        :param bool save_data: true to save the data of the original list along with the list template; otherwise, false.
+        :param bool save_data: true to save the data of the original list along with the list template; otherwise, false
         :param str description: A string that contains the description for the list template.
         :param str name: A string that contains the title for the list template.
         :param str file_name: A string that contains the file name for the list template with an .stp extension.
@@ -202,8 +209,8 @@ class List(SecurableObject):
         Returns the list item with the specified ID.
 
         :param str unique_id:"""
-        item = ListItem(self.context, ResourcePathServiceOperation("getItemByUniqueId", [unique_id], self.resource_path))
-        return item
+        return ListItem(self.context,
+                        ResourcePathServiceOperation("getItemByUniqueId", [unique_id], self.resource_path))
 
     def get_web_dav_url(self, source_url):
         """
@@ -305,8 +312,7 @@ class List(SecurableObject):
 
         :type view_id: str
         """
-        view = View(self.context, ResourcePathServiceOperation("getView", [view_id], self.resource_path), self)
-        return view
+        return View(self.context, ResourcePathServiceOperation("getView", [view_id], self.resource_path), self)
 
     def get_changes(self, query=None):
         """Returns the collection of changes from the change log that have occurred within the list,
@@ -324,6 +330,12 @@ class List(SecurableObject):
     def get_checked_out_files(self):
         result = CheckedOutFileCollection(self.context)
         qry = ServiceOperationQuery(self, "GetCheckedOutFiles", None, None, None, result)
+        self.context.add_query(qry)
+        return result
+
+    def reserve_list_item_id(self):
+        result = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "ReserveListItemId", None, None, None, result)
         self.context.add_query(qry)
         return result
 

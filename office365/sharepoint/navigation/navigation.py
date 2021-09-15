@@ -34,8 +34,10 @@ class Navigation(BaseEntity):
         super(Navigation, self).set_property(name, value, persist_changes)
 
     def get_property(self, name, default_value=None):
-        if name == "TopNavigationBar":
-            default_value = self.top_navigation_bar
-        elif name == "QuickLaunch":
-            default_value = self.quick_launch
+        if default_value is None:
+            property_mapping = {
+                "TopNavigationBar": self.top_navigation_bar,
+                "QuickLaunch": self.quick_launch
+            }
+            default_value = property_mapping.get(name, None)
         return super(Navigation, self).get_property(name, default_value)

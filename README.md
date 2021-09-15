@@ -7,8 +7,9 @@ Office 365 & Microsoft Graph library for Python
 2. [Working with SharePoint API](#Working-with-SharePoint-API) 
 3. [Working with Outlook API](#Working-with-Outlook-API) 
 4. [Working with OneDrive API](#Working-with-OneDrive-API)
-5. [Working with Teams API](#Working-with-Microsoft-Teams-API)    
-6. [Working with Planner API](#Working-with-Microsoft-Planner-API)  
+5. [Working with Teams API](#Working-with-Microsoft-Teams-API)
+6. [Working with OneNote API](#Working-with-Microsoft-OneNote-API)
+7. [Working with Planner API](#Working-with-Microsoft-Planner-API)  
 
 ## Status
 [![Downloads](https://pepy.tech/badge/office365-rest-python-client/month)](https://pepy.tech/project/office365-rest-python-client)
@@ -321,6 +322,8 @@ tenant_name = "contoso.onmicrosoft.com"
 client = GraphClient(tenant_name, acquire_token_func)
 new_team = client.groups["{group_id}"].add_team().execute_query_retry()
 ```
+
+# Working with Microsoft Onenote API
 
 # Working with Microsoft Planner API
 

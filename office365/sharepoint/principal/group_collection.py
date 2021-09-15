@@ -26,9 +26,7 @@ class GroupCollection(BaseEntityCollection):
 
         :type group_id: str
         """
-        group = Group(self.context,
-                      ResourcePathServiceOperation("getbyid", [group_id], self.resource_path))
-        return group
+        return Group(self.context, ResourcePathServiceOperation("GetById", [group_id], self.resource_path))
 
     def get_by_name(self, group_name):
         """Returns a cross-site group from the collection based on the name of the group.
@@ -36,20 +34,22 @@ class GroupCollection(BaseEntityCollection):
         :type group_name: str
         """
         return Group(self.context,
-                     ResourcePathServiceOperation("getByName", [group_name], self.resource_path))
+                     ResourcePathServiceOperation("GetByName", [group_name], self.resource_path))
 
     def remove_by_id(self, group_id):
         """Removes the group with the specified member ID from the collection.
 
         :type group_id: str
         """
-        qry = ServiceOperationQuery(self, "removeById", [group_id])
+        qry = ServiceOperationQuery(self, "RemoveById", [group_id])
         self.context.add_query(qry)
+        return self
 
     def remove_by_login_name(self, group_name):
         """Removes the cross-site group with the specified name from the collection.
 
         :type group_name: str
         """
-        qry = ServiceOperationQuery(self, "removeByLoginName", [group_name])
+        qry = ServiceOperationQuery(self, "RemoveByLoginName", [group_name])
         self.context.add_query(qry)
+        return self
