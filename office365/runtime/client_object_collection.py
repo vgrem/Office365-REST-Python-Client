@@ -17,7 +17,7 @@ class ClientObjectCollection(ClientObject):
         self._data = []
         self._item_type = child_item_type
         self.page_loaded = EventHandler(False)
-        self._default_page_size = 100
+        self._page_size = 100
         self._paged_mode = True
         self._page_index = 0
         self.next_request_url = None
@@ -61,6 +61,7 @@ class ClientObjectCollection(ClientObject):
         """
         child_client_object = self.create_typed_object(value)
         self.add_child(child_client_object)
+        return self
 
     def add_child(self, client_object):
         """
@@ -70,24 +71,27 @@ class ClientObjectCollection(ClientObject):
         """
         client_object._parent_collection = self
         self._data.append(client_object)
+        return self
 
     def remove_child(self, client_object):
         """
         :type client_object: ClientObject
         """
         self._data = [item for item in self._data if item != client_object]
+        return self
 
     def __iter__(self):
         """
         :rtype: collections.Iterable[ClientObject]
         """
-        for cur_item in self._data:
-            yield cur_item
+        for item in self._data:
+            yield item
 
         if self._paged_mode:
             while self.next_request_url:
-                for cur_item in self._get_next_items():
-                    yield cur_item
+                paged_items = self._load_next_items()
+                for item in paged_items:
+                    yield item
 
     def __len__(self):
         return len(self._data)
@@ -98,9 +102,8 @@ class ClientObjectCollection(ClientObject):
         :type index: int
         :rtype: ClientObject
         """
-        item_iterator = iter(self)
         while len(self._data) <= index:
-            next(item_iterator)
+            next(iter(self))
         return self._data[index]
 
     def to_json(self, json_format=None):
@@ -137,13 +140,26 @@ class ClientObjectCollection(ClientObject):
         """
         :type value: int
         """
-        self._paged_mode = False
+        self._page_size = value
         self.query_options.top = value
         return self
+
+    def paged(self, value):
+        """
+        Sets flag to enable/disable iteration over paged collection
+
+        :type value: bool
+        """
+        self._paged_mode = value
+        return self
+
+    def page_size(self, value):
+        return self.top(value).paged(True)
 
     def get_items_count(self):
         """
         Gets total items count
+
         :return: ClientResult
         """
         result = ClientResult(self.context)
@@ -156,16 +172,14 @@ class ClientObjectCollection(ClientObject):
         self.context.after_execute(_calc_items_count)
         return result
 
-    def _load_paged_items(self):
+    def _load_next_items(self):
         request = RequestOptions(self.next_request_url)
         response = self.context.execute_request_direct(request)
-        json = response.json()
+        response.raise_for_status()
         self.next_request_url = None
-        self.context.pending_request().map_json(json, self)
-
-    def _get_next_items(self):
-        self._page_index += 1
-        next_index = self._default_page_size * self._page_index
-        self._load_paged_items()
+        self.context.pending_request().map_json(response.json(), self)
         self.page_loaded.notify(len(self._data))
-        return self._data[next_index:]
+        self._page_index += 1
+        return self._data[self._page_size * self._page_index:]
+
+
