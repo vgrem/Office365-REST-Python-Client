@@ -45,7 +45,7 @@ class ClientObjectCollection(ClientObject):
         if properties is None:
             properties = {}
         if self._item_type is None:
-            raise AttributeError("No class for object type '{0}' found".format(self._item_type))
+            raise AttributeError("No class for entity type '{0}' found".format(self._item_type))
 
         client_object = self._item_type(self.context)
         client_object._parent_collection = self
@@ -146,15 +146,16 @@ class ClientObjectCollection(ClientObject):
 
     def paged(self, value):
         """
-        Sets flag to enable/disable iteration over paged collection
+        Enables/disables server-driven paging
 
-        :type value: bool
+        :param int value: bool: sets flag to enable/disable server-driven paging
         """
         self._paged_mode = value
         return self
 
-    def page_size(self, value):
-        return self.top(value).paged(True)
+    def loaded(self, page_loaded=None):
+        if callable(page_loaded):
+            self.page_loaded += page_loaded
 
     def get_items_count(self):
         """
@@ -181,5 +182,3 @@ class ClientObjectCollection(ClientObject):
         self.page_loaded.notify(len(self._data))
         self._page_index += 1
         return self._data[self._page_size * self._page_index:]
-
-

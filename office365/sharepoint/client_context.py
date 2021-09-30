@@ -121,6 +121,7 @@ class ClientContext(ClientRuntimeContext):
             queries = all_queries[i:i + items_per_batch]
             batch_request.add_query(BatchQuery(self, queries))
             batch_request.execute_query()
+        return self
 
     def build_single_request(self, query):
         """

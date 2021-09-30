@@ -493,7 +493,9 @@ class List(SecurableObject):
         if default_value is None:
             property_mapping = {
                 "ContentTypes": self.content_types,
+                "CustomActionElements": self.custom_action_elements,
                 "DefaultView": self.default_view,
+                "EventReceivers": self.event_receivers,
                 "ParentWeb": self.parent_web,
                 "RootFolder": self.root_folder,
                 "UserCustomActions": self.user_custom_actions

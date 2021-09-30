@@ -1,6 +1,4 @@
 import os
-import adal
-
 from office365.runtime.auth.token_response import TokenResponse
 from office365.sharepoint.client_context import ClientContext
 from tests import test_site_url, test_tenant
@@ -13,6 +11,7 @@ cert_settings = {
 
 
 def acquire_token():
+    import adal
     authority_url = 'https://login.microsoftonline.com/{0}'.format(test_tenant)
     auth_ctx = adal.AuthenticationContext(authority_url)
     with open(cert_settings['certificate_path'], 'r') as file:

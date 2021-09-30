@@ -16,7 +16,11 @@ def ensure_list(web, list_properties):
         return web.lists.add(list_properties).execute_query()
 
 
-def generate_documents(context):
+def generate_documents(context, amount):
+    """
+    :type context: ClientContext
+    :type amount: int
+    """
     lib = ensure_list(context.web,
                       ListCreationInformation("Documents_Archive",
                                               None,
@@ -25,13 +29,12 @@ def generate_documents(context):
     include_files = False
 
     fake = Faker()
-    total_amount = 200
-    for idx in range(0, total_amount):
+    for idx in range(0, amount):
         # 1. Create a folder
         folder_name = fake.date()
         target_folder = lib.root_folder.add(folder_name)
         context.execute_query()
-        print("({0} of {1}) Folder '{2}' has been created".format(idx, total_amount, target_folder.serverRelativeUrl))
+        print("({0} of {1}) Folder '{2}' has been created".format(idx, amount, target_folder.serverRelativeUrl))
 
         if include_files:
             # 2. Upload a file into a folder
@@ -43,7 +46,11 @@ def generate_documents(context):
             print("File '{0}' has been uploaded".format(target_file.serverRelativeUrl))
 
 
-def generate_contacts(context):
+def generate_contacts(context, amount):
+    """
+    :type context: ClientContext
+    :type amount: int
+    """
     contacts_list = ensure_list(context.web,
                                 ListCreationInformation("Contacts_Large",
                                                         None,
@@ -51,8 +58,7 @@ def generate_contacts(context):
                                 )
 
     fake = Faker()
-    total_amount = 2
-    for idx in range(0, total_amount):
+    for idx in range(0, amount):
         contact_properties = {
             'Title': fake.name(),
             'FullName': fake.name(),
@@ -65,11 +71,13 @@ def generate_contacts(context):
             'WorkCountry': fake.country(),
             'WebPage': {'Url': fake.url()}
         }
-        contact_item = contacts_list.add_item(contact_properties).execute_query()
-        print("({0} of {1}) Contact '{2}' has been created".format(idx, total_amount, contact_item.properties["Title"]))
+        #contact_item = contacts_list.add_item(contact_properties).execute_query()
+        contact_item = contacts_list.add_item(contact_properties)
+        print("({0} of {1}) Contact '{2}' has been created".format(idx, amount, contact_item.properties["Title"]))
+    ctx.execute_batch()
 
 
 if __name__ == '__main__':
     ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
-    # generate_contacts(ctx)
-    generate_documents(ctx)
+    generate_contacts(ctx, 5000)
+    #generate_documents(ctx, 100)

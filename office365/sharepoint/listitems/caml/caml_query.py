@@ -4,25 +4,25 @@ from office365.sharepoint.views.view_scope import ViewScope
 
 class CamlQuery(ClientValue):
 
-    def __init__(self, datesInUtc=True, viewXml=None, listItemCollectionPosition=None,
-                 folderServerRelativeUrl=None, allowIncrementalResults=True):
+    def __init__(self, dates_in_utc=True, view_xml=None, listitem_collection_position=None,
+                 folder_server_relative_url=None, allow_incremental_results=True):
         """
         Specifies a Collaborative Application Markup Language (CAML) query on a list or joined lists.
 
         :type bool allowIncrementalResults: Specifies whether the incremental results can be returned.
-        :param ListItemCollectionPosition listItemCollectionPosition: Specifies the information required to
+        :param ListItemCollectionPosition listitem_collection_position: Specifies the information required to
             get the next page of data for the list view.
-        :param str viewXml: Specifies the XML schema that defines the list view.
-        :param str or None folderServerRelativeUrl: Specifies the server-relative URL of a list folder from which
+        :param str view_xml: Specifies the XML schema that defines the list view.
+        :param str or None folder_server_relative_url: Specifies the server-relative URL of a list folder from which
             results are to be returned.
-        :param bool datesInUtc: Specifies whether the query returns dates in Coordinated Universal Time (UTC) format.
+        :param bool dates_in_utc: Specifies whether the query returns dates in Coordinated Universal Time (UTC) format.
         """
         super(CamlQuery, self).__init__()
-        self.DatesInUtc = datesInUtc
-        self.FolderServerRelativeUrl = folderServerRelativeUrl
-        self.AllowIncrementalResults = allowIncrementalResults
-        self.ViewXml = viewXml
-        self.ListItemCollectionPosition = listItemCollectionPosition
+        self.DatesInUtc = dates_in_utc
+        self.FolderServerRelativeUrl = folder_server_relative_url
+        self.AllowIncrementalResults = allow_incremental_results
+        self.ViewXml = view_xml
+        self.ListItemCollectionPosition = listitem_collection_position
 
     @staticmethod
     def parse(query_expr, scope=ViewScope.DefaultValue):
