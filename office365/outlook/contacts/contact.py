@@ -1,4 +1,5 @@
-from office365.directory.extensions.extended_property import SingleValueLegacyExtendedProperty
+from office365.directory.extensions.extended_property import SingleValueLegacyExtendedProperty, \
+    MultiValueLegacyExtendedProperty
 from office365.directory.extensions.extension import Extension
 from office365.directory.profile_photo import ProfilePhoto
 from office365.entity_collection import EntityCollection
@@ -82,8 +83,18 @@ class Contact(Item):
                                  ProfilePhoto(self.context, ResourcePath("photo", self.resource_path)))
 
     @property
+    def multi_value_extended_properties(self):
+        """The collection of multi-value extended properties defined for the Contact.
+
+        :rtype: EntityCollection
+        """
+        return self.get_property('multiValueExtendedProperties',
+                                 EntityCollection(self.context, MultiValueLegacyExtendedProperty,
+                                                  ResourcePath("multiValueExtendedProperties", self.resource_path)))
+
+    @property
     def single_value_extended_properties(self):
-        """The collection of single-value extended properties defined for the contact.
+        """The collection of single-value extended properties defined for the Contact.
 
         :rtype: EntityCollection
         """
@@ -95,6 +106,7 @@ class Contact(Item):
         if default_value is None:
             property_mapping = {
                 "emailAddresses": self.email_addresses,
+                "multiValueExtendedProperties": self.multi_value_extended_properties,
                 "singleValueExtendedProperties": self.single_value_extended_properties
             }
             default_value = property_mapping.get(name, None)

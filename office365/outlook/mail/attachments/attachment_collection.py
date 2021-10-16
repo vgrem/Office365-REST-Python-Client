@@ -20,8 +20,9 @@ class AttachmentCollection(EntityCollection):
 
         :param str source_path: Local file path
         :param int chunk_size: chunk size
+        :param Attachment return_attachment: returned attachment
         """
-        upload_query = AttachmentUploadQuery(self, source_path, chunk_size)
+        upload_query = AttachmentUploadQuery(self, source_path, chunk_size, None)
         self.context.add_query(upload_query)
         return upload_query.return_type
 

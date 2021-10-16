@@ -96,7 +96,7 @@ class GraphClient(ClientRuntimeContext):
         """
         token_json = self._acquire_token_callback()
         token = TokenResponse.from_json(token_json)
-        request.set_header('Authorization', 'Bearer {0}'.format(token.accessToken))
+        request.ensure_header('Authorization', 'Bearer {0}'.format(token.accessToken))
 
     @property
     def me(self):

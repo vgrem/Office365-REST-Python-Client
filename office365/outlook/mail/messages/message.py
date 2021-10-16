@@ -1,3 +1,5 @@
+import os
+
 from office365.directory.extensions.extension import Extension
 from office365.entity_collection import EntityCollection
 from office365.outlook.mail.attachments.attachment_collection import AttachmentCollection
@@ -16,7 +18,34 @@ from office365.runtime.resource_path import ResourcePath
 class Message(Item):
     """A message in a mailbox folder."""
 
+    def upload_attachment(self, file_path):
+        """
+        This approach is used to attach a file if the file size is between 3 MB and 150 MB, otherwise
+        if a file that's smaller than 3 MB, then add_attachment method is utilized
+
+        :type file_path: str
+        """
+        max_upload_chunk = 1000000 * 3
+        file_size = os.stat(file_path).st_size
+        if file_size > max_upload_chunk:
+            file_attachment = FileAttachment(self.context)
+            self.attachments.add_child(file_attachment)
+
+            def _message_loaded():
+                self.attachments.resumable_upload(file_path, max_upload_chunk, file_attachment)
+            self.ensure_property("id", _message_loaded)
+            return file_attachment
+        else:
+            file_attachment = self.add_attachment(AttachmentType.file)
+            with open(file_path, 'rb') as fh:
+                file_attachment.content_bytes = fh.read()
+            file_attachment.name = os.path.basename(fh.name)
+            return file_attachment
+
     def add_attachment(self, attachment_type=AttachmentType.file):
+        """
+        :rtype: FileAttachment or ItemAttachment or ReferenceAttachment
+        """
         attachment_known_types = {
             AttachmentType.file: FileAttachment,
             AttachmentType.item: ItemAttachment,

@@ -18,7 +18,6 @@ class UploadSessionQuery(ClientQuery):
         :type chunk_size: int
         """
         super(UploadSessionQuery, self).__init__(session_item.context, session_item)
-        self._session_item = session_item
         self._file_handle = None
         self._chunk_size = chunk_size
         self._range_start = 0
@@ -38,13 +37,16 @@ class UploadSessionQuery(ClientQuery):
         :type resp: requests.Response
         """
         if self._has_pending_read():
-            qry = ClientQuery(self.context, self.return_type)
+            qry = ClientQuery(self.context, self.binding_type)
             self.context.before_execute(self._construct_range_request)
             self.context.after_execute(self._create_next_range_query)
             self.context.after_execute(self._notify_after_uploaded)
             self.context.add_query(qry, True)
 
     def _construct_range_request(self, request):
+        """
+        :type request: office365.runtime.http.request_options.RequestOptions
+        """
         range_data = self._read_next_chunk()
         request.url = self._session_result.value.uploadUrl
         request.method = HttpMethod.Put
@@ -55,6 +57,9 @@ class UploadSessionQuery(ClientQuery):
         request.data = range_data
 
     def _notify_after_uploaded(self, response):
+        """
+        :type response: requests.Response
+        """
         response.raise_for_status()
         if callable(self._chunk_uploaded):
             self._chunk_uploaded(self._range_end)

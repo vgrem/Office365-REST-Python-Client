@@ -45,3 +45,15 @@ def is_string_type(value):
 
 def is_absolute_url(url):
     return bool(urlparse(url).netloc)
+
+
+def parse_query_string(url, key):
+    if is_py2:
+        import urlparse
+        parsed_url = urlparse.urlparse(url)
+        return urlparse.parse_qs(parsed_url.query)[key][0]
+    else:
+        from urllib.parse import urlparse
+        from urllib.parse import parse_qs
+        parsed_url = urlparse(url)
+        return parse_qs(parsed_url.query)[key][0]

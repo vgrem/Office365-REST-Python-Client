@@ -10,6 +10,20 @@ class CalendarGroup(Entity):
     """
 
     @property
+    def name(self):
+        """
+        :rtype: str
+        """
+        return self.properties.get("name", None)
+
+    @property
+    def class_id(self):
+        """
+        :rtype: str
+        """
+        return self.properties.get("classId", None)
+
+    @property
     def calendars(self):
         """The calendars in the calendar group. Navigation property. Read-only. Nullable."""
         return self.properties.get('calendars',

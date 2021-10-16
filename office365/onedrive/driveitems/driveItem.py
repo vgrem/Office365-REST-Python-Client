@@ -38,7 +38,7 @@ class DriveItem(BaseItem):
 
     def get_by_path(self, url_path):
         """
-        Retrieve DriveItem by path
+        Retrieve DriveItem by server relative path
 
         :type url_path: str
         """
