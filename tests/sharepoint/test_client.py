@@ -5,7 +5,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
     SecondaryAdministratorsFieldsData
 from tests import test_site_url, test_client_credentials, test_user_credentials, settings, create_unique_name, \
-    create_unique_file_name
+    create_unique_file_name, test_team_site_url
 from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
 from office365.runtime.auth.providers.saml_token_provider import SamlTokenProvider
 from office365.runtime.http.request_options import RequestOptions
@@ -73,13 +73,13 @@ class TestSharePointClient(TestCase):
         self.assertEqual(updated_web.properties['Title'], new_web_title)
 
     def test_11_execute_get_and_update_batch_request(self):
-        client = ClientContext(test_site_url).with_credentials(test_user_credentials)
-        list_item = client.web.get_file_by_server_relative_url("/SitePages/Home.aspx").listItemAllFields
+        client = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
+        list_item = client.web.get_file_by_server_relative_url("/sites/team/SitePages/Home.aspx").listItemAllFields
         new_title = create_unique_name("Page")
         list_item.set_property("Title", new_title).update()
         client.execute_batch()
 
-        updated_list_item = client.web.get_file_by_server_relative_url("/SitePages/Home.aspx").listItemAllFields
+        updated_list_item = client.web.get_file_by_server_relative_url("/sites/team/SitePages/Home.aspx").listItemAllFields
         client.load(updated_list_item)
         client.execute_query()
         self.assertEqual(updated_list_item.properties['Title'], new_title)

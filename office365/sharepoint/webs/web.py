@@ -7,7 +7,8 @@ from office365.runtime.resource_path_service_operation import ResourcePathServic
 from office365.sharepoint.alerts.alert_collection import AlertCollection
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.changes.change_collection import ChangeCollection
-from office365.sharepoint.clientsidecomponent.types import SPClientSideComponentQueryResult
+from office365.sharepoint.clientsidecomponent.types import SPClientSideComponentQueryResult, \
+    SPClientSideComponentIdentifier
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
 from office365.sharepoint.eventreceivers.event_receiver_definition import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
@@ -40,6 +41,7 @@ from office365.sharepoint.ui.applicationpages.client_people_picker import (
     ClientPeoplePickerWebServiceInterface, ClientPeoplePickerQueryParameters
 )
 from office365.sharepoint.webparts.client_web_part_collection import ClientWebPartCollection
+from office365.sharepoint.webs.context_web_information import ContextWebInformation
 from office365.sharepoint.webs.regional_settings import RegionalSettings
 from office365.sharepoint.webs.web_information_collection import WebInformationCollection
 from office365.sharepoint.webs.web_template_collection import WebTemplateCollection
@@ -64,6 +66,22 @@ class Web(SecurableObject):
     def get_push_notification_subscriber(self, device_app_instance_id):
         return_type = PushNotificationSubscriber(self.context)
         qry = ServiceOperationQuery(self, "GetPushNotificationSubscriber", [device_app_instance_id], None,
+                                    None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_client_side_components(self, components):
+        """
+        Returns the client side components for the requested components.
+        Client components include data necessary to render Client Side Web Parts and Client Side Applications.
+
+        :param list components: array of requested components, defined by id and version.
+        """
+        return_type = ClientResult(self.context, ClientValueCollection(SPClientSideComponentIdentifier))
+        payload = {
+            "components": components
+        }
+        qry = ServiceOperationQuery(self, "GetClientSideComponents", None, payload,
                                     None, return_type)
         self.context.add_query(qry)
         return return_type
@@ -99,6 +117,19 @@ class Web(SecurableObject):
         result = ClientResult(context)
         params = {"url": url, "isEditLink": is_edit_link}
         qry = ServiceOperationQuery(context.web, "CreateOrganizationSharingLink", None, params, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
+
+    @staticmethod
+    def get_context_web_information(context):
+        """
+        Returns an object that specifies metadata about the site
+
+        :type context: office365.sharepoint.client_context.ClientContext
+        """
+        result = ClientResult(context, ContextWebInformation())
+        qry = ServiceOperationQuery(context.web, "GetContextWebInformation", None, None, None, result)
         qry.static = True
         context.add_query(qry)
         return result
@@ -244,6 +275,7 @@ class Web(SecurableObject):
         return return_list
 
     def get_regional_datetime_schema(self):
+        """Get DateTime Schema based on regional settings"""
         return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "GetRegionalDateTimeSchema", None, None, None, return_type)
         self.context.add_query(qry)
@@ -251,7 +283,10 @@ class Web(SecurableObject):
 
     def get_sharing_link_data(self, link_url):
         """
-        :type link_url: str
+        This method determines basic information about the supplied link URL, including limited data about the object
+        the link URL refers to and any additional sharing link data if the link URL is a tokenized sharing link
+
+        :param str link_url: A URL that is either a tokenized sharing link or a canonical URL for a document
         """
         result = SharingLinkData()
         qry = ServiceOperationQuery(self, "GetSharingLinkData", [link_url], None, None, result)
@@ -396,6 +431,16 @@ class Web(SecurableObject):
         """
         result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "DoesUserHavePermissions", permission_mask, None, None, result)
+        self.context.add_query(qry)
+        return result
+
+    def does_push_notification_subscriber_exist(self, device_app_instance_id):
+        """
+        :type device_app_instance_id: str
+        """
+        result = ClientResult(self.context)
+        params = {"deviceAppInstanceId": device_app_instance_id}
+        qry = ServiceOperationQuery(self, "DoesPushNotificationSubscriberExist", params, None, None, result)
         self.context.add_query(qry)
         return result
 

@@ -399,7 +399,7 @@ class List(SecurableObject):
         """Gets one or more webhook subscriptions on a SharePoint list."""
         return self.properties.get('Subscriptions',
                                    SubscriptionCollection(self.context,
-                                                          ResourcePath("Subscriptions", self.resource_path)))
+                                                          ResourcePath("Subscriptions", self.resource_path), self))
 
     @property
     def views(self):
