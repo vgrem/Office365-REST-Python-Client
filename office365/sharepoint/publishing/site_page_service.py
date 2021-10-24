@@ -4,6 +4,7 @@ from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.administration.org_assets import OrgAssets
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.files.file import File
+from office365.sharepoint.publishing.communication_site import CommunicationSite
 from office365.sharepoint.publishing.file_picker_options import FilePickerOptions
 from office365.sharepoint.publishing.primary_city_time import PrimaryCityTime
 from office365.sharepoint.publishing.site_page_metadata_collection import SitePageMetadataCollection
@@ -19,6 +20,11 @@ class SitePageService(BaseEntity):
     def pages(self):
         return self.properties.get("pages",
                                    SitePageMetadataCollection(self.context, ResourcePath("pages", self.resource_path)))
+
+    @property
+    def communication_site(self):
+        return self.properties.get("CommunicationSite",
+                                   CommunicationSite(self.context, ResourcePath("CommunicationSite", self.resource_path)))
 
     @property
     def entity_type_name(self):

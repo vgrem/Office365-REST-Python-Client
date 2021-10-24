@@ -26,7 +26,7 @@ class TestSPWebHooks(SPTestCase):
 
     def test2_list_webhooks(self):
         subscriptions = self.target_list.subscriptions.get().execute_query()
-        self.assertGreater(len(subscriptions), 1)
+        self.assertGreater(len(subscriptions), 0)
 
     def test3_update_subscription(self):
         subscription = self.__class__.target_subscription

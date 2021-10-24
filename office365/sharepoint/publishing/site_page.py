@@ -1,5 +1,4 @@
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.sharepoint.publishing.site_page_metadata import SitePageMetadata
 
 

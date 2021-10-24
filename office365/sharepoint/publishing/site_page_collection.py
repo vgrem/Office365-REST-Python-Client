@@ -18,3 +18,9 @@ class SitePageCollection(BaseEntityCollection):
         qry = ServiceOperationQuery(self, "IsSitePage", [url], None, None, return_type)
         self.context.add_query(qry)
         return return_type
+
+    def get_page_column_state(self, url):
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "GetPageColumnState", [url], None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
