@@ -7,7 +7,7 @@ from office365.sharepoint.files.file import File
 from office365.sharepoint.publishing.communication_site import CommunicationSite
 from office365.sharepoint.publishing.file_picker_options import FilePickerOptions
 from office365.sharepoint.publishing.primary_city_time import PrimaryCityTime
-from office365.sharepoint.publishing.site_page_metadata_collection import SitePageMetadataCollection
+from office365.sharepoint.publishing.site_page_collection import SitePageCollection
 
 
 class SitePageService(BaseEntity):
@@ -19,12 +19,13 @@ class SitePageService(BaseEntity):
     @property
     def pages(self):
         return self.properties.get("pages",
-                                   SitePageMetadataCollection(self.context, ResourcePath("pages", self.resource_path)))
+                                   SitePageCollection(self.context, ResourcePath("pages", self.resource_path)))
 
     @property
     def communication_site(self):
         return self.properties.get("CommunicationSite",
-                                   CommunicationSite(self.context, ResourcePath("CommunicationSite", self.resource_path)))
+                                   CommunicationSite(self.context,
+                                                     ResourcePath("CommunicationSite", self.resource_path)))
 
     @property
     def entity_type_name(self):
@@ -131,3 +132,11 @@ class SitePageService(BaseEntity):
         qry.static = True
         self.context.add_query(qry)
         return return_type
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "CommunicationSite": self.communication_site,
+            }
+            default_value = property_mapping.get(name, None)
+        return super(SitePageService, self).get_property(name, default_value)

@@ -13,7 +13,10 @@ from office365.runtime.odata.odata_request import ODataRequest
 from office365.runtime.queries.batch_query import BatchQuery
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
+from office365.runtime.resource_path import ResourcePath
+from office365.sharepoint.request_user_context import RequestUserContext
 from office365.sharepoint.sites.site import Site
+from office365.sharepoint.tenant.administration.hub_site_collection import HubSiteCollection
 from office365.sharepoint.webs.context_web_information import ContextWebInformation
 from office365.sharepoint.webs.web import Web
 from office365.runtime.compat import range_or_xrange
@@ -205,6 +208,22 @@ class ClientContext(ClientRuntimeContext):
         if not self.__site:
             self.__site = Site(self)
         return self.__site
+
+    @property
+    def me(self):
+        """Gets the user context for the present request"""
+        return RequestUserContext(self, ResourcePath("Me"))
+
+    @property
+    def lists(self):
+        """Gets information about all lists that the current user can access."""
+        from office365.sharepoint.lists.list_collection import ListCollection
+        return ListCollection(self, ResourcePath("Lists"))
+
+    @property
+    def hub_sites(self):
+        """Gets information about all hub sites that the current user can access."""
+        return HubSiteCollection(self, ResourcePath("hubSites"))
 
     @property
     def base_url(self):

@@ -766,6 +766,8 @@ class Web(SecurableObject):
 
     def page_context_info(self, include_odb_settings, emit_navigation_info):
         """
+        Return Page context info for the current list being rendered.
+
         :param bool include_odb_settings:
         :param bool emit_navigation_info:
         """

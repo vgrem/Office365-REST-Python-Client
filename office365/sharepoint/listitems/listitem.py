@@ -216,6 +216,7 @@ class ListItem(SecurableObject):
         }
         qry = ServiceOperationQuery(self, "ParseAndSetFieldValue", None, payload)
         self.context.add_query(qry)
+        return self
 
     @property
     def display_name(self):
