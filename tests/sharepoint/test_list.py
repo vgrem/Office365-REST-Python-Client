@@ -13,6 +13,14 @@ class TestSPList(SPTestCase):
     target_list = None  # type: List
     target_list_title = "Tasks" + str(randint(0, 10000))
 
+    @classmethod
+    def setUpClass(cls):
+        super(TestSPList, cls).setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
     def test1_get_default_library(self):
         default_lib = self.client.web.default_document_library().get().execute_query()
         self.assertIsNotNone(default_lib.properties["Id"])

@@ -14,6 +14,7 @@ from office365.runtime.queries.batch_query import BatchQuery
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
+from office365.sharepoint.publishing.site_page_service import SitePageService
 from office365.sharepoint.request_user_context import RequestUserContext
 from office365.sharepoint.sites.site import Site
 from office365.sharepoint.tenant.administration.hub_site_collection import HubSiteCollection
@@ -27,8 +28,8 @@ class ClientContext(ClientRuntimeContext):
 
     def __init__(self, base_url, auth_context=None):
         """
-        :type base_url: str
-        :type auth_context: AuthenticationContext or None
+        :param str base_url: Absolute Web or Site Url
+        :param AuthenticationContext or None auth_context: Authentication context
         """
         if base_url.endswith("/"):
             base_url = base_url[:len(base_url) - 1]
@@ -40,7 +41,7 @@ class ClientContext(ClientRuntimeContext):
         self.__web = None
         self.__site = None
         self._base_url = base_url
-        self._contextWebInformation = None
+        self._ctx_web_info = None
         self._pendingRequest = ODataRequest(self, JsonLightFormat(ODataMetadataLevel.Verbose))
         self._pendingRequest.beforeExecute += self._build_modification_query
 
@@ -144,12 +145,11 @@ class ClientContext(ClientRuntimeContext):
         """
         :type request_options: RequestOptions
         """
-        if not self._contextWebInformation:
-            self._contextWebInformation = ContextWebInformation()
-            self.request_form_digest()
-        request_options.set_header('X-RequestDigest', self._contextWebInformation.FormDigestValue)
+        if self._ctx_web_info is None:
+            self.get_context_web_information()
+        request_options.set_header('X-RequestDigest', self._ctx_web_info.FormDigestValue)
 
-    def request_form_digest(self):
+    def get_context_web_information(self):
         """Request Form Digest"""
         request = RequestOptions("contextInfo")
         request.method = HttpMethod.Post
@@ -157,7 +157,8 @@ class ClientContext(ClientRuntimeContext):
         json = response.json()
         json_format = JsonLightFormat()
         json_format.function_tag_name = "GetContextWebInformation"
-        self.pending_request().map_json(json, self._contextWebInformation, json_format)
+        self._ctx_web_info = ContextWebInformation()
+        self.pending_request().map_json(json, self._ctx_web_info, json_format)
 
     def clone(self, url, clear_queries=True):
         """
@@ -226,7 +227,13 @@ class ClientContext(ClientRuntimeContext):
         return HubSiteCollection(self, ResourcePath("hubSites"))
 
     @property
+    def site_pages(self):
+        """Represents a set of APIs to use for managing site pages."""
+        return SitePageService(self, ResourcePath("sitePages"))
+
+    @property
     def base_url(self):
+        """Represents absolute Web or Site Url"""
         return self._base_url
 
     @property

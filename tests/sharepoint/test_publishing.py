@@ -1,5 +1,5 @@
 from office365.sharepoint.publishing.primary_city_time import PrimaryCityTime
-from office365.sharepoint.publishing.site_page_metadata_collection import SitePageMetadataCollection
+from office365.sharepoint.publishing.site_page_collection import SitePageCollection
 from office365.sharepoint.publishing.site_page_service import SitePageService
 from office365.sharepoint.publishing.video_service_discoverer import VideoServiceDiscoverer
 from tests.sharepoint.sharepoint_case import SPTestCase
@@ -22,7 +22,7 @@ class TestSPPublishing(SPTestCase):
     def test2_get_site_pages(self):
         svc = SitePageService(self.client)
         pages = svc.pages.get().execute_query()
-        self.assertIsInstance(pages, SitePageMetadataCollection)
+        self.assertIsInstance(pages, SitePageCollection)
 
     def test3_get_time_zone(self):
         time_zone = SitePageService.get_time_zone(self.client, "Moscow").execute_query()

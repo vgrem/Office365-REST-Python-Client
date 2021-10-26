@@ -12,9 +12,11 @@ from office365.sharepoint.publishing.site_page_collection import SitePageCollect
 
 class SitePageService(BaseEntity):
 
-    def __init__(self, context):
+    def __init__(self, context, resource_path=None):
         """Represents a set of APIs to use for managing site pages."""
-        super(SitePageService, self).__init__(context, ResourcePath("SP.Publishing.SitePageService"))
+        if resource_path is None:
+            resource_path = ResourcePath("SP.Publishing.SitePageService")
+        super(SitePageService, self).__init__(context, resource_path)
 
     @property
     def pages(self):

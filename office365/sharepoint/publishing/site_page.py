@@ -35,30 +35,43 @@ class SitePage(SitePageMetadata):
         """
         pass
 
-    def save_draft(self, title, canvas_content=None, topic_header=None):
+    def save_draft(self, title, canvas_content=None, banner_image_url=None, topic_header=None):
         """
         Updates the Site Page with the provided sitePage metadata and checks in a minor version if the page library
         has minor versions enabled.
 
         :param str title: The title of Site Page
         :param str canvas_content:
+        :param str banner_image_url:
         :param str topic_header:
         """
-        payload = SitePageFieldsData(title=title, canvas_content=canvas_content, topic_header=topic_header)
+        payload = SitePageFieldsData(title=title,
+                                     canvas_content=canvas_content,
+                                     banner_image_url=banner_image_url,
+                                     topic_header=topic_header)
         result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "SaveDraft", None, payload, "sitePage", result)
         self.context.add_query(qry)
         return result
 
-    def save_page_as_draft(self, page_stream):
+    def save_page_as_draft(self, title, canvas_content=None, banner_image_url=None, topic_header=None):
         """
         Updates the Site Page with the provided pageStream content and checks in a minor version if the page library
         has minor versions enabled.
 
-        :param str page_stream: The binary stream to save for the current Site Page.
-        :return:
+        :param str title: The title of Site Page
+        :param str canvas_content:
+        :param str banner_image_url:
+        :param str topic_header:
         """
-        pass
+        payload = SitePageFieldsData(title=title,
+                                     canvas_content=canvas_content,
+                                     banner_image_url=banner_image_url,
+                                     topic_header=topic_header)
+        result = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "SavePageAsDraft", None, payload, "pageStream", result)
+        self.context.add_query(qry)
+        return result
 
     def save_page_as_template(self):
         pass
