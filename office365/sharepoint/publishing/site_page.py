@@ -26,14 +26,22 @@ class SitePage(SitePageMetadata):
         self.context.add_query(qry)
         return self
 
-    def save_page(self, page_stream):
+    def save_page(self, title, canvas_content=None, banner_image_url=None, topic_header=None):
         """
         Updates the current Site Page with the provided pageStream content.
 
-        :param str page_stream: The binary stream to save for the current Site Page.
-        :return:
+        :param str title: The title of Site Page
+        :param str canvas_content:
+        :param str banner_image_url:
+        :param str topic_header:
         """
-        pass
+        payload = SitePageFieldsData(title=title,
+                                     canvas_content=canvas_content,
+                                     banner_image_url=banner_image_url,
+                                     topic_header=topic_header)
+        qry = ServiceOperationQuery(self, "SavePage", None, payload, "pageStream")
+        self.context.add_query(qry)
+        return self
 
     def save_draft(self, title, canvas_content=None, banner_image_url=None, topic_header=None):
         """
@@ -59,7 +67,7 @@ class SitePage(SitePageMetadata):
         Updates the Site Page with the provided pageStream content and checks in a minor version if the page library
         has minor versions enabled.
 
-        :param str title: The title of Site Page
+        :param str title: The title of Site Page. At least Title property needs to be provided
         :param str canvas_content:
         :param str banner_image_url:
         :param str topic_header:
@@ -74,21 +82,75 @@ class SitePage(SitePageMetadata):
         return result
 
     def save_page_as_template(self):
-        pass
+        """
+
+        """
+        return_type = SitePage(self.context)
+        qry = ServiceOperationQuery(self, "SavePageAsTemplate", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def demote_from_news(self):
+        """
+        Updates the promoted state of the site page to 0. On success MUST return true.
+        If the site page already has promoted state as 0, MUST return true. If the site page is not checked out
+        to the current user,
+        the server MUST throw Microsoft.SharePoint.Client.ClientServiceException with ErrorInformation.HttpStatusCode
+        set to 409.
+        """
+        result = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "DemoteFromNews", None, None, None, result)
+        self.context.add_query(qry)
+        return result
+
+    def promote_to_news(self):
+        """
+        Updates the promoted state of the site page to 1 if the site page has not been published yet.
+        Updates the promoted state of the site page to 2 if the site page has already been published.
+        If the site page already has promoted state set to 1 or 2, MUST return true.
+        If the site page is not checked out to the current users,
+        the server MUST throw Microsoft.SharePoint.Client.ClientServiceException with ErrorInformation.HttpStatusCode
+        set to 409.
+        """
+        result = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "PromoteToNews", None, None, None, result)
+        self.context.add_query(qry)
+        return result
 
     def publish(self):
         """
         Publishes a major version of the current Site Page.  Returns TRUE on success, FALSE otherwise.
 
-        :return:
         """
         result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "Publish", None, None, None, result)
         self.context.add_query(qry)
         return result
 
+    def schedule_publish(self, publish_start_date):
+        """
+        Schedules the page publication for a certain date
+
+        :param datetime.datetime publish_start_date: The pending publication scheduled date
+        """
+        payload = SitePageFieldsData(publish_start_date=publish_start_date)
+        result = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "SchedulePublish", None, payload, "sitePage", result)
+        self.context.add_query(qry)
+        return result
+
     def share_page_preview_by_email(self, message, recipient_emails):
-        pass
+        """
+        :param str message:
+        :param list[str] recipient_emails:
+        """
+        payload = {
+            "message": message,
+            "recipientEmails": recipient_emails
+        }
+        qry = ServiceOperationQuery(self, "SharePagePreviewByEmail", None, payload)
+        self.context.add_query(qry)
+        return self
 
     @property
     def canvas_content(self):

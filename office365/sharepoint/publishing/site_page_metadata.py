@@ -14,6 +14,15 @@ class SitePageMetadata(BaseEntity):
         return self.properties.get('AbsoluteUrl', None)
 
     @property
+    def comments_disabled(self):
+        """
+        Indicates if comments are disabled for the current Site Page.
+
+        :rtype: bool or None
+        """
+        return self.properties.get("CommentsDisabled", None)
+
+    @property
     def banner_image_url(self):
         """Gets the banner image Url.
 
@@ -77,6 +86,14 @@ class SitePageMetadata(BaseEntity):
         :rtype: str or None
         """
         return self.properties.get('FirstPublished', None)
+
+    @property
+    def is_page_checked_out_to_current_user(self):
+        """Indicates if the Site Page is checked out to the current user.
+
+        :rtype: bool or None
+        """
+        return self.properties.get('IsPageCheckedOutToCurrentUser', None)
 
     @property
     def entity_type_name(self):
