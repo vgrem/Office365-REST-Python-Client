@@ -4,7 +4,8 @@ from office365.sharepoint.base_entity import BaseEntity
 
 
 class ThemeManager(BaseEntity):
-    """SharePoint site theming"""
+    """SharePoint site theming REST interface to perform basic create, read, update, and delete (CRUD)
+    operations on site themes."""
 
     @property
     def entity_type_name(self):

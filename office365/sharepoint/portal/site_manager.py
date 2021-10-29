@@ -7,19 +7,34 @@ from office365.sharepoint.portal.site_creation_response import SPSiteCreationRes
 
 
 class SPSiteManager(BaseEntity):
+    """Provides REST methods for creating and managing SharePoint sites."""
 
-    def __init__(self, context):
-        super(SPSiteManager, self).__init__(context, ResourcePath("SPSiteManager"))
+    def __init__(self, context, resource_path=None):
+        if resource_path is None:
+            resource_path = ResourcePath("SPSiteManager")
+        super(SPSiteManager, self).__init__(context, resource_path)
 
     def create(self, request):
-        """Create a modern site"""
+        """
+        When executing this method server MUST create a SharePoint site according to the parameters passed in the
+        SPSiteCreationRequest and return the information about the site it created in the format of a
+        SPSiteCreationResponse.
+
+        :param SPSiteCreationRequest request: The entity data object for sites creation request, which include
+            information for the site to be created.
+        """
         result = ClientResult(self.context, SPSiteCreationResponse())
         qry = ServiceOperationQuery(self, "Create", None, request, "request", result)
         self.context.add_query(qry)
         return result
 
     def delete(self, site_id):
-        """Deletes a SharePoint site"""
+        """When executing this method server MUST put the SharePoint site into recycle bin according to
+        the parameter passed in the siteId, if the SharePoint site of giving siteId exists and the site has
+        no attached AD group.
+
+        :param str site_id: The GUID to uniquely identify a SharePoint site.
+        """
         payload = {
             "siteId": site_id
         }
@@ -28,9 +43,10 @@ class SPSiteManager(BaseEntity):
         return self
 
     def get_status(self, site_url):
-        """Get the status of a SharePoint site
+        """When executing this method server SHOULD return a SharePoint site status in the format
+        of a SPSiteCreationRespnse according to the parameter passed in the url.
 
-        :type site_url: str
+        :param str site_url: URL of the site to return status for
         """
         response = ClientResult(self.context, SPSiteCreationResponse())
         qry = ServiceOperationQuery(self, "Status", None, {'url': site_url}, None, response)

@@ -12,7 +12,7 @@ class RoleDefinition(BaseEntity):
         return self.properties.get('Id', None)
 
     @property
-    def roleTypeKind(self):
+    def role_type_kind(self):
         """Specifies the type of the role definition.
         Its value MUST be equal to or greater than 0. Its value MUST be equal to or less than 5."""
         return self.properties.get('RoleTypeKind', None)

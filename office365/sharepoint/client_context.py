@@ -150,7 +150,7 @@ class ClientContext(ClientRuntimeContext):
         request_options.set_header('X-RequestDigest', self._ctx_web_info.FormDigestValue)
 
     def get_context_web_information(self):
-        """Request Form Digest"""
+        """Returns an ContextWebInformation object that specifies metadata about the site"""
         request = RequestOptions("contextInfo")
         request.method = HttpMethod.Post
         response = self.execute_request_direct(request)
@@ -197,6 +197,14 @@ class ClientContext(ClientRuntimeContext):
                 request.ensure_header("IF-MATCH", '*')
 
     @property
+    def context_info(self):
+        """Returns an ContextWebInformation object that specifies metadata about the site
+
+        :rtype: ContextWebInformation
+        """
+        return self._ctx_web_info
+
+    @property
     def web(self):
         """Get Web client object"""
         if not self.__web:
@@ -216,20 +224,50 @@ class ClientContext(ClientRuntimeContext):
         return RequestUserContext(self, ResourcePath("Me"))
 
     @property
+    def micro_service_manager(self):
+        """Alias to MicroServiceManager"""
+        from office365.sharepoint.microservice.micro_service_manager import MicroServiceManager
+        return MicroServiceManager(self, ResourcePath("microServiceManager"))
+
+    @property
+    def group_site_manager(self):
+        """Alias to GroupSiteManager"""
+        from office365.sharepoint.portal.group_site_manager import GroupSiteManager
+        return GroupSiteManager(self, ResourcePath("groupSiteManager"))
+
+    @property
     def lists(self):
-        """Gets information about all lists that the current user can access."""
+        """Alias to ListCollection. Gets information about all lists that the current user can access."""
         from office365.sharepoint.lists.list_collection import ListCollection
         return ListCollection(self, ResourcePath("Lists"))
 
     @property
     def hub_sites(self):
-        """Gets information about all hub sites that the current user can access."""
+        """Alias to HubSiteCollection. Gets information about all hub sites that the current user can access."""
         return HubSiteCollection(self, ResourcePath("hubSites"))
 
     @property
     def site_pages(self):
-        """Represents a set of APIs to use for managing site pages."""
+        """Alias to SitePageService. Represents a set of APIs to use for managing site pages."""
         return SitePageService(self, ResourcePath("sitePages"))
+
+    @property
+    def site_linking_manager(self):
+        """Alias to Microsoft.SharePoint.Portal.SiteLinkingManager. """
+        from office365.sharepoint.portal.site_linking_manager import SiteLinkingManager
+        return SiteLinkingManager(self, ResourcePath("siteLinkingManager"))
+
+    @property
+    def site_manager(self):
+        """Alias to SPSiteManager. Represents methods for creating and managing SharePoint sites"""
+        from office365.sharepoint.portal.site_manager import SPSiteManager
+        return SPSiteManager(self, ResourcePath("spSiteManager"))
+
+    @property
+    def theme_manager(self):
+        """Alias to SP.Utilities.ThemeManager. Represents methods for creating and managing site theming"""
+        from office365.sharepoint.portal.theme_manager import ThemeManager
+        return ThemeManager(self, ResourcePath("themeManager"))
 
     @property
     def base_url(self):

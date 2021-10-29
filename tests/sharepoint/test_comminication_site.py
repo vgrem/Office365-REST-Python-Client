@@ -15,8 +15,9 @@ class TestCommunicationSite(TestCase):
     @classmethod
     def setUpClass(cls):
         super(TestCommunicationSite, cls).setUpClass()
-        cls.client = ClientContext(test_site_url).with_credentials(test_user_credentials)
-        cls.site_manager = SPSiteManager(cls.client)
+        ctx = ClientContext(test_site_url).with_credentials(test_user_credentials)
+        cls.site_manager = SPSiteManager(ctx)
+        cls.client = ctx
 
     def test1_create_site(self):
         current_user = self.client.web.current_user.get().execute_query()
