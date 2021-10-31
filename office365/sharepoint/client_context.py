@@ -146,7 +146,7 @@ class ClientContext(ClientRuntimeContext):
         :type request_options: RequestOptions
         """
         if self._ctx_web_info is None:
-            self.get_context_web_information()
+            self._ctx_web_info = self.get_context_web_information()
         request_options.set_header('X-RequestDigest', self._ctx_web_info.FormDigestValue)
 
     def get_context_web_information(self):
@@ -157,8 +157,9 @@ class ClientContext(ClientRuntimeContext):
         json = response.json()
         json_format = JsonLightFormat()
         json_format.function_tag_name = "GetContextWebInformation"
-        self._ctx_web_info = ContextWebInformation()
-        self.pending_request().map_json(json, self._ctx_web_info, json_format)
+        return_value = ContextWebInformation()
+        self.pending_request().map_json(json, return_value, json_format)
+        return return_value
 
     def clone(self, url, clear_queries=True):
         """
@@ -250,6 +251,12 @@ class ClientContext(ClientRuntimeContext):
     def site_pages(self):
         """Alias to SitePageService. Represents a set of APIs to use for managing site pages."""
         return SitePageService(self, ResourcePath("sitePages"))
+
+    @property
+    def site_icon_manager(self):
+        """Alias to Microsoft.SharePoint.Portal.SiteIconManager. """
+        from office365.sharepoint.portal.site_icon_manager import SiteIconManager
+        return SiteIconManager(self, ResourcePath("SiteIconManager"))
 
     @property
     def site_linking_manager(self):

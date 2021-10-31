@@ -57,3 +57,15 @@ def parse_query_string(url, key):
         from urllib.parse import parse_qs
         parsed_url = urlparse(url)
         return parse_qs(parsed_url.query)[key][0]
+
+
+def get_mime_type(file_name):
+    if is_py2:
+        from mimetypes import MimeTypes
+        mime = MimeTypes()
+        import urllib
+        url = urllib.pathname2url(file_name)
+        return mime.guess_type(url)
+    else:
+        import mimetypes
+        return mimetypes.guess_type(file_name)
