@@ -16,11 +16,11 @@ class OnenotePageCollection(EntityCollection):
     def __init__(self, context, resource_path=None):
         super(OnenotePageCollection, self).__init__(context, OnenotePage, resource_path)
 
-    def add(self, presentation, files=None):
+    def add(self, presentation_file, attachment_files=None):
         """
         :rtype: OnenotePage
         """
-        qry = OneNotePageCreateQuery(self, presentation, files)
+        qry = OneNotePageCreateQuery(self, presentation_file, attachment_files)
         self.context.add_query(qry)
         return qry.return_type
 

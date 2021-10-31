@@ -1,3 +1,4 @@
+# coding=utf-8
 from office365.directory.directory_object import DirectoryObject
 from office365.runtime.client_value_collection import ClientValueCollection
 

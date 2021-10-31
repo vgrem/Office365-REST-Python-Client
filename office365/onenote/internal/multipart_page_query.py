@@ -1,6 +1,7 @@
+import base64
 from email.message import Message
 
-from office365.runtime.compat import get_mime_type
+from office365.runtime.compat import get_mime_type, message_as_bytes_or_string
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.batch_query import create_boundary
 from office365.runtime.queries.client_query import ClientQuery
@@ -10,26 +11,28 @@ def _message_to_payload(message):
     """
     :type message: Message
     """
-    eol = "\r\n"
-    lines = message.as_string().splitlines()
-    payload = str.join(eol, lines[2:]) + eol
-    return str.encode(payload)
+
+    eol = b"\r\n"
+    cc = message_as_bytes_or_string(message)
+    lines = cc.split(b"\n")
+    payload = bytes.join(eol, lines[2:]) + eol
+    return payload
 
 
 class OneNotePageCreateQuery(ClientQuery):
 
-    def __init__(self, pages, presentation, files=None):
+    def __init__(self, pages, presentation_file, attachment_files=None):
         """
         :type pages: office365.onenote.pages.page.OnenotePageCollection
-        :type presentation: dict
-        :type files: dict or None
+        :type presentation_file: typing.IO
+        :type attachment_files: dict or None
         """
         super(OneNotePageCreateQuery, self).__init__(pages.context, pages)
         pages.context.before_execute(self._construct_multipart_request)
-        self._presentation = presentation
-        if files is None:
-            files = {}
-        self._files = files
+        self._presentation = presentation_file
+        if attachment_files is None:
+            attachment_files = {}
+        self._files = attachment_files
 
     def _construct_multipart_request(self, request):
         """
@@ -43,18 +46,19 @@ class OneNotePageCreateQuery(ClientQuery):
         main_message.add_header("Content-Type", "multipart/form-data; boundary={0}".format(boundary))
         main_message.set_boundary(boundary)
 
-        presentation_type = get_mime_type(self._presentation.get("name"))
+        c_type = get_mime_type(self._presentation.name)
         presentation_message = Message()
-        presentation_message.add_header("Content-Type", presentation_type[0])
+        presentation_message.add_header("Content-Type", c_type[0])
         presentation_message.add_header("Content-Disposition", "form-data; name=\"Presentation\"")
-        presentation_message.set_payload(self._presentation.get("content"))
+        presentation_message.set_payload(self._presentation.read())
         main_message.attach(presentation_message)
 
-        for name, file_content in self._files.items():
+        for name, file in self._files.items():
             file_message = Message()
-            file_message.add_header("Content-Type", "text/html")
+            c_type = get_mime_type(file.name)
+            file_message.add_header("Content-Type", c_type[0])
             file_message.add_header("Content-Disposition", "form-data; name=\"{0}\"".format(name))
-            file_message.set_payload(file_content)
+            file_message.set_payload(file.read())
             main_message.attach(file_message)
 
         request.data = _message_to_payload(main_message)
