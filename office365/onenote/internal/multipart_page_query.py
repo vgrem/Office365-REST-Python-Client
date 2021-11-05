@@ -1,5 +1,7 @@
-import base64
+from base64 import encodebytes
+from email import encoders
 from email.message import Message
+from email.mime.text import MIMEText
 
 from office365.runtime.compat import get_mime_type, message_as_bytes_or_string
 from office365.runtime.http.http_method import HttpMethod
@@ -11,11 +13,11 @@ def _message_to_payload(message):
     """
     :type message: Message
     """
-
-    eol = b"\r\n"
-    cc = message_as_bytes_or_string(message)
-    lines = cc.split(b"\n")
-    payload = bytes.join(eol, lines[2:]) + eol
+    lf = b"\n"
+    crlf = b"\r\n"
+    payload = message_as_bytes_or_string(message)
+    lines = payload.split(lf)
+    payload = bytes.join(crlf, lines[2:]) + crlf
     return payload
 
 
@@ -46,19 +48,20 @@ class OneNotePageCreateQuery(ClientQuery):
         main_message.add_header("Content-Type", "multipart/form-data; boundary={0}".format(boundary))
         main_message.set_boundary(boundary)
 
-        c_type = get_mime_type(self._presentation.name)
+        c_type, enc = get_mime_type(self._presentation.name)
         presentation_message = Message()
-        presentation_message.add_header("Content-Type", c_type[0])
+        presentation_message.add_header("Content-Type", c_type)
         presentation_message.add_header("Content-Disposition", "form-data; name=\"Presentation\"")
         presentation_message.set_payload(self._presentation.read())
         main_message.attach(presentation_message)
 
         for name, file in self._files.items():
             file_message = Message()
-            c_type = get_mime_type(file.name)
-            file_message.add_header("Content-Type", c_type[0])
+            c_type, enc = get_mime_type(file.name)
+            file_message.add_header("Content-Type", c_type)
             file_message.add_header("Content-Disposition", "form-data; name=\"{0}\"".format(name))
-            file_message.set_payload(file.read())
+            file_content = file.read()
+            file_message.set_payload(file_content)
             main_message.attach(file_message)
 
         request.data = _message_to_payload(main_message)
@@ -70,4 +73,3 @@ class OneNotePageCreateQuery(ClientQuery):
             self._return_type = OnenotePage(self.context)
             self.binding_type.add_child(self._return_type)
         return self._return_type
-

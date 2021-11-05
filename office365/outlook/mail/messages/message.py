@@ -10,13 +10,49 @@ from office365.outlook.mail.attachments.reference_attachment import ReferenceAtt
 from office365.outlook.mail.item import Item
 from office365.outlook.mail.itemBody import ItemBody
 from office365.outlook.mail.recipient import Recipient
+from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
 
 
 class Message(Item):
     """A message in a mailbox folder."""
+
+    def download(self, file_object):
+        """Download MIME content of a message into a file
+
+        :type file_object: typing.IO
+        """
+        result = self.get_content()
+
+        def _content_downloaded(resp):
+            """
+            :type resp: requests.Response
+            """
+            resp.raise_for_status()
+            file_object.write(result.value)
+
+        self.context.after_execute(_content_downloaded)
+        return self
+
+    def get_content(self):
+        """
+        Get MIME content of a message
+        """
+        result = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "$value", None, None, None, result)
+
+        def _construct_query(request):
+            """
+            :type request: office365.runtime.http.request_options.RequestOptions
+            """
+            request.method = HttpMethod.Get
+
+        self.context.before_execute(_construct_query)
+        self.context.add_query(qry)
+        return result
 
     def upload_attachment(self, file_path):
         """
@@ -33,6 +69,7 @@ class Message(Item):
 
             def _message_loaded():
                 self.attachments.resumable_upload(file_path, max_upload_chunk, file_attachment)
+
             self.ensure_property("id", _message_loaded)
             return file_attachment
         else:
@@ -140,7 +177,10 @@ class Message(Item):
 
     @property
     def body(self):
-        """The body of the message. It can be in HTML or text format."""
+        """The body of the message. It can be in HTML or text format.
+
+        :rtype: ItemBody
+        """
         return self.get_property("body", ItemBody())
 
     @body.setter
