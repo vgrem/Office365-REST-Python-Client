@@ -41,7 +41,7 @@ class ClientContext(ClientRuntimeContext):
         self.__web = None
         self.__site = None
         self._base_url = base_url
-        self._ctx_web_info = None
+        self._ctx_web_info = ContextWebInformation()
         self._pendingRequest = ODataRequest(self, JsonLightFormat(ODataMetadataLevel.Verbose))
         self._pendingRequest.beforeExecute += self._build_modification_query
 
@@ -63,6 +63,7 @@ class ClientContext(ClientRuntimeContext):
             """
             resp.raise_for_status()
             ctx._base_url = result.value
+
         ctx.after_execute(_init_context_for_web)
         return ctx
 
@@ -118,6 +119,7 @@ class ClientContext(ClientRuntimeContext):
 
         def _prepare_batch_request(request):
             self.ensure_form_digest(request)
+
         batch_request.beforeExecute += _prepare_batch_request
 
         all_queries = [qry for qry in self.pending_request().next_query()]
@@ -145,7 +147,7 @@ class ClientContext(ClientRuntimeContext):
         """
         :type request_options: RequestOptions
         """
-        if self._ctx_web_info is None:
+        if not self._ctx_web_info.is_valid:
             self._ctx_web_info = self.get_context_web_information()
         request_options.set_header('X-RequestDigest', self._ctx_web_info.FormDigestValue)
 
