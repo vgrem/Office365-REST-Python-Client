@@ -11,7 +11,7 @@ from office365.outlook.mail.messages.message import Message
 
 client = GraphClient(acquire_token_by_client_credentials)
 user = client.users[test_user_principal_name]
-messages = user.messages.filter("hasAttachments eq true").expand(["attachments"]).top(10).get().execute_query()
+messages = user.messages.filter("hasAttachments eq true").expand(["attachments"]).top(1).get().execute_query()
 with tempfile.TemporaryDirectory() as local_path:
     for message in messages:  # type: Message
         for attachment in message.attachments:  # type: Attachment

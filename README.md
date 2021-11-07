@@ -324,9 +324,10 @@ new_team = client.groups["{group_id}"].add_team().execute_query_retry()
 
 # Working with Microsoft Onenote API
 
-The library covers OneNote API in terms of calls to a user's OneNote notebooks, sections, and pages in a personal or organization account
+The library supports OneNote API in terms of calls to a user's OneNote notebooks, sections, and pages in a personal or organization account
 
 Example: Create a new page
+
 ```python
 from office365.graph_client import GraphClient
 client = GraphClient(acquire_token_func)
@@ -335,13 +336,22 @@ files = {}
 with open("./MyPage.html", 'rb') as f, \
     open("./MyImage.png", 'rb') as img_f, \
     open("./MyDoc.pdf", 'rb') as pdf_f:
-    presentation_file = f
     files["imageBlock1"] = img_f
     files["fileBlock1"] = pdf_f
-    page = client.me.onenote.pages.add(presentation_file=presentation_file, attachment_files=files).execute_query()
+    page = client.me.onenote.pages.add(presentation_file=f, attachment_files=files).execute_query()
 ```
 
 # Working with Microsoft Planner API
+
+The example demonstrates how to create a new planner task
+which corresponds to [`Create plannerTask` endpoint](https://docs.microsoft.com/en-us/graph/api/planner-post-tasks?view=graph-rest-1.0):
+
+```python
+from office365.graph_client import GraphClient
+
+client = GraphClient(acquire_token_func)
+task = client.planner.tasks.add(title="New task", planId="--plan id goes here--").execute_query()
+```
 
 # Third Party Libraries and Dependencies
 The following libraries will be installed when you install the client library:

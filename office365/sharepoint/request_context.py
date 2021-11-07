@@ -2,4 +2,6 @@ from office365.runtime.client_object import ClientObject
 
 
 class RequestContext(ClientObject):
-    pass
+
+    def get_remote_context(self):
+        pass
