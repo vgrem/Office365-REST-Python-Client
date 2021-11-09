@@ -148,13 +148,16 @@ class ClientContext(ClientRuntimeContext):
         :type request_options: RequestOptions
         """
         if not self._ctx_web_info.is_valid:
-            self._ctx_web_info = self.get_context_web_information()
+            self._ctx_web_info = self.get_context_web_information(request_options=request_options)
         request_options.set_header('X-RequestDigest', self._ctx_web_info.FormDigestValue)
 
-    def get_context_web_information(self):
+    def get_context_web_information(self, request_options=None):
         """Returns an ContextWebInformation object that specifies metadata about the site"""
         request = RequestOptions("contextInfo")
         request.method = HttpMethod.Post
+        if request_options:
+            request.proxies = request_options.proxies
+            request.verify = request_options.verify
         response = self.execute_request_direct(request)
         json = response.json()
         json_format = JsonLightFormat()

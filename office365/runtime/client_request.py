@@ -109,30 +109,35 @@ class ClientRequest(object):
                                          headers=request_options.headers,
                                          data=request_options.data,
                                          auth=request_options.auth,
-                                         verify=request_options.verify)
+                                         verify=request_options.verify,
+                                         proxies=request_options.proxies)
             else:
                 response = requests.post(url=request_options.url,
                                          headers=request_options.headers,
                                          json=request_options.data,
                                          auth=request_options.auth,
-                                         verify=request_options.verify)
+                                         verify=request_options.verify,
+                                         proxies=request_options.proxies)
         elif request_options.method == HttpMethod.Patch:
             response = requests.patch(url=request_options.url,
                                       headers=request_options.headers,
                                       json=request_options.data,
                                       auth=request_options.auth,
-                                      verify=request_options.verify)
+                                      verify=request_options.verify,
+                                      proxies=request_options.proxies)
         elif request_options.method == HttpMethod.Delete:
             response = requests.delete(url=request_options.url,
                                        headers=request_options.headers,
                                        auth=request_options.auth,
-                                       verify=request_options.verify)
+                                       verify=request_options.verify,
+                                       proxies=request_options.proxies)
         elif request_options.method == HttpMethod.Put:
             response = requests.put(url=request_options.url,
                                     data=request_options.data,
                                     headers=request_options.headers,
                                     auth=request_options.auth,
-                                    verify=request_options.verify)
+                                    verify=request_options.verify,
+                                    proxies=request_options.proxies)
         else:
             response = requests.get(url=request_options.url,
                                     headers=request_options.headers,
