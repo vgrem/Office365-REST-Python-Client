@@ -234,3 +234,22 @@ class Office365Tenant(BaseEntity):
         qry = ServiceOperationQuery(self, "DeleteTenantTheme", None, payload)
         self.context.add_query(qry)
         return self
+
+    def queue_import_profile_properties(self, id_type, source_data_id_property, property_map, source_uri):
+        """Bulk import custom user profile properties
+
+        :param int id_type: The type of id to use when looking up the user profile.
+        :param str source_data_id_property: The name of the ID property in the source data.
+        :param dict property_map: A map from the source property name to the user profile service property name.
+        :param str source_uri: The URI of the source data file to import.
+        """
+        return_type = ClientResult(self.context)
+        payload = {
+            "idType": id_type,
+            "sourceDataIdProperty": source_data_id_property,
+            "propertyMap": property_map,
+            "sourceUri": source_uri
+        }
+        qry = ServiceOperationQuery(self, "QueueImportProfileProperties", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type

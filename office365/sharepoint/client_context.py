@@ -1,4 +1,5 @@
 import copy
+
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.providers.saml_token_provider import resolve_base_url
@@ -162,6 +163,29 @@ class ClientContext(ClientRuntimeContext):
         return_value = ContextWebInformation()
         self.pending_request().map_json(json, return_value, json_format)
         return return_value
+
+    def execute_query_with_incremental_retry(self, max_retry=5):
+        """Handles throttling requests."""
+        settings = {
+            "timeout": 0
+        }
+
+        def _try_process_if_failed(retry, e):
+            """
+            :type retry: int
+            :type e: requests.exceptions.RequestException
+            """
+
+            # check if request was throttled - http status code 429
+            # or check is request failed due to server unavailable - http status code 503
+            if e.response.status_code == 429 or e.response.status_code == 503:
+                retry_after = e.response.headers.get("Retry-After", None)
+                if retry_after is not None:
+                    settings["timeout"] = int(retry_after)
+
+        self.execute_query_retry(timeout_secs=settings.get("timeout"),
+                                 max_retry=max_retry,
+                                 failure_callback=_try_process_if_failed)
 
     def clone(self, url, clear_queries=True):
         """

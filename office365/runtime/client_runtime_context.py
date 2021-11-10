@@ -39,9 +39,9 @@ class ClientRuntimeContext(object):
                 break
             except exceptions as e:
                 self.add_query(self.current_query, True)
-                sleep(timeout_secs)
                 if callable(failure_callback):
                     failure_callback(retry, e)
+                sleep(timeout_secs)
 
     @abc.abstractmethod
     def pending_request(self):
