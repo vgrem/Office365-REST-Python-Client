@@ -14,7 +14,6 @@ class EventHandler:
     def front_insert(self, listener):
         self._listeners.insert(0, listener)
 
-
     def notify(self, *args, **kwargs):
         for listener in self._listeners:
             if self._once:

@@ -15,7 +15,7 @@ task_item = tasks_list.add_item({
 }).execute_query()
 
 # 2. read & upload attachment for a list item
-path = "../../data/report #123.csv"
+path = "../../../data/report #123.csv"
 with open(path, 'rb') as fh:
     file_content = fh.read()
 attachment_file_info = AttachmentfileCreationInformation(os.path.basename(path), file_content)
