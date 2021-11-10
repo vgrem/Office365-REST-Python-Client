@@ -54,7 +54,7 @@ The following auth flows are supported:
   ```
   Documentation: refer [Granting access using SharePoint App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs) for a details  
   
-  Example: [connect_with_app_principal.py](examples/sharepoint/connect_with_app_principal.py)
+  Example: [connect_with_app_principal.py](examples/sharepoint/connect_with_app_only_principal.py)
   
 - user credentials flow: `ClientContext.with_credentials(user_credentials)`
 

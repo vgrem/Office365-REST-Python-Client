@@ -2,6 +2,7 @@ from office365.runtime.client_object import ClientObject
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.resource_path import ResourcePath
 from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
 from office365.sharepoint.tenant.administration.hubsite_properties import HubSiteProperties
@@ -24,6 +25,12 @@ class Tenant(ClientObject):
             None,
             "Microsoft.Online.SharePoint.TenantAdministration"
             )
+
+    def update(self):
+        """Update Tenant settings"""
+        qry = UpdateEntityQuery(self)
+        self.context.add_query(qry)
+        return self
 
     @staticmethod
     def from_url(admin_site_url):
