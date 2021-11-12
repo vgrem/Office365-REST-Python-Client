@@ -1,4 +1,4 @@
-from office365.onedrive.internal.resourcepaths.resource_path_url import ResourcePathUrl
+from office365.onedrive.internal.paths.resource_path_url import ResourcePathUrl
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 

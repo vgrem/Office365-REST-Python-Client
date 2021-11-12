@@ -1,21 +1,21 @@
-from office365.runtime.odata.odata_path_parser import ODataPathParser
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.base_path import BasePath
+from office365.runtime.odata.odata_path_builder import ODataPathBuilder
 
 
-class ResourcePathServiceOperation(ResourcePath):
+class ResourcePathServiceOperation(BasePath):
     """ Resource path to address Service Operations which
     represents simple functions exposed by an OData service"""
 
-    def __init__(self, method_name, method_parameters=None, parent=None):
+    def __init__(self, name, parameters=None, parent=None):
         """
-        :type method_parameters: list or dict or office365.runtime.client_value.ClientValue or None
-        :type method_name: str
-
-
+        :type parameters: list or dict or office365.runtime.client_value.ClientValue or None
+        :type name: str
+        :type parent: office365.runtime.base_path.BasePath
         """
-        super(ResourcePathServiceOperation, self).__init__(ODataPathParser.from_method(method_name, method_parameters),
-                                                           parent)
+        super(ResourcePathServiceOperation, self).__init__(parent)
+        self._name = name
+        self._parameters = parameters
 
     @property
-    def delimiter(self):
-        return ""
+    def segments(self):
+        return [self.delimiter, ODataPathBuilder.from_operation(self._name, self._parameters)]

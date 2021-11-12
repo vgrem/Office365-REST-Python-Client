@@ -17,6 +17,7 @@ class TestPage(GraphTestCase):
         pass
 
     def test2_list_pages(self):
-        my_pages = self.client.me.onenote.pages.get().execute_query()
+        sections = self.client.me.onenote.sections.top(1).get().execute_query()
+        my_pages = sections[0].pages.get().top(10).execute_query()
         self.assertIsNotNone(my_pages.resource_path)
 

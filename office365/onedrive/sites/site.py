@@ -147,6 +147,6 @@ class Site(BaseItem):
 
     def set_property(self, name, value, persist_changes=True):
         super(Site, self).set_property(name, value, persist_changes)
-        if name == "id" and self._resource_path.segment == "root":
-            self._resource_path = ResourcePath(value, self._resource_path.parent)
+        if name == "id" and self.resource_path.name == "root":
+            self._resource_path = ResourcePath(value, self.resource_path.parent)
         return self

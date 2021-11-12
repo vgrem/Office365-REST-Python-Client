@@ -3,7 +3,7 @@ from office365.onedrive.permissions.permission import Permission
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.lists.list import List
 from office365.onedrive.listitems.list_item import ListItem
-from office365.onedrive.internal.resourcepaths.root_resource_path import RootResourcePath
+from office365.onedrive.internal.paths.root_resource_path import RootResourcePath
 from office365.onedrive.sites.site import Site
 from office365.runtime.resource_path import ResourcePath
 

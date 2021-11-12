@@ -11,7 +11,7 @@ from office365.onedrive.analytics.item_activity_stat import ItemActivityStat
 from office365.onedrive.analytics.item_analytics import ItemAnalytics
 from office365.onedrive.permissions.permission import Permission
 from office365.entity_collection import EntityCollection
-from office365.onedrive.internal.resourcepaths.children_resource_path import ChildrenResourcePath
+from office365.onedrive.internal.paths.children_resource_path import ChildrenResourcePath
 from office365.onedrive.driveitems.conflict_behavior import ConflictBehavior
 from office365.onedrive.shares.shared import Shared
 from office365.onedrive.versions.drive_item_version import DriveItemVersion
@@ -20,16 +20,17 @@ from office365.onedrive.files.fileSystemInfo import FileSystemInfo
 from office365.onedrive.folders.folder import Folder
 from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.driveitems.publication_facet import PublicationFacet
-from office365.onedrive.internal.resourcepaths.root_resource_path import RootResourcePath
+from office365.onedrive.internal.paths.root_resource_path import RootResourcePath
 from office365.onedrive.driveitems.thumbnail_set import ThumbnailSet
 from office365.onedrive.upload_session import UploadSession
 from office365.onedrive.workbooks.workbook import Workbook
-from office365.onedrive.internal.resourcepaths.resource_path_url import ResourcePathUrl
+from office365.onedrive.internal.paths.resource_path_url import ResourcePathUrl
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.resource_path import ResourcePath
+from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
 
 
 class DriveItem(BaseItem):
@@ -333,7 +334,9 @@ class DriveItem(BaseItem):
             "endDateTime": end_dt.strftime('%m-%d-%Y') if end_dt else None,
             "interval": interval
         }
-        return_type = EntityCollection(self.context, ItemActivityStat)
+        return_type = EntityCollection(self.context, ItemActivityStat,
+                                       ResourcePathServiceOperation("getActivitiesByInterval", params,
+                                                                    self.resource_path))
         qry = ServiceOperationQuery(self, "getActivitiesByInterval", params, None, None, return_type)
         self.context.add_query(qry)
 
@@ -564,7 +567,7 @@ class DriveItem(BaseItem):
                 isinstance(parent_path, RootResourcePath):
                 parent_path = parent_path.parent
             else:
-                if parent_path.parent is not None and parent_path.parent.segment == "items":
+                if parent_path.parent is not None and parent_path.parent.name == "items":
                     parent_path = parent_path.parent
                 else:
                     parent_path = ResourcePath("items", parent_path)

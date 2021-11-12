@@ -1,11 +1,6 @@
 from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-
-
-def _save_url(url):
-    if url.endswith("/"):
-        return url
-    return url + "/"
+from office365.runtime.paths.static_service_operation import ResourcePathStaticServiceOperation
 
 
 class ServiceOperationQuery(ClientQuery):
@@ -30,14 +25,19 @@ class ServiceOperationQuery(ClientQuery):
         self.static = False
 
     def build_url(self):
-        method_path = ResourcePathServiceOperation(self.method_name, self.method_parameters)
-        self.binding_type.query_options.reset()
         if self.static:
-            url = _save_url(self.context.service_root_url()) + \
-                  '.'.join([self.binding_type.entity_type_name, method_path.to_url()])
+            path = ResourcePathStaticServiceOperation(
+                self.binding_type.entity_type_name,
+                self.method_name,
+                self.method_parameters)
+            return self.context.service_root_url() + str(path)
         else:
-            url = "".join([_save_url(self.binding_type.resource_url), method_path.to_url()])
-        return url
+            path = ResourcePathServiceOperation(
+                self.method_name,
+                self.method_parameters,
+                self.binding_type.resource_path
+            )
+            return self.context.service_root_url() + str(path)
 
     @property
     def method_name(self):

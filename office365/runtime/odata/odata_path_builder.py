@@ -4,33 +4,31 @@ from office365.runtime.client_value import ClientValue
 from office365.runtime.compat import is_string_type
 
 
-class ODataPathParser(object):
-    @staticmethod
-    def parse_path_string(string):
-        pass
+class ODataPathBuilder(object):
 
     @staticmethod
-    def from_method(method_name, method_parameters=None):
+    def from_operation(name, parameters=None):
         """
+        Constructs segment from operation
 
-        :type method_parameters: list or dict or ClientValue
-        :type method_name: str
+        :type parameters: list or dict or ClientValue
+        :type name: str
         """
         url = ""
-        if method_name:
-            url = method_name
+        if name:
+            url = name
 
-        if isinstance(method_parameters, ClientValue):
-            param_value = method_parameters.to_json()
+        if isinstance(parameters, ClientValue):
+            param_value = parameters.to_json()
             url += "(@v)?@v={0}".format(json.dumps(param_value))
-        elif method_parameters is not None:
+        elif parameters is not None:
             url += "("
-            if isinstance(method_parameters, dict):
-                url += ','.join(['%s=%s' % (key, ODataPathParser.encode_method_value(value)) for (key, value) in
-                                 method_parameters.items() if value is not None])
+            if isinstance(parameters, dict):
+                url += ','.join(['%s=%s' % (key, ODataPathBuilder.encode_method_value(value)) for (key, value) in
+                                 parameters.items() if value is not None])
             else:
-                url += ','.join(['%s' % (ODataPathParser.encode_method_value(value)) for (i, value) in
-                                 enumerate(method_parameters) if value is not None])
+                url += ','.join(['%s' % (ODataPathBuilder.encode_method_value(value)) for (i, value) in
+                                 enumerate(parameters) if value is not None])
             url += ")"
         return url
 

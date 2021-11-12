@@ -6,7 +6,7 @@ def _normalize(key, value):
 
 class QueryOptions(object):
 
-    def __init__(self, select=None, expand=None, filter_expr=None, orderBy=None, top=None, skip=None):
+    def __init__(self, select=None, expand=None, filter_expr=None, order_by=None, top=None, skip=None):
         """
         A query option is a set of query string parameters applied to a resource that can help control the amount
         of data being returned for the resource in the URL
@@ -17,7 +17,7 @@ class QueryOptions(object):
         line with retrieved resources.
         :param str filter_expr: The $filter system query option allows clients to filter a collection of resources
         that are addressed by a request URL.
-        :param str orderBy: The $orderby system query option allows clients to request resources in either ascending
+        :param str order_by: The $orderby system query option allows clients to request resources in either ascending
         order using asc or descending order using desc
         :param int top: The $top system query option requests the number of items in the queried collection to
         be included in the result.
@@ -31,7 +31,7 @@ class QueryOptions(object):
         self.select = select
         self.expand = expand
         self.filter = filter_expr
-        self.orderBy = orderBy
+        self.orderBy = order_by
         self.skip = skip
         self.top = top
 
