@@ -35,6 +35,12 @@ class QueryOptions(object):
         self.skip = skip
         self.top = top
 
+    def __repr__(self):
+        return self.to_url()
+
+    def __str__(self):
+        return self.to_url()
+
     @property
     def is_empty(self):
         result = {k: v for (k, v) in self.__dict__.items() if v is not None and v}

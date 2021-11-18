@@ -25,9 +25,9 @@ class WebCollection(BaseEntityCollection):
         return target_web
 
     @property
-    def resource_url(self):
-        url = super(WebCollection, self).resource_url
+    def service_root_url(self):
+        url = super(WebCollection, self).service_root_url
         parent_web_url = self._parent.get_property("Url")
         if parent_web_url is not None:
-            url = url.replace(self.context.service_root_url(), parent_web_url + '/_api/')
+            url = url.replace(self.context.service_root_url(), parent_web_url + '/_api')
         return url

@@ -55,11 +55,11 @@ class GraphClient(ClientRuntimeContext):
         self._authority_host_url = "https://login.microsoftonline.com"
         self._acquire_token_callback = acquire_token_callback
 
-    def build_single_request(self, query):
+    def build_request(self, query):
         """
         :type: office365.runtime.queries.client_query.ClientQuery
         """
-        request = super(GraphClient, self).build_single_request(query)
+        request = super(GraphClient, self).build_request(query)
         self._build_specific_query(request)
         return request
 

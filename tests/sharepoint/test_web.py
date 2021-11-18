@@ -78,8 +78,8 @@ class TestSharePointWeb(SPTestCase):
 
     def test_10_enum_all_webs(self):
         """Test to enumerate all webs within site"""
-        result = self.client.web.get_all_webs().execute_query()
-        self.assertTrue(len(result.value) > 0)
+        webs = self.client.web.get_all_webs().execute_query()
+        self.assertTrue(len(webs) > 0)
 
     def test_11_read_list(self):
         site_pages = self.client.web.get_list("SitePages").get().execute_query()

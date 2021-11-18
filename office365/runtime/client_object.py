@@ -52,7 +52,7 @@ class ClientObject(object):
         return self
 
     def build_request(self):
-        return self.context.build_request()
+        return self.context.build_request(self.context.current_query)
 
     def get(self):
         self.context.load(self)
@@ -168,17 +168,11 @@ class ClientObject(object):
         return self._entity_type_name
 
     @property
-    def resource_url(self):
-        """Generate resource Url
-
+    def service_root_url(self):
+        """Returns Service Root Url
         :rtype: str or None
         """
-        if self.resource_path:
-            url = self.context.service_root_url() + self.resource_path.to_url()
-            if not self.query_options.is_empty:
-                url = url + "?" + self._query_options.to_url()
-            return url
-        return None
+        return self.context.service_root_url()
 
     @property
     def context(self):

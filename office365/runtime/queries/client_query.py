@@ -1,3 +1,5 @@
+
+
 class ClientQuery(object):
     """Client query"""
 
@@ -18,15 +20,20 @@ class ClientQuery(object):
         self._parameter_name = parameter_name
         self._return_type = return_type
 
-    def build_url(self):
-        return self.binding_type.resource_url
-
     def build_request(self):
-        return self.context.build_single_request(self)
+        return self.context.build_request(self)
 
     def execute_query(self):
         self.context.execute_query()
         return self.return_type
+
+    @property
+    def resource_path(self):
+        return self.binding_type.resource_path
+
+    @property
+    def service_root_url(self):
+        return self.binding_type.service_root_url
 
     @property
     def context(self):

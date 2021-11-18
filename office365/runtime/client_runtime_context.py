@@ -9,15 +9,11 @@ from office365.runtime.queries.read_entity_query import ReadEntityQuery
 
 class ClientRuntimeContext(object):
 
-    def build_request(self):
-        return self.pending_request().build_request()
-
-    def build_single_request(self, query):
+    def build_request(self, query):
         """
-
-        :type: office365.runtime.queries.client_query.ClientQuery
+        :type query: office365.runtime.queries.client_query.ClientQuery
         """
-        return self.pending_request().build_single_request(query)
+        return self.pending_request().build_request(query)
 
     def execute_query_retry(self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None,
                             exceptions=(ClientRequestException,)):
@@ -52,6 +48,9 @@ class ClientRuntimeContext(object):
 
     @abc.abstractmethod
     def service_root_url(self):
+        """
+        :rtype: str
+        """
         pass
 
     @abc.abstractmethod

@@ -14,17 +14,18 @@ class ReadEntityQuery(ClientQuery):
         super(ReadEntityQuery, self).__init__(entity.context, entity, None, None, entity)
         self._properties_to_include = properties_to_include
 
-    def build_url(self):
-        url = super(ReadEntityQuery, self).build_url()
-        if self._properties_to_include:
-            url += "?" + self._build_query_url()
-        return url
+    @property
+    def query_options(self):
+        if self._properties_to_include is not None:
+            return self._build_query_options()
+        else:
+            return self._binding_type.query_options
 
-    def _build_query_url(self):
+    def _build_query_options(self):
         query = QueryOptions()
         for n in self._properties_to_include:
             prop_val = self._binding_type.get_property(n)
             if isinstance(prop_val, ClientObject) or n == "Properties":
                 query.expand.append(n)
             query.select.append(n)
-        return query.to_url()
+        return query

@@ -31,7 +31,7 @@ class TestGraphTeam(GraphTestCase):
     def test5_get_team(self):
         group_id = self.__class__.target_team.id
         existing_team = self.client.teams[group_id].get().execute_query()
-        self.assertIsNotNone(existing_team.resource_url)
+        self.assertIsNotNone(existing_team.resource_path)
         self.assertIsNotNone(existing_team.messaging_settings)
 
         if existing_team.is_archived:

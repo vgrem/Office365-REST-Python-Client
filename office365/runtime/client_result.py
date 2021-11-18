@@ -10,9 +10,6 @@ class ClientResult(object):
         self.context = context
         self.value = default_value
 
-    def build_request(self):
-        return self.context.build_request()
-
     def execute_query(self):
         self.context.execute_query()
         return self

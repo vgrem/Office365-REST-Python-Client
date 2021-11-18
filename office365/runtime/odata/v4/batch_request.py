@@ -14,7 +14,10 @@ class ODataV4BatchRequest(ClientRequest):
     def __init__(self, context):
         super(ODataV4BatchRequest, self).__init__(context)
 
-    def build_request(self):
+    def build_request(self, query):
+        """
+        :type query: office365.runtime.queries.client_query.ClientQuery
+        """
         url = "{0}/$batch".format(self.context.service_root_url())
         request = RequestOptions(url)
         request.method = HttpMethod.Post

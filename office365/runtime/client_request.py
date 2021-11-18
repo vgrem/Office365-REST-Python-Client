@@ -60,17 +60,10 @@ class ClientRequest(object):
         self._current_query = None
         self._queries = []
 
-    def build_single_request(self, query):
-        """
-
-        :type: office365.runtime.queries.client_query.ClientQuery
-        """
-        self._current_query = query
-        return self.build_request()
-
     @abstractmethod
-    def build_request(self):
+    def build_request(self, query):
         """
+        :type query: office365.runtime.queries.client_query.ClientQuery
         :rtype: office365.runtime.http.request_options.RequestOptions
         """
         pass
@@ -86,9 +79,9 @@ class ClientRequest(object):
         """
         Submit a pending request to the server
         """
-        for _ in self.next_query():
+        for qry in self.next_query():
             try:
-                request = self.build_request()
+                request = self.build_request(qry)
                 self.beforeExecute.notify(request)
                 response = self.execute_request_direct(request)
                 response.raise_for_status()

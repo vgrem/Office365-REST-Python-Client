@@ -242,25 +242,25 @@ class Web(SecurableObject):
     def get_all_webs(self):
         """Returns a collection containing a flat list of all Web objects in the Web."""
         from office365.sharepoint.webs.web_collection import WebCollection
-        result = ClientResult(self.context, WebCollection(self.context, self.webs.resource_path))
+        return_type = WebCollection(self.context, self.webs.resource_path)
 
         def _webs_loaded():
-            self._load_sub_webs_inner(self.webs, result)
+            self._load_sub_webs_inner(self.webs, return_type)
 
         self.ensure_property("Webs", _webs_loaded)
-        return result
+        return return_type
 
-    def _load_sub_webs_inner(self, webs, result):
+    def _load_sub_webs_inner(self, webs, all_webs):
         """
         :type webs: office365.sharepoint.webs.web_collection.WebCollection
-        :type result: ClientResult
+        :type all_webs: office365.sharepoint.webs.web_collection.WebCollection
         """
         for cur_web in webs:  # type: Web
-            result.value.add_child(cur_web)
+            all_webs.add_child(cur_web)
 
             def _webs_loaded(web):
                 if len(web.webs) > 0:
-                    self._load_sub_webs_inner(web.webs, result)
+                    self._load_sub_webs_inner(web.webs, all_webs)
 
             cur_web.ensure_property("Webs", _webs_loaded, cur_web)
 
@@ -1057,8 +1057,8 @@ class Web(SecurableObject):
         return self
 
     @property
-    def resource_url(self):
-        url = super(Web, self).resource_url
+    def service_root_url(self):
+        url = super(Web, self).service_root_url
         if self._web_url is not None:
-            url = url.replace(self.context.service_root_url(), self._web_url + '/_api/')
+            url = url.replace(self.context.service_root_url(), self._web_url + '/_api')
         return url

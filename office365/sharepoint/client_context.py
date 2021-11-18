@@ -130,11 +130,11 @@ class ClientContext(ClientRuntimeContext):
             batch_request.execute_query()
         return self
 
-    def build_single_request(self, query):
+    def build_request(self, query):
         """
-        :type: office365.runtime.queries.client_query.ClientQuery
+        :type query: office365.runtime.queries.client_query.ClientQuery
         """
-        request = super(ClientContext, self).build_single_request(query)
+        request = super(ClientContext, self).build_request(query)
         self._build_modification_query(request)
         return request
 

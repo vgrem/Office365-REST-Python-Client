@@ -29,9 +29,6 @@ class UploadSessionQuery(ServiceOperationQuery):
         self._file_handle = None
         self._file_query = self._build_empty_file_query(files)
 
-    def build_url(self):
-        return self._file_query.build_url()
-
     def _build_empty_file_query(self, files):
         info = FileCreationInformation()
         info.url = self.file_name
@@ -80,6 +77,10 @@ class UploadSessionQuery(ServiceOperationQuery):
             else:
                 self._return_type = self.return_type.finish_upload(self._upload_id, uploaded_bytes, piece)
             self.context.after_execute(self._build_upload_session_query)
+
+    @property
+    def resource_path(self):
+        return self._file_query.resource_path
 
     @property
     def return_type(self):
