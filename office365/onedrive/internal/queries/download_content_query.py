@@ -22,3 +22,15 @@ def create_download_content_query(file_item, format_name=None):
     file_item.context.before_execute(_construct_query)
     return qry
 
+
+def create_download_session_content_query(file_item, format_name=None):
+    """
+    :type file_item: office365.onedrive.driveItem.DriveItem
+    :type format_name: str or None
+    """
+    action_name = "content"
+    if format_name is not None:
+        action_name = action_name + r"?format={0}".format(format_name)
+    qry = ServiceOperationQuery(file_item, action_name)
+
+    return qry
