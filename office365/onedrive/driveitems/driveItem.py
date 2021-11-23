@@ -197,6 +197,35 @@ class DriveItem(BaseItem):
         self.context.after_execute(_content_downloaded)
         return self
 
+    def download_session(self, file_object, chunk_downloaded=None, chunk_size=1024 * 1024):
+        """
+        :type file_object: typing.IO
+        :type chunk_downloaded: (int)->None or None
+        :type chunk_size: int
+        """
+        from office365.onedrive.internal.queries.download_content_query import create_download_session_content_query
+        qry = create_download_session_content_query(self)
+
+        def _construct_download_request(request):
+            """
+            :type request: office365.runtime.http.request_options.RequestOptions
+            """
+            request.stream = True
+            request.method = HttpMethod.Get
+
+        def _process_download_response(response):
+            bytes_read = 0
+            for chunk in response.iter_content(chunk_size=chunk_size):
+                bytes_read += len(chunk)
+                if callable(chunk_downloaded):
+                    chunk_downloaded(bytes_read)
+                file_object.write(chunk)
+
+        self.context.before_execute(_construct_download_request)
+        self.context.after_execute(_process_download_response)
+        self.context.add_query(qry)
+        return self
+
     def create_folder(self, name):
         """Create a new folder or DriveItem in a Drive with a specified parent item or path.
 
