@@ -1,8 +1,8 @@
-from office365.runtime.base_path import BasePath
+from office365.runtime.client_path import ClientPath
 from office365.runtime.odata.odata_path_builder import ODataPathBuilder
 
 
-class ResourcePathServiceOperation(BasePath):
+class ResourcePathServiceOperation(ClientPath):
     """ Resource path to address Service Operations which
     represents simple functions exposed by an OData service"""
 
@@ -10,7 +10,7 @@ class ResourcePathServiceOperation(BasePath):
         """
         :type parameters: list or dict or office365.runtime.client_value.ClientValue or None
         :type name: str
-        :type parent: office365.runtime.base_path.BasePath
+        :type parent: office365.runtime.client_path.ClientPath
         """
         super(ResourcePathServiceOperation, self).__init__(parent)
         self._name = name

@@ -1,8 +1,8 @@
-from office365.runtime.base_path import BasePath
+from office365.runtime.client_path import ClientPath
 from office365.runtime.odata.odata_path_builder import ODataPathBuilder
 
 
-class ResourcePathStaticServiceOperation(BasePath):
+class ResourcePathStaticServiceOperation(ClientPath):
     """ Resource path to address static Service Operations"""
 
     def __init__(self, entity, name, parameters=None):

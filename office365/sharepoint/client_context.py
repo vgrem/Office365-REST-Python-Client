@@ -42,9 +42,8 @@ class ClientContext(ClientRuntimeContext):
         self.__web = None
         self.__site = None
         self._base_url = base_url
-        self._ctx_web_info = ContextWebInformation()
-        self._pendingRequest = ODataRequest(self, JsonLightFormat(ODataMetadataLevel.Verbose))
-        self._pendingRequest.beforeExecute += self._build_modification_query
+        self.__ctx_web_info = None
+        self.__pending_request = None
 
     @staticmethod
     def from_url(abs_url):
@@ -142,15 +141,18 @@ class ClientContext(ClientRuntimeContext):
         """
         :return: ODataRequest
         """
-        return self._pendingRequest
+        if self.__pending_request is None:
+            self.__pending_request = ODataRequest(self, JsonLightFormat(ODataMetadataLevel.Verbose))
+            self.__pending_request.beforeExecute += self._build_modification_query
+        return self.__pending_request
 
     def ensure_form_digest(self, request_options):
         """
         :type request_options: RequestOptions
         """
-        if not self._ctx_web_info.is_valid:
-            self._ctx_web_info = self.get_context_web_information(request_options=request_options)
-        request_options.set_header('X-RequestDigest', self._ctx_web_info.FormDigestValue)
+        if self.__ctx_web_info is None or not self.__ctx_web_info.is_valid:
+            self.__ctx_web_info = self.get_context_web_information(request_options=request_options)
+        request_options.set_header('X-RequestDigest', self.__ctx_web_info.FormDigestValue)
 
     def get_context_web_information(self, request_options=None):
         """Returns an ContextWebInformation object that specifies metadata about the site"""
@@ -173,16 +175,16 @@ class ClientContext(ClientRuntimeContext):
             "timeout": 0
         }
 
-        def _try_process_if_failed(retry, e):
+        def _try_process_if_failed(retry, ex):
             """
             :type retry: int
-            :type e: requests.exceptions.RequestException
+            :type ex: requests.exceptions.RequestException
             """
 
             # check if request was throttled - http status code 429
             # or check is request failed due to server unavailable - http status code 503
-            if e.response.status_code == 429 or e.response.status_code == 503:
-                retry_after = e.response.headers.get("Retry-After", None)
+            if ex.response.status_code == 429 or ex.response.status_code == 503:
+                retry_after = ex.response.headers.get("Retry-After", None)
                 if retry_after is not None:
                     settings["timeout"] = int(retry_after)
 
@@ -218,7 +220,7 @@ class ClientContext(ClientRuntimeContext):
         if request.method == HttpMethod.Post:
             self.ensure_form_digest(request)
         # set custom SharePoint control headers
-        if isinstance(self._pendingRequest.json_format, JsonLightFormat):
+        if isinstance(self.pending_request().json_format, JsonLightFormat):
             if isinstance(query, DeleteEntityQuery):
                 request.ensure_header("X-HTTP-Method", "DELETE")
                 request.ensure_header("IF-MATCH", '*')
@@ -232,7 +234,7 @@ class ClientContext(ClientRuntimeContext):
 
         :rtype: ContextWebInformation
         """
-        return self._ctx_web_info
+        return self.__ctx_web_info
 
     @property
     def web(self):

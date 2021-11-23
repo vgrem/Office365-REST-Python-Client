@@ -1,13 +1,13 @@
-from office365.runtime.base_path import BasePath
+from office365.runtime.client_path import ClientPath
 
 
-class ResourcePathUrl(BasePath):
+class ResourcePathUrl(ClientPath):
     """Resource path for OneDrive path-based addressing"""
 
     def __init__(self, rel_url, parent):
         """
         :param str rel_url: File or Folder relative url
-        :type parent: office365.runtime.base_path.BasePath
+        :type parent: office365.runtime.client_path.ClientPath
         """
         super(ResourcePathUrl, self).__init__(parent)
         self._url = rel_url

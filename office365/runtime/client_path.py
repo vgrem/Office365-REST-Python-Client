@@ -1,7 +1,7 @@
 from abc import ABCMeta
 
 
-class BasePath(object):
+class ClientPath(object):
     __metaclass__ = ABCMeta
 
     def __init__(self, parent=None):
@@ -32,7 +32,7 @@ class BasePath(object):
     @property
     def parent(self):
         """
-        :rtype: BasePath or None
+        :rtype: ClientPath or None
         """
         return self._parent
 

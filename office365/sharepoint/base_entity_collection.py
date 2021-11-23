@@ -10,7 +10,7 @@ class BaseEntityCollection(ClientObjectCollection):
 
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
         :type child_item_type: type[ClientObject]
-        :type resource_path: office365.runtime.base_path.BasePath
+        :type resource_path: office365.runtime.client_path.ClientPath
         :type parent: office365.sharepoint.base_entity.BaseEntity or None
         """
         super(BaseEntityCollection, self).__init__(context, child_item_type, resource_path)

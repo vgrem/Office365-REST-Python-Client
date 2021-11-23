@@ -1,14 +1,14 @@
-from office365.runtime.base_path import BasePath
+from office365.runtime.client_path import ClientPath
 
 
-class ResourcePath(BasePath):
+class ResourcePath(ClientPath):
     """OData resource path"""
 
     def __init__(self, name, parent=None):
         """
 
         :param str name: entity or property name
-        :type parent: office365.runtime.base_path.BasePath
+        :type parent: office365.runtime.client_path.ClientPath
         """
         super().__init__(parent)
         self._name = name
