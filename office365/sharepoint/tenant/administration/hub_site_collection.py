@@ -1,6 +1,6 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.tenant.administration.hub_site import HubSite
 
@@ -16,7 +16,7 @@ class HubSiteCollection(BaseEntityCollection):
 
         :type _id: str
         """
-        return HubSite(self.context, ResourcePathServiceOperation("GetById", [_id], self.resource_path))
+        return HubSite(self.context, ServiceOperationPath("GetById", [_id], self.resource_path))
 
     def get_connected_hubs(self, hub_site_id, option):
         """

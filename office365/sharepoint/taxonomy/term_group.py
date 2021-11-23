@@ -1,4 +1,4 @@
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.taxonomy.taxonomy_item import TaxonomyItem, TaxonomyItemCollection
 from office365.sharepoint.taxonomy.term_set import TermSet
 

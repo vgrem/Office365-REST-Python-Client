@@ -1,6 +1,6 @@
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.principal.user import User
 
@@ -36,11 +36,11 @@ class UserCollection(BaseEntityCollection):
 
         :type email: str
         """
-        return User(self.context, ResourcePathServiceOperation("GetByEmail", [email], self.resource_path))
+        return User(self.context, ServiceOperationPath("GetByEmail", [email], self.resource_path))
 
     def get_by_id(self, user_id):
         """Retrieve User object by id"""
-        return User(self.context, ResourcePathServiceOperation("GetById", [user_id], self.resource_path))
+        return User(self.context, ServiceOperationPath("GetById", [user_id], self.resource_path))
 
     def get_by_login_name(self, login_name):
         """Retrieve User object by login name
@@ -48,7 +48,7 @@ class UserCollection(BaseEntityCollection):
         :type login_name: str
         """
         return User(self.context,
-                    ResourcePathServiceOperation("GetByLoginName", [login_name], self.resource_path))
+                    ServiceOperationPath("GetByLoginName", [login_name], self.resource_path))
 
     def remove_by_id(self, _id):
         """Retrieve User object by id"""

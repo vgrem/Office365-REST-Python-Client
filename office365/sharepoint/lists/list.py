@@ -1,8 +1,8 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path import ResourcePath
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
@@ -210,7 +210,7 @@ class List(SecurableObject):
 
         :param str unique_id:"""
         return ListItem(self.context,
-                        ResourcePathServiceOperation("getItemByUniqueId", [unique_id], self.resource_path))
+                        ServiceOperationPath("getItemByUniqueId", [unique_id], self.resource_path))
 
     def get_web_dav_url(self, source_url):
         """
@@ -305,14 +305,14 @@ class List(SecurableObject):
         :type item_id: int
         """
         return ListItem(self.context,
-                        ResourcePathServiceOperation("getItemById", [item_id], self.resource_path))
+                        ServiceOperationPath("getItemById", [item_id], self.resource_path))
 
     def get_view(self, view_id):
         """Returns the list view with the specified view identifier.
 
         :type view_id: str
         """
-        return View(self.context, ResourcePathServiceOperation("getView", [view_id], self.resource_path), self)
+        return View(self.context, ServiceOperationPath("getView", [view_id], self.resource_path), self)
 
     def get_changes(self, query=None):
         """Returns the collection of changes from the change log that have occurred within the list,
@@ -344,7 +344,7 @@ class List(SecurableObject):
             that have FieldLookup.IsRelationship set to true.
         """
         return RelatedFieldCollection(self.context,
-                                      ResourcePathServiceOperation("getRelatedFields", [], self.resource_path))
+                                      ServiceOperationPath("getRelatedFields", [], self.resource_path))
 
     @property
     def id(self):
@@ -508,6 +508,6 @@ class List(SecurableObject):
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id":
-                self._resource_path = ResourcePathServiceOperation(
+                self._resource_path = ServiceOperationPath(
                     "GetById", [value], self._parent_collection.resource_path)
         return self

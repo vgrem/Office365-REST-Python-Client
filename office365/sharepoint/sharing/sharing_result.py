@@ -1,5 +1,5 @@
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.principal.group_collection import GroupCollection
 from office365.sharepoint.sharing.invitationCreationResult import SPInvitationCreationResult

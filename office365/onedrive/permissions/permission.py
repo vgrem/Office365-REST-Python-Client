@@ -7,7 +7,7 @@ from office365.onedrive.permissions.sharing_invitation import SharingInvitation
 from office365.onedrive.permissions.sharing_link import SharingLink
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class Permission(Entity):

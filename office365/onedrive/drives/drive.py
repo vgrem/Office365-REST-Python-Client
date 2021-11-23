@@ -7,7 +7,7 @@ from office365.onedrive.internal.paths.root_resource_path import RootResourcePat
 from office365.onedrive.driveitems.system_facet import SystemFacet
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class Drive(BaseItem):

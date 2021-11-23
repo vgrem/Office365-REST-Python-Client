@@ -7,7 +7,7 @@ from office365.outlook.calendar.email_address import EmailAddress
 from office365.outlook.mail.item import Item
 from office365.outlook.mail.physical_address import PhysicalAddress
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class Contact(Item):

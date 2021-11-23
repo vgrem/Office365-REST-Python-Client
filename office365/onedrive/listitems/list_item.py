@@ -4,7 +4,7 @@ from office365.onedrive.contenttypes.content_type_info import ContentTypeInfo
 from office365.onedrive.listitems.field_value_set import FieldValueSet
 from office365.onedrive.analytics.item_analytics import ItemAnalytics
 from office365.onedrive.versions.list_item_version import ListItemVersion
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class ListItem(BaseItem):

@@ -1,6 +1,6 @@
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path import ResourcePath
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.permissions.role_assignment import RoleAssignment
 
@@ -26,9 +26,9 @@ class RoleAssignmentCollection(BaseEntityCollection):
         :param int principal_id: Specifies the user or group of the role assignment.
         """
         role_assignment = RoleAssignment(self.context,
-                                         ResourcePathServiceOperation("GetByPrincipalId",
-                                                                      [principal_id],
-                                                                      self.resource_path))
+                                         ServiceOperationPath("GetByPrincipalId",
+                                                              [principal_id],
+                                                              self.resource_path))
         self.context.load(role_assignment)
         return role_assignment
 

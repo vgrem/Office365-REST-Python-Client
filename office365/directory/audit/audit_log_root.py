@@ -3,7 +3,7 @@ from office365.directory.audit.provisioning_object_summary import ProvisioningOb
 from office365.directory.audit.signIn import SignIn
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class AuditLogRoot(Entity):

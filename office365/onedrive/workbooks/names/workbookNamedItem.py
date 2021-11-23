@@ -1,6 +1,6 @@
 from office365.entity import Entity
 from office365.onedrive.workbooks.worksheets.worksheet import WorkbookWorksheet
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class WorkbookNamedItem(Entity):

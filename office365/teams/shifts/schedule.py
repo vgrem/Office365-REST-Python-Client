@@ -1,6 +1,6 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.teams.shifts.scheduling_group import SchedulingGroup
 from office365.teams.shifts.shift import Shift
 

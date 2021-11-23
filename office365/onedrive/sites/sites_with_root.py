@@ -1,7 +1,7 @@
 from office365.entity_collection import EntityCollection
 from office365.onedrive.sites.site import Site
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class SitesWithRoot(EntityCollection):

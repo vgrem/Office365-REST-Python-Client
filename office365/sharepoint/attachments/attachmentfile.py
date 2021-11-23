@@ -1,7 +1,7 @@
-from office365.runtime.resource_path import ResourcePath
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.sharepoint.internal.download_file import create_download_file_query
-from office365.sharepoint.internal.upload_file import create_upload_file_query
+from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.sharepoint.internal.queries.download_file import create_download_file_query
+from office365.sharepoint.internal.queries.upload_file import create_upload_file_query
 from office365.sharepoint.files.file import AbstractFile
 
 
@@ -61,5 +61,5 @@ class AttachmentFile(AbstractFile):
         # fallback: create a new resource path
 
         if name == "ServerRelativeUrl":
-            self._resource_path = ResourcePathServiceOperation(
+            self._resource_path = ServiceOperationPath(
                 "getFileByServerRelativeUrl", [value], ResourcePath("Web"))

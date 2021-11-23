@@ -1,6 +1,6 @@
-from office365.runtime.paths.static_service_operation import ResourcePathStaticServiceOperation
+from office365.runtime.paths.static_service_operation import StaticServiceOperationPath
 from office365.runtime.queries.client_query import ClientQuery
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.service_operation import ServiceOperationPath
 
 
 class ServiceOperationQuery(ClientQuery):
@@ -28,12 +28,12 @@ class ServiceOperationQuery(ClientQuery):
     def resource_path(self):
         if isinstance(self, ServiceOperationQuery):
             if self.static:
-                return ResourcePathStaticServiceOperation(
+                return StaticServiceOperationPath(
                     self.binding_type.entity_type_name,
                     self.method_name,
                     self.method_parameters)
             else:
-                return ResourcePathServiceOperation(
+                return ServiceOperationPath(
                     self.method_name,
                     self.method_parameters,
                     self.binding_type.resource_path

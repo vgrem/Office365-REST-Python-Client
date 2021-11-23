@@ -1,9 +1,9 @@
 import os
 
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
-from office365.sharepoint.internal.create_file import create_file_query
-from office365.sharepoint.internal.upload_session import UploadSessionQuery
+from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.sharepoint.internal.queries.create_file import create_file_query
+from office365.sharepoint.internal.queries.upload_session import UploadSessionQuery
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.files.file import File
 from office365.sharepoint.files.file_creation_information import FileCreationInformation
@@ -82,8 +82,8 @@ class FileCollection(BaseEntityCollection):
 
     def get_by_url(self, url):
         """Retrieve File object by url"""
-        return File(self.context, ResourcePathServiceOperation("GetByUrl", [url], self.resource_path))
+        return File(self.context, ServiceOperationPath("GetByUrl", [url], self.resource_path))
 
     def get_by_id(self, _id):
         """Gets the File with the specified ID."""
-        return File(self.context, ResourcePathServiceOperation("getById", [_id], self.resource_path))
+        return File(self.context, ServiceOperationPath("getById", [_id], self.resource_path))

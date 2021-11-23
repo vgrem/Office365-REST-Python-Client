@@ -1,5 +1,5 @@
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.recyclebin.recycleBinItem import RecycleBinItem
 
@@ -22,7 +22,7 @@ class RecycleBinItemCollection(BaseEntityCollection):
         :param str recycleBinId: A hexadecimal value representing the identifier of a recycle bin.
         """
         return RecycleBinItem(self.context,
-                              ResourcePathServiceOperation("GetById", [recycleBinId], self.resource_path))
+                              ServiceOperationPath("GetById", [recycleBinId], self.resource_path))
 
     def delete_all(self):
         """Permanently deletes all Recycle Bin items."""

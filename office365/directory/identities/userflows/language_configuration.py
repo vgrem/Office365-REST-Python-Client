@@ -1,7 +1,7 @@
 from office365.directory.identities.userflows.language_page import UserFlowLanguagePage
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class UserFlowLanguageConfiguration(Entity):

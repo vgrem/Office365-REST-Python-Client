@@ -1,7 +1,7 @@
 from office365.directory.directory_object import DirectoryObject
 from office365.directory.extensions.extension import Extension
 from office365.entity_collection import EntityCollection
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class Organization(DirectoryObject):

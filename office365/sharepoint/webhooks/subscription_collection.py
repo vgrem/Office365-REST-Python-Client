@@ -1,5 +1,5 @@
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.webhooks.subscription import Subscription
 from office365.sharepoint.webhooks.subscription_information import SubscriptionInformation
@@ -13,7 +13,7 @@ class SubscriptionCollection(BaseEntityCollection):
 
     def get_by_id(self, _id):
         """Gets the subscription with the specified ID."""
-        return Subscription(self.context, ResourcePathServiceOperation("getById", [_id], self.resource_path))
+        return Subscription(self.context, ServiceOperationPath("getById", [_id], self.resource_path))
 
     def add(self, information_or_notification):
         """

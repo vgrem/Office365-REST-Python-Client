@@ -1,6 +1,5 @@
-from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
-from office365.runtime.resource_path import ResourcePath
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity import BaseEntity
 
 
@@ -56,7 +55,7 @@ class NavigationNode(BaseEntity):
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id":
-                self._resource_path = ResourcePathServiceOperation("GetById",
-                                                                   [value],
-                                                                   self._parent_collection.resource_path)
+                self._resource_path = ServiceOperationPath("GetById",
+                                                           [value],
+                                                           self._parent_collection.resource_path)
         return self

@@ -1,5 +1,5 @@
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.views.view import View
 
@@ -31,7 +31,7 @@ class ViewCollection(BaseEntityCollection):
         :type view_title: str
         """
         return View(self.context,
-                    ResourcePathServiceOperation("GetByTitle", [view_title], self.resource_path), self._parent)
+                    ServiceOperationPath("GetByTitle", [view_title], self.resource_path), self._parent)
 
     def get_by_id(self, view_id):
         """Gets the list view with the specified ID.
@@ -39,7 +39,7 @@ class ViewCollection(BaseEntityCollection):
         :type view_id: str
         """
         return View(self.context,
-                    ResourcePathServiceOperation("GetById", [view_id], self.resource_path), self._parent)
+                    ServiceOperationPath("GetById", [view_id], self.resource_path), self._parent)
 
     @property
     def parent_list(self):

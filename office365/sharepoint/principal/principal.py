@@ -1,4 +1,4 @@
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity import BaseEntity
 
 
@@ -62,9 +62,9 @@ class Principal(BaseEntity):
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id":
-                self._resource_path = ResourcePathServiceOperation(
+                self._resource_path = ServiceOperationPath(
                     "GetById", [value], self._parent_collection.resource_path)
             elif name == "LoginName":
-                self._resource_path = ResourcePathServiceOperation(
+                self._resource_path = ServiceOperationPath(
                     "GetByName", [value], self._parent_collection.resource_path)
         return self

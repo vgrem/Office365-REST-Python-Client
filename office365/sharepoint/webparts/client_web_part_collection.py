@@ -1,4 +1,4 @@
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.webparts.client_web_part import ClientWebPart
 
@@ -11,4 +11,4 @@ class ClientWebPartCollection(BaseEntityCollection):
 
     def get_by_id(self, _id):
         """Gets the Client web part with the specified ID."""
-        return ClientWebPart(self.context, ResourcePathServiceOperation("getById", [_id], self.resource_path))
+        return ClientWebPart(self.context, ServiceOperationPath("getById", [_id], self.resource_path))

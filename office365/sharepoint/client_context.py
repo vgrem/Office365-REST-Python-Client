@@ -14,7 +14,7 @@ from office365.runtime.odata.odata_request import ODataRequest
 from office365.runtime.queries.batch_query import BatchQuery
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.publishing.site_page_service import SitePageService
 from office365.sharepoint.request_user_context import RequestUserContext
 from office365.sharepoint.sites.site import Site

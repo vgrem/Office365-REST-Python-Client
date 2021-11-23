@@ -29,8 +29,8 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path import ResourcePath
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.service_operation import ServiceOperationPath
 
 
 class DriveItem(BaseItem):
@@ -364,8 +364,8 @@ class DriveItem(BaseItem):
             "interval": interval
         }
         return_type = EntityCollection(self.context, ItemActivityStat,
-                                       ResourcePathServiceOperation("getActivitiesByInterval", params,
-                                                                    self.resource_path))
+                                       ServiceOperationPath("getActivitiesByInterval", params,
+                                                            self.resource_path))
         qry = ServiceOperationQuery(self, "getActivitiesByInterval", params, None, None, return_type)
         self.context.add_query(qry)
 

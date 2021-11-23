@@ -5,7 +5,7 @@ from office365.communications.presences.presence import Presence
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class CloudCommunications(Entity):

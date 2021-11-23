@@ -6,7 +6,7 @@ from office365.onenote.pages.page import OnenotePageCollection
 from office365.onenote.resources.resource import OnenoteResource
 from office365.onenote.sectiongroups.section_group import SectionGroup
 from office365.onenote.sections.section import OnenoteSection
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class Onenote(Entity):

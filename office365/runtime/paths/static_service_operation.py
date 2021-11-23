@@ -2,7 +2,7 @@ from office365.runtime.client_path import ClientPath
 from office365.runtime.odata.odata_path_builder import ODataPathBuilder
 
 
-class ResourcePathStaticServiceOperation(ClientPath):
+class StaticServiceOperationPath(ClientPath):
     """ Resource path to address static Service Operations"""
 
     def __init__(self, entity, name, parameters=None):
@@ -10,7 +10,7 @@ class ResourcePathStaticServiceOperation(ClientPath):
         :type name: str
         :type parameters: list or dict or office365.runtime.client_value.ClientValue or None
         """
-        super(ResourcePathStaticServiceOperation, self).__init__()
+        super(StaticServiceOperationPath, self).__init__()
         self._entity = entity
         self._name = name
         self._parameters = parameters

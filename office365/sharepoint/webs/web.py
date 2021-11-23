@@ -2,8 +2,8 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path import ResourcePath
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.alerts.alert_collection import AlertCollection
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.changes.change_collection import ChangeCollection
@@ -359,7 +359,7 @@ class Web(SecurableObject):
         """
         return File(
             self.context,
-            ResourcePathServiceOperation("getFileByServerRelativeUrl", [url], self.resource_path)
+            ServiceOperationPath("getFileByServerRelativeUrl", [url], self.resource_path)
         )
 
     def get_file_by_server_relative_path(self, decoded_url):
@@ -370,7 +370,7 @@ class Web(SecurableObject):
         """
         return File(
             self.context,
-            ResourcePathServiceOperation("getFileByServerRelativePath", {"DecodedUrl": decoded_url}, self.resource_path)
+            ServiceOperationPath("getFileByServerRelativePath", {"DecodedUrl": decoded_url}, self.resource_path)
         )
 
     def get_folder_by_server_relative_url(self, url):
@@ -379,7 +379,7 @@ class Web(SecurableObject):
         """
         return Folder(
             self.context,
-            ResourcePathServiceOperation("getFolderByServerRelativeUrl", [url], self.resource_path)
+            ServiceOperationPath("getFolderByServerRelativeUrl", [url], self.resource_path)
         )
 
     def get_folder_by_server_relative_path(self, decoded_url):
@@ -392,7 +392,7 @@ class Web(SecurableObject):
         params = {"DecodedUrl": decoded_url}
         return Folder(
             self.context,
-            ResourcePathServiceOperation("getFolderByServerRelativePath", params, self.resource_path)
+            ServiceOperationPath("getFolderByServerRelativePath", params, self.resource_path)
         )
 
     def ensure_folder_path(self, path):
@@ -460,12 +460,12 @@ class Web(SecurableObject):
         :param int user_id: Specifies the member identifier.
         """
         return User(self.context,
-                    ResourcePathServiceOperation("getUserById", [user_id], self.resource_path))
+                    ServiceOperationPath("getUserById", [user_id], self.resource_path))
 
     def default_document_library(self):
         """Retrieves the default document library."""
         return List(self.context,
-                    ResourcePathServiceOperation("defaultDocumentLibrary", None, self.resource_path))
+                    ServiceOperationPath("defaultDocumentLibrary", None, self.resource_path))
 
     def get_list(self, url):
         """Get list by url
@@ -473,7 +473,7 @@ class Web(SecurableObject):
         :type url: str
         """
         return List(self.context,
-                    ResourcePathServiceOperation("getList", [url], self.resource_path))
+                    ServiceOperationPath("getList", [url], self.resource_path))
 
     def get_changes(self, query):
         """Returns the collection of all changes from the change log that have occurred within the scope of the site,
@@ -499,8 +499,8 @@ class Web(SecurableObject):
             "doIncludeCrossLanguage": do_include_cross_language
         }
         return_type = WebTemplateCollection(self.context,
-                                            ResourcePathServiceOperation("GetAvailableWebTemplates ", params,
-                                                                         self.resource_path))
+                                            ServiceOperationPath("GetAvailableWebTemplates ", params,
+                                                                 self.resource_path))
 
         qry = ServiceOperationQuery(self, "GetAvailableWebTemplates", params, None, None, return_type)
         self.context.add_query(qry)
@@ -755,14 +755,14 @@ class Web(SecurableObject):
         for example, "/sites/MySite/Shared Documents/MyDocument.docx".
         :return: ListItem
         """
-        return ListItem(self.context, ResourcePathServiceOperation("GetListItem", [str_url], self.resource_path))
+        return ListItem(self.context, ServiceOperationPath("GetListItem", [str_url], self.resource_path))
 
     def get_catalog(self, type_catalog):
         """Gets the list template gallery, site template gallery, or Web Part gallery for the Web site.
 
         :param int type_catalog: The type of the gallery.
         """
-        return List(self.context, ResourcePathServiceOperation("getCatalog", [type_catalog], self.resource_path))
+        return List(self.context, ServiceOperationPath("getCatalog", [type_catalog], self.resource_path))
 
     def page_context_info(self, include_odb_settings, emit_navigation_info):
         """

@@ -1,7 +1,7 @@
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.resource_path import ResourcePath
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.folders.folder import Folder
 
 
@@ -31,8 +31,8 @@ class DocumentSet(Folder):
             request = RequestOptions(request_url)
             request.method = HttpMethod.Post
             folder_url = parent_folder.serverRelativeUrl + '/' + name
-            return_type._resource_path = ResourcePathServiceOperation("getFolderByServerRelativeUrl", [folder_url],
-                                                                      ResourcePath("Web"))
+            return_type._resource_path = ServiceOperationPath("getFolderByServerRelativeUrl", [folder_url],
+                                                              ResourcePath("Web"))
             request.set_header('Slug', '{0}|{1}'.format(folder_url, ct_id))
             response = context.execute_request_direct(request)
             response.raise_for_status()

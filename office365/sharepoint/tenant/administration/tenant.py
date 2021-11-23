@@ -3,7 +3,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
 from office365.sharepoint.tenant.administration.hubsite_properties import HubSiteProperties
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \

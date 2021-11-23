@@ -2,8 +2,8 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
-from office365.runtime.resource_path import ResourcePath
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.changes.change_query import ChangeQuery
@@ -308,13 +308,13 @@ class Folder(BaseEntity):
         super(Folder, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "ServerRelativeUrl":
-            self._resource_path = ResourcePathServiceOperation("getFolderByServerRelativeUrl", [value],
-                                                               ResourcePath("Web"))
+            self._resource_path = ServiceOperationPath("getFolderByServerRelativeUrl", [value],
+                                                       ResourcePath("Web"))
         elif name == "ServerRelativePath":
-            self._resource_path = ResourcePathServiceOperation("getFolderByServerRelativePath", [value],
-                                                               ResourcePath("Web"))
+            self._resource_path = ServiceOperationPath("getFolderByServerRelativePath", [value],
+                                                       ResourcePath("Web"))
         elif name == "UniqueId":
-            self._resource_path = ResourcePathServiceOperation("getFolderById", [value], ResourcePath("Web"))
+            self._resource_path = ServiceOperationPath("getFolderById", [value], ResourcePath("Web"))
         return self
 
     def _build_full_url(self, rel_url):

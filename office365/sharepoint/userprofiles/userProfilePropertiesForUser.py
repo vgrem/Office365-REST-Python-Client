@@ -1,5 +1,5 @@
 from office365.runtime.client_object import ClientObject
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.service_operation import ServiceOperationPath
 
 
 class UserProfilePropertiesForUser(ClientObject):
@@ -10,4 +10,4 @@ class UserProfilePropertiesForUser(ClientObject):
             "propertyNames": property_names
         }
 
-        super(UserProfilePropertiesForUser, self).__init__(context, ResourcePathServiceOperation("SP.UserProfiles.UserProfilePropertiesForUser", params))
+        super(UserProfilePropertiesForUser, self).__init__(context, ServiceOperationPath("SP.UserProfiles.UserProfilePropertiesForUser", params))

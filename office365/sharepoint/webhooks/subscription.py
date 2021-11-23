@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity import BaseEntity
 
 
@@ -46,8 +46,8 @@ class Subscription(BaseEntity):
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "id":
-                self._resource_path = ResourcePathServiceOperation("getById",
-                                                                   [value], self._parent_collection.resource_path)
+                self._resource_path = ServiceOperationPath("getById",
+                                                           [value], self._parent_collection.resource_path)
         return super(Subscription, self).set_property(name, value, persist_changes)
 
     @property

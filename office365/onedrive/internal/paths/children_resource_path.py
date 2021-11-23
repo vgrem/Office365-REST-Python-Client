@@ -1,4 +1,4 @@
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class ChildrenResourcePath(ResourcePath):

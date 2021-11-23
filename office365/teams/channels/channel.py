@@ -3,7 +3,7 @@ from office365.runtime.compat import quote
 
 from office365.entity import Entity
 from office365.onedrive.driveitems.driveItem import DriveItem
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.teams.channels.conversation_member import ConversationMember
 from office365.teams.messages.chat_message import ChatMessage
 from office365.teams.tabs.teams_tab import TeamsTab

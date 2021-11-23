@@ -1,5 +1,5 @@
 from office365.runtime.client_object import ClientObject
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class SiteCollectionManagementService(ClientObject):

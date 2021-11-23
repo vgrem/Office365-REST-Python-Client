@@ -1,6 +1,6 @@
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.lists.list import List
 
@@ -17,7 +17,7 @@ class ListCollection(BaseEntityCollection):
         :type list_title: str
         """
         return List(self.context,
-                    ResourcePathServiceOperation("GetByTitle", [list_title], self.resource_path))
+                    ServiceOperationPath("GetByTitle", [list_title], self.resource_path))
 
     def get_by_id(self, list_id):
         """Retrieve List client object by id
@@ -25,7 +25,7 @@ class ListCollection(BaseEntityCollection):
         :type list_id: str
         """
         return List(self.context,
-                    ResourcePathServiceOperation("GetById", [list_id], self.resource_path))
+                    ServiceOperationPath("GetById", [list_id], self.resource_path))
 
     def ensure_events_list(self):
         events_list = List(self.context)

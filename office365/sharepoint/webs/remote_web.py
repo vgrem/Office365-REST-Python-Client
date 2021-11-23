@@ -1,7 +1,7 @@
 from office365.onedrive.lists.list import List
 from office365.runtime.client_object import ClientObject
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.webs.web import Web
 
 

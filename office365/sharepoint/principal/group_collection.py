@@ -1,6 +1,6 @@
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.principal.group import Group
 
@@ -26,7 +26,7 @@ class GroupCollection(BaseEntityCollection):
 
         :type group_id: str
         """
-        return Group(self.context, ResourcePathServiceOperation("GetById", [group_id], self.resource_path))
+        return Group(self.context, ServiceOperationPath("GetById", [group_id], self.resource_path))
 
     def get_by_name(self, group_name):
         """Returns a cross-site group from the collection based on the name of the group.
@@ -34,7 +34,7 @@ class GroupCollection(BaseEntityCollection):
         :type group_name: str
         """
         return Group(self.context,
-                     ResourcePathServiceOperation("GetByName", [group_name], self.resource_path))
+                     ServiceOperationPath("GetByName", [group_name], self.resource_path))
 
     def remove_by_id(self, group_id):
         """Removes the group with the specified member ID from the collection.

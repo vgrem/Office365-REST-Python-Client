@@ -1,6 +1,6 @@
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path import ResourcePath
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.contenttypes.field_link_collection import FieldLinkCollection
@@ -121,6 +121,6 @@ class ContentType(BaseEntity):
         super(ContentType, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "StringId" and self._resource_path is None:
-            self._resource_path = ResourcePathServiceOperation(
+            self._resource_path = ServiceOperationPath(
                 "getById", [value], self._parent_collection.resource_path)
         return self

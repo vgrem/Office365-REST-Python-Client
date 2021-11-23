@@ -2,7 +2,7 @@ import base64
 
 from office365.entity_collection import EntityCollection
 from office365.onedrive.shares.shared_drive_item import SharedDriveItem
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 def _url_to_shared_token(url):

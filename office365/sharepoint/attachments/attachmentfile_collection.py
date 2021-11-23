@@ -1,5 +1,5 @@
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.attachments.attachmentfile import AttachmentFile
 from office365.sharepoint.attachments.attachmentfile_creation_information import AttachmentfileCreationInformation
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
@@ -51,6 +51,6 @@ class AttachmentFileCollection(BaseEntityCollection):
         :type filename: str
         """
         return AttachmentFile(context=self.context,
-                              resource_path=ResourcePathServiceOperation("GetByFileName", [filename],
-                                                                         self.resource_path),
+                              resource_path=ServiceOperationPath("GetByFileName", [filename],
+                                                                 self.resource_path),
                               parent_collection=self)

@@ -2,11 +2,11 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path import ResourcePath
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.files.file_version_event import FileVersionEvent
-from office365.sharepoint.internal.download_file import create_download_file_query
+from office365.sharepoint.internal.queries.download_file import create_download_file_query
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.directory.user import User
 from office365.sharepoint.files.file_version_collection import FileVersionCollection
@@ -230,7 +230,7 @@ class File(AbstractFile):
         """Specifies the control set used to access, modify, or add Web Parts associated with this Web Part Page and
         view. """
         return LimitedWebPartManager(self.context,
-                                     ResourcePathServiceOperation(
+                                     ServiceOperationPath(
                                          "getlimitedwebpartmanager",
                                          [scope],
                                          self.resource_path
@@ -599,11 +599,11 @@ class File(AbstractFile):
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "ServerRelativeUrl":
-                self._resource_path = ResourcePathServiceOperation("GetFileByServerRelativeUrl", [value],
-                                                                   ResourcePath("Web"))
+                self._resource_path = ServiceOperationPath("GetFileByServerRelativeUrl", [value],
+                                                           ResourcePath("Web"))
             elif name == "ServerRelativePath":
-                self._resource_path = ResourcePathServiceOperation("getFolderByServerRelativePath", [value],
-                                                                   ResourcePath("Web"))
+                self._resource_path = ServiceOperationPath("getFolderByServerRelativePath", [value],
+                                                           ResourcePath("Web"))
             elif name == "UniqueId":
-                self._resource_path = ResourcePathServiceOperation("GetFileById", [value], ResourcePath("Web"))
+                self._resource_path = ServiceOperationPath("GetFileById", [value], ResourcePath("Web"))
         return self

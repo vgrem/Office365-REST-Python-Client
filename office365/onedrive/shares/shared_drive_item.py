@@ -5,7 +5,7 @@ from office365.onedrive.lists.list import List
 from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.internal.paths.root_resource_path import RootResourcePath
 from office365.onedrive.sites.site import Site
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class SharedDriveItem(BaseItem):

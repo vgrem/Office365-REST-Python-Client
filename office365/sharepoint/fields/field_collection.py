@@ -2,7 +2,7 @@ import uuid
 
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.fields.field import Field
 from office365.sharepoint.fields.field_creation_information import FieldCreationInformation
@@ -307,7 +307,7 @@ class FieldCollection(BaseEntityCollection):
 
     def get_by_id(self, _id):
         """Gets the fields with the specified ID."""
-        return Field(self.context, ResourcePathServiceOperation("getById", [_id], self.resource_path))
+        return Field(self.context, ServiceOperationPath("getById", [_id], self.resource_path))
 
     def get_by_internal_name_or_title(self, name_title):
         """Returns the first field (2) in the collection based on the internal name or the title specified
@@ -316,7 +316,7 @@ class FieldCollection(BaseEntityCollection):
         :param str name_title:  The title or internal name to look up the field (2) by.
         """
         return Field(self.context,
-                     ResourcePathServiceOperation("getByInternalNameOrTitle", [name_title], self.resource_path))
+                     ServiceOperationPath("getByInternalNameOrTitle", [name_title], self.resource_path))
 
     def get_by_title(self, title):
         """Returns the first fields object in the collection based on the title of the specified fields.
@@ -324,4 +324,4 @@ class FieldCollection(BaseEntityCollection):
         :type title: str
         """
         return Field(self.context,
-                     ResourcePathServiceOperation("getByTitle", [title], self.resource_path))
+                     ServiceOperationPath("getByTitle", [title], self.resource_path))

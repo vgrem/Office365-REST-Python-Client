@@ -4,7 +4,7 @@ from office365.onedrive.workbooks.functions.functions import WorkbookFunctions
 from office365.onedrive.workbooks.names.workbookNamedItem import WorkbookNamedItem
 from office365.onedrive.workbooks.tables.workbook_table import WorkbookTable
 from office365.onedrive.workbooks.worksheets.worksheet import WorkbookWorksheetCollection
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class Workbook(Entity):

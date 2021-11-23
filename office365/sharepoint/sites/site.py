@@ -1,7 +1,7 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path import ResourcePath
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.audit.audit import Audit
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.change_collection import ChangeCollection
@@ -119,7 +119,7 @@ class Site(BaseEntity):
             "overrideCompatLevel": override_compat_level
         }
         return_type = WebTemplateCollection(self.context,
-                                            ResourcePathServiceOperation("GetWebTemplates", params, self.resource_path))
+                                            ServiceOperationPath("GetWebTemplates", params, self.resource_path))
 
         qry = ServiceOperationQuery(self, "GetWebTemplates", params, None, None, return_type)
         self.context.add_query(qry)
@@ -135,7 +135,7 @@ class Site(BaseEntity):
             "approvalCorrelationId": approval_correlation_id
         }
         return_type = WebTemplateCollection(self.context,
-                                            ResourcePathServiceOperation("GetWebTemplates", params, self.resource_path))
+                                            ServiceOperationPath("GetWebTemplates", params, self.resource_path))
 
         qry = ServiceOperationQuery(self, "JoinHubSite", params, None, None, return_type)
         self.context.add_query(qry)
@@ -201,7 +201,7 @@ class Site(BaseEntity):
 
         :type type_catalog: int
         """
-        return List(self.context, ResourcePathServiceOperation("getCatalog", [type_catalog], self.resource_path))
+        return List(self.context, ServiceOperationPath("getCatalog", [type_catalog], self.resource_path))
 
     def open_web(self, str_url):
         """Returns the specified Web site from the site collection.

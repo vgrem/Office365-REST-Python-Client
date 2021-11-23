@@ -5,7 +5,7 @@ from office365.onedrive.columns.column_definition import ColumnDefinition
 from office365.onedrive.contenttypes.content_type import ContentType
 from office365.onedrive.listitems.list_item import ListItem
 from office365.runtime.client_value import ClientValue
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class ListInfo(ClientValue):

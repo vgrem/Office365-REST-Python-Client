@@ -1,6 +1,6 @@
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.resource_path_service_operation import ResourcePathServiceOperation
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.navigation.navigation_node import NavigationNode
 
@@ -37,4 +37,4 @@ class NavigationNodeCollection(BaseEntityCollection):
         :type node_id: str
         """
         return NavigationNode(self.context,
-                              ResourcePathServiceOperation("GetById", [node_id], self.resource_path))
+                              ServiceOperationPath("GetById", [node_id], self.resource_path))

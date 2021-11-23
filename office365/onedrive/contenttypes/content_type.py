@@ -2,7 +2,7 @@ from office365.base_item import BaseItem
 from office365.entity_collection import EntityCollection
 from office365.onedrive.columns.column_link import ColumnLink
 from office365.onedrive.listitems.item_reference import ItemReference
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class ContentType(BaseItem):

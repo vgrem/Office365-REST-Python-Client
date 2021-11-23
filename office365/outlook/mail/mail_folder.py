@@ -4,7 +4,7 @@ from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.outlook.mail.messages.message import Message
 from office365.outlook.mail.messages.message_rule import MessageRule
-from office365.runtime.resource_path import ResourcePath
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class MailFolder(Entity):
