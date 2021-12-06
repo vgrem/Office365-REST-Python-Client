@@ -18,6 +18,6 @@ class TestDirectorySession(TestCase):
         session = self.__class__.session.get().execute_query()
         self.assertIsInstance(session, DirectorySession)
 
-    # def test_2_get_me(self):
-    #    me = self.__class__.session.me().get().execute_query()
-    #    self.assertIsNotNone(me.resource_path)
+    def test_2_get_me(self):
+        me = self.__class__.session.me.get().execute_query()
+        self.assertIsNotNone(me.resource_path)
