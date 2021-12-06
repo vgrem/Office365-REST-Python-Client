@@ -12,6 +12,15 @@ class MailFolder(Entity):
     other Outlook items, and child mail folders."""
 
     @property
+    def display_name(self):
+        """
+        The name of the Mail folder
+
+        :rtype: str or None
+        """
+        return self.properties.get("displayName", None)
+
+    @property
     def total_item_count(self):
         """The number of items in the mailFolder."""
         return self.properties.get("totalItemCount", None)

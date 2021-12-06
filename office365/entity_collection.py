@@ -26,9 +26,9 @@ class EntityCollection(ClientObjectCollection):
 
         :rtype: office365.entity.Entity
         """
-        return_type = self.new()
+        return_type = self.new(**kwargs)
         self.add_child(return_type)
-        qry = CreateEntityQuery(self, kwargs, return_type)
+        qry = CreateEntityQuery(self, return_type, return_type)
         self.context.add_query(qry)
         return return_type
 
