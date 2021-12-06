@@ -17,7 +17,7 @@ class SecurableObject(BaseEntity):
         :param office365.sharepoint.principal.principal.Principal principal: Specifies the user or group of the
             role assignment.
 
-        :return: RoleAssignment
+        :rtype: RoleAssignment
         """
         result = ClientResult(self.context, RoleAssignment(self.context))
 

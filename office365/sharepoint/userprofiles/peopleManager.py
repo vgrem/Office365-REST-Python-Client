@@ -74,15 +74,15 @@ class PeopleManager(BaseEntity):
         self.context.add_query(qry)
         return result
 
-    def get_properties_for(self, accountName):
+    def get_properties_for(self, account_name):
         """
         Gets user properties for the specified user.
 
-        :type accountName: str
+        :type account_name: str
         :return: PersonProperties
         """
         result = PersonProperties(self.context)
-        payload = {"accountName": accountName}
+        payload = {"accountName": account_name}
         qry = ServiceOperationQuery(self, "GetPropertiesFor", payload, None, None, result)
         self.context.add_query(qry)
         return result
