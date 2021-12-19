@@ -29,11 +29,11 @@ class ClientQuery(object):
 
     @property
     def resource_path(self):
-        return self.binding_type.resource_path
+        return self.binding_type.resource_path if self.binding_type is not None else None
 
     @property
     def service_root_url(self):
-        return self.binding_type.service_root_url
+        return self.binding_type.service_root_url if self.binding_type is not None else self.context.service_root_url()
 
     @property
     def context(self):

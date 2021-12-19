@@ -41,7 +41,11 @@ class ODataRequest(ClientRequest):
         :type query: office365.runtime.queries.client_query.ClientQuery
         """
         self._current_query = query
-        request_url = query.service_root_url + query.resource_path.to_url()
+
+        if query.resource_path is not None:
+            request_url = query.service_root_url + str(query.resource_path)
+        else:
+            request_url = query.service_root_url + "/"
         if isinstance(query, ReadEntityQuery) and not query.query_options.is_empty:
             request_url += "?" + query.query_options.to_url()
         request = RequestOptions(request_url)
