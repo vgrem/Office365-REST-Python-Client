@@ -2,8 +2,11 @@ import abc
 from time import sleep
 
 from office365.runtime.client_request_exception import ClientRequestException
+from office365.runtime.client_result import ClientResult
 from office365.runtime.compat import is_absolute_url
+from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
+from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.read_entity_query import ReadEntityQuery
 
 
@@ -140,6 +143,29 @@ class ClientRuntimeContext(object):
 
     def clear_queries(self):
         self.pending_request().queries.clear()
+
+    def get_metadata(self):
+        result = ClientResult(self)
+
+        def _construct_download_request(request):
+            """
+            :type request: office365.runtime.http.request_options.RequestOptions
+            """
+            request.url += "$metadata"
+            request.method = HttpMethod.Get
+
+        def _process_download_response(response):
+            """
+            :type response: requests.Response
+            """
+            response.raise_for_status()
+            result.value = response.content
+
+        qry = ClientQuery(self)
+        self.before_execute(_construct_download_request)
+        self.after_execute(_process_download_response)
+        self.add_query(qry)
+        return result
 
     @property
     def current_query(self):

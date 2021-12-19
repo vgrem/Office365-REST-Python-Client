@@ -4,7 +4,6 @@ from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.providers.saml_token_provider import resolve_base_url
 from office365.runtime.auth.user_credential import UserCredential
-from office365.runtime.client_result import ClientResult
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
@@ -13,9 +12,7 @@ from office365.runtime.odata.v3.batch_request import ODataBatchRequest
 from office365.runtime.odata.v3.metadata_level import ODataMetadataLevel
 from office365.runtime.odata.odata_request import ODataRequest
 from office365.runtime.queries.batch_query import BatchQuery
-from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.publishing.site_page_service import SitePageService
@@ -111,29 +108,6 @@ class ClientContext(ClientRuntimeContext):
         """
         self.authentication_context.register_provider(credentials)
         return self
-
-    def get_metadata(self):
-        result = ClientResult(self)
-
-        def _construct_download_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
-            request.url += "$metadata"
-            request.method = HttpMethod.Get
-
-        def _process_download_response(response):
-            """
-            :type response: requests.Response
-            """
-            response.raise_for_status()
-            result.value = response.content
-
-        qry = ClientQuery(self)
-        self.before_execute(_construct_download_request)
-        self.after_execute(_process_download_response)
-        self.add_query(qry)
-        return result
 
     def execute_batch(self, items_per_batch=100):
         """
