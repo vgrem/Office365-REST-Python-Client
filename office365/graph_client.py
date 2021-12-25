@@ -16,7 +16,7 @@ from office365.directory.organizations.organization import Organization
 from office365.directory.subscriptions.subscription import Subscription
 from office365.directory.users.user import User
 from office365.directory.users.user_collection import UserCollection
-from office365.entity_collection import EntityCollection
+from office365.entity_collection import EntityCollection, DeltaCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.shares.shares_collection import SharesCollection
 from office365.onedrive.sites.sites_with_root import SitesWithRoot
@@ -151,7 +151,7 @@ class GraphClient(ClientRuntimeContext):
     @property
     def contacts(self):
         """Get the list of organizational contacts for this organization."""
-        return EntityCollection(self, OrgContact, ResourcePath("contacts"))
+        return DeltaCollection(self, OrgContact, ResourcePath("contacts"))
 
     @property
     def directory(self):
@@ -174,7 +174,7 @@ class GraphClient(ClientRuntimeContext):
     @property
     def applications(self):
         """Get the list of applications in this organization."""
-        return EntityCollection(self, Application, ResourcePath("applications"))
+        return DeltaCollection(self, Application, ResourcePath("applications"))
 
     @property
     def service_principals(self):

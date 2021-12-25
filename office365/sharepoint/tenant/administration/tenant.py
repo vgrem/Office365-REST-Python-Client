@@ -44,7 +44,7 @@ class Tenant(ClientObject):
     def get_lock_state_by_id(self, site_id):
         return self._sites.get_lock_state_by_id(site_id)
 
-    def hub_sites(self, siteUrl):
+    def hub_sites(self, site_url):
         pass
 
     def check_tenant_licenses(self, licenses):

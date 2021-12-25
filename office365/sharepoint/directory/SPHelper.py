@@ -84,6 +84,21 @@ class SPHelper(BaseEntity):
         context.add_query(qry)
         return return_type
 
+    @staticmethod
+    def get_owners(context, group_id, return_type=None):
+        """
+        :param str group_id: Group identifier
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param BaseEntityCollection or None return_type: Returns members
+        """
+        helper = SPHelper(context)
+        if return_type is None:
+            return_type = BaseEntityCollection(context, User)
+        qry = ServiceOperationQuery(helper, "GetOwners", [group_id], None, None, return_type)
+        qry.static = True
+        context.add_query(qry)
+        return return_type
+
     @property
     def entity_type_name(self):
         return "SP.Directory.SPHelper"

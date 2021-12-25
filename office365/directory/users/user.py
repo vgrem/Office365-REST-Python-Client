@@ -15,7 +15,7 @@ from office365.directory.directory_object_collection import DirectoryObjectColle
 from office365.directory.licenses.license_details import LicenseDetails
 from office365.directory.identities.object_identity import ObjectIdentity
 from office365.directory.profile_photo import ProfilePhoto
-from office365.entity_collection import EntityCollection
+from office365.entity_collection import EntityCollection, DeltaCollection
 from office365.outlook.contacts.contact import Contact
 from office365.outlook.contacts.contact_folder import ContactFolder
 from office365.outlook.mail.mail_folder import MailFolder
@@ -315,8 +315,8 @@ class User(DirectoryObject):
         """Get a contact collection from the default Contacts folder of the signed-in user (.../me/contacts),
         or from the specified contact folder."""
         return self.properties.get('contacts',
-                                   EntityCollection(self.context, Contact,
-                                                    ResourcePath("contacts", self.resource_path)))
+                                   DeltaCollection(self.context, Contact,
+                                                   ResourcePath("contacts", self.resource_path)))
 
     @property
     def contact_folders(self):

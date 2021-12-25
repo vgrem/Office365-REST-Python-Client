@@ -268,6 +268,12 @@ class ClientContext(ClientRuntimeContext):
         return GroupSiteManager(self, ResourcePath("groupSiteManager"))
 
     @property
+    def group_service(self):
+        """Alias to GroupService"""
+        from office365.sharepoint.portal.group_service import GroupService
+        return GroupService(self, ResourcePath("GroupService"))
+
+    @property
     def lists(self):
         """Alias to ListCollection. Gets information about all lists that the current user can access."""
         from office365.sharepoint.lists.list_collection import ListCollection

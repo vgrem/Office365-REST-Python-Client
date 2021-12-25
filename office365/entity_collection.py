@@ -38,3 +38,17 @@ class EntityCollection(ClientObjectCollection):
         :rtype: office365.graph_client.GraphClient
         """
         return self._context
+
+
+class DeltaCollection(EntityCollection):
+
+    @property
+    def delta(self):
+        """
+        Get newly created, updated, or deleted entities (changes)
+
+        :rtype: DeltaCollection
+        """
+        return self.get_property('delta',
+                                 DeltaCollection(self.context, self._item_type,
+                                                 ResourcePath("delta", self.resource_path)))
