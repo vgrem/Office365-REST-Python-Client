@@ -83,3 +83,7 @@ class TestGraphGroup(GraphTestCase):
     def test9_delete_group(self):
         grp_to_delete = self.__class__.target_group
         grp_to_delete.delete_object(True).execute_query()
+
+    def test_10_get_changes(self):
+        changed_groups = self.client.groups.delta.select(["displayName"]).get().execute_query()
+        self.assertGreater(len(changed_groups), 0)

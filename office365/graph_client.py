@@ -179,7 +179,7 @@ class GraphClient(ClientRuntimeContext):
     @property
     def service_principals(self):
         """Retrieve a list of servicePrincipal objects."""
-        return EntityCollection(self, ServicePrincipal, ResourcePath("servicePrincipals"))
+        return DeltaCollection(self, ServicePrincipal, ResourcePath("servicePrincipals"))
 
     @property
     def organization(self):

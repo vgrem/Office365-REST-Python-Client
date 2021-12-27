@@ -1,9 +1,9 @@
 from office365.directory.groups.group import Group
-from office365.entity_collection import EntityCollection
+from office365.entity_collection import DeltaCollection
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 
 
-class GroupCollection(EntityCollection):
+class GroupCollection(DeltaCollection):
     """Group's collection"""
 
     def __init__(self, context, resource_path=None):
@@ -15,8 +15,8 @@ class GroupCollection(EntityCollection):
         Security group
 
         :type group_properties: GroupProfile"""
-        grp = Group(self.context)
-        self.add_child(grp)
-        qry = CreateEntityQuery(self, group_properties, grp)
+        return_type = Group(self.context)
+        self.add_child(return_type)
+        qry = CreateEntityQuery(self, group_properties, return_type)
         self.context.add_query(qry)
-        return grp
+        return return_type

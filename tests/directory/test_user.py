@@ -52,3 +52,4 @@ class TestGraphUser(GraphTestCase):
     def test8_get_user_changes(self):
         changed_users = self.client.users.delta.get().execute_query()
         self.assertGreater(len(changed_users), 0)
+

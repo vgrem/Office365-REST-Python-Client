@@ -322,21 +322,21 @@ class User(DirectoryObject):
     def contact_folders(self):
         """Get the contact folder collection in the default Contacts folder of the signed-in user."""
         return self.properties.get('contactFolders',
-                                   EntityCollection(self.context, ContactFolder,
-                                                    ResourcePath("contactFolders", self.resource_path)))
+                                   DeltaCollection(self.context, ContactFolder,
+                                                   ResourcePath("contactFolders", self.resource_path)))
 
     @property
     def events(self):
         """Get an event collection or an event."""
-        return self.properties.get('events', EntityCollection(self.context, Event,
-                                                              ResourcePath("events", self.resource_path)))
+        return self.properties.get('events', DeltaCollection(self.context, Event,
+                                                             ResourcePath("events", self.resource_path)))
 
     @property
     def messages(self):
         """Get an event collection or an event."""
         return self.properties.get('messages',
-                                   EntityCollection(self.context, Message,
-                                                    ResourcePath("messages", self.resource_path)))
+                                   DeltaCollection(self.context, Message,
+                                                   ResourcePath("messages", self.resource_path)))
 
     @property
     def joined_teams(self):
@@ -363,8 +363,8 @@ class User(DirectoryObject):
     def mail_folders(self):
         """Get the mail folder collection under the root folder of the signed-in user. """
         return self.properties.get('mailFolders',
-                                   EntityCollection(self.context, MailFolder,
-                                                    ResourcePath("mailFolders", self.resource_path)))
+                                   DeltaCollection(self.context, MailFolder,
+                                                   ResourcePath("mailFolders", self.resource_path)))
 
     @property
     def outlook(self):
