@@ -334,6 +334,9 @@ class List(SecurableObject):
         return result
 
     def reserve_list_item_id(self):
+        """
+        Reserves the returned list item identifier for the idempotent creation of a list item.
+        """
         result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "ReserveListItemId", None, None, None, result)
         self.context.add_query(qry)

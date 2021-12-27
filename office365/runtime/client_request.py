@@ -90,54 +90,54 @@ class ClientRequest(object):
             except HTTPError as e:
                 raise ClientRequestException(*e.args, response=e.response)
 
-    def execute_request_direct(self, request_options):
+    def execute_request_direct(self, request):
         """Execute client request
 
-        :type request_options: office365.runtime.http.request_options.RequestOptions
+        :type request: office365.runtime.http.request_options.RequestOptions
         """
-        self.context.authenticate_request(request_options)
-        if request_options.method == HttpMethod.Post:
-            if request_options.is_bytes or request_options.is_file:
-                response = requests.post(url=request_options.url,
-                                         headers=request_options.headers,
-                                         data=request_options.data,
-                                         auth=request_options.auth,
-                                         verify=request_options.verify,
-                                         proxies=request_options.proxies)
+        self.context.authenticate_request(request)
+        if request.method == HttpMethod.Post:
+            if request.is_bytes or request.is_file:
+                response = requests.post(url=request.url,
+                                         headers=request.headers,
+                                         data=request.data,
+                                         auth=request.auth,
+                                         verify=request.verify,
+                                         proxies=request.proxies)
             else:
-                response = requests.post(url=request_options.url,
-                                         headers=request_options.headers,
-                                         json=request_options.data,
-                                         auth=request_options.auth,
-                                         verify=request_options.verify,
-                                         proxies=request_options.proxies)
-        elif request_options.method == HttpMethod.Patch:
-            response = requests.patch(url=request_options.url,
-                                      headers=request_options.headers,
-                                      json=request_options.data,
-                                      auth=request_options.auth,
-                                      verify=request_options.verify,
-                                      proxies=request_options.proxies)
-        elif request_options.method == HttpMethod.Delete:
-            response = requests.delete(url=request_options.url,
-                                       headers=request_options.headers,
-                                       auth=request_options.auth,
-                                       verify=request_options.verify,
-                                       proxies=request_options.proxies)
-        elif request_options.method == HttpMethod.Put:
-            response = requests.put(url=request_options.url,
-                                    data=request_options.data,
-                                    headers=request_options.headers,
-                                    auth=request_options.auth,
-                                    verify=request_options.verify,
-                                    proxies=request_options.proxies)
+                response = requests.post(url=request.url,
+                                         headers=request.headers,
+                                         json=request.data,
+                                         auth=request.auth,
+                                         verify=request.verify,
+                                         proxies=request.proxies)
+        elif request.method == HttpMethod.Patch:
+            response = requests.patch(url=request.url,
+                                      headers=request.headers,
+                                      json=request.data,
+                                      auth=request.auth,
+                                      verify=request.verify,
+                                      proxies=request.proxies)
+        elif request.method == HttpMethod.Delete:
+            response = requests.delete(url=request.url,
+                                       headers=request.headers,
+                                       auth=request.auth,
+                                       verify=request.verify,
+                                       proxies=request.proxies)
+        elif request.method == HttpMethod.Put:
+            response = requests.put(url=request.url,
+                                    data=request.data,
+                                    headers=request.headers,
+                                    auth=request.auth,
+                                    verify=request.verify,
+                                    proxies=request.proxies)
         else:
-            response = requests.get(url=request_options.url,
-                                    headers=request_options.headers,
-                                    auth=request_options.auth,
-                                    verify=request_options.verify,
-                                    stream=request_options.stream,
-                                    proxies=request_options.proxies)
+            response = requests.get(url=request.url,
+                                    headers=request.headers,
+                                    auth=request.auth,
+                                    verify=request.verify,
+                                    stream=request.stream,
+                                    proxies=request.proxies)
         return response
 
     def next_query(self):

@@ -35,7 +35,7 @@ class ClientContext(ClientRuntimeContext):
         if base_url.endswith("/"):
             base_url = base_url[:len(base_url) - 1]
         if auth_context is None:
-            self._auth_context = AuthenticationContext(url=base_url)
+            self._auth_context = AuthenticationContext(authority_url=base_url)
         else:
             self._auth_context = auth_context
         super(ClientContext, self).__init__()

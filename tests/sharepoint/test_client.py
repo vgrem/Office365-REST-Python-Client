@@ -19,7 +19,7 @@ class TestSharePointClient(TestCase):
         self.assertIsInstance(ctx.authentication_context._provider, ACSTokenProvider)
 
     def test2_connect_with_app_principal_alt(self):
-        context_auth = AuthenticationContext(url=test_site_url)
+        context_auth = AuthenticationContext(authority_url=test_site_url)
         context_auth.acquire_token_for_app(client_id=settings.get('client_credentials', 'client_id'),
                                            client_secret=settings.get('client_credentials', 'client_secret'))
         ctx = ClientContext(test_site_url, context_auth)

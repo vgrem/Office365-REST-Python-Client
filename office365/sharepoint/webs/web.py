@@ -529,7 +529,9 @@ class Web(SecurableObject):
 
     def get_file_by_guest_url(self, guest_url):
         """
-        :type guest_url: str
+        Returns the file object from the guest access URL.
+
+        :param str guest_url: The guest access URL to get the file with.
         """
         return_type = File(self.context)
         qry = ServiceOperationQuery(self, "GetFileByGuestUrl", [guest_url], None, None, return_type)
@@ -538,7 +540,9 @@ class Web(SecurableObject):
 
     def get_file_by_wopi_frame_url(self, wopi_frame_url):
         """
-        :param str wopi_frame_url:
+        Returns the file object from the WOPI frame URL.
+
+        :param str wopi_frame_url:  The WOPI frame URL used to get the file object.
         """
         return_type = File(self.context)
         qry = ServiceOperationQuery(self, "GetFileByWOPIFrameUrl", [wopi_frame_url], None, None, return_type)
@@ -547,7 +551,9 @@ class Web(SecurableObject):
 
     def get_folder_by_guest_url(self, guest_url):
         """
-        :type guest_url: str
+        Returns the folder object from the tokenized sharing link URL.
+
+        :param str guest_url: The tokenized sharing link URL for the folder.
         """
         return_type = File(self.context)
         qry = ServiceOperationQuery(self, "GetFolderByGuestUrl", [guest_url], None, None, return_type)
@@ -625,10 +631,13 @@ class Web(SecurableObject):
     @staticmethod
     def get_document_and_media_libraries(context, web_full_url, include_page_libraries):
         """
+        Returns the document libraries of a SharePoint site, including picture, asset, and site assets libraries.
+        Document libraries that are private, catalog library, application list, form template, or libraries that user
+        does not have permission to view items are not inlcuded.
 
-        :param office365.sharepoint.client_context.ClientContext context:
-        :param str web_full_url:
-        :param bool include_page_libraries:
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param str web_full_url:  URL of the web.
+        :param bool include_page_libraries: Indicates whether to include page libraries. A value of "true" means yes.
         """
         result = ClientResult(context, ClientValueCollection(DocumentLibraryInformation))
         payload = {
@@ -665,6 +674,7 @@ class Web(SecurableObject):
     @staticmethod
     def get_sharing_link_kind(context, file_url):
         """
+        This method determines the kind of tokenized sharing link represented by the supplied file URL.
 
         :param office365.sharepoint.client_context.ClientContext context:
         :param str file_url:

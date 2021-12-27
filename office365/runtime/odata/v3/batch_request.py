@@ -49,7 +49,7 @@ class ODataBatchRequest(ClientRequest):
         self.context.pending_request().clear()
 
     def _extract_response(self, response):
-        """Parses a multipart/mixed response body from from the position defined by the context.
+        """Parses a multipart/mixed response body from the position defined by the context.
 
         :type response: requests.Response
         """

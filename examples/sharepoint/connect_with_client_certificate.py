@@ -4,7 +4,7 @@ from tests import test_site_url, test_tenant
 
 cert_settings = {
     'client_id': '51d03106-4726-442c-86db-70b32fa7547f',
-    'thumbprint': "6B36FBFC86FB1C019EB6496494B9195E6D179DDB",
+    'thumbprint': "61C754D8D9629BE91972B6A0C1999DC678FB0145",
     'certificate_path': '{0}/selfsigncert.pem'.format(os.path.dirname(__file__))
 }
 

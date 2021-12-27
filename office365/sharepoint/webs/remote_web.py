@@ -8,16 +8,23 @@ from office365.sharepoint.webs.web import Web
 class RemoteWeb(ClientObject):
     """Specifies a remote web that might be on a different domain."""
 
-    def get_list_by_server_relative_url(self, serverRelativeUrl):
+    def get_list_by_server_relative_url(self, server_relative_url):
+        """
+        :type server_relative_url: str
+        """
         target_list = List(self.context)
-        qry = ServiceOperationQuery(self, "GetListByServerRelativeUrl", [serverRelativeUrl], None, None, target_list)
+        qry = ServiceOperationQuery(self, "GetListByServerRelativeUrl", [server_relative_url], None, None, target_list)
         self.context.add_query(qry)
         return target_list
 
     @staticmethod
-    def create(context, requestUrl):
+    def create(context, request_url):
+        """
+        :type context: ClientContext
+        :type request_url: str
+        """
         remote_web = RemoteWeb(context)
-        qry = ServiceOperationQuery(context, None, [requestUrl], None, None, remote_web)
+        qry = ServiceOperationQuery(context, None, [request_url], None, None, remote_web)
         qry.static = True
         context.add_query(qry)
         return remote_web
