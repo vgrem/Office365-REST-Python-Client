@@ -207,6 +207,6 @@ class ClientObject(object):
         if json and self.entity_type_name is not None:
             if isinstance(json_format, JsonLightFormat) and json_format.is_verbose:
                 json[json_format.metadata_type_tag_name] = {'type': self.entity_type_name}
-            elif isinstance(json_format, ODataJsonFormat) and json_format.metadata == "minimal":
+            elif isinstance(json_format, ODataJsonFormat) and json_format.metadata_level == "minimal":
                 json[json_format.metadata_type_tag_name] = "#" + self.entity_type_name
         return json

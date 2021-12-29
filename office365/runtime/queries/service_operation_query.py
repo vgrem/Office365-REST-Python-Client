@@ -1,4 +1,3 @@
-from office365.runtime.paths.static_service_operation import StaticServiceOperationPath
 from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
 
@@ -9,7 +8,8 @@ class ServiceOperationQuery(ClientQuery):
                  method_params=None,
                  parameter_type=None,
                  parameter_name=None,
-                 return_type=None):
+                 return_type=None,
+                 is_static=False):
         """
 
         :type method_params: list or dict or office365.runtime.client_value.ClientValue or None
@@ -22,22 +22,15 @@ class ServiceOperationQuery(ClientQuery):
                                                     return_type)
         self._method_name = method_name
         self._method_params = method_params
-        self.static = False
+        self.static = is_static
 
     @property
     def resource_path(self):
-        if isinstance(self, ServiceOperationQuery):
-            if self.static:
-                return StaticServiceOperationPath(
-                    self.binding_type.entity_type_name,
-                    self.method_name,
-                    self.method_parameters)
-            else:
-                return ServiceOperationPath(
-                    self.method_name,
-                    self.method_parameters,
-                    self.binding_type.resource_path
-                )
+        if self.static:
+            full_name = ".".join([self.binding_type.entity_type_name, self.method_name])
+            return ServiceOperationPath(full_name, self.method_parameters)
+        else:
+            return ServiceOperationPath(self.method_name, self.method_parameters, self.binding_type.resource_path)
 
     @property
     def method_name(self):

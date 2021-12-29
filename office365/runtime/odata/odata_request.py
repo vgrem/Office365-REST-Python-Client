@@ -86,13 +86,12 @@ class ODataRequest(ClientRequest):
         else:
             if isinstance(query, ServiceOperationQuery):
                 self.json_format.function_tag_name = query.method_name
-            else:
-                self.json_format.function_tag_name = None
 
             if isinstance(return_type, ClientResult):
                 if isinstance(return_type.value, ClientValue) or isinstance(return_type.value, ClientObject):
                     return_type = return_type.value
             self.map_json(response.json(), return_type, self.json_format)
+            self.json_format.function_tag_name = None
 
     def map_json(self, json, return_type, json_format=None):
         """

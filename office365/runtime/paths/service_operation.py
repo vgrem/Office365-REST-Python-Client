@@ -1,5 +1,5 @@
 from office365.runtime.client_path import ClientPath
-from office365.runtime.odata.odata_path_builder import ODataPathBuilder
+from office365.runtime.odata.path_builder import ODataPathBuilder
 
 
 class ServiceOperationPath(ClientPath):
@@ -18,4 +18,4 @@ class ServiceOperationPath(ClientPath):
 
     @property
     def segments(self):
-        return [self.delimiter, ODataPathBuilder.from_operation(self._name, self._parameters)]
+        return [self.delimiter, ODataPathBuilder.build(self._name, self._parameters)]

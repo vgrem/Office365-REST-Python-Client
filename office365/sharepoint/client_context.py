@@ -4,6 +4,7 @@ from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.providers.saml_token_provider import resolve_base_url
 from office365.runtime.auth.user_credential import UserCredential
+from office365.runtime.client_result import ClientResult
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
@@ -12,6 +13,7 @@ from office365.runtime.odata.v3.batch_request import ODataBatchRequest
 from office365.runtime.odata.v3.metadata_level import ODataMetadataLevel
 from office365.runtime.odata.odata_request import ODataRequest
 from office365.runtime.queries.batch_query import BatchQuery
+from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.paths.resource_path import ResourcePath
@@ -168,6 +170,23 @@ class ClientContext(ClientRuntimeContext):
         return_value = ContextWebInformation()
         self.pending_request().map_json(json, return_value, json_format)
         return return_value
+
+    def get_context_web_information_ex(self):
+        """Returns an ContextWebInformation object that specifies metadata about the site"""
+        result = ClientResult(self, ContextWebInformation())
+
+        def _construct_request(request):
+            """
+            :type request: office365.runtime.http.request_options.RequestOptions
+            """
+            request.url = self.service_root_url() + "/contextInfo"
+            request.method = HttpMethod.Post
+            self.pending_request().json_format.function_tag_name = "GetContextWebInformation"
+
+        qry = ClientQuery(self, None, None, None, result)
+        self.before_execute(_construct_request)
+        self.add_query(qry)
+        return result
 
     def execute_query_with_incremental_retry(self, max_retry=5):
         """Handles throttling requests."""

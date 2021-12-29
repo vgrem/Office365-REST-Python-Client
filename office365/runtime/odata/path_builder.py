@@ -7,9 +7,9 @@ from office365.runtime.compat import is_string_type
 class ODataPathBuilder(object):
 
     @staticmethod
-    def from_operation(name, parameters=None):
+    def build(name, parameters=None):
         """
-        Constructs segment from operation
+        Constructs path segment from operation name and parameters
 
         :type parameters: list or dict or ClientValue
         :type name: str

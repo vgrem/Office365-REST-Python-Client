@@ -4,12 +4,12 @@ from abc import ABCMeta, abstractmethod
 class ODataJsonFormat(object):
     """OData JSON format"""
 
-    def __init__(self, metadata=None):
+    def __init__(self, metadata_level=None):
         """
 
-        :type metadata: str
+        :type metadata_level: str
         """
-        self.metadata = metadata
+        self.metadata_level = metadata_level
         self.security_tag_name = None
         self.function_tag_name = None
         self.collection_tag_name = None

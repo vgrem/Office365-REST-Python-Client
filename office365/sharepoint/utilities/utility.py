@@ -8,6 +8,10 @@ from office365.sharepoint.utilities.principal_info import PrincipalInfo
 
 
 class Utility(BaseEntity):
+    """
+    Provides tools for converting date and time formats, for obtaining information from user names,
+    for modifying access to sites, and for various other tasks in managing deployment.
+    """
 
     def __init__(self, context):
         super(Utility, self).__init__(context, ResourcePath("SP.Utilities.Utility"))
@@ -15,6 +19,8 @@ class Utility(BaseEntity):
     @staticmethod
     def get_current_user_email_addresses(context):
         """
+        Returns the email addresses of the current user. If more than one email address exists for the current user,
+        returns a list of email addresses separated by semicolons.
 
         :type context: office365.sharepoint.client_context.ClientContext
         """
@@ -28,6 +34,8 @@ class Utility(BaseEntity):
     @staticmethod
     def get_user_permission_levels(context):
         """
+        Retrieves a collection of permission levels of the current user on the web.
+
         :type context: office365.sharepoint.client_context.ClientContext
         """
         result = ClientResult(context, ClientValueCollection(str))
@@ -38,13 +46,16 @@ class Utility(BaseEntity):
         return result
 
     @staticmethod
-    def search_principals_using_context_web(context, s_input, sources, scopes, maxCount, groupName=None):
+    def search_principals_using_context_web(context, s_input, sources, scopes, max_count, group_name=None):
         """
-        :type s_input: str
-        :type sources: int
+        Returns the collection of principals that partially or uniquely matches the specified search criteria in the
+        context of the current Web site
+
+        :param str s_input: Specifies the value to be used when searching for a principal.
+        :param str sources: Specifies the source to be used when searching for a principal.
         :type scopes: int
-        :type maxCount: int
-        :type groupName: str or None
+        :type max_count: int
+        :type group_name: str or None
         :type context: office365.sharepoint.client_context.ClientContext
         """
         result = ClientResult(context, ClientValueCollection(str))
@@ -53,8 +64,8 @@ class Utility(BaseEntity):
             "input": s_input,
             "sources": sources,
             "scopes": scopes,
-            "maxCount": maxCount,
-            "groupName": groupName
+            "maxCount": max_count,
+            "groupName": group_name
         }
         qry = ServiceOperationQuery(utility, "SearchPrincipalsUsingContextWeb", params, None, None, result)
         qry.static = True
@@ -89,9 +100,11 @@ class Utility(BaseEntity):
     @staticmethod
     def expand_groups_to_principals(context, inputs, max_count=None, return_type=None):
         """
+        Expands groups to a collection of principals.
+
         :type context: office365.sharepoint.client_context.ClientContext
-        :type inputs: list[str]
-        :type max_count: int
+        :param list[str] inputs: A collection of groups to be expanded.
+        :param int max_count: Specifies the maximum number of principals to be returned.
         :type return_type: ClientResult
         """
         utility = Utility(context)
@@ -109,8 +122,11 @@ class Utility(BaseEntity):
     @staticmethod
     def log_custom_app_error(context, error):
         """
+        Logs an error from a SharePoint Add-in. The return value indicates the success or failure of this operation.
+        These errors are of interest to administrators who monitor such apps (2).
+
         :type context: office365.sharepoint.client_context.ClientContext
-        :type error: str
+        :param str error: Error string to log
         """
         utility = Utility(context)
         payload = {
