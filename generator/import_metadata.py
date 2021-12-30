@@ -16,13 +16,14 @@ parser.add_argument("-p", "--path",
 args = parser.parse_args()
 
 if args.endpoint == "sharepoint":
+    print("Importing SharePoint model metadata...")
     ctx = ClientContext(test_site_url).with_credentials(test_client_credentials)
     result = ctx.get_metadata().execute_query()
     metadata_xml = minidom.parseString(result.value.decode("utf-8")).toprettyxml(indent="   ")
     with open(args.path, "w") as fh:
         fh.write(metadata_xml)
 elif args.endpoint == "microsoftgraph":
-
+    print("Importing Microsoft Graph model metadata...")
     client = GraphClient(acquire_token_by_client_credentials)
     result = client.get_metadata().execute_query()
     metadata_xml = minidom.parseString(result.value.decode("utf-8")).toprettyxml(indent="   ")

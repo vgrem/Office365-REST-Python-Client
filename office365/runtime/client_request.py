@@ -27,13 +27,6 @@ class ClientRequest(object):
         return self._context
 
     @property
-    def queries(self):
-        """
-        :rtype: list[ClientQuery]
-        """
-        return self._queries
-
-    @property
     def current_query(self):
         """
         :rtype: office365.runtime.queries.client_query.ClientQuery
@@ -79,7 +72,7 @@ class ClientRequest(object):
         """
         Submit a pending request to the server
         """
-        for qry in self.next_query():
+        for qry in self:
             try:
                 request = self.build_request(qry)
                 self.beforeExecute.notify(request)
@@ -140,7 +133,7 @@ class ClientRequest(object):
                                     proxies=request.proxies)
         return response
 
-    def next_query(self):
+    def __iter__(self):
         while len(self._queries) > 0:
             qry = self._queries.pop(0)
             self._current_query = qry

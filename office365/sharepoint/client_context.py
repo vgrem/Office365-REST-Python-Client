@@ -124,7 +124,7 @@ class ClientContext(ClientRuntimeContext):
 
         batch_request.beforeExecute += _prepare_batch_request
 
-        all_queries = [qry for qry in self.pending_request().next_query()]
+        all_queries = [qry for qry in self.pending_request()]
         for i in range_or_xrange(0, len(all_queries), items_per_batch):
             queries = all_queries[i:i + items_per_batch]
             batch_request.add_query(BatchQuery(self, queries))
@@ -222,7 +222,7 @@ class ClientContext(ClientRuntimeContext):
         ctx = copy.deepcopy(self)
         ctx._base_url = url
         if clear_queries:
-            ctx.clear_queries()
+            ctx.clear()
         return ctx
 
     def authenticate_request(self, request):

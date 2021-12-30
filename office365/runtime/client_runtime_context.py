@@ -141,8 +141,8 @@ class ClientRuntimeContext(object):
         """
         self.pending_request().add_query(query, execute_first, set_as_current)
 
-    def clear_queries(self):
-        self.pending_request().queries.clear()
+    def clear(self):
+        self.pending_request().clear()
 
     def get_metadata(self):
         result = ClientResult(self)
