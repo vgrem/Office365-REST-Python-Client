@@ -14,7 +14,7 @@ class WebCollection(BaseEntityCollection):
 
     def add(self, web_creation_information):
         """
-        Create web site
+        Create WebSite
 
         :type web_creation_information: office365.sharepoint.webs.web_creation_information.WebCreationInformation
         """
@@ -25,9 +25,9 @@ class WebCollection(BaseEntityCollection):
         return target_web
 
     @property
-    def service_root_url(self):
-        url = super(WebCollection, self).service_root_url
+    def resource_url(self):
+        val = super(WebCollection, self).resource_url
         parent_web_url = self._parent.get_property("Url")
         if parent_web_url is not None:
-            url = url.replace(self.context.service_root_url(), parent_web_url + '/_api')
-        return url
+            val = val.replace(self.context.service_root_url(), parent_web_url + '/_api')
+        return val

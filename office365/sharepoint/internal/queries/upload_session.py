@@ -79,8 +79,8 @@ class UploadSessionQuery(ServiceOperationQuery):
             self.context.after_execute(self._build_upload_session_query)
 
     @property
-    def resource_path(self):
-        return self._file_query.resource_path
+    def url(self):
+        return self._file_query.url
 
     @property
     def return_type(self):

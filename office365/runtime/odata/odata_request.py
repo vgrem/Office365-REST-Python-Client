@@ -8,7 +8,6 @@ from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
-from office365.runtime.queries.read_entity_query import ReadEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 
@@ -42,13 +41,7 @@ class ODataRequest(ClientRequest):
         """
         self._current_query = query
 
-        if query.resource_path is not None:
-            request_url = query.service_root_url + str(query.resource_path)
-        else:
-            request_url = query.service_root_url + "/"
-        if isinstance(query, ReadEntityQuery) and not query.query_options.is_empty:
-            request_url += "?" + query.query_options.to_url()
-        request = RequestOptions(request_url)
+        request = RequestOptions(query.url)
         self.ensure_media_type(request)
         # set method
         request.method = HttpMethod.Get

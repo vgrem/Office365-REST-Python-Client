@@ -186,7 +186,7 @@ class ClientContext(ClientRuntimeContext):
         qry = ClientQuery(self, None, None, None, result)
         self.before_execute(_construct_request)
         self.add_query(qry)
-        return result
+        return qry
 
     def execute_query_with_incremental_retry(self, max_retry=5):
         """Handles throttling requests."""

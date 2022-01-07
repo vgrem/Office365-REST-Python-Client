@@ -15,13 +15,17 @@ class ReadEntityQuery(ClientQuery):
         self._properties_to_include = properties_to_include
 
     @property
-    def query_options(self):
-        if self._properties_to_include is not None:
-            return self._build_query_options()
-        else:
-            return self._binding_type.query_options
+    def url(self):
+        value = super(ReadEntityQuery, self).url
+        query_options = self._build_query_options()
+        if not query_options.is_empty:
+            value += "?" + query_options.to_url()
+        return value
 
     def _build_query_options(self):
+        if self._properties_to_include is None:
+            return self._binding_type.query_options
+
         query = QueryOptions()
         for n in self._properties_to_include:
             prop_val = self._binding_type.get_property(n)

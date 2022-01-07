@@ -1067,8 +1067,8 @@ class Web(SecurableObject):
         return self
 
     @property
-    def service_root_url(self):
-        url = super(Web, self).service_root_url
+    def resource_url(self):
+        val = super(Web, self).resource_url
         if self._web_url is not None:
-            url = url.replace(self.context.service_root_url(), self._web_url + '/_api')
-        return url
+            val = val.replace(self.context.service_root_url(), self._web_url + '/_api')
+        return val

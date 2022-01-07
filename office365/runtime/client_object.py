@@ -168,11 +168,12 @@ class ClientObject(object):
         return self._entity_type_name
 
     @property
-    def service_root_url(self):
-        """Returns Service Root Url
+    def resource_url(self):
+        """
+        Returns resource url
         :rtype: str or None
         """
-        return self.context.service_root_url()
+        return self.context.service_root_url() + str(self.resource_path)
 
     @property
     def context(self):
