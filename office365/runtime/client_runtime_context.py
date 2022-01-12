@@ -151,7 +151,7 @@ class ClientRuntimeContext(object):
             """
             :type request: office365.runtime.http.request_options.RequestOptions
             """
-            request.url += "$metadata"
+            request.url += "/$metadata"
             request.method = HttpMethod.Get
 
         def _process_download_response(response):
@@ -165,7 +165,7 @@ class ClientRuntimeContext(object):
         self.before_execute(_construct_download_request)
         self.after_execute(_process_download_response)
         self.add_query(qry)
-        return result
+        return qry
 
     @property
     def current_query(self):

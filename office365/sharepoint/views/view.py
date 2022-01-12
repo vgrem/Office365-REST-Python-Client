@@ -38,7 +38,7 @@ class View(BaseEntity):
         result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "RenderAsHtml", None, None, None, result)
         self.context.add_query(qry)
-        return result
+        return qry
 
     def set_view_xml(self, view_xml):
         """

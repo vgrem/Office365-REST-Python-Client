@@ -54,6 +54,7 @@ class Web(SecurableObject):
 
     def __init__(self, context, resource_path=None):
         """
+        Specifies the push notification subscriber over the site for the specified device app instance identifier.
 
         :type resource_path: ResourcePath or None
         :type context: office365.sharepoint.client_context.ClientContext
@@ -88,6 +89,7 @@ class Web(SecurableObject):
 
     def get_push_notification_subscribers_by_user(self, user_or_username):
         """
+        Queries for the push notification subscribers for the site  for the specified user.
 
         :param str or User user_or_username:
         """
@@ -108,11 +110,13 @@ class Web(SecurableObject):
 
     @staticmethod
     def create_organization_sharing_link(context, url, is_edit_link):
-        """
+        """ Creates and returns an organization-internal link that can be used to access a document and gain permissions
+           to it.
 
         :param office365.sharepoint.client_context.ClientContext context:
-        :param str url:
-        :param bool is_edit_link:
+        :param str url: he URL of the site, with the path of the object in SharePoint that is represented as query
+            string parameters, forSharing set to 1 if sharing, and mbypass set to 1 to bypass any mobile logic.
+        :param bool is_edit_link: If true, the link will allow the logged in user to edit privileges on the item.
         """
         result = ClientResult(context)
         params = {"url": url, "isEditLink": is_edit_link}
@@ -136,10 +140,10 @@ class Web(SecurableObject):
 
     @staticmethod
     def get_web_url_from_page_url(context, page_full_url):
-        """Gets Web from page url
+        """Returns the URL of the root folder for the site containing the specified URL
 
         :type context: office365.sharepoint.client_context.ClientContext
-        :type page_full_url: str
+        :param str page_full_url: Specifies the URL from which to return the site URL.
         """
         result = ClientResult(context)
         payload = {
@@ -189,6 +193,11 @@ class Web(SecurableObject):
         return result
 
     def get_client_side_web_parts(self, project, include_errors=False):
+        """
+        :param str project:
+        :param bool include_errors: If true, webparts with errors MUST be included in the results of the request.
+           If false, webparts with errors MUST be excluded in the results of the request.
+        """
         result = ClientValueCollection(SPClientSideComponentQueryResult)
         params = {
             "includeErrors": include_errors,
@@ -689,8 +698,8 @@ class Web(SecurableObject):
     def share_object(context, url, people_picker_input,
                      role_value=None,
                      groupId=0, propagateAcl=False,
-                     sendEmail=True, includeAnonymousLinkInEmail=False, emailSubject=None, emailBody=None,
-                     useSimplifiedRoles=True):
+                     send_email=True, includeAnonymousLinkInEmail=False, email_subject=None, email_body=None,
+                     use_simplified_roles=True):
         """
         This method shares an object in SharePoint such as a list item or site. It returns a SharingResult object
         which contains the completion script and a page to redirect to if desired.
@@ -702,12 +711,12 @@ class Web(SecurableObject):
         :param str people_picker_input: A string of JSON representing users in people picker format.
         :param int groupId: The ID of the group to be added. Zero if not adding to a permissions group.
         :param bool propagateAcl:  A flag to determine if permissions SHOULD be pushed to items with unique permissions.
-        :param bool sendEmail: A flag to determine if an email notification SHOULD be sent (if email is configured).
+        :param bool send_email: A flag to determine if an email notification SHOULD be sent (if email is configured).
         :param bool includeAnonymousLinkInEmail: If an email is being sent, this determines if an anonymous link
         SHOULD be added to the message.
-        :param str emailSubject: The email subject.
-        :param str emailBody: The email subject.
-        :param bool useSimplifiedRoles: A Boolean value indicating whether to use the SharePoint simplified roles
+        :param str email_subject: The email subject.
+        :param str email_body: The email subject.
+        :param bool use_simplified_roles: A Boolean value indicating whether to use the SharePoint simplified roles
         (Edit, View) or not.
 
         """
@@ -719,10 +728,10 @@ class Web(SecurableObject):
             "roleValue": role_value,
             "includeAnonymousLinkInEmail": includeAnonymousLinkInEmail,
             "propagateAcl": propagateAcl,
-            "sendEmail": sendEmail,
-            "emailSubject": emailSubject,
-            "emailBody": emailBody,
-            "useSimplifiedRoles": useSimplifiedRoles
+            "sendEmail": send_email,
+            "emailSubject": email_subject,
+            "emailBody": email_body,
+            "useSimplifiedRoles": use_simplified_roles
         }
         qry = ServiceOperationQuery(context.web, "ShareObject", None, payload, None, result)
         qry.static = True
