@@ -9,8 +9,9 @@ from office365.sharepoint.tenant.administration.tenant import Tenant
 from tests import test_admin_site_url, test_user_credentials
 
 admin_client = ClientContext(test_admin_site_url).with_credentials(test_user_credentials)
-tenant = Tenant(admin_client)
-tenant.set_property("DisableCustomAppAuthentication", False).update().execute_query()
+tenant = Tenant(admin_client).get().execute_query()
+if tenant.get_property("DisableCustomAppAuthentication"):
+    tenant.set_property("DisableCustomAppAuthentication", False).update().execute_query()
 
 
 
