@@ -17,18 +17,18 @@ class AuthenticationContext(object):
         self.authority_url = authority_url
         self._provider = None
 
-    def with_client_certificate(self, tenant, client_id, thumbprint, cert_path):
+    def with_client_certificate(self, tenant, client_id, thumbprint, cert_path,scopes=["{url}/.default".format(url=self.authority_url)]):
         """Creates authenticated SharePoint context via certificate credentials
 
         :param str tenant: Tenant name, for example {}@
         :param str cert_path: Path to A PEM encoded certificate private key.
         :param str thumbprint: Hex encoded thumbprint of the certificate.
         :param str client_id: The OAuth client id of the calling application.
+        :param list[str] scopes :  Scopes requested to access a protected API (a resource)
         """
 
         def _acquire_token_for_client_certificate():
             authority_url = 'https://login.microsoftonline.com/{0}'.format(tenant)
-            scopes = ["{url}/.default".format(url=self.authority_url)]
             credentials = {"thumbprint": thumbprint, "private_key": open(cert_path).read()}
             import msal
             app = msal.ConfidentialClientApplication(
