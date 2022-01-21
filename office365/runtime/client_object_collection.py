@@ -1,7 +1,7 @@
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.types.EventHandler import EventHandler
+from office365.runtime.types.event_handler import EventHandler
 
 
 class ClientObjectCollection(ClientObject):

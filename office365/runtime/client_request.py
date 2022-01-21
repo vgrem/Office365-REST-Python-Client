@@ -5,7 +5,7 @@ from requests import HTTPError
 
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.types.EventHandler import EventHandler
+from office365.runtime.types.event_handler import EventHandler
 
 
 class ClientRequest(object):

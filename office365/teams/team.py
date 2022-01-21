@@ -9,8 +9,8 @@ from office365.teams.team_fun_settings import TeamFunSettings
 from office365.teams.team_guest_settings import TeamGuestSettings
 from office365.teams.team_member_settings import TeamMemberSettings
 from office365.teams.team_messaging_settings import TeamMessagingSettings
-from office365.teams.apps.teams_app_installation import TeamsAppInstallation
-from office365.teams.operations.teams_async_operation import TeamsAsyncOperation
+from office365.teams.apps.app_installation import TeamsAppInstallation
+from office365.teams.operations.async_operation import TeamsAsyncOperation
 from office365.teams.teams_template import TeamsTemplate
 
 
