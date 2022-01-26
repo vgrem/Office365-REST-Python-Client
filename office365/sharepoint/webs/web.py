@@ -544,7 +544,8 @@ class Web(SecurableObject):
         :param str guest_url: The guest access URL to get the file with.
         """
         return_type = File(self.context)
-        qry = ServiceOperationQuery(self, "GetFileByGuestUrl", [guest_url], None, None, return_type)
+        payload = {"guestUrl": guest_url}
+        qry = ServiceOperationQuery(self, "GetFileByGuestUrl", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 

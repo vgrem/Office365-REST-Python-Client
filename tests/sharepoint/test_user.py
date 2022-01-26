@@ -1,4 +1,5 @@
-from tests import test_tenant
+from office365.sharepoint.sharing.sharingUtility import SharingUtility
+from tests import test_tenant, test_user_principal_name
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.changes.change_query import ChangeQuery
@@ -37,3 +38,7 @@ class TestSharePointUser(SPTestCase):
         changes = self.client.site.get_changes(ChangeQuery(user=True)).execute_query()
         self.assertGreater(len(changes), 0)
         # self.assertEqual(changes.entity_type_name, "Collection(SP.Change)")
+
+    #def test7_get_user_directory_info_by_email(self):
+    #    result = SharingUtility.get_user_directory_info_by_email(self.client, test_user_principal_name).execute_query()
+    #    self.assertIsNotNone(result.value)
