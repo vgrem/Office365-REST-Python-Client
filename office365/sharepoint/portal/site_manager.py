@@ -1,9 +1,14 @@
 from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value import ClientValue
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.portal.site_creation_response import SPSiteCreationResponse
+
+
+class GetTeamChannelSiteOwnerResponse(ClientValue):
+    pass
 
 
 class SPSiteManager(BaseEntity):
@@ -58,3 +63,16 @@ class SPSiteManager(BaseEntity):
 
         self.context.before_execute(_construct_status_request)
         return response
+
+    def get_site_url(self, site_id):
+        response = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "SiteUrl", None, {'siteId': site_id}, None, response)
+        self.context.add_query(qry)
+        return response
+
+    def get_team_channel_site_owner(self, site_id):
+        response = ClientResult(self.context, GetTeamChannelSiteOwnerResponse())
+        qry = ServiceOperationQuery(self, "GetTeamChannelSiteOwner", None, {'siteId': site_id}, None, response)
+        self.context.add_query(qry)
+        return response
+

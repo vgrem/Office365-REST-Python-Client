@@ -297,8 +297,9 @@ class Web(SecurableObject):
 
         :param str link_url: A URL that is either a tokenized sharing link or a canonical URL for a document
         """
-        result = SharingLinkData()
-        qry = ServiceOperationQuery(self, "GetSharingLinkData", [link_url], None, None, result)
+        result = ClientResult(self.context, SharingLinkData())
+        payload = {"linkUrl": link_url}
+        qry = ServiceOperationQuery(self, "GetSharingLinkData", None, payload, None, result)
         self.context.add_query(qry)
         return result
 
@@ -697,8 +698,8 @@ class Web(SecurableObject):
     @staticmethod
     def share_object(context, url, people_picker_input,
                      role_value=None,
-                     groupId=0, propagateAcl=False,
-                     send_email=True, includeAnonymousLinkInEmail=False, email_subject=None, email_body=None,
+                     group_id=0, propagate_acl=False,
+                     send_email=True, include_anonymous_link_in_email=False, email_subject=None, email_body=None,
                      use_simplified_roles=True):
         """
         This method shares an object in SharePoint such as a list item or site. It returns a SharingResult object
@@ -709,10 +710,10 @@ class Web(SecurableObject):
         :param str url: The URL of the website with the path of an object in SharePoint query string parameters.
         :param str role_value: The sharing role value for the type of permission to grant on the object.
         :param str people_picker_input: A string of JSON representing users in people picker format.
-        :param int groupId: The ID of the group to be added. Zero if not adding to a permissions group.
-        :param bool propagateAcl:  A flag to determine if permissions SHOULD be pushed to items with unique permissions.
+        :param int group_id: The ID of the group to be added. Zero if not adding to a permissions group.
+        :param bool propagate_acl:  A flag to determine if permissions SHOULD be pushed to items with unique permissions.
         :param bool send_email: A flag to determine if an email notification SHOULD be sent (if email is configured).
-        :param bool includeAnonymousLinkInEmail: If an email is being sent, this determines if an anonymous link
+        :param bool include_anonymous_link_in_email: If an email is being sent, this determines if an anonymous link
         SHOULD be added to the message.
         :param str email_subject: The email subject.
         :param str email_body: The email subject.
@@ -723,11 +724,11 @@ class Web(SecurableObject):
         result = SharingResult(context)
         payload = {
             "url": url,
-            "groupId": groupId,
+            "groupId": group_id,
             "peoplePickerInput": people_picker_input,
             "roleValue": role_value,
-            "includeAnonymousLinkInEmail": includeAnonymousLinkInEmail,
-            "propagateAcl": propagateAcl,
+            "includeAnonymousLinkInEmail": include_anonymous_link_in_email,
+            "propagateAcl": propagate_acl,
             "sendEmail": send_email,
             "emailSubject": email_subject,
             "emailBody": email_body,

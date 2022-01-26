@@ -77,7 +77,7 @@ class ClientRuntimeContext(object):
         """
         Attach an event handler which is triggered before request is submitted to server
 
-        :param (RequestOptions, any) -> None action:
+        :param (office365.runtime.http.request_options.RequestOptions, any) -> None action:
         :param bool once:
         :return: None
         """
@@ -165,7 +165,7 @@ class ClientRuntimeContext(object):
         self.before_execute(_construct_download_request)
         self.after_execute(_process_download_response)
         self.add_query(qry)
-        return qry
+        return result
 
     @property
     def current_query(self):

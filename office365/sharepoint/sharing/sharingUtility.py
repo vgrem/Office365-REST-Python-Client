@@ -5,6 +5,7 @@ from office365.sharepoint.sharing.userDirectoryInfo import UserDirectoryInfo
 
 
 class SharingUtility(BaseEntity):
+    """Provides sharing related utility methods."""
 
     def __init__(self, context):
         super(SharingUtility, self).__init__(context, ResourcePath("SharingUtility"))
@@ -12,9 +13,10 @@ class SharingUtility(BaseEntity):
     @staticmethod
     def get_user_directory_info_by_email(context, email):
         """
+        Get user information by the user’s email address in directory.
 
-        :param str email:
-        :param office365.sharepoint.client_context.ClientContext context:
+        :param str email: The email address of a user.
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
         """
         result = UserDirectoryInfo()
         payload = {

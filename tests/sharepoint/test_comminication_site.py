@@ -32,16 +32,21 @@ class TestCommunicationSite(TestCase):
         self.assertIsNotNone(result.value.SiteStatus)
         self.assertTrue(result.value.SiteStatus != SiteStatus.Error)
 
-    def test3_register_hub_site(self):
+    def test3_get_site_url(self):
+        result = self.site_manager.get_site_url(self.__class__.site_response.SiteId).execute_query()
+        self.assertIsNotNone(result.value)
+        self.assertTrue(self.__class__.site_response.SiteUrl == result.value)
+
+    def test4_register_hub_site(self):
         client_admin = ClientContext(test_admin_site_url).with_credentials(test_user_credentials)
         tenant = Tenant(client_admin)
         props = tenant.register_hub_site(self.__class__.site_response.SiteUrl).execute_query()
         self.assertIsNotNone(props)
 
-    def test4_unregister_hub_site(self):
+    def test5_unregister_hub_site(self):
         client_admin = ClientContext(test_admin_site_url).with_credentials(test_user_credentials)
         tenant = Tenant(client_admin)
         tenant.unregister_hub_site(self.__class__.site_response.SiteUrl).execute_query()
 
-    def test5_delete_site(self):
+    def test6_delete_site(self):
         self.site_manager.delete(self.__class__.site_response.SiteId).execute_query()
