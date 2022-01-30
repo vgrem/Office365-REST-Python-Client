@@ -225,7 +225,7 @@ class Site(BaseEntity):
         self.context.add_query(qry)
         return return_type
 
-    def register_hub_site(self, create_info):
+    def register_hub_site(self, create_info=None):
         """Registers an existing site as a hub site.
 
         :type create_info: HubSiteCreationInformation
@@ -315,6 +315,13 @@ class Site(BaseEntity):
         :rtype: str
         """
         return self.properties.get("Id", None)
+
+    @property
+    def hub_site_id(self):
+        """
+        :rtype: str
+        """
+        return self.properties.get("HubSiteId", None)
 
     @property
     def is_hub_site(self):

@@ -17,7 +17,7 @@ class PeopleManager(BaseEntity):
         """
         Checks whether the current user is following the specified user.
 
-        :param str account_name:
+        :param str account_name: Account name of the specified user.
         :return:
         """
         result = ClientResult(self.context)
@@ -30,7 +30,7 @@ class PeopleManager(BaseEntity):
         """
         Gets the people who are following the specified user.
 
-        :param str account_name:
+        :param str account_name: Account name of the specified user.
         :return:
         """
         result = ClientResult(self.context, PersonPropertiesCollection(self.context))
@@ -43,7 +43,7 @@ class PeopleManager(BaseEntity):
         """
         Add the specified user to the current user's list of followed users.
 
-        :param str account_name:
+        :param str account_name: Account name of the specified user.
         """
         params = {"accountName": account_name}
         qry = ServiceOperationQuery(self, "Follow", params, None, None, None)
@@ -61,15 +61,14 @@ class PeopleManager(BaseEntity):
         self.context.add_query(qry)
         return self
 
-    def get_user_profile_properties(self, accountName):
+    def get_user_profile_properties(self, account_name):
         """
         Gets the specified user profile properties for the specified user.
 
-        :type accountName: str
-        :return: dict
+        :param str account_name: Account name of the specified user.
         """
         result = ClientResult(self.context)
-        payload = {"accountName": accountName}
+        payload = {"accountName": account_name}
         qry = ServiceOperationQuery(self, "GetUserProfileProperties", payload, None, None, result)
         self.context.add_query(qry)
         return result
@@ -87,27 +86,30 @@ class PeopleManager(BaseEntity):
         self.context.add_query(qry)
         return result
 
-    def get_default_document_library(self, accountName, createSiteIfNotExists=False,
-                                     siteCreationPriority=PersonalSiteCreationPriority.Low):
+    def get_default_document_library(self, account_name, create_site_if_not_exists=False,
+                                     site_creation_priority=PersonalSiteCreationPriority.Low):
         """
 
-        :param str accountName:
-        :param bool createSiteIfNotExists:
-        :param int siteCreationPriority:
+        :param str account_name:
+        :param bool create_site_if_not_exists:
+        :param int site_creation_priority:
         :return:
         """
         result = ClientResult(self.context)
-        params = {"accountName": accountName,
-                  "createSiteIfNotExists": createSiteIfNotExists,
-                  "siteCreationPriority": siteCreationPriority}
+        params = {"accountName": account_name,
+                  "createSiteIfNotExists": create_site_if_not_exists,
+                  "siteCreationPriority": site_creation_priority}
         qry = ServiceOperationQuery(self, "GetDefaultDocumentLibrary", params, None, None, result)
         self.context.add_query(qry)
         return result
 
     def get_people_followed_by(self, account_name):
         """
+        The GetPeopleFollowedBy method returns a  list of PersonProperties objects for people who the specified user
+        is following. This method can result in exceptions for conditions such as null arguments or if the specified
+        user cannot be found.
 
-        :type account_name: str
+        :param str account_name: Account name of the specified user.
         :return: PersonPropertiesCollection
         """
         result = PersonPropertiesCollection(self.context)
@@ -118,6 +120,7 @@ class PeopleManager(BaseEntity):
 
     def get_my_followers(self):
         """
+        This method returns a list of PersonProperties objects for the people who are following the current user.
         """
         return_type = PersonPropertiesCollection(self.context)
         qry = ServiceOperationQuery(self, "GetMyFollowers", None, None, None, return_type)

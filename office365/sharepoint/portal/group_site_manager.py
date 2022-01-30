@@ -57,3 +57,19 @@ class GroupSiteManager(ClientObject):
 
         self.context.before_execute(_construct_status_request)
         return result
+
+    def get_current_user_joined_teams(self, get_logo_data=False, force_cache_update=False):
+        """
+        Get the teams in Microsoft Teams that the current user is a direct member of.
+
+        :type get_logo_data: bool
+        :type force_cache_update: bool
+        """
+        result = ClientResult(self.context)
+        payload = {
+            "getLogoData": get_logo_data,
+            "forceCacheUpdate": force_cache_update
+        }
+        qry = ServiceOperationQuery(self, "GetCurrentUserJoinedTeams", None, payload, None, result)
+        self.context.add_query(qry)
+        return result

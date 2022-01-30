@@ -3,12 +3,25 @@ class ClientResult(object):
 
     def __init__(self, context, default_value=None):
         """
+        Client result
 
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         :type default_value: any
         """
-        self.context = context
-        self.value = default_value
+        self._context = context
+        self._value = default_value
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = value
+
+    @property
+    def context(self):
+        return self._context
 
     def execute_query(self):
         self.context.execute_query()

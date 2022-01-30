@@ -14,8 +14,9 @@ class TestTeamSite(TestCase):
     @classmethod
     def setUpClass(cls):
         super(TestTeamSite, cls).setUpClass()
-        cls.client = ClientContext(test_site_url).with_credentials(test_user_credentials)
-        cls.site_manager = GroupSiteManager(cls.client)
+        client = ClientContext(test_site_url).with_credentials(test_user_credentials)
+        cls.site_manager = GroupSiteManager(client)
+        cls.client = client
 
     def test1_create_site(self):
         site_name = "TeamSite{0}".format(uuid.uuid4().hex)
@@ -30,3 +31,7 @@ class TestTeamSite(TestCase):
 
     def test3_delete_site(self):
         self.site_manager.delete(self.__class__.site_info.SiteUrl).execute_query()
+
+    def test4_get_current_user_joined_teams(self):
+        result = self.site_manager.get_current_user_joined_teams().execute_query()
+        self.assertIsNotNone(result.value)

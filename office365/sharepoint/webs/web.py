@@ -115,7 +115,7 @@ class Web(SecurableObject):
 
         :param office365.sharepoint.client_context.ClientContext context:
         :param str url: he URL of the site, with the path of the object in SharePoint that is represented as query
-            string parameters, forSharing set to 1 if sharing, and mbypass set to 1 to bypass any mobile logic.
+            string parameters, forSharing set to 1 if sharing, and bypass set to 1 to bypass any mobile logic.
         :param bool is_edit_link: If true, the link will allow the logged in user to edit privileges on the item.
         """
         result = ClientResult(context)
@@ -124,6 +124,27 @@ class Web(SecurableObject):
         qry.static = True
         context.add_query(qry)
         return result
+
+    @staticmethod
+    def destroy_organization_sharing_link(context, url, is_edit_link, remove_associated_sharing_link_group):
+        """ Removes an existing organization link for an object.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
+        :param str url: the URL of the site, with the path of the object in SharePoint that is represented as query
+            string parameters, forSharing set to 1 if sharing, and bypass set to 1 to bypass any mobile logic.
+        :param bool is_edit_link: If true, the link will allow the logged in user to edit privileges on the item.
+        :param bool remove_associated_sharing_link_group: Indicates whether to remove the groups that contain the users
+            who have been given access to the shared object via the sharing link
+        """
+        payload = {
+            "url": url,
+            "isEditLink": is_edit_link,
+            "removeAssociatedSharingLinkGroup": remove_associated_sharing_link_group
+            }
+        qry = ServiceOperationQuery(context.web, "DestroyOrganizationSharingLink", None, payload, None, None)
+        qry.static = True
+        context.add_query(qry)
+        return context.web
 
     @staticmethod
     def get_context_web_information(context):
@@ -427,7 +448,8 @@ class Web(SecurableObject):
 
     def get_user_effective_permissions(self, user_name):
         """Gets the effective permissions that the specified user has within the current application scope.
-        :type user_name: str
+
+        :param str user_name: Specifies the user login name.
         """
         result = ClientResult(self.context, BasePermissions())
         qry = ServiceOperationQuery(self, "GetUserEffectivePermissions", [user_name], None, None, result)
@@ -446,7 +468,10 @@ class Web(SecurableObject):
 
     def does_push_notification_subscriber_exist(self, device_app_instance_id):
         """
-        :type device_app_instance_id: str
+        Specifies whether the push notification subscriber exists for the current user
+            with the given device  app instance identifier.
+
+        :param str device_app_instance_id: Device application instance identifier.
         """
         result = ClientResult(self.context)
         params = {"deviceAppInstanceId": device_app_instance_id}
@@ -456,8 +481,9 @@ class Web(SecurableObject):
 
     def get_folder_by_id(self, unique_id):
         """
+        Returns the folder object with the specified GUID.
 
-        :type unique_id: str
+        :param str unique_id: A GUID that identifies the folder.
         """
         folder = Folder(self.context)
         qry = ServiceOperationQuery(self, "GetFolderById", [unique_id], None, None, folder)
@@ -546,6 +572,19 @@ class Web(SecurableObject):
         return_type = File(self.context)
         payload = {"guestUrl": guest_url}
         qry = ServiceOperationQuery(self, "GetFileByGuestUrl", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_file_by_linking_url(self, linking_url):
+        """
+        Returns the file object from the linking URL.
+
+        :param str linking_url: The linking URL to return the file object for.
+            A linking URL can be obtained from LinkingUrl.
+        """
+        return_type = File(self.context)
+        payload = {"linkingUrl": linking_url}
+        qry = ServiceOperationQuery(self, "GetFileByLinkingUrl", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 

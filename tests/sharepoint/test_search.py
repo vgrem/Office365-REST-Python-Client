@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from unittest import TestCase
 
 from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.search.administration.documentCrawlLog import DocumentCrawlLog
 from office365.sharepoint.search.query.querySuggestionResults import QuerySuggestionResults
 from office365.sharepoint.search.queryResult import QueryResult
 from office365.sharepoint.search.searchRequest import SearchRequest
@@ -47,3 +48,9 @@ class TestSearch(TestCase):
     def test6_search_suggest(self):
         result = self.search.suggest("guide.docx").execute_query()
         self.assertIsInstance(result.value, QuerySuggestionResults)
+
+    #def test7_get_crawled_urls(self):
+    #    doc_crawl_log = DocumentCrawlLog(self.client)
+    #    result = doc_crawl_log.get_crawled_urls().execute_query()
+    #    self.assertIsNotNone(result.value)
+

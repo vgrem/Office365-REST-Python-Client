@@ -6,7 +6,7 @@ class ClientPath(object):
 
     def __init__(self, parent=None):
         """
-        :type parent: ResourcePath or None
+        :type parent: ClientPath or None
         """
         self._parent = parent
 
