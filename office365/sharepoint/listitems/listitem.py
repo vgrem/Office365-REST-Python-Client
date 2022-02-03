@@ -39,7 +39,10 @@ class ListItem(SecurableObject):
 
     def set_rating(self, value):
         """
-        :type value: int
+        Rates an item within the specified list. The return value is the average rating for the specified list item.
+
+        :param int value: An integer value for the rating to be submitted.
+            The rating value SHOULD be between 1 and 5; otherwise, the server SHOULD return an exception.
         """
         return_value = ClientResult(self.context)
 
@@ -50,7 +53,11 @@ class ListItem(SecurableObject):
 
     def set_like(self, value):
         """
-        :type value: bool
+        Sets or unsets the like quality for the current user for an item within
+           the specified list. The return value is the total number of likes for the specified list item.
+
+        :param bool value: A Boolean value that indicates the operation being either like or unlike.
+            A True value indicates like.
         """
         return_value = ClientResult(self.context)
 
@@ -63,7 +70,9 @@ class ListItem(SecurableObject):
         """
         Gets the full URL to the SharePoint frame page that initiates the SPWOPIAction object with the WOPI
             application associated with the list item.
-        :param int action:
+
+
+        :param int action: Indicates which user action is indicated in the returned WOPIFrameUrl.
         """
         result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "GetWOPIFrameUrl", [action], None, None, result)
@@ -146,8 +155,9 @@ class ListItem(SecurableObject):
 
     def get_sharing_information(self):
         """
+        Retrieves information about the sharing state for a given list item.
 
-        :rtype: ObjectSharingInformation
+        :rtype: ClientResult
         """
         result = ClientResult(self.context, ObjectSharingInformation(self.context))
 
@@ -171,6 +181,14 @@ class ListItem(SecurableObject):
         return self
 
     def update(self):
+        """
+        Updates the item without creating another version of the item.
+        Exceptions:
+        - 2130575305 Microsoft.SharePoint.SPException List item was modified on the server in a way that prevents
+            changes from being committed, as determined by the protocol server.
+        -1 System.InvalidOperationException List does not support this operation.
+
+        """
         self.ensure_type_name(self.parent_list)
         super(ListItem, self).update()
         return self
@@ -183,14 +201,15 @@ class ListItem(SecurableObject):
         return self
 
     def update_overwrite_version(self):
-        """Update the list item."""
-        qry = ServiceOperationQuery(self,
-                                    "updateOverwriteVersion")
+        """Updates the item without creating another version of the item."""
+        qry = ServiceOperationQuery(self, "updateOverwriteVersion")
         self.context.add_query(qry)
         return self
 
     def set_comments_disabled(self, value):
         """
+        Sets the value of CommentsDisabled (section 3.2.5.87.1.1.8) for the item.
+
         :type value: bool
         """
         qry = ServiceOperationQuery(self, "SetCommentsDisabled", [value])

@@ -26,6 +26,15 @@ class Tenant(ClientObject):
             "Microsoft.Online.SharePoint.TenantAdministration"
             )
 
+    def export_to_csv(self, view_xml=None):
+        result = ClientResult(self.context)
+        payload = {
+            "viewXml": view_xml
+        }
+        qry = ServiceOperationQuery(self, "ExportToCSV", None, payload, None, result)
+        self.context.add_query(qry)
+        return result
+
     def update(self):
         """Update Tenant settings"""
         qry = UpdateEntityQuery(self)

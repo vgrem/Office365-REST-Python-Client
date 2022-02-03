@@ -8,17 +8,19 @@ class FieldCreationInformation(ClientValue):
 
     def __init__(self, title, field_type_kind, description=None,
                  lookup_list_id=None, lookup_field_name=None, lookup_web_id=None,
-                 required=False):
+                 required=False, formula=None):
         """
         Represents metadata about fields creation.
 
-        :type lookup_web_id: str
-        :type required: bool
+        :param str lookup_web_id: Specifies the identifier of the site (2) that contains the list that is the
+            source for the field (2) value.
+        :param bool required: Specifies whether the field (2) requires a value.
         :type lookup_field_name: str
-        :type lookup_list_id: str
+        :param str lookup_list_id: A CSOM GUID that specifies the target list for the lookup field (2).
         :type title: str
-        :type field_type_kind: int
+        :param int field_type_kind: Specifies the type of the field (2).
         :type description: str or None
+        :type formula: str or None
         """
         super(FieldCreationInformation, self).__init__()
         self.Title = title
@@ -30,6 +32,7 @@ class FieldCreationInformation(ClientValue):
         self.LookupFieldName = lookup_field_name
         self.LookupWebId = lookup_web_id
         self.Required = required
+        self.Formula = formula
 
     @property
     def entity_type_name(self):

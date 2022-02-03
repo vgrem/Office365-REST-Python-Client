@@ -4,14 +4,19 @@ from office365.sharepoint.base_entity import BaseEntity
 
 
 class Reputation(BaseEntity):
+    """The Reputation static type includes methods to set the reputation properties on a list item."""
 
     @staticmethod
     def set_rating(context, list_id, item_id, rating, return_type=None):
         """
-        :param office365.sharepoint.client_context.ClientContext context: SharePoint context (client)
-        :param str list_id: List Identifier
-        :param int item_id: ListItem Identifier
-        :param int rating: Rating number
+        The SetRating static method rates an item within the specified list.
+        The return value is the average rating for the specified list item.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
+        :param str list_id: A string-represented GUID value specifying the list that the list item belongs to.
+        :param int item_id: An integer value that identifies a list item within the list it belongs to.
+        :param int rating: An integer value for the rating to be submitted.
+            The rating value SHOULD be between 1 and 5; otherwise, the server SHOULD return an exception.
         :param ClientResult return_type: return value
         """
         if return_type is None:
@@ -31,10 +36,15 @@ class Reputation(BaseEntity):
     @staticmethod
     def set_like(context, list_id, item_id, like, return_type=None):
         """
-        :param office365.sharepoint.client_context.ClientContext context:
-        :param str list_id: List Identifier
-        :param int item_id: ListItem Identifier
-        :param bool like: Like/Dislike value
+        The SetLike static method sets or unsets the like quality for the current user for an item within
+           the specified list. The return value is the total number of likes for the specified list item.
+
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
+        :param str list_id: A string-represented GUID value specifying the list that the list item belongs to.
+        :param int item_id: An integer value that identifies a list item within the list it belongs to.
+        :param bool like: A Boolean value that indicates the operation being either like or unlike.
+            A True value indicates like.
         :param ClientResult return_type: return value
         """
         if return_type is None:

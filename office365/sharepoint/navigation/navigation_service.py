@@ -9,7 +9,8 @@ class NavigationService(BaseEntity):
 
     def __init__(self, context):
         """The entry point for REST-based navigation service operations."""
-        super(NavigationService, self).__init__(context, ResourcePath("Microsoft.SharePoint.Navigation.REST.NavigationServiceRest"))
+        super(NavigationService, self).__init__(context,
+                                                ResourcePath("Microsoft.SharePoint.Navigation.REST.NavigationServiceRest"))
 
     def get_publishing_navigation_provider_type(self, mapProviderName="SPNavigationProvider"):
         """
