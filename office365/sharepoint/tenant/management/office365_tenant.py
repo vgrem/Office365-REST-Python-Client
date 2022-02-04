@@ -13,15 +13,15 @@ from office365.sharepoint.tenant.administration.theme_properties import ThemePro
 class Office365Tenant(BaseEntity):
     """Represents a SharePoint Online tenant."""
 
-    @property
-    def allow_editing(self):
-        return self.properties.get("AllowEditing", None)
-
     def __init__(self, context):
         super(Office365Tenant, self).__init__(
             context,
             ResourcePath("Microsoft.Online.SharePoint.TenantManagement.Office365Tenant")
         )
+
+    @property
+    def allow_editing(self):
+        return self.properties.get("AllowEditing", None)
 
     def add_tenant_cdn_origin(self, cdn_type, origin_url):
         """

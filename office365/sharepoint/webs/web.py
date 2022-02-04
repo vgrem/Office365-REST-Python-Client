@@ -32,8 +32,8 @@ from office365.sharepoint.principal.user_collection import UserCollection
 from office365.sharepoint.pushnotifications.push_notification_subscriber import PushNotificationSubscriber
 from office365.sharepoint.recyclebin.recycleBinItemCollection import RecycleBinItemCollection
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
-from office365.sharepoint.sharing.objectSharingSettings import ObjectSharingSettings
-from office365.sharepoint.sharing.sharingLinkData import SharingLinkData
+from office365.sharepoint.sharing.object_sharing_settings import ObjectSharingSettings
+from office365.sharepoint.sharing.sharing_link_data import SharingLinkData
 from office365.sharepoint.sharing.sharing_result import SharingResult
 from office365.sharepoint.sites.site_types import SiteCollectionCorporateCatalogAccessor
 from office365.sharepoint.tenant.administration.tenant_types import TenantCorporateCatalogAccessor
@@ -358,7 +358,7 @@ class Web(SecurableObject):
     @staticmethod
     def get_object_sharing_settings(context, object_url, group_id, use_simplified_roles):
         """Given a path to an object in SharePoint, this will generate a sharing settings object which contains
-        necessary information for rendering sharing information..
+        necessary information for rendering sharing information
 
         :param office365.sharepoint.client_context.ClientContext context: SharePoint client
         :param str object_url: A URL with one of two possible formats.
@@ -373,16 +373,16 @@ class Web(SecurableObject):
         :param bool use_simplified_roles: A Boolean value indicating whether to use the SharePoint
         simplified roles (Edit, View) or not.
         """
-        result = ObjectSharingSettings(context)
+        return_type = ObjectSharingSettings(context)
         payload = {
             "objectUrl": object_url,
             "groupId": group_id,
             "useSimplifiedRoles": use_simplified_roles
         }
-        qry = ServiceOperationQuery(context.web, "GetObjectSharingSettings", None, payload, None, result)
+        qry = ServiceOperationQuery(context.web, "GetObjectSharingSettings", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     def get_file_by_server_relative_url(self, url):
         """Returns the file object located at the specified server-relative URL.
@@ -406,6 +406,7 @@ class Web(SecurableObject):
 
     def get_folder_by_server_relative_url(self, url):
         """Returns the folder object located at the specified server-relative URL.
+
         :type url: str
         """
         return Folder(
@@ -438,7 +439,7 @@ class Web(SecurableObject):
         """Checks whether the specified logon name belongs to a valid user of the website, and if the logon name does
         not already exist, adds it to the website.
 
-        :type login_name: str
+        :param str login_name: Specifies a string that contains the login name.
         """
         target_user = User(self.context)
         self.site_users.add_child(target_user)
@@ -674,6 +675,23 @@ class Web(SecurableObject):
             "webFullUrl": web_full_url
         }
         qry = ServiceOperationQuery(context.web, "GetDocumentLibraries", None, payload, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
+
+    @staticmethod
+    def default_document_library_url(context, web_url):
+        """
+        Returns the default document library URL.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param str web_url:  URL of the web.
+        """
+        result = ClientResult(context, DocumentLibraryInformation())
+        payload = {
+            "webUrl": web_url,
+        }
+        qry = ServiceOperationQuery(context.web, "DefaultDocumentLibraryUrl", None, payload, None, result)
         qry.static = True
         context.add_query(qry)
         return result
@@ -968,6 +986,7 @@ class Web(SecurableObject):
 
     @property
     def site_collection_app_catalog(self):
+        """Returns the site collection app catalog for the given web if it exists."""
         return self.properties.get('SiteCollectionAppCatalog',
                                    SiteCollectionCorporateCatalogAccessor(self.context,
                                                                           ResourcePath("SiteCollectionAppCatalog",
@@ -976,6 +995,7 @@ class Web(SecurableObject):
     @property
     def url(self):
         """Gets the absolute URL for the website.
+
         :rtype: str or None
         """
         return self.properties.get('Url', None)
@@ -983,6 +1003,7 @@ class Web(SecurableObject):
     @property
     def quick_launch_enabled(self):
         """Gets a value that specifies whether the Quick Launch area is enabled on the site.
+
         :rtype: bool or None
         """
         return self.properties.get('QuickLaunchEnabled', None)
@@ -990,6 +1011,7 @@ class Web(SecurableObject):
     @quick_launch_enabled.setter
     def quick_launch_enabled(self, value):
         """Sets a value that specifies whether the Quick Launch area is enabled on the site.
+
         :type value: bool
         """
         self.set_property('QuickLaunchEnabled', value)
@@ -997,6 +1019,7 @@ class Web(SecurableObject):
     @property
     def site_logo_url(self):
         """Gets a value that specifies Site logo url.
+
         :rtype: str or None
         """
         return self.properties.get('SiteLogoUrl', None)
@@ -1012,6 +1035,7 @@ class Web(SecurableObject):
     @property
     def web_template(self):
         """Gets the name of the site definition or site template that was used to create the site.
+
         :rtype: str or None
         """
         return self.properties.get('WebTemplate', None)

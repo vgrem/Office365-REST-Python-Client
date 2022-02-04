@@ -75,6 +75,8 @@ class Utility(BaseEntity):
     @staticmethod
     def create_wiki_page_in_context_web(context, parameters):
         """
+        Creates a wiki page.
+
         :type context: office365.sharepoint.client_context.ClientContext
         :type parameters: office365.sharepoint.pages.wiki_page_creation_information.WikiPageCreationInformation
         """
@@ -88,6 +90,8 @@ class Utility(BaseEntity):
     @staticmethod
     def send_email(context, properties):
         """
+        This method is a static method.
+
         :type context: office365.sharepoint.client_context.ClientContext
         :type properties: office365.sharepoint.utilities.email_properties.EmailProperties
         """

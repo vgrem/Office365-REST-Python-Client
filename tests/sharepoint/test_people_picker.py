@@ -16,9 +16,9 @@ class TestSPPeoplePicker(SPTestCase):
         self.client.execute_query()
         self.assertIsNotNone(result.value)
 
-    # def test2_get_search_results(self):
-    #    request = PickerEntityInformationRequest(Key=settings.get('first_account_name'), GroupId=-1)
-    #    result = ClientPeoplePickerWebServiceInterface.get_picker_entity_information(self.client, request)
+    #def test2_get_search_results(self):
+    #   result = ClientPeoplePickerWebServiceInterface.get_picker_entity_information(self.client,
+    #                                                                                 test_user_principal_name)
     #    self.client.execute_query()
     #    self.assertIsNotNone(result.value)
 

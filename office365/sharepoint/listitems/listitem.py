@@ -9,7 +9,7 @@ from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.comments.comment_collection import CommentCollection
 from office365.sharepoint.fields.field_lookup_value import FieldLookupValue
 from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupValue
-from office365.sharepoint.likes.likedByInformation import LikedByInformation
+from office365.sharepoint.likes.liked_by_information import LikedByInformation
 from office365.sharepoint.listitems.list_item_version import ListItemVersion
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.reputationmodel.reputation import Reputation
@@ -157,16 +157,15 @@ class ListItem(SecurableObject):
         """
         Retrieves information about the sharing state for a given list item.
 
-        :rtype: ClientResult
         """
-        result = ClientResult(self.context, ObjectSharingInformation(self.context))
+        return_type = ObjectSharingInformation(self.context)
 
         def _item_resolved():
-            result.value = ObjectSharingInformation.get_list_item_sharing_information(
-                self.context, self.parent_list.properties["Id"], self.properties["Id"])
+            ObjectSharingInformation.get_list_item_sharing_information(
+                self.context, self.parent_list.properties["Id"], self.properties["Id"], return_type=return_type)
 
         self.ensure_properties(["Id", "ParentList"], _item_resolved)
-        return result.value
+        return return_type
 
     def validate_update_list_item(self, form_values, new_document_update):
         """Validates and sets the values of the specified collection of fields for the list item."""

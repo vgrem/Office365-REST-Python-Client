@@ -10,6 +10,11 @@ class Group(Principal):
     """Represents a collection of users in a SharePoint site. A group is a type of SP.Principal."""
 
     def expand_to_principals(self, max_count=10):
+        """
+        Expands current group to a collection of principals.
+
+        :param int max_count: Specifies the maximum number of principals to be returned.
+        """
         return_type = ClientResult(self.context, ClientValueCollection(PrincipalInfo))
 
         def _group_loaded():

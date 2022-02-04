@@ -123,10 +123,11 @@ class List(SecurableObject):
     @staticmethod
     def get_list_data_as_stream(context, list_full_url, parameters=None):
         """
+        Returns list data from the specified list url and for the specified query parameters.
 
-        :param office365.sharepoint.client_context.ClientContext context:
-        :param str list_full_url:
-        :param RenderListDataParameters parameters:
+        :param office365.sharepoint.client_context.ClientContext context: Client context
+        :param str list_full_url: The absolute URL of the list.
+        :param RenderListDataParameters parameters: The parameters to be used.
         """
         result = ClientResult(context)
         payload = {
@@ -141,12 +142,16 @@ class List(SecurableObject):
     def bulk_validate_update_list_items(self, item_ids, form_values, new_document_update=True,
                                         checkin_comment=None, folder_path=None):
         """
+        Validate and update multiple list items.
 
-        :param list[int] item_ids:
-        :param dict form_values:
-        :param bool new_document_update:
-        :param str checkin_comment:
-        :param str folder_path:
+        :param list[int] item_ids: A collection of item Ids that need to be updated with the same formValues.
+        :param dict form_values: A collection of field internal names and values for the given field.
+            If the collection is empty, no update will take place.
+        :param bool new_document_update: Indicates whether the list item is a document being updated after upload.
+            A value of "true" means yes.
+        :param str checkin_comment: The comment of check in if any. It's only applicable when the item is checked out.
+        :param str folder_path: Decoded path of the folder where the items belong to. If not provided,
+            the server will try to find items to update under root folder.
         """
         result = ClientValueCollection(ListItemFormUpdateValue)
         params = {
@@ -175,6 +180,8 @@ class List(SecurableObject):
 
     def get_list_item_changes_since_token(self, query):
         """
+        Returns the changes made to the list since the date and time specified in the change token defined
+        by the query input parameter.<57>
 
         :type query: office365.sharepoint.changes.change_log_item_query.ChangeLogItemQuery
         """
@@ -208,7 +215,9 @@ class List(SecurableObject):
         """
         Returns the list item with the specified ID.
 
-        :param str unique_id:"""
+        :param str unique_id:
+
+        """
         return ListItem(self.context,
                         ServiceOperationPath("getItemByUniqueId", [unique_id], self.resource_path))
 
@@ -230,6 +239,7 @@ class List(SecurableObject):
 
     def get_items(self, caml_query=None):
         """Returns a collection of items from the list based on the specified query.
+
         :type caml_query: CamlQuery
         """
         if not caml_query:
@@ -270,6 +280,8 @@ class List(SecurableObject):
 
     def create_wiki_page(self, page_name, page_content):
         """
+        Creates a wiki page.
+
         :param str page_name:
         :param str page_content:
         """

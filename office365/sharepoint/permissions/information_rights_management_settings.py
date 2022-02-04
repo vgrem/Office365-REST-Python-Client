@@ -7,6 +7,8 @@ class InformationRightsManagementSettings(BaseEntity):
     @property
     def policy_title(self):
         """
+        Specifies the permission policy title.
+
         :rtype: str or None
         """
         return self.properties.get("PolicyTitle", None)
@@ -14,6 +16,8 @@ class InformationRightsManagementSettings(BaseEntity):
     @property
     def policy_description(self):
         """
+        Specifies the permission policy description.
+
         :rtype: str or None
         """
         return self.properties.get("PolicyDescription", None)
@@ -21,6 +25,8 @@ class InformationRightsManagementSettings(BaseEntity):
     @property
     def group_name(self):
         """
+        Specifies the group name (email address) that the permission is also applicable to.
+
         :rtype: str or None
         """
         return self.properties.get("GroupName", None)

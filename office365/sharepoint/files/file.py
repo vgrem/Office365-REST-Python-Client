@@ -441,6 +441,13 @@ class File(AbstractFile):
 
     @property
     def information_rights_management_settings(self):
+        """
+        Returns the effective Information Rights Management (IRM) settings for the file.
+
+        A file can be IRM-protected based on the IRM settings for the file itself, based on the IRM settings
+        for the list which contains the file, or based on a rule.
+        From greatest to least, IRM settings take precedence in the following order: rule, list, then file.
+        """
         return self.properties.get('InformationRightsManagementSettings',
                                    InformationRightsManagementSettings(self.context,
                                                                        ResourcePath(
@@ -464,7 +471,7 @@ class File(AbstractFile):
         """
         Gets a value that returns the user who last modified the file.
 
-        :rtype: office365.sharepoint.directory.user.User or None
+        :rtype: office365.sharepoint.directory.user.User
         """
         return self.properties.get("ModifiedBy", User(self.context, ResourcePath("ModifiedBy", self.resource_path)))
 
@@ -473,7 +480,7 @@ class File(AbstractFile):
         """
         Gets a value that returns the user that owns the current lock on the file.
 
-        :rtype: office365.sharepoint.directory.user.User or None
+        :rtype: office365.sharepoint.directory.user.User
         """
         return self.properties.get("LockedByUser", User(self.context, ResourcePath("LockedByUser", self.resource_path)))
 
@@ -581,6 +588,14 @@ class File(AbstractFile):
         :rtype: str or None
         """
         return self.properties.get("UniqueId", None)
+
+    @property
+    def customized_page_status(self):
+        """Specifies the customization status of the file.
+
+        :rtype: int or None
+        """
+        return self.properties.get("CustomizedPageStatus", None)
 
     def get_property(self, name, default_value=None):
         if default_value is None:

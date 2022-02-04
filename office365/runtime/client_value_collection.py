@@ -6,8 +6,8 @@ class ClientValueCollection(ClientValue):
 
     def __init__(self, item_type, initial_values=None):
         """
-        :type item_type: any
-        :type initial_values: [] or None
+        :type item_type: type[ClientValue] or type[int] or type[str]
+        :type initial_values: list or dict or None
         """
         super(ClientValueCollection, self).__init__()
         if initial_values is None:

@@ -21,6 +21,7 @@ class ListTemplate(BaseEntity):
         super(ListTemplate, self).__init__(context, resource_path)
 
     def get_global_schema_xml(self):
+        """Retrieves the global schema.xml file."""
         result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "GetGlobalSchemaXml", None, None, None, result)
         self.context.add_query(qry)

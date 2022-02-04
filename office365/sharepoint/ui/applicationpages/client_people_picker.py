@@ -4,25 +4,27 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.principal.principal_source import PrincipalSource
 from office365.sharepoint.principal.principal_type import PrincipalType
-from office365.sharepoint.ui.applicationpages.picker_entity_types import PickerEntityInformation
+from office365.sharepoint.ui.applicationpages.picker_entity_types import PickerEntityInformation, \
+    PickerEntityInformationRequest
 
 
 class PeoplePickerQuerySettings(ClientValue):
+    """Represents additional settings for the principal query."""
     pass
 
 
 class ClientPeoplePickerQueryParameters(ClientValue):
 
-    def __init__(self, queryString, allowEmailAddresses=True, allowMultipleEntities=True, allowOnlyEmailAddresses=False,
+    def __init__(self, query_string, allowEmailAddresses=True, allowMultipleEntities=True, allowOnlyEmailAddresses=False,
                  allUrlZones=False, enabledClaimProviders=None, forceClaims=False, maximumEntitySuggestions=1,
                  principalSource=PrincipalSource.All, principalType=PrincipalType.All, urlZone=0,
-                 urlZoneSpecified=False, sharePointGroupID=0):
+                 urlZoneSpecified=False, sharepoint_group_id=0):
         """
         Specifies the properties of a principal query
 
         :type int urlZone: Specifies a location in the topology of the farm for the principal query.
-        :param int sharePointGroupID: specifies a group containing allowed principals to be used in the principal query.
-        :param str queryString: Specifies the value to be used in the principal query.
+        :param int sharepoint_group_id: specifies a group containing allowed principals to be used in the principal query.
+        :param str query_string: Specifies the value to be used in the principal query.
         :param int principalType: Specifies the type to be used in the principal query.
         :param int principalSource: Specifies the source to be used in the principal query.
         :param int maximumEntitySuggestions: Specifies the maximum number of principals to be returned by the
@@ -39,7 +41,7 @@ class ClientPeoplePickerQueryParameters(ClientValue):
         matching an unverified e-mail address when unable to resolve to a known principal.
         """
         super(ClientPeoplePickerQueryParameters, self).__init__()
-        self.QueryString = queryString
+        self.QueryString = query_string
         self.AllowEmailAddresses = allowEmailAddresses
         self.AllowMultipleEntities = allowMultipleEntities
         self.AllowOnlyEmailAddresses = allowOnlyEmailAddresses
@@ -51,7 +53,7 @@ class ClientPeoplePickerQueryParameters(ClientValue):
         self.PrincipalType = principalType
         self.UrlZone = urlZone
         self.UrlZoneSpecified = urlZoneSpecified
-        self.SharePointGroupID = sharePointGroupID
+        self.SharePointGroupID = sharepoint_group_id
 
     @property
     def entity_type_name(self):
@@ -59,6 +61,7 @@ class ClientPeoplePickerQueryParameters(ClientValue):
 
 
 class ClientPeoplePickerWebServiceInterface(BaseEntity):
+    """Specifies an interface that can be used to query principals."""
 
     def __init__(self, context):
         super(ClientPeoplePickerWebServiceInterface, self).__init__(context)
@@ -111,23 +114,25 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
         return result
 
     @staticmethod
-    def get_picker_entity_information(context, request):
+    def get_picker_entity_information(context, email_address):
         """
+        Gets information of the specified principal.
 
-        :param office365.sharepoint.client_context.ClientContext context:
-        :param office365.sharepoint.ui.applicationpages.picker_entity_types.PickerEntityInformationRequest request:
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
+        :param str email_address: Specifies the principal for which information is being requested.
 
         """
-        result = ClientResult(context, PickerEntityInformation(context))
+        request = PickerEntityInformationRequest(email_address=email_address)
+        return_type = PickerEntityInformation(context)
         svc = ClientPeoplePickerWebServiceInterface(context)
         qry = ServiceOperationQuery(svc, "GetPickerEntityInformation",
                                     None,
                                     request,
                                     "entityInformationRequest",
-                                    result)
+                                    return_type)
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     @property
     def entity_type_name(self):

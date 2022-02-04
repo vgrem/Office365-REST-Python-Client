@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.principal.user import User
-from office365.sharepoint.sharing.documentSharingManager import DocumentSharingManager
+from office365.sharepoint.sharing.document_sharing_manager import DocumentSharingManager
 from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
 from office365.sharepoint.sharing.role_type import RoleType
 from office365.sharepoint.sharing.sharing_result import SharingResult
@@ -17,9 +17,10 @@ class TestSharePointSharing(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.client = ClientContext(test_site_url).with_credentials(test_user_credentials)
-        current_user = cls.client.web.current_user.get().execute_query()
+        client = ClientContext(test_site_url).with_credentials(test_user_credentials)
+        current_user = client.web.current_user.get().execute_query()
         cls.target_user = current_user
+        cls.client = client
 
     def test1_get_role_def(self):
         dsm = DocumentSharingManager(self.client)

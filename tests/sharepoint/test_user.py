@@ -1,4 +1,4 @@
-from office365.sharepoint.sharing.sharingUtility import SharingUtility
+from office365.sharepoint.sharing.sharing_utility import SharingUtility
 from tests import test_tenant, test_user_principal_name
 from tests.sharepoint.sharepoint_case import SPTestCase
 
