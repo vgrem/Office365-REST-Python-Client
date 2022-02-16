@@ -28,9 +28,15 @@ class PageType:
     EditFormDialog = 7
 
     NewForm = 8
+    """Specifies a list form for creating a new list item."""
 
     NewFormDialog = 9
+    """Specifies a list form for creating a new list item that can be displayed within a dialog box on a client
+    computer."""
 
     SolutionForm = 10
+    """Specifies a list form that is represented by a form template (.xsn) file and is used for displaying or editing
+    a list item."""
 
     PAGE_MAXITEMS = 11
+    """Represents the total number of valid page types."""

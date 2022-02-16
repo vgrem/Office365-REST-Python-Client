@@ -1,7 +1,5 @@
-from office365.sharepoint.sharing.sharing_utility import SharingUtility
-from tests import test_tenant, test_user_principal_name
+from tests import test_tenant
 from tests.sharepoint.sharepoint_case import SPTestCase
-
 from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.permissions.base_permissions import BasePermissions
 from office365.sharepoint.principal.user import User

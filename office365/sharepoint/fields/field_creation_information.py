@@ -1,6 +1,5 @@
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.sharepoint.fields.field import Field
 from office365.sharepoint.fields.field_type import FieldType
 
 

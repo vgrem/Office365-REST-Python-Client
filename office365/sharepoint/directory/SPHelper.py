@@ -13,6 +13,26 @@ class SPHelper(BaseEntity):
         super(SPHelper, self).__init__(context, ResourcePath("SP.Directory.SPHelper"))
 
     @staticmethod
+    def is_member_of(context, principal_name, group_id, result=None):
+        """
+        :param str principal_name: User principal name
+        :param str group_id: Group id
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param ClientResult or None result: Client result
+        """
+        helper = SPHelper(context)
+        if result is None:
+            result = ClientResult(context)
+        payload = {
+            "principalName": principal_name,
+            "groupId": group_id
+        }
+        qry = ServiceOperationQuery(helper, "IsMemberOf", None, payload, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
+
+    @staticmethod
     def check_site_availability(context, site_url):
         """
         :param str site_url: Site Url
