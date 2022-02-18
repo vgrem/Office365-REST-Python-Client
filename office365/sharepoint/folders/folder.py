@@ -8,6 +8,7 @@ from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
+from office365.sharepoint.internal.paths.entity_resource import EntityResourcePath
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.storagemetrics.storage_metrics import StorageMetrics
 from office365.sharepoint.utilities.move_copy_options import MoveCopyOptions
@@ -64,6 +65,8 @@ class Folder(BaseEntity):
 
     def get_list_item_changes(self, query):
         """
+        Gets the collection of all changes from the change log that have occurred within the scope of the SharePoint
+        folder based on the specified query.
 
         :param office365.sharepoint.changeQuery.ChangeQuery query: Specifies which changes to return
         """
@@ -77,16 +80,7 @@ class Folder(BaseEntity):
 
         :type name: str
         """
-        new_folder = Folder(self.context)
-
-        def _add_sub_folder():
-            new_folder_url = "/".join([self.serverRelativeUrl, name])
-            new_folder.set_property("ServerRelativeUrl", new_folder_url)
-            qry = CreateEntityQuery(self.folders, new_folder, new_folder)
-            self.context.add_query(qry)
-
-        self.ensure_property("ServerRelativeUrl", _add_sub_folder)
-        return new_folder
+        return self.folders.add(name)
 
     def rename(self, name):
         """Rename a Folder resource
@@ -308,14 +302,11 @@ class Folder(BaseEntity):
         super(Folder, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "ServerRelativeUrl":
-            self._resource_path = ServiceOperationPath("getFolderByServerRelativeUrl", [value],
-                                                       ResourcePath("Web"))
+            self._resource_path = ServiceOperationPath("getFolderByServerRelativeUrl", [value], ResourcePath("Web"))
         elif name == "ServerRelativePath":
-            self._resource_path = ServiceOperationPath("getFolderByServerRelativePath", [value],
-                                                       ResourcePath("Web"))
+            self._resource_path = ServiceOperationPath("getFolderByServerRelativePath", [value], ResourcePath("Web"))
         elif name == "UniqueId":
             self._resource_path = ServiceOperationPath("getFolderById", [value], ResourcePath("Web"))
-        return self
 
     def _build_full_url(self, rel_url):
         """

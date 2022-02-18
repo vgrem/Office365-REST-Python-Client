@@ -2,6 +2,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.userprofiles.hash_tag import HashTagCollection
 from office365.sharepoint.userprofiles.personalSiteCreationPriority import PersonalSiteCreationPriority
 from office365.sharepoint.userprofiles.personProperties import PersonProperties
 from office365.sharepoint.userprofiles.personPropertiesCollection import PersonPropertiesCollection
@@ -12,6 +13,20 @@ class PeopleManager(BaseEntity):
 
     def __init__(self, context):
         super(PeopleManager, self).__init__(context, ResourcePath("SP.UserProfiles.PeopleManager"))
+
+    @staticmethod
+    def get_trending_tags(context):
+        """Gets a collection of the 20 (or fewer) most popular hash tags over the past week.
+        The returned collection is sorted in descending order of frequency of use.
+
+        :type context: office365.sharepoint.client_context.ClientContext
+        """
+        return_type = HashTagCollection(context)
+        manager = PeopleManager(context)
+        qry = ServiceOperationQuery(manager, "GetTrendingTags", None, None, None, return_type)
+        qry.static = True
+        context.add_query(qry)
+        return return_type
 
     def am_i_following(self, account_name):
         """
@@ -68,8 +83,8 @@ class PeopleManager(BaseEntity):
         :param str account_name: Account name of the specified user.
         """
         result = ClientResult(self.context)
-        payload = {"accountName": account_name}
-        qry = ServiceOperationQuery(self, "GetUserProfileProperties", payload, None, None, result)
+        params = {"accountName": account_name}
+        qry = ServiceOperationQuery(self, "GetUserProfileProperties", params, None, None, result)
         self.context.add_query(qry)
         return result
 
@@ -126,3 +141,27 @@ class PeopleManager(BaseEntity):
         qry = ServiceOperationQuery(self, "GetMyFollowers", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
+
+    def follow_tag(self, value):
+        """
+        The FollowTag method sets the current user to be following the specified tag.
+        :param str value: Specifies the tag by its GUID.
+        """
+
+        qry = ServiceOperationQuery(self, "FollowTag", [value])
+        self.context.add_query(qry)
+        return self
+
+    def hide_suggestion(self, account_name):
+        """The HideSuggestion method adds the specified user to list of rejected suggestions.
+
+        :param str account_name: Specifies the user by account name.
+        """
+        params = {"accountName": account_name}
+        qry = ServiceOperationQuery(self, "HideSuggestion", params)
+        self.context.add_query(qry)
+        return self
+
+    @property
+    def entity_type_name(self):
+        return "SP.UserProfiles.PeopleManager"

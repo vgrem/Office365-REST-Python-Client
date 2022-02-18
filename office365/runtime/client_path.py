@@ -4,10 +4,11 @@ from abc import ABCMeta
 class ClientPath(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, parent=None):
+    def __init__(self, name=None, parent=None):
         """
         :type parent: ClientPath or None
         """
+        self._name = name
         self._parent = parent
 
     def __repr__(self):
@@ -42,7 +43,7 @@ class ClientPath(object):
 
     @property
     def name(self):
-        return self.segments[-1] if len(self.segments) > 0 else ""
+        return self._name
 
     @property
     def delimiter(self):

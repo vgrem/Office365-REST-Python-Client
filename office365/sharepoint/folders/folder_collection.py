@@ -1,10 +1,10 @@
 import os
 
-from office365.runtime.queries.create_entity_query import CreateEntityQuery
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.folders.folder import Folder
+from office365.sharepoint.internal.paths.entity_resource import EntityResourcePath
 
 
 class FolderCollection(BaseEntityCollection):
@@ -20,8 +20,10 @@ class FolderCollection(BaseEntityCollection):
 
     def add_using_path(self, decoded_url, overwrite):
         """
-        :type decoded_url: str
-        :type overwrite:  bool
+        Adds the folder located at the specified path to the collection.
+
+        :param str decoded_url: Specifies the path for the folder.
+        :param bool overwrite:  bool
         """
         parameters = {
             "DecodedUrl": decoded_url,
@@ -34,8 +36,9 @@ class FolderCollection(BaseEntityCollection):
 
     def get_by_path(self, decoded_url):
         """
+        Get folder at the specified path.
 
-        :type decoded_url: str
+        :param str decoded_url: Specifies the path for the folder.
         """
         from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
         target_folder = Folder(self.context)
@@ -59,20 +62,20 @@ class FolderCollection(BaseEntityCollection):
             child_folder = child_folder.add(url_part)
         return child_folder
 
-    def add(self, server_relative_url):
+    def add(self, name):
         """Adds the folder that is located at the specified URL to the collection.
 
-        :type server_relative_url: str
+        :param str name: Specifies the Name of the folder.
         """
-        folder = Folder(self.context)
-        self.add_child(folder)
-        folder.set_property("ServerRelativeUrl", server_relative_url)
-        qry = CreateEntityQuery(self, folder, folder)
+        return_type = Folder(self.context, EntityResourcePath(name, self.resource_path))
+        self.add_child(return_type)
+        qry = ServiceOperationQuery(self, "Add", [name], None, None, return_type)
         self.context.add_query(qry)
-        return folder
+        return return_type
 
     def get_by_url(self, url):
         """Retrieve Folder resource by url
+
         :type url: str
         """
         return Folder(self.context, ServiceOperationPath("GetByUrl", [url], self.resource_path))

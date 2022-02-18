@@ -9,23 +9,18 @@ class ResourcePathUrl(ClientPath):
         :param str rel_url: File or Folder relative url
         :type parent: office365.runtime.client_path.ClientPath
         """
-        super(ResourcePathUrl, self).__init__(parent)
-        self._url = rel_url
+        super(ResourcePathUrl, self).__init__(rel_url, parent)
         self._nested = False
 
     @property
     def segments(self):
-        delimiter = "/" if self._nested else ":/"
+        cur_delimiter = "/" if self._nested else self.delimiter
         if isinstance(self.parent, ResourcePathUrl):
             self.parent._nested = True
-            return [self._url, delimiter]
+            return [self._name, cur_delimiter]
         else:
-            return [self.delimiter, self._url, delimiter]
+            return [self.delimiter, self._name, cur_delimiter]
 
     @property
     def delimiter(self):
         return ":/"
-
-    @property
-    def name(self):
-        return self._url

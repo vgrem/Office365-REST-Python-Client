@@ -12,8 +12,7 @@ class ServiceOperationPath(ClientPath):
         :type name: str
         :type parent: office365.runtime.client_path.ClientPath
         """
-        super(ServiceOperationPath, self).__init__(parent)
-        self._name = name
+        super(ServiceOperationPath, self).__init__(name, parent)
         self._parameters = parameters
 
     @property

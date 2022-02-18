@@ -365,10 +365,10 @@ class Web(SecurableObject):
               The two possible URL formats are:
               1) The URL of the site, with the path of the object in SharePoint represented as query string parameters,
               forSharing set to 1 if sharing, and mbypass set to 1 to bypass any mobile logic
-              e.g. http://contoso.com/?forSharing=1&mbypass=1&List=%7BCF908473%2D72D4%2D449D%2D8A53%2D4BD01EC54B84%7D&
+              e.g. https://contoso.com/?forSharing=1&mbypass=1&List=%7BCF908473%2D72D4%2D449D%2D8A53%2D4BD01EC54B84%7D&
               obj={CF908473-72D4-449D-8A53-4BD01EC54B84},1,DOCUMENT
               2) The URL of the SharePoint object (web, list, item) intended for sharing
-              e.g. http://contoso.com/Documents/SampleFile.docx
+              e.g. https://contoso.com/Documents/SampleFile.docx
         :param int group_id: The id value of the permissions group if adding to a group, 0 otherwise.
         :param bool use_simplified_roles: A Boolean value indicating whether to use the SharePoint
         simplified roles (Edit, View) or not.
@@ -542,6 +542,14 @@ class Web(SecurableObject):
         qry = ServiceOperationQuery(self, "GetAvailableWebTemplates", params, None, None, return_type)
         self.context.add_query(qry)
         return return_type
+
+    def increment_site_client_tag(self):
+        """
+        Increments the client cache control number for this site collection.
+        """
+        qry = ServiceOperationQuery(self, "IncrementSiteClientTag")
+        self.context.add_query(qry)
+        return self
 
     def apply_web_template(self, web_template):
         """

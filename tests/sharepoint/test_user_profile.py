@@ -70,3 +70,7 @@ class TestUserProfile(TestCase):
         people_manager = PeopleManager(self.my_client)
         result = people_manager.get_my_followers().execute_query()
         self.assertIsInstance(result, PersonPropertiesCollection)
+
+    def test_10_get_trending_tags(self):
+        result = PeopleManager.get_trending_tags(self.my_client).execute_query()
+        self.assertIsNotNone(result)
