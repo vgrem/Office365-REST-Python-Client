@@ -19,5 +19,6 @@ class FieldUserValue(FieldLookupValue):
 
         def _init_from_user():
             value.LookupId = user.id
-        user.ensure_property("Id", _init_from_user)
+            value.LookupValue = user.login_name
+        user.ensure_properties(["Id", "LoginName"], _init_from_user)
         return value

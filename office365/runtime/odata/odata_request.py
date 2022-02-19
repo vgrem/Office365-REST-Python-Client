@@ -50,7 +50,7 @@ class ODataRequest(ClientRequest):
         elif isinstance(query, (CreateEntityQuery, UpdateEntityQuery, ServiceOperationQuery)):
             request.method = HttpMethod.Post
             if query.parameter_type is not None:
-                request.data = self._normalize_payload(query)
+                request.data = self._normalize_payload(query.parameter_type)
         return request
 
     def ensure_media_type(self, request):
@@ -138,23 +138,22 @@ class ODataRequest(ClientRequest):
                             value = {k: v for k, v in self._next_property(value, data_format)}
                         yield name, value
 
-    def _normalize_payload(self, query):
+    def _normalize_payload(self, value):
         """
         Normalizes OData request payload
 
-        :type query: office365.runtime.queries.client_query.ClientQuery
-        :rtype: dict
+        :type value: ClientObject or ClientValue or dict or list or str
         """
-        if isinstance(query.parameter_type, ClientObject) or isinstance(query.parameter_type, ClientValue):
-            json = query.parameter_type.to_json(self._json_format)
+        if isinstance(value, ClientObject) or isinstance(value, ClientValue):
+            json = value.to_json(self._json_format)
+            query = self.current_query
             if isinstance(query, ServiceOperationQuery) and query.parameter_name is not None:
                 return {query.parameter_name: json}
             return json
-        elif isinstance(query.parameter_type, dict):
-            json = query.parameter_type
-            for k, v in json.items():
-                if isinstance(v, ClientObject) or isinstance(v, ClientValue):
-                    json[k] = v.to_json(self._json_format)
-            return json
-        else:
-            return query.parameter_type
+        elif isinstance(value, dict):
+            for k, v in value.items():
+                value[k] = self._normalize_payload(v)
+        elif isinstance(value, list):
+            for i, item in enumerate(value):
+                value[i] = self._normalize_payload(item)
+        return value

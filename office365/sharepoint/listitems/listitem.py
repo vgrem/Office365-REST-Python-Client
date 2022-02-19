@@ -10,6 +10,7 @@ from office365.sharepoint.comments.comment_collection import CommentCollection
 from office365.sharepoint.fields.field_lookup_value import FieldLookupValue
 from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupValue
 from office365.sharepoint.likes.liked_by_information import LikedByInformation
+from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateValue
 from office365.sharepoint.listitems.list_item_version import ListItemVersion
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.reputationmodel.reputation import Reputation
@@ -167,17 +168,25 @@ class ListItem(SecurableObject):
         self.ensure_properties(["Id", "ParentList"], _item_resolved)
         return return_type
 
-    def validate_update_list_item(self, form_values, new_document_update):
-        """Validates and sets the values of the specified collection of fields for the list item."""
-        qry = ServiceOperationQuery(self,
-                                    "validateUpdateListItem",
-                                    None,
-                                    {
-                                        "formValues": form_values,
-                                        "bNewDocumentUpdate": new_document_update,
-                                    })
+    def validate_update_list_item(self, form_values, new_document_update=False, checkin_comment=None):
+        """Validates and sets the values of the specified collection of fields for the list item.
+
+        :param dict form_values: Specifies a collection of field internal names and values for the given field
+        :param dict new_document_update: Specifies whether the list item is a document being updated after upload.
+        :param str checkin_comment: Check-in comment, if any. This parameter is only applicable when the list item
+             is checked out.
+        """
+        normalized_form_values = [ListItemFormUpdateValue(k, v) for k, v in form_values.items()]
+        payload = {
+            "formValues": normalized_form_values,
+            "bNewDocumentUpdate": new_document_update,
+            "checkInComment": checkin_comment,
+            "datesInUTC": True
+        }
+        result = ClientResult(self.context, ClientValueCollection(ListItemFormUpdateValue))
+        qry = ServiceOperationQuery(self, "ValidateUpdateListItem", None, payload, None, result)
         self.context.add_query(qry)
-        return self
+        return result
 
     def update(self):
         """
@@ -194,14 +203,13 @@ class ListItem(SecurableObject):
 
     def system_update(self):
         """Update the list item."""
-        qry = ServiceOperationQuery(self,
-                                    "systemUpdate")
+        qry = ServiceOperationQuery(self, "SystemUpdate")
         self.context.add_query(qry)
         return self
 
     def update_overwrite_version(self):
         """Updates the item without creating another version of the item."""
-        qry = ServiceOperationQuery(self, "updateOverwriteVersion")
+        qry = ServiceOperationQuery(self, "UpdateOverwriteVersion")
         self.context.add_query(qry)
         return self
 
@@ -217,7 +225,7 @@ class ListItem(SecurableObject):
 
     def get_comments(self):
         comments = CommentCollection(self.context)
-        qry = ServiceOperationQuery(self, "getComments", [], None, None, comments)
+        qry = ServiceOperationQuery(self, "GetComments", [], None, None, comments)
         self.context.add_query(qry)
         return comments
 
