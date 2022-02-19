@@ -69,7 +69,7 @@ class ClientContext(ClientRuntimeContext):
         ctx.after_execute(_init_context_for_web)
         return ctx
 
-    def with_client_certificate(self, tenant, client_id, thumbprint, cert_path,**kwargs):
+    def with_client_certificate(self, tenant, client_id, thumbprint, cert_path, **kwargs):
         """Creates authenticated SharePoint context via certificate credentials
 
         :param str tenant: Tenant name

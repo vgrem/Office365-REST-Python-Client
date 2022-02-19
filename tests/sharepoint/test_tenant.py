@@ -3,6 +3,8 @@ from unittest import TestCase
 
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
+from office365.sharepoint.tenant.administration.sharing_capabilities import SharingCapabilities
 from office365.sharepoint.tenant.management.office365_tenant import Office365Tenant
 from office365.sharepoint.tenant.administration.site_properties import SiteProperties
 from office365.sharepoint.tenant.administration.site_properties_collection import SitePropertiesCollection
@@ -37,10 +39,9 @@ class TestTenant(TestCase):
     #    self.assertIsNotNone(result.value)
 
     def test4_get_site_health_status(self):
-        result = self.tenant.get_site_health_status(test_team_site_url)
-        self.tenant.execute_query()
+        result = self.tenant.get_site_health_status(test_team_site_url).execute_query()
         self.assertIsNotNone(result.value)
-        # self.assertIsInstance(result.value, PortalHealthStatus)
+        self.assertIsInstance(result.value, PortalHealthStatus)
 
     def test5_get_site_state(self):
         target_site = self.client.site.select(["Id"]).get().execute_query()
@@ -78,14 +79,17 @@ class TestTenant(TestCase):
     def test_10_get_site_by_url(self):
         site_props = self.tenant.get_site_properties_by_url(test_site_url, True).execute_query()
         self.assertIsNotNone(site_props.url)
+        #self.assertIsNotNone(site_props.resource_path)
+        self.__class__.target_site_props = site_props
 
-    #    self.__class__.target_site_props = site_props
+    def test_11_update_site(self):
+        site_props_to_update = self.__class__.target_site_props
+        site_props_to_update.set_property('SharingCapability', SharingCapabilities.Disabled)
+        site_props_to_update.update().execute_query()
 
-    # def test_11_update_site(self):
-    #    site_props_to_update = self.__class__.target_site_props
-    #    site_props_to_update.set_property('SharingCapability', SharingCapabilities.ExternalUserAndGuestSharing)
-    #    site_props_to_update.update()
-    #    self.client.execute_query()
+        updated_site_props = self.tenant.get_site_properties_by_url(test_site_url, True).execute_query()
+        self.assertTrue(updated_site_props.sharing_capability == SharingCapabilities.Disabled)
+
     #    self.assertTrue(site_props_to_update.properties['Status'], 'Active')
 
     # def test_12_delete_site(self):
