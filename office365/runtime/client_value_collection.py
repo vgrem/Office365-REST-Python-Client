@@ -41,7 +41,7 @@ class ClientValueCollection(ClientValue):
         for i, v in enumerate(json_items):
             if isinstance(v, ClientValue):
                 json_items[i] = v.to_json(json_format)
-        if isinstance(json_format, JsonLightFormat) and json_format.is_verbose:
+        if isinstance(json_format, JsonLightFormat) and json_format.include_control_information():
             json = {json_format.collection_tag_name: json_items,
                     json_format.metadata_type_tag_name: {'type': self.entity_type_name}}
 

@@ -21,3 +21,11 @@ class ODataJsonFormat(object):
     @abstractmethod
     def get_media_type(self):
         pass
+
+    @abstractmethod
+    def include_control_information(self):
+        """Determines whether control information that is represented as annotations should be included in payload
+
+        :rtype: bool
+        """
+        pass

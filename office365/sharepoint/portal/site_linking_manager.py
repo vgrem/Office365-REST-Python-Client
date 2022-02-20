@@ -24,9 +24,8 @@ class LinkedSitesListContract(ClientValue):
 class SiteLinkingManager(BaseEntity):
     """"""
 
-    def __init__(self, context):
-        super(SiteLinkingManager, self).__init__(context,
-                                                 ResourcePath("Microsoft.SharePoint.Portal.SiteLinkingManager"))
+    def __init__(self, context, resource_path=None):
+        super(SiteLinkingManager, self).__init__(context, resource_path)
 
     def get_site_links(self):
         """"""

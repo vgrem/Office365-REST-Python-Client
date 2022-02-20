@@ -33,7 +33,7 @@ class ClientValue(object):
             if isinstance(v, ClientValue):
                 json[n] = v.to_json(json_format)
 
-        if isinstance(json_format, JsonLightFormat) and json_format.is_verbose and self.entity_type_name is not None:
+        if isinstance(json_format, JsonLightFormat) and json_format.include_control_information() and self.entity_type_name is not None:
             json[json_format.metadata_type_tag_name] = {'type': self.entity_type_name}
 
         return json

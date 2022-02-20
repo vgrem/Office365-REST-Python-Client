@@ -49,7 +49,7 @@ class GraphClient(ClientRuntimeContext):
         :param () -> dict acquire_token_callback: Acquire token function
         """
         super(GraphClient, self).__init__()
-        self._pending_request = ODataRequest(self, V4JsonFormat("minimal"))
+        self._pending_request = ODataRequest(self, V4JsonFormat())
         self._pending_request.beforeExecute += self._build_specific_query
         self._resource = "https://graph.microsoft.com"
         self._authority_host_url = "https://login.microsoftonline.com"

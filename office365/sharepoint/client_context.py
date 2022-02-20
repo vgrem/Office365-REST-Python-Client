@@ -10,7 +10,6 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 from office365.runtime.odata.v3.batch_request import ODataBatchRequest
-from office365.runtime.odata.v3.metadata_level import ODataMetadataLevel
 from office365.runtime.odata.odata_request import ODataRequest
 from office365.runtime.queries.batch_query import BatchQuery
 from office365.runtime.queries.client_query import ClientQuery
@@ -146,7 +145,7 @@ class ClientContext(ClientRuntimeContext):
         :return: ODataRequest
         """
         if self.__pending_request is None:
-            self.__pending_request = ODataRequest(self, JsonLightFormat(ODataMetadataLevel.Verbose))
+            self.__pending_request = ODataRequest(self, JsonLightFormat())
             self.__pending_request.beforeExecute += self._build_modification_query
         return self.__pending_request
 
