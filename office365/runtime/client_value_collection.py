@@ -1,4 +1,5 @@
 from office365.runtime.client_value import ClientValue
+from office365.runtime.odata.odata_type import ODataType
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 
 
@@ -37,16 +38,14 @@ class ClientValueCollection(ClientValue):
         """
         :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat or None
         """
-        json_items = [item for item in self._data]
-        for i, v in enumerate(json_items):
+        json = [item for item in self._data]
+        for i, v in enumerate(json):
             if isinstance(v, ClientValue):
-                json_items[i] = v.to_json(json_format)
+                json[i] = v.to_json(json_format)
         if isinstance(json_format, JsonLightFormat) and json_format.include_control_information():
-            json = {json_format.collection_tag_name: json_items,
+            json = {json_format.collection_tag_name: json,
                     json_format.metadata_type_tag_name: {'type': self.entity_type_name}}
-
-            return json
-        return json_items
+        return json
 
     def set_property(self, index, value, persist_changes=False):
         child_value = self._item_type()
@@ -56,23 +55,15 @@ class ClientValueCollection(ClientValue):
         else:
             child_value = value
         self.add(child_value)
+        return self
 
     @property
     def entity_type_name(self):
-        """
-        Gets server type name
-        """
-        primitive_types = {
-            bool: "Edm.Boolean",
-            int: "Edm.Int32",
-            str: "Edm.String",
-        }
-
         item_type_name = None
 
-        is_primitive = primitive_types.get(self._item_type, None) is not None
+        is_primitive = ODataType.primitive_types.get(self._item_type, None) is not None
         if is_primitive:
-            item_type_name = primitive_types[self._item_type]
+            item_type_name = ODataType.primitive_types[self._item_type]
         elif issubclass(self._item_type, ClientValue):
             item_type_name = self._item_type.entity_type_name.fget(self)
 

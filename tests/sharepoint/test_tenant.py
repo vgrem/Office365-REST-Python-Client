@@ -84,11 +84,11 @@ class TestTenant(TestCase):
 
     def test_11_update_site(self):
         site_props_to_update = self.__class__.target_site_props
-        site_props_to_update.set_property('SharingCapability', SharingCapabilities.Disabled)
+        site_props_to_update.set_property('SharingCapability', SharingCapabilities.ExternalUserAndGuestSharing)
         site_props_to_update.update().execute_query()
 
         updated_site_props = self.tenant.get_site_properties_by_url(test_site_url, True).execute_query()
-        self.assertTrue(updated_site_props.sharing_capability == SharingCapabilities.Disabled)
+        self.assertTrue(updated_site_props.sharing_capability == SharingCapabilities.ExternalUserAndGuestSharing)
 
     #    self.assertTrue(site_props_to_update.properties['Status'], 'Active')
 

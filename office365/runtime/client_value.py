@@ -7,9 +7,6 @@ class ClientValue(object):
     containing entity or as a temporary value
     """
 
-    def __init__(self):
-        super(ClientValue, self).__init__()
-
     def set_property(self, k, v, persist_changes=True):
         prop_type = getattr(self, k, None)
         if isinstance(prop_type, ClientValue) and v is not None:
@@ -20,6 +17,7 @@ class ClientValue(object):
             setattr(self, k, prop_type)
         else:
             setattr(self, k, v)
+        return self
 
     def get_property(self, k):
         return getattr(self, k)

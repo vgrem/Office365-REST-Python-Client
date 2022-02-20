@@ -3,6 +3,8 @@ from office365.runtime.client_value_collection import ClientValueCollection
 
 
 class UserSharingResult(ClientValue):
+    """Specifies a sharing result for an individual user that method UpdateDocumentSharingInfo
+    (section 3.2.5.187.2.1.1) returns."""
 
     def __init__(self):
         super(UserSharingResult, self).__init__()

@@ -1,5 +1,12 @@
 class ODataType(object):
 
+    primitive_types = {
+        bool: "Edm.Boolean",
+        int: "Edm.Int32",
+        str: "Edm.String",
+    }
+    """Primitive server types"""
+
     def __init__(self):
         self.name = None
         self.namespace = None

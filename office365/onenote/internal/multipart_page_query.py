@@ -1,8 +1,4 @@
-from base64 import encodebytes
-from email import encoders
 from email.message import Message
-from email.mime.text import MIMEText
-
 from office365.runtime.compat import get_mime_type, message_as_bytes_or_string
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.batch_query import create_boundary

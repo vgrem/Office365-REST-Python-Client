@@ -3,7 +3,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.principal.group_collection import GroupCollection
 from office365.sharepoint.sharing.invitation_creation_result import SPInvitationCreationResult
-from office365.sharepoint.sharing.userSharingResult import UserSharingResult
+from office365.sharepoint.sharing.user_sharing_result import UserSharingResult
 
 
 class SharingResult(BaseEntity):
