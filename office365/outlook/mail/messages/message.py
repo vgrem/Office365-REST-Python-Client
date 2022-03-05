@@ -102,10 +102,18 @@ class Message(Item):
         self.context.add_query(qry)
         return self
 
-    def reply(self):
+    def reply(self, message=None, comment=None):
         """Reply to the sender of a message by specifying a comment and using the Reply method. The message is then
-        saved in the Sent Items folder. """
-        qry = ServiceOperationQuery(self, "reply")
+        saved in the Sent Items folder.
+
+        :param Message message: Any writeable properties to update in the reply message.
+        :param str comment: A comment to include. Can be an empty string.
+        """
+        payload = {
+            "message": message,
+            "comment": comment
+        }
+        qry = ServiceOperationQuery(self, "reply", None, payload)
         self.context.add_query(qry)
         return self
 
