@@ -40,11 +40,11 @@ class ClientContext(ClientRuntimeContext):
         else:
             self._auth_context = auth_context
         super(ClientContext, self).__init__()
-        self.__web = None
-        self.__site = None
+        self._web = None
+        self._site = None
         self._base_url = base_url
-        self.__ctx_web_info = None
-        self.__pending_request = None
+        self._ctx_web_info = None
+        self._pending_request = None
 
     @staticmethod
     def from_url(abs_url):
@@ -144,18 +144,18 @@ class ClientContext(ClientRuntimeContext):
         """
         :return: ODataRequest
         """
-        if self.__pending_request is None:
-            self.__pending_request = ODataRequest(self, JsonLightFormat())
-            self.__pending_request.beforeExecute += self._build_modification_query
-        return self.__pending_request
+        if self._pending_request is None:
+            self._pending_request = ODataRequest(self, JsonLightFormat())
+            self._pending_request.beforeExecute += self._build_modification_query
+        return self._pending_request
 
     def ensure_form_digest(self, request_options):
         """
         :type request_options: RequestOptions
         """
-        if self.__ctx_web_info is None or not self.__ctx_web_info.is_valid:
-            self.__ctx_web_info = self.get_context_web_information(request_options=request_options)
-        request_options.set_header('X-RequestDigest', self.__ctx_web_info.FormDigestValue)
+        if self._ctx_web_info is None or not self._ctx_web_info.is_valid:
+            self._ctx_web_info = self.get_context_web_information(request_options=request_options)
+        request_options.set_header('X-RequestDigest', self._ctx_web_info.FormDigestValue)
 
     def get_context_web_information(self, request_options=None):
         """Returns an ContextWebInformation object that specifies metadata about the site"""
@@ -222,6 +222,7 @@ class ClientContext(ClientRuntimeContext):
         """
         ctx = copy.deepcopy(self)
         ctx._base_url = url
+        ctx._ctx_web_info = None
         if clear_queries:
             ctx.clear()
         return ctx
@@ -254,21 +255,21 @@ class ClientContext(ClientRuntimeContext):
 
         :rtype: ContextWebInformation
         """
-        return self.__ctx_web_info
+        return self._ctx_web_info
 
     @property
     def web(self):
         """Get Web client object"""
-        if not self.__web:
-            self.__web = Web(self)
-        return self.__web
+        if not self._web:
+            self._web = Web(self)
+        return self._web
 
     @property
     def site(self):
         """Get Site client object"""
-        if not self.__site:
-            self.__site = Site(self)
-        return self.__site
+        if not self._site:
+            self._site = Site(self)
+        return self._site
 
     @property
     def me(self):

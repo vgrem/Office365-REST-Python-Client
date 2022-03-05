@@ -6,7 +6,7 @@ from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
-from office365.sharepoint.customactions.custom_action_element import CustomActionElement
+from office365.sharepoint.customactions.custom_action_element import CustomActionElementCollection
 from office365.sharepoint.eventreceivers.event_receiver_definition import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.fields.related_field_collection import RelatedFieldCollection
@@ -285,15 +285,14 @@ class List(SecurableObject):
         :param str page_name:
         :param str page_content:
         """
-        result = ClientResult(self.context, File(self.context))
+        return_type = File(self.context)
 
-        def _list_loaded():
+        def _root_folder_loaded():
             page_url = self.root_folder.serverRelativeUrl + "/" + page_name
             wiki_props = WikiPageCreationInformation(page_url, page_content)
-            result.value = Utility.create_wiki_page_in_context_web(self.context, wiki_props)
-        self.ensure_property("RootFolder", _list_loaded)
-
-        return result
+            Utility.create_wiki_page_in_context_web(self.context, wiki_props, return_type)
+        self.ensure_property("RootFolder", _root_folder_loaded)
+        return return_type
 
     def add_item_using_path(self, leaf_name, object_type, folder_url):
         """
@@ -445,8 +444,7 @@ class List(SecurableObject):
 
     @property
     def custom_action_elements(self):
-        return self.properties.get('CustomActionElements',
-                                   ClientValueCollection(CustomActionElement))
+        return self.properties.get('CustomActionElements', CustomActionElementCollection())
 
     @property
     def forms(self):

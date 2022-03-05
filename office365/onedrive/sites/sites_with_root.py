@@ -1,4 +1,5 @@
 from office365.entity_collection import EntityCollection
+from office365.onedrive.internal.paths.site_path import SitePath
 from office365.onedrive.sites.site import Site
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
@@ -9,6 +10,13 @@ class SitesWithRoot(EntityCollection):
 
     def __init__(self, context, resource_path):
         super(SitesWithRoot, self).__init__(context, Site, resource_path)
+
+    def get_by_url(self, url):
+        """Address Site resource by absolute url
+
+        :param str url: Site absolute url
+        """
+        return Site(self.context, SitePath(url, self.resource_path))
 
     def remove(self, sites):
         """

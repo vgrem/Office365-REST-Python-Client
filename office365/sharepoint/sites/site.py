@@ -9,7 +9,9 @@ from office365.sharepoint.eventreceivers.event_receiver_definition import EventR
 from office365.sharepoint.features.feature_collection import FeatureCollection
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.portal.site_icon_manager import SiteIconManager
+from office365.sharepoint.portal.site_status import SiteStatus
 from office365.sharepoint.principal.user import User
+from office365.sharepoint.publishing.communication_site import CommunicationSiteCreationRequest
 from office365.sharepoint.recyclebin.recycleBinItemCollection import RecycleBinItemCollection
 from office365.sharepoint.sites.site_health_summary import SiteHealthSummary
 from office365.sharepoint.sites.sph_site import SPHSite
@@ -25,6 +27,61 @@ class Site(BaseEntity):
 
     def __init__(self, context):
         super(Site, self).__init__(context, ResourcePath("Site", None))
+
+    @staticmethod
+    def create_communication_site(root_site_url, alias, title):
+        """
+        Creates a modern SharePoint Communication site
+
+        :param str root_site_url: Tenant root site url, e.g. https://contoso.sharepoint.com
+        :param str alias: Site alias which defines site url, e.g. https://contoso.sharepoint.com/sites/{alias}
+        :param str title: Site title
+        """
+
+        site = Site.from_url(root_site_url).get()  # type: Site
+        ctx = site.context
+
+        def _before_site_create(resp):
+            site_url = f"{root_site_url}sites/{alias}"
+            request = CommunicationSiteCreationRequest(title, site_url)
+            result = ctx.site_pages.communication_site.create(request)
+
+            def _after_site_create(site_create_resp):
+                if result.value.SiteStatus == SiteStatus.Error:
+                    raise ValueError("Site creation error")
+                elif result.value.SiteStatus == SiteStatus.Ready:
+                    site.set_property("NewSiteUrl", result.value.SiteUrl)
+            ctx.after_execute(_after_site_create)
+
+        ctx.after_execute(_before_site_create)
+        return site
+
+    @staticmethod
+    def create_team_site(root_site_url, alias, title, is_public=True):
+        """Creates a modern SharePoint Team site
+
+        :param str root_site_url: Tenant root site url, e.g. https://contoso.sharepoint.com
+        :param str alias: Site alias which defines site url, e.g. https://contoso.sharepoint.com/teams/{alias}
+        :param str title: Site title
+        """
+        from office365.sharepoint.client_context import ClientContext
+        ctx = ClientContext(root_site_url)
+        site = ctx.site.get()
+
+        def _before_site_create(resp):
+            from office365.sharepoint.portal.group_site_manager import GroupSiteManager
+            site_manager = GroupSiteManager(ctx)
+            result = site_manager.create_group_ex(title, alias, is_public, None)
+
+            def _after_site_create(site_create_resp):
+                if result.value.SiteStatus == SiteStatus.Error:
+                    raise ValueError(result.value.ErrorMessage)
+                elif result.value.SiteStatus == SiteStatus.Ready:
+                    site.set_property("NewSiteUrl", result.value.SiteUrl)
+            ctx.after_execute(_after_site_create)
+
+        ctx.after_execute(_before_site_create)
+        return site
 
     @staticmethod
     def from_url(url):
@@ -125,21 +182,22 @@ class Site(BaseEntity):
         self.context.add_query(qry)
         return return_type
 
-    def join_hub_site(self, hub_site_id, approval_token, approval_correlation_id):
+    def join_hub_site(self, hub_site_id, approval_token=None, approval_correlation_id=None):
         """
+        Associates a site with an existing hub site.
 
+        :param str hub_site_id: ID of the hub site to join.
+        :param str approval_token:
+        :param str approval_correlation_id:
         """
-        params = {
+        payload = {
             "hubSiteId": hub_site_id,
             "approvalToken": approval_token,
             "approvalCorrelationId": approval_correlation_id
         }
-        return_type = WebTemplateCollection(self.context,
-                                            ServiceOperationPath("GetWebTemplates", params, self.resource_path))
-
-        qry = ServiceOperationQuery(self, "JoinHubSite", params, None, None, return_type)
+        qry = ServiceOperationQuery(self, "JoinHubSite", None, payload)
         self.context.add_query(qry)
-        return return_type
+        return self
 
     @staticmethod
     def get_url_by_id(context, site_id, stop_redirect=False):
@@ -182,6 +240,7 @@ class Site(BaseEntity):
     @staticmethod
     def exists(context, url):
         """Determine whether site exists
+
         :type context: office365.sharepoint.client_context.ClientContext
         :type url: str
         """
@@ -234,11 +293,16 @@ class Site(BaseEntity):
         self.context.add_query(qry)
         return self
 
-    def run_health_check(self, rule_id, repair, run_always):
+    def run_health_check(self, rule_id=None, repair=None, run_always=None):
         """
-        :param str rule_id:
-        :param bool repair:
-        :param bool run_always:
+        Runs a health check as follows. (The health rules referenced below perform an implementation-dependent check
+        on the health of a site collection.)
+
+        :param str rule_id: Specifies the rule or rules to be run. If the value is an empty GUID, all rules are run,
+             otherwise only the specified rule is run.
+        :param bool repair: Specifies whether repairable rules are to be run in repair mode.
+        :param bool run_always: Specifies whether the rules will be run as a result of this call or cached results
+             from a previous run can be returned.
         """
         payload = {
             "ruleId": rule_id,
@@ -295,7 +359,7 @@ class Site(BaseEntity):
     @property
     def url(self):
         """
-        Site url
+        Specifies the full URL of the site (2), including host name, port number and path.
 
         :rtype: str
         """
@@ -303,7 +367,7 @@ class Site(BaseEntity):
 
     def server_relative_url(self):
         """
-        Gets the server-relative URL of the root Web site in the site collection.
+        Specifies the server-relative URL of the top-level site in the site collection.
 
         :rtype: str
         """
@@ -312,6 +376,8 @@ class Site(BaseEntity):
     @property
     def id(self):
         """
+        Specifies the GUID that identifies the site collection.
+
         :rtype: str
         """
         return self.properties.get("Id", None)
@@ -392,3 +458,11 @@ class Site(BaseEntity):
             }
             default_value = property_mapping.get(name, None)
         return super(Site, self).get_property(name, default_value)
+
+    def set_property(self, name, value, persist_changes=True):
+        super(Site, self).set_property(name, value, persist_changes)
+        if name == "NewSiteUrl":
+            safe_url = value[:-1] if value[-1] == "/" else value
+            super(Site, self).set_property("Url", safe_url)
+            self._context = self.context.clone(safe_url)
+        return self

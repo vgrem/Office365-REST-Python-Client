@@ -8,6 +8,23 @@ from office365.sharepoint.principal.user_id_info import UserIdInfo
 class User(Principal):
     """Represents a user in Microsoft SharePoint Foundation. A user is a type of SP.Principal."""
 
+    def get_personal_site(self):
+        """Get personal site"""
+        from office365.sharepoint.sites.site import Site
+        site = Site(self.context)
+
+        def _user_loaded():
+            from office365.sharepoint.userprofiles.peopleManager import PeopleManager
+            people_manager = PeopleManager(self.context)
+            person_props = people_manager.get_properties_for(self.login_name)
+
+            def _person_props_loaded(resp):
+                site.set_property("NewSiteUrl", person_props.properties['PersonalUrl'])
+            self.context.after_execute(_person_props_loaded)
+
+        self.ensure_property("LoginName", _user_loaded)
+        return site
+
     def get(self):
         """
         :rtype: User

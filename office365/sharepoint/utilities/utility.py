@@ -73,19 +73,21 @@ class Utility(BaseEntity):
         return result
 
     @staticmethod
-    def create_wiki_page_in_context_web(context, parameters):
+    def create_wiki_page_in_context_web(context, parameters, return_type=None):
         """
         Creates a wiki page.
 
         :type context: office365.sharepoint.client_context.ClientContext
         :type parameters: office365.sharepoint.pages.wiki_page_creation_information.WikiPageCreationInformation
+        :type return_type: File
         """
-        return_file = File(context)
+        if return_type is None:
+            return_type = File(context)
         utility = Utility(context)
-        qry = ServiceOperationQuery(utility, "CreateWikiPageInContextWeb", None, parameters, "parameters", return_file)
+        qry = ServiceOperationQuery(utility, "CreateWikiPageInContextWeb", None, parameters, "parameters", return_type)
         qry.static = True
         context.add_query(qry)
-        return return_file
+        return return_type
 
     @staticmethod
     def send_email(context, properties):

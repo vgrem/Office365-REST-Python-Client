@@ -1,4 +1,5 @@
 from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.listitems.caml.caml_query import CamlQuery
 from tests import test_client_credentials, test_team_site_url
 
 
@@ -36,13 +37,34 @@ def get_items(target_list):
     print("Loaded items count: {0}".format(len(items)))
     index = 0
     for item in items:
-        #print("{0}: {1}".format(index, item.properties['Title']))
+        # print("{0}: {1}".format(index, item.properties['Title']))
         index += 1
+
+
+def query_large_list(target_list):
+    """
+    :type target_list: office365.sharepoint.lists.list.List
+    """
+
+    def create_paged_query(page_size):
+        qry = CamlQuery()
+        qry.ViewXml = f"""
+        <View Scope='RecursiveAll'>
+           <Query><Where><Neq><FieldRef Name=\"FullName\" /><Value Type=\"Text\">Travis Clayton</Value></Neq></Where></Query>
+           <QueryOptions><QueryThrottleMode>Override</QueryThrottleMode></QueryOptions>
+           <RowLimit Paged='TRUE'>{page_size}</RowLimit>
+       </View>
+       """
+        return qry
+
+    items = target_list.get_items(create_paged_query(100)).execute_query()
+    print(items)
 
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 
 large_list = ctx.web.lists.get_by_title("Contacts_Large")
-get_total_count(large_list)
-#get_items(large_list)
+query_large_list(large_list)
+# get_total_count(large_list)
+# get_items(large_list)
 # enum_items(large_list)

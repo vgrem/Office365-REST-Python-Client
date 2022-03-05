@@ -4,6 +4,7 @@ from tests import settings
 
 
 test_user_principal_name = settings.get('users', 'test_user1')
+test_user_principal_name_alt = settings.get('users', 'test_user2')
 
 tenant_prefix = settings.get('default', 'tenant_prefix')
 tenant_name = settings.get('default', 'tenant')

@@ -5,6 +5,7 @@ from office365.onedrive.columns.column_definition import ColumnDefinition
 from office365.onedrive.contenttypes.content_type import ContentType
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.analytics.item_analytics import ItemAnalytics
+from office365.onedrive.internal.paths.site_path import SitePath
 from office365.onedrive.lists.list_collection import ListCollection
 from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.permissions.permission import Permission
@@ -147,6 +148,7 @@ class Site(BaseItem):
 
     def set_property(self, name, value, persist_changes=True):
         super(Site, self).set_property(name, value, persist_changes)
-        if name == "id" and self.resource_path.name == "root":
-            self._resource_path = ResourcePath(value, self.resource_path.parent)
+        if name == "id":
+            if self.resource_path.name == "root" or isinstance(self.resource_path, SitePath):
+                self._resource_path = ResourcePath(value, self.resource_path.parent)
         return self

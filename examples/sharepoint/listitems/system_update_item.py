@@ -13,7 +13,6 @@ items = list_tasks.items.get().top(1).execute_query()
 if len(items) == 0:
     sys.exit("No items for update found")
 
-
 item_to_update = items[0]  # type: ListItem
 author = ctx.web.site_users.get_by_email(test_user_principal_name)
 
@@ -24,6 +23,8 @@ result = item_to_update.validate_update_list_item({
     "Modified": modified_date
 }).execute_query()
 
-print("Item has been updated successfully")
-
-
+has_any_error = any([item.HasException for item in result.value])
+if has_any_error:
+    print("Item update completed with errors, for details refer 'ErrorMessage' property")
+else:
+    print("Item has been updated successfully")

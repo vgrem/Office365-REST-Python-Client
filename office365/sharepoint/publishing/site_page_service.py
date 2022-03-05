@@ -11,6 +11,7 @@ from office365.sharepoint.publishing.site_page_collection import SitePageCollect
 
 
 class SitePageService(BaseEntity):
+    """Represents a set of APIs to use for managing site pages."""
 
     def __init__(self, context, resource_path=None):
         """Represents a set of APIs to use for managing site pages."""
@@ -20,11 +21,13 @@ class SitePageService(BaseEntity):
 
     @property
     def pages(self):
+        """Gets the SitePageCollection for the current web."""
         return self.properties.get("pages",
                                    SitePageCollection(self.context, ResourcePath("pages", self.resource_path)))
 
     @property
     def communication_site(self):
+        """Gets a CommunicationSite for the current web."""
         return self.properties.get("CommunicationSite",
                                    CommunicationSite(self.context,
                                                      ResourcePath("CommunicationSite", self.resource_path)))

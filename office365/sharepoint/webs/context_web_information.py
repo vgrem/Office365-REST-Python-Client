@@ -21,6 +21,9 @@ class ContextWebInformation(ClientValue):
         self.WebFullUrl = None
         self._valid_from = time.time()
 
+    def reset(self):
+        pass
+
     @property
     def is_valid(self):
         if self.FormDigestTimeoutSeconds is None:
