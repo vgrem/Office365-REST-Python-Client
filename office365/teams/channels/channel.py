@@ -1,16 +1,50 @@
 from office365.entity_collection import EntityCollection
+from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value import ClientValue
 from office365.runtime.compat import quote
 
 from office365.entity import Entity
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.teams.channels.conversation_member import ConversationMember
 from office365.teams.messages.chat_message import ChatMessage
 from office365.teams.tabs.tab import TeamsTab
 
 
+class ProvisionChannelEmailResult(ClientValue):
+    pass
+
+
 class Channel(Entity):
     """Teams are made up of channels, which are the conversations you have with your teammates"""
+
+    def provision_email(self):
+        """
+        Provision an email address for a channel.
+
+        Microsoft Teams doesn't automatically provision an email address for a channel by default.
+        To have Teams provision an email address, you can call provisionEmail, or through the Teams user interface,
+        select Get email address, which triggers Teams to generate an email address if it has not already provisioned
+        one.
+
+        To remove the email address of a channel, use the removeEmail method.
+        """
+        return_type = ClientResult(self.context, ProvisionChannelEmailResult())
+        qry = ServiceOperationQuery(self, "provisionEmail", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def remove_email(self):
+        """
+        Remove the email address of a channel.
+
+        You can remove an email address only if it was provisioned using the provisionEmail method or through
+        the Microsoft Teams client.
+        """
+        qry = ServiceOperationQuery(self, "removeEmail")
+        self.context.add_query(qry)
+        return self
 
     @property
     def files_folder(self):

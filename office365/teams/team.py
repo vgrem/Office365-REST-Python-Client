@@ -19,6 +19,7 @@ class Team(Entity):
     logical isolation of discussion, within a team. """
 
     def delete_object(self):
+        """Deletes a team"""
         def _team_loaded():
             group = self.context.groups[self.id]
             group.delete_object(False)
@@ -185,6 +186,15 @@ class Team(Entity):
         see sending Teams activity notifications:
         https://docs.microsoft.com/en-us/graph/teams-send-activityfeednotifications
 
+        :param teamworkActivityTopic topic: Topic of the notification. Specifies the resource being talked about.
+        :param str activity_type: Activity type. This must be declared in the Teams app manifest.
+        :param str chain_id: Optional. Used to override a previous notification. Use the same chainId in subsequent
+            requests to override the previous notification.
+        :param str preview_text: Preview text for the notification. Microsoft Teams will only show first 150 characters
+        :param dict template_parameters: Values for template variables defined in the activity feed entry corresponding
+            to activityType in Teams app manifest.
+        :param teamworkNotificationRecipient template_parameters: Recipient of the notification.
+             Only Azure AD users are supported.
         """
         payload = {
             "topic": topic,

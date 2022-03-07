@@ -39,6 +39,7 @@ class User(DirectoryObject):
     def assign_license(self, add_licenses, remove_licenses):
         """
         Add or remove licenses on the user.
+
         :param list[str] remove_licenses: A collection of skuIds that identify the licenses to remove.
         :param list[AssignedLicense] add_licenses: A collection of assignedLicense objects that specify
              the licenses to add.

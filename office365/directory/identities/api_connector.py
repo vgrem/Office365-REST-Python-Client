@@ -1,3 +1,4 @@
+from office365.directory.identities.authentication_configuration_base import ApiAuthenticationConfigurationBase
 from office365.entity import Entity
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 
@@ -25,3 +26,9 @@ class IdentityApiConnector(Entity):
         qry = ServiceOperationQuery(self, "uploadClientCertificate", None, payload, None, None)
         self.context.add_query(qry)
         return self
+
+    @property
+    def authentication_configuration(self):
+        """The object which describes the authentication configuration details for calling the API.
+        Basic and PKCS 12 client certificate are supported."""
+        return self.properties.get("authenticationConfiguration", ApiAuthenticationConfigurationBase())

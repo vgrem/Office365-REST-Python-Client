@@ -141,7 +141,8 @@ class Site(BaseItem):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
-                "contentTypes": self.content_types
+                "contentTypes": self.content_types,
+                "siteCollection": self.site_collection
             }
             default_value = property_mapping.get(name, None)
         return super(Site, self).get_property(name, default_value)
