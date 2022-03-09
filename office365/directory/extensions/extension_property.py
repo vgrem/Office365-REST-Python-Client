@@ -1,6 +1,6 @@
 # coding=utf-8
 from office365.directory.directory_object import DirectoryObject
-from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.types.string_collection import StringCollection
 
 
 class ExtensionProperty(DirectoryObject):
@@ -54,4 +54,4 @@ class ExtensionProperty(DirectoryObject):
         Device
         Application
         """
-        return self.properties.get("targetObjects", ClientValueCollection(str))
+        return self.properties.get("targetObjects", StringCollection())

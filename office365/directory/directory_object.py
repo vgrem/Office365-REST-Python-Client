@@ -1,7 +1,7 @@
 from office365.entity import Entity
 from office365.runtime.client_result import ClientResult
-from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.types.string_collection import StringCollection
 
 
 class DirectoryObject(Entity):
@@ -13,7 +13,7 @@ class DirectoryObject(Entity):
         This function is transitive.
 
         :type security_enabled_only: bool"""
-        result = ClientResult(self.context, ClientValueCollection(str))
+        result = ClientResult(self.context, StringCollection())
         payload = {
             "securityEnabledOnly": security_enabled_only
         }

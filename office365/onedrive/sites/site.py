@@ -11,6 +11,7 @@ from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.permissions.permission import Permission
 from office365.onedrive.sharepoint_ids import SharePointIds
 from office365.onedrive.sites.site_collection import SiteCollection
+from office365.onedrive.termstore.store import Store
 from office365.onenote.onenote import Onenote
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
@@ -138,11 +139,26 @@ class Site(BaseItem):
         return self.properties.get('onenote',
                                    Onenote(self.context, ResourcePath("onenote", self.resource_path)))
 
+    @property
+    def term_store(self):
+        """The default termStore under this site."""
+        return self.properties.get('termStore',
+                                   Store(self.context, ResourcePath("termStore", self.resource_path)))
+
+    @property
+    def term_stores(self):
+        """The collection of termStores under this site."""
+        return self.properties.get('termStores',
+                                   EntityCollection(self.context, Store,
+                                                    ResourcePath("termStores", self.resource_path)))
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "contentTypes": self.content_types,
-                "siteCollection": self.site_collection
+                "siteCollection": self.site_collection,
+                "termStore": self.term_store,
+                "termStores": self.term_stores
             }
             default_value = property_mapping.get(name, None)
         return super(Site, self).get_property(name, default_value)
@@ -151,5 +167,6 @@ class Site(BaseItem):
         super(Site, self).set_property(name, value, persist_changes)
         if name == "id":
             if self.resource_path.name == "root" or isinstance(self.resource_path, SitePath):
-                self._resource_path = ResourcePath(value, self.resource_path.parent)
+                # self._resource_path = ResourcePath(value, self.resource_path.parent)
+                self._resource_path.name = value
         return self

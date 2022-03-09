@@ -6,6 +6,23 @@ def _normalize(key, value):
 
 class QueryOptions(object):
 
+    @staticmethod
+    def build(client_object, properties_to_include):
+        """
+        :param office365.runtime.client_object.ClientObject client_object: Client object
+        :param list[str] properties_to_include: The list of properties to include
+        """
+        query = QueryOptions()
+        for name in properties_to_include:
+            val = client_object.get_property(name)
+            from office365.runtime.client_object import ClientObject
+            from office365.runtime.client_object_collection import ClientObjectCollection
+            if isinstance(client_object, ClientObjectCollection) or \
+                isinstance(val, ClientObject) or name == "Properties":
+                query.expand.append(name)
+            query.select.append(name)
+        return query
+
     def __init__(self, select=None, expand=None, filter_expr=None, order_by=None, top=None, skip=None):
         """
         A query option is a set of query string parameters applied to a resource that can help control the amount

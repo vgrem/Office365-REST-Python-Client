@@ -8,6 +8,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.types.string_collection import StringCollection
 
 
 class Application(DirectoryObject):
@@ -134,7 +135,7 @@ class Application(DirectoryObject):
         if the application is multi-tenant. For more information see Application Objects and Service Principal Objects.
         The any operator is required for filter expressions on multi-valued properties.
         """
-        return self.properties.get('identifierUris', ClientValueCollection(str))
+        return self.properties.get('identifierUris', StringCollection())
 
     @property
     def signin_audience(self):

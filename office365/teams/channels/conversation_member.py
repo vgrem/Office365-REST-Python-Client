@@ -1,5 +1,5 @@
 from office365.entity import Entity
-from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.types.string_collection import StringCollection
 
 
 class ConversationMember(Entity):
@@ -8,6 +8,6 @@ class ConversationMember(Entity):
     @property
     def roles(self):
         """The roles for that user."""
-        return self.properties.get('roles', ClientValueCollection(str))
+        return self.properties.get('roles', StringCollection())
 
 

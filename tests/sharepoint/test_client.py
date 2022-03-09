@@ -2,6 +2,7 @@ from unittest import TestCase
 
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.types.string_collection import StringCollection
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
     SecondaryAdministratorsFieldsData
 from tests import test_site_url, test_client_credentials, test_user_credentials, settings, create_unique_name, \
@@ -103,7 +104,7 @@ class TestSharePointClient(TestCase):
         self.assertTrue(len(files_after), files_count_before)
 
     def test_14_get_entity_type_name(self):
-        str_col = ClientValueCollection(str, [])
+        str_col = StringCollection([])
         self.assertEqual(str_col.entity_type_name, "Collection(Edm.String)")
 
         type_item = SecondaryAdministratorsFieldsData(None, [])

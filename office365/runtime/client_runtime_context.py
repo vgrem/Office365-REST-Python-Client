@@ -63,14 +63,19 @@ class ClientRuntimeContext(object):
         """
         pass
 
-    def load(self, client_object, properties_to_retrieve=None):
+    def load(self, client_object, properties_to_retrieve=None, after_loaded=None):
         """Prepare retrieval query
 
         :type properties_to_retrieve: list[str] or None
         :type client_object: office365.runtime.client_object.ClientObject
+        :type after_loaded: (any) -> None
         """
         qry = ReadEntityQuery(client_object, properties_to_retrieve)
         self.add_query(qry)
+        if callable(after_loaded):
+            def _action():
+                after_loaded(client_object)
+            self.after_query_execute(qry, _action)
         return qry
 
     def before_execute(self, action, once=True, *args, **kwargs):

@@ -64,3 +64,11 @@ class List(BaseItem):
         return self.get_property('subscriptions',
                                  EntityCollection(self.context, Subscription,
                                                   ResourcePath("subscriptions", self.resource_path)))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "contentTypes": self.content_types
+            }
+            default_value = property_mapping.get(name, None)
+        return super(List, self).get_property(name, default_value)
