@@ -12,4 +12,4 @@ class ResourcePath(ClientValue):
         return "SP.ResourcePath"
 
     def __str__(self):
-        return "DecodedUrl='{0}'".format(self.DecodedUrl)
+        return str(self.DecodedUrl)

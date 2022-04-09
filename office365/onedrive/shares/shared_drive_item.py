@@ -3,7 +3,7 @@ from office365.onedrive.permissions.permission import Permission
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.lists.list import List
 from office365.onedrive.listitems.list_item import ListItem
-from office365.onedrive.internal.paths.root_resource_path import RootResourcePath
+from office365.onedrive.internal.paths.root_path import RootPath
 from office365.onedrive.sites.site import Site
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -36,7 +36,7 @@ class SharedDriveItem(BaseItem):
         Deprecated -- use driveItem instead.
         """
         return self.properties.get('root',
-                                   DriveItem(self.context, RootResourcePath(self.resource_path)))
+                                   DriveItem(self.context, RootPath(self.resource_path)))
 
     @property
     def site(self):

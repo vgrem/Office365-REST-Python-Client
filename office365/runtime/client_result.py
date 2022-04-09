@@ -7,6 +7,7 @@ class ClientResult(object):
 
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         :type default_value: int or str or bool or office365.runtime.client_value.ClientValue
+            or office365.runtime.client_object.ClientObject
         """
         self._context = context
         self._value = default_value

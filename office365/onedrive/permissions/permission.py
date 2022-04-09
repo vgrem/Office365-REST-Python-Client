@@ -8,6 +8,7 @@ from office365.onedrive.permissions.sharing_link import SharingLink
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.types.string_collection import StringCollection
 
 
 class Permission(Entity):
@@ -23,7 +24,7 @@ class Permission(Entity):
         """
         payload = {
             "recipients": ClientValueCollection(DriveRecipient, [DriveRecipient.from_email(r) for r in recipients]),
-            "roles": ClientValueCollection(str, roles)
+            "roles": StringCollection(roles)
         }
         return_type = EntityCollection(self.context, Permission, ResourcePath("permissions", self.resource_path))
         qry = ServiceOperationQuery(self, "grant", None, payload, None, return_type)
@@ -53,7 +54,7 @@ class Permission(Entity):
     @property
     def roles(self):
         """The type of permission, e.g. read. See below for the full list of roles. Read-only."""
-        return self.properties.get('roles', ClientValueCollection(str))
+        return self.properties.get('roles', StringCollection())
 
     @roles.setter
     def roles(self, value):
@@ -62,7 +63,7 @@ class Permission(Entity):
 
         :type value: list[str]
         """
-        self.set_property("roles", ClientValueCollection(str, value))
+        self.set_property("roles", StringCollection(value))
 
     @property
     def share_id(self):

@@ -46,6 +46,19 @@ from office365.sharepoint.webs.regional_settings import RegionalSettings
 from office365.sharepoint.webs.web_information_collection import WebInformationCollection
 from office365.sharepoint.webs.web_template_collection import WebTemplateCollection
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
+from office365.runtime.compat import urlparse
+
+
+def _create_safe_url(context, url, relative=True):
+    """
+    :type context: office365.sharepoint.client_context.ClientContext
+    :type url: str
+    :type relative: bool
+    """
+    site_path = urlparse(context.base_url).path
+    root_site_url = context.base_url.replace(site_path, "")
+    result = url if url.startswith(site_path) else "/".join([site_path, url])
+    return result if relative else "".join([root_site_url, result])
 
 
 class Web(SecurableObject):
@@ -298,9 +311,10 @@ class Web(SecurableObject):
         """
         :type decoded_url: str
         """
+        safe_decoded_url = _create_safe_url(self.context, decoded_url)
         return_list = List(self.context)
         self.lists.add_child(return_list)
-        qry = ServiceOperationQuery(self, "GetListUsingPath", SPResPath(decoded_url), None, None, return_list)
+        qry = ServiceOperationQuery(self, "GetListUsingPath", SPResPath(safe_decoded_url), None, None, return_list)
         self.context.add_query(qry)
         return return_list
 
@@ -347,7 +361,7 @@ class Web(SecurableObject):
         """
         result = ClientResult(context)
         payload = {
-            "url": context.base_url + url,
+            "url": _create_safe_url(context, url, False),
             "isEditLink": is_edit_link
         }
         qry = ServiceOperationQuery(context.web, "CreateAnonymousLink", None, payload, None, result)
@@ -504,13 +518,14 @@ class Web(SecurableObject):
         return List(self.context,
                     ServiceOperationPath("defaultDocumentLibrary", None, self.resource_path))
 
-    def get_list(self, url):
-        """Get list by url
+    def get_list(self, path):
+        """Get list by path
 
-        :type url: str
+        :type path: str
         """
+        safe_path = _create_safe_url(self.context, path)
         return List(self.context,
-                    ServiceOperationPath("getList", [url], self.resource_path))
+                    ServiceOperationPath("getList", [safe_path], self.resource_path))
 
     def get_changes(self, query):
         """Returns the collection of all changes from the change log that have occurred within the scope of the site,

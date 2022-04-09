@@ -29,6 +29,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.types.string_collection import StringCollection
 from office365.teams.team_collection import TeamCollection
 from office365.teams.user_teamwork import UserTeamwork
 
@@ -46,7 +47,7 @@ class User(DirectoryObject):
         """
         params = {
             "addLicenses": ClientValueCollection(AssignedLicense, add_licenses),
-            "removeLicenses": ClientValueCollection(str, remove_licenses)
+            "removeLicenses": StringCollection(remove_licenses)
         }
         qry = ServiceOperationQuery(self, "assignLicense", None, params, None, self)
         self.context.add_query(qry)

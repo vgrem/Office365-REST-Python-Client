@@ -10,7 +10,7 @@ class BaseEntity(ClientObject):
         SharePoint specific entity
 
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
-        :param office365.runtime.client_path.ClientPath resource_path: Resource Path
+        :param office365.runtime.paths.resource_path.ResourcePath resource_path: Resource Path
         :param str namespace: default namespace
         """
         super(BaseEntity, self).__init__(context, resource_path, parent_collection, namespace)

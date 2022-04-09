@@ -1,4 +1,4 @@
-from office365.onedrive.internal.queries.upload_session_query import UploadSessionQuery
+from office365.onedrive.internal.queries.upload_session import UploadSessionQuery
 from office365.outlook.mail.attachments.attachment_item import AttachmentItem
 from office365.outlook.mail.attachments.attachment_type import AttachmentType
 from office365.runtime.compat import parse_query_string

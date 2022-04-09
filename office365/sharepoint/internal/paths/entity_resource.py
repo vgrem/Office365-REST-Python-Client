@@ -1,7 +1,8 @@
 from office365.runtime.paths.resource_path import ResourcePath
 
 
-class EntityResourcePath(ResourcePath):
+class EntityPath(ResourcePath):
+    """Path for addressing a single entity"""
 
     @property
     def segments(self):

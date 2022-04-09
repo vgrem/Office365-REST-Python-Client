@@ -14,6 +14,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.teams.internal.paths.team import TeamPath
 from office365.teams.team import Team
 
 
@@ -83,7 +84,7 @@ class Group(DirectoryObject):
 
     def add_team(self):
         """Create a new team under a group."""
-        team = Team(self.context, ResourcePath("team", self.resource_path))
+        team = Team(self.context, TeamPath(self.resource_path))
         team._parent_collection = self.parent_collection
         qry = ServiceOperationQuery(self, "team", None, team, None, team)
         self.context.add_query(qry)

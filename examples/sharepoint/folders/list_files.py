@@ -19,7 +19,11 @@ def enum_folder(parent_folder, fn):
 
 
 def print_file(f):
+    """
+    :type f: File
+    """
     print(f.properties['ServerRelativeUrl'])
+    #print(f.server_relative_path)
 
 
 target_folder_url = "Shared Documents/Archive"

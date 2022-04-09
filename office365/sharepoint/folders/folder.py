@@ -1,5 +1,4 @@
 from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.paths.resource_path import ResourcePath
@@ -8,7 +7,6 @@ from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.change_collection import ChangeCollection
 from office365.sharepoint.changes.change_query import ChangeQuery
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
-from office365.sharepoint.internal.paths.entity_resource import EntityResourcePath
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.storagemetrics.storage_metrics import StorageMetrics
 from office365.sharepoint.utilities.move_copy_options import MoveCopyOptions

@@ -26,7 +26,7 @@ class ClientValue(object):
         """
         :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat or None
         """
-        json = dict((k, v) for k, v in vars(self).items() if v is not None)
+        json = {k: v for k, v in vars(self).items() if v is not None}
         for n, v in json.items():
             if isinstance(v, ClientValue):
                 json[n] = v.to_json(json_format)

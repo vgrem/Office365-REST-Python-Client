@@ -1,7 +1,7 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
-from office365.onedrive.termstore.group import Group
-from office365.onedrive.termstore.set import Set
+from office365.onedrive.termstore.group import Group, GroupCollection
+from office365.onedrive.termstore.set import Set, SetCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.string_collection import StringCollection
 
@@ -47,13 +47,13 @@ class Store(Entity):
     def groups(self):
         """Collection of all groups available in the term store."""
         return self.properties.get('groups',
-                                   EntityCollection(self.context, Group, ResourcePath("groups", self.resource_path)))
+                                   GroupCollection(self.context, ResourcePath("groups", self.resource_path)))
 
     @property
     def sets(self):
         """Collection of all sets available in the term store."""
         return self.properties.get('sets',
-                                   EntityCollection(self.context, Set, ResourcePath("sets", self.resource_path)))
+                                   SetCollection(self.context, ResourcePath("sets", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:

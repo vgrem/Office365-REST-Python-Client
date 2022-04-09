@@ -1,7 +1,7 @@
 from office365.runtime.client_result import ClientResult
-from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.types.string_collection import StringCollection
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.sites.language_collection import LanguageCollection
 
@@ -30,7 +30,7 @@ class ServerSettings(BaseEntity):
         :type context: office365.sharepoint.client_context.ClientContext
         """
         binding_type = ServerSettings(context)
-        return_type = ClientResult(context, ClientValueCollection(str))
+        return_type = ClientResult(context, StringCollection())
         qry = ServiceOperationQuery(binding_type, "GetBlockedFileExtensions", None, None, None, return_type)
         qry.static = True
         context.add_query(qry)

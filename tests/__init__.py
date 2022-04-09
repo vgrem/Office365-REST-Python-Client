@@ -48,6 +48,7 @@ test_user_credentials = UserCredential(settings.get('user_credentials', 'usernam
                                        settings.get('user_credentials', 'password'))
 
 test_site_url = settings.get('default', 'site_url')
+test_root_site_url = settings.get('default', 'root_site_url')
 test_team_site_url = settings.get('default', 'team_site_url')
 test_admin_site_url = settings.get('default', 'admin_site_url')
 

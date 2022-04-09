@@ -13,7 +13,7 @@ class ClientObject(object):
         Base client object which define named properties and relationships of an entity
 
         :type parent_collection: office365.runtime.client_object_collection.ClientObjectCollection or None
-        :type resource_path: office365.runtime.client_path.ClientPath or None
+        :type resource_path: office365.runtime.paths.resource_path.ResourcePath or None
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         :type namespace: str
         """

@@ -5,13 +5,13 @@ from office365.onedrive.driveitems.image import Image
 from office365.onedrive.driveitems.item_preview_info import ItemPreviewInfo
 from office365.onedrive.driveitems.photo import Photo
 from office365.onedrive.driveitems.special_folder import SpecialFolder
-from office365.onedrive.internal.queries.upload_content_query import create_upload_content_query
+from office365.onedrive.internal.queries.upload_content import create_upload_content_query
 from office365.base_item import BaseItem
 from office365.onedrive.analytics.item_activity_stat import ItemActivityStat
 from office365.onedrive.analytics.item_analytics import ItemAnalytics
 from office365.onedrive.permissions.permission import Permission
 from office365.entity_collection import EntityCollection
-from office365.onedrive.internal.paths.children_resource_path import ChildrenResourcePath
+from office365.onedrive.internal.paths.children_path import ChildrenPath
 from office365.onedrive.driveitems.conflict_behavior import ConflictBehavior
 from office365.onedrive.shares.shared import Shared
 from office365.onedrive.versions.drive_item_version import DriveItemVersion
@@ -20,11 +20,11 @@ from office365.onedrive.files.fileSystemInfo import FileSystemInfo
 from office365.onedrive.folders.folder import Folder
 from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.driveitems.publication_facet import PublicationFacet
-from office365.onedrive.internal.paths.root_resource_path import RootResourcePath
+from office365.onedrive.internal.paths.root_path import RootPath
 from office365.onedrive.driveitems.thumbnail_set import ThumbnailSet
 from office365.onedrive.upload_session import UploadSession
 from office365.onedrive.workbooks.workbook import Workbook
-from office365.onedrive.internal.paths.resource_path_url import ResourcePathUrl
+from office365.onedrive.internal.paths.url_path import UrlPath
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.create_entity_query import CreateEntityQuery
@@ -43,7 +43,7 @@ class DriveItem(BaseItem):
 
         :type url_path: str
         """
-        return DriveItem(self.context, ResourcePathUrl(url_path, self.resource_path), self.children)
+        return DriveItem(self.context, UrlPath(url_path, self.resource_path), self.children)
 
     def create_link(self, link_type, scope="", expiration_datetime=None, password=None, message=None):
         """
@@ -133,7 +133,7 @@ class DriveItem(BaseItem):
         :param str source_path: Local file path
         :param int chunk_size: chunk size
         """
-        from office365.onedrive.internal.queries.file_upload_query import ResumableFileUpload
+        from office365.onedrive.internal.queries.file_upload import ResumableFileUpload
         upload_query = ResumableFileUpload(self, source_path, chunk_size, chunk_uploaded)
         self.children.add_child(upload_query.return_type)
         self.context.add_query(upload_query)
@@ -176,7 +176,7 @@ class DriveItem(BaseItem):
     def get_content(self):
         """Download the contents of the primary stream (file) of a DriveItem. Only driveItems with the file property
         can be downloaded. """
-        from office365.onedrive.internal.queries.download_content_query import create_download_content_query
+        from office365.onedrive.internal.queries.download_content import create_download_content_query
         qry = create_download_content_query(self)
         self.context.add_query(qry)
         return qry.return_type
@@ -203,7 +203,7 @@ class DriveItem(BaseItem):
         :type chunk_downloaded: (int)->None or None
         :type chunk_size: int
         """
-        from office365.onedrive.internal.queries.download_content_query import create_download_session_content_query
+        from office365.onedrive.internal.queries.download_content import create_download_session_content_query
         qry = create_download_session_content_query(self)
 
         def _construct_download_request(request):
@@ -231,7 +231,7 @@ class DriveItem(BaseItem):
 
         :param str name: Folder name
         """
-        return_type = DriveItem(self.context, None)
+        return_type = DriveItem(self.context)
         self.children.add_child(return_type)
         payload = {
             "name": name,
@@ -249,7 +249,7 @@ class DriveItem(BaseItem):
         :type format_name: str
         :rtype: ClientResult
         """
-        from office365.onedrive.internal.queries.download_content_query import create_download_content_query
+        from office365.onedrive.internal.queries.download_content import create_download_content_query
         qry = create_download_content_query(self, format_name)
         self.context.add_query(qry)
         return qry.return_type
@@ -502,7 +502,7 @@ class DriveItem(BaseItem):
         :rtype: EntityCollection
         """
         return self.get_property('children',
-                                 EntityCollection(self.context, DriveItem, ChildrenResourcePath(self.resource_path)))
+                                 EntityCollection(self.context, DriveItem, ChildrenPath(self.resource_path, "items")))
 
     @property
     def listItem(self):
@@ -581,24 +581,8 @@ class DriveItem(BaseItem):
     def set_property(self, name, value, persist_changes=True):
         if name == "id":
             if self._resource_path is None:
-                self._resource_path = self._resolve_path(value)
-            elif isinstance(self._resource_path, ResourcePathUrl):
-                self._resource_path = self._resolve_path(value)
+                self._resource_path = self.parent_collection.resource_path.normalize(value)
+            elif isinstance(self._resource_path, UrlPath):
+                self._resource_path = self._resource_path.normalize(value)
         super(DriveItem, self).set_property(name, value, persist_changes)
         return self
-
-    def _resolve_path(self, item_id):
-        resolved = False
-        parent_path = self.parent_collection.resource_path
-        while not resolved:
-            if isinstance(parent_path, ChildrenResourcePath) or \
-                isinstance(parent_path, ResourcePathUrl) or \
-                isinstance(parent_path, RootResourcePath):
-                parent_path = parent_path.parent
-            else:
-                if parent_path.parent is not None and parent_path.parent.name == "items":
-                    parent_path = parent_path.parent
-                else:
-                    parent_path = ResourcePath("items", parent_path)
-                resolved = True
-        return ResourcePath(item_id, parent_path)

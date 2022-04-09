@@ -1,7 +1,7 @@
-from office365.onedrive.internal.queries.upload_session_query import UploadSessionQuery
+from office365.onedrive.internal.queries.upload_session import UploadSessionQuery
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.driveitems.drive_item_uploadable_properties import DriveItemUploadableProperties
-from office365.onedrive.internal.paths.resource_path_url import ResourcePathUrl
+from office365.onedrive.internal.paths.url_path import UrlPath
 
 
 class ResumableFileUpload(UploadSessionQuery):
@@ -16,11 +16,11 @@ class ResumableFileUpload(UploadSessionQuery):
 
     @property
     def binding_type(self):
-        return DriveItem(self.context, ResourcePathUrl(self.file_name, self._binding_type.resource_path))
+        return DriveItem(self.context, UrlPath(self.file_name, self._binding_type.resource_path))
 
     @property
     def return_type(self):
         if self._return_type is None:
             self._return_type = DriveItem(self.context,
-                                          ResourcePathUrl(self.file_name, self._binding_type.resource_path))
+                                          UrlPath(self.file_name, self._binding_type.resource_path))
         return self._return_type

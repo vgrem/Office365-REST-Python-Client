@@ -18,6 +18,6 @@ class ReadEntityQuery(ClientQuery):
         value = super(ReadEntityQuery, self).url
         if self._properties_to_include is not None:
             value += "?" + QueryOptions.build(self.binding_type, self._properties_to_include).to_url()
-        elif self.binding_type.query_options is not None:
+        elif not self.binding_type.query_options.is_empty:
             value += "?" + self.binding_type.query_options.to_url()
         return value

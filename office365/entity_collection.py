@@ -19,6 +19,7 @@ class EntityCollection(ClientObjectCollection):
         return self._item_type(self.context, ResourcePath(key, self.resource_path))
 
     def new(self, **kwargs):
+        """Create a resource"""
         return self.create_typed_object(properties=kwargs, persist_changes=True)
 
     def add(self, **kwargs):

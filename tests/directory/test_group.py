@@ -21,7 +21,7 @@ class TestGraphGroup(GraphTestCase):
             grp_name = "Group_" + uuid.uuid4().hex
             properties = GroupProfile(grp_name)
             properties.securityEnabled = False
-            properties.mailEnabled = True
+            properties.mailEnabled = False
             properties.groupTypes = ["Unified"]
             new_group = self.client.groups.add(properties).execute_query()
             self.assertIsNotNone(new_group.id)

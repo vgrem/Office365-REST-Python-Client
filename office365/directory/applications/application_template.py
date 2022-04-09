@@ -1,5 +1,5 @@
 from office365.entity import Entity
-from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.types.string_collection import StringCollection
 
 
 class ApplicationTemplate(Entity):
@@ -22,4 +22,4 @@ class ApplicationTemplate(Entity):
         Health, Human resources, IT infrastructure, Mail, Management, Marketing, Media, Productivity,
         Project management, Telecommunications, Tools, Travel, and Web design & hosting.
         """
-        return self.properties.get("categories", ClientValueCollection(str))
+        return self.properties.get("categories", StringCollection())

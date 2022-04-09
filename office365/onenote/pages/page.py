@@ -5,10 +5,10 @@ from office365.onenote.notebooks.notebook import Notebook
 from office365.onenote.pages.page_links import PageLinks
 from office365.onenote.sections.section import OnenoteSection
 from office365.runtime.client_result import ClientResult
-from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.types.string_collection import StringCollection
 
 
 class OnenotePageCollection(EntityCollection):
@@ -71,7 +71,7 @@ class OnenotePage(OnenoteEntitySchemaObjectModel):
         if it 's installed. The oneNoteWebUrl link opens the page in OneNote on the web. Read-only.
 
         """
-        return self.properties.get("userTags", ClientValueCollection(str))
+        return self.properties.get("userTags", StringCollection())
 
     @property
     def parent_notebook(self):

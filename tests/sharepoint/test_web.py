@@ -25,12 +25,12 @@ class TestSharePointWeb(SPTestCase):
         self.__class__.target_user = current_user
 
     def test2_get_web_from_page_url(self):
-        page_url = "{site_url}SitePages/Home.aspx".format(site_url=test_site_url)
+        page_url = "{site_url}/SitePages/Home.aspx".format(site_url=test_site_url)
         result = Web.get_web_url_from_page_url(self.client, page_url).execute_query()
         self.assertIsNotNone(result.value)
 
     def test3_get_list_item_by_url(self):
-        page_url = "{site_url}SitePages/Home.aspx".format(site_url=test_site_url)
+        page_url = "{site_url}/SitePages/Home.aspx".format(site_url=test_site_url)
         target_item = self.client.web.get_list_item(page_url).execute_query()
         self.assertIsNotNone(target_item.resource_path)
 
@@ -119,7 +119,7 @@ class TestSharePointWeb(SPTestCase):
         self.assertGreaterEqual(len(templates), 0)
 
     def test_20_ensure_folder_path(self):
-        folder_path = "/Shared Documents/Archive/2020/12"
+        folder_path = "Shared Documents/Archive/2020/12"
         folder_new_nested = self.client.web.ensure_folder_path(folder_path).execute_query()
         folder_new_nested = self.client.web.get_folder_by_server_relative_url(folder_path).get().execute_query()
         self.assertTrue(folder_new_nested.properties["Exists"])

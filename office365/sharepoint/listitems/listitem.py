@@ -31,7 +31,7 @@ class ListItem(SecurableObject):
         """
 
         :type context: office365.sharepoint.client_context.ClientContext
-        :type resource_path: office365.runtime.client_path.ClientPath or None
+        :type resource_path: office365.runtime.paths.resource_path.ResourcePath or None
         :type parent_list: office365.sharepoint.lists.list.List or None
         """
         super(ListItem, self).__init__(context, resource_path)

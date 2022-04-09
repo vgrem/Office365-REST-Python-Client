@@ -13,6 +13,6 @@ class GroupProfile(ClientValue):
         self.description = description
         self.mailEnabled = mail_enabled
         self.securityEnabled = security_enabled
-        self.owners = []
-        self.members = []
-        self.groupTypes = []
+        self.owners = None
+        self.members = None
+        self.groupTypes = None

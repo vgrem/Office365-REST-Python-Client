@@ -6,7 +6,7 @@ from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.portal.site_status import SiteStatus
 from office365.sharepoint.portal.site_creation_request import SPSiteCreationRequest
 from office365.sharepoint.portal.site_manager import SPSiteManager
-from tests import test_user_credentials, test_site_url, test_admin_site_url
+from tests import test_user_credentials, test_site_url, test_admin_site_url, test_root_site_url
 
 
 class TestCommunicationSite(TestCase):
@@ -15,13 +15,13 @@ class TestCommunicationSite(TestCase):
     @classmethod
     def setUpClass(cls):
         super(TestCommunicationSite, cls).setUpClass()
-        ctx = ClientContext(test_site_url).with_credentials(test_user_credentials)
+        ctx = ClientContext(test_root_site_url).with_credentials(test_user_credentials)
         cls.site_manager = SPSiteManager(ctx)
         cls.client = ctx
 
     def test1_create_site(self):
         current_user = self.client.web.current_user.get().execute_query()
-        site_url = "{0}sites/{1}".format(test_site_url, uuid.uuid4().hex)
+        site_url = "{0}/sites/{1}".format(test_site_url, uuid.uuid4().hex)
         request = SPSiteCreationRequest("CommSite123", site_url, current_user.user_principal_name)
         result = self.site_manager.create(request).execute_query()
         self.assertIsNotNone(result.value.SiteStatus)

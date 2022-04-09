@@ -1,6 +1,6 @@
 import os
 
-from tests import test_client_credentials, create_unique_name
+from tests import test_client_credentials, create_unique_name, test_root_site_url
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.changes.change_query import ChangeQuery
@@ -65,7 +65,7 @@ class TestSharePointFile(SPTestCase):
         self.__class__.target_file = files[0]
 
     def test4_get_file_from_absolute_url(self):
-        file_abs_url = self.client.base_url + self.__class__.target_file.serverRelativeUrl
+        file_abs_url = test_root_site_url + self.__class__.target_file.serverRelativeUrl
         file = File.from_url(file_abs_url).with_credentials(test_client_credentials).get().execute_query()
         self.assertIsNotNone(file.serverRelativeUrl)
 

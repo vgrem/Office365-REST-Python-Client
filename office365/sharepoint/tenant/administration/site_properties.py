@@ -1,5 +1,5 @@
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.internal.paths.entity_resource import EntityResourcePath
+from office365.sharepoint.internal.paths.entity_resource import EntityPath
 
 
 class SiteProperties(BaseEntity):
@@ -85,7 +85,7 @@ class SiteProperties(BaseEntity):
         def _ensure_site_url():
             ctx = self.context.clone(self.url)
             site = ctx.site.select(["Id"]).get().execute_query()
-            self._resource_path = EntityResourcePath(site.id, self._parent_collection.resource_path)
+            self._resource_path = EntityPath(site.id, self._parent_collection.resource_path)
             action()
 
         if self._resource_path is None:
