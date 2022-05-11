@@ -19,44 +19,7 @@ Office 365 & Microsoft Graph library for Python
 
 # Installation
 
-Use pip:
 
-```
-pip install Office365-REST-Python-Client
-```
-
-### Note 
->
-
->Alternatively the _latest_ version could be directly installed via GitHub:
->```
->pip install git+https://github.com/vgrem/Office365-REST-Python-Client.git
->```
-
-
-# Working with SharePoint API
-
-The list of supported API versions: 
--   [SharePoint 2013 REST API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and above 
--   SharePoint Online & OneDrive for Business REST API
-
-#### Authentication
-
-The following auth flows are supported:
-
-- app principals flow: 
-  `ClientContext.with_credentials(client_credentials)`
-  
-  Usage:
-  ``` 
-  client_credentials = ClientCredential('{client_id}','{client_secret}')
-  ctx = ClientContext('{url}').with_credentials(client_credentials)
-  ```
-  Documentation: refer [Granting access using SharePoint App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs) for a details  
-  
-  Example: [connect_with_app_principal.py](examples/sharepoint/connect_with_app_only_principal.py)
-  
-- user credentials flow: `ClientContext.with_credentials(user_credentials)`
 
   Usage:
   ``` 
