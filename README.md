@@ -18,6 +18,7 @@ Office 365 & Microsoft Graph library for Python
 [![Build Status](https://travis-ci.com/vgrem/Office365-REST-Python-Client.svg?branch=master)](https://travis-ci.com/vgrem/Office365-REST-Python-Client)
 
 # Installation
+NEW for NEW_VIET
 
 
 
