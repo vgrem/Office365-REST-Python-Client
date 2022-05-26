@@ -22,15 +22,27 @@ class ClientValue(object):
     def get_property(self, k):
         return getattr(self, k)
 
+    def __iter__(self):
+        for n, v in vars(self).items():
+            yield n, v
+
     def to_json(self, json_format=None):
         """
         :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat or None
         """
-        json = {k: v for k, v in vars(self).items() if v is not None}
+
+        def include(val):
+            from office365.runtime.client_value_collection import ClientValueCollection
+            if val is None:
+                return False
+            elif isinstance(val, ClientValueCollection) and len(val) == 0:
+                return False
+            return True
+
+        json = {k: v for k, v in self if include(v)}
         for n, v in json.items():
             if isinstance(v, ClientValue):
                 json[n] = v.to_json(json_format)
-
         if isinstance(json_format, JsonLightFormat) and json_format.include_control_information() and self.entity_type_name is not None:
             json[json_format.metadata_type_tag_name] = {'type': self.entity_type_name}
 

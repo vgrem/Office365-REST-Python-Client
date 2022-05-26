@@ -23,8 +23,8 @@ setup(
     extras_require={
         'NtlmProvider': ["requests_ntlm"]
     },
-    tests_require=['nose', 'adal'],
-    test_suite='nose.collector',
+    tests_require=['pytest', 'adal'],
+    test_suite='tests',
     license="MIT",
     keywords="git",
     classifiers=[

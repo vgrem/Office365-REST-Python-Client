@@ -1,5 +1,5 @@
 from office365.runtime.client_value import ClientValue
-from office365.sharepoint.search.queryResult import QueryResult
+from office365.sharepoint.search.query_result import QueryResult
 
 
 class SearchResult(ClientValue):

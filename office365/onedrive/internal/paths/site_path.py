@@ -9,7 +9,8 @@ class SitePath(ResourcePath):
     def segments(self):
         if is_absolute_url(self.name):
             url_info = urlparse(self.name)
-            return [self.delimiter, url_info.hostname, ":", url_info.path[:-1]]
+            safe_path = url_info.path[:-1] if url_info.path.endswith("/") else url_info.path
+            return [self.delimiter, url_info.hostname, ":", safe_path]
         else:
             return super(SitePath, self).segments
 

@@ -38,7 +38,7 @@ class ClientValueCollection(ClientValue):
         """
         :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat or None
         """
-        json = [item for item in self._data]
+        json = [v for v in self]
         for i, v in enumerate(json):
             if isinstance(v, ClientValue):
                 json[i] = v.to_json(json_format)

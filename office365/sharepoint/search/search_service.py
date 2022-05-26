@@ -4,12 +4,13 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.search.query.popularTenantQuery import PopularTenantQuery
+from office365.sharepoint.search.query.popular_tenant_query import PopularTenantQuery
 from office365.sharepoint.search.query.querySuggestionResults import QuerySuggestionResults
-from office365.sharepoint.search.searchResult import SearchResult
+from office365.sharepoint.search.search_result import SearchResult
 
 
 class SearchService(BaseEntity):
+    """SearchService exposes OData Service Operations."""
 
     def __init__(self, context):
         super(SearchService, self).__init__(context, ResourcePath("Microsoft.Office.Server.Search.REST.SearchService"))
@@ -46,7 +47,7 @@ class SearchService(BaseEntity):
     def query(self, search_request):
         """The operation is used to retrieve search results by using the HTTP protocol with the GET method.
 
-        :type search_request: office365.sharepoint.search.searchRequest.SearchRequest
+        :type search_request: office365.sharepoint.search.search_request.SearchRequest
         """
         result = ClientResult(self.context, SearchResult())
         qry = ServiceOperationQuery(self, "query", search_request.to_json(), None, "query", result)
@@ -65,7 +66,7 @@ class SearchService(BaseEntity):
         """The operation is used to retrieve search results through the use of the HTTP protocol
         with method type POST.
 
-        :type request: office365.sharepoint.search.searchRequest.SearchRequest"""
+        :type request: office365.sharepoint.search.search_request.SearchRequest"""
         result = ClientResult(self.context, SearchResult())
         qry = ServiceOperationQuery(self, "postquery", None, request, "request", result)
         self.context.add_query(qry)
@@ -98,4 +99,7 @@ class SearchService(BaseEntity):
         return result
 
     def auto_completions(self):
+        """
+        The operation is used to retrieve auto completion results by using the HTTP protocol with the GET method.
+        """
         pass

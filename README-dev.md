@@ -22,7 +22,7 @@ This file is in .gitignore, so it will never be committed.
 
 ```bash
 $ . .env   # source it to export the variable
-$ nose2 ...  # run the test(s) you need...
+$ pytest ...  # run the test(s) you need...
 ```
 
 #### Configure Tenant
