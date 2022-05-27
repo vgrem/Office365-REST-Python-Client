@@ -3,7 +3,7 @@ from random import randint
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.files.file import File
-from office365.sharepoint.recyclebin.recycleBinItemCollection import RecycleBinItemCollection
+from office365.sharepoint.recyclebin.item_collection import RecycleBinItemCollection
 
 
 class TestSharePointRecycleBin(SPTestCase):

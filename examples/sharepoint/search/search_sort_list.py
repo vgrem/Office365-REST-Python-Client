@@ -1,6 +1,3 @@
-import json
-
-from office365.runtime.types.string_collection import StringCollection
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.search.query.sort import Sort
 from office365.sharepoint.search.search_request import SearchRequest
@@ -10,8 +7,12 @@ from tests import test_site_url, test_user_credentials
 ctx = ClientContext(test_site_url).with_credentials(test_user_credentials)
 search = SearchService(ctx)
 
-select_props = StringCollection(["Path", "LastModifiedTime"])
-request = SearchRequest("IsDocument:1", SelectProperties=select_props)
-request.SortList.add(Sort("ModifiedBy", 1))
+request = SearchRequest(query_text="IsDocument:1",
+                        sort_list=[Sort("LastModifiedTime", 1)],
+                        select_properties=["Path", "LastModifiedTime"],
+                        row_limit=20)
 result = search.post_query(request).execute_query()
 relevant_results = result.value.PrimaryQueryResult.RelevantResults
+for r in relevant_results.get('Table').get('Rows').items():
+    cells = r[1].get('Cells')
+    print(cells[1].get('Value'))

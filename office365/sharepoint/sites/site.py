@@ -12,7 +12,7 @@ from office365.sharepoint.portal.site_icon_manager import SiteIconManager
 from office365.sharepoint.portal.site_status import SiteStatus
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.publishing.communication_site import CommunicationSiteCreationRequest
-from office365.sharepoint.recyclebin.recycleBinItemCollection import RecycleBinItemCollection
+from office365.sharepoint.recyclebin.item_collection import RecycleBinItemCollection
 from office365.sharepoint.sites.site_health_summary import SiteHealthSummary
 from office365.sharepoint.sites.sph_site import SPHSite
 from office365.sharepoint.sites.usage_info import UsageInfo

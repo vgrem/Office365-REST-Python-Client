@@ -30,7 +30,7 @@ from office365.sharepoint.principal.group_collection import GroupCollection
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.principal.user_collection import UserCollection
 from office365.sharepoint.pushnotifications.push_notification_subscriber import PushNotificationSubscriber
-from office365.sharepoint.recyclebin.recycleBinItemCollection import RecycleBinItemCollection
+from office365.sharepoint.recyclebin.item_collection import RecycleBinItemCollection
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
 from office365.sharepoint.sharing.object_sharing_settings import ObjectSharingSettings
 from office365.sharepoint.sharing.sharing_link_data import SharingLinkData

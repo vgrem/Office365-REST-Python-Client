@@ -1,7 +1,7 @@
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.recyclebin.recycleBinItem import RecycleBinItem
+from office365.sharepoint.recyclebin.item import RecycleBinItem
 
 
 class RecycleBinItemCollection(BaseEntityCollection):

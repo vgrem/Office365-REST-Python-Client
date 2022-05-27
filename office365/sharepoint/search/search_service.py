@@ -5,7 +5,7 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.search.query.popular_tenant_query import PopularTenantQuery
-from office365.sharepoint.search.query.querySuggestionResults import QuerySuggestionResults
+from office365.sharepoint.search.query.suggestion_results import QuerySuggestionResults
 from office365.sharepoint.search.search_result import SearchResult
 
 
