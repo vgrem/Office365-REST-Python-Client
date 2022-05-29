@@ -2,8 +2,8 @@ from unittest import TestCase
 
 from office365.sharepoint.userprofiles.personPropertiesCollection import PersonPropertiesCollection
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.userprofiles.peopleManager import PeopleManager
-from office365.sharepoint.userprofiles.profileLoader import ProfileLoader
+from office365.sharepoint.userprofiles.people_manager import PeopleManager
+from office365.sharepoint.userprofiles.profile_loader import ProfileLoader
 from tests import test_user_credentials, test_team_site_url, test_user_principal_name
 
 

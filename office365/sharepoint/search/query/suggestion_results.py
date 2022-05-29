@@ -1,5 +1,14 @@
 from office365.runtime.client_value import ClientValue
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.types.string_collection import StringCollection
+
+
+class PersonalResultSuggestion(ClientValue):
+    pass
+
+
+class QuerySuggestionQuery(ClientValue):
+    pass
 
 
 class QuerySuggestionResults(ClientValue):
@@ -14,3 +23,6 @@ class QuerySuggestionResults(ClientValue):
             ShowPeopleNameSuggestions in properties input element is set to false.
         """
         self.PeopleNames = StringCollection(people_names)
+        self.PersonalResults = ClientValueCollection(PersonalResultSuggestion)
+        self.PopularResults = ClientValueCollection(PersonalResultSuggestion)
+        self.Queries = ClientValueCollection(QuerySuggestionQuery)

@@ -1,5 +1,5 @@
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.userprofiles.personProperties import PersonProperties
+from office365.sharepoint.userprofiles.person_properties import PersonProperties
 
 
 class PersonPropertiesCollection(BaseEntityCollection):

@@ -14,7 +14,7 @@ class User(Principal):
         site = Site(self.context)
 
         def _user_loaded():
-            from office365.sharepoint.userprofiles.peopleManager import PeopleManager
+            from office365.sharepoint.userprofiles.people_manager import PeopleManager
             people_manager = PeopleManager(self.context)
             person_props = people_manager.get_properties_for(self.login_name)
 

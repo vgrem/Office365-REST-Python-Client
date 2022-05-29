@@ -3,6 +3,7 @@ from office365.sharepoint.base_entity import BaseEntity
 
 
 class TenantSettings(BaseEntity):
+    """Specifies the tenant properties."""
 
     @staticmethod
     def current(context):

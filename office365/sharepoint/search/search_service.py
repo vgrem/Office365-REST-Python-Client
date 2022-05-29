@@ -1,11 +1,13 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.compat import is_string_type
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.search.query.popular_tenant_query import PopularTenantQuery
 from office365.sharepoint.search.query.suggestion_results import QuerySuggestionResults
+from office365.sharepoint.search.search_request import SearchRequest
 from office365.sharepoint.search.search_result import SearchResult
 
 
@@ -36,6 +38,8 @@ class SearchService(BaseEntity):
         pass
 
     def export_popular_tenant_queries(self, count):
+        """This method is used to get a list of popular search queries executed on the tenant.
+        """
         result = ClientResult(self.context, ClientValueCollection(PopularTenantQuery))
         payload = {
             "count": count,
@@ -44,13 +48,17 @@ class SearchService(BaseEntity):
         self.context.add_query(qry)
         return result
 
-    def query(self, search_request):
+    def query(self, request_or_query):
         """The operation is used to retrieve search results by using the HTTP protocol with the GET method.
 
-        :type search_request: office365.sharepoint.search.search_request.SearchRequest
+        :type request_or_query: office365.sharepoint.search.search_request.SearchRequest or str
         """
+        if is_string_type(request_or_query):
+            params = SearchRequest(query_text=request_or_query)
+        else:
+            params = request_or_query
         result = ClientResult(self.context, SearchResult())
-        qry = ServiceOperationQuery(self, "query", search_request.to_json(), None, "query", result)
+        qry = ServiceOperationQuery(self, "query", params.to_json(), None, "query", result)
         self.context.add_query(qry)
 
         def _construct_request(request):
@@ -90,6 +98,11 @@ class SearchService(BaseEntity):
         pass
 
     def suggest(self, query_text):
+        """
+        :param str query_text: The query text of the search query. If this element is not present or a value
+             is not specified, a default value of an empty string MUST be used, and the server MUST return a
+             FaultException<ExceptionDetail> message.
+        """
         result = ClientResult(self.context, QuerySuggestionResults())
         payload = {
             "querytext": query_text
