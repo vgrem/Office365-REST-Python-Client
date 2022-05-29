@@ -3,9 +3,9 @@ from random import randint
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.lists.list_creation_information import ListCreationInformation
 from office365.sharepoint.lists.list_template_type import ListTemplateType
-from tests import test_client_credentials, test_site_url
+from tests import test_client_credentials, test_team_site_url
 
-ctx = ClientContext(test_site_url).with_credentials(test_client_credentials)
+ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 
 list_name = "Tasks" + str(randint(0, 10000))
 create_info = ListCreationInformation(list_name, None, ListTemplateType.Tasks)

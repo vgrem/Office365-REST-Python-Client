@@ -36,8 +36,8 @@ class TestUserProfile(TestCase):
     def test5_get_properties_for(self):
         me = self.my_client.web.current_user.get().execute_query()
         people_manager = PeopleManager(self.my_client)
-        result = people_manager.get_properties_for(me.login_name).execute_query()
-        self.assertIsNotNone(result)
+        properties = people_manager.get_properties_for(me.login_name).execute_query()
+        self.assertIsNotNone(properties)
 
     def test6_get_default_document_library(self):
         me = self.my_client.web.current_user.get().execute_query()

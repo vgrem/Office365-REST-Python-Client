@@ -3,6 +3,14 @@ from office365.sharepoint.base_entity import BaseEntity
 
 
 class Alert(BaseEntity):
+    """
+    Represents an alert, which generates periodic e-mail notifications sent to a user about the list, list item,
+    document, or document library to which the alert applies. SP.Alert provides information about the alert,
+    such as which alert template is used, the alert frequency, and the UserID of the user who created the alert.
+
+    The AlertTime, ItemID, ListID and ListUrl properties are not included in the default scalar property
+    set for this type.
+    """
 
     @property
     def user(self):

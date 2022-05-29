@@ -21,7 +21,7 @@ result = item_to_update.validate_update_list_item({
     "Title": "Task (updated)",
     "Author": FieldUserValue.from_user(author),
     "Modified": modified_date
-}).execute_query()
+}, dates_in_utc=True).execute_query()
 
 has_any_error = any([item.HasException for item in result.value])
 if has_any_error:

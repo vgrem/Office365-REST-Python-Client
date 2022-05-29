@@ -168,20 +168,22 @@ class ListItem(SecurableObject):
         self.ensure_properties(["Id", "ParentList"], _item_resolved)
         return return_type
 
-    def validate_update_list_item(self, form_values, new_document_update=False, checkin_comment=None):
+    def validate_update_list_item(self, form_values, new_document_update=False, checkin_comment=None,
+                                  dates_in_utc=None):
         """Validates and sets the values of the specified collection of fields for the list item.
 
         :param dict form_values: Specifies a collection of field internal names and values for the given field
         :param dict new_document_update: Specifies whether the list item is a document being updated after upload.
         :param str checkin_comment: Check-in comment, if any. This parameter is only applicable when the list item
              is checked out.
+        :param bool or None dates_in_utc:
         """
         normalized_form_values = [ListItemFormUpdateValue(k, v) for k, v in form_values.items()]
         payload = {
             "formValues": normalized_form_values,
             "bNewDocumentUpdate": new_document_update,
             "checkInComment": checkin_comment,
-            "datesInUTC": True
+            "datesInUTC": dates_in_utc
         }
         result = ClientResult(self.context, ClientValueCollection(ListItemFormUpdateValue))
         qry = ServiceOperationQuery(self, "ValidateUpdateListItem", None, payload, None, result)
