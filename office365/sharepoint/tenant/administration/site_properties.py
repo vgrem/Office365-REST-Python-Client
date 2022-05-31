@@ -55,9 +55,11 @@ class SiteProperties(BaseEntity):
         Determines what level of sharing is available for the site.
 
         The valid values are:
-            - ExternalUserAndGuestSharing (default) - External user sharing (share by email) and guest link sharing are both enabled.
+            - ExternalUserAndGuestSharing (default) - External user sharing (share by email) and guest link sharing
+                 are both enabled.
             - Disabled - External user sharing (share by email) and guest link sharing are both disabled.
-            - ExternalUserSharingOnly - External user sharing (share by email) is enabled, but guest link sharing is disabled.
+            - ExternalUserSharingOnly - External user sharing (share by email) is enabled, but guest link sharing
+                 is disabled.
             - ExistingExternalUserSharingOnly - Only guests already in your organization's directory.
 
 

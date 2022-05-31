@@ -2,7 +2,7 @@ from office365.runtime.queries.create_entity_query import CreateEntityQuery
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.navigation.navigation_node import NavigationNode
+from office365.sharepoint.navigation.node import NavigationNode
 
 
 class NavigationNodeCollection(BaseEntityCollection):
@@ -14,7 +14,7 @@ class NavigationNodeCollection(BaseEntityCollection):
         """
         Creates a navigation node object and adds it to the collection.
 
-        :type create_node_info: office365.sharepoint.navigation.navigation_node_creation_information.NavigationNodeCreationInformation
+        :type create_node_info: office365.sharepoint.navigation.node_creation_information.NavigationNodeCreationInformation
         """
         target_node = NavigationNode(self.context)
         target_node.title = create_node_info.Title
@@ -25,6 +25,9 @@ class NavigationNodeCollection(BaseEntityCollection):
         return target_node
 
     def get_by_index(self, index):
+        """
+        :param int index:
+        """
         target_node = NavigationNode(self.context)
         self.add_child(target_node)
         qry = ServiceOperationQuery(self, "GetByIndex", [index], None, None, target_node)

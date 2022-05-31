@@ -75,4 +75,3 @@ class SPSiteManager(BaseEntity):
         qry = ServiceOperationQuery(self, "GetTeamChannelSiteOwner", None, {'siteId': site_id}, None, response)
         self.context.add_query(qry)
         return response
-

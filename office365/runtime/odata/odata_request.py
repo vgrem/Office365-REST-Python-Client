@@ -104,7 +104,7 @@ class ODataRequest(ClientRequest):
                 else:
                     return_type.set_property(k, v, False)
 
-    def _next_property(self, json, data_format):
+    def _next_property(self, json, data_format):  # noqa: C901
         """
         :type json: any
         :type data_format: office365.runtime.odata.odata_json_format.ODataJsonFormat

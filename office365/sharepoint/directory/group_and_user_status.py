@@ -10,4 +10,3 @@ class GroupAndUserStatus(BaseEntity):
         """Get a Group"""
         return self.properties.get("Group",
                                    Group(self.context, ResourcePath("Group", self.resource_path)))
-

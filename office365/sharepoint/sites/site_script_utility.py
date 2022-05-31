@@ -15,8 +15,8 @@ class SiteScriptUtility(BaseEntity):
     """
 
     def __init__(self, context):
-        super(SiteScriptUtility, self).__init__(context,
-                                                ResourcePath("Microsoft.SharePoint.Utilities.WebTemplateExtensions.SiteScriptUtility"))
+        path = ResourcePath("Microsoft.SharePoint.Utilities.WebTemplateExtensions.SiteScriptUtility")
+        super(SiteScriptUtility, self).__init__(context, path)
 
     @staticmethod
     def create_site_script(context, title, description, content):
@@ -28,7 +28,7 @@ class SiteScriptUtility(BaseEntity):
         :param str description:
         :param str content:
         """
-        return_type = ClientResult(context, SiteScriptMetadata)
+        return_type = ClientResult(context, SiteScriptMetadata())
         utility = SiteScriptUtility(context)
         payload = {
             "Title": title,

@@ -18,7 +18,7 @@ class QueryOptions(object):
             from office365.runtime.client_object import ClientObject
             from office365.runtime.client_object_collection import ClientObjectCollection
             if isinstance(client_object, ClientObjectCollection) or \
-                isinstance(val, ClientObject) or name == "Properties":
+               isinstance(val, ClientObject) or name == "Properties":
                 query.expand.append(name)
             query.select.append(name)
         return query

@@ -10,7 +10,7 @@ from email.message import Message
 from office365.runtime.client_request import ClientRequest
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.queries.batch_query import BatchQuery, create_boundary
+from office365.runtime.queries.batch_query import create_boundary
 
 
 class ODataBatchRequest(ClientRequest):

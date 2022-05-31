@@ -280,7 +280,7 @@ class FieldCollection(BaseEntityCollection):
         </ArrayOfProperty>
     </Customization>
 </Field>
-'''.format(list_id=list_id, name=name, list_attr=list_attr, web_id=web_id, field_id=field_id, ssp_id=ssp_id,
+'''.format(name=name, list_attr=list_attr, web_id=web_id, field_id=field_id, ssp_id=ssp_id,
            term_set_id=term_set_id, anchor_id=anchor_id, text_field_id=text_field_id)
 
         field_schema = XmlSchemaFieldCreationInformation(schema_xml)

@@ -49,4 +49,3 @@ class TimeZoneCollection(BaseEntityCollection):
 
     def __init__(self, context, resource_path=None):
         super(TimeZoneCollection, self).__init__(context, TimeZone, resource_path)
-

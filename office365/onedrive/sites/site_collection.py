@@ -15,7 +15,3 @@ class SiteCollection(ClientValue):
         self.root = root
         self.hostname = hostname
         self.dataLocationCode = data_location_code
-
-
-
-

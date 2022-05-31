@@ -20,7 +20,6 @@ from office365.onedrive.files.fileSystemInfo import FileSystemInfo
 from office365.onedrive.folders.folder import Folder
 from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.driveitems.publication_facet import PublicationFacet
-from office365.onedrive.internal.paths.root_path import RootPath
 from office365.onedrive.driveitems.thumbnail_set import ThumbnailSet
 from office365.onedrive.upload_session import UploadSession
 from office365.onedrive.workbooks.workbook import Workbook

@@ -65,4 +65,3 @@ class TermStore(TaxonomyItem):
         return self.properties.get("termGroups",
                                    TaxonomyItemCollection(self.context, TermGroup,
                                                           ResourcePath("termGroups", self.resource_path)))
-

@@ -43,5 +43,3 @@ class RegionalSettings(BaseEntity):
         """Gets the collection of time zones used in a server farm."""
         return self.properties.get("TimeZones",
                                    TimeZoneCollection(self.context, ResourcePath("TimeZones", self.resource_path)))
-
-

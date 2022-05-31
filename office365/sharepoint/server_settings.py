@@ -46,7 +46,8 @@ class ServerSettings(BaseEntity):
         """
         binding_type = ServerSettings(context)
         return_type = LanguageCollection(context)
-        qry = ServiceOperationQuery(binding_type, "GetGlobalInstalledLanguages", [compatibility_level], None, None, return_type)
+        qry = ServiceOperationQuery(binding_type, "GetGlobalInstalledLanguages", [compatibility_level],
+                                    None, None, return_type)
         qry.static = True
         context.add_query(qry)
         return return_type

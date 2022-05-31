@@ -49,4 +49,3 @@ class ListItem(BaseItem):
             }
             default_value = property_mapping.get(name, None)
         return super(ListItem, self).get_property(name, default_value)
-

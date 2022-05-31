@@ -30,4 +30,3 @@ class FieldCalculated(Field):
         :type val: str
         """
         self.set_property('Formula', val)
-

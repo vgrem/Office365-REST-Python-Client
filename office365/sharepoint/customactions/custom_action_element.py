@@ -8,10 +8,8 @@ class CustomActionElement(ClientValue):
 
 
 class CustomActionElementCollection(ClientValue):
+    """This is the class that represents a collection of CustomActionElement."""
 
     def __init__(self):
         super(CustomActionElementCollection, self).__init__()
         self.Items = ClientValueCollection(CustomActionElement)
-
-
-

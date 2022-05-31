@@ -96,8 +96,8 @@ class DirectoryObjectCollection(DeltaCollection):
         :param str mail_nickname: The mail nickname of the group to validate.
              The property is not individually required. However, at least one property (displayName or mailNickname)
              is required.
-        :param str on_behalf_of_userid: The ID of the user to impersonate when calling the API. The validation results are for the
-            onBehalfOfUserId's attributes and roles.
+        :param str on_behalf_of_userid: The ID of the user to impersonate when calling the API. The validation results
+            are for the onBehalfOfUserId's attributes and roles.
         """
         payload = {
             "entityType": entity_type,

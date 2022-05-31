@@ -431,7 +431,6 @@ class Web(SecurableObject):
     def get_folder_by_server_relative_path(self, decoded_url):
         """Returns the folder object located at the specified server-relative URL.
         Prefer this method over get_folder_by_server_relative_url since it supports % and # symbols
-        Details: https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/supporting-and-in-file-and-folder-with-the-resourcepath-api
 
         :type decoded_url: str
         """

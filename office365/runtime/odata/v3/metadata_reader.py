@@ -10,4 +10,3 @@ class ODataV3Reader(ODataReader):
             'edmx': 'http://schemas.microsoft.com/ado/2007/06/edmx',
             'm': 'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata'
         })
-

@@ -18,4 +18,3 @@ class ChoiceColumn(ClientValue):
         self.allowTextEntry = allow_text_entry
         self.choices = StringCollection(choices)
         self.displayAs = display_as
-

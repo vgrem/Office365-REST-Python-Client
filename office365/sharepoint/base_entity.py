@@ -47,4 +47,3 @@ class BaseEntity(ClientObject):
         if self._entity_type_name is None:
             self._entity_type_name = ".".join([self._namespace, type(self).__name__])
         return self._entity_type_name
-

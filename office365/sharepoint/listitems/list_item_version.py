@@ -62,5 +62,3 @@ class ListItemVersion(BaseEntity):
                 self._resource_path = ServiceOperationPath(
                     "GetById", [value], self._parent_collection.resource_path)
         return super(ListItemVersion, self).set_property(name, value, persist_changes)
-
-

@@ -11,4 +11,3 @@ class TermGroup(TaxonomyItem):
         return self.properties.get("termSets",
                                    TaxonomyItemCollection(self.context, TermSet,
                                                           ResourcePath("termSets", self.resource_path)))
-

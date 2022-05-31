@@ -20,4 +20,3 @@ class ObjectSharingInformationUser(BaseEntity):
         """
         return self.properties.get('User',
                                    User(self.context, ResourcePath("User", self.resource_path)))
-

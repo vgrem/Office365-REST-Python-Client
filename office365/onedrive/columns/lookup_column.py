@@ -16,4 +16,3 @@ class LookupColumn(ClientValue):
         self.listId = list_id
         self.columnName = column_name
         self.allowMultipleValues = allow_multiple_values
-

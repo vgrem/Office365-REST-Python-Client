@@ -105,4 +105,3 @@ class SitePageMetadata(BaseEntity):
                 self._resource_path = ServiceOperationPath(
                     "getById", [value], self.parent_collection.resource_path)
         return super(SitePageMetadata, self).set_property(name, value, persist_changes)
-

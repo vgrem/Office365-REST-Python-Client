@@ -43,4 +43,3 @@ class RelatedField(BaseEntity):
         from office365.sharepoint.lists.list import List
         return self.properties.get("LookupList",
                                    List(self.context, ResourcePath("LookupList", self.resource_path)))
-

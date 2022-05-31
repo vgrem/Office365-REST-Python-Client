@@ -13,5 +13,3 @@ class SitePath(ResourcePath):
             return [self.delimiter, url_info.hostname, ":", safe_path]
         else:
             return super(SitePath, self).segments
-
-

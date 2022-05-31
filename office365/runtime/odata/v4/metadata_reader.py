@@ -10,4 +10,3 @@ class ODataV4Reader(ODataReader):
             'xmlns': 'http://docs.oasis-open.org/odata/ns/edm',
             'edmx': 'http://docs.oasis-open.org/odata/ns/edmx'
         })
-

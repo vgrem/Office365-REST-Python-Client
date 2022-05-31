@@ -30,4 +30,3 @@ class UserCustomAction(BaseEntity):
         """Returns the UserResource object that corresponds to the Title for this object."""
         return self.properties.get('TitleResource',
                                    UserResource(self.context, ResourcePath("TitleResource", self.resource_path)))
-

@@ -63,4 +63,3 @@ class Reputation(BaseEntity):
     @property
     def entity_type_name(self):
         return "Microsoft.Office.Server.ReputationModel.Reputation"
-

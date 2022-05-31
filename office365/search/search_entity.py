@@ -25,4 +25,3 @@ class SearchEntity(Entity):
         qry = ServiceOperationQuery(self, "query", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
-

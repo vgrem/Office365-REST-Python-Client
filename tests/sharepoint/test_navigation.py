@@ -1,6 +1,6 @@
-from office365.sharepoint.navigation.navigation_node import NavigationNode
-from office365.sharepoint.navigation.navigation_node_collection import NavigationNodeCollection
-from office365.sharepoint.navigation.navigation_node_creation_information import NavigationNodeCreationInformation
+from office365.sharepoint.navigation.node import NavigationNode
+from office365.sharepoint.navigation.node_collection import NavigationNodeCollection
+from office365.sharepoint.navigation.node_creation_information import NavigationNodeCreationInformation
 from office365.sharepoint.navigation.navigation_service import NavigationService
 from tests.sharepoint.sharepoint_case import SPTestCase
 

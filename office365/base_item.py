@@ -86,4 +86,3 @@ class BaseItem(Entity):
             }
             default_value = property_mapping.get(name, None)
         return super(BaseItem, self).get_property(name, default_value)
-

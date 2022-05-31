@@ -36,4 +36,3 @@ class SocialIdentityProvider(IdentityProviderBase):
         :rtype: str or None
         """
         return self.properties.get('identityProviderType', None)
-

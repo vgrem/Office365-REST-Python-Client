@@ -30,4 +30,3 @@ class WorkbookNamedItem(Entity):
         to the worksheet. Read-only."""
         return self.properties.get('worksheet',
                                    WorkbookWorksheet(self.context, ResourcePath("worksheet", self.resource_path)))
-

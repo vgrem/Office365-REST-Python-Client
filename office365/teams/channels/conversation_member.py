@@ -9,5 +9,3 @@ class ConversationMember(Entity):
     def roles(self):
         """The roles for that user."""
         return self.properties.get('roles', StringCollection())
-
-

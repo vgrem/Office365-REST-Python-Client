@@ -1,4 +1,3 @@
-import datetime
 from datetime import datetime, timedelta
 from office365.runtime.compat import urlparse, timezone
 

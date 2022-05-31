@@ -1,6 +1,5 @@
 from office365.communications.onlinemeetings.meeting_participants import MeetingParticipants
 from office365.entity import Entity
-from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.outlook.mail.itemBody import ItemBody
 
 

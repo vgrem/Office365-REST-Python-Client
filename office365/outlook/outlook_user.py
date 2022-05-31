@@ -27,4 +27,3 @@ class OutlookUser(Entity):
         return self.properties.get('masterCategories',
                                    EntityCollection(self.context, OutlookCategory,
                                                     ResourcePath("masterCategories", self.resource_path)))
-

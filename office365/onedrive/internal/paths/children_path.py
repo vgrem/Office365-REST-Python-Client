@@ -18,6 +18,3 @@ class ChildrenPath(ResourcePath):
             return super(ChildrenPath, self).normalize(path.name, path.parent, inplace)
         else:
             return super(ChildrenPath, self).normalize(name, ResourcePath(self._collection_name, self.parent), inplace)
-
-
-
