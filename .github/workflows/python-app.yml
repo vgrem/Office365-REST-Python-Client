@@ -19,10 +19,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Set up SDK settings via env vars
+    - name: Set up library settings
+      with: # Set the secret as an input
+        office365_python_sdk_securevars: ${{ secrets.OFFICE365_PYTHON_SDK_SECUREVARS }}
       env:
         office365_python_sdk_securevars: ${{ secrets.OFFICE365_PYTHON_SDK_SECUREVARS }}
       run: |
+        echo "OFFICE365_PYTHON_SDK_SECUREVARS:${{secrets.OFFICE365_PYTHON_SDK_SECUREVARS}}"
         echo "OFFICE365_PYTHON_SDK_SECUREVARS:${{env.OFFICE365_PYTHON_SDK_SECUREVARS}}"
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
