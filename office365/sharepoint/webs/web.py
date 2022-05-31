@@ -242,7 +242,12 @@ class Web(SecurableObject):
         return result
 
     def add_supported_ui_language(self, lcid):
-        qry = ServiceOperationQuery(self, "getSubWebsFilteredForCurrentUser", {"lcid": lcid}, None, None, None)
+        """
+        Adds a supported UI language by its language identifier.
+
+        :param int lcid: Specifies the language identifier to be added.
+        """
+        qry = ServiceOperationQuery(self, "AddSupportedUILanguage", {"lcid": lcid})
         self.context.add_query(qry)
         return self
 

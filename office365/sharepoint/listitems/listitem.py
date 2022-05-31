@@ -226,6 +226,7 @@ class ListItem(SecurableObject):
         return self
 
     def get_comments(self):
+        """Retrieve ListItem comments"""
         comments = CommentCollection(self.context)
         qry = ServiceOperationQuery(self, "GetComments", [], None, None, comments)
         self.context.add_query(qry)
