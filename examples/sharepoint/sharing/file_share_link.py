@@ -7,7 +7,7 @@ from tests import test_user_credentials, test_team_site_url
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
 
-options = {
+sharing_messages = {
     0: "A value has not been initialized",
     1: "A direct link or canonical URL to an object",
     2: "An organization access link with view permissions to an object",
@@ -27,7 +27,7 @@ link_url = result.value.sharingLinkInfo.Url
 
 # Verify a link
 result = Web.get_sharing_link_kind(ctx, link_url).execute_query()
-print(options.get(result.value, "Unknown sharing link"))
+print(sharing_messages.get(result.value, "Unknown sharing link"))
 
 # Unshare a file link
 target_file.unshare_link(SharingLinkKind.AnonymousView).execute_query()

@@ -16,7 +16,7 @@ class SearchRequest(ClientValue):
                  row_limit=None, rows_per_page=None, start_row=None,
                  enable_sorting=None, sort_list=None, query_template=None, ranking_model_id=None,
                  summary_length=None, collapse_specification=None, client_type=None,
-                 enable_query_rules=None, **kwargs):
+                 enable_query_rules=None, source_id=None, **kwargs):
         """
         :param str query_text: The query text of the search query. If this element is not present or a value is not
             specified, a default value of an empty string MUST be used, and the server MUST return a
@@ -62,6 +62,9 @@ class SearchRequest(ClientValue):
         :param bool or None enable_query_rules: Specifies whether query rules are included when a search query is
             executed. If the value is true, query rules are applied to the search query. If the value is false,
             query rules MUST NOT be applied in the search query.
+        :param str or None source_id: Specifies the unique identifier for result source to use for executing the
+            search query. If no value is specified then the protocol server MUST use the id for the default
+            result source.
         """
         super(SearchRequest, self).__init__()
         self.Querytext = query_text
@@ -79,6 +82,7 @@ class SearchRequest(ClientValue):
         self.SummaryLength = summary_length
         self.StartRow = start_row
         self.EnableQueryRules = enable_query_rules
+        self.SourceId = source_id
         self.__dict__.update(**kwargs)
 
     @property
