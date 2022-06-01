@@ -51,11 +51,28 @@ class File(AbstractFile):
         file = ctx.web.get_file_by_server_relative_url(file_relative_url)
         return file
 
+    def share_link(self, link_kind, expiration=None):
+        """Creates a tokenized sharing link for a list item based on the specified parameters and optionally
+        sends an email to the people that are listed in the specified parameters.
+
+        :param int link_kind: The kind of the tokenized sharing link to be created/updated or retrieved.
+        :param datetime or None expiration: A date/time string for which the format conforms to the ISO 8601:2004(E)
+            complete representation for calendar date and time of day and which represents the time and date of expiry
+            for the tokenized sharing link. Both the minutes and hour value MUST be specified for the difference
+            between the local and UTC time. Midnight is represented as 00:00:00. A null value indicates no expiry.
+            This value is only applicable to tokenized sharing links that are anonymous access links.
+        """
+        return self.listItemAllFields.share_link(link_kind, expiration)
+
     def get_image_preview_uri(self, width, height, client_type=None):
         """
-        :param int width:
-        :param int height:
-        :param str client_type:
+        Returns the uri where the thumbnail with the closest size to the desired can be found.
+        The actual resolution of the thumbnail might not be the same as the desired values.
+
+
+        :param int width: The desired width of the resolution.
+        :param int height: The desired height of the resolution.
+        :param str client_type: The client type. Used for logging.
         """
         result = ClientResult(self.context)
         payload = {
@@ -69,9 +86,12 @@ class File(AbstractFile):
 
     def get_image_preview_url(self, width, height, client_type=None):
         """
-        :param int width:
-        :param int height:
-        :param str client_type:
+        Returns the url where the thumbnail with the closest size to the desired can be found.
+        The actual resolution of the thumbnail might not be the same as the desired values.
+
+        :param int width: The desired width of the resolution.
+        :param int height: The desired height of the resolution.
+        :param str client_type: The client type. Used for logging.
         """
         result = ClientResult(self.context)
         payload = {
@@ -179,14 +199,10 @@ class File(AbstractFile):
 
     def unpublish(self, comment):
         """Removes the file from content approval or unpublish a major version.
+
         :type comment: str
         """
-        qry = ServiceOperationQuery(self,
-                                    "unpublish",
-                                    {
-                                        "comment": comment,
-                                    }
-                                    )
+        qry = ServiceOperationQuery(self, "unpublish", {"comment": comment})
         self.context.add_query(qry)
         return self
 
@@ -220,9 +236,7 @@ class File(AbstractFile):
 
     def undocheckout(self):
         """Reverts an existing checkout for the file."""
-        qry = ServiceOperationQuery(self,
-                                    "undocheckout"
-                                    )
+        qry = ServiceOperationQuery(self, "UndoCheckout")
         self.context.add_query(qry)
         return self
 
@@ -231,7 +245,7 @@ class File(AbstractFile):
         view. """
         return LimitedWebPartManager(self.context,
                                      ServiceOperationPath(
-                                         "getlimitedwebpartmanager",
+                                         "GetLimitedWebPartManager",
                                          [scope],
                                          self.resource_path
                                      ))

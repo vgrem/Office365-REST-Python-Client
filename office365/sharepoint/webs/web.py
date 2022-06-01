@@ -77,7 +77,18 @@ class Web(SecurableObject):
         super(Web, self).__init__(context, resource_path)
         self._web_url = None
 
+    def consent_to_power_platform(self):
+        return_type = FlowSynchronizationResult(self.context)
+        qry = ServiceOperationQuery(self, "ConsentToPowerPlatform", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def get_push_notification_subscriber(self, device_app_instance_id):
+        """
+        Specifies the push notification subscriber over the site for the specified device app instance identifier.
+
+        :param str device_app_instance_id: Device application instance identifier.
+        """
         return_type = PushNotificationSubscriber(self.context)
         qry = ServiceOperationQuery(self, "GetPushNotificationSubscriber", [device_app_instance_id], None,
                                     None, return_type)
@@ -187,6 +198,27 @@ class Web(SecurableObject):
         qry.static = True
         context.add_query(qry)
         return result
+
+    def create_default_associated_groups(self, user_login, user_login2, group_name_seed):
+        """
+        Creates the default Owners, Members and Visitors SPGroups on the web.
+
+        :param str user_login: The user logon name of the group owner.
+        :param str user_login2: The secondary contact for the group.
+        :param str group_name_seed: The name seed to use when creating of the full names of the default groups.
+            For example, if the name seed is Contoso then the default groups will be created with the names:
+            Contoso Owners, Contoso Members and Contoso Visitors. If the value of this parameter is null then the
+            web title is used instead.
+        """
+        payload = {
+            "userLogin": user_login,
+            "userLogin2": user_login2,
+            "groupNameSeed": group_name_seed
+        }
+        qry = ServiceOperationQuery(self, "CreateDefaultAssociatedGroups", None, payload)
+        qry.static = True
+        self.context.add_query(qry)
+        return self
 
     def create_group_based_environment(self):
         return_type = FlowSynchronizationResult(self.context)
@@ -724,6 +756,23 @@ class Web(SecurableObject):
         return result
 
     @staticmethod
+    def delete_all_anonymous_links_for_object(context, url):
+        """
+        Removes all existing anonymous links for an object.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param str url:  The URL of the object being shared, with the path of the object in SharePoint that is
+             represented as query string parameters.
+        """
+        payload = {
+            "url": url
+        }
+        qry = ServiceOperationQuery(context.web, "DeleteAllAnonymousLinksForObject", None, payload)
+        qry.static = True
+        context.add_query(qry)
+        return context.web
+
+    @staticmethod
     def get_document_and_media_libraries(context, web_full_url, include_page_libraries):
         """
         Returns the document libraries of a SharePoint site, including picture, asset, and site assets libraries.
@@ -767,18 +816,20 @@ class Web(SecurableObject):
         context.after_execute(_group_resolved)
 
     @staticmethod
-    def get_sharing_link_kind(context, file_url):
+    def get_sharing_link_kind(context, file_url, return_type=None):
         """
         This method determines the kind of tokenized sharing link represented by the supplied file URL.
 
         :param office365.sharepoint.client_context.ClientContext context:
-        :param str file_url:
+        :param str file_url: A URL that is a tokenized sharing link for a document
+        :param ClientResult or None return_type: Return object
         """
-        result = ClientResult(context)
-        qry = ServiceOperationQuery(context.web, "GetSharingLinkKind", None, {"fileUrl": file_url}, None, result)
+        if return_type is None:
+            return_type = ClientResult(context)
+        qry = ServiceOperationQuery(context.web, "GetSharingLinkKind", None, {"fileUrl": file_url}, None, return_type)
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def share_object(context, url, people_picker_input,

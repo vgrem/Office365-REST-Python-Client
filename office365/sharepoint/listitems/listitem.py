@@ -16,6 +16,9 @@ from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.reputationmodel.reputation import Reputation
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
 from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
+from office365.sharepoint.sharing.share_link_request import ShareLinkRequest
+from office365.sharepoint.sharing.share_link_response import ShareLinkResponse
+from office365.sharepoint.sharing.share_link_settings import ShareLinkSettings
 from office365.sharepoint.sharing.sharing_result import SharingResult
 from office365.sharepoint.taxonomy.taxonomy_field_value import TaxonomyFieldValueCollection
 from office365.sharepoint.ui.applicationpages.client_people_picker import (
@@ -37,6 +40,23 @@ class ListItem(SecurableObject):
         super(ListItem, self).__init__(context, resource_path)
         if parent_list is not None:
             self.set_property("ParentList", parent_list, False)
+
+    def share_link(self, link_kind, expiration=None):
+        """Creates a tokenized sharing link for a list item based on the specified parameters and optionally
+        sends an email to the people that are listed in the specified parameters.
+
+        :param int link_kind: The kind of the tokenized sharing link to be created/updated or retrieved.
+        :param datetime or None expiration: A date/time string for which the format conforms to the ISO 8601:2004(E)
+            complete representation for calendar date and time of day and which represents the time and date of expiry
+            for the tokenized sharing link. Both the minutes and hour value MUST be specified for the difference
+            between the local and UTC time. Midnight is represented as 00:00:00. A null value indicates no expiry.
+            This value is only applicable to tokenized sharing links that are anonymous access links.
+        """
+        result = ClientResult(self.context, ShareLinkResponse())
+        payload = ShareLinkRequest(settings=ShareLinkSettings(link_kind=link_kind, expiration=expiration))
+        qry = ServiceOperationQuery(self, "ShareLink", None, payload, "request", result)
+        self.context.add_query(qry)
+        return result
 
     def set_rating(self, value):
         """

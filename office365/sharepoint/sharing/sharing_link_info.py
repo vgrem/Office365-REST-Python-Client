@@ -9,6 +9,7 @@ class SharingLinkInfo(ClientValue):
         """
         Specifies the information about the tokenized sharing link.
 
+        :para
         """
         super(SharingLinkInfo, self).__init__()
         self.AllowsAnonymousAccess = None
