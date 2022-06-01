@@ -51,8 +51,12 @@ class File(AbstractFile):
         file = ctx.web.get_file_by_server_relative_url(file_relative_url)
         return file
 
+    def get_sharing_information(self):
+        """Gets the sharing information for a file."""
+        return self.listItemAllFields.get_sharing_information()
+
     def share_link(self, link_kind, expiration=None):
-        """Creates a tokenized sharing link for a list item based on the specified parameters and optionally
+        """Creates a tokenized sharing link for a file based on the specified parameters and optionally
         sends an email to the people that are listed in the specified parameters.
 
         :param int link_kind: The kind of the tokenized sharing link to be created/updated or retrieved.
@@ -63,6 +67,16 @@ class File(AbstractFile):
             This value is only applicable to tokenized sharing links that are anonymous access links.
         """
         return self.listItemAllFields.share_link(link_kind, expiration)
+
+    def unshare_link(self, link_kind, share_id=None):
+        """
+        Removes the specified tokenized sharing link of the file.
+
+        :param int link_kind: This optional value specifies the globally unique identifier (GUID) of the tokenized
+            sharing link that is intended to be removed.
+        :param str or None share_id: The kind of tokenized sharing link that is intended to be removed.
+        """
+        return self.listItemAllFields.unshare_link(link_kind, share_id)
 
     def get_image_preview_uri(self, width, height, client_type=None):
         """

@@ -30,6 +30,33 @@ class Folder(BaseEntity):
         relative_url = abs_url.replace(ctx.base_url, "")
         return ctx.web.get_folder_by_server_relative_url(relative_url)
 
+    def get_sharing_information(self):
+        """Gets the sharing information for a folder."""
+        return self.list_item_all_fields.get_sharing_information()
+
+    def share_link(self, link_kind, expiration=None):
+        """Creates a tokenized sharing link for a folder based on the specified parameters and optionally
+        sends an email to the people that are listed in the specified parameters.
+
+        :param int link_kind: The kind of the tokenized sharing link to be created/updated or retrieved.
+        :param datetime or None expiration: A date/time string for which the format conforms to the ISO 8601:2004(E)
+            complete representation for calendar date and time of day and which represents the time and date of expiry
+            for the tokenized sharing link. Both the minutes and hour value MUST be specified for the difference
+            between the local and UTC time. Midnight is represented as 00:00:00. A null value indicates no expiry.
+            This value is only applicable to tokenized sharing links that are anonymous access links.
+        """
+        return self.list_item_all_fields.share_link(link_kind, expiration)
+
+    def unshare_link(self, link_kind, share_id=None):
+        """
+        Removes the specified tokenized sharing link of the folder.
+
+        :param int link_kind: This optional value specifies the globally unique identifier (GUID) of the tokenized
+            sharing link that is intended to be removed.
+        :param str or None share_id: The kind of tokenized sharing link that is intended to be removed.
+        """
+        return self.list_item_all_fields.unshare_link(link_kind, share_id)
+
     def recycle(self):
         """Moves the folder to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
 
