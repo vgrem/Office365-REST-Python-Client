@@ -136,14 +136,10 @@ class TestSharePointListItem(SPTestCase):
         # would ignore all other previously set query params (like top(2))
 
         items = self.target_list.items.top(2)
-        self.client.load(items)
+        qry = self.client.load(items, ["Id", "AttachmentFiles"])
+        self.assertEqual(qry.url, items.resource_url + "?$select=Id,AttachmentFiles&$expand=AttachmentFiles&$top=2")
         self.client.execute_query()
-        
-        items2 = self.target_list.items.top(2)
-        self.client.load(items2, [])
-        self.client.execute_query()
-
-        self.assertEqual(len(items), len(items2))
+        self.assertLessEqual(len(items), 2)
 
     def test_19_delete_multiple_items(self):
         items = self.target_list.items.get().execute_query()  # get existing items
@@ -151,5 +147,5 @@ class TestSharePointListItem(SPTestCase):
         for item in items:
             item.delete_object()
         self.client.execute_batch()
-        result_after = self.target_list.items.get().execute_query()
-        self.assertEqual(len(result_after), 0)
+        items_after = self.target_list.items.get().execute_query()
+        self.assertEqual(len(items_after), 0)
