@@ -164,7 +164,7 @@ class Web(SecurableObject):
             "url": url,
             "isEditLink": is_edit_link,
             "removeAssociatedSharingLinkGroup": remove_associated_sharing_link_group
-            }
+        }
         qry = ServiceOperationQuery(context.web, "DestroyOrganizationSharingLink", None, payload, None, None)
         qry.static = True
         context.add_query(qry)
@@ -685,16 +685,15 @@ class Web(SecurableObject):
         """
 
         picker_result = ClientResult(self.context)
-        sharing_result = ClientResult(self.context, SharingResult(self.context))
+        sharing_result = SharingResult(self.context)
 
         def _picker_value_resolved(picker_value):
             picker_result.value = picker_value
 
         def _grp_resolved(role_value):
             def _web_loaded():
-                sharing_result.value = Web.share_object(self.context, self.url, picker_result.value, role_value,
-                                                        0,
-                                                        False, send_email, False, email_subject, email_body)
+                Web.share_object(self.context, self.url, picker_result.value, role_value, 0,
+                                 False, send_email, False, email_subject, email_body, result=sharing_result)
 
             self.ensure_property("Url", _web_loaded)
 
@@ -702,7 +701,7 @@ class Web(SecurableObject):
         ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(self.context, params,
                                                                                 _picker_value_resolved)
         Web._resolve_group_value(self.context, share_option, _grp_resolved)
-        return sharing_result.value
+        return sharing_result
 
     def unshare(self):
         """
@@ -836,7 +835,7 @@ class Web(SecurableObject):
                      role_value=None,
                      group_id=0, propagate_acl=False,
                      send_email=True, include_anonymous_link_in_email=False, email_subject=None, email_body=None,
-                     use_simplified_roles=True):
+                     use_simplified_roles=True, result=None):
         """
         This method shares an object in SharePoint such as a list item or site. It returns a SharingResult object
         which contains the completion script and a page to redirect to if desired.
@@ -847,7 +846,7 @@ class Web(SecurableObject):
         :param str role_value: The sharing role value for the type of permission to grant on the object.
         :param str people_picker_input: A string of JSON representing users in people picker format.
         :param int group_id: The ID of the group to be added. Zero if not adding to a permissions group.
-        :param bool propagate_acl:  A flag to determine if permissions SHOULD be pushed to items with unique permissions.
+        :param bool propagate_acl:  A flag to determine if permissions SHOULD be pushed to items with unique permissions
         :param bool send_email: A flag to determine if an email notification SHOULD be sent (if email is configured).
         :param bool include_anonymous_link_in_email: If an email is being sent, this determines if an anonymous link
         SHOULD be added to the message.
@@ -857,7 +856,8 @@ class Web(SecurableObject):
         (Edit, View) or not.
 
         """
-        result = SharingResult(context)
+        if result is None:
+            result = SharingResult(context)
         payload = {
             "url": url,
             "groupId": group_id,

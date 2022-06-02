@@ -187,8 +187,7 @@ class ListItem(SecurableObject):
         def _picker_value_resolved(picker_value):
             from office365.sharepoint.webs.web import Web
             result.value = Web.share_object(self.context, file_result.value, picker_value, role_values[share_option],
-                                            0,
-                                            False, send_email, False, email_subject, email_body)
+                                            0, False, send_email, False, email_subject, email_body)
 
         self.ensure_property("EncodedAbsUrl", _property_resolved)
         params = ClientPeoplePickerQueryParameters(user_principal_name)
