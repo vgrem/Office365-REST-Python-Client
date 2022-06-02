@@ -16,8 +16,9 @@ class ReadEntityQuery(ClientQuery):
     @property
     def url(self):
         value = super(ReadEntityQuery, self).url
+        url_query_params = []
         if self._properties_to_include is not None:
-            value += "?" + QueryOptions.build(self.binding_type, self._properties_to_include).to_url()
-        elif not self.binding_type.query_options.is_empty:
-            value += "?" + self.binding_type.query_options.to_url()
-        return value
+            url_query_params += QueryOptions.build(self.binding_type, self._properties_to_include).to_url().split("&")
+        if not self.binding_type.query_options.is_empty:
+            url_query_params += self.binding_type.query_options.to_url().split("&")
+        return value + "?" + "&".join(url_query_params)

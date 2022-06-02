@@ -131,7 +131,21 @@ class TestSharePointListItem(SPTestCase):
         result = self.target_list.items.get().execute_query()
         self.assertEqual(len(result), self.batch_items_count)
 
-    def test_18_delete_multiple_items(self):
+    def test_18_get_multiple_items_with_params(self):
+        # test case for when .load with set properties_to_retrieve
+        # would ignore all other previously set query params (like top(2))
+
+        items = self.target_list.items.top(2)
+        self.client.load(items)
+        self.client.execute_query()
+        
+        items2 = self.target_list.items.top(2)
+        self.client.load(items2, [])
+        self.client.execute_query()
+
+        self.assertEqual(len(items), len(items2))
+
+    def test_19_delete_multiple_items(self):
         items = self.target_list.items.get().execute_query()  # get existing items
         self.assertGreater(len(items), 0)
         for item in items:
