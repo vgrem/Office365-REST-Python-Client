@@ -21,7 +21,7 @@ from office365.sharepoint.sites.site import Site
 from office365.sharepoint.tenant.administration.hub_site_collection import HubSiteCollection
 from office365.sharepoint.webs.context_web_information import ContextWebInformation
 from office365.sharepoint.webs.web import Web
-from office365.runtime.compat import range_or_xrange
+from office365.runtime.compat import range_or_xrange, urlparse
 
 
 class ClientContext(ClientRuntimeContext):
@@ -44,6 +44,18 @@ class ClientContext(ClientRuntimeContext):
         self._base_url = base_url
         self._ctx_web_info = None
         self._pending_request = None
+
+    def create_safe_url(self, orig_url, relative=True):
+        """
+        Creates a safe url
+
+        :type orig_url: str
+        :type relative: bool
+        """
+        site_path = urlparse(self.base_url).path
+        root_site_url = self.base_url.replace(site_path, "")
+        url = orig_url if orig_url.startswith(site_path) else "/".join([site_path, orig_url])
+        return url if relative else "".join([root_site_url, url])
 
     @staticmethod
     def from_url(abs_url):

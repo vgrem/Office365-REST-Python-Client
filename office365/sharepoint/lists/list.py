@@ -23,6 +23,7 @@ from office365.sharepoint.listitems.listItem_collection import ListItemCollectio
 from office365.sharepoint.lists.list_rule import SPListRule
 from office365.sharepoint.pages.wiki_page_creation_information import WikiPageCreationInformation
 from office365.sharepoint.permissions.securable_object import SecurableObject
+from office365.sharepoint.sites.site_script_utility import SiteScriptUtility
 from office365.sharepoint.usercustomactions.user_custom_action_collection import UserCustomActionCollection
 from office365.sharepoint.views.view import View
 from office365.sharepoint.views.view_collection import ViewCollection
@@ -35,6 +36,20 @@ class List(SecurableObject):
 
     def __init__(self, context, resource_path=None):
         super(List, self).__init__(context, resource_path)
+
+    def get_site_script(self, options=None):
+        """Creates site script syntax
+
+        :param dict or None options:
+        """
+        result = ClientResult(self.context)
+
+        def _list_loaded():
+            list_abs_url = self.context.create_safe_url(self.root_folder.serverRelativeUrl, False)
+            SiteScriptUtility.get_site_script_from_list(self.context, list_abs_url, options, return_type=result)
+
+        self.ensure_property("RootFolder", _list_loaded)
+        return result
 
     def get_all_rules(self):
         return_type = ClientResult(self.context, ClientValueCollection(SPListRule))
@@ -88,10 +103,13 @@ class List(SecurableObject):
 
     def create_document_with_default_name(self, folder_path, extension):
         """
-        :param str folder_path:
-        :param str extension:
+        Creates a empty document with default filename with the given extension at the path given by folderPath.
+        Returns the name of the newly created document.
+
+        :param str folder_path: The path within the current list at which to create the document.
+        :param str extension: The file extension without dot prefix.
         """
-        return_type = FlowSynchronizationResult(self.context)
+        return_type = ClientResult(self.context)
         payload = {
             "folderPath": folder_path,
             "extension": extension
@@ -109,8 +127,11 @@ class List(SecurableObject):
 
     def render_list_data(self, view_xml):
         """
+        Returns the data for the specified query view.<56> The result is implementation-specific, used for
+        providing data to a user interface.
 
-        :param str view_xml: View xml
+        :param str view_xml:  Specifies the query as XML that conforms to the ViewDefinition type as specified in
+            [MS-WSSCAML] section 2.3.2.17.
         """
         result = ClientResult(self.context)
         payload = {
@@ -215,7 +236,7 @@ class List(SecurableObject):
         """
         Returns the list item with the specified ID.
 
-        :param str unique_id:
+        :param str unique_id: The unique ID that is associated with the list item.
 
         """
         return ListItem(self.context,
@@ -296,9 +317,16 @@ class List(SecurableObject):
 
     def add_item_using_path(self, leaf_name, object_type, folder_url):
         """
-        :type leaf_name: str
-        :type object_type: int
-        :type folder_url: str
+        Adds a ListItem to an existing List.
+
+        :param str leaf_name: Specifies the name of the list item that will be created. In the case of a
+            document library, the name is equal to the filename of the list item.
+        :param int object_type: Specifies the file system object type for the item that will be created.
+            It MUST be either FileSystemObjectType.File or FileSystemObjectType.Folder.
+        :param str ot None folder_url: Specifies the url of the folder of the new list item.
+            The value MUST be either null or the decoded url value an empty string or a server-relative
+            URL or an absolute URL. If the value is not null or the decoded url value not being empty string,
+            the decoded url value MUST point to a location within the list.
         """
         from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
         parameters = ListItemCreationInformationUsingPath(leaf_name, object_type, folder_path=SPResPath(folder_url))
@@ -339,6 +367,7 @@ class List(SecurableObject):
         return changes
 
     def get_checked_out_files(self):
+        """Returns a collection of checked-out files as specified in section 3.2.5.381."""
         result = CheckedOutFileCollection(self.context)
         qry = ServiceOperationQuery(self, "GetCheckedOutFiles", None, None, None, result)
         self.context.add_query(qry)
@@ -364,6 +393,7 @@ class List(SecurableObject):
     def id(self):
         """
         Gets a value that specifies the list identifier.
+
         :rtype: str
         """
         return self.properties.get("Id", None)

@@ -29,12 +29,13 @@ from office365.sharepoint.principal.group import Group
 from office365.sharepoint.principal.group_collection import GroupCollection
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.principal.user_collection import UserCollection
-from office365.sharepoint.pushnotifications.push_notification_subscriber import PushNotificationSubscriber
+from office365.sharepoint.pushnotifications.subscriber import PushNotificationSubscriber
 from office365.sharepoint.recyclebin.item_collection import RecycleBinItemCollection
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
 from office365.sharepoint.sharing.object_sharing_settings import ObjectSharingSettings
 from office365.sharepoint.sharing.sharing_link_data import SharingLinkData
 from office365.sharepoint.sharing.sharing_result import SharingResult
+from office365.sharepoint.sites.site_script_utility import SiteScriptUtility
 from office365.sharepoint.sites.site_types import SiteCollectionCorporateCatalogAccessor
 from office365.sharepoint.tenant.administration.tenant_types import TenantCorporateCatalogAccessor
 from office365.sharepoint.ui.applicationpages.client_people_picker import (
@@ -43,22 +44,10 @@ from office365.sharepoint.ui.applicationpages.client_people_picker import (
 from office365.sharepoint.webparts.client_web_part_collection import ClientWebPartCollection
 from office365.sharepoint.webs.context_web_information import ContextWebInformation
 from office365.sharepoint.webs.regional_settings import RegionalSettings
+from office365.sharepoint.webs.site_scripts import SiteScriptSerializationResult, SiteScriptSerializationInfo
 from office365.sharepoint.webs.web_information_collection import WebInformationCollection
 from office365.sharepoint.webs.web_template_collection import WebTemplateCollection
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
-from office365.runtime.compat import urlparse
-
-
-def _create_safe_url(context, url, relative=True):
-    """
-    :type context: office365.sharepoint.client_context.ClientContext
-    :type url: str
-    :type relative: bool
-    """
-    site_path = urlparse(context.base_url).path
-    root_site_url = context.base_url.replace(site_path, "")
-    result = url if url.startswith(site_path) else "/".join([site_path, url])
-    return result if relative else "".join([root_site_url, result])
 
 
 class Web(SecurableObject):
@@ -76,6 +65,27 @@ class Web(SecurableObject):
             resource_path = ResourcePath("Web")
         super(Web, self).__init__(context, resource_path)
         self._web_url = None
+
+    def get_site_script(self, include_branding=True, included_lists=None, include_links_to_exported_items=True,
+                        include_regional_settings=True):
+        """
+        Creates site script syntax from current SharePoint site.
+
+        :param bool include_branding: Extracts the configuration of the site's branding.
+        :param list[str] or None included_lists: A list of one or more lists. Each is identified by the list url.
+        :param bool include_links_to_exported_items: Extracts navigation links. In order to export navigation links
+            pointing to lists, the list needs to be included in the request as well.
+        :param bool include_regional_settings: Extracts the site's regional settings.
+        """
+        result = ClientResult(self.context, SiteScriptSerializationResult())
+        info = SiteScriptSerializationInfo(include_branding, included_lists, include_links_to_exported_items,
+                                           include_regional_settings)
+
+        def _web_loaded():
+            SiteScriptUtility.get_site_script_from_web(self.context, self.url, info, return_type=result)
+
+        self.ensure_property("Url", _web_loaded)
+        return result
 
     def consent_to_power_platform(self):
         return_type = FlowSynchronizationResult(self.context)
@@ -348,7 +358,7 @@ class Web(SecurableObject):
         """
         :type decoded_url: str
         """
-        safe_decoded_url = _create_safe_url(self.context, decoded_url)
+        safe_decoded_url = self.context.create_safe_url(decoded_url)
         return_list = List(self.context)
         self.lists.add_child(return_list)
         qry = ServiceOperationQuery(self, "GetListUsingPath", SPResPath(safe_decoded_url), None, None, return_list)
@@ -398,7 +408,7 @@ class Web(SecurableObject):
         """
         result = ClientResult(context)
         payload = {
-            "url": _create_safe_url(context, url, False),
+            "url": context.create_safe_url(url, False),
             "isEditLink": is_edit_link
         }
         qry = ServiceOperationQuery(context.web, "CreateAnonymousLink", None, payload, None, result)
@@ -559,7 +569,7 @@ class Web(SecurableObject):
 
         :type path: str
         """
-        safe_path = _create_safe_url(self.context, path)
+        safe_path = self.context.create_safe_url(path)
         return List(self.context,
                     ServiceOperationPath("getList", [safe_path], self.resource_path))
 
@@ -831,6 +841,33 @@ class Web(SecurableObject):
         return return_type
 
     @staticmethod
+    def forward_object_link(context, url, people_picker_input, email_subject=None, email_body=None):
+        """
+        Shares an object in SharePoint, such as a list item or a site with no Acl changes, by sending the link.
+        This is used when the user has no permission to share and cannot send access request.
+        The user can use this method to send the link of the object to site members who already have permission
+        to view the object.
+        Returns a SharingResult object that contains completion script and page for redirection if desired.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param str url: The URL of the website with the path of an object in SharePoint query string parameters.
+        :param str people_picker_input: A string of JSON representing users in people picker format.
+        :param str email_subject: The email subject.
+        :param str email_body: The email subject.
+        """
+        result = SharingResult(context)
+        payload = {
+            "url": url,
+            "peoplePickerInput": people_picker_input,
+            "emailSubject": email_subject,
+            "emailBody": email_body,
+        }
+        qry = ServiceOperationQuery(context.web, "ForwardObjectLink", None, payload, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
+
+    @staticmethod
     def share_object(context, url, people_picker_input,
                      role_value=None,
                      group_id=0, propagate_acl=False,
@@ -854,7 +891,7 @@ class Web(SecurableObject):
         :param str email_body: The email subject.
         :param bool use_simplified_roles: A Boolean value indicating whether to use the SharePoint simplified roles
         (Edit, View) or not.
-
+        :param SharingResult or None result: Return type
         """
         if result is None:
             result = SharingResult(context)

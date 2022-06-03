@@ -7,6 +7,7 @@ from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.sitedesigns.site_design_metadata import SiteDesignMetadata
 from office365.sharepoint.sitedesigns.site_script_metadata import SiteScriptMetadata
 from office365.sharepoint.sitedesigns.site_design_principal import SiteDesignPrincipal
+from office365.sharepoint.webs.site_scripts import SiteScriptSerializationResult, SiteScriptSerializationInfo
 
 
 class SiteScriptUtility(BaseEntity):
@@ -17,6 +18,50 @@ class SiteScriptUtility(BaseEntity):
     def __init__(self, context):
         path = ResourcePath("Microsoft.SharePoint.Utilities.WebTemplateExtensions.SiteScriptUtility")
         super(SiteScriptUtility, self).__init__(context, path)
+
+    @staticmethod
+    def get_site_script_from_list(context, list_url, options=None, return_type=None):
+        """
+        Creates site script syntax from an existing SharePoint list.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param str list_url:  URL of the list.
+        :param dict or None options:
+        :param ClientResult return_type:  Return type
+        """
+        if return_type is None:
+            return_type = ClientResult(context)
+        payload = {
+            "listUrl": list_url,
+            "options": options
+        }
+        utility = SiteScriptUtility(context)
+        qry = ServiceOperationQuery(utility, "GetSiteScriptFromList", None, payload, None, return_type)
+        qry.static = True
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
+    def get_site_script_from_web(context, web_url, info=None, return_type=None):
+        """
+        Creates site script syntax from an existing SharePoint site.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param str web_url:  URL of the web.
+        :param SiteScriptSerializationInfo or None info:
+        :param ClientResult return_type:  Return type
+        """
+        if return_type is None:
+            return_type = ClientResult(context, SiteScriptSerializationResult())
+        payload = {
+            "webUrl": web_url,
+            "info": info
+        }
+        utility = SiteScriptUtility(context)
+        qry = ServiceOperationQuery(utility, "GetSiteScriptFromWeb", None, payload, None, return_type)
+        qry.static = True
+        context.add_query(qry)
+        return return_type
 
     @staticmethod
     def create_site_script(context, title, description, content):
@@ -127,3 +172,7 @@ class SiteScriptUtility(BaseEntity):
         qry.static = True
         context.add_query(qry)
         return utility
+
+    @property
+    def entity_type_name(self):
+        return "Microsoft.SharePoint.Utilities.WebTemplateExtensions.SiteScriptUtility"
