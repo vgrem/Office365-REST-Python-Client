@@ -68,7 +68,7 @@ class Folder(BaseEntity):
     def recycle_with_parameters(self, parameters):
         """
 
-        :type parameters: office365.sharepoint.folders.folder_delete_parameters.FolderDeleteParameters
+        :type parameters: office365.sharepoint.folders.delete_parameters.FolderDeleteParameters
         """
         result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "RecycleWithParameters", None, parameters, "parameters", result)

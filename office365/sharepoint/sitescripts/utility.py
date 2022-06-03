@@ -4,10 +4,10 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.sitedesigns.site_design_metadata import SiteDesignMetadata
-from office365.sharepoint.sitedesigns.site_script_metadata import SiteScriptMetadata
-from office365.sharepoint.sitedesigns.site_design_principal import SiteDesignPrincipal
-from office365.sharepoint.webs.site_scripts import SiteScriptSerializationResult, SiteScriptSerializationInfo
+from office365.sharepoint.sitedesigns.metadata import SiteDesignMetadata
+from office365.sharepoint.sitescripts.metadata import SiteScriptMetadata
+from office365.sharepoint.sitedesigns.principal import SiteDesignPrincipal
+from office365.sharepoint.sitescripts.types import SiteScriptSerializationResult, SiteScriptActionResult
 
 
 class SiteScriptUtility(BaseEntity):
@@ -71,19 +71,36 @@ class SiteScriptUtility(BaseEntity):
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
         :param str title:
         :param str description:
-        :param str content:
+        :param dict content:
         """
         return_type = ClientResult(context, SiteScriptMetadata())
         utility = SiteScriptUtility(context)
-        payload = {
+        params = {
             "Title": title,
             "Description": description,
-            "Content": content
         }
-        qry = ServiceOperationQuery(utility, "CreateSiteScript", None, payload, None, return_type)
+        qry = ServiceOperationQuery(utility, "CreateSiteScript", params, content, None, return_type)
         qry.static = True
         context.add_query(qry)
         return return_type
+
+    @staticmethod
+    def delete_site_script(context, _id):
+        """
+        Deletes a site script.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param str _id:
+
+        """
+        utility = SiteScriptUtility(context)
+        payload = {
+            "id": _id,
+        }
+        qry = ServiceOperationQuery(utility, "DeleteSiteScript", None, payload, None, None)
+        qry.static = True
+        context.add_query(qry)
+        return utility
 
     @staticmethod
     def get_site_scripts(context, store=None):
@@ -99,6 +116,24 @@ class SiteScriptUtility(BaseEntity):
             "store": store
         }
         qry = ServiceOperationQuery(utility, "GetSiteScripts", None, payload, None, return_type)
+        qry.static = True
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
+    def execute_site_script_action(context, action_definition):
+        """
+        Gets a list of information on all existing site scripts.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param str action_definition:
+        """
+        return_type = ClientResult(context, ClientValueCollection(SiteScriptActionResult))
+        utility = SiteScriptUtility(context)
+        payload = {
+            "actionDefinition": action_definition
+        }
+        qry = ServiceOperationQuery(utility, "ExecuteSiteScriptAction", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
         return return_type

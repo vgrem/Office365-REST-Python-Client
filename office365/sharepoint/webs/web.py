@@ -35,7 +35,7 @@ from office365.sharepoint.sharing.externalSharingSiteOption import ExternalShari
 from office365.sharepoint.sharing.object_sharing_settings import ObjectSharingSettings
 from office365.sharepoint.sharing.sharing_link_data import SharingLinkData
 from office365.sharepoint.sharing.sharing_result import SharingResult
-from office365.sharepoint.sites.site_script_utility import SiteScriptUtility
+from office365.sharepoint.sitescripts.utility import SiteScriptUtility
 from office365.sharepoint.sites.site_types import SiteCollectionCorporateCatalogAccessor
 from office365.sharepoint.tenant.administration.tenant_types import TenantCorporateCatalogAccessor
 from office365.sharepoint.ui.applicationpages.client_people_picker import (
@@ -44,7 +44,7 @@ from office365.sharepoint.ui.applicationpages.client_people_picker import (
 from office365.sharepoint.webparts.client_web_part_collection import ClientWebPartCollection
 from office365.sharepoint.webs.context_web_information import ContextWebInformation
 from office365.sharepoint.webs.regional_settings import RegionalSettings
-from office365.sharepoint.webs.site_scripts import SiteScriptSerializationResult, SiteScriptSerializationInfo
+from office365.sharepoint.sitescripts.types import SiteScriptSerializationResult, SiteScriptSerializationInfo
 from office365.sharepoint.webs.web_information_collection import WebInformationCollection
 from office365.sharepoint.webs.web_template_collection import WebTemplateCollection
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath

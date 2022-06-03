@@ -23,7 +23,7 @@ from office365.sharepoint.listitems.listItem_collection import ListItemCollectio
 from office365.sharepoint.lists.list_rule import SPListRule
 from office365.sharepoint.pages.wiki_page_creation_information import WikiPageCreationInformation
 from office365.sharepoint.permissions.securable_object import SecurableObject
-from office365.sharepoint.sites.site_script_utility import SiteScriptUtility
+from office365.sharepoint.sitescripts.utility import SiteScriptUtility
 from office365.sharepoint.usercustomactions.user_custom_action_collection import UserCustomActionCollection
 from office365.sharepoint.views.view import View
 from office365.sharepoint.views.view_collection import ViewCollection

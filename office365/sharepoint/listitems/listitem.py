@@ -15,12 +15,10 @@ from office365.sharepoint.listitems.list_item_version import ListItemVersion
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.reputationmodel.reputation import Reputation
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
-from office365.sharepoint.sharing.information_request import SharingInformationRequest
 from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
 from office365.sharepoint.sharing.share_link_request import ShareLinkRequest
 from office365.sharepoint.sharing.share_link_response import ShareLinkResponse
 from office365.sharepoint.sharing.share_link_settings import ShareLinkSettings
-from office365.sharepoint.sharing.sharing_information import SharingInformation
 from office365.sharepoint.sharing.sharing_result import SharingResult
 from office365.sharepoint.taxonomy.taxonomy_field_value import TaxonomyFieldValueCollection
 from office365.sharepoint.ui.applicationpages.client_people_picker import (
@@ -42,14 +40,6 @@ class ListItem(SecurableObject):
         super(ListItem, self).__init__(context, resource_path)
         if parent_list is not None:
             self.set_property("ParentList", parent_list, False)
-
-    def get_sharing_information(self):
-        """Gets the sharing information for a list item."""
-        return_type = SharingInformation(self.context)
-        payload = SharingInformationRequest()
-        qry = ServiceOperationQuery(self, "GetSharingInformation", None, payload, "request", return_type)
-        self.context.add_query(qry)
-        return return_type
 
     def share_link(self, link_kind, expiration=None):
         """Creates a tokenized sharing link for a list item based on the specified parameters and optionally

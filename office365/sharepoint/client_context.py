@@ -290,7 +290,7 @@ class ClientContext(ClientRuntimeContext):
     @property
     def micro_service_manager(self):
         """Alias to MicroServiceManager"""
-        from office365.sharepoint.microservice.micro_service_manager import MicroServiceManager
+        from office365.sharepoint.microservice.manager import MicroServiceManager
         return MicroServiceManager(self, ResourcePath("microServiceManager"))
 
     @property
