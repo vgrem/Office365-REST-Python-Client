@@ -1,18 +1,18 @@
 from office365.runtime.client_value import ClientValue
-from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.types.collections import StringCollection
 
 
 class SecondaryAdministratorsFieldsData(ClientValue):
 
-    def __init__(self, site_id, emails=None, names=None):
+    def __init__(self, site_id=None, emails=None, names=None):
         """
         :type emails: List[str] or None
         :type names: List[str] or None
         :type site_id: str or None
         """
         super(SecondaryAdministratorsFieldsData, self).__init__()
-        self.secondaryAdministratorEmails = ClientValueCollection(str, emails)
-        self.secondaryAdministratorLoginNames = ClientValueCollection(str, names)
+        self.secondaryAdministratorEmails = StringCollection(emails)
+        self.secondaryAdministratorLoginNames = StringCollection(names)
         self.siteId = site_id
 
     @property

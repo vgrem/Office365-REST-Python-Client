@@ -139,6 +139,71 @@ class SiteScriptUtility(BaseEntity):
         return return_type
 
     @staticmethod
+    def create_site_design(context, info):
+        """
+        Creates a new site design available to users when they create a new site from the SharePoint start page.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param office365.sharepoint.sitedesigns.creation_info.SiteDesignCreationInfo info:
+        """
+        return_type = ClientResult(context, SiteDesignMetadata())
+        utility = SiteScriptUtility(context)
+        qry = ServiceOperationQuery(utility, "CreateSiteDesign", None, info, "info", return_type)
+        qry.static = True
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
+    def update_site_design(context, update_info):
+        """
+        Updates a site design with new values.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param SiteDesignMetadata update_info:
+        """
+        return_type = ClientResult(context, SiteDesignMetadata())
+        utility = SiteScriptUtility(context)
+        qry = ServiceOperationQuery(utility, "UpdateSiteDesign", None, update_info, "updateInfo", return_type)
+        qry.static = True
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
+    def get_site_designs(context, include_untargeted=True, store=None):
+        """
+        Gets a list of information on existing site designs.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param bool include_untargeted:
+        :param int or None store:
+        """
+        return_type = ClientResult(context, ClientValueCollection(SiteDesignMetadata))
+        utility = SiteScriptUtility(context)
+        payload = {
+            "includeUntargeted": include_untargeted,
+            "store": store
+        }
+        qry = ServiceOperationQuery(utility, "GetSiteDesigns", None, payload, None, return_type)
+        qry.static = True
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
+    def get_site_design_stages(context, site_design_id):
+        """
+        Gets a list of site design stages.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param str site_design_id:
+        """
+        return_type = ClientResult(context)
+        utility = SiteScriptUtility(context)
+        qry = ServiceOperationQuery(utility, "GetSiteDesignStages", [site_design_id], None, None, return_type)
+        qry.static = True
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
     def get_site_design_metadata(context, _id, store=None):
         """
         Gets information about a specific site script.

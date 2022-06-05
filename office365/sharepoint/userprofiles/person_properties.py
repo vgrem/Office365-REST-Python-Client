@@ -1,4 +1,4 @@
-from office365.runtime.types.string_collection import StringCollection
+from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.base_entity import BaseEntity
 
 

@@ -1,6 +1,6 @@
 # coding=utf-8
 from office365.directory.directory_object import DirectoryObject
-from office365.runtime.types.string_collection import StringCollection
+from office365.runtime.types.collections import StringCollection
 
 
 class ExtensionProperty(DirectoryObject):

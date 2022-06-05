@@ -1,11 +1,15 @@
+import uuid
+
+
 class ODataType(object):
 
-    primitive_types = {
+    standard_types = {
         bool: "Edm.Boolean",
         int: "Edm.Int32",
         str: "Edm.String",
+        uuid.UUID: "Edm.Guid"
     }
-    """Primitive server types"""
+    """Primitive OData data type mapping"""
 
     def __init__(self):
         self.name = None
@@ -13,6 +17,34 @@ class ODataType(object):
         self.baseType = None
         self.properties = {}
         self.methods = {}
+
+    @staticmethod
+    def resolve_type(client_type):
+        """
+        Resolve OData type name
+
+        :param str or int or bool or uuid or ClientValue or list[str or int or bool or uuid] client_type: Client value
+        """
+        from office365.runtime.client_value import ClientValue
+        from office365.runtime.client_value_collection import ClientValueCollection
+
+        collection = False
+        if isinstance(client_type, list):
+            collection = True
+            resolved_name = ODataType.standard_types.get(type(client_type[0]), None)
+        elif isinstance(client_type, ClientValue):
+            if isinstance(client_type, ClientValueCollection):
+                collection = True
+                resolved_name = client_type.item_type_name
+            else:
+                resolved_name = client_type.entity_type_name
+        else:
+            resolved_name = ODataType.standard_types.get(type(client_type), None)
+
+        if resolved_name:
+            return "Collection({0})".format(resolved_name) if collection else resolved_name
+        else:
+            return None
 
     def add_property(self, prop_schema):
         """

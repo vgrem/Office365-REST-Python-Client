@@ -1,6 +1,6 @@
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.types.string_collection import StringCollection
+from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.search.query.sort import Sort
 
 

@@ -6,7 +6,7 @@ from office365.onedrive.listitems.item_reference import ItemReference
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.types.string_collection import StringCollection
+from office365.runtime.types.collections import StringCollection
 
 
 class ContentType(BaseItem):

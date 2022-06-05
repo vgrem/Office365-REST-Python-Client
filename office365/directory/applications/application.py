@@ -8,7 +8,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.runtime.types.string_collection import StringCollection
+from office365.runtime.types.collections import StringCollection
 
 
 class Application(DirectoryObject):
