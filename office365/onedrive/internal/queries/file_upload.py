@@ -1,7 +1,7 @@
 from office365.onedrive.internal.queries.upload_session import UploadSessionQuery
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.driveitems.drive_item_uploadable_properties import DriveItemUploadableProperties
-from office365.onedrive.internal.paths.url_path import UrlPath
+from office365.onedrive.internal.paths.url import UrlPath
 
 
 class ResumableFileUpload(UploadSessionQuery):

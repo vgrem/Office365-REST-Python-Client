@@ -11,7 +11,7 @@ from office365.onedrive.analytics.item_activity_stat import ItemActivityStat
 from office365.onedrive.analytics.item_analytics import ItemAnalytics
 from office365.onedrive.permissions.permission import Permission
 from office365.entity_collection import EntityCollection
-from office365.onedrive.internal.paths.children_path import ChildrenPath
+from office365.onedrive.internal.paths.children import ChildrenPath
 from office365.onedrive.driveitems.conflict_behavior import ConflictBehavior
 from office365.onedrive.shares.shared import Shared
 from office365.onedrive.versions.drive_item_version import DriveItemVersion
@@ -23,7 +23,7 @@ from office365.onedrive.driveitems.publication_facet import PublicationFacet
 from office365.onedrive.driveitems.thumbnail_set import ThumbnailSet
 from office365.onedrive.upload_session import UploadSession
 from office365.onedrive.workbooks.workbook import Workbook
-from office365.onedrive.internal.paths.url_path import UrlPath
+from office365.onedrive.internal.paths.url import UrlPath
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.create_entity_query import CreateEntityQuery

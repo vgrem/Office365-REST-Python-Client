@@ -25,3 +25,14 @@ class CalendarPermission(Entity):
         For the "My Organization" sharee, the address property is null. Read-only.
         """
         return self.properties.get("emailAddress", EmailAddress())
+
+    @property
+    def is_removable(self):
+        """
+        True if the user can be removed from the list of sharees or delegates for the specified calendar,
+        false otherwise. The "My organization" user determines the permissions other people within your organization
+        have to the given calendar. You cannot remove "My organization" as a sharee to a calendar.
+
+        :rtype: bool or None
+        """
+        return self.properties.get("isRemovable", None)

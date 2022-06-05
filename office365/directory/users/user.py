@@ -2,8 +2,10 @@ from office365.communications.onlinemeetings.online_meeting_collection import On
 from office365.communications.presences.presence import Presence
 from office365.directory.extensions.extension import Extension
 from office365.directory.licenses.assigned_plan import AssignedPlan
+from office365.directory.users.user_settings import UserSettings
 from office365.onedrive.sites.site import Site
 from office365.onenote.onenote import Onenote
+from office365.outlook.calendar.attendee_base import AttendeeBase
 from office365.outlook.calendar.calendar import Calendar
 from office365.outlook.calendar.calendar_group import CalendarGroup
 from office365.outlook.calendar.event import Event
@@ -93,7 +95,7 @@ class User(DirectoryObject):
         self.context.add_query(qry)
         return self
 
-    def find_meeting_times(self):
+    def find_meeting_times(self, attendees=None, location_constraint=None):
         """
         Suggest meeting times and locations based on organizer and attendee availability, and time or location
         constraints specified as parameters.
@@ -106,9 +108,20 @@ class User(DirectoryObject):
         In scenarios like test environments where the input parameters and calendar data remain static, expect
         that the suggested results may differ over time.
 
+        :param list[AttendeeBase] or None attendees: A collection of attendees or resources for the meeting.
+            Since findMeetingTimes assumes that any attendee who is a person is always required, specify required
+            for a person and resource for a resource in the corresponding type property. An empty collection causes
+            findMeetingTimes to look for free time slots for only the organizer. Optional.
+        :param office365.outlook.calendar.location_constraint.LocationConstraint or None location_constraint:
+            The organizer's requirements about the meeting location, such as whether a suggestion for a meeting
+            location is required, or there are specific locations only where the meeting can take place. Optional.
         """
+        payload = {
+            "attendees": ClientValueCollection(AttendeeBase, attendees),
+            "locationConstraint": location_constraint
+        }
         result = ClientResult(self.context, MeetingTimeSuggestionsResult())
-        qry = ServiceOperationQuery(self, "findMeetingTimes", None, None, None, result)
+        qry = ServiceOperationQuery(self, "findMeetingTimes", None, payload, None, result)
         self.context.add_query(qry)
         return result
 
@@ -185,14 +198,56 @@ class User(DirectoryObject):
         self.context.add_query(qry)
         return result
 
+    def reprocess_license_assignment(self):
+        """
+        Reprocess all group-based license assignments for the user. To learn more about group-based licensing,
+        see What is group-based licensing in Azure Active Directory. Also see Identify and resolve license assignment
+        problems for a group in Azure Active Directory for more details.
+        """
+        return_type = User(self.context)
+        qry = ServiceOperationQuery(self, "reprocessLicenseAssignment", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     @property
     def account_enabled(self):
+        """True if the account is enabled; otherwise, false. This property is required when a user is created."""
         return self.properties.get('accountEnabled', None)
+
+    @property
+    def given_name(self):
+        """
+        The given name (first name) of the user. Maximum length is 64 characters.
+        """
+        return self.properties.get('givenName', None)
+
+    @property
+    def user_principal_name(self):
+        """
+        The user principal name (UPN) of the user. The UPN is an Internet-style login name for the user based on the
+        Internet standard RFC 822. By convention, this should map to the user's email name.
+        The general format is alias@domain, where domain must be present in the tenant's collection of verified domains.
+        This property is required when a user is created. The verified domains for the tenant can be accessed from
+        the verifiedDomains property of organization.
+        NOTE: This property cannot contain accent characters.
+        Only the following characters are allowed A - Z, a - z, 0 - 9, ' . - _ ! # ^ ~.
+        For the complete list of allowed characters, see username policies.
+
+        :rtype: str or None
+        """
+        return self.properties.get('userPrincipalName', None)
 
     @property
     def assigned_plans(self):
         """The plans that are assigned to the user."""
         return self.properties.get('assignedPlans', ClientValueCollection(AssignedPlan))
+
+    @property
+    def business_phones(self):
+        """String collection	The telephone numbers for the user. NOTE: Although this is a string collection,
+        only one number can be set for this property. Read-only for users synced from on-premises directory.
+        """
+        return self.properties.get('businessPhones', StringCollection())
 
     @property
     def creation_type(self):
@@ -214,7 +269,7 @@ class User(DirectoryObject):
         """A list of additional email addresses for the user;
         for example: ["bob@contoso.com", "Robert@fabrikam.com"]. Supports $filter.
         """
-        return self.properties.get('otherMails', ClientValueCollection(str))
+        return self.properties.get('otherMails', StringCollection())
 
     @property
     def identities(self):
@@ -381,6 +436,12 @@ class User(DirectoryObject):
                                    Onenote(self.context, ResourcePath("onenote", self.resource_path)))
 
     @property
+    def settings(self):
+        """Represents the user and organization settings object."""
+        return self.properties.get('settings',
+                                   UserSettings(self.context, ResourcePath("settings", self.resource_path)))
+
+    @property
     def planner(self):
         """The plannerUser resource provide access to Planner resources for a user."""
         return self.properties.get('planner',
@@ -433,6 +494,7 @@ class User(DirectoryObject):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "businessPhones": self.business_phones,
                 "calendarGroups": self.calendar_groups,
                 "contactFolders": self.contact_folders,
                 "licenseDetails": self.license_details,

@@ -1,6 +1,6 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
-from office365.onedrive.internal.paths.children_path import ChildrenPath
+from office365.onedrive.internal.paths.children import ChildrenPath
 from office365.onedrive.termstore.localized_label import LocalizedLabel
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection

@@ -1,3 +1,4 @@
+import datetime
 import uuid
 
 
@@ -7,6 +8,7 @@ class ODataType(object):
         bool: "Edm.Boolean",
         int: "Edm.Int32",
         str: "Edm.String",
+        datetime.datetime: "Edm.DateTimeOffset",
         uuid.UUID: "Edm.Guid"
     }
     """Primitive OData data type mapping"""

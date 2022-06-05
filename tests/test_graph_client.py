@@ -1,8 +1,8 @@
 import uuid
 
-from office365.onedrive.internal.paths.children_path import ChildrenPath
-from office365.onedrive.internal.paths.root_path import RootPath
-from office365.onedrive.internal.paths.url_path import UrlPath
+from office365.onedrive.internal.paths.children import ChildrenPath
+from office365.onedrive.internal.paths.root import RootPath
+from office365.onedrive.internal.paths.url import UrlPath
 from office365.runtime.paths.resource_path import ResourcePath
 from tests import test_team_site_url
 from tests.graph_case import GraphTestCase

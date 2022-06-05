@@ -3,5 +3,7 @@ class AttachmentType:
         pass
 
     file = "file"
+
     item = "item"
+
     reference = "reference"

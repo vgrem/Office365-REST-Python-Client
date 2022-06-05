@@ -4,6 +4,7 @@ from office365.directory.applications.app_role_assignment import AppRoleAssignme
 from office365.directory.licenses.assigned_license import AssignedLicense
 from office365.directory.directory_object import DirectoryObject
 from office365.directory.directory_object_collection import DirectoryObjectCollection
+from office365.directory.resource_specific_permission_grant import ResourceSpecificPermissionGrant
 from office365.entity_collection import EntityCollection, DeltaCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onenote.onenote import Onenote
@@ -35,6 +36,12 @@ class Group(DirectoryObject):
         qry = ServiceOperationQuery(self, "addFavorite")
         self.context.add_query(qry)
         return self
+
+    def check_granted_permissions_for_app(self):
+        return_type = EntityCollection(self.context, ResourceSpecificPermissionGrant)
+        qry = ServiceOperationQuery(self, "checkGrantedPermissionsForApp", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def remove_favorite(self):
         """
