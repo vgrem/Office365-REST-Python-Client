@@ -6,16 +6,16 @@ from office365.runtime.types.event_handler import EventHandler
 
 class ClientObjectCollection(ClientObject):
 
-    def __init__(self, context, child_item_type, resource_path=None):
+    def __init__(self, context, item_type, resource_path=None):
         """Client object collection
 
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
-        :type child_item_type: type[ClientObject]
+        :type item_type: type[ClientObject]
         :type resource_path: office365.runtime.paths.resource_path.ResourcePath
         """
         super(ClientObjectCollection, self).__init__(context, resource_path)
         self._data = []
-        self._item_type = child_item_type
+        self._item_type = item_type
         self.page_loaded = EventHandler(False)
         self._page_size = 100
         self._paged_mode = True
@@ -174,6 +174,9 @@ class ClientObjectCollection(ClientObject):
         return result
 
     def _load_next_items(self):
+        """
+        Submit a request to retrieve next collection of items
+        """
         request = RequestOptions(self.next_request_url)
         response = self.context.execute_request_direct(request)
         response.raise_for_status()

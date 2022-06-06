@@ -4,7 +4,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.audit.audit import Audit
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.changes.change_collection import ChangeCollection
+from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.eventreceivers.event_receiver_definition import EventReceiverDefinitionCollection
 from office365.sharepoint.features.feature_collection import FeatureCollection
 from office365.sharepoint.lists.list import List
@@ -137,7 +137,7 @@ class Site(BaseEntity):
         """Returns the collection of all changes from the change log that have occurred within the scope of the site,
         based on the specified query.
 
-        :param office365.sharepoint.changes.change_query.ChangeQuery query: Specifies which changes to return
+        :param office365.sharepoint.changes.query.ChangeQuery query: Specifies which changes to return
         """
         changes = ChangeCollection(self.context)
         qry = ServiceOperationQuery(self, "getChanges", None, query, "query", changes)

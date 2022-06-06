@@ -6,7 +6,7 @@ from office365.sharepoint.internal.queries.create_file import create_file_query
 from office365.sharepoint.internal.queries.upload_session import UploadSessionQuery
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.files.file import File
-from office365.sharepoint.files.file_creation_information import FileCreationInformation
+from office365.sharepoint.files.creation_information import FileCreationInformation
 
 
 class FileCollection(BaseEntityCollection):
@@ -56,7 +56,7 @@ class FileCollection(BaseEntityCollection):
     def add(self, file_creation_information):
         """Creates a File resource
 
-        :type file_creation_information: office365.sharepoint.files.file_creation_information.FileCreationInformation
+        :type file_creation_information: office365.sharepoint.files.creation_information.FileCreationInformation
         :rtype: office365.sharepoint.files.file.File
         """
         qry = create_file_query(self, file_creation_information)

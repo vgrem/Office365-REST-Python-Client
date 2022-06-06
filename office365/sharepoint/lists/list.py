@@ -3,8 +3,8 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.changes.change_collection import ChangeCollection
-from office365.sharepoint.changes.change_query import ChangeQuery
+from office365.sharepoint.changes.collection import ChangeCollection
+from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
 from office365.sharepoint.customactions.custom_action_element import CustomActionElementCollection
 from office365.sharepoint.eventreceivers.event_receiver_definition import EventReceiverDefinitionCollection
@@ -204,7 +204,7 @@ class List(SecurableObject):
         Returns the changes made to the list since the date and time specified in the change token defined
         by the query input parameter.<57>
 
-        :type query: office365.sharepoint.changes.change_log_item_query.ChangeLogItemQuery
+        :type query: office365.sharepoint.changes.log_item_query.ChangeLogItemQuery
         """
         result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "getListItemChangesSinceToken", None, query, "query", result)

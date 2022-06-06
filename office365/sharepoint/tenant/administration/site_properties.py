@@ -1,5 +1,5 @@
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.internal.paths.entity_resource import EntityPath
+from office365.sharepoint.internal.paths.entity import EntityPath
 
 
 class SiteProperties(BaseEntity):

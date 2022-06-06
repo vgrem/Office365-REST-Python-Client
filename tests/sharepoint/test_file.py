@@ -3,7 +3,7 @@ import os
 from tests import test_client_credentials, create_unique_name, test_root_site_url
 from tests.sharepoint.sharepoint_case import SPTestCase
 
-from office365.sharepoint.changes.change_query import ChangeQuery
+from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.files.file import File
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.list_creation_information import ListCreationInformation

@@ -23,7 +23,6 @@ jobs:
       env:
         office365_python_sdk_securevars: '${{ secrets.OFFICE365_PYTHON_SDK_SECUREVARS }}'
       run: |
-        echo "OFFICE365_PYTHON_SDK_SECUREVARS:${{secrets.OFFICE365_PYTHON_SDK_SECUREVARS}}"
         echo "OFFICE365_PYTHON_SDK_SECUREVARS:${{env.office365_python_sdk_securevars}}"
     - name: Set up Python 3.10
       uses: actions/setup-python@v3

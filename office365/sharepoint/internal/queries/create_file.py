@@ -2,14 +2,12 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.sharepoint.files.file import File
 
 
-def create_file_query(files, file_creation_information):
+def create_file_query(files, file_create_info):
     """
-    :type file_creation_information: office365.sharepoint.files.file_creation_information.FileCreationInformation
-    :type files: office365.sharepoint.files.file_collection.FileCollection
+    :type file_create_info: office365.sharepoint.files.creation_information.FileCreationInformation
+    :type files: office365.sharepoint.files.collection.FileCollection
     """
     return_file = File(files.context)
-    qry = ServiceOperationQuery(files, "add", file_creation_information.to_json(),
-                                file_creation_information.content, None,
-                                return_file)
+    qry = ServiceOperationQuery(files, "add", file_create_info.to_json(), file_create_info.content, None, return_file)
     files.add_child(return_file)
     return qry

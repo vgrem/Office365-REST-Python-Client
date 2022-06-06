@@ -16,14 +16,14 @@ class ChangeCollection(BaseEntityCollection):
 
         :type properties: dict
         """
-        from office365.sharepoint.changes.change_user import ChangeUser
-        from office365.sharepoint.changes.change_group import ChangeGroup
-        from office365.sharepoint.changes.change_list import ChangeList
-        from office365.sharepoint.changes.change_web import ChangeWeb
-        from office365.sharepoint.changes.change_content_type import ChangeContentType
-        from office365.sharepoint.changes.change_alert import ChangeAlert
-        from office365.sharepoint.changes.change_field import ChangeField
-        from office365.sharepoint.changes.change_item import ChangeItem
+        from office365.sharepoint.changes.user import ChangeUser
+        from office365.sharepoint.changes.group import ChangeGroup
+        from office365.sharepoint.changes.list import ChangeList
+        from office365.sharepoint.changes.web import ChangeWeb
+        from office365.sharepoint.changes.content_type import ChangeContentType
+        from office365.sharepoint.changes.alert import ChangeAlert
+        from office365.sharepoint.changes.field import ChangeField
+        from office365.sharepoint.changes.item import ChangeItem
 
         if "ListId" in properties and "WebId" in properties:
             self._item_type = ChangeList

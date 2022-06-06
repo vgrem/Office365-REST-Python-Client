@@ -1,7 +1,7 @@
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.attachments.attachmentfile import AttachmentFile
-from office365.sharepoint.attachments.attachmentfile_creation_information import AttachmentfileCreationInformation
+from office365.sharepoint.attachments.file import AttachmentFile
+from office365.sharepoint.attachments.file_creation_information import AttachmentfileCreationInformation
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.files.file import File
 
@@ -52,5 +52,4 @@ class AttachmentFileCollection(BaseEntityCollection):
         """
         return AttachmentFile(context=self.context,
                               resource_path=ServiceOperationPath("GetByFileName", [filename],
-                                                                 self.resource_path),
-                              parent_collection=self)
+                                                                 self.resource_path), parent_collection=self)

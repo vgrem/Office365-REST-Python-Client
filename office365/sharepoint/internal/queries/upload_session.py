@@ -5,14 +5,14 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.sharepoint.internal.queries.create_file import create_file_query
 from office365.sharepoint.files.file import File
-from office365.sharepoint.files.file_creation_information import FileCreationInformation
+from office365.sharepoint.files.creation_information import FileCreationInformation
 
 
 class UploadSessionQuery(ServiceOperationQuery):
     def __init__(self, files, source_path, chunk_size, chunk_uploaded, chunk_func_args):
         """
 
-        :type files: office365.sharepoint.files.file_collection.FileCollection
+        :type files: office365.sharepoint.files.collection.FileCollection
         :type source_path: str
         :type chunk_size: int
         :type chunk_uploaded: (int, *)->None

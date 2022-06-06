@@ -252,7 +252,7 @@ class ClientContext(ClientRuntimeContext):
         if request.method == HttpMethod.Post:
             self.ensure_form_digest(request)
         # set custom SharePoint control headers
-        if isinstance(self.pending_request().json_format, JsonLightFormat):
+        if isinstance(self.pending_request().default_json_format, JsonLightFormat):
             if isinstance(query, DeleteEntityQuery):
                 request.ensure_header("X-HTTP-Method", "DELETE")
                 request.ensure_header("IF-MATCH", '*')

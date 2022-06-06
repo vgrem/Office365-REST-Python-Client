@@ -1,11 +1,10 @@
 import uuid
 
-from examples.sharepoint.files.upload_file import test_team_site_url
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.fields.field_calculated import FieldCalculated
 from office365.sharepoint.fields.field_creation_information import FieldCreationInformation
 from office365.sharepoint.fields.field_type import FieldType
-from tests import test_client_credentials
+from tests import test_client_credentials, test_team_site_url
 
 client = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 

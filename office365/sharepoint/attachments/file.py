@@ -52,14 +52,13 @@ class AttachmentFile(AbstractFile):
     @property
     def parent_collection(self):
         """
-        :rtype: office365.sharepoint.attachments.attachmentfile_collection.AttachmentFileCollection
+        :rtype: office365.sharepoint.attachments.file_collection.AttachmentFileCollection
         """
         return self._parent_collection
 
     def set_property(self, name, value, persist_changes=True):
         super(AttachmentFile, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
-
         if name == "ServerRelativeUrl":
             self._resource_path = ServiceOperationPath(
                 "getFileByServerRelativeUrl", [value], ResourcePath("Web"))

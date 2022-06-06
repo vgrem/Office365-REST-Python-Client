@@ -4,7 +4,7 @@ from random import randint
 
 from tests.sharepoint.sharepoint_case import SPTestCase
 
-from office365.sharepoint.attachments.attachmentfile_creation_information import AttachmentfileCreationInformation
+from office365.sharepoint.attachments.file_creation_information import AttachmentfileCreationInformation
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.list_creation_information import ListCreationInformation
 from office365.sharepoint.lists.list_template_type import ListTemplateType

@@ -1,3 +1,5 @@
+import copy
+
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_request import ClientRequest
@@ -21,11 +23,11 @@ class ODataRequest(ClientRequest):
         :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat
         """
         super(ODataRequest, self).__init__(context)
-        self._json_format = json_format
+        self._default_json_format = json_format
 
     @property
-    def json_format(self):
-        return self._json_format
+    def default_json_format(self):
+        return self._default_json_format
 
     def execute_request_direct(self, request):
         """
@@ -57,7 +59,7 @@ class ODataRequest(ClientRequest):
         """
         :type request: RequestOptions
         """
-        media_type = self.json_format.get_media_type()
+        media_type = self.default_json_format.get_media_type()
         request.ensure_header('Content-Type', media_type)
         request.ensure_header('Accept', media_type)
 
@@ -65,6 +67,7 @@ class ODataRequest(ClientRequest):
         """
         :type response: requests.Response
         """
+        json_format = copy.deepcopy(self.default_json_format)
         query = self.context.current_query
         return_type = query.return_type
         if return_type is None:
@@ -78,13 +81,12 @@ class ODataRequest(ClientRequest):
                 return_type.value = response.content
         else:
             if isinstance(query, ServiceOperationQuery):
-                self.json_format.function_tag_name = query.method_name
+                json_format.function_tag_name = query.method_name
 
             if isinstance(return_type, ClientResult):
                 if isinstance(return_type.value, ClientValue) or isinstance(return_type.value, ClientObject):
                     return_type = return_type.value
-            self.map_json(response.json(), return_type, self.json_format)
-            self.json_format.function_tag_name = None
+            self.map_json(response.json(), return_type, json_format)
 
     def map_json(self, json, return_type, json_format=None):
         """
@@ -93,7 +95,7 @@ class ODataRequest(ClientRequest):
         :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat
         """
         if json_format is None:
-            json_format = self.json_format
+            json_format = self.default_json_format
 
         if json and return_type is not None:
             for k, v in self._next_property(json, json_format):
@@ -104,38 +106,38 @@ class ODataRequest(ClientRequest):
                 else:
                     return_type.set_property(k, v, False)
 
-    def _next_property(self, json, data_format):  # noqa: C901
+    def _next_property(self, json, json_format):  # noqa: C901
         """
         :type json: any
-        :type data_format: office365.runtime.odata.odata_json_format.ODataJsonFormat
+        :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat
         """
-        if isinstance(data_format, JsonLightFormat):
-            json = json.get(data_format.security_tag_name, json)
-            json = json.get(data_format.function_tag_name, json)
+        if isinstance(json_format, JsonLightFormat):
+            json = json.get(json_format.security_tag_name, json)
+            json = json.get(json_format.function_tag_name, json)
 
         if not isinstance(json, dict):
             yield "value", json
         else:
-            next_link_url = json.get(self.json_format.collection_next_tag_name, None)
-            json = json.get(data_format.collection_tag_name, json)
+            next_link_url = json.get(json_format.collection_next_tag_name, None)
+            json = json.get(json_format.collection_tag_name, json)
             if next_link_url:
-                yield self.json_format.collection_next_tag_name, next_link_url
+                yield json_format.collection_next_tag_name, next_link_url
 
             if isinstance(json, list):
                 for index, item in enumerate(json):
                     if isinstance(item, dict):
-                        item = {k: v for k, v in self._next_property(item, data_format)}
+                        item = {k: v for k, v in self._next_property(item, json_format)}
                     yield index, item
             else:
                 for name, value in json.items():
-                    if isinstance(data_format, JsonLightFormat):
+                    if isinstance(json_format, JsonLightFormat):
                         is_valid = name != "__metadata" and not (isinstance(value, dict) and "__deferred" in value)
                     else:
                         is_valid = "@odata" not in name
 
                     if is_valid:
                         if isinstance(value, dict):
-                            value = {k: v for k, v in self._next_property(value, data_format)}
+                            value = {k: v for k, v in self._next_property(value, json_format)}
                         yield name, value
 
     def _normalize_payload(self, value):
@@ -145,10 +147,10 @@ class ODataRequest(ClientRequest):
         :type value: ClientObject or ClientValue or dict or list or str
         """
         if isinstance(value, ClientObject) or isinstance(value, ClientValue):
-            json = value.to_json(self._json_format)
+            json = value.to_json(self._default_json_format)
             query = self.current_query
             if isinstance(query, ServiceOperationQuery) and query.parameter_name is not None:
-                return {query.parameter_name: json}
+                json = {query.parameter_name: json}
             return json
         elif isinstance(value, dict):
             for k, v in value.items():

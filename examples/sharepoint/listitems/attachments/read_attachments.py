@@ -1,7 +1,7 @@
 import os
 import tempfile
 
-from office365.sharepoint.attachments.attachmentfile import AttachmentFile
+from office365.sharepoint.attachments.file import AttachmentFile
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.listitems.listitem import ListItem
 from tests import test_client_credentials, test_team_site_url

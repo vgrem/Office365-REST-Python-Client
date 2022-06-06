@@ -5,11 +5,11 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.files.file_version_event import FileVersionEvent
+from office365.sharepoint.files.version_event import FileVersionEvent
 from office365.sharepoint.internal.queries.download_file import create_download_file_query
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.directory.user import User
-from office365.sharepoint.files.file_version_collection import FileVersionCollection
+from office365.sharepoint.principal.user import User
+from office365.sharepoint.files.version_collection import FileVersionCollection
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.permissions.information_rights_management_settings import InformationRightsManagementSettings
 from office365.sharepoint.webparts.limited_webpart_manager import LimitedWebPartManager
@@ -523,6 +523,7 @@ class File(AbstractFile):
     @property
     def server_relative_path(self):
         """Gets the server-relative Path of the list folder.
+
         :rtype: SPResPath or None
         """
         return self.properties.get("ServerRelativePath", SPResPath())

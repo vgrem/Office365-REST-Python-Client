@@ -9,8 +9,8 @@ class ShiftItem(ScheduleEntity):
     def __init__(self, display_name=None, activities=None):
         """
         :param str display_name: The shift label of the shiftItem.
-        :param list[ShiftActivity] activities: An incremental part of a shift which can cover details of when and where an employee
-            is during their shift. For example, an assignment or a scheduled break or lunch.
+        :param list[ShiftActivity] activities: An incremental part of a shift which can cover details of when and
+            where an employee is during their shift. For example, an assignment or a scheduled break or lunch.
         """
         self.displayName = display_name
         self.activities = ClientValueCollection(ShiftActivity, activities)

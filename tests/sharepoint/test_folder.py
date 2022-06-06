@@ -3,7 +3,7 @@ from random import randint
 from tests import create_unique_name
 from tests.sharepoint.sharepoint_case import SPTestCase
 
-from office365.sharepoint.changes.change_collection import ChangeCollection
+from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.list_creation_information import ListCreationInformation

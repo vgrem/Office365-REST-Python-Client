@@ -4,8 +4,8 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.changes.change_collection import ChangeCollection
-from office365.sharepoint.changes.change_query import ChangeQuery
+from office365.sharepoint.changes.collection import ChangeCollection
+from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.comments.comment_collection import CommentCollection
 from office365.sharepoint.fields.field_lookup_value import FieldLookupValue
 from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupValue
@@ -274,14 +274,14 @@ class ListItem(SecurableObject):
 
     def get_comments(self):
         """Retrieve ListItem comments"""
-        comments = CommentCollection(self.context)
-        qry = ServiceOperationQuery(self, "GetComments", [], None, None, comments)
+        return_type = CommentCollection(self.context)
+        qry = ServiceOperationQuery(self, "GetComments", [], None, None, return_type)
         self.context.add_query(qry)
-        return comments
+        return return_type
 
     def parse_and_set_field_value(self, field_name, value):
         """Sets the value of the field (2) for the list item based on an implementation-specific transformation
-           of the value..
+           of the value.
            :param str field_name: Specifies the field internal name.
            :param str value: Specifies the new value for the field (2).
 
@@ -323,7 +323,7 @@ class ListItem(SecurableObject):
     @property
     def attachment_files(self):
         """Specifies the collection of attachments that are associated with the list item.<62>"""
-        from office365.sharepoint.attachments.attachmentfile_collection import AttachmentFileCollection
+        from office365.sharepoint.attachments.file_collection import AttachmentFileCollection
         return self.properties.get("AttachmentFiles",
                                    AttachmentFileCollection(self.context,
                                                             ResourcePath("AttachmentFiles", self.resource_path)))

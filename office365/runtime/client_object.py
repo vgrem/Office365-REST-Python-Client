@@ -197,15 +197,23 @@ class ClientObject(object):
 
     def to_json(self, json_format=None):
         """
+        Serialize client object
+
         :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat or None
         """
-        ser_prop_names = [n for n, p in self._properties_metadata.items() if p.get("persist", False) is True]
-        json = dict((k, self.get_property(k)) for k in self.properties if k in ser_prop_names)
+        if json_format is None:
+            ser_prop_names = [n for n in self._properties.keys()]
+            include_control_info = False
+        else:
+            ser_prop_names = [n for n, p in self._properties_metadata.items() if p.get("persist", False) is True]
+            include_control_info = self.entity_type_name is not None and json_format.include_control_information()
+
+        json = {k: self.get_property(k) for k in self._properties if k in ser_prop_names}
         for k, v in json.items():
             if isinstance(v, ClientObject) or isinstance(v, ClientValue):
                 json[k] = v.to_json(json_format)
 
-        if json and self.entity_type_name is not None and json_format.include_control_information():
+        if json and include_control_info:
             if isinstance(json_format, JsonLightFormat):
                 json[json_format.metadata_type_tag_name] = {'type': self.entity_type_name}
             elif isinstance(json_format, ODataJsonFormat):

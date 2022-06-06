@@ -43,7 +43,7 @@ class ListItemVersion(BaseEntity):
 
     @property
     def file_version(self):
-        from office365.sharepoint.files.file_version import FileVersion
+        from office365.sharepoint.files.version import FileVersion
         return self.properties.get("FileVersion",
                                    FileVersion(self.context, ResourcePath("FileVersion", self.resource_path)))
 

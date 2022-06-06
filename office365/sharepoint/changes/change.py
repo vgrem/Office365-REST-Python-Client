@@ -1,5 +1,5 @@
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.changes.change_token import ChangeToken
+from office365.sharepoint.changes.token import ChangeToken
 
 
 class Change(BaseEntity):
