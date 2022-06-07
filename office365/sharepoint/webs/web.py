@@ -10,7 +10,7 @@ from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.clientsidecomponent.types import SPClientSideComponentQueryResult, \
     SPClientSideComponentIdentifier
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
-from office365.sharepoint.eventreceivers.event_receiver_definition import EventReceiverDefinitionCollection
+from office365.sharepoint.eventreceivers.definition import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.files.file import File
 from office365.sharepoint.flows.synchronization_result import FlowSynchronizationResult

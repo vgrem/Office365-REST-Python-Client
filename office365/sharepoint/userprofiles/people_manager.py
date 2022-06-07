@@ -3,7 +3,7 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.userprofiles.hash_tag import HashTagCollection
-from office365.sharepoint.userprofiles.personalSiteCreationPriority import PersonalSiteCreationPriority
+from office365.sharepoint.userprofiles.personal_site_creation_priority import PersonalSiteCreationPriority
 from office365.sharepoint.userprofiles.person_properties import PersonProperties
 from office365.sharepoint.userprofiles.personPropertiesCollection import PersonPropertiesCollection
 
@@ -48,11 +48,11 @@ class PeopleManager(BaseEntity):
         :param str account_name: Account name of the specified user.
         :return:
         """
-        result = ClientResult(self.context, PersonPropertiesCollection(self.context))
+        return_type = PersonPropertiesCollection(self.context)
         params = {"accountName": account_name}
-        qry = ServiceOperationQuery(self, "GetFollowersFor", params, None, None, result)
+        qry = ServiceOperationQuery(self, "GetFollowersFor", params, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def follow(self, account_name):
         """
@@ -105,10 +105,11 @@ class PeopleManager(BaseEntity):
                                      site_creation_priority=PersonalSiteCreationPriority.Low):
         """
 
-        :param str account_name:
-        :param bool create_site_if_not_exists:
-        :param int site_creation_priority:
-        :return:
+        :param str account_name: The login name of the user whose OneDrive URL is required.
+             For example, "i:0#.f|membership|admin@contoso.sharepoint.com”.
+        :param bool create_site_if_not_exists: If this value is set to true and the site doesn't exist, the site will
+            get created.
+        :param int site_creation_priority: The priority for site creation. Type: PersonalSiteCreationPriority
         """
         result = ClientResult(self.context)
         params = {"accountName": account_name,

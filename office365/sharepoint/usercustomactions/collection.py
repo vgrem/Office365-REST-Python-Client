@@ -1,6 +1,6 @@
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.usercustomactions.user_custom_action import UserCustomAction
+from office365.sharepoint.usercustomactions.action import UserCustomAction
 
 
 class UserCustomActionCollection(BaseEntityCollection):

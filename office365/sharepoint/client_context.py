@@ -153,6 +153,8 @@ class ClientContext(ClientRuntimeContext):
 
     def pending_request(self):
         """
+        Provides access to underlying request instance
+
         :return: ODataRequest
         """
         if self._pending_request is None:
@@ -304,6 +306,18 @@ class ClientContext(ClientRuntimeContext):
         """Alias to GroupService"""
         from office365.sharepoint.portal.group_service import GroupService
         return GroupService(self, ResourcePath("GroupService"))
+
+    @property
+    def people_manager(self):
+        """Alias to PeopleManager"""
+        from office365.sharepoint.userprofiles.people_manager import PeopleManager
+        return PeopleManager(self)
+
+    @property
+    def profile_loader(self):
+        """Alias to ProfileLoader"""
+        from office365.sharepoint.userprofiles.profile_loader import ProfileLoader
+        return ProfileLoader.get_profile_loader(self)
 
     @property
     def lists(self):

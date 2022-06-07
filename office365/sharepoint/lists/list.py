@@ -7,7 +7,7 @@ from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
 from office365.sharepoint.customactions.custom_action_element import CustomActionElementCollection
-from office365.sharepoint.eventreceivers.event_receiver_definition import EventReceiverDefinitionCollection
+from office365.sharepoint.eventreceivers.definition import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.fields.related_field_collection import RelatedFieldCollection
 from office365.sharepoint.files.checkedOutFileCollection import CheckedOutFileCollection
@@ -24,7 +24,7 @@ from office365.sharepoint.lists.list_rule import SPListRule
 from office365.sharepoint.pages.wiki_page_creation_information import WikiPageCreationInformation
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.sitescripts.utility import SiteScriptUtility
-from office365.sharepoint.usercustomactions.user_custom_action_collection import UserCustomActionCollection
+from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
 from office365.sharepoint.views.view import View
 from office365.sharepoint.views.view_collection import ViewCollection
 from office365.sharepoint.webhooks.subscription_collection import SubscriptionCollection

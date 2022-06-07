@@ -5,7 +5,7 @@ from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.audit.audit import Audit
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.collection import ChangeCollection
-from office365.sharepoint.eventreceivers.event_receiver_definition import EventReceiverDefinitionCollection
+from office365.sharepoint.eventreceivers.definition import EventReceiverDefinitionCollection
 from office365.sharepoint.features.feature_collection import FeatureCollection
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.portal.site_icon_manager import SiteIconManager
@@ -16,7 +16,7 @@ from office365.sharepoint.recyclebin.item_collection import RecycleBinItemCollec
 from office365.sharepoint.sites.site_health_summary import SiteHealthSummary
 from office365.sharepoint.sites.sph_site import SPHSite
 from office365.sharepoint.sites.usage_info import UsageInfo
-from office365.sharepoint.usercustomactions.user_custom_action_collection import UserCustomActionCollection
+from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
 from office365.sharepoint.webs.web import Web
 from office365.sharepoint.webs.web_template_collection import WebTemplateCollection
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
@@ -25,8 +25,8 @@ from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 class Site(BaseEntity):
     """Represents a collection of sites in a Web application, including a top-level website and all its sub sites."""
 
-    def __init__(self, context):
-        super(Site, self).__init__(context, ResourcePath("Site", None))
+    def __init__(self, context, resource_path=None):
+        super(Site, self).__init__(context, ResourcePath("Site", resource_path))
 
     @staticmethod
     def create_communication_site(root_site_url, alias, title):

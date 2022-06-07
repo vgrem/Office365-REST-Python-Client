@@ -67,18 +67,18 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
         super(ClientPeoplePickerWebServiceInterface, self).__init__(context)
 
     @staticmethod
-    def get_search_results(context, searchPattern, providerID=None, hierarchyNodeID=None, entityTypes=None):
+    def get_search_results(context, search_pattern, provider_id=None, hierarchyNodeID=None, entityTypes=None):
         """
         :type context: office365.sharepoint.client_context.ClientContext
-        :type searchPattern: str
-        :type providerID: str
+        :type search_pattern: str
+        :type provider_id: str
         :type hierarchyNodeID: str
         :type entityTypes: str
         """
         result = ClientResult(context)
         payload = {
-            "searchPattern": searchPattern,
-            "providerID": providerID,
+            "searchPattern": search_pattern,
+            "providerID": provider_id,
             "hierarchyNodeID": hierarchyNodeID,
             "entityTypes": entityTypes
         }

@@ -30,6 +30,9 @@ class ClientRequestException(RequestException):
 
     @property
     def message(self):
+        """
+        :rtype: str
+        """
         if self.payload:
             error = self.payload.get('error')
             if error:

@@ -82,7 +82,8 @@ class Group(DirectoryObject):
         of groups provisioned in Azure AD. Note that Microsoft 365 groups cannot contain groups.
         So membership in a Microsoft 365 group is always direct.
 
-        :type group_ids: list[str]
+        :param list[str] group_ids: A collection that contains the object IDs of the groups in which to
+            check membership. Up to 20 groups may be specified.
         """
         result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "checkMemberGroups", None, group_ids, None, result)
@@ -212,9 +213,9 @@ class Group(DirectoryObject):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "appRoleAssignments": self.app_role_assignments,
                 "transitiveMembers": self.transitive_members,
                 "transitiveMemberOf": self.transitive_member_of,
-                "appRoleAssignments": self.app_role_assignments
             }
             default_value = property_mapping.get(name, None)
         return super(Group, self).get_property(name, default_value)

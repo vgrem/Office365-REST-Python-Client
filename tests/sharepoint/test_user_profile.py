@@ -3,27 +3,21 @@ from unittest import TestCase
 from office365.sharepoint.userprofiles.personPropertiesCollection import PersonPropertiesCollection
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.userprofiles.people_manager import PeopleManager
-from office365.sharepoint.userprofiles.profile_loader import ProfileLoader
 from tests import test_user_credentials, test_team_site_url, test_user_principal_name
 
 
 class TestUserProfile(TestCase):
-    profile_loader = None  # type: ProfileLoader
 
     @classmethod
     def setUpClass(cls):
         cls.my_client = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
 
-    def test1_get_profile_loader(self):
-        profile_loader = ProfileLoader.get_profile_loader(self.my_client).execute_query()
-        self.__class__.profile_loader = profile_loader
-
     def test2_get_profile_loader(self):
-        user_profile = self.__class__.profile_loader.get_user_profile().execute_query()
-        self.assertIsNotNone(user_profile.properties["AccountName"])
+        user_profile = self.my_client.profile_loader.get_user_profile().execute_query()
+        self.assertIsNotNone(user_profile.account_name)
 
     def test3_create_personal_site(self):
-        user_profile = self.__class__.profile_loader.get_user_profile()
+        user_profile = self.my_client.profile_loader.get_user_profile()
         up = user_profile.create_personal_site_enque(True).execute_query()
         self.assertIsNotNone(up.properties['PublicUrl'])
 
@@ -47,8 +41,7 @@ class TestUserProfile(TestCase):
 
     def test7_get_people_followed_by(self):
         me = self.my_client.web.current_user.get().execute_query()
-        people_manager = PeopleManager(self.my_client)
-        result = people_manager.get_people_followed_by(me.login_name).execute_query()
+        result = self.my_client.people_manager.get_people_followed_by(me.login_name).execute_query()
         self.assertIsNotNone(result)
 
     def test7_start_stop_following(self):
@@ -61,14 +54,12 @@ class TestUserProfile(TestCase):
             people_manager.follow(target_user.login_name)
 
     def test8_get_followers_for(self):
-        people_manager = PeopleManager(self.my_client)
         target_user = self.my_client.web.ensure_user(test_user_principal_name).execute_query()
-        result = people_manager.get_followers_for(target_user.login_name).execute_query()
-        self.assertIsInstance(result.value, PersonPropertiesCollection)
+        result = self.my_client.people_manager.get_followers_for(target_user.login_name).execute_query()
+        self.assertIsInstance(result, PersonPropertiesCollection)
 
     def test9_get_my_followers(self):
-        people_manager = PeopleManager(self.my_client)
-        result = people_manager.get_my_followers().execute_query()
+        result = self.my_client.people_manager.get_my_followers().execute_query()
         self.assertIsInstance(result, PersonPropertiesCollection)
 
     def test_10_get_trending_tags(self):

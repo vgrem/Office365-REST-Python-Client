@@ -36,7 +36,7 @@ jobs:
         flake8 office365 --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       env:
-        office365_python_sdk_securevars: '${{ secrets.OFFICE365_PYTHON_SDK_SECUREVARS }}'
+        office365_python_sdk_securevars: ${{ secrets.OFFICE365_PYTHON_SDK_SECUREVARS }}
       run: |
         echo "${{env.office365_python_sdk_securevars}}"
         pytest

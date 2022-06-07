@@ -25,7 +25,10 @@ class TeamCollection(EntityCollection):
         return super(TeamCollection, self).get()
 
     def get_all(self, include_properties=None):
-        """List all teams in Microsoft Teams for an organization"""
+        """List all teams in Microsoft Teams for an organization
+
+        :param list[str] include_properties: The list of Team properties to include
+        """
         if include_properties is None:
             include_properties = []
         include_properties = include_properties + ["id", "resourceProvisioningOptions"]
