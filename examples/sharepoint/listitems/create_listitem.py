@@ -3,8 +3,8 @@ from office365.sharepoint.fields.field_creation_information import FieldCreation
 from office365.sharepoint.fields.field_multi_user_value import FieldMultiUserValue
 from office365.sharepoint.fields.field_type import FieldType
 from office365.sharepoint.fields.field_user_value import FieldUserValue
-from office365.sharepoint.lists.list_creation_information import ListCreationInformation
-from office365.sharepoint.lists.list_template_type import ListTemplateType
+from office365.sharepoint.lists.creation_information import ListCreationInformation
+from office365.sharepoint.lists.template_type import ListTemplateType
 from tests import create_unique_name, test_site_url, test_client_credentials, test_user_principal_name
 
 

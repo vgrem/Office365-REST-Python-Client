@@ -3,8 +3,8 @@ from random import randint
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.lists.list import List
-from office365.sharepoint.lists.list_creation_information import ListCreationInformation
-from office365.sharepoint.lists.list_template_type import ListTemplateType
+from office365.sharepoint.lists.creation_information import ListCreationInformation
+from office365.sharepoint.lists.template_type import ListTemplateType
 from office365.sharepoint.permissions.base_permissions import BasePermissions
 from office365.sharepoint.sharing.role_type import RoleType
 

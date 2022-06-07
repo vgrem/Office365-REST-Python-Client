@@ -18,7 +18,7 @@ class SPTestCase(TestCase):
         """
 
         :type web: office365.sharepoint.webs.web.Web
-        :type list_properties: office365.sharepoint.lists.list_creation_information.ListCreationInformation
+        :type list_properties: office365.sharepoint.lists.creation_information.ListCreationInformation
         """
         lists = web.lists.filter("Title eq '{0}'".format(list_properties.Title)).get().execute_query()
         return lists[0] if len(lists) == 1 else web.lists.add(list_properties).execute_query()

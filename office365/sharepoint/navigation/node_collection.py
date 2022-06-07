@@ -16,28 +16,46 @@ class NavigationNodeCollection(BaseEntityCollection):
 
         :type create_node_info: office365.sharepoint.navigation.node_creation_information.NavigationNodeCreationInformation
         """
-        target_node = NavigationNode(self.context)
-        target_node.title = create_node_info.Title
-        target_node.url = create_node_info.Url
-        self.add_child(target_node)
-        qry = CreateEntityQuery(self, target_node, target_node)
+        return_type = NavigationNode(self.context)
+        return_type.title = create_node_info.Title
+        return_type.url = create_node_info.Url
+        self.add_child(return_type)
+        qry = CreateEntityQuery(self, return_type, return_type)
         self.context.add_query(qry)
-        return target_node
+        return return_type
+
+    def move_after(self, node_id, previous_node_id):
+        """
+        Moves a navigation node after a specified navigation node in the navigation node collection.
+
+        :param int node_id: Identifier of the navigation node that is moved.
+        :param int previous_node_id: Identifier of the navigation node after which the node identified by nodeId moves to
+        """
+        params = {
+            "nodeId": node_id,
+            "previousNodeId": previous_node_id
+        }
+        qry = ServiceOperationQuery(self, "GetByIndex", params)
+        self.context.add_query(qry)
+        return self
 
     def get_by_index(self, index):
         """
-        :param int index:
+        Returns the navigation node at the specified index.
+
+        :param int index: The index of the navigation node to be returned.
         """
-        target_node = NavigationNode(self.context)
-        self.add_child(target_node)
-        qry = ServiceOperationQuery(self, "GetByIndex", [index], None, None, target_node)
+        return_type = NavigationNode(self.context)
+        self.add_child(return_type)
+        qry = ServiceOperationQuery(self, "GetByIndex", [index], None, None, return_type)
         self.context.add_query(qry)
-        return target_node
+        return return_type
 
     def get_by_id(self, node_id):
-        """Gets the navigation node with the specified ID.
+        """Returns the navigation node with the specified identifier.
+        It MUST return NULL if no navigation node corresponds to the specified identifier.
 
-        :type node_id: str
+        :param int node_id: Specifies the identifier of the navigation node.
         """
         return NavigationNode(self.context,
                               ServiceOperationPath("GetById", [node_id], self.resource_path))

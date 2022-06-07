@@ -7,8 +7,8 @@ from tests.sharepoint.sharepoint_case import SPTestCase
 from office365.sharepoint.listitems.caml.caml_query import CamlQuery
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.list import List
-from office365.sharepoint.lists.list_creation_information import ListCreationInformation
-from office365.sharepoint.lists.list_template_type import ListTemplateType
+from office365.sharepoint.lists.creation_information import ListCreationInformation
+from office365.sharepoint.lists.template_type import ListTemplateType
 
 
 class TestSharePointListItem(SPTestCase):

@@ -197,7 +197,7 @@ class ClientObject(object):
 
     def to_json(self, json_format=None):
         """
-        Serialize client object
+        Serializes client object
 
         :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat or None
         """

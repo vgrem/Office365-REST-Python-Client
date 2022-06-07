@@ -3,6 +3,7 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.navigation.menu_state import MenuState
+from office365.sharepoint.navigation.provider_type import NavigationProviderType
 
 
 class NavigationService(BaseEntity):
@@ -13,7 +14,7 @@ class NavigationService(BaseEntity):
         service_path = ResourcePath("Microsoft.SharePoint.Navigation.REST.NavigationServiceRest")
         super(NavigationService, self).__init__(context, service_path)
 
-    def get_publishing_navigation_provider_type(self, map_provider_name="SPNavigationProvider"):
+    def get_publishing_navigation_provider_type(self, map_provider_name=NavigationProviderType.SPNavigationProvider):
         """
         Gets a publishing navigation provider type when publishing feature is turned on for the site (2).
         If navigation provider is not found on the site MUST return InvalidSiteMapProvider type.
@@ -65,9 +66,44 @@ class NavigationService(BaseEntity):
         self.context.add_query(qry)
         return return_type
 
-    def save_menu_state(self):
-        """Updates the menu tree rooted at the specified root node for a given provider."""
-        pass
+    def menu_state(self, menu_node_key, map_provider_name, depth=None, custom_properties=None):
+        """
+        Returns the menu tree rooted at the specified root node for a given provider.
+
+        :param str menu_node_key: A unique key identifying the node that will be used as root node in the returned
+            result
+        :param str map_provider_name: The name identifying a provider to use for the lookup
+        :param int depth:  The number of levels to include in the returned site map. If no value is specified,
+           a depth of 10 is used.
+        :param str custom_properties: A comma separated list of custom properties to request.
+            The character "\" is used to escape commas, allowing comma to be part of the property names.
+        """
+        return_type = ClientResult(self.context, MenuState())
+        payload = {
+            "menuNodeKey": menu_node_key,
+            "mapProviderName": map_provider_name,
+            "depth": depth,
+            "customProperties": custom_properties
+        }
+        qry = ServiceOperationQuery(self, "MenuState", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def save_menu_state(self, menu_node_key, map_provider_name):
+        """Updates the menu tree rooted at the specified root node for a given provider.
+
+        :param str menu_node_key: A unique key identifying the node that will be used as root node in the returned
+            result
+        :param str map_provider_name: The name identifying a provider to use for the lookup
+        """
+        return_type = ClientResult(self.context)
+        payload = {
+            "menuNodeKey": menu_node_key,
+            "mapProviderName": map_provider_name
+        }
+        qry = ServiceOperationQuery(self, "SaveMenuState", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     @property
     def entity_type_name(self):

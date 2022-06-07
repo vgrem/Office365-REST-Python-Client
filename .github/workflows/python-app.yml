@@ -19,11 +19,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Set up library settings
-      env:
-        office365_python_sdk_securevars: '${{ secrets.OFFICE365_PYTHON_SDK_SECUREVARS }}'
-      run: |
-        echo "OFFICE365_PYTHON_SDK_SECUREVARS:${{env.office365_python_sdk_securevars}}"
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
@@ -40,5 +35,8 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 office365 --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
+      env:
+        office365_python_sdk_securevars: '${{ secrets.OFFICE365_PYTHON_SDK_SECUREVARS }}'
       run: |
+        echo "${{env.office365_python_sdk_securevars}}"
         pytest

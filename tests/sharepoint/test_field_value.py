@@ -14,8 +14,8 @@ from office365.sharepoint.fields.field_multi_user_value import FieldMultiUserVal
 from office365.sharepoint.fields.field_user_value import FieldUserValue
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.list import List
-from office365.sharepoint.lists.list_creation_information import ListCreationInformation
-from office365.sharepoint.lists.list_template_type import ListTemplateType
+from office365.sharepoint.lists.creation_information import ListCreationInformation
+from office365.sharepoint.lists.template_type import ListTemplateType
 
 
 class TestFieldValue(SPTestCase):

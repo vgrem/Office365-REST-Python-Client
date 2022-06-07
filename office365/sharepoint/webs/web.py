@@ -13,7 +13,7 @@ from office365.sharepoint.contenttypes.content_type_collection import ContentTyp
 from office365.sharepoint.eventreceivers.event_receiver_definition import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.files.file import File
-from office365.sharepoint.flows.flow_synchronization_result import FlowSynchronizationResult
+from office365.sharepoint.flows.synchronization_result import FlowSynchronizationResult
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.folders.folder_collection import FolderCollection
 from office365.sharepoint.listitems.listitem import ListItem

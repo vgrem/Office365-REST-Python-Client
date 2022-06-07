@@ -3,29 +3,53 @@ class ListTemplateType:
         pass
 
     InvalidType = -1
+
     NoListTemplate = 0
+
     GenericList = 100
+
     DocumentLibrary = 101
+
     Survey = 102
+
     Links = 103
+
     Announcements = 104
+
     Contacts = 105
+
     Events = 106
+
     Tasks = 107
+
     DiscussionBoard = 108
+
     PictureLibrary = 109
+
     DataSources = 110
+
     WebTemplateCatalog = 111
+
     UserInformation = 112
+
     WebPartCatalog = 113
+
     ListTemplateCatalog = 114
+
     XMLForm = 115
+
     MasterPageCatalog = 116
+
     NoCodeWorkflows = 117
+
     WorkflowProcess = 118
+
     WebPageLibrary = 119
+
     CustomGrid = 120
+
     SolutionCatalog = 121
+
     NoCodePublic = 122
     ThemeCatalog = 123
     DesignCatalog = 124

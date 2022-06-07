@@ -16,7 +16,7 @@ def create_unique_file_name(prefix, ext):
 
 
 class SecEnvInterpolation(BasicInterpolation):
-    secure_vars = os.environ['office365_python_sdk_securevars'].split(';')
+    secure_vars = os.environ.get('office365_python_sdk_securevars').split(';')
 
     def before_get(self, parser, section, option, value, defaults):
         value = super(SecEnvInterpolation, self).before_get(parser, section, option, value, defaults)

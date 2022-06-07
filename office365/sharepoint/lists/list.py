@@ -12,7 +12,7 @@ from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.fields.related_field_collection import RelatedFieldCollection
 from office365.sharepoint.files.checkedOutFileCollection import CheckedOutFileCollection
 from office365.sharepoint.files.file import File
-from office365.sharepoint.flows.flow_synchronization_result import FlowSynchronizationResult
+from office365.sharepoint.flows.synchronization_result import FlowSynchronizationResult
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.forms.form_collection import FormCollection
 from office365.sharepoint.listitems.caml.caml_query import CamlQuery

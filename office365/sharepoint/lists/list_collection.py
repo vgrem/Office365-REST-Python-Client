@@ -54,7 +54,7 @@ class ListCollection(BaseEntityCollection):
     def add(self, list_creation_information):
         """Creates a List resource
 
-        :type list_creation_information: office365.sharepoint.lists.list_creation_information.ListCreationInformation
+        :type list_creation_information: office365.sharepoint.lists.creation_information.ListCreationInformation
         """
         target_list = List(self.context)
         self.add_child(target_list)
