@@ -6,7 +6,7 @@ from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
-from office365.sharepoint.customactions.custom_action_element import CustomActionElementCollection
+from office365.sharepoint.customactions.element import CustomActionElementCollection
 from office365.sharepoint.eventreceivers.definition import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.fields.related_field_collection import RelatedFieldCollection
@@ -14,7 +14,7 @@ from office365.sharepoint.files.checkedOutFileCollection import CheckedOutFileCo
 from office365.sharepoint.files.file import File
 from office365.sharepoint.flows.synchronization_result import FlowSynchronizationResult
 from office365.sharepoint.folders.folder import Folder
-from office365.sharepoint.forms.form_collection import FormCollection
+from office365.sharepoint.forms.collection import FormCollection
 from office365.sharepoint.listitems.caml.caml_query import CamlQuery
 from office365.sharepoint.listitems.creation_information_using_path import ListItemCreationInformationUsingPath
 from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateValue

@@ -81,3 +81,9 @@ class UserProfile(BaseEntity):
             }
             default_value = property_mapping.get(name, None)
         return super(UserProfile, self).get_property(name, default_value)
+
+    def set_property(self, name, value, persist_changes=True):
+        super(UserProfile, self).set_property(name, value, persist_changes)
+        # fallback: create a new resource path
+        if name == "AccountName":
+            pass

@@ -1,6 +1,6 @@
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.webs.timeZone import TimeZone, TimeZoneCollection
+from office365.sharepoint.webs.time_zone import TimeZone, TimeZoneCollection
 
 
 class RegionalSettings(BaseEntity):
@@ -43,3 +43,12 @@ class RegionalSettings(BaseEntity):
         """Gets the collection of time zones used in a server farm."""
         return self.properties.get("TimeZones",
                                    TimeZoneCollection(self.context, ResourcePath("TimeZones", self.resource_path)))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "TimeZones": self.time_zones,
+                "TimeZone": self.time_zone,
+            }
+            default_value = property_mapping.get(name, None)
+        return super(RegionalSettings, self).get_property(name, default_value)

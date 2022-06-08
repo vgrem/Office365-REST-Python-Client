@@ -1,6 +1,5 @@
 from unittest import TestCase
 
-from office365.sharepoint.userprofiles.personPropertiesCollection import PersonPropertiesCollection
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.userprofiles.people_manager import PeopleManager
 from tests import test_user_credentials, test_team_site_url, test_user_principal_name
@@ -19,24 +18,21 @@ class TestUserProfile(TestCase):
     def test3_create_personal_site(self):
         user_profile = self.my_client.profile_loader.get_user_profile()
         up = user_profile.create_personal_site_enque(True).execute_query()
-        self.assertIsNotNone(up.properties['PublicUrl'])
+        self.assertIsNotNone(up.public_url)
 
     def test4_get_user_props(self):
         target_user = self.my_client.web.ensure_user(test_user_principal_name).execute_query()
-        people_manager = PeopleManager(self.my_client)
-        result = people_manager.get_user_profile_properties(target_user.login_name).execute_query()
+        result = self.my_client.people_manager.get_user_profile_properties(target_user.login_name).execute_query()
         self.assertIsNotNone(result.value)
 
     def test5_get_properties_for(self):
-        me = self.my_client.web.current_user.get().execute_query()
-        people_manager = PeopleManager(self.my_client)
-        properties = people_manager.get_properties_for(me.login_name).execute_query()
+        me = self.my_client.web.current_user
+        properties = self.my_client.people_manager.get_properties_for(me).execute_query()
         self.assertIsNotNone(properties)
 
     def test6_get_default_document_library(self):
         me = self.my_client.web.current_user.get().execute_query()
-        people_manager = PeopleManager(self.my_client)
-        result = people_manager.get_default_document_library(me.login_name).execute_query()
+        result = self.my_client.people_manager.get_default_document_library(me.login_name).execute_query()
         self.assertIsNotNone(result.value)
 
     def test7_get_people_followed_by(self):
@@ -55,13 +51,13 @@ class TestUserProfile(TestCase):
 
     def test8_get_followers_for(self):
         target_user = self.my_client.web.ensure_user(test_user_principal_name).execute_query()
-        result = self.my_client.people_manager.get_followers_for(target_user.login_name).execute_query()
-        self.assertIsInstance(result, PersonPropertiesCollection)
+        col = self.my_client.people_manager.get_followers_for(target_user.login_name).execute_query()
+        self.assertGreaterEqual(len(col), 0)
 
     def test9_get_my_followers(self):
-        result = self.my_client.people_manager.get_my_followers().execute_query()
-        self.assertIsInstance(result, PersonPropertiesCollection)
+        col = self.my_client.people_manager.get_my_followers().execute_query()
+        self.assertGreaterEqual(len(col), 0)
 
     def test_10_get_trending_tags(self):
-        result = PeopleManager.get_trending_tags(self.my_client).execute_query()
-        self.assertIsNotNone(result)
+        col = PeopleManager.get_trending_tags(self.my_client).execute_query()
+        self.assertGreaterEqual(len(col), 0)

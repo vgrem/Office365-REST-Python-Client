@@ -57,7 +57,10 @@ class UserCollection(BaseEntityCollection):
         return self
 
     def remove_by_login_name(self, login_name):
-        """Remove User object by login name"""
+        """Remove User object by login name
+
+        :param str login_name:
+        """
         qry = ServiceOperationQuery(self, "RemoveByLoginName", [login_name])
         self.context.add_query(qry)
         return self

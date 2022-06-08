@@ -2,10 +2,24 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.principal.user import User
 from office365.sharepoint.userprofiles.hash_tag import HashTagCollection
 from office365.sharepoint.userprofiles.personal_site_creation_priority import PersonalSiteCreationPriority
 from office365.sharepoint.userprofiles.person_properties import PersonProperties
-from office365.sharepoint.userprofiles.personPropertiesCollection import PersonPropertiesCollection
+
+
+def _resolve_user(user_or_name, action):
+    """
+    :param str or User user_or_name: User or Login name of the specified user.
+    :param (str) -> None action: Callback
+    """
+    if isinstance(user_or_name, User):
+        def _user_loaded():
+            action(user_or_name.login_name)
+        user_or_name.ensure_property("LoginName", _user_loaded)
+    else:
+        action(user_or_name)
 
 
 class PeopleManager(BaseEntity):
@@ -48,9 +62,20 @@ class PeopleManager(BaseEntity):
         :param str account_name: Account name of the specified user.
         :return:
         """
-        return_type = PersonPropertiesCollection(self.context)
+        return_type = BaseEntityCollection(self.context, PersonProperties)
         params = {"accountName": account_name}
         qry = ServiceOperationQuery(self, "GetFollowersFor", params, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_user_information(self, account_name, site_id):
+        """
+        :param str account_name: Account name of the specified user.
+        :param str site_id: Site Identifier.
+        """
+        return_type = ClientResult(self.context)
+        params = {"accountName": account_name, "siteId": site_id}
+        qry = ServiceOperationQuery(self, "GetSPUserInformation", params, None, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -76,30 +101,38 @@ class PeopleManager(BaseEntity):
         self.context.add_query(qry)
         return self
 
-    def get_user_profile_properties(self, account_name):
+    def get_user_profile_properties(self, user_or_name):
         """
         Gets the specified user profile properties for the specified user.
 
-        :param str account_name: Account name of the specified user.
+        :param str or User user_or_name: User or Login name of the specified user.
         """
-        result = ClientResult(self.context)
-        params = {"accountName": account_name}
-        qry = ServiceOperationQuery(self, "GetUserProfileProperties", params, None, None, result)
-        self.context.add_query(qry)
-        return result
+        return_type = ClientResult(self.context)
 
-    def get_properties_for(self, account_name):
+        def _user_resolved(account_name):
+            params = {"accountName": account_name}
+            qry = ServiceOperationQuery(self, "GetUserProfileProperties", params, None, None, return_type)
+            self.context.add_query(qry)
+
+        _resolve_user(user_or_name, _user_resolved)
+        return return_type
+
+    def get_properties_for(self, user_or_name):
         """
         Gets user properties for the specified user.
 
-        :type account_name: str
+        :param str or User user_or_name: Specifies the User object or its login name.
         :return: PersonProperties
         """
-        result = PersonProperties(self.context)
-        payload = {"accountName": account_name}
-        qry = ServiceOperationQuery(self, "GetPropertiesFor", payload, None, None, result)
-        self.context.add_query(qry)
-        return result
+        return_type = PersonProperties(self.context)
+
+        def _get_properties_for_inner(account_name):
+            params = {"accountName": account_name}
+            qry = ServiceOperationQuery(self, "GetPropertiesFor", params, None, None, return_type)
+            self.context.add_query(qry)
+
+        _resolve_user(user_or_name, _get_properties_for_inner)
+        return return_type
 
     def get_default_document_library(self, account_name, create_site_if_not_exists=False,
                                      site_creation_priority=PersonalSiteCreationPriority.Low):
@@ -126,19 +159,19 @@ class PeopleManager(BaseEntity):
         user cannot be found.
 
         :param str account_name: Account name of the specified user.
-        :return: PersonPropertiesCollection
+        :return: BaseEntityCollection
         """
-        result = PersonPropertiesCollection(self.context)
+        return_type = BaseEntityCollection(self.context, PersonProperties)
         params = {"accountName": account_name}
-        qry = ServiceOperationQuery(self, "GetPeopleFollowedBy", params, None, None, result)
+        qry = ServiceOperationQuery(self, "GetPeopleFollowedBy", params, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def get_my_followers(self):
         """
         This method returns a list of PersonProperties objects for the people who are following the current user.
         """
-        return_type = PersonPropertiesCollection(self.context)
+        return_type = BaseEntityCollection(self.context, PersonProperties)
         qry = ServiceOperationQuery(self, "GetMyFollowers", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type

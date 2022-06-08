@@ -10,7 +10,9 @@ class RemoteWeb(ClientObject):
 
     def get_list_by_server_relative_url(self, server_relative_url):
         """
-        :type server_relative_url: str
+        Returns the list that is associated with the specified server-relative URL.
+
+        :param str server_relative_url: A string that contains the site-relative URL for a list.
         """
         target_list = List(self.context)
         qry = ServiceOperationQuery(self, "GetListByServerRelativeUrl", [server_relative_url], None, None, target_list)

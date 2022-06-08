@@ -9,6 +9,43 @@ class PersonProperties(BaseEntity):
     """
 
     @property
+    def account_name(self):
+        """
+        The AccountName property specifies the person's account name.
+
+        :rtype: str or None
+        """
+        return self.properties.get('AccountName', None)
+
+    @property
+    def email(self):
+        """
+        The Email property specifies the person's email address.
+
+        :rtype: str or None
+        """
+        return self.properties.get("Email", None)
+
+    @property
+    def latest_post(self):
+        """
+        The  LatestPost property specifies the person's latest microblog post.
+
+        :rtype: str or None
+        """
+        return self.properties.get("LatestPost", None)
+
+    @property
+    def peers(self):
+        """
+        The Peers property specifies an array of strings that specify the account names of person's peers, that is,
+        those who have the same manager.
+
+        :rtype: StringCollection
+        """
+        return self.properties.get("Peers", StringCollection())
+
+    @property
     def extended_managers(self):
         """
         The ExtendedManagers property specifies an array of strings that specify the account names of
@@ -27,6 +64,15 @@ class PersonProperties(BaseEntity):
         :rtype: StringCollection
         """
         return self.properties.get('ExtendedReports', StringCollection())
+
+    @property
+    def picture_url(self):
+        """
+        The PictureUrl property specifies the  URL for the person's profile picture.
+
+        :rtype: str or None
+        """
+        return self.properties.get('PictureUrl', None)
 
     @property
     def user_url(self):

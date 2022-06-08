@@ -14,10 +14,8 @@ class Office365Tenant(BaseEntity):
     """Represents a SharePoint Online tenant."""
 
     def __init__(self, context):
-        super(Office365Tenant, self).__init__(
-            context,
-            ResourcePath("Microsoft.Online.SharePoint.TenantManagement.Office365Tenant")
-        )
+        static_path = ResourcePath("Microsoft.Online.SharePoint.TenantManagement.Office365Tenant")
+        super(Office365Tenant, self).__init__(context, static_path)
 
     @property
     def allow_editing(self):
