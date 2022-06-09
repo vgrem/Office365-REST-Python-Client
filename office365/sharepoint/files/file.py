@@ -640,6 +640,11 @@ class File(AbstractFile):
 
     def set_property(self, name, value, persist_changes=True):
         super(File, self).set_property(name, value, persist_changes)
+
+        # prioritize using UniqueId
+        if name == "UniqueId":
+            self._resource_path = ServiceOperationPath("GetFileById", [value], ResourcePath("Web"))
+        
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "ServerRelativeUrl":
@@ -648,6 +653,4 @@ class File(AbstractFile):
             elif name == "ServerRelativePath":
                 self._resource_path = ServiceOperationPath("getFolderByServerRelativePath", [value],
                                                            ResourcePath("Web"))
-            elif name == "UniqueId":
-                self._resource_path = ServiceOperationPath("GetFileById", [value], ResourcePath("Web"))
         return self
