@@ -4,7 +4,7 @@ from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.contenttypes.content_type import ContentType
-from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
+from office365.sharepoint.contenttypes.collection import ContentTypeCollection
 from office365.sharepoint.contenttypes.creation_information import ContentTypeCreationInformation
 
 

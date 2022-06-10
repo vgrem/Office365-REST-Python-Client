@@ -4,7 +4,7 @@ from time import sleep
 from office365.sharepoint.types.wopi_action import SPWOPIAction
 from tests import create_unique_name
 from tests.sharepoint.sharepoint_case import SPTestCase
-from office365.sharepoint.listitems.caml.caml_query import CamlQuery
+from office365.sharepoint.listitems.caml.query import CamlQuery
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.creation_information import ListCreationInformation

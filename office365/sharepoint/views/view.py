@@ -4,7 +4,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
-from office365.sharepoint.listitems.caml.caml_query import CamlQuery
+from office365.sharepoint.listitems.caml.query import CamlQuery
 from office365.sharepoint.views.view_field_collection import ViewFieldCollection
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
@@ -19,7 +19,7 @@ class View(BaseEntity):
     def get_items(self):
         """Get list items per a view
 
-        :rtype: office365.sharepoint.listitems.listItem_collection.ListItemCollection
+        :rtype: office365.sharepoint.listitems.collection.ListItemCollection
         """
 
         def _get_items_inner():

@@ -1,4 +1,4 @@
-from office365.sharepoint.taxonomy.taxonomy_item import TaxonomyItem
+from office365.sharepoint.taxonomy.item import TaxonomyItem
 
 
 class Term(TaxonomyItem):

@@ -5,7 +5,8 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.query import ChangeQuery
-from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
+from office365.sharepoint.changes.token import ChangeToken
+from office365.sharepoint.contenttypes.collection import ContentTypeCollection
 from office365.sharepoint.customactions.element import CustomActionElementCollection
 from office365.sharepoint.eventreceivers.definition import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
@@ -15,11 +16,11 @@ from office365.sharepoint.files.file import File
 from office365.sharepoint.flows.synchronization_result import FlowSynchronizationResult
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.forms.collection import FormCollection
-from office365.sharepoint.listitems.caml.caml_query import CamlQuery
+from office365.sharepoint.listitems.caml.query import CamlQuery
 from office365.sharepoint.listitems.creation_information_using_path import ListItemCreationInformationUsingPath
 from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateValue
 from office365.sharepoint.listitems.listitem import ListItem
-from office365.sharepoint.listitems.listItem_collection import ListItemCollection
+from office365.sharepoint.listitems.collection import ListItemCollection
 from office365.sharepoint.lists.list_rule import SPListRule
 from office365.sharepoint.pages.wiki_page_creation_information import WikiPageCreationInformation
 from office365.sharepoint.permissions.securable_object import SecurableObject
@@ -29,6 +30,7 @@ from office365.sharepoint.views.view import View
 from office365.sharepoint.views.view_collection import ViewCollection
 from office365.sharepoint.webhooks.subscription_collection import SubscriptionCollection
 from office365.sharepoint.utilities.utility import Utility
+from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
 class List(SecurableObject):
@@ -328,7 +330,6 @@ class List(SecurableObject):
             URL or an absolute URL. If the value is not null or the decoded url value not being empty string,
             the decoded url value MUST point to a location within the list.
         """
-        from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
         parameters = ListItemCreationInformationUsingPath(leaf_name, object_type, folder_path=SPResPath(folder_url))
         item = ListItem(self.context)
         qry = ServiceOperationQuery(self, "AddItemUsingPath", None, parameters, "parameters", item)
@@ -397,6 +398,21 @@ class List(SecurableObject):
         :rtype: str
         """
         return self.properties.get("Id", None)
+
+    @property
+    def crawl_non_default_views(self):
+        """
+        Specifies whether or not the crawler indexes the non-default views of the list.
+        Specify a value of true if the crawler indexes the list's non-default views; specify false if otherwise.
+
+        :rtype: bool or None
+        """
+        return self.properties.get("CrawlNonDefaultViews", None)
+
+    @property
+    def current_change_token(self):
+        """Gets the current change token that is used in the change log for the list."""
+        return self.properties.get("CurrentChangeToken", ChangeToken())
 
     @property
     def enable_folder_creation(self):
@@ -532,16 +548,19 @@ class List(SecurableObject):
 
     @property
     def parent_web_path(self):
-        return self.properties.get('ParentWebPath', None)
+        """Returns the path of the parent web for the list."""
+        return self.properties.get('ParentWebPath', SPResPath())
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "CurrentChangeToken": self.current_change_token,
                 "ContentTypes": self.content_types,
                 "CustomActionElements": self.custom_action_elements,
                 "DefaultView": self.default_view,
                 "EventReceivers": self.event_receivers,
                 "ParentWeb": self.parent_web,
+                "ParentWebPath": self.parent_web_path,
                 "RootFolder": self.root_folder,
                 "UserCustomActions": self.user_custom_actions
             }

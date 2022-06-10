@@ -1,5 +1,5 @@
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.listitems.caml.caml_query import CamlQuery
+from office365.sharepoint.listitems.caml.query import CamlQuery
 from tests import test_client_credentials, test_team_site_url
 
 

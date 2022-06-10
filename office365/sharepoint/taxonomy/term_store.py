@@ -1,6 +1,7 @@
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.taxonomy.taxonomy_item import TaxonomyItem, TaxonomyItemCollection
+from office365.runtime.types.collections import StringCollection
+from office365.sharepoint.taxonomy.item import TaxonomyItem, TaxonomyItemCollection
 from office365.sharepoint.taxonomy.term import Term
 from office365.sharepoint.taxonomy.term_group import TermGroup
 
@@ -8,18 +9,16 @@ from office365.sharepoint.taxonomy.term_group import TermGroup
 class TermStore(TaxonomyItem):
     """Represents a hierarchical or flat set of Term objects known as a 'TermSet'."""
 
-    def search_term(self, label, setId, parentTermId=None, languageTag=None):
+    def search_term(self, label, set_id, parent_term_id=None, language_tag=None):
         """
 
         :param str label:
-        :param str setId:
-        :param str or None parentTermId:
-        :param str or None languageTag:
-        :return:
+        :param str set_id:
+        :param str or None parent_term_id:
+        :param str or None language_tag:
         """
         return_type = TaxonomyItemCollection(self.context, Term, self.resource_path)
-        # params = {"label": label, "setId": setId, "parentTermId": parentTermId, "languageTag": languageTag}
-        params = {"label": label, "setId": setId}
+        params = {"label": label, "setId": set_id, "parentTermId": parent_term_id, "languageTag": language_tag}
         qry = ServiceOperationQuery(self, "searchTerm", params, None, None, return_type)
         self.context.add_query(qry)
 
@@ -58,10 +57,17 @@ class TermStore(TaxonomyItem):
         """
         :rtype: list[str]
          """
-        return self.properties.get("languageTags", [])
+        return self.properties.get("languageTags", StringCollection())
 
     @property
     def term_groups(self):
         return self.properties.get("termGroups",
                                    TaxonomyItemCollection(self.context, TermGroup,
                                                           ResourcePath("termGroups", self.resource_path)))
+
+    def get_property(self, name, default_value=None):
+        if name == "termGroups":
+            default_value = self.term_groups
+        elif name == "languageTags":
+            default_value = self.language_tags
+        return super(TermStore, self).get_property(name, default_value)

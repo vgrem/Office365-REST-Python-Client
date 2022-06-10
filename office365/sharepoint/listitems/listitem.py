@@ -11,7 +11,7 @@ from office365.sharepoint.fields.field_lookup_value import FieldLookupValue
 from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupValue
 from office365.sharepoint.likes.liked_by_information import LikedByInformation
 from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateValue
-from office365.sharepoint.listitems.list_item_version import ListItemVersion
+from office365.sharepoint.listitems.version import ListItemVersion
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.reputationmodel.reputation import Reputation
 from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
@@ -20,7 +20,7 @@ from office365.sharepoint.sharing.share_link_request import ShareLinkRequest
 from office365.sharepoint.sharing.share_link_response import ShareLinkResponse
 from office365.sharepoint.sharing.share_link_settings import ShareLinkSettings
 from office365.sharepoint.sharing.sharing_result import SharingResult
-from office365.sharepoint.taxonomy.taxonomy_field_value import TaxonomyFieldValueCollection
+from office365.sharepoint.taxonomy.field_value import TaxonomyFieldValueCollection
 from office365.sharepoint.ui.applicationpages.client_people_picker import (
     ClientPeoplePickerWebServiceInterface, ClientPeoplePickerQueryParameters
 )

@@ -2,7 +2,7 @@ import sys
 from random import randint
 
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.taxonomy.taxonomy_field_value import TaxonomyFieldValue
+from office365.sharepoint.taxonomy.field_value import TaxonomyFieldValue
 from tests import test_team_site_url, test_client_credentials
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)

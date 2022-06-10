@@ -30,11 +30,13 @@ class ClientValueCollection(ClientValue):
         return self._data[index]
 
     def __iter__(self):
-        for item in self._data:
-            yield item
+        return iter(self._data)
 
     def __len__(self):
         return len(self._data)
+
+    def __repr__(self):
+        return repr(self._data)
 
     def to_json(self, json_format=None):
         """
@@ -68,8 +70,8 @@ class ClientValueCollection(ClientValue):
             return initial_value
 
     def set_property(self, index, value, persist_changes=False):
-        child_value = self._create_value(value)
-        self.add(child_value)
+        item_value = self._create_value(value)
+        self.add(item_value)
         return self
 
     @property

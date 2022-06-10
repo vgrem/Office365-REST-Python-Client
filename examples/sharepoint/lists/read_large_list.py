@@ -1,5 +1,5 @@
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.listitems.caml.caml_query import CamlQuery
+from office365.sharepoint.listitems.caml.query import CamlQuery
 from tests import test_client_credentials, test_team_site_url
 
 
@@ -64,7 +64,7 @@ def query_large_list(target_list):
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 
 large_list = ctx.web.lists.get_by_title("Contacts_Large")
-query_large_list(large_list)
+# query_large_list(large_list)
 # get_total_count(large_list)
 # get_items(large_list)
-# enum_items(large_list)
+enum_items(large_list)

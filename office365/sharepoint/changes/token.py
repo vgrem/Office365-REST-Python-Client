@@ -8,3 +8,6 @@ class ChangeToken(ClientValue):
     def __init__(self):
         super(ChangeToken, self).__init__()
         self.StringValue = None
+
+    def __repr__(self):
+        return self.StringValue

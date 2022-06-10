@@ -1,6 +1,6 @@
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.teams.team_channel import TeamChannel
+from office365.sharepoint.teams.channel import TeamChannel
 
 
 class TeamChannelManager(BaseEntity):

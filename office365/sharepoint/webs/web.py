@@ -7,9 +7,10 @@ from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.alerts.alert_collection import AlertCollection
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.changes.collection import ChangeCollection
+from office365.sharepoint.clientsidecomponent.storage_entity import StorageEntity
 from office365.sharepoint.clientsidecomponent.types import SPClientSideComponentQueryResult, \
     SPClientSideComponentIdentifier
-from office365.sharepoint.contenttypes.content_type_collection import ContentTypeCollection
+from office365.sharepoint.contenttypes.collection import ContentTypeCollection
 from office365.sharepoint.eventreceivers.definition import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.field_collection import FieldCollection
 from office365.sharepoint.files.file import File
@@ -972,6 +973,52 @@ class Web(SecurableObject):
         qry = ServiceOperationQuery(self, "PageContextInfo", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
+
+    def get_storage_entity(self, key):
+        """
+        This will return the storage entity identified by the given key
+
+        :param str key: ID of storage entity to be returned.
+        """
+        return_type = StorageEntity(self.context)
+        params = {
+            "key": key,
+        }
+        qry = ServiceOperationQuery(self, "GetStorageEntity", params, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def set_storage_entity(self, key, value, description=None, comments=None):
+        """
+        This will set the storage entity identified by the given key
+
+        :param str key: Id of the storage entity to be set.
+        :param str value: Value of the storage entity to be set.
+        :param str description: Description of the storage entity to be set.
+        :param str comments: Comments of the storage entity to be set.
+        """
+        payload = {
+            "key": key,
+            "value": value,
+            "description": description,
+            "comments": comments
+        }
+        qry = ServiceOperationQuery(self, "SetStorageEntity", None, payload, None)
+        self.context.add_query(qry)
+        return self
+
+    def remove_storage_entity(self, key):
+        """
+        This will remove the storage entity identified by the given key
+
+        :param str key: Id of the storage entity to be removed.
+        """
+        params = {
+            "key": key,
+        }
+        qry = ServiceOperationQuery(self, "RemoveStorageEntity", params, None, None, return_type)
+        self.context.add_query(qry)
+        return self
 
     @property
     def allow_rss_feeds(self):

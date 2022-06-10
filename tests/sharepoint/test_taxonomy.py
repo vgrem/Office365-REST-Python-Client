@@ -1,11 +1,10 @@
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.fields.field import Field
-from office365.sharepoint.taxonomy.taxonomy_field import TaxonomyField
-from office365.sharepoint.taxonomy.taxonomy_service import TaxonomyService
-from office365.sharepoint.taxonomy.term import Term
+from office365.sharepoint.taxonomy.field import TaxonomyField
+from office365.sharepoint.taxonomy.service import TaxonomyService
 from office365.sharepoint.taxonomy.term_set import TermSet
-from office365.sharepoint.taxonomy.term_store import TermStore
 from office365.sharepoint.taxonomy.term_group import TermGroup
+from office365.sharepoint.taxonomy.term_store import TermStore
 from tests import test_team_site_url, test_client_credentials
 from tests.sharepoint.sharepoint_case import SPTestCase
 
@@ -26,16 +25,16 @@ class TestSPTaxonomy(SPTestCase):
     def tearDownClass(cls):
         pass
 
-    #def test1_get_term_store(self):
-    #    term_store = self.tax_svc.term_store.get().execute_query()
-    #    self.assertIsInstance(term_store, TermStore)
-    #    self.assertIsNotNone(term_store.name)
+    def test1_get_term_store(self):
+        term_store = self.tax_svc.term_store.get().execute_query()
+        self.assertIsInstance(term_store, TermStore)
+        self.assertIsNotNone(term_store.name)
 
-    #def test2_get_term_groups(self):
-    #    term_groups = self.tax_svc.term_store.term_groups.filter("name eq 'Geography'").get().execute_query()
-    #    self.assertGreater(len(term_groups), 0)
-    #    self.assertIsInstance(term_groups[0], TermGroup)
-    #    self.__class__.target_term_group = term_groups[0]
+    def test2_get_term_groups(self):
+        term_groups = self.tax_svc.term_store.term_groups.filter("name eq 'Geography'").get().execute_query()
+        self.assertGreater(len(term_groups), 0)
+        self.assertIsInstance(term_groups[0], TermGroup)
+        self.__class__.target_term_group = term_groups[0]
 
     #def test3_get_term_sets(self):
     #    term_sets = self.__class__.target_term_group.term_sets.get().execute_query()

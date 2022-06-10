@@ -23,3 +23,7 @@ class TaxonomyField(FieldLookup):
     def text_field(self, value):
         """Sets the GUID that identifies the hidden text field in an item."""
         self.set_property("TextField", value)
+
+    @property
+    def entity_type_name(self):
+        return "SP.Taxonomy.TaxonomyField"

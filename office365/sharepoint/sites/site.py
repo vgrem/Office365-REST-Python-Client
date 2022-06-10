@@ -6,7 +6,7 @@ from office365.sharepoint.audit.audit import Audit
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.eventreceivers.definition import EventReceiverDefinitionCollection
-from office365.sharepoint.features.feature_collection import FeatureCollection
+from office365.sharepoint.features.collection import FeatureCollection
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.portal.site_icon_manager import SiteIconManager
 from office365.sharepoint.portal.site_status import SiteStatus
