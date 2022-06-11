@@ -1,7 +1,7 @@
 from office365.runtime.client_value import ClientValue
 
 
-class AttachmentfileCreationInformation(ClientValue):
+class AttachmentCreationInformation(ClientValue):
 
     def __init__(self, filename=None, content=None):
         """
@@ -10,7 +10,7 @@ class AttachmentfileCreationInformation(ClientValue):
         :type filename: str
         :type content: str or bytes
         """
-        super(AttachmentfileCreationInformation, self).__init__()
+        super(AttachmentCreationInformation, self).__init__()
         self._filename = filename
         self._content = content
 

@@ -1,7 +1,7 @@
 import os
 import tempfile
 
-from office365.sharepoint.attachments.file import AttachmentFile
+from office365.sharepoint.attachments.attachment import Attachment
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.listitems.listitem import ListItem
 from tests import test_client_credentials, test_team_site_url
@@ -20,7 +20,7 @@ for item in items:  # type: ListItem
         # 2. Explicitly load attachments for ListItem
         attachment_files = item.attachment_files.get().execute_query()
         # 3. Enumerate and save attachments
-        for attachment_file in attachment_files:  # type: AttachmentFile
+        for attachment_file in attachment_files:  # type: Attachment
             download_file_name = os.path.join(download_path, os.path.basename(attachment_file.file_name))
             with open(download_file_name, 'wb') as fh:
                 attachment_file.download(fh).execute_query()

@@ -323,10 +323,10 @@ class ListItem(SecurableObject):
     @property
     def attachment_files(self):
         """Specifies the collection of attachments that are associated with the list item.<62>"""
-        from office365.sharepoint.attachments.file_collection import AttachmentFileCollection
+        from office365.sharepoint.attachments.collection import AttachmentCollection
         return self.properties.get("AttachmentFiles",
-                                   AttachmentFileCollection(self.context,
-                                                            ResourcePath("AttachmentFiles", self.resource_path)))
+                                   AttachmentCollection(self.context,
+                                                        ResourcePath("AttachmentFiles", self.resource_path)))
 
     @property
     def content_type(self):

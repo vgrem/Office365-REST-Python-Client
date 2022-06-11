@@ -455,15 +455,20 @@ class Web(SecurableObject):
             ServiceOperationPath("getFileByServerRelativeUrl", [url], self.resource_path)
         )
 
-    def get_file_by_server_relative_path(self, decoded_url):
+    def get_file_by_server_relative_path(self, decoded_url_or_path):
         """Returns the file object located at the specified server-relative path.
         Prefer this method over get_folder_by_server_relative_url since it supports % and # symbols in names
 
-        :type decoded_url: str
+        :type decoded_url_or_path: str or SPResPath
         """
+
+        if isinstance(decoded_url_or_path, SPResPath):
+            params = decoded_url_or_path.to_json()
+        else:
+            params = {"DecodedUrl": decoded_url_or_path}
         return File(
             self.context,
-            ServiceOperationPath("getFileByServerRelativePath", {"DecodedUrl": decoded_url}, self.resource_path)
+            ServiceOperationPath("getFileByServerRelativePath", params, self.resource_path)
         )
 
     def get_folder_by_server_relative_url(self, url):
@@ -1016,7 +1021,7 @@ class Web(SecurableObject):
         params = {
             "key": key,
         }
-        qry = ServiceOperationQuery(self, "RemoveStorageEntity", params, None, None, return_type)
+        qry = ServiceOperationQuery(self, "RemoveStorageEntity", params, None, None, None)
         self.context.add_query(qry)
         return self
 
