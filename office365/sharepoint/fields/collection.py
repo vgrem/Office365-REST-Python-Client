@@ -5,8 +5,8 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.fields.field import Field
-from office365.sharepoint.fields.field_creation_information import FieldCreationInformation
-from office365.sharepoint.fields.field_type import FieldType
+from office365.sharepoint.fields.creation_information import FieldCreationInformation
+from office365.sharepoint.fields.type import FieldType
 from office365.sharepoint.fields.xmlSchemaFieldCreationInformation import XmlSchemaFieldCreationInformation
 
 
@@ -92,7 +92,7 @@ class FieldCollection(BaseEntityCollection):
     def add(self, field_create_information):
         """Adds a fields to the fields collection.
 
-        :type field_create_information: office365.sharepoint.fields.field_creation_information.FieldCreationInformation
+        :type field_create_information: office365.sharepoint.fields.creation_information.FieldCreationInformation
         """
         field = Field.create_field_from_type(self.context, field_create_information)
         self.add_child(field)
@@ -103,7 +103,7 @@ class FieldCollection(BaseEntityCollection):
     def add_field(self, parameters):
         """Adds a fields to the fields collection.
 
-        :type parameters: office365.sharepoint.fields.field_creation_information.FieldCreationInformation
+        :type parameters: office365.sharepoint.fields.creation_information.FieldCreationInformation
         """
         field = Field(self.context)
         self.add_child(field)

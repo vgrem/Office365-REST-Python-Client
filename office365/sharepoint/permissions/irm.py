@@ -30,3 +30,8 @@ class InformationRightsManagementSettings(BaseEntity):
         :rtype: str or None
         """
         return self.properties.get("GroupName", None)
+
+
+class EffectiveInformationRightsManagementSettings(BaseEntity):
+    """A collection of effective IRM settings on the file."""
+    pass

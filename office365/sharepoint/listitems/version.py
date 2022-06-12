@@ -38,7 +38,7 @@ class ListItemVersion(BaseEntity):
     @property
     def fields(self):
         """Gets the collection of fields that are used in the list that contains the item version."""
-        from office365.sharepoint.fields.field_collection import FieldCollection
+        from office365.sharepoint.fields.collection import FieldCollection
         return self.properties.get("Fields", FieldCollection(self.context, ResourcePath("Fields", self.resource_path)))
 
     @property

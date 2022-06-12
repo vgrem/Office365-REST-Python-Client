@@ -8,8 +8,8 @@ from office365.sharepoint.base_entity_collection import BaseEntityCollection
 class AttachmentCollection(BaseEntityCollection):
     """Represents a collection of Attachment resources."""
 
-    def __init__(self, context, resource_path=None):
-        super(AttachmentCollection, self).__init__(context, Attachment, resource_path)
+    def __init__(self, context, resource_path=None, parent=None):
+        super(AttachmentCollection, self).__init__(context, Attachment, resource_path, parent)
 
     def add(self, attachment_file_information):
         """

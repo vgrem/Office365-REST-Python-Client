@@ -3,14 +3,15 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.changes.token import ChangeToken
 from office365.sharepoint.contenttypes.collection import ContentTypeCollection
 from office365.sharepoint.customactions.element import CustomActionElementCollection
 from office365.sharepoint.eventreceivers.definition import EventReceiverDefinitionCollection
-from office365.sharepoint.fields.field_collection import FieldCollection
-from office365.sharepoint.fields.related_field_collection import RelatedFieldCollection
+from office365.sharepoint.fields.collection import FieldCollection
+from office365.sharepoint.fields.related_field import RelatedField
 from office365.sharepoint.files.checkedOutFileCollection import CheckedOutFileCollection
 from office365.sharepoint.files.file import File
 from office365.sharepoint.flows.synchronization_result import FlowSynchronizationResult
@@ -387,8 +388,8 @@ class List(SecurableObject):
         """Returns a collection of lookup fields that use this list as a data source and
             that have FieldLookup.IsRelationship set to true.
         """
-        return RelatedFieldCollection(self.context,
-                                      ServiceOperationPath("getRelatedFields", [], self.resource_path))
+        return BaseEntityCollection(self.context, RelatedField,
+                                    ServiceOperationPath("getRelatedFields", [], self.resource_path))
 
     @property
     def id(self):

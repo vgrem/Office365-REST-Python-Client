@@ -186,8 +186,8 @@ class Folder(BaseEntity):
     def move_to_by_path(self, new_relative_path, retain_editor_and_modified=False):
         """Moves the folder with files to the destination Path.
 
-        :type new_relative_path: str
-        :type retain_editor_and_modified: bool
+        :param str new_relative_path: A full URL path that represents the destination folder.
+        :param bool retain_editor_and_modified:
         """
         target_folder = Folder(self.context)
         target_folder.set_property("ServerRelativePath", SPResPath(new_relative_path))
@@ -308,7 +308,7 @@ class Folder(BaseEntity):
         """Gets the server-relative Path of the list folder.
         :rtype: SPResPath or None
         """
-        return self.properties.get("ServerRelativePath", SPResPath(None))
+        return self.properties.get("ServerRelativePath", SPResPath())
 
     def get_property(self, name, default_value=None):
         if default_value is None:

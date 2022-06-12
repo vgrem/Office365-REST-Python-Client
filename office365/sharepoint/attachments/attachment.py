@@ -1,5 +1,3 @@
-from office365.runtime.paths.resource_path import ResourcePath
-from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.internal.queries.download_file import create_download_file_query
 from office365.sharepoint.internal.queries.upload_file import create_upload_file_query
@@ -86,18 +84,12 @@ class Attachment(BaseEntity):
         """
         return self.properties.get("ServerRelativePath", SPResPath())
 
-    @property
-    def parent_collection(self):
-        """
-        :rtype: office365.sharepoint.attachments.collection.AttachmentCollection
-        """
-        return self._parent_collection
-
     def set_property(self, name, value, persist_changes=True):
         super(Attachment, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
-        if name == "ServerRelativeUrl":
-            self._resource_path = ServiceOperationPath("GetFileByServerRelativeUrl", [value], ResourcePath("Web"))
+        if self._resource_path is None:
+            if name == "ServerRelativeUrl":
+                self._resource_path = self.context.web.get_file_by_server_relative_url(value).resource_path
 
     def get_property(self, name, default_value=None):
         if default_value is None:

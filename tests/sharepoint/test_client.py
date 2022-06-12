@@ -75,15 +75,14 @@ class TestSharePointClient(TestCase):
         self.assertEqual(updated_web.properties['Title'], new_web_title)
 
     def test_11_execute_get_and_update_batch_request(self):
+        page_url = "/sites/team/SitePages/Home.aspx"
         client = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
-        list_item = client.web.get_file_by_server_relative_url("/sites/team/SitePages/Home.aspx").listItemAllFields
+        list_item = client.web.get_file_by_server_relative_url(page_url).listItemAllFields
         new_title = create_unique_name("Page")
         list_item.set_property("Title", new_title).update()
         client.execute_batch()
 
-        updated_list_item = client.web.get_file_by_server_relative_url("/sites/team/SitePages/Home.aspx").listItemAllFields
-        client.load(updated_list_item)
-        client.execute_query()
+        updated_list_item = client.web.get_file_by_server_relative_url(page_url).listItemAllFields.get().execute_query()
         self.assertEqual(updated_list_item.properties['Title'], new_title)
 
     def test_12_create_and_delete_batch_request(self):
@@ -121,7 +120,7 @@ class TestSharePointClient(TestCase):
         str_col = StringCollection()
         self.assertEqual(str_col.entity_type_name, "Collection(Edm.String)")
 
-        type_item = SecondaryAdministratorsFieldsData(None, [])
+        type_item = SecondaryAdministratorsFieldsData()
         self.assertEqual(type_item.entity_type_name,
                          "Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsFieldsData")
 

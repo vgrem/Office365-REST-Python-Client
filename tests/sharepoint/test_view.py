@@ -1,8 +1,8 @@
 import uuid
 
 from office365.sharepoint.fields.field import Field
-from office365.sharepoint.fields.field_creation_information import FieldCreationInformation
-from office365.sharepoint.fields.field_type import FieldType
+from office365.sharepoint.fields.creation_information import FieldCreationInformation
+from office365.sharepoint.fields.type import FieldType
 from office365.sharepoint.views.view_field_collection import ViewFieldCollection
 from tests import create_unique_name
 from tests.sharepoint.sharepoint_case import SPTestCase

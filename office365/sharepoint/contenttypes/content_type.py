@@ -4,7 +4,7 @@ from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.contenttypes.field_link_collection import FieldLinkCollection
-from office365.sharepoint.fields.field_collection import FieldCollection
+from office365.sharepoint.fields.collection import FieldCollection
 
 
 class ContentType(BaseEntity):

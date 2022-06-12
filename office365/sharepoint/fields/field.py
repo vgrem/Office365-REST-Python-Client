@@ -2,7 +2,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.fields.field_type import FieldType
+from office365.sharepoint.fields.type import FieldType
 
 
 class Field(BaseEntity):
@@ -13,19 +13,19 @@ class Field(BaseEntity):
 
     @staticmethod
     def resolve_field_type(type_id_or_name):
-        from office365.sharepoint.fields.field_calculated import FieldCalculated
-        from office365.sharepoint.fields.field_choice import FieldChoice
-        from office365.sharepoint.fields.field_computed import FieldComputed
-        from office365.sharepoint.fields.field_currency import FieldCurrency
-        from office365.sharepoint.fields.field_guid import FieldGuid
-        from office365.sharepoint.fields.field_lookup import FieldLookup
-        from office365.sharepoint.fields.field_multi_choice import FieldMultiChoice
-        from office365.sharepoint.fields.field_multi_line_text import FieldMultiLineText
-        from office365.sharepoint.fields.field_text import FieldText
-        from office365.sharepoint.fields.field_url import FieldUrl
-        from office365.sharepoint.fields.field_user import FieldUser
+        from office365.sharepoint.fields.calculated import FieldCalculated
+        from office365.sharepoint.fields.choice import FieldChoice
+        from office365.sharepoint.fields.computed import FieldComputed
+        from office365.sharepoint.fields.currency import FieldCurrency
+        from office365.sharepoint.fields.guid import FieldGuid
+        from office365.sharepoint.fields.lookup import FieldLookup
+        from office365.sharepoint.fields.multi_choice import FieldMultiChoice
+        from office365.sharepoint.fields.multi_line_text import FieldMultiLineText
+        from office365.sharepoint.fields.text import FieldText
+        from office365.sharepoint.fields.url import FieldUrl
+        from office365.sharepoint.fields.user import FieldUser
         from office365.sharepoint.taxonomy.field import TaxonomyField
-        from office365.sharepoint.fields.field_date_time import FieldDateTime
+        from office365.sharepoint.fields.date_time import FieldDateTime
         field_known_types = {
             FieldType.Text: FieldText,
             FieldType.Calculated: FieldCalculated,
@@ -51,9 +51,10 @@ class Field(BaseEntity):
     @staticmethod
     def create_field_from_type(context, field_parameters):
         """
+        Creates a field based on its type
 
-        :type context: ClientContext
-        :type field_parameters: office365.sharepoint.fields.field_creation_information.FieldCreationInformation
+        :type context: office365.sharepoint.client_context.ClientContext
+        :type field_parameters: office365.sharepoint.fields.creation_information.FieldCreationInformation
         :return: Field
         """
         field_type = Field.resolve_field_type(field_parameters.FieldTypeKind)
@@ -85,20 +86,25 @@ class Field(BaseEntity):
 
     def set_show_in_edit_form(self, flag):
         """Sets the value of the ShowInEditForm property for this fields.
-        :type flag: bool
+
+        :param bool flag: A Boolean value that indicates whether this field is shown in the edit form.
         """
         qry = ServiceOperationQuery(self, "setShowInEditForm", [flag])
         self.context.add_query(qry)
 
     def set_show_in_new_form(self, flag):
-        """Sets the value of the ShowInNewForm property for this fields."""
+        """Sets the value of the ShowInNewForm property for this fields.
+
+        :param bool flag: A Boolean value that indicates whether this field is shown in the new form.
+        """
         qry = ServiceOperationQuery(self, "setShowInNewForm", [flag])
         self.context.add_query(qry)
         return self
 
     @property
     def id(self):
-        """Gets a value that specifies the field identifier.
+        """
+        Gets a value that specifies the field identifier.
 
         :rtype: str or None
         """

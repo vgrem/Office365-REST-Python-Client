@@ -1,4 +1,4 @@
-from office365.sharepoint.fields.field_number import FieldNumber
+from office365.sharepoint.fields.number import FieldNumber
 
 
 class FieldCurrency(FieldNumber):

@@ -11,7 +11,8 @@ from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.files.version_collection import FileVersionCollection
 from office365.sharepoint.listitems.listitem import ListItem
-from office365.sharepoint.permissions.information_rights_management_settings import InformationRightsManagementSettings
+from office365.sharepoint.permissions.irm import InformationRightsManagementSettings, \
+    EffectiveInformationRightsManagementSettings
 from office365.sharepoint.webparts.limited_webpart_manager import LimitedWebPartManager
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
@@ -272,22 +273,30 @@ class File(AbstractFile):
         return return_stream
 
     def save_binary_stream(self, stream):
-        """Saves the file."""
+        """Saves the file in binary format.
+
+        :param str or bytes stream: A stream containing the contents of the specified file.
+        """
         qry = ServiceOperationQuery(self, "SaveBinaryStream", None, {"file": stream})
         self.context.add_query(qry)
         return self
 
     def get_upload_status(self, upload_id):
+        """Gets the status of a chunk upload session.
+
+        :param str upload_id:  The upload session ID.
+        """
         payload = {
             "uploadId": upload_id,
         }
-        qry = ServiceOperationQuery(self, "GetUploadStatus", None, payload)
+        return_type = File(self.context)
+        qry = ServiceOperationQuery(self, "GetUploadStatus", None, payload, None, return_type)
         self.context.add_query(qry)
-        return self
+        return return_type
 
     def upload_with_checksum(self, upload_id, checksum, stream):
         """
-        :param str upload_id:
+        :param str upload_id: The upload session ID.
         :param str checksum:
         :param bytes stream:
         """
@@ -302,6 +311,12 @@ class File(AbstractFile):
         return return_type
 
     def cancel_upload(self, upload_id):
+        """
+        Aborts the chunk upload session without saving the uploaded data. If StartUpload (section 3.2.5.64.2.1.22)
+        created the file, the file will be deleted.
+
+        :param str upload_id:  The upload session ID.
+        """
         payload = {
             "uploadId": upload_id,
         }
@@ -455,6 +470,12 @@ class File(AbstractFile):
         return self
 
     @property
+    def author(self):
+        """Specifies the user who added the file."""
+        return self.properties.get('Author',
+                                   User(self.context, ResourcePath("Author", self.resource_path)))
+
+    @property
     def checked_out_by_user(self):
         """Gets an object that represents the user who has checked out the file."""
         return self.properties.get('CheckedOutByUser',
@@ -462,19 +483,29 @@ class File(AbstractFile):
 
     @property
     def version_events(self):
+        """Gets the history of events on this version object."""
         return self.properties.get("VersionEvents",
                                    BaseEntityCollection(self.context,
                                                         FileVersionEvent,
                                                         ResourcePath("VersionEvents", self.resource_path)))
 
     @property
-    def information_rights_management_settings(self):
+    def effective_information_rights_management_settings(self):
         """
         Returns the effective Information Rights Management (IRM) settings for the file.
 
-        A file can be IRM-protected based on the IRM settings for the file itself, based on the IRM settings
-        for the list which contains the file, or based on a rule.
-        From greatest to least, IRM settings take precedence in the following order: rule, list, then file.
+        A file can be IRM-protected based on the IRM settings for the file itself, based on the IRM settings for the
+        list which contains the file, or based on a rule. From greatest to least, IRM settings take precedence in the
+        following order: rule, list, then file.
+        """
+        path = ResourcePath("EffectiveInformationRightsManagementSettings", self.resource_path)
+        return self.properties.get('EffectiveInformationRightsManagementSettings',
+                                   EffectiveInformationRightsManagementSettings(self.context, path))
+
+    @property
+    def information_rights_management_settings(self):
+        """
+        Returns the Information Rights Management (IRM) settings for the file.
         """
         return self.properties.get('InformationRightsManagementSettings',
                                    InformationRightsManagementSettings(self.context,
@@ -631,6 +662,7 @@ class File(AbstractFile):
             property_mapping = {
                 "CheckedOutByUser": self.checked_out_by_user,
                 "VersionEvents": self.version_events,
+                "EffectiveInformationRightsManagementSettings": self.effective_information_rights_management_settings,
                 "InformationRightsManagementSettings": self.information_rights_management_settings,
                 "LockedByUser": self.locked_by_user,
                 "ModifiedBy": self.modified_by
@@ -644,7 +676,7 @@ class File(AbstractFile):
         # prioritize using UniqueId
         if name == "UniqueId":
             self._resource_path = ServiceOperationPath("GetFileById", [value], ResourcePath("Web"))
-        
+
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "ServerRelativeUrl":

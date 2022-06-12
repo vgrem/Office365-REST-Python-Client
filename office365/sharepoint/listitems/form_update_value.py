@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from office365.runtime.client_value import ClientValue
-from office365.sharepoint.fields.field_lookup_value import FieldLookupValue
+from office365.sharepoint.fields.lookup_value import FieldLookupValue
 
 
 class ListItemFormUpdateValue(ClientValue):

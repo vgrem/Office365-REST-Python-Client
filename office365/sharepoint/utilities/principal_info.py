@@ -2,4 +2,8 @@ from office365.runtime.client_value import ClientValue
 
 
 class PrincipalInfo(ClientValue):
-    pass
+    """Provides access to information about a principal."""
+
+    @property
+    def entity_type_name(self):
+        return "SP.Utilities.PrincipalInfo"

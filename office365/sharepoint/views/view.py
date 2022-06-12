@@ -116,7 +116,7 @@ class View(BaseEntity):
         """Gets the server-relative Path of the View.
         :rtype: SPResPath or None
         """
-        return self.properties.get("ServerRelativePath", SPResPath(None))
+        return self.properties.get("ServerRelativePath", SPResPath())
 
     def get_property(self, name, default_value=None):
         property_mapping = {

@@ -1,4 +1,4 @@
-from office365.sharepoint.fields.field_multi_choice import FieldMultiChoice
+from office365.sharepoint.fields.multi_choice import FieldMultiChoice
 
 
 class FieldRatingScale(FieldMultiChoice):

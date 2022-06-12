@@ -12,7 +12,7 @@ from office365.sharepoint.clientsidecomponent.types import SPClientSideComponent
     SPClientSideComponentIdentifier
 from office365.sharepoint.contenttypes.collection import ContentTypeCollection
 from office365.sharepoint.eventreceivers.definition import EventReceiverDefinitionCollection
-from office365.sharepoint.fields.field_collection import FieldCollection
+from office365.sharepoint.fields.collection import FieldCollection
 from office365.sharepoint.files.file import File
 from office365.sharepoint.flows.synchronization_result import FlowSynchronizationResult
 from office365.sharepoint.folders.folder import Folder
@@ -1278,7 +1278,7 @@ class Web(SecurableObject):
         """Gets the server-relative Path of the Web.
         :rtype: SPResPath or None
         """
-        return self.properties.get("ServerRelativePath", SPResPath(None))
+        return self.properties.get("ServerRelativePath", SPResPath())
 
     def get_property(self, name, default_value=None):
         if default_value is None:

@@ -7,7 +7,7 @@ from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.comments.comment_collection import CommentCollection
-from office365.sharepoint.fields.field_lookup_value import FieldLookupValue
+from office365.sharepoint.fields.lookup_value import FieldLookupValue
 from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupValue
 from office365.sharepoint.likes.liked_by_information import LikedByInformation
 from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateValue
@@ -425,7 +425,7 @@ class ListItem(SecurableObject):
 
         # fallback: create a new resource path
         if self._resource_path is None:
-            if name == "Id" and self._parent_collection is not None:
+            if name == "Id":
                 self._resource_path = ServiceOperationPath(
                     "getItemById", [value], self._parent_collection.resource_path.parent)
         return self

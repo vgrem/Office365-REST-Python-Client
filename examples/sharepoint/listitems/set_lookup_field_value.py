@@ -1,7 +1,7 @@
 import sys
 
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.fields.field_lookup_value import FieldLookupValue
+from office365.sharepoint.fields.lookup_value import FieldLookupValue
 from tests import test_team_site_url, test_client_credentials
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)

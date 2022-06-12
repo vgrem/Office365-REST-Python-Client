@@ -1,5 +1,5 @@
 from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupValue
-from office365.sharepoint.fields.field_user_value import FieldUserValue
+from office365.sharepoint.fields.user_value import FieldUserValue
 
 
 class FieldMultiUserValue(FieldMultiLookupValue):

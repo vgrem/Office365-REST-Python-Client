@@ -2,7 +2,7 @@ import sys
 from datetime import datetime, timedelta
 
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.fields.field_user_value import FieldUserValue
+from office365.sharepoint.fields.user_value import FieldUserValue
 from office365.sharepoint.listitems.listitem import ListItem
 from tests import test_team_site_url, test_client_credentials, test_user_principal_name
 
