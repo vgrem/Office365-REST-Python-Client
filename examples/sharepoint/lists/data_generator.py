@@ -3,17 +3,8 @@ import os
 from faker import Faker
 
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.lists.creation_information import ListCreationInformation
 from office365.sharepoint.lists.template_type import ListTemplateType
 from tests import test_team_site_url, test_user_credentials
-
-
-def ensure_list(web, list_properties):
-    lists = web.lists.filter("Title eq '{0}'".format(list_properties.Title)).get().execute_query()
-    if len(lists) == 1:
-        return lists[0]
-    else:
-        return web.lists.add(list_properties).execute_query()
 
 
 def generate_documents(context, amount):
@@ -21,11 +12,7 @@ def generate_documents(context, amount):
     :type context: ClientContext
     :type amount: int
     """
-    lib = ensure_list(context.web,
-                      ListCreationInformation("Documents_Archive",
-                                              None,
-                                              ListTemplateType.DocumentLibrary))
-
+    lib = context.web.lists.get_by_title("Documents_Archive")
     include_files = False
 
     fake = Faker()
@@ -51,11 +38,7 @@ def generate_contacts(context, amount):
     :type context: ClientContext
     :type amount: int
     """
-    contacts_list = ensure_list(context.web,
-                                ListCreationInformation("Contacts_Large",
-                                                        None,
-                                                        ListTemplateType.Contacts)
-                                )
+    contacts_list = context.web.lists.get_by_title("Contacts_Large")
 
     fake = Faker()
     for idx in range(0, amount):
@@ -71,7 +54,7 @@ def generate_contacts(context, amount):
             'WorkCountry': fake.country(),
             'WebPage': {'Url': fake.url()}
         }
-        #contact_item = contacts_list.add_item(contact_properties).execute_query()
+        # contact_item = contacts_list.add_item(contact_properties).execute_query()
         contact_item = contacts_list.add_item(contact_properties)
         print("({0} of {1}) Contact '{2}' has been created".format(idx, amount, contact_item.properties["Title"]))
     ctx.execute_batch()
@@ -80,4 +63,4 @@ def generate_contacts(context, amount):
 if __name__ == '__main__':
     ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
     generate_contacts(ctx, 5000)
-    #generate_documents(ctx, 100)
+    # generate_documents(ctx, 100)

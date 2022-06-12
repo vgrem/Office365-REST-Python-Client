@@ -10,7 +10,7 @@ ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials
 
 download_path = tempfile.mkdtemp()
 
-list_title = "Tasks"
+list_title = "Company Tasks"
 source_list = ctx.web.lists.get_by_title(list_title)
 items = source_list.items
 ctx.load(items, ["ID", "UniqueId", "FileRef", "LinkFilename", "Title", "Attachments"])

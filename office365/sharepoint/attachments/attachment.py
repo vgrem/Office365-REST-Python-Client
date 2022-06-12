@@ -32,9 +32,12 @@ class Attachment(BaseEntity):
             self.ensure_property("ServerRelativeUrl", _download_file_by_url)
         return self
 
-    def upload(self, file_object):
+    def upload(self, file_object, use_path=True):
         """
+        Upload attachment into list item
+
         :type file_object: typing.IO
+        :param bool use_path: Use Path instead of Url for addressing attachments
         """
 
         def _upload_file_by_url():
@@ -42,7 +45,15 @@ class Attachment(BaseEntity):
             qry = create_upload_file_query(target_file, file_object)
             self.context.add_query(qry)
 
-        self.ensure_property("ServerRelativeUrl", _upload_file_by_url)
+        def _upload_file_by_path():
+            target_file = self.context.web.get_file_by_server_relative_path(self.server_relative_path)
+            qry = create_upload_file_query(target_file, file_object)
+            self.context.add_query(qry)
+
+        if use_path:
+            self.ensure_property("ServerRelativePath", _upload_file_by_path)
+        else:
+            self.ensure_property("ServerRelativeUrl", _upload_file_by_url)
         return self
 
     @property

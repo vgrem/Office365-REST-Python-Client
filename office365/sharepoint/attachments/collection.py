@@ -37,13 +37,33 @@ class AttachmentCollection(BaseEntityCollection):
         self.context.add_query(qry)
         return return_type
 
-    def add_using_path(self):
-        pass
+    def add_using_path(self, decoded_url, content_stream):
+        """
+        Adds the attachment represented by the file name and stream in the specified parameter to the list item.
+
+        :param str decoded_url: Specifies the path for the attachment file.
+        :param str content_stream: Stream containing the content of the attachment.
+        """
+        return_type = Attachment(self.context)
+        payload = {
+            "DecodedUrl": decoded_url,
+            "contentStream": content_stream
+        }
+        qry = ServiceOperationQuery(self, "AddUsingPath", None, payload, None, return_type)
+        self.context.add_query(qry)
+        self.add_child(return_type)
+        return return_type
 
     def get_by_filename(self, filename):
         """Retrieve Attachment file object by filename
 
-        :type filename: str
+        :param str filename: The specified file name.
         """
-        return Attachment(self.context, ServiceOperationPath("GetByFileName", [filename],
-                                                             self.resource_path), parent_collection=self)
+        return Attachment(self.context, ServiceOperationPath("GetByFileName", [filename], self.resource_path))
+
+    def get_by_filename_as_path(self, decoded_url):
+        """Get the attachment file.
+
+        :param str decoded_url: The specified file name.
+        """
+        return Attachment(self.context, ServiceOperationPath("GetByFileNameAsPath", [decoded_url], self.resource_path))
