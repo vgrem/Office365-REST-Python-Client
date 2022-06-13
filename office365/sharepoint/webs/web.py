@@ -709,7 +709,7 @@ class Web(SecurableObject):
         def _grp_resolved(role_value):
             def _web_loaded():
                 Web.share_object(self.context, self.url, picker_result.value, role_value, 0,
-                                 False, send_email, False, email_subject, email_body, result=sharing_result)
+                                 False, send_email, False, email_subject, email_body, return_type=sharing_result)
 
             self.ensure_property("Url", _web_loaded)
 
@@ -721,17 +721,17 @@ class Web(SecurableObject):
 
     def unshare(self):
         """
-        Unshare a Web
+        Removes Sharing permissions on a Web
 
         :rtype: SharingResult
         """
-        result = ClientResult(self.context)
+        result = SharingResult(self.context)
 
         def _web_initialized():
-            result.value = Web.unshare_object(self.context, self.url)
+            Web.unshare_object(self.context, self.url, return_type=result)
 
         self.ensure_property("Url", _web_initialized)
-        return result.value
+        return result
 
     @staticmethod
     def get_document_libraries(context, web_full_url):
@@ -878,7 +878,7 @@ class Web(SecurableObject):
                      role_value=None,
                      group_id=0, propagate_acl=False,
                      send_email=True, include_anonymous_link_in_email=False, email_subject=None, email_body=None,
-                     use_simplified_roles=True, result=None):
+                     use_simplified_roles=True, return_type=None):
         """
         This method shares an object in SharePoint such as a list item or site. It returns a SharingResult object
         which contains the completion script and a page to redirect to if desired.
@@ -897,10 +897,10 @@ class Web(SecurableObject):
         :param str email_body: The email subject.
         :param bool use_simplified_roles: A Boolean value indicating whether to use the SharePoint simplified roles
         (Edit, View) or not.
-        :param SharingResult or None result: Return type
+        :param SharingResult or None return_type: Return type
         """
-        if result is None:
-            result = SharingResult(context)
+        if return_type is None:
+            return_type = SharingResult(context)
         payload = {
             "url": url,
             "groupId": group_id,
@@ -913,28 +913,29 @@ class Web(SecurableObject):
             "emailBody": email_body,
             "useSimplifiedRoles": use_simplified_roles
         }
-        qry = ServiceOperationQuery(context.web, "ShareObject", None, payload, None, result)
+        qry = ServiceOperationQuery(context.web, "ShareObject", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
-    def unshare_object(context, url):
+    def unshare_object(context, url, return_type=None):
         """
         Removes Sharing permissions on an object.
 
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
         :param str url: A SharingResult object which contains status codes pertaining to the completion of the operation
-        :return: SharingResult
+        :param SharingResult return_type: Return type
         """
-        result = SharingResult(context)
+        if return_type is None:
+            return_type = SharingResult(context)
         payload = {
             "url": url
         }
-        qry = ServiceOperationQuery(context.web, "UnshareObject", None, payload, None, result)
+        qry = ServiceOperationQuery(context.web, "UnshareObject", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     def get_file_by_id(self, unique_id):
         """Returns the file object with the specified GUID.

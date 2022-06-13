@@ -13,18 +13,20 @@ class SecurableObject(BaseEntity):
 
     def get_role_assignment(self, principal):
         """
+        Retrieves the role assignment object (1) based on the specified user or group
 
         :param office365.sharepoint.principal.principal.Principal principal: Specifies the user or group of the
             role assignment.
 
         :rtype: RoleAssignment
         """
-        result = ClientResult(self.context, RoleAssignment(self.context))
+        return_type = RoleAssignment(self.context)
 
         def _principal_loaded():
-            result.value = self.role_assignments.get_by_principal_id(principal.id)
+            return_type._resource_path = self.role_assignments.get_by_principal_id(principal.id).resource_path
+
         principal.ensure_property("Id", _principal_loaded)
-        return result.value
+        return return_type
 
     def add_role_assignment(self, principal, role_def):
         """Adds a role assignment to securable resource.<81>

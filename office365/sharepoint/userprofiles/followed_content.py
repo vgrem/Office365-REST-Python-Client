@@ -25,4 +25,3 @@ class FollowedContent(BaseEntity):
     @property
     def entity_type_name(self):
         return "SP.UserProfiles.FollowedContent"
-

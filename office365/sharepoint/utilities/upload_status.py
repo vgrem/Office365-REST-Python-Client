@@ -28,4 +28,3 @@ class UploadStatus(BaseEntity):
         :rtype: str or None
         """
         return self.properties.get('UploadId', None)
-

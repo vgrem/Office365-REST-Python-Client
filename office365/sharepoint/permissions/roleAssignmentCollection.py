@@ -17,20 +17,16 @@ class RoleAssignmentCollection(BaseEntityCollection):
         in collection or by resource id"""
         if type(index_or_principal_id) == int:
             return super(RoleAssignmentCollection, self).__getitem__(index_or_principal_id)
-        return self._item_type(self.context,
-                               ResourcePath(index_or_principal_id, self.resource_path))
+        else:
+            return self._item_type(self.context, ResourcePath(index_or_principal_id, self.resource_path))
 
     def get_by_principal_id(self, principal_id):
         """Retrieves the role assignment object (1) based on the specified user or group.
 
         :param int principal_id: Specifies the user or group of the role assignment.
         """
-        role_assignment = RoleAssignment(self.context,
-                                         ServiceOperationPath("GetByPrincipalId",
-                                                              [principal_id],
-                                                              self.resource_path))
-        self.context.load(role_assignment)
-        return role_assignment
+        return RoleAssignment(self.context,
+                              ServiceOperationPath("GetByPrincipalId", [principal_id], self.resource_path))
 
     def add_role_assignment(self, principal_id, role_def_id):
         """Adds a role assignment to the role assignment collection.<81>
@@ -44,6 +40,7 @@ class RoleAssignmentCollection(BaseEntityCollection):
         }
         qry = ServiceOperationQuery(self, "AddRoleAssignment", payload, None, None, None)
         self.context.add_query(qry)
+        return self
 
     def remove_role_assignment(self, principal_id, role_def_id):
         """Removes the role assignment with the specified principal and role definition from the collection.
@@ -57,3 +54,4 @@ class RoleAssignmentCollection(BaseEntityCollection):
         }
         qry = ServiceOperationQuery(self, "RemoveRoleAssignment", payload, None, None, None)
         self.context.add_query(qry)
+        return self

@@ -163,7 +163,7 @@ class ListItem(SecurableObject):
         :rtype: SharingResult
         """
 
-        result = ClientResult(self.context, SharingResult(self.context))
+        sharing_result = SharingResult(self.context)
         file_result = ClientResult(self.context)
 
         role_values = {
@@ -176,14 +176,14 @@ class ListItem(SecurableObject):
 
         def _picker_value_resolved(picker_value):
             from office365.sharepoint.webs.web import Web
-            result.value = Web.share_object(self.context, file_result.value, picker_value, role_values[share_option],
-                                            0, False, send_email, False, email_subject, email_body)
+            Web.share_object(self.context, file_result.value, picker_value, role_values[share_option],
+                             0, False, send_email, False, email_subject, email_body, return_type=sharing_result)
 
         self.ensure_property("EncodedAbsUrl", _property_resolved)
         params = ClientPeoplePickerQueryParameters(user_principal_name)
         ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(self.context,
                                                                                 params, _picker_value_resolved)
-        return result.value
+        return sharing_result
 
     def unshare(self):
         """
@@ -191,15 +191,15 @@ class ListItem(SecurableObject):
 
         :rtype: SharingResult
         """
-        result = ClientResult(self.context, SharingResult(self.context))
+        result = SharingResult(self.context)
 
         def _property_resolved():
             abs_url = self.get_property("EncodedAbsUrl")
             from office365.sharepoint.webs.web import Web
-            result.value = Web.unshare_object(self.context, abs_url)
+            Web.unshare_object(self.context, abs_url, return_type=result)
 
         self.ensure_property("EncodedAbsUrl", _property_resolved)
-        return result.value
+        return result
 
     def get_sharing_information(self):
         """

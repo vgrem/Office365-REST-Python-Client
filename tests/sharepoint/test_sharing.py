@@ -5,6 +5,7 @@ from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.sharing.document_sharing_manager import DocumentSharingManager
 from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
+from office365.sharepoint.sharing.operation_status_code import SharingOperationStatusCode
 from office365.sharepoint.sharing.role_type import RoleType
 from office365.sharepoint.sharing.sharing_result import SharingResult
 from office365.sharepoint.webs.web import Web
@@ -51,6 +52,7 @@ class TestSharePointSharing(TestCase):
     def test6_share_web(self):
         result = self.client.web.share(self.target_user.user_principal_name).execute_query()
         self.assertIsInstance(result, SharingResult)
+        self.assertEqual(result.status_code, SharingOperationStatusCode.CompletedSuccessfully)
 
     def test7_unshare_web(self):
         result = self.client.web.unshare().execute_query()

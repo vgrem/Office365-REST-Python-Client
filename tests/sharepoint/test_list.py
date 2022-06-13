@@ -53,8 +53,8 @@ class TestSPList(SPTestCase):
     def test6_library_get_unique_perms(self):
         target_lib = self.client.web.default_document_library()
         target_user = self.client.web.current_user
-        assignment = target_lib.get_role_assignment(target_user).execute_query()
-        self.assertIsNotNone(assignment)
+        assignment = target_lib.get_role_assignment(target_user).get().execute_query()
+        self.assertIsNotNone(assignment.principal_id)
 
     def test6_library_remove_unique_perms(self):
         target_role_def = self.client.web.role_definitions.get_by_type(RoleType.Contributor)
