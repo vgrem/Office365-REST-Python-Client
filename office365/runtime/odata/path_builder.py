@@ -14,13 +14,9 @@ class ODataPathBuilder(object):
         :type parameters: list or dict or ClientValue
         :type name: str
         """
-        url = ""
-        if name:
-            url = name
-
+        url = name or ""
         if isinstance(parameters, ClientValue):
-            param_value = parameters.to_json()
-            url += "(@v)?@v={0}".format(json.dumps(param_value))
+            url += "(@v)?@v={0}".format(json.dumps(parameters.to_json()))
         elif parameters is not None:
             url += "("
             if isinstance(parameters, dict):

@@ -450,36 +450,24 @@ class Web(SecurableObject):
         """Returns the file object located at the specified server-relative URL.
         :type url: str
         """
-        return File(
-            self.context,
-            ServiceOperationPath("getFileByServerRelativeUrl", [url], self.resource_path)
-        )
+        return File(self.context, ServiceOperationPath("getFileByServerRelativeUrl", [url], self.resource_path))
 
-    def get_file_by_server_relative_path(self, decoded_url_or_path):
+    def get_file_by_server_relative_path(self, url_or_path):
         """Returns the file object located at the specified server-relative path.
         Prefer this method over get_folder_by_server_relative_url since it supports % and # symbols in names
 
-        :type decoded_url_or_path: str or SPResPath
+        :type url_or_path: str or SPResPath
         """
-
-        if isinstance(decoded_url_or_path, SPResPath):
-            params = decoded_url_or_path.to_json()
-        else:
-            params = {"DecodedUrl": decoded_url_or_path}
-        return File(
-            self.context,
-            ServiceOperationPath("getFileByServerRelativePath", params, self.resource_path)
-        )
+        path = url_or_path if isinstance(url_or_path, SPResPath) else SPResPath(url_or_path)
+        return File(self.context,
+                    ServiceOperationPath("getFileByServerRelativePath", path.to_json(), self.resource_path))
 
     def get_folder_by_server_relative_url(self, url):
         """Returns the folder object located at the specified server-relative URL.
 
         :type url: str
         """
-        return Folder(
-            self.context,
-            ServiceOperationPath("getFolderByServerRelativeUrl", [url], self.resource_path)
-        )
+        return Folder(self.context, ServiceOperationPath("getFolderByServerRelativeUrl", [url], self.resource_path))
 
     def get_folder_by_server_relative_path(self, decoded_url):
         """Returns the folder object located at the specified server-relative URL.
@@ -487,11 +475,9 @@ class Web(SecurableObject):
 
         :type decoded_url: str
         """
-        params = {"DecodedUrl": decoded_url}
-        return Folder(
-            self.context,
-            ServiceOperationPath("getFolderByServerRelativePath", params, self.resource_path)
-        )
+        path = SPResPath(decoded_url)
+        return Folder(self.context,
+                      ServiceOperationPath("getFolderByServerRelativePath", path.to_json(), self.resource_path))
 
     def ensure_folder_path(self, path):
         """
@@ -552,23 +538,18 @@ class Web(SecurableObject):
 
         :param str unique_id: A GUID that identifies the folder.
         """
-        folder = Folder(self.context)
-        qry = ServiceOperationQuery(self, "GetFolderById", [unique_id], None, None, folder)
-        self.context.add_query(qry)
-        return folder
+        return Folder(self.context, ServiceOperationPath("GetFolderById", [unique_id], self.resource_path))
 
     def get_user_by_id(self, user_id):
         """Returns the user corresponding to the specified member identifier for the current site.
 
         :param int user_id: Specifies the member identifier.
         """
-        return User(self.context,
-                    ServiceOperationPath("getUserById", [user_id], self.resource_path))
+        return User(self.context, ServiceOperationPath("getUserById", [user_id], self.resource_path))
 
     def default_document_library(self):
         """Retrieves the default document library."""
-        return List(self.context,
-                    ServiceOperationPath("defaultDocumentLibrary", None, self.resource_path))
+        return List(self.context, ServiceOperationPath("defaultDocumentLibrary", None, self.resource_path))
 
     def get_list(self, path):
         """Get list by path
@@ -941,10 +922,7 @@ class Web(SecurableObject):
 
         :param str unique_id: A GUID that identifies the file object.
         """
-        return_file = File(self.context)
-        qry = ServiceOperationQuery(self.context.web, "GetFileById", [unique_id], None, None, return_file)
-        self.context.add_query(qry)
-        return return_file
+        return File(self.context, ServiceOperationPath("GetFileById", [unique_id], self.resource_path))
 
     def get_list_item(self, str_url):
         """

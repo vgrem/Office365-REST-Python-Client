@@ -5,7 +5,7 @@ class ClientQuery(object):
 
     def __init__(self, context, binding_type=None, parameter_type=None, parameter_name=None, return_type=None):
         """
-        Base query
+        Generic query
 
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         :type binding_type: office365.runtime.client_object.ClientObject or None

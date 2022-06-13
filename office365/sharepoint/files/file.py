@@ -675,7 +675,7 @@ class File(AbstractFile):
 
         # prioritize using UniqueId
         if name == "UniqueId":
-            self._resource_path = ServiceOperationPath("GetFileById", [value], ResourcePath("Web"))
+            self._resource_path = self.context.web.get_file_by_id(value).resource_path
 
         # fallback: create a new resource path
         if self._resource_path is None:

@@ -51,8 +51,9 @@ class TestSharePointFolder(SPTestCase):
 
     def test4_get_folder_by_id(self):
         folder_id = self.__class__.target_folder.unique_id
-        folder = self.client.web.get_folder_by_id(folder_id).execute_query()
+        folder = self.client.web.get_folder_by_id(folder_id).get().execute_query()
         self.assertIsNotNone(folder.resource_path)
+        self.assertTrue(folder.exists)
 
     def test5_update_folder_properties(self):
         list_item = self.__class__.target_folder.list_item_all_fields
