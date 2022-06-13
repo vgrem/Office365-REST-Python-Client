@@ -21,7 +21,7 @@ from office365.sharepoint.sites.site import Site
 from office365.sharepoint.tenant.administration.hub_site_collection import HubSiteCollection
 from office365.sharepoint.webs.context_web_information import ContextWebInformation
 from office365.sharepoint.webs.web import Web
-from office365.runtime.compat import range_or_xrange, urlparse
+from office365.runtime.compat import range_or_xrange, urlparse, is_absolute_url
 
 
 class ClientContext(ClientRuntimeContext):
@@ -52,6 +52,9 @@ class ClientContext(ClientRuntimeContext):
         :type orig_url: str
         :type relative: bool
         """
+        if is_absolute_url(orig_url) and not relative:
+            return orig_url
+
         site_path = urlparse(self.base_url).path
         root_site_url = self.base_url.replace(site_path, "")
         url = orig_url if orig_url.startswith(site_path) else "/".join([site_path, orig_url])

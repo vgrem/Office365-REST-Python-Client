@@ -12,7 +12,6 @@ from office365.sharepoint.storagemetrics.storage_metrics import StorageMetrics
 from office365.sharepoint.utilities.move_copy_options import MoveCopyOptions
 from office365.sharepoint.utilities.move_copy_util import MoveCopyUtil
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
-from office365.runtime.compat import urlparse
 
 
 class Folder(BaseEntity):
@@ -141,8 +140,7 @@ class Folder(BaseEntity):
 
         def _copy_folder():
             opts = MoveCopyOptions(keep_both=keep_both, reset_author_and_created_on_copy=reset_author_and_created)
-            MoveCopyUtil.copy_folder(self.context, self._build_full_url(self.serverRelativeUrl),
-                                     self._build_full_url(new_relative_url), opts)
+            MoveCopyUtil.copy_folder(self.context, self.serverRelativeUrl, new_relative_url, opts)
 
         self.ensure_property("ServerRelativeUrl", _copy_folder)
         return target_folder
@@ -160,8 +158,8 @@ class Folder(BaseEntity):
 
         def _copy_folder():
             opts = MoveCopyOptions(keep_both=keep_both, reset_author_and_created_on_copy=reset_author_and_created)
-            MoveCopyUtil.copy_folder_by_path(self.context, self._build_full_url(self.server_relative_path.DecodedUrl),
-                                             self._build_full_url(new_relative_path), opts)
+            MoveCopyUtil.copy_folder_by_path(self.context, self.server_relative_path.DecodedUrl, new_relative_path,
+                                             opts)
 
         self.ensure_property("ServerRelativePath", _copy_folder)
         return target_folder
@@ -176,9 +174,8 @@ class Folder(BaseEntity):
         target_folder.set_property("ServerRelativeUrl", new_relative_url)
 
         def _move_folder():
-            MoveCopyUtil.move_folder(self.context, self._build_full_url(self.serverRelativeUrl),
-                                     self._build_full_url(new_relative_url),
-                                     MoveCopyOptions(retain_editor_and_modified_on_move=retain_editor_and_modified))
+            opt = MoveCopyOptions(retain_editor_and_modified_on_move=retain_editor_and_modified)
+            MoveCopyUtil.move_folder(self.context, self.serverRelativeUrl, new_relative_url, opt)
 
         self.ensure_property("ServerRelativeUrl", _move_folder)
         return target_folder
@@ -193,10 +190,8 @@ class Folder(BaseEntity):
         target_folder.set_property("ServerRelativePath", SPResPath(new_relative_path))
 
         def _move_folder():
-            MoveCopyUtil.move_folder_by_path(self.context, self._build_full_url(self.server_relative_path.DecodedUrl),
-                                             self._build_full_url(new_relative_path),
-                                             MoveCopyOptions(
-                                                 retain_editor_and_modified_on_move=retain_editor_and_modified))
+            opt = MoveCopyOptions(retain_editor_and_modified_on_move=retain_editor_and_modified)
+            MoveCopyUtil.move_folder_by_path(self.context, self.server_relative_path.DecodedUrl, new_relative_path, opt)
 
         self.ensure_property("ServerRelativePath", _move_folder)
         return target_folder
@@ -332,10 +327,3 @@ class Folder(BaseEntity):
             self._resource_path = ServiceOperationPath("getFolderByServerRelativePath", [value], ResourcePath("Web"))
         elif name == "UniqueId":
             self._resource_path = ServiceOperationPath("getFolderById", [value], ResourcePath("Web"))
-
-    def _build_full_url(self, rel_url):
-        """
-        :type rel_url: str
-        """
-        site_path = urlparse(self.context.base_url).path
-        return self.context.base_url.replace(site_path, "") + rel_url

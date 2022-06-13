@@ -4,7 +4,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.permissions.base_permissions import BasePermissions
 from office365.sharepoint.permissions.role_assignment import RoleAssignment
-from office365.sharepoint.permissions.roleAssignmentCollection import RoleAssignmentCollection
+from office365.sharepoint.permissions.role_assignment_collection import RoleAssignmentCollection
 from office365.sharepoint.principal.user import User
 
 
@@ -17,13 +17,12 @@ class SecurableObject(BaseEntity):
 
         :param office365.sharepoint.principal.principal.Principal principal: Specifies the user or group of the
             role assignment.
-
-        :rtype: RoleAssignment
         """
         return_type = RoleAssignment(self.context)
+        self.role_assignments.add_child(return_type)
 
         def _principal_loaded():
-            return_type._resource_path = self.role_assignments.get_by_principal_id(principal.id).resource_path
+            return_type.set_property("PrincipalId", principal.id)
 
         principal.ensure_property("Id", _principal_loaded)
         return return_type
@@ -67,19 +66,20 @@ class SecurableObject(BaseEntity):
         """Creates unique role assignments for the securable object. If the securable object already has
         unique role assignments, the protocol server MUST NOT alter any role assignments.
 
-        :param bool clear_sub_scopes:  If the securable object is a site (2), and the clearSubscopes parameter is "true",
-        the role assignments for all child securable objects in the current site (2) and in the sites (2) that inherit
-        role assignments from the current site (2) MUST be cleared and those securable objects inherit role assignments
-        from the current site (2) after this call. If the securable object is a site (2), and the clearSubscopes
-        parameter is "false", the role assignments for all child securable objects that do not inherit role assignments
-        from their parent object (1) MUST remain unchanged. If the securable object is not a site (2), and the
-        clearSubscopes parameter is "true", the role assignments for all child securable objects MUST be cleared and
-        those securable objects inherit role assignments from the current securable object after this call. If the
-        securable object is not a site (2), and the clearSubscopes parameter is "false", the role assignments for all
-        child securable objects that do not inherit role assignments from their parent object (1) MUST remain unchanged.
+        :param bool clear_sub_scopes:  If the securable object is a site (2), and the clearSubscopes parameter
+             is "true", the role assignments for all child securable objects in the current site (2) and in the sites
+             that inherit role assignments from the current site (2) MUST be cleared and those securable objects
+             inherit role assignments from the current site (2) after this call. If the securable object is a site (2),
+             and the clearSubscopes parameter is "false", the role assignments for all child securable objects that
+             do not inherit role assignments from their parent object (1) MUST remain unchanged.
+             If the securable object is not a site (2), and the clearSubscopes parameter is "true",
+             the role assignments for all child securable objects MUST be cleared and those securable objects inherit
+             role assignments from the current securable object after this call. If the securable object is not a site,
+             and the clearSubscopes parameter is "false", the role assignments for all child securable objects that
+             do not inherit role assignments from their parent object (1) MUST remain unchanged.
         :param bool copy_role_assignments: Specifies whether to copy the role assignments from
-        the parent securable object.If the value is "false", the collection of role assignments MUST contain
-        only 1 role assignment containing the current user after the operation.
+              the parent securable object.If the value is "false", the collection of role assignments MUST contain
+              only 1 role assignment containing the current user after the operation.
 
         """
         payload = {

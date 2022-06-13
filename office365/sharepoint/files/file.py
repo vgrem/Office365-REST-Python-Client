@@ -387,10 +387,10 @@ class File(AbstractFile):
         return self
 
     @staticmethod
-    def save_binary(ctx, server_relative_url, content):
+    def save_binary(context, server_relative_url, content):
         """Uploads a file
 
-        :type ctx: ClientContext
+        :type context: office365.sharepoint.client_context.ClientContext
         :type server_relative_url: str
         :type content: str
         """
@@ -399,22 +399,22 @@ class File(AbstractFile):
         request.method = HttpMethod.Post
         request.set_header('X-HTTP-Method', 'PUT')
         request.data = content
-        response = ctx.execute_request_direct(request)
+        response = context.execute_request_direct(request)
         return response
 
     @staticmethod
-    def open_binary(ctx, server_relative_url):
+    def open_binary(context, server_relative_url):
         """
         Returns the file object located at the specified server-relative URL.
 
-        :type ctx: ClientContext
+        :type context: office365.sharepoint.client_context.ClientContext
         :type server_relative_url: str
         :return Response
         """
         url = r"web/getFileByServerRelativePath(DecodedUrl='{0}')/\$value".format(server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Get
-        response = ctx.execute_request_direct(request)
+        response = context.execute_request_direct(request)
         return response
 
     def download(self, file_object):

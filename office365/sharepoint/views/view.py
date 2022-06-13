@@ -13,6 +13,9 @@ class View(BaseEntity):
     """Specifies a List View."""
 
     def __init__(self, context, resource_path=None, parent_list=None):
+        """
+        :type parent_list: office365.sharepoint.lists.list.List or None
+        """
         super(View, self).__init__(context, resource_path)
         self._parent_list = parent_list
 
@@ -42,7 +45,9 @@ class View(BaseEntity):
 
     def set_view_xml(self, view_xml):
         """
-        :type view_xml: str
+        Sets the view schema.
+
+        :param str view_xml: The view XML to set.
         """
         qry = ServiceOperationQuery(self, "SetViewXml", None, {"viewXml": view_xml})
         self.context.add_query(qry)

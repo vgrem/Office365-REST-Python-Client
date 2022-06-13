@@ -173,6 +173,8 @@ class ClientObject(object):
         Returns resource url
         :rtype: str or None
         """
+        if self.resource_path is None:
+            return None
         return self.context.service_root_url() + str(self.resource_path)
 
     @property

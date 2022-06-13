@@ -1,6 +1,6 @@
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.permissions.roleDefinitionCollection import RoleDefinitionCollection
+from office365.sharepoint.permissions.role_definition_collection import RoleDefinitionCollection
 from office365.sharepoint.principal.principal import Principal
 
 
@@ -33,3 +33,10 @@ class RoleAssignment(BaseEntity):
             }
             default_value = property_mapping.get(name, None)
         return super(RoleAssignment, self).get_property(name, default_value)
+
+    def set_property(self, name, value, persist_changes=True):
+        super(RoleAssignment, self).set_property(name, value, persist_changes)
+        if self._resource_path is None:
+            if name == "PrincipalId":
+                self._resource_path = self.parent_collection.get_by_principal_id(value).resource_path
+        return self

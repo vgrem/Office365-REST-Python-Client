@@ -24,7 +24,7 @@ from office365.sharepoint.lists.list_collection import ListCollection
 from office365.sharepoint.lists.list_template_collection import ListTemplateCollection
 from office365.sharepoint.navigation.navigation import Navigation
 from office365.sharepoint.permissions.base_permissions import BasePermissions
-from office365.sharepoint.permissions.roleDefinitionCollection import RoleDefinitionCollection
+from office365.sharepoint.permissions.role_definition_collection import RoleDefinitionCollection
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.principal.group import Group
 from office365.sharepoint.principal.group_collection import GroupCollection
@@ -576,8 +576,7 @@ class Web(SecurableObject):
         :type path: str
         """
         safe_path = self.context.create_safe_url(path)
-        return List(self.context,
-                    ServiceOperationPath("getList", [safe_path], self.resource_path))
+        return List(self.context, ServiceOperationPath("getList", [safe_path], self.resource_path))
 
     def get_changes(self, query):
         """Returns the collection of all changes from the change log that have occurred within the scope of the site,
