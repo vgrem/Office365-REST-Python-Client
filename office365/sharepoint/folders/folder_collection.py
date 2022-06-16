@@ -12,12 +12,6 @@ class FolderCollection(BaseEntityCollection):
     def __init__(self, context, resource_path=None, parent=None):
         super(FolderCollection, self).__init__(context, Folder, resource_path, parent)
 
-    def get(self):
-        """
-        :rtype: FolderCollection
-        """
-        return super(FolderCollection, self).get()
-
     def add_using_path(self, decoded_url, overwrite):
         """
         Adds the folder located at the specified path to the collection.

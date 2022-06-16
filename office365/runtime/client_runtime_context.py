@@ -14,6 +14,8 @@ class ClientRuntimeContext(object):
 
     def build_request(self, query):
         """
+        Builds a request
+
         :type query: office365.runtime.queries.client_query.ClientQuery
         """
         return self.pending_request().build_request(query)
@@ -136,6 +138,7 @@ class ClientRuntimeContext(object):
         return self.pending_request().execute_request_direct(self._normalize_request(request))
 
     def execute_query(self):
+        """Submit request(s) to the server"""
         self.pending_request().execute_query()
 
     def add_query(self, query, execute_first=False, set_as_current=True):

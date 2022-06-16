@@ -306,7 +306,10 @@ class FieldCollection(BaseEntityCollection):
         return field
 
     def get_by_id(self, _id):
-        """Gets the fields with the specified ID."""
+        """Gets the fields with the specified ID.
+
+        :type _id: str
+        """
         return Field(self.context, ServiceOperationPath("getById", [_id], self.resource_path))
 
     def get_by_internal_name_or_title(self, name_title):

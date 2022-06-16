@@ -1,9 +1,12 @@
 import copy
+from typing import TypeVar
 
 from office365.runtime.client_value import ClientValue
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_json_format import ODataJsonFormat
 from office365.runtime.odata.query_options import QueryOptions
+
+T = TypeVar('T', bound='ClientObject')
 
 
 class ClientObject(object):
@@ -38,6 +41,11 @@ class ClientObject(object):
         self._properties_metadata = {}
 
     def execute_query(self):
+        """
+        Submit request(s) to the server
+
+        :type self: T
+        """
         self.context.execute_query()
         return self
 
@@ -55,13 +63,17 @@ class ClientObject(object):
         return self.context.build_request(self.context.current_query)
 
     def get(self):
+        """Retrieves a client object from the server
+
+        :type self: T
+        """
         self.context.load(self)
         return self
 
     def is_property_available(self, name):
         """Returns a Boolean value that indicates whether the specified property has been retrieved or set.
 
-        :param str name: A Property name
+        :param str name: A property name
         """
         if name in self.properties:
             return True
@@ -77,9 +89,10 @@ class ClientObject(object):
 
     def select(self, names):
         """
+        Allows to request a limited set of properties
 
-        :param list[str] names:
-        :return:
+        :param list[str] names: the list of property names
+        :return self
         """
         self.query_options.select = names
         return self
@@ -93,8 +106,9 @@ class ClientObject(object):
         """
         Gets property value
 
-        :param str name: property name
-        :param any default_value: property value
+        :type name: str
+        :type default_value: T
+        :rtype: T
         """
         if default_value is None:
             normalized_name = name[0].lower() + name[1:]
@@ -154,12 +168,14 @@ class ClientObject(object):
         return self
 
     def clone_object(self):
+        """Clones a client object"""
         result = copy.deepcopy(self)
         result._context = self.context
         return result
 
     @property
     def entity_type_name(self):
+        """Returns server type name"""
         if self._entity_type_name is None:
             if self._namespace is None:
                 self._entity_type_name = type(self).__name__
@@ -171,6 +187,7 @@ class ClientObject(object):
     def resource_url(self):
         """
         Returns resource url
+
         :rtype: str or None
         """
         if self.resource_path is None:

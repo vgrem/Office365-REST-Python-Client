@@ -22,17 +22,6 @@ class ClientObjectCollection(ClientObject):
         self._page_index = 0
         self.next_request_url = None
 
-    @property
-    def entity_type_name(self):
-        name = super(ClientObjectCollection, self).entity_type_name
-        return "Collection({0})".format(name)
-
-    def get(self):
-        """
-        :rtype: ClientObjectCollection
-        """
-        return super(ClientObjectCollection, self).get()
-
     def clear(self):
         self._data = []
 
@@ -59,8 +48,8 @@ class ClientObjectCollection(ClientObject):
         :type value: any
         :type persist_changes: bool
         """
-        child_client_object = self.create_typed_object(value)
-        self.add_child(child_client_object)
+        client_object = self.create_typed_object(value)
+        self.add_child(client_object)
         return self
 
     def add_child(self, client_object):
@@ -188,3 +177,8 @@ class ClientObjectCollection(ClientObject):
         self.page_loaded.notify(len(self._data))
         self._page_index += 1
         return self._data[self._page_size * self._page_index:]
+
+    @property
+    def entity_type_name(self):
+        name = super(ClientObjectCollection, self).entity_type_name
+        return "Collection({0})".format(name)

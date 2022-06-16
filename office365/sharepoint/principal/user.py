@@ -25,12 +25,6 @@ class User(Principal):
         self.ensure_property("LoginName", _user_loaded)
         return site
 
-    def get(self):
-        """
-        :rtype: User
-        """
-        return super(User, self).get()
-
     @property
     def groups(self):
         """Gets a collection of group objects that represents all of the groups for the user."""

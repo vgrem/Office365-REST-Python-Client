@@ -15,10 +15,7 @@ class FileCreationInformation(ClientValue):
         self._content = content
 
     def to_json(self, json_format=None):
-        return {
-            "overwrite": self.overwrite,
-            "url": self.url
-        }
+        return {"overwrite": self.overwrite, "url": self.url}
 
     @property
     def content(self):

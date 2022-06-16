@@ -11,25 +11,18 @@ class UserCollection(BaseEntityCollection):
     def __init__(self, context, resource_path=None):
         super(UserCollection, self).__init__(context, User, resource_path)
 
-    def get(self):
-        """
-        :rtype: UserCollection
-        """
-        return super(UserCollection, self).get()
-
     def add_user(self, login_name):
         """
-        Adds a user
+        Creates a user
 
         :type login_name: str
         """
-        user = User(self.context)
-        user._parent_collection = self
-        user.set_property('LoginName', login_name)
-        qry = CreateEntityQuery(self, user, user)
+        return_type = User(self.context)
+        self.add_child(return_type)
+        return_type.set_property('LoginName', login_name)
+        qry = CreateEntityQuery(self, return_type, return_type)
         self.context.add_query(qry)
-        self.add_child(user)
-        return user
+        return return_type
 
     def get_by_email(self, email):
         """Retrieve User object by email
@@ -47,8 +40,7 @@ class UserCollection(BaseEntityCollection):
 
         :type login_name: str
         """
-        return User(self.context,
-                    ServiceOperationPath("GetByLoginName", [login_name], self.resource_path))
+        return User(self.context, ServiceOperationPath("GetByLoginName", [login_name], self.resource_path))
 
     def remove_by_id(self, _id):
         """Retrieve User object by id"""

@@ -3,7 +3,6 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.changes.token import ChangeToken
@@ -11,7 +10,7 @@ from office365.sharepoint.contenttypes.collection import ContentTypeCollection
 from office365.sharepoint.customactions.element import CustomActionElementCollection
 from office365.sharepoint.eventreceivers.definition import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.collection import FieldCollection
-from office365.sharepoint.fields.related_field import RelatedField
+from office365.sharepoint.fields.related_field_collection import RelatedFieldCollection
 from office365.sharepoint.files.checkedOutFileCollection import CheckedOutFileCollection
 from office365.sharepoint.files.file import File
 from office365.sharepoint.flows.synchronization_result import FlowSynchronizationResult
@@ -332,10 +331,10 @@ class List(SecurableObject):
             the decoded url value MUST point to a location within the list.
         """
         parameters = ListItemCreationInformationUsingPath(leaf_name, object_type, folder_path=SPResPath(folder_url))
-        item = ListItem(self.context)
-        qry = ServiceOperationQuery(self, "AddItemUsingPath", None, parameters, "parameters", item)
+        return_type = ListItem(self.context)
+        qry = ServiceOperationQuery(self, "AddItemUsingPath", None, parameters, "parameters", return_type)
         self.context.add_query(qry)
-        return item
+        return return_type
 
     def add_validate_update_item(self):
         pass
@@ -345,8 +344,7 @@ class List(SecurableObject):
 
         :type item_id: int
         """
-        return ListItem(self.context,
-                        ServiceOperationPath("getItemById", [item_id], self.resource_path))
+        return ListItem(self.context, ServiceOperationPath("getItemById", [item_id], self.resource_path))
 
     def get_view(self, view_id):
         """Returns the list view with the specified view identifier.
@@ -388,8 +386,7 @@ class List(SecurableObject):
         """Returns a collection of lookup fields that use this list as a data source and
             that have FieldLookup.IsRelationship set to true.
         """
-        return BaseEntityCollection(self.context, RelatedField,
-                                    ServiceOperationPath("getRelatedFields", [], self.resource_path))
+        return RelatedFieldCollection(self.context, ServiceOperationPath("getRelatedFields", [], self.resource_path))
 
     @property
     def id(self):

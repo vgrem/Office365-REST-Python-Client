@@ -11,21 +11,20 @@ class ContentTypeCollection(BaseEntityCollection):
     def __init__(self, context, resource_path=None, parent=None):
         super(ContentTypeCollection, self).__init__(context, ContentType, resource_path, parent)
 
-    def get_by_id(self, contentTypeId):
+    def get_by_id(self, content_type_id):
         """
         Returns the content type with the given identifier from the collection.
         If a content type with the given identifier is not found in the collection, the server MUST return null.
 
-        :param str contentTypeId: A hexadecimal value representing the identifier of a content type.
+        :param str content_type_id: A hexadecimal value representing the identifier of a content type.
         """
-        return ContentType(self.context, ServiceOperationPath("GetById", [contentTypeId], self.resource_path))
+        return ContentType(self.context, ServiceOperationPath("GetById", [content_type_id], self.resource_path))
 
     def add(self, content_type_info):
         """Adds a new content type to the collection and returns a reference to the added SP.ContentType.
 
         :param ContentTypeCreationInformation content_type_info: Specifies properties that is to be used to
             construct the new content type.
-
         """
         ct = ContentType(self.context)
         self.add_child(ct)
@@ -39,16 +38,16 @@ class ContentTypeCollection(BaseEntityCollection):
         self.context.add_query(qry)
         return ct
 
-    def add_available_content_type(self, contentTypeId):
+    def add_available_content_type(self, content_type_id):
         """Adds the specified content type to the content type collection.
 
-        :param str contentTypeId: Specifies the identifier of the content type to be added to the content type
+        :param str content_type_id: Specifies the identifier of the content type to be added to the content type
             collection. It MUST exist in the web's available content types.
 
         """
         ct = ContentType(self.context)
         self.add_child(ct)
-        qry = ServiceOperationQuery(self, "AddAvailableContentType", [contentTypeId], None, None, ct)
+        qry = ServiceOperationQuery(self, "AddAvailableContentType", [content_type_id], None, None, ct)
         self.context.add_query(qry)
         return ct
 

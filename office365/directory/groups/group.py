@@ -125,8 +125,8 @@ class Group(DirectoryObject):
 
         :rtype: DirectoryObjectCollection
         """
-        return self.get_property('members',
-                                 DirectoryObjectCollection(self.context, ResourcePath("members", self.resource_path)))
+        return self.properties.get('members',
+                                   DirectoryObjectCollection(self.context, ResourcePath("members", self.resource_path)))
 
     @property
     def transitive_members(self):

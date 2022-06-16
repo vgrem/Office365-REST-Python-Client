@@ -3,11 +3,10 @@ import tempfile
 
 from examples import acquire_token_by_username_password
 from office365.graph_client import GraphClient
-from office365.onedrive.driveitems.driveItem import DriveItem
 
 client = GraphClient(acquire_token_by_username_password)
 # 1. address file by path and get file metadata
-file_item = client.me.drive.root.get_by_path("archive/Sample.rtf").get().execute_query()  # type: DriveItem
+file_item = client.me.drive.root.get_by_path("archive/Sample.rtf").get().execute_query()
 
 # 2. download file content
 with tempfile.TemporaryDirectory() as local_path:

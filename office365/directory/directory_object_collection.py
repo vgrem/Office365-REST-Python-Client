@@ -11,12 +11,6 @@ class DirectoryObjectCollection(DeltaCollection):
     def __init__(self, context, resource_path=None):
         super(DirectoryObjectCollection, self).__init__(context, DirectoryObject, resource_path)
 
-    def get(self):
-        """
-        :rtype: DirectoryObjectCollection
-        """
-        return super(DirectoryObjectCollection, self).get()
-
     def __getitem__(self, key):
         """
         :type key: int or str

@@ -7,7 +7,7 @@ from office365.onedrive.driveitems.driveItem import DriveItem
 
 client = GraphClient(acquire_token_by_username_password)
 # address folder by path
-folder_item = client.me.drive.root.get_by_path("archive").get().execute_query()  # type: DriveItem
+folder_item = client.me.drive.root.get_by_path("archive").get().execute_query()
 
 with tempfile.TemporaryDirectory() as local_path:
     items = folder_item.children.get().execute_query()

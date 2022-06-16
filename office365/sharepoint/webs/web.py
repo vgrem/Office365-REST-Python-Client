@@ -355,11 +355,13 @@ class Web(SecurableObject):
 
             cur_web.ensure_property("Webs", _webs_loaded, cur_web)
 
-    def get_list_using_path(self, decoded_url):
+    def get_list_using_path(self, url):
         """
-        :type decoded_url: str
+        Returns the list that is associated with the specified server-relative path.
+
+        :param str url: Contains the site-relative path for a list, for example, /Lists/Announcements.
         """
-        safe_decoded_url = self.context.create_safe_url(decoded_url)
+        safe_decoded_url = self.context.create_safe_url(url)
         return_list = List(self.context)
         self.lists.add_child(return_list)
         qry = ServiceOperationQuery(self, "GetListUsingPath", SPResPath(safe_decoded_url), None, None, return_list)
@@ -1047,7 +1049,9 @@ class Web(SecurableObject):
 
     @property
     def site_users(self):
-        """Get site users"""
+        """
+        Get site users
+        """
         return self.properties.get('SiteUsers',
                                    UserCollection(self.context, ResourcePath("siteUsers", self.resource_path)))
 
@@ -1247,6 +1251,7 @@ class Web(SecurableObject):
     def ui_version(self):
         """
         Gets or sets the user interface (UI) version of the Web site.
+
         :rtype: int or None
         """
         return self.properties.get('UIVersion', None)
@@ -1268,7 +1273,9 @@ class Web(SecurableObject):
                 "ContentTypes": self.content_types,
                 "ClientWebParts": self.client_web_parts,
                 "CurrentUser": self.current_user,
+                "ListTemplates": self.list_templates,
                 "ParentWeb": self.parent_web,
+                "PushNotificationSubscribers": self.push_notification_subscribers,
                 "RootFolder": self.root_folder,
                 "RegionalSettings": self.regional_settings,
                 "RoleDefinitions": self.role_definitions,
@@ -1287,6 +1294,7 @@ class Web(SecurableObject):
 
     @property
     def resource_url(self):
+        """Returns Web url"""
         val = super(Web, self).resource_url
         if self._web_url is not None:
             val = val.replace(self.context.service_root_url(), self._web_url + '/_api')

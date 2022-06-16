@@ -18,12 +18,6 @@ class TeamCollection(EntityCollection):
         """
         return Team(self.context, ResourcePath(key, self.resource_path))
 
-    def get(self):
-        """
-        :rtype: TeamCollection
-        """
-        return super(TeamCollection, self).get()
-
     def get_all(self, include_properties=None):
         """List all teams in Microsoft Teams for an organization
 

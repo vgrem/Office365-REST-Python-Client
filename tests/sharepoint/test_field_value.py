@@ -9,7 +9,7 @@ from office365.sharepoint.fields.type import FieldType
 from office365.sharepoint.fields.lookup_value import FieldLookupValue
 from office365.sharepoint.fields.multi_choice import FieldMultiChoice
 from office365.sharepoint.fields.multi_choice_value import FieldMultiChoiceValue
-from office365.sharepoint.fields.fieldMultiLookupValue import FieldMultiLookupValue
+from office365.sharepoint.fields.multi_lookup_value import FieldMultiLookupValue
 from office365.sharepoint.fields.multi_user_value import FieldMultiUserValue
 from office365.sharepoint.fields.user_value import FieldUserValue
 from office365.sharepoint.listitems.listitem import ListItem

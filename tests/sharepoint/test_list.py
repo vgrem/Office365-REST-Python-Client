@@ -75,17 +75,16 @@ class TestSPList(SPTestCase):
         list_properties.BaseTemplate = ListTemplateType.TasksWithTimelineAndHierarchy
         list_properties.Title = self.target_list_title
         list_to_create = self.client.web.lists.add(list_properties).execute_query()
-        self.assertEqual(list_properties.Title, list_to_create.properties['Title'])
+        self.assertEqual(list_properties.Title, list_to_create.title)
         self.__class__.target_list = list_to_create
 
     def test9_read_list_by_title(self):
         list_to_read = self.client.web.lists.get_by_title(self.target_list_title).get().execute_query()
-        self.assertEqual(self.target_list_title, list_to_read.properties['Title'])
+        self.assertEqual(self.target_list_title, list_to_read.title)
 
     def test_10_read_list_by_id(self):
-        list_to_read = self.client.web.lists.get_by_id(self.__class__.target_list.properties['Id']) \
-            .get().execute_query()
-        self.assertEqual(self.target_list.properties['Id'], list_to_read.properties['Id'])
+        list_to_read = self.client.web.lists.get_by_id(self.__class__.target_list.id).get().execute_query()
+        self.assertEqual(self.target_list.id, list_to_read.id)
 
     def test_11_read_list_fields(self):
         fields = self.__class__.target_list.get_related_fields().get().execute_query()
@@ -96,9 +95,7 @@ class TestSPList(SPTestCase):
         self.target_list_title += "_updated"
         list_to_update.set_property('Title', self.target_list_title).update().execute_query()
 
-        result = self.client.web.lists.filter("Title eq '{0}'".format(self.target_list_title))
-        self.client.load(result)
-        self.client.execute_query()
+        result = self.client.web.lists.filter("Title eq '{0}'".format(self.target_list_title)).get().execute_query()
         self.assertEqual(len(result), 1)
 
     def test_13_get_list_permissions(self):

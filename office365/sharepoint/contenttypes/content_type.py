@@ -25,10 +25,12 @@ class ContentType(BaseEntity):
         Updates the content type, and any child objects  of the content type if specified,
         with any changes made to the content type.
 
-        :param bool update_children:
+        :param bool update_children: Specifies whether changes propagate to child objects of the content type.
         """
-        qry = ServiceOperationQuery(self, "Update", [update_children])
-        self.context.add_query(qry)
+        super(ContentType, self).update()
+        if update_children:
+            qry = ServiceOperationQuery(self, "Update", [update_children])
+            self.context.add_query(qry)
         return self
 
     @property
@@ -69,13 +71,15 @@ class ContentType(BaseEntity):
     @description.setter
     def description(self, value):
         """Sets the description of the content type.
-        :rtype: str or None
+
+        :type value: str
         """
         self.set_property("Description", value)
 
     @property
     def group(self):
         """Gets the group of the content type.
+
         :rtype: str or None
         """
         return self.properties.get("Group", None)
@@ -83,7 +87,8 @@ class ContentType(BaseEntity):
     @group.setter
     def group(self, value):
         """Sets the group of the content type.
-        :rtype: str or None
+
+        :type value: str
         """
         self.set_property("Group", value)
 
