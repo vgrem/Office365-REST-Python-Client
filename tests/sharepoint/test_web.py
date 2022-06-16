@@ -122,7 +122,7 @@ class TestSharePointWeb(SPTestCase):
         folder_path = "Shared Documents/Archive/2020/12"
         folder_new_nested = self.client.web.ensure_folder_path(folder_path).execute_query()
         folder_new_nested = self.client.web.get_folder_by_server_relative_url(folder_path).get().execute_query()
-        self.assertTrue(folder_new_nested.properties["Exists"])
+        self.assertTrue(folder_new_nested.exists)
 
     def test_21_get_context_web_theme_data(self):
         result = Web.get_context_web_theme_data(self.client).execute_query()
@@ -137,3 +137,8 @@ class TestSharePointWeb(SPTestCase):
         #result = self.client.web.get_push_notification_subscribers_by_user(current_user).execute_query()
         #self.assertIsNotNone(result.resource_path)
         pass
+
+    def test_24_get_list_item_by_path(self):
+        page_url = "SitePages/Home.aspx"
+        target_item = self.client.web.get_list_item_using_path(page_url).get().execute_query()
+        self.assertIsNotNone(target_item.resource_path)

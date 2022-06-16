@@ -6,8 +6,12 @@ class TaxonomyFieldValue(ClientValue):
 
     def __init__(self, label=None, term_guid=None, wss_id=-1):
         """
-        :type label: str
-        :type term_guid: str
+        Represents a single value held in a TaxonomyField (section 3.1.5.27) object.
+
+        :param str label: Specifies the label of the TaxonomyField (section 3.1.5.27) object.
+        :parm str term_guid: Specifies a string representing Term (section 3.1.5.16) GUID.
+        :parm int wss_id: Specifies the list item identifier of the list item containing the TaxonomyFieldValue
+            that is encapsulated by the TaxonomyFieldValue (section 3.1.5.13) object.
         """
         super(TaxonomyFieldValue, self).__init__()
         self.Label = label

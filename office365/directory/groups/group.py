@@ -133,12 +133,10 @@ class Group(DirectoryObject):
         """
         Get a list of the group's members. A group can have users, devices, organizational contacts,
         and other groups as members. This operation is transitive and returns a flat list of all nested members.
-
-        :rtype: DirectoryObjectCollection
         """
-        return self.get_property('transitiveMembers',
-                                 DirectoryObjectCollection(self.context,
-                                                           ResourcePath("transitiveMembers", self.resource_path)))
+        return self.properties.get('transitiveMembers',
+                                   DirectoryObjectCollection(self.context,
+                                                             ResourcePath("transitiveMembers", self.resource_path)))
 
     @property
     def transitive_member_of(self):
@@ -146,30 +144,24 @@ class Group(DirectoryObject):
         Get groups that the group is a member of. This operation is transitive and will also include all groups that
         this groups is a nested member of. Unlike getting a user's Microsoft 365 groups, this returns all
         types of groups, not just Microsoft 365 groups.
-
-        :rtype: DirectoryObjectCollection
         """
-        return self.get_property('transitiveMemberOf',
-                                 DirectoryObjectCollection(self.context,
-                                                           ResourcePath("transitiveMemberOf", self.resource_path)))
+        return self.properties.get('transitiveMemberOf',
+                                   DirectoryObjectCollection(self.context,
+                                                             ResourcePath("transitiveMemberOf", self.resource_path)))
 
     @property
     def owners(self):
         """The owners of the group.
-
-        :rtype: DirectoryObjectCollection
         """
-        return self.get_property('owners',
-                                 DirectoryObjectCollection(self.context, ResourcePath("owners", self.resource_path)))
+        return self.properties.get('owners',
+                                   DirectoryObjectCollection(self.context, ResourcePath("owners", self.resource_path)))
 
     @property
     def drives(self):
         """The group's drives. Read-only.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('drives',
-                                 EntityCollection(self.context, Drive, ResourcePath("drives", self.resource_path)))
+        return self.properties.get('drives',
+                                   EntityCollection(self.context, Drive, ResourcePath("drives", self.resource_path)))
 
     @property
     def sites(self):
@@ -178,8 +170,8 @@ class Group(DirectoryObject):
         :rtype: SiteCollection
         """
         from office365.onedrive.sites.sites_with_root import SitesWithRoot
-        return self.get_property('sites',
-                                 SitesWithRoot(self.context, ResourcePath("sites", self.resource_path)))
+        return self.properties.get('sites',
+                                   SitesWithRoot(self.context, ResourcePath("sites", self.resource_path)))
 
     @property
     def events(self):

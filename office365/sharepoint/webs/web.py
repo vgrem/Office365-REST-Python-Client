@@ -42,6 +42,7 @@ from office365.sharepoint.tenant.administration.tenant_types import TenantCorpor
 from office365.sharepoint.ui.applicationpages.client_people_picker import (
     ClientPeoplePickerWebServiceInterface, ClientPeoplePickerQueryParameters
 )
+from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
 from office365.sharepoint.webparts.client_web_part_collection import ClientWebPartCollection
 from office365.sharepoint.webs.context_web_information import ContextWebInformation
 from office365.sharepoint.webs.regional_settings import RegionalSettings
@@ -391,6 +392,7 @@ class Web(SecurableObject):
     @staticmethod
     def get_context_web_theme_data(context):
         """
+        Get ThemeData for the context web.
 
         :type context: office365.sharepoint.client_context.ClientContext
         """
@@ -495,11 +497,11 @@ class Web(SecurableObject):
 
         :param str login_name: Specifies a string that contains the login name.
         """
-        target_user = User(self.context)
-        self.site_users.add_child(target_user)
-        qry = ServiceOperationQuery(self, "EnsureUser", [login_name], None, None, target_user)
+        return_type = User(self.context)
+        self.site_users.add_child(return_type)
+        qry = ServiceOperationQuery(self, "EnsureUser", [login_name], None, None, return_type)
         self.context.add_query(qry)
-        return target_user
+        return return_type
 
     def get_user_effective_permissions(self, user_name):
         """Gets the effective permissions that the specified user has within the current application scope.
@@ -936,6 +938,18 @@ class Web(SecurableObject):
         """
         return ListItem(self.context, ServiceOperationPath("GetListItem", [str_url], self.resource_path))
 
+    def get_list_item_using_path(self, decoded_url):
+        """
+        Returns the list item that is associated with the specified server-relative path.
+
+        :param str decoded_url: A string that contains the server-relative path,
+        for example, "/sites/MySite/Shared Documents/MyDocument.docx".
+        :return: ListItem
+        """
+        path = SPResPath(self.context.create_safe_url(decoded_url))
+        return ListItem(self.context,
+                        ServiceOperationPath("GetListItemUsingPath", path.to_json(), self.resource_path))
+
     def get_catalog(self, type_catalog):
         """Gets the list template gallery, site template gallery, or Web Part gallery for the Web site.
 
@@ -1022,11 +1036,50 @@ class Web(SecurableObject):
         return self.properties.get("AlternateCssUrl", None)
 
     @property
+    def author(self):
+        """
+        Gets a user object that represents the user who created the Web site.
+
+        :rtype: office365.sharepoint.directory.user.User or None
+        """
+        return self.properties.get("Author", User(self.context, ResourcePath("Author", self.resource_path)))
+
+    @property
+    def created(self):
+        """Specifies when the site was created.
+
+        :rtype: datetime or None
+        """
+        return self.properties.get("Created", None)
+
+    @property
+    def custom_master_url(self):
+        """Gets the URL for a custom master page to apply to the Web site
+
+        :rtype: str or None
+        """
+        return self.properties.get("CustomMasterUrl", None)
+
+    @property
     def id(self):
         """
+        Specifies the site identifier for the site
+
         :rtype: str
         """
         return self.properties.get("Id", None)
+
+    @property
+    def access_requests_list(self):
+        return self.properties.get('AccessRequestsList',
+                                   List(self.context, ResourcePath("AccessRequestsList", self.resource_path)))
+
+    @property
+    def access_request_list_url(self):
+        """
+        :rtype: str or None
+        """
+        return self.properties.get("AccessRequestListUrl", None)
 
     @property
     def webs(self):
@@ -1050,7 +1103,7 @@ class Web(SecurableObject):
     @property
     def site_users(self):
         """
-        Get site users
+        Specifies the collection of users in the site collection that contains the site
         """
         return self.properties.get('SiteUsers',
                                    UserCollection(self.context, ResourcePath("siteUsers", self.resource_path)))
@@ -1109,12 +1162,11 @@ class Web(SecurableObject):
         """Gets the collection of role definitions for the Web site."""
         return self.properties.get("RoleDefinitions",
                                    RoleDefinitionCollection(self.context,
-                                                            ResourcePath("RoleDefinitions",
-                                                                         self.resource_path)))
+                                                            ResourcePath("RoleDefinitions", self.resource_path)))
 
     @property
     def event_receivers(self):
-        """Get Event receivers"""
+        """Specifies the collection of event receiver definitions that are currently available on the Web site"""
         return self.properties.get('EventReceivers',
                                    EventReceiverDefinitionCollection(self.context,
                                                                      ResourcePath("eventReceivers", self.resource_path),
@@ -1122,13 +1174,17 @@ class Web(SecurableObject):
 
     @property
     def client_web_parts(self):
-        """Client Web Parts"""
+        """
+        Gets a collection of the ClientWebParts installed in this SP.Web. It can be used to get metadata of the
+        ClientWebParts or render them. It is a read-only collection as ClientWebParts need to be installed in
+        an app package."""
         return self.properties.get('ClientWebParts',
                                    ClientWebPartCollection(self.context,
                                                            ResourcePath("ClientWebParts", self.resource_path)))
 
     @property
     def tenant_app_catalog(self):
+        """Returns the tenant app catalog for the given tenant if it exists."""
         return self.properties.get('TenantAppCatalog',
                                    TenantCorporateCatalogAccessor(self.context,
                                                                   ResourcePath("TenantAppCatalog", self.resource_path)))
@@ -1140,6 +1196,12 @@ class Web(SecurableObject):
                                    SiteCollectionCorporateCatalogAccessor(self.context,
                                                                           ResourcePath("SiteCollectionAppCatalog",
                                                                                        self.resource_path)))
+
+    @property
+    def web_infos(self):
+        """Specifies the collection of all child sites for the site"""
+        return self.properties.get('WebInfos',
+                                   WebInformationCollection(self.context, ResourcePath("WebInfos", self.resource_path)))
 
     @property
     def url(self):
@@ -1197,20 +1259,21 @@ class Web(SecurableObject):
 
     @property
     def recycle_bin(self):
-        """Get recycle bin"""
+        """Specifies the collection of Recycle Bin items of the Recycle Bin of the site"""
         return self.properties.get('RecycleBin',
                                    RecycleBinItemCollection(self.context,
                                                             ResourcePath("RecycleBin", self.resource_path)))
 
     @property
     def navigation(self):
-        """Gets a web site navigation."""
+        """Specifies the navigation structure on the site (2), including the Quick Launch area and the link bar."""
         return self.properties.get('Navigation',
                                    Navigation(self.context,
                                               ResourcePath("Navigation", self.resource_path)))
 
     @property
     def push_notification_subscribers(self):
+        """Specifies the collection of push notification subscribers for the site"""
         return self.properties.get('PushNotificationSubscribers',
                                    BaseEntityCollection(self.context, PushNotificationSubscriber,
                                                         ResourcePath("PushNotificationSubscribers",
@@ -1223,23 +1286,45 @@ class Web(SecurableObject):
 
     @property
     def alerts(self):
+        """Gets the collection of alerts for the site or subsite."""
         return self.properties.get('Alerts',
                                    AlertCollection(self.context,
                                                    ResourcePath("Alerts", self.resource_path)))
 
     @property
     def available_fields(self):
+        """
+        Specifies the collection of all fields available for the current scope, including those of the
+        current site, as well as any parent sites.
+        """
         return self.properties.get('AvailableFields',
-                                   FieldCollection(self.context,
-                                                   ResourcePath("AvailableFields", self.resource_path)))
+                                   FieldCollection(self.context, ResourcePath("AvailableFields", self.resource_path)))
+
+    @property
+    def available_content_types(self):
+        """
+        Specifies the collection of all site content types that apply to the current scope,
+        including those of the current site (2), as well as any parent sites.
+        """
+        return self.properties.get('AvailableContentTypes',
+                                   ContentTypeCollection(self.context, ResourcePath("AvailableContentTypes",
+                                                                                    self.resource_path)))
 
     @property
     def site_user_info_list(self):
+        """
+        Specifies the user information list for the site collection that contains the site
+        """
         return self.properties.get('SiteUserInfoList',
                                    List(self.context, ResourcePath("SiteUserInfoList", self.resource_path)))
 
     @property
     def welcome_page(self):
+        """
+        Specifies the URL of the Welcome page for the site
+
+        :rtype: str or None
+        """
         return self.properties.get('WelcomePage', None)
 
     @property
@@ -1257,22 +1342,32 @@ class Web(SecurableObject):
         return self.properties.get('UIVersion', None)
 
     @property
+    def user_custom_actions(self):
+        """Specifies the collection of user custom actions for the site"""
+        return self.properties.get('UserCustomActions',
+                                   UserCustomActionCollection(self.context,
+                                                              ResourcePath("UserCustomActions", self.resource_path)))
+
+    @property
     def server_relative_path(self):
-        """Gets the server-relative Path of the Web.
-        :rtype: SPResPath or None
+        """
+        Gets the server-relative Path of the Web.
         """
         return self.properties.get("ServerRelativePath", SPResPath())
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "AccessRequestsList": self.access_requests_list,
                 "AvailableFields": self.available_fields,
+                "AvailableContentTypes": self.available_content_types,
                 "AssociatedOwnerGroup": self.associated_owner_group,
                 "AssociatedMemberGroup": self.associated_member_group,
                 "AssociatedVisitorGroup": self.associated_visitor_group,
                 "ContentTypes": self.content_types,
                 "ClientWebParts": self.client_web_parts,
                 "CurrentUser": self.current_user,
+                "EventReceivers": self.event_receivers,
                 "ListTemplates": self.list_templates,
                 "ParentWeb": self.parent_web,
                 "PushNotificationSubscribers": self.push_notification_subscribers,
@@ -1280,8 +1375,13 @@ class Web(SecurableObject):
                 "RegionalSettings": self.regional_settings,
                 "RoleDefinitions": self.role_definitions,
                 "RecycleBin": self.recycle_bin,
+                "SiteCollectionAppCatalog": self.site_collection_app_catalog,
                 "SiteGroups": self.site_groups,
-                "SiteUsers": self.site_users
+                "SiteUsers": self.site_users,
+                "SiteUserInfoList": self.site_user_info_list,
+                "TenantAppCatalog": self.tenant_app_catalog,
+                "UserCustomActions": self.user_custom_actions,
+                "WebInfos": self.web_infos
             }
             default_value = property_mapping.get(name, None)
         return super(Web, self).get_property(name, default_value)

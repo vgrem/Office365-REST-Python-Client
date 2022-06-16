@@ -7,6 +7,7 @@ from office365.runtime.odata.odata_json_format import ODataJsonFormat
 from office365.runtime.odata.query_options import QueryOptions
 
 T = TypeVar('T', bound='ClientObject')
+P_T = TypeVar('P_T')
 
 
 class ClientObject(object):
@@ -81,7 +82,9 @@ class ClientObject(object):
 
     def expand(self, names):
         """
+        Specifies the related resources to be included in line with retrieved resources
 
+        :type self: T
         :type names: list[str]
         """
         self.query_options.expand = names
@@ -91,8 +94,8 @@ class ClientObject(object):
         """
         Allows to request a limited set of properties
 
+        :type self: T
         :param list[str] names: the list of property names
-        :return self
         """
         self.query_options.select = names
         return self
@@ -101,14 +104,15 @@ class ClientObject(object):
         if self._parent_collection is None:
             return
         self._parent_collection.remove_child(self)
+        return self
 
     def get_property(self, name, default_value=None):
         """
         Gets property value
 
         :type name: str
-        :type default_value: T
-        :rtype: T
+        :type default_value: P_T
+        :rtype: P_T
         """
         if default_value is None:
             normalized_name = name[0].lower() + name[1:]
@@ -119,7 +123,7 @@ class ClientObject(object):
         """Sets property value
 
         :param str name: Property name
-        :param any value: Property value
+        :param P_T value: Property value
         :param bool persist_changes: Persist changes
         """
         self._properties_metadata[name] = {}

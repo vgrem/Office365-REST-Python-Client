@@ -90,7 +90,6 @@ class ClientObjectCollection(ClientObject):
 
     def __getitem__(self, index):
         """
-
         :type index: int
         :rtype: ClientObject
         """
@@ -103,16 +102,16 @@ class ClientObjectCollection(ClientObject):
 
     def filter(self, expression):
         """
-        Sets OData $filter query option
+        Allows clients to filter a collection of resources that are addressed by a request URL
 
-        :type expression: str
+        :param str expression: Filter expression, for example: Id eq ''
         """
         self.query_options.filter = expression
         return self
 
     def order_by(self, value):
         """
-        Sets OData $orderBy query option
+        Allows clients to request resources in either ascending order using asc or descending order using desc
 
         :type value: int
         """
@@ -121,7 +120,7 @@ class ClientObjectCollection(ClientObject):
 
     def skip(self, value):
         """
-        Sets $skip system query option
+        Requests the number of items in the queried collection that are to be skipped and not included in the result
 
         :type value: int
         """
