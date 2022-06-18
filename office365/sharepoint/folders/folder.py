@@ -32,6 +32,51 @@ class Folder(BaseEntity):
         """Gets the sharing information for a folder."""
         return self.list_item_all_fields.get_sharing_information()
 
+    def move_to(self, new_url):
+        """
+        Moves the folder and its contents to a new folder at the specified URL.
+        This method applies only to the context of a single site.
+
+        An exception is thrown if a folder with the same name as specified in the parameter already exists.
+
+        :param str new_url: A string that specifies the URL for the new folder.
+        """
+        return_type = Folder(self.context)
+        return_type.set_property("ServerRelativeUrl", new_url)
+        payload = {"newUrl": new_url}
+        qry = ServiceOperationQuery(self, "MoveTo", payload)
+        self.context.add_query(qry)
+        return return_type
+
+    def move_to_with_parameters(self, new_relative_url, retain_editor_and_modified=False):
+        """Moves the folder with files to the destination URL.
+
+        :type new_relative_url: str
+        :type retain_editor_and_modified: bool
+        """
+        return_type = Folder(self.context)
+        return_type.set_property("ServerRelativeUrl", new_relative_url)
+
+        def _move_folder():
+            opt = MoveCopyOptions(retain_editor_and_modified_on_move=retain_editor_and_modified)
+            MoveCopyUtil.move_folder(self.context, self.serverRelativeUrl, new_relative_url, opt)
+
+        self.ensure_property("ServerRelativeUrl", _move_folder)
+        return return_type
+
+    def move_to_using_path(self, new_path):
+        """
+        Moves the folder and its contents to a new folder at the specified path.
+
+        An exception is thrown if a folder with the same name as specified in the parameter already exists.
+
+        :param str new_path: Specifies the destination path.
+        """
+        params = SPResPath(new_path)
+        qry = ServiceOperationQuery(self, "MoveToUsingPath", params)
+        self.context.add_query(qry)
+        return self
+
     def share_link(self, link_kind, expiration=None):
         """Creates a tokenized sharing link for a folder based on the specified parameters and optionally
         sends an email to the people that are listed in the specified parameters.
@@ -145,7 +190,7 @@ class Folder(BaseEntity):
         self.ensure_property("ServerRelativeUrl", _copy_folder)
         return target_folder
 
-    def copy_to_by_path(self, new_relative_path, keep_both=False, reset_author_and_created=False):
+    def copy_to_using_path(self, new_relative_path, keep_both=False, reset_author_and_created=False):
         """Copies the folder with files to the destination Path.
 
         :type new_relative_path: str
@@ -164,23 +209,7 @@ class Folder(BaseEntity):
         self.ensure_property("ServerRelativePath", _copy_folder)
         return target_folder
 
-    def move_to(self, new_relative_url, retain_editor_and_modified=False):
-        """Moves the folder with files to the destination URL.
-
-        :type new_relative_url: str
-        :type retain_editor_and_modified: bool
-        """
-        target_folder = Folder(self.context)
-        target_folder.set_property("ServerRelativeUrl", new_relative_url)
-
-        def _move_folder():
-            opt = MoveCopyOptions(retain_editor_and_modified_on_move=retain_editor_and_modified)
-            MoveCopyUtil.move_folder(self.context, self.serverRelativeUrl, new_relative_url, opt)
-
-        self.ensure_property("ServerRelativeUrl", _move_folder)
-        return target_folder
-
-    def move_to_by_path(self, new_relative_path, retain_editor_and_modified=False):
+    def move_to_using_path_with_parameters(self, new_relative_path, retain_editor_and_modified=False):
         """Moves the folder with files to the destination Path.
 
         :param str new_relative_path: A full URL path that represents the destination folder.

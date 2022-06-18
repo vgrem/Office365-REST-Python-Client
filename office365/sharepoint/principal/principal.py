@@ -23,6 +23,11 @@ class Principal(BaseEntity):
 
     @title.setter
     def title(self, value):
+        """
+        Sets a value that specifies the name of the principal.
+
+        :type value: str
+        """
         self.set_property('Title', value)
 
     @property
@@ -62,9 +67,7 @@ class Principal(BaseEntity):
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id":
-                self._resource_path = ServiceOperationPath(
-                    "GetById", [value], self._parent_collection.resource_path)
+                self._resource_path = ServiceOperationPath("GetById", [value], self.parent_collection.resource_path)
             elif name == "LoginName":
-                self._resource_path = ServiceOperationPath(
-                    "GetByName", [value], self._parent_collection.resource_path)
+                self._resource_path = ServiceOperationPath("GetByName", [value], self.parent_collection.resource_path)
         return self

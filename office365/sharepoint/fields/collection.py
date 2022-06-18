@@ -94,11 +94,11 @@ class FieldCollection(BaseEntityCollection):
 
         :type field_create_information: office365.sharepoint.fields.creation_information.FieldCreationInformation
         """
-        field = Field.create_field_from_type(self.context, field_create_information)
-        self.add_child(field)
-        qry = CreateEntityQuery(self, field, field)
+        return_type = Field.create_field_from_type(self.context, field_create_information)
+        self.add_child(return_type)
+        qry = CreateEntityQuery(self, return_type, return_type)
         self.context.add_query(qry)
-        return field
+        return return_type
 
     def add_field(self, parameters):
         """Adds a fields to the fields collection.

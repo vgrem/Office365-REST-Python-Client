@@ -1,9 +1,8 @@
-from office365.runtime.client_object import ClientObject
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
 from office365.sharepoint.tenant.administration.hubsite_properties import HubSiteProperties
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
@@ -15,16 +14,12 @@ from office365.sharepoint.tenant.administration.sitePropertiesEnumerableFilter i
 from office365.sharepoint.tenant.administration.spo_operation import SpoOperation
 
 
-class Tenant(ClientObject):
+class Tenant(BaseEntity):
     """Represents a SharePoint tenant."""
 
     def __init__(self, context):
-        super(Tenant, self).__init__(
-            context,
-            ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant"),
-            None,
-            "Microsoft.Online.SharePoint.TenantAdministration"
-            )
+        static_path = ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant")
+        super(Tenant, self).__init__(context, static_path)
 
     def export_to_csv(self, view_xml=None):
         result = ClientResult(self.context)
@@ -34,12 +29,6 @@ class Tenant(ClientObject):
         qry = ServiceOperationQuery(self, "ExportToCSV", None, payload, None, result)
         self.context.add_query(qry)
         return result
-
-    def update(self):
-        """Update Tenant settings"""
-        qry = UpdateEntityQuery(self)
-        self.context.add_query(qry)
-        return self
 
     @staticmethod
     def from_url(admin_site_url):
@@ -233,3 +222,7 @@ class Tenant(ClientObject):
         """Gets a collection of sites."""
         return self.properties.get('sites',
                                    SitePropertiesCollection(self.context, ResourcePath("sites", self.resource_path)))
+
+    @property
+    def entity_type_name(self):
+        return "Microsoft.Online.SharePoint.TenantAdministration"

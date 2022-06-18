@@ -40,10 +40,17 @@ class PersonProperties(BaseEntity):
         """
         The Peers property specifies an array of strings that specify the account names of person's peers, that is,
         those who have the same manager.
-
-        :rtype: StringCollection
         """
         return self.properties.get("Peers", StringCollection())
+
+    @property
+    def personal_url(self):
+        """
+        The PersonalUrl property specifies the absolute URL of the person's personal page.
+
+        :rtype: str or None
+        """
+        return self.properties.get("PersonalUrl", None)
 
     @property
     def extended_managers(self):

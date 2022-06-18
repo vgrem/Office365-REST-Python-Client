@@ -96,12 +96,13 @@ class TestSharePointFolder(SPTestCase):
         self.assertEqual(len(result), 1)
 
     def test_11_move_folder(self):
-        folder_from = self.__class__.target_folder.get().execute_query()
-        folder_name = "Move_" + str(randint(0, 1000))
-        folder_to = self.__class__.target_list.root_folder.add(folder_name).execute_query()
+        folder_from = self.__class__.target_folder
+        target_folder = self.__class__.target_list.root_folder.get().execute_query()
+        target_folder_url = target_folder.serverRelativeUrl + "/Move_" + str(randint(0, 1000))
 
-        folder_to = folder_from.move_to(folder_to.serverRelativeUrl).get().execute_query()
+        folder_to = folder_from.move_to(target_folder_url).execute_query()
         self.assertIsNotNone(folder_to.serverRelativeUrl)
+        self.__class__.target_folder = folder_to
 
     def test_12_recycle_folder(self):
         folder_to_recycle = self.__class__.target_folder
@@ -136,5 +137,7 @@ class TestSharePointFolder(SPTestCase):
         self.__class__.target_folder = new_folder
 
     def test_17_get_by_path(self):
-        folder = self.__class__.target_list.root_folder.folders.get_by_path(self.target_folder_name).execute_query()
+        folder = self.__class__.target_list.root_folder.folders.get_by_path(self.target_folder_name)\
+            .get().execute_query()
         self.assertIsNotNone(folder.resource_path)
+        self.assertIsNotNone(folder.unique_id)

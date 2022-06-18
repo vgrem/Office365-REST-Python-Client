@@ -11,7 +11,7 @@ from examples import acquire_token_by_client_credentials, test_user_principal_na
 from office365.graph_client import GraphClient
 from office365.onedrive.permissions.permission import Permission
 from office365.sharepoint.client_context import ClientContext
-from tests import test_client_credentials, test_team_site_url, test_user_credentials
+from tests import test_client_credentials, test_team_site_url
 
 
 def assign_site_access(site_url, roles=None, clear_existing=False):
@@ -43,21 +43,14 @@ def assign_site_access(site_url, roles=None, clear_existing=False):
         target_site.permissions.add(roles=roles, grantedToIdentities=identities).execute_query()
 
 
-def get_site_url():
-    ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
-    site = ctx.web.current_user.get_personal_site().execute_query()
-    return site.url
-
-
 def verify_site_access():
     ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
     site = ctx.web.site_users.get_by_email(test_user_principal_name_alt).get_personal_site().execute_query()
     print(site.url)
 
 
-user_site_url = get_site_url()
 # assign permissions
-assign_site_access(user_site_url, [], True)
-#assign_site_access(user_site_url, ["read", "write"])
+# assign_site_access(user_site_url, [], True)
+# assign_site_access(user_site_url, ["read", "write"])
 # verify site access
 verify_site_access()

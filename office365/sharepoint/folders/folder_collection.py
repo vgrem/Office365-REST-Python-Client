@@ -5,6 +5,7 @@ from office365.runtime.queries.service_operation_query import ServiceOperationQu
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.internal.paths.entity import EntityPath
+from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
 class FolderCollection(BaseEntityCollection):
@@ -25,18 +26,6 @@ class FolderCollection(BaseEntityCollection):
         }
         target_folder = Folder(self.context)
         qry = ServiceOperationQuery(self, "AddUsingPath", parameters, None, None, target_folder)
-        self.context.add_query(qry)
-        return target_folder
-
-    def get_by_path(self, decoded_url):
-        """
-        Get folder at the specified path.
-
-        :param str decoded_url: Specifies the path for the folder.
-        """
-        from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
-        target_folder = Folder(self.context)
-        qry = ServiceOperationQuery(self, "GetByPath", SPResPath(decoded_url), None, "parameters", target_folder)
         self.context.add_query(qry)
         return target_folder
 
@@ -70,6 +59,16 @@ class FolderCollection(BaseEntityCollection):
     def get_by_url(self, url):
         """Retrieve Folder resource by url
 
-        :type url: str
+        :param str url: Specifies the URL of the list folder. The URL MUST be an absolute URL, a server-relative URL,
+            a site-relative URL relative to the site (2) containing the collection of list folders, or relative to the
+            list folder that directly contains this collection of list folders.
         """
         return Folder(self.context, ServiceOperationPath("GetByUrl", [url], self.resource_path))
+
+    def get_by_path(self, decoded_url):
+        """
+        Get folder at the specified path.
+
+        :param str decoded_url: Specifies the path for the folder.
+        """
+        return Folder(self.context, ServiceOperationPath("GetByPath", SPResPath(decoded_url), self.resource_path))
