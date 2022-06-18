@@ -5,6 +5,7 @@ from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.audit.audit import Audit
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.collection import ChangeCollection
+from office365.sharepoint.changes.token import ChangeToken
 from office365.sharepoint.eventreceivers.definition import EventReceiverDefinitionCollection
 from office365.sharepoint.features.collection import FeatureCollection
 from office365.sharepoint.lists.list import List
@@ -85,13 +86,13 @@ class Site(BaseEntity):
 
     @staticmethod
     def from_url(url):
-        """Construct and return a site instance
+        """
+        Initiates and returns a site instance
 
         :type url: str
         """
         from office365.sharepoint.client_context import ClientContext
-        client = ClientContext(url)
-        return client.site
+        return ClientContext(url).site
 
     def get_site_logo(self):
         """
@@ -116,6 +117,9 @@ class Site(BaseEntity):
         return self
 
     def is_valid_home_site(self):
+        """
+        Determines whether a site is landing site for your intranet.
+        """
         return_type = ClientResult(self.context)
 
         def _site_loaded():
@@ -125,6 +129,9 @@ class Site(BaseEntity):
         return return_type
 
     def set_as_home_site(self):
+        """
+        Sets a site as a landing site for your intranet.
+        """
         result = ClientResult(self.context)
 
         def _site_loaded():
@@ -318,9 +325,20 @@ class Site(BaseEntity):
         """
         Disables the hub site feature on a site.
         """
-        qry = ServiceOperationQuery(self, "UnRegisterHubSite", None, None, None, None)
+        qry = ServiceOperationQuery(self, "UnRegisterHubSite")
         self.context.add_query(qry)
         return self
+
+    @property
+    def allow_designer(self):
+        """
+        Specifies whether a designer can be used on this site collection.
+        See Microsoft.SharePoint.Client.Web.AllowDesignerForCurrentUser, which is the scalar property used
+        to determine the behavior for the current user. The default, if not disabled on the Web application, is "true".
+
+        :rtype: bool or None
+        """
+        return self.properties.get("AllowDesigner", None)
 
     @property
     def audit(self):
@@ -328,6 +346,20 @@ class Site(BaseEntity):
         Enables auditing of how site collection is accessed, changed, and used.
         """
         return self.properties.get("Audit", Audit(self.context, ResourcePath("Audit", self.resource_path)))
+
+    @property
+    def classification(self):
+        """
+        Gets the classification of this site.
+
+        :rtype: str or None
+        """
+        return self.properties.get("Classification", None)
+
+    @property
+    def current_change_token(self):
+        """Gets the current change token that is used in the change log for the site collection."""
+        return self.properties.get("CurrentChangeToken", ChangeToken())
 
     @property
     def root_web(self):
@@ -352,6 +384,9 @@ class Site(BaseEntity):
     @property
     def required_designer_version(self):
         """
+        Specifies the required minimum version of the designer that can be used on this site collection.
+        The default, if not disabled on the Web application, is "15.0.0.0".
+
         :rtype: str
         """
         return self.properties.get("RequiredDesignerVersion", None)
@@ -374,6 +409,15 @@ class Site(BaseEntity):
         return self.properties.get("ServerRelativeUrl", None)
 
     @property
+    def share_by_email_enabled(self):
+        """
+        When true, users will be able to grant permissions to guests for resources within the site collection.
+
+        :rtype: bool or none
+        """
+        return self.properties.get('ShareByEmailEnabled', None)
+
+    @property
     def id(self):
         """
         Specifies the GUID that identifies the site collection.
@@ -392,6 +436,8 @@ class Site(BaseEntity):
     @property
     def is_hub_site(self):
         """
+        Returns whether the specified site is a hub site
+
         :rtype: bool
         """
         return self.properties.get("IsHubSite", None)
@@ -449,6 +495,7 @@ class Site(BaseEntity):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "CurrentChangeToken": self.current_change_token,
                 "EventReceivers": self.event_receivers,
                 "RecycleBin": self.recycle_bin,
                 "RootWeb": self.root_web,

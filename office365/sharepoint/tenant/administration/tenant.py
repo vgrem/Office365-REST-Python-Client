@@ -126,8 +126,8 @@ class Tenant(ClientObject):
         :param str site_url:
         :return:
         """
-        params = {"siteUrl": site_url}
-        qry = ServiceOperationQuery(self, "UnregisterHubSite", None, params, None, None)
+        payload = {"siteUrl": site_url}
+        qry = ServiceOperationQuery(self, "UnregisterHubSite", None, payload, None, None)
         self.context.add_query(qry)
         return self
 

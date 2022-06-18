@@ -40,6 +40,8 @@ class ClientValueCollection(ClientValue):
 
     def to_json(self, json_format=None):
         """
+        Serializes a client value's collection
+
         :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat or None
         """
         json = [v for v in self]
@@ -80,4 +82,7 @@ class ClientValueCollection(ClientValue):
 
     @property
     def entity_type_name(self):
+        """
+        Returns server type name of value's collection
+        """
         return ODataType.resolve_type(self)

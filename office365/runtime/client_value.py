@@ -28,7 +28,7 @@ class ClientValue(object):
 
     def to_json(self, json_format=None):
         """
-        Serialize client value
+        Serializes a client value
 
         :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat or None
         """
@@ -52,4 +52,7 @@ class ClientValue(object):
 
     @property
     def entity_type_name(self):
+        """
+        Returns server type name of value
+        """
         return type(self).__name__

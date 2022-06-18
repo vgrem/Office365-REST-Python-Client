@@ -2,7 +2,6 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation_query import ServiceOperationQuery
 from office365.runtime.queries.update_entity_query import UpdateEntityQuery
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.query import ChangeQuery
@@ -66,6 +65,7 @@ class Folder(BaseEntity):
 
     def recycle_with_parameters(self, parameters):
         """
+        Moves the list folder to the Recycle Bin and returns the identifier of the new Recycle Bin item
 
         :type parameters: office365.sharepoint.folders.delete_parameters.FolderDeleteParameters
         """
@@ -198,7 +198,7 @@ class Folder(BaseEntity):
 
     @property
     def storage_metrics(self):
-        """"""
+        """Specifies the storage-related metrics for list folders in the site"""
         return self.properties.get("StorageMetrics",
                                    StorageMetrics(self.context, ResourcePath("StorageMetrics", self.resource_path)))
 
@@ -210,7 +210,7 @@ class Folder(BaseEntity):
 
     @property
     def files(self):
-        """Get a file collection"""
+        """Specifies the collection of files contained in the list folder."""
         from office365.sharepoint.files.collection import FileCollection
         return self.properties.get("Files",
                                    FileCollection(self.context, ResourcePath("Files", self.resource_path)))
@@ -225,30 +225,39 @@ class Folder(BaseEntity):
 
     @property
     def parent_folder(self):
-        """Specifies the list folder.
-        """
+        """Specifies the list folder."""
         return self.properties.get("ParentFolder",
                                    Folder(self.context, ResourcePath("ParentFolder", self.resource_path)))
 
     @property
     def name(self):
         """Specifies the list folder name.
+
         :rtype: str or None
         """
         return self.properties.get("Name", None)
 
     @property
     def is_wopi_enabled(self):
+        """
+        Indicates whether the folder is enabled for WOPI default action.
+
+        :rtype: bool or None
+        """
         return self.properties.get("IsWOPIEnabled", None)
 
     @property
     def prog_id(self):
-        """Gets the identifier (ID) of the application in which the folder was created."""
+        """Gets the identifier (ID) of the application in which the folder was created.
+
+        :rtype: str or None
+        """
         return self.properties.get("ProgID", None)
 
     @property
     def unique_id(self):
         """Gets the unique ID of the folder.
+
         :rtype: str or None
         """
         return self.properties.get("UniqueId", None)
@@ -256,6 +265,7 @@ class Folder(BaseEntity):
     @property
     def exists(self):
         """Gets a Boolean value that indicates whether the folder exists.
+
         :rtype: bool or None
         """
         return self.properties.get("Exists", None)
@@ -263,6 +273,7 @@ class Folder(BaseEntity):
     @property
     def welcome_page(self):
         """Specifies the server-relative URL for the list folder Welcome page.
+
         :rtype: str or None
         """
         return self.properties.get("WelcomePage", None)
@@ -292,8 +303,17 @@ class Folder(BaseEntity):
         return self.properties.get("TimeLastModified", None)
 
     @property
+    def time_created(self):
+        """Gets when the folder was created in UTC.
+
+        :rtype: datetime or None
+        """
+        return self.properties.get("TimeCreated", None)
+
+    @property
     def serverRelativeUrl(self):
         """Gets the server-relative URL of the list folder.
+
         :rtype: str or None
         """
         return self.properties.get("ServerRelativeUrl", None)
@@ -321,9 +341,10 @@ class Folder(BaseEntity):
     def set_property(self, name, value, persist_changes=True):
         super(Folder, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
-        if name == "ServerRelativeUrl":
-            self._resource_path = ServiceOperationPath("getFolderByServerRelativeUrl", [value], ResourcePath("Web"))
-        elif name == "ServerRelativePath":
-            self._resource_path = ServiceOperationPath("getFolderByServerRelativePath", [value], ResourcePath("Web"))
-        elif name == "UniqueId":
-            self._resource_path = ServiceOperationPath("getFolderById", [value], ResourcePath("Web"))
+        if name == "UniqueId":
+            self._resource_path = self.context.web.get_folder_by_id(value).resource_path
+        if self._resource_path is None:
+            if name == "ServerRelativeUrl":
+                self._resource_path = self.context.web.get_folder_by_server_relative_url(value).resource_path
+            elif name == "ServerRelativePath":
+                self._resource_path = self.context.web.get_folder_by_server_relative_path(value).resource_path

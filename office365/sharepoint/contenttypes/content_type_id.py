@@ -18,3 +18,6 @@ class ContentTypeId(ClientValue):
         """
         super(ContentTypeId, self).__init__()
         self.StringValue = string_value
+
+    def __repr__(self):
+        return self.StringValue

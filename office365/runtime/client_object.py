@@ -1,7 +1,9 @@
 import copy
+import datetime
 from typing import TypeVar
 
 from office365.runtime.client_value import ClientValue
+from office365.runtime.odata.odata_type import ODataType
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 from office365.runtime.odata.odata_json_format import ODataJsonFormat
 from office365.runtime.odata.query_options import QueryOptions
@@ -131,7 +133,7 @@ class ClientObject(object):
             self.set_metadata(name, "persist", True)
 
         prop_type = self.get_property(name)
-        if isinstance(prop_type, ClientObject) or isinstance(prop_type, ClientValue) and value is not None:
+        if isinstance(prop_type, ClientObject) or isinstance(prop_type, ClientValue):
             if isinstance(value, list):
                 [prop_type.set_property(i, v, persist_changes) for i, v in enumerate(value)]
                 self._properties[name] = prop_type
@@ -141,7 +143,10 @@ class ClientObject(object):
             else:
                 self._properties[name] = value
         else:
-            self._properties[name] = value
+            if isinstance(prop_type, datetime.datetime):
+                self._properties[name] = ODataType.parse_datetime(value)
+            else:
+                self._properties[name] = value
         return self
 
     def ensure_property(self, name, action, *args, **kwargs):

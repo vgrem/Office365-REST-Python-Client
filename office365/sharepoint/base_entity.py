@@ -17,6 +17,7 @@ class BaseEntity(ClientObject):
 
     def with_credentials(self, credentials):
         """
+        :type self: T
         :type credentials:  UserCredential or ClientCredential
         """
         self.context.with_credentials(credentials)

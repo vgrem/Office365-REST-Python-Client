@@ -1,3 +1,4 @@
+from datetime import datetime
 from random import randint
 
 from tests import test_site_url
@@ -142,3 +143,8 @@ class TestSharePointWeb(SPTestCase):
         page_url = "SitePages/Home.aspx"
         target_item = self.client.web.get_list_item_using_path(page_url).get().execute_query()
         self.assertIsNotNone(target_item.resource_path)
+
+    def test_25_parse_datetime(self):
+        today = str(datetime.today())
+        result = self.client.web.parse_datetime(today).execute_query()
+        self.assertIsNotNone(result.value)

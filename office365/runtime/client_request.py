@@ -56,6 +56,8 @@ class ClientRequest(object):
     @abstractmethod
     def build_request(self, query):
         """
+        Builds a request
+
         :type query: office365.runtime.queries.client_query.ClientQuery
         :rtype: office365.runtime.http.request_options.RequestOptions
         """
@@ -70,7 +72,7 @@ class ClientRequest(object):
 
     def execute_query(self):
         """
-        Submit a pending request to the server
+        Submits a pending request to the server
         """
         for qry in self:
             try:
@@ -84,7 +86,7 @@ class ClientRequest(object):
                 raise ClientRequestException(*e.args, response=e.response)
 
     def execute_request_direct(self, request):
-        """Execute client request
+        """Execute the client request
 
         :type request: office365.runtime.http.request_options.RequestOptions
         """

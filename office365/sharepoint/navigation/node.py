@@ -55,7 +55,5 @@ class NavigationNode(BaseEntity):
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id":
-                self._resource_path = ServiceOperationPath("GetById",
-                                                           [value],
-                                                           self._parent_collection.resource_path)
+                self._resource_path = ServiceOperationPath("GetById", [value], self.parent_collection.resource_path)
         return self

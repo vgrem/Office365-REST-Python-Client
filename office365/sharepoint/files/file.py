@@ -680,9 +680,7 @@ class File(AbstractFile):
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "ServerRelativeUrl":
-                self._resource_path = ServiceOperationPath("GetFileByServerRelativeUrl", [value],
-                                                           ResourcePath("Web"))
+                self._resource_path = self.context.web.get_file_by_server_relative_url(value).resource_path
             elif name == "ServerRelativePath":
-                self._resource_path = ServiceOperationPath("getFolderByServerRelativePath", [value],
-                                                           ResourcePath("Web"))
+                self._resource_path = self.context.web.get_file_by_server_relative_path(value).resource_path
         return self

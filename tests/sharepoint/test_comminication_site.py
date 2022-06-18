@@ -1,6 +1,8 @@
 import uuid
 from unittest import TestCase
 
+from office365.sharepoint.portal.site_creation_response import SPSiteCreationResponse
+from office365.sharepoint.sites.site import Site
 from office365.sharepoint.tenant.administration.tenant import Tenant
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.portal.site_status import SiteStatus
@@ -10,7 +12,7 @@ from tests import test_user_credentials, test_site_url, test_admin_site_url, tes
 
 
 class TestCommunicationSite(TestCase):
-    site_response = None
+    site_response = None  # type: SPSiteCreationResponse
 
     @classmethod
     def setUpClass(cls):
@@ -41,7 +43,11 @@ class TestCommunicationSite(TestCase):
         client_admin = ClientContext(test_admin_site_url).with_credentials(test_user_credentials)
         tenant = Tenant(client_admin)
         props = tenant.register_hub_site(self.__class__.site_response.SiteUrl).execute_query()
-        self.assertIsNotNone(props)
+        self.assertIsNotNone(props.site_id)
+
+        target_site = Site.from_url(self.__class__.site_response.SiteUrl).with_credentials(test_user_credentials)
+        target_site.get().execute_query()
+        self.assertTrue(target_site.is_hub_site)
 
     def test5_unregister_hub_site(self):
         client_admin = ClientContext(test_admin_site_url).with_credentials(test_user_credentials)

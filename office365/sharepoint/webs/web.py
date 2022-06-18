@@ -44,7 +44,10 @@ from office365.sharepoint.ui.applicationpages.client_people_picker import (
 )
 from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
 from office365.sharepoint.webparts.client_web_part_collection import ClientWebPartCollection
+from office365.sharepoint.webs.calendar_type import CalendarType
 from office365.sharepoint.webs.context_web_information import ContextWebInformation
+from office365.sharepoint.webs.datetime_field_format_type import DateTimeFieldFormatType
+from office365.sharepoint.webs.multilingual_settings import MultilingualSettings
 from office365.sharepoint.webs.regional_settings import RegionalSettings
 from office365.sharepoint.sitescripts.types import SiteScriptSerializationResult, SiteScriptSerializationInfo
 from office365.sharepoint.webs.web_information_collection import WebInformationCollection
@@ -594,6 +597,17 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
+    def hub_site_data(self, force_refresh):
+        """Retrieves data describing a SharePoint hub site.
+
+        :param bool force_refresh:
+        """
+        return_type = ClientResult(self.context)
+        payload = {"forceRefresh": force_refresh}
+        qry = ServiceOperationQuery(self, "HubSiteData", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def increment_site_client_tag(self):
         """
         Increments the client cache control number for this site collection.
@@ -667,6 +681,26 @@ class Web(SecurableObject):
         """
         return_type = File(self.context)
         qry = ServiceOperationQuery(self, "GetFolderByGuestUrl", [guest_url], None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def parse_datetime(self, value, display_format=DateTimeFieldFormatType.DateTime, calendar_type=CalendarType.None_):
+        """
+        Returns parsed DateTime value.
+
+        :param str value: The input is the string of a datetime that's in web's local time and in web's calendar.
+           For example, the input "09/08/1430" when web's calendar was set to Hijri, the actual datetime is 07/31/2009
+           in Gregorian calendar.
+        :param int display_format: Int value representing SP.DateTimeFieldFormatType
+        :param int calendar_type: Int value representing SP.CalendarType
+        """
+        return_type = ClientResult(self.context)
+        payload = {
+            "value": value,
+            "displayFormat": display_format,
+            "calendarType": calendar_type
+        }
+        qry = ServiceOperationQuery(self, "ParseDateTime", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -809,6 +843,10 @@ class Web(SecurableObject):
         context.load(grp)
 
         def _group_resolved(resp):
+            """
+            :type resp: requests.Response
+            """
+            resp.raise_for_status()
             role_value = "group:{groupId}".format(groupId=grp.properties["Id"])
             on_resolved(role_value)
 
@@ -1039,8 +1077,6 @@ class Web(SecurableObject):
     def author(self):
         """
         Gets a user object that represents the user who created the Web site.
-
-        :rtype: office365.sharepoint.directory.user.User or None
         """
         return self.properties.get("Author", User(self.context, ResourcePath("Author", self.resource_path)))
 
@@ -1244,6 +1280,14 @@ class Web(SecurableObject):
                                                           ResourcePath("ListTemplates", self.resource_path)))
 
     @property
+    def multilingual_settings(self):
+        """Gets a value that specifies the collection of list definitions and list templates available for creating
+            lists on the site."""
+        return self.properties.get('MultilingualSettings',
+                                   MultilingualSettings(self.context,
+                                                        ResourcePath("MultilingualSettings", self.resource_path)))
+
+    @property
     def web_template(self):
         """Gets the name of the site definition or site template that was used to create the site.
 
@@ -1369,6 +1413,7 @@ class Web(SecurableObject):
                 "CurrentUser": self.current_user,
                 "EventReceivers": self.event_receivers,
                 "ListTemplates": self.list_templates,
+                "MultilingualSettings": self.multilingual_settings,
                 "ParentWeb": self.parent_web,
                 "PushNotificationSubscribers": self.push_notification_subscribers,
                 "RootFolder": self.root_folder,
