@@ -1,4 +1,4 @@
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.attachments.attachment import Attachment
 from office365.sharepoint.attachments.creation_information import AttachmentCreationInformation

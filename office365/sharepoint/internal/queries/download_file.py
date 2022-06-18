@@ -1,5 +1,5 @@
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 def create_download_file_query(source_file, file_object):

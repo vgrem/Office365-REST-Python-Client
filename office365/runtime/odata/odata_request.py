@@ -8,10 +8,10 @@ from office365.runtime.client_value import ClientValue
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
-from office365.runtime.queries.create_entity_query import CreateEntityQuery
-from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
-from office365.runtime.queries.update_entity_query import UpdateEntityQuery
+from office365.runtime.queries.create_entity import CreateEntityQuery
+from office365.runtime.queries.delete_entity import DeleteEntityQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.runtime.queries.update_entity import UpdateEntityQuery
 
 
 class ODataRequest(ClientRequest):

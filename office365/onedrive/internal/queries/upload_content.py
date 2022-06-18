@@ -1,6 +1,6 @@
 from office365.onedrive.internal.paths.url import UrlPath
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 def create_upload_content_query(folder_item, name, content=None):

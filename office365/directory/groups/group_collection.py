@@ -1,6 +1,6 @@
 from office365.directory.groups.group import Group
 from office365.entity_collection import DeltaCollection
-from office365.runtime.queries.create_entity_query import CreateEntityQuery
+from office365.runtime.queries.create_entity import CreateEntityQuery
 
 
 class GroupCollection(DeltaCollection):

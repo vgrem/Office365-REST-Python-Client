@@ -1,6 +1,6 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value import ClientValue
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.principal.principal_source import PrincipalSource
 from office365.sharepoint.principal.principal_type import PrincipalType

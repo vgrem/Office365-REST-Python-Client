@@ -5,7 +5,7 @@ from office365.onenote.notebooks.recent_notebook import RecentNotebook
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class NotebookCollection(EntityCollection):

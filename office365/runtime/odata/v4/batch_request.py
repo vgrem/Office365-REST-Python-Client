@@ -81,6 +81,6 @@ class ODataV4BatchRequest(ClientRequest):
     @property
     def current_query(self):
         """
-        :rtype: office365.runtime.queries.batch_query.BatchQuery
+        :rtype: office365.runtime.queries.batch.BatchQuery
         """
         return self._current_query

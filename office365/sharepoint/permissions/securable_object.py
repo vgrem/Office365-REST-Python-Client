@@ -1,5 +1,5 @@
 from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.permissions.base_permissions import BasePermissions

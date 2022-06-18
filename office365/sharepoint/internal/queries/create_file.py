@@ -1,4 +1,4 @@
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.files.file import File
 
 

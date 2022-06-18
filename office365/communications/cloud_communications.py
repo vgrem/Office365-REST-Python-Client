@@ -4,7 +4,7 @@ from office365.communications.onlinemeetings.online_meeting_collection import On
 from office365.communications.presences.presence import Presence
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 
 

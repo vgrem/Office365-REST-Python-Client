@@ -2,7 +2,7 @@ import os
 import uuid
 
 from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.internal.queries.create_file import create_file_query
 from office365.sharepoint.files.file import File
 from office365.sharepoint.files.creation_information import FileCreationInformation

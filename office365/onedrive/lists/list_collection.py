@@ -1,6 +1,6 @@
 from office365.entity_collection import EntityCollection
 from office365.onedrive.lists.list import List
-from office365.runtime.queries.create_entity_query import CreateEntityQuery
+from office365.runtime.queries.create_entity import CreateEntityQuery
 
 
 class ListCollection(EntityCollection):

@@ -30,9 +30,9 @@ from office365.runtime.odata.odata_request import ODataRequest
 from office365.runtime.odata.v4.batch_request import ODataV4BatchRequest
 from office365.runtime.odata.v4.json_format import V4JsonFormat
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.runtime.queries.batch_query import BatchQuery
-from office365.runtime.queries.delete_entity_query import DeleteEntityQuery
-from office365.runtime.queries.update_entity_query import UpdateEntityQuery
+from office365.runtime.queries.batch import BatchQuery
+from office365.runtime.queries.delete_entity import DeleteEntityQuery
+from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.search.search_entity import SearchEntity
 from office365.teams.chats.chat import Chat
 from office365.teams.team_collection import TeamCollection

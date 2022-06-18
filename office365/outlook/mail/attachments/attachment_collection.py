@@ -3,7 +3,7 @@ from office365.outlook.internal.attachment_upload_query import AttachmentUploadQ
 from office365.outlook.mail.attachments.attachment import Attachment
 from office365.onedrive.upload_session import UploadSession
 from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class AttachmentCollection(EntityCollection):

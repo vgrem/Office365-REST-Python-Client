@@ -1,5 +1,5 @@
 from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.audit.audit import Audit
@@ -400,6 +400,7 @@ class Site(BaseEntity):
         """
         return self.properties.get('Url', None)
 
+    @property
     def server_relative_url(self):
         """
         Specifies the server-relative URL of the top-level site in the site collection.

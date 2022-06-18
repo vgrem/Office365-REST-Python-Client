@@ -1,5 +1,5 @@
 from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.publishing.site_page_fields_data import SitePageFieldsData
 from office365.sharepoint.publishing.site_page_metadata import SitePageMetadata
 

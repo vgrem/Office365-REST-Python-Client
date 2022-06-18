@@ -13,7 +13,7 @@ from office365.planner.planner_group import PlannerGroup
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.teams.internal.paths.team import TeamPath
 from office365.teams.team import Team

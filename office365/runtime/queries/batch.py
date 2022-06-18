@@ -1,7 +1,7 @@
 import uuid
 
 from office365.runtime.queries.client_query import ClientQuery
-from office365.runtime.queries.read_entity_query import ReadEntityQuery
+from office365.runtime.queries.read_entity import ReadEntityQuery
 
 
 def create_boundary(prefix, compact=False):

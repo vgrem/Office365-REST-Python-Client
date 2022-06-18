@@ -1,7 +1,7 @@
 from office365.communications.onlinemeetings.online_meeting import OnlineMeeting
 from office365.entity_collection import EntityCollection
-from office365.runtime.queries.create_entity_query import CreateEntityQuery
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.create_entity import CreateEntityQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class OnlineMeetingCollection(EntityCollection):

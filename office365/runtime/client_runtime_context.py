@@ -7,7 +7,7 @@ from office365.runtime.compat import is_absolute_url
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.queries.client_query import ClientQuery
-from office365.runtime.queries.read_entity_query import ReadEntityQuery
+from office365.runtime.queries.read_entity import ReadEntityQuery
 
 
 class ClientRuntimeContext(object):

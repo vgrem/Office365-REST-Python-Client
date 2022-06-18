@@ -1,4 +1,4 @@
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.taxonomy.item import TaxonomyItem, TaxonomyItemCollection

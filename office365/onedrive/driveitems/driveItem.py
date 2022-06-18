@@ -26,8 +26,8 @@ from office365.onedrive.workbooks.workbook import Workbook
 from office365.onedrive.internal.paths.url import UrlPath
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.queries.create_entity_query import CreateEntityQuery
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.create_entity import CreateEntityQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 

@@ -168,7 +168,7 @@ class ClientObject(object):
 
         names_to_include = [n for n in names if not self.is_property_available(n)]
         if len(names_to_include) > 0:
-            from office365.runtime.queries.read_entity_query import ReadEntityQuery
+            from office365.runtime.queries.read_entity import ReadEntityQuery
             qry = ReadEntityQuery(self, names_to_include)
             self.context.add_query(qry, set_as_current=False)
             self.context.after_query_execute(qry, action, *args, **kwargs)

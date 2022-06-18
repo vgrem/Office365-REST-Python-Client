@@ -1,7 +1,7 @@
 from email.message import Message
 from office365.runtime.compat import get_mime_type, message_as_bytes_or_string
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.queries.batch_query import create_boundary
+from office365.runtime.queries.batch import create_boundary
 from office365.runtime.queries.client_query import ClientQuery
 
 

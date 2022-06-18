@@ -6,7 +6,7 @@ from office365.onenote.pages.page_links import PageLinks
 from office365.onenote.sections.section import OnenoteSection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
 

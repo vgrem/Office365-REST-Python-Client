@@ -1,6 +1,6 @@
 import os
 
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.internal.queries.create_file import create_file_query
 from office365.sharepoint.internal.queries.upload_session import UploadSessionQuery

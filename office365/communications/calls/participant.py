@@ -3,7 +3,7 @@ from office365.communications.calls.participant_info import ParticipantInfo
 from office365.communications.operations.invite_participants import InviteParticipantsOperation
 from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class Participant(Entity):

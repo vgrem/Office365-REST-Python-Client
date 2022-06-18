@@ -2,7 +2,7 @@ from office365.directory.directory_object import DirectoryObject
 from office365.entity_collection import EntityCollection, DeltaCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class DirectoryObjectCollection(DeltaCollection):

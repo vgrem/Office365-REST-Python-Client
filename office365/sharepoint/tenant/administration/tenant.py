@@ -1,9 +1,10 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
+from office365.sharepoint.sites.home_sites_details import HomeSitesDetails
 from office365.sharepoint.tenant.administration.hubsite_properties import HubSiteProperties
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
     SecondaryAdministratorsFieldsData
@@ -20,6 +21,12 @@ class Tenant(BaseEntity):
     def __init__(self, context):
         static_path = ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant")
         super(Tenant, self).__init__(context, static_path)
+
+    def get_home_sites_details(self):
+        return_type = ClientResult(self.context, ClientValueCollection(HomeSitesDetails))
+        qry = ServiceOperationQuery(self, "GetHomeSitesDetails", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def export_to_csv(self, view_xml=None):
         result = ClientResult(self.context)
@@ -112,8 +119,7 @@ class Tenant(BaseEntity):
         """
         Unregisters a hub site so that it is no longer a hub site.
 
-        :param str site_url:
-        :return:
+        :param str site_url: Site Url
         """
         payload = {"siteUrl": site_url}
         qry = ServiceOperationQuery(self, "UnregisterHubSite", None, payload, None, None)
@@ -168,15 +174,15 @@ class Tenant(BaseEntity):
         :param str url: A string that represents the site URL.
         :param bool include_detail: A Boolean value that indicates whether to include all of the SPSite properties.
         """
-        site_props = SiteProperties(self.context)
-        self._sites.add_child(site_props)
+        return_type = SiteProperties(self.context)
+        self._sites.add_child(return_type)
         payload = {
             'url': url,
             'includeDetail': include_detail
         }
-        qry = ServiceOperationQuery(self, "getSitePropertiesByUrl", None, payload, None, site_props)
+        qry = ServiceOperationQuery(self, "getSitePropertiesByUrl", None, payload, None, return_type)
         self.context.add_query(qry)
-        return site_props
+        return return_type
 
     def get_site_properties_from_sharepoint_by_filters(self, _filter, start_index=0, include_detail=False):
         """
@@ -185,14 +191,14 @@ class Tenant(BaseEntity):
         :param int start_index:
         :param str _filter:
         """
-        site_props_col = SitePropertiesCollection(self.context)
+        return_type = SitePropertiesCollection(self.context)
         qry = ServiceOperationQuery(self, "getSitePropertiesFromSharePointByFilters",
                                     None,
                                     SitePropertiesEnumerableFilter(_filter, start_index, include_detail),
                                     "speFilter",
-                                    site_props_col)
+                                    return_type)
         self.context.add_query(qry)
-        return site_props_col
+        return return_type
 
     def connect_site_to_hub_site_by_id(self, site_url, hub_site_id):
         """

@@ -1,5 +1,5 @@
 from office365.onedrive.versions.base_item_version import BaseItemVersion
-from office365.runtime.queries.service_operation_query import ServiceOperationQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class DriveItemVersion(BaseItemVersion):
