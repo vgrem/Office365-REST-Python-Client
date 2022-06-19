@@ -21,10 +21,13 @@ from office365.sharepoint.listitems.creation_information_using_path import ListI
 from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateValue
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.listitems.collection import ListItemCollection
+from office365.sharepoint.lists.creatables_info import CreatablesInfo
 from office365.sharepoint.lists.list_rule import SPListRule
 from office365.sharepoint.pages.wiki_page_creation_information import WikiPageCreationInformation
 from office365.sharepoint.permissions.securable_object import SecurableObject
+from office365.sharepoint.principal.user import User
 from office365.sharepoint.sitescripts.utility import SiteScriptUtility
+from office365.sharepoint.types.user_resource import UserResource
 from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
 from office365.sharepoint.views.view import View
 from office365.sharepoint.views.view_collection import ViewCollection
@@ -34,7 +37,11 @@ from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
 class List(SecurableObject):
-    """Represents a list on a SharePoint Web site."""
+    """Represents a list on a SharePoint Web site.
+
+    A container within a SharePoint site that stores list items. A list has a customizable schema that is
+    composed of one or more fields.
+    """
 
     def __init__(self, context, resource_path=None):
         super(List, self).__init__(context, resource_path)
@@ -44,14 +51,13 @@ class List(SecurableObject):
 
         :param dict or None options:
         """
-        result = ClientResult(self.context)
+        return_type = ClientResult(self.context)
 
         def _list_loaded():
             list_abs_url = self.context.create_safe_url(self.root_folder.serverRelativeUrl, False)
-            SiteScriptUtility.get_site_script_from_list(self.context, list_abs_url, options, return_type=result)
-
+            SiteScriptUtility.get_site_script_from_list(self.context, list_abs_url, options, return_type=return_type)
         self.ensure_property("RootFolder", _list_loaded)
-        return result
+        return return_type
 
     def get_all_rules(self):
         return_type = ClientResult(self.context, ClientValueCollection(SPListRule))
@@ -368,10 +374,10 @@ class List(SecurableObject):
 
     def get_checked_out_files(self):
         """Returns a collection of checked-out files as specified in section 3.2.5.381."""
-        result = CheckedOutFileCollection(self.context)
-        qry = ServiceOperationQuery(self, "GetCheckedOutFiles", None, None, None, result)
+        return_type = CheckedOutFileCollection(self.context)
+        qry = ServiceOperationQuery(self, "GetCheckedOutFiles", None, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def reserve_list_item_id(self):
         """
@@ -398,6 +404,30 @@ class List(SecurableObject):
         return self.properties.get("Id", None)
 
     @property
+    def author(self):
+        """Specifies the user who created the list."""
+        return self.properties.get('Author',
+                                   User(self.context, ResourcePath("Author", self.resource_path)))
+
+    @property
+    def allow_content_types(self):
+        """
+        Specifies whether the list supports content types.
+
+        :rtype: bool or None
+        """
+        return self.properties.get("AllowContentTypes", None)
+
+    @property
+    def base_template(self):
+        """
+        Specifies the list server template of the list.
+
+        :rtype: int or None
+        """
+        return self.properties.get("BaseTemplate", None)
+
+    @property
     def crawl_non_default_views(self):
         """
         Specifies whether or not the crawler indexes the non-default views of the list.
@@ -406,6 +436,20 @@ class List(SecurableObject):
         :rtype: bool or None
         """
         return self.properties.get("CrawlNonDefaultViews", None)
+
+    @property
+    def creatables_info(self):
+        """
+        Returns an object that describes what this list can create, and a collection of links to visit in order to
+        create those things. If it can't create certain things, it contains an error message describing why.
+
+         The consumer MUST append the encoded URL of the current page to the links returned here.
+         (This page the link goes to needs it as a query parameter to function correctly.)
+         The consumer SHOULD also consider appending &IsDlg=1 to the link, to remove the UI from the linked page,
+         if desired.
+        """
+        return self.properties.get('CreatablesInfo',
+                                   CreatablesInfo(self.context, ResourcePath("CreatablesInfo", self.resource_path)))
 
     @property
     def current_change_token(self):
@@ -545,21 +589,63 @@ class List(SecurableObject):
         self.set_property('Description', val)
 
     @property
+    def description_resource(self):
+        """Represents the description of this list."""
+        return self.properties.get('DescriptionResource',
+                                   UserResource(self.context, ResourcePath("DescriptionResource", self.resource_path)))
+
+    @property
     def parent_web_path(self):
         """Returns the path of the parent web for the list."""
         return self.properties.get('ParentWebPath', SPResPath())
 
+    @property
+    def schema_xml(self):
+        """Specifies the list schema of the list.
+
+        :rtype: str or None
+        """
+        return self.properties.get("SchemaXml", None)
+
+    @property
+    def template_feature_id(self):
+        """
+        Specifies the feature identifier of the feature that contains the list schema for the list.
+        It MUST be an empty GUID if the list schema for the list is not contained within a feature.
+
+        :rtype: str or None
+        """
+        return self.properties.get("TemplateFeatureId", None)
+
+    @property
+    def title_resource(self):
+        """Represents the title of this list."""
+        return self.properties.get('TitleResource',
+                                   UserResource(self.context, ResourcePath("TitleResource", self.resource_path)))
+
+    @property
+    def validation_formula(self):
+        """
+        Specifies the data validation criteria for a list item.
+
+        :rtype: str or None
+        """
+        return self.properties.get("ValidationFormula", None)
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "CreatablesInfo": self.creatables_info,
                 "CurrentChangeToken": self.current_change_token,
                 "ContentTypes": self.content_types,
                 "CustomActionElements": self.custom_action_elements,
+                "DescriptionResource": self.description_resource,
                 "DefaultView": self.default_view,
                 "EventReceivers": self.event_receivers,
                 "ParentWeb": self.parent_web,
                 "ParentWebPath": self.parent_web_path,
                 "RootFolder": self.root_folder,
+                "TitleResource": self.title_resource,
                 "UserCustomActions": self.user_custom_actions
             }
             default_value = property_mapping.get(name, None)

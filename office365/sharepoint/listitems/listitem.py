@@ -10,6 +10,7 @@ from office365.sharepoint.comments.comment_collection import CommentCollection
 from office365.sharepoint.fields.lookup_value import FieldLookupValue
 from office365.sharepoint.fields.multi_lookup_value import FieldMultiLookupValue
 from office365.sharepoint.likes.liked_by_information import LikedByInformation
+from office365.sharepoint.listitems.compliance_info import ListItemComplianceInfo
 from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateValue
 from office365.sharepoint.listitems.version import ListItemVersion
 from office365.sharepoint.permissions.securable_object import SecurableObject
@@ -350,6 +351,8 @@ class ListItem(SecurableObject):
     @property
     def comments_disabled(self):
         """
+        Indicates whether comments for this item are disabled or not.
+
         :rtype: bool or None
         """
         return self.properties.get("CommentsDisabled", None)
@@ -358,6 +361,7 @@ class ListItem(SecurableObject):
     def file_system_object_type(self):
         """
         Gets a value that specifies whether the list item is a file or a list folder.
+
         :rtype: str or None
         """
         return self.properties.get("FileSystemObjectType", None)
@@ -366,15 +370,19 @@ class ListItem(SecurableObject):
     def id(self):
         """
         Gets a value that specifies the list item identifier.
+
         :rtype: int
         """
         return self.properties.get("Id", None)
 
     @property
+    def compliance_info(self):
+        return self.properties.get("ComplianceInfo", ListItemComplianceInfo())
+
+    @property
     def liked_by_information(self):
         """
         Gets a value that specifies the list item identifier.
-        :rtype: LikedByInformation
         """
         return self.properties.get("LikedByInformation",
                                    LikedByInformation(self.context,
@@ -392,6 +400,7 @@ class ListItem(SecurableObject):
             property_mapping = {
                 "AttachmentFiles": self.attachment_files,
                 "ContentType": self.content_type,
+                "ComplianceInfo": self.compliance_info,
                 "EffectiveBasePermissions": self.effective_base_permissions,
                 "LikedByInformation": self.liked_by_information,
                 "ParentList": self.parent_list,

@@ -95,6 +95,7 @@ class ContentType(BaseEntity):
     @property
     def schema_xml(self):
         """Specifies the XML schema that represents the content type.
+
         :rtype: str or None
         """
         return self.properties.get("SchemaXml", None)

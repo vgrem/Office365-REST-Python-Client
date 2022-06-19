@@ -9,7 +9,7 @@ from office365.sharepoint.userprofiles.personal_site_creation_priority import Pe
 from office365.sharepoint.userprofiles.person_properties import PersonProperties
 
 
-def _resolve_user(user_or_name, action):
+def _ensure_user(user_or_name, action):
     """
     :param str or User user_or_name: User or Login name of the specified user.
     :param (str) -> None action: Callback
@@ -114,7 +114,7 @@ class PeopleManager(BaseEntity):
             qry = ServiceOperationQuery(self, "GetUserProfileProperties", params, None, None, return_type)
             self.context.add_query(qry)
 
-        _resolve_user(user_or_name, _user_resolved)
+        _ensure_user(user_or_name, _user_resolved)
         return return_type
 
     def get_properties_for(self, user_or_name):
@@ -131,26 +131,33 @@ class PeopleManager(BaseEntity):
             qry = ServiceOperationQuery(self, "GetPropertiesFor", params, None, None, return_type)
             self.context.add_query(qry)
 
-        _resolve_user(user_or_name, _get_properties_for_inner)
+        _ensure_user(user_or_name, _get_properties_for_inner)
         return return_type
 
-    def get_default_document_library(self, account_name, create_site_if_not_exists=False,
+    def get_default_document_library(self, user_or_name, create_site_if_not_exists=False,
                                      site_creation_priority=PersonalSiteCreationPriority.Low):
         """
+        Gets the OneDrive Document library path for a given user.
 
-        :param str account_name: The login name of the user whose OneDrive URL is required.
+        :param str or User user_or_name user_or_name: The login name of the user whose OneDrive URL is required.
              For example, "i:0#.f|membership|admin@contoso.sharepoint.com”.
         :param bool create_site_if_not_exists: If this value is set to true and the site doesn't exist, the site will
             get created.
         :param int site_creation_priority: The priority for site creation. Type: PersonalSiteCreationPriority
         """
-        result = ClientResult(self.context)
-        params = {"accountName": account_name,
-                  "createSiteIfNotExists": create_site_if_not_exists,
-                  "siteCreationPriority": site_creation_priority}
-        qry = ServiceOperationQuery(self, "GetDefaultDocumentLibrary", params, None, None, result)
-        self.context.add_query(qry)
-        return result
+        return_type = ClientResult(self.context)
+
+        def _get_default_document_library(account_name):
+            params = {
+                "accountName": account_name,
+                "createSiteIfNotExists": create_site_if_not_exists,
+                "siteCreationPriority": site_creation_priority
+            }
+            qry = ServiceOperationQuery(self, "GetDefaultDocumentLibrary", params, None, None, return_type)
+            self.context.add_query(qry)
+
+        _ensure_user(user_or_name, _get_default_document_library)
+        return return_type
 
     def get_people_followed_by(self, account_name):
         """

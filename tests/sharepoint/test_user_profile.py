@@ -31,8 +31,8 @@ class TestUserProfile(TestCase):
         self.assertIsNotNone(properties)
 
     def test6_get_default_document_library(self):
-        me = self.my_client.web.current_user.get().execute_query()
-        result = self.my_client.people_manager.get_default_document_library(me.login_name).execute_query()
+        me = self.my_client.web.current_user
+        result = self.my_client.people_manager.get_default_document_library(me).execute_query()
         self.assertIsNotNone(result.value)
 
     def test7_get_people_followed_by(self):

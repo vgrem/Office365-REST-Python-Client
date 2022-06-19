@@ -27,7 +27,8 @@ class CamlQuery(ClientValue):
     @staticmethod
     def parse(query_expr, scope=ViewScope.DefaultValue):
         """
-        Construct CamlQuery object from expression
+        Initiates a CamlQuery object from a query expression
+
         :type query_expr: str
         :type scope: ViewScope
         """
@@ -47,11 +48,13 @@ class CamlQuery(ClientValue):
 
     @staticmethod
     def create_all_folders_query():
+        """Constructs a query to return folder objects"""
         qry_text = "<Where><Eq><FieldRef Name=\"FSObjType\" /><Value Type=\"Integer\">1</Value></Eq></Where>"
         return CamlQuery.parse(qry_text, ViewScope.RecursiveAll)
 
     @staticmethod
     def create_all_files_query():
+        """Constructs a query to return file objects"""
         qry_text = "<Where><Eq><FieldRef Name=\"FSObjType\" /><Value Type=\"Integer\">0</Value></Eq></Where>"
         return CamlQuery.parse(qry_text, ViewScope.RecursiveAll)
 
