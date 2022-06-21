@@ -4,6 +4,8 @@ from office365.sharepoint.files.file import File
 
 def create_file_query(files, file_create_info):
     """
+    Constructs a query to create/upload a file
+
     :type file_create_info: office365.sharepoint.files.creation_information.FileCreationInformation
     :type files: office365.sharepoint.files.collection.FileCollection
     """

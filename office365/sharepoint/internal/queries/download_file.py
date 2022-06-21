@@ -4,7 +4,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 def create_download_file_query(source_file, file_object):
     """
-    A download file content query
+    Constructs a query to download a file content
 
     :type source_file: office365.sharepoint.files.file.File
     :type file_object: typing.IO

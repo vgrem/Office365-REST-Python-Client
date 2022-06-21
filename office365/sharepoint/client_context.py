@@ -29,6 +29,8 @@ class ClientContext(ClientRuntimeContext):
 
     def __init__(self, base_url, auth_context=None):
         """
+        Instantiates a SharePoint client context
+
         :param str base_url: Absolute Web or Site Url
         :param AuthenticationContext or None auth_context: Authentication context
         """

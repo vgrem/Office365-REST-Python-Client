@@ -4,7 +4,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 def create_upload_file_query(file, file_object):
     """
-    A Upload file content query
+    Constructs upload file content query
 
     :type file: office365.sharepoint.files.file.File
     :type file_object: typing.IO

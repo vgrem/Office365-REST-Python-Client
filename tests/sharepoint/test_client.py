@@ -3,6 +3,7 @@ from unittest import TestCase
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.odata.odata_type import ODataType
+from office365.runtime.odata.query_options import QueryOptions
 from office365.runtime.types.collections import StringCollection, GuidCollection
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
     SecondaryAdministratorsFieldsData
@@ -128,3 +129,8 @@ class TestSharePointClient(TestCase):
         expected_type = "Collection(Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsFieldsData)"
         self.assertEqual(type_col.entity_type_name, expected_type)
 
+    def test_15_build_query_options(self):
+        client = ClientContext(test_site_url)
+        lib = client.web.default_document_library()
+        options = QueryOptions.build(lib, ["Author", "Comments"])
+        self.assertEqual(str(options), "$select=Author,Comments&$expand=Author")

@@ -43,6 +43,7 @@ from office365.sharepoint.ui.applicationpages.client_people_picker import (
     ClientPeoplePickerWebServiceInterface, ClientPeoplePickerQueryParameters
 )
 from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
+from office365.sharepoint.views.view import View
 from office365.sharepoint.webparts.client_web_part_collection import ClientWebPartCollection
 from office365.sharepoint.webs.calendar_type import CalendarType
 from office365.sharepoint.webs.context_web_information import ContextWebInformation
@@ -359,18 +360,47 @@ class Web(SecurableObject):
 
             cur_web.ensure_property("Webs", _webs_loaded, cur_web)
 
-    def get_list_using_path(self, url):
+    def get_list_using_path(self, decoded_url):
         """
         Returns the list that is associated with the specified server-relative path.
 
-        :param str url: Contains the site-relative path for a list, for example, /Lists/Announcements.
+        :param str decoded_url: Contains the site-relative path for a list, for example, /Lists/Announcements.
         """
-        safe_decoded_url = self.context.create_safe_url(url)
-        return_list = List(self.context)
-        self.lists.add_child(return_list)
-        qry = ServiceOperationQuery(self, "GetListUsingPath", SPResPath(safe_decoded_url), None, None, return_list)
+        safe_decoded_url = self.context.create_safe_url(decoded_url)
+        return_type = List(self.context)
+        self.lists.add_child(return_type)
+        qry = ServiceOperationQuery(self, "GetListUsingPath", SPResPath(safe_decoded_url), None, None, return_type)
         self.context.add_query(qry)
-        return return_list
+        return return_type
+
+    def get_news_list(self, allow_create=False):
+        """
+        Returns the News List on this web, if it exists. If the list does not exist, the list will be created and
+        then returned if allowCreate is set to true. The News List is a hidden SP.List in which News Posts are stored.
+
+        :param bool allow_create: Indicates whether to create the list if it does not exist on this web.
+            "true" means yes.
+        """
+        return_type = List(self.context)
+        self.lists.add_child(return_type)
+        payload = {"allowCreate": allow_create}
+        qry = ServiceOperationQuery(self, "GetNewsList", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_view_from_url(self, list_url):
+        """Returns a view of a list within the site based on the specified URL.
+
+        :param str list_url: Contains either an absolute URL or a site-relative URL of a view.
+        """
+        return View(self.context, ServiceOperationPath("GetViewFromUrl", [list_url], self.resource_path))
+
+    def get_view_from_path(self, decoded_url):
+        """Returns a view of a list within the site based on the specified path.
+
+        :param str decoded_url: Contains either an absolute path or a site-relative path of a view.
+        """
+        return View(self.context, ServiceOperationPath("GetViewFromPath", [decoded_url], self.resource_path))
 
     def get_regional_datetime_schema(self):
         """Get DateTime Schema based on regional settings"""
@@ -386,11 +416,11 @@ class Web(SecurableObject):
 
         :param str link_url: A URL that is either a tokenized sharing link or a canonical URL for a document
         """
-        result = ClientResult(self.context, SharingLinkData())
+        return_type = ClientResult(self.context, SharingLinkData())
         payload = {"linkUrl": link_url}
-        qry = ServiceOperationQuery(self, "GetSharingLinkData", None, payload, None, result)
+        qry = ServiceOperationQuery(self, "GetSharingLinkData", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def get_context_web_theme_data(context):
@@ -597,10 +627,12 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
-    def hub_site_data(self, force_refresh):
+    def hub_site_data(self, force_refresh=False):
         """Retrieves data describing a SharePoint hub site.
 
-        :param bool force_refresh:
+        :param bool force_refresh: Default value is false. When false, the data is returned from the server's cache.
+            When true, the cache is refreshed with the latest updates and then returned. Use this if you just made
+            changes and need to see those changes right away.
         """
         return_type = ClientResult(self.context)
         payload = {"forceRefresh": force_refresh}
@@ -986,7 +1018,7 @@ class Web(SecurableObject):
         """
         path = SPResPath(self.context.create_safe_url(decoded_url))
         return ListItem(self.context,
-                        ServiceOperationPath("GetListItemUsingPath", path.to_json(), self.resource_path))
+                        ServiceOperationPath("GetListItemUsingPath", path, self.resource_path))
 
     def get_catalog(self, type_catalog):
         """Gets the list template gallery, site template gallery, or Web Part gallery for the Web site.

@@ -22,6 +22,7 @@ from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateV
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.listitems.collection import ListItemCollection
 from office365.sharepoint.lists.creatables_info import CreatablesInfo
+from office365.sharepoint.lists.data_source import ListDataSource
 from office365.sharepoint.lists.list_rule import SPListRule
 from office365.sharepoint.pages.wiki_page_creation_information import WikiPageCreationInformation
 from office365.sharepoint.permissions.securable_object import SecurableObject
@@ -336,14 +337,30 @@ class List(SecurableObject):
             URL or an absolute URL. If the value is not null or the decoded url value not being empty string,
             the decoded url value MUST point to a location within the list.
         """
-        parameters = ListItemCreationInformationUsingPath(leaf_name, object_type, folder_path=SPResPath(folder_url))
+        parameters = ListItemCreationInformationUsingPath(leaf_name, object_type, folder_path=folder_url)
         return_type = ListItem(self.context)
         qry = ServiceOperationQuery(self, "AddItemUsingPath", None, parameters, "parameters", return_type)
         self.context.add_query(qry)
         return return_type
 
-    def add_validate_update_item(self):
-        pass
+    def add_validate_update_item(self, create_info, form_values=None):
+        """
+        Adds an item to an existing list and validate the list item update values. If all fields validated successfully,
+         commit all changes. If there's any exception in any of the fields, the item will not be committed.
+
+        :param ListItemCreationInformation create_info:  Contains the information that determines how the item
+            will be created.
+        :param dict form_values: A collection of field internal names and values for the given field. If the collection
+            is empty, no update will take place.
+        """
+        payload = {
+            "listItemCreateInfo": create_info,
+            "formValues": [ListItemFormUpdateValue(k, v) for k, v in form_values.items()]
+        }
+        return_type = ClientResult(self.context, ClientValueCollection(ListItemFormUpdateValue))
+        qry = ServiceOperationQuery(self, "AddValidateUpdateItem", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def get_item_by_id(self, item_id):
         """Returns the list item with the specified list item identifier.
@@ -428,6 +445,16 @@ class List(SecurableObject):
         return self.properties.get("BaseTemplate", None)
 
     @property
+    def base_type(self):
+        """
+        Specifies the base type of the list.
+        It MUST be one of the following values: GenericList, DocumentLibrary, DiscussionBoard, Survey, or Issue.
+
+        :rtype: int or None
+        """
+        return self.properties.get("BaseType", None)
+
+    @property
     def crawl_non_default_views(self):
         """
         Specifies whether or not the crawler indexes the non-default views of the list.
@@ -455,6 +482,14 @@ class List(SecurableObject):
     def current_change_token(self):
         """Gets the current change token that is used in the change log for the list."""
         return self.properties.get("CurrentChangeToken", ChangeToken())
+
+    @property
+    def data_source(self):
+        """
+        Specifies the data source of an external list.
+        If HasExternalDataSource is "false", the server MUST return NULL.
+        """
+        return self.properties.get("DataSource", ListDataSource())
 
     @property
     def enable_folder_creation(self):
@@ -639,6 +674,7 @@ class List(SecurableObject):
                 "CurrentChangeToken": self.current_change_token,
                 "ContentTypes": self.content_types,
                 "CustomActionElements": self.custom_action_elements,
+                "DataSource": self.data_source,
                 "DescriptionResource": self.description_resource,
                 "DefaultView": self.default_view,
                 "EventReceivers": self.event_receivers,

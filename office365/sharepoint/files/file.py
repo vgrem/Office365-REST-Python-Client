@@ -431,11 +431,12 @@ class File(AbstractFile):
         self.ensure_property("ServerRelativePath", _download_inner)
         return self
 
-    def download_session(self, file_object, chunk_downloaded=None, chunk_size=1024 * 1024):
+    def download_session(self, file_object, chunk_downloaded=None, chunk_size=1024 * 1024, use_path=True):
         """
         :type file_object: typing.IO
         :type chunk_downloaded: (int)->None or None
         :type chunk_size: int
+        :param bool use_path: Use Path instead of Url for addressing files
         """
 
         def _download_as_stream():
@@ -466,7 +467,10 @@ class File(AbstractFile):
 
             self.context.add_query(qry)
 
-        self.ensure_property("ServerRelativeUrl", _download_as_stream)
+        if use_path:
+            self.ensure_property("ServerRelativePath", _download_as_stream)
+        else:
+            self.ensure_property("ServerRelativeUrl", _download_as_stream)
         return self
 
     @property

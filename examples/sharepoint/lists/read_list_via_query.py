@@ -5,6 +5,10 @@ from tests import test_client_credentials, test_team_site_url
 
 
 def create_paged_query(page_size):
+    """
+    :type page_size: int
+    """
+
     qry = CamlQuery()
     qry.ViewXml = f"""
     <View Scope='RecursiveAll'>
