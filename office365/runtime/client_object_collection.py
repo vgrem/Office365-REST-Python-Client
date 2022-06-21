@@ -104,6 +104,7 @@ class ClientObjectCollection(ClientObject):
         """
         Allows clients to filter a collection of resources that are addressed by a request URL
 
+        :type self: T
         :param str expression: Filter expression, for example: Id eq ''
         """
         self.query_options.filter = expression
@@ -113,6 +114,7 @@ class ClientObjectCollection(ClientObject):
         """
         Allows clients to request resources in either ascending order using asc or descending order using desc
 
+        :type self: T
         :type value: int
         """
         self.query_options.orderBy = value
@@ -122,6 +124,7 @@ class ClientObjectCollection(ClientObject):
         """
         Requests the number of items in the queried collection that are to be skipped and not included in the result
 
+        :type self: T
         :type value: int
         """
         self.query_options.skip = value
@@ -129,6 +132,9 @@ class ClientObjectCollection(ClientObject):
 
     def top(self, value):
         """
+        Specifies the number of items in the queried collection to be included in the result
+
+        :type self: T
         :type value: int
         """
         self._page_size = value
@@ -139,6 +145,7 @@ class ClientObjectCollection(ClientObject):
         """
         Enables/disables server-driven paging
 
+        :type self: T
         :param int value: bool: sets flag to enable/disable server-driven paging
         """
         self._paged_mode = value
