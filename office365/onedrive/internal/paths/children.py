@@ -12,9 +12,8 @@ class ChildrenPath(ResourcePath):
         self._collection_name = collection_name
 
     def normalize(self, name, parent=None, inplace=False):
-        from office365.onedrive.internal.paths.root import RootPath
-        if isinstance(self.parent, RootPath):
+        if self._collection_name != "items":
+            return super(ChildrenPath, self).normalize(name, ResourcePath(self._collection_name, self.parent), inplace)
+        else:
             path = self.parent.normalize(name, parent, inplace)
             return super(ChildrenPath, self).normalize(path.name, path.parent, inplace)
-        else:
-            return super(ChildrenPath, self).normalize(name, ResourcePath(self._collection_name, self.parent), inplace)

@@ -7,7 +7,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 class DocumentSet(ClientValue):
     """Represents a document set in SharePoint."""
 
-    def __init__(self, welcome_page_url, allowed_content_types=None, default_contents=None,
+    def __init__(self, welcome_page_url=None, allowed_content_types=None, default_contents=None,
                  propagate_welcome_page_changes=None, should_prefix_name_to_file=None):
         """
         :param str welcome_page_url:  Welcome page absolute URL.

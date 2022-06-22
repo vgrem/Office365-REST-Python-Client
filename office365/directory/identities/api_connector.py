@@ -14,13 +14,17 @@ class IdentityApiConnector(Entity):
     show an input validation error, or overwrite user collected attributes.
     """
 
-    def upload_client_certificate(self, pkcs12Value, password):
+    def upload_client_certificate(self, pkcs12_value, password):
         """Upload a PKCS 12 format key (.pfx) to an API connector's authentication configuration.
         The input is a base-64 encoded value of the PKCS 12 certificate contents.
-        This method returns an apiConnector."""
+        This method returns an apiConnector.
+
+        :param str pkcs12_value:
+        :param str password:
+        """
 
         payload = {
-            "pkcs12Value": pkcs12Value,
+            "pkcs12Value": pkcs12_value,
             "password": password
         }
         qry = ServiceOperationQuery(self, "uploadClientCertificate", None, payload, None, None)

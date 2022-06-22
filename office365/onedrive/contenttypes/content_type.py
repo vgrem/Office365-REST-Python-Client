@@ -2,6 +2,9 @@ from office365.base_item import BaseItem
 from office365.entity_collection import EntityCollection
 from office365.onedrive.columns.column_definition import ColumnDefinition
 from office365.onedrive.columns.column_link import ColumnLink
+from office365.onedrive.contenttypes.content_type_order import ContentTypeOrder
+from office365.onedrive.documentsets.content import DocumentSetContent
+from office365.onedrive.documentsets.document_set import DocumentSet
 from office365.onedrive.listitems.item_reference import ItemReference
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
@@ -40,6 +43,37 @@ class ContentType(BaseItem):
         qry = ServiceOperationQuery(self, "associateWithHubSites", None, payload)
         self.context.add_query(qry)
         return self
+
+    def publish(self):
+        """
+        Publishes a contentType present in the content type hub site.
+        """
+        qry = ServiceOperationQuery(self, "publish")
+        self.context.add_query(qry)
+        return self
+
+    def unpublish(self):
+        """
+        Unpublish a contentType from a content type hub site.
+        """
+        qry = ServiceOperationQuery(self, "unpublish")
+        self.context.add_query(qry)
+        return self
+
+    @property
+    def document_set(self):
+        """
+        Document Set metadata.
+        """
+        return self.properties.get("documentSet", DocumentSet())
+
+    @property
+    def document_template(self):
+        """
+        Document template metadata. To make sure that documents have consistent content across a site and its subsites,
+        you can associate a Word, Excel, or PowerPoint template with a site content type.
+        """
+        return self.properties.get("documentTemplate", DocumentSetContent())
 
     @property
     def name(self):
@@ -118,12 +152,22 @@ class ContentType(BaseItem):
                                                     ColumnDefinition,
                                                     ResourcePath("columnPositions", self.resource_path)))
 
+    @property
+    def order(self):
+        """
+        Specifies the order in which the content type appears in the selection UI.
+        """
+        return self.properties.get("order", ContentTypeOrder())
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "columnLinks": self.column_links,
+                "documentSet": self.document_set,
+                "documentTemplate": self.document_template,
                 "columnPositions": self.column_positions,
-                "baseTypes": self.base_types
+                "baseTypes": self.base_types,
+                "inheritedFrom": self.inherited_from
             }
             default_value = property_mapping.get(name, None)
         return super(ContentType, self).get_property(name, default_value)
