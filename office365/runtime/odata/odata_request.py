@@ -128,7 +128,7 @@ class ODataRequest(ClientRequest):
                     if isinstance(item, dict):
                         item = {k: v for k, v in self._next_property(item, json_format)}
                     yield index, item
-            else:
+            elif isinstance(json, dict):
                 for name, value in json.items():
                     if isinstance(json_format, JsonLightFormat):
                         is_valid = name != "__metadata" and not (isinstance(value, dict) and "__deferred" in value)
@@ -139,6 +139,8 @@ class ODataRequest(ClientRequest):
                         if isinstance(value, dict):
                             value = {k: v for k, v in self._next_property(value, json_format)}
                         yield name, value
+            else:
+                yield "value", json
 
     def _normalize_payload(self, value):
         """

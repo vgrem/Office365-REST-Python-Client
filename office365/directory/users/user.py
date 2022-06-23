@@ -7,7 +7,7 @@ from office365.onedrive.sites.site import Site
 from office365.onenote.onenote import Onenote
 from office365.outlook.calendar.attendee_base import AttendeeBase
 from office365.outlook.calendar.calendar import Calendar
-from office365.outlook.calendar.calendar_group import CalendarGroup
+from office365.outlook.calendar.group import CalendarGroup
 from office365.outlook.calendar.event import Event
 from office365.outlook.calendar.meeting_time_suggestions_result import MeetingTimeSuggestionsResult
 from office365.outlook.calendar.reminder import Reminder
@@ -20,11 +20,11 @@ from office365.directory.profile_photo import ProfilePhoto
 from office365.entity_collection import EntityCollection, DeltaCollection
 from office365.outlook.contacts.contact import Contact
 from office365.outlook.contacts.contact_folder import ContactFolder
-from office365.outlook.mail.mail_folder import MailFolder
+from office365.outlook.mail.folder import MailFolder
 from office365.onedrive.drives.drive import Drive
 from office365.outlook.mail.mailbox_settings import MailboxSettings
 from office365.outlook.mail.messages.message import Message
-from office365.outlook.outlook_user import OutlookUser
+from office365.outlook.user import OutlookUser
 from office365.planner.planner_user import PlannerUser
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -360,12 +360,9 @@ class User(DirectoryObject):
 
     @property
     def drive(self):
-        """Retrieve the properties and relationships of a Drive resource.
-
-        :rtype: Drive
-        """
-        return self.get_property('drive',
-                                 Drive(self.context, ResourcePath("drive", self.resource_path)))
+        """Retrieve the properties and relationships of a Drive resource."""
+        return self.properties.get('drive',
+                                   Drive(self.context, ResourcePath("drive", self.resource_path)))
 
     @property
     def contacts(self):
@@ -453,9 +450,9 @@ class User(DirectoryObject):
 
         :rtype: EntityCollection
         """
-        return self.get_property('extensions',
-                                 EntityCollection(self.context, Extension,
-                                                  ResourcePath("extensions", self.resource_path)))
+        return self.properties.get('extensions',
+                                   EntityCollection(self.context, Extension,
+                                                    ResourcePath("extensions", self.resource_path)))
 
     @property
     def direct_reports(self):
@@ -464,9 +461,9 @@ class User(DirectoryObject):
 
         :rtype: EntityCollection
         """
-        return self.get_property('directReports',
-                                 DirectoryObjectCollection(self.context,
-                                                           ResourcePath("directReports", self.resource_path)))
+        return self.properties.get('directReports',
+                                   DirectoryObjectCollection(self.context,
+                                                             ResourcePath("directReports", self.resource_path)))
 
     @property
     def online_meetings(self):
@@ -475,9 +472,9 @@ class User(DirectoryObject):
 
         :rtype: OnlineMeetingCollection
         """
-        return self.get_property('onlineMeetings',
-                                 OnlineMeetingCollection(self.context,
-                                                         ResourcePath("onlineMeetings", self.resource_path)))
+        return self.properties.get('onlineMeetings',
+                                   OnlineMeetingCollection(self.context,
+                                                           ResourcePath("onlineMeetings", self.resource_path)))
 
     @property
     def presence(self):
@@ -497,6 +494,7 @@ class User(DirectoryObject):
                 "businessPhones": self.business_phones,
                 "calendarGroups": self.calendar_groups,
                 "contactFolders": self.contact_folders,
+                "followedSites": self.followed_sites,
                 "licenseDetails": self.license_details,
                 "memberOf": self.member_of,
                 "transitiveMemberOf": self.transitive_member_of,

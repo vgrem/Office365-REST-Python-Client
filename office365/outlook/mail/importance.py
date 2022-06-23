@@ -3,5 +3,7 @@ class Importance:
         pass
 
     low = "low"
+
     normal = "normal"
+
     high = "high"

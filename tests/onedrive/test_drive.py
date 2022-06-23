@@ -36,3 +36,7 @@ class TestDrive(GraphTestCase):
     def test4_search_drive(self):
         items = self.client.me.drive.search("Guide.docx").execute_query()
         self.assertIsNotNone(items.resource_path)
+
+    def test5_shared_with_me(self):
+        col = self.client.me.drive.shared_with_me().execute_query()
+        self.assertIsNotNone(col.resource_path)

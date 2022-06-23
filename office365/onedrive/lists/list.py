@@ -4,6 +4,7 @@ from office365.entity_collection import EntityCollection
 from office365.onedrive.columns.column_definition import ColumnDefinition
 from office365.onedrive.contenttypes.content_type import ContentType
 from office365.onedrive.listitems.list_item import ListItem
+from office365.onedrive.sharepoint_ids import SharePointIds
 from office365.runtime.client_value import ClientValue
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -22,6 +23,15 @@ class List(BaseItem):
     including template and field definitions. """
 
     @property
+    def display_name(self):
+        """
+        The displayable title of the list.
+
+        :rtype: str or None
+        """
+        return self.properties.get("displayName", None)
+
+    @property
     def list(self):
         """Provides additional details about the list."""
         return self.properties.get('list', ListInfo())
@@ -29,41 +39,41 @@ class List(BaseItem):
     @property
     def sharepoint_ids(self):
         """Returns identifiers useful for SharePoint REST compatibility."""
-        return self.properties.get('sharepointIds', None)
+        return self.properties.get('sharepointIds', SharePointIds())
 
     @property
     def drive(self):
         """Only present on document libraries. Allows access to the list as a drive resource with driveItems."""
         from office365.onedrive.drives.drive import Drive
-        return self.get_property('drive',
-                                 Drive(self.context, ResourcePath("drive", self.resource_path)))
+        return self.properties.get('drive',
+                                   Drive(self.context, ResourcePath("drive", self.resource_path)))
 
     @property
     def columns(self):
         """The collection of columns under this site."""
-        return self.get_property('columns',
-                                 EntityCollection(self.context, ColumnDefinition,
-                                                  ResourcePath("columns", self.resource_path)))
+        return self.properties.get('columns',
+                                   EntityCollection(self.context, ColumnDefinition,
+                                                    ResourcePath("columns", self.resource_path)))
 
     @property
     def content_types(self):
         """The collection of content types under this site."""
-        return self.get_property('contentTypes',
-                                 EntityCollection(self.context, ContentType,
-                                                  ResourcePath("contentTypes", self.resource_path)))
+        return self.properties.get('contentTypes',
+                                   EntityCollection(self.context, ContentType,
+                                                    ResourcePath("contentTypes", self.resource_path)))
 
     @property
     def items(self):
         """All items contained in the list."""
-        return self.get_property('items',
-                                 EntityCollection(self.context, ListItem, ResourcePath("items", self.resource_path)))
+        return self.properties.get('items',
+                                   EntityCollection(self.context, ListItem, ResourcePath("items", self.resource_path)))
 
     @property
     def subscriptions(self):
         """The set of subscriptions on the list."""
-        return self.get_property('subscriptions',
-                                 EntityCollection(self.context, Subscription,
-                                                  ResourcePath("subscriptions", self.resource_path)))
+        return self.properties.get('subscriptions',
+                                   EntityCollection(self.context, Subscription,
+                                                    ResourcePath("subscriptions", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:

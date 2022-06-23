@@ -1,4 +1,4 @@
-from office365.outlook.outlook_entity import OutlookEntity
+from office365.outlook.entity import OutlookEntity
 
 
 class Item(OutlookEntity):

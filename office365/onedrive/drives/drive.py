@@ -19,7 +19,7 @@ class Drive(BaseItem):
 
         :type query_text: str
         """
-        return_type = EntityCollection(self.context, DriveItem, ResourcePath("items", self.resource_path))
+        return_type = EntityCollection(self.context, DriveItem, self.items.resource_path)
         qry = ServiceOperationQuery(self, "search", {"q": query_text}, None, None, return_type)
         self.context.add_query(qry)
 
@@ -35,13 +35,31 @@ class Drive(BaseItem):
         This collection includes items that are in the user's drive as well as items
         they have access to from other drives.
         """
-        return_type = EntityCollection(self.context, DriveItem, ResourcePath("items", self.resource_path))
+        return_type = EntityCollection(self.context, DriveItem, self.items.resource_path)
         qry = ServiceOperationQuery(self, "recent", None, None, None, return_type)
         self.context.add_query(qry)
 
         def _construct_request(request):
+            """
+            :type request: office365.runtime.http.request_options.RequestOptions
+            """
             request.method = HttpMethod.Get
 
+        self.context.before_execute(_construct_request)
+        return return_type
+
+    def shared_with_me(self):
+        """Retrieve a collection of DriveItem resources that have been shared with the owner of the Drive.
+        """
+        return_type = EntityCollection(self.context, DriveItem, self.items.resource_path)
+        qry = ServiceOperationQuery(self, "sharedWithMe", None, None, None, return_type)
+        self.context.add_query(qry)
+
+        def _construct_request(request):
+            """
+            :type request: office365.runtime.http.request_options.RequestOptions
+            """
+            request.method = HttpMethod.Get
         self.context.before_execute(_construct_request)
         return return_type
 
@@ -71,56 +89,36 @@ class Drive(BaseItem):
         return self.properties.get('owner', IdentitySet())
 
     @property
-    def shared_with_me(self):
-        """Retrieve a collection of DriveItem resources that have been shared with the owner of the Drive.
-
-        :rtype: EntityCollection
-        """
-        return self.get_property('sharedWithMe',
-                                 EntityCollection(self.context, DriveItem,
-                                                  ResourcePath("sharedWithMe", self.resource_path)))
-
-    @property
     def root(self):
-        """The root folder of the drive.
-
-        :rtype: DriveItem
-        """
-        return self.get_property('root', DriveItem(self.context, RootPath(self.resource_path)))
+        """The root folder of the drive."""
+        return self.properties.get('root', DriveItem(self.context, RootPath(self.resource_path)))
 
     @property
     def list(self):
         """For drives in SharePoint, the underlying document library list.
-
-        :rtype: List
         """
-        return self.get_property('list', List(self.context, ResourcePath("list", self.resource_path)))
+        return self.properties.get('list', List(self.context, ResourcePath("list", self.resource_path)))
 
     @property
     def items(self):
-        """All items contained in the drive.
-
-        :rtype: EntityCollection
-        """
-        return self.get_property('items',
-                                 EntityCollection(self.context, DriveItem, ResourcePath("items", self.resource_path)))
+        """All items contained in the drive."""
+        return self.properties.get('items',
+                                   EntityCollection(self.context, DriveItem, ResourcePath("items", self.resource_path)))
 
     @property
     def following(self):
         """The list of items the user is following. Only in OneDrive for Business.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('following',
-                                 EntityCollection(self.context, DriveItem,
-                                                  ResourcePath("following", self.resource_path)))
+        return self.properties.get('following',
+                                   EntityCollection(self.context, DriveItem,
+                                                    ResourcePath("following", self.resource_path)))
 
     @property
     def special(self):
-        """Collection of common folders available in OneDrive. Read-only. Nullable.
+        """Collection of common folders available in OneDrive. Read-only. Nullable."""
+        return self.properties.get('special',
+                                   EntityCollection(self.context, DriveItem,
+                                                    ResourcePath("special", self.resource_path)))
 
-        :rtype: EntityCollection
-        """
-        return self.get_property('special',
-                                 EntityCollection(self.context, DriveItem,
-                                                  ResourcePath("special", self.resource_path)))
+    def get_property(self, name, default_value=None):
+        return super(Drive, self).get_property(name, default_value)

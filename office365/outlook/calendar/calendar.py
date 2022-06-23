@@ -1,4 +1,4 @@
-from office365.outlook.calendar.calendar_permission import CalendarPermission
+from office365.outlook.calendar.permission import CalendarPermission
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.outlook.calendar.email_address import EmailAddress
 from office365.outlook.calendar.event import Event
