@@ -8,5 +8,5 @@ ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials
 file_url = '/sites/team/Shared Documents/big_buck_bunny.mp4'
 file = ctx.web.get_file_by_server_relative_url(file_url)
 file_item = file.listItemAllFields.select(["EffectiveBasePermissions"]).get().execute_query()  # type: ListItem
-pprint(file_item.effective_base_permissions.permission_levels)
+print(file_item.effective_base_permissions.permission_levels)
 
