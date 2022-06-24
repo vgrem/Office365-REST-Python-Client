@@ -27,3 +27,8 @@ class TestUtility(SPTestCase):
         owner_group = self.client.web.associated_owner_group.get().execute_query()
         result = Utility.expand_groups_to_principals(self.client, [owner_group.login_name], 10).execute_query()
         self.assertIsNotNone(result.value)
+
+    def test5_create_email_body_for_invitation(self):
+        result = Utility.create_email_body_for_invitation(self.client, "SitePages/Home.aspx").execute_query()
+        self.assertIsNotNone(result.value)
+

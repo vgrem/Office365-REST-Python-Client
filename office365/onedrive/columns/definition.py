@@ -25,6 +25,14 @@ class ColumnDefinition(BaseItem):
     """
 
     @property
+    def display_name(self):
+        """The user-facing name of the column.
+
+        :rtype: str or None
+        """
+        return self.properties.get("displayName", None)
+
+    @property
     def enforce_unique_values(self):
         """
         If true, no two list items may have the same value for this column.
@@ -148,3 +156,4 @@ class ColumnDefinition(BaseItem):
             }
             default_value = property_mapping.get(name, None)
         return super(ColumnDefinition, self).get_property(name, default_value)
+

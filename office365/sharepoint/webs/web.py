@@ -38,7 +38,7 @@ from office365.sharepoint.sharing.sharing_link_data import SharingLinkData
 from office365.sharepoint.sharing.sharing_result import SharingResult
 from office365.sharepoint.sitescripts.utility import SiteScriptUtility
 from office365.sharepoint.sites.site_types import SiteCollectionCorporateCatalogAccessor
-from office365.sharepoint.tenant.administration.tenant_types import TenantCorporateCatalogAccessor
+from office365.sharepoint.tenant.administration.catalog_accessor import TenantCorporateCatalogAccessor
 from office365.sharepoint.ui.applicationpages.client_people_picker import (
     ClientPeoplePickerWebServiceInterface, ClientPeoplePickerQueryParameters
 )

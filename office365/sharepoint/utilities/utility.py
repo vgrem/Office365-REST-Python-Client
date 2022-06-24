@@ -2,6 +2,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.files.file import File
 from office365.sharepoint.utilities.principal_info import PrincipalInfo
@@ -15,6 +16,22 @@ class Utility(BaseEntity):
 
     def __init__(self, context):
         super(Utility, self).__init__(context, ResourcePath("SP.Utilities.Utility"))
+
+    @staticmethod
+    def create_email_body_for_invitation(context, page_address):
+        """Creates the contents of the e-mail message used to invite users to a document or resource in a site
+
+        :type context: office365.sharepoint.client_context.ClientContext
+        :param str page_address: Specifies part of the display name for the document or resource.
+        """
+        result = ClientResult(context)
+        utility = Utility(context)
+        safe_page_address = context.create_safe_url(page_address, False)
+        payload = {"pageAddress": safe_page_address}
+        qry = ServiceOperationQuery(utility, "CreateEmailBodyForInvitation", None, payload, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
 
     @staticmethod
     def get_current_user_email_addresses(context):
@@ -38,7 +55,7 @@ class Utility(BaseEntity):
 
         :type context: office365.sharepoint.client_context.ClientContext
         """
-        result = ClientResult(context, ClientValueCollection(str))
+        result = ClientResult(context, StringCollection())
         utility = Utility(context)
         qry = ServiceOperationQuery(utility, "GetUserPermissionLevels", None, None, None, result)
         qry.static = True
@@ -53,12 +70,14 @@ class Utility(BaseEntity):
 
         :param str s_input: Specifies the value to be used when searching for a principal.
         :param str sources: Specifies the source to be used when searching for a principal.
-        :type scopes: int
-        :type max_count: int
-        :type group_name: str or None
+        :param int scopes: Specifies the type to be used when searching for a principal.
+        :param int max_count: Specifies the maximum number of principals to be returned.
+        :param str or None group_name:  Specifies the name of a site collection group in the site collection that
+            contains the current Web site. The collection of users in this site collection group is used when searching
+            for a principal.
         :type context: office365.sharepoint.client_context.ClientContext
         """
-        result = ClientResult(context, ClientValueCollection(str))
+        result = ClientResult(context, StringCollection())
         utility = Utility(context)
         params = {
             "input": s_input,
@@ -140,6 +159,38 @@ class Utility(BaseEntity):
         }
         return_type = ClientResult(context)
         qry = ServiceOperationQuery(utility, "LogCustomAppError", None, payload, None, return_type)
+        qry.static = True
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
+    def resolve_principal_in_current_context(context, string_input, scopes=None, sources=None,
+                                             input_is_email_only=None, add_to_user_info_list=None,
+                                             match_user_info_list=None):
+        """
+        Returns information about a principal that matches the specified search criteria in the context of the current
+        Web site.
+
+        :type context: office365.sharepoint.client_context.ClientContext
+        :param str string_input: Specifies the value to be used when searching for a principal.
+        :param int scopes: Specifies the type to be used when searching for a principal.
+        :param str sources: Specifies the source to be used when searching for a principal.
+        :param bool input_is_email_only: Specifies whether only the e-mail address is used when searching for
+            a principal
+        :param bool add_to_user_info_list: Specifies whether to add the principal to the user information list.
+        :param bool match_user_info_list: Specifies whether to return the principal found in the user information list.
+        """
+        utility = Utility(context)
+        payload = {
+            "input": string_input,
+            "scopes": scopes,
+            "sources": sources,
+            "inputIsEmailOnly": input_is_email_only,
+            "addToUserInfoList": add_to_user_info_list,
+            "matchUserInfoList": match_user_info_list
+        }
+        return_type = ClientResult(context)
+        qry = ServiceOperationQuery(utility, "ResolvePrincipalInCurrentContext", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
         return return_type

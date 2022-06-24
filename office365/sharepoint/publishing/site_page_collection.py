@@ -4,6 +4,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.publishing.site_page import SitePage
+from office365.sharepoint.translation.status_collection import TranslationStatusCollection
 
 
 class SitePageCollection(BaseEntityCollection):
@@ -33,6 +34,15 @@ class SitePageCollection(BaseEntityCollection):
         qry = ServiceOperationQuery(self, "CreateAppPage", None, payload, None, result)
         self.context.add_query(qry)
         return result
+
+    def get_translations(self, source_item_id=None):
+        """
+        :param str source_item_id:
+        """
+        return_type = TranslationStatusCollection(self.context)
+        qry = ServiceOperationQuery(self, "GetTranslations", [source_item_id], None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def is_site_page(self, url):
         """

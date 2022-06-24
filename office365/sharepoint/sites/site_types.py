@@ -3,6 +3,7 @@ from office365.sharepoint.base_entity_collection import BaseEntityCollection
 
 
 class SiteCollectionCorporateCatalogAccessor(BaseEntity):
+    """Accessor for the site collection corporate catalog."""
     pass
 
 

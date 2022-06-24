@@ -1,4 +1,5 @@
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
 class Form(BaseEntity):
@@ -21,3 +22,10 @@ class Form(BaseEntity):
         :rtype: str or None
         """
         return self.properties.get("ServerRelativeUrl", None)
+
+    @property
+    def resource_path(self):
+        """
+        Gets the Web site–relative Path of the form
+        """
+        return self.properties.get("ResourcePath", SPResPath())

@@ -1,4 +1,5 @@
 from office365.sharepoint.publishing.primary_city_time import PrimaryCityTime
+from office365.sharepoint.publishing.site_page import SitePage
 from office365.sharepoint.publishing.site_page_collection import SitePageCollection
 from office365.sharepoint.publishing.site_page_service import SitePageService
 from office365.sharepoint.publishing.video_service_discoverer import VideoServiceDiscoverer
@@ -44,3 +45,11 @@ class TestSPPublishing(SPTestCase):
     def test7_get_video_service_manager(self):
         discoverer = VideoServiceDiscoverer(self.client).get().execute_query()
         self.assertIsNotNone(discoverer.resource_path)
+
+    def test8_get_page_translations(self):
+        pages = self.client.site_pages.pages.get().filter("FileName eq 'Home.aspx'").execute_query()
+        self.assertEqual(len(pages), 1)
+        first_page = pages[0]  # type: SitePage
+
+        #translations = first_page.translations.get().execute_query()
+        #self.assertIsNotNone(translations.resource_path)

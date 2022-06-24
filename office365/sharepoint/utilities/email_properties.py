@@ -6,13 +6,14 @@ class EmailProperties(ClientValue):
 
     def __init__(self, body, subject, to, from_address=None, cc=None, bcc=None, additional_headers=None):
         """
+        Specifies the definition of the email to send which includes both the message fields and body
 
-        :param str body:
-        :param str subject:
-        :param list[str] to:
-        :param str or None from_address:
-        :param list[str] or None cc:
-        :param list[str] or None bcc:
+        :param str body: Specifies the message body to send.
+        :param str subject: Specifies the Subject field of the e-mail.
+        :param list[str] to: Specifies the To field of the email.
+        :param str or None from_address: Specifies the From field of the email.
+        :param list[str] or None cc: Specifies the carbon copy (cc) recipients of the email.
+        :param list[str] or None bcc: Specifies the blind carbon copy (bcc) recipients of the email
         :param dict or None additional_headers:
         """
         super(EmailProperties, self).__init__()

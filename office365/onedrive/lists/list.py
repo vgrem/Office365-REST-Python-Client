@@ -1,7 +1,7 @@
 from office365.base_item import BaseItem
 from office365.directory.subscriptions.subscription import Subscription
 from office365.entity_collection import EntityCollection
-from office365.onedrive.columns.column_definition import ColumnDefinition
+from office365.onedrive.columns.definition_collection import ColumnDefinitionCollection
 from office365.onedrive.contenttypes.content_type import ContentType
 from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.sharepoint_ids import SharePointIds
@@ -52,8 +52,8 @@ class List(BaseItem):
     def columns(self):
         """The collection of columns under this site."""
         return self.properties.get('columns',
-                                   EntityCollection(self.context, ColumnDefinition,
-                                                    ResourcePath("columns", self.resource_path)))
+                                   ColumnDefinitionCollection(self.context,
+                                                              ResourcePath("columns", self.resource_path)))
 
     @property
     def content_types(self):

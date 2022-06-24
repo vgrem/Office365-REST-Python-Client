@@ -1,7 +1,9 @@
 from office365.runtime.client_result import ClientResult
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.publishing.site_page_fields_data import SitePageFieldsData
 from office365.sharepoint.publishing.site_page_metadata import SitePageMetadata
+from office365.sharepoint.translation.status_collection import TranslationStatusCollection
 
 
 class SitePage(SitePageMetadata):
@@ -187,6 +189,12 @@ class SitePage(SitePageMetadata):
         :rtype: str or None
         """
         self.set_property("LayoutWebpartsContent", value)
+
+    @property
+    def translations(self):
+        return self.properties.get('Translations',
+                                   TranslationStatusCollection(self.context,
+                                                               ResourcePath("Translations", self.resource_path)))
 
     @property
     def entity_type_name(self):
