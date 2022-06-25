@@ -3,15 +3,15 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.teams.channels.channel import Channel
-from office365.teams.channels.channel_collection import ChannelCollection
+from office365.teams.channels.collection import ChannelCollection
 from office365.teams.shifts.schedule import Schedule
-from office365.teams.team_fun_settings import TeamFunSettings
-from office365.teams.team_guest_settings import TeamGuestSettings
-from office365.teams.team_member_settings import TeamMemberSettings
-from office365.teams.team_messaging_settings import TeamMessagingSettings
+from office365.teams.fun_settings import TeamFunSettings
+from office365.teams.guest_settings import TeamGuestSettings
+from office365.teams.member_settings import TeamMemberSettings
+from office365.teams.messaging_settings import TeamMessagingSettings
 from office365.teams.apps.app_installation import TeamsAppInstallation
 from office365.teams.operations.async_operation import TeamsAsyncOperation
-from office365.teams.teams_template import TeamsTemplate
+from office365.teams.template import TeamsTemplate
 
 
 class Team(Entity):

@@ -2,7 +2,7 @@ from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.teams.messages.chat_message_attachment import ChatMessageAttachment
+from office365.teams.chats.message_attachment import ChatMessageAttachment
 
 
 class ChatMessage(Entity):
@@ -14,7 +14,7 @@ class ChatMessage(Entity):
     @property
     def attachments(self):
         """The collection of replies."""
-        return self.properties.get("attachments", ClientValueCollection(ChatMessageAttachment()))
+        return self.properties.get("attachments", ClientValueCollection(ChatMessageAttachment))
 
     @property
     def replies(self):
@@ -28,6 +28,8 @@ class ChatMessage(Entity):
     @property
     def web_url(self):
         """
+        Link to the message in Microsoft Teams.
+
         :rtype: str
         """
         return self.properties.get("webUrl", None)
@@ -36,6 +38,7 @@ class ChatMessage(Entity):
     def importance(self):
         """
         The importance of the chat message. The possible values are: normal, high, urgent.
+
         :rtype: str
         """
         return self.properties.get("importance", None)

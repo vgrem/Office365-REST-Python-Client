@@ -32,7 +32,7 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
-from office365.teams.team_collection import TeamCollection
+from office365.teams.collection import TeamCollection
 from office365.teams.user_teamwork import UserTeamwork
 
 

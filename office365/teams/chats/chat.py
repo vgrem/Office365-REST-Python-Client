@@ -3,7 +3,7 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.teams.apps.app_installation import TeamsAppInstallation
 from office365.teams.channels.conversation_member import ConversationMember
-from office365.teams.messages.chat_message import ChatMessage
+from office365.teams.chats.message import ChatMessage
 from office365.teams.operations.async_operation import TeamsAsyncOperation
 
 
@@ -31,9 +31,9 @@ class Chat(Entity):
 
         :rtype: EntityCollection
         """
-        return self.get_property('members',
-                                 EntityCollection(self.context, ConversationMember,
-                                                  ResourcePath("members", self.resource_path)))
+        return self.properties.get('members',
+                                   EntityCollection(self.context, ConversationMember,
+                                                    ResourcePath("members", self.resource_path)))
 
     @property
     def messages(self):
@@ -45,12 +45,10 @@ class Chat(Entity):
     def operations(self):
         """
         A collection of all the Teams async operations that ran or are running on the chat. Nullable.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('operations',
-                                 EntityCollection(self.context, TeamsAsyncOperation,
-                                                  ResourcePath("operations", self.resource_path)))
+        return self.properties.get('operations',
+                                   EntityCollection(self.context, TeamsAsyncOperation,
+                                                    ResourcePath("operations", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:

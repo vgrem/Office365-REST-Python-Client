@@ -1,7 +1,5 @@
 from office365.directory.groups.group import Group
-from office365.directory.groups.group_profile import GroupProfile
 from office365.entity_collection import EntityCollection
-from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.teams.team import Team
 
@@ -31,33 +29,39 @@ class TeamCollection(EntityCollection):
         def _process_response(resp):
             for grp in groups:  # type: Group
                 if "Team" in grp.properties["resourceProvisioningOptions"]:
-                    new_team = Team(self.context, ResourcePath(grp.id, self.resource_path))
+                    team = Team(self.context, ResourcePath(grp.id, self.resource_path))
                     for k, v in grp.properties.items():
-                        new_team.set_property(k, v)
-                    self.add_child(new_team)
+                        team.set_property(k, v)
+                    self.add_child(team)
 
         self.context.after_execute(_process_response)
         return self
 
-    def create(self, group_name):
-        """Provision a new team along with a group.
+    def create(self, display_name, description=None):
+        """Create a new team.
 
-        :type group_name: str
-        :rtype: ClientResult
+        :param str display_name: The name of the team.
+        :param str or None description: 	An optional description for the team. Maximum length: 1024 characters.
+
+        :rtype: Team
         """
+        payload = {
+            "displayName": display_name,
+            "description": description,
+            "template@odata.bind": "https://graph.microsoft.com/v1.0/teamsTemplates('standard')",
+        }
 
-        grp_properties = GroupProfile(group_name)
-        grp_properties.securityEnabled = False
-        grp_properties.mailEnabled = True
-        grp_properties.groupTypes = ["Unified"]
-        target_group = self.context.groups.add(grp_properties)
-        result = ClientResult(self.context, Team(self.context))
+        return_type = self.add(**payload)
 
-        def _group_created(resp):
+        def _process_response(resp):
             """
             :type resp: requests.Response
             """
-            result.value = target_group.add_team()
+            #loc = resp.headers.get('Location', None)
 
-        self.context.after_execute(_group_created)
-        return result
+            content_loc = resp.headers.get('Content-Location', None)
+            team_id = content_loc[content_loc.find("(") + 2:content_loc.find(")") - 1]
+            return_type.set_property("id", team_id)
+        self.context.after_execute(_process_response)
+        return return_type
+

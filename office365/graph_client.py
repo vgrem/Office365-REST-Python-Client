@@ -5,9 +5,9 @@ from office365.directory.applications.service_principal import ServicePrincipal
 from office365.directory.audit.audit_log_root import AuditLogRoot
 from office365.directory.directory import Directory
 from office365.directory.directory_object_collection import DirectoryObjectCollection
-from office365.directory.groups.group_collection import GroupCollection
-from office365.directory.groups.group_lifecycle_policy import GroupLifecyclePolicy
-from office365.directory.groups.group_setting_template import GroupSettingTemplate
+from office365.directory.groups.collection import GroupCollection
+from office365.directory.groups.lifecycle_policy import GroupLifecyclePolicy
+from office365.directory.groups.setting_template import GroupSettingTemplate
 from office365.directory.identities.identity_container import IdentityContainer
 from office365.directory.identities.identity_provider import IdentityProvider
 from office365.directory.licenses.subscribed_sku import SubscribedSku
@@ -35,8 +35,8 @@ from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.search.search_entity import SearchEntity
 from office365.teams.chats.chat import Chat
-from office365.teams.team_collection import TeamCollection
-from office365.teams.teams_template import TeamsTemplate
+from office365.teams.collection import TeamCollection
+from office365.teams.template import TeamsTemplate
 
 
 class GraphClient(ClientRuntimeContext):

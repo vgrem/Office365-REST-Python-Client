@@ -3,7 +3,7 @@ import uuid
 from tests.graph_case import GraphTestCase
 
 from office365.teams.channels.channel import Channel
-from office365.teams.messages.chat_message import ChatMessage
+from office365.teams.chats.message import ChatMessage
 from office365.outlook.mail.itemBody import ItemBody
 from office365.teams.team import Team
 
@@ -18,15 +18,13 @@ class TestGraphChannel(GraphTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestGraphChannel, cls).setUpClass()
-        grp_name = "Group_" + uuid.uuid4().hex
-        result = cls.client.teams.create(grp_name)
-        cls.client.execute_query_retry()
-        cls.target_team = result.value
+        team_name = "Team_" + uuid.uuid4().hex
+        team = cls.client.teams.create(team_name).execute_query()
+        cls.target_team = team
 
     @classmethod
     def tearDownClass(cls):
-        group_id = cls.target_team.id
-        cls.client.groups[group_id].delete_object().execute_query()
+        cls.target_team.delete_object().execute_query_retry()
 
     def test1_get_team(self):
         team = self.__class__.target_team.get().execute_query()

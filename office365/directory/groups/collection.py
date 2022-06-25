@@ -1,4 +1,5 @@
 from office365.directory.groups.group import Group
+from office365.directory.groups.profile import GroupProfile
 from office365.entity_collection import DeltaCollection
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
@@ -19,4 +20,25 @@ class GroupCollection(DeltaCollection):
         self.add_child(return_type)
         qry = CreateEntityQuery(self, group_properties, return_type)
         self.context.add_query(qry)
+        return return_type
+
+    def create_with_team(self, group_name):
+        """Provision a new group along with a team.
+
+        :param str group_name:
+        """
+        grp_properties = GroupProfile(group_name)
+        grp_properties.securityEnabled = False
+        grp_properties.mailEnabled = True
+        grp_properties.groupTypes = ["Unified"]
+        return_type = self.context.groups.add(grp_properties)
+
+        def _group_created(resp):
+            """
+            :type resp: requests.Response
+            """
+            new_team = return_type.add_team()
+            return_type.set_property("team", new_team, False)
+
+        self.context.after_execute(_group_created)
         return return_type

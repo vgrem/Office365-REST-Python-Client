@@ -13,11 +13,11 @@ class TestGraphTeam(GraphTestCase):
     def setUpClass(cls):
         super(TestGraphTeam, cls).setUpClass()
 
-    def test1_create_team_from_group(self):
-        grp_name = "Group_" + uuid.uuid4().hex
-        result = self.client.teams.create(grp_name).execute_query_retry(max_retry=6, timeout_secs=5)
-        self.assertIsNotNone(result.value.id)
-        self.__class__.target_team = result.value
+    def test1_create_team(self):
+        team_name = "Group_" + uuid.uuid4().hex
+        team = self.client.teams.create(team_name).execute_query()
+        self.assertIsNotNone(team.id)
+        self.__class__.target_team = team
 
     def test3_get_all_teams(self):
         teams = self.client.teams.get_all().execute_query()
@@ -51,5 +51,5 @@ class TestGraphTeam(GraphTestCase):
         self.client.teams[team_id].archive().execute_query()
 
     def test8_delete_team(self):
-        grp_to_delete = self.__class__.target_team
-        grp_to_delete.delete_object().execute_query()
+        team_to_delete = self.__class__.target_team
+        team_to_delete.delete_object().execute_query_retry()
