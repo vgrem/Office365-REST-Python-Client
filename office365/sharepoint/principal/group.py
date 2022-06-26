@@ -7,7 +7,7 @@ from office365.sharepoint.utilities.principal_info import PrincipalInfo
 
 
 class Group(Principal):
-    """Represents a collection of users in a SharePoint site. A group is a type of SP.Principal."""
+    """Represents a collection of members in a SharePoint site. A group is a type of SP.Principal."""
 
     def expand_to_principals(self, max_count=10):
         """
@@ -59,6 +59,6 @@ class Group(Principal):
 
     @property
     def users(self):
-        """Gets a collection of user objects that represents all of the users in the group."""
+        """Gets a collection of user objects that represents all of the members in the group."""
         from office365.sharepoint.principal.user_collection import UserCollection
         return self.properties.get('Users', UserCollection(self.context, ResourcePath("Users", self.resource_path)))
