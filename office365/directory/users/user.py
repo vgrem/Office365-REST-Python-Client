@@ -1,5 +1,6 @@
 from office365.communications.onlinemeetings.online_meeting_collection import OnlineMeetingCollection
 from office365.communications.presences.presence import Presence
+from office365.delta_collection import DeltaCollection
 from office365.directory.extensions.extension import Extension
 from office365.directory.licenses.assigned_plan import AssignedPlan
 from office365.directory.users.user_settings import UserSettings
@@ -17,7 +18,7 @@ from office365.directory.directory_object_collection import DirectoryObjectColle
 from office365.directory.licenses.license_details import LicenseDetails
 from office365.directory.identities.object_identity import ObjectIdentity
 from office365.directory.profile_photo import ProfilePhoto
-from office365.entity_collection import EntityCollection, DeltaCollection
+from office365.entity_collection import EntityCollection
 from office365.outlook.contacts.contact import Contact
 from office365.outlook.contacts.contact_folder import ContactFolder
 from office365.outlook.mail.folder import MailFolder
@@ -32,6 +33,7 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
+from office365.teams.chats.collection import ChatCollection
 from office365.teams.collection import TeamCollection
 from office365.teams.user_teamwork import UserTeamwork
 
@@ -215,9 +217,17 @@ class User(DirectoryObject):
         return self.properties.get('accountEnabled', None)
 
     @property
+    def chats(self):
+        """The user's chats."""
+        return self.properties.get('chats',
+                                   ChatCollection(self.context, ResourcePath("chats", self.resource_path)))
+
+    @property
     def given_name(self):
         """
         The given name (first name) of the user. Maximum length is 64 characters.
+
+        :rtype: str or None
         """
         return self.properties.get('givenName', None)
 
@@ -285,8 +295,7 @@ class User(DirectoryObject):
     @property
     def assigned_licenses(self):
         """The licenses that are assigned to the user, including inherited (group-based) licenses. """
-        return self.properties.get('assignedLicenses',
-                                   ClientValueCollection(AssignedLicense))
+        return self.properties.get('assignedLicenses', ClientValueCollection(AssignedLicense))
 
     @property
     def followed_sites(self):

@@ -1,8 +1,8 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.teams.apps.app_installation import TeamsAppInstallation
-from office365.teams.channels.conversation_member import ConversationMember
+from office365.teams.apps.installation import TeamsAppInstallation
+from office365.teams.members.conversation import ConversationMember
 from office365.teams.chats.message import ChatMessage
 from office365.teams.operations.async_operation import TeamsAsyncOperation
 

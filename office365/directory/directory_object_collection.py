@@ -1,5 +1,6 @@
+from office365.delta_collection import DeltaCollection
 from office365.directory.directory_object import DirectoryObject
-from office365.entity_collection import EntityCollection, DeltaCollection
+from office365.entity_collection import EntityCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -10,13 +11,6 @@ class DirectoryObjectCollection(DeltaCollection):
 
     def __init__(self, context, resource_path=None):
         super(DirectoryObjectCollection, self).__init__(context, DirectoryObject, resource_path)
-
-    def __getitem__(self, key):
-        """
-        :type key: int or str
-        :rtype: DirectoryObject
-        """
-        return super(DirectoryObjectCollection, self).__getitem__(key)
 
     def get_by_ids(self, ids):
         """

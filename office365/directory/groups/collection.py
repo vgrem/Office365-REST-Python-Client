@@ -1,6 +1,6 @@
+from office365.delta_collection import DeltaCollection
 from office365.directory.groups.group import Group
 from office365.directory.groups.profile import GroupProfile
-from office365.entity_collection import DeltaCollection
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
 

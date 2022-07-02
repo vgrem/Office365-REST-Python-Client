@@ -1,7 +1,11 @@
+from typing import TypeVar
+
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.types.event_handler import EventHandler
+
+T = TypeVar('T', bound='ClientObjectCollection')
 
 
 class ClientObjectCollection(ClientObject):
@@ -14,7 +18,7 @@ class ClientObjectCollection(ClientObject):
         :type resource_path: office365.runtime.paths.resource_path.ResourcePath
         """
         super(ClientObjectCollection, self).__init__(context, resource_path)
-        self._data = []
+        self._data = []  # type: list[ClientObject]
         self._item_type = item_type
         self.page_loaded = EventHandler(False)
         self._page_size = 100
@@ -24,6 +28,7 @@ class ClientObjectCollection(ClientObject):
 
     def clear(self):
         self._data = []
+        return self
 
     def create_typed_object(self, properties=None, persist_changes=False):
         """
@@ -42,10 +47,10 @@ class ClientObjectCollection(ClientObject):
             client_object.set_property(k, v, persist_changes)
         return client_object
 
-    def set_property(self, name, value, persist_changes=False):
+    def set_property(self, index, value, persist_changes=False):
         """
-        :type name: str
-        :type value: any
+        :type index: int
+        :type value: dict
         :type persist_changes: bool
         """
         client_object = self.create_typed_object(value)
@@ -91,7 +96,6 @@ class ClientObjectCollection(ClientObject):
     def __getitem__(self, index):
         """
         :type index: int
-        :rtype: ClientObject
         """
         while len(self._data) <= index:
             next(iter(self))

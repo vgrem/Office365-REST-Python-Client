@@ -1,7 +1,7 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.teams.apps.app_definition import TeamsAppDefinition
+from office365.teams.apps.definition import TeamsAppDefinition
 
 
 class TeamsApp(Entity):

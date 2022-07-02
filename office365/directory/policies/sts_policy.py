@@ -1,4 +1,4 @@
-from office365.directory.policies.policy_base import PolicyBase
+from office365.directory.policies.base import PolicyBase
 
 
 class StsPolicy(PolicyBase):

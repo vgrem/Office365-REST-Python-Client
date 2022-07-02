@@ -1,5 +1,5 @@
+from office365.delta_collection import DeltaCollection
 from office365.directory.users.user import User
-from office365.entity_collection import DeltaCollection
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
 

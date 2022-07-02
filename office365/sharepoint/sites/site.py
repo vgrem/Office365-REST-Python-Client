@@ -64,24 +64,23 @@ class Site(BaseEntity):
         :param str root_site_url: Tenant root site url, e.g. https://contoso.sharepoint.com
         :param str alias: Site alias which defines site url, e.g. https://contoso.sharepoint.com/teams/{alias}
         :param str title: Site title
+        :param bool is_public:
         """
         from office365.sharepoint.client_context import ClientContext
         ctx = ClientContext(root_site_url)
-        site = ctx.site.get()
+        site = ctx.site
 
-        def _before_site_create(resp):
-            from office365.sharepoint.portal.group_site_manager import GroupSiteManager
-            site_manager = GroupSiteManager(ctx)
-            result = site_manager.create_group_ex(title, alias, is_public, None)
+        from office365.sharepoint.portal.group_site_manager import GroupSiteManager
+        site_manager = GroupSiteManager(ctx)
+        result = site_manager.create_group_ex(title, alias, is_public)
 
-            def _after_site_create(site_create_resp):
-                if result.value.SiteStatus == SiteStatus.Error:
-                    raise ValueError(result.value.ErrorMessage)
-                elif result.value.SiteStatus == SiteStatus.Ready:
-                    site.set_property("NewSiteUrl", result.value.SiteUrl)
-            ctx.after_execute(_after_site_create)
+        def _after_site_create(site_create_resp):
+            if result.value.SiteStatus == SiteStatus.Error:
+                raise ValueError(result.value.ErrorMessage)
+            elif result.value.SiteStatus == SiteStatus.Ready:
+                site.set_property("NewSiteUrl", result.value.SiteUrl)
 
-        ctx.after_execute(_before_site_create)
+        ctx.after_execute(_after_site_create)
         return site
 
     @staticmethod

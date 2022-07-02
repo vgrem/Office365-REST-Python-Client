@@ -1,8 +1,9 @@
 from office365.communications.cloud_communications import CloudCommunications
+from office365.delta_collection import DeltaCollection
 from office365.directory.applications.application import Application
 from office365.directory.applications.application_template import ApplicationTemplate
 from office365.directory.applications.service_principal import ServicePrincipal
-from office365.directory.audit.audit_log_root import AuditLogRoot
+from office365.directory.audit.log_root import AuditLogRoot
 from office365.directory.directory import Directory
 from office365.directory.directory_object_collection import DirectoryObjectCollection
 from office365.directory.groups.collection import GroupCollection
@@ -16,7 +17,7 @@ from office365.directory.organizations.organization import Organization
 from office365.directory.subscriptions.subscription import Subscription
 from office365.directory.users.user import User
 from office365.directory.users.user_collection import UserCollection
-from office365.entity_collection import EntityCollection, DeltaCollection
+from office365.entity_collection import EntityCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.shares.shares_collection import SharesCollection
 from office365.onedrive.sites.sites_with_root import SitesWithRoot
@@ -34,7 +35,7 @@ from office365.runtime.queries.batch import BatchQuery
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.search.search_entity import SearchEntity
-from office365.teams.chats.chat import Chat
+from office365.teams.chats.collection import ChatCollection
 from office365.teams.collection import TeamCollection
 from office365.teams.template import TeamsTemplate
 
@@ -140,7 +141,7 @@ class GraphClient(ClientRuntimeContext):
     @property
     def chats(self):
         """Get teams"""
-        return EntityCollection(self, Chat, ResourcePath("chats"))
+        return ChatCollection(self, ResourcePath("chats"))
 
     @property
     def group_setting_templates(self):

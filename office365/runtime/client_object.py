@@ -42,6 +42,7 @@ class ClientObject(object):
 
     def clear(self):
         self._properties_metadata = {}
+        return self
 
     def execute_query(self):
         """
@@ -66,9 +67,10 @@ class ClientObject(object):
         return self.context.build_request(self.context.current_query)
 
     def get(self):
-        """Retrieves a client object from the server
-
+        """
         :type self: T
+
+        Retrieves a client object from the server
         """
         self.context.load(self)
         return self

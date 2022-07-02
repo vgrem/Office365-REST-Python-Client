@@ -1,7 +1,7 @@
 from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.teams.apps.app import TeamsApp
-from office365.teams.tabs.tab_configuration import TeamsTabConfiguration
+from office365.teams.tabs.configuration import TeamsTabConfiguration
 
 
 class TeamsTab(Entity):
