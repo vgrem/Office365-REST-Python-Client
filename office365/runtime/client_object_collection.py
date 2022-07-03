@@ -11,7 +11,7 @@ T = TypeVar('T', bound='ClientObjectCollection')
 class ClientObjectCollection(ClientObject):
 
     def __init__(self, context, item_type, resource_path=None):
-        """Client object collection
+        """A collection container which represents a named collections of objects
 
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         :type item_type: type[ClientObject]

@@ -5,12 +5,12 @@
 import os
 import tempfile
 
-from examples import acquire_token_by_client_credentials
+from examples import acquire_token_by_client_credentials, test_user_principal_name
 from office365.graph_client import GraphClient
-from tests import test_user_principal_name
-
 
 client = GraphClient(acquire_token_by_client_credentials)
+
+
 drive = client.users[test_user_principal_name].drive  # get user's drive
 with tempfile.TemporaryDirectory() as local_path:
     drive_items = drive.root.children.get().execute_query()
