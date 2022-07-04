@@ -4,19 +4,19 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.alerts.alert_collection import AlertCollection
+from office365.sharepoint.alerts.collection import AlertCollection
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.clientsidecomponent.storage_entity import StorageEntity
-from office365.sharepoint.clientsidecomponent.types import SPClientSideComponentQueryResult, \
-    SPClientSideComponentIdentifier
+from office365.sharepoint.clientsidecomponent.query_result import SPClientSideComponentQueryResult
+from office365.sharepoint.clientsidecomponent.identifier import SPClientSideComponentIdentifier
 from office365.sharepoint.contenttypes.collection import ContentTypeCollection
 from office365.sharepoint.eventreceivers.definition import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.collection import FieldCollection
 from office365.sharepoint.files.file import File
 from office365.sharepoint.flows.synchronization_result import FlowSynchronizationResult
 from office365.sharepoint.folders.folder import Folder
-from office365.sharepoint.folders.folder_collection import FolderCollection
+from office365.sharepoint.folders.collection import FolderCollection
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.document_library_information import DocumentLibraryInformation
 from office365.sharepoint.lists.list import List
@@ -37,14 +37,14 @@ from office365.sharepoint.sharing.object_sharing_settings import ObjectSharingSe
 from office365.sharepoint.sharing.sharing_link_data import SharingLinkData
 from office365.sharepoint.sharing.sharing_result import SharingResult
 from office365.sharepoint.sitescripts.utility import SiteScriptUtility
-from office365.sharepoint.sites.site_types import SiteCollectionCorporateCatalogAccessor
-from office365.sharepoint.tenant.administration.catalog_accessor import TenantCorporateCatalogAccessor
+from office365.sharepoint.marketplace.sitecollection.appcatalog.accessor import SiteCollectionCorporateCatalogAccessor
+from office365.sharepoint.marketplace.tenant.appcatalog.accessor import TenantCorporateCatalogAccessor
 from office365.sharepoint.ui.applicationpages.client_people_picker import (
     ClientPeoplePickerWebServiceInterface, ClientPeoplePickerQueryParameters
 )
 from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
 from office365.sharepoint.views.view import View
-from office365.sharepoint.webparts.client_web_part_collection import ClientWebPartCollection
+from office365.sharepoint.webparts.client.collection import ClientWebPartCollection
 from office365.sharepoint.webs.calendar_type import CalendarType
 from office365.sharepoint.webs.context_web_information import ContextWebInformation
 from office365.sharepoint.webs.datetime_field_format_type import DateTimeFieldFormatType

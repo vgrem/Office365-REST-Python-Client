@@ -13,7 +13,7 @@ class AlertCollection(BaseEntityCollection):
     def add(self, parameters):
         """
 
-        :type parameters: office365.sharepoint.alerts.alert_creation_information.AlertCreationInformation
+        :type parameters: office365.sharepoint.alerts.creation_information.AlertCreationInformation
         """
         alert = Alert(self.context, None)
         self.add_child(alert)

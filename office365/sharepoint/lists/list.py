@@ -455,6 +455,15 @@ class List(SecurableObject):
         return self.properties.get("BaseType", None)
 
     @property
+    def default_display_form_url(self):
+        """
+        Specifies the location of the default display form for the list.
+
+        :rtype: str or None
+        """
+        return self.properties.get("DefaultDisplayFormUrl", None)
+
+    @property
     def crawl_non_default_views(self):
         """
         Specifies whether or not the crawler indexes the non-default views of the list.
@@ -557,6 +566,14 @@ class List(SecurableObject):
         return self.properties.get('ContentTypes',
                                    ContentTypeCollection(self.context,
                                                          ResourcePath("ContentTypes", self.resource_path), self))
+
+    @property
+    def content_types_enabled(self):
+        """Specifies whether content types are enabled for the list.
+
+        :rtype: bool or None
+        """
+        return self.properties.get('ContentTypesEnabled', None)
 
     @property
     def user_custom_actions(self):

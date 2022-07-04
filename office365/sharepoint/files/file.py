@@ -13,8 +13,9 @@ from office365.sharepoint.files.version_collection import FileVersionCollection
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.permissions.irm import InformationRightsManagementSettings, \
     EffectiveInformationRightsManagementSettings
-from office365.sharepoint.webparts.limited_webpart_manager import LimitedWebPartManager
+from office365.sharepoint.webparts.limited_manager import LimitedWebPartManager
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
+from office365.sharepoint.webparts.personalization_scope import PersonalizationScope
 
 
 class AbstractFile(BaseEntity):
@@ -255,15 +256,15 @@ class File(AbstractFile):
         self.context.add_query(qry)
         return self
 
-    def get_limited_webpart_manager(self, scope):
+    def get_limited_webpart_manager(self, scope=PersonalizationScope.User):
         """Specifies the control set used to access, modify, or add Web Parts associated with this Web Part Page and
-        view. """
+        view.
+
+        :param int scope:  Specifies the personalization scope value that depicts how Web Parts are viewed on the
+            Web Part Page.
+        """
         return LimitedWebPartManager(self.context,
-                                     ServiceOperationPath(
-                                         "GetLimitedWebPartManager",
-                                         [scope],
-                                         self.resource_path
-                                     ))
+                                     ServiceOperationPath("GetLimitedWebPartManager", [scope], self.resource_path))
 
     def open_binary_stream(self):
         """Opens the file as a stream."""

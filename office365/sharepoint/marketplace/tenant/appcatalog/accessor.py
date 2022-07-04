@@ -1,10 +1,23 @@
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.sites.site_types import SiteCollectionAppCatalogAllowedItems
+from office365.sharepoint.marketplace.sitecollection.appcatalog.allowed_items import \
+    SiteCollectionAppCatalogAllowedItems
+from office365.sharepoint.marketplace.app_metadata import CorporateCatalogAppMetadata
 
 
 class TenantCorporateCatalogAccessor(BaseEntity):
     """Accessor for the tenant corporate catalog."""
+
+    def get_app_by_id(self, item_unique_id):
+        """
+        :param str item_unique_id:
+        """
+        payload = {"itemUniqueId": item_unique_id}
+        return_type = CorporateCatalogAppMetadata(self.context)
+        qry = ServiceOperationQuery(self, "GetAppById", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     @property
     def site_collection_app_catalogs_sites(self):

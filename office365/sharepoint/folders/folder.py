@@ -248,7 +248,7 @@ class Folder(BaseEntity):
     def folders(self):
         """Specifies the collection of list folders contained within the list folder.
         """
-        from office365.sharepoint.folders.folder_collection import FolderCollection
+        from office365.sharepoint.folders.collection import FolderCollection
         return self.properties.get("Folders",
                                    FolderCollection(self.context, ResourcePath("Folders", self.resource_path)))
 

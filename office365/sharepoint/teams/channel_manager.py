@@ -1,5 +1,6 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.sites.team_site_data import TeamSiteData
 from office365.sharepoint.teams.channel import TeamChannel
 
 
@@ -24,6 +25,22 @@ class TeamChannelManager(BaseEntity):
         }
         return_type = TeamChannel(context)
         qry = ServiceOperationQuery(manager, "AddTeamChannel", None, payload, None, return_type)
+        qry.static = True
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
+    def get_team_site_data(context, ignore_validation=True):
+        """
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
+        :param bool ignore_validation:
+        """
+        manager = TeamChannelManager(context)
+        payload = {
+            "ignoreValidation": ignore_validation,
+        }
+        return_type = TeamSiteData(context)
+        qry = ServiceOperationQuery(manager, "GetTeamSiteData", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
         return return_type

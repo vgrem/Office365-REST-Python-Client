@@ -30,8 +30,8 @@ class TestTenant(TestCase):
         self.assertIsNotNone(self.tenant.root_site_url)
 
     def test2_get_tenant_settings(self):
-        tenant_settings = TenantSettings.current(self.client).execute_query()
-        self.assertIsNotNone(tenant_settings.properties)
+        tenant_settings = TenantSettings.current(self.client).get().execute_query()
+        self.assertIsNotNone(tenant_settings.resource_path)
 
     # def test3_check_tenant_licenses(self):
     #    result = self.tenant.check_tenant_licenses(["SharePoint"])

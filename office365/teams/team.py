@@ -20,6 +20,7 @@ class Team(Entity):
 
     def delete_object(self):
         """Deletes a team"""
+
         def _team_loaded():
             group = self.context.groups[self.id]
             group.delete_object(False)
@@ -98,11 +99,9 @@ class Team(Entity):
     @property
     def channels(self):
         """The collection of channels & messages associated with the team.
-
-        :rtype: ChannelCollection
         """
-        return self.get_property('channels',
-                                 ChannelCollection(self.context, ResourcePath("channels", self.resource_path)))
+        return self.properties.get('channels',
+                                   ChannelCollection(self.context, ResourcePath("channels", self.resource_path)))
 
     @property
     def group(self):
@@ -114,49 +113,37 @@ class Team(Entity):
     def primary_channel(self):
         """
         The general channel for the team.
-
-        :rtype: Channel
         """
-        return self.get_property('primaryChannel',
-                                 Channel(self.context, ResourcePath("primaryChannel", self.resource_path)))
+        return self.properties.get('primaryChannel',
+                                   Channel(self.context, ResourcePath("primaryChannel", self.resource_path)))
 
     @property
     def schedule(self):
-        """The shifts of shifts for this team.
-
-        :rtype: Schedule
-        """
-        return self.get_property('shifts',
-                                 Schedule(self.context, ResourcePath("shifts", self.resource_path)))
+        """The shifts of shifts for this team."""
+        return self.properties.get('shifts',
+                                   Schedule(self.context, ResourcePath("shifts", self.resource_path)))
 
     @property
     def installed_apps(self):
-        """The apps installed in this team.
-
-        :rtype: EntityCollection
-        """
-        return self.get_property('installedApps',
-                                 EntityCollection(self.context, TeamsAppInstallation,
-                                                  ResourcePath("installedApps", self.resource_path)))
+        """The apps installed in this team."""
+        return self.properties.get('installedApps',
+                                   EntityCollection(self.context, TeamsAppInstallation,
+                                                    ResourcePath("installedApps", self.resource_path)))
 
     @property
     def operations(self):
         """The async operations that ran or are running on this team.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('operations',
-                                 EntityCollection(self.context, TeamsAsyncOperation,
-                                                  ResourcePath("installedApps", self.resource_path)))
+        return self.properties.get('operations',
+                                   EntityCollection(self.context, TeamsAsyncOperation,
+                                                    ResourcePath("operations", self.resource_path)))
 
     @property
     def template(self):
         """The template this team was created from
-
-        :rtype: TeamsTemplate
         """
-        return self.get_property('template',
-                                 TeamsTemplate(self.context, ResourcePath("template", self.resource_path)))
+        return self.properties.get('template',
+                                   TeamsTemplate(self.context, ResourcePath("template", self.resource_path)))
 
     def archive(self):
         """Archive the specified team. When a team is archived, users can no longer send or like messages on any
