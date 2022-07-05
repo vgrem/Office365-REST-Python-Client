@@ -1,7 +1,7 @@
 import uuid
 
 from office365.runtime.client_value import ClientValue
-from office365.runtime.odata.odata_type import ODataType
+from office365.runtime.odata.type import ODataType
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 
 
@@ -42,7 +42,7 @@ class ClientValueCollection(ClientValue):
         """
         Serializes a client value's collection
 
-        :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat or None
+        :type json_format: office365.runtime.odata.json_format.ODataJsonFormat or None
         """
         json = [v for v in self]
         for i, v in enumerate(json):

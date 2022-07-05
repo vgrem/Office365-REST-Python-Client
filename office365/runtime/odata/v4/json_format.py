@@ -1,4 +1,4 @@
-from office365.runtime.odata.odata_json_format import ODataJsonFormat
+from office365.runtime.odata.json_format import ODataJsonFormat
 from office365.runtime.odata.v4.metadata_level import ODataV4MetadataLevel
 
 

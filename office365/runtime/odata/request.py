@@ -20,7 +20,7 @@ class ODataRequest(ClientRequest):
         """
 
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
-        :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat
+        :type json_format: office365.runtime.odata.json_format.ODataJsonFormat
         """
         super(ODataRequest, self).__init__(context)
         self._default_json_format = json_format
@@ -92,7 +92,7 @@ class ODataRequest(ClientRequest):
         """
         :type json: any
         :type return_type: ClientValue or ClientResult  or ClientObject
-        :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat
+        :type json_format: office365.runtime.odata.json_format.ODataJsonFormat
         """
         if json_format is None:
             json_format = self.default_json_format
@@ -109,7 +109,7 @@ class ODataRequest(ClientRequest):
     def _next_property(self, json, json_format):  # noqa: C901
         """
         :type json: any
-        :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat
+        :type json_format: office365.runtime.odata.json_format.ODataJsonFormat
         """
         if isinstance(json_format, JsonLightFormat):
             json = json.get(json_format.security_tag_name, json)

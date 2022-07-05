@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.odata.odata_type import ODataType
+from office365.runtime.odata.type import ODataType
 from office365.runtime.odata.query_options import QueryOptions
 from office365.runtime.types.collections import StringCollection, GuidCollection
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \

@@ -10,7 +10,7 @@ class TypeBuilder(ast.NodeTransformer):
 
     def __init__(self, type_schema, options):
         """
-        :type type_schema: office365.runtime.odata.odata_type.ODataType
+        :type type_schema: office365.runtime.odata.type.ODataType
         :type options: dict
         """
         self._schema = type_schema

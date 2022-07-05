@@ -8,7 +8,7 @@ class ODataModel(object):
 
     def add_type(self, type_schema):
         """
-        :type type_schema: office365.runtime.odata.odata_type.ODataType
+        :type type_schema: office365.runtime.odata.type.ODataType
         :return:
         """
         type_alias = type_schema.name

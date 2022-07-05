@@ -3,9 +3,9 @@ import datetime
 from typing import TypeVar
 
 from office365.runtime.client_value import ClientValue
-from office365.runtime.odata.odata_type import ODataType
+from office365.runtime.odata.type import ODataType
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
-from office365.runtime.odata.odata_json_format import ODataJsonFormat
+from office365.runtime.odata.json_format import ODataJsonFormat
 from office365.runtime.odata.query_options import QueryOptions
 
 T = TypeVar('T', bound='ClientObject')
@@ -229,7 +229,7 @@ class ClientObject(object):
         """
         Serializes client object
 
-        :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat or None
+        :type json_format: office365.runtime.odata.json_format.ODataJsonFormat or None
         """
         if json_format is None:
             ser_prop_names = [n for n in self._properties.keys()]

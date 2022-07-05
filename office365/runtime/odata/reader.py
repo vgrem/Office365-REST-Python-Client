@@ -1,8 +1,8 @@
 from xml.etree import ElementTree as ET
 
-from office365.runtime.odata.odata_model import ODataModel
-from office365.runtime.odata.odata_property import ODataProperty
-from office365.runtime.odata.odata_type import ODataType
+from office365.runtime.odata.model import ODataModel
+from office365.runtime.odata.property import ODataProperty
+from office365.runtime.odata.type import ODataType
 
 
 class ODataReader(object):

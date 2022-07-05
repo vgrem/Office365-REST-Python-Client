@@ -27,7 +27,7 @@ from office365.reports.report_root import ReportRoot
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.odata.odata_request import ODataRequest
+from office365.runtime.odata.request import ODataRequest
 from office365.runtime.odata.v4.batch_request import ODataV4BatchRequest
 from office365.runtime.odata.v4.json_format import V4JsonFormat
 from office365.runtime.paths.resource_path import ResourcePath

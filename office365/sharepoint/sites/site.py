@@ -507,9 +507,10 @@ class Site(BaseEntity):
         return super(Site, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
-        super(Site, self).set_property(name, value, persist_changes)
         if name == "NewSiteUrl":
             safe_url = value[:-1] if value[-1] == "/" else value
             super(Site, self).set_property("Url", safe_url)
             self._context = self.context.clone(safe_url)
+        else:
+            super(Site, self).set_property(name, value, persist_changes)
         return self

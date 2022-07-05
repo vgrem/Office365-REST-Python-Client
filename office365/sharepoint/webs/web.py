@@ -1312,6 +1312,23 @@ class Web(SecurableObject):
                                                           ResourcePath("ListTemplates", self.resource_path)))
 
     @property
+    def is_multilingual(self):
+        """Gets whether Multilingual UI is turned on for this web or not.
+
+        :rtype: bool or None
+        """
+        return self.properties.get('IsMultilingual', None)
+
+    @is_multilingual.setter
+    def is_multilingual(self, val):
+        """
+        Sets whether Multilingual UI is turned on for this web or not.
+
+        :type val: bool
+        """
+        self.set_property("IsMultilingual", val)
+
+    @property
     def multilingual_settings(self):
         """Gets a value that specifies the collection of list definitions and list templates available for creating
             lists on the site."""

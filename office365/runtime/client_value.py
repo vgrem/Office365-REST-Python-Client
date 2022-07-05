@@ -30,7 +30,7 @@ class ClientValue(object):
         """
         Serializes a client value
 
-        :type json_format: office365.runtime.odata.odata_json_format.ODataJsonFormat or None
+        :type json_format: office365.runtime.odata.json_format.ODataJsonFormat or None
         """
 
         def _is_valid_value(val):

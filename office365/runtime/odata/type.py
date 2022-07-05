@@ -63,7 +63,7 @@ class ODataType(object):
 
     def add_property(self, prop_schema):
         """
-        :type prop_schema:  office365.runtime.odata.odata_property.ODataProperty
+        :type prop_schema:  office365.runtime.odata.property.ODataProperty
         """
         alias = prop_schema.name
         # if type_schema['state'] == 'detached':

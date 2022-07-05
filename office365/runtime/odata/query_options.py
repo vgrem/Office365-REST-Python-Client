@@ -9,29 +9,6 @@ def _normalize(key, value):
 
 class QueryOptions(object):
 
-    @staticmethod
-    def build(client_object, properties_to_include=None):
-        """
-        :param office365.runtime.client_object.ClientObject client_object: Client object
-        :param list[str] or None properties_to_include: The list of properties to include
-        """
-        query_options = copy.deepcopy(client_object.query_options)
-        if properties_to_include is None:
-            return query_options
-
-        for name in properties_to_include:
-            from office365.runtime.client_object import ClientObject
-            from office365.runtime.client_object_collection import ClientObjectCollection
-            if isinstance(client_object, ClientObjectCollection):
-                prop = client_object.create_typed_object().get_property(name)
-            else:
-                prop = client_object.get_property(name)
-
-            if name == "Properties" or isinstance(prop, ClientObject):
-                query_options.expand.append(name)
-            query_options.select.append(name)
-        return query_options
-
     def __init__(self, select=None, expand=None, filter_expr=None, order_by=None, top=None, skip=None):
         """
         A query option is a set of query string parameters applied to a resource that can help control the amount
@@ -60,6 +37,29 @@ class QueryOptions(object):
         self.orderBy = order_by
         self.skip = skip
         self.top = top
+
+    @staticmethod
+    def build(client_object, properties_to_include=None):
+        """
+        :param office365.runtime.client_object.ClientObject client_object: Client object
+        :param list[str] or None properties_to_include: The list of properties to include
+        """
+        query_options = copy.deepcopy(client_object.query_options)
+        if properties_to_include is None:
+            return query_options
+
+        for name in properties_to_include:
+            from office365.runtime.client_object import ClientObject
+            from office365.runtime.client_object_collection import ClientObjectCollection
+            if isinstance(client_object, ClientObjectCollection):
+                prop = client_object.create_typed_object().get_property(name)
+            else:
+                prop = client_object.get_property(name)
+
+            if name == "Properties" or isinstance(prop, ClientObject):
+                query_options.expand.append(name)
+            query_options.select.append(name)
+        return query_options
 
     def __repr__(self):
         return self.to_url()

@@ -20,13 +20,13 @@ from office365.directory.identities.object_identity import ObjectIdentity
 from office365.directory.profile_photo import ProfilePhoto
 from office365.entity_collection import EntityCollection
 from office365.outlook.contacts.contact import Contact
-from office365.outlook.contacts.contact_folder import ContactFolder
+from office365.outlook.contacts.folder import ContactFolder
 from office365.outlook.mail.folder import MailFolder
 from office365.onedrive.drives.drive import Drive
 from office365.outlook.mail.mailbox_settings import MailboxSettings
 from office365.outlook.mail.messages.message import Message
 from office365.outlook.user import OutlookUser
-from office365.planner.planner_user import PlannerUser
+from office365.planner.user import PlannerUser
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod

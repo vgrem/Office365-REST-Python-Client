@@ -1,14 +1,19 @@
+import time
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.listitems.collection import ListItemCollection
 from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
 from office365.sharepoint.sites.home_sites_details import HomeSitesDetails
+from office365.sharepoint.sites.site import Site
 from office365.sharepoint.tenant.administration.hubsite_properties import HubSiteProperties
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
     SecondaryAdministratorsFieldsData
 from office365.sharepoint.tenant.administration.secondary_administrators_info import SecondaryAdministratorsInfo
+from office365.sharepoint.tenant.administration.site_creation_properties import SiteCreationProperties
 from office365.sharepoint.tenant.administration.site_properties import SiteProperties
 from office365.sharepoint.tenant.administration.site_properties_collection import SitePropertiesCollection
 from office365.sharepoint.tenant.administration.sitePropertiesEnumerableFilter import SitePropertiesEnumerableFilter
@@ -21,6 +26,12 @@ class Tenant(BaseEntity):
     def __init__(self, context):
         static_path = ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant")
         super(Tenant, self).__init__(context, static_path)
+
+    def get_home_sites(self):
+        return_type = ClientResult(self.context, ClientValueCollection(HomeSitesDetails))
+        qry = ServiceOperationQuery(self, "GetHomeSites", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def get_home_sites_details(self):
         return_type = ClientResult(self.context, ClientValueCollection(HomeSitesDetails))
@@ -47,7 +58,7 @@ class Tenant(BaseEntity):
         return Tenant(admin_client)
 
     def get_lock_state_by_id(self, site_id):
-        return self._sites.get_lock_state_by_id(site_id)
+        return self.sites.get_lock_state_by_id(site_id)
 
     def hub_sites(self, site_url):
         pass
@@ -64,6 +75,24 @@ class Tenant(BaseEntity):
         qry = ServiceOperationQuery(self, "CheckTenantLicenses", None, params, "licenses", result)
         self.context.add_query(qry)
         return result
+
+    def get_site_status(self, url):
+        """
+        :param str url:
+        """
+        result = self.aggregated_site_collections_list.items.filter("SiteUrl eq '{0}'".format(url)).get()
+        return result
+
+    def get_sites_by_state(self, states=None):
+        """
+        :param list[int] states:
+        """
+        return_type = ListItemCollection(self.context,
+                                         ResourcePath("items", self.aggregated_site_collections_list.resource_path))
+        payload = {"states": states}
+        qry = ServiceOperationQuery(self, "GetSitesByState", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def get_site_health_status(self, source_url):
         """
@@ -126,17 +155,40 @@ class Tenant(BaseEntity):
         self.context.add_query(qry)
         return self
 
-    def create_site(self, site_create_props):
+    def create_site(self, url, owner, title=None):
         """Queues a site collection for creation with the specified properties.
 
-        :param SiteCreationProperties site_create_props:
-        A SiteCreationProperties object that contains the initial properties
-        of the new site collection.
+        :param str title: Sets the new site’s title.
+        :param str url: Sets the new site’s URL.
+        :param str owner: Sets the login name of the owner of the new site.
         """
-        result = SpoOperation(self.context)
-        qry = ServiceOperationQuery(self, "CreateSite", None, site_create_props, "siteCreationProperties", result)
+        return_type = SpoOperation(self.context)
+        payload = SiteCreationProperties(title=title, url=url, owner=owner)
+        qry = ServiceOperationQuery(self, "CreateSite", None, payload, "siteCreationProperties", return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
+
+    def create_site_sync(self, url, owner, title=None):
+        """Creates a site collection"""
+        return_type = Site(self.context)
+        op = self.create_site(url, owner, title)
+
+        def _verify_site_status(resp, items=None):
+            """
+            :type resp: requests.Response
+            """
+            if items is None:
+                is_complete = op.is_complete
+            else:
+                is_complete = len([item for item in items if item.properties.get("SiteUrl") == url]) > 0
+            if not is_complete:
+                time.sleep(op.polling_interval_secs)
+                items = self.get_sites_by_state([0, 1, 2])
+                self.context.after_execute(_verify_site_status, items=items)
+
+            return_type.set_property("NewSiteUrl", url)
+        self.context.after_execute(_verify_site_status)
+        return return_type
 
     def remove_site(self, site_url):
         """Deletes the site with the specified URL
@@ -144,7 +196,8 @@ class Tenant(BaseEntity):
         :param str site_url: A string representing the URL of the site.
         """
         result = SpoOperation(self.context)
-        qry = ServiceOperationQuery(self, "removeSite", [site_url], None, None, result)
+        params = {"siteUrl": site_url}
+        qry = ServiceOperationQuery(self, "removeSite", None, params, None, result)
         self.context.add_query(qry)
         return result
 
@@ -168,14 +221,14 @@ class Tenant(BaseEntity):
         self.context.add_query(qry)
         return result
 
-    def get_site_properties_by_url(self, url, include_detail):
+    def get_site_properties_by_url(self, url, include_detail=False):
         """
 
         :param str url: A string that represents the site URL.
         :param bool include_detail: A Boolean value that indicates whether to include all of the SPSite properties.
         """
         return_type = SiteProperties(self.context)
-        self._sites.add_child(return_type)
+        self.sites.add_child(return_type)
         payload = {
             'url': url,
             'includeDetail': include_detail
@@ -216,6 +269,10 @@ class Tenant(BaseEntity):
         return self
 
     @property
+    def aggregated_site_collections_list(self):
+        return self.context.web.lists.get_by_title("DO_NOT_DELETE_SPLIST_TENANTADMIN_AGGREGATED_SITECOLLECTIONS")
+
+    @property
     def root_site_url(self):
         """
 
@@ -224,11 +281,11 @@ class Tenant(BaseEntity):
         return self.properties.get('RootSiteUrl', None)
 
     @property
-    def _sites(self):
+    def sites(self):
         """Gets a collection of sites."""
         return self.properties.get('sites',
                                    SitePropertiesCollection(self.context, ResourcePath("sites", self.resource_path)))
 
     @property
     def entity_type_name(self):
-        return "Microsoft.Online.SharePoint.TenantAdministration"
+        return "Microsoft.Online.SharePoint.TenantAdministration.Tenant"

@@ -9,7 +9,7 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 from office365.runtime.odata.v3.batch_request import ODataBatchRequest
-from office365.runtime.odata.odata_request import ODataRequest
+from office365.runtime.odata.request import ODataRequest
 from office365.runtime.queries.batch import BatchQuery
 from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.delete_entity import DeleteEntityQuery

@@ -10,7 +10,7 @@ from office365.entity_collection import EntityCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onenote.onenote import Onenote
 from office365.outlook.calendar.event import Event
-from office365.planner.planner_group import PlannerGroup
+from office365.planner.group import PlannerGroup
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod

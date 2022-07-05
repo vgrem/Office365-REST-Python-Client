@@ -7,7 +7,7 @@ from office365.runtime.odata.v4.metadata_reader import ODataV4Reader
 
 def generate_files(model, options):
     """
-    :type model: office365.runtime.odata.odata_model.ODataModel
+    :type model: office365.runtime.odata.model.ODataModel
     :type options: ConfigParser
     """
     for name in model.types:

@@ -1,4 +1,4 @@
-from office365.runtime.odata.odata_reader import ODataReader
+from office365.runtime.odata.reader import ODataReader
 
 
 class ODataV3Reader(ODataReader):

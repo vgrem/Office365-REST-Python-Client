@@ -20,7 +20,7 @@ class TestTeamSite(TestCase):
 
     def test1_create_site(self):
         site_name = "TeamSite{0}".format(uuid.uuid4().hex)
-        result = self.site_manager.create_group_ex("Team Site", site_name, True, None).execute_query()
+        result = self.site_manager.create_group_ex("Team Site", site_name, True).execute_query()
         self.assertIsNotNone(result.value.GroupId)
         self.__class__.site_info = result.value
 

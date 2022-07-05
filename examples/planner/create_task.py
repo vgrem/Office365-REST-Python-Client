@@ -5,7 +5,7 @@ from office365.planner.plans.plan import PlannerPlan
 
 def ensure_plan(planner, name):
     """
-    :type planner: office365.planner.planner_user.PlannerUser
+    :type planner: office365.planner.user.PlannerUser
     :type name: str
     :rtype: PlannerPlan
     """
