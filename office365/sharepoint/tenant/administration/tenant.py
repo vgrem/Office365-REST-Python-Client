@@ -169,7 +169,12 @@ class Tenant(BaseEntity):
         return return_type
 
     def create_site_sync(self, url, owner, title=None):
-        """Creates a site collection"""
+        """Creates a site collection
+
+         :param str title: Sets the new site’s title.
+        :param str url: Sets the new site’s URL.
+        :param str owner: Sets the login name of the owner of the new site.
+        """
         return_type = Site(self.context)
         op = self.create_site(url, owner, title)
 
@@ -271,6 +276,33 @@ class Tenant(BaseEntity):
     @property
     def aggregated_site_collections_list(self):
         return self.context.web.lists.get_by_title("DO_NOT_DELETE_SPLIST_TENANTADMIN_AGGREGATED_SITECOLLECTIONS")
+
+    @property
+    def allow_comments_text_on_email_enabled(self):
+        """
+        When enabled, the email notification that a user receives when is mentioned,
+            includes the surrounding document context
+
+        :rtype: bool or None
+        """
+        return self.properties.get('AllowCommentsTextOnEmailEnabled', None)
+
+    @property
+    def allow_everyone_except_external_users_claim_in_private_site(self):
+        """
+        :rtype: bool or None
+        """
+        return self.properties.get('AllowEveryoneExceptExternalUsersClaimInPrivateSite', None)
+
+    @property
+    def allow_editing(self):
+        """
+        Prevents users from editing Office files in the browser and copying and pasting Office file contents
+        out of the browser window.
+
+        :rtype: bool or None
+        """
+        return self.properties.get('AllowEditing', None)
 
     @property
     def root_site_url(self):

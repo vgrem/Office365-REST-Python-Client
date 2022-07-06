@@ -16,7 +16,7 @@ from office365.directory.organizations.org_contact import OrgContact
 from office365.directory.organizations.organization import Organization
 from office365.directory.subscriptions.subscription import Subscription
 from office365.directory.users.user import User
-from office365.directory.users.user_collection import UserCollection
+from office365.directory.users.collection import UserCollection
 from office365.entity_collection import EntityCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.shares.shares_collection import SharesCollection

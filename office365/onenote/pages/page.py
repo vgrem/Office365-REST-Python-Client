@@ -1,6 +1,4 @@
-from office365.entity_collection import EntityCollection
 from office365.onenote.entity_schema_object_model import OnenoteEntitySchemaObjectModel
-from office365.onenote.internal.multipart_page_query import OneNotePageCreateQuery
 from office365.onenote.notebooks.notebook import Notebook
 from office365.onenote.pages.page_links import PageLinks
 from office365.onenote.sections.section import OnenoteSection
@@ -9,20 +7,6 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
-
-
-class OnenotePageCollection(EntityCollection):
-
-    def __init__(self, context, resource_path=None):
-        super(OnenotePageCollection, self).__init__(context, OnenotePage, resource_path)
-
-    def add(self, presentation_file, attachment_files=None):
-        """
-        :rtype: OnenotePage
-        """
-        qry = OneNotePageCreateQuery(self, presentation_file, attachment_files)
-        self.context.add_query(qry)
-        return qry.return_type
 
 
 class OnenotePage(OnenoteEntitySchemaObjectModel):

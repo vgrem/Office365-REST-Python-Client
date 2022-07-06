@@ -1,6 +1,5 @@
 from office365.runtime.client_value import ClientValue
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
 
 
 class EventReceiverDefinitionCreationInformation(ClientValue):
@@ -37,7 +36,3 @@ class EventReceiverDefinition(BaseEntity):
         return self.properties.get('ReceiverUrl', None)
 
 
-class EventReceiverDefinitionCollection(BaseEntityCollection):
-
-    def __init__(self, context, resource_path=None, parent=None):
-        super(EventReceiverDefinitionCollection, self).__init__(context, EventReceiverDefinition, resource_path, parent)

@@ -3,6 +3,7 @@ from office365.onedrive.driveitems.publication_facet import PublicationFacet
 
 
 class BaseItemVersion(Entity):
+    """Represents a previous version of an item or entity."""
 
     @property
     def last_modified_datetime(self):

@@ -21,7 +21,7 @@ class OneNotePageCreateQuery(ClientQuery):
 
     def __init__(self, pages, presentation_file, attachment_files=None):
         """
-        :type pages: office365.onenote.pages.page.OnenotePageCollection
+        :type pages: office365.onenote.pages.page_collection.OnenotePageCollection
         :type presentation_file: typing.IO
         :type attachment_files: dict or None
         """

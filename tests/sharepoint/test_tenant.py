@@ -4,6 +4,7 @@ from unittest import TestCase
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
+from office365.sharepoint.tenant.administration.settings_service import TenantAdminSettingsService
 from office365.sharepoint.tenant.administration.sharing_capabilities import SharingCapabilities
 from office365.sharepoint.tenant.management.office365_tenant import Office365Tenant
 from office365.sharepoint.tenant.administration.site_properties import SiteProperties
@@ -117,3 +118,12 @@ class TestTenant(TestCase):
         tenant = Office365Tenant(self.client)
         result = tenant.get_tenant_cdn_policies(0).execute_query()
         self.assertIsInstance(result.value, ClientValueCollection)
+
+    def test_17_get_tenant_settings_service(self):
+        tenant_svc = TenantAdminSettingsService(self.client).get().execute_query()
+        self.assertIsNotNone(tenant_svc)
+
+    def test_18_get_tenant_sharing_status(self):
+        tenant_svc = TenantAdminSettingsService(self.client)
+        result = tenant_svc.get_tenant_sharing_status().execute_query()
+        self.assertIsNotNone(result.value)

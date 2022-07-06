@@ -1,7 +1,7 @@
 import sys
 
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
+from office365.sharepoint.sharing.external_sharing_site_option import ExternalSharingSiteOption
 from tests import test_user_credentials, test_team_site_url, test_user_principal_name_alt
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)

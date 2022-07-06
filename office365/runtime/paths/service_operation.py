@@ -3,8 +3,7 @@ from office365.runtime.odata.path_builder import ODataPathBuilder
 
 
 class ServiceOperationPath(ResourcePath):
-    """ Resource path to address Service Operations which
-    represents simple functions exposed by an OData service"""
+    """Path to address Service Operations which represents simple functions exposed by an OData service"""
 
     def __init__(self, name, parameters=None, parent=None):
         """

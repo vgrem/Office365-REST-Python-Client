@@ -3,7 +3,7 @@ from office365.communications.presences.presence import Presence
 from office365.delta_collection import DeltaCollection
 from office365.directory.extensions.extension import Extension
 from office365.directory.licenses.assigned_plan import AssignedPlan
-from office365.directory.users.user_settings import UserSettings
+from office365.directory.users.settings import UserSettings
 from office365.onedrive.sites.site import Site
 from office365.onenote.onenote import Onenote
 from office365.outlook.calendar.attendee_base import AttendeeBase
@@ -36,6 +36,7 @@ from office365.runtime.types.collections import StringCollection
 from office365.teams.chats.collection import ChatCollection
 from office365.teams.collection import TeamCollection
 from office365.teams.user_teamwork import UserTeamwork
+from office365.todo.todo import Todo
 
 
 class User(DirectoryObject):
@@ -496,6 +497,12 @@ class User(DirectoryObject):
         """A container for the range of Microsoft Teams functionalities that are available per user in the tenant."""
         return self.properties.get('teamwork',
                                    UserTeamwork(self.context, ResourcePath("teamwork", self.resource_path)))
+
+    @property
+    def todo(self):
+        """Represents the To Do services available to a user."""
+        return self.properties.get('todo',
+                                   Todo(self.context, ResourcePath("todo", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:

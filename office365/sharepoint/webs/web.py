@@ -11,7 +11,7 @@ from office365.sharepoint.clientsidecomponent.storage_entity import StorageEntit
 from office365.sharepoint.clientsidecomponent.query_result import SPClientSideComponentQueryResult
 from office365.sharepoint.clientsidecomponent.identifier import SPClientSideComponentIdentifier
 from office365.sharepoint.contenttypes.collection import ContentTypeCollection
-from office365.sharepoint.eventreceivers.definition import EventReceiverDefinitionCollection
+from office365.sharepoint.eventreceivers.definition_collection import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.collection import FieldCollection
 from office365.sharepoint.files.file import File
 from office365.sharepoint.flows.synchronization_result import FlowSynchronizationResult
@@ -32,7 +32,7 @@ from office365.sharepoint.principal.user import User
 from office365.sharepoint.principal.user_collection import UserCollection
 from office365.sharepoint.pushnotifications.subscriber import PushNotificationSubscriber
 from office365.sharepoint.recyclebin.item_collection import RecycleBinItemCollection
-from office365.sharepoint.sharing.externalSharingSiteOption import ExternalSharingSiteOption
+from office365.sharepoint.sharing.external_sharing_site_option import ExternalSharingSiteOption
 from office365.sharepoint.sharing.object_sharing_settings import ObjectSharingSettings
 from office365.sharepoint.sharing.sharing_link_data import SharingLinkData
 from office365.sharepoint.sharing.sharing_result import SharingResult

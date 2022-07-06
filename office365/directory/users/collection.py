@@ -12,7 +12,7 @@ class UserCollection(DeltaCollection):
     def add(self, user_properties):
         """Create a new user.
 
-        :type user_properties: office365.directory.users.user_profile.UserProfile
+        :type user_properties: office365.directory.users.profile.UserProfile
         """
         return_type = User(self.context)
         qry = CreateEntityQuery(self, user_properties, return_type)
