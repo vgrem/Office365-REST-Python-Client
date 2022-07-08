@@ -2,7 +2,7 @@ from office365.base_item import BaseItem
 from office365.entity_collection import EntityCollection
 from office365.onedrive.columns.definition import ColumnDefinition
 from office365.onedrive.columns.column_link import ColumnLink
-from office365.onedrive.contenttypes.content_type_order import ContentTypeOrder
+from office365.onedrive.contenttypes.order import ContentTypeOrder
 from office365.onedrive.documentsets.content import DocumentSetContent
 from office365.onedrive.documentsets.document_set import DocumentSet
 from office365.onedrive.listitems.item_reference import ItemReference

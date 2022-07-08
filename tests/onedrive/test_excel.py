@@ -37,3 +37,16 @@ class TestExcel(GraphTestCase):
     def test2_list_workbook_tables(self):
         tables = self.__class__.target_item.workbook.tables.get().execute_query_retry()
         self.assertIsNotNone(tables.resource_path)
+
+    #def test3_workbook_create_session(self):
+    #    result = self.__class__.target_item.workbook.create_session().execute_query()
+    #    self.assertIsNotNone(result.value)
+
+    #def test4_workbook_close_session(self):
+    #    self.__class__.target_item.workbook.close_session().execute_query()
+
+    def test5_function_days(self):
+        pass
+
+
+

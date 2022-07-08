@@ -1,6 +1,6 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
-from office365.onenote.notebooks.notebook_collection import NotebookCollection
+from office365.onenote.notebooks.collection import NotebookCollection
 from office365.onenote.operations.onenote import OnenoteOperation
 from office365.onenote.pages.page_collection import OnenotePageCollection
 from office365.onenote.resources.resource import OnenoteResource

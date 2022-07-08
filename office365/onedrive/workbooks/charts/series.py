@@ -1,5 +1,5 @@
 from office365.entity import Entity
 
 
-class WorkbookRange(Entity):
+class WorkbookChartSeries(Entity):
     pass

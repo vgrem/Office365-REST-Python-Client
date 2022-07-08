@@ -11,7 +11,7 @@ from office365.onedrive.columns.term import TermColumn
 from office365.onedrive.columns.text import TextColumn
 from office365.onedrive.columns.thumbnail import ThumbnailColumn
 from office365.onedrive.columns.validation import ColumnValidation
-from office365.onedrive.contenttypes.content_type_info import ContentTypeInfo
+from office365.onedrive.contenttypes.info import ContentTypeInfo
 from office365.runtime.paths.resource_path import ResourcePath
 
 

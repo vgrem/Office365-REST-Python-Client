@@ -1,10 +1,4 @@
-from office365.runtime.client_value import ClientValue
 from office365.sharepoint.base_entity import BaseEntity
-
-
-class EventReceiverDefinitionCreationInformation(ClientValue):
-    """Represents the properties that can be set when creating a client-side event receiver definition."""
-    pass
 
 
 class EventReceiverDefinition(BaseEntity):

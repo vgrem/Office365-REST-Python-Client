@@ -1,6 +1,6 @@
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.search.search_hits_container import SearchHitsContainer
+from office365.search.hits_container import SearchHitsContainer
 
 
 class SearchResponse(ClientValue):
@@ -8,10 +8,10 @@ class SearchResponse(ClientValue):
 
     def __init__(self, search_terms=None, hits_containers=None):
         """
+        :param list[str] search_terms: Contains the search terms sent in the initial search query.
+        :param list[SearchHitsContainer] hits_containers: A collection of search results.
 
         """
         super(SearchResponse, self).__init__()
         self.searchTerms = search_terms
-        if hits_containers is None:
-            hits_containers = ClientValueCollection(SearchHitsContainer)
-        self.hitsContainers = hits_containers
+        self.hitsContainers = ClientValueCollection(SearchHitsContainer, hits_containers)

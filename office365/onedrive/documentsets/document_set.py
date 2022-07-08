@@ -1,4 +1,4 @@
-from office365.onedrive.contenttypes.content_type_info import ContentTypeInfo
+from office365.onedrive.contenttypes.info import ContentTypeInfo
 from office365.onedrive.documentsets.content import DocumentSetContent
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection

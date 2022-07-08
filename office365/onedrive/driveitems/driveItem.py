@@ -14,7 +14,7 @@ from office365.entity_collection import EntityCollection
 from office365.onedrive.internal.paths.children import ChildrenPath
 from office365.onedrive.driveitems.conflict_behavior import ConflictBehavior
 from office365.onedrive.shares.shared import Shared
-from office365.onedrive.versions.drive_item_version import DriveItemVersion
+from office365.onedrive.versions.drive_item import DriveItemVersion
 from office365.onedrive.files.file import File
 from office365.onedrive.files.fileSystemInfo import FileSystemInfo
 from office365.onedrive.folders.folder import Folder

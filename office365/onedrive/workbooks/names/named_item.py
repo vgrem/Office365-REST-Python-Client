@@ -1,5 +1,4 @@
 from office365.entity import Entity
-from office365.onedrive.workbooks.worksheets.worksheet import WorkbookWorksheet
 from office365.runtime.paths.resource_path import ResourcePath
 
 
@@ -28,5 +27,6 @@ class WorkbookNamedItem(Entity):
     def worksheet(self):
         """Returns the worksheet on which the named item is scoped to. Available only if the item is scoped
         to the worksheet. Read-only."""
+        from office365.onedrive.workbooks.worksheets.worksheet import WorkbookWorksheet
         return self.properties.get('worksheet',
                                    WorkbookWorksheet(self.context, ResourcePath("worksheet", self.resource_path)))
