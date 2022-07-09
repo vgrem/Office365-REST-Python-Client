@@ -5,7 +5,9 @@ class Report(ClientValue):
 
     def __init__(self, content=None):
         """
-        :param str content:
+        Returns the content appropriate for the context
+
+        :param str content: Report content; details vary by report type.
         """
         super(Report, self).__init__()
         self.content = content

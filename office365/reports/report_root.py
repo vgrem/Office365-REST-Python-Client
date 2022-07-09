@@ -32,6 +32,18 @@ class ReportRoot(Entity):
         self.context.add_query(qry)
         return qry.return_type
 
+    def get_email_activity_user_detail(self, period):
+        """
+        Get details about email activity users have performed.
+
+        :param str period: Specifies the length of time over which the report is aggregated.
+            The supported values for {period_value} are: D7, D30, D90, and D180. These values follow the format
+            Dn where n represents the number of days over which the report is aggregated. Required.
+        """
+        qry = create_report_query(self, "getEmailActivityUserDetail", period)
+        self.context.add_query(qry)
+        return qry.return_type
+
     def get_office365_activations_user_counts(self):
         """
         Get the count of Microsoft 365 activations on desktops and devices.
@@ -99,6 +111,18 @@ class ReportRoot(Entity):
             Dn where n represents the number of days over which the report is aggregated. Required.
         """
         qry = create_report_query(self, "getOneDriveUsageStorage", period)
+        self.context.add_query(qry)
+        return qry.return_type
+
+    def get_mailbox_usage_detail(self, period):
+        """
+        Get details about mailbox usage.
+
+        :param str period: Specifies the length of time over which the report is aggregated.
+            The supported values for {period_value} are: D7, D30, D90, and D180. These values follow the format
+            Dn where n represents the number of days over which the report is aggregated. Required.
+        """
+        qry = create_report_query(self, "getMailboxUsageDetail", period)
         self.context.add_query(qry)
         return qry.return_type
 

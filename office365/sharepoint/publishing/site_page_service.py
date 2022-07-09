@@ -36,19 +36,25 @@ class SitePageService(BaseEntity):
     def entity_type_name(self):
         return "SP.Publishing.SitePageService"
 
-    @staticmethod
-    def can_create_promoted_page(context):
+    def can_create_page(self):
         """
         Checks if the current user has permission to create a site page on the site pages document library.
         MUST return true if the user has permission to create a site page, otherwise MUST return false.
 
-        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
         """
-        return_type = ClientResult(context)
-        svc = SitePageService(context)
-        qry = ServiceOperationQuery(svc, "CanCreatePromotedPage", None, None, None, return_type)
-        qry.static = True
-        context.add_query(qry)
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "CanCreatePage", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def can_create_promoted_page(self):
+        """
+        Checks if the current user has permission to create a site page on the site pages document library.
+        MUST return true if the user has permission to create a site page, otherwise MUST return false.
+        """
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "CanCreatePromotedPage", None, None, None, return_type)
+        self.context.add_query(qry)
         return return_type
 
     @staticmethod
@@ -58,7 +64,6 @@ class SitePageService(BaseEntity):
 
         :param office365.sharepoint.client_context.ClientContext context:
         :param str city_name: The name of the city.
-        :return: PrimaryCityTime
         """
         return_type = PrimaryCityTime(context)
         svc = SitePageService(context)

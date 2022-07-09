@@ -1,4 +1,4 @@
-from office365.communications.onlinemeetings.online_meeting_collection import OnlineMeetingCollection
+from office365.communications.onlinemeetings.collection import OnlineMeetingCollection
 from office365.communications.presences.presence import Presence
 from office365.delta_collection import DeltaCollection
 from office365.directory.extensions.extension import Extension

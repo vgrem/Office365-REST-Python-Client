@@ -16,7 +16,7 @@ from office365.onedrive.driveitems.conflict_behavior import ConflictBehavior
 from office365.onedrive.shares.shared import Shared
 from office365.onedrive.versions.drive_item import DriveItemVersion
 from office365.onedrive.files.file import File
-from office365.onedrive.files.fileSystemInfo import FileSystemInfo
+from office365.onedrive.files.system_info import FileSystemInfo
 from office365.onedrive.folders.folder import Folder
 from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.driveitems.publication_facet import PublicationFacet

@@ -1,6 +1,6 @@
 from office365.communications.callrecords.call_record import CallRecord
 from office365.communications.calls.call import Call
-from office365.communications.onlinemeetings.online_meeting_collection import OnlineMeetingCollection
+from office365.communications.onlinemeetings.collection import OnlineMeetingCollection
 from office365.communications.presences.presence import Presence
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection

@@ -3,17 +3,20 @@ from office365.runtime.odata.v4.metadata_level import ODataV4MetadataLevel
 
 
 class V4JsonFormat(ODataJsonFormat):
-    """V4 JSON format"""
+    """JSON format (V4)"""
 
     def __init__(self, metadata_level=ODataV4MetadataLevel.Minimal):
         super(V4JsonFormat, self).__init__(metadata_level)
         """The IEEE754Compatible format parameter indicates that the service MUST serialize Edm.Int64 and
         Edm.Decimal numbers as strings."""
         self.IEEE754Compatible = False
-        """"""
         self.streaming = False
         self.collection_tag_name = "value"
         self.metadata_type_tag_name = "@odata.type"
+
+    @staticmethod
+    def no_metadata():
+        return V4JsonFormat(ODataV4MetadataLevel.NoMetadata)
 
     def get_media_type(self):
         return "application/json;odata.metadata={0};odata.streaming={1};IEEE754Compatible={2}" \

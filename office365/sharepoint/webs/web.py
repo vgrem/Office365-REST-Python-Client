@@ -4,6 +4,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.sharepoint.activities.entity import SPActivityEntity
 from office365.sharepoint.alerts.collection import AlertCollection
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.changes.collection import ChangeCollection
@@ -47,12 +48,12 @@ from office365.sharepoint.views.view import View
 from office365.sharepoint.webparts.client.collection import ClientWebPartCollection
 from office365.sharepoint.webs.calendar_type import CalendarType
 from office365.sharepoint.webs.context_web_information import ContextWebInformation
-from office365.sharepoint.webs.datetime_field_format_type import DateTimeFieldFormatType
+from office365.sharepoint.fields.datetime_field_format_type import DateTimeFieldFormatType
 from office365.sharepoint.webs.multilingual_settings import MultilingualSettings
 from office365.sharepoint.webs.regional_settings import RegionalSettings
 from office365.sharepoint.sitescripts.types import SiteScriptSerializationResult, SiteScriptSerializationInfo
-from office365.sharepoint.webs.web_information_collection import WebInformationCollection
-from office365.sharepoint.webs.web_template_collection import WebTemplateCollection
+from office365.sharepoint.webs.information_collection import WebInformationCollection
+from office365.sharepoint.webs.template_collection import WebTemplateCollection
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
@@ -337,7 +338,7 @@ class Web(SecurableObject):
 
     def get_all_webs(self):
         """Returns a collection containing a flat list of all Web objects in the Web."""
-        from office365.sharepoint.webs.web_collection import WebCollection
+        from office365.sharepoint.webs.collection import WebCollection
         return_type = WebCollection(self.context, self.webs.resource_path)
 
         def _webs_loaded():
@@ -348,8 +349,8 @@ class Web(SecurableObject):
 
     def _load_sub_webs_inner(self, webs, all_webs):
         """
-        :type webs: office365.sharepoint.webs.web_collection.WebCollection
-        :type all_webs: office365.sharepoint.webs.web_collection.WebCollection
+        :type webs: office365.sharepoint.webs.collection.WebCollection
+        :type all_webs: office365.sharepoint.webs.collection.WebCollection
         """
         for cur_web in webs:  # type: Web
             all_webs.add_child(cur_web)
@@ -1090,6 +1091,12 @@ class Web(SecurableObject):
         return self
 
     @property
+    def activities(self):
+        return self.properties.get("Activities",
+                                   BaseEntityCollection(self.context, SPActivityEntity,
+                                                        ResourcePath("Activities", self.resource_path)))
+
+    @property
     def allow_rss_feeds(self):
         """Gets a Boolean value that specifies whether the site collection allows RSS feeds.
 
@@ -1152,7 +1159,7 @@ class Web(SecurableObject):
     @property
     def webs(self):
         """Get child webs"""
-        from office365.sharepoint.webs.web_collection import WebCollection
+        from office365.sharepoint.webs.collection import WebCollection
         return self.properties.get("Webs",
                                    WebCollection(self.context, ResourcePath("webs", self.resource_path), self))
 

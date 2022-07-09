@@ -19,7 +19,7 @@ from office365.sharepoint.sites.sph_site import SPHSite
 from office365.sharepoint.sites.usage_info import UsageInfo
 from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
 from office365.sharepoint.webs.web import Web
-from office365.sharepoint.webs.web_template_collection import WebTemplateCollection
+from office365.sharepoint.webs.template_collection import WebTemplateCollection
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 

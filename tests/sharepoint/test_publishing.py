@@ -53,3 +53,8 @@ class TestSPPublishing(SPTestCase):
 
         #translations = first_page.translations.get().execute_query()
         #self.assertIsNotNone(translations.resource_path)
+
+    def test9_can_create_page(self):
+        result = self.client.site_pages.can_create_page().execute_query()
+        self.assertIsNotNone(result.value)
+

@@ -15,11 +15,11 @@ class AlertCollection(BaseEntityCollection):
 
         :type parameters: office365.sharepoint.alerts.creation_information.AlertCreationInformation
         """
-        alert = Alert(self.context, None)
-        self.add_child(alert)
-        qry = ServiceOperationQuery(self, "Add", None, parameters, "alertCreationInformation", alert)
+        return_type = Alert(self.context)
+        self.add_child(return_type)
+        qry = ServiceOperationQuery(self, "Add", None, parameters, "alertCreationInformation", return_type)
         self.context.add_query(qry)
-        return alert
+        return return_type
 
     def contains(self, id_alert):
         """

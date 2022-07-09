@@ -1,5 +1,5 @@
 from office365.communications.calls.invitation_participant_info import InvitationParticipantInfo
-from office365.communications.operations.comms_operation import CommsOperation
+from office365.communications.operations.comms import CommsOperation
 from office365.runtime.client_value_collection import ClientValueCollection
 
 

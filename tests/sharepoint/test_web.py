@@ -9,7 +9,7 @@ from office365.sharepoint.permissions.permission_kind import PermissionKind
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.webs.subweb_query import SubwebQuery
 from office365.sharepoint.webs.web import Web
-from office365.sharepoint.webs.web_creation_information import WebCreationInformation
+from office365.sharepoint.webs.creation_information import WebCreationInformation
 
 
 class TestSharePointWeb(SPTestCase):

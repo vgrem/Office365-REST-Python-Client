@@ -14,10 +14,13 @@ from office365.directory.identities.identity_provider import IdentityProvider
 from office365.directory.licenses.subscribed_sku import SubscribedSku
 from office365.directory.organizations.org_contact import OrgContact
 from office365.directory.organizations.organization import Organization
+from office365.directory.policies.root import PolicyRoot
 from office365.directory.subscriptions.subscription import Subscription
 from office365.directory.users.user import User
 from office365.directory.users.collection import UserCollection
+from office365.education.root import EducationRoot
 from office365.entity_collection import EntityCollection
+from office365.external.external import External
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.shares.shares_collection import SharesCollection
 from office365.onedrive.sites.sites_with_root import SitesWithRoot
@@ -35,6 +38,7 @@ from office365.runtime.queries.batch import BatchQuery
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.search.entity import SearchEntity
+from office365.security.security import Security
 from office365.teams.chats.collection import ChatCollection
 from office365.teams.collection import TeamCollection
 from office365.teams.template import TeamsTemplate
@@ -248,3 +252,26 @@ class GraphClient(ClientRuntimeContext):
         The search endpoint is the entry point for Microsoft Search API to query data.
         """
         return SearchEntity(self, ResourcePath("search"))
+
+    @property
+    def education(self):
+        """
+        The /education namespace exposes functionality that is specific to the education sector.
+        """
+        return EducationRoot(self, ResourcePath("education"))
+
+    @property
+    def policies(self):
+        """Resource type exposing navigation properties for the policies singleton."""
+        return PolicyRoot(self, ResourcePath("policies"))
+
+    @property
+    def external(self):
+        """A logical container  for external sources."""
+        return External(self, ResourcePath("external"))
+
+    @property
+    def security(self):
+        """The security resource is the entry point for the Security object model.
+        It returns a singleton security resource. It doesn't contain any usable properties."""
+        return Security(self, ResourcePath("security"))
