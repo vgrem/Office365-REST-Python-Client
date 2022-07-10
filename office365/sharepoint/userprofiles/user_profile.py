@@ -1,3 +1,4 @@
+from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
@@ -46,6 +47,15 @@ class UserProfile(BaseEntity):
         return self.properties.get("PublicUrl", None)
 
     @property
+    def url_to_create_personal_site(self):
+        """
+        The UrlToCreatePersonalSite property specifies the URL to allow the current user to create a personal site.
+
+        :rtype: str or None
+        """
+        return self.properties.get("UrlToCreatePersonalSite", None)
+
+    @property
     def followed_content(self):
         """
         Gets a FollowedContent object for the user.
@@ -73,6 +83,18 @@ class UserProfile(BaseEntity):
         self.context.add_query(qry)
         return self
 
+    def share_all_social_data(self, share_all):
+        """
+        The ShareAllSocialData method specifies whether the current user's social data is to be shared.
+
+        :param bool share_all:  If true, social data is shared; if false, social data is not shared.
+        """
+        payload = {"shareAll": share_all}
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "ShareAllSocialData", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
@@ -87,3 +109,4 @@ class UserProfile(BaseEntity):
         # fallback: create a new resource path
         if name == "AccountName":
             pass
+        return self

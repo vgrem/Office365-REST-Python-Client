@@ -20,10 +20,10 @@ class ClientValueCollection(ClientValue):
 
     def add(self, value):
         self._data.append(value)
+        return self
 
     def __getitem__(self, index):
         """
-
         :type index: int
         :rtype: ClientValue
         """

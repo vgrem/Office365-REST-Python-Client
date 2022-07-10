@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.runtime.client_value import ClientValue
 
 
-class SocialAttachment(BaseEntity):
+class SocialAttachment(ClientValue):
     """The SocialAttachment class represents an image, document preview, or video preview attachment."""
 
     @property

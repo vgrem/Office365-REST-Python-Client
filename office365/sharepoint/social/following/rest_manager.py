@@ -9,10 +9,10 @@ from office365.sharepoint.social.actor import SocialActor
 class SocialRestFollowingManager(BaseEntity):
     """Provides methods for managing a user's list of followed actors (users, documents, sites, and tags)."""
 
-    def __init__(self, context, path=None):
-        if path is None:
-            path = ResourcePath("SP.Social.SocialRestFollowingManager")
-        super(SocialRestFollowingManager, self).__init__(context, path)
+    def __init__(self, context, resource_path=None):
+        if resource_path is None:
+            resource_path = ResourcePath("SP.Social.SocialRestFollowingManager")
+        super(SocialRestFollowingManager, self).__init__(context, resource_path)
 
     def followers(self):
         """The Followers method retrieves the current user's list of followers. For details on the SocialActor type,
