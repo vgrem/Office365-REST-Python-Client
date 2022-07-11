@@ -25,7 +25,7 @@ from office365.sharepoint.lists.list_collection import ListCollection
 from office365.sharepoint.lists.list_template_collection import ListTemplateCollection
 from office365.sharepoint.navigation.navigation import Navigation
 from office365.sharepoint.permissions.base_permissions import BasePermissions
-from office365.sharepoint.permissions.role_definition_collection import RoleDefinitionCollection
+from office365.sharepoint.permissions.roles.definitions.collection import RoleDefinitionCollection
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.principal.group import Group
 from office365.sharepoint.principal.group_collection import GroupCollection
@@ -1417,6 +1417,14 @@ class Web(SecurableObject):
         """
         return self.properties.get('SiteUserInfoList',
                                    List(self.context, ResourcePath("SiteUserInfoList", self.resource_path)))
+
+    @property
+    def title(self):
+        """Gets the title of the web.
+
+        :rtype: str or None
+        """
+        return self.properties.get("Title", None)
 
     @property
     def welcome_page(self):

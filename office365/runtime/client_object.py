@@ -186,7 +186,7 @@ class ClientObject(object):
 
     @property
     def entity_type_name(self):
-        """Returns server type name"""
+        """Returns server type name for an entity"""
         if self._entity_type_name is None:
             if self._namespace is None:
                 self._entity_type_name = type(self).__name__

@@ -1,6 +1,6 @@
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.permissions.role_definition_collection import RoleDefinitionCollection
+from office365.sharepoint.permissions.roles.definitions.collection import RoleDefinitionCollection
 from office365.sharepoint.principal.principal import Principal
 
 

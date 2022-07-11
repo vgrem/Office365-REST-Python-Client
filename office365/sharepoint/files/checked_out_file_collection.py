@@ -1,6 +1,6 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.files.checkedOutFile import CheckedOutFile
+from office365.sharepoint.files.checked_out_file import CheckedOutFile
 
 
 class CheckedOutFileCollection(BaseEntityCollection):

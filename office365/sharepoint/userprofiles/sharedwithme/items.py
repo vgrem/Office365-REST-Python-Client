@@ -1,6 +1,5 @@
 from office365.sharepoint.base_entity import BaseEntity
 
 
-class SharedWithMeDocument(BaseEntity):
-    """"""
+class SharedWithMeItems(BaseEntity):
     pass

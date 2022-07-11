@@ -13,10 +13,19 @@ class V4JsonFormat(ODataJsonFormat):
         self.streaming = False
         self.collection_tag_name = "value"
         self.metadata_type_tag_name = "@odata.type"
+        self.collection_next_tag_name = "@odata.nextLink"
 
     @staticmethod
     def no_metadata():
         return V4JsonFormat(ODataV4MetadataLevel.NoMetadata)
+
+    @staticmethod
+    def minimal():
+        return V4JsonFormat(ODataV4MetadataLevel.Minimal)
+
+    @staticmethod
+    def full():
+        return V4JsonFormat(ODataV4MetadataLevel.Full)
 
     def get_media_type(self):
         return "application/json;odata.metadata={0};odata.streaming={1};IEEE754Compatible={2}" \

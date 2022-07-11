@@ -8,11 +8,11 @@ from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.files.version_event import FileVersionEvent
 from office365.sharepoint.internal.queries.download_file import create_download_file_query
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.permissions.irm.effective_settings import EffectiveInformationRightsManagementSettings
+from office365.sharepoint.permissions.irm.settings import InformationRightsManagementSettings
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.files.version_collection import FileVersionCollection
 from office365.sharepoint.listitems.listitem import ListItem
-from office365.sharepoint.permissions.irm import InformationRightsManagementSettings, \
-    EffectiveInformationRightsManagementSettings
 from office365.sharepoint.webparts.limited_manager import LimitedWebPartManager
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 from office365.sharepoint.webparts.personalization_scope import PersonalizationScope

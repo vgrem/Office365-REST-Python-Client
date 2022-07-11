@@ -1,7 +1,7 @@
 from pprint import pprint
 
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.permissions.permission_kind import PermissionKind
+from office365.sharepoint.permissions.kind import PermissionKind
 from tests import test_team_site_url, test_user_principal_name_alt, test_user_credentials
 
 client = ClientContext(test_team_site_url).with_credentials(test_user_credentials)

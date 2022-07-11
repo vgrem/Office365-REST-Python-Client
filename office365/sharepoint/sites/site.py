@@ -347,6 +347,16 @@ class Site(BaseEntity):
         return self.properties.get("Audit", Audit(self.context, ResourcePath("Audit", self.resource_path)))
 
     @property
+    def can_upgrade(self):
+        """
+        Specifies whether this site collection is in an implementation-specific valid state for site collection upgrade,
+         "true" if it is; otherwise, "false".
+
+        :rtype: bool
+        """
+        return self.properties.get("CanUpgrade", None)
+
+    @property
     def classification(self):
         """
         Gets the classification of this site.
@@ -359,6 +369,13 @@ class Site(BaseEntity):
     def current_change_token(self):
         """Gets the current change token that is used in the change log for the site collection."""
         return self.properties.get("CurrentChangeToken", ChangeToken())
+
+    @property
+    def group_id(self):
+        """
+        :rtype: str or None
+        """
+        return self.properties.get("GroupId", None)
 
     @property
     def root_web(self):
@@ -416,6 +433,22 @@ class Site(BaseEntity):
         :rtype: bool or none
         """
         return self.properties.get('ShareByEmailEnabled', None)
+
+    @property
+    def trim_audit_log(self):
+        """
+        When this flag is set for the site, the audit events are trimmed periodically.
+
+        :rtype: bool or none
+        """
+        return self.properties.get('TrimAuditLog', None)
+
+    @property
+    def write_locked(self):
+        """
+        :rtype: bool or none
+        """
+        return self.properties.get('WriteLocked', None)
 
     @property
     def id(self):

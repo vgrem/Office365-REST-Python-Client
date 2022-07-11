@@ -14,6 +14,26 @@ class GroupSiteManager(ClientObject):
             resource_path = ResourcePath("GroupSiteManager")
         super(GroupSiteManager, self).__init__(context, resource_path)
 
+    def create_group_for_site(self, display_name, alias, is_public=None, optional_params=None):
+        """
+        Create a modern site
+
+        :param str display_name:
+        :param str alias:
+        :param bool or None is_public:
+        :param office365.sharepoint.portal.group_creation_params.GroupCreationParams or None optional_params:
+        """
+        payload = {
+            "displayName": display_name,
+            "alias": alias,
+            "isPublic": is_public,
+            "optionalParams": optional_params
+        }
+        return_type = ClientResult(self.context, GroupSiteInfo())
+        qry = ServiceOperationQuery(self, "CreateGroupForSite", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def create_group_ex(self, display_name, alias, is_public, optional_params=None):
         """
         Create a modern site
@@ -24,10 +44,10 @@ class GroupSiteManager(ClientObject):
         :param office365.sharepoint.portal.group_creation_params.GroupCreationParams or None optional_params:
         """
         payload = GroupCreationInformation(display_name, alias, is_public, optional_params)
-        result = ClientResult(self.context, GroupSiteInfo())
-        qry = ServiceOperationQuery(self, "CreateGroupEx", None, payload, None, result)
+        return_type = ClientResult(self.context, GroupSiteInfo())
+        qry = ServiceOperationQuery(self, "CreateGroupEx", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def delete(self, site_url):
         """

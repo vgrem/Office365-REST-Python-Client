@@ -11,6 +11,26 @@ class ContentTypeCollection(BaseEntityCollection):
     def __init__(self, context, resource_path=None, parent=None):
         super(ContentTypeCollection, self).__init__(context, ContentType, resource_path, parent)
 
+    def get_by_name(self, name):
+        """
+        Returns the content type with the given name from the collection.
+
+        :param str name: Content type name
+        """
+        return_type = ContentType(self.context)
+        filter_expr = "Name eq '{0}'".format(name)
+
+        def _after_get_by_name(cts):
+            if len(cts) != 1:
+                message = "Entity not found or ambiguous match found for filter: {0}".format(filter_expr)
+                raise ValueError(message)
+            self.add_child(return_type)
+            return_type.set_property("StringId", cts[0].get_property("StringId"))
+
+        col = ContentTypeCollection(self.context, self.resource_path).filter(filter_expr)
+        self.context.load(col, after_loaded=_after_get_by_name)
+        return return_type
+
     def get_by_id(self, content_type_id):
         """
         Returns the content type with the given identifier from the collection.

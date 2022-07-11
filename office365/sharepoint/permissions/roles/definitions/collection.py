@@ -1,6 +1,6 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.permissions.role_definition import RoleDefinition
+from office365.sharepoint.permissions.roles.definitions.definition import RoleDefinition
 
 
 class RoleDefinitionCollection(BaseEntityCollection):

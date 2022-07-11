@@ -1,7 +1,7 @@
 import inspect
 
 from office365.runtime.client_value import ClientValue
-from office365.sharepoint.permissions.permission_kind import PermissionKind
+from office365.sharepoint.permissions.kind import PermissionKind
 
 
 class BasePermissions(ClientValue):

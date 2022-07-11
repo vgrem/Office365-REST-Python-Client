@@ -32,6 +32,3 @@ class InformationRightsManagementSettings(BaseEntity):
         return self.properties.get("GroupName", None)
 
 
-class EffectiveInformationRightsManagementSettings(BaseEntity):
-    """A collection of effective IRM settings on the file."""
-    pass

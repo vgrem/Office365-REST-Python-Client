@@ -22,7 +22,7 @@ class ClientObjectCollection(ClientObject):
         self._item_type = item_type
         self.page_loaded = EventHandler(False)
         self._page_size = 100
-        self._paged_mode = True
+        self._paged_mode = False
         self._page_index = 0
         self.next_request_url = None
 
@@ -168,6 +168,10 @@ class ClientObjectCollection(ClientObject):
         result = ClientResult(self.context)
 
         def _calc_items_count(resp):
+            """
+            :type resp: requests.Response
+            """
+            resp.raise_for_status()
             list(iter(self))
             result.value = len(self)
 
@@ -190,5 +194,6 @@ class ClientObjectCollection(ClientObject):
 
     @property
     def entity_type_name(self):
+        """Returns server type name for the collection of entities"""
         name = super(ClientObjectCollection, self).entity_type_name
         return "Collection({0})".format(name)

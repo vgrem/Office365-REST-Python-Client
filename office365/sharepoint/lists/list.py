@@ -11,7 +11,7 @@ from office365.sharepoint.customactions.element import CustomActionElementCollec
 from office365.sharepoint.eventreceivers.definition_collection import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.collection import FieldCollection
 from office365.sharepoint.fields.related_field_collection import RelatedFieldCollection
-from office365.sharepoint.files.checkedOutFileCollection import CheckedOutFileCollection
+from office365.sharepoint.files.checked_out_file_collection import CheckedOutFileCollection
 from office365.sharepoint.files.file import File
 from office365.sharepoint.flows.synchronization_result import FlowSynchronizationResult
 from office365.sharepoint.folders.folder import Folder

@@ -9,6 +9,12 @@ class UserCollection(DeltaCollection):
     def __init__(self, context, resource_path=None):
         super(UserCollection, self).__init__(context, User, resource_path)
 
+    def __getitem__(self, id_or_principal_name):
+        """
+        :rtype: User
+        """
+        return super(UserCollection, self).__getitem__(id_or_principal_name)
+
     def add(self, user_properties):
         """Create a new user.
 

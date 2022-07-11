@@ -1,6 +1,5 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.contenttypes.field_link_collection import FieldLinkCollection
@@ -60,6 +59,13 @@ class ContentType(BaseEntity):
         :rtype: str or None
         """
         self.set_property("Name", value)
+
+    @property
+    def new_form_client_side_component_properties(self):
+        """
+        :rtype: str or None
+        """
+        return self.properties.get("NewFormClientSideComponentProperties", None)
 
     @property
     def description(self):
@@ -127,6 +133,5 @@ class ContentType(BaseEntity):
         super(ContentType, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "StringId" and self._resource_path is None:
-            self._resource_path = ServiceOperationPath(
-                "getById", [value], self._parent_collection.resource_path)
+            self._resource_path = self.parent_collection.get_by_id(value).resource_path
         return self

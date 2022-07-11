@@ -3,8 +3,8 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.permissions.base_permissions import BasePermissions
-from office365.sharepoint.permissions.role_assignment import RoleAssignment
-from office365.sharepoint.permissions.role_assignment_collection import RoleAssignmentCollection
+from office365.sharepoint.permissions.roles.assignments.assignment import RoleAssignment
+from office365.sharepoint.permissions.roles.assignments.collection import RoleAssignmentCollection
 from office365.sharepoint.principal.user import User
 
 
