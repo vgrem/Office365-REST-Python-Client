@@ -13,18 +13,13 @@ class TeamCollection(EntityCollection):
     def __getitem__(self, key):
         return Team(self.context, ResourcePath(key, self.resource_path))
 
-    def get_all(self, page_size=None, page_loaded=None, include_properties=None):
+    def get_all(self, page_size=None, page_loaded=None):
         """List all teams in Microsoft Teams for an organization
 
         :param int page_size: Page size
         :param (ClientObjectCollection) -> None page_loaded: Page loaded event
-        :param list[str] include_properties: The list of Team properties to include
         """
-        if include_properties is None:
-            include_properties = []
-        include_properties = include_properties + ["id", "resourceProvisioningOptions"]
-
-        def _process_response(groups):
+        def _init_teams(groups):
             """
             :type groups: GroupCollection
             """
@@ -35,7 +30,7 @@ class TeamCollection(EntityCollection):
                         team.set_property(k, v)
                     self.add_child(team)
 
-        self.context.load(self.context.groups, include_properties, after_loaded=_process_response)
+        self.context.groups.get_all(page_size, page_loaded=_init_teams)
         return self
 
     def create(self, display_name, description=None):

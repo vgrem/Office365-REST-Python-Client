@@ -172,7 +172,7 @@ class ClientObjectCollection(ClientObject):
 
         :type self: T
         :param int page_size: Page size
-        :param (ClientObjectCollection) -> None page_loaded: Page loaded event
+        :param (T) -> None page_loaded: Page loaded event
         """
         self.paged(page_size, page_loaded)
         self._clear_results = False
