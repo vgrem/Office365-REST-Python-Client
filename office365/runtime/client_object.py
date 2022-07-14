@@ -1,4 +1,3 @@
-import copy
 import datetime
 from typing import TypeVar
 
@@ -177,12 +176,6 @@ class ClientObject(object):
         else:
             action(*args, **kwargs)
         return self
-
-    def clone_object(self):
-        """Clones a client object"""
-        result = copy.deepcopy(self)
-        result._context = self.context
-        return result
 
     @property
     def entity_type_name(self):

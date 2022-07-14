@@ -1,8 +1,6 @@
 from typing import TypeVar
 
 from office365.runtime.client_object import ClientObject
-from office365.runtime.client_result import ClientResult
-from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.types.event_handler import EventHandler
 
 T = TypeVar('T', bound='ClientObjectCollection')
@@ -20,14 +18,16 @@ class ClientObjectCollection(ClientObject):
         super(ClientObjectCollection, self).__init__(context, resource_path)
         self._data = []  # type: list[ClientObject]
         self._item_type = item_type
-        self.page_loaded = EventHandler(False)
-        self._page_size = 100
+        self._page_loaded = EventHandler(False)
         self._paged_mode = False
         self._page_index = 0
         self.next_request_url = None
+        self._clear_results = True
 
     def clear(self):
-        self._data = []
+        if self._clear_results:
+            self._data = []
+        self.next_request_url = None
         return self
 
     def create_typed_object(self, properties=None, persist_changes=False):
@@ -80,12 +80,11 @@ class ClientObjectCollection(ClientObject):
         """
         for item in self._data:
             yield item
-
         if self._paged_mode:
-            while self.next_request_url:
-                paged_items = self._load_next_items()
-                for item in paged_items:
-                    yield item
+            while self.has_next:
+                next_items = self._load_next().execute_query()
+                for next_item in next_items:
+                    yield next_item
 
     def __len__(self):
         return len(self._data)
@@ -97,11 +96,10 @@ class ClientObjectCollection(ClientObject):
         """
         :type index: int
         """
-        while len(self._data) <= index:
-            next(iter(self))
         return self._data[index]
 
     def to_json(self, json_format=None):
+        """Serializes the collection into JSON"""
         return [item.to_json(json_format) for item in self._data]
 
     def filter(self, expression):
@@ -109,7 +107,7 @@ class ClientObjectCollection(ClientObject):
         Allows clients to filter a collection of resources that are addressed by a request URL
 
         :type self: T
-        :param str expression: Filter expression, for example: Id eq ''
+        :param str expression: Filter expression, for example: 'Id eq 123'
         """
         self.query_options.filter = expression
         return self
@@ -141,56 +139,68 @@ class ClientObjectCollection(ClientObject):
         :type self: T
         :type value: int
         """
-        self._page_size = value
         self.query_options.top = value
         return self
 
-    def paged(self, value):
+    def paged(self, page_size=None, page_loaded=None):
         """
-        Enables/disables server-driven paging
+        Retrieves via server-driven paging mode
 
         :type self: T
-        :param int value: bool: sets flag to enable/disable server-driven paging
+        :param int page_size: Page size
+        :param (ClientObjectCollection) -> None page_loaded: Page loaded event
         """
-        self._paged_mode = value
+        self._paged_mode = True
+        self._page_loaded += page_loaded
+        if page_size:
+            self.top(page_size)
         return self
 
-    def loaded(self, page_loaded=None):
-        if callable(page_loaded):
-            self.page_loaded += page_loaded
+    def get(self):
+        self.context.load(self, after_loaded=self._page_loaded)
+        return self
 
-    def get_items_count(self):
+    def get_all(self, page_size=None, page_loaded=None):
         """
-        Gets total items count
+        Gets all the items in a collection, regardless of the size.
 
-        :return: ClientResult
+        :param int page_size: Page size
+        :param (ClientObjectCollection) -> None page_loaded: Page loaded event
         """
-        result = ClientResult(self.context)
+        self.paged(page_size, page_loaded)
+        self._clear_results = False
 
-        def _calc_items_count(resp):
-            """
-            :type resp: requests.Response
-            """
-            resp.raise_for_status()
-            list(iter(self))
-            result.value = len(self)
+        def _page_loaded(items):
+            self._page_loaded.notify(self)
+            if self.has_next:
+                self._load_next(after_loaded=_page_loaded)
 
-        self.context.load(self)
-        self.context.after_execute(_calc_items_count)
-        return result
+        self.context.load(self, after_loaded=_page_loaded)
+        return self
 
-    def _load_next_items(self):
+    def _load_next(self, after_loaded=None):
         """
         Submit a request to retrieve next collection of items
+
+        :param (ClientObjectCollection) -> None after_loaded: Page loaded event
         """
-        request = RequestOptions(self.next_request_url)
-        response = self.context.execute_request_direct(request)
-        response.raise_for_status()
-        self.next_request_url = None
-        self.context.pending_request().map_json(response.json(), self)
-        self.page_loaded.notify(len(self._data))
-        self._page_index += 1
-        return self._data[self._page_size * self._page_index:]
+        def _construct_next_query(request):
+            """
+            :type request: office365.runtime.http.request_options.RequestOptions
+            """
+            self._page_index += 1
+            request.url = self.next_request_url
+
+        self.context.load(self, before_loaded=_construct_next_query, after_loaded=after_loaded)
+        return self
+
+    @property
+    def page_index(self):
+        return self._page_index
+
+    @property
+    def has_next(self):
+        return self.next_request_url is not None
 
     @property
     def entity_type_name(self):

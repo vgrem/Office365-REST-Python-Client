@@ -10,6 +10,7 @@ from tests import test_admin_site_url, test_user_credentials
 
 admin_client = ClientContext(test_admin_site_url).with_credentials(test_user_credentials)
 tenant = Tenant(admin_client).get().execute_query()
+# print(tenant.get_property("DisableCustomAppAuthentication"))
 if tenant.get_property("DisableCustomAppAuthentication"):
     tenant.set_property("DisableCustomAppAuthentication", False).update().execute_query()
 
