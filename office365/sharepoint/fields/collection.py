@@ -66,24 +66,30 @@ class FieldCollection(BaseEntityCollection):
         [create_field_info.Choices.add(choice) for choice in values]
         return self.add_field(create_field_info)
 
-    def add_user_field(self):
-        pass
+    def add_user_field(self, title):
+        """
+        Adds a user field
 
-    def add_dependent_lookup_field(self, displayName, primaryLookupField, lookupField):
+        :param str title: specifies the display name of the field
+        """
+        create_field_info = FieldCreationInformation(title, FieldType.User)
+        return self.add_field(create_field_info)
+
+    def add_dependent_lookup_field(self, display_name, primary_lookup_field, lookup_field):
         """Adds a secondary lookup field to a field (2) collection.
         A reference (3) to the SP.Field that was added is returned.
-        :param str lookupField: Name of the field (2) from the target list (1) to include data from.
-        :param Field primaryLookupField: Main lookup field to associate the dependent lookup field with.
+        :param str lookup_field: Name of the field (2) from the target list (1) to include data from.
+        :param Field primary_lookup_field: Main lookup field to associate the dependent lookup field with.
             A dependent lookup field will include data from the list item referred to from the instance of the main
             lookup field.
-        :param str displayName: Title of the added field
+        :param str display_name: Title of the added field
         """
         return_field = Field(self.context)
         self.add_child(return_field)
         parameters = {
-            "displayName": displayName,
-            "primaryLookupField": primaryLookupField,
-            "lookupField": lookupField
+            "displayName": display_name,
+            "primaryLookupField": primary_lookup_field,
+            "lookupField": lookup_field
         }
         qry = ServiceOperationQuery(self, "AddDependentLookupField", None, parameters, None, return_field)
         self.context.add_query(qry)
@@ -290,13 +296,15 @@ class FieldCollection(BaseEntityCollection):
         """
         :type schema_xml: str
         """
-        field = Field(self.context)
+        return_type = Field(self.context)
         field_schema = XmlSchemaFieldCreationInformation(schema_xml)
-        self._create_field_as_xml_query(field_schema, field)
-        return field
+        self._create_field_as_xml_query(field_schema, return_type)
+        return return_type
 
     def _create_field_as_xml_query(self, schema_xml, field):
         """
+        Creates a field based on the values defined in the parameters input parameter.
+
         :type field: Field
         :type schema_xml: XmlSchemaFieldCreationInformation
         """

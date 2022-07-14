@@ -23,7 +23,7 @@ from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.listitems.collection import ListItemCollection
 from office365.sharepoint.lists.creatables_info import CreatablesInfo
 from office365.sharepoint.lists.data_source import ListDataSource
-from office365.sharepoint.lists.list_rule import SPListRule
+from office365.sharepoint.lists.rule import SPListRule
 from office365.sharepoint.pages.wiki_page_creation_information import WikiPageCreationInformation
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.principal.user import User

@@ -327,7 +327,7 @@ class ClientContext(ClientRuntimeContext):
     @property
     def lists(self):
         """Alias to ListCollection. Gets information about all lists that the current user can access."""
-        from office365.sharepoint.lists.list_collection import ListCollection
+        from office365.sharepoint.lists.collection import ListCollection
         return ListCollection(self, ResourcePath("Lists"))
 
     @property

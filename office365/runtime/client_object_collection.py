@@ -151,19 +151,26 @@ class ClientObjectCollection(ClientObject):
         :param (ClientObjectCollection) -> None page_loaded: Page loaded event
         """
         self._paged_mode = True
-        self._page_loaded += page_loaded
+        if callable(page_loaded):
+            self._page_loaded += page_loaded
         if page_size:
             self.top(page_size)
         return self
 
     def get(self):
-        self.context.load(self, after_loaded=self._page_loaded)
+        """
+        :type self: T
+        """
+        def _loaded(items):
+            self._page_loaded.notify(self)
+        self.context.load(self, after_loaded=_loaded)
         return self
 
     def get_all(self, page_size=None, page_loaded=None):
         """
         Gets all the items in a collection, regardless of the size.
 
+        :type self: T
         :param int page_size: Page size
         :param (ClientObjectCollection) -> None page_loaded: Page loaded event
         """

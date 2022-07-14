@@ -22,7 +22,7 @@ class ContentTypeCollection(BaseEntityCollection):
 
         def _after_get_by_name(cts):
             if len(cts) != 1:
-                message = "Entity not found or ambiguous match found for filter: {0}".format(filter_expr)
+                message = "Content type not found or ambiguous match found for name: {0}".format(name)
                 raise ValueError(message)
             self.add_child(return_type)
             return_type.set_property("StringId", cts[0].get_property("StringId"))

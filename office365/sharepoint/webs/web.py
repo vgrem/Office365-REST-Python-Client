@@ -21,8 +21,8 @@ from office365.sharepoint.folders.collection import FolderCollection
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.document_library_information import DocumentLibraryInformation
 from office365.sharepoint.lists.list import List
-from office365.sharepoint.lists.list_collection import ListCollection
-from office365.sharepoint.lists.list_template_collection import ListTemplateCollection
+from office365.sharepoint.lists.collection import ListCollection
+from office365.sharepoint.lists.template_collection import ListTemplateCollection
 from office365.sharepoint.navigation.navigation import Navigation
 from office365.sharepoint.permissions.base_permissions import BasePermissions
 from office365.sharepoint.permissions.roles.definitions.collection import RoleDefinitionCollection
