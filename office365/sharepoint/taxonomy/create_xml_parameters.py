@@ -5,12 +5,12 @@ from office365.runtime.client_value import ClientValue
 
 class TaxonomyFieldCreateXmlParameters(ClientValue):
 
-    def __init__(self, name, ssp_id, term_set_id, anchor_id="00000000-0000-0000-0000-000000000000"):
+    def __init__(self, name, term_set_id, anchor_id="00000000-0000-0000-0000-000000000000"):
         """
         :param str name:
         """
         self.name = name
-        self.ssp_id = ssp_id
+        self.ssp_id = None
         self.term_set_id = term_set_id
         self.anchor_id = anchor_id
         self.field_id = str(uuid.uuid1())

@@ -3,35 +3,11 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.taxonomy.item import TaxonomyItem
 from office365.sharepoint.taxonomy.item_collection import TaxonomyItemCollection
-from office365.sharepoint.taxonomy.set import TermSet
-from office365.sharepoint.taxonomy.term import Term
 from office365.sharepoint.taxonomy.group import TermGroup
 
 
 class TermStore(TaxonomyItem):
     """Represents a hierarchical or flat set of Term objects known as a 'TermSet'."""
-
-    def search_term(self, label, set_id=None, parent_term_id=None, language_tag=None):
-        """
-
-        :param str label:
-        :param str set_id:
-        :param str or None parent_term_id:
-        :param str or None language_tag:
-        """
-        return_type = TaxonomyItemCollection(self.context, Term, self.resource_path)
-        params = {"label": label, "setId": set_id, "parentTermId": parent_term_id, "languageTag": language_tag}
-        qry = ServiceOperationQuery(self, "searchTerm", params, None, None, return_type)
-        self.context.add_query(qry)
-
-        def _construct_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
-            pass
-
-        self.context.before_execute(_construct_request)
-        return return_type
 
     @property
     def id(self):

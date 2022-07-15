@@ -1,20 +1,46 @@
 import uuid
 
 from office365.sharepoint.fields.lookup import FieldLookup
+from office365.sharepoint.taxonomy.create_xml_parameters import TaxonomyFieldCreateXmlParameters
 
 
 class TaxonomyField(FieldLookup):
     """Represents a taxonomy field."""
 
     @staticmethod
-    def create(context, name, ssp_id, term_set_id):
+    def create(fields, name, term_set_id):
         """
-        :type context: office365.sharepoint.client_context.ClientContext
+        :type fields: office365.sharepoint.fields.collection.FieldCollection
         :param str name:
-        :param str ssp_id:
         :param str term_set_id:
         """
-        pass
+        return_type = TaxonomyField(fields.context)
+        fields.add_child(return_type)
+        params = TaxonomyFieldCreateXmlParameters(name, term_set_id)
+
+        def _create_taxonomy_field_inner():
+            from office365.sharepoint.lists.list import List
+            if isinstance(fields.parent, List):
+                parent_list = fields.parent
+
+                def _list_loaded():
+                    params.web_id = parent_list.parent_web.id
+                    params.list_id = parent_list.id
+                    fields.create_field_as_xml(params.schema_xml, return_type)
+                fields.parent.ensure_properties(["Id", "ParentWeb"], _list_loaded)
+            else:
+                def _web_loaded():
+                    params.web_id = fields.context.web.id
+                    fields.create_field_as_xml(params.schema_xml, return_type)
+                fields.context.web.ensure_property("Id", _web_loaded)
+
+        text_field = return_type._create_text_field(name)
+
+        def _after_text_field_created(resp):
+            params.text_field_id = text_field.id
+            _create_taxonomy_field_inner()
+        fields.context.after_execute(_after_text_field_created)
+        return return_type
 
     def _create_text_field(self, name):
         """Creates hidden text field"""

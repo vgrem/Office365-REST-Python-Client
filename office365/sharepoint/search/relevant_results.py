@@ -1,5 +1,5 @@
 from office365.runtime.client_value import ClientValue
-from office365.sharepoint.search.simpleDataTable import SimpleDataTable
+from office365.sharepoint.search.simple_data_table import SimpleDataTable
 
 
 class RelevantResults(ClientValue):

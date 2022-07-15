@@ -373,7 +373,7 @@ class ClientContext(ClientRuntimeContext):
     @property
     def search(self):
         """Alias to SearchService"""
-        from office365.sharepoint.search.search_service import SearchService
+        from office365.sharepoint.search.service import SearchService
         return SearchService(self)
 
     @property

@@ -1,7 +1,7 @@
 import json
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.search.search_request import SearchRequest
-from office365.sharepoint.search.search_service import SearchService
+from office365.sharepoint.search.request import SearchRequest
+from office365.sharepoint.search.service import SearchService
 from tests import test_site_url, test_user_credentials
 
 ctx = ClientContext(test_site_url).with_credentials(test_user_credentials)

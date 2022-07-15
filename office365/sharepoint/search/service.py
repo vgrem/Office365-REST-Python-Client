@@ -8,8 +8,8 @@ from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.search.query.auto_completion_results import QueryAutoCompletionResults
 from office365.sharepoint.search.query.popular_tenant_query import PopularTenantQuery
 from office365.sharepoint.search.query.suggestion_results import QuerySuggestionResults
-from office365.sharepoint.search.search_request import SearchRequest
-from office365.sharepoint.search.search_result import SearchResult
+from office365.sharepoint.search.request import SearchRequest
+from office365.sharepoint.search.result import SearchResult
 
 
 class SearchService(BaseEntity):
@@ -52,7 +52,7 @@ class SearchService(BaseEntity):
     def query(self, request_or_query):
         """The operation is used to retrieve search results by using the HTTP protocol with the GET method.
 
-        :type request_or_query: office365.sharepoint.search.search_request.SearchRequest or str
+        :type request_or_query: office365.sharepoint.search.request.SearchRequest or str
         """
         if is_string_type(request_or_query):
             params = SearchRequest(query_text=request_or_query)
@@ -75,7 +75,7 @@ class SearchService(BaseEntity):
         """The operation is used to retrieve search results through the use of the HTTP protocol
         with method type POST.
 
-        :type request: office365.sharepoint.search.search_request.SearchRequest"""
+        :type request: office365.sharepoint.search.request.SearchRequest"""
         result = ClientResult(self.context, SearchResult())
         qry = ServiceOperationQuery(self, "postquery", None, request, "request", result)
         self.context.add_query(qry)

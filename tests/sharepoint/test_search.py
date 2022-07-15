@@ -4,10 +4,10 @@ from unittest import TestCase
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.search.query.suggestion_results import QuerySuggestionResults
 from office365.sharepoint.search.query_result import QueryResult
-from office365.sharepoint.search.search_request import SearchRequest
-from office365.sharepoint.search.search_result import SearchResult
-from office365.sharepoint.search.search_service import SearchService
-from office365.sharepoint.search.search_setting import SearchSetting
+from office365.sharepoint.search.request import SearchRequest
+from office365.sharepoint.search.result import SearchResult
+from office365.sharepoint.search.service import SearchService
+from office365.sharepoint.search.setting import SearchSetting
 from tests import test_user_credentials, test_site_url
 
 

@@ -1,5 +1,3 @@
-import uuid
-
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
@@ -8,7 +6,6 @@ from office365.sharepoint.fields.field import Field
 from office365.sharepoint.fields.creation_information import FieldCreationInformation
 from office365.sharepoint.fields.type import FieldType
 from office365.sharepoint.fields.xmlSchemaFieldCreationInformation import XmlSchemaFieldCreationInformation
-from office365.sharepoint.taxonomy.create_xml_parameters import TaxonomyFieldCreateXmlParameters
 from office365.sharepoint.taxonomy.field import TaxonomyField
 
 
@@ -119,47 +116,14 @@ class FieldCollection(BaseEntityCollection):
         self.context.add_query(qry)
         return return_type
 
-    def create_taxonomy_field(self, name, ssp_id, term_set_id):
+    def create_taxonomy_field(self, name, term_set_id):
         """
         Creates a taxonomy field
 
-        :param str name:
-        :param str ssp_id:
-        :param str term_set_id:
+        :param str name: Field name
+        :param str term_set_id: TermSet Id
         """
-        return_type = TaxonomyField(self.context)
-        params = TaxonomyFieldCreateXmlParameters(name, ssp_id, term_set_id)
-
-        def _create_taxonomy_field_inner():
-            from office365.sharepoint.lists.list import List
-            if isinstance(self._parent, List):
-                parent_list = self._parent
-
-                def _list_loaded():
-                    params.web_id = parent_list.parent_web.id
-                    params.list_id = parent_list.id
-                    self.create_field_as_xml(params.schema_xml, return_type)
-                self._parent.ensure_properties(["Id", "ParentWeb"], _list_loaded)
-            else:
-                def _web_loaded():
-                    params.web_id = self.context.web.id
-                    self.create_field_as_xml(params.schema_xml, return_type)
-                self.context.web.ensure_property("Id", _web_loaded)
-
-        text_field_name = "{name}".format(name=uuid.uuid4().hex)
-        text_field_schema = '''
-            <Field Type="Note" DisplayName="{name}_0" Hidden="TRUE" CanBeDeleted="TRUE" ShowInViewForms="FALSE"
-                   CanToggleHidden="TRUE" StaticName="{text_field_name}" Name="{text_field_name}">
-            </Field>
-        '''.format(name=name, text_field_name=text_field_name)
-        text_field = self.create_field_as_xml(text_field_schema)
-
-        def _after_text_field_created(resp):
-            params.text_field_id = text_field.id
-            _create_taxonomy_field_inner()
-        self.context.after_execute(_after_text_field_created, True)
-
-        return return_type
+        return TaxonomyField.create(self, name, term_set_id)
 
     def create_field_as_xml(self, schema_xml, return_type=None):
         """

@@ -8,3 +8,7 @@ class TaxonomyMetadata(ClientValue):
         :param str anchor_id:
         """
         self.anchorId = anchor_id
+
+    @property
+    def entity_type_name(self):
+        return "SP.Publishing.TaxonomyMetadata"

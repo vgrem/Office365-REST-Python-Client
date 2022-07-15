@@ -49,15 +49,13 @@ class TestSPTaxonomy(SPTestCase):
         self.assertIsInstance(terms[0], Term)
 
     #def test5_search_term(self):
-    #    result = self.tax_svc.term_store.search_term("Finland", self.__class__.target_term_set.properties.get('id'))
-    #    result = self.tax_svc.term_store.search_term("Finland").execute_query()
+    #    result = self.tax_svc.term_store.search_term("Sweden").execute_query()
     #    self.assertIsNotNone(result.resource_path)
 
     def test6_create_list_tax_field(self):
-        ssp_id = "f02be691-d551-462f-aaae-e1c89168cd0b"
         term_set_id = "b49f64b3-4722-4336-9a5c-56c326b344d4"
         tax_field = self.client.web.default_document_library().fields \
-            .create_taxonomy_field(name="Category", ssp_id=ssp_id, term_set_id=term_set_id).execute_query()
+            .create_taxonomy_field(name="Category123", term_set_id=term_set_id).execute_query()
         self.assertIsNotNone(tax_field.resource_path)
         self.__class__.target_field = tax_field
 
