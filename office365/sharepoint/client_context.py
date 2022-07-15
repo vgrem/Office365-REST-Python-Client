@@ -365,6 +365,18 @@ class ClientContext(ClientRuntimeContext):
         return ThemeManager(self, ResourcePath("themeManager"))
 
     @property
+    def taxonomy(self):
+        """Alias to TaxonomyService"""
+        from office365.sharepoint.taxonomy.service import TaxonomyService
+        return TaxonomyService(self)
+
+    @property
+    def search(self):
+        """Alias to SearchService"""
+        from office365.sharepoint.search.search_service import SearchService
+        return SearchService(self)
+
+    @property
     def base_url(self):
         """Represents absolute Web or Site Url"""
         return self._base_url

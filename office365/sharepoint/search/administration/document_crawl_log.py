@@ -10,9 +10,8 @@ class DocumentCrawlLog(BaseEntity):
     about items that were crawled."""
 
     def __init__(self, context):
-        super(DocumentCrawlLog, self).__init__(context,
-                                               ResourcePath(
-                                                   "Microsoft.SharePoint.Client.Search.Administration.DocumentCrawlLog"))
+        static_path = ResourcePath("Microsoft.SharePoint.Client.Search.Administration.DocumentCrawlLog")
+        super(DocumentCrawlLog, self).__init__(context,static_path)
 
     def get_crawled_urls(self, get_count_only=False):
         """

@@ -7,6 +7,7 @@ from office365.sharepoint.search.query_result import QueryResult
 from office365.sharepoint.search.search_request import SearchRequest
 from office365.sharepoint.search.search_result import SearchResult
 from office365.sharepoint.search.search_service import SearchService
+from office365.sharepoint.search.search_setting import SearchSetting
 from tests import test_user_credentials, test_site_url
 
 
@@ -47,6 +48,15 @@ class TestSearch(TestCase):
     def test6_search_suggest(self):
         result = self.search.suggest("guide.docx").execute_query()
         self.assertIsInstance(result.value, QuerySuggestionResults)
+
+    #def test7_auto_completions(self):
+    #    result = self.search.auto_completions("guide").execute_query()
+    #    self.assertIsNotNone(result.value)
+
+    def test8_get_query_configuration(self):
+        settings = SearchSetting(self.client)
+        result = settings.get_query_configuration().execute_query()
+        self.assertIsNotNone(result.value)
 
     #def test7_get_crawled_urls(self):
     #    doc_crawl_log = DocumentCrawlLog(self.client)

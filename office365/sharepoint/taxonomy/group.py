@@ -1,6 +1,7 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.taxonomy.item import TaxonomyItem, TaxonomyItemCollection
-from office365.sharepoint.taxonomy.term_set import TermSet
+from office365.sharepoint.taxonomy.item import TaxonomyItem
+from office365.sharepoint.taxonomy.item_collection import TaxonomyItemCollection
+from office365.sharepoint.taxonomy.set import TermSet
 
 
 class TermGroup(TaxonomyItem):

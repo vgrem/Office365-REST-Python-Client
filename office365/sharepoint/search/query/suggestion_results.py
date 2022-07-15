@@ -1,10 +1,7 @@
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.types.collections import StringCollection
-
-
-class PersonalResultSuggestion(ClientValue):
-    pass
+from office365.sharepoint.search.query.personal_result_suggestion import PersonalResultSuggestion
 
 
 class QuerySuggestionQuery(ClientValue):
@@ -26,3 +23,7 @@ class QuerySuggestionResults(ClientValue):
         self.PersonalResults = ClientValueCollection(PersonalResultSuggestion)
         self.PopularResults = ClientValueCollection(PersonalResultSuggestion)
         self.Queries = ClientValueCollection(QuerySuggestionQuery)
+
+    @property
+    def entity_type_name(self):
+        return "Microsoft.SharePoint.Client.Search.Query.QuerySuggestionResults"

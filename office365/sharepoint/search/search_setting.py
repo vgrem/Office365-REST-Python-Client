@@ -22,7 +22,7 @@ class SearchSetting(BaseEntity):
         payload = {
             "callLocalSearchFarmsOnly": call_local_search_farms_only
         }
-        qry = ServiceOperationQuery(self, "GetQueryConfiguration", None, payload, None, result)
+        qry = ServiceOperationQuery(self, "getqueryconfiguration", None, payload, None, result)
         self.context.add_query(qry)
         return result
 

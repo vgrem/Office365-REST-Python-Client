@@ -1,15 +1,17 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
-from office365.sharepoint.taxonomy.item import TaxonomyItem, TaxonomyItemCollection
+from office365.sharepoint.taxonomy.item import TaxonomyItem
+from office365.sharepoint.taxonomy.item_collection import TaxonomyItemCollection
+from office365.sharepoint.taxonomy.set import TermSet
 from office365.sharepoint.taxonomy.term import Term
-from office365.sharepoint.taxonomy.term_group import TermGroup
+from office365.sharepoint.taxonomy.group import TermGroup
 
 
 class TermStore(TaxonomyItem):
     """Represents a hierarchical or flat set of Term objects known as a 'TermSet'."""
 
-    def search_term(self, label, set_id, parent_term_id=None, language_tag=None):
+    def search_term(self, label, set_id=None, parent_term_id=None, language_tag=None):
         """
 
         :param str label:
@@ -34,6 +36,8 @@ class TermStore(TaxonomyItem):
     @property
     def id(self):
         """
+        Gets the unique identifier.
+
         :rtype: str
         """
         return self.properties.get("id", None)
@@ -41,6 +45,8 @@ class TermStore(TaxonomyItem):
     @property
     def name(self):
         """
+        Gets the name
+
         :rtype: str
         """
         return self.properties.get("name", None)
@@ -48,6 +54,8 @@ class TermStore(TaxonomyItem):
     @property
     def default_language_tag(self):
         """
+        Gets or sets the LCID of the default working language.
+
         :rtype: str
         """
         return self.properties.get("defaultLanguageTag", None)
@@ -55,12 +63,13 @@ class TermStore(TaxonomyItem):
     @property
     def language_tags(self):
         """
-        :rtype: list[str]
-         """
+        Gets an integer collection of LCIDs.
+        """
         return self.properties.get("languageTags", StringCollection())
 
     @property
     def term_groups(self):
+        """Gets a collection of the child Group objects"""
         return self.properties.get("termGroups",
                                    TaxonomyItemCollection(self.context, TermGroup,
                                                           ResourcePath("termGroups", self.resource_path)))

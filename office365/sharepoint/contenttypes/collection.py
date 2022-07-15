@@ -18,17 +18,16 @@ class ContentTypeCollection(BaseEntityCollection):
         :param str name: Content type name
         """
         return_type = ContentType(self.context)
-        filter_expr = "Name eq '{0}'".format(name)
+        self.add_child(return_type)
 
-        def _after_get_by_name(cts):
-            if len(cts) != 1:
+        def _after_get_by_name(col):
+            if len(col) != 1:
                 message = "Content type not found or ambiguous match found for name: {0}".format(name)
                 raise ValueError(message)
-            self.add_child(return_type)
-            return_type.set_property("StringId", cts[0].get_property("StringId"))
+            return_type.set_property("StringId", col[0].get_property("StringId"))
 
-        col = ContentTypeCollection(self.context, self.resource_path).filter(filter_expr)
-        self.context.load(col, after_loaded=_after_get_by_name)
+        self.filter("Name eq '{0}'".format(name))
+        self.context.load(self, after_loaded=_after_get_by_name)
         return return_type
 
     def get_by_id(self, content_type_id):

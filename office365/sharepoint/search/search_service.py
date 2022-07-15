@@ -5,6 +5,7 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.search.query.auto_completion_results import QueryAutoCompletionResults
 from office365.sharepoint.search.query.popular_tenant_query import PopularTenantQuery
 from office365.sharepoint.search.query.suggestion_results import QuerySuggestionResults
 from office365.sharepoint.search.search_request import SearchRequest
@@ -111,8 +112,31 @@ class SearchService(BaseEntity):
         self.context.add_query(qry)
         return result
 
-    def auto_completions(self):
+    def auto_completions(self, query_text, sources=None, number_of_completions=None, cursor_position=None):
         """
         The operation is used to retrieve auto completion results by using the HTTP protocol with the GET method.
+
+        :param str query_text: The query text of the search query. If this element is not present or a value is not
+             specified, a default value of an empty string MUST be used, and the server MUST return
+             a FaultException<ExceptionDetail> message.
+        :param str sources: Specifies the sources that the protocol server SHOULD use when computing the result.
+            If NULL, the protocol server SHOULD use all of the sources for autocompletions. The value SHOULD be a
+            comma separated set of sources for autocompletions. The set of available sources the server SHOULD support
+            is "Tag", which MAY be compiled from the set of #tags applied to documents. If the sources value is not
+            a comma separated set of sources, or any of the source does not match "Tag", the server SHOULD return
+            completions from all available sources.
+        :param int number_of_completions: Specifies the maximum number query completion results in
+            GetQueryCompletionsResponse response message.
+        :param int cursor_position: Specifies the cursor position in the query text when this operation is sent
+            to the protocol server.
         """
-        pass
+        return_type = ClientResult(self.context, QueryAutoCompletionResults())
+        payload = {
+            "querytext": query_text,
+            #"sources": sources,
+            #"numberOfCompletions": number_of_completions,
+            #"cursorPosition": cursor_position
+        }
+        qry = ServiceOperationQuery(self, "autocompletions", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
