@@ -4,8 +4,8 @@ from office365.outlook.calendar.attendee import Attendee
 from office365.directory.extensions.extension import Extension
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.outlook.calendar.email_address import EmailAddress
-from office365.outlook.mail.attachments.attachment_collection import AttachmentCollection
-from office365.outlook.mail.item import Item
+from office365.outlook.item import OutlookItem
+from office365.outlook.mail.attachments.collection import AttachmentCollection
 from office365.outlook.mail.itemBody import ItemBody
 from office365.outlook.mail.location import Location
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -13,7 +13,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 
 
-class Event(Item):
+class Event(OutlookItem):
     """An event in a user calendar, or the default calendar of a Microsoft 365 group."""
 
     def accept(self, send_response, comment=None):

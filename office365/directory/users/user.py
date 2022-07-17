@@ -24,7 +24,7 @@ from office365.outlook.contacts.folder import ContactFolder
 from office365.outlook.mail.folder import MailFolder
 from office365.onedrive.drives.drive import Drive
 from office365.outlook.mail.mailbox_settings import MailboxSettings
-from office365.outlook.mail.messages.message import Message
+from office365.outlook.mail.messages.collection import MessageCollection
 from office365.outlook.user import OutlookUser
 from office365.planner.user import PlannerUser
 from office365.runtime.client_result import ClientResult
@@ -399,8 +399,7 @@ class User(DirectoryObject):
     def messages(self):
         """Get an event collection or an event."""
         return self.properties.get('messages',
-                                   DeltaCollection(self.context, Message,
-                                                   ResourcePath("messages", self.resource_path)))
+                                   MessageCollection(self.context, ResourcePath("messages", self.resource_path)))
 
     @property
     def joined_teams(self):

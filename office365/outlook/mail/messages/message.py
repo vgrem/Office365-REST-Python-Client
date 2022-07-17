@@ -2,12 +2,12 @@ import os
 
 from office365.directory.extensions.extension import Extension
 from office365.entity_collection import EntityCollection
-from office365.outlook.mail.attachments.attachment_collection import AttachmentCollection
+from office365.outlook.item import OutlookItem
+from office365.outlook.mail.attachments.collection import AttachmentCollection
 from office365.outlook.mail.attachments.attachment_type import AttachmentType
-from office365.outlook.mail.attachments.file_attachment import FileAttachment
-from office365.outlook.mail.attachments.item_attachment import ItemAttachment
-from office365.outlook.mail.attachments.reference_attachment import ReferenceAttachment
-from office365.outlook.mail.item import Item
+from office365.outlook.mail.attachments.file import FileAttachment
+from office365.outlook.mail.attachments.item import ItemAttachment
+from office365.outlook.mail.attachments.reference import ReferenceAttachment
 from office365.outlook.mail.itemBody import ItemBody
 from office365.outlook.mail.recipient import Recipient
 from office365.runtime.client_result import ClientResult
@@ -17,7 +17,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 
 
-class Message(Item):
+class Message(OutlookItem):
     """A message in a mailbox folder."""
 
     def download(self, file_object):

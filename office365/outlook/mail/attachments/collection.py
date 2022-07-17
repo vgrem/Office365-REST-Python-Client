@@ -1,5 +1,5 @@
 from office365.entity_collection import EntityCollection
-from office365.outlook.internal.attachment_upload_query import AttachmentUploadQuery
+from office365.outlook.internal.queries.attachment_upload import AttachmentUploadQuery
 from office365.outlook.mail.attachments.attachment import Attachment
 from office365.onedrive.upload_session import UploadSession
 from office365.runtime.client_result import ClientResult
@@ -20,7 +20,6 @@ class AttachmentCollection(EntityCollection):
 
         :param str source_path: Local file path
         :param int chunk_size: chunk size
-        :param Attachment return_attachment: returned attachment
         """
         upload_query = AttachmentUploadQuery(self, source_path, chunk_size, None)
         self.context.add_query(upload_query)
@@ -29,7 +28,8 @@ class AttachmentCollection(EntityCollection):
     def create_upload_session(self, attachment_item):
         """
         Create an upload session that allows an app to iteratively upload ranges of a file,
-        so as to attach the file to the specified Outlook item. The item can be a message or event.
+             so as to attach the file to the specified Outlook item. The item can be a message or event.
+
         :type attachment_item: office365.mail.attachment_item.AttachmentItem
         """
         result = ClientResult(self.context, UploadSession())
