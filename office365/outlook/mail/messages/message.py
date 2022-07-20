@@ -1,13 +1,11 @@
+import base64
 import os
 
 from office365.directory.extensions.extension import Extension
 from office365.entity_collection import EntityCollection
 from office365.outlook.item import OutlookItem
 from office365.outlook.mail.attachments.collection import AttachmentCollection
-from office365.outlook.mail.attachments.attachment_type import AttachmentType
 from office365.outlook.mail.attachments.file import FileAttachment
-from office365.outlook.mail.attachments.item import ItemAttachment
-from office365.outlook.mail.attachments.reference import ReferenceAttachment
 from office365.outlook.mail.itemBody import ItemBody
 from office365.outlook.mail.recipient import Recipient
 from office365.runtime.client_result import ClientResult
@@ -33,7 +31,6 @@ class Message(OutlookItem):
             """
             resp.raise_for_status()
             file_object.write(result.value)
-
         self.context.after_execute(_content_downloaded)
         return self
 
@@ -54,6 +51,19 @@ class Message(OutlookItem):
         self.context.add_query(qry)
         return result
 
+    def add_file_attachment(self, name, content, content_type=None):
+        """
+        :param str name:
+        :param str or bytes content:
+        :param str or None content_type:
+        """
+        return_type = FileAttachment(self.context)
+        self.attachments.add_child(return_type)
+        return_type.name = name
+        return_type.content_bytes = content
+        return_type.content_type = content_type
+        return return_type
+
     def upload_attachment(self, file_path):
         """
         This approach is used to attach a file if the file size is between 3 MB and 150 MB, otherwise
@@ -61,37 +71,20 @@ class Message(OutlookItem):
 
         :type file_path: str
         """
+        return_type = FileAttachment(self.context)
+        self.attachments.add_child(return_type)
         max_upload_chunk = 1000000 * 3
         file_size = os.stat(file_path).st_size
         if file_size > max_upload_chunk:
-            file_attachment = FileAttachment(self.context)
-            self.attachments.add_child(file_attachment)
-
             def _message_loaded():
-                self.attachments.resumable_upload(file_path, max_upload_chunk, file_attachment)
-
+                self.attachments.resumable_upload(file_path, max_upload_chunk, return_type)
             self.ensure_property("id", _message_loaded)
-            return file_attachment
         else:
-            file_attachment = self.add_attachment(AttachmentType.file)
             with open(file_path, 'rb') as fh:
-                file_attachment.content_bytes = fh.read()
-            file_attachment.name = os.path.basename(fh.name)
-            return file_attachment
-
-    def add_attachment(self, attachment_type=AttachmentType.file):
-        """
-        :rtype: FileAttachment or ItemAttachment or ReferenceAttachment
-        """
-        attachment_known_types = {
-            AttachmentType.file: FileAttachment,
-            AttachmentType.item: ItemAttachment,
-            AttachmentType.reference: ReferenceAttachment,
-        }
-        attachment = attachment_known_types.get(attachment_type)(self.context)
-        self.attachments.add_child(attachment)
-        self.set_property('attachments', attachment.parent_collection, True)
-        return attachment
+                orig_content = fh.read()
+                return_type.content_bytes = base64.b64encode(orig_content).decode("utf-8")
+            return_type.name = os.path.basename(fh.name)
+        return self
 
     def send(self):
         """
@@ -102,20 +95,20 @@ class Message(OutlookItem):
         self.context.add_query(qry)
         return self
 
-    def reply(self, message=None, comment=None):
+    def reply(self, comment=None):
         """Reply to the sender of a message by specifying a comment and using the Reply method. The message is then
         saved in the Sent Items folder.
 
-        :param Message message: Any writeable properties to update in the reply message.
         :param str comment: A comment to include. Can be an empty string.
         """
+        message = Message(self.context)
         payload = {
             "message": message,
             "comment": comment
         }
         qry = ServiceOperationQuery(self, "reply", None, payload)
         self.context.add_query(qry)
-        return self
+        return message
 
     def reply_all(self):
         """Reply to all recipients of a message. The message is then saved in the Sent Items folder. """

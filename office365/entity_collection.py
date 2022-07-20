@@ -19,13 +19,9 @@ class EntityCollection(ClientObjectCollection):
         else:
             raise ValueError("Invalid key: expected either an entity index (int) or identifier (str)")
 
-    def new(self, **kwargs):
-        """Creates an entity"""
-        return self.create_typed_object(properties=kwargs, persist_changes=True)
-
     def add(self, **kwargs):
         """Creates an entity and prepares the query"""
-        return_type = self.new(**kwargs)
+        return_type = self.create_typed_object(properties=kwargs, persist_changes=True)
         self.add_child(return_type)
         qry = CreateEntityQuery(self, return_type, return_type)
         self.context.add_query(qry)

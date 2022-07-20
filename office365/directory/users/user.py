@@ -25,6 +25,7 @@ from office365.outlook.mail.folder import MailFolder
 from office365.onedrive.drives.drive import Drive
 from office365.outlook.mail.mailbox_settings import MailboxSettings
 from office365.outlook.mail.messages.collection import MessageCollection
+from office365.outlook.mail.messages.message import Message
 from office365.outlook.user import OutlookUser
 from office365.planner.user import PlannerUser
 from office365.runtime.client_result import ClientResult
@@ -69,19 +70,28 @@ class User(DirectoryObject):
         self.context.add_query(qry)
         return self
 
-    def send_mail(self, message, save_to_sent_items=False):
+    def send_mail(self, subject, body, to_recipients, save_to_sent_items=False):
         """Send a new message on the fly
 
-        :type message: office365.mail.message.Message
-        :type save_to_sent_items: bool
+        :param str subject: The subject of the message.
+        :param str body: The body of the message. It can be in HTML or text format
+        :param list[str] to_recipients: The To: recipients for the message.
+        :param bool save_to_sent_items: Indicates whether to save the message in Sent Items. Specify it only if
+            the parameter is false; default is true
         """
+        message = Message(self.context)
+        message.persist_changes("attachments")
+        message.subject = subject
+        message.body = body
+        message.to_recipients = to_recipients
+
         payload = {
             "message": message,
             "saveToSentItems": save_to_sent_items
         }
         qry = ServiceOperationQuery(self, "sendmail", None, payload)
         self.context.add_query(qry)
-        return self
+        return message
 
     def export_personal_data(self, storage_location):
         """

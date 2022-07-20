@@ -23,7 +23,7 @@ class ClientObject(object):
         :type namespace: str
         """
         self._properties = {}
-        self._properties_metadata = {}
+        self._ser_property_names = []
         self._entity_type_name = None
         self._query_options = QueryOptions()
         self._parent_collection = parent_collection
@@ -31,16 +31,15 @@ class ClientObject(object):
         self._resource_path = resource_path
         self._namespace = namespace
 
-    def set_metadata(self, name, group, value):
-        if name not in self._properties_metadata:
-            self._properties_metadata[name] = {}
-        self._properties_metadata[name][group] = value
-
-    def get_metadata(self, name, group, default_value=None):
-        return self._properties_metadata.get(name, {}).get(group, default_value)
+    def persist_changes(self, name):
+        self._ser_property_names.append(name)
+        default_value = self.get_property(name)
+        if default_value is not None:
+            self.set_property(name, default_value)
+        return self
 
     def clear(self):
-        self._properties_metadata = {}
+        self._ser_property_names = []
         return self
 
     def execute_query(self):
@@ -129,9 +128,8 @@ class ClientObject(object):
         :param P_T value: Property value
         :param bool persist_changes: Persist changes
         """
-        self._properties_metadata[name] = {}
         if persist_changes:
-            self.set_metadata(name, "persist", True)
+            self._ser_property_names.append(name)
 
         prop_type = self.get_property(name)
         if isinstance(prop_type, ClientObject) or isinstance(prop_type, ClientValue):
@@ -228,7 +226,7 @@ class ClientObject(object):
             ser_prop_names = [n for n in self._properties.keys()]
             include_control_info = False
         else:
-            ser_prop_names = [n for n, p in self._properties_metadata.items() if p.get("persist", False) is True]
+            ser_prop_names = [n for n in self._ser_property_names]
             include_control_info = self.entity_type_name is not None and json_format.include_control_information()
 
         json = {k: self.get_property(k) for k in self._properties if k in ser_prop_names}
