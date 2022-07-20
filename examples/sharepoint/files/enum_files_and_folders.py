@@ -8,6 +8,6 @@ doc_lib = ctx.web.lists.get_by_title("Documents_Archive")
 items = doc_lib.items.select(["FileSystemObjectType"]).expand(["File", "Folder"]).get().execute_query()
 for item in items:  # type: ListItem
     if item.file_system_object_type == FileSystemObjectType.Folder:
-        print("Folder url: {0}".format(item.folder.serverRelativeUrl))
+        print("(Folder): {0}".format(item.folder.serverRelativeUrl))
     else:
-        print("File url: {0}".format(item.file.serverRelativeUrl))
+        print("(File): {0}".format(item.file.serverRelativeUrl))

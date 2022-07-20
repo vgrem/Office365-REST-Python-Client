@@ -8,7 +8,7 @@ class MoveCopyUtil(BaseEntity):
     """A container class for static move/copy methods."""
 
     @staticmethod
-    def copy_folder(context, src_url, dest_url, options):
+    def copy_folder(context, src_url, dest_url, options=None):
         """
         Copies a folder from a source URL to a destination URL.
 
@@ -31,14 +31,14 @@ class MoveCopyUtil(BaseEntity):
         return result
 
     @staticmethod
-    def copy_folder_by_path(context, src_path, dest_path, options):
+    def copy_folder_by_path(context, src_path, dest_path, options=None):
         """
         Copies a folder from a source URL to a destination URL.
 
         :param office365.sharepoint.client_context.ClientContext context: client context
         :param str src_path: A full or server relative path that represents the source folder.
         :param str dest_path:  A full or server relative url that represents the destination folder.
-        :param office365.sharepoint.utilities.move_copy_options.MoveCopyOptions options:
+        :param office365.sharepoint.utilities.move_copy_options.MoveCopyOptions or None options:
         """
         result = ClientResult(context)
         util = MoveCopyUtil(context)

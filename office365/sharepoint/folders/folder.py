@@ -199,11 +199,11 @@ class Folder(BaseEntity):
         """
 
         target_folder = Folder(self.context)
-        target_folder.set_property("ServerRelativePath", SPResPath(new_relative_path))
+        target_folder.set_property("ServerRelativePath", new_relative_path)
 
         def _copy_folder():
             opts = MoveCopyOptions(keep_both=keep_both, reset_author_and_created_on_copy=reset_author_and_created)
-            MoveCopyUtil.copy_folder_by_path(self.context, self.server_relative_path.DecodedUrl, new_relative_path,
+            MoveCopyUtil.copy_folder_by_path(self.context, str(self.server_relative_path), new_relative_path,
                                              opts)
 
         self.ensure_property("ServerRelativePath", _copy_folder)
