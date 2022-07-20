@@ -1,14 +1,10 @@
 from office365.runtime.client_result import ClientResult
-from office365.runtime.client_value import ClientValue
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.portal.site_creation_response import SPSiteCreationResponse
-
-
-class GetTeamChannelSiteOwnerResponse(ClientValue):
-    pass
+from office365.sharepoint.teams.site_owner_response import GetTeamChannelSiteOwnerResponse
 
 
 class SPSiteManager(BaseEntity):

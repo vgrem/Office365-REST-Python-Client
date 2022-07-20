@@ -4,46 +4,8 @@ from office365.onedrive.internal.paths.children import ChildrenPath
 from office365.onedrive.termstore.localized_name import LocalizedName
 from office365.onedrive.termstore.relation import Relation
 from office365.onedrive.termstore.term import Term, TermCollection
-from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
-
-
-class SetCollection(EntityCollection):
-
-    def __init__(self, context, resource_path=None, parent_group=None):
-        """
-        :param office365.onedrive.termstore.group.Group parent_group: The parent group that contains the set
-        """
-        super(SetCollection, self).__init__(context, Set, resource_path)
-        self._parent_group = parent_group
-
-    def add(self, name, parent_group=None):
-        """Create a new set object.
-
-        :param office365.onedrive.termstore.group.Group parent_group: The parent group that contains the set.
-        :param str name: Default name (in en-US localization).
-        """
-        result = ClientResult(self.context, Set(self.context))
-
-        def _group_loaded(set_create_info):
-            result.value = super(SetCollection, self).add(**set_create_info)
-
-        if self._parent_group is not None:
-            props = {
-                "localizedNames": ClientValueCollection(LocalizedName, [LocalizedName(name)])
-            }
-            self._parent_group.ensure_property("id", _group_loaded, props)
-        elif parent_group is not None:
-            props = {
-                "parentGroup": {"id": parent_group.id},
-                "localizedNames": ClientValueCollection(LocalizedName, [LocalizedName(name)])
-            }
-            parent_group.ensure_property("id", _group_loaded, props)
-        else:
-            raise TypeError("Parameter 'parent_group' is not set")
-
-        return result.value
 
 
 class Set(Entity):
@@ -57,6 +19,10 @@ class Set(Entity):
         """Children terms of set in term store."""
         return self.properties.get('children',
                                    TermCollection(self.context, ChildrenPath(self.resource_path, "terms"), self))
+
+    @property
+    def localized_names(self):
+        return self.properties.get("localizedNames", ClientValueCollection(LocalizedName))
 
     @property
     def parent_group(self):
@@ -81,6 +47,7 @@ class Set(Entity):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "localizedNames": self.localized_names,
                 "parentGroup": self.parent_group
             }
             default_value = property_mapping.get(name, None)

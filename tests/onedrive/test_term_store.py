@@ -5,7 +5,7 @@ from office365.onedrive.termstore.group import Group
 from office365.onedrive.termstore.set import Set
 from office365.onedrive.termstore.store import Store
 from office365.onedrive.termstore.term import Term
-from tests import test_team_site_url, test_root_site_url
+from tests import test_root_site_url
 from tests.graph_case import GraphTestCase, acquire_token_by_client_credentials
 
 

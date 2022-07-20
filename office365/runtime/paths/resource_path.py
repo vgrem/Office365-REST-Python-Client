@@ -2,7 +2,7 @@ class ResourcePath(object):
 
     def __init__(self, name, parent=None):
         """
-        :type name: str
+        :type name: str or None
         :type parent: ResourcePath or None
         """
         self._name = name

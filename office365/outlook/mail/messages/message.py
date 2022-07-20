@@ -11,6 +11,7 @@ from office365.outlook.mail.recipient import Recipient
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.paths.none import NonePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -53,25 +54,28 @@ class Message(OutlookItem):
 
     def add_file_attachment(self, name, content, content_type=None):
         """
-        :param str name:
-        :param str or bytes content:
-        :param str or None content_type:
+        Attach a file to message
+
+        :param str name: The name representing the text that is displayed below the icon representing the
+             embedded attachment
+        :param str content: The contents of the file
+        :param str or None content_type: The content type of the attachment.
         """
         return_type = FileAttachment(self.context)
         self.attachments.add_child(return_type)
         return_type.name = name
-        return_type.content_bytes = content
+        return_type.content_bytes = base64.b64encode(content.encode("utf-8")).decode("utf-8")
         return_type.content_type = content_type
         return return_type
 
     def upload_attachment(self, file_path):
         """
         This approach is used to attach a file if the file size is between 3 MB and 150 MB, otherwise
-        if a file that's smaller than 3 MB, then add_attachment method is utilized
+        if a file that's smaller than 3 MB, then add_file_attachment method is utilized
 
         :type file_path: str
         """
-        return_type = FileAttachment(self.context)
+        return_type = FileAttachment(self.context, NonePath(self.resource_path))
         self.attachments.add_child(return_type)
         max_upload_chunk = 1000000 * 3
         file_size = os.stat(file_path).st_size

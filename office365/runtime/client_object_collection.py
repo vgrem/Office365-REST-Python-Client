@@ -82,7 +82,7 @@ class ClientObjectCollection(ClientObject):
             yield item
         if self._paged_mode:
             while self.has_next:
-                next_items = self._load_next().execute_query()
+                next_items = self._get_next().execute_query()
                 for next_item in next_items:
                     yield next_item
 
@@ -180,12 +180,12 @@ class ClientObjectCollection(ClientObject):
         def _page_loaded(items):
             self._page_loaded.notify(self)
             if self.has_next:
-                self._load_next(after_loaded=_page_loaded)
+                self._get_next(after_loaded=_page_loaded)
 
         self.context.load(self, after_loaded=_page_loaded)
         return self
 
-    def _load_next(self, after_loaded=None):
+    def _get_next(self, after_loaded=None):
         """
         Submit a request to retrieve next collection of items
 

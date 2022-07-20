@@ -1,7 +1,8 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.onedrive.termstore.group import Group, GroupCollection
-from office365.onedrive.termstore.set import Set, SetCollection
+from office365.onedrive.termstore.set import Set
+from office365.onedrive.termstore.set_collection import SetCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
 
