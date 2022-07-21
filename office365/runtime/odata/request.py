@@ -155,9 +155,7 @@ class ODataRequest(ClientRequest):
                 json = {query.parameter_name: json}
             return json
         elif isinstance(value, dict):
-            for k, v in value.items():
-                value[k] = self._normalize_payload(v)
+            return {k: self._normalize_payload(v) for k, v in value.items() if v is not None}
         elif isinstance(value, list):
-            for i, item in enumerate(value):
-                value[i] = self._normalize_payload(item)
+            return [self._normalize_payload(item) for item in value]
         return value

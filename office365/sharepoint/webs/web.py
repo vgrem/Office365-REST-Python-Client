@@ -281,14 +281,14 @@ class Web(SecurableObject):
         :param bool include_errors: If true, webparts with errors MUST be included in the results of the request.
            If false, webparts with errors MUST be excluded in the results of the request.
         """
-        result = ClientValueCollection(SPClientSideComponentQueryResult)
+        return_type = ClientResult(self.context, ClientValueCollection(SPClientSideComponentQueryResult))
         params = {
             "includeErrors": include_errors,
             "project": project
         }
-        qry = ServiceOperationQuery(self, "getClientSideWebParts", None, params, None, result)
+        qry = ServiceOperationQuery(self, "getClientSideWebParts", None, params, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def add_supported_ui_language(self, lcid):
         """

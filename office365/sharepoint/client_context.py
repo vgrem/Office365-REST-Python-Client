@@ -11,8 +11,8 @@ from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 from office365.runtime.odata.v3.batch_request import ODataBatchRequest
 from office365.runtime.odata.request import ODataRequest
 from office365.runtime.queries.batch import BatchQuery
-from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.publishing.site_page_service import SitePageService
@@ -192,20 +192,18 @@ class ClientContext(ClientRuntimeContext):
 
     def get_context_web_information_ex(self):
         """Returns an ContextWebInformation object that specifies metadata about the site"""
-        result = ClientResult(self, ContextWebInformation())
+        return_type = ClientResult(self, ContextWebInformation())
 
         def _construct_request(request):
             """
             :type request: office365.runtime.http.request_options.RequestOptions
             """
             request.url = self.service_root_url() + "/contextInfo"
-            request.method = HttpMethod.Post
-            self.pending_request().json_format.function_tag_name = "GetContextWebInformation"
 
-        qry = ClientQuery(self, None, None, None, result)
+        qry = ServiceOperationQuery(self.web, "GetContextWebInformation", None, None, None, return_type)
         self.before_execute(_construct_request)
         self.add_query(qry)
-        return qry
+        return return_type
 
     def execute_query_with_incremental_retry(self, max_retry=5):
         """Handles throttling requests."""
