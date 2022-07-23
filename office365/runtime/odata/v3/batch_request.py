@@ -39,14 +39,11 @@ class ODataBatchRequest(ClientRequest):
 
         :type batch_response: requests.Response
         """
-        query_id = 0
-        for response in self._extract_response(batch_response):
+        for qry, response in self._extract_response(batch_response):
             response.raise_for_status()
-            qry = self.current_query.ordered_queries[query_id]
-            self.context.pending_request().add_query(qry, reset_queue=True)
+            self.context.pending_request().add_query(qry)
             self.context.pending_request().process_response(response)
-            query_id += 1
-        self.context.pending_request().clear()
+            self.context.pending_request().clear()
 
     def _extract_response(self, response):
         """Parses a multipart/mixed response body from the position defined by the context.
@@ -62,9 +59,13 @@ class ODataBatchRequest(ClientRequest):
         )
 
         message = message_from_bytes_or_string(http_body)  # type: Message
+
+        query_id = 0
         for raw_response in message.get_payload():
             if raw_response.get_content_type() == "application/http":
-                yield self._deserialize_response(raw_response)
+                qry = self.current_query.ordered_queries[query_id]
+                query_id += 1
+                yield qry, self._deserialize_response(raw_response)
 
     def _prepare_payload(self):
         """
@@ -152,6 +153,6 @@ class ODataBatchRequest(ClientRequest):
     @property
     def current_query(self):
         """
-        :rtype: BatchQuery
+        :rtype: office365.runtime.queries.batch.BatchQuery
         """
         return self._current_query

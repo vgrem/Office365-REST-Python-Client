@@ -31,12 +31,11 @@ class ODataV4BatchRequest(ClientRequest):
 
         :type batch_response: requests.Response
         """
-        for query_id, resp in self._extract_response(batch_response):
+        for qry, resp in self._extract_response(batch_response):
             resp.raise_for_status()
-            sub_qry = self.current_query.ordered_queries[query_id]
-            self.context.pending_request().add_query(sub_qry)
+            self.context.pending_request().add_query(qry)
             self.context.pending_request().process_response(resp)
-        self.context.pending_request().clear()
+            self.context.pending_request().clear()
 
     def _extract_response(self, batch_response):
         """
@@ -48,7 +47,9 @@ class ODataV4BatchRequest(ClientRequest):
             resp.status_code = int(json_resp['status'])
             resp.headers = CaseInsensitiveDict(json_resp['headers'])
             resp._content = json.dumps(json_resp["body"]).encode('utf-8')
-            yield int(json_resp["id"]), resp
+            qry_id = int(json_resp["id"])
+            qry = self.current_query.ordered_queries[qry_id]
+            yield qry, resp
 
     def _prepare_payload(self):
         """

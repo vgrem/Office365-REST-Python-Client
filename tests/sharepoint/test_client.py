@@ -5,6 +5,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.odata.type import ODataType
 from office365.runtime.odata.query_options import QueryOptions
 from office365.runtime.types.collections import StringCollection, GuidCollection
+from office365.sharepoint.principal.user_id_info import UserIdInfo
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
     SecondaryAdministratorsFieldsData
 from tests import test_site_url, test_client_credentials, test_user_credentials, settings, create_unique_name, \
@@ -64,6 +65,7 @@ class TestSharePointClient(TestCase):
         client.execute_batch()
         self.assertIsNotNone(current_web.url)
         self.assertIsNotNone(current_user.user_id)
+        self.assertIsInstance(current_user.user_id, UserIdInfo)
 
     def test_10_execute_update_batch_request(self):
         client = ClientContext(test_site_url).with_credentials(test_user_credentials)

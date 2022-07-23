@@ -33,25 +33,24 @@ class ClientRequest(object):
         """
         return self._current_query
 
-    def add_query(self, query, execute_first=False, set_as_current=True, reset_queue=False):
+    def add_query(self, query, execute_first=False, set_as_current=True):
         """
         :type query: office365.runtime.queries.client_query.ClientQuery
         :type execute_first: bool
         :type set_as_current: bool
-        :type reset_queue: bool
         """
-        if reset_queue:
-            self._queries = []
         if set_as_current:
             self._current_query = query
         if execute_first:
             self._queries.insert(0, query)
         else:
             self._queries.append(query)
+        return self
 
     def clear(self):
         self._current_query = None
         self._queries = []
+        return self
 
     @abstractmethod
     def build_request(self, query):
