@@ -172,7 +172,7 @@ class ClientObject(object):
         if len(names_to_include) > 0:
             from office365.runtime.queries.read_entity import ReadEntityQuery
             qry = ReadEntityQuery(self, names_to_include)
-            self.context.add_query(qry, set_as_current=False)
+            self.context.add_query(qry)
             self.context.after_query_execute(qry, action, *args, **kwargs)
         else:
             action(*args, **kwargs)

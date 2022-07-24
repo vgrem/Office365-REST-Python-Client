@@ -136,3 +136,16 @@ class TestSharePointClient(TestCase):
         lib = client.web.default_document_library()
         options = QueryOptions.build(lib, ["Author", "Comments"])
         self.assertEqual(str(options), "$select=Author,Comments&$expand=Author")
+
+    def test_16_ensure_property(self):
+        client = ClientContext(test_site_url).with_credentials(test_user_credentials)
+        me = client.web.current_user.get()
+        site = client.site
+
+        def _owner_loaded():
+            self.assertIsNotNone(site.owner.id)
+        site.ensure_property("Owner", _owner_loaded).get()
+        lib = client.web.default_document_library().get()
+        client.execute_query()
+        self.assertIsNotNone(me.login_name)
+        self.assertIsNotNone(lib.title)

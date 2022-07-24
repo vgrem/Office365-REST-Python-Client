@@ -385,7 +385,7 @@ class Site(BaseEntity):
     @property
     def owner(self):
         """Gets or sets the owner of the site collection. (Read-only in sandboxed solutions.)"""
-        return self.properties.get('owner', User(self.context, ResourcePath("owner", self.resource_path)))
+        return self.properties.get('Owner', User(self.context, ResourcePath("Owner", self.resource_path)))
 
     @property
     def read_only(self):

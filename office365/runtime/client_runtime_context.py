@@ -144,13 +144,12 @@ class ClientRuntimeContext(object):
         """Submit request(s) to the server"""
         self.pending_request().execute_query()
 
-    def add_query(self, query, execute_first=False, set_as_current=True):
+    def add_query(self, query, execute_first=False):
         """
         :type query: office365.runtime.queries.client_query.ClientQuery
         :type execute_first: bool
-        :type set_as_current: bool
         """
-        self.pending_request().add_query(query, execute_first, set_as_current)
+        self.pending_request().add_query(query, execute_first)
 
     def clear(self):
         self.pending_request().clear()
