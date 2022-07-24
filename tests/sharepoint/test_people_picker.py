@@ -1,5 +1,5 @@
-from office365.sharepoint.ui.applicationpages.client_people_picker import \
-    ClientPeoplePickerWebServiceInterface, ClientPeoplePickerQueryParameters
+from office365.sharepoint.ui.applicationpages.peoplepicker.web_service_interface import \
+    ClientPeoplePickerWebServiceInterface
 from tests import test_user_principal_name
 from tests.sharepoint.sharepoint_case import SPTestCase
 
@@ -11,8 +11,8 @@ class TestSPPeoplePicker(SPTestCase):
         super(TestSPPeoplePicker, cls).setUpClass()
 
     def test1_get_search_results(self):
-        params = ClientPeoplePickerQueryParameters(test_user_principal_name)
-        result = ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(self.client, params)
+        result = ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(self.client,
+                                                                                         test_user_principal_name)
         self.client.execute_query()
         self.assertIsNotNone(result.value)
 

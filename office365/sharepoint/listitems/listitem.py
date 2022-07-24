@@ -22,8 +22,8 @@ from office365.sharepoint.sharing.share_link_response import ShareLinkResponse
 from office365.sharepoint.sharing.share_link_settings import ShareLinkSettings
 from office365.sharepoint.sharing.sharing_result import SharingResult
 from office365.sharepoint.taxonomy.field_value import TaxonomyFieldValueCollection
-from office365.sharepoint.ui.applicationpages.client_people_picker import (
-    ClientPeoplePickerWebServiceInterface, ClientPeoplePickerQueryParameters
+from office365.sharepoint.ui.applicationpages.peoplepicker.web_service_interface import (
+    ClientPeoplePickerWebServiceInterface
 )
 
 
@@ -181,9 +181,9 @@ class ListItem(SecurableObject):
                              0, False, send_email, False, email_subject, email_body, return_type=sharing_result)
 
         self.ensure_property("EncodedAbsUrl", _property_resolved)
-        params = ClientPeoplePickerQueryParameters(user_principal_name)
         ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(self.context,
-                                                                                params, _picker_value_resolved)
+                                                                                user_principal_name,
+                                                                                _picker_value_resolved)
         return sharing_result
 
     def unshare(self):

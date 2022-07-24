@@ -40,8 +40,8 @@ from office365.sharepoint.sharing.sharing_result import SharingResult
 from office365.sharepoint.sitescripts.utility import SiteScriptUtility
 from office365.sharepoint.marketplace.sitecollection.appcatalog.accessor import SiteCollectionCorporateCatalogAccessor
 from office365.sharepoint.marketplace.tenant.appcatalog.accessor import TenantCorporateCatalogAccessor
-from office365.sharepoint.ui.applicationpages.client_people_picker import (
-    ClientPeoplePickerWebServiceInterface, ClientPeoplePickerQueryParameters
+from office365.sharepoint.ui.applicationpages.peoplepicker.web_service_interface import (
+    ClientPeoplePickerWebServiceInterface
 )
 from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
 from office365.sharepoint.views.view import View
@@ -764,8 +764,7 @@ class Web(SecurableObject):
 
             self.ensure_property("Url", _web_loaded)
 
-        params = ClientPeoplePickerQueryParameters(user_principal_name)
-        ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(self.context, params,
+        ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(self.context, user_principal_name,
                                                                                 _picker_value_resolved)
         Web._resolve_group_value(self.context, share_option, _grp_resolved)
         return sharing_result

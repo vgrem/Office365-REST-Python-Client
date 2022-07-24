@@ -1,10 +1,4 @@
-from office365.runtime.client_object import ClientObject
 from office365.runtime.client_value import ClientValue
-
-
-class PickerEntityInformation(ClientObject):
-    """Represents additional information about the principal."""
-    pass
 
 
 class PickerEntityInformationRequest(ClientValue):
