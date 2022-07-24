@@ -3,7 +3,7 @@ from office365.entity_collection import EntityCollection
 from office365.onedrive.internal.paths.children import ChildrenPath
 from office365.onedrive.termstore.localized_name import LocalizedName
 from office365.onedrive.termstore.relation import Relation
-from office365.onedrive.termstore.term import Term, TermCollection
+from office365.onedrive.termstore.term_collection import TermCollection
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -42,7 +42,7 @@ class Set(Entity):
     def terms(self):
         """All the terms under the set."""
         return self.properties.get('terms',
-                                   EntityCollection(self.context, Term, ResourcePath("terms", self.resource_path)))
+                                   TermCollection(self.context, ResourcePath("terms", self.resource_path), self))
 
     def get_property(self, name, default_value=None):
         if default_value is None:
