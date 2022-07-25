@@ -40,6 +40,6 @@ def query_items_no_paged(target_list):
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 large_list = ctx.web.lists.get_by_title("Contacts_Large")
-#query_large_list(large_list)
-get_total_count(large_list)
+query_large_list(large_list)
+#get_total_count(large_list)
 #query_items_no_paged(large_list)

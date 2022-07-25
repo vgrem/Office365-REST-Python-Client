@@ -101,12 +101,10 @@ class ODataRequest(ClientRequest):
             for k, v in self._next_property(json, json_format):
                 if isinstance(return_type, ClientResult):
                     return_type.value = v
-                elif isinstance(return_type, ClientObjectCollection) and k == json_format.collection_next_tag_name:
-                    return_type.next_request_url = v
                 else:
                     return_type.set_property(k, v, False)
 
-    def _next_property(self, json, json_format):  # noqa: C901
+    def _next_property(self, json, json_format):
         """
         :type json: any
         :type json_format: office365.runtime.odata.json_format.ODataJsonFormat
@@ -121,7 +119,7 @@ class ODataRequest(ClientRequest):
             next_link_url = json.get(json_format.collection_next_tag_name, None)
             json = json.get(json_format.collection_tag_name, json)
             if next_link_url:
-                yield json_format.collection_next_tag_name, next_link_url
+                yield "__nextLinkUrl", next_link_url
 
             if isinstance(json, list):
                 for index, item in enumerate(json):

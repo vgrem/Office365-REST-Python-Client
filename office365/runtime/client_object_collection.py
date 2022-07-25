@@ -20,14 +20,14 @@ class ClientObjectCollection(ClientObject):
         self._item_type = item_type
         self._page_loaded = EventHandler(False)
         self._paged_mode = False
-        self._page_index = 0
-        self.next_request_url = None
-        self._clear_results = True
+        self._current_pos = None
+        self._next_request_url = None
 
     def clear(self):
-        if self._clear_results:
+        if not self._paged_mode:
             self._data = []
-        self.next_request_url = None
+        self._next_request_url = None
+        self._current_pos = len(self._data)
         return self
 
     def create_typed_object(self, properties=None, persist_changes=False):
@@ -47,14 +47,17 @@ class ClientObjectCollection(ClientObject):
             client_object.set_property(k, v, persist_changes)
         return client_object
 
-    def set_property(self, index, value, persist_changes=False):
+    def set_property(self, key, value, persist_changes=False):
         """
-        :type index: int
+        :type key: int or str
         :type value: dict
         :type persist_changes: bool
         """
-        client_object = self.create_typed_object(value)
-        self.add_child(client_object)
+        if key == "__nextLinkUrl":
+            self._next_request_url = value
+        else:
+            client_object = self.create_typed_object(value)
+            self.add_child(client_object)
         return self
 
     def add_child(self, client_object):
@@ -82,7 +85,8 @@ class ClientObjectCollection(ClientObject):
             yield item
         if self._paged_mode:
             while self.has_next:
-                next_items = self._get_next().execute_query()
+                self._get_next().execute_query()
+                next_items = self._data[self._current_pos:]
                 for next_item in next_items:
                     yield next_item
 
@@ -175,7 +179,6 @@ class ClientObjectCollection(ClientObject):
         :param (T) -> None page_loaded: Page loaded event
         """
         self.paged(page_size, page_loaded)
-        self._clear_results = False
 
         def _page_loaded(items):
             self._page_loaded.notify(self)
@@ -195,19 +198,14 @@ class ClientObjectCollection(ClientObject):
             """
             :type request: office365.runtime.http.request_options.RequestOptions
             """
-            self._page_index += 1
-            request.url = self.next_request_url
+            request.url = self._next_request_url
 
         self.context.load(self, before_loaded=_construct_next_query, after_loaded=after_loaded)
         return self
 
     @property
-    def page_index(self):
-        return self._page_index
-
-    @property
     def has_next(self):
-        return self.next_request_url is not None
+        return self._next_request_url is not None
 
     @property
     def entity_type_name(self):
