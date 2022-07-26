@@ -3,16 +3,13 @@ import json
 import requests
 from requests.structures import CaseInsensitiveDict
 
-from office365.runtime.client_request import ClientRequest
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
+from office365.runtime.odata.batch_request import ODataBatchRequest
 
 
-class ODataV4BatchRequest(ClientRequest):
+class ODataV4BatchRequest(ODataBatchRequest):
     """ JSON batch request """
-
-    def __init__(self, context):
-        super(ODataV4BatchRequest, self).__init__(context)
 
     def build_request(self, query):
         """
@@ -78,10 +75,3 @@ class ODataV4BatchRequest(ClientRequest):
             request_json["dependsOn"] = depends_on
         request_json["url"] = request_json["url"].replace(self.context.service_root_url(), "")
         return request_json
-
-    @property
-    def current_query(self):
-        """
-        :rtype: office365.runtime.queries.batch.BatchQuery
-        """
-        return self._current_query

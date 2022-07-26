@@ -33,7 +33,6 @@ class BatchQuery(ClientQuery):
 
     def add(self, query):
         """
-
         :type query: ClientQuery
         """
         self._queries.append(query)

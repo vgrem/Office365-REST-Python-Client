@@ -34,7 +34,6 @@ from office365.runtime.odata.request import ODataRequest
 from office365.runtime.odata.v4.batch_request import ODataV4BatchRequest
 from office365.runtime.odata.v4.json_format import V4JsonFormat
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.runtime.queries.batch import BatchQuery
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.search.entity import SearchEntity
@@ -67,12 +66,15 @@ class GraphClient(ClientRuntimeContext):
         self._build_specific_query(request)
         return request
 
-    def execute_batch(self):
-        """Constructs and submit a batch request"""
-        batch_request = ODataV4BatchRequest(self)
-        queries = [qry for qry in self.pending_request()]
-        batch_request.add_query(BatchQuery(self, queries))  # Aggregate requests into batch request
+    def execute_batch(self, items_per_batch=100):
+        """Constructs and submit a batch request
+
+        :param int items_per_batch: Maximum to be selected for bulk operation
+        """
+        batch_request = ODataV4BatchRequest(self, items_per_batch)
+        [batch_request.add_query(qry) for qry in self.pending_request()]
         batch_request.execute_query()
+        return self
 
     def pending_request(self):
         return self._pending_request

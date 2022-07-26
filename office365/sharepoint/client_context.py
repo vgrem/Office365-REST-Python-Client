@@ -8,9 +8,8 @@ from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
-from office365.runtime.odata.v3.batch_request import ODataBatchRequest
+from office365.runtime.odata.v3.batch_request import ODataBatchV3Request
 from office365.runtime.odata.request import ODataRequest
-from office365.runtime.queries.batch import BatchQuery
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
@@ -21,7 +20,7 @@ from office365.sharepoint.sites.site import Site
 from office365.sharepoint.tenant.administration.hub_site_collection import HubSiteCollection
 from office365.sharepoint.webs.context_web_information import ContextWebInformation
 from office365.sharepoint.webs.web import Web
-from office365.runtime.compat import range_or_xrange, urlparse, is_absolute_url
+from office365.runtime.compat import urlparse, is_absolute_url
 
 
 class ClientContext(ClientRuntimeContext):
@@ -134,18 +133,14 @@ class ClientContext(ClientRuntimeContext):
 
         :param int items_per_batch: Maximum to be selected for bulk operation
         """
-        batch_request = ODataBatchRequest(self)
+        batch_request = ODataBatchV3Request(self, items_per_batch)
 
         def _prepare_batch_request(request):
             self.ensure_form_digest(request)
 
         batch_request.beforeExecute += _prepare_batch_request
-
-        all_queries = [qry for qry in self.pending_request()]
-        for i in range_or_xrange(0, len(all_queries), items_per_batch):
-            queries = all_queries[i:i + items_per_batch]
-            batch_request.add_query(BatchQuery(self, queries))
-            batch_request.execute_query()
+        [batch_request.add_query(qry) for qry in self.pending_request()]
+        batch_request.execute_query()
         return self
 
     def build_request(self, query):

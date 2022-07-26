@@ -7,16 +7,13 @@ from requests.structures import CaseInsensitiveDict
 from office365.runtime.compat import message_from_bytes_or_string, message_as_bytes_or_string
 from email.message import Message
 
-from office365.runtime.client_request import ClientRequest
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
+from office365.runtime.odata.batch_request import ODataBatchRequest
 from office365.runtime.queries.batch import create_boundary
 
 
-class ODataBatchRequest(ClientRequest):
-
-    def __init__(self, context):
-        super(ODataBatchRequest, self).__init__(context)
+class ODataBatchV3Request(ODataBatchRequest):
 
     def build_request(self, query):
         """
@@ -149,10 +146,3 @@ class ODataBatchRequest(ClientRequest):
         message.add_header("Content-Transfer-Encoding", "binary")
         message.set_payload(payload)
         return message
-
-    @property
-    def current_query(self):
-        """
-        :rtype: office365.runtime.queries.batch.BatchQuery
-        """
-        return self._current_query
