@@ -11,13 +11,16 @@ class ClientResult(object):
         self._context = context
         self._value = default_value
 
+    def set_property(self, key, value, persist_changes=False):
+        from office365.runtime.client_value import ClientValue
+        if isinstance(self.value, ClientValue):
+            self.value.set_property(key, value, persist_changes)
+        else:
+            self._value = value
+
     @property
     def value(self):
         return self._value
-
-    @value.setter
-    def value(self, value):
-        self._value = value
 
     def execute_query(self):
         self._context.execute_query()

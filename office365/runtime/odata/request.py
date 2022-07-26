@@ -77,14 +77,11 @@ class ODataRequest(ClientRequest):
 
         if response.headers.get('Content-Type', '').lower().split(';')[0] != 'application/json':
             if isinstance(return_type, ClientResult):
-                return_type.value = response.content
+                return_type.set_property("__value", response.content)
         else:
             if isinstance(query, ServiceOperationQuery):
                 json_format.function_tag_name = query.method_name
 
-            if isinstance(return_type, ClientResult):
-                if isinstance(return_type.value, ClientValue) or isinstance(return_type.value, ClientObject):
-                    return_type = return_type.value
             self.map_json(response.json(), return_type, json_format)
 
     def map_json(self, json, return_type, json_format=None):
@@ -98,10 +95,7 @@ class ODataRequest(ClientRequest):
 
         if json and return_type is not None:
             for k, v in self._next_property(json, json_format):
-                if isinstance(return_type, ClientResult):
-                    return_type.value = v
-                else:
-                    return_type.set_property(k, v, False)
+                return_type.set_property(k, v, False)
 
     def _next_property(self, json, json_format):
         """
@@ -113,7 +107,7 @@ class ODataRequest(ClientRequest):
             json = json.get(json_format.function_tag_name, json)
 
         if not isinstance(json, dict):
-            yield "value", json
+            yield "__value", json
         else:
             next_link_url = json.get(json_format.collection_next_tag_name, None)
             json = json.get(json_format.collection_tag_name, json)
@@ -137,7 +131,7 @@ class ODataRequest(ClientRequest):
                             value = {k: v for k, v in self._next_property(value, json_format)}
                         yield name, value
             else:
-                yield "value", json
+                yield "__value", json
 
     def _normalize_payload(self, value):
         """

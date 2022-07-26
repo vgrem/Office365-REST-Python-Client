@@ -154,7 +154,7 @@ class ClientRuntimeContext(object):
         self.pending_request().clear()
 
     def get_metadata(self):
-        result = ClientResult(self)
+        return_type = ClientResult(self)
 
         def _construct_download_request(request):
             """
@@ -168,13 +168,13 @@ class ClientRuntimeContext(object):
             :type response: requests.Response
             """
             response.raise_for_status()
-            result.value = response.content
+            return_type.set_property("__value", response.content)
 
         qry = ClientQuery(self)
         self.before_execute(_construct_download_request)
         self.after_execute(_process_download_response)
         self.add_query(qry)
-        return result
+        return return_type
 
     @property
     def current_query(self):
