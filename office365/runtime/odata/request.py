@@ -1,7 +1,6 @@
 import copy
 
 from office365.runtime.client_object import ClientObject
-from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_request import ClientRequest
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value import ClientValue

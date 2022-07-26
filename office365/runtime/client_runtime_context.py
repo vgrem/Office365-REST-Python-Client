@@ -39,7 +39,7 @@ class ClientRuntimeContext(object):
                     success_callback(self.current_query.return_type)
                 break
             except exceptions as e:
-                self.add_query(self.current_query, True)
+                self.add_query(self.current_query)
                 if callable(failure_callback):
                     failure_callback(retry, e)
                 sleep(timeout_secs)
@@ -144,12 +144,11 @@ class ClientRuntimeContext(object):
         """Submit request(s) to the server"""
         self.pending_request().execute_query()
 
-    def add_query(self, query, execute_first=False):
+    def add_query(self, query):
         """
         :type query: office365.runtime.queries.client_query.ClientQuery
-        :type execute_first: bool
         """
-        self.pending_request().add_query(query, execute_first)
+        self.pending_request().add_query(query)
 
     def clear(self):
         self.pending_request().clear()

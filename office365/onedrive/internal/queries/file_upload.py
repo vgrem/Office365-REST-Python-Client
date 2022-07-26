@@ -4,7 +4,7 @@ from office365.onedrive.driveitems.drive_item_uploadable_properties import Drive
 from office365.onedrive.internal.paths.url import UrlPath
 
 
-class ResumableFileUpload(UploadSessionQuery):
+class ResumableFileUploadQuery(UploadSessionQuery):
     """Create an upload session to allow your app to upload files up to the maximum file size. An upload session
     allows your app to upload ranges of the file in sequential API requests, which allows the transfer to be resumed
     if a connection is dropped while the upload is in progress. """

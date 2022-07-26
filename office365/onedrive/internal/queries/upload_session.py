@@ -24,7 +24,6 @@ class UploadSessionQuery(ClientQuery):
         self._range_end = 0
         self._chunk_uploaded = chunk_uploaded
         self._source_path = source_path
-        self._session_result = None
         self._session_result = self.create_upload_session()
         self.context.after_execute(self._create_next_range_query)
 
@@ -37,11 +36,11 @@ class UploadSessionQuery(ClientQuery):
         :type resp: requests.Response
         """
         if self._has_pending_read():
-            qry = ClientQuery(self.context, self.binding_type)
             self.context.before_execute(self._construct_range_request)
+            if callable(self._chunk_uploaded):
+                self._chunk_uploaded(self._range_end)
+            self.context.add_query(self)
             self.context.after_execute(self._create_next_range_query)
-            self.context.after_execute(self._notify_after_uploaded)
-            self.context.add_query(qry, True)
 
     def _construct_range_request(self, request):
         """
@@ -55,14 +54,6 @@ class UploadSessionQuery(ClientQuery):
                            'bytes {0}-{1}/{2}'.format(self._range_start, self._range_end - 1, self.file_size))
         request.set_header('Accept', '*/*')
         request.data = range_data
-
-    def _notify_after_uploaded(self, response):
-        """
-        :type response: requests.Response
-        """
-        response.raise_for_status()
-        if callable(self._chunk_uploaded):
-            self._chunk_uploaded(self._range_end)
 
     def _read_next_chunk(self):
         self._range_start = self._file_handle.tell()

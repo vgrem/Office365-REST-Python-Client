@@ -132,11 +132,11 @@ class DriveItem(BaseItem):
         :param str source_path: Local file path
         :param int chunk_size: chunk size
         """
-        from office365.onedrive.internal.queries.file_upload import ResumableFileUpload
-        upload_query = ResumableFileUpload(self, source_path, chunk_size, chunk_uploaded)
-        self.children.add_child(upload_query.return_type)
-        self.context.add_query(upload_query)
-        return upload_query.return_type
+        from office365.onedrive.internal.queries.file_upload import ResumableFileUploadQuery
+        qry = ResumableFileUploadQuery(self, source_path, chunk_size, chunk_uploaded)
+        self.children.add_child(qry.return_type)
+        self.context.add_query(qry)
+        return qry.return_type
 
     def create_upload_session(self, item):
         """Creates a temporary storage location where the bytes of the file will be saved until the complete file is
