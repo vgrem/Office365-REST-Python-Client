@@ -98,6 +98,7 @@ class ListItem(SecurableObject):
 
         def _list_item_loaded():
             Reputation.set_rating(self.context, self.parent_list.id, self.id, value, return_value)
+
         self.parent_list.ensure_properties(["Id", "ParentList"], _list_item_loaded)
         return return_value
 
@@ -113,6 +114,7 @@ class ListItem(SecurableObject):
 
         def _list_item_loaded():
             Reputation.set_like(self.context, self.parent_list.id, self.id, value, return_value)
+
         self.parent_list.ensure_properties(["Id", "ParentList"], _list_item_loaded)
         return return_value
 
@@ -164,27 +166,27 @@ class ListItem(SecurableObject):
         :rtype: SharingResult
         """
 
-        sharing_result = SharingResult(self.context)
-        file_result = ClientResult(self.context)
-
+        return_type = SharingResult(self.context)
         role_values = {
             ExternalSharingSiteOption.View: "role:1073741826",
             ExternalSharingSiteOption.Edit: "role:1073741827",
         }
 
-        def _property_resolved():
-            file_result.value = self.get_property("EncodedAbsUrl")
-
-        def _picker_value_resolved(picker_value):
+        def _picker_value_resolved(resp, picker_result):
+            file_abs_url = self.get_property("EncodedAbsUrl")
+            picker_value = "[{0}]".format(picker_result.value)
             from office365.sharepoint.webs.web import Web
-            Web.share_object(self.context, file_result.value, picker_value, role_values[share_option],
-                             0, False, send_email, False, email_subject, email_body, return_type=sharing_result)
+            Web.share_object(self.context, file_abs_url, picker_value, role_values[share_option],
+                             0, False, send_email, False, email_subject, email_body, return_type=return_type)
+
+        def _property_resolved():
+            picker_result = ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(self.context,
+                                                                                                    user_principal_name)
+            self.context.after_execute(_picker_value_resolved, True, picker_result)
 
         self.ensure_property("EncodedAbsUrl", _property_resolved)
-        ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(self.context,
-                                                                                user_principal_name,
-                                                                                _picker_value_resolved)
-        return sharing_result
+
+        return return_type
 
     def unshare(self):
         """
@@ -192,15 +194,15 @@ class ListItem(SecurableObject):
 
         :rtype: SharingResult
         """
-        result = SharingResult(self.context)
+        return_type = SharingResult(self.context)
 
         def _property_resolved():
             abs_url = self.get_property("EncodedAbsUrl")
             from office365.sharepoint.webs.web import Web
-            Web.unshare_object(self.context, abs_url, return_type=result)
+            Web.unshare_object(self.context, abs_url, return_type=return_type)
 
         self.ensure_property("EncodedAbsUrl", _property_resolved)
-        return result
+        return return_type
 
     def get_sharing_information(self):
         """

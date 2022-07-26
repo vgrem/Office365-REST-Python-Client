@@ -36,30 +36,21 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
         return result
 
     @staticmethod
-    def client_people_picker_resolve_user(context, query_string, on_resolved=None):
+    def client_people_picker_resolve_user(context, query_string):
         """
         Resolves the principals to a string of JSON representing users in people picker format.
 
-
-        :param (str) -> None on_resolved: resolved event
         :param str query_string: Specifies the value to be used in the principal query.
         :param office365.sharepoint.client_context.ClientContext context:
 
         """
-        result = ClientResult(context)
+        return_type = ClientResult(context)
         svc = ClientPeoplePickerWebServiceInterface(context)
         query_params = ClientPeoplePickerQueryParameters(query_string=query_string)
-        qry = ServiceOperationQuery(svc, "ClientPeoplePickerResolveUser", None, query_params, "queryParams", result)
+        qry = ServiceOperationQuery(svc, "ClientPeoplePickerResolveUser", None, query_params, "queryParams", return_type)
         qry.static = True
         context.add_query(qry)
-
-        def _process_result(resp):
-            result.value = "[{0}]".format(result.value)
-            if callable(on_resolved):
-                on_resolved(result.value)
-
-        context.after_execute(_process_result)
-        return result
+        return return_type
 
     @staticmethod
     def get_picker_entity_information(context, email_address):

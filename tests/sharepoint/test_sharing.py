@@ -41,7 +41,7 @@ class TestSharePointSharing(TestCase):
     def test4_share_file(self):
         target_file_item = self.client.web.get_list_item("/SitePages/Home.aspx")
         result = target_file_item.share(self.target_user.user_principal_name).execute_query()
-        self.assertIsInstance(result, SharingResult)
+        self.assertIsNone(result.error_message)
 
     def test5_unshare_file(self):
         target_file_item = self.client.web.get_list_item("/SitePages/Home.aspx")
@@ -53,6 +53,7 @@ class TestSharePointSharing(TestCase):
         result = self.client.web.share(self.target_user.user_principal_name).execute_query()
         self.assertIsInstance(result, SharingResult)
         self.assertEqual(result.status_code, SharingOperationStatusCode.CompletedSuccessfully)
+        self.assertIsNone(result.error_message)
 
     def test7_unshare_web(self):
         result = self.client.web.unshare().execute_query()

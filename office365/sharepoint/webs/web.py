@@ -750,24 +750,30 @@ class Web(SecurableObject):
         :param str email_body: The email subject.
         :rtype: SharingResult
         """
+        return_type = SharingResult(self.context)
 
-        picker_result = ClientResult(self.context)
-        sharing_result = SharingResult(self.context)
+        def _picker_value_resolved(resp, picker_result, group):
+            picker_input = "[{0}]".format(picker_result.value)
+            role_value = "group:{groupId}".format(groupId=group.properties["Id"])
+            Web.share_object(self.context, self.url, picker_input, role_value, 0,
+                             False, send_email, False, email_subject, email_body, return_type=return_type)
 
-        def _picker_value_resolved(picker_value):
-            picker_result.value = picker_value
+        def _grp_resolved(group):
+            picker_result = ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(self.context,
+                                                                                                    user_principal_name)
+            self.context.after_execute(_picker_value_resolved, True, picker_result, group)
 
-        def _grp_resolved(role_value):
-            def _web_loaded():
-                Web.share_object(self.context, self.url, picker_result.value, role_value, 0,
-                                 False, send_email, False, email_subject, email_body, return_type=sharing_result)
+        def _web_resolved():
+            groups = {
+                ExternalSharingSiteOption.View: self.associated_visitor_group,
+                ExternalSharingSiteOption.Edit: self.associated_member_group,
+                ExternalSharingSiteOption.Owner: self.associated_owner_group,
+            }
+            selected_group = groups[share_option]
+            self.context.load(selected_group, after_loaded=_grp_resolved)
 
-            self.ensure_property("Url", _web_loaded)
-
-        ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(self.context, user_principal_name,
-                                                                                _picker_value_resolved)
-        Web._resolve_group_value(self.context, share_option, _grp_resolved)
-        return sharing_result
+        self.ensure_property("Url", _web_resolved)
+        return return_type
 
     def unshare(self):
         """
@@ -775,13 +781,13 @@ class Web(SecurableObject):
 
         :rtype: SharingResult
         """
-        result = SharingResult(self.context)
+        return_type = SharingResult(self.context)
 
         def _web_initialized():
-            Web.unshare_object(self.context, self.url, return_type=result)
+            Web.unshare_object(self.context, self.url, return_type=return_type)
 
         self.ensure_property("Url", _web_initialized)
-        return result
+        return return_type
 
     @staticmethod
     def get_document_libraries(context, web_full_url):
@@ -857,32 +863,6 @@ class Web(SecurableObject):
         qry.static = True
         context.add_query(qry)
         return result
-
-    @staticmethod
-    def _resolve_group_value(context, share_option, on_resolved):
-        """
-
-        :param office365.sharepoint.client_context.ClientContext context:
-        :param ExternalSharingSiteOption share_option:
-        :param (str) -> None on_resolved:
-        """
-        options = {
-            ExternalSharingSiteOption.View: context.web.associated_visitor_group,
-            ExternalSharingSiteOption.Edit: context.web.associated_member_group,
-            ExternalSharingSiteOption.Owner: context.web.associated_owner_group,
-        }
-        grp = options[share_option]
-        context.load(grp)
-
-        def _group_resolved(resp):
-            """
-            :type resp: requests.Response
-            """
-            resp.raise_for_status()
-            role_value = "group:{groupId}".format(groupId=grp.properties["Id"])
-            on_resolved(role_value)
-
-        context.after_execute(_group_resolved)
 
     @staticmethod
     def get_sharing_link_kind(context, file_url, return_type=None):
