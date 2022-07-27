@@ -23,7 +23,7 @@ class TestSharePointClient(TestCase):
         self.assertIsInstance(ctx.authentication_context._provider, ACSTokenProvider)
 
     def test2_connect_with_app_principal_alt(self):
-        context_auth = AuthenticationContext(authority_url=test_site_url)
+        context_auth = AuthenticationContext(url=test_site_url)
         context_auth.acquire_token_for_app(client_id=settings.get('client_credentials', 'client_id'),
                                            client_secret=settings.get('client_credentials', 'client_secret'))
         ctx = ClientContext(test_site_url, context_auth)
@@ -34,7 +34,8 @@ class TestSharePointClient(TestCase):
         self.assertIsInstance(ctx.authentication_context._provider, SamlTokenProvider)
 
     def test5_init_from_url(self):
-        ctx = ClientContext.from_url(test_site_url).with_credentials(test_user_credentials)
+        page_url = "{site_url}/SitePages/Home.aspx".format(site_url=test_team_site_url)
+        ctx = ClientContext.from_url(page_url).with_credentials(test_user_credentials)
         web = ctx.web.get().execute_query()
         self.assertIsNotNone(web.url)
 

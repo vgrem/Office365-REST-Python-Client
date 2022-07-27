@@ -4,17 +4,18 @@ from office365.runtime.auth.providers.oauth_token_provider import OAuthTokenProv
 from office365.runtime.auth.providers.saml_token_provider import SamlTokenProvider
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.auth.user_credential import UserCredential
+from office365.runtime.compat import get_absolute_url
 
 
 class AuthenticationContext(object):
 
-    def __init__(self, authority_url):
+    def __init__(self, url):
         """
         Authentication context for SharePoint Online/OneDrive For Business
 
-        :param str authority_url:  authority url
+        :param str url:  Absolute Web or Site Url
         """
-        self.authority_url = authority_url
+        self.url = url.rstrip("/")
         self._provider = None
 
     def with_client_certificate(self, tenant, client_id, thumbprint, cert_path, **kwargs):
@@ -30,7 +31,8 @@ class AuthenticationContext(object):
         def _acquire_token_for_client_certificate():
             authority_url = 'https://login.microsoftonline.com/{0}'.format(tenant)
             credentials = {"thumbprint": thumbprint, "private_key": open(cert_path).read()}
-            scopes = kwargs.get('scopes', ["{url}/.default".format(url=self.authority_url)])
+            resource = get_absolute_url(self.url)
+            scopes = kwargs.get('scopes', ["{url}/.default".format(url=resource)])
             import msal
             app = msal.ConfidentialClientApplication(
                 client_id,
@@ -40,25 +42,23 @@ class AuthenticationContext(object):
             result = app.acquire_token_for_client(scopes)
             return TokenResponse.from_json(result)
 
-        self.register_provider(_acquire_token_for_client_certificate)
+        self.with_access_token(_acquire_token_for_client_certificate)
         return self
 
-    def register_provider(self, credentials_or_token_func, **kwargs):
-        if callable(credentials_or_token_func):
-            self._provider = OAuthTokenProvider(credentials_or_token_func)
-        elif isinstance(credentials_or_token_func, ClientCredential):
-            self._provider = ACSTokenProvider(self.authority_url, credentials_or_token_func.clientId,
-                                              credentials_or_token_func.clientSecret)
-        elif isinstance(credentials_or_token_func, UserCredential):
+    def with_access_token(self, token_func):
+        self._provider = OAuthTokenProvider(token_func)
+
+    def with_credentials(self, credentials, **kwargs):
+        if isinstance(credentials, ClientCredential):
+            self._provider = ACSTokenProvider(self.url, credentials.clientId, credentials.clientSecret)
+        elif isinstance(credentials, UserCredential):
             allow_ntlm = kwargs.get('allow_ntlm', False)
             if allow_ntlm:
                 from office365.runtime.auth.providers.ntlm_provider import NtlmProvider
-                self._provider = NtlmProvider(credentials_or_token_func.userName,
-                                              credentials_or_token_func.password)
+                self._provider = NtlmProvider(credentials.userName, credentials.password)
             else:
                 browser_mode = kwargs.get('browser_mode', False)
-                self._provider = SamlTokenProvider(self.authority_url, credentials_or_token_func.userName,
-                                                   credentials_or_token_func.password, browser_mode)
+                self._provider = SamlTokenProvider(self.url, credentials.userName, credentials.password, browser_mode)
         else:
             raise ValueError("Unknown credential type")
 
@@ -70,7 +70,7 @@ class AuthenticationContext(object):
         :type username: str
         :type browser_mode: str
         """
-        self._provider = SamlTokenProvider(url=self.authority_url, username=username, password=password,
+        self._provider = SamlTokenProvider(url=self.url, username=username, password=password,
                                            browser_mode=browser_mode)
         return self._provider.ensure_authentication_cookie()
 
@@ -78,12 +78,13 @@ class AuthenticationContext(object):
         """Acquire token via client credentials (SharePoint App Principal)
         Status: deprecated!
         """
-        self._provider = ACSTokenProvider(url=self.authority_url, client_id=client_id, client_secret=client_secret)
+        self._provider = ACSTokenProvider(url=self.url, client_id=client_id, client_secret=client_secret)
         return self._provider.ensure_app_only_access_token()
 
     def authenticate_request(self, request):
         """
         Authenticate request
+
         :type request: office365.runtime.http.request_options.RequestOptions
         """
         self._provider.authenticate_request(request)

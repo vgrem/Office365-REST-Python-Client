@@ -1,7 +1,6 @@
 import copy
 
 from office365.runtime.auth.authentication_context import AuthenticationContext
-from office365.runtime.auth.providers.saml_token_provider import resolve_base_url
 from office365.runtime.auth.user_credential import UserCredential
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_runtime_context import ClientRuntimeContext
@@ -20,7 +19,7 @@ from office365.sharepoint.sites.site import Site
 from office365.sharepoint.tenant.administration.hub_site_collection import HubSiteCollection
 from office365.sharepoint.webs.context_web_information import ContextWebInformation
 from office365.sharepoint.webs.web import Web
-from office365.runtime.compat import urlparse, is_absolute_url
+from office365.runtime.compat import urlparse, is_absolute_url, get_absolute_url
 
 
 class ClientContext(ClientRuntimeContext):
@@ -33,16 +32,12 @@ class ClientContext(ClientRuntimeContext):
         :param str base_url: Absolute Web or Site Url
         :param AuthenticationContext or None auth_context: Authentication context
         """
-        if base_url.endswith("/"):
-            base_url = base_url[:len(base_url) - 1]
-        if auth_context is None:
-            self._auth_context = AuthenticationContext(authority_url=base_url)
-        else:
-            self._auth_context = auth_context
         super(ClientContext, self).__init__()
+        if auth_context is None:
+            auth_context = AuthenticationContext(url=base_url)
+        self._auth_context = auth_context
         self._web = None
         self._site = None
-        self._base_url = base_url
         self._ctx_web_info = None
         self._pending_request = None
 
@@ -62,23 +57,23 @@ class ClientContext(ClientRuntimeContext):
         return url if relative else "".join([root_site_url, url])
 
     @staticmethod
-    def from_url(abs_url):
+    def from_url(full_url):
         """
         Constructs ClientContext from absolute Url
 
-        :param str abs_url: Absolute Url to resource
+        :param str full_url: Full Url to a resource
         :return: ClientContext
         """
-        base_url = resolve_base_url(abs_url)
-        ctx = ClientContext(base_url)
-        result = Web.get_web_url_from_page_url(ctx, abs_url)
+        root_site_url = get_absolute_url(full_url)
+        ctx = ClientContext(root_site_url)
+        result = Web.get_web_url_from_page_url(ctx, full_url)
 
         def _init_context_for_web(resp):
             """
             :type resp: requests.Response
             """
             resp.raise_for_status()
-            ctx._base_url = result.value
+            ctx._auth_context.url = result.value
 
         ctx.after_execute(_init_context_for_web)
         return ctx
@@ -100,7 +95,7 @@ class ClientContext(ClientRuntimeContext):
         """
         :type token_func: () -> TokenResponse
         """
-        self.authentication_context.register_provider(token_func)
+        self.authentication_context.with_access_token(token_func)
         return self
 
     def with_user_credentials(self, username, password, allow_ntlm=False, browser_mode=False):
@@ -112,7 +107,7 @@ class ClientContext(ClientRuntimeContext):
         :type allow_ntlm: bool
         :type browser_mode: bool
         """
-        self.authentication_context.register_provider(
+        self.authentication_context.with_credentials(
             UserCredential(username, password),
             allow_ntlm=allow_ntlm,
             browser_mode=browser_mode)
@@ -124,7 +119,7 @@ class ClientContext(ClientRuntimeContext):
 
         :type credentials: UserCredential or ClientCredential
         """
-        self.authentication_context.register_provider(credentials)
+        self.authentication_context.with_credentials(credentials)
         return self
 
     def execute_batch(self, items_per_batch=100):
@@ -232,14 +227,14 @@ class ClientContext(ClientRuntimeContext):
         :return ClientContext
         """
         ctx = copy.deepcopy(self)
-        ctx._base_url = url
+        ctx._auth_context.url = url
         ctx._ctx_web_info = None
         if clear_queries:
             ctx.clear()
         return ctx
 
     def authenticate_request(self, request):
-        self._auth_context.authenticate_request(request)
+        self.authentication_context.authenticate_request(request)
 
     def _build_modification_query(self, request):
         """
@@ -372,7 +367,7 @@ class ClientContext(ClientRuntimeContext):
     @property
     def base_url(self):
         """Represents absolute Web or Site Url"""
-        return self._base_url
+        return self.authentication_context.url
 
     @property
     def authentication_context(self):

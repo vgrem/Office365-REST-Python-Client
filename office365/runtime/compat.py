@@ -19,14 +19,12 @@ if is_py2:
     from urlparse import urljoin
     import pytz as timezone
     from email import message_from_string as message_from_bytes_or_string
-    from __builtin__ import xrange as range_or_xrange
 elif is_py3:
     from urllib.parse import urlparse
     from urllib.parse import quote
     from urllib.parse import urljoin
     from datetime import timezone
     from email import message_from_bytes as message_from_bytes_or_string
-    from builtins import range as range_or_xrange
 
 
 def message_as_bytes_or_string(message):
@@ -45,6 +43,11 @@ def is_string_type(value):
 
 def is_absolute_url(url):
     return bool(urlparse(url).netloc)
+
+
+def get_absolute_url(url):
+    path = urlparse(url).path
+    return url.replace(path, "")
 
 
 def parse_query_string(url, key):
