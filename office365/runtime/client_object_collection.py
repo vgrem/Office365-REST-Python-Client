@@ -30,22 +30,13 @@ class ClientObjectCollection(ClientObject):
         self._current_pos = len(self._data)
         return self
 
-    def create_typed_object(self, properties=None, persist_changes=False):
+    def create_typed_object(self):
         """
-        :type properties: dict
-        :type persist_changes: bool
         :rtype: ClientObject
         """
-        if properties is None:
-            properties = {}
         if self._item_type is None:
-            raise AttributeError("No class for entity type '{0}' found".format(self._item_type))
-
-        client_object = self._item_type(self.context)
-        client_object._parent_collection = self
-        for k, v in properties.items():
-            client_object.set_property(k, v, persist_changes)
-        return client_object
+            raise AttributeError("No class model for entity type '{0}' was found".format(self._item_type))
+        return self._item_type(self.context)
 
     def set_property(self, key, value, persist_changes=False):
         """
@@ -56,8 +47,9 @@ class ClientObjectCollection(ClientObject):
         if key == "__nextLinkUrl":
             self._next_request_url = value
         else:
-            client_object = self.create_typed_object(value)
+            client_object = self.create_typed_object()
             self.add_child(client_object)
+            [client_object.set_property(k, v, persist_changes) for k, v in value.items()]
         return self
 
     def add_child(self, client_object):

@@ -10,9 +10,7 @@ from office365.sharepoint.eventreceivers.definition_collection import EventRecei
 from office365.sharepoint.features.collection import FeatureCollection
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.portal.site_icon_manager import SiteIconManager
-from office365.sharepoint.portal.site_status import SiteStatus
 from office365.sharepoint.principal.user import User
-from office365.sharepoint.publishing.communication_site import CommunicationSiteCreationRequest
 from office365.sharepoint.recyclebin.item_collection import RecycleBinItemCollection
 from office365.sharepoint.sitehealth.summary import SiteHealthSummary
 from office365.sharepoint.sites.sph_site import SPHSite
@@ -29,59 +27,12 @@ class Site(BaseEntity):
     def __init__(self, context, resource_path=None):
         super(Site, self).__init__(context, ResourcePath("Site", resource_path))
 
-    @staticmethod
-    def create_communication_site(root_site_url, alias, title):
-        """
-        Creates a modern SharePoint Communication site
-
-        :param str root_site_url: Tenant root site url, e.g. https://contoso.sharepoint.com
-        :param str alias: Site alias which defines site url, e.g. https://contoso.sharepoint.com/sites/{alias}
-        :param str title: Site title
-        """
-
-        site = Site.from_url(root_site_url).get()  # type: Site
-        ctx = site.context
-
-        def _before_site_create(resp):
-            site_url = f"{root_site_url}sites/{alias}"
-            request = CommunicationSiteCreationRequest(title, site_url)
-            result = ctx.site_pages.communication_site.create(request)
-
-            def _after_site_create(site_create_resp):
-                if result.value.SiteStatus == SiteStatus.Error:
-                    raise ValueError("Site creation error")
-                elif result.value.SiteStatus == SiteStatus.Ready:
-                    site.set_property("NewSiteUrl", result.value.SiteUrl)
-            ctx.after_execute(_after_site_create)
-
-        ctx.after_execute(_before_site_create)
-        return site
-
-    @staticmethod
-    def create_team_site(root_site_url, alias, title, is_public=True):
-        """Creates a modern SharePoint Team site
-
-        :param str root_site_url: Tenant root site url, e.g. https://contoso.sharepoint.com
-        :param str alias: Site alias which defines site url, e.g. https://contoso.sharepoint.com/teams/{alias}
-        :param str title: Site title
-        :param bool is_public:
-        """
-        from office365.sharepoint.client_context import ClientContext
-        ctx = ClientContext(root_site_url)
-        site = ctx.site
-
-        from office365.sharepoint.portal.group_site_manager import GroupSiteManager
-        site_manager = GroupSiteManager(ctx)
-        result = site_manager.create_group_ex(title, alias, is_public)
-
-        def _after_site_create(site_create_resp):
-            if result.value.SiteStatus == SiteStatus.Error:
-                raise ValueError(result.value.ErrorMessage)
-            elif result.value.SiteStatus == SiteStatus.Ready:
-                site.set_property("NewSiteUrl", result.value.SiteUrl)
-
-        ctx.after_execute(_after_site_create)
-        return site
+    def delete_object(self):
+        """Deletes a site"""
+        def _site_resolved():
+            pass
+        self.ensure_property("Url", _site_resolved)
+        return self
 
     @staticmethod
     def from_url(url):
@@ -540,10 +491,9 @@ class Site(BaseEntity):
         return super(Site, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
-        if name == "NewSiteUrl":
-            safe_url = value[:-1] if value[-1] == "/" else value
-            super(Site, self).set_property("Url", safe_url)
-            self._context = self.context.clone(safe_url)
+        if name == "__siteUrl":
+            super(Site, self).set_property("Url", value)
+            self._context = self.context.clone(value)
         else:
             super(Site, self).set_property(name, value, persist_changes)
         return self

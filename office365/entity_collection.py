@@ -21,9 +21,9 @@ class EntityCollection(ClientObjectCollection):
 
     def add(self, **kwargs):
         """Creates an entity and prepares the query"""
-        return_type = self.create_typed_object(properties=kwargs, persist_changes=True)
+        return_type = self.create_typed_object()
         self.add_child(return_type)
-        qry = CreateEntityQuery(self, return_type, return_type)
+        qry = CreateEntityQuery(self, kwargs, return_type)
         self.context.add_query(qry)
         return return_type
 

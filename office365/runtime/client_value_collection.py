@@ -55,7 +55,7 @@ class ClientValueCollection(ClientValue):
                     json_format.metadata_type_tag_name: {'type': self.entity_type_name}}
         return json
 
-    def _create_value(self, initial_value=None):
+    def _create_typed_value(self, initial_value=None):
         """
         :type initial_value: int or bool or str or ClientValue or dict or None
         """
@@ -72,13 +72,13 @@ class ClientValueCollection(ClientValue):
             return initial_value
 
     def set_property(self, index, value, persist_changes=False):
-        item_value = self._create_value(value)
+        item_value = self._create_typed_value(value)
         self.add(item_value)
         return self
 
     @property
     def item_type_name(self):
-        return ODataType.resolve_type(self._create_value())
+        return ODataType.resolve_type(self._create_typed_value())
 
     @property
     def entity_type_name(self):

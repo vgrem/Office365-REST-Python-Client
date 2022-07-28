@@ -191,7 +191,7 @@ class Tenant(BaseEntity):
                 items = self.get_sites_by_state([0, 1, 2])
                 self.context.after_execute(_verify_site_status, items=items)
 
-            return_type.set_property("NewSiteUrl", url)
+            return_type.set_property("__siteUrl", url)
         self.context.after_execute(_verify_site_status)
         return return_type
 

@@ -4,16 +4,7 @@ from office365.runtime.queries.update_entity import UpdateEntityQuery
 
 
 class BaseEntity(ClientObject):
-
-    def __init__(self, context, resource_path=None, namespace="SP", parent_collection=None):
-        """
-        SharePoint specific entity
-
-        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
-        :param office365.runtime.paths.resource_path.ResourcePath resource_path: Resource Path
-        :param str namespace: default namespace
-        """
-        super(BaseEntity, self).__init__(context, resource_path, parent_collection, namespace)
+    """SharePoint specific entity"""
 
     def with_credentials(self, credentials):
         """
@@ -46,5 +37,5 @@ class BaseEntity(ClientObject):
     @property
     def entity_type_name(self):
         if self._entity_type_name is None:
-            self._entity_type_name = ".".join([self._namespace, type(self).__name__])
+            self._entity_type_name = ".".join(["SP", type(self).__name__])
         return self._entity_type_name

@@ -19,7 +19,7 @@ class User(Principal):
             person_props = people_manager.get_properties_for(self.login_name)
 
             def _person_props_loaded(resp):
-                site.set_property("NewSiteUrl", person_props.personal_url)
+                site.set_property("__siteUrl", person_props.personal_url)
             self.context.after_execute(_person_props_loaded)
 
         self.ensure_property("LoginName", _user_loaded)

@@ -13,14 +13,13 @@ P_T = TypeVar('P_T')
 
 class ClientObject(object):
 
-    def __init__(self, context, resource_path=None, parent_collection=None, namespace=None):
+    def __init__(self, context, resource_path=None, parent_collection=None):
         """
         Base client object which define named properties and relationships of an entity
 
         :type parent_collection: office365.runtime.client_object_collection.ClientObjectCollection or None
         :type resource_path: office365.runtime.paths.resource_path.ResourcePath or None
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
-        :type namespace: str
         """
         self._properties = {}
         self._ser_property_names = []
@@ -29,7 +28,6 @@ class ClientObject(object):
         self._parent_collection = parent_collection
         self._context = context
         self._resource_path = resource_path
-        self._namespace = namespace
 
     def persist_changes(self, name):
         """
@@ -182,10 +180,7 @@ class ClientObject(object):
     def entity_type_name(self):
         """Returns server type name for an entity"""
         if self._entity_type_name is None:
-            if self._namespace is None:
-                self._entity_type_name = type(self).__name__
-            else:
-                self._entity_type_name = ".".join([self._namespace, type(self).__name__])
+            self._entity_type_name = type(self).__name__
         return self._entity_type_name
 
     @property

@@ -13,6 +13,8 @@ from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.sharepoint.portal.site_status import SiteStatus
+from office365.sharepoint.publishing.communication_site import CommunicationSiteCreationRequest
 from office365.sharepoint.publishing.site_page_service import SitePageService
 from office365.sharepoint.request_user_context import RequestUserContext
 from office365.sharepoint.sites.site import Site
@@ -255,6 +257,53 @@ class ClientContext(ClientRuntimeContext):
                 request.ensure_header("X-HTTP-Method", "MERGE")
                 request.ensure_header("IF-MATCH", '*')
 
+    def create_team_site(self, alias, title, is_public=True):
+        """Creates a modern SharePoint Team site
+
+        :param str alias: Site alias which defines site url, e.g. https://contoso.sharepoint.com/teams/{alias}
+        :param str title: Site title
+        :param bool is_public:
+        """
+        result = self.group_site_manager.create_group_ex(title, alias, is_public)
+        return_type = Site(self)
+
+        def _after_site_create(resp):
+            """
+            :type resp: requests.Response
+            """
+            resp.raise_for_status()
+            if result.value.SiteStatus == SiteStatus.Error:
+                raise ValueError(result.value.ErrorMessage)
+            elif result.value.SiteStatus == SiteStatus.Ready:
+                return_type.set_property("__siteUrl", result.value.SiteUrl)
+
+        self.after_execute(_after_site_create)
+        return return_type
+
+    def create_communication_site(self, alias, title):
+        """
+        Creates a modern SharePoint Communication site
+
+        :param str alias: Site alias which defines site url, e.g. https://contoso.sharepoint.com/sites/{alias}
+        :param str title: Site title
+        """
+        return_type = Site(self)
+        site_url = f"{self.base_url}/sites/{alias}"
+        request = CommunicationSiteCreationRequest(title, site_url)
+        result = self.site_pages.communication_site.create(request)
+
+        def _after_site_create(resp):
+            """
+            :type resp: requests.Response
+            """
+            resp.raise_for_status()
+            if result.value.SiteStatus == SiteStatus.Error:
+                raise ValueError("Site creation error")
+            elif result.value.SiteStatus == SiteStatus.Ready:
+                return_type.set_property("__siteUrl", result.value.SiteUrl)
+        self.after_execute(_after_site_create)
+        return return_type
+
     @property
     def context_info(self):
         """Returns an ContextWebInformation object that specifies metadata about the site
@@ -363,6 +412,12 @@ class ClientContext(ClientRuntimeContext):
         """Alias to SearchService"""
         from office365.sharepoint.search.service import SearchService
         return SearchService(self)
+
+    @property
+    def tenant_settings(self):
+        """Alias to TenantSettings"""
+        from office365.sharepoint.tenant.tenant_settings import TenantSettings
+        return TenantSettings.current(self)
 
     @property
     def base_url(self):
