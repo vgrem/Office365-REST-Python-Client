@@ -30,7 +30,7 @@ class Site(BaseEntity):
     def delete_object(self):
         """Deletes a site"""
         def _site_resolved():
-            pass
+            self.context.group_site_manager.delete(self.url)
         self.ensure_property("Url", _site_resolved)
         return self
 

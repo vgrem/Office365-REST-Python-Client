@@ -1,8 +1,8 @@
+from office365.sharepoint.publishing.pages.collection import SitePageCollection
+from office365.sharepoint.publishing.pages.service import SitePageService
 from office365.sharepoint.publishing.primary_city_time import PrimaryCityTime
-from office365.sharepoint.publishing.site_page import SitePage
-from office365.sharepoint.publishing.site_page_collection import SitePageCollection
-from office365.sharepoint.publishing.site_page_service import SitePageService
-from office365.sharepoint.publishing.video_service_discoverer import VideoServiceDiscoverer
+from office365.sharepoint.publishing.pages.page import SitePage
+from office365.sharepoint.publishing.video.service_discoverer import VideoServiceDiscoverer
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 

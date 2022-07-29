@@ -5,9 +5,9 @@ from examples import acquire_token_by_username_password
 from office365.graph_client import GraphClient
 
 
-def print_success(g):
+def print_success(group):
     """
-    :type g: office365.directory.groups.group.Group
+    :type group: office365.directory.groups.group.Group
     """
     print(f"team has been deleted")
 

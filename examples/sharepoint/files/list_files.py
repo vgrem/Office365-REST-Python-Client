@@ -22,10 +22,10 @@ def print_file(f):
     """
     :type f: File
     """
-    print(f.properties['ServerRelativeUrl'])
-    #print(f.server_relative_path)
+    #print(f.properties['ServerRelativeUrl'])
+    print(f.server_relative_path)
 
 
 target_folder_url = "Shared Documents/Archive"
-root_folder = ctx.web.get_folder_by_server_relative_url(target_folder_url)
+root_folder = ctx.web.get_folder_by_server_relative_path(target_folder_url)
 enum_folder(root_folder, print_file)

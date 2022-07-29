@@ -14,8 +14,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.portal.site_status import SiteStatus
-from office365.sharepoint.publishing.communication_site import CommunicationSiteCreationRequest
-from office365.sharepoint.publishing.site_page_service import SitePageService
+from office365.sharepoint.publishing.pages.service import SitePageService
 from office365.sharepoint.request_user_context import RequestUserContext
 from office365.sharepoint.sites.site import Site
 from office365.sharepoint.tenant.administration.hub_site_collection import HubSiteCollection
@@ -163,7 +162,7 @@ class ClientContext(ClientRuntimeContext):
         """
         :type request_options: RequestOptions
         """
-        if self._ctx_web_info is None or not self._ctx_web_info.is_valid:
+        if not self.context_info.is_valid:
             self._ctx_web_info = self.get_context_web_information(request_options=request_options)
         request_options.set_header('X-RequestDigest', self._ctx_web_info.FormDigestValue)
 
@@ -288,9 +287,7 @@ class ClientContext(ClientRuntimeContext):
         :param str title: Site title
         """
         return_type = Site(self)
-        site_url = f"{self.base_url}/sites/{alias}"
-        request = CommunicationSiteCreationRequest(title, site_url)
-        result = self.site_pages.communication_site.create(request)
+        result = self.site_pages.communication_site.create(alias, title)
 
         def _after_site_create(resp):
             """
@@ -310,6 +307,8 @@ class ClientContext(ClientRuntimeContext):
 
         :rtype: ContextWebInformation
         """
+        if self._ctx_web_info is None:
+            self._ctx_web_info = ContextWebInformation()
         return self._ctx_web_info
 
     @property
@@ -418,6 +417,32 @@ class ClientContext(ClientRuntimeContext):
         """Alias to TenantSettings"""
         from office365.sharepoint.tenant.tenant_settings import TenantSettings
         return TenantSettings.current(self)
+
+    @property
+    def tenant(self):
+        from office365.sharepoint.tenant.administration.tenant import Tenant
+        if self.is_tenant:
+            return Tenant(self)
+        else:
+            admin_ctx = self.clone(self.tenant_url)
+            return Tenant(admin_ctx)
+
+    @property
+    def tenant_url(self):
+        root_url = get_absolute_url(self.base_url)
+        if "-admin." in root_url:
+            return root_url
+        result = urlparse(self.base_url)
+        names = str(result.netloc).split(".")
+        names[0] = names[0] + "-admin"
+        return result.scheme + "://" + ".".join(names)
+
+    @property
+    def is_tenant(self):
+        """
+        Determines whether the current site is a tenant administration site
+        """
+        return self.tenant_url == self.base_url
 
     @property
     def base_url(self):
