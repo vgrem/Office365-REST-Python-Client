@@ -55,14 +55,13 @@ class ClientValueCollection(ClientValue):
                     json_format.metadata_type_tag_name: {'type': self.entity_type_name}}
         return json
 
-    def _create_typed_value(self, initial_value=None):
+    def create_typed_value(self, initial_value=None):
         """
         :type initial_value: int or bool or str or ClientValue or dict or None
         """
         if initial_value is None:
             return uuid.uuid4() if self._item_type == uuid.UUID else self._item_type()
-
-        if self._item_type == uuid.UUID:
+        elif self._item_type == uuid.UUID:
             return uuid.UUID(initial_value)
         elif issubclass(self._item_type, ClientValue):
             value = self._item_type()
@@ -72,17 +71,13 @@ class ClientValueCollection(ClientValue):
             return initial_value
 
     def set_property(self, index, value, persist_changes=False):
-        item_value = self._create_typed_value(value)
-        self.add(item_value)
+        client_value = self.create_typed_value(value)
+        self.add(client_value)
         return self
-
-    @property
-    def item_type_name(self):
-        return ODataType.resolve_type(self._create_typed_value())
 
     @property
     def entity_type_name(self):
         """
         Returns server type name of value's collection
         """
-        return ODataType.resolve_type(self)
+        return "Collection({0})".format(ODataType.resolve_type(self._item_type))

@@ -38,28 +38,14 @@ class ODataType(object):
         """
         Resolves OData type name
 
-        :param str or int or bool or uuid or ClientValue or list[str or int or bool or uuid] client_type: Client value
+        :param T client_type: Client value type
         """
         from office365.runtime.client_value import ClientValue
-        from office365.runtime.client_value_collection import ClientValueCollection
-
-        collection = False
-        if isinstance(client_type, list):
-            collection = True
-            resolved_name = ODataType.primitive_types.get(type(client_type[0]), None)
-        elif isinstance(client_type, ClientValue):
-            if isinstance(client_type, ClientValueCollection):
-                collection = True
-                resolved_name = client_type.item_type_name
-            else:
-                resolved_name = client_type.entity_type_name
+        if issubclass(client_type, ClientValue):
+            client_value = client_type()
+            return client_value.entity_type_name
         else:
-            resolved_name = ODataType.primitive_types.get(type(client_type), None)
-
-        if resolved_name:
-            return "Collection({0})".format(resolved_name) if collection else resolved_name
-        else:
-            return None
+            return ODataType.primitive_types.get(client_type, None)
 
     def add_property(self, prop_schema):
         """

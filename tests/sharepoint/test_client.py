@@ -108,17 +108,14 @@ class TestSharePointClient(TestCase):
         self.assertTrue(len(files_after), files_count_before)
 
     def test_14_get_entity_type_name(self):
-        type_name = ODataType.resolve_type([""])
-        self.assertEqual(type_name, "Collection(Edm.String)")
-
         guid_coll = GuidCollection()
         self.assertEqual(guid_coll.entity_type_name, "Collection(Edm.Guid)")
 
-        custom_type_name = ODataType.resolve_type(SecondaryAdministratorsFieldsData())
+        custom_type_name = ODataType.resolve_type(SecondaryAdministratorsFieldsData)
         self.assertEqual(custom_type_name,
                          "Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsFieldsData")
 
-        str_type_name = ODataType.resolve_type(StringCollection())
+        str_type_name = ODataType.resolve_type(StringCollection)
         self.assertEqual(str_type_name, "Collection(Edm.String)")
 
         str_col = StringCollection()
