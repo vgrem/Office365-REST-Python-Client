@@ -19,28 +19,28 @@ class ODataBatchV3Request(ODataBatchRequest):
         """
         Construct a OData v3 Batch request
 
-        :type query: office365.runtime.queries.client_query.ClientQuery
+        :type query: office365.runtime.queries.batch.BatchQuery
         """
         url = "{0}/$batch".format(self.context.service_root_url())
         request = RequestOptions(url)
         request.method = HttpMethod.Post
         media_type = "multipart/mixed"
-        content_type = "; ".join([media_type, "boundary={0}".format(self.current_query.current_boundary)])
+        content_type = "; ".join([media_type, "boundary={0}".format(query.current_boundary)])
         request.ensure_header('Content-Type', content_type)
-        request.data = self._prepare_payload()
+        request.data = self._prepare_payload(query)
         return request
 
-    def process_response(self, batch_response):
+    def process_response(self, response):
         """
         Parses an HTTP response.
 
-        :type batch_response: requests.Response
+        :type response: requests.Response
         """
-        for qry, response in self._extract_response(batch_response):
-            response.raise_for_status()
-            self.context.pending_request().add_query(qry)
-            self.context.pending_request().process_response(response)
-            self.context.pending_request().clear()
+        for qry, sub_response in self._extract_response(response):
+            sub_response.raise_for_status()
+            self.context.add_query(qry)
+            self.context.pending_request().process_response(sub_response)
+            self.context.clear()
 
     def _extract_response(self, response):
         """Parses a multipart/mixed response body from the position defined by the context.
@@ -64,27 +64,29 @@ class ODataBatchV3Request(ODataBatchRequest):
                 query_id += 1
                 yield qry, self._deserialize_response(raw_response)
 
-    def _prepare_payload(self):
+    def _prepare_payload(self, query):
         """
         Serializes a batch request body.
+
+        :type query: office365.runtime.queries.batch.BatchQuery
         """
         main_message = Message()
         main_message.add_header("Content-Type", "multipart/mixed")
-        main_message.set_boundary(self.current_query.current_boundary)
+        main_message.set_boundary(query.current_boundary)
 
-        if self.current_query.has_change_sets:
+        if query.has_change_sets:
             change_set_message = Message()
             change_set_boundary = create_boundary("changeset_", True)
             change_set_message.add_header("Content-Type", "multipart/mixed")
             change_set_message.set_boundary(change_set_boundary)
 
-            for qry in self.current_query.change_sets:
+            for qry in query.change_sets:
                 request = qry.build_request()
                 message = self._serialize_request(request)
                 change_set_message.attach(message)
             main_message.attach(change_set_message)
 
-        for qry in self.current_query.get_queries:
+        for qry in query.get_queries:
             request = qry.build_request()
             message = self._serialize_request(request)
             main_message.attach(message)

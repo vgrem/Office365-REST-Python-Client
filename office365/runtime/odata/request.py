@@ -33,7 +33,7 @@ class ODataRequest(ClientRequest):
 
         :type request: office365.runtime.http.request_options.RequestOptions
         """
-        self.ensure_media_type(request)
+        self._include_media_type_header(request)
         return super(ODataRequest, self).execute_request_direct(request)
 
     def build_request(self, query):
@@ -43,7 +43,7 @@ class ODataRequest(ClientRequest):
         self._current_query = query
 
         request = RequestOptions(query.url)
-        self.ensure_media_type(request)
+        self._include_media_type_header(request)
         # set method
         request.method = HttpMethod.Get
         if isinstance(query, DeleteEntityQuery):
@@ -53,14 +53,6 @@ class ODataRequest(ClientRequest):
             if query.parameter_type is not None:
                 request.data = self._normalize_payload(query.parameter_type)
         return request
-
-    def ensure_media_type(self, request):
-        """
-        :type request: RequestOptions
-        """
-        media_type = self.default_json_format.get_media_type()
-        request.ensure_header('Content-Type', media_type)
-        request.ensure_header('Accept', media_type)
 
     def process_response(self, response):
         """
@@ -150,3 +142,11 @@ class ODataRequest(ClientRequest):
         elif isinstance(value, list):
             return [self._normalize_payload(item) for item in value]
         return value
+
+    def _include_media_type_header(self, request):
+        """
+        :type request: RequestOptions
+        """
+        media_type = self.default_json_format.get_media_type()
+        request.ensure_header('Content-Type', media_type)
+        request.ensure_header('Accept', media_type)

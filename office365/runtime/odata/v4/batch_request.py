@@ -13,32 +13,34 @@ class ODataV4BatchRequest(ODataBatchRequest):
 
     def build_request(self, query):
         """
-        :type query: office365.runtime.queries.client_query.ClientQuery
+        Builds a batch request
+
+        :type query: office365.runtime.queries.batch.BatchQuery
         """
         url = "{0}/$batch".format(self.context.service_root_url())
         request = RequestOptions(url)
         request.method = HttpMethod.Post
         request.ensure_header('Content-Type', "application/json")
         request.ensure_header('Accept', "application/json")
-        request.data = self._prepare_payload()
+        request.data = self._prepare_payload(query)
         return request
 
-    def process_response(self, batch_response):
+    def process_response(self, response):
         """Parses an HTTP response.
 
-        :type batch_response: requests.Response
+        :type response: requests.Response
         """
-        for qry, resp in self._extract_response(batch_response):
-            resp.raise_for_status()
+        for qry, sub_response in self._extract_response(response):
+            sub_response.raise_for_status()
             self.context.pending_request().add_query(qry)
-            self.context.pending_request().process_response(resp)
+            self.context.pending_request().process_response(sub_response)
             self.context.pending_request().clear()
 
-    def _extract_response(self, batch_response):
+    def _extract_response(self, response):
         """
         type batch_response: requests.Response
         """
-        json_responses = batch_response.json()
+        json_responses = response.json()
         for json_resp in json_responses["responses"]:
             resp = requests.Response()
             resp.status_code = int(json_resp['status'])
@@ -48,13 +50,14 @@ class ODataV4BatchRequest(ODataBatchRequest):
             qry = self.current_query.ordered_queries[qry_id]
             yield qry, resp
 
-    def _prepare_payload(self):
+    def _prepare_payload(self, query):
         """
         Serializes a batch request body.
-        """
 
+        :type query: office365.runtime.queries.batch.BatchQuery
+        """
         requests_json = []
-        for qry in self.current_query.queries:
+        for qry in query.queries:
             request_id = str(len(requests_json))
             request = qry.build_request()
             requests_json.append(self._normalize_request(request, request_id))
