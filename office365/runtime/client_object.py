@@ -29,16 +29,6 @@ class ClientObject(object):
         self._context = context
         self._resource_path = resource_path
 
-    def persist_changes(self, name):
-        """
-        :param str name: Property name
-        """
-        self._ser_property_names.append(name)
-        default_value = self.get_property(name)
-        if default_value is not None:
-            self.set_property(name, default_value)
-        return self
-
     def clear(self):
         self._ser_property_names = []
         return self

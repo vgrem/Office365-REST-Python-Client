@@ -12,17 +12,8 @@ class TestAttachments(GraphTestCase):
         super(TestAttachments, cls).setUpClass()
         cls.target_message = cls.client.me.messages.add(
             subject="Meet for lunch?",
-            body={
-                "contentType": "Text",
-                "content": "The new cafeteria is open."
-            },
-            toRecipients=[
-                {
-                    "emailAddress": {
-                        "address": "fannyd@contoso.onmicrosoft.com"
-                    }
-                }
-            ]
+            body="The new cafeteria is open.",
+            to_recipients=["fannyd@contoso.onmicrosoft.com"]
         ).execute_query()
 
     @classmethod

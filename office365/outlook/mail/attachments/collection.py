@@ -32,15 +32,8 @@ class AttachmentCollection(EntityCollection):
 
         :type attachment_item: office365.mail.attachment_item.AttachmentItem
         """
-        result = ClientResult(self.context, UploadSession())
-        qry = ServiceOperationQuery(self,
-                                    "createUploadSession",
-                                    None,
-                                    {
-                                        "AttachmentItem": attachment_item
-                                    },
-                                    None,
-                                    result
-                                    )
+        return_type = ClientResult(self.context, UploadSession())
+        payload = {"AttachmentItem": attachment_item}
+        qry = ServiceOperationQuery(self, "createUploadSession", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type

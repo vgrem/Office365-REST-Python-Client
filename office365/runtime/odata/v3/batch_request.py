@@ -38,7 +38,7 @@ class ODataBatchV3Request(ODataBatchRequest):
         """
         for qry, sub_response in self._extract_response(response):
             sub_response.raise_for_status()
-            self.context.add_query(qry)
+            self.context.pending_request().add_query(qry)
             self.context.pending_request().process_response(sub_response)
             self.context.clear()
 

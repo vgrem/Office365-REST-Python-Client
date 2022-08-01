@@ -19,9 +19,17 @@ class ClientObjectCollection(ClientObject):
         self._data = []  # type: list[ClientObject]
         self._item_type = item_type
         self._page_loaded = EventHandler(False)
+        self._changed = EventHandler(False)
         self._paged_mode = False
         self._current_pos = None
         self._next_request_url = None
+
+    def track_changes(self, target_object):
+        """
+        :type target_object: ClientObject
+        """
+        target_object.set_property(self.resource_path.name, self)
+        return self
 
     def clear(self):
         if not self._paged_mode:
@@ -60,6 +68,7 @@ class ClientObjectCollection(ClientObject):
         """
         client_object._parent_collection = self
         self._data.append(client_object)
+        self._changed.notify(self)
         return self
 
     def remove_child(self, client_object):
@@ -67,6 +76,7 @@ class ClientObjectCollection(ClientObject):
         :type client_object: ClientObject
         """
         self._data = [item for item in self._data if item != client_object]
+        self._changed.notify(self)
         return self
 
     def __iter__(self):

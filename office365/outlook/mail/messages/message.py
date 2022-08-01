@@ -11,7 +11,6 @@ from office365.outlook.mail.recipient import Recipient
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.paths.none import NonePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -75,8 +74,8 @@ class Message(OutlookItem):
 
         :type file_path: str
         """
-        return_type = FileAttachment(self.context, NonePath(self.resource_path))
-        self.attachments.add_child(return_type)
+        return_type = FileAttachment(self.context)
+        self.attachments.track_changes(self).add_child(return_type)
         max_upload_chunk = 1000000 * 3
         file_size = os.stat(file_path).st_size
         if file_size > max_upload_chunk:

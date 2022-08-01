@@ -80,7 +80,7 @@ class User(DirectoryObject):
             the parameter is false; default is true
         """
         message = Message(self.context)
-        message.persist_changes("attachments")
+        message.attachments.track_changes(message)
         message.subject = subject
         message.body = body
         message.to_recipients = to_recipients
