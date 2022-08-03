@@ -26,6 +26,7 @@ from office365.onedrive.drives.drive import Drive
 from office365.outlook.mail.mailbox_settings import MailboxSettings
 from office365.outlook.mail.messages.collection import MessageCollection
 from office365.outlook.mail.messages.message import Message
+from office365.outlook.mail.recipient import Recipient
 from office365.outlook.user import OutlookUser
 from office365.planner.user import PlannerUser
 from office365.runtime.client_result import ClientResult
@@ -80,10 +81,9 @@ class User(DirectoryObject):
             the parameter is false; default is true
         """
         message = Message(self.context)
-        message.attachments.track_changes(message)
         message.subject = subject
         message.body = body
-        message.to_recipients = to_recipients
+        [message.to_recipients.add(Recipient.from_email(email)) for email in to_recipients]
 
         payload = {
             "message": message,

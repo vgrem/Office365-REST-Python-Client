@@ -21,9 +21,9 @@ class EntityCollection(ClientObjectCollection):
 
     def add(self, **kwargs):
         """Creates an entity and prepares the query"""
-        return_type = self.create_typed_object()
+        return_type = self.create_typed_object(**kwargs)
         self.add_child(return_type)
-        qry = CreateEntityQuery(self, kwargs, return_type)
+        qry = CreateEntityQuery(self, return_type, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -33,4 +33,3 @@ class EntityCollection(ClientObjectCollection):
         :rtype: office365.graph_client.GraphClient
         """
         return self._context
-

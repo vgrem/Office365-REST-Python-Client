@@ -1,5 +1,6 @@
 from office365.outlook.mail.messages.message import Message
-from tests import test_user_principal_name
+from office365.outlook.mail.recipient import Recipient
+from tests import test_user_principal_name, test_user_principal_name_alt
 from tests.graph_case import GraphTestCase
 
 
@@ -16,7 +17,8 @@ class TestGraphMail(GraphTestCase):
 
     def test3_send_message(self):
         message = self.__class__.target_message
-        message.to_recipients = [test_user_principal_name]
+        message.to_recipients.add(Recipient.from_email(test_user_principal_name))
+        message.to_recipients.add(Recipient.from_email(test_user_principal_name_alt))
         message.body = "The new cafeteria is open."
         message.update()
         message.send().execute_query()

@@ -13,6 +13,4 @@ if len(messages) == 0:
     sys.exit("No messages were found")
 
 first_message = messages[0]  # type: Message
-first_message.reply(
-    comment="Fanny, would you join us next time?"
-).execute_query()
+first_message.reply(comment="Fanny, would you join us next time?").execute_query()

@@ -31,6 +31,7 @@ class Message(OutlookItem):
             """
             resp.raise_for_status()
             file_object.write(result.value)
+
         self.context.after_execute(_content_downloaded)
         return self
 
@@ -75,12 +76,13 @@ class Message(OutlookItem):
         :type file_path: str
         """
         return_type = FileAttachment(self.context)
-        self.attachments.track_changes(self).add_child(return_type)
+        self.attachments.add_child(return_type)
         max_upload_chunk = 1000000 * 3
         file_size = os.stat(file_path).st_size
         if file_size > max_upload_chunk:
             def _message_loaded():
                 self.attachments.resumable_upload(file_path, max_upload_chunk, return_type)
+
             self.ensure_property("id", _message_loaded)
         else:
             with open(file_path, 'rb') as fh:
@@ -172,9 +174,11 @@ class Message(OutlookItem):
 
     @property
     def attachments(self):
-        """The fileAttachment and itemAttachment attachments for the message."""
-        return self.properties.get('attachments',
-                                   AttachmentCollection(self.context, ResourcePath("attachments", self.resource_path)))
+        """The fileAttachment and itemAttachment attachments for the message.
+        """
+        return self.get_property('attachments',
+                                 AttachmentCollection(self.context, ResourcePath("attachments", self.resource_path)),
+                                 True)
 
     @property
     def extensions(self):
@@ -217,22 +221,16 @@ class Message(OutlookItem):
     @property
     def to_recipients(self):
         """The To: recipients for the message."""
-        return self.properties.get('toRecipients', ClientValueCollection(Recipient))
+        return self.get_property('toRecipients', ClientValueCollection(Recipient), True)
 
-    @to_recipients.setter
-    def to_recipients(self, value):
-        """
-        The To: recipients for the message.
-
-        :type value: list[str] or list[Recipient]
-        """
-        self.set_property('toRecipients',
-                          ClientValueCollection(Recipient, [Recipient.from_email(email) for email in value]))
-
-    def get_property(self, name, default_value=None):
+    def get_property(self, name, default_value=None, track_changes=False):
         if default_value is None:
             property_type_mapping = {
                 "toRecipients": self.to_recipients
             }
             default_value = property_type_mapping.get(name, None)
-        return super(Message, self).get_property(name, default_value)
+
+        value = super(Message, self).get_property(name, default_value)
+        if track_changes:
+            self.track_changes(name, value)
+        return value

@@ -19,17 +19,9 @@ class ClientObjectCollection(ClientObject):
         self._data = []  # type: list[ClientObject]
         self._item_type = item_type
         self._page_loaded = EventHandler(False)
-        self._changed = EventHandler(False)
         self._paged_mode = False
         self._current_pos = None
         self._next_request_url = None
-
-    def track_changes(self, target_object):
-        """
-        :type target_object: ClientObject
-        """
-        target_object.set_property(self.resource_path.name, self)
-        return self
 
     def clear(self):
         if not self._paged_mode:
@@ -38,13 +30,12 @@ class ClientObjectCollection(ClientObject):
         self._current_pos = len(self._data)
         return self
 
-    def create_typed_object(self):
-        """
-        :rtype: ClientObject
-        """
+    def create_typed_object(self, **kwargs):
         if self._item_type is None:
             raise AttributeError("No class model for entity type '{0}' was found".format(self._item_type))
-        return self._item_type(self.context)
+        client_object = self._item_type(self.context)  # type: ClientObject
+        [client_object.set_property(k, v) for k, v in kwargs.items() if v is not None]
+        return client_object
 
     def set_property(self, key, value, persist_changes=False):
         """
@@ -68,7 +59,6 @@ class ClientObjectCollection(ClientObject):
         """
         client_object._parent_collection = self
         self._data.append(client_object)
-        self._changed.notify(self)
         return self
 
     def remove_child(self, client_object):
@@ -76,7 +66,6 @@ class ClientObjectCollection(ClientObject):
         :type client_object: ClientObject
         """
         self._data = [item for item in self._data if item != client_object]
-        self._changed.notify(self)
         return self
 
     def __iter__(self):
@@ -167,8 +156,10 @@ class ClientObjectCollection(ClientObject):
         """
         :type self: T
         """
+
         def _loaded(items):
             self._page_loaded.notify(self)
+
         self.context.load(self, after_loaded=_loaded)
         return self
 
@@ -196,6 +187,7 @@ class ClientObjectCollection(ClientObject):
 
         :param (ClientObjectCollection) -> None after_loaded: Page loaded event
         """
+
         def _construct_next_query(request):
             """
             :type request: office365.runtime.http.request_options.RequestOptions

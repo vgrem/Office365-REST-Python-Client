@@ -99,6 +99,12 @@ class ClientObject(object):
         self._parent_collection.remove_child(self)
         return self
 
+    def track_changes(self, name, value):
+        if name not in self._ser_property_names:
+            self._ser_property_names.append(name)
+            self._properties[name] = value
+        return self
+
     def get_property(self, name, default_value=None):
         """
         Gets property value
@@ -122,18 +128,18 @@ class ClientObject(object):
         if persist_changes:
             self._ser_property_names.append(name)
 
-        prop_type = self.get_property(name)
-        if isinstance(prop_type, ClientObject) or isinstance(prop_type, ClientValue):
+        typed_value = self.get_property(name)
+        if isinstance(typed_value, ClientObject) or isinstance(typed_value, ClientValue):
             if isinstance(value, list):
-                [prop_type.set_property(i, v, persist_changes) for i, v in enumerate(value)]
-                self._properties[name] = prop_type
+                [typed_value.set_property(i, v, persist_changes) for i, v in enumerate(value)]
+                self._properties[name] = typed_value
             elif isinstance(value, dict):
-                [prop_type.set_property(k, v, persist_changes) for k, v in value.items()]
-                self._properties[name] = prop_type
+                [typed_value.set_property(k, v, persist_changes) for k, v in value.items()]
+                self._properties[name] = typed_value
             else:
                 self._properties[name] = value
         else:
-            if isinstance(prop_type, datetime.datetime):
+            if isinstance(typed_value, datetime.datetime):
                 self._properties[name] = ODataType.parse_datetime(value)
             else:
                 self._properties[name] = value
