@@ -1,3 +1,5 @@
+import base64
+
 from office365.entity_collection import EntityCollection
 from office365.outlook.internal.queries.attachment_upload import AttachmentUploadQuery
 from office365.outlook.mail.attachments.attachment import Attachment
@@ -11,6 +13,23 @@ class AttachmentCollection(EntityCollection):
 
     def __init__(self, context, resource_path=None):
         super(AttachmentCollection, self).__init__(context, Attachment, resource_path)
+
+    def add_file(self, name, content, content_type=None):
+        """
+        Attach a file to message
+
+        :param str name: The name representing the text that is displayed below the icon representing the
+             embedded attachment
+        :param str content: The contents of the file
+        :param str or None content_type: The content type of the attachment.
+        """
+        from office365.outlook.mail.attachments.file import FileAttachment
+        return_type = FileAttachment(self.context)
+        return_type.name = name
+        return_type.content_bytes = base64.b64encode(content.encode("utf-8")).decode("utf-8")
+        return_type.content_type = content_type
+        self.add_child(return_type)
+        return self
 
     def resumable_upload(self, source_path, chunk_size=1000000):
         """

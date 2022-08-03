@@ -1,11 +1,9 @@
-import base64
 import os
 
 from office365.directory.extensions.extension import Extension
 from office365.entity_collection import EntityCollection
 from office365.outlook.item import OutlookItem
 from office365.outlook.mail.attachments.collection import AttachmentCollection
-from office365.outlook.mail.attachments.file import FileAttachment
 from office365.outlook.mail.itemBody import ItemBody
 from office365.outlook.mail.recipient import Recipient
 from office365.runtime.client_result import ClientResult
@@ -61,12 +59,8 @@ class Message(OutlookItem):
         :param str content: The contents of the file
         :param str or None content_type: The content type of the attachment.
         """
-        return_type = FileAttachment(self.context)
-        self.attachments.add_child(return_type)
-        return_type.name = name
-        return_type.content_bytes = base64.b64encode(content.encode("utf-8")).decode("utf-8")
-        return_type.content_type = content_type
-        return return_type
+        self.attachments.add_file(name, content, content_type)
+        return self
 
     def upload_attachment(self, file_path):
         """
@@ -75,20 +69,16 @@ class Message(OutlookItem):
 
         :type file_path: str
         """
-        return_type = FileAttachment(self.context)
-        self.attachments.add_child(return_type)
         max_upload_chunk = 1000000 * 3
         file_size = os.stat(file_path).st_size
         if file_size > max_upload_chunk:
             def _message_loaded():
-                self.attachments.resumable_upload(file_path, max_upload_chunk, return_type)
-
+                self.attachments.resumable_upload(file_path, max_upload_chunk)
             self.ensure_property("id", _message_loaded)
         else:
             with open(file_path, 'rb') as fh:
-                orig_content = fh.read()
-                return_type.content_bytes = base64.b64encode(orig_content).decode("utf-8")
-            return_type.name = os.path.basename(fh.name)
+                content = fh.read()
+            self.attachments.add_file(os.path.basename(fh.name), content.decode("utf-8"))
         return self
 
     def send(self):
