@@ -1,3 +1,5 @@
+import os
+
 from office365.directory.subscriptions.subscription import Subscription
 from office365.onedrive.driveitems.audio import Audio
 from office365.onedrive.driveitems.geo_coordinates import GeoCoordinates
@@ -5,6 +7,7 @@ from office365.onedrive.driveitems.image import Image
 from office365.onedrive.driveitems.item_preview_info import ItemPreviewInfo
 from office365.onedrive.driveitems.photo import Photo
 from office365.onedrive.driveitems.special_folder import SpecialFolder
+from office365.onedrive.internal.queries.resumable_file_upload import create_resumable_file_upload_query
 from office365.onedrive.internal.queries.upload_content import create_upload_content_query
 from office365.base_item import BaseItem
 from office365.onedrive.analytics.item_activity_stat import ItemActivityStat
@@ -21,7 +24,6 @@ from office365.onedrive.folders.folder import Folder
 from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.driveitems.publication_facet import PublicationFacet
 from office365.onedrive.driveitems.thumbnail_set import ThumbnailSet
-from office365.onedrive.upload_session import UploadSession
 from office365.onedrive.workbooks.workbook import Workbook
 from office365.onedrive.internal.paths.url import UrlPath
 from office365.runtime.client_result import ClientResult
@@ -30,6 +32,7 @@ from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.runtime.queries.upload_session import UploadSessionQuery
 
 
 class DriveItem(BaseItem):
@@ -118,7 +121,7 @@ class DriveItem(BaseItem):
         self.context.add_query(qry)
         return self
 
-    def resumable_upload(self, source_path, chunk_size=1000000, chunk_uploaded=None):
+    def resumable_upload(self, source_path, chunk_size=2000000, chunk_uploaded=None):
         """
         Create an upload session to allow your app to upload files up to the maximum file size.
         An upload session allows your app to upload ranges of the file in sequential API requests,
@@ -129,14 +132,14 @@ class DriveItem(BaseItem):
             Upload bytes to the upload session
 
         :param chunk_uploaded:
-        :param str source_path: Local file path
+        :param str source_path: File path
         :param int chunk_size: chunk size
         """
-        from office365.onedrive.internal.queries.file_upload import ResumableFileUploadQuery
-        qry = ResumableFileUploadQuery(self, source_path, chunk_size, chunk_uploaded)
-        self.children.add_child(qry.return_type)
+        file_name = os.path.basename(source_path)
+        return_type = DriveItem(self.context, UrlPath(file_name, self.resource_path))
+        qry = create_resumable_file_upload_query(return_type, source_path, chunk_size, chunk_uploaded)
         self.context.add_query(qry)
-        return qry.return_type
+        return return_type
 
     def create_upload_session(self, item):
         """Creates a temporary storage location where the bytes of the file will be saved until the complete file is
@@ -144,18 +147,9 @@ class DriveItem(BaseItem):
 
         :type item: office365.graph.onedrive.driveItemUploadableProperties.DriveItemUploadableProperties
         """
-        result = ClientResult(self.context, UploadSession())
-        qry = ServiceOperationQuery(self,
-                                    "createUploadSession",
-                                    None,
-                                    {
-                                        "item": item
-                                    },
-                                    None,
-                                    result
-                                    )
+        qry = UploadSessionQuery(self, {"item": item})
         self.context.add_query(qry)
-        return result
+        return qry.return_type
 
     def upload(self, name, content):
         """The simple upload API allows you to provide the contents of a new file or update the contents of an

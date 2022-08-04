@@ -62,23 +62,24 @@ class Message(OutlookItem):
         self.attachments.add_file(name, content, content_type)
         return self
 
-    def upload_attachment(self, file_path):
+    def upload_attachment(self, file_path, chunk_uploaded=None):
         """
         This approach is used to attach a file if the file size is between 3 MB and 150 MB, otherwise
         if a file that's smaller than 3 MB, then add_file_attachment method is utilized
 
-        :type file_path: str
+        :param str file_path:
+        :param ()->None chunk_uploaded: Upload action
         """
         max_upload_chunk = 1000000 * 3
         file_size = os.stat(file_path).st_size
         if file_size > max_upload_chunk:
             def _message_loaded():
-                self.attachments.resumable_upload(file_path, max_upload_chunk)
+                self.attachments.resumable_upload(file_path, max_upload_chunk, chunk_uploaded)
             self.ensure_property("id", _message_loaded)
         else:
-            with open(file_path, 'rb') as fh:
-                content = fh.read()
-            self.attachments.add_file(os.path.basename(fh.name), content.decode("utf-8"))
+            with open(file_path, 'rb') as file_object:
+                content = file_object.read()
+            self.attachments.add_file(os.path.basename(file_object.name), content.decode("utf-8"))
         return self
 
     def send(self):

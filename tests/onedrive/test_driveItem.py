@@ -83,7 +83,7 @@ class TestDriveItem(GraphTestCase):
     def test_10_upload_file_session(self):
         file_name = "big_buck_bunny.mp4"
         local_path = "{0}/../data/{1}".format(os.path.dirname(__file__), file_name)
-        target_file = self.target_drive.root.resumable_upload(local_path).execute_query()
+        target_file = self.target_drive.root.resumable_upload(local_path).get().execute_query()
         self.assertIsNotNone(target_file.web_url)
 
     def test_11_download_file(self):

@@ -13,5 +13,5 @@ def print_progress(range_pos):
 
 
 # upload a file
-file_item = folder_item.resumable_upload(local_path, chunk_uploaded=print_progress).execute_query()
+file_item = folder_item.resumable_upload(local_path, chunk_uploaded=print_progress).get().execute_query()
 print(f"File {file_item.web_url} has been uploaded")
