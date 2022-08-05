@@ -3,7 +3,7 @@ import os
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.internal.queries.create_file import create_file_query
-from office365.sharepoint.internal.queries.upload_session import UploadSessionQuery
+from office365.sharepoint.internal.queries.upload_session import create_upload_session_query
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.files.file import File
 from office365.sharepoint.files.creation_information import FileCreationInformation
@@ -27,18 +27,17 @@ class FileCollection(BaseEntityCollection):
         self.context.add_query(qry)
         return qry.return_type
 
-    def create_upload_session(self, source_path, chunk_size, chunk_uploaded=None, *chunk_func_args):
+    def create_upload_session(self, source_path, chunk_size, chunk_uploaded=None, **kwargs):
         """Upload a file as multiple chunks
 
         :param str source_path: path where file to upload resides
         :param int chunk_size: upload chunk size (in bytes)
         :param (long)->None or None chunk_uploaded: uploaded event
-        :param chunk_func_args: arguments to pass to chunk_uploaded function
-        :return: office365.sharepoint.files.file.File
+        :param kwargs: arguments to pass to chunk_uploaded function
         """
         file_size = os.path.getsize(source_path)
         if file_size > chunk_size:
-            qry = UploadSessionQuery(self, source_path, chunk_size, chunk_uploaded, chunk_func_args)
+            qry = create_upload_session_query(self, source_path, chunk_size, chunk_uploaded, **kwargs)
             self.context.add_query(qry)
             return qry.return_type
         else:
