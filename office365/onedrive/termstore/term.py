@@ -17,7 +17,9 @@ class Term(Entity):
     def children(self):
         """Children of current term."""
         return self.properties.get('children',
-                                   EntityCollection(self.context, Term, ChildrenPath(self.resource_path, "terms")))
+                                   EntityCollection(self.context, Term,
+                                                    ChildrenPath(self.resource_path,
+                                                                 ResourcePath("terms", self.resource_path.parent))))
 
     @property
     def relations(self):

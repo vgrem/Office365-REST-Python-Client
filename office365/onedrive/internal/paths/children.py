@@ -1,19 +1,17 @@
-from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.entity import EntityPath
 
 
-class ChildrenPath(ResourcePath):
+class ChildrenPath(EntityPath):
     """Resource path for OneDrive children addressing"""
 
-    def __init__(self, parent, collection_name="items"):
-        """
-        :param str collection_name: Resolved path name
-        """
-        super(ChildrenPath, self).__init__("children", parent)
-        self._collection_name = collection_name
+    def __init__(self, parent, collection=None):
+        super(ChildrenPath, self).__init__("children", parent, collection)
 
-    def normalize(self, name, parent=None, inplace=False):
-        if self._collection_name != "items":
-            return super(ChildrenPath, self).normalize(name, ResourcePath(self._collection_name, self.parent), inplace)
-        else:
-            path = self.parent.normalize(name, parent, inplace)
-            return super(ChildrenPath, self).normalize(path.name, path.parent, inplace)
+    @property
+    def collection(self):
+        if self._collection is None:
+            if isinstance(self.parent, EntityPath):
+                self._collection = self.parent.collection
+            else:
+                self._collection = self.parent.parent
+        return self._collection

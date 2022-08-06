@@ -11,6 +11,7 @@ from office365.directory.groups.lifecycle_policy import GroupLifecyclePolicy
 from office365.directory.groups.setting_template import GroupSettingTemplate
 from office365.directory.identities.identity_container import IdentityContainer
 from office365.directory.identities.identity_provider import IdentityProvider
+from office365.directory.internal.paths.me import MePath
 from office365.directory.licenses.subscribed_sku import SubscribedSku
 from office365.directory.organizations.org_contact import OrgContact
 from office365.directory.organizations.organization import Organization
@@ -107,7 +108,7 @@ class GraphClient(ClientRuntimeContext):
     @property
     def me(self):
         """The Me endpoint is provided as a shortcut for specifying the current user"""
-        return User(self, ResourcePath("me"))
+        return User(self, MePath())
 
     @property
     def drives(self):

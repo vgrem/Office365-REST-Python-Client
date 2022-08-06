@@ -1,4 +1,5 @@
 class ResourcePath(object):
+    """OData resource  path"""
 
     def __init__(self, name, parent=None):
         """
@@ -20,23 +21,6 @@ class ResourcePath(object):
     def __str__(self):
         return self.to_url()
 
-    def normalize(self, name, parent=None, inplace=False):
-        """
-        :type name: str or None
-        :type parent: ResourcePath or None
-        :type inplace: bool
-        """
-        if parent is None:
-            parent = self.parent
-
-        if inplace:
-            self._name = name
-            self._parent = parent
-            self.__class__ = ResourcePath
-            return self
-        else:
-            return ResourcePath(name, parent)
-
     def to_url(self):
         """
         Builds url
@@ -54,7 +38,7 @@ class ResourcePath(object):
 
     @property
     def segments(self):
-        return [self.delimiter, str(self._name or '')]
+        return [self.delimiter, str(self.name or '')]
 
     @property
     def name(self):

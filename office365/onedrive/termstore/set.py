@@ -18,7 +18,8 @@ class Set(Entity):
     def children(self):
         """Children terms of set in term store."""
         return self.properties.get('children',
-                                   TermCollection(self.context, ChildrenPath(self.resource_path, "terms"), self))
+                                   TermCollection(self.context,
+                                                  ChildrenPath(self.resource_path, self.terms.resource_path), self))
 
     @property
     def localized_names(self):

@@ -1,14 +1,15 @@
+from office365.runtime.paths.entity import EntityPath
 from office365.runtime.paths.resource_path import ResourcePath
 
 
-class RootPath(ResourcePath):
+class RootPath(EntityPath):
     """Resource path for OneDrive path-based addressing"""
 
-    def __init__(self, parent):
-        super(RootPath, self).__init__("root", parent)
+    def __init__(self, parent=None, collection=None):
+        super(RootPath, self).__init__("root", parent, collection)
 
-    def normalize(self, name, parent=None, inplace=False):
-        if self.parent.name == "drive":
-            return super(RootPath, self).normalize(name, ResourcePath("items", self.parent), inplace)
-        else:
-            return super(RootPath, self).normalize(name, self.parent, inplace)
+    @property
+    def collection(self):
+        if self._collection is None:
+            self._collection = ResourcePath("items", self.parent)
+        return self._collection

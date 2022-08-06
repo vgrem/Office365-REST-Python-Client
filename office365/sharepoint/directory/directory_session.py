@@ -10,7 +10,7 @@ class DirectorySession(BaseEntity):
 
     @property
     def me(self):
-        return self.properties.get('me', User(self.context, ResourcePath("me", self.resource_path)))
+        return self.properties.get('Me', User(self.context, ResourcePath("Me", self.resource_path)))
 
     def get_graph_user(self, principal_name):
         """

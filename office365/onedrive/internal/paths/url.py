@@ -1,30 +1,32 @@
-from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.entity import EntityPath
 
 
-class UrlPath(ResourcePath):
-    """Resource path for OneDrive path-based addressing"""
+class UrlPath(EntityPath):
+    """Resource path for OneDrive entity path-based addressing"""
 
-    def __init__(self, rel_url, parent):
+    def __init__(self, url, parent):
         """
-        :param str rel_url: File or Folder relative url
+        :param str url: File or Folder server relative url
         :type parent: office365.runtime.paths.ResourcePath
         """
-        super(UrlPath, self).__init__(rel_url, parent)
+        super(UrlPath, self).__init__(url, parent)
         self._nested = False
 
-    def normalize(self, value, parent=None, inplace=False):
-        path = self.parent.normalize(value)
-        return super(UrlPath, self).normalize(path.name, path.parent, inplace)
+    @property
+    def collection(self):
+        while self.parent and self._collection is None:
+            self._collection = self.parent.collection
+        return self._collection
 
     @property
     def segments(self):
-        cur_delimiter = "/" if self._nested else self.delimiter
+        cur_delimiter = self.delimiter if self._nested else self.url_delimiter
         if isinstance(self.parent, UrlPath):
             self.parent._nested = True
             return [self._name, cur_delimiter]
         else:
-            return [self.delimiter, self._name, cur_delimiter]
+            return [self.url_delimiter, self._name, cur_delimiter]
 
     @property
-    def delimiter(self):
+    def url_delimiter(self):
         return ":/"

@@ -43,6 +43,3 @@ class DirectoryObject(Entity):
     def deleted_datetime(self):
         """ETag for the item."""
         return self.properties.get('deletedDateTime', None)
-
-    def set_property(self, name, value, persist_changes=True):
-        super(DirectoryObject, self).set_property(name, value, persist_changes)

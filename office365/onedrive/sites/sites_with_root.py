@@ -2,6 +2,7 @@ from office365.entity_collection import EntityCollection
 from office365.onedrive.internal.paths.root import RootPath
 from office365.onedrive.internal.paths.site import SitePath
 from office365.onedrive.sites.site import Site
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.read_entity import ReadEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
@@ -37,4 +38,4 @@ class SitesWithRoot(EntityCollection):
 
     @property
     def root(self):
-        return self.properties.get('root', Site(self.context, RootPath(self.resource_path)))
+        return self.properties.get('root', Site(self.context, RootPath(self.resource_path, ResourcePath("sites"))))

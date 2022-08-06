@@ -31,7 +31,6 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.upload_session import UploadSessionQuery
 
 
@@ -55,8 +54,8 @@ class DriveItem(BaseItem):
 
         :param str link_type: The type of sharing link to create. Either view, edit, or embed.
         :param str scope:  The scope of link to create. Either anonymous or organization.
-        :param str expiration_datetime: A String with format of yyyy-MM-ddTHH:mm:ssZ of DateTime indicates the expiration
-            time of the permission.
+        :param str expiration_datetime: A String with format of yyyy-MM-ddTHH:mm:ssZ of DateTime indicates
+            the expiration time of the permission.
         :param str password: The password of the sharing link that is set by the creator. Optional
             and OneDrive Personal only.
         :param str message:
@@ -95,19 +94,16 @@ class DriveItem(BaseItem):
         Check out a driveItem resource to prevent others from editing the document, and prevent your changes
         from being visible until the documented is checked in.
         """
-        qry = ServiceOperationQuery(self,
-                                    "checkout",
-                                    None
-                                    )
+        qry = ServiceOperationQuery(self, "checkout")
         self.context.add_query(qry)
         return self
 
-    def checkin(self, comment, checkInAs=""):
+    def checkin(self, comment, checkin_as=""):
         """
         Check in a checked out driveItem resource, which makes the version of the document available to others.
 
         :param str comment: comment to the new version of the file
-        :param str checkInAs: The status of the document after the check-in operation is complete.
+        :param str checkin_as: The status of the document after the check-in operation is complete.
             Can be published or unspecified.
         """
         qry = ServiceOperationQuery(self,
@@ -115,7 +111,7 @@ class DriveItem(BaseItem):
                                     None,
                                     {
                                         "comment": comment,
-                                        "checkInAs": checkInAs
+                                        "checkInAs": checkin_as
                                     }
                                     )
         self.context.add_query(qry)
@@ -356,9 +352,7 @@ class DriveItem(BaseItem):
             "endDateTime": end_dt.strftime('%m-%d-%Y') if end_dt else None,
             "interval": interval
         }
-        return_type = EntityCollection(self.context, ItemActivityStat,
-                                       ServiceOperationPath("getActivitiesByInterval", params,
-                                                            self.resource_path))
+        return_type = EntityCollection(self.context, ItemActivityStat, self.resource_path)
         qry = ServiceOperationQuery(self, "getActivitiesByInterval", params, None, None, return_type)
         self.context.add_query(qry)
 
@@ -495,7 +489,7 @@ class DriveItem(BaseItem):
         :rtype: EntityCollection
         """
         return self.get_property('children',
-                                 EntityCollection(self.context, DriveItem, ChildrenPath(self.resource_path, "items")))
+                                 EntityCollection(self.context, DriveItem, ChildrenPath(self.resource_path)))
 
     @property
     def listItem(self):
@@ -570,12 +564,3 @@ class DriveItem(BaseItem):
             }
             default_value = property_mapping.get(name, None)
         return super(DriveItem, self).get_property(name, default_value)
-
-    def set_property(self, name, value, persist_changes=True):
-        if name == "id":
-            if self._resource_path is None:
-                self._resource_path = self.parent_collection.resource_path.normalize(value)
-            elif isinstance(self._resource_path, UrlPath):
-                self._resource_path = self._resource_path.normalize(value)
-        super(DriveItem, self).set_property(name, value, persist_changes)
-        return self

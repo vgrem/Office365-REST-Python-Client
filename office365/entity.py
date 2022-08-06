@@ -1,4 +1,5 @@
 from office365.runtime.client_object import ClientObject
+from office365.runtime.paths.entity import EntityPath
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
@@ -43,10 +44,10 @@ class Entity(ClientObject):
         super(Entity, self).set_property(name, value, persist_changes)
         if name == "id":
             if self._resource_path is None:
-                if type(self.parent_collection.resource_path) is ResourcePath:
-                    self._resource_path = ResourcePath(value, self.parent_collection.resource_path)
-                else:
+                if isinstance(self.parent_collection.resource_path, EntityPath):
                     self._resource_path = self.parent_collection.resource_path.normalize(value)
-            else:
+                else:
+                    self._resource_path = ResourcePath(value, self.parent_collection.resource_path)
+            elif isinstance(self._resource_path, EntityPath):
                 self._resource_path.normalize(value, inplace=True)
         return self

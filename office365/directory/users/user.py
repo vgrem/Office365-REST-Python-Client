@@ -32,6 +32,7 @@ from office365.planner.user import PlannerUser
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.paths.entity import EntityPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
@@ -300,8 +301,7 @@ class User(DirectoryObject):
            May contain multiple items with the same signInType value.
            Supports $filter.
         """
-        return self.properties.get('identities',
-                                   ClientValueCollection(ObjectIdentity))
+        return self.properties.get('identities', ClientValueCollection(ObjectIdentity))
 
     @property
     def assigned_licenses(self):
@@ -382,7 +382,7 @@ class User(DirectoryObject):
     def drive(self):
         """Retrieve the properties and relationships of a Drive resource."""
         return self.properties.get('drive',
-                                   Drive(self.context, ResourcePath("drive", self.resource_path)))
+                                   Drive(self.context, EntityPath("drive", self.resource_path, ResourcePath("drives"))))
 
     @property
     def contacts(self):
@@ -537,5 +537,5 @@ class User(DirectoryObject):
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "id" or name == "userPrincipalName":
-                self._resource_path = ResourcePath(value, self._parent_collection.resource_path)
+                self._resource_path = ResourcePath(value, self.parent_collection.resource_path)
         return self
