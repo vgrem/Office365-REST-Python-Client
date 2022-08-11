@@ -66,7 +66,6 @@ class TestFieldValue(SPTestCase):
         self.assertEqual(lookup_field.type_as_string, 'LookupMulti')
 
     def test4_set_field_multi_lookup_value(self):
-        # item_to_update = self.__class__.target_item
         item_to_update = self.__class__.target_list.get_item_by_id(self.__class__.target_item.id)
         lookup_id = self.__class__.target_item.id
         field_value = FieldMultiLookupValue()

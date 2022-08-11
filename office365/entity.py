@@ -30,8 +30,10 @@ class Entity(ClientObject):
 
     @property
     def entity_type_name(self):
-        name = type(self).__name__
-        return "microsoft.graph." + name[0].lower() + name[1:]
+        if self._entity_type_name is None:
+            name = type(self).__name__
+            self._entity_type_name = "microsoft.graph." + name[0].lower() + name[1:]
+        return self._entity_type_name
 
     @property
     def id(self):

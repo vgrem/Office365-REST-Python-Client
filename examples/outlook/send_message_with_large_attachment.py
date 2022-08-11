@@ -1,6 +1,8 @@
 from examples import acquire_token_by_username_password
 from office365.graph_client import GraphClient
 
+# Upload large attachment to Outlook message
+
 client = GraphClient(acquire_token_by_username_password)
 
 # local_path = "../../tests/data/Sample.txt"

@@ -80,3 +80,8 @@ class TestGraphClient(GraphTestCase):
     def test_14_resolve_my_drive_resource_path(self):
         my_drive = self.client.me.drive.get().execute_query()
         self.assertEqual("/drives/{0}".format(my_drive.id), str(my_drive.resource_path))
+
+    def test_15_resolve_entity_type_name(self):
+        name = self.client.me.joined_teams.entity_type_name
+        self.assertEqual("Collection(microsoft.graph.team)", name)
+

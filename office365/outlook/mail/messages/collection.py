@@ -21,8 +21,8 @@ class MessageCollection(DeltaCollection):
         """
         if to_recipients is not None:
             kwargs["toRecipients"] = ClientValueCollection(Recipient,
-                                                                 [Recipient.from_email(email) for email
-                                                                  in to_recipients])
+                                                           [Recipient.from_email(email) for email
+                                                            in to_recipients])
         if body is not None:
             kwargs["body"] = body if isinstance(body, ItemBody) else ItemBody(body)
         if subject is not None:

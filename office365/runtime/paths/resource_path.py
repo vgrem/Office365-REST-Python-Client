@@ -1,9 +1,9 @@
 class ResourcePath(object):
-    """OData resource  path"""
+    """OData resource path"""
 
     def __init__(self, name, parent=None):
         """
-        :type name: str or None
+        :type name: str
         :type parent: ResourcePath or None
         """
         self._name = name
@@ -38,7 +38,7 @@ class ResourcePath(object):
 
     @property
     def segments(self):
-        return [self.delimiter, str(self.name or '')]
+        return [self.delimiter, str(self.name)]
 
     @property
     def name(self):

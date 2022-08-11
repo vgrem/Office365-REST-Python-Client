@@ -30,11 +30,17 @@ class ClientObjectCollection(ClientObject):
         self._current_pos = len(self._data)
         return self
 
-    def create_typed_object(self, **kwargs):
+    def create_typed_object(self, initial_properties=None, resource_path=None):
+        """
+        :type initial_properties: dict[str, P_T] or None
+        :type resource_path: office365.runtime.paths.resource_path.ResourcePath or None
+        """
+        if initial_properties is None:
+            initial_properties = {}
         if self._item_type is None:
             raise AttributeError("No class model for entity type '{0}' was found".format(self._item_type))
-        client_object = self._item_type(self.context)  # type: ClientObject
-        [client_object.set_property(k, v) for k, v in kwargs.items() if v is not None]
+        client_object = self._item_type(context=self.context, resource_path=resource_path)  # type: ClientObject
+        [client_object.set_property(k, v) for k, v in initial_properties.items() if v is not None]
         return client_object
 
     def set_property(self, key, value, persist_changes=False):
@@ -204,5 +210,7 @@ class ClientObjectCollection(ClientObject):
     @property
     def entity_type_name(self):
         """Returns server type name for the collection of entities"""
-        name = super(ClientObjectCollection, self).entity_type_name
-        return "Collection({0})".format(name)
+        if self._entity_type_name is None:
+            client_object = self.create_typed_object()
+            self._entity_type_name = "Collection({0})".format(client_object.entity_type_name)
+        return self._entity_type_name

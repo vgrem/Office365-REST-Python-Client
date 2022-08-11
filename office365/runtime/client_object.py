@@ -23,14 +23,16 @@ class ClientObject(object):
         """
         self._properties = {}
         self._ser_property_names = []
-        self._entity_type_name = None
         self._query_options = QueryOptions()
         self._parent_collection = parent_collection
         self._context = context
+        self._entity_type_name = None
         self._resource_path = resource_path
 
     def clear(self):
+        self._properties = {k: v for k, v in self._properties.items() if k not in self._ser_property_names}
         self._ser_property_names = []
+        self._query_options = QueryOptions()
         return self
 
     def execute_query(self):

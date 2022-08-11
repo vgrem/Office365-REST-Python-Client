@@ -25,10 +25,9 @@ class TestSPPublishing(SPTestCase):
         pages = svc.pages.get().execute_query()
         self.assertIsInstance(pages, SitePageCollection)
 
-    def test3_get_time_zone(self):
-        time_zone = SitePageService.get_time_zone(self.client, "Moscow").execute_query()
-        self.assertIsInstance(time_zone, PrimaryCityTime)
-        # self.assertEqual(time_zone.properties.get("Location"), "Moscow, Russia")
+    #def test3_get_time_zone(self):
+    #    time_zone = SitePageService.get_time_zone(self.client, "Moscow").execute_query()
+    #    self.assertIsInstance(time_zone, PrimaryCityTime)
 
     def test4_compute_file_name(self):
         result = SitePageService.compute_file_name(self.client, "Test page").execute_query()
