@@ -5,14 +5,10 @@ from office365.sharepoint.internal.paths.entity import EntityPath
 class SiteProperties(BaseEntity):
     """Contains a property bag of information about a site."""
 
-    def __init__(self, context):
-        super(SiteProperties, self).__init__(context)
-
     def update(self):
         """Updates the site collection properties with the new properties specified in the SiteProperties object."""
         def _update():
             super(SiteProperties, self).update()
-
         self._ensure_resource_path(_update)
         return self
 

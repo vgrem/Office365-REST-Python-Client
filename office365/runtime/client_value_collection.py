@@ -50,9 +50,9 @@ class ClientValueCollection(ClientValue):
                 json[i] = v.to_json(json_format)
             elif isinstance(v, uuid.UUID):
                 json[i] = str(v)
-        if isinstance(json_format, JsonLightFormat) and json_format.include_control_information():
-            json = {json_format.collection_tag_name: json,
-                    json_format.metadata_type_tag_name: {'type': self.entity_type_name}}
+        if isinstance(json_format, JsonLightFormat) and json_format.include_control_information:
+            json = {json_format.collection: json,
+                    json_format.metadata_type: {'type': self.entity_type_name}}
         return json
 
     def create_typed_value(self, initial_value=None):

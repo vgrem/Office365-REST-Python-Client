@@ -33,7 +33,7 @@ class ODataRequest(ClientRequest):
 
         :type request: office365.runtime.http.request_options.RequestOptions
         """
-        self._include_media_type_header(request)
+        self._build_specific_request(request)
         return super(ODataRequest, self).execute_request_direct(request)
 
     def build_request(self, query):
@@ -43,7 +43,7 @@ class ODataRequest(ClientRequest):
         self._current_query = query
 
         request = RequestOptions(query.url)
-        self._include_media_type_header(request)
+        self._build_specific_request(request)
         # set method
         request.method = HttpMethod.Get
         if isinstance(query, DeleteEntityQuery):
@@ -71,8 +71,8 @@ class ODataRequest(ClientRequest):
             if isinstance(return_type, ClientResult):
                 return_type.set_property("__value", response.content)
         else:
-            if isinstance(query, ServiceOperationQuery):
-                json_format.function_tag_name = query.method_name
+            if isinstance(query, ServiceOperationQuery) and isinstance(json_format, JsonLightFormat):
+                json_format.function = query.method_name
 
             self.map_json(response.json(), return_type, json_format)
 
@@ -95,14 +95,14 @@ class ODataRequest(ClientRequest):
         :type json_format: office365.runtime.odata.json_format.ODataJsonFormat
         """
         if isinstance(json_format, JsonLightFormat):
-            json = json.get(json_format.security_tag_name, json)
-            json = json.get(json_format.function_tag_name, json)
+            json = json.get(json_format.security, json)
+            json = json.get(json_format.function, json)
 
         if not isinstance(json, dict):
             yield "__value", json
         else:
-            next_link_url = json.get(json_format.collection_next_tag_name, None)
-            json = json.get(json_format.collection_tag_name, json)
+            next_link_url = json.get(json_format.collection_next, None)
+            json = json.get(json_format.collection, json)
             if next_link_url:
                 yield "__nextLinkUrl", next_link_url
 
@@ -143,10 +143,10 @@ class ODataRequest(ClientRequest):
             return [self._normalize_payload(item) for item in value]
         return value
 
-    def _include_media_type_header(self, request):
+    def _build_specific_request(self, request):
         """
         :type request: RequestOptions
         """
-        media_type = self.default_json_format.get_media_type()
+        media_type = self.default_json_format.media_type
         request.ensure_header('Content-Type', media_type)
         request.ensure_header('Accept', media_type)

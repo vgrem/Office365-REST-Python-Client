@@ -11,25 +11,24 @@ class V4JsonFormat(ODataJsonFormat):
         Edm.Decimal numbers as strings."""
         self.IEEE754Compatible = False
         self.streaming = False
-        self.collection_tag_name = "value"
-        self.metadata_type_tag_name = "@odata.type"
-        self.collection_next_tag_name = "@odata.nextLink"
 
-    @staticmethod
-    def no_metadata():
-        return V4JsonFormat(ODataV4MetadataLevel.NoMetadata)
+    @property
+    def metadata_type(self):
+        return "@odata.type"
 
-    @staticmethod
-    def minimal():
-        return V4JsonFormat(ODataV4MetadataLevel.Minimal)
+    @property
+    def collection(self):
+        return "value"
 
-    @staticmethod
-    def full():
-        return V4JsonFormat(ODataV4MetadataLevel.Full)
+    @property
+    def collection_next(self):
+        return "@odata.nextLink"
 
-    def get_media_type(self):
+    @property
+    def media_type(self):
         return "application/json;odata.metadata={0};odata.streaming={1};IEEE754Compatible={2}" \
             .format(self.metadata_level, self.streaming, self.IEEE754Compatible)
 
+    @property
     def include_control_information(self):
         return self.metadata_level == ODataV4MetadataLevel.Minimal or self.metadata_level == ODataV4MetadataLevel.Full

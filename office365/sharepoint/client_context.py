@@ -176,7 +176,7 @@ class ClientContext(ClientRuntimeContext):
         response = self.execute_request_direct(request)
         json = response.json()
         json_format = JsonLightFormat()
-        json_format.function_tag_name = "GetContextWebInformation"
+        json_format.function = "GetContextWebInformation"
         return_value = ContextWebInformation()
         self.pending_request().map_json(json, return_value, json_format)
         return return_value

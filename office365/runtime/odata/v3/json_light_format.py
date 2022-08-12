@@ -7,18 +7,32 @@ class JsonLightFormat(ODataJsonFormat):
 
     def __init__(self, metadata_level=ODataV3MetadataLevel.Verbose):
         super(JsonLightFormat, self).__init__(metadata_level)
-        if self.metadata_level == ODataV3MetadataLevel.Verbose:
-            self.security_tag_name = "d"
-            self.collection_tag_name = "results"
-            self.collection_next_tag_name = "__next"
-            self.metadata_type_tag_name = "__metadata"
-            self.binding_parameter_tag_name = None
-        else:
-            self.collection_next_tag_name = "value"
+        self.function = None
 
-    def get_media_type(self):
+    @property
+    def security(self):
+        return "d"
+
+    @property
+    def collection(self):
+        if self.metadata_level == ODataV3MetadataLevel.Verbose:
+            return "results"
+        else:
+            return "value"
+
+    @property
+    def collection_next(self):
+        return "__next"
+
+    @property
+    def metadata_type(self):
+        return "__metadata"
+
+    @property
+    def media_type(self):
         return 'application/json;odata={0}'.format(self.metadata_level)
 
+    @property
     def include_control_information(self):
         return self.metadata_level == ODataV3MetadataLevel.Verbose \
                or self.metadata_level == ODataV3MetadataLevel.MinimalMetadata

@@ -223,7 +223,7 @@ class ClientObject(object):
             include_control_info = False
         else:
             ser_prop_names = [n for n in self._ser_property_names]
-            include_control_info = self.entity_type_name is not None and json_format.include_control_information()
+            include_control_info = self.entity_type_name is not None and json_format.include_control_information
 
         json = {k: self.get_property(k) for k in self._properties if k in ser_prop_names}
         for k, v in json.items():
@@ -232,7 +232,7 @@ class ClientObject(object):
 
         if json and include_control_info:
             if isinstance(json_format, JsonLightFormat):
-                json[json_format.metadata_type_tag_name] = {'type': self.entity_type_name}
+                json[json_format.metadata_type] = {'type': self.entity_type_name}
             elif isinstance(json_format, ODataJsonFormat):
-                json[json_format.metadata_type_tag_name] = "#" + self.entity_type_name
+                json[json_format.metadata_type] = "#" + self.entity_type_name
         return json

@@ -1,4 +1,4 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 
 
 class ODataJsonFormat(object):
@@ -6,26 +6,37 @@ class ODataJsonFormat(object):
 
     def __init__(self, metadata_level=None):
         """
-
         :type metadata_level: str
         """
         self.metadata_level = metadata_level
-        self.security_tag_name = None
-        self.function_tag_name = None
-        self.collection_tag_name = None
-        self.collection_next_tag_name = None
-        self.metadata_type_tag_name = None
 
     __metaclass__ = ABCMeta
 
-    @abstractmethod
-    def get_media_type(self):
-        pass
+    @property
+    def metadata_type(self):
+        raise NotImplementedError
 
-    @abstractmethod
+    @property
+    def collection(self):
+        raise NotImplementedError
+
+    @property
+    def collection_next(self):
+        raise NotImplementedError
+
+    @property
+    def media_type(self):
+        """
+        Gets media type
+
+        :rtype: str
+        """
+        raise NotImplementedError
+
+    @property
     def include_control_information(self):
         """Determines whether control information that is represented as annotations should be included in payload
 
         :rtype: bool
         """
-        pass
+        raise NotImplementedError
