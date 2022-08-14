@@ -5,18 +5,33 @@ from office365.sharepoint.tenant.administration.site_properties import SitePrope
 
 
 class SitePropertiesCollection(BaseEntityCollection):
-    """CSiteProperties resource collection"""
+    """SiteProperties resource collection"""
     def __init__(self, context, resource_path=None):
         super(SitePropertiesCollection, self).__init__(context, SiteProperties, resource_path)
 
     def get_by_id(self, site_id):
-        site_props = SiteProperties(self.context)
-        qry = ServiceOperationQuery(self, "GetById", [site_id], None, None, site_props)
+        """
+        :param str site_id: Site identifier
+        """
+        return_type = SiteProperties(self.context)
+        qry = ServiceOperationQuery(self, "GetById", [site_id], None, None, return_type)
         self.context.add_query(qry)
-        return site_props
+        return return_type
 
     def get_lock_state_by_id(self, site_id):
+        """
+        :param str site_id: Site identifier
+        """
         result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "GetLockStateById", [site_id], None, None, result)
+        self.context.add_query(qry)
+        return result
+
+    def check_site_is_archived_by_id(self, site_id):
+        """
+        :param str site_id: Site identifier
+        """
+        result = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "CheckSiteIsArchivedById", [site_id], None, None, result)
         self.context.add_query(qry)
         return result

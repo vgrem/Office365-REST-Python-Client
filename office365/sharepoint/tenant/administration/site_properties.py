@@ -1,5 +1,4 @@
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.internal.paths.entity import EntityPath
 
 
 class SiteProperties(BaseEntity):
@@ -7,16 +6,25 @@ class SiteProperties(BaseEntity):
 
     def update(self):
         """Updates the site collection properties with the new properties specified in the SiteProperties object."""
-        def _update():
-            super(SiteProperties, self).update()
-        self._ensure_resource_path(_update)
+        def _ensure_site_loaded():
+            ctx = self.context.clone(self.url)
+            ctx.site.update()
+        self.ensure_property("Url", _ensure_site_loaded)
         return self
 
-    def set_property(self, name, value, persist_changes=True):
-        super(SiteProperties, self).set_property(name, value, persist_changes)
-        # fallback: create a new resource path
-        if name == "Url" and self._resource_path is None:
-            pass
+    @property
+    def owner_login_name(self):
+        """
+        :rtype: str
+        """
+        return self.properties.get('OwnerLoginName', None)
+
+    @property
+    def webs_count(self):
+        """
+        :rtype: int
+        """
+        return self.properties.get('WebsCount', None)
 
     @property
     def url(self):
@@ -76,18 +84,8 @@ class SiteProperties(BaseEntity):
     def entity_type_name(self):
         return "Microsoft.Online.SharePoint.TenantAdministration.SiteProperties"
 
-    def _ensure_resource_path(self, action):
-        """
-        :type action: () -> None
-        """
-        def _ensure_site_url():
-            ctx = self.context.clone(self.url)
-            site = ctx.site.select(["Id"]).get().execute_query()
-            self._resource_path = EntityPath(site.id, self._parent_collection.resource_path)
-            action()
-
-        if self._resource_path is None:
-            self.ensure_property("Url", _ensure_site_url)
-        else:
-            action()
-        return self
+    def set_property(self, name, value, persist_changes=True):
+        super(SiteProperties, self).set_property(name, value, persist_changes)
+        # fallback: create a new resource path
+        if name == "Url" and self._resource_path is None:
+            pass
