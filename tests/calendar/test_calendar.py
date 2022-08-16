@@ -9,7 +9,7 @@ class TestCalendar(GraphTestCase):
     """Tests for Calendar"""
 
     cal_name = create_unique_name("Volunteer")
-    target_cal = None  # type: Calendar
+    target_cal = None  # type: Optional[Calendar]
 
     @classmethod
     def setUpClass(cls):
