@@ -1,3 +1,4 @@
+import time
 import uuid
 
 from tests.graph_case import GraphTestCase
@@ -68,4 +69,5 @@ class TestGraphChannel(GraphTestCase):
         channels_before = self.__class__.target_team.channels.get().execute_query()
         self.__class__.target_channel.delete_object().execute_query()
         channels_after = self.__class__.target_team.channels.get().execute_query()
+        time.sleep(5)
         self.assertEqual(len(channels_before)-1, len(channels_after))

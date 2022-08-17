@@ -59,7 +59,7 @@ class ODataRequest(ClientRequest):
         :type response: requests.Response
         """
         json_format = copy.deepcopy(self.default_json_format)
-        query = self.context.current_query
+        query = self.current_query
         return_type = query.return_type
         if return_type is None:
             return
