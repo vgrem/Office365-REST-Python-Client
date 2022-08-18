@@ -34,7 +34,7 @@ class DocumentSet(Folder):
             return_type._resource_path = ServiceOperationPath("getFolderByServerRelativeUrl", [folder_url],
                                                               ResourcePath("Web"))
             request.set_header('Slug', '{0}|{1}'.format(folder_url, ct_id))
-            response = context.execute_request_direct(request)
+            response = context.pending_request().execute_request_direct(request)
             response.raise_for_status()
             json = response.json()
             context.pending_request().map_json(json, return_type)

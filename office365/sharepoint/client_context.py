@@ -168,12 +168,12 @@ class ClientContext(ClientRuntimeContext):
 
     def get_context_web_information(self, request_options=None):
         """Returns an ContextWebInformation object that specifies metadata about the site"""
-        request = RequestOptions("contextInfo")
+        request = RequestOptions("{0}/contextInfo".format(self.service_root_url()))
         request.method = HttpMethod.Post
         if request_options:
             request.proxies = request_options.proxies
             request.verify = request_options.verify
-        response = self.execute_request_direct(request)
+        response = self.pending_request().execute_request_direct(request)
         json = response.json()
         json_format = JsonLightFormat()
         json_format.function = "GetContextWebInformation"
@@ -358,7 +358,7 @@ class ClientContext(ClientRuntimeContext):
     def profile_loader(self):
         """Alias to ProfileLoader"""
         from office365.sharepoint.userprofiles.profile_loader import ProfileLoader
-        return ProfileLoader.get_profile_loader(self)
+        return ProfileLoader(self)
 
     @property
     def lists(self):

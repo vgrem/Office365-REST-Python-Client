@@ -395,12 +395,13 @@ class File(AbstractFile):
         :type server_relative_url: str
         :type content: str
         """
-        url = r"web/getFileByServerRelativePath(DecodedUrl='{0}')/\$value".format(server_relative_url)
+        url = r"{0}/web/getFileByServerRelativePath(DecodedUrl='{1}')/\$value".format(context.service_root_url(),
+                                                                                      server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Post
         request.set_header('X-HTTP-Method', 'PUT')
         request.data = content
-        response = context.execute_request_direct(request)
+        response = context.pending_request().execute_request_direct(request)
         return response
 
     @staticmethod
@@ -412,10 +413,11 @@ class File(AbstractFile):
         :type server_relative_url: str
         :return Response
         """
-        url = r"web/getFileByServerRelativePath(DecodedUrl='{0}')/\$value".format(server_relative_url)
+        url = r"{0}/web/getFileByServerRelativePath(DecodedUrl='{1}')/\$value".format(context.service_root_url(),
+                                                                                      server_relative_url)
         request = RequestOptions(url)
         request.method = HttpMethod.Get
-        response = context.execute_request_direct(request)
+        response = context.pending_request().execute_request_direct(request)
         return response
 
     def download(self, file_object):

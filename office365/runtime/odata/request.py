@@ -30,7 +30,6 @@ class ODataRequest(ClientRequest):
 
     def execute_request_direct(self, request):
         """
-
         :type request: office365.runtime.http.request_options.RequestOptions
         """
         self._build_specific_request(request)
@@ -51,7 +50,7 @@ class ODataRequest(ClientRequest):
         elif isinstance(query, (CreateEntityQuery, UpdateEntityQuery, ServiceOperationQuery)):
             request.method = HttpMethod.Post
             if query.parameter_type is not None:
-                request.data = self._normalize_payload(query.parameter_type)
+                request.data = self._build_payload(query)
         return request
 
     def process_response(self, response):
@@ -125,23 +124,25 @@ class ODataRequest(ClientRequest):
             else:
                 yield "__value", json
 
-    def _normalize_payload(self, value):
+    def _build_payload(self, query):
         """
         Normalizes OData request payload
 
-        :type value: ClientObject or ClientValue or dict or list or str
+        :type query: office365.runtime.queries.client_query.ClientQuery
         """
-        if isinstance(value, ClientObject) or isinstance(value, ClientValue):
-            json = value.to_json(self._default_json_format)
-            query = self.current_query
-            if isinstance(query, ServiceOperationQuery) and query.parameter_name is not None:
-                json = {query.parameter_name: json}
-            return json
-        elif isinstance(value, dict):
-            return {k: self._normalize_payload(v) for k, v in value.items() if v is not None}
-        elif isinstance(value, list):
-            return [self._normalize_payload(item) for item in value]
-        return value
+        def _normalize_payload(payload):
+            if isinstance(payload, ClientObject) or isinstance(payload, ClientValue):
+                return payload.to_json(self._default_json_format)
+            elif isinstance(payload, dict):
+                return {k: _normalize_payload(v) for k, v in payload.items() if v is not None}
+            elif isinstance(payload, list):
+                return [_normalize_payload(item) for item in payload]
+            return payload
+
+        json = _normalize_payload(query.parameter_type)
+        if isinstance(query, ServiceOperationQuery) and query.parameter_name is not None:
+            json = {query.parameter_name: json}
+        return json
 
     def _build_specific_request(self, request):
         """

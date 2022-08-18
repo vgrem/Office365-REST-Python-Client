@@ -134,11 +134,13 @@ class ClientRuntimeContext(object):
 
         self.pending_request().afterExecute += _process_response
 
-    def execute_request_direct(self, request):
+    def execute_request_direct(self, path):
         """
-        :type request: office365.runtime.http.request_options.RequestOptions or str
+        :type path: str
         """
-        return self.pending_request().execute_request_direct(self._normalize_request(request))
+        full_url = "".join([self.service_root_url(), "/", path])
+        request = RequestOptions(full_url)
+        return self.pending_request().execute_request_direct(request)
 
     def execute_query(self):
         """Submit request(s) to the server"""
@@ -183,17 +185,3 @@ class ClientRuntimeContext(object):
         """
         return self.pending_request().current_query
 
-    def _normalize_request(self, request):
-        """
-        :type request: office365.runtime.http.request_options.RequestOptions or str
-        """
-        if not isinstance(request, RequestOptions):
-            request = RequestOptions(request)
-
-        if not is_absolute_url(request.url):
-            url_parts = [self.service_root_url()]
-            if not request.url.startswith("/"):
-                url_parts.append("/")
-            url_parts.append(request.url)
-            request.url = "".join(url_parts)
-        return request
