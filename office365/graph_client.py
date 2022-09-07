@@ -89,7 +89,7 @@ class GraphClient(ClientRuntimeContext):
 
         :type request: RequestOptions
         """
-        query = self.current_query
+        query = self.pending_request().current_query
         if isinstance(query, UpdateEntityQuery):
             request.method = HttpMethod.Patch
         elif isinstance(query, DeleteEntityQuery):

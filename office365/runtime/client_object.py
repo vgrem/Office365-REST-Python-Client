@@ -55,7 +55,7 @@ class ClientObject(object):
         return self
 
     def build_request(self):
-        return self.context.current_query.build_request()
+        return self.context.pending_request().current_query.build_request()
 
     def get(self):
         """

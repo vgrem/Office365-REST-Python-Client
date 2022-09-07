@@ -3,7 +3,6 @@ from time import sleep
 
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.client_result import ClientResult
-from office365.runtime.compat import is_absolute_url
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.queries.client_query import ClientQuery
@@ -36,10 +35,10 @@ class ClientRuntimeContext(object):
             try:
                 self.execute_query()
                 if callable(success_callback):
-                    success_callback(self.current_query.return_type)
+                    success_callback(self.pending_request().current_query.return_type)
                 break
             except exceptions as e:
-                self.add_query(self.current_query)
+                self.add_query(self.pending_request().current_query)
                 if callable(failure_callback):
                     failure_callback(retry, e)
                 sleep(timeout_secs)
@@ -112,7 +111,7 @@ class ClientRuntimeContext(object):
             """
             :type resp: requests.Response
             """
-            if self.current_query.id == query.id:
+            if self.pending_request().current_query.id == query.id:
                 action(*args, **kwargs)
                 self.pending_request().afterExecute -= _process_response
 
@@ -177,11 +176,4 @@ class ClientRuntimeContext(object):
         self.after_execute(_process_download_response)
         self.add_query(qry)
         return return_type
-
-    @property
-    def current_query(self):
-        """
-        :rtype: office365.runtime.queries.client_query.ClientQuery
-        """
-        return self.pending_request().current_query
 
