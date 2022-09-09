@@ -9,7 +9,7 @@ from office365.sharepoint.changes.token import ChangeToken
 from office365.sharepoint.eventreceivers.definition_collection import EventReceiverDefinitionCollection
 from office365.sharepoint.features.collection import FeatureCollection
 from office365.sharepoint.lists.list import List
-from office365.sharepoint.portal.site_icon_manager import SiteIconManager
+from office365.sharepoint.portal.sites.icon_manager import SiteIconManager
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.recyclebin.item_collection import RecycleBinItemCollection
 from office365.sharepoint.sitehealth.summary import SiteHealthSummary

@@ -9,7 +9,7 @@ class User(Principal):
     """Represents a user in Microsoft SharePoint Foundation. A user is a type of SP.Principal."""
 
     def get_personal_site(self):
-        """Get personal site"""
+        """Get Personal Site"""
         from office365.sharepoint.sites.site import Site
         site = Site(self.context)
 
@@ -24,6 +24,16 @@ class User(Principal):
 
         self.ensure_property("LoginName", _user_loaded)
         return site
+
+    def get_user_profile_properties(self, property_names=None):
+        from office365.sharepoint.userprofiles.properties_for_user import UserProfilePropertiesForUser
+        return_type = UserProfilePropertiesForUser(self.context)
+
+        def _user_loaded():
+            return_type.set_property("PropertyNames", property_names)
+            return_type.set_property("AccountName", self.user_principal_name)
+        self.ensure_property("UserPrincipalName", _user_loaded)
+        return return_type
 
     @property
     def groups(self):

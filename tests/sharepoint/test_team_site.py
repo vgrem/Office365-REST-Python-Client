@@ -2,7 +2,7 @@ import uuid
 from unittest import TestCase
 
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.portal.site_status import SiteStatus
+from office365.sharepoint.portal.sites.status import SiteStatus
 from office365.sharepoint.sites.site import Site
 from tests import test_site_url, test_user_credentials
 
@@ -33,4 +33,8 @@ class TestTeamSite(TestCase):
 
     def test4_get_current_user_joined_teams(self):
         result = self.client.group_site_manager.get_current_user_joined_teams().execute_query()
+        self.assertIsNotNone(result.value)
+
+    def test5_get_group_creation_context(self):
+        result = self.client.group_site_manager.get_group_creation_context().execute_query()
         self.assertIsNotNone(result.value)

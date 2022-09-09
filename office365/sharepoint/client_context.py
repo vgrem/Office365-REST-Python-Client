@@ -13,7 +13,7 @@ from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.portal.site_status import SiteStatus
+from office365.sharepoint.portal.sites.status import SiteStatus
 from office365.sharepoint.publishing.pages.service import SitePageService
 from office365.sharepoint.request_user_context import RequestUserContext
 from office365.sharepoint.sites.site import Site
@@ -337,15 +337,22 @@ class ClientContext(ClientRuntimeContext):
         return MicroServiceManager(self, ResourcePath("microServiceManager"))
 
     @property
+    def models(self):
+        """Alias to collection of SPMachineLearningModel"""
+        from office365.sharepoint.contentcenter.machinelearning.model import SPMachineLearningModel
+        from office365.sharepoint.base_entity_collection import BaseEntityCollection
+        return BaseEntityCollection(self, SPMachineLearningModel, ResourcePath("models"))
+
+    @property
     def group_site_manager(self):
         """Alias to GroupSiteManager"""
-        from office365.sharepoint.portal.group_site_manager import GroupSiteManager
+        from office365.sharepoint.portal.groups.site_manager import GroupSiteManager
         return GroupSiteManager(self, ResourcePath("groupSiteManager"))
 
     @property
     def group_service(self):
         """Alias to GroupService"""
-        from office365.sharepoint.portal.group_service import GroupService
+        from office365.sharepoint.portal.groups.service import GroupService
         return GroupService(self, ResourcePath("GroupService"))
 
     @property
@@ -379,19 +386,19 @@ class ClientContext(ClientRuntimeContext):
     @property
     def site_icon_manager(self):
         """Alias to Microsoft.SharePoint.Portal.SiteIconManager. """
-        from office365.sharepoint.portal.site_icon_manager import SiteIconManager
+        from office365.sharepoint.portal.sites.icon_manager import SiteIconManager
         return SiteIconManager(self, ResourcePath("SiteIconManager"))
 
     @property
     def site_linking_manager(self):
         """Alias to Microsoft.SharePoint.Portal.SiteLinkingManager. """
-        from office365.sharepoint.portal.site_linking_manager import SiteLinkingManager
+        from office365.sharepoint.portal.sites.linking_manager import SiteLinkingManager
         return SiteLinkingManager(self, ResourcePath("siteLinkingManager"))
 
     @property
     def site_manager(self):
         """Alias to SPSiteManager. Represents methods for creating and managing SharePoint sites"""
-        from office365.sharepoint.portal.site_manager import SPSiteManager
+        from office365.sharepoint.portal.sites.manager import SPSiteManager
         return SPSiteManager(self, ResourcePath("spSiteManager"))
 
     @property

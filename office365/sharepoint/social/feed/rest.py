@@ -1,5 +1,6 @@
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.social.feed.feed import SocialFeed
 
 
 class SocialRestFeed(BaseEntity):
@@ -11,3 +12,7 @@ class SocialRestFeed(BaseEntity):
 
     def __init__(self, context):
         super(SocialRestFeed, self).__init__(context, ResourcePath("SP.Social.SocialRestFeed"))
+
+    @property
+    def social_feed(self):
+        return self.properties.get("SocialFeed", SocialFeed())

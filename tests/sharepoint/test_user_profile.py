@@ -61,3 +61,10 @@ class TestUserProfile(TestCase):
     def test_10_get_trending_tags(self):
         col = PeopleManager.get_trending_tags(self.my_client).execute_query()
         self.assertGreaterEqual(len(col), 0)
+
+    def test_11_get_user_Profile_properties(self):
+        user_props = self.my_client.web.current_user.get_user_profile_properties().get().execute_query()
+        self.assertIsNotNone(user_props.resource_path)
+
+        result = user_props.get_property_names().execute_query()
+        self.assertIsNotNone(result.value)

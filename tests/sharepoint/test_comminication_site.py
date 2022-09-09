@@ -1,13 +1,13 @@
 import uuid
 from unittest import TestCase
 
-from office365.sharepoint.portal.site_creation_response import SPSiteCreationResponse
+from office365.sharepoint.portal.sites.creation_response import SPSiteCreationResponse
 from office365.sharepoint.sites.site import Site
 from office365.sharepoint.tenant.administration.tenant import Tenant
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.portal.site_status import SiteStatus
-from office365.sharepoint.portal.site_creation_request import SPSiteCreationRequest
-from office365.sharepoint.portal.site_manager import SPSiteManager
+from office365.sharepoint.portal.sites.status import SiteStatus
+from office365.sharepoint.portal.sites.creation_request import SPSiteCreationRequest
+from office365.sharepoint.portal.sites.manager import SPSiteManager
 from tests import test_user_credentials, test_site_url, test_admin_site_url, test_root_site_url
 
 

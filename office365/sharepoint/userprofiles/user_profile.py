@@ -71,6 +71,18 @@ class UserProfile(BaseEntity):
         return self.properties.get("PersonalSite",
                                    Site(self.context, ResourcePath("PersonalSite", self.resource_path)))
 
+    def create_personal_site(self, lcid):
+        """
+        The CreatePersonalSite method creates a personal site (2) for this user, which can be used to share documents,
+        web pages, and other files.
+
+        :param int lcid: Specifies the locale identifier for the site.
+        """
+        payload = {"lcid": lcid}
+        qry = ServiceOperationQuery(self, "CreatePersonalSite", None, payload)
+        self.context.add_query(qry)
+        return self
+
     def create_personal_site_enque(self, is_interactive):
         """
         Enqueues creating a personal site for this user, which can be used to share documents, web pages,

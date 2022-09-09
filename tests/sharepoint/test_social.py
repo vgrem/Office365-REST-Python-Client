@@ -42,6 +42,11 @@ class TestSocial(SPTestCase):
         result = manager.get_suggestions().execute_query()
         self.assertIsNotNone(result.value)
 
+    #def test8_get_social_feed(self):
+    #    feed = SocialRestFeed(self.my_client).get().execute_query()
+    #    self.assertIsNotNone(feed.social_feed)
+
+
 
 
 
