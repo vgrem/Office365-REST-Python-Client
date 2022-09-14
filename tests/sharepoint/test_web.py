@@ -148,3 +148,7 @@ class TestSharePointWeb(SPTestCase):
         today = str(datetime.today())
         result = self.client.web.parse_datetime(today).execute_query()
         self.assertIsNotNone(result.value)
+
+    def test_26_list_acs_service_principals(self):
+        result = self.client.web.list_acs_service_principals().execute_query()
+        self.assertIsNotNone(result.value)

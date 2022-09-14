@@ -1,16 +1,15 @@
 from office365.sharepoint.publishing.pages.collection import SitePageCollection
 from office365.sharepoint.publishing.pages.service import SitePageService
-from office365.sharepoint.publishing.primary_city_time import PrimaryCityTime
 from office365.sharepoint.publishing.pages.page import SitePage
 from office365.sharepoint.publishing.video.service_discoverer import VideoServiceDiscoverer
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 
-class TestSPPublishing(SPTestCase):
+class TestPublishing(SPTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestSPPublishing, cls).setUpClass()
+        super(TestPublishing, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
@@ -25,7 +24,7 @@ class TestSPPublishing(SPTestCase):
         pages = svc.pages.get().execute_query()
         self.assertIsInstance(pages, SitePageCollection)
 
-    #def test3_get_time_zone(self):
+    # def test3_get_time_zone(self):
     #    time_zone = SitePageService.get_time_zone(self.client, "Moscow").execute_query()
     #    self.assertIsInstance(time_zone, PrimaryCityTime)
 
@@ -50,10 +49,13 @@ class TestSPPublishing(SPTestCase):
         self.assertEqual(len(pages), 1)
         first_page = pages[0]  # type: SitePage
 
-        #translations = first_page.translations.get().execute_query()
-        #self.assertIsNotNone(translations.resource_path)
+        # translations = first_page.translations.get().execute_query()
+        # self.assertIsNotNone(translations.resource_path)
 
     def test9_can_create_page(self):
         result = self.client.site_pages.can_create_page().execute_query()
         self.assertIsNotNone(result.value)
 
+    def test_10_get_current_user_memberships(self):
+        result = SitePageService.get_current_user_memberships(self.client).execute_query()
+        self.assertIsNotNone(result.value)

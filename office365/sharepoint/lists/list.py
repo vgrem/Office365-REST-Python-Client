@@ -7,7 +7,7 @@ from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.changes.token import ChangeToken
 from office365.sharepoint.contenttypes.collection import ContentTypeCollection
-from office365.sharepoint.customactions.element import CustomActionElementCollection
+from office365.sharepoint.customactions.element_collection import CustomActionElementCollection
 from office365.sharepoint.eventreceivers.definition_collection import EventReceiverDefinitionCollection
 from office365.sharepoint.fields.collection import FieldCollection
 from office365.sharepoint.fields.related_field_collection import RelatedFieldCollection

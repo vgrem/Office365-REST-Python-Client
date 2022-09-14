@@ -6,7 +6,9 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.activities.entity import SPActivityEntity
 from office365.sharepoint.alerts.collection import AlertCollection
+from office365.sharepoint.authentication.acs_service_principal_info import SPACSServicePrincipalInfo
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.businessdata.app_bdc_catalog import AppBdcCatalog
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.clientsidecomponent.storage_entity import StorageEntity
 from office365.sharepoint.clientsidecomponent.query_result import SPClientSideComponentQueryResult
@@ -249,6 +251,15 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
+    def list_acs_service_principals(self):
+        """
+        List service principals
+        """
+        return_type = ClientResult(self.context, ClientValueCollection(SPACSServicePrincipalInfo))
+        qry = ServiceOperationQuery(self, "ListACSServicePrincipals", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def sync_flow_instances(self, target_web_url):
         """
         :param str target_web_url:
@@ -271,9 +282,21 @@ class Web(SecurableObject):
 
     def get_all_client_side_components(self):
         result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "getAllClientSideComponents", None, None, None, result)
+        qry = ServiceOperationQuery(self, "GetAllClientSideComponents", None, None, None, result)
         self.context.add_query(qry)
         return result
+
+    def get_app_bdc_catalog(self):
+        """
+        Returns the Business Data Connectivity (BDC) MetadataCatalog for an application that gives access to the
+        external content types defined in the BDC metadata model packaged by the application.<151>
+        This method SHOULD be called on the Web (section 3.2.5.143) object that represents the site for the application
+        and it returns the BDC MetadataCatalog deployed on the site.
+        """
+        return_type = AppBdcCatalog(self.context)
+        qry = ServiceOperationQuery(self, "GetAppBdcCatalog", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def get_client_side_web_parts(self, project, include_errors=False):
         """

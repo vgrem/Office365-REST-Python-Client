@@ -1,15 +1,14 @@
 from office365.runtime.client_value import ClientValue
-from office365.runtime.client_value_collection import ClientValueCollection
 
 
 class CustomActionElement(ClientValue):
     """A class specifies a custom action element."""
-    pass
+
+    def __init__(self, clientside_component_id=None):
+        """
+        :param str clientside_component_id: The unique identifier of the client-side component associated
+            with the custom action.
+        """
+        self.ClientSideComponentId = clientside_component_id
 
 
-class CustomActionElementCollection(ClientValue):
-    """This is the class that represents a collection of CustomActionElement."""
-
-    def __init__(self):
-        super(CustomActionElementCollection, self).__init__()
-        self.Items = ClientValueCollection(CustomActionElement)

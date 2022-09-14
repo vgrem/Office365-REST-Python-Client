@@ -1,6 +1,7 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.administration.orgassets.org_assets import OrgAssets
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.files.file import File
@@ -58,6 +59,19 @@ class SitePageService(BaseEntity):
         return return_type
 
     @staticmethod
+    def get_current_user_memberships(context, scenario=None):
+        """
+        :param office365.sharepoint.client_context.ClientContext context: Client context
+        :param str scenario:
+        """
+        return_type = ClientResult(context, StringCollection())
+        svc = SitePageService(context)
+        qry = ServiceOperationQuery(svc, "GetCurrentUserMemberships", None, None, None, return_type)
+        qry.static = True
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
     def get_time_zone(context, city_name):
         """
         Gets time zone data for specified city.
@@ -93,12 +107,16 @@ class SitePageService(BaseEntity):
         pass
 
     @staticmethod
-    def get_current_user_memberships():
-        pass
+    def is_file_picker_external_image_search_enabled(context):
+        """
 
-    @staticmethod
-    def is_file_picker_external_image_search_enabled():
-        pass
+        :param office365.sharepoint.client_context.ClientContext context: Client context
+        """
+        result = ClientResult(context)
+        svc = SitePageService(context)
+        qry = ServiceOperationQuery(svc, "IsFilePickerExternalImageSearchEnabled", None, None, None, result, True)
+        context.add_query(qry)
+        return result
 
     @staticmethod
     def org_assets(context):
@@ -139,6 +157,29 @@ class SitePageService(BaseEntity):
         return_type = File(self.context)
         params = {"pageName": page_name, "imageFileName": image_file_name, "imageStream": image_stream}
         qry = ServiceOperationQuery(self, "AddImage", params, None, None, return_type)
+        qry.static = True
+        self.context.add_query(qry)
+        return return_type
+
+    def add_image_from_external_url(self, page_name, image_file_name, external_url, sub_folder_name, page_id):
+        """
+        Adds an image to the site assets library of the current web.
+        Returns a File object ([MS-CSOMSPT] section 3.2.5.64) that represents the image.
+
+        :param str image_file_name: Indicates the file name of the image to be added.
+        :param str page_name: Indicates the name of that site page that the image is to be used in.
+        :param str external_url:
+        :param str sub_folder_name:
+        :param str page_id:
+        """
+        return_type = File(self.context)
+        params = {"pageName": page_name,
+                  "imageFileName": image_file_name,
+                  "externalUrl": external_url,
+                  "subFolderName": sub_folder_name,
+                  "pageId": page_id
+                  }
+        qry = ServiceOperationQuery(self, "AddImageFromExternalUrl", params, None, None, return_type)
         qry.static = True
         self.context.add_query(qry)
         return return_type

@@ -17,7 +17,7 @@ from office365.sharepoint.portal.sites.status import SiteStatus
 from office365.sharepoint.publishing.pages.service import SitePageService
 from office365.sharepoint.request_user_context import RequestUserContext
 from office365.sharepoint.sites.site import Site
-from office365.sharepoint.tenant.administration.hub_site_collection import HubSiteCollection
+from office365.sharepoint.tenant.administration.hubsites.collection import HubSiteCollection
 from office365.sharepoint.webs.context_web_information import ContextWebInformation
 from office365.sharepoint.webs.web import Web
 from office365.runtime.compat import urlparse, is_absolute_url, get_absolute_url

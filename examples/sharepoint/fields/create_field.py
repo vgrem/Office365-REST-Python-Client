@@ -13,3 +13,7 @@ create_field_info = FieldCreationInformation(field_name, FieldType.Calculated)
 create_field_info.set_property("Formula", '=CONCATENATE(Author,":",Created)')
 created_field = client.site.root_web.fields.add(create_field_info).execute_query()  # type: FieldCalculated
 print(f"Calculated field with formula {created_field.formula} has been created")
+
+# clean up
+field = client.site.root_web.fields.get_by_internal_name_or_title(field_name)
+field.delete_object().execute_query()

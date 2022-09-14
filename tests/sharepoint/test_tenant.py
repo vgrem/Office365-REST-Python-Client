@@ -127,3 +127,7 @@ class TestTenant(TestCase):
         tenant_svc = TenantAdminSettingsService(self.client)
         result = tenant_svc.get_tenant_sharing_status().execute_query()
         self.assertIsNotNone(result.value)
+
+    def test_19_get_site_thumbnail_logo(self):
+        result = self.tenant.get_site_thumbnail_logo(test_site_url).execute_query()
+        self.assertIsNotNone(result.value)

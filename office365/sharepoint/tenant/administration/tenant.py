@@ -9,7 +9,7 @@ from office365.sharepoint.listitems.collection import ListItemCollection
 from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
 from office365.sharepoint.sites.home_sites_details import HomeSitesDetails
 from office365.sharepoint.sites.site import Site
-from office365.sharepoint.tenant.administration.hubsite_properties import HubSiteProperties
+from office365.sharepoint.tenant.administration.hubsites.properties import HubSiteProperties
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
     SecondaryAdministratorsFieldsData
 from office365.sharepoint.tenant.administration.secondary_administrators_info import SecondaryAdministratorsInfo
@@ -26,6 +26,16 @@ class Tenant(BaseEntity):
     def __init__(self, context):
         static_path = ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant")
         super(Tenant, self).__init__(context, static_path)
+
+    def get_site_thumbnail_logo(self, site_url):
+        """
+        :param str site_url:
+        """
+        payload = {"siteUrl": site_url}
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "GetSiteThumbnailLogo", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def get_home_sites(self):
         return_type = ClientResult(self.context, ClientValueCollection(HomeSitesDetails))
@@ -272,6 +282,16 @@ class Tenant(BaseEntity):
         qry = ServiceOperationQuery(self, "ConnectSiteToHubSiteById", None, params, None, None)
         self.context.add_query(qry)
         return self
+
+    def send_email(self, site_url):
+        """
+        :type site_url: str
+        """
+        return_type = ClientResult(self.context)
+        payload = {"siteUrl": site_url}
+        qry = ServiceOperationQuery(self, "SendEmail", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     @property
     def aggregated_site_collections_list(self):
