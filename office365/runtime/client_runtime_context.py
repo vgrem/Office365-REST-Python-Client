@@ -31,7 +31,7 @@ class ClientRuntimeContext(object):
         :param exceptions: tuple of exceptions that we retry
         """
 
-        for retry in range(1, max_retry):
+        for retry in range(1, max_retry + 1):
             try:
                 self.execute_query()
                 if callable(success_callback):
