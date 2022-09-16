@@ -44,6 +44,9 @@ class Field(BaseEntity):
         else:
             if type_id_or_name == "TaxonomyFieldType" or type_id_or_name == "TaxonomyFieldTypeMulti":
                 return TaxonomyField
+            elif type_id_or_name == "Thumbnail":
+                from office365.sharepoint.fields.thumbnail import FieldThumbnail
+                return FieldThumbnail
             else:
                 return Field
 

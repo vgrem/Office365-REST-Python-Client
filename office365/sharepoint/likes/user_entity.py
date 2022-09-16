@@ -10,3 +10,12 @@ class UserEntity(BaseEntity):
         The Datetime of the like.
         """
         return self.properties.get("creationDate", None)
+
+    @property
+    def email(self):
+        """
+        The email of the user who liked the item.
+
+        :rtype: str
+        """
+        return self.properties.get("email", None)

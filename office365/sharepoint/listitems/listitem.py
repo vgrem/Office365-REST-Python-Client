@@ -1,3 +1,5 @@
+import json
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -7,6 +9,7 @@ from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.comments.collection import CommentCollection
+from office365.sharepoint.fields.image_value import ImageFieldValue
 from office365.sharepoint.fields.lookup_value import FieldLookupValue
 from office365.sharepoint.fields.multi_lookup_value import FieldMultiLookupValue
 from office365.sharepoint.likes.liked_by_information import LikedByInformation
@@ -282,6 +285,22 @@ class ListItem(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
+    def override_policy_tip(self, user_action, justification):
+        """
+        Overrides the policy tip on this list item.
+
+        :param int user_action: The user action to take.
+        :param str justification: The reason why the override is being done.
+        """
+        return_type = ClientResult(self.context)
+        payload = {
+            "userAction": user_action,
+            "justification": justification
+        }
+        qry = ServiceOperationQuery(self, "OverridePolicyTip", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def parse_and_set_field_value(self, field_name, value):
         """Sets the value of the field (2) for the list item based on an implementation-specific transformation
            of the value.
@@ -422,6 +441,8 @@ class ListItem(SecurableObject):
         if persist_changes:
             if isinstance(value, TaxonomyFieldValueCollection):
                 self._set_taxonomy_field_value(name, value)
+            elif isinstance(value, ImageFieldValue):
+                super(ListItem, self).set_property(name, json.dumps(value.to_json()), persist_changes)
             elif isinstance(value, FieldMultiLookupValue):
                 collection = ClientValueCollection(int, [v.LookupId for v in value])
                 super(ListItem, self).set_property("{name}Id".format(name=name), collection)

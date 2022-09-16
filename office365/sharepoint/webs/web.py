@@ -705,6 +705,21 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
+    def get_file_by_guest_url_ensure_access(self, guest_url, ensure_access):
+        """
+        Returns the file object from the tokenized sharing link URL.
+
+        :param str guest_url: The guest access URL to get the file with.
+        :param bool ensure_access:  Indicates if the request to the tokenized sharing link grants perpetual access to
+            the calling user. If it is set to true then the user who is requesting the file will be granted perpetual
+            permissions through the tokenized sharing link.
+        """
+        return_type = File(self.context)
+        payload = {"guestUrl": guest_url, "ensureAccess": ensure_access}
+        qry = ServiceOperationQuery(self, "GetFileByGuestUrlEnsureAccess", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def get_file_by_linking_url(self, linking_url):
         """
         Returns the file object from the linking URL.
@@ -715,6 +730,18 @@ class Web(SecurableObject):
         return_type = File(self.context)
         payload = {"linkingUrl": linking_url}
         qry = ServiceOperationQuery(self, "GetFileByLinkingUrl", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_file_by_url(self, file_url):
+        """
+        Returns the file object from the given URL.
+
+        :param str file_url: The URL used to get the file object.
+        """
+        return_type = File(self.context)
+        params = {"fileUrl": file_url}
+        qry = ServiceOperationQuery(self, "GetFileByUrl", params, None, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -1088,7 +1115,18 @@ class Web(SecurableObject):
         params = {
             "key": key,
         }
-        qry = ServiceOperationQuery(self, "RemoveStorageEntity", params, None, None, None)
+        qry = ServiceOperationQuery(self, "RemoveStorageEntity", params)
+        self.context.add_query(qry)
+        return self
+
+    def remove_supported_ui_language(self, lcid):
+        """
+        Removes a supported UI language by its language identifier.
+
+        :param str lcid: Specifies the language identifier to be removed.
+        """
+        params = {"lcid": lcid}
+        qry = ServiceOperationQuery(self, "RemoveSupportedUILanguage", params)
         self.context.add_query(qry)
         return self
 
