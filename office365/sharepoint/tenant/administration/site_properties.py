@@ -1,4 +1,9 @@
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.internal.paths.entity import EntityPath
+from office365.sharepoint.sites.site import Site
+from office365.sharepoint.tenant.administration.deny_add_and_customize_pages_status import \
+    DenyAddAndCustomizePagesStatus
 
 
 class SiteProperties(BaseEntity):
@@ -6,11 +11,30 @@ class SiteProperties(BaseEntity):
 
     def update(self):
         """Updates the site collection properties with the new properties specified in the SiteProperties object."""
-        def _ensure_site_loaded():
-            ctx = self.context.clone(self.url)
-            ctx.site.update()
-        self.ensure_property("Url", _ensure_site_loaded)
+
+        site = Site(self.context)
+        site.set_property("__siteUrl", self.url)
+
+        def _site_loaded(return_type):
+            self._resource_path = EntityPath(site.id, self.parent_collection.resource_path)
+            super(SiteProperties, self).update()
+        self.context.load(site, after_loaded=_site_loaded)
         return self
+
+    @property
+    def deny_add_and_customize_pages(self):
+        enum_value = self.properties.get("DenyAddAndCustomizePages", None)
+        if enum_value is None:
+            return enum_value
+        return enum_value == DenyAddAndCustomizePagesStatus.Enabled
+
+    @deny_add_and_customize_pages.setter
+    def deny_add_and_customize_pages(self, value):
+        """
+        :param bool value:
+        """
+        enum_value = DenyAddAndCustomizePagesStatus.Enabled if value else DenyAddAndCustomizePagesStatus.Disabled
+        self.set_property("DenyAddAndCustomizePages", enum_value)
 
     @property
     def owner_login_name(self):
@@ -88,4 +112,5 @@ class SiteProperties(BaseEntity):
         super(SiteProperties, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "Url" and self._resource_path is None:
-            pass
+            self._resource_path = ServiceOperationPath(self.entity_type_name, {"Url": value})
+        return self

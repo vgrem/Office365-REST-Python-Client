@@ -1,8 +1,8 @@
 from office365.directory.identities.api_connector import IdentityApiConnector
 from office365.directory.identities.conditional_access_root import ConditionalAccessRoot
+from office365.directory.identities.providers.base_collection import IdentityProviderBaseCollection
 from office365.directory.identities.userflows.attribute import IdentityUserFlowAttribute
 from office365.directory.identities.userflows.b2x.user_flow import B2XIdentityUserFlow
-from office365.directory.identities.providers.identity_provider_base import IdentityProviderBase
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
@@ -34,8 +34,8 @@ class IdentityContainer(Entity):
     def identity_providers(self):
         """Represents entry point for identity provider base."""
         return self.properties.get('identityProviders',
-                                   EntityCollection(self.context, IdentityProviderBase,
-                                                    ResourcePath("identityProviders", self.resource_path)))
+                                   IdentityProviderBaseCollection(self.context,
+                                                                  ResourcePath("identityProviders", self.resource_path)))
 
     @property
     def b2x_user_flows(self):

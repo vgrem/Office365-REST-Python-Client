@@ -13,8 +13,8 @@ from office365.directory.identities.identity_container import IdentityContainer
 from office365.directory.identities.identity_provider import IdentityProvider
 from office365.directory.internal.paths.me import MePath
 from office365.directory.licenses.subscribed_sku import SubscribedSku
-from office365.directory.organizations.org_contact import OrgContact
-from office365.directory.organizations.organization import Organization
+from office365.intune.organizations.org_contact import OrgContact
+from office365.intune.organizations.organization import Organization
 from office365.directory.policies.root import PolicyRoot
 from office365.directory.subscriptions.subscription import Subscription
 from office365.directory.users.user import User
@@ -190,7 +190,7 @@ class GraphClient(ClientRuntimeContext):
 
     @property
     def organization(self):
-        return Organization(self, ResourcePath("organization"))
+        return EntityCollection(self, Organization, ResourcePath("organization"))
 
     @property
     def subscribed_skus(self):

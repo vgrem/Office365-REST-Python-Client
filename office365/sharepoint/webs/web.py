@@ -459,6 +459,17 @@ class Web(SecurableObject):
         context.add_query(qry)
         return result
 
+    def create_site_page(self, page_metadata):
+        """Create a site page
+
+        :param str page_metadata:
+        """
+        payload = {"pageMetaData": page_metadata}
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "CreateSitePage", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     @staticmethod
     def create_anonymous_link(context, url, is_edit_link):
         """Create an anonymous link which can be used to access a document without needing to authenticate.
@@ -474,6 +485,31 @@ class Web(SecurableObject):
             "isEditLink": is_edit_link
         }
         qry = ServiceOperationQuery(context.web, "CreateAnonymousLink", None, payload, None, result)
+        qry.static = True
+        context.add_query(qry)
+        return result
+
+    @staticmethod
+    def create_anonymous_link_with_expiration(context, url, is_edit_link, expiration_string):
+        """
+        Creates and returns an anonymous link that can be used to access a document without needing to authenticate.
+
+        :param bool is_edit_link: If true, the link will allow the guest user edit privileges on the item.
+        :param str url: The URL of the site, with the path of the object in SharePoint represented as query
+        string parameters
+        :param str expiration_string: A date/time string for which the format conforms to the ISO 8601:2004(E) complete
+        representation for calendar date and time of day, and which represents the time and date of expiry for the
+        anonymous link. Both the minutes and hour value MUST be specified for the difference between the local and
+        UTC time. Midnight is represented as 00:00:00.
+        :param office365.sharepoint.client_context.ClientContext context: client context
+        """
+        result = ClientResult(context)
+        payload = {
+            "url": context.create_safe_url(url, False),
+            "isEditLink": is_edit_link,
+            "expirationString": expiration_string
+        }
+        qry = ServiceOperationQuery(context.web, "CreateAnonymousLinkWithExpiration", None, payload, None, result)
         qry.static = True
         context.add_query(qry)
         return result
@@ -889,6 +925,29 @@ class Web(SecurableObject):
             "url": url
         }
         qry = ServiceOperationQuery(context.web, "DeleteAllAnonymousLinksForObject", None, payload)
+        qry.static = True
+        context.add_query(qry)
+        return context.web
+
+    @staticmethod
+    def delete_anonymous_link_for_object(context, url, is_edit_link, remove_associated_sharing_link_group):
+        """
+        Removes an existing anonymous link for an object..
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param str url:  The URL of the object being shared, with the path of the object in SharePoint that is
+             represented as query string parameters.
+        :param bool is_edit_link: If true, the edit link for the object will be removed. If false, the view only link
+            for the object will be removed.
+        :param bool remove_associated_sharing_link_group: Indicates whether to remove the groups that contain the users
+        who have been given access to the shared object via the sharing link¹.
+        """
+        payload = {
+            "url": url,
+            "isEditLink": is_edit_link,
+            "removeAssociatedSharingLinkGroup": remove_associated_sharing_link_group
+        }
+        qry = ServiceOperationQuery(context.web, "DeleteAnonymousLinkForObject", None, payload)
         qry.static = True
         context.add_query(qry)
         return context.web
