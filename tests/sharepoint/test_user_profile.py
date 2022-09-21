@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.userprofiles.my_site_links import MySiteLinks
 from office365.sharepoint.userprofiles.people_manager import PeopleManager
 from tests import test_user_credentials, test_team_site_url, test_user_principal_name
 
@@ -68,3 +69,8 @@ class TestUserProfile(TestCase):
 
         result = user_props.get_property_names().execute_query()
         self.assertIsNotNone(result.value)
+
+    def test_12_get_my_site_links(self):
+        result = MySiteLinks.get_my_site_links(self.my_client).execute_query()
+        self.assertIsNotNone(result.all_documents_link)
+

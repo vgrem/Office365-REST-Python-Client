@@ -38,3 +38,7 @@ class TestTeamSite(TestCase):
     def test5_get_group_creation_context(self):
         result = self.client.group_site_manager.get_group_creation_context().execute_query()
         self.assertIsNotNone(result.value)
+
+    def test6_get_current_user_shared_channel_member_groups(self):
+        result = self.client.group_site_manager.get_current_user_shared_channel_member_groups().execute_query()
+        self.assertIsNotNone(result.value)

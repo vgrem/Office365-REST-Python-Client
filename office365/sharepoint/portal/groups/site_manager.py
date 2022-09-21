@@ -100,3 +100,24 @@ class GroupSiteManager(ClientObject):
         qry = ServiceOperationQuery(self, "GetCurrentUserJoinedTeams", None, payload, None, result)
         self.context.add_query(qry)
         return result
+
+    def get_current_user_shared_channel_member_groups(self):
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "GetCurrentUserSharedChannelMemberGroups", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_team_channels(self, team_id, use_staging_endpoint):
+        """
+        :param str team_id:
+        :param bool use_staging_endpoint:
+        """
+        return_type = ClientResult(self.context)
+        payload = {
+            "teamId": team_id,
+            "useStagingEndpoint": use_staging_endpoint
+        }
+        qry = ServiceOperationQuery(self, "GetTeamChannels", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+

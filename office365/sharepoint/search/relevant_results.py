@@ -15,3 +15,7 @@ class RelevantResults(ClientValue):
         self.Table = SimpleDataTable()
         self.TotalRows = None
         self.TotalRowsIncludingDuplicates = None
+
+    @property
+    def entity_type_name(self):
+        return "Microsoft.Office.Server.Search.REST.RelevantResults"
