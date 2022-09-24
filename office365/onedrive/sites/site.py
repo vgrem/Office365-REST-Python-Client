@@ -2,7 +2,7 @@ from office365.base_item import BaseItem
 from office365.entity_collection import EntityCollection
 from office365.onedrive.analytics.item_activity_stat import ItemActivityStat
 from office365.onedrive.columns.definition import ColumnDefinition
-from office365.onedrive.contenttypes.content_type import ContentType
+from office365.onedrive.contenttypes.collection import ContentTypeCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.analytics.item_analytics import ItemAnalytics
 from office365.onedrive.lists.list_collection import ListCollection
@@ -92,8 +92,8 @@ class Site(BaseItem):
     def content_types(self):
         """The collection of content types under this site."""
         return self.properties.get('contentTypes',
-                                   EntityCollection(self.context, ContentType,
-                                                    ResourcePath("contentTypes", self.resource_path)))
+                                   ContentTypeCollection(self.context,
+                                                         ResourcePath("contentTypes", self.resource_path)))
 
     @property
     def lists(self):

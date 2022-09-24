@@ -23,3 +23,7 @@ class LogExport(BaseEntity):
         qry = ServiceOperationQuery(self, "GetLogTypes", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
+
+    @property
+    def entity_type_name(self):
+        return "Microsoft.Online.SharePoint.SPLogger.LogExport"

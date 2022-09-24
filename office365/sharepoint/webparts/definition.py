@@ -1,4 +1,5 @@
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.webparts.webpart import WebPart
 
@@ -7,6 +8,17 @@ class WebPartDefinition(BaseEntity):
     """Represents a Web Part on a Web Part Page. Provides operations for moving, deleting, and changing the state of
     the Web Part."""
 
+    def delete_web_part(self):
+        """
+        Deletes the Web Part from the page.
+        When Scope is User, the current user MUST have permissions to add and delete personalized Web Parts.
+        When Scope is Shared, the current user MUST have permissions to customize pages.
+        """
+        qry = ServiceOperationQuery(self, "DeleteWebPart")
+        self.context.add_query(qry)
+        return self
+
+    @property
     def web_part(self):
         """The WebPart object (1), as specified in section 3.2.5.148, associated with this WebPartDefinition.
         The WebPart object (1) contains additional properties relating to the Web Part represented by this

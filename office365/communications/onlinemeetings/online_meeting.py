@@ -12,8 +12,8 @@ class OnlineMeeting(Entity):
     @property
     def participants(self):
         """
-        The participants associated with the online meeting. This includes the organizer and the attendees.
-        :rtype: MeetingParticipants
+        The participants associated with the online meeting. This includes the organizer and the attendees.mgflkhklgföPipisk1980!
+
         """
         return self.get_property('participants', MeetingParticipants())
 

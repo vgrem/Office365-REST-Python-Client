@@ -14,7 +14,7 @@ class CloudCommunications(Entity):
         """
         Get the presence information for multiple users.
 
-        :type ids: list[str]
+        :param list[str] ids: The user object IDs.
         """
         return_type = EntityCollection(self.context, Presence, ResourcePath("presences", self.resource_path))
         qry = ServiceOperationQuery(self, "getPresencesByUserId", None, {"ids": ids}, None, return_type)
@@ -50,7 +50,6 @@ class CloudCommunications(Entity):
     @property
     def presences(self):
         """"
-        :rtype: EntityCollection
         """
         return self.get_property('presences',
                                  EntityCollection(self.context, Presence,

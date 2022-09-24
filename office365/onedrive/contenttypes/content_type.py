@@ -20,7 +20,6 @@ class ContentType(BaseItem):
         """
         Check the publishing status of a contentType in a content type hub site.
         """
-
         return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "isPublished", None, None, None, return_type)
         self.context.add_query(qry)
