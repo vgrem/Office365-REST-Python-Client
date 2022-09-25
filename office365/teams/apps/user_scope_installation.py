@@ -11,7 +11,8 @@ class UserScopeTeamsAppInstallation(TeamsAppInstallation):
 
     @property
     def chat(self):
-        """The chat between the user and Teams app.
+        """
+        The chat between the user and Teams app.
         """
         return self.properties.get('chat',
                                    Chat(self.context, ResourcePath("chat", self.resource_path)))

@@ -28,6 +28,16 @@ class ListCollection(BaseEntityCollection):
         return List(self.context,
                     ServiceOperationPath("GetById", [list_id], self.resource_path))
 
+    def ensure_client_rendered_site_pages_library(self):
+        """
+        Returns a list that is designated as a default location for site pages.
+        """
+        return_type = List(self.context)
+        self.add_child(return_type)
+        qry = ServiceOperationQuery(self, "EnsureClientRenderedSitePagesLibrary", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def ensure_events_list(self):
         """Returns a list that is designated as a default location for events."""
         return_type = List(self.context)

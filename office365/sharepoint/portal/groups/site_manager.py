@@ -63,6 +63,12 @@ class GroupSiteManager(ClientObject):
         self.context.add_query(qry)
         return self
 
+    def ensure_team_for_group(self):
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "EnsureTeamForGroup", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def get_group_creation_context(self):
         return_type = ClientResult(self.context, GroupCreationContext())
         qry = ServiceOperationQuery(self, "GetGroupCreationContext", None, None, None, return_type)

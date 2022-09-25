@@ -1,7 +1,7 @@
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.marketplace.sitecollection.appcatalog.accessor import SiteCollectionCorporateCatalogAccessor
 from office365.sharepoint.sites.site import Site
-from office365.sharepoint.tenant.tenant_settings import TenantSettings
+from office365.sharepoint.tenant.settings import TenantSettings
 from tests import test_user_credentials, test_admin_site_url
 from tests.sharepoint.sharepoint_case import SPTestCase
 

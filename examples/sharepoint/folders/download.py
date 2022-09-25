@@ -13,7 +13,7 @@ files = ctx.web.lists.get_by_title("Documents").root_folder.files.get().execute_
 download_path = tempfile.mkdtemp()
 for file in files:  # type: File
     print("Downloading file: {0} ...".format(file.properties["ServerRelativeUrl"]))
-    download_file_name = os.path.join(download_path, os.path.basename(file.properties["Name"]))
+    download_file_name = os.path.join(download_path, os.path.basename(file.name))
     with open(download_file_name, "wb") as local_file:
         file.download(local_file).execute_query()
     print("[Ok] file has been downloaded: {0}".format(download_file_name))

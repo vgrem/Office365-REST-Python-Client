@@ -6,11 +6,12 @@ from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
 from office365.sharepoint.tenant.administration.settings_service import TenantAdminSettingsService
 from office365.sharepoint.tenant.administration.sharing_capabilities import SharingCapabilities
+from office365.sharepoint.tenant.cdn_api import TenantCdnApi
 from office365.sharepoint.tenant.management.office365_tenant import Office365Tenant
 from office365.sharepoint.tenant.administration.site_properties import SiteProperties
 from office365.sharepoint.tenant.administration.site_properties_collection import SitePropertiesCollection
 from office365.sharepoint.tenant.administration.tenant import Tenant
-from office365.sharepoint.tenant.tenant_settings import TenantSettings
+from office365.sharepoint.tenant.settings import TenantSettings
 from tests import test_site_url, test_admin_site_url, test_user_credentials, test_team_site_url
 
 
@@ -131,3 +132,7 @@ class TestTenant(TestCase):
     def test_19_get_site_thumbnail_logo(self):
         result = self.tenant.get_site_thumbnail_logo(test_site_url).execute_query()
         self.assertIsNotNone(result.value)
+
+    def test_20_get_tenant_cdn_api(self):
+        cdn_api = TenantCdnApi(self.client).get().execute_query()
+        self.assertIsNotNone(cdn_api.resource_path)

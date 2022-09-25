@@ -61,12 +61,18 @@ class List(SecurableObject):
         return return_type
 
     def get_all_rules(self):
+        """
+
+        """
         return_type = ClientResult(self.context, ClientValueCollection(SPListRule))
         qry = ServiceOperationQuery(self, "GetAllRules", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
 
     def get_business_app_operation_status(self):
+        """
+
+        """
         return_type = FlowSynchronizationResult(self.context)
         qry = ServiceOperationQuery(self, "GetBusinessAppOperationStatus", None, None, None, return_type)
         self.context.add_query(qry)
@@ -198,6 +204,8 @@ class List(SecurableObject):
     def get_lookup_field_choices(self, target_field_name, paging_info=None):
         """
 
+        :param str target_field_name:
+        :param str paging_info:
         """
         result = ClientResult(self.context)
         params = {
@@ -219,6 +227,28 @@ class List(SecurableObject):
         qry = ServiceOperationQuery(self, "getListItemChangesSinceToken", None, query, "query", result)
         self.context.add_query(qry)
         return result
+
+    def save_as_new_view(self, old_name, new_name, private_view, uri):
+        """
+        Overwrites a view if it already exists, creates a new view if it does not; and then extracts the
+        implementation-specific filter and sort information from the URL and builds and updates the view's XML.
+        Returns the URL of the view.
+
+        :param str old_name: The name of the view the user is currently on.
+        :param str new_name: The new name given by the user.
+        :param bool private_view: Set to "true" to make the view private; otherwise, "false".
+        :param str uri: URL that contains all the implementation-specific filter and sort information for the view.
+        """
+        payload = {
+            "oldName": old_name,
+            "newName": new_name,
+            "privateView": private_view,
+            "uri": uri
+        }
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "SaveAsNewView", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return self
 
     def save_as_template(self, file_name, name, description, save_data):
         """
@@ -400,16 +430,35 @@ class List(SecurableObject):
         """
         Reserves the returned list item identifier for the idempotent creation of a list item.
         """
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "ReserveListItemId", None, None, None, result)
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "ReserveListItemId", None, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def get_related_fields(self):
-        """Returns a collection of lookup fields that use this list as a data source and
-            that have FieldLookup.IsRelationship set to true.
+        """
+        Returns a collection of lookup fields that use this list as a data source and
+        that have FieldLookup.IsRelationship set to true.
         """
         return RelatedFieldCollection(self.context, ServiceOperationPath("getRelatedFields", [], self.resource_path))
+
+    def get_special_folder_url(self, folder_type, force_create, existing_folder_guid):
+        """
+        Gets the relative URL of the Save to OneDrive folder.
+
+        :param int folder_type: The Save-to-OneDrive type.
+        :param bool force_create: Specify true if the folder doesn't exist and SHOULD be created.
+        :param str existing_folder_guid:  The GUID of the created folders that exist, if any.
+        """
+        payload = {
+            "type": folder_type,
+            "bForceCreate": force_create,
+            "existingFolderGuid": existing_folder_guid
+        }
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "GetSpecialFolderUrl", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     @property
     def id(self):
@@ -684,6 +733,13 @@ class List(SecurableObject):
         """
         return self.properties.get("ValidationFormula", None)
 
+    @property
+    def parent_collection(self):
+        """
+        :rtype: office365.sharepoint.lists.collection.ListCollection
+        """
+        return self._parent_collection
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
@@ -709,6 +765,5 @@ class List(SecurableObject):
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id":
-                self._resource_path = ServiceOperationPath(
-                    "GetById", [value], self._parent_collection.resource_path)
+                self._resource_path = self.parent_collection.get_by_id(value).resource_path
         return self

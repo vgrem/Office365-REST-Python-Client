@@ -126,7 +126,6 @@ class ListItem(SecurableObject):
         Gets the full URL to the SharePoint frame page that initiates the SPWOPIAction object with the WOPI
             application associated with the list item.
 
-
         :param int action: Indicates which user action is indicated in the returned WOPIFrameUrl.
         """
         result = ClientResult(self.context)
@@ -166,7 +165,6 @@ class ListItem(SecurableObject):
         :param bool send_email: A flag to determine if an email notification SHOULD be sent (if email is configured).
         :param str email_subject: The email subject.
         :param str email_body: The email subject.
-        :rtype: SharingResult
         """
 
         return_type = SharingResult(self.context)

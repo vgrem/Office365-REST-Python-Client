@@ -422,7 +422,7 @@ class ClientContext(ClientRuntimeContext):
     @property
     def tenant_settings(self):
         """Alias to TenantSettings"""
-        from office365.sharepoint.tenant.tenant_settings import TenantSettings
+        from office365.sharepoint.tenant.settings import TenantSettings
         return TenantSettings.current(self)
 
     @property
