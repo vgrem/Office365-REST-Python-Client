@@ -1189,6 +1189,25 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return self
 
+    def set_access_request_site_description_and_update(self, description=None):
+        """
+        :param str description:
+        """
+        payload = {"description": description}
+        qry = ServiceOperationQuery(self, "SetAccessRequestSiteDescriptionAndUpdate", None, payload)
+        self.context.add_query(qry)
+        return self
+
+    def set_global_nav_settings(self, title, source):
+        """
+        :param str title:
+        :param str source:
+        """
+        payload = {"title": title, "source": source}
+        qry = ServiceOperationQuery(self, "SetGlobalNavSettings", None, payload)
+        self.context.add_query(qry)
+        return self
+
     @property
     def activities(self):
         return self.properties.get("Activities",

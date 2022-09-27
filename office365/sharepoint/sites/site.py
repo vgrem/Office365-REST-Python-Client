@@ -27,6 +27,25 @@ class Site(BaseEntity):
     def __init__(self, context, resource_path=None):
         super(Site, self).__init__(context, ResourcePath("Site", resource_path))
 
+    def create_preview_site(self, upgrade=None, sendemail=None):
+        """
+        Schedules the creation of an evaluation copy of the site collection for the purposes of evaluating an upgrade
+        of the site collection to a newer version
+
+        :param bool upgrade: If "true", the evaluation site collection MUST be upgraded when it is created.
+            If "false", the evaluation site collection MUST NOT be upgraded when it is created
+        :param bool sendemail: If "true", a notification email MUST be sent to the requestor and the site collection
+            administrators at the completion of the creation of the evaluation site collection. If "false",
+            such notification MUST NOT be sent
+        """
+        payload = {
+            "upgrade": upgrade,
+            "sendemail": sendemail
+        }
+        qry = ServiceOperationQuery(self, "CreatePreviewSPSite", None, payload)
+        self.context.add_query(qry)
+        return self
+
     def delete_object(self):
         """Deletes a site"""
         def _site_resolved():
@@ -65,6 +84,17 @@ class Site(BaseEntity):
         site_manager = SiteIconManager(self.context)
         site_manager.set_site_logo(relative_logo_url=relative_logo_url)
         return self
+
+    def is_comm_site(self):
+        """
+        Determines whether a site is communication site
+        """
+        return_type = ClientResult(self.context)
+
+        def _site_loaded():
+            SPHSite.is_comm_site(self.context, self.url, return_type)
+        self.ensure_property("Url", _site_loaded)
+        return return_type
 
     def is_valid_home_site(self):
         """

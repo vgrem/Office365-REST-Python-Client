@@ -11,8 +11,8 @@ class NavigationService(BaseEntity):
 
     def __init__(self, context):
         """The entry point for REST-based navigation service operations."""
-        service_path = ResourcePath("Microsoft.SharePoint.Navigation.REST.NavigationServiceRest")
-        super(NavigationService, self).__init__(context, service_path)
+        static_path = ResourcePath("Microsoft.SharePoint.Navigation.REST.NavigationServiceRest")
+        super(NavigationService, self).__init__(context, static_path)
 
     def get_publishing_navigation_provider_type(self, map_provider_name=NavigationProviderType.SPNavigationProvider):
         """
@@ -21,7 +21,6 @@ class NavigationService(BaseEntity):
 
         :param str map_provider_name: The server will use "SPNavigationProvider" as provider name
             if mapProviderName is not specified.
-        :return:
         """
         return_type = ClientResult(self.context)
         params = {"mapProviderName": map_provider_name}
@@ -36,6 +35,9 @@ class NavigationService(BaseEntity):
         return return_type
 
     def global_nav_enabled(self):
+        """
+
+        """
         result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "GlobalNavEnabled", None, None, None, result)
         self.context.add_query(qry)
@@ -44,9 +46,8 @@ class NavigationService(BaseEntity):
     def set_global_nav_enabled(self, is_enabled):
         """
         :param bool is_enabled:
-        :return:
         """
-        qry = ServiceOperationQuery(self, "SetGlobalNavEnabled", None, {"isEnabled": is_enabled}, None)
+        qry = ServiceOperationQuery(self, "SetGlobalNavEnabled", None, {"isEnabled": is_enabled})
         self.context.add_query(qry)
         return self
 

@@ -16,14 +16,46 @@ class SPHSite(BaseEntity):
         super(SPHSite, self).__init__(context, ResourcePath("SP.SPHSite"))
 
     @staticmethod
+    def is_comm_site(context, site_url, return_value=None):
+        """
+        Determines whether a site is a communication site
+
+        :param office365.sharepoint.client_context.ClientContext context:
+        :param str site_url: URL of the site to return status for
+        :param ClientResult return_value:
+        """
+        if return_value is None:
+            return_value = ClientResult(context)
+        params = {"siteUrl": site_url}
+        qry = ServiceOperationQuery(SPHSite(context), "IsCommSite", params, None, None, return_value, True)
+        context.add_query(qry)
+        return return_value
+
+    @staticmethod
+    def is_modern_site_with_horizontal_nav(context, site_url, return_value=None):
+        """
+        Determines whether a site is a modern site with horizontal navigation
+
+        :param office365.sharepoint.client_context.ClientContext context:
+        :param str site_url: URL of the site to return status for
+        :param ClientResult return_value:
+        """
+        if return_value is None:
+            return_value = ClientResult(context)
+        params = {"siteUrl": site_url}
+        qry = ServiceOperationQuery(SPHSite(context), "IsModernSiteWithHorizontalNav", params, None, None,
+                                    return_value, True)
+        context.add_query(qry)
+        return return_value
+
+    @staticmethod
     def is_valid_home_site(context, site_url, return_value=None):
         """
         Determines whether a site is landing site for your intranet.
 
-        :param ClientResult return_value:
         :param office365.sharepoint.client_context.ClientContext context:
-        :param str site_url:
-        :return:
+        :param str site_url: URL of the site to return status for
+        :param ClientResult return_value:
         """
 
         if return_value is None:

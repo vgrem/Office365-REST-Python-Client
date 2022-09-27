@@ -1,6 +1,7 @@
 from office365.communications.onlinemeetings.collection import OnlineMeetingCollection
 from office365.communications.presences.presence import Presence
 from office365.delta_collection import DeltaCollection
+from office365.directory.authentication.authentication import Authentication
 from office365.directory.extensions.extension import Extension
 from office365.directory.licenses.assigned_plan import AssignedPlan
 from office365.directory.users.settings import UserSettings
@@ -63,9 +64,11 @@ class User(DirectoryObject):
 
     def change_password(self, current_password, new_password):
         """
+        Enable the user to update their password. Any user can update their password without belonging
+        to any administrator role.
 
-        :param str current_password:
-        :param str new_password:
+        :param str current_password: Your current password.
+        :param str new_password: Your new password.
         """
         qry = ServiceOperationQuery(self, "changePassword", None,
                                     {"currentPassword": current_password, "newPassword": new_password})
@@ -263,6 +266,14 @@ class User(DirectoryObject):
     def assigned_plans(self):
         """The plans that are assigned to the user."""
         return self.properties.get('assignedPlans', ClientValueCollection(AssignedPlan))
+
+    @property
+    def authentication(self):
+        """
+        The authentication methods that are supported for the user.
+        """
+        return self.properties.get('authentication',
+                                   Authentication(self.context, ResourcePath("authentication", self.resource_path)))
 
     @property
     def business_phones(self):

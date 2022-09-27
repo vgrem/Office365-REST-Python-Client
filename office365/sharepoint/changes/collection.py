@@ -3,6 +3,7 @@ from office365.sharepoint.changes.change import Change
 
 
 class ChangeCollection(BaseEntityCollection):
+    """Represents a collection of Change objects"""
 
     def __init__(self, context, resource_path=None):
         super(ChangeCollection, self).__init__(context, Change, resource_path)

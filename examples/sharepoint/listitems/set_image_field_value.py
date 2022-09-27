@@ -3,7 +3,6 @@ import os
 import sys
 
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.fields.image_value import ImageFieldValue
 from office365.sharepoint.listitems.listitem import ListItem
 from tests import test_team_site_url, test_client_credentials
 

@@ -45,3 +45,7 @@ class TestSite(SPTestCase):
         sub_site = self.client.site.open_web_by_id(web.id).execute_query()
         self.assertIsNotNone(sub_site.id)
 
+    def test9_is_comm_site(self):
+        result = self.client.site.is_comm_site().execute_query()
+        self.assertIsInstance(result.value, bool)
+

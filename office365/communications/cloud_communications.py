@@ -1,5 +1,5 @@
 from office365.communications.callrecords.call_record import CallRecord
-from office365.communications.calls.call import Call
+from office365.communications.calls.collection import CallCollection
 from office365.communications.onlinemeetings.collection import OnlineMeetingCollection
 from office365.communications.presences.presence import Presence
 from office365.entity import Entity
@@ -24,28 +24,25 @@ class CloudCommunications(Entity):
     @property
     def calls(self):
         """"
-        :rtype: EntityCollection
         """
-        return self.get_property('calls',
-                                 EntityCollection(self.context, Call, ResourcePath("calls", self.resource_path)))
+        return self.properties.get('calls',
+                                   CallCollection(self.context, ResourcePath("calls", self.resource_path)))
 
     @property
     def call_records(self):
         """"
-        :rtype: EntityCollection
         """
-        return self.get_property('callRecords',
-                                 EntityCollection(self.context, CallRecord,
-                                                  ResourcePath("callRecords", self.resource_path)))
+        return self.properties.get('callRecords',
+                                   EntityCollection(self.context, CallRecord,
+                                                    ResourcePath("callRecords", self.resource_path)))
 
     @property
     def online_meetings(self):
         """"
-        :rtype: OnlineMeetingCollection
         """
-        return self.get_property('onlineMeetings',
-                                 OnlineMeetingCollection(self.context,
-                                                         ResourcePath("onlineMeetings", self.resource_path)))
+        return self.properties.get('onlineMeetings',
+                                   OnlineMeetingCollection(self.context,
+                                                           ResourcePath("onlineMeetings", self.resource_path)))
 
     @property
     def presences(self):

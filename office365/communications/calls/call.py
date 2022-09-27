@@ -1,10 +1,11 @@
-from office365.communications.calls.call_route import CallRoute
+from office365.communications.calls.route import CallRoute
 from office365.communications.calls.participant import Participant
 from office365.communications.operations.comms import CommsOperation
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class Call(Entity):
@@ -12,6 +13,36 @@ class Call(Entity):
     The call resource is created when there is an incoming call for the application or the application creates a
     new outgoing call via a POST on app/calls.
     """
+
+    def reject(self, reason=None, callback_uri=None):
+        """
+        Enable a bot to reject an incoming call. The incoming call request can be an invite from a participant in
+        a group call or a peer-to-peer call. If an invite to a group call is received, the notification will contain
+        the chatInfo and meetingInfo parameters.
+
+        The bot is expected to answer or reject the call before the call times out. The current timeout value is
+        15 seconds.
+
+        This API does not end existing calls that have already been answered. Use delete call to end a call.
+
+        :param str reason: The rejection reason. Possible values are None, Busy and Forbidden
+        :param str callback_uri: This allows bots to provide a specific callback URI for the current call to receive
+            later notifications. If this property has not been set, the bot's global callback URI will be used instead.
+            This must be https.
+        """
+        payload = {
+            "reason": reason,
+            "callbackUri": callback_uri
+        }
+        qry = ServiceOperationQuery(self, "reject", None, payload)
+        self.context.add_query(qry)
+        return self
+
+    def delete(self):
+        """
+        Delete or hang up an active call. For group calls, this will only delete your call leg and the underlying
+        group call will still continue."""
+        return super(Call, self).delete_object()
 
     @property
     def callback_uri(self):
@@ -26,17 +57,17 @@ class Call(Entity):
     @property
     def participants(self):
         """
-        :rtype: EntityCollection
+        Participant collection
         """
-        return self.get_property('participants',
-                                 EntityCollection(self.context, Participant,
-                                                  ResourcePath("participants", self.resource_path)))
+        return self.properties.get('participants',
+                                   EntityCollection(self.context, Participant,
+                                                    ResourcePath("participants", self.resource_path)))
 
     @property
     def operations(self):
         """
-        :rtype: EntityCollection
+        CommsOperation collection
         """
-        return self.get_property('operations',
-                                 EntityCollection(self.context, CommsOperation,
-                                                  ResourcePath("operations", self.resource_path)))
+        return self.properties.get('operations',
+                                   EntityCollection(self.context, CommsOperation,
+                                                    ResourcePath("operations", self.resource_path)))
