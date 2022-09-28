@@ -79,17 +79,19 @@ class ClientContext(ClientRuntimeContext):
         ctx.after_execute(_init_context_for_web)
         return ctx
 
-    def with_client_certificate(self, tenant, client_id, thumbprint, cert_path, **kwargs):
+    def with_client_certificate(self, tenant, client_id, thumbprint, cert_path=None, private_key=None, scopes=None):
         """Creates authenticated SharePoint context via certificate credentials
 
         :param str tenant: Tenant name
-        :param str cert_path: Path to A PEM encoded certificate private key.
+        :param str or None cert_path: Path to A PEM encoded certificate private key.
+        :param str or None private_key: A PEM encoded certificate private key.
         :param str thumbprint: Hex encoded thumbprint of the certificate.
         :param str client_id: The OAuth client id of the calling application.
-        :param list[str] scopes (optional):  Scopes requested to access a protected API (a resource)
+        :param list[str] or None scopes:  Scopes requested to access a protected API (a resource)
 
         """
-        self.authentication_context.with_client_certificate(tenant, client_id, thumbprint, cert_path, **kwargs)
+        self.authentication_context.with_client_certificate(tenant, client_id, thumbprint, cert_path, private_key,
+                                                            scopes)
         return self
 
     def with_access_token(self, token_func):

@@ -18,21 +18,28 @@ class AuthenticationContext(object):
         self.url = url.rstrip("/")
         self._provider = None
 
-    def with_client_certificate(self, tenant, client_id, thumbprint, cert_path, **kwargs):
+    def with_client_certificate(self, tenant, client_id, thumbprint, cert_path=None, private_key=None, scopes=None):
         """Creates authenticated SharePoint context via certificate credentials
 
         :param str tenant: Tenant name, for example {}@
-        :param str cert_path: Path to A PEM encoded certificate private key.
-        :param str thumbprint: Hex encoded thumbprint of the certificate.
         :param str client_id: The OAuth client id of the calling application.
-        :param list[str] scopes (optional):  Scopes requested to access a protected API (a resource)
+        :param str thumbprint: Hex encoded thumbprint of the certificate.
+        :param str or None cert_path: Path to A PEM encoded certificate private key.
+        :param str or None private_key: A PEM encoded certificate private key.
+        :param list[str] or None scopes:  Scopes requested to access a protected API (a resource)
         """
+        if scopes is None:
+            resource = get_absolute_url(self.url)
+            scopes = ["{url}/.default".format(url=resource)]
+        if cert_path is None and private_key is None:
+            raise ValueError("Private key is missing. Use either 'cert_path' or 'private_key' to pass the value")
+        elif cert_path is not None:
+            with open(cert_path, 'r') as f:
+                private_key = f.read()
 
         def _acquire_token_for_client_certificate():
             authority_url = 'https://login.microsoftonline.com/{0}'.format(tenant)
-            credentials = {"thumbprint": thumbprint, "private_key": open(cert_path).read()}
-            resource = get_absolute_url(self.url)
-            scopes = kwargs.get('scopes', ["{url}/.default".format(url=resource)])
+            credentials = {"thumbprint": thumbprint, "private_key": private_key}
             import msal
             app = msal.ConfidentialClientApplication(
                 client_id,

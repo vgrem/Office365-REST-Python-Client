@@ -18,6 +18,11 @@ class TranslationStatusCollection(BaseEntity):
         self.context.add_query(qry)
         return return_type
 
+    def update_translation_languages(self):
+        qry = ServiceOperationQuery(self, "UpdateTranslationLanguages")
+        self.context.add_query(qry)
+        return self
+
     @property
     def untranslated_languages(self):
         return self.properties.get("UntranslatedLanguages", StringCollection())
