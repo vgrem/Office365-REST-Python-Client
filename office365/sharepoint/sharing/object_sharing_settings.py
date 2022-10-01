@@ -80,3 +80,13 @@ class ObjectSharingSettings(BaseEntity):
         return self.properties.get("SharingPermissions",
                                    SharingPermissionInformation(self.context,
                                                                 ResourcePath("SharingPermissions", self.resource_path)))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "ObjectSharingInformation": self.object_sharing_information,
+                "SharePointSettings": self.sharepoint_settings,
+                "SharingPermissions": self.sharing_permissions
+            }
+            default_value = property_mapping.get(name, None)
+        return super(ObjectSharingSettings, self).get_property(name, default_value)

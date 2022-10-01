@@ -15,6 +15,10 @@ class RecycleBinItem(BaseEntity):
         return self
 
     def move_to_second_stage(self):
+        """
+        Moves the Recycle Bin item from the first-stage Recycle Bin to the second-stage Recycle Bin if the
+        SecondStageRecycleBinQuota property on the current web application is not 0. Otherwise, deletes the item.
+        """
         qry = ServiceOperationQuery(self, "MoveToSecondStage")
         self.context.add_query(qry)
         return self
@@ -36,8 +40,6 @@ class RecycleBinItem(BaseEntity):
     def author(self):
         """
         Gets a value that specifies the user who created the Recycle Bin item.
-
-        :rtype: office365.sharepoint.directory.user.User or None
         """
         return self.properties.get("Author", User(self.context, ResourcePath("Author", self.resource_path)))
 

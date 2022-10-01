@@ -175,3 +175,5 @@ class TestSharePointFile(SPTestCase):
 
         file_col = self.__class__.target_list.root_folder.files.get().execute_query()
         self.assertEqual(len(file_col), 0)
+
+

@@ -58,3 +58,7 @@ class TestSharePointSharing(TestCase):
     def test7_unshare_web(self):
         result = self.client.web.unshare().execute_query()
         self.assertIsInstance(result, SharingResult)
+
+    def test8_get_web_sharing_information(self):
+        result = ObjectSharingInformation.get_web_sharing_information(self.client).execute_query()
+        self.assertIsNotNone(result.properties)

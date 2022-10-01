@@ -1,3 +1,4 @@
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.internal.queries.download_file import create_download_file_query
 from office365.sharepoint.internal.queries.upload_file import create_upload_file_query
@@ -28,6 +29,12 @@ class Attachment(BaseEntity):
             self.ensure_property("ServerRelativePath", _download_file_by_path)
         else:
             self.ensure_property("ServerRelativeUrl", _download_file_by_url)
+        return self
+
+    def recycle_object(self):
+        """Move this attachment to site recycle bin."""
+        qry = ServiceOperationQuery(self, "RecycleObject")
+        self.context.add_query(qry)
         return self
 
     def upload(self, file_object, use_path=True):

@@ -31,7 +31,7 @@ from office365.sharepoint.sitescripts.utility import SiteScriptUtility
 from office365.sharepoint.types.user_resource import UserResource
 from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
 from office365.sharepoint.views.view import View
-from office365.sharepoint.views.view_collection import ViewCollection
+from office365.sharepoint.views.collection import ViewCollection
 from office365.sharepoint.webhooks.subscription_collection import SubscriptionCollection
 from office365.sharepoint.utilities.utility import Utility
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath

@@ -13,4 +13,11 @@ class TeamsAsyncOperation(Entity):
     the targetResourceLocation will point to the created/modified resource.
 
     """
-    pass
+
+    @property
+    def target_resource_id(self):
+        """The ID of the object that's created or modified as result of this async operation, typically a team.
+
+        :rtype: str or None
+        """
+        return self.properties.get("targetResourceId", None)

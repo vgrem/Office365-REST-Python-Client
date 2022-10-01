@@ -34,7 +34,7 @@ class HubSiteCollection(BaseEntityCollection):
 
     def get_site_url_by_hub_site_id(self, hub_site_id):
         """
-        :type hub_site_id: str
+        :param str hub_site_id:
         """
         return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "GetSiteUrlByHubSiteId", [hub_site_id], None, None, return_type)

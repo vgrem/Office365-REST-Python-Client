@@ -22,11 +22,69 @@ class ObjectSharingInformation(BaseEntity):
         payload = {
             "docId": doc_id
         }
-        result = ClientResult(context)
-        qry = ServiceOperationQuery(binding_type, "CanCurrentUserShare", None, payload, None, result)
-        qry.static = True
+        return_type = ClientResult(context)
+        qry = ServiceOperationQuery(binding_type, "CanCurrentUserShare", None, payload, None, return_type, True)
         context.add_query(qry)
-        return result
+        return return_type
+
+    @staticmethod
+    def can_current_user_share_remote(context, doc_id):
+        """Indicates whether the current user can share the document identified by docId, from a remote context.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
+        :param str doc_id: Identifies the document that will be analyzed from a sharing perspective.
+        """
+        binding_type = ObjectSharingInformation(context)
+        payload = {
+            "docId": doc_id
+        }
+        return_type = ClientResult(context)
+        qry = ServiceOperationQuery(binding_type, "CanCurrentUserShareRemote", None, payload, None, return_type, True)
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
+    def get_web_sharing_information(context, exclude_current_user=None, exclude_site_admin=None,
+                                    exclude_security_groups=None, retrieve_anonymous_links=None,
+                                    retrieve_user_info_details=None, check_for_access_requests=None):
+        """
+        Retrieves information about the sharing state for the current site. The current site is the site
+        in the context of which this method is invoked.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
+        :param bool exclude_current_user: Specifies whether the returned sharing state information will exclude
+            information about the user making the request.
+        :param bool exclude_site_admin: Specifies whether the returned sharing state information will exclude
+            information about users who are site collection administrators of the site collection which contains
+            the current site
+        :param bool exclude_security_groups: Specifies whether the returned sharing state information will exclude
+            information about security groups which have permissions to the current site
+        :param bool retrieve_anonymous_links:  This parameter is ignored by the method.
+        :param bool retrieve_user_info_details: Specifies whether the returned sharing state information will contain
+             basic or detailed information about the users with permissions to the current site
+        :param bool check_for_access_requests: Specifies whether the returned sharing state information will contain a
+             URL to a location which describes any access requests present in the current site,
+             if such a URL is available
+        """
+        return_type = ObjectSharingInformation(context)
+        payload = {
+            "excludeCurrentUser": exclude_current_user,
+            "excludeSiteAdmin": exclude_site_admin,
+            "excludeSecurityGroups": exclude_security_groups,
+            "retrieveAnonymousLinks": retrieve_anonymous_links,
+            "retrieveUserInfoDetails": retrieve_user_info_details,
+            "checkForAccessRequests": check_for_access_requests
+        }
+        qry = ServiceOperationQuery(return_type, "GetWebSharingInformation", None, payload, None, return_type, True)
+        context.add_query(qry)
+        return return_type
+
+    def get_shared_with_users(self):
+        """Returns an array that contains the users with whom a securable object is shared."""
+        return_type = BaseEntityCollection(self.context, ObjectSharingInformationUser)
+        qry = ServiceOperationQuery(self, "GetSharedWithUsers", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     @staticmethod
     def get_list_item_sharing_information(context, list_id, item_id, exclude_current_user=True, exclude_site_admin=True,

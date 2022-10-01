@@ -3,10 +3,7 @@ from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
-
-
-class LinkedSiteContract(ClientValue):
-    pass
+from office365.sharepoint.portal.sites.linked_contract import LinkedSiteContract
 
 
 class LinkedSitesListContract(ClientValue):

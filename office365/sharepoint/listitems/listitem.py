@@ -186,14 +186,11 @@ class ListItem(SecurableObject):
             self.context.after_execute(_picker_value_resolved, True, picker_result)
 
         self.ensure_property("EncodedAbsUrl", _property_resolved)
-
         return return_type
 
     def unshare(self):
         """
         Unshare a ListItem (file or folder facet)
-
-        :rtype: SharingResult
         """
         return_type = SharingResult(self.context)
 
@@ -208,13 +205,12 @@ class ListItem(SecurableObject):
     def get_sharing_information(self):
         """
         Retrieves information about the sharing state for a given list item.
-
         """
         return_type = ObjectSharingInformation(self.context)
 
         def _item_resolved():
             ObjectSharingInformation.get_list_item_sharing_information(
-                self.context, self.parent_list.properties["Id"], self.properties["Id"], return_type=return_type)
+                self.context, self.parent_list.id, self.id, return_type=return_type)
 
         self.ensure_properties(["Id", "ParentList"], _item_resolved)
         return return_type

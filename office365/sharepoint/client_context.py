@@ -333,6 +333,12 @@ class ClientContext(ClientRuntimeContext):
         return RequestUserContext(self, ResourcePath("Me"))
 
     @property
+    def ee(self):
+        """Alias to EmployeeEngagement"""
+        from office365.sharepoint.viva.employee_engagement import EmployeeEngagement
+        return EmployeeEngagement(self)
+
+    @property
     def micro_service_manager(self):
         """Alias to MicroServiceManager"""
         from office365.sharepoint.microservice.manager import MicroServiceManager
