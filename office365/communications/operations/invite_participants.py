@@ -10,6 +10,6 @@ class InviteParticipantsOperation(CommsOperation):
     @property
     def participants(self):
         """
-        :rtype: ClientValueCollection
+        The participants to invite.
         """
-        return self.get_property('participants', ClientValueCollection(InvitationParticipantInfo))
+        return self.properties.get('participants', ClientValueCollection(InvitationParticipantInfo))

@@ -37,3 +37,9 @@ class TestSite(GraphTestCase):
 
     def test6_unfollow(self):
         pass
+
+    def test7_get_applicable_content_types_for_list(self):
+        my_site = self.client.sites.root
+        doc_lib = my_site.lists["Documents"].get().execute_query()
+        cts = my_site.get_applicable_content_types_for_list(doc_lib.id).execute_query()
+        self.assertIsNotNone(cts.resource_path)

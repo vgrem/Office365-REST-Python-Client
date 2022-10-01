@@ -4,18 +4,9 @@ from office365.entity_collection import EntityCollection
 from office365.onedrive.columns.definition_collection import ColumnDefinitionCollection
 from office365.onedrive.contenttypes.collection import ContentTypeCollection
 from office365.onedrive.listitems.list_item import ListItem
+from office365.onedrive.lists.info import ListInfo
 from office365.onedrive.sharepoint_ids import SharePointIds
-from office365.runtime.client_value import ClientValue
 from office365.runtime.paths.resource_path import ResourcePath
-
-
-class ListInfo(ClientValue):
-
-    def __init__(self, template=None, content_types_enabled=False, hidden=False):
-        super(ListInfo, self).__init__()
-        self.template = template
-        self.contentTypesEnabled = content_types_enabled
-        self.hidden = hidden
 
 
 class List(BaseItem):

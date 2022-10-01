@@ -9,9 +9,9 @@ class DriveItemUploadableProperties(ClientValue):
         self.fileSystemInfo = None
         self.name = None
         self.description = None
-        self.__fileSize = None
+        self._fileSize = None
 
     @property
     def file_size(self):
         """Provides an expected file size to perform a quota check prior to upload. Only on OneDrive Personal."""
-        return self.__fileSize
+        return self._fileSize

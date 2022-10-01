@@ -1,6 +1,6 @@
 from office365.entity_collection import EntityCollection
 from office365.onedrive.internal.paths.shared import SharedPath
-from office365.onedrive.shares.shared_drive_item import SharedDriveItem
+from office365.onedrive.shares.drive_item import SharedDriveItem
 
 
 class SharesCollection(EntityCollection):

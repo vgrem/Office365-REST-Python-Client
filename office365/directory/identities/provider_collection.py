@@ -1,4 +1,4 @@
-from office365.directory.identities.identity_provider import IdentityProvider
+from office365.directory.identities.provider import IdentityProvider
 from office365.entity_collection import EntityCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery

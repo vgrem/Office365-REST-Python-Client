@@ -1,5 +1,6 @@
 from office365.communications.calls.route import CallRoute
 from office365.communications.calls.participant import Participant
+from office365.communications.operations.cancel_media_processing import CancelMediaProcessingOperation
 from office365.communications.operations.comms import CommsOperation
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
@@ -13,6 +14,27 @@ class Call(Entity):
     The call resource is created when there is an incoming call for the application or the application creates a
     new outgoing call via a POST on app/calls.
     """
+
+    def cancel_media_processing(self, client_context=None):
+        """
+        Cancels processing for any in-progress media operations.
+
+        Media operations refer to the IVR operations playPrompt and recordResponse, which are by default queued
+        to process in order. The cancelMediaProcessing method cancels any operation that is in-process as well as
+        operations that are queued. For example, this method can be used to clean up the IVR operation queue for
+        a new media operation. However, it will not cancel a subscribeToTone operation because it operates independent
+        of any operation queue.
+
+
+        :param str client_context: The client context.
+        """
+        return_type = CancelMediaProcessingOperation(self.context)
+        payload = {
+            "clientContext": client_context,
+        }
+        qry = ServiceOperationQuery(self, "cancelMediaProcessing", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def reject(self, reason=None, callback_uri=None):
         """

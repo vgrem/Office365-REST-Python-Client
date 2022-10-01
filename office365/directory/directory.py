@@ -1,4 +1,4 @@
-from office365.directory.directory_object_collection import DirectoryObjectCollection
+from office365.directory.object_collection import DirectoryObjectCollection
 from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
 

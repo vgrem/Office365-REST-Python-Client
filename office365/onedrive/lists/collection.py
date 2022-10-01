@@ -9,13 +9,14 @@ class ListCollection(EntityCollection):
     def __init__(self, context, resource_path=None):
         super(ListCollection, self).__init__(context, List, resource_path)
 
-    def add(self, list_creation_information):
+    def add(self, creation_information):
         """
         Creates a Drive list resource
 
+        :param Any creation_information:
         """
-        target_list = List(self.context)
-        self.add_child(target_list)
-        qry = CreateEntityQuery(self, list_creation_information, target_list)
+        return_type = List(self.context)
+        self.add_child(return_type)
+        qry = CreateEntityQuery(self, creation_information, return_type)
         self.context.add_query(qry)
-        return target_list
+        return return_type

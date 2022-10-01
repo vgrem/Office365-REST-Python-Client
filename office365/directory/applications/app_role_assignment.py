@@ -1,8 +1,14 @@
-from office365.directory.directory_object import DirectoryObject
+from office365.directory.object import DirectoryObject
 from office365.entity_collection import EntityCollection
 
 
 class AppRoleAssignment(DirectoryObject):
+    """
+    Used to record when a user, group, or service principal is assigned an app role for an app.
+
+    An app role assignment is a relationship between the assigned principal (a user, a group, or a service principal),
+    a resource application (the app's service principal) and an app role defined on the resource application.
+    """
     pass
 
 

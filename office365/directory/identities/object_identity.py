@@ -6,7 +6,7 @@ class ObjectIdentity(ClientValue):
     Represents an identity used to sign in to a user account.
     """
 
-    def __init__(self, signInType=None, issuer=None, issuerAssignedId=None):
+    def __init__(self, signInType=None, issuer=None, issuer_assigned_id=None):
         """
 
         :param str signInType: Specifies the user sign-in types in your directory, such as emailAddress, userName
@@ -18,7 +18,7 @@ class ObjectIdentity(ClientValue):
             domain name, for example contoso.onmicrosoft.com.
             For external users from other Azure AD organization, this will be the domain of the federated organization,
             for example contoso.com.
-        :param str issuerAssignedId: Specifies the unique identifier assigned to the user by the issuer.
+        :param str issuer_assigned_id: Specifies the unique identifier assigned to the user by the issuer.
             The combination of issuer and issuerAssignedId must be unique within the organization. Represents
             the sign-in name for the user, when signInType is set to emailAddress or userName
             (also known as local accounts).
@@ -26,4 +26,4 @@ class ObjectIdentity(ClientValue):
         super(ObjectIdentity, self).__init__()
         self.signInType = signInType
         self.issuer = issuer
-        self.issuerAssignedId = issuerAssignedId
+        self.issuerAssignedId = issuer_assigned_id

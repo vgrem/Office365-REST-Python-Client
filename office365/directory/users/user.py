@@ -14,14 +14,15 @@ from office365.outlook.calendar.event import Event
 from office365.outlook.calendar.meeting_time_suggestions_result import MeetingTimeSuggestionsResult
 from office365.outlook.calendar.reminder import Reminder
 from office365.directory.licenses.assigned_license import AssignedLicense
-from office365.directory.directory_object import DirectoryObject
-from office365.directory.directory_object_collection import DirectoryObjectCollection
+from office365.directory.object import DirectoryObject
+from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.licenses.license_details import LicenseDetails
 from office365.directory.identities.object_identity import ObjectIdentity
 from office365.directory.profile_photo import ProfilePhoto
 from office365.entity_collection import EntityCollection
 from office365.outlook.contacts.contact import Contact
 from office365.outlook.contacts.folder import ContactFolder
+from office365.outlook.convert_id_result import ConvertIdResult
 from office365.outlook.mail.folder import MailFolder
 from office365.onedrive.drives.drive import Drive
 from office365.outlook.mail.mailbox_settings import MailboxSettings
@@ -223,6 +224,34 @@ class User(DirectoryObject):
         """
         return_type = User(self.context)
         qry = ServiceOperationQuery(self, "reprocessLicenseAssignment", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def remove_all_devices_from_management(self):
+        """
+        Retire all devices from management for this user
+        """
+        qry = ServiceOperationQuery(self, "removeAllDevicesFromManagement")
+        self.context.add_query(qry)
+        return self
+
+    def translate_exchange_ids(self, input_ids, source_id_type=None, target_id_type=None):
+        """
+        Translate identifiers of Outlook-related resources between formats.
+
+        :param list[str] input_ids: A collection of identifiers to convert. All identifiers in the collection MUST
+            have the same source ID type, and MUST be for items in the same mailbox. Maximum size of this collection
+            is 1000 strings.
+        :param str source_id_type: The ID type of the identifiers in the InputIds parameter.
+        :param str target_id_type: The requested ID type to convert to.
+        """
+        return_type = ClientResult(self.context, ConvertIdResult())
+        payload = {
+            "InputIds": StringCollection(input_ids),
+            "TargetIdType": target_id_type,
+            "SourceIdType": source_id_type
+        }
+        qry = ServiceOperationQuery(self, "translateExchangeIds", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 

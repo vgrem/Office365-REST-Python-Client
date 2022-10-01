@@ -5,7 +5,7 @@ from office365.onedrive.columns.definition import ColumnDefinition
 from office365.onedrive.contenttypes.collection import ContentTypeCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.analytics.item_analytics import ItemAnalytics
-from office365.onedrive.lists.list_collection import ListCollection
+from office365.onedrive.lists.collection import ListCollection
 from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.permissions.permission import Permission
 from office365.onedrive.sharepoint_ids import SharePointIds
@@ -36,10 +36,32 @@ class Site(BaseItem):
 
         :type path: str
         """
-        return_site = Site(self.context)
-        qry = ServiceOperationQuery(self, "GetByPath", [path], None, None, return_site)
+        return_type = Site(self.context)
+        qry = ServiceOperationQuery(self, "GetByPath", [path], None, None, return_type)
         self.context.add_query(qry)
-        return return_site
+        return return_type
+
+    def get_applicable_content_types_for_list(self, list_id):
+        """
+        Get site contentTypes that can be added to a list.
+
+        :param str list_id: GUID of the list for which the applicable content types need to be fetched.
+        """
+        return_type = ContentTypeCollection(self.context, self.content_types.resource_path)
+        params = {
+            "listId": list_id
+        }
+        qry = ServiceOperationQuery(self, "getApplicableContentTypesForList", params, None, None, return_type)
+        self.context.add_query(qry)
+
+        def _construct_query(request):
+            """
+            :type request: office365.runtime.http.request_options.RequestOptions
+            """
+            request.method = HttpMethod.Get
+
+        self.context.before_execute(_construct_query)
+        return return_type
 
     def get_activities_by_interval(self, start_dt=None, end_dt=None, interval=None):
         """
@@ -87,6 +109,13 @@ class Site(BaseItem):
         return self.properties.get('columns',
                                    EntityCollection(self.context, ColumnDefinition,
                                                     ResourcePath("columns", self.resource_path)))
+
+    @property
+    def external_columns(self):
+        """The collection of columns under this site."""
+        return self.properties.get('externalColumns',
+                                   EntityCollection(self.context, ColumnDefinition,
+                                                    ResourcePath("externalColumns", self.resource_path)))
 
     @property
     def content_types(self):
@@ -155,6 +184,7 @@ class Site(BaseItem):
         if default_value is None:
             property_mapping = {
                 "contentTypes": self.content_types,
+                "externalColumns": self.external_columns,
                 "siteCollection": self.site_collection,
                 "termStore": self.term_store,
                 "termStores": self.term_stores

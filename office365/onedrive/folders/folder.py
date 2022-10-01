@@ -9,9 +9,9 @@ class Folder(ClientValue):
 
     def __init__(self, child_count=None, view=None):
         """
-
-        :param int child_count:
-        :param office365.onedrive.folderView.FolderView view:
+        :param int child_count: Number of children contained immediately within this container.
+        :param office365.onedrive.folderView.FolderView view: A collection of properties defining the recommended
+             view for the folder.
         """
         super(Folder, self).__init__()
         self.childCount = child_count

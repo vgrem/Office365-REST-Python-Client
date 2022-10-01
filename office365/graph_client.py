@@ -5,14 +5,15 @@ from office365.directory.applications.application_template import ApplicationTem
 from office365.directory.applications.service_principal import ServicePrincipal
 from office365.directory.audit.log_root import AuditLogRoot
 from office365.directory.directory import Directory
-from office365.directory.directory_object_collection import DirectoryObjectCollection
+from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.groups.collection import GroupCollection
 from office365.directory.groups.lifecycle_policy import GroupLifecyclePolicy
 from office365.directory.groups.setting_template import GroupSettingTemplate
-from office365.directory.identities.identity_container import IdentityContainer
-from office365.directory.identities.identity_provider import IdentityProvider
+from office365.directory.identities.container import IdentityContainer
+from office365.directory.identities.provider import IdentityProvider
 from office365.directory.internal.paths.me import MePath
 from office365.directory.licenses.subscribed_sku import SubscribedSku
+from office365.directory.resource_specific_permission_grant import ResourceSpecificPermissionGrant
 from office365.intune.organizations.org_contact import OrgContact
 from office365.intune.organizations.organization import Organization
 from office365.directory.policies.root import PolicyRoot
@@ -23,7 +24,7 @@ from office365.education.root import EducationRoot
 from office365.entity_collection import EntityCollection
 from office365.external.external import External
 from office365.onedrive.drives.drive import Drive
-from office365.onedrive.shares.shares_collection import SharesCollection
+from office365.onedrive.shares.collection import SharesCollection
 from office365.onedrive.sites.sites_with_root import SitesWithRoot
 from office365.outlook.calendar.place import Place
 from office365.planner.planner import Planner
@@ -45,11 +46,10 @@ from office365.teams.template import TeamsTemplate
 
 
 class GraphClient(ClientRuntimeContext):
-    """Graph client"""
+    """Graph Service client"""
 
     def __init__(self, acquire_token_callback):
         """
-
         :param () -> dict acquire_token_callback: Acquire token function
         """
         super(GraphClient, self).__init__()
@@ -190,6 +190,7 @@ class GraphClient(ClientRuntimeContext):
 
     @property
     def organization(self):
+        """"""
         return EntityCollection(self, Organization, ResourcePath("organization"))
 
     @property
@@ -199,10 +200,14 @@ class GraphClient(ClientRuntimeContext):
 
     @property
     def group_lifecycle_policies(self):
+        """"""
         return EntityCollection(self, GroupLifecyclePolicy, ResourcePath("groupLifecyclePolicies"))
 
     @property
     def communications(self):
+        """
+        Cloud communications API endpoint
+        """
         return CloudCommunications(self, ResourcePath("communications"))
 
     @property
@@ -248,6 +253,13 @@ class GraphClient(ClientRuntimeContext):
         It returns a singleton planner resource. It doesn't contain any usable properties.
         """
         return Planner(self, ResourcePath("planner"))
+
+    @property
+    def permission_grants(self):
+        """
+        List all resource-specific permission grants
+        """
+        return EntityCollection(self, ResourceSpecificPermissionGrant, ResourcePath("permissionGrants"))
 
     @property
     def search(self):

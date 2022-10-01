@@ -60,6 +60,15 @@ class ContentType(BaseItem):
         return self
 
     @property
+    def associated_hubs_urls(self):
+        """
+        List of canonical URLs for hub sites with which this content type is associated to.
+        This will contain all hub sites where this content type is queued to be enforced or is already enforced.
+        Enforcing a content type means that the content type will be applied to the lists in the enforced sites.
+        """
+        return self.properties.get("associatedHubsUrls", StringCollection())
+
+    @property
     def document_set(self):
         """
         Document Set metadata.

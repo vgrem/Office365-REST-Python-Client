@@ -7,4 +7,13 @@ class GeoCoordinates(ClientValue):
     contained within the file. If a DriveItem has a non-null location facet, the item represents a file with
     a known location associated with it.
     """
-    pass
+
+    def __init__(self, altitude=None, latitude=None, longitude=None):
+        """
+        :param float altitude: The altitude (height), in feet, above sea level for the item.
+        :param float latitude: The latitude, in decimal, for the item
+        :param float longitude: The longitude, in decimal, for the item
+        """
+        self.altitude = altitude
+        self.latitude = latitude
+        self.longitude = longitude

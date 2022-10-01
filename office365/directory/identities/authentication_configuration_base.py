@@ -1,4 +1,5 @@
 from office365.runtime.client_value import ClientValue
+from office365.runtime.types.collections import StringCollection
 
 
 class ApiAuthenticationConfigurationBase(ClientValue):
@@ -12,4 +13,8 @@ class ApiAuthenticationConfigurationBase(ClientValue):
     - clientCertificateAuthentication for client certificate authentication (used for fetching the client
          certificates of an API connector)
     """
-    pass
+    def __init__(self, order=None):
+        """
+        :param list[str] order:
+        """
+        self.order = StringCollection(order)

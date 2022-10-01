@@ -16,13 +16,13 @@ class EntityCollection(ClientObjectCollection):
         if type(key) == int:
             return super(EntityCollection, self).__getitem__(key)
         elif is_string_type(key):
-            return self._item_type(self.context, ResourcePath(key, self.resource_path))
+            return self.create_typed_object(resource_path=ResourcePath(key, self.resource_path))
         else:
-            raise ValueError("Invalid key: expected either an entity index (int) or identifier (str)")
+            raise ValueError("Invalid key: expected either an entity index [int] or identifier [str]")
 
     def add(self, **kwargs):
         """Creates an entity and prepares the query"""
-        return_type = self.create_typed_object(initial_properties=kwargs, resource_path=NonePath(self.resource_path))
+        return_type = self.create_typed_object(kwargs, NonePath(self.resource_path))
         self.add_child(return_type)
         qry = CreateEntityQuery(self, return_type, return_type)
         self.context.add_query(qry)

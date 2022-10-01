@@ -35,12 +35,11 @@ class ClientObjectCollection(ClientObject):
         :type initial_properties: dict[str, P_T] or None
         :type resource_path: office365.runtime.paths.resource_path.ResourcePath or None
         """
-        if initial_properties is None:
-            initial_properties = {}
         if self._item_type is None:
             raise AttributeError("No class model for entity type '{0}' was found".format(self._item_type))
         client_object = self._item_type(context=self.context, resource_path=resource_path)  # type: ClientObject
-        [client_object.set_property(k, v) for k, v in initial_properties.items() if v is not None]
+        if initial_properties is not None:
+            [client_object.set_property(k, v) for k, v in initial_properties.items() if v is not None]
         return client_object
 
     def set_property(self, key, value, persist_changes=False):

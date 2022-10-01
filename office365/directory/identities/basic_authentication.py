@@ -9,6 +9,10 @@ class BasicAuthentication(ApiAuthenticationConfigurationBase):
     """
 
     def __init__(self, username=None, password=None):
+        """
+        :param str username: The username.
+        :param str password: The password. It is not returned in the responses.
+        """
         super(BasicAuthentication, self).__init__()
         self.username = username
         self.password = password

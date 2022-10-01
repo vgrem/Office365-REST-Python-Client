@@ -10,9 +10,6 @@ class TeamCollection(EntityCollection):
     def __init__(self, context, resource_path=None):
         super(TeamCollection, self).__init__(context, Team, resource_path)
 
-    def __getitem__(self, key):
-        return Team(self.context, ResourcePath(key, self.resource_path))
-
     def get_all(self, page_size=None, page_loaded=None):
         """List all teams in Microsoft Teams for an organization
 
@@ -53,8 +50,6 @@ class TeamCollection(EntityCollection):
             """
             :type resp: requests.Response
             """
-            #loc = resp.headers.get('Location', None)
-
             content_loc = resp.headers.get('Content-Location', None)
             team_id = content_loc[content_loc.find("(") + 2:content_loc.find(")") - 1]
             return_type.set_property("id", team_id)

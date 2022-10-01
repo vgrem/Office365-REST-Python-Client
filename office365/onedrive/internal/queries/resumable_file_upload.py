@@ -1,6 +1,6 @@
 import os
 
-from office365.onedrive.driveitems.drive_item_uploadable_properties import DriveItemUploadableProperties
+from office365.onedrive.driveitems.uploadable_properties import DriveItemUploadableProperties
 from office365.runtime.odata.v4.upload_session_request import UploadSessionRequest
 from office365.runtime.queries.upload_session import UploadSessionQuery
 
@@ -37,4 +37,3 @@ def create_resumable_file_upload_query(return_type, source_path, chunk_size, chu
             session_request.execute_query()
     context.after_execute(_upload_session)
     return qry
-

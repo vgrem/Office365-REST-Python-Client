@@ -13,7 +13,6 @@ class File(ClientValue):
         """
         :param str mime_type: The MIME type for the file. This is determined by logic on the server and might not be
             the value provided when the file was uploaded. Read-only.
-
         :param str hashes: Hashes of the file's binary content, if available. Read-only.
         """
         super(File, self).__init__()

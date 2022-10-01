@@ -8,6 +8,9 @@ class DriveRecipient(ClientValue):
     """
 
     def __init__(self, alias=None, email=None, object_id=None):
+        """
+
+        """
         super(DriveRecipient, self).__init__()
         self.alias = alias
         self.email = email
