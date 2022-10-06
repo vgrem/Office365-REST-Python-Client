@@ -8,11 +8,11 @@ def create_download_content_query(file_item, format_name=None):
     :type file_item: office365.onedrive.driveItem.DriveItem
     :type format_name: str or None
     """
-    result = ClientResult(file_item.context)
+    return_type = ClientResult(file_item.context)
     action_name = "content"
     if format_name is not None:
         action_name = action_name + r"?format={0}".format(format_name)
-    qry = ServiceOperationQuery(file_item, action_name, None, None, None, result)
+    qry = ServiceOperationQuery(file_item, action_name, None, None, None, return_type)
 
     def _construct_query(request):
         """
@@ -32,5 +32,4 @@ def create_download_session_content_query(file_item, format_name=None):
     if format_name is not None:
         action_name = action_name + r"?format={0}".format(format_name)
     qry = ServiceOperationQuery(file_item, action_name)
-
     return qry

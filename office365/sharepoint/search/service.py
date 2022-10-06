@@ -8,6 +8,7 @@ from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.search.query.auto_completion_results import QueryAutoCompletionResults
 from office365.sharepoint.search.query.popular_tenant_query import PopularTenantQuery
 from office365.sharepoint.search.query.suggestion_results import QuerySuggestionResults
+from office365.sharepoint.search.query.tenantCustomQuerySuggestions import TenantCustomQuerySuggestions
 from office365.sharepoint.search.request import SearchRequest
 from office365.sharepoint.search.result import SearchResult
 
@@ -35,8 +36,10 @@ class SearchService(BaseEntity):
         return result
 
     def export_manual_suggestions(self):
-        """"""
-        pass
+        return_type = ClientResult(self.context, TenantCustomQuerySuggestions())
+        qry = ServiceOperationQuery(self, "exportmanualsuggestions", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def export_popular_tenant_queries(self, count):
         """This method is used to get a list of popular search queries executed on the tenant.
@@ -133,9 +136,9 @@ class SearchService(BaseEntity):
         return_type = ClientResult(self.context, QueryAutoCompletionResults())
         payload = {
             "querytext": query_text,
-            #"sources": sources,
-            #"numberOfCompletions": number_of_completions,
-            #"cursorPosition": cursor_position
+            "sources": sources,
+            "numberOfCompletions": number_of_completions,
+            "cursorPosition": cursor_position
         }
         qry = ServiceOperationQuery(self, "autocompletions", None, payload, None, return_type)
         self.context.add_query(qry)

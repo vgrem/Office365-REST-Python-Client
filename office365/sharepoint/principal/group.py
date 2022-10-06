@@ -27,19 +27,23 @@ class Group(Principal):
         """
         :type user_or_id: long or Principal
         """
+
+        def _set_user_as_owner(owner_id):
+            qry = ServiceOperationQuery(self, "SetUserAsOwner", None, {"ownerId": owner_id})
+            self.context.add_query(qry)
+
         if isinstance(user_or_id, Principal):
             def _user_loaded():
-                next_qry = ServiceOperationQuery(self, "SetUserAsOwner", None, {"ownerId": user_or_id.id})
-                self.context.add_query(next_qry)
+                _set_user_as_owner(user_or_id.id)
             user_or_id.ensure_property("Id", _user_loaded)
         else:
-            qry = ServiceOperationQuery(self, "SetUserAsOwner", None, {"ownerId": user_or_id})
-            self.context.add_query(qry)
+            _set_user_as_owner(user_or_id)
         return self
 
     @property
     def owner_title(self):
         """Specifies the name of the owner of the group.
+
         :rtype: str or None
         """
         return self.properties.get('OwnerTitle', None)

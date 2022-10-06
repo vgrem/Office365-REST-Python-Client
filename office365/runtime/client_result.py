@@ -11,6 +11,17 @@ class ClientResult(object):
         self._context = context
         self._value = default_value
 
+    def after_execute(self, action, *args, **kwargs):
+
+        def _process_response(resp):
+            """
+            :type resp: requests.Response
+            """
+            resp.raise_for_status()
+            action(self, *args, **kwargs)
+        self._context.after_execute(_process_response, True)
+        return self
+
     def set_property(self, key, value, persist_changes=False):
         from office365.runtime.client_value import ClientValue
         if isinstance(self.value, ClientValue):
@@ -23,10 +34,14 @@ class ClientResult(object):
         return self._value
 
     def execute_query(self):
+        """Submit request(s) to the server"""
         self._context.execute_query()
         return self
 
     def execute_query_retry(self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None):
+        """
+        Executes the current set of data retrieval queries and method invocations and retries it if needed.
+        """
         self._context.execute_query_retry(max_retry=max_retry,
                                           timeout_secs=timeout_secs,
                                           success_callback=success_callback,

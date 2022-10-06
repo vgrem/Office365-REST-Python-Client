@@ -11,7 +11,7 @@ class User(Principal):
     def get_personal_site(self):
         """Get Personal Site"""
         from office365.sharepoint.sites.site import Site
-        site = Site(self.context)
+        return_type = Site(self.context)
 
         def _user_loaded():
             from office365.sharepoint.userprofiles.people_manager import PeopleManager
@@ -19,13 +19,16 @@ class User(Principal):
             person_props = people_manager.get_properties_for(self.login_name)
 
             def _person_props_loaded(resp):
-                site.set_property("__siteUrl", person_props.personal_url)
+                return_type.set_property("__siteUrl", person_props.personal_url)
             self.context.after_execute(_person_props_loaded)
 
         self.ensure_property("LoginName", _user_loaded)
-        return site
+        return return_type
 
     def get_user_profile_properties(self, property_names=None):
+        """
+        :param list[str] property_names:
+        """
         from office365.sharepoint.userprofiles.properties_for_user import UserProfilePropertiesForUser
         return_type = UserProfilePropertiesForUser(self.context)
 
@@ -51,7 +54,7 @@ class User(Principal):
     @property
     def is_site_admin(self):
         """Gets a Boolean value that specifies whether the user is a site collection administrator."""
-        return self.properties.get('isSiteAdmin', None)
+        return self.properties.get('IsSiteAdmin', None)
 
     @property
     def user_id(self):

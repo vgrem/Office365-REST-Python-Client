@@ -119,6 +119,13 @@ class SitePageMetadata(BaseEntity):
         return self._parent_collection
 
     @property
+    def topic_header(self):
+        """
+        :rtype: str or None
+        """
+        return self.properties.get('TopicHeader', None)
+
+    @property
     def entity_type_name(self):
         return "SP.Publishing.SitePageMetadata"
 

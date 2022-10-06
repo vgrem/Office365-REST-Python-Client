@@ -137,12 +137,11 @@ class SitePageService(BaseEntity):
 
         :param office365.sharepoint.client_context.ClientContext context: Client context
         """
-        result = ClientResult(context, FilePickerOptions())
+        return_type = ClientResult(context, FilePickerOptions())
         svc = SitePageService(context)
-        qry = ServiceOperationQuery(svc, "FilePickerTabOptions", None, None, None, result)
-        qry.static = True
+        qry = ServiceOperationQuery(svc, "FilePickerTabOptions", None, None, None, return_type, True)
         context.add_query(qry)
-        return result
+        return return_type
 
     def add_image(self, page_name, image_file_name, image_stream):
         """

@@ -7,6 +7,7 @@ from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.listitems.caml.query import CamlQuery
 from office365.sharepoint.views.field_collection import ViewFieldCollection
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
+from office365.sharepoint.views.visualization import Visualization
 
 
 class View(BaseEntity):
@@ -119,15 +120,20 @@ class View(BaseEntity):
     @property
     def server_relative_path(self):
         """Gets the server-relative Path of the View.
-        :rtype: SPResPath or None
         """
         return self.properties.get("ServerRelativePath", SPResPath())
+
+    @property
+    def visualization_info(self):
+        """Specifies how the view is layed out."""
+        return self.properties.get("VisualizationInfo", Visualization())
 
     def get_property(self, name, default_value=None):
         property_mapping = {
             "ViewFields": self.view_fields,
             "DefaultView": self.default_view,
-            "ServerRelativePath": self.server_relative_path
+            "ServerRelativePath": self.server_relative_path,
+            "VisualizationInfo": self.visualization_info
         }
         if name in property_mapping:
             default_value = property_mapping[name]
@@ -135,7 +141,6 @@ class View(BaseEntity):
 
     def set_property(self, name, value, persist_changes=True):
         """
-
         :type name: str
         :type value: any
         :type persist_changes: bool

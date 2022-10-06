@@ -1,4 +1,5 @@
 from office365.runtime.client_value import ClientValue
+from office365.sharepoint.search.refinement_results import RefinementResults
 
 
 class QueryResult(ClientValue):
@@ -12,6 +13,7 @@ class QueryResult(ClientValue):
         :param str query_id: Specifies the identifier for the search query
         """
         self.QueryId = query_id
+        self.RefinementResults = RefinementResults()
 
     @property
     def entity_type_name(self):

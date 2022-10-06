@@ -13,6 +13,7 @@ from office365.sharepoint.permissions.irm.settings import InformationRightsManag
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.files.version_collection import FileVersionCollection
 from office365.sharepoint.listitems.listitem import ListItem
+from office365.sharepoint.utilities.wopi_frame_action import SPWOPIFrameAction
 from office365.sharepoint.webparts.limited_manager import LimitedWebPartManager
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 from office365.sharepoint.webparts.personalization_scope import PersonalizationScope
@@ -56,6 +57,22 @@ class File(AbstractFile):
     def get_sharing_information(self):
         """Gets the sharing information for a file."""
         return self.listItemAllFields.get_sharing_information()
+
+    def get_wopi_frame_url(self, action=SPWOPIFrameAction.View):
+        """
+        Returns the full URL to the SharePoint frame page that will initiate the specified WOPI frame action with the
+        file's associated WOPI application. If there is no associated WOPI application or associated action,
+        the return value is an empty string.
+
+        :param str action: The full URL to the WOPI frame.
+        """
+        return_type = ClientResult(self.context)
+        params = {
+            "action": action
+        }
+        qry = ServiceOperationQuery(self, "GetWOPIFrameUrl", params, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def share_link(self, link_kind, expiration=None):
         """Creates a tokenized sharing link for a file based on the specified parameters and optionally
@@ -121,51 +138,41 @@ class File(AbstractFile):
 
     def recycle(self):
         """Moves the file to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
-
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "Recycle", None, None, None, result)
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "Recycle", None, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def approve(self, comment):
-        """Approves the file submitted for content approval with the specified comment.
-
-        :type comment: str
         """
-        qry = ServiceOperationQuery(self,
-                                    "approve",
-                                    {
-                                        "comment": comment
-                                    })
+        Approves the file submitted for content approval with the specified comment.
+
+        :param str comment: A string containing the comment.
+        """
+        qry = ServiceOperationQuery(self, "Approve", {"comment": comment})
         self.context.add_query(qry)
         return self
 
     def deny(self, comment):
         """Denies approval for a file that was submitted for content approval.
 
-        :type comment: str
+        :param str comment: A string containing the comment.
         """
-        qry = ServiceOperationQuery(self,
-                                    "deny",
-                                    {
-                                        "comment": comment
-                                    })
+        qry = ServiceOperationQuery(self, "Deny", {"comment": comment})
         self.context.add_query(qry)
         return self
 
     def copyto(self, new_relative_url, overwrite):
         """Copies the file to the destination URL.
 
-        :type new_relative_url: str
-        :type overwrite: bool
+        :param str new_relative_url: Specifies the destination URL.
+        :param bool overwrite: Specifies whether a file with the same name is overwritten.
         """
-        qry = ServiceOperationQuery(self,
-                                    "CopyTo",
-                                    {
-                                        "strNewUrl": new_relative_url,
-                                        "boverwrite": overwrite
-                                    },
-                                    None)
+        params = {
+            "strNewUrl": new_relative_url,
+            "boverwrite": overwrite
+        }
+        qry = ServiceOperationQuery(self, "CopyTo", params)
         self.context.add_query(qry)
         return self
 
@@ -205,12 +212,7 @@ class File(AbstractFile):
         """Submits the file for content approval with the specified comment.
         :type comment: str
         """
-        qry = ServiceOperationQuery(self,
-                                    "publish",
-                                    {
-                                        "comment": comment,
-                                    }
-                                    )
+        qry = ServiceOperationQuery(self, "Publish", {"comment": comment})
         self.context.add_query(qry)
 
     def unpublish(self, comment):
@@ -224,9 +226,7 @@ class File(AbstractFile):
 
     def checkout(self):
         """Checks out the file from a document library based on the check-out type."""
-        qry = ServiceOperationQuery(self,
-                                    "checkout",
-                                    )
+        qry = ServiceOperationQuery(self, "checkout")
         self.context.add_query(qry)
         return self
 
@@ -238,7 +238,7 @@ class File(AbstractFile):
         :param checkin_type: 0 (minor), or 1 (major) or 2 (overwrite)
             For more information on checkin types, please see
             https://docs.microsoft.com/en-us/previous-versions/office/sharepoint-csom/ee542953(v%3Doffice.15)
-        :type checkin_type: int
+        :param int checkin_type: Specifies the type of check-in.
         """
         qry = ServiceOperationQuery(self,
                                     "checkin",
@@ -331,7 +331,7 @@ class File(AbstractFile):
         :param bytes content: File content
         :param str upload_id: Upload session id
         """
-        result = ClientResult(self.context)
+        return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(self,
                                     "startUpload",
                                     {
@@ -339,10 +339,10 @@ class File(AbstractFile):
                                     },
                                     content,
                                     None,
-                                    result
+                                    return_type
                                     )
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def continue_upload(self, upload_id, file_offset, content):
         """
@@ -352,7 +352,7 @@ class File(AbstractFile):
         :param int file_offset: File offset
         :param bytes content: File content
         """
-        result = ClientResult(self.context)
+        return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(self,
                                     "continueUpload",
                                     {
@@ -361,10 +361,10 @@ class File(AbstractFile):
                                     },
                                     content,
                                     None,
-                                    result
+                                    return_type
                                     )
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def finish_upload(self, upload_id, file_offset, content):
         """Uploads the last file fragment and commits the file. The current file content is changed when this method
@@ -467,7 +467,6 @@ class File(AbstractFile):
                     file_object.write(chunk)
 
             self.context.after_execute(_process_download_response)
-
             self.context.add_query(qry)
 
         if use_path:

@@ -57,6 +57,7 @@ from office365.sharepoint.sitescripts.types import SiteScriptSerializationResult
 from office365.sharepoint.webs.information_collection import WebInformationCollection
 from office365.sharepoint.webs.template_collection import WebTemplateCollection
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
+from office365.sharepoint.webs.theme_info import ThemeInfo
 
 
 class Web(SecurableObject):
@@ -1254,6 +1255,13 @@ class Web(SecurableObject):
         return self.properties.get("CustomMasterUrl", None)
 
     @property
+    def custom_site_actions_disabled(self):
+        """
+        :rtype: bool or None
+        """
+        return self.properties.get("CustomSiteActionsDisabled", None)
+
+    @property
     def id(self):
         """
         Specifies the site identifier for the site
@@ -1275,21 +1283,28 @@ class Web(SecurableObject):
         return self.properties.get("AccessRequestListUrl", None)
 
     @property
+    def effective_base_permissions(self):
+        """Specifies the effective permissions that are assigned to the current user"""
+        from office365.sharepoint.permissions.base_permissions import BasePermissions
+        return self.properties.get("EffectiveBasePermissions", BasePermissions())
+
+    @property
     def webs(self):
-        """Get child webs"""
+        """Specifies the collection of all child sites for the site"""
         from office365.sharepoint.webs.collection import WebCollection
         return self.properties.get("Webs",
                                    WebCollection(self.context, ResourcePath("webs", self.resource_path), self))
 
     @property
     def folders(self):
-        """Get folder resources"""
+        """Specifies the collection of all first-level folders in the site """
         return self.properties.get('Folders',
                                    FolderCollection(self.context, ResourcePath("folders", self.resource_path), self))
 
     @property
     def lists(self):
-        """Get web list collection"""
+        """Specifies the collection of lists that are contained in the site available to the current user based on the
+        current user's permissions."""
         return self.properties.get('Lists',
                                    ListCollection(self.context, ResourcePath("lists", self.resource_path)))
 
@@ -1395,6 +1410,12 @@ class Web(SecurableObject):
         """Specifies the collection of all child sites for the site"""
         return self.properties.get('WebInfos',
                                    WebInformationCollection(self.context, ResourcePath("WebInfos", self.resource_path)))
+
+    @property
+    def theme_info(self):
+        """Specifies the site theme associated with the site"""
+        return self.properties.get('ThemeInfo',
+                                   ThemeInfo(self.context, ResourcePath("ThemeInfo", self.resource_path)))
 
     @property
     def url(self):
@@ -1593,6 +1614,7 @@ class Web(SecurableObject):
                 "ContentTypes": self.content_types,
                 "ClientWebParts": self.client_web_parts,
                 "CurrentUser": self.current_user,
+                "EffectiveBasePermissions": self.effective_base_permissions,
                 "EventReceivers": self.event_receivers,
                 "ListTemplates": self.list_templates,
                 "MultilingualSettings": self.multilingual_settings,
@@ -1608,7 +1630,8 @@ class Web(SecurableObject):
                 "SiteUserInfoList": self.site_user_info_list,
                 "TenantAppCatalog": self.tenant_app_catalog,
                 "UserCustomActions": self.user_custom_actions,
-                "WebInfos": self.web_infos
+                "WebInfos": self.web_infos,
+                "ThemeInfo": self.theme_info
             }
             default_value = property_mapping.get(name, None)
         return super(Web, self).get_property(name, default_value)

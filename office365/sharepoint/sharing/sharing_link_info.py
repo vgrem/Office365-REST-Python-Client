@@ -5,15 +5,16 @@ from office365.sharepoint.sharing.link_invitation import LinkInvitation
 
 class SharingLinkInfo(ClientValue):
 
-    def __init__(self):
+    def __init__(self, allows_anonymous_access=None, application_id=None):
         """
         Specifies the information about the tokenized sharing link.
 
-        :para
+        :param bool allows_anonymous_access:
+        :param str application_id:
         """
         super(SharingLinkInfo, self).__init__()
-        self.AllowsAnonymousAccess = None
-        self.ApplicationId = None
+        self.AllowsAnonymousAccess = allows_anonymous_access
+        self.ApplicationId = application_id
         self.CreatedBy = None
         self.PasswordProtected = None
         self.Invitations = ClientValueCollection(LinkInvitation)

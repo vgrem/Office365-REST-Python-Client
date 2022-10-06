@@ -46,10 +46,19 @@ class Site(BaseEntity):
         self.context.add_query(qry)
         return self
 
+    def certify_site(self):
+        """"""
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "CertifySite", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def delete_object(self):
         """Deletes a site"""
+
         def _site_resolved():
             self.context.group_site_manager.delete(self.url)
+
         self.ensure_property("Url", _site_resolved)
         return self
 
@@ -93,6 +102,7 @@ class Site(BaseEntity):
 
         def _site_loaded():
             SPHSite.is_comm_site(self.context, self.url, return_type)
+
         self.ensure_property("Url", _site_loaded)
         return return_type
 
@@ -169,6 +179,33 @@ class Site(BaseEntity):
         self.context.add_query(qry)
         return return_type
 
+    def invalidate(self):
+        """
+        Invalidates cached upgrade information about the site collection so that this information will be
+        recomputed the next time it is needed
+        """
+        qry = ServiceOperationQuery(self, "Invalidate")
+        self.context.add_query(qry)
+        return self
+
+    def needs_upgrade_by_type(self, version_upgrade, recursive):
+        """
+        Returns "true" if this site collection requires site collection upgrade of the specified type;
+        otherwise, "false"
+
+        :param bool version_upgrade: If "true", version-to-version site collection upgrade is requested;
+            otherwise "false" for build-to-build site collection upgrade.
+        :param bool recursive: If "true", child upgradable objects will be inspected; otherwise "false".
+        """
+        return_type = ClientResult(self.context)
+        payload = {
+            "versionUpgrade": version_upgrade,
+            "recursive": recursive,
+        }
+        qry = ServiceOperationQuery(self, "NeedsUpgradeByType", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def join_hub_site(self, hub_site_id, approval_token=None, approval_correlation_id=None):
         """
         Associates a site with an existing hub site.
@@ -219,7 +256,7 @@ class Site(BaseEntity):
             "stopRedirect": stop_redirect,
             "webId": web_id
         }
-        qry = ServiceOperationQuery(context.site, "GetUrlById", None, payload, None, result)
+        qry = ServiceOperationQuery(context.site, "GetUrlByIdForWeb", None, payload, None, result)
         qry.static = True
         context.add_query(qry)
         return result
@@ -306,6 +343,19 @@ class Site(BaseEntity):
         Disables the hub site feature on a site.
         """
         qry = ServiceOperationQuery(self, "UnRegisterHubSite")
+        self.context.add_query(qry)
+        return self
+
+    def update_client_object_model_use_remote_apis_permission_setting(self, require_use_remote_apis):
+        """
+        Sets whether the client-side object model (CSOM) requests that are made in the context of any site inside
+        the site collection require UseRemoteAPIs permission.
+
+        :param bool require_use_remote_apis: Specifies whether the client-side object model (CSOM) requests that are
+            made in the context of any site inside the site collection require UseRemoteAPIs permission
+        """
+        payload = {"requireUseRemoteAPIs": require_use_remote_apis}
+        qry = ServiceOperationQuery(self, "UpdateClientObjectModelUseRemoteAPIsPermissionSetting", None, payload)
         self.context.add_query(qry)
         return self
 

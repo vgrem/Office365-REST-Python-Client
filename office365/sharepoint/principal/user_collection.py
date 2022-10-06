@@ -25,33 +25,44 @@ class UserCollection(BaseEntityCollection):
         return return_type
 
     def get_by_email(self, email):
-        """Retrieve User object by email
+        """
+        Returns the user with the specified e-mail address.
 
-        :type email: str
+        :param str email: A string that contains the e-mail address of the user.
         """
         return User(self.context, ServiceOperationPath("GetByEmail", [email], self.resource_path))
 
     def get_by_id(self, user_id):
-        """Retrieve User object by id"""
+        """
+        Returns the user with the specified member identifier.
+
+        :param int user_id: Specifies the member identifier.
+        """
         return User(self.context, ServiceOperationPath("GetById", [user_id], self.resource_path))
 
     def get_by_login_name(self, login_name):
-        """Retrieve User object by login name
+        """
+        Retrieve User object by login name
 
-        :type login_name: str
+        :param str login_name: A string that contains the login name of the user.
         """
         return User(self.context, ServiceOperationPath("GetByLoginName", [login_name], self.resource_path))
 
-    def remove_by_id(self, _id):
-        """Retrieve User object by id"""
-        qry = ServiceOperationQuery(self, "RemoveById", [_id])
+    def remove_by_id(self, user_id):
+        """
+        Retrieve User object by id
+
+        :param int user_id: Specifies the member identifier.
+        """
+        qry = ServiceOperationQuery(self, "RemoveById", [user_id])
         self.context.add_query(qry)
         return self
 
     def remove_by_login_name(self, login_name):
-        """Remove User object by login name
+        """
+        Remove User object by login name
 
-        :param str login_name:
+        :param str login_name: A string that contains the user name.
         """
         qry = ServiceOperationQuery(self, "RemoveByLoginName", [login_name])
         self.context.add_query(qry)
