@@ -1,6 +1,6 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.translation.user_resource import UserResource
 
 
 class NavigationNode(BaseEntity):
@@ -18,7 +18,10 @@ class NavigationNode(BaseEntity):
 
     @property
     def title(self):
-        """Gets a value that specifies the anchor text for the navigation node link."""
+        """Gets a value that specifies the anchor text for the navigation node link.
+
+        :rtype: str
+        """
         return self.properties.get('Title', None)
 
     @title.setter
@@ -28,7 +31,10 @@ class NavigationNode(BaseEntity):
 
     @property
     def url(self):
-        """Gets a value that specifies the URL stored with the navigation node."""
+        """Gets a value that specifies the URL stored with the navigation node.
+
+        :rtype: str
+        """
         return self.properties.get('Url', None)
 
     @url.setter
@@ -39,6 +45,7 @@ class NavigationNode(BaseEntity):
     @property
     def is_visible(self):
         """Gets a value that specifies the anchor text for the navigation node link.
+
         :rtype: bool or None
         """
         return self.properties.get('isVisible', None)
@@ -50,10 +57,31 @@ class NavigationNode(BaseEntity):
         """
         return self.properties.get('isExternal', None)
 
+    @property
+    def parent_collection(self):
+        """
+        :rtype: office365.sharepoint.navigation.node_collection.NavigationNodeCollection
+        """
+        return self._parent_collection
+
+    @property
+    def title_resource(self):
+        """Represents the title of this node."""
+        return self.properties.get('TitleResource',
+                                   UserResource(self.context, ResourcePath("TitleResource", self.resource_path)))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "TitleResource": self.title_resource
+            }
+            default_value = property_mapping.get(name, None)
+        return super(NavigationNode, self).get_property(name, default_value)
+
     def set_property(self, name, value, persist_changes=True):
         super(NavigationNode, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id":
-                self._resource_path = ServiceOperationPath("GetById", [value], self.parent_collection.resource_path)
+                self._resource_path = self.parent_collection.get_by_id(value).resource_path
         return self

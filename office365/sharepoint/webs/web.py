@@ -42,6 +42,7 @@ from office365.sharepoint.sharing.sharing_result import SharingResult
 from office365.sharepoint.sitescripts.utility import SiteScriptUtility
 from office365.sharepoint.marketplace.sitecollection.appcatalog.accessor import SiteCollectionCorporateCatalogAccessor
 from office365.sharepoint.marketplace.tenant.appcatalog.accessor import TenantCorporateCatalogAccessor
+from office365.sharepoint.translation.user_resource import UserResource
 from office365.sharepoint.ui.applicationpages.peoplepicker.web_service_interface import (
     ClientPeoplePickerWebServiceInterface
 )
@@ -1366,6 +1367,12 @@ class Web(SecurableObject):
                                                          ResourcePath("ContentTypes", self.resource_path), self))
 
     @property
+    def description_resource(self):
+        """A UserResource object that represents the description of this web."""
+        return self.properties.get('DescriptionResource',
+                                   UserResource(self.context, ResourcePath("DescriptionResource", self.resource_path)))
+
+    @property
     def role_definitions(self):
         """Gets the collection of role definitions for the Web site."""
         return self.properties.get("RoleDefinitions",
@@ -1602,6 +1609,12 @@ class Web(SecurableObject):
         """
         return self.properties.get("ServerRelativePath", SPResPath())
 
+    @property
+    def title_resource(self):
+        """A UserResource object that represents the title of this web."""
+        return self.properties.get('TitleResource',
+                                   UserResource(self.context, ResourcePath("TitleResource", self.resource_path)))
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
@@ -1614,6 +1627,7 @@ class Web(SecurableObject):
                 "ContentTypes": self.content_types,
                 "ClientWebParts": self.client_web_parts,
                 "CurrentUser": self.current_user,
+                "DescriptionResource": self.description_resource,
                 "EffectiveBasePermissions": self.effective_base_permissions,
                 "EventReceivers": self.event_receivers,
                 "ListTemplates": self.list_templates,
@@ -1629,6 +1643,7 @@ class Web(SecurableObject):
                 "SiteUsers": self.site_users,
                 "SiteUserInfoList": self.site_user_info_list,
                 "TenantAppCatalog": self.tenant_app_catalog,
+                "TitleResource": self.title_resource,
                 "UserCustomActions": self.user_custom_actions,
                 "WebInfos": self.web_infos,
                 "ThemeInfo": self.theme_info

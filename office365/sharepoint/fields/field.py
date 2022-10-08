@@ -1,7 +1,9 @@
 from office365.runtime.client_result import ClientResult
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.fields.type import FieldType
+from office365.sharepoint.translation.user_resource import UserResource
 
 
 class Field(BaseEntity):
@@ -66,12 +68,18 @@ class Field(BaseEntity):
         return field
 
     def enable_index(self):
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "enableIndex", None, None, None, result)
+        """
+
+        """
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "enableIndex", None, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def disable_index(self):
+        """
+
+        """
         result = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "disableIndex", None, None, None, result)
         self.context.add_query(qry)
@@ -118,6 +126,12 @@ class Field(BaseEntity):
         :rtype: str or None
         """
         return self.properties.get('DefaultFormula', None)
+
+    @property
+    def description_resource(self):
+        """Gets the resource object corresponding to the Description property for a field"""
+        return self.properties.get('DescriptionResource',
+                                   UserResource(self.context, ResourcePath("DescriptionResource", self.resource_path)))
 
     @property
     def schema_xml(self):
@@ -256,6 +270,12 @@ class Field(BaseEntity):
         return self.properties.get('TypeDisplayName', None)
 
     @property
+    def title_resource(self):
+        """Gets the resource object corresponding to the Title property for a field"""
+        return self.properties.get('TitleResource',
+                                   UserResource(self.context, ResourcePath("TitleResource", self.resource_path)))
+
+    @property
     def type_short_description(self):
         """
         Gets a value that specifies the description for the type of the field.
@@ -263,6 +283,15 @@ class Field(BaseEntity):
         :rtype: str or None
         """
         return self.properties.get('TypeShortDescription', None)
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "DescriptionResource": self.description_resource,
+                "TitleResource": self.title_resource
+            }
+            default_value = property_mapping.get(name, None)
+        return super(Field, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
         super(Field, self).set_property(name, value, persist_changes)

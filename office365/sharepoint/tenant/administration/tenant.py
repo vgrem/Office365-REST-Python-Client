@@ -5,6 +5,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.listitems.collection import ListItemCollection
 from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
 from office365.sharepoint.sites.home_sites_details import HomeSitesDetails
@@ -18,6 +19,7 @@ from office365.sharepoint.tenant.administration.site_properties import SitePrope
 from office365.sharepoint.tenant.administration.site_properties_collection import SitePropertiesCollection
 from office365.sharepoint.tenant.administration.sitePropertiesEnumerableFilter import SitePropertiesEnumerableFilter
 from office365.sharepoint.tenant.administration.spo_operation import SpoOperation
+from office365.sharepoint.tenant.administration.top_files_sharing_insights import TopFilesSharingInsights
 
 
 class Tenant(BaseEntity):
@@ -26,6 +28,16 @@ class Tenant(BaseEntity):
     def __init__(self, context):
         static_path = ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant")
         super(Tenant, self).__init__(context, static_path)
+
+    def get_top_files_sharing_insights(self, query_mode=None):
+        """
+        :param int query_mode:
+        """
+        payload = {"queryMode": query_mode}
+        return_type = BaseEntityCollection(self.context, TopFilesSharingInsights)
+        qry = ServiceOperationQuery(self, "GetTopFilesSharingInsights", payload, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def get_site_thumbnail_logo(self, site_url):
         """
@@ -49,6 +61,12 @@ class Tenant(BaseEntity):
         self.context.add_query(qry)
         return return_type
 
+    def has_valid_education_license(self):
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "HasValidEducationLicense", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def export_to_csv(self, view_xml=None):
         result = ClientResult(self.context)
         payload = {
@@ -68,6 +86,9 @@ class Tenant(BaseEntity):
         return Tenant(admin_client)
 
     def get_lock_state_by_id(self, site_id):
+        """
+        :param str site_id:
+        """
         return self.sites.get_lock_state_by_id(site_id)
 
     def hub_sites(self, site_url):

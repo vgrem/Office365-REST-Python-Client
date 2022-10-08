@@ -11,7 +11,7 @@ class DocumentCrawlLog(BaseEntity):
 
     def __init__(self, context):
         static_path = ResourcePath("Microsoft.SharePoint.Client.Search.Administration.DocumentCrawlLog")
-        super(DocumentCrawlLog, self).__init__(context,static_path)
+        super(DocumentCrawlLog, self).__init__(context, static_path)
 
     def get_crawled_urls(self, get_count_only=False):
         """
@@ -19,13 +19,13 @@ class DocumentCrawlLog(BaseEntity):
 
         :type get_count_only: bool
         """
-        result = ClientResult(self.context, SimpleDataTable())
+        return_type = ClientResult(self.context, SimpleDataTable())
         payload = {
             "getCountOnly": get_count_only
         }
-        qry = ServiceOperationQuery(self, "GetCrawledUrls", None, payload, None, result)
+        qry = ServiceOperationQuery(self, "GetCrawledUrls", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     @property
     def entity_type_name(self):

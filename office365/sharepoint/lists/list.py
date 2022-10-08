@@ -28,7 +28,7 @@ from office365.sharepoint.pages.wiki_page_creation_information import WikiPageCr
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.sitescripts.utility import SiteScriptUtility
-from office365.sharepoint.types.user_resource import UserResource
+from office365.sharepoint.translation.user_resource import UserResource
 from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
 from office365.sharepoint.views.view import View
 from office365.sharepoint.views.collection import ViewCollection

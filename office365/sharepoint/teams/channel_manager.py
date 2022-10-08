@@ -35,12 +35,11 @@ class TeamChannelManager(BaseEntity):
         :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
         :param bool ignore_validation:
         """
-        manager = TeamChannelManager(context)
         payload = {
             "ignoreValidation": ignore_validation,
         }
         return_type = TeamSiteData(context)
-        qry = ServiceOperationQuery(manager, "GetTeamSiteData", None, payload, None, return_type)
+        qry = ServiceOperationQuery(TeamChannelManager(context), "GetTeamSiteData", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
         return return_type

@@ -14,6 +14,7 @@ from office365.sharepoint.principal.user import User
 from office365.sharepoint.recyclebin.item_collection import RecycleBinItemCollection
 from office365.sharepoint.sitehealth.summary import SiteHealthSummary
 from office365.sharepoint.sites.sph_site import SPHSite
+from office365.sharepoint.sites.upgrade_info import UpgradeInfo
 from office365.sharepoint.sites.usage_info import UsageInfo
 from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
 from office365.sharepoint.webs.web import Web
@@ -550,6 +551,11 @@ class Site(BaseEntity):
         return self.properties.get("UsageInfo", UsageInfo())
 
     @property
+    def upgrade_info(self):
+        """Specifies the upgrade information of this site collection."""
+        return self.properties.get("UpgradeInfo", UpgradeInfo())
+
+    @property
     def user_custom_actions(self):
         """Gets the User Custom Actions that are associated with the site."""
         return self.properties.get('UserCustomActions',
@@ -565,6 +571,7 @@ class Site(BaseEntity):
                 "RootWeb": self.root_web,
                 "SecondaryContact": self.secondary_contact,
                 "UsageInfo": self.usage_info,
+                "UpgradeInfo": self.upgrade_info,
                 "UserCustomActions": self.user_custom_actions
             }
             default_value = property_mapping.get(name, None)

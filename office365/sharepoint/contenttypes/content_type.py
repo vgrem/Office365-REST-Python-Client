@@ -4,6 +4,7 @@ from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.contenttypes.field_link_collection import FieldLinkCollection
 from office365.sharepoint.fields.collection import FieldCollection
+from office365.sharepoint.translation.user_resource import UserResource
 
 
 class ContentType(BaseEntity):
@@ -83,6 +84,12 @@ class ContentType(BaseEntity):
         self.set_property("Description", value)
 
     @property
+    def description_resource(self):
+        """Gets the SP.UserResource object (section 3.2.5.333) for the description of this content type"""
+        return self.properties.get('DescriptionResource',
+                                   UserResource(self.context, ResourcePath("DescriptionResource", self.resource_path)))
+
+    @property
     def group(self):
         """Gets the group of the content type.
 
@@ -97,6 +104,12 @@ class ContentType(BaseEntity):
         :type value: str
         """
         self.set_property("Group", value)
+
+    @property
+    def name_resource(self):
+        """Specifies the SP.UserResource object for the name of this content type"""
+        return self.properties.get('NameResource',
+                                   UserResource(self.context, ResourcePath("NameResource", self.resource_path)))
 
     @property
     def schema_xml(self):
@@ -125,8 +138,13 @@ class ContentType(BaseEntity):
                                    FieldLinkCollection(self.context, ResourcePath("FieldLinks", self.resource_path)))
 
     def get_property(self, name, default_value=None):
-        if name == "FieldLinks":
-            default_value = self.field_links
+        if default_value is None:
+            property_mapping = {
+                "DescriptionResource": self.description_resource,
+                "FieldLinks": self.field_links,
+                "NameResource": self.name_resource
+            }
+            default_value = property_mapping.get(name, None)
         return super(ContentType, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
