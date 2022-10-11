@@ -57,8 +57,6 @@ class PersonProperties(BaseEntity):
         """
         The ExtendedManagers property specifies an array of strings that specify the account names of
         a person's managers.
-
-        :rtype: StringCollection
         """
         return self.properties.get('ExtendedManagers', StringCollection())
 
@@ -67,8 +65,6 @@ class PersonProperties(BaseEntity):
         """
         The ExtendedReports properties specifies an array of strings that specify the account names of
         person's extended reports.
-
-        :rtype: StringCollection
         """
         return self.properties.get('ExtendedReports', StringCollection())
 
@@ -89,6 +85,10 @@ class PersonProperties(BaseEntity):
         :rtype: str or None
         """
         return self.properties.get('UserUrl', None)
+
+    @property
+    def entity_type_name(self):
+        return "SP.UserProfiles.PersonProperties"
 
     def get_property(self, name, default_value=None):
         if default_value is None:

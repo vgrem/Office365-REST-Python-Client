@@ -60,8 +60,8 @@ class TestUserProfile(TestCase):
         self.assertGreaterEqual(len(col), 0)
 
     def test_10_get_trending_tags(self):
-        col = PeopleManager.get_trending_tags(self.my_client).execute_query()
-        self.assertGreaterEqual(len(col), 0)
+        result = PeopleManager.get_trending_tags(self.my_client).execute_query()
+        self.assertGreaterEqual(len(result.items), 0)
 
     def test_11_get_user_Profile_properties(self):
         user_props = self.my_client.web.current_user.get_user_profile_properties().get().execute_query()

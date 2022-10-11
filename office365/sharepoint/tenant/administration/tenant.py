@@ -17,7 +17,7 @@ from office365.sharepoint.tenant.administration.secondary_administrators_info im
 from office365.sharepoint.tenant.administration.site_creation_properties import SiteCreationProperties
 from office365.sharepoint.tenant.administration.site_properties import SiteProperties
 from office365.sharepoint.tenant.administration.site_properties_collection import SitePropertiesCollection
-from office365.sharepoint.tenant.administration.sitePropertiesEnumerableFilter import SitePropertiesEnumerableFilter
+from office365.sharepoint.tenant.administration.site_properties_enumerable_filter import SitePropertiesEnumerableFilter
 from office365.sharepoint.tenant.administration.spo_operation import SpoOperation
 from office365.sharepoint.tenant.administration.top_files_sharing_insights import TopFilesSharingInsights
 

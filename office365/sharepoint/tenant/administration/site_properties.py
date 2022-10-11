@@ -1,4 +1,5 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.internal.paths.entity import EntityPath
 from office365.sharepoint.sites.site import Site
@@ -8,6 +9,18 @@ from office365.sharepoint.tenant.administration.deny_add_and_customize_pages_sta
 
 class SiteProperties(BaseEntity):
     """Contains a property bag of information about a site."""
+
+    @staticmethod
+    def clear_sharing_lock_down(context, site_url):
+        """
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint client service
+        :param str site_url:
+        """
+        payload = {"siteUrl": site_url}
+        binding_type = SiteProperties(context)
+        qry = ServiceOperationQuery(binding_type, "ClearSharingLockDown", None, payload, None, None, True)
+        context.add_query(qry)
+        return binding_type
 
     def update(self):
         """Updates the site collection properties with the new properties specified in the SiteProperties object."""

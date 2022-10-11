@@ -8,12 +8,13 @@ T = TypeVar('T', bound='ClientObjectCollection')
 
 class ClientObjectCollection(ClientObject):
 
-    def __init__(self, context, item_type, resource_path=None):
+    def __init__(self, context, item_type, resource_path=None, parent=None):
         """A collection container which represents a named collections of objects
 
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         :type item_type: type[ClientObject]
         :type resource_path: office365.runtime.paths.resource_path.ResourcePath
+        :type parent: ClientObject or None
         """
         super(ClientObjectCollection, self).__init__(context, resource_path)
         self._data = []  # type: list[ClientObject]
@@ -22,6 +23,7 @@ class ClientObjectCollection(ClientObject):
         self._paged_mode = False
         self._current_pos = None
         self._next_request_url = None
+        self._parent = parent
 
     def clear(self):
         if not self._paged_mode:
@@ -201,6 +203,10 @@ class ClientObjectCollection(ClientObject):
 
         self.context.load(self, before_loaded=_construct_next_query, after_loaded=after_loaded)
         return self
+
+    @property
+    def parent(self):
+        return self._parent
 
     @property
     def has_next(self):

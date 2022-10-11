@@ -15,7 +15,7 @@ from office365.sharepoint.views.view import View
 from office365.sharepoint.views.create_information import ViewCreationInformation
 
 
-class TestSPView(SPTestCase):
+class TestView(SPTestCase):
     target_list = None  # type: List
     target_view = None  # type: View
     target_field = None  # type: Field
@@ -23,7 +23,7 @@ class TestSPView(SPTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestSPView, cls).setUpClass()
+        super(TestView, cls).setUpClass()
         cls.target_list = cls.ensure_list(cls.client.web,
                                           ListCreationInformation("Tasks",
                                                                   None,

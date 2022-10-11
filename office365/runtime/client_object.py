@@ -48,6 +48,9 @@ class ClientObject(object):
                             timeout_secs=5,
                             success_callback=None,
                             failure_callback=None):
+        """
+        Executes the current set of data retrieval queries and method invocations and retries it if needed.
+        """
         self.context.execute_query_retry(max_retry=max_retry,
                                          timeout_secs=timeout_secs,
                                          success_callback=success_callback,
@@ -55,6 +58,7 @@ class ClientObject(object):
         return self
 
     def build_request(self):
+        """Builds a request"""
         return self.context.pending_request().current_query.build_request()
 
     def get(self):

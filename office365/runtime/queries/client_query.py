@@ -21,6 +21,7 @@ class ClientQuery(object):
         self._return_type = return_type
 
     def build_request(self):
+        """Builds a request"""
         return self.context.build_request(self)
 
     def execute_query(self):

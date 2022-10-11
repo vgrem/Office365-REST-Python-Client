@@ -195,6 +195,8 @@
             <Member Name="viewer" Value="2"/>
             <Member Name="externalGuest" Value="3"/>
             <Member Name="unknownFutureValue" Value="4"/>
+            <Member Name="scheduler" Value="5"/>
+            <Member Name="teamMember" Value="6"/>
          </EnumType>
          <EnumType Name="dayOfWeek">
             <Member Name="sunday" Value="0"/>
@@ -4410,6 +4412,7 @@
             <Property Name="managedDeviceName" Type="Edm.String"/>
             <Property Name="managedDeviceOwnerType" Type="graph.managedDeviceOwnerType" Nullable="false"/>
             <Property Name="managementAgent" Type="graph.managementAgentType" Nullable="false"/>
+            <Property Name="managementCertificateExpirationDate" Type="Edm.DateTimeOffset" Nullable="false"/>
             <Property Name="manufacturer" Type="Edm.String"/>
             <Property Name="meid" Type="Edm.String"/>
             <Property Name="model" Type="Edm.String"/>
@@ -4421,6 +4424,7 @@
             <Property Name="physicalMemoryInBytes" Type="Edm.Int64" Nullable="false"/>
             <Property Name="remoteAssistanceSessionErrorDetails" Type="Edm.String"/>
             <Property Name="remoteAssistanceSessionUrl" Type="Edm.String"/>
+            <Property Name="requireUserEnrollmentApproval" Type="Edm.Boolean"/>
             <Property Name="serialNumber" Type="Edm.String"/>
             <Property Name="subscriberCarrier" Type="Edm.String"/>
             <Property Name="totalStorageSpaceInBytes" Type="Edm.Int64" Nullable="false"/>
@@ -4432,6 +4436,7 @@
             <NavigationProperty Name="deviceCompliancePolicyStates" Type="Collection(graph.deviceCompliancePolicyState)" ContainsTarget="true"/>
             <NavigationProperty Name="deviceConfigurationStates" Type="Collection(graph.deviceConfigurationState)" ContainsTarget="true"/>
             <NavigationProperty Name="deviceCategory" Type="graph.deviceCategory" ContainsTarget="true"/>
+            <NavigationProperty Name="users" Type="Collection(graph.user)"/>
          </EntityType>
          <EntityType Name="managedAppRegistration" BaseType="graph.entity" Abstract="true">
             <Property Name="appIdentifier" Type="graph.mobileAppIdentifier"/>
@@ -5140,6 +5145,7 @@
          </ComplexType>
          <EntityType Name="bookingAppointment" BaseType="graph.entity">
             <Property Name="additionalInformation" Type="Edm.String"/>
+            <Property Name="anonymousJoinWebUrl" Type="Edm.String"/>
             <Property Name="customers" Type="Collection(graph.bookingCustomerInformationBase)" Nullable="false"/>
             <Property Name="customerTimeZone" Type="Edm.String"/>
             <Property Name="duration" Type="Edm.Duration" Nullable="false"/>
@@ -5171,6 +5177,7 @@
             <Property Name="displayName" Type="Edm.String" Nullable="false"/>
             <Property Name="email" Type="Edm.String"/>
             <Property Name="isPublished" Type="Edm.Boolean"/>
+            <Property Name="languageTag" Type="Edm.String"/>
             <Property Name="phone" Type="Edm.String"/>
             <Property Name="publicUrl" Type="Edm.String"/>
             <Property Name="schedulingPolicy" Type="graph.bookingSchedulingPolicy"/>
@@ -5198,8 +5205,10 @@
             <Property Name="defaultReminders" Type="Collection(graph.bookingReminder)"/>
             <Property Name="description" Type="Edm.String"/>
             <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="isAnonymousJoinEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="isHiddenFromCustomers" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="isLocationOnline" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="languageTag" Type="Edm.String" Nullable="false"/>
             <Property Name="maximumAttendeesCount" Type="Edm.Int32" Nullable="false"/>
             <Property Name="notes" Type="Edm.String"/>
             <Property Name="postBuffer" Type="Edm.Duration" Nullable="false"/>
@@ -5223,6 +5232,7 @@
             <Property Name="availabilityIsAffectedByPersonalCalendar" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="displayName" Type="Edm.String" Nullable="false"/>
             <Property Name="emailAddress" Type="Edm.String"/>
+            <Property Name="isEmailNotificationEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="role" Type="graph.bookingStaffRole" Nullable="false"/>
             <Property Name="timeZone" Type="Edm.String"/>
             <Property Name="useBusinessHours" Type="Edm.Boolean" Nullable="false"/>
@@ -8407,6 +8417,12 @@
             <Property Name="v4_4" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="v5_0" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="v5_1" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="v6_0" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="v7_0" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="v7_1" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="v8_0" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="v8_1" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="v9_0" Type="Edm.Boolean" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="appConfigurationSettingItem">
             <Property Name="appConfigKey" Type="Edm.String" Nullable="false"/>
@@ -9195,6 +9211,8 @@
             <Property Name="appleIdentifier" Type="Edm.String"/>
             <Property Name="certificate" Type="Edm.String"/>
             <Property Name="certificateSerialNumber" Type="Edm.String"/>
+            <Property Name="certificateUploadFailureReason" Type="Edm.String"/>
+            <Property Name="certificateUploadStatus" Type="Edm.String"/>
             <Property Name="expirationDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
             <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
             <Property Name="topicIdentifier" Type="Edm.String"/>
@@ -10568,7 +10586,13 @@
             <Property Name="verticalAccuracy" Type="Edm.Double" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="deviceOperatingSystemSummary">
+            <Property Name="androidCorporateWorkProfileCount" Type="Edm.Int32" Nullable="false"/>
             <Property Name="androidCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="androidDedicatedCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="androidDeviceAdminCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="androidFullyManagedCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="androidWorkProfileCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="configMgrDeviceCount" Type="Edm.Int32" Nullable="false"/>
             <Property Name="iosCount" Type="Edm.Int32" Nullable="false"/>
             <Property Name="macOSCount" Type="Edm.Int32" Nullable="false"/>
             <Property Name="unknownCount" Type="Edm.Int32" Nullable="false"/>
@@ -16485,6 +16509,26 @@
             <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
             <ReturnType Type="Edm.Stream" Nullable="false"/>
          </Function>
+         <Function Name="getM365AppPlatformUserCounts" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getM365AppUserCounts" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getM365AppUserDetail" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getM365AppUserDetail" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
          <Function Name="getMailboxUsageDetail" IsBound="true">
             <Parameter Name="reportRoot" Type="graph.reportRoot"/>
             <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
@@ -17582,6 +17626,16 @@
             </Parameter>
             <ReturnType Type="Edm.Boolean" Nullable="false"/>
          </Function>
+         <Action Name="sendActivityNotificationToRecipients" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.teamwork"/>
+            <Parameter Name="topic" Type="graph.teamworkActivityTopic"/>
+            <Parameter Name="activityType" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="chainId" Type="Edm.Int64"/>
+            <Parameter Name="previewText" Type="graph.itemBody"/>
+            <Parameter Name="teamsAppId" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="templateParameters" Type="Collection(graph.keyValuePair)"/>
+            <Parameter Name="recipients" Type="Collection(graph.teamworkNotificationRecipient)"/>
+         </Action>
          <Action Name="upgrade" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.teamsAppInstallation"/>
          </Action>
@@ -20886,6 +20940,9 @@
          <Annotations Target="microsoft.graph.bookingAppointment">
             <Annotation Term="Org.OData.Core.V1.Description" String="Represents a booked appointment of a service by a customer in a business."/>
          </Annotations>
+         <Annotations Target="microsoft.graph.bookingAppointment/anonymousJoinWebUrl">
+            <Annotation Term="Org.OData.Core.V1.IsURL" Bool="true"/>
+         </Annotations>
          <Annotations Target="microsoft.graph.bookingAppointment/duration">
             <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
          </Annotations>
@@ -22511,6 +22568,24 @@
          </Annotations>
          <Annotations Target="microsoft.graph.androidMinimumOperatingSystem/v5_1">
             <Annotation Term="Org.OData.Core.V1.Description" String="Version 5.1 or later."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.androidMinimumOperatingSystem/v6_0">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Version 6.0 or later."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.androidMinimumOperatingSystem/v7_0">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Version 7.0 or later."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.androidMinimumOperatingSystem/v7_1">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Version 7.1 or later."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.androidMinimumOperatingSystem/v8_0">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Version 8.0 or later."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.androidMinimumOperatingSystem/v8_1">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Version 8.1 or later."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.androidMinimumOperatingSystem/v9_0">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Version 9.0 or later."/>
          </Annotations>
          <Annotations Target="microsoft.graph.appConfigurationSettingItem">
             <Annotation Term="Org.OData.Core.V1.Description" String="Contains properties for App configuration setting item."/>
@@ -25972,6 +26047,13 @@
                <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
             </Annotation>
          </Annotations>
+         <Annotations Target="microsoft.graph.managedDevice/managementCertificateExpirationDate">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Reports device management certificate expiration date. This property is read-only."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
+         </Annotations>
          <Annotations Target="microsoft.graph.managedDevice/manufacturer">
             <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
             <Annotation Term="Org.OData.Core.V1.Description" String="Manufacturer of the device. This property is read-only."/>
@@ -26045,6 +26127,13 @@
                <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
             </Annotation>
          </Annotations>
+         <Annotations Target="microsoft.graph.managedDevice/requireUserEnrollmentApproval">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Reports if the managed iOS device is user approval enrollment. This property is read-only."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
+         </Annotations>
          <Annotations Target="microsoft.graph.managedDevice/serialNumber">
             <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
             <Annotation Term="Org.OData.Core.V1.Description" String="SerialNumber. This property is read-only."/>
@@ -26103,6 +26192,9 @@
          </Annotations>
          <Annotations Target="microsoft.graph.managedDevice/deviceCategory">
             <Annotation Term="Org.OData.Core.V1.Description" String="Device category"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.managedDevice/users">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The primary users associated with the managed device."/>
          </Annotations>
          <Annotations Target="microsoft.graph.reportRoot">
             <Annotation Term="Org.OData.Core.V1.Description" String="The resource that represents an instance of Enrollment Failure Reports."/>
@@ -28043,8 +28135,26 @@
          <Annotations Target="microsoft.graph.deviceOperatingSystemSummary">
             <Annotation Term="Org.OData.Core.V1.Description" String="Device operating system summary."/>
          </Annotations>
+         <Annotations Target="microsoft.graph.deviceOperatingSystemSummary/androidCorporateWorkProfileCount">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The count of Corporate work profile Android devices. Also known as Corporate Owned Personally Enabled (COPE). Valid values -1 to 2147483647"/>
+         </Annotations>
          <Annotations Target="microsoft.graph.deviceOperatingSystemSummary/androidCount">
             <Annotation Term="Org.OData.Core.V1.Description" String="Number of android device count."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceOperatingSystemSummary/androidDedicatedCount">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Number of dedicated Android devices."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceOperatingSystemSummary/androidDeviceAdminCount">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Number of device admin Android devices."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceOperatingSystemSummary/androidFullyManagedCount">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Number of fully managed Android devices."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceOperatingSystemSummary/androidWorkProfileCount">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Number of work profile Android devices."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceOperatingSystemSummary/configMgrDeviceCount">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Number of ConfigMgr managed devices."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceOperatingSystemSummary/iosCount">
             <Annotation Term="Org.OData.Core.V1.Description" String="Number of iOS device count."/>
@@ -28095,6 +28205,12 @@
                <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
             </Annotation>
          </Annotations>
+         <Annotations Target="microsoft.graph.applePushNotificationCertificate/certificateUploadFailureReason">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The reason the certificate upload failed."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.applePushNotificationCertificate/certificateUploadStatus">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The certificate upload status."/>
+         </Annotations>
          <Annotations Target="microsoft.graph.applePushNotificationCertificate/expirationDateTime">
             <Annotation Term="Org.OData.Core.V1.Description" String="The expiration date and time for Apple push notification certificate."/>
          </Annotations>
@@ -28144,13 +28260,13 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device performance entity contains device boot performance details."/>
          </Annotations>
          <Annotations Target="microsoft.graph.userExperienceAnalyticsDevicePerformance/averageBlueScreens">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Average (mean) number of Blue Screens per device in the last 14 days. Valid values 0 to 9999999"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Average (mean) number of Blue Screens per device in the last 30 days. Valid values 0 to 9999999"/>
          </Annotations>
          <Annotations Target="microsoft.graph.userExperienceAnalyticsDevicePerformance/averageRestarts">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Average (mean) number of Restarts per device in the last 14 days. Valid values 0 to 9999999"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Average (mean) number of Restarts per device in the last 30 days. Valid values 0 to 9999999"/>
          </Annotations>
          <Annotations Target="microsoft.graph.userExperienceAnalyticsDevicePerformance/blueScreenCount">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Number of Blue Screens in the last 14 days. Valid values 0 to 9999999"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Number of Blue Screens in the last 30 days. Valid values 0 to 9999999"/>
          </Annotations>
          <Annotations Target="microsoft.graph.userExperienceAnalyticsDevicePerformance/bootScore">
             <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device boot score."/>
@@ -28198,7 +28314,7 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics responsive desktop time in milliseconds."/>
          </Annotations>
          <Annotations Target="microsoft.graph.userExperienceAnalyticsDevicePerformance/restartCount">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Number of Restarts in the last 14 days. Valid values 0 to 9999999"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Number of Restarts in the last 30 days. Valid values 0 to 9999999"/>
          </Annotations>
          <Annotations Target="microsoft.graph.userExperienceAnalyticsDevicePerformance/startupPerformanceScore">
             <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device startup performance score. Valid values -1.79769313486232E+308 to 1.79769313486232E+308"/>

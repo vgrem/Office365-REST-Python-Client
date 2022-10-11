@@ -1,10 +1,10 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.listitems.caml.query import CamlQuery
+from office365.sharepoint.listitems.collection import ListItemCollection
 from office365.sharepoint.views.field_collection import ViewFieldCollection
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 from office365.sharepoint.views.visualization import Visualization
@@ -21,28 +21,24 @@ class View(BaseEntity):
         self._parent_list = parent_list
 
     def get_items(self):
-        """Get list items per a view
-
-        :rtype: office365.sharepoint.listitems.collection.ListItemCollection
-        """
+        """Get list items per a view"""
+        return_type = ListItemCollection(self.context, self.parent_list.items.resource_path)
 
         def _get_items_inner():
             caml_query = CamlQuery.parse(self.view_query)
-            qry = ServiceOperationQuery(self._parent_list, "GetItems", None, caml_query, "query",
-                                        self._parent_list.items)
+            qry = ServiceOperationQuery(self.parent_list, "GetItems", None, caml_query, "query", return_type)
             self.context.add_query(qry)
-
-        self.ensure_property("viewQuery", _get_items_inner)
-        return self._parent_list.items
+        self.ensure_property("ViewQuery", _get_items_inner)
+        return return_type
 
     def render_as_html(self):
         """
         Returns the list view as HTML.
         """
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "RenderAsHtml", None, None, None, result)
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "RenderAsHtml", None, None, None, return_type)
         self.context.add_query(qry)
-        return qry
+        return return_type
 
     def set_view_xml(self, view_xml):
         """
@@ -53,6 +49,18 @@ class View(BaseEntity):
         qry = ServiceOperationQuery(self, "SetViewXml", None, {"viewXml": view_xml})
         self.context.add_query(qry)
         return self
+
+    @property
+    def parent_list(self):
+        """Returns parent List"""
+        return self._parent_list
+
+    @property
+    def parent_collection(self):
+        """
+        :rtype: office365.sharepoint.views.collection.ViewCollection
+        """
+        return self._parent_collection
 
     @property
     def js_link(self):
@@ -140,15 +148,9 @@ class View(BaseEntity):
         return super(View, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
-        """
-        :type name: str
-        :type value: any
-        :type persist_changes: bool
-        """
         super(View, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id":
-                self._resource_path = ServiceOperationPath(
-                    "GetById", [value], self._parent_collection.resource_path)
+                self._resource_path = self.parent_collection.get_by_id(value).resource_path
         return self

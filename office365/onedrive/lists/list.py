@@ -44,7 +44,7 @@ class List(BaseItem):
         """The collection of columns under this site."""
         return self.properties.get('columns',
                                    ColumnDefinitionCollection(self.context,
-                                                              ResourcePath("columns", self.resource_path)))
+                                                              ResourcePath("columns", self.resource_path), self))
 
     @property
     def content_types(self):
