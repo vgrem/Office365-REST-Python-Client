@@ -4,5 +4,5 @@ from tests import test_client_credentials, test_admin_site_url
 
 admin_client = ClientContext(test_admin_site_url).with_credentials(test_client_credentials)
 tenant = Tenant(admin_client)
-result = tenant.get_top_files_sharing_insights(1).execute_query()
+result = tenant.render_recent_admin_actions().execute_query()
 print(result)

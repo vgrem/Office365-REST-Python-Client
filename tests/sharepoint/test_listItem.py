@@ -136,8 +136,9 @@ class TestSharePointListItem(SPTestCase):
         # would ignore all other previously set query params (like top(2))
 
         items = self.target_list.items.top(2)
-        qry = self.client.load(items, ["Id", "AttachmentFiles"])
-        self.assertEqual(qry.url, items.resource_url + "?$select=Id,AttachmentFiles&$expand=AttachmentFiles&$top=2")
+        self.client.load(items, ["Id", "AttachmentFiles"])
+        self.assertEqual(self.client.pending_request().current_query.url,
+                         items.resource_url + "?$select=Id,AttachmentFiles&$expand=AttachmentFiles&$top=2")
         self.client.execute_query()
         self.assertLessEqual(len(items), 2)
 

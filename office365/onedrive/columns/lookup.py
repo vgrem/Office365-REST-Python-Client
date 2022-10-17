@@ -12,7 +12,9 @@ class LookupColumn(ClientValue):
         :param str list_id: The unique identifier of the lookup source list.
         :param str column_name: The name of the lookup source column.
         :param bool allow_multiple_values: Indicates whether multiple values can be selected from the source.
-        :param str primary_lookup_column_id:
+        :param str primary_lookup_column_id: If specified, this column is a secondary lookup, pulling an additional
+            field from the list item looked up by the primary lookup. Use the list item looked up by the primary
+            as the source for the column named here.
         """
         self.listId = list_id
         self.columnName = column_name

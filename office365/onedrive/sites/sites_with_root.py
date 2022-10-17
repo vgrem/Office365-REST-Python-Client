@@ -28,7 +28,6 @@ class SitesWithRoot(EntityCollection):
         :type sites: SitesWithRoot
         """
         return_type = SitesWithRoot(self.context, self.resource_path)
-
         payload = {
             "value": sites,
         }

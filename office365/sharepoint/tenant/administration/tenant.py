@@ -7,9 +7,12 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.listitems.collection import ListItemCollection
+from office365.sharepoint.lists.render_data_parameters import RenderListDataParameters
+from office365.sharepoint.lists.render_override_parameters import RenderListDataOverrideParameters
 from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
 from office365.sharepoint.sites.home_sites_details import HomeSitesDetails
 from office365.sharepoint.sites.site import Site
+from office365.sharepoint.tenant.administration.collaboration.insights_data import CollaborationInsightsData
 from office365.sharepoint.tenant.administration.hubsites.properties import HubSiteProperties
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
     SecondaryAdministratorsFieldsData
@@ -28,6 +31,22 @@ class Tenant(BaseEntity):
     def __init__(self, context):
         static_path = ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant")
         super(Tenant, self).__init__(context, static_path)
+
+    def get_collaboration_insights_data(self):
+        return_type = ClientResult(self.context, CollaborationInsightsData())
+        qry = ServiceOperationQuery(self, "GetCollaborationInsightsData", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def render_recent_admin_actions(self):
+        return_type = ClientResult(self.context)
+        payload = {
+            "parameters": RenderListDataParameters(),
+            "overrideParameters": RenderListDataOverrideParameters()
+        }
+        qry = ServiceOperationQuery(self, "RenderRecentAdminActions", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def get_top_files_sharing_insights(self, query_mode=None):
         """
@@ -68,6 +87,9 @@ class Tenant(BaseEntity):
         return return_type
 
     def export_to_csv(self, view_xml=None):
+        """
+        :param str view_xml:
+        """
         result = ClientResult(self.context)
         payload = {
             "viewXml": view_xml
@@ -75,6 +97,16 @@ class Tenant(BaseEntity):
         qry = ServiceOperationQuery(self, "ExportToCSV", None, payload, None, result)
         self.context.add_query(qry)
         return result
+
+    def render_policy_report(self):
+        return_type = ClientResult(self.context)
+        payload = {
+            "parameters": RenderListDataParameters(),
+            "overrideParameters": RenderListDataOverrideParameters()
+        }
+        qry = ServiceOperationQuery(self, "RenderPolicyReport", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     @staticmethod
     def from_url(admin_site_url):

@@ -105,7 +105,7 @@ class TestSharePointClient(TestCase):
         files_after = list_pages.root_folder.files
         client.load(files_after)
         client.execute_batch()
-        self.assertTrue(len(files_after), files_count_before)
+        self.assertEqual(len(files_after), files_count_before)
 
     def test_14_get_entity_type_name(self):
         guid_coll = GuidCollection()

@@ -1,20 +1,20 @@
 from office365.base_item import BaseItem
 from office365.entity_collection import EntityCollection
 from office365.onedrive.analytics.item_activity_stat import ItemActivityStat
-from office365.onedrive.columns.definition import ColumnDefinition
+from office365.onedrive.analytics.item_analytics import ItemAnalytics
+from office365.onedrive.columns.definition_collection import ColumnDefinitionCollection
 from office365.onedrive.contenttypes.collection import ContentTypeCollection
 from office365.onedrive.drives.drive import Drive
-from office365.onedrive.analytics.item_analytics import ItemAnalytics
-from office365.onedrive.lists.collection import ListCollection
 from office365.onedrive.listitems.list_item import ListItem
+from office365.onedrive.lists.collection import ListCollection
 from office365.onedrive.permissions.permission import Permission
 from office365.onedrive.sharepoint_ids import SharePointIds
 from office365.onedrive.sites.site_collection import SiteCollection
 from office365.onedrive.termstore.store import Store
 from office365.onenote.onenote import Onenote
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class Site(BaseItem):
@@ -107,15 +107,16 @@ class Site(BaseItem):
     def columns(self):
         """The collection of columns under this site."""
         return self.properties.get('columns',
-                                   EntityCollection(self.context, ColumnDefinition,
-                                                    ResourcePath("columns", self.resource_path)))
+                                   ColumnDefinitionCollection(self.context,
+                                                              ResourcePath("columns", self.resource_path), self))
 
     @property
     def external_columns(self):
         """The collection of columns under this site."""
         return self.properties.get('externalColumns',
-                                   EntityCollection(self.context, ColumnDefinition,
-                                                    ResourcePath("externalColumns", self.resource_path)))
+                                   ColumnDefinitionCollection(self.context,
+                                                              ResourcePath("externalColumns", self.resource_path),
+                                                              self))
 
     @property
     def content_types(self):

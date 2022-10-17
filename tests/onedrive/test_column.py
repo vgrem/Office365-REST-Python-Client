@@ -5,7 +5,7 @@ from tests.graph_case import GraphTestCase
 
 
 class TestColumn(GraphTestCase):
-    target_columns = []  # type: list[ColumnDefinition]
+    list_columns = []  # type: list[ColumnDefinition]
 
     @classmethod
     def setUpClass(cls):
@@ -20,16 +20,16 @@ class TestColumn(GraphTestCase):
         column_name = create_unique_name("TextColumn")
         column = self.doclib.columns.add_text(column_name).execute_query()
         self.assertIsNotNone(column.resource_path)
-        self.__class__.target_columns.append(column)
+        self.__class__.list_columns.append(column)
 
     def test3_create_lookup_column(self):
         column_name = create_unique_name("LookupColumn")
-        column = self.doclib.columns.add_lookup(column_name).execute_query()
+        column = self.doclib.columns.add_lookup(column_name, self.doclib).execute_query()
         self.assertIsNotNone(column.resource_path)
-        self.__class__.target_columns.append(column)
+        self.__class__.list_columns.append(column)
 
-    def test3_delete_columns(self):
-        for col_to_del in self.__class__.target_columns:
+    def test3_delete_list_columns(self):
+        for col_to_del in self.__class__.list_columns:
             col_to_del.delete_object().execute_query()
 
 

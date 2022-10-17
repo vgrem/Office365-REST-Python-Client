@@ -80,15 +80,14 @@ class ClientRuntimeContext(object):
             def _action():
                 after_loaded(client_object)
             self.after_query_execute(qry, _action)
-        return qry
+        return self
 
     def before_execute(self, action, once=True, *args, **kwargs):
         """
         Attach an event handler which is triggered before request is submitted to server
 
         :param (office365.runtime.http.request_options.RequestOptions, any) -> None action:
-        :param bool once:
-        :return: None
+        :param bool once: Flag which determines whether action is executed once or multiple times
         """
 
         def _process_request(request):
@@ -97,6 +96,7 @@ class ClientRuntimeContext(object):
             action(request, *args, **kwargs)
 
         self.pending_request().beforeExecute += _process_request
+        return self
 
     def after_query_execute(self, query, action, *args, **kwargs):
         """
@@ -104,18 +104,19 @@ class ClientRuntimeContext(object):
 
         :type query: office365.runtime.queries.client_query.ClientQuery
         :type action: (Response, *args, **kwargs) -> None
-        :return: None
         """
 
         def _process_response(resp):
             """
             :type resp: requests.Response
             """
+            resp.raise_for_status()
             if self.pending_request().current_query.id == query.id:
-                action(*args, **kwargs)
                 self.pending_request().afterExecute -= _process_response
+                action(*args, **kwargs)
 
         self.pending_request().afterExecute += _process_response
+        return self
 
     def after_execute(self, action, once=True, *args, **kwargs):
         """
@@ -123,7 +124,6 @@ class ClientRuntimeContext(object):
 
         :param (RequestOptions, *args, **kwargs) -> None action:
         :param bool once:
-        :return: None
         """
 
         def _process_response(response):
@@ -132,6 +132,7 @@ class ClientRuntimeContext(object):
             action(response, *args, **kwargs)
 
         self.pending_request().afterExecute += _process_response
+        return self
 
     def execute_request_direct(self, path):
         """
@@ -150,9 +151,11 @@ class ClientRuntimeContext(object):
         :type query: office365.runtime.queries.client_query.ClientQuery
         """
         self.pending_request().add_query(query)
+        return self
 
     def clear(self):
         self.pending_request().clear()
+        return self
 
     def get_metadata(self):
         return_type = ClientResult(self)

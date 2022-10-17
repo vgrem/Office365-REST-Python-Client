@@ -21,6 +21,7 @@ from office365.sharepoint.listitems.creation_information_using_path import ListI
 from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateValue
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.listitems.collection import ListItemCollection
+from office365.sharepoint.lists.bloom_filter import ListBloomFilter
 from office365.sharepoint.lists.creatables_info import CreatablesInfo
 from office365.sharepoint.lists.data_source import ListDataSource
 from office365.sharepoint.lists.rule import SPListRule
@@ -46,6 +47,27 @@ class List(SecurableObject):
 
     def __init__(self, context, resource_path=None):
         super(List, self).__init__(context, resource_path)
+
+    def delete_rule(self, rule_id):
+        """
+        :param str rule_id:
+        """
+        payload = {"ruleId": rule_id}
+        qry = ServiceOperationQuery(self, "DeleteRule", None, payload)
+        self.context.add_query(qry)
+        return self
+
+    def get_bloom_filter(self, start_item_id=None):
+        """
+        Generates a Bloom filter (probabilistic structure for checking the existence of list items) for the current list
+
+        :param int start_item_id: he ID of the list item to start the search at.
+        """
+        return_type = ListBloomFilter(self.context)
+        payload = {"startItemId": start_item_id}
+        qry = ServiceOperationQuery(self, "GetBloomFilter", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def get_site_script(self, options=None):
         """Creates site script syntax

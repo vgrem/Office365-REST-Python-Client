@@ -4,6 +4,7 @@ from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.files.version_event import FileVersionEvent
 from office365.sharepoint.internal.queries.download_file import create_download_file_query
@@ -473,6 +474,18 @@ class File(AbstractFile):
             self.ensure_property("ServerRelativePath", _download_as_stream)
         else:
             self.ensure_property("ServerRelativeUrl", _download_as_stream)
+        return self
+
+    def rename(self, new_file_name):
+        """
+        Rename a file
+
+        :param str new_file_name: A new file name
+        """
+        item = self.listItemAllFields
+        item.set_property('FileLeafRef', new_file_name)
+        qry = UpdateEntityQuery(item)
+        self.context.add_query(qry)
         return self
 
     @property
