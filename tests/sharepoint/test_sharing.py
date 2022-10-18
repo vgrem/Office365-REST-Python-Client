@@ -3,11 +3,11 @@ from unittest import TestCase
 
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.principal.user import User
-from office365.sharepoint.sharing.document_sharing_manager import DocumentSharingManager
+from office365.sharepoint.sharing.document_manager import DocumentSharingManager
 from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
 from office365.sharepoint.sharing.operation_status_code import SharingOperationStatusCode
 from office365.sharepoint.sharing.role_type import RoleType
-from office365.sharepoint.sharing.sharing_result import SharingResult
+from office365.sharepoint.sharing.result import SharingResult
 from office365.sharepoint.webs.web import Web
 from tests import test_site_url, test_user_credentials
 

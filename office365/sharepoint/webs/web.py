@@ -35,10 +35,11 @@ from office365.sharepoint.principal.user import User
 from office365.sharepoint.principal.user_collection import UserCollection
 from office365.sharepoint.pushnotifications.subscriber import PushNotificationSubscriber
 from office365.sharepoint.recyclebin.item_collection import RecycleBinItemCollection
-from office365.sharepoint.sharing.external_sharing_site_option import ExternalSharingSiteOption
+from office365.sharepoint.sharing.external_site_option import ExternalSharingSiteOption
+from office365.sharepoint.sharing.links.access_request import SharingLinkAccessRequest
 from office365.sharepoint.sharing.object_sharing_settings import ObjectSharingSettings
-from office365.sharepoint.sharing.sharing_link_data import SharingLinkData
-from office365.sharepoint.sharing.sharing_result import SharingResult
+from office365.sharepoint.sharing.links.data import SharingLinkData
+from office365.sharepoint.sharing.result import SharingResult
 from office365.sharepoint.sitescripts.utility import SiteScriptUtility
 from office365.sharepoint.marketplace.sitecollection.appcatalog.accessor import SiteCollectionCorporateCatalogAccessor
 from office365.sharepoint.marketplace.tenant.appcatalog.accessor import TenantCorporateCatalogAccessor
@@ -743,6 +744,29 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
+    def get_file_by_guest_url_extended(self, guest_url, ensure_access=None, password=None):
+        """
+        Returns the file object from the tokenized sharing link URL.
+
+        :param str guest_url: The tokenized sharing link URL for the folder.
+        :param str password: This value contains the password to be supplied to a tokenized sharing link for validation.
+             This value is only needed if the link requires a password before granting access and the calling user
+             does not currently have perpetual access through the tokenized sharing link.
+             This value MUST be set to the correct password for the tokenized sharing link for the access granting
+             operation to succeed. If the tokenized sharing link does not require a password or the calling user
+             already has perpetual access through the tokenized sharing link, this value will be ignored.
+        :param bool ensure_access: Indicates if the request to the tokenized sharing link grants perpetual access to
+            the calling user.
+        """
+        return_type = File(self.context)
+        payload = {
+            "guestUrl": guest_url,
+            "requestSettings": SharingLinkAccessRequest(ensure_access, password)
+        }
+        qry = ServiceOperationQuery(self, "GetFileByGuestUrlExtended", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def get_file_by_guest_url_ensure_access(self, guest_url, ensure_access):
         """
         Returns the file object from the tokenized sharing link URL.
@@ -800,8 +824,32 @@ class Web(SecurableObject):
 
         :param str guest_url: The tokenized sharing link URL for the folder.
         """
-        return_type = File(self.context)
-        qry = ServiceOperationQuery(self, "GetFolderByGuestUrl", [guest_url], None, None, return_type)
+        return_type = Folder(self.context)
+        payload = {"guestUrl": guest_url}
+        qry = ServiceOperationQuery(self, "GetFolderByGuestUrl", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_folder_by_guest_url_extended(self, guest_url, ensure_access=None, password=None):
+        """
+        Returns the folder object from the tokenized sharing link URL.
+
+        :param str guest_url: The tokenized sharing link URL for the folder.
+        :param str password: This value contains the password to be supplied to a tokenized sharing link for validation.
+             This value is only needed if the link requires a password before granting access and the calling user
+             does not currently have perpetual access through the tokenized sharing link.
+             This value MUST be set to the correct password for the tokenized sharing link for the access granting
+             operation to succeed. If the tokenized sharing link does not require a password or the calling user
+             already has perpetual access through the tokenized sharing link, this value will be ignored.
+        :param bool ensure_access: Indicates if the request to the tokenized sharing link grants perpetual access to
+            the calling user.
+        """
+        return_type = Folder(self.context)
+        payload = {
+            "guestUrl": guest_url,
+            "requestSettings": SharingLinkAccessRequest(ensure_access, password)
+        }
+        qry = ServiceOperationQuery(self, "GetFolderByGuestUrlExtended", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 

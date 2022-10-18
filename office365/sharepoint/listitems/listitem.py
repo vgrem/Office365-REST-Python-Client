@@ -18,12 +18,12 @@ from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateV
 from office365.sharepoint.listitems.version import ListItemVersion
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.reputationmodel.reputation import Reputation
-from office365.sharepoint.sharing.external_sharing_site_option import ExternalSharingSiteOption
+from office365.sharepoint.sharing.external_site_option import ExternalSharingSiteOption
 from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
-from office365.sharepoint.sharing.share_link_request import ShareLinkRequest
-from office365.sharepoint.sharing.share_link_response import ShareLinkResponse
-from office365.sharepoint.sharing.share_link_settings import ShareLinkSettings
-from office365.sharepoint.sharing.sharing_result import SharingResult
+from office365.sharepoint.sharing.links.share_request import ShareLinkRequest
+from office365.sharepoint.sharing.links.share_response import ShareLinkResponse
+from office365.sharepoint.sharing.links.share_settings import ShareLinkSettings
+from office365.sharepoint.sharing.result import SharingResult
 from office365.sharepoint.taxonomy.field_value import TaxonomyFieldValueCollection
 from office365.sharepoint.ui.applicationpages.peoplepicker.web_service_interface import (
     ClientPeoplePickerWebServiceInterface

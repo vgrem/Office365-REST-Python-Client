@@ -5,7 +5,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.sharing.object_sharing_information_user import ObjectSharingInformationUser
-from office365.sharepoint.sharing.sharing_link_info import SharingLinkInfo
+from office365.sharepoint.sharing.links.info import SharingLinkInfo
 
 
 class ObjectSharingInformation(BaseEntity):

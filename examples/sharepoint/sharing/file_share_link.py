@@ -1,7 +1,7 @@
 import json
 
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.sharing.sharing_link_kind import SharingLinkKind
+from office365.sharepoint.sharing.links.kind import SharingLinkKind
 from office365.sharepoint.webs.web import Web
 from tests import test_user_credentials, test_team_site_url
 
