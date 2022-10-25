@@ -127,8 +127,8 @@ class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         payload = self._prepare_request_from_template('FederatedSAML.xml', {
             'auth_url': adfs_url,
             'message_id': str(uuid.uuid4()),
-            'username': self._username,
-            'password': self._password,
+            'username': xml_escape(self._username),
+            'password': xml_escape(self._password),
             'created': self._sts_profile.created,
             'expires': self._sts_profile.expires,
             'issuer': self._sts_profile.tokenIssuer
