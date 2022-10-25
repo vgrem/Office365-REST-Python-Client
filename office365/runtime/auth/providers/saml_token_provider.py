@@ -1,7 +1,6 @@
 import os
 import uuid
 from xml.etree import ElementTree
-from xml.sax.saxutils import escape as xml_escape
 import xml.dom.minidom as minidom
 
 import requests
@@ -19,6 +18,16 @@ def resolve_base_url(url):
     parts = url.split('://')
     host_name = parts[1].split("/")[0]
     return parts[0] + '://' + host_name
+
+
+def xml_escape(s_val):
+    s_val = s_val.replace("&", "&amp;")
+    s_val = s_val.replace("<", "&lt;")
+    s_val = s_val.replace(">", "&gt;")
+    s_val = s_val.replace("\"", "&quot;")
+    s_val = s_val.replace("'", "&apos;")
+    return s_val
+
 
 def is_valid_auth_cookies(values):
     return any(values) and (values.get('FedAuth', None) is not None or values.get('SPOIDCRL', None) is not None)
