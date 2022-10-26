@@ -67,13 +67,11 @@ class Folder(BaseEntity):
     def move_to_using_path(self, new_path):
         """
         Moves the folder and its contents to a new folder at the specified path.
-
         An exception is thrown if a folder with the same name as specified in the parameter already exists.
 
         :param str new_path: Specifies the destination path.
         """
-        params = SPResPath(new_path)
-        qry = ServiceOperationQuery(self, "MoveToUsingPath", params)
+        qry = ServiceOperationQuery(self, "MoveToUsingPath", SPResPath(new_path))
         self.context.add_query(qry)
         return self
 
@@ -103,10 +101,10 @@ class Folder(BaseEntity):
     def recycle(self):
         """Moves the folder to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
 
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "Recycle", None, None, None, result)
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "Recycle", None, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def recycle_with_parameters(self, parameters):
         """
@@ -139,10 +137,10 @@ class Folder(BaseEntity):
 
         :param office365.sharepoint.changeQuery.ChangeQuery query: Specifies which changes to return
         """
-        changes = ChangeCollection(self.context)
-        qry = ServiceOperationQuery(self, "getListItemChanges", None, query, "query", changes)
+        return_type = ChangeCollection(self.context)
+        qry = ServiceOperationQuery(self, "getListItemChanges", None, query, "query", return_type)
         self.context.add_query(qry)
-        return changes
+        return return_type
 
     def add(self, name):
         """Adds the folder that is located under a current folder
@@ -168,9 +166,8 @@ class Folder(BaseEntity):
 
         :type file_name: str
         :type content: str
-        :rtype: office365.sharepoint.files.file.File
         """
-        return self.files.upload(file_name, content)
+        return self.files.add(file_name, content, True)
 
     def copy_to(self, new_relative_url, keep_both=False, reset_author_and_created=False):
         """Copies the folder with files to the destination URL.
@@ -180,15 +177,15 @@ class Folder(BaseEntity):
         :type reset_author_and_created: bool
         """
 
-        target_folder = Folder(self.context)
-        target_folder.set_property("ServerRelativeUrl", new_relative_url)
+        return_type = Folder(self.context)
+        return_type.set_property("ServerRelativeUrl", new_relative_url)
 
         def _copy_folder():
             opts = MoveCopyOptions(keep_both=keep_both, reset_author_and_created_on_copy=reset_author_and_created)
             MoveCopyUtil.copy_folder(self.context, self.serverRelativeUrl, new_relative_url, opts)
 
         self.ensure_property("ServerRelativeUrl", _copy_folder)
-        return target_folder
+        return return_type
 
     def copy_to_using_path(self, new_relative_path, keep_both=False, reset_author_and_created=False):
         """Copies the folder with files to the destination Path.
@@ -198,8 +195,8 @@ class Folder(BaseEntity):
         :type reset_author_and_created: bool
         """
 
-        target_folder = Folder(self.context)
-        target_folder.set_property("ServerRelativePath", new_relative_path)
+        return_type = Folder(self.context)
+        return_type.set_property("ServerRelativePath", new_relative_path)
 
         def _copy_folder():
             opts = MoveCopyOptions(keep_both=keep_both, reset_author_and_created_on_copy=reset_author_and_created)
@@ -207,7 +204,7 @@ class Folder(BaseEntity):
                                              opts)
 
         self.ensure_property("ServerRelativePath", _copy_folder)
-        return target_folder
+        return return_type
 
     def move_to_using_path_with_parameters(self, new_relative_path, retain_editor_and_modified=False):
         """Moves the folder with files to the destination Path.
@@ -215,15 +212,15 @@ class Folder(BaseEntity):
         :param str new_relative_path: A full URL path that represents the destination folder.
         :param bool retain_editor_and_modified:
         """
-        target_folder = Folder(self.context)
-        target_folder.set_property("ServerRelativePath", SPResPath(new_relative_path))
+        return_type = Folder(self.context)
+        return_type.set_property("ServerRelativePath", SPResPath(new_relative_path))
 
         def _move_folder():
             opt = MoveCopyOptions(retain_editor_and_modified_on_move=retain_editor_and_modified)
             MoveCopyUtil.move_folder_by_path(self.context, self.server_relative_path.DecodedUrl, new_relative_path, opt)
 
         self.ensure_property("ServerRelativePath", _move_folder)
-        return target_folder
+        return return_type
 
     @property
     def storage_metrics(self):
@@ -377,3 +374,4 @@ class Folder(BaseEntity):
                 self._resource_path = self.context.web.get_folder_by_server_relative_url(value).resource_path
             elif name == "ServerRelativePath":
                 self._resource_path = self.context.web.get_folder_by_server_relative_path(value).resource_path
+        return self

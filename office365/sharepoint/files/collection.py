@@ -2,7 +2,6 @@ import os
 
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.internal.queries.create_file import create_file_query
 from office365.sharepoint.internal.queries.upload_session import create_upload_session_query
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.files.file import File
@@ -20,12 +19,8 @@ class FileCollection(BaseEntityCollection):
 
         :type file_name: str
         :type content: bytes or str
-        :rtype: office365.sharepoint.files.file.File
         """
-        info = FileCreationInformation(url=file_name, overwrite=True, content=content)
-        qry = create_file_query(self, info)
-        self.context.add_query(qry)
-        return qry.return_type
+        return self.add(file_name, content, True)
 
     def create_upload_session(self, source_path, chunk_size, chunk_uploaded=None, **kwargs):
         """Upload a file as multiple chunks
@@ -43,17 +38,25 @@ class FileCollection(BaseEntityCollection):
         else:
             with open(source_path, 'rb') as content_file:
                 file_content = content_file.read()
-            return self.upload(os.path.basename(source_path), file_content)
+            return self.add(os.path.basename(source_path), file_content, True)
 
-    def add(self, file_creation_information):
-        """Creates a File resource
-
-        :type file_creation_information: office365.sharepoint.files.creation_information.FileCreationInformation
-        :rtype: office365.sharepoint.files.file.File
+    def add(self, url, content, overwrite=False):
         """
-        qry = create_file_query(self, file_creation_information)
+        Adds a file to the collection based on provided file creation information. A reference to the SP.File that
+        was added is returned.
+
+        :param str url: Specifies the URL of the file to be added. It MUST NOT be NULL. It MUST be a URL of relative
+            or absolute form. Its length MUST be equal to or greater than 1.
+        :param bool overwrite: Specifies whether to overwrite an existing file with the same name and in the same
+            location as the one being added.
+        :param str or bytes content: Specifies the binary content of the file to be added.
+        """
+        return_type = File(self.context)
+        self.add_child(return_type)
+        create_info = FileCreationInformation(url=url, overwrite=overwrite)
+        qry = ServiceOperationQuery(self, "add", create_info.to_json(), content, None,  return_type)
         self.context.add_query(qry)
-        return qry.return_type
+        return return_type
 
     def add_template_file(self, url_of_file, template_file_type):
         """Adds a ghosted file to an existing list or document library.
@@ -61,16 +64,15 @@ class FileCollection(BaseEntityCollection):
         :param int template_file_type: refer TemplateFileType enum
         :param str url_of_file: server relative url of a file
         """
-        target_file = File(self.context)
-        self.add_child(target_file)
-        qry = ServiceOperationQuery(self,
-                                    "addTemplateFile",
-                                    {
-                                        "urlOfFile": url_of_file,
-                                        "templateFileType": template_file_type
-                                    }, None, None, target_file)
+        return_type = File(self.context)
+        self.add_child(return_type)
+        params = {
+            "urlOfFile": url_of_file,
+            "templateFileType": template_file_type
+        }
+        qry = ServiceOperationQuery(self, "addTemplateFile", params, None, None, return_type)
         self.context.add_query(qry)
-        return target_file
+        return return_type
 
     def get_by_url(self, url):
         """Retrieve File object by url"""

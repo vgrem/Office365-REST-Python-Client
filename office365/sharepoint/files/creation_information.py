@@ -6,42 +6,21 @@ class FileCreationInformation(ClientValue):
 
     def __init__(self, url=None, overwrite=False, content=None):
         """
-
-        :type url: str
+        :param str url: Specifies the URL of the file to be added. It MUST NOT be NULL. It MUST be a URL of relative
+            or absolute form. Its length MUST be equal to or greater than 1.
+        :param bool overwrite: Specifies whether to overwrite an existing file with the same name and in the same
+            location as the one being added.
+        :param str or bytes content: Specifies the binary content of the file to be added.
         """
         super(FileCreationInformation, self).__init__()
-        self._url = url
-        self._overwrite = overwrite
-        self._content = content
+        self.Url = url
+        self.Overwrite = overwrite
+        self.Content = content
+        self.XorHash = None
 
     def to_json(self, json_format=None):
-        return {"overwrite": self.overwrite, "url": self.url}
+        return {"overwrite": self.Overwrite, "url": self.Url}
 
     @property
-    def content(self):
-        """Gets the binary content of the file."""
-        return self._content
-
-    @content.setter
-    def content(self, value):
-        """Sets the binary content of the file."""
-        self._content = value
-
-    @property
-    def overwrite(self):
-        """Indicates whether to overwrite an existing file with the same name and in the same location
-        as the one being added."""
-        return self._overwrite
-
-    @property
-    def url(self):
-        """The URL of the file."""
-        return self._url
-
-    @url.setter
-    def url(self, value):
-        self._url = value
-
-    @overwrite.setter
-    def overwrite(self, value):
-        self._overwrite = value
+    def entity_type_name(self):
+        return None

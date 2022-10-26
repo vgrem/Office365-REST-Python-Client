@@ -15,8 +15,8 @@ def create_upload_session_query(binding_type, source_path, chunk_size, chunk_upl
     :type chunk_uploaded: (int, *)->None
     """
     create_info = FileCreationInformation()
-    create_info.url = os.path.basename(source_path)
-    create_info.overwrite = True
+    create_info.Url = os.path.basename(source_path)
+    create_info.Overwrite = True
 
     context = binding_type.context
     qry = create_file_query(binding_type, create_info)
