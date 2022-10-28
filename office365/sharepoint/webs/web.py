@@ -10,6 +10,7 @@ from office365.sharepoint.authentication.acs_service_principal_info import SPACS
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.businessdata.app_bdc_catalog import AppBdcCatalog
 from office365.sharepoint.changes.collection import ChangeCollection
+from office365.sharepoint.clientsidecomponent.hostedapps.manager import HostedAppsManager
 from office365.sharepoint.clientsidecomponent.storage_entity import StorageEntity
 from office365.sharepoint.clientsidecomponent.query_result import SPClientSideComponentQueryResult
 from office365.sharepoint.clientsidecomponent.identifier import SPClientSideComponentIdentifier
@@ -1351,6 +1352,11 @@ class Web(SecurableObject):
                                    FolderCollection(self.context, ResourcePath("folders", self.resource_path), self))
 
     @property
+    def hosted_apps(self):
+        return self.properties.get('HostedApps',
+                                   HostedAppsManager(self.context, ResourcePath("HostedApps", self.resource_path)))
+
+    @property
     def lists(self):
         """Specifies the collection of lists that are contained in the site available to the current user based on the
         current user's permissions."""
@@ -1678,6 +1684,7 @@ class Web(SecurableObject):
                 "DescriptionResource": self.description_resource,
                 "EffectiveBasePermissions": self.effective_base_permissions,
                 "EventReceivers": self.event_receivers,
+                "HostedApps": self.hosted_apps,
                 "ListTemplates": self.list_templates,
                 "MultilingualSettings": self.multilingual_settings,
                 "ParentWeb": self.parent_web,

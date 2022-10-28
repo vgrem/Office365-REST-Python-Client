@@ -9,10 +9,10 @@ class ClientQuery(object):
 
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         :type binding_type: office365.runtime.client_object.ClientObject or None
-        :type parameter_type:  office365.runtime.client_object.ClientObject or ClientValue or dict or bytes or None
-        :type parameter_name:  str or None
-        :type return_type:  office365.runtime.client_object.ClientObject or office365.runtime.client_result.ClientResult
-           or office365.runtime.client_value.ClientValue or None
+        :type parameter_type: office365.runtime.client_object.ClientObject or ClientValue or dict or bytes or None
+        :type parameter_name: str or None
+        :type return_type: office365.runtime.client_object.ClientObject
+            or office365.runtime.client_result.ClientResult or None
         """
         self._context = context
         self._binding_type = binding_type

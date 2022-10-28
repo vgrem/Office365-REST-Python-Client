@@ -1,15 +1,18 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.sharepoint.files.creation_information import FileCreationInformation
 from office365.sharepoint.files.file import File
 
 
-def create_file_query(files, file_create_info):
+def create_file_query(binding_type, name, content=None):
     """
     Constructs a query to create/upload a file
 
-    :type file_create_info: office365.sharepoint.files.creation_information.FileCreationInformation
-    :type files: office365.sharepoint.files.collection.FileCollection
+    :type name: str
+    :type content: str or None
+    :type binding_type: office365.sharepoint.files.collection.FileCollection
     """
-    return_file = File(files.context)
-    qry = ServiceOperationQuery(files, "add", file_create_info.to_json(), file_create_info.Content, None, return_file)
-    files.add_child(return_file)
+    return_type = File(binding_type.context)
+    binding_type.add_child(return_type)
+    create_info = FileCreationInformation(url=name, overwrite=True)
+    qry = ServiceOperationQuery(binding_type, "add", create_info.to_json(), content, None, return_type)
     return qry

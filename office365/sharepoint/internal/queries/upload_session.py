@@ -4,65 +4,75 @@ import uuid
 from office365.runtime.client_result import ClientResult
 from office365.sharepoint.internal.queries.create_file import create_file_query
 from office365.sharepoint.files.file import File
-from office365.sharepoint.files.creation_information import FileCreationInformation
 
 
-def create_upload_session_query(binding_type, source_path, chunk_size, chunk_uploaded, **kwargs):
+def create_upload_session_query_ex(binding_type, path_or_file, chunk_size, chunk_uploaded, **kwargs):
     """
     :type binding_type: office365.sharepoint.files.collection.FileCollection
-    :type source_path: str
+    :type path_or_file: typing.IO or str
     :type chunk_size: int
     :type chunk_uploaded: (int, *)->None
     """
-    create_info = FileCreationInformation()
-    create_info.Url = os.path.basename(source_path)
-    create_info.Overwrite = True
+    if hasattr(path_or_file, 'read'):
+        return create_upload_session_query(binding_type, path_or_file, chunk_size, chunk_uploaded, **kwargs)
+    else:
+        f = open(path_or_file, 'rb')
+        return create_upload_session_query(binding_type, f, chunk_size, chunk_uploaded, True, **kwargs)
 
-    context = binding_type.context
-    qry = create_file_query(binding_type, create_info)
+
+def create_upload_session_query(binding_type, file_object, chunk_size, chunk_uploaded, force_close=False, **kwargs):
+    """
+    :type binding_type: office365.sharepoint.files.collection.FileCollection
+    :type file_object: typing.IO
+    :type chunk_size: int
+    :type force_close: bool
+    :type chunk_uploaded: (int, *)->None
+    """
+
     upload_id = str(uuid.uuid4())
-    file_size = os.stat(source_path).st_size
+    file_size = os.fstat(file_object.fileno()).st_size
+    file_name = os.path.basename(file_object.name)
 
-    def _read_next(file_object):
+    def _read_next():
         return file_object.read(chunk_size)
 
-    def _has_pending_read(file_object):
+    def _has_pending_read():
         bytes_read = file_object.tell()
-        if bytes_read >= file_size:
-            file_object.close()
-            return False
-        return True
+        return bytes_read < file_size
 
-    def _start_upload(resp):
-        file_object = open(source_path, 'rb')
-        _upload_next(resp, file_object=file_object, return_type=qry.return_type)
-
-    def _upload_next(response, file_object, return_type):
+    def _run_upload(response, return_type, next_return_type=None):
         """
+        :type return_type: File
         :type response: requests.Response
         """
         response.raise_for_status()
 
         uploaded_bytes = 0
-        if isinstance(return_type, ClientResult):
-            uploaded_bytes = int(return_type.value)
-        elif isinstance(return_type, File):
-            uploaded_bytes = return_type.length
+        if isinstance(next_return_type, ClientResult):
+            uploaded_bytes = int(next_return_type.value)
+        elif isinstance(next_return_type, File):
+            uploaded_bytes = next_return_type.length
 
         if callable(chunk_uploaded):
             chunk_uploaded(uploaded_bytes, **kwargs)
 
-        if not _has_pending_read(file_object):
+        if not _has_pending_read():
+            if force_close and not file_object.closed:
+                file_object.close()
             return
 
-        content = _read_next(file_object)
+        content = _read_next()
         if uploaded_bytes == 0:
-            next_return_type = qry.return_type.start_upload(upload_id, content)
+            next_return_type = return_type.start_upload(upload_id, content)
         elif uploaded_bytes + len(content) < file_size:
-            next_return_type = qry.return_type.continue_upload(upload_id, uploaded_bytes, content)
+            next_return_type = return_type.continue_upload(upload_id, uploaded_bytes, content)
         else:
-            next_return_type = qry.return_type.finish_upload(upload_id, uploaded_bytes, content)
-        context.after_execute(_upload_next, file_object=file_object, return_type=next_return_type)
+            next_return_type = return_type.finish_upload(upload_id, uploaded_bytes, content)
+        binding_type.context.after_execute(_run_upload, return_type=return_type, next_return_type=next_return_type)
 
-    context.after_execute(_start_upload)
-    return qry
+    if file_size > chunk_size:
+        qry = create_file_query(binding_type, file_name)
+        binding_type.context.after_execute(_run_upload, return_type=qry.return_type, next_return_type=qry.return_type)
+        return qry
+    else:
+        return create_file_query(binding_type, file_name, file_object.read())

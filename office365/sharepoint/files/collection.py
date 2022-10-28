@@ -1,8 +1,6 @@
-import os
-
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.internal.queries.upload_session import create_upload_session_query
+from office365.sharepoint.internal.queries.upload_session import create_upload_session_query_ex
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.files.file import File
 from office365.sharepoint.files.creation_information import FileCreationInformation
@@ -22,23 +20,18 @@ class FileCollection(BaseEntityCollection):
         """
         return self.add(file_name, content, True)
 
-    def create_upload_session(self, source_path, chunk_size, chunk_uploaded=None, **kwargs):
+    def create_upload_session(self, path_or_file, chunk_size, chunk_uploaded=None, **kwargs):
         """Upload a file as multiple chunks
 
-        :param str source_path: path where file to upload resides
+        :param str or typing.IO path_or_file: path where file to upload resides or file handle
         :param int chunk_size: upload chunk size (in bytes)
         :param (long)->None or None chunk_uploaded: uploaded event
         :param kwargs: arguments to pass to chunk_uploaded function
         """
-        file_size = os.path.getsize(source_path)
-        if file_size > chunk_size:
-            qry = create_upload_session_query(self, source_path, chunk_size, chunk_uploaded, **kwargs)
-            self.context.add_query(qry)
-            return qry.return_type
-        else:
-            with open(source_path, 'rb') as content_file:
-                file_content = content_file.read()
-            return self.add(os.path.basename(source_path), file_content, True)
+
+        qry = create_upload_session_query_ex(self, path_or_file, chunk_size, chunk_uploaded, **kwargs)
+        self.context.add_query(qry)
+        return qry.return_type
 
     def add(self, url, content, overwrite=False):
         """
@@ -54,7 +47,7 @@ class FileCollection(BaseEntityCollection):
         return_type = File(self.context)
         self.add_child(return_type)
         create_info = FileCreationInformation(url=url, overwrite=overwrite)
-        qry = ServiceOperationQuery(self, "add", create_info.to_json(), content, None,  return_type)
+        qry = ServiceOperationQuery(self, "add", create_info.to_json(), content, None, return_type)
         self.context.add_query(qry)
         return return_type
 
