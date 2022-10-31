@@ -6,6 +6,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.portal.groups.creation_context import GroupCreationContext
 from office365.sharepoint.portal.groups.creation_information import GroupCreationInformation
 from office365.sharepoint.portal.groups.site_info import GroupSiteInfo
+from office365.sharepoint.portal.teams.recent_and_joined_response import RecentAndJoinedTeamsResponse
 
 
 class GroupSiteManager(ClientObject):
@@ -113,7 +114,7 @@ class GroupSiteManager(ClientObject):
         self.context.add_query(qry)
         return return_type
 
-    def get_team_channels(self, team_id, use_staging_endpoint):
+    def get_team_channels(self, team_id, use_staging_endpoint=False):
         """
         :param str team_id:
         :param bool use_staging_endpoint:
@@ -126,4 +127,34 @@ class GroupSiteManager(ClientObject):
         qry = ServiceOperationQuery(self, "GetTeamChannels", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
+
+    def notebook(self, group_id):
+        """
+        :param str group_id:
+        """
+        return_type = ClientResult(self.context, str())
+        payload = {"groupId": group_id}
+        qry = ServiceOperationQuery(self, "Notebook", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def recent_and_joined_teams(self, include_recent=None, include_teams=None, include_pinned=None,
+                                existing_joined_teams_data=None):
+        """
+        :param bool include_recent:
+        :param bool include_teams:
+        :param bool include_pinned:
+        :param str existing_joined_teams_data:
+        """
+        return_type = ClientResult(self.context, RecentAndJoinedTeamsResponse())
+        payload = {
+            "includeRecent": include_recent,
+            "includeTeams": include_teams,
+            "includePinned": include_pinned,
+            "existingJoinedTeamsData": existing_joined_teams_data
+        }
+        qry = ServiceOperationQuery(self, "RecentAndJoinedTeams", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
 

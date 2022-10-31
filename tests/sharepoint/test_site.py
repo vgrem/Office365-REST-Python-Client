@@ -49,3 +49,7 @@ class TestSite(SPTestCase):
         result = self.client.site.is_comm_site().execute_query()
         self.assertIsInstance(result.value, bool)
 
+    #def test_10_get_site_links(self):
+    #    result = self.client.site_linking_manager.get_site_links().execute_query()
+    #    self.assertIsNotNone(result.value)
+

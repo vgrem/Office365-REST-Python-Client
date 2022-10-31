@@ -20,3 +20,16 @@ class VideoItem(BaseEntity):
         qry = ServiceOperationQuery(self, "GetVideoEmbedCode", params, None, None, return_type)
         self.context.add_query(qry)
         return return_type
+
+    def set_video_owner(self, owner_id):
+        """
+        :param int owner_id:
+        """
+        payload = {"id": owner_id}
+        qry = ServiceOperationQuery(self, "SetVideoOwner", None, payload)
+        self.context.add_query(qry)
+        return self
+
+    @property
+    def entity_type_name(self):
+        return "SP.Publishing.VideoItem"

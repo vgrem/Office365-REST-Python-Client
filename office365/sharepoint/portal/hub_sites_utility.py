@@ -9,12 +9,14 @@ class SPHubSitesUtility(BaseEntity):
     associate existing sites with hub sites, and obtain or update information about hub sites.
     """
 
-    def __init__(self, context):
-        super(SPHubSitesUtility, self).__init__(context, ResourcePath("Microsoft.SharePoint.Portal.SPHubSitesUtility"))
+    def __init__(self, context, resource_path=None):
+        if resource_path is None:
+            resource_path = ResourcePath("Microsoft.SharePoint.Portal.SPHubSitesUtility")
+        super(SPHubSitesUtility, self).__init__(context, resource_path)
 
     def get_hub_sites(self):
         """Gets information about all hub sites that the current user can access."""
-        hub_sites = HubSiteCollection(self.context)
-        qry = ServiceOperationQuery(self, "GetHubSites", None, None, None, hub_sites)
+        return_type = HubSiteCollection(self.context)
+        qry = ServiceOperationQuery(self, "GetHubSites", None, None, None, return_type)
         self.context.add_query(qry)
-        return hub_sites
+        return return_type

@@ -42,7 +42,7 @@ class TestPublishing(SPTestCase):
 
     def test7_get_video_service_manager(self):
         discoverer = VideoServiceDiscoverer(self.client).get().execute_query()
-        self.assertIsNotNone(discoverer.resource_path)
+        self.assertIsNotNone(discoverer.video_portal_url)
 
     def test8_get_page_translations(self):
         pages = self.client.site_pages.pages.get().filter("FileName eq 'Home.aspx'").execute_query()
@@ -59,3 +59,8 @@ class TestPublishing(SPTestCase):
     def test_10_get_current_user_memberships(self):
         result = SitePageService.get_current_user_memberships(self.client).execute_query()
         self.assertIsNotNone(result.value)
+
+    def test_11_get_page_diagnostics(self):
+        result = self.client.page_diagnostics.by_page("/sites/team/SitePages/Home.aspx").execute_query()
+        self.assertIsNotNone(result.value)
+

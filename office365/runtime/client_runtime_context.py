@@ -1,5 +1,6 @@
 import abc
 from time import sleep
+from typing import TypeVar
 
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.client_result import ClientResult
@@ -7,6 +8,8 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.read_entity import ReadEntityQuery
+
+T = TypeVar('T', bound='ClientObject')
 
 
 class ClientRuntimeContext(object):
@@ -70,7 +73,7 @@ class ClientRuntimeContext(object):
         :type properties_to_retrieve: list[str] or None
         :type client_object: office365.runtime.client_object.ClientObject
         :type before_loaded: (office365.runtime.http.request_options.RequestOptions) -> None
-        :type after_loaded: (office365.runtime.client_object.ClientObject) -> None
+        :type after_loaded: (T) -> None
         """
         qry = ReadEntityQuery(client_object, properties_to_retrieve)
         self.add_query(qry)
@@ -79,6 +82,7 @@ class ClientRuntimeContext(object):
         if callable(after_loaded):
             def _action():
                 after_loaded(client_object)
+
             self.after_query_execute(qry, _action)
         return self
 
@@ -179,4 +183,3 @@ class ClientRuntimeContext(object):
         self.after_execute(_process_download_response)
         self.add_query(qry)
         return return_type
-

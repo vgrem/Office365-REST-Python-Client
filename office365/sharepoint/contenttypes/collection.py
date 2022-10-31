@@ -21,6 +21,9 @@ class ContentTypeCollection(BaseEntityCollection):
         self.add_child(return_type)
 
         def _after_get_by_name(col):
+            """
+            :type col: ContentTypeCollection
+            """
             if len(col) != 1:
                 message = "Content type not found or ambiguous match found for name: {0}".format(name)
                 raise ValueError(message)

@@ -6,3 +6,10 @@ class VideoServiceDiscoverer(BaseEntity):
 
     def __init__(self, context):
         super(VideoServiceDiscoverer, self).__init__(context, ResourcePath("SP.Publishing.VideoServiceDiscoverer"))
+
+    @property
+    def video_portal_url(self):
+        """
+        :rtype: str or None
+        """
+        return self.properties.get("VideoPortalUrl", None)

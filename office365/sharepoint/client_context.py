@@ -347,9 +347,8 @@ class ClientContext(ClientRuntimeContext):
     @property
     def models(self):
         """Alias to collection of SPMachineLearningModel"""
-        from office365.sharepoint.contentcenter.machinelearning.model import SPMachineLearningModel
-        from office365.sharepoint.base_entity_collection import BaseEntityCollection
-        return BaseEntityCollection(self, SPMachineLearningModel, ResourcePath("models"))
+        from office365.sharepoint.contentcenter.machinelearning.model_collection import SPMachineLearningModelCollection
+        return SPMachineLearningModelCollection(self, ResourcePath("models"))
 
     @property
     def group_site_manager(self):
@@ -362,6 +361,12 @@ class ClientContext(ClientRuntimeContext):
         """Alias to GroupService"""
         from office365.sharepoint.portal.groups.service import GroupService
         return GroupService(self, ResourcePath("GroupService"))
+
+    @property
+    def page_diagnostics(self):
+        """Alias to PageDiagnosticsController"""
+        from office365.sharepoint.publishing.diagnostics.controller import PageDiagnosticsController
+        return PageDiagnosticsController(self)
 
     @property
     def people_manager(self):
@@ -387,6 +392,18 @@ class ClientContext(ClientRuntimeContext):
         return HubSiteCollection(self, ResourcePath("hubSites"))
 
     @property
+    def hub_sites_utility(self):
+        """Alias to HubSitesUtility."""
+        from office365.sharepoint.portal.hub_sites_utility import SPHubSitesUtility
+        return SPHubSitesUtility(self, ResourcePath("HubSitesUtility"))
+
+    @property
+    def machine_learning(self):
+        """Alias to SPMachineLearningHub"""
+        from office365.sharepoint.contentcenter.machinelearning.hub import SPMachineLearningHub
+        return SPMachineLearningHub(self, ResourcePath("machinelearning"))
+
+    @property
     def site_pages(self):
         """Alias to SitePageService. Represents a set of APIs to use for managing site pages."""
         return SitePageService(self, ResourcePath("sitePages"))
@@ -400,7 +417,7 @@ class ClientContext(ClientRuntimeContext):
     @property
     def site_linking_manager(self):
         """Alias to Microsoft.SharePoint.Portal.SiteLinkingManager. """
-        from office365.sharepoint.portal.sites.linking_manager import SiteLinkingManager
+        from office365.sharepoint.portal.linkedsites.manager import SiteLinkingManager
         return SiteLinkingManager(self, ResourcePath("siteLinkingManager"))
 
     @property

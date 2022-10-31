@@ -11,10 +11,9 @@ size_chunk = 1000000
 # local_path = "../../../tests/data/big_buck_bunny.mp4"
 local_path = "../../../tests/data/SharePoint User Guide.docx"
 
-file_size = os.path.getsize(local_path)
-
 
 def print_upload_progress(offset):
+    file_size = os.path.getsize(local_path)
     print("Uploaded '{0}' bytes from '{1}'...[{2}%]".format(offset, file_size, round(offset / file_size * 100, 2)))
 
 
