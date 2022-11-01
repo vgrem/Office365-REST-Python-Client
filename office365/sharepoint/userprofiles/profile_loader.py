@@ -26,13 +26,12 @@ class ProfileLoader(ClientObject):
     @staticmethod
     def get_owner_user_profile(context):
         """
-        Gets the user profile for the Site (2) owner.
+        Gets the user profile for the Site owner.
 
-        :type: office365.sharepoint.client_context.ClientContext context
+        :type context: office365.sharepoint.client_context.ClientContext
         """
         return_type = UserProfile(context)
-        qry = ServiceOperationQuery(return_type, "GetOwnerUserProfile", None, None, None, return_type)
-        qry.static = True
+        qry = ServiceOperationQuery(ProfileLoader(context), "GetOwnerUserProfile", None, None, None, return_type, True)
         context.add_query(qry)
         return return_type
 

@@ -68,6 +68,14 @@ class Tenant(BaseEntity):
         self.context.add_query(qry)
         return return_type
 
+    def get_home_site_url(self):
+        """
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(self, "GetSPHSiteUrl", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def get_home_sites(self):
         return_type = ClientResult(self.context, ClientValueCollection(HomeSitesDetails))
         qry = ServiceOperationQuery(self, "GetHomeSites", None, None, None, return_type)
@@ -77,6 +85,14 @@ class Tenant(BaseEntity):
     def get_home_sites_details(self):
         return_type = ClientResult(self.context, ClientValueCollection(HomeSitesDetails))
         qry = ServiceOperationQuery(self, "GetHomeSitesDetails", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def remove_home_site(self):
+        """
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(self, "RemoveSPHSite", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
 

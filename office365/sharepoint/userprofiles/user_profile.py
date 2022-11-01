@@ -91,7 +91,18 @@ class UserProfile(BaseEntity):
         :type is_interactive: bool
         """
         payload = {"isInteractive": is_interactive}
-        qry = ServiceOperationQuery(self, "CreatePersonalSiteEnque", None, payload, None, None)
+        qry = ServiceOperationQuery(self, "CreatePersonalSiteEnque", None, payload)
+        self.context.add_query(qry)
+        return self
+
+    def set_my_site_first_run_experience(self, value):
+        """
+        Sets the personal site First Run flag for the user.
+
+        :param str value: The value to be set for the First Run flag.
+        """
+        payload = {"value": value}
+        qry = ServiceOperationQuery(self, "SetMySiteFirstRunExperience", None, payload)
         self.context.add_query(qry)
         return self
 
@@ -122,3 +133,7 @@ class UserProfile(BaseEntity):
         if name == "AccountName":
             pass
         return self
+
+    @property
+    def entity_type_name(self):
+        return "SP.UserProfiles.UserProfile"

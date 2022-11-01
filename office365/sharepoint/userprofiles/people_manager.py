@@ -1,6 +1,7 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.principal.user import User
@@ -17,6 +18,7 @@ def _ensure_user(user_or_name, action):
     if isinstance(user_or_name, User):
         def _user_loaded():
             action(user_or_name.login_name)
+
         user_or_name.ensure_property("LoginName", _user_loaded)
     else:
         action(user_or_name)
@@ -97,7 +99,18 @@ class PeopleManager(BaseEntity):
         :param str account_name:
         """
         params = {"accountName": account_name}
-        qry = ServiceOperationQuery(self, "StopFollowing", params, None, None, None)
+        qry = ServiceOperationQuery(self, "StopFollowing", params)
+        self.context.add_query(qry)
+        return self
+
+    def stop_following_tag(self, value):
+        """
+        The StopFollowingTag method sets the current user to no longer be following the specified tag.
+
+        :param str value: Specifies the tag by its GUID
+        """
+        params = {"value": value}
+        qry = ServiceOperationQuery(self, "StopFollowingTag", params)
         self.context.add_query(qry)
         return self
 
@@ -200,6 +213,78 @@ class PeopleManager(BaseEntity):
         """
         params = {"accountName": account_name}
         qry = ServiceOperationQuery(self, "HideSuggestion", params)
+        self.context.add_query(qry)
+        return self
+
+    def reset_user_onedrive_quota_to_default(self, account_name):
+        """
+        :param str account_name: Specifies the user by account name.
+        """
+        return_type = ClientResult(self.context, str())
+        params = {"accountName": account_name}
+        qry = ServiceOperationQuery(self, "ResetUserOneDriveQuotaToDefault", params, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def set_my_profile_picture(self, picture):
+        """
+        The SetMyProfilePicture method uploads and sets the user profile picture. Pictures in bmp, jpg and png formats
+        and up to 5,000,000 bytes are supported. A user can upload a picture only to the user's own profile.
+
+        :param str or bytes picture: Binary content of an image file
+        """
+        qry = ServiceOperationQuery(self, "SetMyProfilePicture", None, {"picture": picture})
+        self.context.add_query(qry)
+        return self
+
+    def set_user_onedrive_quota(self, account_name, new_quota, new_quota_warning):
+        """
+        :param str account_name:
+        :param long new_quota:
+        :param long new_quota_warning:
+        """
+        return_type = ClientResult(self.context, str())
+        payload = {
+            "accountName": account_name,
+            "newQuota": new_quota,
+            "newQuotaWarning": new_quota_warning
+        }
+        qry = ServiceOperationQuery(self, "SetUserOneDriveQuota", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def set_multi_valued_profile_property(self, account_name, property_name, property_values):
+        """
+        Sets the value of a multivalued user profile property.
+
+
+        :param str account_name: Specifies the user by account name.
+        :param str property_name: The name of the property to set.
+        :param list[str] property_values: The values being set on the property.
+        """
+        payload = {
+            "accountName": account_name,
+            "propertyName": property_name,
+            "propertyValues": StringCollection(property_values)
+        }
+        qry = ServiceOperationQuery(self, "SetMultiValuedProfileProperty", None, payload)
+        self.context.add_query(qry)
+        return self
+
+    def set_single_value_profile_property(self, account_name, property_name, property_value):
+        """
+        Sets the value of a user profile property.
+
+        :param str account_name: Specifies the user by account name.
+        :param str property_name: The name of the property to set.
+        :param str property_value: The value being set on the property.
+        """
+        payload = {
+            "accountName": account_name,
+            "propertyName": property_name,
+            "propertyValue": property_value
+        }
+        qry = ServiceOperationQuery(self, "SetSingleValueProfileProperty", None, payload)
         self.context.add_query(qry)
         return self
 

@@ -1,4 +1,5 @@
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 
 
@@ -9,6 +10,14 @@ class PersonalCache(BaseEntity):
 
     def __init__(self, context):
         super(PersonalCache, self).__init__(context, ResourcePath("SP.UserProfiles.PersonalCache"))
+
+    def dispose(self):
+        """
+
+        """
+        qry = ServiceOperationQuery(self, "Dispose")
+        self.context.add_query(qry)
+        return self
 
     @property
     def cache_name(self):

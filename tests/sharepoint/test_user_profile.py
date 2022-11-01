@@ -8,9 +8,16 @@ from tests import test_user_credentials, test_team_site_url, test_user_principal
 
 class TestUserProfile(TestCase):
 
+    promoted_links = None
+
     @classmethod
     def setUpClass(cls):
         cls.my_client = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
+
+    #def test1_get_owner_user_profile(self):
+    #    from office365.sharepoint.userprofiles.profile_loader import ProfileLoader
+    #    up = ProfileLoader.get_owner_user_profile(self.my_client).execute_query()
+    #    self.assertIsNotNone(up.resource_path)
 
     def test2_get_profile_loader(self):
         user_profile = self.my_client.profile_loader.get_user_profile().execute_query()
@@ -63,7 +70,7 @@ class TestUserProfile(TestCase):
         result = PeopleManager.get_trending_tags(self.my_client).execute_query()
         self.assertGreaterEqual(len(result.items), 0)
 
-    def test_11_get_user_Profile_properties(self):
+    def test_11_get_user_profile_properties(self):
         user_props = self.my_client.web.current_user.get_user_profile_properties().get().execute_query()
         self.assertIsNotNone(user_props.resource_path)
 
@@ -74,3 +81,26 @@ class TestUserProfile(TestCase):
         result = MySiteLinks.get_my_site_links(self.my_client).execute_query()
         self.assertIsNotNone(result.all_documents_link)
 
+    #def test_13_set_single_value_profile_property(self):
+    #    user = self.my_client.web.ensure_user(test_user_principal_name).execute_query()
+    #    self.my_client.people_manager.\
+    #        set_single_value_profile_property(user.login_name, "Country", "Finland").execute_query()
+
+    def test_14_add_site_link(self):
+        from office365.sharepoint.userprofiles.promoted_sites import PromotedSites
+        PromotedSites.add_site_link(self.my_client, "https://www.google.com", "Google").execute_query()
+
+    def test_15_get_promoted_links_as_tiles(self):
+        from office365.sharepoint.userprofiles.promoted_sites import PromotedSites
+        result = PromotedSites.get_promoted_links_as_tiles(self.my_client).execute_query()
+        self.assertIsNotNone(result.value)
+        self.assertGreater(len(result.value), 0)
+        self.__class__.promoted_links = result.value
+
+    def test_16_get_promoted_links_as_tiles(self):
+        from office365.sharepoint.userprofiles.promoted_sites import PromotedSites
+        for promoted_link in self.__class__.promoted_links:
+            PromotedSites.delete_site_link(self.my_client, promoted_link.ID)
+        self.my_client.execute_batch()
+        after_result = PromotedSites.get_promoted_links_as_tiles(self.my_client).execute_query()
+        self.assertEqual(len(after_result.value), 0)
