@@ -200,11 +200,10 @@ class Web(SecurableObject):
 
         :type context: office365.sharepoint.client_context.ClientContext
         """
-        result = ClientResult(context, ContextWebInformation())
-        qry = ServiceOperationQuery(context.web, "GetContextWebInformation", None, None, None, result)
-        qry.static = True
+        return_type = ClientResult(context, ContextWebInformation())
+        qry = ServiceOperationQuery(context.web, "GetContextWebInformation", None, None, None, return_type, True)
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def get_web_url_from_page_url(context, page_full_url):

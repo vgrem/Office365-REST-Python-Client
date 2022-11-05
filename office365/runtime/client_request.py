@@ -70,7 +70,6 @@ class ClientRequest(object):
         for qry in self:
             try:
                 request = self.build_request(qry)
-                self.beforeExecute.notify(request)
                 response = self.execute_request_direct(request)
                 response.raise_for_status()
                 self.process_response(response)
@@ -83,6 +82,7 @@ class ClientRequest(object):
 
         :type request: office365.runtime.http.request_options.RequestOptions
         """
+        self.beforeExecute.notify(request)
         self.context.authenticate_request(request)
         if request.method == HttpMethod.Post:
             if request.is_bytes or request.is_file:

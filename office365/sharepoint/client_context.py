@@ -2,7 +2,6 @@ import copy
 
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.auth.user_credential import UserCredential
-from office365.runtime.client_result import ClientResult
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
@@ -10,7 +9,6 @@ from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 from office365.runtime.odata.v3.batch_request import ODataBatchV3Request
 from office365.runtime.odata.request import ODataRequest
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.portal.sites.status import SiteStatus
@@ -165,38 +163,19 @@ class ClientContext(ClientRuntimeContext):
         :type request_options: RequestOptions
         """
         if not self.context_info.is_valid:
-            self._ctx_web_info = self.get_context_web_information(request_options=request_options)
+            self._ctx_web_info = self._get_context_web_information()
         request_options.set_header('X-RequestDigest', self._ctx_web_info.FormDigestValue)
 
-    def get_context_web_information(self, request_options=None):
+    def _get_context_web_information(self):
         """Returns an ContextWebInformation object that specifies metadata about the site"""
         request = RequestOptions("{0}/contextInfo".format(self.service_root_url()))
         request.method = HttpMethod.Post
-        if request_options:
-            request.proxies = request_options.proxies
-            request.verify = request_options.verify
         response = self.pending_request().execute_request_direct(request)
-        json = response.json()
         json_format = JsonLightFormat()
         json_format.function = "GetContextWebInformation"
         return_value = ContextWebInformation()
-        self.pending_request().map_json(json, return_value, json_format)
+        self.pending_request().map_json(response.json(), return_value, json_format)
         return return_value
-
-    def get_context_web_information_ex(self):
-        """Returns an ContextWebInformation object that specifies metadata about the site"""
-        return_type = ClientResult(self, ContextWebInformation())
-
-        def _construct_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
-            request.url = self.service_root_url() + "/contextInfo"
-
-        qry = ServiceOperationQuery(self.web, "GetContextWebInformation", None, None, None, return_type)
-        self.before_execute(_construct_request)
-        self.add_query(qry)
-        return return_type
 
     def execute_query_with_incremental_retry(self, max_retry=5):
         """Handles throttling requests."""
@@ -245,6 +224,9 @@ class ClientContext(ClientRuntimeContext):
 
         :type request: RequestOptions
         """
+        if request.url == "{0}/contextInfo".format(self.service_root_url()):
+            return
+
         query = self.pending_request().current_query
 
         if request.method == HttpMethod.Post:
