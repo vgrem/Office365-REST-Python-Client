@@ -17,6 +17,7 @@ from office365.sharepoint.tenant.administration.hubsites.properties import HubSi
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
     SecondaryAdministratorsFieldsData
 from office365.sharepoint.tenant.administration.secondary_administrators_info import SecondaryAdministratorsInfo
+from office365.sharepoint.tenant.administration.site_administrators_info import SiteAdministratorsInfo
 from office365.sharepoint.tenant.administration.site_creation_properties import SiteCreationProperties
 from office365.sharepoint.tenant.administration.site_properties import SiteProperties
 from office365.sharepoint.tenant.administration.site_properties_collection import SitePropertiesCollection
@@ -183,18 +184,32 @@ class Tenant(BaseEntity):
         self.context.add_query(qry)
         return result
 
+    def get_site_administrators(self, site_id, return_type=None):
+        """
+        Gets site collection administrators
+
+        :type site_id: str
+        :type return_type: ClientResult
+        """
+        if return_type is None:
+            return_type = ClientResult(self.context, ClientValueCollection(SiteAdministratorsInfo))
+        payload = {"siteId": site_id}
+        qry = ServiceOperationQuery(self, "GetSiteAdministrators", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def get_site_secondary_administrators(self, site_id):
         """
         Gets site collection administrators
 
         :type site_id: str
         """
-        result = ClientResult(self.context, ClientValueCollection(SecondaryAdministratorsInfo))
+        return_type = ClientResult(self.context, ClientValueCollection(SecondaryAdministratorsInfo))
         payload = SecondaryAdministratorsFieldsData(site_id)
         qry = ServiceOperationQuery(self, "GetSiteSecondaryAdministrators", None, payload,
-                                    "secondaryAdministratorsFieldsData", result)
+                                    "secondaryAdministratorsFieldsData", return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def set_site_secondary_administrators(self, site_id, emails=None, names=None):
         """

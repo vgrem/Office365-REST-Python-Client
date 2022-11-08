@@ -1,4 +1,5 @@
 from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
@@ -16,6 +17,7 @@ from office365.sharepoint.sitehealth.summary import SiteHealthSummary
 from office365.sharepoint.sites.sph_site import SPHSite
 from office365.sharepoint.sites.upgrade_info import UpgradeInfo
 from office365.sharepoint.sites.usage_info import UsageInfo
+from office365.sharepoint.tenant.administration.site_administrators_info import SiteAdministratorsInfo
 from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
 from office365.sharepoint.webs.web import Web
 from office365.sharepoint.webs.template_collection import WebTemplateCollection
@@ -123,13 +125,13 @@ class Site(BaseEntity):
         """
         Sets a site as a landing site for your intranet.
         """
-        result = ClientResult(self.context)
+        return_type = ClientResult(self.context)
 
         def _site_loaded():
-            self.result = SPHSite.set_as_home_site(self.context, self.url, result)
+            self.result = SPHSite.set_as_home_site(self.context, self.url, return_type)
 
         self.ensure_property("Url", _site_loaded)
-        return result
+        return return_type
 
     def get_changes(self, query):
         """Returns the collection of all changes from the change log that have occurred within the scope of the site,
@@ -137,10 +139,10 @@ class Site(BaseEntity):
 
         :param office365.sharepoint.changes.query.ChangeQuery query: Specifies which changes to return
         """
-        changes = ChangeCollection(self.context)
-        qry = ServiceOperationQuery(self, "getChanges", None, query, "query", changes)
+        return_type = ChangeCollection(self.context)
+        qry = ServiceOperationQuery(self, "getChanges", None, query, "query", return_type)
         self.context.add_query(qry)
-        return changes
+        return return_type
 
     def get_recycle_bin_items(self, row_limit=100, is_ascending=True):
         """
@@ -157,6 +159,14 @@ class Site(BaseEntity):
         qry = ServiceOperationQuery(self, "GetRecycleBinItems", None, payload, None, result)
         self.context.add_query(qry)
         return result
+
+    def get_site_administrators(self):
+        return_type = ClientResult(self.context, ClientValueCollection(SiteAdministratorsInfo))
+
+        def _site_loaded():
+            self.context.tenant.get_site_administrators(self.id, return_type)
+        self.ensure_property("Id", _site_loaded)
+        return return_type
 
     def get_web_templates(self, lcid=1033, override_compat_level=0):
         """

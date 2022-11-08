@@ -5,6 +5,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.update_entity import UpdateEntityQuery
+from office365.sharepoint.activities.capabilities import ActivityCapabilities
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.files.version_event import FileVersionEvent
 from office365.sharepoint.internal.queries.download_file import create_download_file_query
@@ -487,6 +488,10 @@ class File(AbstractFile):
         qry = UpdateEntityQuery(item)
         self.context.add_query(qry)
         return self
+
+    @property
+    def activity_capabilities(self):
+        return self.properties.get("ActivityCapabilities", ActivityCapabilities())
 
     @property
     def author(self):

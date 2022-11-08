@@ -5,6 +5,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.activities.entity import SPActivityEntity
+from office365.sharepoint.activities.logger import ActivityLogger
 from office365.sharepoint.alerts.collection import AlertCollection
 from office365.sharepoint.authentication.acs_service_principal_info import SPACSServicePrincipalInfo
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
@@ -1265,6 +1266,11 @@ class Web(SecurableObject):
                                                         ResourcePath("Activities", self.resource_path)))
 
     @property
+    def activity_logger(self):
+        return self.properties.get("ActivityLogger",
+                                   ActivityLogger(self.context, ResourcePath("ActivityLogger", self.resource_path)))
+
+    @property
     def allow_rss_feeds(self):
         """Gets a Boolean value that specifies whether the site collection allows RSS feeds.
 
@@ -1672,6 +1678,7 @@ class Web(SecurableObject):
         if default_value is None:
             property_mapping = {
                 "AccessRequestsList": self.access_requests_list,
+                "ActivityLogger": self.activity_logger,
                 "AvailableFields": self.available_fields,
                 "AvailableContentTypes": self.available_content_types,
                 "AssociatedOwnerGroup": self.associated_owner_group,
@@ -1714,7 +1721,7 @@ class Web(SecurableObject):
     @property
     def resource_url(self):
         """Returns Web url"""
-        val = super(Web, self).resource_url
+        orig_resource_url = super(Web, self).resource_url
         if self._web_url is not None:
-            val = val.replace(self.context.service_root_url(), self._web_url + '/_api')
-        return val
+            orig_resource_url = orig_resource_url.replace(self.context.service_root_url(), self._web_url + '/_api')
+        return orig_resource_url

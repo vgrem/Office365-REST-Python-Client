@@ -130,11 +130,7 @@ class ClientContext(ClientRuntimeContext):
         :param int items_per_batch: Maximum to be selected for bulk operation
         """
         batch_request = ODataBatchV3Request(self, items_per_batch)
-
-        def _prepare_batch_request(request):
-            self.ensure_form_digest(request)
-
-        batch_request.beforeExecute += _prepare_batch_request
+        batch_request.beforeExecute += self.ensure_form_digest
         [batch_request.add_query(qry) for qry in self.pending_request()]
         batch_request.execute_query()
         return self
@@ -158,13 +154,13 @@ class ClientContext(ClientRuntimeContext):
             self._pending_request.beforeExecute += self._build_modification_query
         return self._pending_request
 
-    def ensure_form_digest(self, request_options):
+    def ensure_form_digest(self, request):
         """
-        :type request_options: RequestOptions
+        :type request: RequestOptions
         """
         if not self.context_info.is_valid:
             self._ctx_web_info = self._get_context_web_information()
-        request_options.set_header('X-RequestDigest', self._ctx_web_info.FormDigestValue)
+        request.set_header('X-RequestDigest', self._ctx_web_info.FormDigestValue)
 
     def _get_context_web_information(self):
         """Returns an ContextWebInformation object that specifies metadata about the site"""
@@ -438,7 +434,7 @@ class ClientContext(ClientRuntimeContext):
         if self.is_tenant:
             return Tenant(self)
         else:
-            admin_ctx = self.clone(self.tenant_url)
+            admin_ctx = self.clone(self.tenant_url, False)
             return Tenant(admin_ctx)
 
     @property
