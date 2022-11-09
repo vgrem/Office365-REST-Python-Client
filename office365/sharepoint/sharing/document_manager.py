@@ -11,43 +11,51 @@ from office365.sharepoint.userprofiles.sharedwithme.view_item_removal_result imp
 class DocumentSharingManager(BaseEntity):
     """Specifies document sharing related methods."""
 
-    def get_role_definition(self, role):
+    @staticmethod
+    def get_role_definition(context, role):
         """This method returns a role definition in the current web that is associated with a given Role
         (section 3.2.5.188) value.
 
+        :type context: office365.sharepoint.client_context.ClientContext
         :param int role: A Role value for which to obtain the associated role definition object.
         """
-        role_def = RoleDefinition(self.context)
-        self.context.web.role_definitions.add_child(role_def)
-        qry = ServiceOperationQuery(self, "GetRoleDefinition", [role], None, None, role_def)
-        qry.static = True
-        self.context.add_query(qry)
-        return role_def
+        return_type = RoleDefinition(context)
+        context.web.role_definitions.add_child(return_type)
+        binding_type = DocumentSharingManager(context)
+        qry = ServiceOperationQuery(binding_type, "GetRoleDefinition", [role], None, None, return_type, True)
+        context.add_query(qry)
+        return return_type
 
-    def remove_items_from_shared_with_me_view(self, item_urls):
+    @staticmethod
+    def remove_items_from_shared_with_me_view(context, item_urls):
         """
         Removes an item so that it no longer shows in the current user's 'Shared With Me' view. However, this
             does not remove the user's actual permissions to the item. Up to 200 items can be provided in a single call.
             Returns a list of results indicating whether the items were successfully removed. The length of this array
             will match the length of the itemUrls array that was provided.
 
+        :type context: office365.sharepoint.client_context.ClientContext
         :param list[str] item_urls: A list of absolute URLs of the items to be removed from the view.
             These items might belong to any site or site collection in the tenant.
         """
-        result = ClientResult(self.context, ClientValueCollection(SharedWithMeViewItemRemovalResult))
-        qry = ServiceOperationQuery(self, "RemoveItemsFromSharedWithMeView", [item_urls], None, None, result)
-        qry.static = True
-        self.context.add_query(qry)
-        return result
+        return_type = ClientResult(context, ClientValueCollection(SharedWithMeViewItemRemovalResult))
+        binding_type = DocumentSharingManager(context)
+        qry = ServiceOperationQuery(binding_type, "RemoveItemsFromSharedWithMeView", [item_urls], None, None,
+                                    return_type, True)
+        context.add_query(qry)
+        return return_type
 
-    def update_document_sharing_info(self, resource_address, user_role_assignments, validate_existing_permissions,
-                                     additive_mode, send_server_managed_notification, custom_message,
-                                     include_anonymous_links_in_notification, propagate_acl):
+    @staticmethod
+    def update_document_sharing_info(context, resource_address, user_role_assignments,
+                                     validate_existing_permissions=None, additive_mode=None,
+                                     send_server_managed_notification=None, custom_message=None,
+                                     include_anonymous_links_in_notification=None, propagate_acl=None):
         """
         This method allows a caller with the 'ManagePermission' permission to update sharing information about a
         document to enable document sharing with a set of users. It returns an array of
         UserSharingResult (section 3.2.5.190) elements where each element contains the sharing status for each user.
 
+        :type context: office365.sharepoint.client_context.ClientContext
         :param str resource_address: A URL that points to a securable object, which can be a document, folder or the
             root folder of a document library.
         :param list[UserRoleAssignment] user_role_assignments:An array of recipients and assigned roles on the securable
@@ -73,10 +81,10 @@ class DocumentSharingManager(BaseEntity):
             an anonymous access link in the email notification, and if the value is "false", no link will be included.
         :param bool propagate_acl: A flag to determine if permissions SHOULD be pushed to items with unique permission.
         """
-        result = ClientResult(self.context, ClientValueCollection(UserSharingResult))
+        return_type = ClientResult(context, ClientValueCollection(UserSharingResult))
         payload = {
             "resourceAddress": resource_address,
-            "userRoleAssignments": ClientValueCollection(UserRoleAssignment, user_role_assignments),
+            "userRoleAssignments": user_role_assignments,
             "validateExistingPermissions": validate_existing_permissions,
             "additiveMode": additive_mode,
             "sendServerManagedNotification": send_server_managed_notification,
@@ -84,10 +92,10 @@ class DocumentSharingManager(BaseEntity):
             "includeAnonymousLinksInNotification": include_anonymous_links_in_notification,
             "propagateAcl": propagate_acl
         }
-        qry = ServiceOperationQuery(self, "UpdateDocumentSharingInfo", None, payload, None, result)
-        qry.static = True
-        self.context.add_query(qry)
-        return result
+        binding_type = DocumentSharingManager(context)
+        qry = ServiceOperationQuery(binding_type, "UpdateDocumentSharingInfo", None, payload, None, return_type, True)
+        context.add_query(qry)
+        return return_type
 
     @property
     def entity_type_name(self):

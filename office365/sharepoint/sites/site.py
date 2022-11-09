@@ -261,16 +261,16 @@ class Site(BaseEntity):
         :type stop_redirect: bool
         :type web_id: str
         """
-        result = ClientResult(context)
+        return_type = ClientResult(context)
         payload = {
             "id": site_id,
             "stopRedirect": stop_redirect,
             "webId": web_id
         }
-        qry = ServiceOperationQuery(context.site, "GetUrlByIdForWeb", None, payload, None, result)
+        qry = ServiceOperationQuery(context.site, "GetUrlByIdForWeb", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def exists(context, url):

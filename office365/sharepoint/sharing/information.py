@@ -14,3 +14,11 @@ class SharingInformation(BaseEntity):
         """PickerSettings used by the PeoplePicker Control."""
         return self.properties.get('pickerSettings',
                                    PickerSettings(self.context, ResourcePath("pickerSettings", self.resource_path)))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "pickerSettings": self.picker_settings,
+            }
+            default_value = property_mapping.get(name, None)
+        return super(SharingInformation, self).get_property(name, default_value)

@@ -42,6 +42,15 @@ class Office365Tenant(BaseEntity):
         self.context.add_query(qry)
         return self
 
+    def disable_sharing_for_non_owners_of_site(self, site_url):
+        """
+        :param str site_url:
+        """
+        payload = {"siteUrl": site_url}
+        qry = ServiceOperationQuery(self, "DisableSharingForNonOwnersOfSite", None, payload)
+        self.context.add_query(qry)
+        return self
+
     def get_tenant_cdn_enabled(self, cdn_type):
         """
         Returns whether Public content delivery network (CDN) or Private CDN is enabled on the tenant level.

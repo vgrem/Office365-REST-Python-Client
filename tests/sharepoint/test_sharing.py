@@ -24,8 +24,7 @@ class TestSharePointSharing(TestCase):
         cls.client = client
 
     def test1_get_role_def(self):
-        dsm = DocumentSharingManager(self.client)
-        role_def = dsm.get_role_definition(RoleType.Contributor).execute_query()
+        role_def = DocumentSharingManager.get_role_definition(self.client, RoleType.Contributor).execute_query()
         self.assertTrue(role_def.name, "Full Control")
 
     def test2_get_object_sharing_settings(self):
