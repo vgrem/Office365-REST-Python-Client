@@ -1,5 +1,5 @@
 from office365.entity_collection import EntityCollection
-from office365.onedrive.workbooks.tables.row import WorkbookTableRow
+from office365.onedrive.workbooks.tables.rows.row import WorkbookTableRow
 
 
 class WorkbookTableRowCollection(EntityCollection):

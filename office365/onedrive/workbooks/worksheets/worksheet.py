@@ -2,8 +2,8 @@ from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.onedrive.workbooks.charts.chart import WorkbookChart
 from office365.onedrive.workbooks.names.named_item import WorkbookNamedItem
+from office365.onedrive.workbooks.tables.collection import WorkbookTableCollection
 from office365.onedrive.workbooks.tables.pivot_table import WorkbookPivotTable
-from office365.onedrive.workbooks.tables.table import WorkbookTable
 from office365.onedrive.workbooks.worksheets.protection import WorkbookWorksheetProtection
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -40,8 +40,7 @@ class WorkbookWorksheet(Entity):
     def tables(self):
         """Collection of tables that are part of the worksheet."""
         return self.properties.get('tables',
-                                   EntityCollection(self.context, WorkbookTable,
-                                                    ResourcePath("tables", self.resource_path)))
+                                   WorkbookTableCollection(self.context, ResourcePath("tables", self.resource_path)))
 
     @property
     def pivot_tables(self):

@@ -342,7 +342,7 @@ class ListItem(SecurableObject):
         from office365.sharepoint.attachments.collection import AttachmentCollection
         return self.properties.get("AttachmentFiles",
                                    AttachmentCollection(self.context,
-                                                        ResourcePath("AttachmentFiles", self.resource_path)))
+                                                        ResourcePath("AttachmentFiles", self.resource_path), self))
 
     @property
     def content_type(self):

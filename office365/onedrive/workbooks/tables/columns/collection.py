@@ -1,5 +1,5 @@
 from office365.entity_collection import EntityCollection
-from office365.onedrive.workbooks.tables.column import WorkbookTableColumn
+from office365.onedrive.workbooks.tables.columns.column import WorkbookTableColumn
 
 
 class WorkbookTableColumnCollection(EntityCollection):

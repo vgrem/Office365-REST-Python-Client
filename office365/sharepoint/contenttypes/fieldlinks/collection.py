@@ -1,5 +1,5 @@
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.contenttypes.field_link import FieldLink
+from office365.sharepoint.contenttypes.fieldlinks.field_link import FieldLink
 
 
 class FieldLinkCollection(BaseEntityCollection):
