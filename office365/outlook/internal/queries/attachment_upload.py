@@ -15,35 +15,31 @@ def create_attachment_upload_query(binding_type, return_type, source_path, chunk
     qry = UploadSessionQuery(binding_type, {"AttachmentItem": AttachmentItem.create_file(source_path)})
     context = binding_type.context
 
-    def _upload_session(resp):
+    def _start_upload(resp):
         """
         :type resp: requests.Response
         """
         resp.raise_for_status()
         with open(source_path, 'rb') as source_file:
-            session_request = UploadSessionRequest(context, source_file, chunk_size)
-            session_request.add_query(qry)
+            session_request = UploadSessionRequest(context, source_file, chunk_size, chunk_uploaded)
 
             def _construct_request(request):
                 auth_token = parse_query_string(request.url, "authtoken")
                 request.set_header('Authorization', 'Bearer {0}'.format(auth_token))
-
             session_request.beforeExecute += _construct_request
 
             def _process_response(response):
                 """
                 :type response: requests.Response
                 """
-                if callable(chunk_uploaded):
-                    chunk_uploaded(session_request.range_end)
                 location = response.headers.get("Location", None)
                 if location is None:
                     return
                 attachment_id = location[location.find("Attachments(") + 13:-2]
                 return_type.set_property("id", attachment_id)
-
             session_request.afterExecute += _process_response
-            session_request.execute_query()
 
-    context.after_execute(_upload_session)
+            session_request.execute_query(qry)
+
+    context.after_execute(_start_upload)
     return qry

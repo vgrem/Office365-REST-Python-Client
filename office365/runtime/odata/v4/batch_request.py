@@ -25,20 +25,20 @@ class ODataV4BatchRequest(ODataBatchRequest):
         request.data = self._prepare_payload(query)
         return request
 
-    def process_response(self, response):
+    def process_response(self, response, query):
         """Parses an HTTP response.
 
         :type response: requests.Response
+        :type query: office365.runtime.queries.batch.BatchQuery
         """
-        for qry, sub_response in self._extract_response(response):
-            sub_response.raise_for_status()
-            self.context.pending_request().add_query(qry)
-            self.context.pending_request().process_response(sub_response)
-            self.context.pending_request().clear()
+        for sub_qry, sub_resp in self._extract_response(response, query):
+            sub_resp.raise_for_status()
+            self.context.pending_request().process_response(sub_resp, sub_qry)
 
-    def _extract_response(self, response):
+    def _extract_response(self, response, query):
         """
-        type batch_response: requests.Response
+        :type response: requests.Response
+        :type query: office365.runtime.queries.batch.BatchQuery
         """
         json_responses = response.json()
         for json_resp in json_responses["responses"]:
@@ -47,7 +47,7 @@ class ODataV4BatchRequest(ODataBatchRequest):
             resp.headers = CaseInsensitiveDict(json_resp['headers'])
             resp._content = json.dumps(json_resp["body"]).encode('utf-8')
             qry_id = int(json_resp["id"])
-            qry = self.current_query.ordered_queries[qry_id]
+            qry = query.ordered_queries[qry_id]
             yield qry, resp
 
     def _prepare_payload(self, query):

@@ -14,12 +14,28 @@ T = TypeVar('T', bound='ClientObject')
 
 class ClientRuntimeContext(object):
 
+    def __init__(self):
+        self._queries = []
+        self._current_query = None
+
+    @property
+    def current_query(self):
+        """
+        :rtype: office365.runtime.queries.client_query.ClientQuery
+        """
+        return self._current_query
+
+    @property
+    def has_pending_request(self):
+        return len(self._queries) > 0
+
     def build_request(self, query):
         """
         Builds a request
 
         :type query: office365.runtime.queries.client_query.ClientQuery
         """
+        self._current_query = query
         return self.pending_request().build_request(query)
 
     def execute_query_retry(self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None,
@@ -38,10 +54,10 @@ class ClientRuntimeContext(object):
             try:
                 self.execute_query()
                 if callable(success_callback):
-                    success_callback(self.pending_request().current_query.return_type)
+                    success_callback(self.current_query.return_type)
                 break
             except exceptions as e:
-                self.add_query(self.pending_request().current_query)
+                self.add_query(self.current_query)
                 if callable(failure_callback):
                     failure_callback(retry, e)
                 sleep(timeout_secs)
@@ -115,7 +131,7 @@ class ClientRuntimeContext(object):
             :type resp: requests.Response
             """
             resp.raise_for_status()
-            if self.pending_request().current_query.id == query.id:
+            if self.current_query.id == query.id:
                 self.pending_request().afterExecute -= _process_response
                 action(*args, **kwargs)
 
@@ -148,17 +164,21 @@ class ClientRuntimeContext(object):
 
     def execute_query(self):
         """Submit request(s) to the server"""
-        self.pending_request().execute_query()
+        while self.has_pending_request:
+            qry = self._get_next_query()
+            self.pending_request().execute_query(qry)
 
     def add_query(self, query):
         """
         :type query: office365.runtime.queries.client_query.ClientQuery
         """
-        self.pending_request().add_query(query)
+        self._current_query = query
+        self._queries.append(query)
         return self
 
     def clear(self):
-        self.pending_request().clear()
+        self._current_query = None
+        self._queries = []
         return self
 
     def get_metadata(self):
@@ -183,3 +203,18 @@ class ClientRuntimeContext(object):
         self.after_execute(_process_download_response)
         self.add_query(qry)
         return return_type
+
+    def _get_next_query(self, n=1):
+        """
+        :type n: int
+        """
+        if n == 1:
+            qry = self._queries.pop(0)
+        else:
+            from office365.runtime.queries.batch import BatchQuery
+            qry = BatchQuery(self)
+            while self.has_pending_request and n > 0:
+                qry.add(self._queries.pop(0))
+                n = n - 1
+        self._current_query = qry
+        return qry

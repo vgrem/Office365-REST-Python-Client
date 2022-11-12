@@ -30,22 +30,22 @@ class ODataBatchV3Request(ODataBatchRequest):
         request.data = self._prepare_payload(query)
         return request
 
-    def process_response(self, response):
+    def process_response(self, response, query):
         """
         Parses an HTTP response.
 
         :type response: requests.Response
+        :type query: office365.runtime.queries.batch.BatchQuery
         """
-        for qry, sub_response in self._extract_response(response):
-            sub_response.raise_for_status()
-            self.context.pending_request().add_query(qry)
-            self.context.pending_request().process_response(sub_response)
-            self.context.clear()
+        for sub_qry, sub_resp in self._extract_response(response, query):
+            sub_resp.raise_for_status()
+            self.context.pending_request().process_response(sub_resp, sub_qry)
 
-    def _extract_response(self, response):
+    def _extract_response(self, response, query):
         """Parses a multipart/mixed response body from the position defined by the context.
 
         :type response: requests.Response
+        :type query: office365.runtime.queries.batch.BatchQuery
         """
         content_type = response.headers['Content-Type'].encode("ascii")
         http_body = (
@@ -60,7 +60,7 @@ class ODataBatchV3Request(ODataBatchRequest):
         query_id = 0
         for raw_response in message.get_payload():
             if raw_response.get_content_type() == "application/http":
-                qry = self.current_query.ordered_queries[query_id]
+                qry = query.ordered_queries[query_id]
                 query_id += 1
                 yield qry, self._deserialize_response(raw_response)
 

@@ -39,8 +39,6 @@ class ODataRequest(ClientRequest):
         """
         :type query: office365.runtime.queries.client_query.ClientQuery
         """
-        self._current_query = query
-
         request = RequestOptions(query.url)
         self._build_specific_request(request)
         # set method
@@ -53,12 +51,12 @@ class ODataRequest(ClientRequest):
                 request.data = self._build_payload(query)
         return request
 
-    def process_response(self, response):
+    def process_response(self, response, query):
         """
         :type response: requests.Response
+        :type query: office365.runtime.queries.client_query.ClientQuery
         """
         json_format = copy.deepcopy(self.default_json_format)
-        query = self.current_query
         return_type = query.return_type
         if return_type is None:
             return

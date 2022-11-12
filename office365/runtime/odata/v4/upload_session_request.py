@@ -8,14 +8,17 @@ from office365.runtime.types.event_handler import EventHandler
 
 class UploadSessionRequest(ClientRequest):
 
-    def __init__(self, context, file_object, chunk_size):
+    def __init__(self, context, file_object, chunk_size, chunk_uploaded=None):
         """
-        :param typing.IO file_object:
+        :type file_object: typing.IO
+        :type chunk_size: int
+        :type chunk_uploaded: (int) -> None
         """
         super(UploadSessionRequest, self).__init__(context)
         self._file_object = file_object
         self.chunk_uploaded = EventHandler(True)
         self._chunk_size = chunk_size
+        self._chunk_uploaded = chunk_uploaded
         self._range_start = 0
         self._range_end = 0
 
@@ -33,10 +36,16 @@ class UploadSessionRequest(ClientRequest):
         request.data = range_data
         return request
 
-    def process_response(self, response):
+    def process_response(self, response, query):
+        """
+        :type response: requests.Response
+        :type query: office365.runtime.queries.upload_session.UploadSessionQuery
+        """
         response.raise_for_status()
+        if callable(self._chunk_uploaded):
+            self._chunk_uploaded(self.range_end)
         if self.has_pending_read:
-            self.add_query(self.current_query)
+            self.execute_query(query)
 
     def _read_next(self):
         self._range_start = self._file_object.tell()

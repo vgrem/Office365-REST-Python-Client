@@ -129,10 +129,11 @@ class ClientContext(ClientRuntimeContext):
 
         :param int items_per_batch: Maximum to be selected for bulk operation
         """
-        batch_request = ODataBatchV3Request(self, items_per_batch)
+        batch_request = ODataBatchV3Request(self)
         batch_request.beforeExecute += self.ensure_form_digest
-        [batch_request.add_query(qry) for qry in self.pending_request()]
-        batch_request.execute_query()
+        while self.has_pending_request:
+            qry = self._get_next_query(items_per_batch)
+            batch_request.execute_query(qry)
         return self
 
     def build_request(self, query):
@@ -223,16 +224,14 @@ class ClientContext(ClientRuntimeContext):
         if request.url == "{0}/contextInfo".format(self.service_root_url()):
             return
 
-        query = self.pending_request().current_query
-
         if request.method == HttpMethod.Post:
             self.ensure_form_digest(request)
         # set custom SharePoint control headers
         if isinstance(self.pending_request().default_json_format, JsonLightFormat):
-            if isinstance(query, DeleteEntityQuery):
+            if isinstance(self.current_query, DeleteEntityQuery):
                 request.ensure_header("X-HTTP-Method", "DELETE")
                 request.ensure_header("IF-MATCH", '*')
-            elif isinstance(query, UpdateEntityQuery):
+            elif isinstance(self.current_query, UpdateEntityQuery):
                 request.ensure_header("X-HTTP-Method", "MERGE")
                 request.ensure_header("IF-MATCH", '*')
 

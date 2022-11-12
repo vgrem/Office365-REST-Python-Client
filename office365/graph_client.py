@@ -72,9 +72,10 @@ class GraphClient(ClientRuntimeContext):
 
         :param int items_per_batch: Maximum to be selected for bulk operation
         """
-        batch_request = ODataV4BatchRequest(self, items_per_batch)
-        [batch_request.add_query(qry) for qry in self.pending_request()]
-        batch_request.execute_query()
+        batch_request = ODataV4BatchRequest(self)
+        while self.has_pending_request:
+            qry = self._get_next_query(items_per_batch)
+            batch_request.execute_query(qry)
         return self
 
     def pending_request(self):
@@ -89,7 +90,7 @@ class GraphClient(ClientRuntimeContext):
 
         :type request: RequestOptions
         """
-        query = self.pending_request().current_query
+        query = self.current_query
         if isinstance(query, UpdateEntityQuery):
             request.method = HttpMethod.Patch
         elif isinstance(query, DeleteEntityQuery):

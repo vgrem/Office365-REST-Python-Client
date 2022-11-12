@@ -59,7 +59,7 @@ class ClientObject(object):
 
     def build_request(self):
         """Builds a request"""
-        return self.context.pending_request().current_query.build_request()
+        return self.context.current_query.build_request()
 
     def get(self):
         """

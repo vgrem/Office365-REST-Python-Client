@@ -17,34 +17,12 @@ class ClientRequest(object):
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         """
         self._context = context
-        self._queries = []
-        self._current_query = None
         self.beforeExecute = EventHandler()
         self.afterExecute = EventHandler()
 
     @property
     def context(self):
         return self._context
-
-    @property
-    def current_query(self):
-        """
-        :rtype: office365.runtime.queries.client_query.ClientQuery
-        """
-        return self._current_query
-
-    def add_query(self, query):
-        """
-        :type query: office365.runtime.queries.client_query.ClientQuery
-        """
-        self._current_query = query
-        self._queries.append(query)
-        return self
-
-    def clear(self):
-        self._current_query = None
-        self._queries = []
-        return self
 
     @abstractmethod
     def build_request(self, query):
@@ -57,25 +35,27 @@ class ClientRequest(object):
         pass
 
     @abstractmethod
-    def process_response(self, response):
+    def process_response(self, response, query):
         """
         :type response: requests.Response
+        :type query: office365.runtime.queries.client_query.ClientQuery
         """
         pass
 
-    def execute_query(self):
+    def execute_query(self, query):
         """
         Submits a pending request to the server
+
+        :type query: office365.runtime.queries.client_query.ClientQuery
         """
-        for qry in self:
-            try:
-                request = self.build_request(qry)
-                response = self.execute_request_direct(request)
-                response.raise_for_status()
-                self.process_response(response)
-                self.afterExecute.notify(response)
-            except HTTPError as e:
-                raise ClientRequestException(*e.args, response=e.response)
+        try:
+            request = self.build_request(query)
+            response = self.execute_request_direct(request)
+            response.raise_for_status()
+            self.process_response(response, query)
+            self.afterExecute.notify(response)
+        except HTTPError as e:
+            raise ClientRequestException(*e.args, response=e.response)
 
     def execute_request_direct(self, request):
         """Execute the client request
@@ -127,9 +107,3 @@ class ClientRequest(object):
                                     stream=request.stream,
                                     proxies=request.proxies)
         return response
-
-    def __iter__(self):
-        while len(self._queries) > 0:
-            qry = self._queries.pop(0)
-            self._current_query = qry
-            yield qry

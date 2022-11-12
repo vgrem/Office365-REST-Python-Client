@@ -17,7 +17,7 @@ def run_example_1():
     draft_message = client.me.messages.add(
         subject="Meet for lunch?",
         body="The new cafeteria is open.",
-        to_recipients=["fannyd@contoso.onmicrosoft.com", "vvgrem@gmail.com"]
+        to_recipients=["fannyd@contoso.onmicrosoft.com"]
     ).execute_query()
 
     draft_message.upload_attachment(local_path, print_progress).send().execute_query()
@@ -34,5 +34,6 @@ def run_example_2():
 
 
 run_example_1()
+#run_example_2()
 
 
