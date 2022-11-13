@@ -63,3 +63,9 @@ class BatchQuery(ClientQuery):
     @property
     def has_change_sets(self):
         return len(self.change_sets) > 0
+
+    @property
+    def url(self):
+        return "{0}/$batch".format(self.context.service_root_url())
+
+

@@ -20,8 +20,8 @@ def create_attachment_upload_query(binding_type, return_type, source_path, chunk
         :type resp: requests.Response
         """
         resp.raise_for_status()
-        with open(source_path, 'rb') as source_file:
-            session_request = UploadSessionRequest(context, source_file, chunk_size, chunk_uploaded)
+        with open(source_path, 'rb') as local_file:
+            session_request = UploadSessionRequest(local_file, chunk_size, chunk_uploaded)
 
             def _construct_request(request):
                 auth_token = parse_query_string(request.url, "authtoken")

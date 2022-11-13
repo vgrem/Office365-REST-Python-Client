@@ -15,13 +15,13 @@ from office365.runtime.queries.update_entity import UpdateEntityQuery
 
 class ODataRequest(ClientRequest):
 
-    def __init__(self, context, json_format):
+    def __init__(self, json_format):
         """
+        Creates OData request
 
-        :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         :type json_format: office365.runtime.odata.json_format.ODataJsonFormat
         """
-        super(ODataRequest, self).__init__(context)
+        super(ODataRequest, self).__init__()
         self._default_json_format = json_format
 
     @property
@@ -32,7 +32,7 @@ class ODataRequest(ClientRequest):
         """
         :type request: office365.runtime.http.request_options.RequestOptions
         """
-        self._build_specific_request(request)
+        self._ensure_json_format(request)
         return super(ODataRequest, self).execute_request_direct(request)
 
     def build_request(self, query):
@@ -40,7 +40,7 @@ class ODataRequest(ClientRequest):
         :type query: office365.runtime.queries.client_query.ClientQuery
         """
         request = RequestOptions(query.url)
-        self._build_specific_request(request)
+        self._ensure_json_format(request)
         # set method
         request.method = HttpMethod.Get
         if isinstance(query, DeleteEntityQuery):
@@ -142,7 +142,7 @@ class ODataRequest(ClientRequest):
             json = {query.parameter_name: json}
         return json
 
-    def _build_specific_request(self, request):
+    def _ensure_json_format(self, request):
         """
         :type request: RequestOptions
         """

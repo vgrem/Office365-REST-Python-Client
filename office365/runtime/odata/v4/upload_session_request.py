@@ -8,13 +8,13 @@ from office365.runtime.types.event_handler import EventHandler
 
 class UploadSessionRequest(ClientRequest):
 
-    def __init__(self, context, file_object, chunk_size, chunk_uploaded=None):
+    def __init__(self, file_object, chunk_size, chunk_uploaded=None):
         """
         :type file_object: typing.IO
         :type chunk_size: int
         :type chunk_uploaded: (int) -> None
         """
-        super(UploadSessionRequest, self).__init__(context)
+        super(UploadSessionRequest, self).__init__()
         self._file_object = file_object
         self.chunk_uploaded = EventHandler(True)
         self._chunk_size = chunk_size

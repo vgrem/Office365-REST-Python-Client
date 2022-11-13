@@ -17,8 +17,7 @@ class ODataV4BatchRequest(ODataRequest):
 
         :type query: office365.runtime.queries.batch.BatchQuery
         """
-        url = "{0}/$batch".format(self.context.service_root_url())
-        request = RequestOptions(url)
+        request = RequestOptions(query.url)
         request.method = HttpMethod.Post
         request.ensure_header('Content-Type', "application/json")
         request.ensure_header('Accept', "application/json")
@@ -59,23 +58,23 @@ class ODataV4BatchRequest(ODataRequest):
         """
         requests_json = []
         for qry in query.queries:
-            request_id = str(len(requests_json))
-            request = qry.build_request()
-            requests_json.append(self._normalize_request(request, request_id))
+            qry_id = str(len(requests_json))
+            requests_json.append(self._normalize_request(qry, qry_id))
 
         return {"requests": requests_json}
 
-    def _normalize_request(self, request, _id, depends_on=None):
+    @staticmethod
+    def _normalize_request(query, query_id, depends_on=None):
         """
-
-        :type request: RequestOptions
-        :type _id: str
+        :type query: office365.runtime.queries.client_query.ClientQuery
+        :type query_id: str
         :type depends_on:  list[str] or None
         """
+        request = query.build_request()
         allowed_props = ["id", "method", "headers", "url", "body"]
         request_json = dict((k, v) for k, v in vars(request).items() if v is not None and k in allowed_props)
-        request_json["id"] = _id
+        request_json["id"] = query_id
         if depends_on is not None:
             request_json["dependsOn"] = depends_on
-        request_json["url"] = request_json["url"].replace(self.context.service_root_url(), "")
+        request_json["url"] = request_json["url"].replace(query.context.service_root_url(), "")
         return request_json

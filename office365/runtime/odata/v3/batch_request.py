@@ -21,8 +21,7 @@ class ODataBatchV3Request(ODataRequest):
 
         :type query: office365.runtime.queries.batch.BatchQuery
         """
-        url = "{0}/$batch".format(self.context.service_root_url())
-        request = RequestOptions(url)
+        request = RequestOptions(query.url)
         request.method = HttpMethod.Post
         media_type = "multipart/mixed"
         content_type = "; ".join([media_type, "boundary={0}".format(query.current_boundary)])

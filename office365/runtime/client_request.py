@@ -10,19 +10,12 @@ from office365.runtime.types.event_handler import EventHandler
 
 class ClientRequest(object):
 
-    def __init__(self, context):
+    def __init__(self):
         """
         Abstract request client
-
-        :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         """
-        self._context = context
         self.beforeExecute = EventHandler()
         self.afterExecute = EventHandler()
-
-    @property
-    def context(self):
-        return self._context
 
     @abstractmethod
     def build_request(self, query):

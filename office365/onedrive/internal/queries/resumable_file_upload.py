@@ -22,8 +22,8 @@ def create_resumable_file_upload_query(return_type, local_path, chunk_size, chun
         :type resp: requests.Response
         """
         resp.raise_for_status()
-        with open(local_path, 'rb') as f:
-            session_request = UploadSessionRequest(context, f, chunk_size, chunk_uploaded)
+        with open(local_path, 'rb') as local_file:
+            session_request = UploadSessionRequest(local_file, chunk_size, chunk_uploaded)
             session_request.execute_query(qry)
     context.after_execute(_start_upload)
     return qry

@@ -71,7 +71,7 @@ class GraphClient(ClientRuntimeContext):
 
         :param int items_per_batch: Maximum to be selected for bulk operation
         """
-        batch_request = ODataV4BatchRequest(self, V4JsonFormat())
+        batch_request = ODataV4BatchRequest(V4JsonFormat())
         batch_request.beforeExecute += self._authenticate_request
         while self.has_pending_request:
             qry = self._get_next_query(items_per_batch)
@@ -80,7 +80,7 @@ class GraphClient(ClientRuntimeContext):
 
     def pending_request(self):
         if self._pending_request is None:
-            self._pending_request = ODataRequest(self, V4JsonFormat())
+            self._pending_request = ODataRequest(V4JsonFormat())
             self._pending_request.beforeExecute += self._authenticate_request
             self._pending_request.beforeExecute += self._build_specific_query
         return self._pending_request

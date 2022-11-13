@@ -129,7 +129,7 @@ class ClientContext(ClientRuntimeContext):
 
         :param int items_per_batch: Maximum to be selected for bulk operation
         """
-        batch_request = ODataBatchV3Request(self, JsonLightFormat())
+        batch_request = ODataBatchV3Request(JsonLightFormat())
         batch_request.beforeExecute += self._authenticate_request
         batch_request.beforeExecute += self.ensure_form_digest
         while self.has_pending_request:
@@ -152,7 +152,7 @@ class ClientContext(ClientRuntimeContext):
         :return: ODataRequest
         """
         if self._pending_request is None:
-            self._pending_request = ODataRequest(self, JsonLightFormat())
+            self._pending_request = ODataRequest(JsonLightFormat())
             self._pending_request.beforeExecute += self._authenticate_request
             self._pending_request.beforeExecute += self._build_modification_query
         return self._pending_request
