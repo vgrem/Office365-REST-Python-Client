@@ -53,8 +53,7 @@ class GraphClient(ClientRuntimeContext):
         :param () -> dict acquire_token_callback: Acquire token function
         """
         super(GraphClient, self).__init__()
-        self._pending_request = ODataRequest(self, V4JsonFormat())
-        self._pending_request.beforeExecute += self._build_specific_query
+        self._pending_request = None
         self._resource = "https://graph.microsoft.com"
         self._authority_host_url = "https://login.microsoftonline.com"
         self._acquire_token_callback = acquire_token_callback
@@ -72,13 +71,18 @@ class GraphClient(ClientRuntimeContext):
 
         :param int items_per_batch: Maximum to be selected for bulk operation
         """
-        batch_request = ODataV4BatchRequest(self)
+        batch_request = ODataV4BatchRequest(self, V4JsonFormat())
+        batch_request.beforeExecute += self._authenticate_request
         while self.has_pending_request:
             qry = self._get_next_query(items_per_batch)
             batch_request.execute_query(qry)
         return self
 
     def pending_request(self):
+        if self._pending_request is None:
+            self._pending_request = ODataRequest(self, V4JsonFormat())
+            self._pending_request.beforeExecute += self._authenticate_request
+            self._pending_request.beforeExecute += self._build_specific_query
         return self._pending_request
 
     def service_root_url(self):
@@ -86,17 +90,16 @@ class GraphClient(ClientRuntimeContext):
 
     def _build_specific_query(self, request):
         """
-        Builds Graph specific request
+        Builds Graph specific HTTP request
 
         :type request: RequestOptions
         """
-        query = self.current_query
-        if isinstance(query, UpdateEntityQuery):
+        if isinstance(self.current_query, UpdateEntityQuery):
             request.method = HttpMethod.Patch
-        elif isinstance(query, DeleteEntityQuery):
+        elif isinstance(self.current_query, DeleteEntityQuery):
             request.method = HttpMethod.Delete
 
-    def authenticate_request(self, request):
+    def _authenticate_request(self, request):
         """
         Authenticate request
 

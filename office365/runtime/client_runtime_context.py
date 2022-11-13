@@ -76,13 +76,6 @@ class ClientRuntimeContext(object):
         """
         pass
 
-    @abc.abstractmethod
-    def authenticate_request(self, request):
-        """
-        :type request: office365.runtime.http.request_options.RequestOptions
-        """
-        pass
-
     def load(self, client_object, properties_to_retrieve=None, before_loaded=None, after_loaded=None):
         """Prepare retrieval query
 

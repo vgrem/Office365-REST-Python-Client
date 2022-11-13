@@ -5,10 +5,10 @@ from requests.structures import CaseInsensitiveDict
 
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.odata.batch_request import ODataBatchRequest
+from office365.runtime.odata.request import ODataRequest
 
 
-class ODataV4BatchRequest(ODataBatchRequest):
+class ODataV4BatchRequest(ODataRequest):
     """ JSON batch request """
 
     def build_request(self, query):
@@ -33,9 +33,10 @@ class ODataV4BatchRequest(ODataBatchRequest):
         """
         for sub_qry, sub_resp in self._extract_response(response, query):
             sub_resp.raise_for_status()
-            self.context.pending_request().process_response(sub_resp, sub_qry)
+            super(ODataV4BatchRequest, self).process_response(sub_resp, sub_qry)
 
-    def _extract_response(self, response, query):
+    @staticmethod
+    def _extract_response(response, query):
         """
         :type response: requests.Response
         :type query: office365.runtime.queries.batch.BatchQuery

@@ -63,7 +63,6 @@ class ClientRequest(object):
         :type request: office365.runtime.http.request_options.RequestOptions
         """
         self.beforeExecute.notify(request)
-        self.context.authenticate_request(request)
         if request.method == HttpMethod.Post:
             if request.is_bytes or request.is_file:
                 response = requests.post(url=request.url,

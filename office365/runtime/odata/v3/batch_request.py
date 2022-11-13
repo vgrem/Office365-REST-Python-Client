@@ -9,11 +9,11 @@ from email.message import Message
 
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.odata.batch_request import ODataBatchRequest
+from office365.runtime.odata.request import ODataRequest
 from office365.runtime.queries.batch import create_boundary
 
 
-class ODataBatchV3Request(ODataBatchRequest):
+class ODataBatchV3Request(ODataRequest):
 
     def build_request(self, query):
         """
@@ -39,7 +39,7 @@ class ODataBatchV3Request(ODataBatchRequest):
         """
         for sub_qry, sub_resp in self._extract_response(response, query):
             sub_resp.raise_for_status()
-            self.context.pending_request().process_response(sub_resp, sub_qry)
+            super(ODataBatchV3Request, self).process_response(sub_resp, sub_qry)
 
     def _extract_response(self, response, query):
         """Parses a multipart/mixed response body from the position defined by the context.
