@@ -80,6 +80,16 @@ class Web(SecurableObject):
         super(Web, self).__init__(context, resource_path)
         self._web_url = None
 
+    def add_cross_farm_message(self, message):
+        """
+        :param str message:
+        """
+        payload = {"messagePayloadBase64": message}
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(self, "AddCrossFarmMessage", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def get_site_script(self, include_branding=True, included_lists=None, include_links_to_exported_items=True,
                         include_regional_settings=True):
         """
@@ -597,6 +607,16 @@ class Web(SecurableObject):
         return_type = User(self.context)
         self.site_users.add_child(return_type)
         qry = ServiceOperationQuery(self, "EnsureUser", [login_name], None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def ensure_tenant_app_catalog(self, caller_id):
+        """
+        :param str caller_id:
+        """
+        return_type = ClientResult(self.context, bool())
+        payload = {"callerId": caller_id}
+        qry = ServiceOperationQuery(self, "EnsureTenantAppCatalog", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 

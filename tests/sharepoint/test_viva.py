@@ -15,4 +15,9 @@ class TestViva(SPTestCase):
         return_type = self.client.ee.app_configuration.get().execute_query()
         self.assertIsNotNone(return_type.resource_path)
 
+    #def test2_get_dashboard_content(self):
+    #    return_type = self.client.ee.dashboard_content().execute_query()
+    #    self.assertIsNotNone(return_type.value)
+
+
 

@@ -11,8 +11,18 @@ class EmployeeEngagement(BaseEntity):
     def __init__(self, context):
         super(EmployeeEngagement, self).__init__(context, ResourcePath("SP.EmployeeEngagement"))
 
+    def dashboard_content(self, override_language_code=None):
+        """
+        :param str override_language_code:
+        """
+        return_type = ClientResult(self.context, str())
+        payload = {"return return_type": override_language_code}
+        qry = ServiceOperationQuery(self, "DashboardContent", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def viva_home_configuration(self):
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, dict())
         qry = ServiceOperationQuery(self, "VivaHomeConfiguration", None, None, None, return_type)
         self.context.add_query(qry)
 

@@ -100,6 +100,22 @@ class List(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
+    def search_lookup_field_choices(self, target_field_name, begins_with_search_string, paging_info):
+        """
+        :param str target_field_name:
+        :param str begins_with_search_string:
+        :param str paging_info:
+        """
+        return_type = FlowSynchronizationResult(self.context)
+        payload = {
+            "targetFieldName": target_field_name,
+            "beginsWithSearchString": begins_with_search_string,
+            "pagingInfo": paging_info
+        }
+        qry = ServiceOperationQuery(self, "SearchLookupFieldChoices", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def sync_flow_callback_url(self, flow_id):
         """
         :param str flow_id:
@@ -157,10 +173,10 @@ class List(SecurableObject):
 
     def recycle(self):
         """Moves the list to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "Recycle", None, None, None, result)
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "Recycle", None, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def render_list_data(self, view_xml):
         """
@@ -211,7 +227,7 @@ class List(SecurableObject):
         :param str folder_path: Decoded path of the folder where the items belong to. If not provided,
             the server will try to find items to update under root folder.
         """
-        result = ClientValueCollection(ListItemFormUpdateValue)
+        return_type = ClientResult(self.context, ClientValueCollection(ListItemFormUpdateValue))
         params = {
             "itemIds": item_ids,
             "formValues": ClientValueCollection(ListItemFormUpdateValue, form_values),
@@ -219,9 +235,9 @@ class List(SecurableObject):
             "checkInComment": checkin_comment,
             "folderPath": folder_path
         }
-        qry = ServiceOperationQuery(self, "BulkValidateUpdateListItems", None, params, None, result)
+        qry = ServiceOperationQuery(self, "BulkValidateUpdateListItems", None, params, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def get_lookup_field_choices(self, target_field_name, paging_info=None):
         """
@@ -229,7 +245,7 @@ class List(SecurableObject):
         :param str target_field_name:
         :param str paging_info:
         """
-        result = ClientResult(self.context)
+        result = ClientResult(self.context, str())
         params = {
             "targetFieldName": target_field_name,
             "pagingInfo": paging_info
@@ -267,7 +283,7 @@ class List(SecurableObject):
             "privateView": private_view,
             "uri": uri
         }
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, str())
         qry = ServiceOperationQuery(self, "SaveAsNewView", None, payload, None, return_type)
         self.context.add_query(qry)
         return self
@@ -311,13 +327,13 @@ class List(SecurableObject):
         :return: ClientResult
         """
 
-        result = ClientResult(self.context)
+        return_type = ClientResult(self.context)
         payload = {
             "sourceUrl": source_url
         }
-        qry = ServiceOperationQuery(self, "getWebDavUrl", None, payload, None, result)
+        qry = ServiceOperationQuery(self, "getWebDavUrl", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def get_items(self, caml_query=None):
         """Returns a collection of items from the list based on the specified query.
@@ -326,10 +342,10 @@ class List(SecurableObject):
         """
         if not caml_query:
             caml_query = CamlQuery.create_all_items_query()
-        items = ListItemCollection(self.context, ResourcePath("items", self.resource_path))
-        qry = ServiceOperationQuery(self, "GetItems", None, caml_query, "query", items)
+        return_type = ListItemCollection(self.context, ResourcePath("items", self.resource_path))
+        qry = ServiceOperationQuery(self, "GetItems", None, caml_query, "query", return_type)
         self.context.add_query(qry)
-        return items
+        return return_type
 
     def add_item(self, list_item_creation_information):
         """The recommended way to add a list item is to send a POST request to the ListItemCollection resource endpoint,
@@ -436,10 +452,10 @@ class List(SecurableObject):
         """
         if query is None:
             query = ChangeQuery(list_=True)
-        changes = ChangeCollection(self.context)
-        qry = ServiceOperationQuery(self, "getChanges", None, query, "query", changes)
+        return_type = ChangeCollection(self.context)
+        qry = ServiceOperationQuery(self, "getChanges", None, query, "query", return_type)
         self.context.add_query(qry)
-        return changes
+        return return_type
 
     def get_checked_out_files(self):
         """Returns a collection of checked-out files as specified in section 3.2.5.381."""

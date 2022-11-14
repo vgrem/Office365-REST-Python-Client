@@ -152,3 +152,7 @@ class TestSharePointWeb(SPTestCase):
     def test_26_list_acs_service_principals(self):
         result = self.client.web.list_acs_service_principals().execute_query()
         self.assertIsNotNone(result.value)
+
+    def test_27_ensure_tenant_app_catalog(self):
+        result = self.client.web.ensure_tenant_app_catalog("app").execute_query()
+        self.assertIsNotNone(result.value)
