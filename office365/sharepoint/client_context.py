@@ -131,7 +131,7 @@ class ClientContext(ClientRuntimeContext):
         """
         batch_request = ODataBatchV3Request(JsonLightFormat())
         batch_request.beforeExecute += self._authenticate_request
-        batch_request.beforeExecute += self.ensure_form_digest
+        batch_request.beforeExecute += self._ensure_form_digest
         while self.has_pending_request:
             qry = self._get_next_query(items_per_batch)
             batch_request.execute_query(qry)
@@ -157,7 +157,7 @@ class ClientContext(ClientRuntimeContext):
             self._pending_request.beforeExecute += self._build_modification_query
         return self._pending_request
 
-    def ensure_form_digest(self, request):
+    def _ensure_form_digest(self, request):
         """
         :type request: RequestOptions
         """
@@ -227,7 +227,7 @@ class ClientContext(ClientRuntimeContext):
             return
 
         if request.method == HttpMethod.Post:
-            self.ensure_form_digest(request)
+            self._ensure_form_digest(request)
         # set custom SharePoint control headers
         if isinstance(self.pending_request().default_json_format, JsonLightFormat):
             if isinstance(self.current_query, DeleteEntityQuery):

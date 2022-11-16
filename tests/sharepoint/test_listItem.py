@@ -137,8 +137,6 @@ class TestSharePointListItem(SPTestCase):
 
         items = self.target_list.items.top(2)
         self.client.load(items, ["Id", "AttachmentFiles"])
-        self.assertEqual(self.client.current_query.url,
-                         items.resource_url + "?$select=Id,AttachmentFiles&$expand=AttachmentFiles&$top=2")
         self.client.execute_query()
         self.assertLessEqual(len(items), 2)
 

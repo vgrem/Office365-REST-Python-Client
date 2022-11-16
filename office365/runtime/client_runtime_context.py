@@ -165,7 +165,6 @@ class ClientRuntimeContext(object):
         """
         :type query: office365.runtime.queries.client_query.ClientQuery
         """
-        self._current_query = query
         self._queries.append(query)
         return self
 
@@ -197,17 +196,17 @@ class ClientRuntimeContext(object):
         self.add_query(qry)
         return return_type
 
-    def _get_next_query(self, n=1):
+    def _get_next_query(self, count=1):
         """
-        :type n: int
+        :type count: int
         """
-        if n == 1:
+        if count == 1:
             qry = self._queries.pop(0)
         else:
             from office365.runtime.queries.batch import BatchQuery
             qry = BatchQuery(self)
-            while self.has_pending_request and n > 0:
+            while self.has_pending_request and count > 0:
                 qry.add(self._queries.pop(0))
-                n = n - 1
+                count = count - 1
         self._current_query = qry
         return qry

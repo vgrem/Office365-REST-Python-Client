@@ -12,7 +12,6 @@ from tests import test_site_url, test_client_credentials, test_user_credentials,
     create_unique_file_name, test_team_site_url
 from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
 from office365.runtime.auth.providers.saml_token_provider import SamlTokenProvider
-from office365.runtime.http.request_options import RequestOptions
 from office365.sharepoint.client_context import ClientContext
 
 
@@ -43,9 +42,7 @@ class TestSharePointClient(TestCase):
         pass
 
     def test7_construct_get_request(self):
-        client = ClientContext(test_site_url).with_credentials(test_user_credentials)
-        request = client.web.current_user.get().build_request()
-        self.assertIsInstance(request, RequestOptions)
+        pass
 
     def test8_execute_multiple_queries_sequentially(self):
         client = ClientContext(test_site_url).with_credentials(test_user_credentials)

@@ -57,10 +57,6 @@ class ClientObject(object):
                                          failure_callback=failure_callback)
         return self
 
-    def build_request(self):
-        """Builds a request"""
-        return self.context.current_query.build_request()
-
     def get(self):
         """
         :type self: T
