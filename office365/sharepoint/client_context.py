@@ -159,13 +159,15 @@ class ClientContext(ClientRuntimeContext):
 
     def _get_context_web_information(self):
         """Returns an ContextWebInformation object that specifies metadata about the site"""
+        client = ODataRequest(JsonLightFormat())
+        client.beforeExecute += self._authenticate_request
         request = RequestOptions("{0}/contextInfo".format(self.service_root_url()))
         request.method = HttpMethod.Post
-        response = self.pending_request().execute_request_direct(request)
+        response = client.execute_request_direct(request)
         json_format = JsonLightFormat()
         json_format.function = "GetContextWebInformation"
         return_value = ContextWebInformation()
-        self.pending_request().map_json(response.json(), return_value, json_format)
+        client.map_json(response.json(), return_value, json_format)
         return return_value
 
     def execute_query_with_incremental_retry(self, max_retry=5):
@@ -215,9 +217,6 @@ class ClientContext(ClientRuntimeContext):
 
         :type request: RequestOptions
         """
-        if request.url == "{0}/contextInfo".format(self.service_root_url()):
-            return
-
         if request.method == HttpMethod.Post:
             self._ensure_form_digest(request)
         # set custom SharePoint control headers
