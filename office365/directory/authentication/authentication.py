@@ -15,5 +15,5 @@ class Authentication(Entity):
         """Represents all authentication methods registered to a user."""
         return self.properties.get('methods',
                                    EntityCollection(self.context, AuthenticationMethod,
-                                                    ResourcePath("drives", self.resource_path)))
+                                                    ResourcePath("methods", self.resource_path)))
 

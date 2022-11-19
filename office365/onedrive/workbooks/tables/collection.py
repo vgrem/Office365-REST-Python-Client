@@ -1,5 +1,6 @@
 from office365.entity_collection import EntityCollection
 from office365.onedrive.workbooks.tables.table import WorkbookTable
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class WorkbookTableCollection(EntityCollection):
@@ -24,6 +25,11 @@ class WorkbookTableCollection(EntityCollection):
         :param bool has_headers: Boolean value that indicates whether the data being imported has column labels. If
            the source does not contain headers (i.e,. when this property set to false),
            Excel will automatically generate header shifting the data down by one row.
-        :rtype: WorkbookTable
+
         """
-        return super(WorkbookTableCollection, self).add(address=address, hasHeaders=has_headers)
+        return_type = WorkbookTable(self.context)
+        self.add_child(return_type)
+        payload = {"address": address, "hasHeaders": has_headers}
+        qry = ServiceOperationQuery(self, "add", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type

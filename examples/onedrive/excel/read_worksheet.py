@@ -15,7 +15,7 @@ def upload_sample(graph_client):
 
 file_name = "Financial Sample.xlsx"
 client = GraphClient(acquire_token_by_username_password)
-# upload_sample(client)
+upload_sample(client)
 
 # Load worksheets
 worksheets = client.me.drive.root.get_by_path(file_name).workbook.worksheets.get().execute_query()

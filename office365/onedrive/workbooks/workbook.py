@@ -5,7 +5,7 @@ from office365.onedrive.workbooks.functions.functions import WorkbookFunctions
 from office365.onedrive.workbooks.names.named_item import WorkbookNamedItem
 from office365.onedrive.workbooks.operations.workbook import WorkbookOperation
 from office365.onedrive.workbooks.session_info import WorkbookSessionInfo
-from office365.onedrive.workbooks.tables.table import WorkbookTable
+from office365.onedrive.workbooks.tables.collection import WorkbookTableCollection
 from office365.onedrive.workbooks.worksheets.collection import WorkbookWorksheetCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
@@ -67,8 +67,7 @@ class Workbook(Entity):
     def tables(self):
         """Represents a collection of tables associated with the workbook. Read-only."""
         return self.properties.get('tables',
-                                   EntityCollection(self.context, WorkbookTable,
-                                                    ResourcePath("tables", self.resource_path)))
+                                   WorkbookTableCollection(self.context, ResourcePath("tables", self.resource_path)))
 
     @property
     def names(self):
