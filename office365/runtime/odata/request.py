@@ -23,24 +23,17 @@ class ODataRequest(ClientRequest):
         """
         super(ODataRequest, self).__init__()
         self._default_json_format = json_format
+        self.beforeExecute += self._ensure_json_format
 
     @property
     def default_json_format(self):
         return self._default_json_format
-
-    def execute_request_direct(self, request):
-        """
-        :type request: office365.runtime.http.request_options.RequestOptions
-        """
-        self._ensure_json_format(request)
-        return super(ODataRequest, self).execute_request_direct(request)
 
     def build_request(self, query):
         """
         :type query: office365.runtime.queries.client_query.ClientQuery
         """
         request = RequestOptions(query.url)
-        self._ensure_json_format(request)
         # set method
         request.method = HttpMethod.Get
         if isinstance(query, DeleteEntityQuery):

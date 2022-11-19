@@ -28,6 +28,27 @@ class Folder(BaseEntity):
         relative_url = abs_url.replace(ctx.base_url, "")
         return ctx.web.get_folder_by_server_relative_url(relative_url)
 
+    def get_files(self, recursive=False):
+        """
+        Retrieves files
+
+        :param bool recursive: Determines whether to enumerate folders recursively
+        """
+        from office365.sharepoint.files.collection import FileCollection
+        return_type = FileCollection(self.context, self.files.resource_path)
+
+        def _loaded(parent):
+            """
+            :type parent: Folder
+            """
+            [return_type.add_child(f) for f in parent.files]
+            if recursive:
+                for folder in parent.folders:
+                    folder.ensure_properties(["Files", "Folders"], _loaded, parent=folder)
+
+        self.ensure_properties(["Files", "Folders"], _loaded, parent=self)
+        return return_type
+
     def get_sharing_information(self):
         """Gets the sharing information for a folder."""
         return self.list_item_all_fields.get_sharing_information()

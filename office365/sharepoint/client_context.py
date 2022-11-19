@@ -137,14 +137,6 @@ class ClientContext(ClientRuntimeContext):
             batch_request.execute_query(qry)
         return self
 
-    def build_request(self, query):
-        """
-        :type query: office365.runtime.queries.client_query.ClientQuery
-        """
-        request = super(ClientContext, self).build_request(query)
-        self._build_modification_query(request)
-        return request
-
     def pending_request(self):
         """
         Provides access to underlying request instance
