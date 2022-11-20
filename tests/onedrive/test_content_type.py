@@ -1,15 +1,18 @@
 import uuid
+from unittest import TestCase
 
+from office365.graph_client import GraphClient
 from office365.onedrive.contenttypes.content_type import ContentType
-from tests.graph_case import GraphTestCase
+from tests.graph_case import acquire_token_by_username_password
 
 
-class TestContentType(GraphTestCase):
+class TestContentType(TestCase):
     target_ct = None  # type: ContentType
 
     @classmethod
     def setUpClass(cls):
         super(TestContentType, cls).setUpClass()
+        cls.client = GraphClient(acquire_token_by_username_password)
 
     @classmethod
     def tearDownClass(cls):
@@ -25,6 +28,14 @@ class TestContentType(GraphTestCase):
         self.assertIsNotNone(ct.resource_path)
         self.__class__.target_ct = ct
 
-    def test3_delete(self):
+    #def test3_publish(self):
+    #    result = self.__class__.target_ct.publish().is_published().execute_query()
+    #    self.assertTrue(result.value)
+
+    #def test4_unpublish(self):
+    #    result = self.__class__.target_ct.unpublish().is_published().execute_query()
+    #    self.assertFalse(result.value)
+
+    def test5_delete(self):
         ct_to_del = self.__class__.target_ct
         ct_to_del.delete_object().execute_query()

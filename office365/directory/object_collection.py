@@ -18,13 +18,13 @@ class DirectoryObjectCollection(DeltaCollection):
 
         :type ids: list[str]
         """
-        result = ClientResult(self.context)
+        return_type = ClientResult(self.context)
         params = {
             "ids": ids
         }
-        qry = ServiceOperationQuery(self, "getByIds", params, None, None, result)
+        qry = ServiceOperationQuery(self, "getByIds", params, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def add(self, user_id):
         """

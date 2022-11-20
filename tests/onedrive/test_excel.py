@@ -46,22 +46,26 @@ class TestExcel(GraphTestCase):
         self.assertIsNotNone(tables.resource_path)
         self.assertGreater(len(tables), 0)
 
-    def test4_get_table_rows(self):
+    def test4_data_body_range(self):
+        result = self.__class__.table.data_body_range().execute_query()
+        self.assertIsNotNone(result.address)
+
+    def test5_get_table_rows(self):
         rows = self.__class__.table.rows.get().execute_query()
         self.assertIsNotNone(rows.resource_path)
 
-    def test4_create_table_rows(self):
+    def test6_create_table_rows(self):
         rows = self.__class__.table.rows.add([["a", "b", "c"]]).execute_query()
         self.assertIsNotNone(rows.resource_path)
 
-    def test5_delete_workbook_table(self):
+    def test7_delete_workbook_table(self):
         self.__class__.table.delete_object().execute_query()
 
-    #def test3_workbook_create_session(self):
+    #def test8_workbook_create_session(self):
     #    result = self.__class__.target_item.workbook.create_session().execute_query()
     #    self.assertIsNotNone(result.value)
 
-    #def test4_workbook_close_session(self):
+    #def test9_workbook_close_session(self):
     #    self.__class__.target_item.workbook.close_session().execute_query()
 
 

@@ -21,11 +21,11 @@ class NotebookCollection(EntityCollection):
 
         :param str web_url: The URL path of the notebook to retrieve. It can also contain a "onenote:" prefix.
         """
-        result = ClientResult(self.context, CopyNotebookModel())
+        return_type = ClientResult(self.context, CopyNotebookModel())
         params = {"webUrl": web_url}
-        qry = ServiceOperationQuery(self, "getNotebookFromWebUrl", params, None, None, result)
+        qry = ServiceOperationQuery(self, "getNotebookFromWebUrl", params, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def get_recent_notebooks(self, include_personal_notebooks=True):
         """Get a list of recentNotebook instances that have been accessed by the signed-in user.
@@ -35,13 +35,13 @@ class NotebookCollection(EntityCollection):
             your request will return a 400 error response.
         """
 
-        result = ClientResult(self.context, ClientValueCollection(RecentNotebook))
+        return_type = ClientResult(self.context, ClientValueCollection(RecentNotebook))
         params = {"includePersonalNotebooks": include_personal_notebooks}
-        qry = ServiceOperationQuery(self, "getRecentNotebooks", params, None, None, result)
+        qry = ServiceOperationQuery(self, "getRecentNotebooks", params, None, None, return_type)
         self.context.add_query(qry)
 
         def _construct_request(request):
             request.method = HttpMethod.Get
 
         self.context.before_execute(_construct_request)
-        return result
+        return return_type

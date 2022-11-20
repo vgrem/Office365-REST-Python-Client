@@ -1,4 +1,4 @@
-from office365.directory.authentication.method import AuthenticationMethod
+from office365.directory.authentication.methods.method import AuthenticationMethod
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
@@ -11,9 +11,33 @@ class Authentication(Entity):
     """
 
     @property
+    def fido2_methods(self):
+        """Represents the FIDO2 security keys registered to a user for authentication."""
+        from office365.directory.authentication.methods.fido import Fido2AuthenticationMethod
+        return self.properties.get('fido2Methods',
+                                   EntityCollection(self.context, Fido2AuthenticationMethod,
+                                                    ResourcePath("fido2Methods", self.resource_path)))
+
+    @property
+    def phone_methods(self):
+        """The phone numbers registered to a user for authentication."""
+        from office365.directory.authentication.methods.phone import PhoneAuthenticationMethod
+        return self.properties.get('phoneMethods',
+                                   EntityCollection(self.context, PhoneAuthenticationMethod,
+                                                    ResourcePath("phoneMethods", self.resource_path)))
+
+    @property
     def methods(self):
         """Represents all authentication methods registered to a user."""
         return self.properties.get('methods',
                                    EntityCollection(self.context, AuthenticationMethod,
                                                     ResourcePath("methods", self.resource_path)))
 
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "fido2Methods": self.fido2_methods,
+                "phoneMethods": self.phone_methods
+            }
+            default_value = property_mapping.get(name, None)
+        return super(Authentication, self).get_property(name, default_value)
