@@ -1,6 +1,7 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.onedrive.workbooks.applications.application import WorkbookApplication
+from office365.onedrive.workbooks.comments.comment import WorkbookComment
 from office365.onedrive.workbooks.functions.functions import WorkbookFunctions
 from office365.onedrive.workbooks.names.named_item import WorkbookNamedItem
 from office365.onedrive.workbooks.operations.workbook import WorkbookOperation
@@ -56,6 +57,13 @@ class Workbook(Entity):
         """"""
         return self.properties.get('application',
                                    WorkbookApplication(self.context, ResourcePath("application", self.resource_path)))
+
+    @property
+    def comments(self):
+        """"""
+        return self.properties.get('comments',
+                                   EntityCollection(self.context,
+                                                    WorkbookComment, ResourcePath("comments", self.resource_path)))
 
     @property
     def functions(self):

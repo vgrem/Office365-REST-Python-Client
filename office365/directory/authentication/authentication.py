@@ -27,6 +27,15 @@ class Authentication(Entity):
                                                     ResourcePath("phoneMethods", self.resource_path)))
 
     @property
+    def password_methods(self):
+        """Represents the password that's registered to a user for authentication. For security, the password itself
+        will never be returned in the object, but action can be taken to reset a password."""
+        from office365.directory.authentication.methods.password import PasswordAuthenticationMethod
+        return self.properties.get('passwordMethods',
+                                   EntityCollection(self.context, PasswordAuthenticationMethod,
+                                                    ResourcePath("passwordMethods", self.resource_path)))
+
+    @property
     def methods(self):
         """Represents all authentication methods registered to a user."""
         return self.properties.get('methods',
@@ -37,6 +46,7 @@ class Authentication(Entity):
         if default_value is None:
             property_mapping = {
                 "fido2Methods": self.fido2_methods,
+                "passwordMethods": self.password_methods,
                 "phoneMethods": self.phone_methods
             }
             default_value = property_mapping.get(name, None)

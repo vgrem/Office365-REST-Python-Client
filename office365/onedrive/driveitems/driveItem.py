@@ -46,6 +46,14 @@ class DriveItem(BaseItem):
         """
         return DriveItem(self.context, UrlPath(url_path, self.resource_path), self.children)
 
+    def create_powerpoint(self, name):
+        """
+        Creates a PowerPoint file
+
+        :param str name:
+        """
+        return self.upload(name, None)
+
     def create_link(self, link_type, scope="", expiration_datetime=None, password=None, message=None):
         """
         The createLink action will create a new sharing link if the specified link type doesn't already exist
@@ -154,7 +162,7 @@ class DriveItem(BaseItem):
         :param name: The contents of the request body should be the binary stream of the file to be uploaded.
         :type name: str
         :param content: The contents of the request body should be the binary stream of the file to be uploaded.
-        :type content: str or bytes
+        :type content: str or bytes or None
         :rtype: DriveItem
         """
         qry = create_upload_content_query(self, name, content)

@@ -1,8 +1,8 @@
 from office365.entity_collection import EntityCollection
 from office365.onedrive.listitems.field_value_set import FieldValueSet
 from office365.onedrive.versions.base_item import BaseItemVersion
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class ListItemVersion(BaseItemVersion):
