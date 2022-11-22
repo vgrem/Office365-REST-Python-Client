@@ -33,6 +33,22 @@ class Tenant(BaseEntity):
         static_path = ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant")
         super(Tenant, self).__init__(context, static_path)
 
+    def delete_policy_definition(self, item_id):
+        """
+        :param int item_id:
+        """
+        qry = ServiceOperationQuery(self, "DeletePolicyDefinition", None, {"itemId": item_id})
+        self.context.add_query(qry)
+        return self
+
+    def delete_recent_admin_action_report(self, report_id):
+        """
+        :param int report_id:
+        """
+        qry = ServiceOperationQuery(self, "DeleteRecentAdminActionReport", None, {"reportId": report_id})
+        self.context.add_query(qry)
+        return self
+
     def get_collaboration_insights_data(self):
         return_type = ClientResult(self.context, CollaborationInsightsData())
         qry = ServiceOperationQuery(self, "GetCollaborationInsightsData", None, None, None, return_type)
@@ -98,6 +114,7 @@ class Tenant(BaseEntity):
         return return_type
 
     def has_valid_education_license(self):
+        """"""
         return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "HasValidEducationLicense", None, None, None, return_type)
         self.context.add_query(qry)
@@ -116,6 +133,7 @@ class Tenant(BaseEntity):
         return result
 
     def render_policy_report(self):
+        """"""
         return_type = ClientResult(self.context)
         payload = {
             "parameters": RenderListDataParameters(),

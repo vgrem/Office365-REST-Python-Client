@@ -84,6 +84,18 @@ class View(BaseEntity):
         self.set_property("ContentTypeId", value)
 
     @property
+    def editor_modified(self):
+        """Specifies whether the list view was modified in an editor."""
+        return self.properties.get("EditorModified", None)
+
+    def formats(self):
+        """Specifies the column and row formatting for the list view.
+
+        :stype: str or None
+        """
+        return self.properties.get("Formats", None)
+
+    @property
     def hidden(self):
         """Gets whether the list view is hidden.
         :rtype: bool or None
@@ -125,11 +137,20 @@ class View(BaseEntity):
         """Gets a value that specifies the base view identifier of the list view."""
         return self.properties.get('BaseViewId', None)
 
+    def read_only_view(self):
+        """Specifies whether the list view is read-only."""
+        return self.properties.get('ReadOnlyView', None)
+
     @property
     def server_relative_path(self):
         """Gets the server-relative Path of the View.
         """
         return self.properties.get("ServerRelativePath", SPResPath())
+
+    @property
+    def view_joins(self):
+        """Specifies the joins that are used in the list view."""
+        return self.properties.get("ViewJoins", None)
 
     @property
     def visualization_info(self):

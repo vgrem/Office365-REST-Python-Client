@@ -112,11 +112,11 @@ class SitePageService(BaseEntity):
 
         :param office365.sharepoint.client_context.ClientContext context: Client context
         """
-        result = ClientResult(context)
+        return_type = ClientResult(context)
         svc = SitePageService(context)
-        qry = ServiceOperationQuery(svc, "IsFilePickerExternalImageSearchEnabled", None, None, None, result, True)
+        qry = ServiceOperationQuery(svc, "IsFilePickerExternalImageSearchEnabled", None, None, None, return_type, True)
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def org_assets(context):

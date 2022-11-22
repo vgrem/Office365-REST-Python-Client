@@ -15,6 +15,7 @@ from office365.sharepoint.principal.user import User
 from office365.sharepoint.recyclebin.item_collection import RecycleBinItemCollection
 from office365.sharepoint.sitehealth.summary import SiteHealthSummary
 from office365.sharepoint.sites.sph_site import SPHSite
+from office365.sharepoint.sites.azure_container_Info import ProvisionedTemporaryAzureContainerInfo
 from office365.sharepoint.sites.upgrade_info import UpgradeInfo
 from office365.sharepoint.sites.usage_info import UsageInfo
 from office365.sharepoint.tenant.administration.site_administrators_info import SiteAdministratorsInfo
@@ -316,6 +317,13 @@ class Site(BaseEntity):
         """
         return_type = Web(self.context)
         qry = ServiceOperationQuery(self, "OpenWebById", {"gWebId": web_id}, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def provision_temporary_azure_container(self):
+        """"""
+        return_type = ClientResult(self.context, ProvisionedTemporaryAzureContainerInfo())
+        qry = ServiceOperationQuery(self, "ProvisionTemporaryAzureContainer", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
 
