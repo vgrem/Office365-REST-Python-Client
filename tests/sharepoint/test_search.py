@@ -34,8 +34,7 @@ class TestSearch(TestCase):
         self.assertIsNotNone(result.value)
 
     def test4_search_post_query(self):
-        request = SearchRequest("filename:guide.docx")
-        result = self.search.post_query(request).execute_query()
+        result = self.search.post_query(query_text="filename:guide.docx").execute_query()
         self.assertIsInstance(result.value, SearchResult)
         self.assertIsInstance(result.value.PrimaryQueryResult, QueryResult)
 

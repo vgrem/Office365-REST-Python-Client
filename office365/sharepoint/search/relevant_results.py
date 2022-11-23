@@ -3,6 +3,11 @@ from office365.sharepoint.search.simple_data_table import SimpleDataTable
 
 
 class RelevantResults(ClientValue):
+    """
+    The RelevantResults table contains the actual query results. It MUST only be present if the ResultTypes element
+    in the properties element of the Execute message contains ResultType.RelevantResults,
+    as specified in section 2.2.5.5
+    """
 
     def __init__(self):
         super(RelevantResults, self).__init__()

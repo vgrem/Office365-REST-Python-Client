@@ -44,13 +44,13 @@ class SearchService(BaseEntity):
     def export_popular_tenant_queries(self, count):
         """This method is used to get a list of popular search queries executed on the tenant.
         """
-        result = ClientResult(self.context, ClientValueCollection(PopularTenantQuery))
+        return_type = ClientResult(self.context, ClientValueCollection(PopularTenantQuery))
         payload = {
             "count": count,
         }
-        qry = ServiceOperationQuery(self, "exportpopulartenantqueries", None, payload, None, result)
+        qry = ServiceOperationQuery(self, "exportpopulartenantqueries", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def query(self, request_or_query):
         """The operation is used to retrieve search results by using the HTTP protocol with the GET method.
@@ -74,15 +74,23 @@ class SearchService(BaseEntity):
         self.context.before_execute(_construct_request)
         return result
 
-    def post_query(self, request):
+    def post_query(self, query_text, select_properties=None, trim_duplicates=None, row_limit=None, **kwargs):
         """The operation is used to retrieve search results through the use of the HTTP protocol
         with method type POST.
 
-        :type request: office365.sharepoint.search.request.SearchRequest"""
-        result = ClientResult(self.context, SearchResult())
-        qry = ServiceOperationQuery(self, "postquery", None, request, "request", result)
+        :param str query_text: The query text of the search query.
+        :param list[str] select_properties: Specifies a property bag of key value pairs.
+        :param bool trim_duplicates:  Specifies whether duplicates are removed by the protocol server before sorting,
+             selecting, and sending the search results.
+        :param int row_limit: The number of search results the protocol client wants to receive, starting at the index
+            specified in the StartRow element. The RowLimit value MUST be greater than or equal to zero.
+        """
+        return_type = ClientResult(self.context, SearchResult())
+        request = SearchRequest(query_text=query_text, select_properties=select_properties,
+                                trim_duplicates=trim_duplicates, row_limit=row_limit, **kwargs)
+        qry = ServiceOperationQuery(self, "postquery", None, request, "request", return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def record_page_click(self):
         """The operation is used to record page clicks"""
@@ -91,10 +99,10 @@ class SearchService(BaseEntity):
     def search_center_url(self):
         """The operation is used to get the URI address of the search center by using the HTTP protocol
         with the GET method. The operation returns the URI of the of the search center."""
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "searchCenterUrl", None, None, None, result)
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "searchCenterUrl", None, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def results_page_address(self):
         """The operation is used to get the URI address of the result page by using the HTTP protocol
@@ -107,13 +115,13 @@ class SearchService(BaseEntity):
              is not specified, a default value of an empty string MUST be used, and the server MUST return a
              FaultException<ExceptionDetail> message.
         """
-        result = ClientResult(self.context, QuerySuggestionResults())
+        return_type = ClientResult(self.context, QuerySuggestionResults())
         payload = {
             "querytext": query_text
         }
-        qry = ServiceOperationQuery(self, "suggest", None, payload, None, result)
+        qry = ServiceOperationQuery(self, "suggest", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def auto_completions(self, query_text, sources=None, number_of_completions=None, cursor_position=None):
         """

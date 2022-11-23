@@ -9,4 +9,3 @@ if result.value:
     result = setting.export_search_reports(tenant_id="af6a80a4-8b4b-4879-88af-42ff8a545211",
                                            report_type="ReportTopQueries").execute_query()
     print(result)
-
