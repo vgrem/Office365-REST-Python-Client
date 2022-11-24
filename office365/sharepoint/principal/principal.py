@@ -56,7 +56,7 @@ class Principal(BaseEntity):
 
     @property
     def principal_type(self):
-        """Gets the login name of the principal.
+        """Gets the type of the principal.
 
         :rtype: int or None
         """
