@@ -13,5 +13,5 @@ class SimpleDataRow(ClientValue):
             key = v.get('Key', None)
             type_name = v.get('ValueType', None)
             if key is not None:
-                self.Cells[key] = v.get("Value")
+                self.Cells[key] = v.get("Value", None)
         return self

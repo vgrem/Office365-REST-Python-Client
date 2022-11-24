@@ -9,10 +9,13 @@ class RelevantResults(ClientValue):
     as specified in section 2.2.5.5
     """
 
-    def __init__(self):
+    def __init__(self, item_template_id=None):
+        """
+        :param str item_template_id:
+        """
         super(RelevantResults, self).__init__()
         self.GroupTemplateId = None
-        self.ItemTemplateId = None
+        self.ItemTemplateId = item_template_id
         self.Properties = []
         self.ResultTitle = None
         self.ResultTitleUrl = None

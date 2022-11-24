@@ -17,13 +17,28 @@ class DocumentCrawlLog(BaseEntity):
         """
         Retrieves information about all the contents that were crawled.
 
-        :type get_count_only: bool
+        :param bool get_count_only: f true, only the count of the contents crawled MUST be returned.
+             If false, all the information about the crawled contents MUST be returned.
         """
         return_type = ClientResult(self.context, SimpleDataTable())
         payload = {
             "getCountOnly": get_count_only
         }
         qry = ServiceOperationQuery(self, "GetCrawledUrls", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_unsuccesful_crawled_urls(self, display_url=None):
+        """
+        Retrieves information about the contents that failed crawling.
+
+        :param str display_url:
+        """
+        return_type = ClientResult(self.context, SimpleDataTable())
+        payload = {
+            "displayUrl": display_url
+        }
+        qry = ServiceOperationQuery(self, "GetUnsuccesfulCrawledUrls", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 

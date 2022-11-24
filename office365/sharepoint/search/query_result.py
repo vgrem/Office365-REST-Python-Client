@@ -3,6 +3,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.search.custom_result import CustomResult
 from office365.sharepoint.search.refinement_results import RefinementResults
 from office365.sharepoint.search.relevant_results import RelevantResults
+from office365.sharepoint.search.special_term_results import SpecialTermResults
 
 
 class QueryResult(ClientValue):
@@ -11,7 +12,8 @@ class QueryResult(ClientValue):
     as specified in [MS-QSSWS] section 3.1.4.1.3.6.
     """
 
-    def __init__(self, query_id=None, custom_results=None, relevant_results=RelevantResults(), query_rule_id=None):
+    def __init__(self, query_id=None, custom_results=None, relevant_results=RelevantResults(),
+                 query_rule_id=None, special_term_results=SpecialTermResults()):
         """
         :param str query_id: Specifies the identifier for the search query
         :param list[CustomResults] custom_results: CustomResults is a list that contains zero or more CustomResult
@@ -27,6 +29,7 @@ class QueryResult(ClientValue):
         self.RefinementResults = RefinementResults()
         self.CustomResults = ClientValueCollection(CustomResult, custom_results)
         self.RelevantResults = relevant_results
+        self.SpecialTermResults = special_term_results
 
     @property
     def entity_type_name(self):

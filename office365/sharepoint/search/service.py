@@ -92,9 +92,28 @@ class SearchService(BaseEntity):
         self.context.add_query(qry)
         return return_type
 
-    def record_page_click(self):
-        """The operation is used to record page clicks"""
-        pass
+    def record_page_click(self, page_info=None, click_type=None, block_type=None):
+        """This operation is used by the protocol client to inform the protocol server that a user clicked a
+        query result on a page. When a click happens, the protocol client sends the details about the click
+        and the page impression for which the query result was clicked to the protocol server.
+        This operation MUST NOT be used if no query logging information is returned for a query.
+        Also this operation MUST NOT be used if a user clicks a query result for which query logging
+        information was not returned
+
+        :param str page_info: Specifies the information about the clicked page, the page impression.
+        :param str click_type: Type of clicks. If a particular query result is clicked then the click type returned
+             by the search service for this query result MUST be used. If "more" link is clicked then "ClickMore"
+             click type MUST be used.
+        :param str block_type: Type of query results in the page impression block
+        """
+        payload = {
+            "pageInfo": page_info,
+            "clickType": click_type,
+            "blockType": block_type
+        }
+        qry = ServiceOperationQuery(self, "RecordPageClick", None, payload)
+        self.context.add_query(qry)
+        return self
 
     def search_center_url(self):
         """The operation is used to get the URI address of the search center by using the HTTP protocol
