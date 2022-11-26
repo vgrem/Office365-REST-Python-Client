@@ -68,20 +68,20 @@ class SPHSite(BaseEntity):
         return return_value
 
     @staticmethod
-    def set_as_home_site(context, site_url, return_value=None):
+    def set_as_home_site(context, site_url, viva_connections_default_start=None, return_value=None):
         """
         Sets a site as a landing site for your intranet.
 
         :param ClientResult return_value:
         :param office365.sharepoint.client_context.ClientContext context:
         :param str site_url:
+        :param bool viva_connections_default_start:
         """
 
         if return_value is None:
             return_value = ClientResult(context)
         sph = SPHSite(context)
-        params = {"siteUrl": site_url}
-        qry = ServiceOperationQuery(sph, "SetSPHSite", params, None, None, return_value)
-        qry.static = True
+        params = {"siteUrl": site_url, "vivaConnectionsDefaultStart": viva_connections_default_start}
+        qry = ServiceOperationQuery(sph, "SetSPHSite", None, params, None, return_value)
         context.add_query(qry)
         return return_value

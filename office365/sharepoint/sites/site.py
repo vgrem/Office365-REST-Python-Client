@@ -61,9 +61,12 @@ class Site(BaseEntity):
         """Deletes a site"""
 
         def _site_resolved():
-            self.context.group_site_manager.delete(self.url)
+            if self.group_id == "00000000-0000-0000-0000-000000000000":
+                self.context.site_manager.delete(self.id)
+            else:
+                self.context.group_site_manager.delete(self.url)
 
-        self.ensure_property("Url", _site_resolved)
+        self.ensure_properties(["Url", "GroupId", "Id"], _site_resolved)
         return self
 
     @staticmethod
@@ -129,7 +132,7 @@ class Site(BaseEntity):
         return_type = ClientResult(self.context)
 
         def _site_loaded():
-            self.result = SPHSite.set_as_home_site(self.context, self.url, return_type)
+            self.result = SPHSite.set_as_home_site(self.context, self.url, False, return_type)
 
         self.ensure_property("Url", _site_loaded)
         return return_type

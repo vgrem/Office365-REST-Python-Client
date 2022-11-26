@@ -1,3 +1,8 @@
+import uuid
+
+from office365.sharepoint.portal.sites.creation_response import SPSiteCreationResponse
+from office365.sharepoint.portal.sites.status import SiteStatus
+from tests import test_site_url, test_user_principal_name_alt, test_admin_credentials
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.lists.template_type import ListTemplateType
@@ -5,21 +10,20 @@ from office365.sharepoint.sites.site import Site
 
 
 class TestSite(SPTestCase):
-    target_site = None  # type: Site
+    site_response = None  # type: SPSiteCreationResponse
 
     def test1_if_site_loaded(self):
         site = self.client.site.get().execute_query()
         self.assertIs(site.is_property_available('Url'), True, "Site resource was not requested")
         self.assertIs(site.is_property_available('RootWeb'), False)
-        self.__class__.target_site = site
 
     def test2_if_site_exists(self):
-        site_url = self.__class__.target_site.url
+        site_url = self.client.site.url
         result = Site.exists(self.client, site_url).execute_query()
         self.assertIsNotNone(result.value)
 
     def test3_get_site_by_id(self):
-        site_id = self.__class__.target_site.properties['Id']
+        site_id = self.client.site.id
         result = Site.get_url_by_id(self.client, site_id).execute_query()
         self.assertIsNotNone(result.value)
 
@@ -45,11 +49,30 @@ class TestSite(SPTestCase):
         sub_site = self.client.site.open_web_by_id(web.id).execute_query()
         self.assertIsNotNone(sub_site.id)
 
-    def test9_is_comm_site(self):
-        result = self.client.site.is_comm_site().execute_query()
-        self.assertIsInstance(result.value, bool)
-
-    #def test_10_get_site_links(self):
+    # def test_10_get_site_links(self):
     #    result = self.client.site_linking_manager.get_site_links().execute_query()
     #    self.assertIsNotNone(result.value)
 
+    def test9_create_site(self):
+        site_url = "{0}/sites/{1}".format(test_site_url, uuid.uuid4().hex)
+        result = self.client.site_manager.create("Comm Site", site_url, test_user_principal_name_alt).execute_query()
+        self.assertIsNotNone(result.value)
+        self.__class__.site_response = result.value
+
+    def test_10_get_site_status(self):
+        site_url = self.__class__.site_response.SiteUrl
+        result = self.client.site_manager.get_status(site_url).execute_query()
+        self.assertIsNotNone(result.value.SiteStatus)
+        self.assertTrue(result.value.SiteStatus != SiteStatus.Error)
+
+    def test_11_get_site_url(self):
+        site_id = self.__class__.site_response.SiteId
+        result = self.client.site_manager.get_site_url(site_id).execute_query()
+        self.assertIsNotNone(result.value)
+        self.assertTrue(self.__class__.site_response.SiteUrl == result.value)
+
+    def test_12_delete_site(self):
+        from office365.sharepoint.client_context import ClientContext
+        admin_ctx = ClientContext(self.client.base_url).with_credentials(test_admin_credentials)
+        site_id = self.__class__.site_response.SiteId
+        admin_ctx.site_manager.delete(site_id).execute_query()

@@ -14,6 +14,7 @@ from office365.sharepoint.sites.home_sites_details import HomeSitesDetails
 from office365.sharepoint.sites.site import Site
 from office365.sharepoint.tenant.administration.collaboration.insights_data import CollaborationInsightsData
 from office365.sharepoint.tenant.administration.hubsites.properties import HubSiteProperties
+from office365.sharepoint.tenant.administration.insights.onedrive_site_sharing import OneDriveSiteSharingInsights
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
     SecondaryAdministratorsFieldsData
 from office365.sharepoint.tenant.administration.secondary_administrators_info import SecondaryAdministratorsInfo
@@ -22,8 +23,9 @@ from office365.sharepoint.tenant.administration.site_creation_properties import 
 from office365.sharepoint.tenant.administration.site_properties import SiteProperties
 from office365.sharepoint.tenant.administration.site_properties_collection import SitePropertiesCollection
 from office365.sharepoint.tenant.administration.site_properties_enumerable_filter import SitePropertiesEnumerableFilter
+from office365.sharepoint.tenant.administration.siteinfo_for_site_picker import SiteInfoForSitePicker
 from office365.sharepoint.tenant.administration.spo_operation import SpoOperation
-from office365.sharepoint.tenant.administration.top_files_sharing_insights import TopFilesSharingInsights
+from office365.sharepoint.tenant.administration.insights.top_files_sharing import TopFilesSharingInsights
 
 
 class Tenant(BaseEntity):
@@ -49,6 +51,13 @@ class Tenant(BaseEntity):
         self.context.add_query(qry)
         return self
 
+    def get_onedrive_site_sharing_insights(self, query_mode):
+        return_type = ClientResult(self.context, OneDriveSiteSharingInsights())
+        payload = {"queryMode": query_mode}
+        qry = ServiceOperationQuery(self, "GetOneDriveSiteSharingInsights", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def get_collaboration_insights_data(self):
         return_type = ClientResult(self.context, CollaborationInsightsData())
         qry = ServiceOperationQuery(self, "GetCollaborationInsightsData", None, None, None, return_type)
@@ -65,7 +74,7 @@ class Tenant(BaseEntity):
         self.context.add_query(qry)
         return return_type
 
-    def get_top_files_sharing_insights(self, query_mode=None):
+    def get_top_files_sharing_insights(self, query_mode):
         """
         :param int query_mode:
         """
@@ -312,11 +321,11 @@ class Tenant(BaseEntity):
 
         :param str site_url: A string representing the URL of the site.
         """
-        result = SpoOperation(self.context)
+        return_type = SpoOperation(self.context)
         params = {"siteUrl": site_url}
-        qry = ServiceOperationQuery(self, "removeSite", None, params, None, result)
+        qry = ServiceOperationQuery(self, "removeSite", None, params, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def remove_deleted_site(self, site_url):
         """Permanently removes the specified deleted site from the recycle bin.
@@ -327,6 +336,18 @@ class Tenant(BaseEntity):
         qry = ServiceOperationQuery(self, "RemoveDeletedSite", [site_url], None, None, result)
         self.context.add_query(qry)
         return result
+
+    def reorder_home_sites(self, home_sites_site_ids):
+        """
+        :param list[str] home_sites_site_ids:
+        """
+        payload = {
+            "homeSitesSiteIds": home_sites_site_ids
+        }
+        return_type = ClientResult(self.context, ClientValueCollection(HomeSitesDetails))
+        qry = ServiceOperationQuery(self, "ReorderHomeSites", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def restore_deleted_site(self, site_url):
         """Restores deleted site with the specified URL
@@ -396,6 +417,10 @@ class Tenant(BaseEntity):
         return return_type
 
     @property
+    def ai_builder_site_info_list(self):
+        return self.properties.get("AIBuilderSiteInfoList", ClientValueCollection(SiteInfoForSitePicker))
+
+    @property
     def aggregated_site_collections_list(self):
         return self.context.web.lists.get_by_title("DO_NOT_DELETE_SPLIST_TENANTADMIN_AGGREGATED_SITECOLLECTIONS")
 
@@ -425,6 +450,9 @@ class Tenant(BaseEntity):
         :rtype: bool or None
         """
         return self.properties.get('AllowEditing', None)
+
+    def default_content_center_site(self):
+        return self.properties.get("DefaultContentCenterSite", SiteInfoForSitePicker())
 
     @property
     def root_site_url(self):

@@ -5,6 +5,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.principal.user import User
+from office365.sharepoint.tenant.administration.siteinfo_for_site_picker import SiteInfoForSitePicker
 from office365.sharepoint.tenant.management.users_results import GetExternalUsersResults, RemoveExternalUsersResults, \
     SPOUserSessionRevocationResult
 from office365.sharepoint.tenant.administration.theme_properties import ThemeProperties
@@ -20,6 +21,10 @@ class Office365Tenant(BaseEntity):
     @property
     def allow_editing(self):
         return self.properties.get("AllowEditing", None)
+
+    @property
+    def ai_builder_site_info_list(self):
+        return self.properties.get("AIBuilderSiteInfoList", ClientValueCollection(SiteInfoForSitePicker))
 
     def add_tenant_cdn_origin(self, cdn_type, origin_url):
         """

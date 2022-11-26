@@ -12,6 +12,7 @@ class CommunicationSiteCreationRequest(ClientValue):
         :param str title: Site title
         :param str url: Absolute site url
         :param str description:
+        :param str lcid: The LCID (locale identifier) for a site
         """
         self.Title = title
         self.Url = url

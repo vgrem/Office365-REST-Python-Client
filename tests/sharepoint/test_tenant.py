@@ -136,3 +136,7 @@ class TestTenant(TestCase):
     def test_20_get_tenant_cdn_api(self):
         cdn_api = TenantCdnApi(self.client).get().execute_query()
         self.assertIsNotNone(cdn_api.resource_path)
+
+    #def test_21_get_onedrive_site_sharing_insights(self):
+    #    result = self.tenant.get_onedrive_site_sharing_insights(1).execute_query()
+    #    self.assertIsNotNone(result.value)

@@ -47,6 +47,9 @@ test_client_credentials = ClientCredential(settings.get('client_credentials', 'c
 test_user_credentials = UserCredential(settings.get('user_credentials', 'username'),
                                        settings.get('user_credentials', 'password'))
 
+test_admin_credentials = UserCredential(settings.get('user_credentials', 'username'),
+                                        settings.get('user_credentials', 'password'))
+
 test_site_url = settings.get('default', 'site_url')
 test_root_site_url = settings.get('default', 'root_site_url')
 test_team_site_url = settings.get('default', 'team_site_url')

@@ -43,3 +43,33 @@ class TeamChannelManager(BaseEntity):
         qry.static = True
         context.add_query(qry)
         return return_type
+
+    @staticmethod
+    def save_conversations(context, list_url, list_item_id, updated_conversations_object):
+        """
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
+        :param str list_url:
+        :param int list_item_id:
+        :param str updated_conversations_object:
+        """
+        payload = {
+            "listUrl": list_url,
+            "listItemId": list_item_id,
+            "updatedConversationsObject": updated_conversations_object
+        }
+        binding_type = TeamChannelManager(context)
+        qry = ServiceOperationQuery(binding_type, "SaveConversations", None, payload, is_static=True)
+        context.add_query(qry)
+        return binding_type
+
+    @staticmethod
+    def sync_teamsite_settings(context):
+        """
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
+        """
+        return_type = TeamSiteData(context)
+        qry = ServiceOperationQuery(TeamChannelManager(context), "SyncTeamSiteSettings", return_type=return_type,
+                                    is_static=True)
+        context.add_query(qry)
+        return return_type
+

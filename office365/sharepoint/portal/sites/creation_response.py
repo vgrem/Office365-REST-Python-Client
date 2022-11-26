@@ -8,3 +8,7 @@ class SPSiteCreationResponse(ClientValue):
         self.SiteId = None
         self.SiteStatus = None
         self.SiteUrl = None
+
+    @property
+    def entity_type_name(self):
+        return "Microsoft.SharePoint.Portal.SPSiteCreationResponse"

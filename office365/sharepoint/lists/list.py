@@ -48,6 +48,28 @@ class List(SecurableObject):
     def __init__(self, context, resource_path=None):
         super(List, self).__init__(context, resource_path)
 
+    def create_document_and_get_edit_link(self, file_name=None, folder_path=None,
+                                          document_template_type=1, template_url=None):
+        """
+        Creates a document at the path and of the type specified within the current list.
+        Returns an edit link to the file.
+
+        :param str file_name: Specifies the name of the document.
+        :param str folder_path: Specifies the path within the current list to create the document in.
+        :param str document_template_type: A number representing the type of document to create.
+        :param str template_url: Specifies the URL of the document template (2) to base the new document on.
+        """
+        return_type = ClientResult(self.context, str())
+        payload = {
+            "fileName": file_name,
+            "folderPath": folder_path,
+            "documentTemplateType": document_template_type,
+            "templateUrl": template_url
+        }
+        qry = ServiceOperationQuery(self, "CreateDocumentAndGetEditLink", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def delete_rule(self, rule_id):
         """
         :param str rule_id:

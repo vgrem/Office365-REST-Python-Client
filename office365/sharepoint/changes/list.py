@@ -1,7 +1,13 @@
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.changes.change import Change
 
 
 class ChangeList(Change):
+    """
+    Specifies a change on a list.
+
+    The RelativeTime and RootFolderUrl properties are not included in the default scalar property set for this type.
+    """
 
     @property
     def base_template(self):
@@ -10,3 +16,9 @@ class ChangeList(Change):
     @property
     def list_id(self):
         return self.properties.get("ListId", None)
+
+    @property
+    def creator(self):
+        """An SP.User object that represents information about the user who created the list."""
+        from office365.sharepoint.principal.user import User
+        return self.properties.get("Creator", User(self.context, ResourcePath("Creator", self.resource_path)))

@@ -259,17 +259,17 @@ class ClientContext(ClientRuntimeContext):
         :param str title: Site title
         """
         return_type = Site(self)
-        result = self.site_pages.communication_site.create(alias, title)
+        site_result = self.site_pages.communication_site.create(alias, title)
 
         def _after_site_create(resp):
             """
             :type resp: requests.Response
             """
             resp.raise_for_status()
-            if result.value.SiteStatus == SiteStatus.Error:
+            if site_result.value.SiteStatus == SiteStatus.Error:
                 raise ValueError("Site creation error")
-            elif result.value.SiteStatus == SiteStatus.Ready:
-                return_type.set_property("__siteUrl", result.value.SiteUrl)
+            elif site_result.value.SiteStatus == SiteStatus.Ready:
+                return_type.set_property("__siteUrl", site_result.value.SiteUrl)
         self.after_execute(_after_site_create)
         return return_type
 

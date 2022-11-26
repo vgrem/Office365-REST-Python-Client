@@ -3,6 +3,7 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.portal.sites.creation_request import SPSiteCreationRequest
 from office365.sharepoint.portal.sites.creation_response import SPSiteCreationResponse
 from office365.sharepoint.teams.site_owner_response import GetTeamChannelSiteOwnerResponse
 
@@ -15,19 +16,32 @@ class SPSiteManager(BaseEntity):
             resource_path = ResourcePath("SPSiteManager")
         super(SPSiteManager, self).__init__(context, resource_path)
 
-    def create(self, request):
+    def create(self, title, site_url, owner=None):
         """
         When executing this method server MUST create a SharePoint site according to the parameters passed in the
         SPSiteCreationRequest and return the information about the site it created in the format of a
         SPSiteCreationResponse.
 
-        :param SPSiteCreationRequest request: The entity data object for sites creation request, which include
-            information for the site to be created.
+        :param str title: Site title
+        :param str site_url: Site url
+        :param str or office365.sharepoint.principal.user.User owner: Site owner
         """
-        result = ClientResult(self.context, SPSiteCreationResponse())
-        qry = ServiceOperationQuery(self, "Create", None, request, "request", result)
-        self.context.add_query(qry)
-        return result
+        return_type = ClientResult(self.context, SPSiteCreationResponse())
+
+        def _create_query(owner_string=None):
+            request = SPSiteCreationRequest(title, site_url, owner_string)
+            return ServiceOperationQuery(self, "Create", None, request, "request", return_type)
+
+        from office365.sharepoint.principal.user import User
+        if isinstance(owner, User):
+            def _owner_loaded():
+                next_qry = _create_query(owner.user_principal_name)
+                self.context.add_query(next_qry)
+            owner.ensure_property("UserPrincipalName", _owner_loaded)
+        else:
+            qry = _create_query(owner)
+            self.context.add_query(qry)
+        return return_type
 
     def delete(self, site_id):
         """When executing this method server MUST put the SharePoint site into recycle bin according to
@@ -45,7 +59,7 @@ class SPSiteManager(BaseEntity):
 
     def get_status(self, site_url):
         """When executing this method server SHOULD return a SharePoint site status in the format
-        of a SPSiteCreationRespnse according to the parameter passed in the url.
+        of a SPSiteCreationResponse according to the parameter passed in the url.
 
         :param str site_url: URL of the site to return status for
         """
@@ -61,13 +75,19 @@ class SPSiteManager(BaseEntity):
         return response
 
     def get_site_url(self, site_id):
-        response = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "SiteUrl", None, {'siteId': site_id}, None, response)
+        """
+        :param str site_id: The GUID to uniquely identify a SharePoint site.
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(self, "SiteUrl", None, {'siteId': site_id}, None, return_type)
         self.context.add_query(qry)
-        return response
+        return return_type
 
     def get_team_channel_site_owner(self, site_id):
-        response = ClientResult(self.context, GetTeamChannelSiteOwnerResponse())
-        qry = ServiceOperationQuery(self, "GetTeamChannelSiteOwner", None, {'siteId': site_id}, None, response)
+        """
+        :param str site_id: The GUID to uniquely identify a SharePoint site.
+        """
+        return_type = ClientResult(self.context, GetTeamChannelSiteOwnerResponse())
+        qry = ServiceOperationQuery(self, "GetTeamChannelSiteOwner", None, {'siteId': site_id}, None, return_type)
         self.context.add_query(qry)
-        return response
+        return return_type

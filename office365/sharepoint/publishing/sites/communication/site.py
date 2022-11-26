@@ -28,10 +28,10 @@ class CommunicationSite(BaseEntity):
         """
         site_url = "{base_url}/sites/{alias}".format(base_url=self.context.base_url, alias=alias)
         request = CommunicationSiteCreationRequest(title, site_url)
-        result = ClientResult(self.context, CommunicationSiteCreationResponse())
-        qry = ServiceOperationQuery(self, "Create", None, request, "request", result)
+        return_type = ClientResult(self.context, CommunicationSiteCreationResponse())
+        qry = ServiceOperationQuery(self, "Create", None, request, "request", return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def get_status(self, site_url):
         """

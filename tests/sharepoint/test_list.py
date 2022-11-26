@@ -1,5 +1,6 @@
 from random import randint
 
+from office365.sharepoint.lists.currency import CurrencyList
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 from office365.sharepoint.lists.list import List
@@ -130,3 +131,12 @@ class TestSPList(SPTestCase):
     def test_18_get_list_by_server_relative_url(self):
         pages_list = self.client.web.get_list("SitePages").get().execute_query()
         self.assertIsNotNone(pages_list.resource_path)
+
+    def test_19_get_currency_list(self):
+        result = CurrencyList.get_list(self.client).execute_query()
+        self.assertIsNotNone(result.value)
+
+    def test_20_create_document(self):
+        lib = self.client.web.default_document_library()
+        result = lib.create_document_and_get_edit_link().execute_query()
+        self.assertIsNotNone(result.value)

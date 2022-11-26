@@ -7,7 +7,8 @@ from office365.sharepoint.sharing.principal import Principal
 class SharingLinkInfo(ClientValue):
 
     def __init__(self, allows_anonymous_access=None, application_id=None, created=None, created_by=Principal(),
-                 password_protected=None, invitations=None, redeemed_users=None):
+                 password_protected=None, invitations=None, redeemed_users=None,
+                 last_modified_by=Principal(), password_last_modified_by=Principal()):
         """
         Specifies the information about the tokenized sharing link.
 
@@ -21,6 +22,9 @@ class SharingLinkInfo(ClientValue):
         :param list[LinkInvitation] invitations: This value contains the current membership list for principals
              that have been Invited to the tokenized sharing link.
         :param list[LinkInvitation] redeemed_users:
+        :param Principal last_modified_by: Indicates the principal who last modified the tokenized sharing link.
+             This value MUST be null if the last modified by value is not recorded.
+        :param Principal password_last_modified_by:
         """
         super(SharingLinkInfo, self).__init__()
         self.AllowsAnonymousAccess = allows_anonymous_access
@@ -30,6 +34,8 @@ class SharingLinkInfo(ClientValue):
         self.PasswordProtected = password_protected
         self.Invitations = ClientValueCollection(LinkInvitation, invitations)
         self.RedeemedUsers = ClientValueCollection(LinkInvitation, redeemed_users)
+        self.LastModifiedBy = last_modified_by
+        self.PasswordLastModifiedBy = password_last_modified_by
 
     @property
     def entity_type_name(self):
