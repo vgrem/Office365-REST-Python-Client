@@ -9,7 +9,7 @@ from office365.sharepoint.publishing.sites.communication.creation_response impor
 class CommunicationSite(BaseEntity):
     """Represents a Communication Site."""
 
-    def create(self, alias, title):
+    def create(self, title, site_url, description=None):
         """
         Initiates creation of a Communication Site.
 
@@ -23,11 +23,11 @@ class CommunicationSite(BaseEntity):
 
         - If the SiteStatus returns 3 or 0, the Communication site failed to be created.
 
-        :param str alias: Site alias which defines site url, e.g. https://contoso.sharepoint.com/sites/{alias}
+        :param str site_url: Site url
         :param str title: Site title
+        :param str description: Site description
         """
-        site_url = "{base_url}/sites/{alias}".format(base_url=self.context.base_url, alias=alias)
-        request = CommunicationSiteCreationRequest(title, site_url)
+        request = CommunicationSiteCreationRequest(title, site_url, description)
         return_type = ClientResult(self.context, CommunicationSiteCreationResponse())
         qry = ServiceOperationQuery(self, "Create", None, request, "request", return_type)
         self.context.add_query(qry)

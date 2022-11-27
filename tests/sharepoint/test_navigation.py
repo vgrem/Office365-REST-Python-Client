@@ -1,7 +1,6 @@
 from office365.sharepoint.navigation.node import NavigationNode
 from office365.sharepoint.navigation.node_collection import NavigationNodeCollection
 from office365.sharepoint.navigation.node_creation_information import NavigationNodeCreationInformation
-from office365.sharepoint.navigation.navigation_service import NavigationService
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 
@@ -11,12 +10,17 @@ class TestNavigation(SPTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestNavigation, cls).setUpClass()
-        cls.nav_svc = NavigationService(cls.client)
+        #result = cls.client.site.is_valid_home_site().execute_query()
+        #if result.value is False:
+        #    result = cls.client.site.set_as_home_site().execute_query()
+        #    cls.assertTrue(result.value)
+
+    #def test1_get_global_nav(self):
+    #    result = admin_client.navigation_service.global_nav().execute_query()
+    #    self.assertIsNotNone(result.value)
 
     def test_2_is_global_nav_enabled(self):
-        # self.nav_svc.set_global_nav_enabled(True).execute_query()
-        result = self.nav_svc.global_nav_enabled()
-        self.nav_svc.execute_query()
+        result = self.client.navigation_service.global_nav_enabled().execute_query()
         self.assertIsNotNone(result.value)
 
     def test_3_get_web_navigation(self):
@@ -44,22 +48,6 @@ class TestNavigation(SPTestCase):
         node_to_del = self.__class__.target_node
         node_to_del.delete_object().execute_query()
 
-
-    # def test1_ensure_home_site(self):
-    #    result = self.client.site.is_valid_home_site()
-    #    self.client.execute_query()
-    #    self.assertIsInstance(result.value, bool)
-    #    if result.value is False:
-    #        result = self.client.site.set_as_home_site()
-    #        self.client.execute_query()
-    #        self.assertIsNotNone(result.value)
-
-    # def test2_get_publishing_navigation_provider_type(self):
-    #    result = self.nav_svc.get_publishing_navigation_provider_type()
-    #    self.client.execute_query()
-    #    self.assertIsInstance(result.value, int)
-
-    # def test3_global_nav(self):
-    #    result = self.nav_svc.global_nav()
-    #    self.client.execute_query()
-    #    self.assertIsNotNone(result)
+    def test8_get_publishing_navigation_provider_type(self):
+        result = self.client.navigation_service.get_publishing_navigation_provider_type().execute_query()
+        self.assertIsInstance(result.value, int)

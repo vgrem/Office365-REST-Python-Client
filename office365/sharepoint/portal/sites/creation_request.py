@@ -3,17 +3,18 @@ from office365.runtime.client_value import ClientValue
 
 class SPSiteCreationRequest(ClientValue):
 
-    def __init__(self, title, url, owner=None, lcid=1033):
+    def __init__(self, title, url, owner=None, lcid=1033, web_template="SITEPAGEPUBLISHING#0"):
         """
         :param str title:
         :param str url:
         :param str owner:
         :param int lcid:
+        :param str web_template:
         """
         super(SPSiteCreationRequest, self).__init__()
         self.Title = title
         self.Url = url
-        self.WebTemplate = "SITEPAGEPUBLISHING#0"
+        self.WebTemplate = web_template
         self.Owner = owner
         self.Lcid = lcid
         self.ShareByEmailEnabled = False

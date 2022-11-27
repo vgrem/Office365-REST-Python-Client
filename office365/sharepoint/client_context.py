@@ -228,15 +228,17 @@ class ClientContext(ClientRuntimeContext):
                 request.ensure_header("X-HTTP-Method", "MERGE")
                 request.ensure_header("IF-MATCH", '*')
 
-    def create_team_site(self, alias, title, is_public=True):
-        """Creates a modern SharePoint Team site
-
-        :param str alias: Site alias which defines site url, e.g. https://contoso.sharepoint.com/teams/{alias}
-        :param str title: Site title
-        :param bool is_public:
+    def create_modern_site(self, title, alias, owner=None):
         """
-        result = self.group_site_manager.create_group_ex(title, alias, is_public)
+        Creates a modern site
+
+        :param str alias: Site alias which defines site url, e.g. https://contoso.sharepoint.com/sites/{alias}
+        :param str title: Site title
+        :param str or office365.sharepoint.principal.user.User owner: Site owner
+        """
         return_type = Site(self)
+        site_url = "{base_url}/sites/{alias}".format(base_url=get_absolute_url(self.base_url), alias=alias)
+        result = self.site_manager.create(title, site_url, owner)
 
         def _after_site_create(resp):
             """
@@ -247,8 +249,30 @@ class ClientContext(ClientRuntimeContext):
                 raise ValueError(result.value.ErrorMessage)
             elif result.value.SiteStatus == SiteStatus.Ready:
                 return_type.set_property("__siteUrl", result.value.SiteUrl)
-
         self.after_execute(_after_site_create)
+        return return_type
+
+    def create_team_site(self, alias, title, is_public=True):
+        """Creates a modern SharePoint Team site
+
+        :param str alias: Site alias which defines site url, e.g. https://contoso.sharepoint.com/teams/{alias}
+        :param str title: Site title
+        :param bool is_public:
+        """
+        result = self.group_site_manager.create_group_ex(title, alias, is_public)
+        return_type = Site(self)
+
+        def _after_site_created(resp):
+            """
+            :type resp: requests.Response
+            """
+            resp.raise_for_status()
+            if result.value.SiteStatus == SiteStatus.Error:
+                raise ValueError(result.value.ErrorMessage)
+            elif result.value.SiteStatus == SiteStatus.Ready:
+                return_type.set_property("__siteUrl", result.value.SiteUrl)
+
+        self.after_execute(_after_site_created)
         return return_type
 
     def create_communication_site(self, alias, title):
@@ -259,7 +283,8 @@ class ClientContext(ClientRuntimeContext):
         :param str title: Site title
         """
         return_type = Site(self)
-        site_result = self.site_pages.communication_site.create(alias, title)
+        site_url = "{base_url}/sites/{alias}".format(base_url=get_absolute_url(self.base_url), alias=alias)
+        site_result = self.site_pages.communication_site.create(title, site_url)
 
         def _after_site_create(resp):
             """
@@ -331,6 +356,12 @@ class ClientContext(ClientRuntimeContext):
         """Alias to GroupService"""
         from office365.sharepoint.portal.groups.service import GroupService
         return GroupService(self, ResourcePath("GroupService"))
+
+    @property
+    def navigation_service(self):
+        """Alias to NavigationService"""
+        from office365.sharepoint.navigation.navigation_service import NavigationService
+        return NavigationService(self)
 
     @property
     def page_diagnostics(self):

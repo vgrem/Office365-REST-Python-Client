@@ -38,7 +38,7 @@ class GroupSiteManager(ClientObject):
 
     def create_group_ex(self, display_name, alias, is_public, optional_params=None):
         """
-        Create a modern site
+        Creates a modern site
 
         :param str display_name:
         :param str alias:

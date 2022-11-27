@@ -41,14 +41,33 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
         Resolves the principals to a string of JSON representing users in people picker format.
 
         :param str query_string: Specifies the value to be used in the principal query.
-        :param office365.sharepoint.client_context.ClientContext context:
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
 
         """
-        return_type = ClientResult(context)
-        svc = ClientPeoplePickerWebServiceInterface(context)
-        query_params = ClientPeoplePickerQueryParameters(query_string=query_string)
-        qry = ServiceOperationQuery(svc, "ClientPeoplePickerResolveUser", None, query_params, "queryParams", return_type)
-        qry.static = True
+        return_type = ClientResult(context, str())
+        binding_type = ClientPeoplePickerWebServiceInterface(context)
+        params = ClientPeoplePickerQueryParameters(query_string=query_string)
+        qry = ServiceOperationQuery(binding_type, "ClientPeoplePickerResolveUser", None, params,
+                                    "queryParams", return_type, True)
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
+    def client_people_picker_search_user(context, query_string, maximum_entity_suggestions=100):
+        """
+        Returns for a string of JSON representing users in people picker format of the specified principals.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
+        :param str query_string: Specifies the value to be used in the principal query.
+        :param int maximum_entity_suggestions: Specifies the maximum number of principals to be returned by the
+        principal query.
+        """
+        return_type = ClientResult(context, str())
+        binding_type = ClientPeoplePickerWebServiceInterface(context)
+        params = ClientPeoplePickerQueryParameters(query_string=query_string,
+                                                   maximum_entity_suggestions=maximum_entity_suggestions)
+        qry = ServiceOperationQuery(binding_type, "ClientPeoplePickerSearchUser", None, params,
+                                    "queryParams", return_type, True)
         context.add_query(qry)
         return return_type
 

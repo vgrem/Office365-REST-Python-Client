@@ -2,6 +2,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.navigation.home_site_navigation_settings import HomeSiteNavigationSettings
 from office365.sharepoint.navigation.menu_state import MenuState
 from office365.sharepoint.navigation.provider_type import NavigationProviderType
 
@@ -29,7 +30,8 @@ class NavigationService(BaseEntity):
         return return_type
 
     def global_nav(self):
-        return_type = MenuState()
+        """"""
+        return_type = ClientResult(self.context, MenuState())
         qry = ServiceOperationQuery(self, "GlobalNav", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
@@ -38,10 +40,10 @@ class NavigationService(BaseEntity):
         """
 
         """
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "GlobalNavEnabled", None, None, None, result)
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(self, "GlobalNavEnabled", None, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def set_global_nav_enabled(self, is_enabled):
         """
@@ -105,6 +107,20 @@ class NavigationService(BaseEntity):
         qry = ServiceOperationQuery(self, "SaveMenuState", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
+
+    @property
+    def home_site_settings(self):
+        return self.properties.get("HomeSiteSettings",
+                                   HomeSiteNavigationSettings(self.context, ResourcePath("HomeSiteSettings",
+                                                                                         self.resource_path)))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "HomeSiteSettings": self.home_site_settings,
+            }
+            default_value = property_mapping.get(name, None)
+        return super(NavigationService, self).get_property(name, default_value)
 
     @property
     def entity_type_name(self):
