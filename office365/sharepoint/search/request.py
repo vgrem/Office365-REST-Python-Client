@@ -1,6 +1,7 @@
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.types.collections import StringCollection
+from office365.sharepoint.search.query.reordering_rule import ReorderingRule
 from office365.sharepoint.search.query.sort.sort import Sort
 
 
@@ -16,7 +17,7 @@ class SearchRequest(ClientValue):
                  row_limit=None, rows_per_page=None, start_row=None,
                  enable_sorting=None, sort_list=None, query_template=None, ranking_model_id=None,
                  summary_length=None, collapse_specification=None, client_type=None,
-                 enable_query_rules=None, source_id=None, **kwargs):
+                 enable_query_rules=None, source_id=None, reordering_rules=None, **kwargs):
         """
         :param str query_text: The query text of the search query. If this element is not present or a value is not
             specified, a default value of an empty string MUST be used, and the server MUST return a
@@ -65,6 +66,7 @@ class SearchRequest(ClientValue):
         :param str or None source_id: Specifies the unique identifier for result source to use for executing the
             search query. If no value is specified then the protocol server MUST use the id for the default
             result source.
+        :param [ReorderingRule] reordering_rules:
         """
         super(SearchRequest, self).__init__()
         self.Querytext = query_text
@@ -83,6 +85,7 @@ class SearchRequest(ClientValue):
         self.StartRow = start_row
         self.EnableQueryRules = enable_query_rules
         self.SourceId = source_id
+        self.ReorderingRules = ClientValueCollection(ReorderingRule, reordering_rules)
         self.__dict__.update(**kwargs)
 
     @property

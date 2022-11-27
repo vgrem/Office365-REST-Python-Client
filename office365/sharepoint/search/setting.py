@@ -2,6 +2,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.search.promoted_results_operations_result import PromotedResultsOperationsResult
 from office365.sharepoint.search.query.configuration import QueryConfiguration
 from office365.sharepoint.search.reports.base import ReportBase
 
@@ -50,10 +51,34 @@ class SearchSetting(BaseEntity):
         return result
 
     def ping_admin_endpoint(self):
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "PingAdminEndpoint", None, None, None, result)
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "PingAdminEndpoint", None, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
+
+    def get_promoted_result_query_rules(self, site_collection_level=None, offset=None, number_of_rules=None):
+        """
+        The operation is called to retrieve the promoted results (also called Best Bets) for a tenant or a
+        site collection.
+
+        :param bool site_collection_level: This parameter is used by the protocol server to decide which promoted
+           results to return to the client. If the parameter is true, the promoted results for the current
+           site collection are returned. If the parameter is false, all promoted results for the
+           tenant/Search Service Application are returned.
+        :param int offset: This parameter is the offset into the collection of promoted results. Default value is zero.
+           It is used to page through a large result set.
+        :param int number_of_rules: his parameter is the number of promoted results that are returned in the operation.
+            Default value is 100. It is used together with the offset to page through a large result set.
+        """
+        return_type = ClientResult(self.context, PromotedResultsOperationsResult())
+        payload = {
+            "siteCollectionLevel": site_collection_level,
+            "offset": offset,
+            "numberOfRules": number_of_rules
+        }
+        qry = ServiceOperationQuery(self, "getpromotedresultqueryrules", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     @property
     def entity_type_name(self):

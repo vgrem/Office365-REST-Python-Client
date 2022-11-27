@@ -405,6 +405,12 @@ class ClientContext(ClientRuntimeContext):
         return SPMachineLearningHub(self, ResourcePath("machinelearning"))
 
     @property
+    def search_setting(self):
+        """Alias to SearchSetting"""
+        from office365.sharepoint.search.setting import SearchSetting
+        return SearchSetting(self)
+
+    @property
     def site_pages(self):
         """Alias to SitePageService. Represents a set of APIs to use for managing site pages."""
         return SitePageService(self, ResourcePath("sitePages"))
