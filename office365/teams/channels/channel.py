@@ -1,23 +1,40 @@
 from office365.entity_collection import EntityCollection
 from office365.runtime.client_result import ClientResult
-from office365.runtime.client_value import ClientValue
 from office365.runtime.compat import quote
 
 from office365.entity import Entity
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.teams.channels.provision_email_result import ProvisionChannelEmailResult
 from office365.teams.members.conversation import ConversationMember
 from office365.teams.chats.message import ChatMessage
 from office365.teams.tabs.tab import TeamsTab
 
 
-class ProvisionChannelEmailResult(ClientValue):
-    pass
-
-
 class Channel(Entity):
     """Teams are made up of channels, which are the conversations you have with your teammates"""
+
+    def does_user_have_access(self, user_id=None, tenant_id=None, user_principal_name=None):
+        """Determine whether a user has access to a shared channel.
+
+        :param str user_id: Unique identifier for the user. Either specify the userId or the userPrincipalName property
+           in the request.
+        :param str tenant_id: The ID of the Azure Active Directory tenant that the user belongs to.
+             The default value for this property is the current tenantId of the signed-in user or app.
+        :param str user_principal_name: The user principal name (UPN) of the user. Either specify the userId or the
+             userPrincipalName property in the request.
+        """
+        return_type = ClientResult(self.context, bool())
+        params = {
+            "userId": user_id,
+            "tenantId": tenant_id,
+            "userPrincipalName": user_principal_name
+        }
+        qry = FunctionQuery(self, "doesUserHaveAccess", params, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def provision_email(self):
         """
@@ -73,9 +90,19 @@ class Channel(Entity):
 
         :rtype: EntityCollection
         """
-        return self.get_property('members',
-                                 EntityCollection(self.context, ConversationMember,
-                                                  ResourcePath("members", self.resource_path)))
+        return self.properties.get('members',
+                                   EntityCollection(self.context, ConversationMember,
+                                                    ResourcePath("members", self.resource_path)))
+
+    @property
+    def membership_type(self):
+        """
+        The type of the channel. Can be set during creation and can't be changed.
+        The possible values are: standard, private, unknownFutureValue, shared. The default value is standard.
+        Note that you must use the Prefer: include-unknown-enum-members request header to get the following value
+        in this evolvable enum: shared.
+        """
+        return self.properties.get("membershipType", None)
 
     @property
     def web_url(self):

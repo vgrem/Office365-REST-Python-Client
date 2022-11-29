@@ -72,6 +72,14 @@ class Event(OutlookItem):
         self.context.add_query(qry)
         return self
 
+    def dismiss_reminder(self):
+        """
+        Dismiss a reminder that has been triggered for an event in a user calendar.
+        """
+        qry = ServiceOperationQuery(self, "dismissReminder")
+        self.context.add_query(qry)
+        return self
+
     @property
     def start(self):
         """

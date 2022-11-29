@@ -6,7 +6,7 @@ from office365.outlook.timezone_information import TimeZoneInformation
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.runtime.queries.function import FunctionQuery
 
 
 class OutlookUser(Entity):
@@ -19,7 +19,7 @@ class OutlookUser(Entity):
         list. You can subsequently get the preferred language by getting the user's mailbox settings.
         """
         return_type = ClientResult(self.context, ClientValueCollection(LocaleInfo))
-        qry = ServiceOperationQuery(self, "supportedLanguages", None, None, None, return_type)
+        qry = FunctionQuery(self, "supportedLanguages", None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -33,7 +33,7 @@ class OutlookUser(Entity):
         You can subsequently get the preferred time zone by getting the user's mailbox settings.
         """
         return_type = ClientResult(self.context, ClientValueCollection(TimeZoneInformation))
-        qry = ServiceOperationQuery(self, "supportedTimeZones", None, None, None, return_type)
+        qry = FunctionQuery(self, "supportedTimeZones", None, return_type)
         self.context.add_query(qry)
         return return_type
 
