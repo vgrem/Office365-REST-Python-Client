@@ -1,5 +1,4 @@
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.social.following.manager import SocialFollowingManager
 from office365.sharepoint.social.following.rest_manager import SocialRestFollowingManager
 from office365.sharepoint.social.switch import SPSocialSwitch
 from tests import test_team_site_url, test_user_credentials
@@ -33,20 +32,13 @@ class TestSocial(SPTestCase):
         self.assertIsNotNone(result.value)
 
     def test6_get_followers_alt(self):
-        manager = SocialFollowingManager(self.my_client)
-        result = manager.get_followers().execute_query()
+        result = self.my_client.social_following_manager.get_followers().execute_query()
         self.assertIsNotNone(result.value)
 
     def test7_get_suggestions(self):
-        manager = SocialFollowingManager(self.my_client)
-        result = manager.get_suggestions().execute_query()
+        result = self.my_client.social_following_manager.get_suggestions().execute_query()
         self.assertIsNotNone(result.value)
 
     #def test8_get_social_feed(self):
     #    feed = SocialRestFeed(self.my_client).get().execute_query()
     #    self.assertIsNotNone(feed.social_feed)
-
-
-
-
-

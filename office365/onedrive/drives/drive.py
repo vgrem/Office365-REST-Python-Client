@@ -2,12 +2,11 @@ from office365.base_item import BaseItem
 from office365.directory.identities.identity_set import IdentitySet
 from office365.entity_collection import EntityCollection
 from office365.onedrive.driveitems.driveItem import DriveItem
-from office365.onedrive.lists.list import List
-from office365.onedrive.internal.paths.root import RootPath
 from office365.onedrive.driveitems.system_facet import SystemFacet
-from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.onedrive.internal.paths.root import RootPath
+from office365.onedrive.lists.list import List
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.function import FunctionQuery
 
 
 class Drive(BaseItem):
@@ -20,13 +19,8 @@ class Drive(BaseItem):
         :type query_text: str
         """
         return_type = EntityCollection(self.context, DriveItem, self.items.resource_path)
-        qry = ServiceOperationQuery(self, "search", {"q": query_text}, None, None, return_type)
+        qry = FunctionQuery(self, "search", {"q": query_text}, return_type)
         self.context.add_query(qry)
-
-        def _construct_request(request):
-            request.method = HttpMethod.Get
-
-        self.context.before_execute(_construct_request)
         return return_type
 
     def recent(self):
@@ -36,31 +30,16 @@ class Drive(BaseItem):
         they have access to from other drives.
         """
         return_type = EntityCollection(self.context, DriveItem, self.items.resource_path)
-        qry = ServiceOperationQuery(self, "recent", None, None, None, return_type)
+        qry = FunctionQuery(self, "recent", None, return_type)
         self.context.add_query(qry)
-
-        def _construct_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
-            request.method = HttpMethod.Get
-
-        self.context.before_execute(_construct_request)
         return return_type
 
     def shared_with_me(self):
         """Retrieve a collection of DriveItem resources that have been shared with the owner of the Drive.
         """
         return_type = EntityCollection(self.context, DriveItem, self.items.resource_path)
-        qry = ServiceOperationQuery(self, "sharedWithMe", None, None, None, return_type)
+        qry = FunctionQuery(self, "sharedWithMe", None, return_type)
         self.context.add_query(qry)
-
-        def _construct_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
-            request.method = HttpMethod.Get
-        self.context.before_execute(_construct_request)
         return return_type
 
     @property

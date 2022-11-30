@@ -434,6 +434,11 @@ class ClientContext(ClientRuntimeContext):
         return SPSiteManager(self, ResourcePath("spSiteManager"))
 
     @property
+    def social_following_manager(self):
+        from office365.sharepoint.social.following.manager import SocialFollowingManager
+        return SocialFollowingManager(self)
+
+    @property
     def theme_manager(self):
         """Alias to SP.Utilities.ThemeManager. Represents methods for creating and managing site theming"""
         from office365.sharepoint.portal.theme_manager import ThemeManager

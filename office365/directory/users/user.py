@@ -35,6 +35,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.paths.entity import EntityPath
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
@@ -176,19 +177,14 @@ class User(DirectoryObject):
         :param datetime.datetime start_dt: The start date and time of the event for which the reminder is set up.
             The value is represented in ISO 8601 format, for example, "2015-11-08T19:00:00.0000000".
         """
-        result = ClientResult(self.context, ClientValueCollection(Reminder))
+        return_type = ClientResult(self.context, ClientValueCollection(Reminder))
         params = {
             "startDateTime": start_dt.isoformat(),
             "endDateTime": end_dt.isoformat(),
         }
-        qry = ServiceOperationQuery(self, "reminderView", params, None, None, result)
+        qry = FunctionQuery(self, "reminderView", params, return_type)
         self.context.add_query(qry)
-
-        def _construct_request(request):
-            request.method = HttpMethod.Get
-
-        self.context.before_execute(_construct_request)
-        return result
+        return return_type
 
     def delete_object(self, permanent_delete=False):
         """

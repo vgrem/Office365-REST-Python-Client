@@ -18,8 +18,7 @@ class Store(Entity):
             """
             :type group_sets: EntityCollection
             """
-            for s in group_sets:
-                return_type.add_child(s)
+            [return_type.add_child(s) for s in group_sets]
 
         def _groups_loaded(groups):
             """
