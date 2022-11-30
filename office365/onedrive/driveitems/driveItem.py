@@ -29,6 +29,7 @@ from office365.onedrive.internal.paths.url import UrlPath
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.create_entity import CreateEntityQuery
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.upload_session import UploadSessionQuery
@@ -306,15 +307,7 @@ class DriveItem(BaseItem):
         :type query_text: str
         """
         return_type = EntityCollection(self.context, DriveItem, ResourcePath("items", self.resource_path))
-        qry = ServiceOperationQuery(self, "search", {"q": query_text}, None, None, return_type)
-
-        def _construct_query(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
-            request.method = HttpMethod.Get
-
-        self.context.before_execute(_construct_query)
+        qry = FunctionQuery(self, "search", {"q": query_text}, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -361,13 +354,8 @@ class DriveItem(BaseItem):
             "interval": interval
         }
         return_type = EntityCollection(self.context, ItemActivityStat, self.resource_path)
-        qry = ServiceOperationQuery(self, "getActivitiesByInterval", params, None, None, return_type)
+        qry = FunctionQuery(self, "getActivitiesByInterval", params, return_type)
         self.context.add_query(qry)
-
-        def _construct_request(request):
-            request.method = HttpMethod.Get
-
-        self.context.before_execute(_construct_request)
         return return_type
 
     def restore(self, parent_reference, name):

@@ -1,5 +1,7 @@
 from office365.entity import Entity
 from office365.reports.internal.queries.create_report_query import create_report_query
+from office365.runtime.client_result import ClientResult
+from office365.runtime.queries.function import FunctionQuery
 
 
 class ReportRoot(Entity):
@@ -14,8 +16,8 @@ class ReportRoot(Entity):
             The supported values for {period_value} are: D7, D30, D90, and D180. These values follow the format
             Dn where n represents the number of days over which the report is aggregated. Required.
         """
-
-        qry = create_report_query(self, "getEmailActivityCounts", period)
+        return_type = ClientResult(self.context, str())
+        qry = FunctionQuery(self, "getEmailActivityCounts", {"period": period}, return_type)
         self.context.add_query(qry)
         return qry.return_type
 
@@ -43,6 +45,16 @@ class ReportRoot(Entity):
         qry = create_report_query(self, "getEmailActivityUserDetail", period)
         self.context.add_query(qry)
         return qry.return_type
+
+    def get_m365_app_user_counts(self, period=None):
+        """
+        Get a report that provides the trend in the number of active users for each app (Outlook, Word, Excel,
+        PowerPoint, OneNote, and Teams) in your organization.
+        """
+        return_type = ClientResult(self.context, str())
+        qry = FunctionQuery(self, "getM365AppUserCounts", {"period": period}, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def get_office365_activations_user_counts(self):
         """

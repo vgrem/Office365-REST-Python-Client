@@ -15,3 +15,8 @@ class TestOutlookReports(GraphTestCase):
         result = self.client.reports.get_email_activity_counts("D7").execute_query()
         self.assertIsNotNone(result.value)
 
+    def test2_get_m365_app_user_counts(self):
+        result = self.client.reports.get_m365_app_user_counts("D7").execute_query()
+        self.assertIsNotNone(result.value)
+
+

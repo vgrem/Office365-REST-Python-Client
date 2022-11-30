@@ -14,6 +14,7 @@ from office365.directory.identities.provider import IdentityProvider
 from office365.directory.internal.paths.me import MePath
 from office365.directory.licenses.subscribed_sku import SubscribedSku
 from office365.directory.resource_specific_permission_grant import ResourceSpecificPermissionGrant
+from office365.directory.roles.management import RoleManagement
 from office365.intune.organizations.org_contact import OrgContact
 from office365.intune.organizations.organization import Organization
 from office365.directory.policies.root import PolicyRoot
@@ -234,6 +235,10 @@ class GraphClient(ClientRuntimeContext):
         The resource that represents an instance of History Reports.
         """
         return ReportRoot(self, ResourcePath("reports"))
+
+    @property
+    def role_management(self):
+        return RoleManagement(self, ResourcePath("roleManagement"))
 
     @property
     def teams_templates(self):

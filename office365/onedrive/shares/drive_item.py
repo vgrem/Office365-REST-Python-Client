@@ -1,4 +1,5 @@
 from office365.base_item import BaseItem
+from office365.directory.identities.identity_set import IdentitySet
 from office365.onedrive.permissions.permission import Permission
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.lists.list import List
@@ -29,6 +30,11 @@ class SharedDriveItem(BaseItem):
         """
         return self.properties.get('driveItem',
                                    DriveItem(self.context, ResourcePath("driveItem", self.resource_path)))
+
+    @property
+    def owner(self):
+        """Information about the owner of the shared item being referenced."""
+        return self.properties.get("owner", IdentitySet())
 
     @property
     def root(self):

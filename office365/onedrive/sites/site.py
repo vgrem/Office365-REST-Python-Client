@@ -12,8 +12,8 @@ from office365.onedrive.sharepoint_ids import SharePointIds
 from office365.onedrive.sites.site_collection import SiteCollection
 from office365.onedrive.termstore.store import Store
 from office365.onenote.onenote import Onenote
-from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
@@ -51,16 +51,8 @@ class Site(BaseItem):
         params = {
             "listId": list_id
         }
-        qry = ServiceOperationQuery(self, "getApplicableContentTypesForList", params, None, None, return_type)
+        qry = FunctionQuery(self, "getApplicableContentTypesForList", params, return_type)
         self.context.add_query(qry)
-
-        def _construct_query(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
-            request.method = HttpMethod.Get
-
-        self.context.before_execute(_construct_query)
         return return_type
 
     def get_activities_by_interval(self, start_dt=None, end_dt=None, interval=None):
@@ -78,13 +70,8 @@ class Site(BaseItem):
             "interval": interval
         }
         return_type = EntityCollection(self.context, ItemActivityStat)
-        qry = ServiceOperationQuery(self, "getActivitiesByInterval", params, None, None, return_type)
+        qry = FunctionQuery(self, "getActivitiesByInterval", params, return_type)
         self.context.add_query(qry)
-
-        def _construct_request(request):
-            request.method = HttpMethod.Get
-
-        self.context.before_execute(_construct_request)
         return return_type
 
     @property
