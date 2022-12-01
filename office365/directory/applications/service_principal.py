@@ -1,7 +1,9 @@
+from office365.directory.applications.app_role_assignment import AppRoleAssignmentCollection
 from office365.directory.certificates.self_signed import SelfSignedCertificate
 from office365.directory.key_credential import KeyCredential
 from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.object import DirectoryObject
+from office365.directory.password_credential import PasswordCredential
 from office365.directory.permissions.scope import PermissionScope
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -35,9 +37,16 @@ class ServicePrincipal(DirectoryObject):
         self.context.add_query(qry)
         return return_type
 
-    def add_password(self):
-        """"""
-        pass
+    def add_password(self, display_name=None):
+        """Adds a strong password to an application.
+
+        :param str display_name: App display name
+        """
+        params = PasswordCredential(display_name=display_name)
+        return_type = ClientResult(self.context, params)
+        qry = ServiceOperationQuery(self, "addPassword", None, params, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def add_token_signing_certificate(self, display_name, end_datetime=None):
         """
@@ -80,6 +89,15 @@ class ServicePrincipal(DirectoryObject):
         return self.properties.get('appDisplayName', None)
 
     @property
+    def app_role_assigned_to(self):
+        """
+        App role assignments for this app or service, granted to users, groups, and other service principals.
+        Supports $expand."""
+        return self.properties.get('appRoleAssignedTo',
+                                   AppRoleAssignmentCollection(self.context,
+                                                               ResourcePath("appRoleAssignedTo", self.resource_path)))
+
+    @property
     def service_principal_type(self):
         """
         Identifies whether the service principal represents an application, a managed identity, or a legacy application.
@@ -120,10 +138,27 @@ class ServicePrincipal(DirectoryObject):
         """
         return self.properties.get("oauth2PermissionScopes", ClientValueCollection(PermissionScope))
 
+    @property
+    def created_objects(self):
+        """Directory objects created by this service principal. """
+        return self.properties.get('createdObjects',
+                                   DirectoryObjectCollection(self.context,
+                                                             ResourcePath("createdObjects", self.resource_path)))
+
+    @property
+    def owned_objects(self):
+        """Directory objects that are owned by this service principal. """
+        return self.properties.get('ownedObjects',
+                                   DirectoryObjectCollection(self.context,
+                                                             ResourcePath("ownedObjects", self.resource_path)))
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
-                "oauth2PermissionScopes": self.oauth2_permission_scopes
+                "app_role_assigned_to": self.app_role_assigned_to,
+                "created_objects": self.created_objects,
+                "oauth2PermissionScopes": self.oauth2_permission_scopes,
+                "ownedObjects": self.owned_objects
             }
             default_value = property_mapping.get(name, None)
         return super(ServicePrincipal, self).get_property(name, default_value)

@@ -1,4 +1,5 @@
 from office365.entity import Entity
+from office365.runtime.types.collections import StringCollection
 
 
 class SingleValueLegacyExtendedProperty(Entity):
@@ -8,4 +9,8 @@ class SingleValueLegacyExtendedProperty(Entity):
 
 class MultiValueLegacyExtendedProperty(Entity):
     """An extended property that contains a collection of values."""
-    pass
+
+    @property
+    def value(self):
+        """A collection of property values."""
+        return self.properties.get("value", StringCollection())

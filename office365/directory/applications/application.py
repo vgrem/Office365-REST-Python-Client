@@ -1,3 +1,4 @@
+from office365.directory.applications.public_client import PublicClientApplication
 from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.object import DirectoryObject
 from office365.directory.extensions.extension_property import ExtensionProperty
@@ -138,6 +139,13 @@ class Application(DirectoryObject):
         return self.properties.get('identifierUris', StringCollection())
 
     @property
+    def public_client(self):
+        """
+        Specifies settings for installed clients such as desktop or mobile devices.
+        """
+        return self.properties.get('publicClient', PublicClientApplication())
+
+    @property
     def signin_audience(self):
         """
         Specifies the Microsoft accounts that are supported for the current application.
@@ -149,20 +157,33 @@ class Application(DirectoryObject):
         return self.properties.get('signInAudience', None)
 
     @property
-    def owners(self):
-        """Directory objects that are owners of the application. Read-only.
+    def created_on_behalf_of(self):
+        """"""
+        return self.properties.get('createdOnBehalfOf',
+                                   DirectoryObject(self.context, ResourcePath("createdOnBehalfOf", self.resource_path)))
 
-        :rtype: DirectoryObjectCollection
+    @property
+    def owners(self):
+        """Directory objects that are owners of the application.
         """
-        return self.get_property('owners',
-                                 DirectoryObjectCollection(self.context, ResourcePath("owners", self.resource_path)))
+        return self.properties.get('owners',
+                                   DirectoryObjectCollection(self.context, ResourcePath("owners", self.resource_path)))
 
     @property
     def extension_properties(self):
         """List extension properties on an application object.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('extensionProperties',
-                                 EntityCollection(self.context, ExtensionProperty,
-                                                  ResourcePath("extensionProperties", self.resource_path)))
+        return self.properties.get('extensionProperties',
+                                   EntityCollection(self.context, ExtensionProperty,
+                                                    ResourcePath("extensionProperties", self.resource_path)))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "createdOnBehalfOf": self.created_on_behalf_of,
+                "extensionProperties": self.extension_properties,
+                "keyCredentials": self.key_credentials,
+                "publicClient": self.public_client
+            }
+            default_value = property_mapping.get(name, None)
+        return super(Application, self).get_property(name, default_value)

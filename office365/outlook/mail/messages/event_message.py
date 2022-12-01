@@ -1,4 +1,5 @@
 from office365.outlook.mail.messages.message import Message
+from office365.outlook.mail.patterned_recurrence import PatternedRecurrence
 from office365.runtime.paths.resource_path import ResourcePath
 
 
@@ -14,3 +15,8 @@ class EventMessage(Message):
         from office365.outlook.calendar.event import Event
         return self.properties.get('event',
                                    Event(self.context, ResourcePath("event", self.resource_path)))
+
+    @property
+    def patterned_recurrence(self):
+        """"""
+        return self.properties.get("patternedRecurrence", PatternedRecurrence())

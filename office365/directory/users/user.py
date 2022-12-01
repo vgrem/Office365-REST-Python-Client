@@ -502,8 +502,6 @@ class User(DirectoryObject):
     @property
     def extensions(self):
         """The collection of open extensions defined for the user. Nullable.
-
-        :rtype: EntityCollection
         """
         return self.properties.get('extensions',
                                    EntityCollection(self.context, Extension,
@@ -513,8 +511,6 @@ class User(DirectoryObject):
     def direct_reports(self):
         """
         Get a user's direct reports.
-
-        :rtype: EntityCollection
         """
         return self.properties.get('directReports',
                                    DirectoryObjectCollection(self.context,
@@ -524,8 +520,6 @@ class User(DirectoryObject):
     def online_meetings(self):
         """
         Get a user's online meetings.
-
-        :rtype: OnlineMeetingCollection
         """
         return self.properties.get('onlineMeetings',
                                    OnlineMeetingCollection(self.context,

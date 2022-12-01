@@ -19,3 +19,7 @@ class TestDirectory(GraphTestCase):
     def test4_get_member_objects(self):
         result = self.client.me.get_member_objects().execute_query()
         self.assertIsInstance(result.value, ClientValueCollection)
+
+    def test5_list_directory_roles(self):
+        result = self.client.directory_roles.get().execute_query()
+        self.assertIsNotNone(result.resource_path)

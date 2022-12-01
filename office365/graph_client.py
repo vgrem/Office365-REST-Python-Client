@@ -15,6 +15,7 @@ from office365.directory.internal.paths.me import MePath
 from office365.directory.licenses.subscribed_sku import SubscribedSku
 from office365.directory.resource_specific_permission_grant import ResourceSpecificPermissionGrant
 from office365.directory.roles.management import RoleManagement
+from office365.directory.roles.role import DirectoryRole
 from office365.intune.organizations.org_contact import OrgContact
 from office365.intune.organizations.organization import Organization
 from office365.directory.policies.root import PolicyRoot
@@ -144,7 +145,7 @@ class GraphClient(ClientRuntimeContext):
 
     @property
     def chats(self):
-        """Get teams"""
+        """Get chats"""
         return ChatCollection(self, ResourcePath("chats"))
 
     @property
@@ -161,6 +162,11 @@ class GraphClient(ClientRuntimeContext):
     def directory(self):
         """Represents a deleted item in the directory"""
         return Directory(self, ResourcePath("directory"))
+
+    @property
+    def directory_roles(self):
+        """Represents a directory roles in the directory"""
+        return DeltaCollection(self, DirectoryRole, ResourcePath("directoryRoles"))
 
     @property
     def identity_providers(self):
