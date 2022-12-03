@@ -1,6 +1,6 @@
 from office365.sharepoint.publishing.pages.collection import SitePageCollection
-from office365.sharepoint.publishing.pages.service import SitePageService
 from office365.sharepoint.publishing.pages.page import SitePage
+from office365.sharepoint.publishing.pages.service import SitePageService
 from office365.sharepoint.publishing.video.service_discoverer import VideoServiceDiscoverer
 from tests.sharepoint.sharepoint_case import SPTestCase
 
@@ -16,12 +16,11 @@ class TestPublishing(SPTestCase):
         pass
 
     def test1_init_site_page_service(self):
-        svc = SitePageService(self.client).get().execute_query()
+        svc = self.client.site_pages.get().execute_query()
         self.assertIsNotNone(svc.resource_path)
 
     def test2_get_site_pages(self):
-        svc = SitePageService(self.client)
-        pages = svc.pages.get().execute_query()
+        pages = self.client.site_pages.pages.get().execute_query()
         self.assertIsInstance(pages, SitePageCollection)
 
     # def test3_get_time_zone(self):
@@ -64,3 +63,7 @@ class TestPublishing(SPTestCase):
         result = self.client.page_diagnostics.by_page("/sites/team/SitePages/Home.aspx").execute_query()
         self.assertIsNotNone(result.value)
 
+    #def test_12_share_page_preview_by_email(self):
+    #    page = self.client.site_pages.pages.get_by_url("/sites/team/SitePages/Home.aspx")
+    #    page.share_page_preview_by_email("This page has been shared with you",
+    #                                     [test_user_principal_name_alt]).execute_query()

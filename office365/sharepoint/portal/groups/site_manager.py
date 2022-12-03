@@ -16,6 +16,12 @@ class GroupSiteManager(ClientObject):
             resource_path = ResourcePath("GroupSiteManager")
         super(GroupSiteManager, self).__init__(context, resource_path)
 
+    def can_user_create_group(self):
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(self, "CanUserCreateGroup", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def create_group_for_site(self, display_name, alias, is_public=None, optional_params=None):
         """
         Create a modern site

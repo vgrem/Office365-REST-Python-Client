@@ -43,7 +43,7 @@ class SitePageService(BaseEntity):
         MUST return true if the user has permission to create a site page, otherwise MUST return false.
 
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, bool())
         qry = ServiceOperationQuery(self, "CanCreatePage", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
@@ -53,7 +53,7 @@ class SitePageService(BaseEntity):
         Checks if the current user has permission to create a site page on the site pages document library.
         MUST return true if the user has permission to create a site page, otherwise MUST return false.
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, bool())
         qry = ServiceOperationQuery(self, "CanCreatePromotedPage", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
@@ -82,8 +82,7 @@ class SitePageService(BaseEntity):
         return_type = PrimaryCityTime(context)
         svc = SitePageService(context)
         params = {"cityName": city_name}
-        qry = ServiceOperationQuery(svc, "GetTimeZone", params, None, None, return_type)
-        qry.static = True
+        qry = ServiceOperationQuery(svc, "GetTimeZone", params, None, None, return_type, True)
         context.add_query(qry)
         return return_type
 
@@ -124,12 +123,11 @@ class SitePageService(BaseEntity):
 
         :param office365.sharepoint.client_context.ClientContext context: Client context
         """
-        result = ClientResult(context, OrgAssets())
+        return_type = ClientResult(context, OrgAssets())
         svc = SitePageService(context)
-        qry = ServiceOperationQuery(svc, "OrgAssets", None, None, None, result)
-        qry.static = True
+        qry = ServiceOperationQuery(svc, "OrgAssets", None, None, None, return_type, True)
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def file_picker_tab_options(context):
@@ -155,8 +153,7 @@ class SitePageService(BaseEntity):
         """
         return_type = File(self.context)
         params = {"pageName": page_name, "imageFileName": image_file_name, "imageStream": image_stream}
-        qry = ServiceOperationQuery(self, "AddImage", params, None, None, return_type)
-        qry.static = True
+        qry = ServiceOperationQuery(self, "AddImage", params, None, None, return_type, True)
         self.context.add_query(qry)
         return return_type
 

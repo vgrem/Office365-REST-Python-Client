@@ -1,4 +1,6 @@
 from office365.runtime.client_value import ClientValue
+from office365.runtime.client_value_collection import ClientValueCollection
+from office365.sharepoint.search.query.auto_completion_match import QueryAutoCompletionMatch
 
 
 class QueryAutoCompletion(ClientValue):
@@ -12,6 +14,7 @@ class QueryAutoCompletion(ClientValue):
              Source.
         :param str source: This element represents the Source used when retrieving the matched results.
         """
+        self.Matches = ClientValueCollection(QueryAutoCompletionMatch)
         self.Query = query
         self.Score = score
         self.Source = source

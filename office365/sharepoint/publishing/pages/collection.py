@@ -1,4 +1,5 @@
 from office365.runtime.client_result import ClientResult
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
@@ -49,7 +50,7 @@ class SitePageCollection(SitePageMetadataCollection):
 
         :param str url: URL of the SitePage to be checked.
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, bool())
         qry = ServiceOperationQuery(self, "IsSitePage", [url], None, None, return_type)
         self.context.add_query(qry)
         return return_type
@@ -60,7 +61,18 @@ class SitePageCollection(SitePageMetadataCollection):
 
         :param str url: URL of the SitePage for which to return state.
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, int())
         qry = ServiceOperationQuery(self, "GetPageColumnState", [url], None, None, return_type)
         self.context.add_query(qry)
         return return_type
+
+    def get_by_url(self, url):
+        """Gets the site page with the specified server relative url.
+
+        :param int url: Specifies the server relative url of the site page.
+        """
+        return SitePage(self.context, ServiceOperationPath("GetByUrl", [url], self.resource_path))
+
+    def templates(self):
+        return SitePageMetadataCollection(self.context, SitePage,
+                                          ServiceOperationPath("Templates", None, self.resource_path))

@@ -45,7 +45,7 @@ class TestSearch(TestCase):
         result = self.client.search.suggest("guide.docx").execute_query()
         self.assertIsInstance(result.value, QuerySuggestionResults)
 
-    #def test7_auto_completions(self):
+    # def test7_auto_completions(self):
     #    result = self.search.auto_completions("guide").execute_query()
     #    self.assertIsNotNone(result.value)
 
@@ -56,9 +56,16 @@ class TestSearch(TestCase):
     def test9_get_promoted_result_query_rules(self):
         result = self.client.search_setting.get_promoted_result_query_rules().execute_query()
         self.assertIsNotNone(result.value)
-        
 
-    #def test7_get_crawled_urls(self):
+    # def test7_get_crawled_urls(self):
     #    doc_crawl_log = DocumentCrawlLog(self.client)
     #    result = doc_crawl_log.get_crawled_urls().execute_query()
+    #    self.assertIsNotNone(result.value)
+
+    #def test_10_auto_completions(self):
+    #    result = self.client.search.auto_completions("guide.docx").execute_query()
+    #    self.assertIsNotNone(result.value)
+
+    #def test_11_get_crawled_urls(self):
+    #    result = DocumentCrawlLog(self.client).get_crawled_urls().execute_query()
     #    self.assertIsNotNone(result.value)

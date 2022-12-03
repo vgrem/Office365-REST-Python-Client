@@ -1,9 +1,22 @@
 from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value import ClientValue
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.publishing.pages.fields_data import SitePageFieldsData
 from office365.sharepoint.publishing.pages.metadata import SitePageMetadata
 from office365.sharepoint.translation.status_collection import TranslationStatusCollection
+
+
+class SharePagePreviewByEmailFieldsData(ClientValue):
+
+    def __init__(self, message=None, recipient_emails=None):
+        self.message = message
+        self.recipientEmails = StringCollection(recipient_emails)
+
+    @property
+    def entity_type_name(self):
+        return "SP.Publishing.SharePagePreviewByEmailFieldsData"
 
 
 class SitePage(SitePageMetadata):
@@ -25,6 +38,11 @@ class SitePage(SitePageMetadata):
     def discard_page(self):
         """Discards the current checked out version of the Site Page.  Returns the resulting SitePage after discard."""
         qry = ServiceOperationQuery(self, "DiscardPage")
+        self.context.add_query(qry)
+        return self
+
+    def ensure_title_resource(self):
+        qry = ServiceOperationQuery(self, "EnsureTitleResource")
         self.context.add_query(qry)
         return self
 
@@ -59,10 +77,10 @@ class SitePage(SitePageMetadata):
                                      canvas_content=canvas_content,
                                      banner_image_url=banner_image_url,
                                      topic_header=topic_header)
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "SaveDraft", None, payload, "sitePage", result)
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(self, "SaveDraft", None, payload, "sitePage", return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def save_page_as_draft(self, title, canvas_content=None, banner_image_url=None, topic_header=None):
         """
@@ -78,10 +96,10 @@ class SitePage(SitePageMetadata):
                                      canvas_content=canvas_content,
                                      banner_image_url=banner_image_url,
                                      topic_header=topic_header)
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "SavePageAsDraft", None, payload, "pageStream", result)
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(self, "SavePageAsDraft", None, payload, "pageStream", return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def save_page_as_template(self):
         """
@@ -124,7 +142,7 @@ class SitePage(SitePageMetadata):
         Publishes a major version of the current Site Page.  Returns TRUE on success, FALSE otherwise.
 
         """
-        result = ClientResult(self.context)
+        result = ClientResult(self.context, bool())
         qry = ServiceOperationQuery(self, "Publish", None, None, None, result)
         self.context.add_query(qry)
         return result
@@ -146,13 +164,16 @@ class SitePage(SitePageMetadata):
         :param str message:
         :param list[str] recipient_emails:
         """
-        payload = {
-            "message": message,
-            "recipientEmails": recipient_emails
-        }
+        payload = SharePagePreviewByEmailFieldsData(message, recipient_emails)
         qry = ServiceOperationQuery(self, "SharePagePreviewByEmail", None, payload)
         self.context.add_query(qry)
         return self
+
+    def start_co_auth(self):
+        return_type = SitePage(self.context, self.resource_path)
+        qry = ServiceOperationQuery(self, "StartCoAuth", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     @property
     def canvas_content(self):
