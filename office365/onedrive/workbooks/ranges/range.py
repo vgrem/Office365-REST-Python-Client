@@ -1,9 +1,18 @@
 from office365.entity import Entity
+from office365.onedrive.workbooks.ranges.view import WorkbookRangeView
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.function import FunctionQuery
 
 
 class WorkbookRange(Entity):
     """Range represents a set of one or more contiguous cells such as a cell, a row, a column, block of cells, etc."""
+
+    def visible_view(self):
+        """"""
+        return_type = WorkbookRangeView(self.context)
+        qry = FunctionQuery(self, "visibleView", return_type=return_type)
+        self.context.add_query(qry)
+        return return_type
 
     @property
     def address(self):

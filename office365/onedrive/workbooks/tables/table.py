@@ -2,8 +2,8 @@ from office365.entity import Entity
 from office365.onedrive.workbooks.ranges.range import WorkbookRange
 from office365.onedrive.workbooks.tables.columns.collection import WorkbookTableColumnCollection
 from office365.onedrive.workbooks.tables.rows.collection import WorkbookTableRowCollection
-from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
@@ -13,24 +13,22 @@ class WorkbookTable(Entity):
     def data_body_range(self):
         """Gets the range object associated with the data body of the table."""
         return_type = WorkbookRange(self.context)
-        qry = ServiceOperationQuery(self, "dataBodyRange", return_type=return_type)
+        qry = FunctionQuery(self, "dataBodyRange", return_type=return_type)
         self.context.add_query(qry)
+        return return_type
 
-        def _construct_request(request):
-            request.method = HttpMethod.Get
-        self.context.before_execute(_construct_request)
+    def range(self):
+        """Get the range object associated with the entire table."""
+        return_type = WorkbookRange(self.context)
+        qry = FunctionQuery(self, "range", return_type=return_type)
+        self.context.add_query(qry)
         return return_type
 
     def total_row_range(self):
         """Gets the range object associated with totals row of the table."""
         return_type = WorkbookRange(self.context)
-        qry = ServiceOperationQuery(self, "totalRowRange", return_type=return_type)
+        qry = FunctionQuery(self, "totalRowRange", return_type=return_type)
         self.context.add_query(qry)
-
-        def _construct_request(request):
-            request.method = HttpMethod.Get
-
-        self.context.before_execute(_construct_request)
         return return_type
 
     def clear_filters(self):
