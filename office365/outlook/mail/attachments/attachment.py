@@ -1,7 +1,6 @@
 from office365.entity import Entity
 from office365.runtime.client_result import ClientResult
-from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.runtime.queries.function import FunctionQuery
 
 
 class Attachment(Entity):
@@ -28,18 +27,10 @@ class Attachment(Entity):
         """
         Gets the raw contents of a file or item attachment
         """
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "$value", None, None, None, result)
-
-        def _construct_query(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
-            request.method = HttpMethod.Get
-
-        self.context.before_execute(_construct_query)
+        return_type = ClientResult(self.context)
+        qry = FunctionQuery(self, "$value", None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     @property
     def name(self):

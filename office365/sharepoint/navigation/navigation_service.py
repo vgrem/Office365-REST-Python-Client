@@ -60,7 +60,7 @@ class NavigationService(BaseEntity):
         :param str current_url: A URL relative to the site collection identifying the node within the menu tree.
         :param str map_provider_name: The name identifying a provider to use for the lookup
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, str())
         params = {
             "currentUrl": current_url,
             "mapProviderName": map_provider_name

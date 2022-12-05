@@ -7,7 +7,6 @@ class Recipient(ClientValue):
 
     def __init__(self, email_address=EmailAddress()):
         """
-
         :param EmailAddress email_address: The recipient's email address.
         """
         super(Recipient, self).__init__()

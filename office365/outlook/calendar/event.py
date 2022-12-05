@@ -6,7 +6,7 @@ from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.outlook.calendar.email_address import EmailAddress
 from office365.outlook.item import OutlookItem
 from office365.outlook.mail.attachments.collection import AttachmentCollection
-from office365.outlook.mail.itemBody import ItemBody
+from office365.outlook.mail.item_body import ItemBody
 from office365.outlook.mail.location import Location
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery

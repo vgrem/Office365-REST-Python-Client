@@ -3,6 +3,7 @@ from office365.communications.presences.presence import Presence
 from office365.delta_collection import DeltaCollection
 from office365.directory.authentication.authentication import Authentication
 from office365.directory.extensions.extension import Extension
+from office365.directory.insights.office_graph import OfficeGraphInsights
 from office365.directory.licenses.assigned_plan import AssignedPlan
 from office365.directory.users.settings import UserSettings
 from office365.onedrive.sites.site import Site
@@ -354,6 +355,12 @@ class User(DirectoryObject):
                                                     ResourcePath("followedSites", self.resource_path)))
 
     @property
+    def insights(self):
+        """"""
+        return self.properties.get('insights',
+                                   OfficeGraphInsights(self.context, ResourcePath("insights", self.resource_path)))
+
+    @property
     def photo(self):
         """
         The user's profile photo. Read-only.
@@ -364,7 +371,7 @@ class User(DirectoryObject):
     @property
     def manager(self):
         """
-        The user or contact that is this user's manager. Read-only. (HTTP Methods: GET, PUT, DELETE.)
+        The user or contact that is this user's manager
         """
         return self.properties.get('manager',
                                    DirectoryObject(self.context, ResourcePath("manager", self.resource_path)))
@@ -557,7 +564,8 @@ class User(DirectoryObject):
                 "assignedLicenses": self.assigned_licenses,
                 "mailFolders": self.mail_folders,
                 "mailboxSettings": self.mailbox_settings,
-                "directReports": self.direct_reports
+                "directReports": self.direct_reports,
+                "onlineMeetings": self.online_meetings
             }
             default_value = property_mapping.get(name, None)
         return super(User, self).get_property(name, default_value)

@@ -41,7 +41,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.search.entity import SearchEntity
-from office365.security.security import Security
+from office365.directory.security.security import Security
 from office365.teams.chats.collection import ChatCollection
 from office365.teams.collection import TeamCollection
 from office365.teams.template import TeamsTemplate

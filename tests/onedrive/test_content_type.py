@@ -28,7 +28,7 @@ class TestContentType(TestCase):
         self.assertIsNotNone(ct.resource_path)
         self.__class__.target_ct = ct
 
-    #def test3_publish(self):
+    #def test3_publish_and_verify_if_published(self):
     #    result = self.__class__.target_ct.publish().is_published().execute_query()
     #    self.assertTrue(result.value)
 

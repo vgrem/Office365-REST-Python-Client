@@ -6,7 +6,7 @@ class PhysicalAddress(ClientValue):
 
     def __init__(self, city=None, country_or_region=None, postal_code=None):
         """
-        :param str city: strThe city.
+        :param str city: The city.
         :param str country_or_region: The country or region. It's a free-format string value, for example, "United States".
         :param str postal_code: The postal code.
         """

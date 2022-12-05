@@ -1,6 +1,5 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
-from office365.planner.plans.plan import PlannerPlan
 from office365.planner.tasks.task import PlannerTask
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -11,13 +10,12 @@ class PlannerUser(Entity):
 
     @property
     def plans(self):
-        """Read-only. Nullable. Returns the plannerTasks assigned to the user.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('plans',
-                                 EntityCollection(self.context, PlannerPlan,
-                                                  ResourcePath("plans", self.resource_path)))
+        Returns the plannerTasks assigned to the user.
+        """
+        from office365.planner.plans.collection import PlannerPlanCollection
+        return self.properties.get('plans',
+                                   PlannerPlanCollection(self.context, ResourcePath("plans", self.resource_path)))
 
     @property
     def tasks(self):
@@ -25,6 +23,6 @@ class PlannerUser(Entity):
 
         :rtype: EntityCollection
         """
-        return self.get_property('tasks',
-                                 EntityCollection(self.context, PlannerTask,
-                                                  ResourcePath("tasks", self.resource_path)))
+        return self.properties.get('tasks',
+                                   EntityCollection(self.context, PlannerTask,
+                                                    ResourcePath("tasks", self.resource_path)))

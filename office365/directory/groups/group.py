@@ -2,6 +2,7 @@ import json
 
 from office365.delta_collection import DeltaCollection
 from office365.directory.applications.app_role_assignment import AppRoleAssignmentCollection
+from office365.directory.extensions.extension import Extension
 from office365.directory.licenses.assigned_license import AssignedLicense
 from office365.directory.object import DirectoryObject
 from office365.directory.object_collection import DirectoryObjectCollection
@@ -10,6 +11,7 @@ from office365.entity_collection import EntityCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onenote.onenote import Onenote
 from office365.outlook.calendar.event import Event
+from office365.outlook.mail.conversation_thread import ConversationThread
 from office365.planner.group import PlannerGroup
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -121,10 +123,18 @@ class Group(DirectoryObject):
         return self
 
     @property
-    def members(self):
-        """Users and groups that are members of this group.
+    def extensions(self):
+        """
+        The collection of open extensions defined for the group
+        """
+        return self.properties.get('extensions',
+                                   EntityCollection(self.context, Extension,
+                                                    ResourcePath("extensions", self.resource_path)))
 
-        :rtype: DirectoryObjectCollection
+    @property
+    def members(self):
+        """
+        Users and groups that are members of this group.
         """
         return self.properties.get('members',
                                    DirectoryObjectCollection(self.context, ResourcePath("members", self.resource_path)))
@@ -149,6 +159,13 @@ class Group(DirectoryObject):
         return self.properties.get('transitiveMemberOf',
                                    DirectoryObjectCollection(self.context,
                                                              ResourcePath("transitiveMemberOf", self.resource_path)))
+
+    @property
+    def threads(self):
+        """The group's conversation threads"""
+        return self.properties.get('threads',
+                                   EntityCollection(self.context, ConversationThread,
+                                                    ResourcePath("threads", self.resource_path)))
 
     @property
     def owners(self):
@@ -207,6 +224,7 @@ class Group(DirectoryObject):
         if default_value is None:
             property_mapping = {
                 "appRoleAssignments": self.app_role_assignments,
+                "assignedLicenses": self.assigned_licenses,
                 "transitiveMembers": self.transitive_members,
                 "transitiveMemberOf": self.transitive_member_of,
             }

@@ -3,8 +3,7 @@ from office365.onenote.notebooks.notebook import Notebook
 from office365.onenote.pages.page_links import PageLinks
 from office365.onenote.sections.section import OnenoteSection
 from office365.runtime.client_result import ClientResult
-from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
 
@@ -14,18 +13,10 @@ class OnenotePage(OnenoteEntitySchemaObjectModel):
 
     def get_content(self):
         """Download the page's HTML content. """
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "content", None, None, None, result)
-
-        def _construct_query(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
-            request.method = HttpMethod.Get
-
-        self.context.before_execute(_construct_query)
+        return_type = ClientResult(self.context)
+        qry = FunctionQuery(self, "content", None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     @property
     def content_url(self):
@@ -60,20 +51,16 @@ class OnenotePage(OnenoteEntitySchemaObjectModel):
     @property
     def parent_notebook(self):
         """The notebook that contains the page. Read-only.
-
-        :rtype: Notebook
         """
-        return self.get_property('parentNotebook',
-                                 Notebook(self.context, ResourcePath("parentNotebook", self.resource_path)))
+        return self.properties.get('parentNotebook',
+                                   Notebook(self.context, ResourcePath("parentNotebook", self.resource_path)))
 
     @property
     def parent_section(self):
-        """The section that contains the page. Read-only.
-
-        :rtype: OnenoteSection
+        """The section that contains the page.
         """
-        return self.get_property('parentSection',
-                                 OnenoteSection(self.context, ResourcePath("parentSection", self.resource_path)))
+        return self.properties.get('parentSection',
+                                   OnenoteSection(self.context, ResourcePath("parentSection", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:

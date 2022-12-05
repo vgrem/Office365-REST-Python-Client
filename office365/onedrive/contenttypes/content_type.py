@@ -8,6 +8,7 @@ from office365.onedrive.documentsets.document_set import DocumentSet
 from office365.onedrive.listitems.item_reference import ItemReference
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 
@@ -20,8 +21,8 @@ class ContentType(BaseItem):
         """
         Check the publishing status of a contentType in a content type hub site.
         """
-        return_type = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "isPublished", None, None, None, return_type)
+        return_type = ClientResult(self.context, bool())
+        qry = FunctionQuery(self, "isPublished", None, return_type)
         self.context.add_query(qry)
         return return_type
 

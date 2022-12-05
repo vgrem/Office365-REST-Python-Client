@@ -1,6 +1,6 @@
 from office365.communications.onlinemeetings.meeting_participants import MeetingParticipants
 from office365.entity import Entity
-from office365.outlook.mail.itemBody import ItemBody
+from office365.outlook.mail.item_body import ItemBody
 
 
 class OnlineMeeting(Entity):

@@ -1,5 +1,5 @@
 from office365.delta_collection import DeltaCollection
-from office365.outlook.mail.itemBody import ItemBody
+from office365.outlook.mail.item_body import ItemBody
 from office365.outlook.mail.messages.message import Message
 from office365.outlook.mail.recipient import Recipient
 from office365.runtime.client_value_collection import ClientValueCollection

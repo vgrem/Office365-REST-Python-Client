@@ -6,6 +6,7 @@ from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.portal.sites.creation_request import SPSiteCreationRequest
 from office365.sharepoint.portal.sites.creation_response import SPSiteCreationResponse
 from office365.sharepoint.teams.site_owner_response import GetTeamChannelSiteOwnerResponse
+from office365.sharepoint.viva.site_request_info import VivaSiteRequestInfo
 
 
 class SPSiteManager(BaseEntity):
@@ -89,5 +90,15 @@ class SPSiteManager(BaseEntity):
         """
         return_type = ClientResult(self.context, GetTeamChannelSiteOwnerResponse())
         qry = ServiceOperationQuery(self, "GetTeamChannelSiteOwner", None, {'siteId': site_id}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def viva_backend_site_url_from_name(self, site_name):
+        """
+        :param str site_name:
+        """
+        return_type = ClientResult(self.context, VivaSiteRequestInfo())
+        payload = {'siteName': site_name}
+        qry = ServiceOperationQuery(self, "VivaBackendSiteUrlFromName", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type

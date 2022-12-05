@@ -1,7 +1,7 @@
 from office365.entity_collection import EntityCollection
 from office365.onedrive.contenttypes.content_type import ContentType
-from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.create_entity import CreateEntityQuery
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
@@ -86,14 +86,7 @@ class ContentTypeCollection(EntityCollection):
         to sites and lists, effectively switching from a "push everywhere" to "pull as needed" approach.
         The method allows users to pull content types directly from the content type hub to a site or list.
         """
-        def _construct_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
-            request.method = HttpMethod.Get
-
         return_type = ContentTypeCollection(self.context, self.resource_path)
-        qry = ServiceOperationQuery(self, "getCompatibleHubContentTypes", None, None, None, return_type)
+        qry = FunctionQuery(self, "getCompatibleHubContentTypes", None, return_type)
         self.context.add_query(qry)
-        self.context.before_execute(_construct_request)
         return return_type

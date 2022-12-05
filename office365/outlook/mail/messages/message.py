@@ -4,17 +4,35 @@ from office365.directory.extensions.extension import Extension
 from office365.entity_collection import EntityCollection
 from office365.outlook.item import OutlookItem
 from office365.outlook.mail.attachments.collection import AttachmentCollection
-from office365.outlook.mail.itemBody import ItemBody
+from office365.outlook.mail.item_body import ItemBody
 from office365.outlook.mail.recipient import Recipient
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.function import FunctionQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class Message(OutlookItem):
     """A message in a mailbox folder."""
+
+    def create_forward(self, to_recipients=None, message=None, comment=None):
+        """
+        Create a draft to forward an existing message, in either JSON or MIME format.
+
+        :param list[Recipient] to_recipients:
+        :param Message message:
+        :param str comment:
+        """
+        return_type = Message(self.context)
+        payload = {
+            "ToRecipients": ClientValueCollection(Recipient, to_recipients),
+            "Message": message,
+            "Comment": comment
+        }
+        qry = ServiceOperationQuery(self, "createForward", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return self
 
     def download(self, file_object):
         """Download MIME content of a message into a file
@@ -37,18 +55,10 @@ class Message(OutlookItem):
         """
         Get MIME content of a message
         """
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "$value", None, None, None, result)
-
-        def _construct_query(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
-            request.method = HttpMethod.Get
-
-        self.context.before_execute(_construct_query)
+        return_type = ClientResult(self.context)
+        qry = FunctionQuery(self, "$value", None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def add_file_attachment(self, name, content, content_type=None):
         """
@@ -75,6 +85,7 @@ class Message(OutlookItem):
         if file_size > max_upload_chunk:
             def _message_loaded():
                 self.attachments.resumable_upload(file_path, max_upload_chunk, chunk_uploaded)
+
             self.ensure_property("id", _message_loaded)
         else:
             with open(file_path, 'rb') as file_object:

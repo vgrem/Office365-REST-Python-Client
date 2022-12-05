@@ -2,7 +2,7 @@ from office365.directory.extensions.extended_property import SingleValueLegacyEx
     MultiValueLegacyExtendedProperty
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
-from office365.outlook.mail.messages.message import Message
+from office365.outlook.mail.messages.collection import MessageCollection
 from office365.outlook.mail.messages.message_rule import MessageRule
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -42,8 +42,7 @@ class MailFolder(Entity):
     def messages(self):
         """The collection of messages in the mailFolder."""
         return self.properties.get('messages',
-                                   EntityCollection(self.context, Message,
-                                                    ResourcePath("messages", self.resource_path)))
+                                   MessageCollection(self.context, ResourcePath("messages", self.resource_path)))
 
     @property
     def multi_value_extended_properties(self):

@@ -35,10 +35,10 @@ class Calendar(Entity):
             "endTime": DateTimeTimeZone.parse(end_time),
             "availabilityViewInterval": availability_view_interval
         }
-        result = ClientResult(self.context, ClientValueCollection(ScheduleInformation))
-        qry = ServiceOperationQuery(self, "getSchedule", None, payload, None, result)
+        return_type = ClientResult(self.context, ClientValueCollection(ScheduleInformation))
+        qry = ServiceOperationQuery(self, "getSchedule", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     @property
     def can_edit(self):

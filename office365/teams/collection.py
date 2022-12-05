@@ -1,4 +1,4 @@
-from office365.directory.groups.group import Group
+
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.teams.team import Team
