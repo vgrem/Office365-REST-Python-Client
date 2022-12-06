@@ -34,6 +34,10 @@ class TestCommunicationSite(TestCase):
         result = self.__class__.target_site.is_valid_home_site().execute_query()
         self.assertIsNotNone(result.value)
 
+    #def test5_get_home_details(self):
+    #    result = self.client.home_site.details().execute_query()
+    #    self.assertIsNotNone(result.value)
+
     def test7_register_hub_site(self):
         tenant = Tenant.from_url(test_admin_site_url).with_credentials(test_user_credentials)
         props = tenant.register_hub_site(self.__class__.target_site.url).execute_query()

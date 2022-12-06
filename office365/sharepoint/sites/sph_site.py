@@ -7,14 +7,16 @@ from office365.sharepoint.sites.home_site_reference import SPHSiteReference
 
 class SPHSite(BaseEntity):
 
-    def __init__(self, context):
+    def __init__(self, context, resource_path=None):
         """
         A home site represents a SharePoint communication site.
         It brings together news, events, embedded video and conversations, and other resources to deliver an engaging
         experience that reflects your organization's voice, priorities, and brand.
         It also allows your users to search for content (such as sites, news, and files) across your organization
         """
-        super(SPHSite, self).__init__(context, ResourcePath("SP.SPHSite"))
+        if resource_path is None:
+            resource_path = ResourcePath("SP.SPHSite")
+        super(SPHSite, self).__init__(context, resource_path)
 
     def details(self):
         return_type = ClientResult(self.context, SPHSiteReference())

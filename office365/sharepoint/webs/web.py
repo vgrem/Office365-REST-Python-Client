@@ -1,4 +1,5 @@
 # coding=utf-8
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -1278,6 +1279,19 @@ class Web(SecurableObject):
         qry = ServiceOperationQuery(self, "SetGlobalNavSettings", None, payload)
         self.context.add_query(qry)
         return self
+
+    def assign_document_id(self, site_prefix):
+        """
+        Assign Document IDs
+
+        :param str site_prefix: Specify whether IDs will be automatically assigned to all documents in the
+            Site Collection. Additionally, you can specify a set of 4-12 characters that will be used at the beginning
+            of all IDs assigned for documents in this Site Collection, to help ensure that items in different
+            Site Collections will never get the same ID. Note: A timer job will be scheduled to assign IDs to
+            documents already in the Site Collection.
+        """
+        props = {"docid_msft_hier_siteprefix": site_prefix, "docid_enabled": "1"}
+        return self.set_property("AllProperties", props).update()
 
     @property
     def activities(self):

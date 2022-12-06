@@ -3,14 +3,15 @@ import copy
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.auth.user_credential import UserCredential
 from office365.runtime.client_runtime_context import ClientRuntimeContext
+from office365.runtime.compat import urlparse, is_absolute_url, get_absolute_url
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.odata.v3.json_light_format import JsonLightFormat
-from office365.runtime.odata.v3.batch_request import ODataBatchV3Request
 from office365.runtime.odata.request import ODataRequest
+from office365.runtime.odata.v3.batch_request import ODataBatchV3Request
+from office365.runtime.odata.v3.json_light_format import JsonLightFormat
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
-from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.portal.sites.status import SiteStatus
 from office365.sharepoint.publishing.pages.service import SitePageService
 from office365.sharepoint.request_user_context import RequestUserContext
@@ -18,7 +19,6 @@ from office365.sharepoint.sites.site import Site
 from office365.sharepoint.tenant.administration.hubsites.collection import HubSiteCollection
 from office365.sharepoint.webs.context_web_information import ContextWebInformation
 from office365.sharepoint.webs.web import Web
-from office365.runtime.compat import urlparse, is_absolute_url, get_absolute_url
 
 
 class ClientContext(ClientRuntimeContext):
@@ -323,6 +323,11 @@ class ClientContext(ClientRuntimeContext):
         return self._site
 
     @property
+    def apps(self):
+        from office365.sharepoint.apps.app_collection import AppCollection
+        return AppCollection(self, ResourcePath("Apps"))
+
+    @property
     def me(self):
         """Gets the user context for the present request"""
         return RequestUserContext(self, ResourcePath("Me"))
@@ -405,6 +410,18 @@ class ClientContext(ClientRuntimeContext):
         return SPMachineLearningHub(self, ResourcePath("machinelearning"))
 
     @property
+    def org_news(self):
+        """Alias to OrgNewsSite"""
+        from office365.sharepoint.portal.organization_news import OrganizationNews
+        return OrganizationNews(self, ResourcePath("OrgNews"))
+
+    @property
+    def org_news_site(self):
+        """Alias to OrgNewsSite"""
+        from office365.sharepoint.orgnewssite.api import OrgNewsSiteApi
+        return OrgNewsSiteApi(self, ResourcePath("OrgNewsSite"))
+
+    @property
     def search_setting(self):
         """Alias to SearchSetting"""
         from office365.sharepoint.search.setting import SearchSetting
@@ -434,6 +451,24 @@ class ClientContext(ClientRuntimeContext):
         return SPSiteManager(self, ResourcePath("spSiteManager"))
 
     @property
+    def home_service(self):
+        """Alias to SharePointHomeServiceContextBuilder."""
+        from office365.sharepoint.portal.home.service_context_builder import SharePointHomeServiceContextBuilder
+        return SharePointHomeServiceContextBuilder(self, ResourcePath("sphomeservice"))
+
+    @property
+    def home_site(self):
+        """Alias to SPHSite."""
+        from office365.sharepoint.sites.sph_site import SPHSite
+        return SPHSite(self, ResourcePath("SPHSite"))
+
+    @property
+    def publications(self):
+        from office365.sharepoint.base_entity_collection import BaseEntityCollection
+        from office365.sharepoint.contentcenter.machinelearning.publication import SPMachineLearningPublication
+        return BaseEntityCollection(self, SPMachineLearningPublication, ResourcePath("publications"))
+
+    @property
     def social_following_manager(self):
         from office365.sharepoint.social.following.manager import SocialFollowingManager
         return SocialFollowingManager(self)
@@ -461,6 +496,12 @@ class ClientContext(ClientRuntimeContext):
         """Alias to TenantSettings"""
         from office365.sharepoint.tenant.settings import TenantSettings
         return TenantSettings.current(self)
+
+    @property
+    def work_items(self):
+        from office365.sharepoint.contentcenter.machinelearning.work_item_collection import \
+            SPMachineLearningWorkItemCollection
+        return SPMachineLearningWorkItemCollection(self, ResourcePath("workitems"))
 
     @property
     def tenant(self):
