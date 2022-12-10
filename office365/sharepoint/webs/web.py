@@ -25,6 +25,7 @@ from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.folders.collection import FolderCollection
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.document_library_information import DocumentLibraryInformation
+from office365.sharepoint.lists.get_parameters import GetListsParameters
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.collection import ListCollection
 from office365.sharepoint.lists.template_collection import ListTemplateCollection
@@ -36,6 +37,7 @@ from office365.sharepoint.principal.group import Group
 from office365.sharepoint.principal.group_collection import GroupCollection
 from office365.sharepoint.principal.user import User
 from office365.sharepoint.principal.user_collection import UserCollection
+from office365.sharepoint.pushnotifications.collection import PushNotificationSubscriberCollection
 from office365.sharepoint.pushnotifications.subscriber import PushNotificationSubscriber
 from office365.sharepoint.recyclebin.item_collection import RecycleBinItemCollection
 from office365.sharepoint.sharing.external_site_option import ExternalSharingSiteOption
@@ -146,24 +148,26 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
-    def get_push_notification_subscribers_by_user(self, user_or_username):
+    def get_push_notification_subscribers_by_user(self, user):
         """
         Queries for the push notification subscribers for the site  for the specified user.
 
-        :param str or User user_or_username:
+        :param str or User user: User object or login name
         """
-        return_type = BaseEntityCollection(self.context, PushNotificationSubscriber)
+        return_type = PushNotificationSubscriberCollection(self.context)
 
-        if isinstance(user_or_username, User):
+        def _create_query(login_name):
+            return ServiceOperationQuery(self, "GetPushNotificationSubscribersByUser",
+                                         [login_name], None, None, return_type)
+
+        if isinstance(user, User):
             def _user_loaded():
-                next_qry = ServiceOperationQuery(self, "GetPushNotificationSubscribersByUser",
-                                                 [user_or_username.login_name], None, None, return_type)
+                next_qry = _create_query(user.login_name)
                 self.context.add_query(next_qry)
 
-            user_or_username.ensure_property("LoginName", _user_loaded)
+            user.ensure_property("LoginName", _user_loaded)
         else:
-            qry = ServiceOperationQuery(self, "GetPushNotificationSubscribersByUser", [user_or_username], None,
-                                        None, return_type)
+            qry = _create_query(user)
             self.context.add_query(qry)
         return return_type
 
@@ -177,12 +181,12 @@ class Web(SecurableObject):
             string parameters, forSharing set to 1 if sharing, and bypass set to 1 to bypass any mobile logic.
         :param bool is_edit_link: If true, the link will allow the logged in user to edit privileges on the item.
         """
-        result = ClientResult(context)
+        return_type = ClientResult(context)
         params = {"url": url, "isEditLink": is_edit_link}
-        qry = ServiceOperationQuery(context.web, "CreateOrganizationSharingLink", None, params, None, result)
+        qry = ServiceOperationQuery(context.web, "CreateOrganizationSharingLink", None, params, None, return_type)
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def destroy_organization_sharing_link(context, url, is_edit_link, remove_associated_sharing_link_group):
@@ -296,7 +300,7 @@ class Web(SecurableObject):
         return return_type
 
     def get_all_client_side_components(self):
-        result = ClientResult(self.context)
+        result = ClientResult(self.context, str())
         qry = ServiceOperationQuery(self, "GetAllClientSideComponents", None, None, None, result)
         self.context.add_query(qry)
         return result
@@ -338,19 +342,28 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return self
 
+    def get_lists(self):
+        return_type = ListCollection(self.context)
+        payload = {
+            "getListsParams": GetListsParameters()
+        }
+        qry = ServiceOperationQuery(self, "GetLists", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def get_sub_webs_filtered_for_current_user(self, query):
         """Returns a collection of objects that contain metadata about subsites of the current site (2) in which the
         current user is a member.
 
         :type query: office365.sharepoint.webs.subweb_query.SubwebQuery
         """
-        users = WebInformationCollection(self.context)
+        return_type = WebInformationCollection(self.context)
         qry = ServiceOperationQuery(self, "getSubWebsFilteredForCurrentUser", {
             "nWebTemplateFilter": query.WebTemplateFilter,
             "nConfigurationFilter": query.ConfigurationFilter
-        }, None, None, users)
+        }, None, None, return_type)
         self.context.add_query(qry)
-        return users
+        return return_type
 
     def get_recycle_bin_items(self, paging_info=None, row_limit=100, is_ascending=True, order_by=None, item_state=None):
         """
@@ -362,7 +375,7 @@ class Web(SecurableObject):
         :param int order_by: the column by which to order the Recycle Bin query.
         :param int item_state: Recycle Bin stage of items to return in the query.
         """
-        result = RecycleBinItemCollection(self.context)
+        return_type = RecycleBinItemCollection(self.context)
         payload = {
             "rowLimit": row_limit,
             "isAscending": is_ascending,
@@ -370,9 +383,9 @@ class Web(SecurableObject):
             "orderBy": order_by,
             "itemState": item_state
         }
-        qry = ServiceOperationQuery(self, "GetRecycleBinItems", None, payload, None, result)
+        qry = ServiceOperationQuery(self, "GetRecycleBinItems", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def get_all_webs(self):
         """Returns a collection containing a flat list of all Web objects in the Web."""
@@ -443,7 +456,7 @@ class Web(SecurableObject):
 
     def get_regional_datetime_schema(self):
         """Get DateTime Schema based on regional settings"""
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, str())
         qry = ServiceOperationQuery(self, "GetRegionalDateTimeSchema", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
@@ -468,7 +481,7 @@ class Web(SecurableObject):
 
         :type context: office365.sharepoint.client_context.ClientContext
         """
-        result = ClientResult(context)
+        result = ClientResult(context, str())
         qry = ServiceOperationQuery(context.web, "GetContextWebThemeData", None, None, None, result)
         qry.static = True
         context.add_query(qry)
@@ -494,15 +507,15 @@ class Web(SecurableObject):
         string parameters
         :param office365.sharepoint.client_context.ClientContext context: client context
         """
-        result = ClientResult(context)
+        return_type = ClientResult(context, str())
         payload = {
             "url": context.create_safe_url(url, False),
             "isEditLink": is_edit_link
         }
-        qry = ServiceOperationQuery(context.web, "CreateAnonymousLink", None, payload, None, result)
+        qry = ServiceOperationQuery(context.web, "CreateAnonymousLink", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def create_anonymous_link_with_expiration(context, url, is_edit_link, expiration_string):
@@ -636,10 +649,10 @@ class Web(SecurableObject):
 
         :type permission_mask: BasePermissions
         """
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "DoesUserHavePermissions", permission_mask, None, None, result)
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(self, "DoesUserHavePermissions", permission_mask, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def does_push_notification_subscriber_exist(self, device_app_instance_id):
         """
@@ -648,11 +661,11 @@ class Web(SecurableObject):
 
         :param str device_app_instance_id: Device application instance identifier.
         """
-        result = ClientResult(self.context)
+        return_type = ClientResult(self.context, bool())
         params = {"deviceAppInstanceId": device_app_instance_id}
-        qry = ServiceOperationQuery(self, "DoesPushNotificationSubscriberExist", params, None, None, result)
+        qry = ServiceOperationQuery(self, "DoesPushNotificationSubscriberExist", params, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def get_folder_by_id(self, unique_id):
         """
@@ -687,10 +700,10 @@ class Web(SecurableObject):
 
         :param office365.sharepoint.changes.query.ChangeQuery query: Specifies which changes to return
         """
-        changes = ChangeCollection(self.context)
-        qry = ServiceOperationQuery(self, "getChanges", None, query, "query", changes)
+        return_type = ChangeCollection(self.context)
+        qry = ServiceOperationQuery(self, "getChanges", None, query, "query", return_type)
         self.context.add_query(qry)
-        return changes
+        return return_type
 
     def get_available_web_templates(self, lcid=1033, do_include_cross_language=False):
         """
@@ -705,7 +718,7 @@ class Web(SecurableObject):
             "doIncludeCrossLanguage": do_include_cross_language
         }
         return_type = WebTemplateCollection(self.context,
-                                            ServiceOperationPath("GetAvailableWebTemplates ", params,
+                                            ServiceOperationPath("GetAvailableWebTemplates", params,
                                                                  self.resource_path))
 
         qry = ServiceOperationQuery(self, "GetAvailableWebTemplates", params, None, None, return_type)
@@ -1280,7 +1293,7 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return self
 
-    def assign_document_id(self, site_prefix):
+    def assign_document_id(self, site_prefix, enabled=True):
         """
         Assign Document IDs
 
@@ -1289,8 +1302,10 @@ class Web(SecurableObject):
             of all IDs assigned for documents in this Site Collection, to help ensure that items in different
             Site Collections will never get the same ID. Note: A timer job will be scheduled to assign IDs to
             documents already in the Site Collection.
+        :param bool enabled:
         """
-        props = {"docid_msft_hier_siteprefix": site_prefix, "docid_enabled": "1"}
+
+        props = {'docid_x005f_msft_x005f_hier_x005f_siteprefix': site_prefix, 'docid_x005f_enabled': "1"}
         return self.set_property("AllProperties", props).update()
 
     @property

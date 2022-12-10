@@ -25,3 +25,7 @@ class SocialAnnouncementManager(BaseEntity):
         qry.static = True
         context.add_query(qry)
         return return_type
+
+    @property
+    def entity_type_name(self):
+        return "SP.Social.SocialAnnouncementManager"

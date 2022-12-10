@@ -44,7 +44,11 @@ class TestSite(SPTestCase):
         result = self.client.site.get_site_logo().execute_query()
         self.assertIsNotNone(result.value)
 
-    def test8_open_web_by_id(self):
+    def test8_get_available_tags(self):
+        result = self.client.site.get_available_tags().execute_query()
+        self.assertIsNotNone(result.value)
+
+    def test9_open_web_by_id(self):
         web = self.client.web.get().execute_query()
         sub_site = self.client.site.open_web_by_id(web.id).execute_query()
         self.assertIsNotNone(sub_site.id)
@@ -53,25 +57,25 @@ class TestSite(SPTestCase):
     #    result = self.client.site_linking_manager.get_site_links().execute_query()
     #    self.assertIsNotNone(result.value)
 
-    def test9_create_site(self):
+    def test_10_create_site(self):
         site_url = "{0}/sites/{1}".format(test_site_url, uuid.uuid4().hex)
         result = self.client.site_manager.create("Comm Site", site_url, test_user_principal_name_alt).execute_query()
         self.assertIsNotNone(result.value)
         self.__class__.site_response = result.value
 
-    def test_10_get_site_status(self):
+    def test_11_get_site_status(self):
         site_url = self.__class__.site_response.SiteUrl
         result = self.client.site_manager.get_status(site_url).execute_query()
         self.assertIsNotNone(result.value.SiteStatus)
         self.assertTrue(result.value.SiteStatus != SiteStatus.Error)
 
-    def test_11_get_site_url(self):
+    def test_12_get_site_url(self):
         site_id = self.__class__.site_response.SiteId
         result = self.client.site_manager.get_site_url(site_id).execute_query()
         self.assertIsNotNone(result.value)
         self.assertTrue(self.__class__.site_response.SiteUrl == result.value)
 
-    def test_12_delete_site(self):
+    def test_13_delete_site(self):
         from office365.sharepoint.client_context import ClientContext
         admin_ctx = ClientContext(self.client.base_url).with_credentials(test_admin_credentials)
         site_id = self.__class__.site_response.SiteId

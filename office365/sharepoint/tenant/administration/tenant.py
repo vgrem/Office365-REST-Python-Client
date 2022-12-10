@@ -375,11 +375,11 @@ class Tenant(BaseEntity):
         self.context.add_query(qry)
         return return_type
 
-    def get_site_properties_from_sharepoint_by_filters(self, _filter, start_index=0, include_detail=False):
+    def get_site_properties_from_sharepoint_by_filters(self, _filter=None, start_index=None, include_detail=False):
         """
 
         :param bool include_detail:
-        :param int start_index:
+        :param str start_index:
         :param str _filter:
         """
         return_type = SitePropertiesCollection(self.context)

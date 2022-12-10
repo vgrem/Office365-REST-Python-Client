@@ -10,23 +10,39 @@ class FeatureCollection(BaseEntityCollection):
     def __init__(self, context, resource_path=None, parent=None):
         super(FeatureCollection, self).__init__(context, Feature, resource_path, parent)
 
-    def add(self, feature_id, force, featdef_scope):
+    def add(self, feature_id, force, featdef_scope, verify_if_activated=False):
         """
         Adds the feature to the collection of activated features and returns the added feature.
 
         :param str feature_id: The feature identifier of the feature to be added.
         :param bool force: Specifies whether to continue with the operation even if there are errors.
         :param int featdef_scope: The feature scope for this feature.
+        :param bool verify_if_activated: Verify if activated first to avoid System.Data.DuplicateNameException exception
         """
         return_type = Feature(self.context)
-        payload = {
-            "featureId": feature_id,
-            "force": force,
-            "featdefScope": featdef_scope
-        }
         self.add_child(return_type)
-        qry = ServiceOperationQuery(self, "Add", None, payload, None, return_type)
-        self.context.add_query(qry)
+
+        def _create_query():
+            payload = {
+                "featureId": feature_id,
+                "force": force,
+                "featdefScope": featdef_scope
+            }
+            return ServiceOperationQuery(self, "Add", None, payload, None, return_type)
+
+        def _create_if_not_activated(f):
+            """
+            :type f: Feature
+            """
+            if not f.properties:
+                self.context.add_query(_create_query())
+
+        if verify_if_activated:
+            feature = self.get_by_id(feature_id)
+            self.context.load(feature, after_loaded=_create_if_not_activated)
+        else:
+            self.context.add_query(_create_query())
+
         return return_type
 
     def get_by_id(self, feature_id):

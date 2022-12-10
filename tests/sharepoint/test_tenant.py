@@ -52,7 +52,7 @@ class TestTenant(TestCase):
         self.assertIsNotNone(result.value)
 
     def test6_list_sites(self):
-        sites = self.tenant.get_site_properties_from_sharepoint_by_filters("", 0, False).execute_query()
+        sites = self.tenant.get_site_properties_from_sharepoint_by_filters().execute_query()
         self.assertIsInstance(sites, SitePropertiesCollection)
 
     def test7_get_site_secondary_administrators(self):

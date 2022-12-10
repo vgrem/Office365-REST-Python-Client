@@ -1,3 +1,5 @@
+import typing
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.principal.principal import Principal
@@ -6,6 +8,22 @@ from office365.sharepoint.principal.user import User
 
 class ObjectSharingInformationUser(BaseEntity):
     """Contains information about a principal with whom a securable object is shared. It can be a user or a group."""
+
+    @property
+    def email(self):
+        """
+        Specifies the email address for the user.
+
+        :rtype: str or None
+        """
+        return self.properties.get("Email", None)
+
+    @property
+    def login_name(self):
+        """
+        Specifies the login name for the principal.
+        """
+        return self.properties.get("LoginName", None)
 
     def principal(self):
         """

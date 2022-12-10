@@ -2,6 +2,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.social.actor import SocialActor
 from office365.sharepoint.social.attachment import SocialAttachment
 from office365.sharepoint.social.thread import SocialThread
 
@@ -10,8 +11,10 @@ class SocialFeedManager(BaseEntity):
     """The SocialFeedManager class provides access to social feeds. It provides methods to create posts,
     delete posts, read posts, and perform other operations on posts."""
 
-    def __init__(self, context):
-        super(SocialFeedManager, self).__init__(context, ResourcePath("SP.Social.SocialFeedManager"))
+    def __init__(self, context, resource_path=None):
+        if resource_path is None:
+            resource_path = ResourcePath("SP.Social.SocialFeedManager")
+        super(SocialFeedManager, self).__init__(context, resource_path)
 
     def create_post(self, target_id=None, creation_data=None):
         """
@@ -59,3 +62,13 @@ class SocialFeedManager(BaseEntity):
         qry = ServiceOperationQuery(self, "CreateFileAttachment", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
+
+    @property
+    def owner(self):
+        """The Owner property returns the current user."""
+        return self.properties.get("Owner", SocialActor())
+
+    @property
+    def personal_site_portal_uri(self):
+        """The PersonalSitePortalUri property specifies the URI of the personal site portal."""
+        return self.properties.get("PersonalSitePortalUri", None)

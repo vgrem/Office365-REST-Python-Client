@@ -133,11 +133,10 @@ class TestSharePointWeb(SPTestCase):
         result = self.client.web.get_regional_datetime_schema().execute_query()
         self.assertIsNotNone(result.value)
 
-    def test_23_get_push_notification_subscribers_by_user(self):
-        #current_user = self.client.web.current_user
-        #result = self.client.web.get_push_notification_subscribers_by_user(current_user).execute_query()
-        #self.assertIsNotNone(result.resource_path)
-        pass
+    #def test_23_get_push_notification_subscribers_by_user(self):
+    #    current_user = self.client.web.current_user
+    #    result = self.client.web.get_push_notification_subscribers_by_user(current_user).execute_query()
+    #    self.assertIsNotNone(result.resource_path)
 
     def test_24_get_list_item_by_path(self):
         page_url = "SitePages/Home.aspx"

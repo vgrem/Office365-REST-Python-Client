@@ -7,6 +7,8 @@ from office365.sharepoint.audit.audit import Audit
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.token import ChangeToken
+from office365.sharepoint.compliance.store_proxy import SPPolicyStoreProxy
+from office365.sharepoint.compliance.tag import ComplianceTag
 from office365.sharepoint.eventreceivers.definition_collection import EventReceiverDefinitionCollection
 from office365.sharepoint.features.collection import FeatureCollection
 from office365.sharepoint.lists.list import List
@@ -78,6 +80,15 @@ class Site(BaseEntity):
         """
         from office365.sharepoint.client_context import ClientContext
         return ClientContext(url).site
+
+    def get_available_tags(self):
+        return_type = ClientResult(self.context, ClientValueCollection(ComplianceTag))
+
+        def _site_loaded():
+            SPPolicyStoreProxy.get_available_tags_for_site(self.context, self.url, return_type)
+
+        self.ensure_property("Url", _site_loaded)
+        return return_type
 
     def get_site_logo(self):
         """
@@ -169,6 +180,7 @@ class Site(BaseEntity):
 
         def _site_loaded():
             self.context.tenant.get_site_administrators(self.id, return_type)
+
         self.ensure_property("Id", _site_loaded)
         return return_type
 
