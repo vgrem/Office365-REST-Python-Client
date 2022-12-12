@@ -124,7 +124,7 @@ class Tenant(BaseEntity):
 
     def has_valid_education_license(self):
         """"""
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, bool())
         qry = ServiceOperationQuery(self, "HasValidEducationLicense", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
@@ -133,17 +133,17 @@ class Tenant(BaseEntity):
         """
         :param str view_xml:
         """
-        result = ClientResult(self.context)
+        return_type = ClientResult(self.context)
         payload = {
             "viewXml": view_xml
         }
-        qry = ServiceOperationQuery(self, "ExportToCSV", None, payload, None, result)
+        qry = ServiceOperationQuery(self, "ExportToCSV", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def render_policy_report(self):
         """"""
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, bytes())
         payload = {
             "parameters": RenderListDataParameters(),
             "overrideParameters": RenderListDataOverrideParameters()
@@ -354,10 +354,10 @@ class Tenant(BaseEntity):
 
         :param str site_url: A string representing the URL of the site.
         """
-        result = SpoOperation(self.context)
-        qry = ServiceOperationQuery(self, "RestoreDeletedSite", [site_url], None, None, result)
+        return_type = SpoOperation(self.context)
+        qry = ServiceOperationQuery(self, "RestoreDeletedSite", [site_url], None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def get_site_properties_by_url(self, url, include_detail=False):
         """
@@ -410,7 +410,7 @@ class Tenant(BaseEntity):
         """
         :type site_url: str
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, bool())
         payload = {"siteUrl": site_url}
         qry = ServiceOperationQuery(self, "SendEmail", None, payload, None, return_type)
         self.context.add_query(qry)

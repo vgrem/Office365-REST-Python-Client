@@ -12,6 +12,8 @@ class FieldCalculated(Field):
     @property
     def currency_locale_id(self):
         """
+        Gets the locale ID that is used for currency on the Web site.
+
         :rtype: int or None
         """
         return self.properties.get('CurrencyLocaleId', None)
@@ -19,6 +21,8 @@ class FieldCalculated(Field):
     @property
     def formula(self):
         """
+        Specifies the formula for the field
+
         :rtype: str or None
         """
         return self.properties.get('Formula', None)

@@ -13,7 +13,7 @@ class TenantAdminSettingsService(BaseEntity):
         super(TenantAdminSettingsService, self).__init__(context, static_path)
 
     def get_tenant_sharing_status(self):
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, int())
         qry = ServiceOperationQuery(self, "GetTenantSharingStatus", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
