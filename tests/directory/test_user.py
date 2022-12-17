@@ -53,3 +53,7 @@ class TestGraphUser(GraphTestCase):
         changed_users = self.client.users.delta.get().execute_query()
         self.assertGreater(len(changed_users), 0)
 
+    def test9_get_my_member_groups(self):
+        result = self.client.me.get_member_groups().execute_query()
+        self.assertIsNotNone(result.value)
+

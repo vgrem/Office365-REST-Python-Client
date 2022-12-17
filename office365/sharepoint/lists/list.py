@@ -627,6 +627,13 @@ class List(SecurableObject):
         """
         return self.properties.get("DefaultEditFormUrl", None)
 
+    @property
+    def default_item_open_in_browser(self):
+        """
+        :rtype: bool or None
+        """
+        return self.properties.get("DefaultItemOpenInBrowser", None)
+
     @enable_folder_creation.setter
     def enable_folder_creation(self, value):
         self.set_property("EnableFolderCreation", value, True)

@@ -451,6 +451,7 @@ class Tenant(BaseEntity):
         """
         return self.properties.get('AllowEditing', None)
 
+    @property
     def default_content_center_site(self):
         return self.properties.get("DefaultContentCenterSite", SiteInfoForSitePicker())
 

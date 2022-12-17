@@ -16,7 +16,9 @@ from office365.directory.licenses.subscribed_sku import SubscribedSku
 from office365.directory.resource_specific_permission_grant import ResourceSpecificPermissionGrant
 from office365.directory.roles.management import RoleManagement
 from office365.directory.roles.role import DirectoryRole
-from office365.intune.organizations.org_contact import OrgContact
+from office365.intune.devices.app_management import DeviceAppManagement
+from office365.intune.devices.management import DeviceManagement
+from office365.intune.organizations.contact import OrgContact
 from office365.intune.organizations.organization import Organization
 from office365.directory.policies.root import PolicyRoot
 from office365.directory.subscriptions.subscription import Subscription
@@ -107,6 +109,16 @@ class GraphClient(ClientRuntimeContext):
     def me(self):
         """The Me endpoint is provided as a shortcut for specifying the current user"""
         return User(self, MePath())
+
+    @property
+    def device_management(self):
+        """Singleton entity that acts as a container for all device management functionality."""
+        return DeviceManagement(self, ResourcePath("deviceManagement"))
+
+    @property
+    def device_app_management(self):
+        """Singleton entity that acts as a container for all device and app management functionality."""
+        return DeviceAppManagement(self, ResourcePath("deviceAppManagement"))
 
     @property
     def drives(self):

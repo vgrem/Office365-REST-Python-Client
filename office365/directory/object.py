@@ -40,18 +40,26 @@ class DirectoryObject(Entity):
         """Return all the groups that the specified user, group, or directory object is a member of. This function is
         transitive.
 
-        :type security_enabled_only: bool"""
-        result = ClientResult(self.context)
+        :param bool security_enabled_only: true to specify that only security groups that the entity is a member
+            of should be returned; false to specify that all groups and directory roles that the entity is a member
+            of should be returned. true can be specified only for users or service principals to return security-enabled
+            groups.
+        """
+        return_type = ClientResult(self.context, StringCollection())
         payload = {
             "securityEnabledOnly": security_enabled_only
         }
-        qry = ServiceOperationQuery(self, "getMemberGroups", None, payload, None, result)
+        qry = ServiceOperationQuery(self, "getMemberGroups", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def restore(self):
         """
+        Restore a recently deleted application, group, servicePrincipal, administrative unit, or user object from
+        deleted items. If an item was accidentally deleted, you can fully restore the item. This is not applicable
+        to security groups, which are deleted permanently.
 
+        A recently deleted item will remain available for up to 30 days. After 30 days, the item is permanently deleted.
         """
         qry = ServiceOperationQuery(self, "restore")
         self.context.add_query(qry)
@@ -59,5 +67,5 @@ class DirectoryObject(Entity):
 
     @property
     def deleted_datetime(self):
-        """ETag for the item."""
+        """Date and time when this object was deleted. Always null when the object hasn't been deleted."""
         return self.properties.get('deletedDateTime', None)

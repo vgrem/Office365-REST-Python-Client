@@ -71,6 +71,15 @@ class Site(BaseEntity):
         self.ensure_properties(["Url", "GroupId", "Id"], _site_resolved)
         return self
 
+    def extend_upgrade_reminder_date(self):
+        """
+        Extend the upgrade reminder date for this site collection, so that site collection administrators will
+        not be reminded to run a site collection upgrade before the new date
+        """
+        qry = ServiceOperationQuery(self, "ExtendUpgradeReminderDate")
+        self.context.add_query(qry)
+        return self
+
     @staticmethod
     def from_url(url):
         """
@@ -97,9 +106,7 @@ class Site(BaseEntity):
         return_type = ClientResult(self.context)
 
         def _site_loaded():
-            site_manager = SiteIconManager(self.context)
-            site_manager.get_site_logo(self.url, return_type=return_type)
-
+            self.context.site_icon_manager.get_site_logo(self.url, return_type=return_type)
         self.ensure_property("Url", _site_loaded)
         return return_type
 
@@ -258,15 +265,15 @@ class Site(BaseEntity):
         :type site_id: str
         :type stop_redirect: bool
         """
-        result = ClientResult(context)
+        return_type = ClientResult(context, str())
         payload = {
             "id": site_id,
             "stopRedirect": stop_redirect
         }
-        qry = ServiceOperationQuery(context.site, "GetUrlById", None, payload, None, result)
+        qry = ServiceOperationQuery(context.site, "GetUrlById", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def get_url_by_id_for_web(context, site_id, stop_redirect, web_id):
@@ -293,16 +300,15 @@ class Site(BaseEntity):
         """Determine whether site exists
 
         :type context: office365.sharepoint.client_context.ClientContext
-        :type url: str
+        :param str url: The absolute url of a site.
         """
-        result = ClientResult(context)
+        return_type = ClientResult(context, bool())
         payload = {
             "url": url
         }
-        qry = ServiceOperationQuery(context.site, "Exists", None, payload, None, result)
-        qry.static = True
+        qry = ServiceOperationQuery(context.site, "Exists", None, payload, None, return_type, True)
         context.add_query(qry)
-        return result
+        return return_type
 
     def get_catalog(self, type_catalog):
         """
@@ -431,6 +437,25 @@ class Site(BaseEntity):
         return self.properties.get("Classification", None)
 
     @property
+    def compatibility_level(self):
+        """
+        Specifies the compatibility level of the site collection for the purpose of major version level compatibility
+        checks
+
+        :rtype: str
+        """
+        return self.properties.get('CompatibilityLevel', None)
+
+    @property
+    def comments_on_site_pages_disabled(self):
+        """
+        Indicates whether comments on site pages are disabled or not.
+
+        :rtype: bool
+        """
+        return self.properties.get('CommentsOnSitePagesDisabled', None)
+
+    @property
     def current_change_token(self):
         """Gets the current change token that is used in the change log for the site collection."""
         return self.properties.get("CurrentChangeToken", ChangeToken())
@@ -441,6 +466,15 @@ class Site(BaseEntity):
         :rtype: str or None
         """
         return self.properties.get("GroupId", None)
+
+    @property
+    def lock_issue(self):
+        """
+        Specifies the comment that is used when a site collection is locked
+
+        :rtype: str or None
+        """
+        return self.properties.get("LockIssue", None)
 
     @property
     def root_web(self):

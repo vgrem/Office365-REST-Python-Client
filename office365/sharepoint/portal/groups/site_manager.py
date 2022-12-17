@@ -105,7 +105,7 @@ class GroupSiteManager(ClientObject):
         :type get_logo_data: bool
         :type force_cache_update: bool
         """
-        result = ClientResult(self.context)
+        result = ClientResult(self.context, str())
         payload = {
             "getLogoData": get_logo_data,
             "forceCacheUpdate": force_cache_update

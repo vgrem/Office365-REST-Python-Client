@@ -971,14 +971,14 @@ class Web(SecurableObject):
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
         :param str web_full_url: The URL of the web.
         """
-        result = ClientResult(context, ClientValueCollection(DocumentLibraryInformation))
+        return_type = ClientResult(context, ClientValueCollection(DocumentLibraryInformation))
         payload = {
             "webFullUrl": web_full_url
         }
-        qry = ServiceOperationQuery(context.web, "GetDocumentLibraries", None, payload, None, result)
+        qry = ServiceOperationQuery(context.web, "GetDocumentLibraries", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def default_document_library_url(context, web_url):
@@ -988,14 +988,13 @@ class Web(SecurableObject):
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
         :param str web_url:  URL of the web.
         """
-        result = ClientResult(context, DocumentLibraryInformation())
+        return_type = ClientResult(context, DocumentLibraryInformation())
         payload = {
             "webUrl": web_url,
         }
-        qry = ServiceOperationQuery(context.web, "DefaultDocumentLibraryUrl", None, payload, None, result)
-        qry.static = True
+        qry = ServiceOperationQuery(context.web, "DefaultDocumentLibraryUrl", None, payload, None, return_type, True)
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def delete_all_anonymous_links_for_object(context, url):
@@ -1048,15 +1047,15 @@ class Web(SecurableObject):
         :param str web_full_url:  URL of the web.
         :param bool include_page_libraries: Indicates whether to include page libraries. A value of "true" means yes.
         """
-        result = ClientResult(context, ClientValueCollection(DocumentLibraryInformation))
+        return_type = ClientResult(context, ClientValueCollection(DocumentLibraryInformation))
         payload = {
             "webFullUrl": web_full_url,
             "includePageLibraries": include_page_libraries
         }
-        qry = ServiceOperationQuery(context.web, "GetDocumentAndMediaLibraries", None, payload, None, result)
+        qry = ServiceOperationQuery(context.web, "GetDocumentAndMediaLibraries", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def get_sharing_link_kind(context, file_url, return_type=None):
@@ -1089,17 +1088,17 @@ class Web(SecurableObject):
         :param str email_subject: The email subject.
         :param str email_body: The email subject.
         """
-        result = SharingResult(context)
+        return_type = SharingResult(context)
         payload = {
             "url": url,
             "peoplePickerInput": people_picker_input,
             "emailSubject": email_subject,
             "emailBody": email_body,
         }
-        qry = ServiceOperationQuery(context.web, "ForwardObjectLink", None, payload, None, result)
+        qry = ServiceOperationQuery(context.web, "ForwardObjectLink", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def share_object(context, url, people_picker_input,

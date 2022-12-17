@@ -347,7 +347,7 @@ class ClientContext(ClientRuntimeContext):
     @property
     def models(self):
         """Alias to collection of SPMachineLearningModel"""
-        from office365.sharepoint.contentcenter.machinelearning.model_collection import SPMachineLearningModelCollection
+        from office365.sharepoint.contentcenter.machinelearning.models.collection import SPMachineLearningModelCollection
         return SPMachineLearningModelCollection(self, ResourcePath("models"))
 
     @property
@@ -465,7 +465,7 @@ class ClientContext(ClientRuntimeContext):
     @property
     def publications(self):
         from office365.sharepoint.base_entity_collection import BaseEntityCollection
-        from office365.sharepoint.contentcenter.machinelearning.publication import SPMachineLearningPublication
+        from office365.sharepoint.contentcenter.machinelearning.publications.publication import SPMachineLearningPublication
         return BaseEntityCollection(self, SPMachineLearningPublication, ResourcePath("publications"))
 
     @property
@@ -499,7 +499,7 @@ class ClientContext(ClientRuntimeContext):
 
     @property
     def work_items(self):
-        from office365.sharepoint.contentcenter.machinelearning.work_item_collection import \
+        from office365.sharepoint.contentcenter.machinelearning.workitems.collection import \
             SPMachineLearningWorkItemCollection
         return SPMachineLearningWorkItemCollection(self, ResourcePath("workitems"))
 

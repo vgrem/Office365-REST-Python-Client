@@ -97,6 +97,23 @@ class Team(Entity):
         return self.properties.get('createdDateTime', None)
 
     @property
+    def all_channels(self):
+        """
+        List of channels either hosted in or shared with the team (incoming channels).
+        """
+        return self.properties.get('allChannels',
+                                   ChannelCollection(self.context, ResourcePath("allChannels", self.resource_path)))
+
+    @property
+    def incoming_channels(self):
+        """
+        List of channels shared with the team.
+        """
+        return self.properties.get('incomingChannels',
+                                   ChannelCollection(self.context,
+                                                     ResourcePath("incomingChannels", self.resource_path)))
+
+    @property
     def channels(self):
         """The collection of channels & messages associated with the team.
         """
@@ -119,9 +136,9 @@ class Team(Entity):
 
     @property
     def schedule(self):
-        """The shifts of shifts for this team."""
-        return self.properties.get('shifts',
-                                   Schedule(self.context, ResourcePath("shifts", self.resource_path)))
+        """The schedule of shifts for this team."""
+        return self.properties.get('schedule',
+                                   Schedule(self.context, ResourcePath("schedule", self.resource_path)))
 
     @property
     def installed_apps(self):
@@ -198,6 +215,8 @@ class Team(Entity):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "allChannels": self.all_channels,
+                "incomingChannels": self.incoming_channels,
                 "installedApps": self.installed_apps,
                 "primaryChannel": self.primary_channel
             }

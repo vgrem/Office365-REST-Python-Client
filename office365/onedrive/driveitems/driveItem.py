@@ -395,7 +395,7 @@ class DriveItem(BaseItem):
         self.context.add_query(qry)
         return result
 
-    def validate_permission(self, challenge_token, password):
+    def validate_permission(self, challenge_token=None, password=None):
         """
         :type challenge_token: str
         :type password: str
@@ -404,8 +404,7 @@ class DriveItem(BaseItem):
             "challengeToken": challenge_token,
             "password": password
         }
-        result = ClientResult(self.context, ItemPreviewInfo())
-        qry = ServiceOperationQuery(self, "validatePermission", None, payload, None, result)
+        qry = ServiceOperationQuery(self, "validatePermission", None, payload)
         self.context.add_query(qry)
         return self
 

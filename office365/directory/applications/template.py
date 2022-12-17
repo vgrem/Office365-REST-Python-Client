@@ -23,3 +23,19 @@ class ApplicationTemplate(Entity):
         Project management, Telecommunications, Tools, Travel, and Web design & hosting.
         """
         return self.properties.get("categories", StringCollection())
+
+    @property
+    def supported_provisioning_types(self):
+        """
+        The list of provisioning modes supported by this application
+        """
+        return self.properties.get("supportedProvisioningTypes", StringCollection())
+
+    @property
+    def supported_single_signon_modes(self):
+        """
+        The list of single sign-on modes supported by this application.
+        The supported values are oidc, password, saml, and notSupported.
+        """
+        return self.properties.get("supportedSingleSignOnModes", StringCollection())
+

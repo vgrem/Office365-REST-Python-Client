@@ -58,43 +58,46 @@ class TestDriveItem(GraphTestCase):
         result = self.__class__.target_file.preview("1").execute_query()
         self.assertIsNotNone(result.value)
 
-    def test5_checkout(self):
+    #def test5_validate_permission(self):
+    #    self.__class__.target_file.validate_permission().execute_query()
+
+    def test6_checkout(self):
         self.__class__.target_file.checkout().execute_query()
         target_item = self.__class__.target_file.get().select(["publication"]).execute_query()
         self.assertEqual(target_item.publication.level, 'checkout')
 
-    def test6_checkin(self):
+    def test7_checkin(self):
         self.__class__.target_file.checkin("").execute_query()
         target_item = self.__class__.target_file.get().select(["publication"]).execute_query()
         self.assertEqual(target_item.publication.level, 'published')
 
-    def test7_list_versions(self):
+    def test8_list_versions(self):
         versions = self.__class__.target_file.versions.get().execute_query()
         self.assertGreater(len(versions), 1)
 
-    #def test8_follow(self):
+    #def test9_follow(self):
     #    target_item = self.__class__.target_file.follow().execute_query()
     #    self.assertIsNotNone(target_item.resource_path)
 
-    #def test9_unfollow(self):
+    #def test_10_unfollow(self):
     #    target_item = self.__class__.target_file.unfollow().execute_query()
     #    self.assertIsNotNone(target_item.resource_path)
 
-    def test_10_upload_file_session(self):
+    def test_11_upload_file_session(self):
         file_name = "big_buck_bunny.mp4"
         local_path = "{0}/../data/{1}".format(os.path.dirname(__file__), file_name)
         target_file = self.target_drive.root.resumable_upload(local_path).get().execute_query()
         self.assertIsNotNone(target_file.web_url)
 
-    def test_11_download_file(self):
+    def test_12_download_file(self):
         result = self.__class__.target_file.get_content().execute_query()
         self.assertIsNotNone(result.value)
 
-    def test_12_convert_file(self):
+    def test_13_convert_file(self):
         result = self.__class__.target_file.convert('pdf').execute_query()
         self.assertIsNotNone(result.value)
 
-    def test_13_copy_file(self):
+    def test_14_copy_file(self):
         file_name = "Copied_{0}_SharePoint User Guide.docx".format(uuid.uuid4().hex)
         result = self.__class__.target_file.copy(file_name).execute_query()
         self.assertIsNotNone(result.value)
@@ -107,13 +110,13 @@ class TestDriveItem(GraphTestCase):
     #    self.client.execute_query()
     #    self.assertIsNotNone(result.value)
 
-    def test_14_get_activities_by_interval(self):
+    def test_15_get_activities_by_interval(self):
         end_time = datetime.utcnow()
         start_time = end_time - timedelta(days=14)
         result = self.__class__.target_file.get_activities_by_interval(start_dt=start_time, end_dt=end_time, interval='day')
         self.client.execute_query()
         self.assertIsNotNone(result)
 
-    def test_15_delete_file(self):
+    def test_16_delete_file(self):
         items = self.target_drive.root.children.top(2).get().execute_query()
         items[1].delete_object().execute_query()
