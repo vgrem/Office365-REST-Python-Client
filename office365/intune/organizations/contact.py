@@ -9,6 +9,15 @@ class OrgContact(DirectoryObject):
     from on-premises directories or from Exchange Online, and are read-only."""
 
     @property
+    def direct_reports(self):
+        """
+        Get a user's direct reports.
+        """
+        return self.properties.get('directReports',
+                                   DirectoryObjectCollection(self.context,
+                                                             ResourcePath("directReports", self.resource_path)))
+
+    @property
     def manager(self):
         """
         The user or contact that is this contact's manager.
@@ -33,6 +42,7 @@ class OrgContact(DirectoryObject):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "directReports": self.direct_reports,
                 "memberOf": self.member_of,
                 "transitiveMemberOf": self.transitive_member_of,
             }

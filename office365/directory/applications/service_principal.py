@@ -1,9 +1,11 @@
+from office365.delta_collection import DeltaCollection
 from office365.directory.applications.app_role_assignment import AppRoleAssignmentCollection
 from office365.directory.certificates.self_signed import SelfSignedCertificate
 from office365.directory.key_credential import KeyCredential
 from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.object import DirectoryObject
 from office365.directory.password_credential import PasswordCredential
+from office365.directory.permissions.grants.oauth2 import OAuth2PermissionGrant
 from office365.directory.permissions.scope import PermissionScope
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -139,6 +141,13 @@ class ServicePrincipal(DirectoryObject):
         return self.properties.get("oauth2PermissionScopes", ClientValueCollection(PermissionScope))
 
     @property
+    def oauth2_permission_grants(self):
+        """"""
+        return self.properties.get('oauth2PermissionGrants',
+                                   DeltaCollection(self.context, OAuth2PermissionGrant,
+                                                   ResourcePath("oauth2PermissionGrants", self.resource_path)))
+
+    @property
     def created_objects(self):
         """Directory objects created by this service principal. """
         return self.properties.get('createdObjects',
@@ -158,7 +167,8 @@ class ServicePrincipal(DirectoryObject):
                 "app_role_assigned_to": self.app_role_assigned_to,
                 "created_objects": self.created_objects,
                 "oauth2PermissionScopes": self.oauth2_permission_scopes,
-                "ownedObjects": self.owned_objects
+                "ownedObjects": self.owned_objects,
+                "oauth2PermissionGrants": self.oauth2_permission_grants
             }
             default_value = property_mapping.get(name, None)
         return super(ServicePrincipal, self).get_property(name, default_value)

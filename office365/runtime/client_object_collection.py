@@ -119,7 +119,7 @@ class ClientObjectCollection(ClientObject):
         Allows clients to request resources in either ascending order using asc or descending order using desc
 
         :type self: T
-        :type value: int
+        :type value: str
         """
         self.query_options.orderBy = value
         return self

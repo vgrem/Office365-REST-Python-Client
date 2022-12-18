@@ -13,7 +13,7 @@ from office365.directory.identities.container import IdentityContainer
 from office365.directory.identities.provider import IdentityProvider
 from office365.directory.internal.paths.me import MePath
 from office365.directory.licenses.subscribed_sku import SubscribedSku
-from office365.directory.resource_specific_permission_grant import ResourceSpecificPermissionGrant
+from office365.directory.permissions.grants.resource_specific import ResourceSpecificPermissionGrant
 from office365.directory.roles.management import RoleManagement
 from office365.directory.roles.role import DirectoryRole
 from office365.intune.devices.app_management import DeviceAppManagement
@@ -21,7 +21,6 @@ from office365.intune.devices.management import DeviceManagement
 from office365.intune.organizations.contact import OrgContact
 from office365.intune.organizations.organization import Organization
 from office365.directory.policies.root import PolicyRoot
-from office365.directory.subscriptions.subscription import Subscription
 from office365.directory.users.user import User
 from office365.directory.users.collection import UserCollection
 from office365.education.root import EducationRoot
@@ -44,6 +43,7 @@ from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.search.entity import SearchEntity
 from office365.directory.security.security import Security
+from office365.subscriptions.subscription import Subscription
 from office365.teams.chats.collection import ChatCollection
 from office365.teams.collection import TeamCollection
 from office365.teams.template import TeamsTemplate

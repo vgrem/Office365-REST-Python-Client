@@ -5,6 +5,7 @@ from office365.directory.authentication.authentication import Authentication
 from office365.directory.extensions.extension import Extension
 from office365.directory.insights.office_graph import OfficeGraphInsights
 from office365.directory.licenses.assigned_plan import AssignedPlan
+from office365.directory.permissions.grants.oauth2 import OAuth2PermissionGrant
 from office365.directory.users.settings import UserSettings
 from office365.onedrive.sites.site import Site
 from office365.onenote.onenote import Onenote
@@ -17,7 +18,7 @@ from office365.outlook.calendar.reminder import Reminder
 from office365.directory.licenses.assigned_license import AssignedLicense
 from office365.directory.object import DirectoryObject
 from office365.directory.object_collection import DirectoryObjectCollection
-from office365.directory.licenses.license_details import LicenseDetails
+from office365.directory.licenses.details import LicenseDetails
 from office365.directory.identities.object_identity import ObjectIdentity
 from office365.directory.profile_photo import ProfilePhoto
 from office365.entity_collection import EntityCollection
@@ -468,6 +469,13 @@ class User(DirectoryObject):
                                                              ResourcePath("memberOf", self.resource_path)))
 
     @property
+    def oauth2_permission_grants(self):
+        """"""
+        return self.properties.get('oauth2PermissionGrants',
+                                   DeltaCollection(self.context, OAuth2PermissionGrant,
+                                                   ResourcePath("oauth2PermissionGrants", self.resource_path)))
+
+    @property
     def transitive_member_of(self):
         """Get groups, directory roles that the user is a member of. This API request is transitive, and will also
         return all groups the user is a nested member of. """
@@ -565,7 +573,8 @@ class User(DirectoryObject):
                 "mailFolders": self.mail_folders,
                 "mailboxSettings": self.mailbox_settings,
                 "directReports": self.direct_reports,
-                "onlineMeetings": self.online_meetings
+                "onlineMeetings": self.online_meetings,
+                "oauth2PermissionGrants": self.oauth2_permission_grants
             }
             default_value = property_mapping.get(name, None)
         return super(User, self).get_property(name, default_value)

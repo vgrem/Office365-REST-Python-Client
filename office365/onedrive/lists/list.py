@@ -1,5 +1,4 @@
 from office365.base_item import BaseItem
-from office365.directory.subscriptions.subscription import Subscription
 from office365.entity_collection import EntityCollection
 from office365.onedrive.columns.definition_collection import ColumnDefinitionCollection
 from office365.onedrive.contenttypes.collection import ContentTypeCollection
@@ -7,6 +6,7 @@ from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.lists.info import ListInfo
 from office365.onedrive.sharepoint_ids import SharePointIds
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.subscriptions.subscription import Subscription
 
 
 class List(BaseItem):

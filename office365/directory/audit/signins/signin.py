@@ -1,4 +1,4 @@
-from office365.directory.audit.signIn_status import SignInStatus
+from office365.directory.audit.signins.status import SignInStatus
 from office365.entity import Entity
 
 

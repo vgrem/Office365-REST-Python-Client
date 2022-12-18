@@ -1,4 +1,6 @@
+from office365.directory.applications.api import ApiApplication
 from office365.directory.applications.public_client import PublicClientApplication
+from office365.directory.applications.spa import SpaApplication
 from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.object import DirectoryObject
 from office365.directory.extensions.extension_property import ExtensionProperty
@@ -81,8 +83,9 @@ class Application(DirectoryObject):
             The type, usage and key are required properties for this usage. Supported key types are:
                 AsymmetricX509Cert: The usage must be Verify.
                 X509CertAndPassword: The usage must be Sign
-        :param PasswordCredential password_credential: Only secretText is required to be set which should contain the password
-             for the key. This property is required only for keys of type X509CertAndPassword. Set it to null otherwise.
+        :param PasswordCredential password_credential: Only secretText is required to be set which should contain
+             the password for the key. This property is required only for keys of type X509CertAndPassword.
+             Set it to null otherwise.
         :param str proof: A self-signed JWT token used as a proof of possession of the existing keys
         """
         payload = {
@@ -112,6 +115,23 @@ class Application(DirectoryObject):
         qry = ServiceOperationQuery(self, "removeKey", None, {"keyId": key_id, "proof": proof})
         self.context.add_query(qry)
         return self
+
+    @property
+    def app_id(self):
+        """The unique identifier for the application that is assigned to an application by Azure AD. Not nullable. """
+        return self.properties.get("appId", None)
+
+    @property
+    def api(self):
+        """Specifies settings for an application that implements a web API."""
+        return self.properties.get("api", ApiApplication())
+
+    @property
+    def spa(self):
+        """
+        Specifies settings for a single-page application, including sign out URLs and redirect URIs for
+        authorization codes and access tokens."""
+        return self.properties.get("spa", SpaApplication())
 
     @property
     def key_credentials(self):

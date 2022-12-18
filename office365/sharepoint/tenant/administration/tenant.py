@@ -89,7 +89,7 @@ class Tenant(BaseEntity):
         :param str site_url:
         """
         payload = {"siteUrl": site_url}
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, bytes())
         qry = ServiceOperationQuery(self, "GetSiteThumbnailLogo", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type

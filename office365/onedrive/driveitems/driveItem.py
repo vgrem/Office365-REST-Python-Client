@@ -1,6 +1,5 @@
 import os
 
-from office365.directory.subscriptions.subscription import Subscription
 from office365.onedrive.driveitems.audio import Audio
 from office365.onedrive.driveitems.geo_coordinates import GeoCoordinates
 from office365.onedrive.driveitems.image import Image
@@ -33,6 +32,7 @@ from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.upload_session import UploadSessionQuery
+from office365.subscriptions.subscription import Subscription
 
 
 class DriveItem(BaseItem):
@@ -545,12 +545,10 @@ class DriveItem(BaseItem):
     @property
     def subscriptions(self):
         """The set of subscriptions on the driveItem.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('subscriptions',
-                                 EntityCollection(self.context, Subscription,
-                                                  ResourcePath("subscriptions", self.resource_path)))
+        return self.properties.get('subscriptions',
+                                   EntityCollection(self.context, Subscription,
+                                                    ResourcePath("subscriptions", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:

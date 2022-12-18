@@ -6,7 +6,7 @@ from office365.directory.extensions.extension import Extension
 from office365.directory.licenses.assigned_license import AssignedLicense
 from office365.directory.object import DirectoryObject
 from office365.directory.object_collection import DirectoryObjectCollection
-from office365.directory.resource_specific_permission_grant import ResourceSpecificPermissionGrant
+from office365.directory.permissions.grants.resource_specific import ResourceSpecificPermissionGrant
 from office365.entity_collection import EntityCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onenote.onenote import Onenote
