@@ -1,6 +1,6 @@
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.compat import is_string_type
-from office365.runtime.paths.none import NonePath
+from office365.runtime.paths.item import ItemPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -24,7 +24,7 @@ class EntityCollection(ClientObjectCollection):
         """
         Creates an entity and prepares the query
         """
-        return_type = self.create_typed_object(kwargs, NonePath(self.resource_path))
+        return_type = self.create_typed_object(kwargs, ItemPath(self.resource_path))
         self.add_child(return_type)
         qry = CreateEntityQuery(self, return_type, return_type)
         self.context.add_query(qry)

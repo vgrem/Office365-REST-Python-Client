@@ -12,11 +12,13 @@ from office365.sharepoint.comments.collection import CommentCollection
 from office365.sharepoint.fields.image_value import ImageFieldValue
 from office365.sharepoint.fields.lookup_value import FieldLookupValue
 from office365.sharepoint.fields.multi_lookup_value import FieldMultiLookupValue
+from office365.sharepoint.fields.string_values import FieldStringValues
 from office365.sharepoint.likes.liked_by_information import LikedByInformation
 from office365.sharepoint.listitems.compliance_info import ListItemComplianceInfo
 from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateValue
 from office365.sharepoint.listitems.version import ListItemVersion
 from office365.sharepoint.permissions.securable_object import SecurableObject
+from office365.sharepoint.policy.dlp_policy_tip import DlpPolicyTip
 from office365.sharepoint.reputationmodel.reputation import Reputation
 from office365.sharepoint.sharing.external_site_option import ExternalSharingSiteOption
 from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
@@ -225,17 +227,16 @@ class ListItem(SecurableObject):
              is checked out.
         :param bool or None dates_in_utc:
         """
-        normalized_form_values = [ListItemFormUpdateValue(k, v) for k, v in form_values.items()]
         payload = {
-            "formValues": normalized_form_values,
+            "formValues": [ListItemFormUpdateValue(k, v) for k, v in form_values.items()],
             "bNewDocumentUpdate": new_document_update,
             "checkInComment": checkin_comment,
             "datesInUTC": dates_in_utc
         }
-        result = ClientResult(self.context, ClientValueCollection(ListItemFormUpdateValue))
-        qry = ServiceOperationQuery(self, "ValidateUpdateListItem", None, payload, None, result)
+        return_type = ClientResult(self.context, ClientValueCollection(ListItemFormUpdateValue))
+        qry = ServiceOperationQuery(self, "ValidateUpdateListItem", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def update(self):
         """
@@ -286,7 +287,7 @@ class ListItem(SecurableObject):
         :param int user_action: The user action to take.
         :param str justification: The reason why the override is being done.
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, int())
         payload = {
             "userAction": user_action,
             "justification": justification
@@ -298,9 +299,9 @@ class ListItem(SecurableObject):
     def parse_and_set_field_value(self, field_name, value):
         """Sets the value of the field (2) for the list item based on an implementation-specific transformation
            of the value.
-           :param str field_name: Specifies the field internal name.
-           :param str value: Specifies the new value for the field (2).
 
+        :param str field_name: Specifies the field internal name.
+        :param str value: Specifies the new value for the field (2).
         """
         payload = {
             "fieldName": field_name,
@@ -395,6 +396,24 @@ class ListItem(SecurableObject):
         return self.properties.get("ComplianceInfo", ListItemComplianceInfo())
 
     @property
+    def comments_disabled_scope(self):
+        """Indicates at what scope comments are disabled."""
+        return self.properties.get("CommentsDisabledScope", None)
+
+    @property
+    def get_dlp_policy_tip(self):
+        """Gets the Data Loss Protection policy tip notification for this item."""
+        return self.properties.get("GetDlpPolicyTip",
+                                   DlpPolicyTip(self.context, ResourcePath("GetDlpPolicyTip", self.resource_path)))
+
+    @property
+    def field_values_as_html(self):
+        """Specifies the values for the list item as Hypertext Markup Language (HTML)."""
+        return self.properties.get("FieldValuesAsHtml",
+                                   FieldStringValues(self.context, ResourcePath("FieldValuesAsHtml",
+                                                                                self.resource_path)))
+
+    @property
     def liked_by_information(self):
         """
         Gets a value that specifies the list item identifier.
@@ -417,6 +436,8 @@ class ListItem(SecurableObject):
                 "ContentType": self.content_type,
                 "ComplianceInfo": self.compliance_info,
                 "EffectiveBasePermissions": self.effective_base_permissions,
+                "GetDlpPolicyTip": self.get_dlp_policy_tip,
+                "FieldValuesAsHtml": self.field_values_as_html,
                 "LikedByInformation": self.liked_by_information,
                 "ParentList": self.parent_list,
             }
@@ -464,7 +485,6 @@ class ListItem(SecurableObject):
 
             def _tax_text_field_loaded():
                 self.set_property(tax_text_field.properties["StaticName"], str(value))
-
             tax_text_field.ensure_property("StaticName", _tax_text_field_loaded)
 
         tax_field.ensure_property("TextField", _tax_field_loaded)

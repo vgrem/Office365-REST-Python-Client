@@ -5,6 +5,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.activities.entity import SPActivityEntity
 from office365.sharepoint.activities.logger import ActivityLogger
 from office365.sharepoint.alerts.collection import AlertCollection
@@ -531,16 +532,16 @@ class Web(SecurableObject):
         UTC time. Midnight is represented as 00:00:00.
         :param office365.sharepoint.client_context.ClientContext context: client context
         """
-        result = ClientResult(context)
+        return_type = ClientResult(context, str())
         payload = {
             "url": context.create_safe_url(url, False),
             "isEditLink": is_edit_link,
             "expirationString": expiration_string
         }
-        qry = ServiceOperationQuery(context.web, "CreateAnonymousLinkWithExpiration", None, payload, None, result)
+        qry = ServiceOperationQuery(context.web, "CreateAnonymousLinkWithExpiration", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def get_object_sharing_settings(context, object_url, group_id, use_simplified_roles):
@@ -571,26 +572,43 @@ class Web(SecurableObject):
         context.add_query(qry)
         return return_type
 
+    def get_client_side_components_by_id(self, component_ids=None):
+        """
+        Returns the client side components for the requested component identifiers.
+        Client components include data necessary to render Client Side Web Parts and Client Side Applications.
+
+        :param list[str] component_ids: List of requested component identifiers.
+        """
+        return_type = ClientResult(self.context, ClientValueCollection(SPClientSideComponentQueryResult))
+        payload = {
+            "componentIds": StringCollection(component_ids)
+        }
+        qry = ServiceOperationQuery(self, "GetClientSideComponentsById", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def get_file_by_server_relative_url(self, url):
-        """Returns the file object located at the specified server-relative URL.
-        :type url: str
+        """
+        Returns the file object located at the specified server-relative URL.
+
+        :param str url: Specifies the server-relative URL for the file.
         """
         return File(self.context, ServiceOperationPath("getFileByServerRelativeUrl", [url], self.resource_path))
 
-    def get_file_by_server_relative_path(self, url_or_path):
+    def get_file_by_server_relative_path(self, decoded_url):
         """Returns the file object located at the specified server-relative path.
         Prefer this method over get_folder_by_server_relative_url since it supports % and # symbols in names
 
-        :type url_or_path: str or SPResPath
+        :param str or SPResPath decoded_url: Contains the server-relative path of the file.
         """
-        path = url_or_path if isinstance(url_or_path, SPResPath) else SPResPath(url_or_path)
+        path = decoded_url if isinstance(decoded_url, SPResPath) else SPResPath(decoded_url)
         return File(self.context,
                     ServiceOperationPath("getFileByServerRelativePath", path.to_json(), self.resource_path))
 
     def get_folder_by_server_relative_url(self, url):
         """Returns the folder object located at the specified server-relative URL.
 
-        :type url: str
+        :param str url: Specifies the server-relative URL for the folder.
         """
         return Folder(self.context, ServiceOperationPath("getFolderByServerRelativeUrl", [url], self.resource_path))
 
@@ -598,7 +616,7 @@ class Web(SecurableObject):
         """Returns the folder object located at the specified server-relative URL.
         Prefer this method over get_folder_by_server_relative_url since it supports % and # symbols
 
-        :type decoded_url: str
+        :param str decoded_url: Contains the server-relative URL for the folder.
         """
         path = SPResPath(decoded_url)
         return Folder(self.context,
@@ -647,7 +665,7 @@ class Web(SecurableObject):
     def does_user_have_permissions(self, permission_mask):
         """Returns whether the current user has the given set of permissions.
 
-        :type permission_mask: BasePermissions
+        :param BasePermissions permission_mask: Specifies the set of permissions to verify.
         """
         return_type = ClientResult(self.context, bool())
         qry = ServiceOperationQuery(self, "DoesUserHavePermissions", permission_mask, None, None, return_type)
@@ -689,7 +707,7 @@ class Web(SecurableObject):
     def get_list(self, path):
         """Get list by path
 
-        :type path: str
+        :param str path: A string that contains the site-relative URL for a list, for example, /Lists/Announcements.
         """
         safe_path = self.context.create_safe_url(path)
         return List(self.context, ServiceOperationPath("getList", [safe_path], self.resource_path))
@@ -711,7 +729,6 @@ class Web(SecurableObject):
 
         :param int lcid: Specifies the LCID of the site templates to be retrieved.
         :param bool do_include_cross_language: Specifies whether to include language-neutral site templates.
-        :return:
         """
         params = {
             "lcid": lcid,
@@ -760,7 +777,6 @@ class Web(SecurableObject):
     def get_custom_list_templates(self):
         """
         Specifies the collection of custom list templates for a given site.
-
         """
         return_type = ListTemplateCollection(self.context)
         qry = ServiceOperationQuery(self, "GetCustomListTemplates", None, None, None, return_type)
@@ -1335,6 +1351,14 @@ class Web(SecurableObject):
         return self.properties.get("AlternateCssUrl", None)
 
     @property
+    def app_instance_id(self):
+        """
+        Specifies the identifier of the app instance that this site (2) represents. If this site (2) does not
+        represent an app instance, then this MUST specify an empty GUID.
+        """
+        return self.properties.get("AppInstanceId", None)
+
+    @property
     def author(self):
         """
         Gets a user object that represents the user who created the Web site.
@@ -1390,6 +1414,18 @@ class Web(SecurableObject):
         """Specifies the effective permissions that are assigned to the current user"""
         from office365.sharepoint.permissions.base_permissions import BasePermissions
         return self.properties.get("EffectiveBasePermissions", BasePermissions())
+
+    @property
+    def enable_minimal_download(self):
+        """
+        Specifies whether the site will use the minimal download strategy by default.
+
+        The minimal download strategy will use a single .aspx file (start.aspx) for your pages, with the actual URL
+        encoded in the text following the hash mark ('#'). When navigating from page to page, only the changes
+        between two compatible pages will be downloaded. Fewer bytes will be downloaded and the page will appear
+        more quickly.
+        """
+        return self.properties.get("EnableMinimalDownload", None)
 
     @property
     def webs(self):
@@ -1472,6 +1508,15 @@ class Web(SecurableObject):
         return self.properties.get('ContentTypes',
                                    ContentTypeCollection(self.context,
                                                          ResourcePath("ContentTypes", self.resource_path), self))
+
+    @property
+    def configuration(self):
+        """
+        Specifies the identifier (ID) of the site definition that was used to create the site (2). If the site (2)
+        was created with a custom site template this specifies the identifier (ID) of the site definition from which
+        the custom site template is derived.
+        """
+        return self.properties.get("Configuration", None)
 
     @property
     def description_resource(self):
@@ -1618,6 +1663,11 @@ class Web(SecurableObject):
                                                             ResourcePath("RecycleBin", self.resource_path)))
 
     @property
+    def recycle_bin_enabled(self):
+        """Specifies whether the Recycle Bin is enabled."""
+        return self.properties.get("RecycleBinEnabled", None)
+
+    @property
     def navigation(self):
         """Specifies the navigation structure on the site (2), including the Quick Launch area and the link bar."""
         return self.properties.get('Navigation',
@@ -1628,9 +1678,9 @@ class Web(SecurableObject):
     def push_notification_subscribers(self):
         """Specifies the collection of push notification subscribers for the site"""
         return self.properties.get('PushNotificationSubscribers',
-                                   BaseEntityCollection(self.context, PushNotificationSubscriber,
-                                                        ResourcePath("PushNotificationSubscribers",
-                                                                     self.resource_path)))
+                                   PushNotificationSubscriberCollection(self.context,
+                                                                        ResourcePath("PushNotificationSubscribers",
+                                                                                     self.resource_path)))
 
     @property
     def root_folder(self):
@@ -1717,10 +1767,20 @@ class Web(SecurableObject):
         return self.properties.get("ServerRelativePath", SPResPath())
 
     @property
+    def syndication_enabled(self):
+        """Specifies whether the [RSS2.0] feeds are enabled on the site"""
+        return self.properties.get("SyndicationEnabled", None)
+
+    @property
     def title_resource(self):
         """A UserResource object that represents the title of this web."""
         return self.properties.get('TitleResource',
                                    UserResource(self.context, ResourcePath("TitleResource", self.resource_path)))
+
+    @property
+    def treeview_enabled(self):
+        """Specifies whether the tree view is enabled on the site """
+        return self.properties.get("TreeViewEnabled", None)
 
     def get_property(self, name, default_value=None):
         if default_value is None:

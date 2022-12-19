@@ -6,7 +6,8 @@ class FieldLink(BaseEntity):
 
     @property
     def id(self):
-        """Gets a value that specifies the GUID of the FieldLink.
+        """
+        Gets a value that specifies the GUID of the FieldLink.
 
         :rtype: str or None
         """
@@ -22,14 +23,14 @@ class FieldLink(BaseEntity):
 
     @property
     def read_only(self):
-        """"
+        """
         :rtype: bool or None
         """
         return self.properties.get('ReadOnly', None)
 
     @property
     def required(self):
-        """"
+        """
         Gets a value that specifies whether the field (2) requires a value.
 
         :rtype: bool or None
@@ -38,7 +39,7 @@ class FieldLink(BaseEntity):
 
     @property
     def hidden(self):
-        """"
+        """
         Gets a value that specifies whether the field is displayed in forms that can be edited.
 
         :rtype: bool or None

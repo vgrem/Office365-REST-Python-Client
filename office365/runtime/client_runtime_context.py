@@ -91,7 +91,6 @@ class ClientRuntimeContext(object):
         if callable(after_loaded):
             def _action():
                 after_loaded(client_object)
-
             self.after_query_execute(qry, _action)
         return self
 

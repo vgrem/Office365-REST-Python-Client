@@ -1,5 +1,5 @@
 from office365.delta_collection import DeltaCollection
-from office365.directory.applications.app_role_assignment import AppRoleAssignmentCollection
+from office365.directory.applications.roles.assignment import AppRoleAssignmentCollection
 from office365.directory.certificates.self_signed import SelfSignedCertificate
 from office365.directory.key_credential import KeyCredential
 from office365.directory.object_collection import DirectoryObjectCollection

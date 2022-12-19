@@ -1,6 +1,8 @@
 from office365.directory.applications.api import ApiApplication
 from office365.directory.applications.public_client import PublicClientApplication
+from office365.directory.applications.roles.role import AppRole
 from office365.directory.applications.spa import SpaApplication
+from office365.directory.certificates.certification import Certification
 from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.object import DirectoryObject
 from office365.directory.extensions.extension_property import ExtensionProperty
@@ -122,9 +124,24 @@ class Application(DirectoryObject):
         return self.properties.get("appId", None)
 
     @property
+    def app_roles(self):
+        """
+        The collection of roles defined for the application. With app role assignments, these roles can be assigned to
+        users, groups, or service principals associated with other applications
+        """
+        return self.properties.get("appRoles", ClientValueCollection(AppRole))
+
+    @property
     def api(self):
         """Specifies settings for an application that implements a web API."""
         return self.properties.get("api", ApiApplication())
+
+    @property
+    def certification(self):
+        """
+        Specifies the certification status of the application.
+        """
+        return self.properties.get("certification", Certification())
 
     @property
     def spa(self):
@@ -200,6 +217,7 @@ class Application(DirectoryObject):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "appRoles": self.app_roles,
                 "createdOnBehalfOf": self.created_on_behalf_of,
                 "extensionProperties": self.extension_properties,
                 "keyCredentials": self.key_credentials,

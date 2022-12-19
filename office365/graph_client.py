@@ -162,7 +162,7 @@ class GraphClient(ClientRuntimeContext):
 
     @property
     def group_setting_templates(self):
-        """Get teams"""
+        """Group setting templates represent system-defined settings available to the tenant."""
         return EntityCollection(self, GroupSettingTemplate, ResourcePath("groupSettingTemplates"))
 
     @property

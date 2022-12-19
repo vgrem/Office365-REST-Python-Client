@@ -10,6 +10,6 @@ class ClientCertificateAuthentication(ApiAuthenticationConfigurationBase):
     This is used to retrieve the public properties of uploaded certificates.
     """
 
-    def __init__(self):
-        super().__init__()
-        self.certificateList = ClientValueCollection(Pkcs12CertificateInformation)
+    def __init__(self, certificates=None):
+        super(ClientCertificateAuthentication, self).__init__()
+        self.certificateList = ClientValueCollection(Pkcs12CertificateInformation, certificates)

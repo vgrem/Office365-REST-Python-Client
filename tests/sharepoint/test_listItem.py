@@ -97,7 +97,11 @@ class TestSharePointListItem(SPTestCase):
         versions = self.__class__.target_item.versions.get().execute_query()
         self.assertIsNotNone(versions.resource_path)
 
-    def test_12_set_comments_disabled(self):
+    def test_12_get_dlp_policy_tip(self):
+        result = self.__class__.target_item.get_dlp_policy_tip.get().execute_query()
+        self.assertIsNotNone(result.resource_path)
+
+    def test_13_enable_comments(self):
         comments = self.__class__.target_item.set_comments_disabled(False).execute_query()
         self.assertIsNotNone(comments.resource_path)
 
@@ -105,17 +109,17 @@ class TestSharePointListItem(SPTestCase):
     #    comments = self.__class__.target_item.get_comments().execute_query()
     #    self.assertIsNotNone(comments.resource_path)
 
-    def test_13_recycle_item(self):
+    def test_14_recycle_item(self):
         pass
 
-    def test_14_restore_item(self):
+    def test_15_restore_item(self):
         pass
 
-    def test_15_set_rating(self):
+    def test_16_set_rating(self):
         result = self.__class__.target_item.set_rating(1).execute_query()
         self.assertIsNotNone(result.value)
 
-    def test_16_delete_list_item(self):
+    def test_17_delete_list_item(self):
         item_id = self.__class__.target_item.properties["Id"]
         item_to_delete = self.__class__.target_item
         item_to_delete.delete_object().execute_query()
@@ -123,7 +127,7 @@ class TestSharePointListItem(SPTestCase):
         result = self.target_list.items.filter("Id eq {0}".format(item_id)).get().execute_query()
         self.assertEqual(0, len(result))
 
-    def test_17_create_multiple_items(self):
+    def test_18_create_multiple_items(self):
         for i in range(0, self.batch_items_count):
             item_properties = {'Title': "Task {0}".format(i)}
             self.target_list.add_item(item_properties)
@@ -131,7 +135,7 @@ class TestSharePointListItem(SPTestCase):
         result = self.target_list.items.get().execute_query()
         self.assertEqual(len(result), self.batch_items_count)
 
-    def test_18_get_multiple_items_with_params(self):
+    def test_19_get_multiple_items_with_params(self):
         # test case for when .load with set properties_to_retrieve
         # would ignore all other previously set query params (like top(2))
 
@@ -140,11 +144,10 @@ class TestSharePointListItem(SPTestCase):
         self.client.execute_query()
         self.assertLessEqual(len(items), 2)
 
-    def test_19_delete_multiple_items(self):
+    def test_20_delete_multiple_items(self):
         items = self.target_list.items.get().execute_query()  # get existing items
         self.assertGreater(len(items), 0)
-        for item in items:
-            item.delete_object()
+        [item.delete_object() for item in items]
         self.client.execute_batch()
         items_after = self.target_list.items.get().execute_query()
         self.assertEqual(len(items_after), 0)

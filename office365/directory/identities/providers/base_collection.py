@@ -1,7 +1,7 @@
 from office365.directory.identities.providers.base import IdentityProviderBase
 from office365.entity_collection import EntityCollection
 from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.types.collections import StringCollection
 
 
@@ -18,7 +18,7 @@ class IdentityProviderBaseCollection(EntityCollection):
         Please use the new identityProviderBase API.
         """
         return_type = ClientResult(self.context, StringCollection())
-        qry = ServiceOperationQuery(self, "availableProviderTypes", None, None, None, return_type)
+        qry = FunctionQuery(self, "availableProviderTypes", None, return_type)
         self.context.add_query(qry)
         return return_type
 

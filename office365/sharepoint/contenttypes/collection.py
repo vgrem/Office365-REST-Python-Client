@@ -3,6 +3,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.contenttypes.content_type import ContentType
+from office365.sharepoint.contenttypes.entity_data import ContentTypeEntityData
 
 
 class ContentTypeCollection(BaseEntityCollection):
@@ -48,36 +49,54 @@ class ContentTypeCollection(BaseEntityCollection):
         :param ContentTypeCreationInformation content_type_info: Specifies properties that is to be used to
             construct the new content type.
         """
-        ct = ContentType(self.context)
-        self.add_child(ct)
-        ct_json = content_type_info.to_json()
-        for k, v in ct_json.items():
+        return_type = ContentType(self.context)
+        self.add_child(return_type)
+        params = content_type_info.to_json()
+        for k, v in params.items():
             if k == "Id":
-                ct.set_property(k, {"StringValue": v}, True)
+                return_type.set_property(k, {"StringValue": v}, True)
             else:
-                ct.set_property(k, v, True)
-        qry = CreateEntityQuery(self, ct, ct)
+                return_type.set_property(k, v, True)
+        qry = CreateEntityQuery(self, return_type, return_type)
         self.context.add_query(qry)
-        return ct
+        return return_type
+
+    def create(self, name, description=None, group=None, parent_content_type=None):
+        """
+        Creates a new content type to the collection and returns a reference to the added SP.ContentType.
+
+        :param str name:  Specifies the name
+        :param str description: Specifies the description
+        :param str group: Specifies the group of the content type
+        :param str or ContentType parent_content_type: Specifies the parent content type (string identifier or object)
+        """
+        def _create_query(parent_content_type_id):
+            """
+            :type parent_content_type_id: str
+            """
+            parameters = ContentTypeEntityData(name, description, group, parent_content_type_id)
+            return ServiceOperationQuery(self, "Create", None, parameters, "parameters", return_type)
+
+        return_type = ContentType(self.context)
+        self.add_child(return_type)
+        if isinstance(parent_content_type, ContentType):
+            def _ct_loaded():
+                next_qry = _create_query(parent_content_type.string_id)
+                self.context.add_query(next_qry)
+            parent_content_type.ensure_property("StringId", _ct_loaded)
+        else:
+            qry = _create_query(parent_content_type)
+            self.context.add_query(qry)
+        return return_type
 
     def add_available_content_type(self, content_type_id):
         """Adds the specified content type to the content type collection.
 
         :param str content_type_id: Specifies the identifier of the content type to be added to the content type
             collection. It MUST exist in the web's available content types.
-
         """
-        ct = ContentType(self.context)
-        self.add_child(ct)
-        qry = ServiceOperationQuery(self, "AddAvailableContentType", [content_type_id], None, None, ct)
+        return_type = ContentType(self.context)
+        self.add_child(return_type)
+        qry = ServiceOperationQuery(self, "AddAvailableContentType", [content_type_id], None, None, return_type)
         self.context.add_query(qry)
-        return ct
-
-    def add_existing_content_type(self, content_type):
-        """Adds an existing content type to the collection. The name of the given content type MUST NOT be the same
-        as any of the content types in the collection. A reference to the SP.ContentType that was added is returned.
-
-        :param ContentType content_type: Specifies the content type to be added to the collection
-
-        """
-        pass
+        return return_type

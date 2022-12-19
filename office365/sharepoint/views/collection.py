@@ -16,7 +16,7 @@ class ViewCollection(BaseEntityCollection):
 
         :type view_creation_information: office365.sharepoint.views.create_information.ViewCreationInformation
         """
-        return_type = View(self.context, None, self._parent)
+        return_type = View(self.context, None, self.parent_list)
         self.add_child(return_type)
         qry = ServiceOperationQuery(self, "Add", None, view_creation_information, "parameters", return_type)
         self.context.add_query(qry)

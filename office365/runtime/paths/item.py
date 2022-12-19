@@ -1,7 +1,7 @@
 from office365.runtime.paths.entity import EntityPath
 
 
-class NonePath(EntityPath):
+class ItemPath(EntityPath):
 
     def __init__(self, parent=None):
-        super(NonePath, self).__init__(None, parent, parent)
+        super(ItemPath, self).__init__(None, parent, parent)

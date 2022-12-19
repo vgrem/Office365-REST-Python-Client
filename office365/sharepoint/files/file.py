@@ -68,7 +68,7 @@ class File(AbstractFile):
 
         :param str action: The full URL to the WOPI frame.
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, str())
         params = {
             "action": action
         }
@@ -109,7 +109,7 @@ class File(AbstractFile):
         :param int height: The desired height of the resolution.
         :param str client_type: The client type. Used for logging.
         """
-        result = ClientResult(self.context)
+        result = ClientResult(self.context, str())
         payload = {
             "width": width,
             "height": height,
@@ -128,19 +128,19 @@ class File(AbstractFile):
         :param int height: The desired height of the resolution.
         :param str client_type: The client type. Used for logging.
         """
-        result = ClientResult(self.context)
+        return_type = ClientResult(self.context, str())
         payload = {
             "width": width,
             "height": height,
             "clientType": client_type
         }
-        qry = ServiceOperationQuery(self, "GetImagePreviewUrl", None, payload, None, result)
+        qry = ServiceOperationQuery(self, "GetImagePreviewUrl", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def recycle(self):
         """Moves the file to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, str())
         qry = ServiceOperationQuery(self, "Recycle", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
@@ -179,10 +179,17 @@ class File(AbstractFile):
         return self
 
     def copyto_using_path(self, decoded_url, overwrite):
-        """Copies the file to the destination URL.
+        """
+        Copies the file to the destination path. Server MUST overwrite an existing file of the same name
+        if bOverwrite is true.
+        Exceptions:
+           Error Code, Error Type Name, Condition
+           2147024729, Microsoft.SharePoint.SPFileLockException, The file is not locked
+           2147018894, Microsoft.SharePoint.SPFileLockException, There is a shared lock on the file
+           2147018887, Microsoft.SharePoint.SPFileLockException, There is an exclusive lock on the file
 
-        :type decoded_url: str
-        :type overwrite: bool
+        :param str decoded_url: Specifies the destination path.
+        :param bool overwrite: Specifies whether a file with the same name is overwritten.
         """
         qry = ServiceOperationQuery(self,
                                     "CopyToUsingPath",
@@ -197,8 +204,8 @@ class File(AbstractFile):
     def moveto(self, new_relative_url, flag):
         """Moves the file to the specified destination URL.
 
-        :type new_relative_url: str
-        :type flag: int
+        :param str new_relative_url: Specifies the destination URL.
+        :param int flag: Specifies the kind of move operation.
         """
         qry = ServiceOperationQuery(self,
                                     "moveto",
@@ -212,7 +219,8 @@ class File(AbstractFile):
 
     def publish(self, comment):
         """Submits the file for content approval with the specified comment.
-        :type comment: str
+
+        :param str comment: Specifies the comment.
         """
         qry = ServiceOperationQuery(self, "Publish", {"comment": comment})
         self.context.add_query(qry)
@@ -270,10 +278,10 @@ class File(AbstractFile):
 
     def open_binary_stream(self):
         """Opens the file as a stream."""
-        return_stream = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "OpenBinaryStream", None, None, None, return_stream)
+        return_type = ClientResult(self.context, bytes())
+        qry = ServiceOperationQuery(self, "OpenBinaryStream", None, None, None, return_type)
         self.context.add_query(qry)
-        return return_stream
+        return return_type
 
     def save_binary_stream(self, stream):
         """Saves the file in binary format.
@@ -333,7 +341,7 @@ class File(AbstractFile):
         :param bytes content: File content
         :param str upload_id: Upload session id
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, int())
         qry = ServiceOperationQuery(self,
                                     "startUpload",
                                     {
@@ -354,7 +362,7 @@ class File(AbstractFile):
         :param int file_offset: File offset
         :param bytes content: File content
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, int())
         qry = ServiceOperationQuery(self,
                                     "continueUpload",
                                     {

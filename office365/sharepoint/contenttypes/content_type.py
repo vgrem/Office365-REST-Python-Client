@@ -34,6 +34,21 @@ class ContentType(BaseEntity):
         return self
 
     @property
+    def display_form_template_name(self):
+        """
+        Specifies the name of a custom display form template to use for list items that have been assigned
+        the content type.
+        """
+        return self.properties.get("DisplayFormTemplateName", None)
+
+    @property
+    def display_form_url(self):
+        """
+        Specifies the URL of a custom display form to use for list items that have been assigned the content type.
+        """
+        return self.properties.get("DisplayFormUrl", None)
+
+    @property
     def id(self):
         """Specifies an identifier for the content type as specified in [MS-WSSTS] section 2.1.2.8.1.
         :rtype: ContentTypeId
@@ -104,6 +119,21 @@ class ContentType(BaseEntity):
         :type value: str
         """
         self.set_property("Group", value)
+
+    @property
+    def hidden(self):
+        """Specifies whether the content type is unavailable for creation or usage directly from a user interface."""
+        return self.properties.get("Hidden", None)
+
+    @property
+    def js_link(self):
+        """Gets or sets the JSLink for the content type custom form template"""
+        return self.properties.get("JSLink", None)
+
+    @property
+    def read_only(self):
+        """Specifies whether changes to the content type properties are denied."""
+        return self.properties.get("ReadOnly", None)
 
     @property
     def name_resource(self):
