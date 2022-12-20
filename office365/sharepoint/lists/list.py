@@ -27,7 +27,7 @@ from office365.sharepoint.lists.data_source import ListDataSource
 from office365.sharepoint.lists.rule import SPListRule
 from office365.sharepoint.pages.wiki_page_creation_information import WikiPageCreationInformation
 from office365.sharepoint.permissions.securable_object import SecurableObject
-from office365.sharepoint.principal.user import User
+from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.sitescripts.utility import SiteScriptUtility
 from office365.sharepoint.translation.user_resource import UserResource
 from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection

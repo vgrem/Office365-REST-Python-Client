@@ -1,9 +1,7 @@
-import typing
-
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.principal.principal import Principal
-from office365.sharepoint.principal.user import User
+from office365.sharepoint.principal.users.user import User
 
 
 class ObjectSharingInformationUser(BaseEntity):

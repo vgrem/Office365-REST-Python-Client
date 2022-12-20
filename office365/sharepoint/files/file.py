@@ -12,7 +12,7 @@ from office365.sharepoint.internal.queries.download_file import create_download_
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.permissions.irm.effective_settings import EffectiveInformationRightsManagementSettings
 from office365.sharepoint.permissions.irm.settings import InformationRightsManagementSettings
-from office365.sharepoint.principal.user import User
+from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.files.version_collection import FileVersionCollection
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.utilities.wopi_frame_action import SPWOPIFrameAction

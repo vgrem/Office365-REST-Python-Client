@@ -1,5 +1,6 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.contenttypes.fieldlinks.collection import FieldLinkCollection
@@ -14,9 +15,13 @@ class ContentType(BaseEntity):
         """
         The ReorderFields method is called to change the order in which fields appear in a content type.
 
-        :param list[str] field_names:
+        :param list[str] field_names: Rearranges the collection of fields in the order in which field internal
+             names are specified.
         """
-        qry = ServiceOperationQuery(self, "ReorderFields", field_names)
+        payload = {
+            "fieldNames": StringCollection(field_names)
+        }
+        qry = ServiceOperationQuery(self, "ReorderFields", None, payload)
         self.context.add_query(qry)
         return self
 
@@ -29,7 +34,8 @@ class ContentType(BaseEntity):
         """
         super(ContentType, self).update()
         if update_children:
-            qry = ServiceOperationQuery(self, "Update", [update_children])
+            payload = {"updateChildren": update_children}
+            qry = ServiceOperationQuery(self, "Update", None, payload)
             self.context.add_query(qry)
         return self
 

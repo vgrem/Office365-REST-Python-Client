@@ -43,7 +43,7 @@ class FileVersion(BaseEntity):
     @property
     def created_by(self):
         """Gets the user that created the file version."""
-        from office365.sharepoint.principal.user import User
+        from office365.sharepoint.principal.users.user import User
         return self.properties.get("CreatedBy", User(self.context, ResourcePath("CreatedBy", self.resource_path)))
 
     @property

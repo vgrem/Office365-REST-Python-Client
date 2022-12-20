@@ -4,7 +4,9 @@ class PermissionKind:
         pass
 
     EmptyMask = 0
+
     ViewListItems = 1
+
     AddListItems = 2
     EditListItems = 3
     DeleteListItems = 4

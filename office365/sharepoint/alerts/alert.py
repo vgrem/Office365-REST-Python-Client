@@ -15,7 +15,7 @@ class Alert(BaseEntity):
     @property
     def user(self):
         """Gets user object that represents User for the alert."""
-        from office365.sharepoint.principal.user import User
+        from office365.sharepoint.principal.users.user import User
         return self.properties.get('User',
                                    User(self.context, ResourcePath("user", self.resource_path)))
 

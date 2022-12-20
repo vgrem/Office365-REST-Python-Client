@@ -4,7 +4,8 @@ from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.principal.group import Group
+from office365.sharepoint.principal.groups.creation_information import GroupCreationInformation
+from office365.sharepoint.principal.groups.group import Group
 from office365.sharepoint.utilities.principal_info import PrincipalInfo
 
 
@@ -25,16 +26,21 @@ class GroupCollection(BaseEntityCollection):
             return_type = cur_grp.expand_to_principals(max_count)
         return return_type
 
-    def add(self, group_creation_information):
-        """Creates a Group resource
-
-        :type group_creation_information: any
+    def add(self, title, description=None):
         """
-        group = Group(self.context)
-        self.add_child(group)
-        qry = CreateEntityQuery(self, group_creation_information, group)
+        Adds a group to the collection. A reference to the SP.Group that was added is returned.
+
+        :param str title: A string that specifies the name of the cross-site group to be created.
+            It MUST NOT be NULL. Its length MUST be equal to or less than 255. It MUST NOT be empty.
+        :param str description: A string that contains the description of the cross-site group to be created.
+            Its length MUST be equal to or less than 512.
+        """
+        return_type = Group(self.context)
+        self.add_child(return_type)
+        params = GroupCreationInformation(title, description)
+        qry = CreateEntityQuery(self, params, return_type)
         self.context.add_query(qry)
-        return group
+        return return_type
 
     def get_by_id(self, group_id):
         """Returns the list item with the specified list item identifier.

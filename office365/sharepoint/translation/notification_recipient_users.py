@@ -10,6 +10,6 @@ class TranslationNotificationRecipientUsers(BaseEntity):
 
     @property
     def recipients(self):
-        from office365.sharepoint.principal.user_collection import UserCollection
+        from office365.sharepoint.principal.users.collection import UserCollection
         return self.properties.get("Recipients",
                                    UserCollection(self.context, ResourcePath("Recipients", self.resource_path)))

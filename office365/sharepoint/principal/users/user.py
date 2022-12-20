@@ -2,7 +2,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.alerts.collection import AlertCollection
 from office365.sharepoint.principal.principal import Principal
-from office365.sharepoint.principal.user_id_info import UserIdInfo
+from office365.sharepoint.principal.users.id_info import UserIdInfo
 
 
 class User(Principal):
@@ -41,7 +41,7 @@ class User(Principal):
     @property
     def groups(self):
         """Gets a collection of group objects that represents all of the groups for the user."""
-        from office365.sharepoint.principal.group_collection import GroupCollection
+        from office365.sharepoint.principal.groups.collection import GroupCollection
         return self.properties.get('Groups',
                                    GroupCollection(self.context, ResourcePath("Groups", self.resource_path)))
 

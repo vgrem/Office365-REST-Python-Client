@@ -34,10 +34,10 @@ from office365.sharepoint.navigation.navigation import Navigation
 from office365.sharepoint.permissions.base_permissions import BasePermissions
 from office365.sharepoint.permissions.roles.definitions.collection import RoleDefinitionCollection
 from office365.sharepoint.permissions.securable_object import SecurableObject
-from office365.sharepoint.principal.group import Group
-from office365.sharepoint.principal.group_collection import GroupCollection
-from office365.sharepoint.principal.user import User
-from office365.sharepoint.principal.user_collection import UserCollection
+from office365.sharepoint.principal.groups.group import Group
+from office365.sharepoint.principal.groups.collection import GroupCollection
+from office365.sharepoint.principal.users.user import User
+from office365.sharepoint.principal.users.collection import UserCollection
 from office365.sharepoint.pushnotifications.collection import PushNotificationSubscriberCollection
 from office365.sharepoint.pushnotifications.subscriber import PushNotificationSubscriber
 from office365.sharepoint.recyclebin.item_collection import RecycleBinItemCollection
@@ -1536,7 +1536,7 @@ class Web(SecurableObject):
         """Specifies the collection of event receiver definitions that are currently available on the Web site"""
         return self.properties.get('EventReceivers',
                                    EventReceiverDefinitionCollection(self.context,
-                                                                     ResourcePath("eventReceivers", self.resource_path),
+                                                                     ResourcePath("EventReceivers", self.resource_path),
                                                                      self))
 
     @property

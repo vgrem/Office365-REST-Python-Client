@@ -4,7 +4,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.principal.user import User
+from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.userprofiles.hash_tag import HashTagCollection
 from office365.sharepoint.userprofiles.personal_site_creation_priority import PersonalSiteCreationPriority
 from office365.sharepoint.userprofiles.person_properties import PersonProperties

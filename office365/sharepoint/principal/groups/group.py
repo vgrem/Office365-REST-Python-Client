@@ -41,6 +41,16 @@ class Group(Principal):
         return self
 
     @property
+    def allow_members_edit_membership(self):
+        """Specifies whether a member of the group can add and remove members from the group."""
+        return self.properties.get('AllowMembersEditMembership', None)
+
+    @property
+    def allow_request_to_join_leave(self):
+        """Specifies whether to allow users to request to join or leave in the group."""
+        return self.properties.get('AllowRequestToJoinLeave', None)
+
+    @property
     def owner_title(self):
         """Specifies the name of the owner of the group.
 
@@ -64,5 +74,5 @@ class Group(Principal):
     @property
     def users(self):
         """Gets a collection of user objects that represents all of the members in the group."""
-        from office365.sharepoint.principal.user_collection import UserCollection
+        from office365.sharepoint.principal.users.collection import UserCollection
         return self.properties.get('Users', UserCollection(self.context, ResourcePath("Users", self.resource_path)))

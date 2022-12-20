@@ -1,9 +1,19 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.permissions.base_permissions import BasePermissions
 
 
 class RoleDefinition(BaseEntity):
     """Defines a single role definition, including a name, description, and set of rights."""
+
+    @property
+    def base_permissions(self):
+        """
+        Specifies the base permissions for the role definition.
+        When assigning values to the property, use bitwise AND, OR, and XOR operators with values from
+        the BasePermissions uint.
+        """
+        return self.properties.get('BasePermissions', BasePermissions())
 
     @property
     def id(self):
@@ -36,6 +46,14 @@ class RoleDefinition(BaseEntity):
     def description(self, value):
         """Gets or sets a value that specifies the description of the role definition."""
         self.set_property('Description', value)
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "BasePermissions": self.base_permissions,
+            }
+            default_value = property_mapping.get(name, None)
+        return super(RoleDefinition, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
         if self.resource_path is None:

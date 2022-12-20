@@ -5,7 +5,7 @@ from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.permissions.base_permissions import BasePermissions
 from office365.sharepoint.permissions.roles.assignments.assignment import RoleAssignment
 from office365.sharepoint.permissions.roles.assignments.collection import RoleAssignmentCollection
-from office365.sharepoint.principal.user import User
+from office365.sharepoint.principal.users.user import User
 
 
 class SecurableObject(BaseEntity):
@@ -30,10 +30,10 @@ class SecurableObject(BaseEntity):
     def add_role_assignment(self, principal, role_def):
         """Adds a role assignment to securable resource.<81>
 
-        :param office365.sharepoint.permissions.role_definition.RoleDefinition role_def: Specifies the role definition
-        of the role assignment.
+        :param office365.sharepoint.permissions.roles.definitions.definition.RoleDefinition role_def: Specifies the
+            role definition of the role assignment.
         :param office365.sharepoint.principal.principal.Principal principal: Specifies the user or group of the
-        role assignment.
+            role assignment.
         """
 
         def _principal_loaded():
@@ -103,18 +103,18 @@ class SecurableObject(BaseEntity):
 
         :param str or User user_or_name: Specifies the user login name or User object.
         """
-        result = ClientResult(self.context, BasePermissions())
+        return_type = ClientResult(self.context, BasePermissions())
 
         if isinstance(user_or_name, User):
             def _user_loaded():
                 next_qry = ServiceOperationQuery(self, "GetUserEffectivePermissions", [user_or_name.login_name],
-                                                 None, None, result)
+                                                 None, None, return_type)
                 self.context.add_query(next_qry)
             user_or_name.ensure_property("LoginName", _user_loaded)
         else:
-            qry = ServiceOperationQuery(self, "GetUserEffectivePermissions", [user_or_name], None, None, result)
+            qry = ServiceOperationQuery(self, "GetUserEffectivePermissions", [user_or_name], None, None, return_type)
             self.context.add_query(qry)
-        return result
+        return return_type
 
     @property
     def has_unique_role_assignments(self):

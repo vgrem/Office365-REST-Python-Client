@@ -2,7 +2,7 @@ from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.principal.user import User
+from office365.sharepoint.principal.users.user import User
 
 
 class UserCollection(BaseEntityCollection):

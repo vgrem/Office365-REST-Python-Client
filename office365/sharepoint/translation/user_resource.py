@@ -25,7 +25,7 @@ class UserResource(BaseEntity):
         """
         """
         return_type = ClientResult(self.context, ClientValueCollection(SPResourceEntry))
-        qry = ServiceOperationQuery(self, "GetResourceEntries", None, None, None, return_type)
+        qry = ServiceOperationQuery(self, "GetResourceEntries", [], None, None, return_type)
         self.context.add_query(qry)
         return return_type
 

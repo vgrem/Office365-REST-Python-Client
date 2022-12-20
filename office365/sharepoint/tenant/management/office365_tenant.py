@@ -4,7 +4,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.principal.user import User
+from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.tenant.administration.siteinfo_for_site_picker import SiteInfoForSitePicker
 from office365.sharepoint.tenant.management.externalusers.results.session_revocation import SPOUserSessionRevocationResult
 from office365.sharepoint.tenant.management.externalusers.results.remove import RemoveExternalUsersResults

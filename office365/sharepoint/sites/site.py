@@ -13,7 +13,7 @@ from office365.sharepoint.eventreceivers.definition_collection import EventRecei
 from office365.sharepoint.features.collection import FeatureCollection
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.portal.sites.icon_manager import SiteIconManager
-from office365.sharepoint.principal.user import User
+from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.recyclebin.item_collection import RecycleBinItemCollection
 from office365.sharepoint.sitehealth.summary import SiteHealthSummary
 from office365.sharepoint.sites.sph_site import SPHSite

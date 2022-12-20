@@ -2,7 +2,7 @@ from office365.runtime.compat import urljoin
 from unittest import TestCase
 
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.principal.user import User
+from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.sharing.document_manager import DocumentSharingManager
 from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
 from office365.sharepoint.sharing.operation_status_code import SharingOperationStatusCode

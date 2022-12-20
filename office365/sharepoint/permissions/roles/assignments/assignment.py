@@ -9,7 +9,7 @@ class RoleAssignment(BaseEntity):
 
     @property
     def principal_id(self):
-        """"""
+        """Specifies the identifier of the user or group corresponding to the role assignment."""
         return self.properties.get("PrincipalId", None)
 
     @property
