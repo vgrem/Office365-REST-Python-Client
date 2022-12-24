@@ -77,7 +77,7 @@ class Utility(BaseEntity):
             for a principal.
         :type context: office365.sharepoint.client_context.ClientContext
         """
-        result = ClientResult(context, StringCollection())
+        return_type = ClientResult(context, StringCollection())
         utility = Utility(context)
         params = {
             "input": s_input,
@@ -86,10 +86,10 @@ class Utility(BaseEntity):
             "maxCount": max_count,
             "groupName": group_name
         }
-        qry = ServiceOperationQuery(utility, "SearchPrincipalsUsingContextWeb", params, None, None, result)
+        qry = ServiceOperationQuery(utility, "SearchPrincipalsUsingContextWeb", params, None, None, return_type)
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def create_wiki_page_in_context_web(context, parameters, return_type=None):

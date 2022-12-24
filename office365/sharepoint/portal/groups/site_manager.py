@@ -134,6 +134,18 @@ class GroupSiteManager(ClientObject):
         self.context.add_query(qry)
         return return_type
 
+    def get_team_channels_direct(self, team_id):
+        """
+        :param str team_id:
+        """
+        return_type = ClientResult(self.context, str())
+        payload = {
+            "teamId": team_id,
+        }
+        qry = ServiceOperationQuery(self, "GetTeamChannelsDirect", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def notebook(self, group_id):
         """
         :param str group_id:

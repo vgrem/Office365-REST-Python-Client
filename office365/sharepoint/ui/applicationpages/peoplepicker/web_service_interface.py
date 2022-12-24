@@ -16,13 +16,17 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
     @staticmethod
     def get_search_results(context, search_pattern, provider_id=None, hierarchy_node_id=None, entity_types=None):
         """
+        Specifies a JSON formatted CSOM String of principals found in the search.
+
         :type context: office365.sharepoint.client_context.ClientContext
-        :type search_pattern: str
-        :type provider_id: str
-        :type hierarchy_node_id: str
-        :type entity_types: str
+        :param str search_pattern: Specifies a pattern used to search for principals.
+            The value is implementation-specific.
+        :param str provider_id: The identifier of a claims provider.
+        :param str hierarchy_node_id: The identifier of a node in the hierarchy. The search MUST be conducted under
+            this node.
+        :param str entity_types: The type of principals to search for.
         """
-        result = ClientResult(context)
+        return_type = ClientResult(context, str())
         payload = {
             "searchPattern": search_pattern,
             "providerID": provider_id,
@@ -30,10 +34,34 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
             "entityTypes": entity_types
         }
         svc = ClientPeoplePickerWebServiceInterface(context)
-        qry = ServiceOperationQuery(svc, "GetSearchResults", None, payload, None, result)
-        qry.static = True
+        qry = ServiceOperationQuery(svc, "GetSearchResults", None, payload, None, return_type, True)
         context.add_query(qry)
-        return result
+        return return_type
+
+    @staticmethod
+    def get_search_results_by_hierarchy(context, provider_id=None, hierarchy_node_id=None, entity_types=None,
+                                        context_url=None):
+        """
+        Specifies a JSON formatted CSOM String of principals found in the search grouped by hierarchy.
+
+        :type context: office365.sharepoint.client_context.ClientContext
+        :param str provider_id: The identifier of a claims provider.
+        :param str hierarchy_node_id: The identifier of a node in the hierarchy. The search MUST be conducted under
+            this node.
+        :param str entity_types: The type of principals to search for.
+        :param str context_url: The URL to use as context when searching for principals.
+        """
+        return_type = ClientResult(context, str())
+        payload = {
+            "providerID": provider_id,
+            "hierarchyNodeID": hierarchy_node_id,
+            "entityTypes": entity_types,
+            "contextUrl": context_url
+        }
+        svc = ClientPeoplePickerWebServiceInterface(context)
+        qry = ServiceOperationQuery(svc, "GetSearchResultsByHierarchy", None, payload, None, return_type, True)
+        context.add_query(qry)
+        return return_type
 
     @staticmethod
     def client_people_picker_resolve_user(context, query_string):

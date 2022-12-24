@@ -14,7 +14,6 @@ class TestClientSideComponent(SPTestCase):
         result = self.client.web.get_all_client_side_components().execute_query()
         self.assertIsNotNone(result.value)
 
-    #def test2_get_client_side_web_parts(self):
-    #    result = self.client.web.get_client_side_web_parts()
-    #    self.client.execute_query()
-    #    self.assertIsNotNone(result.value)
+    def test2_get_client_side_web_parts(self):
+        result = self.client.web.get_client_side_web_parts().execute_query()
+        self.assertIsNotNone(result.value)

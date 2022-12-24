@@ -19,13 +19,13 @@ class SearchSetting(BaseEntity):
 
         :param bool call_local_search_farms_only: This is a flag that indicates to only call the local search farm.
         """
-        result = ClientResult(self.context, QueryConfiguration())
+        return_type = ClientResult(self.context, QueryConfiguration())
         payload = {
             "callLocalSearchFarmsOnly": call_local_search_farms_only
         }
-        qry = ServiceOperationQuery(self, "getqueryconfiguration", None, payload, None, result)
+        qry = ServiceOperationQuery(self, "getqueryconfiguration", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def export_search_reports(self, tenant_id, report_type=None, interval=None,
                               start_date=None, end_date=None, site_collection_id=None):
@@ -37,7 +37,7 @@ class SearchSetting(BaseEntity):
         :param str end_date:
         :param str site_collection_id:
         """
-        result = ClientResult(self.context, ReportBase())
+        return_type = ClientResult(self.context, ReportBase())
         payload = {
             "TenantId": tenant_id,
             "ReportType": report_type,
@@ -46,9 +46,9 @@ class SearchSetting(BaseEntity):
             "EndDate": end_date,
             "SiteCollectionId": site_collection_id
         }
-        qry = ServiceOperationQuery(self, "ExportSearchReports", None, payload, None, result)
+        qry = ServiceOperationQuery(self, "ExportSearchReports", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def ping_admin_endpoint(self):
         return_type = ClientResult(self.context)

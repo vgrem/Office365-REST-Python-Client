@@ -12,7 +12,8 @@ class QueryResult(ClientValue):
     as specified in [MS-QSSWS] section 3.1.4.1.3.6.
     """
 
-    def __init__(self, query_id=None, custom_results=None, relevant_results=RelevantResults(),
+    def __init__(self, query_id=None, custom_results=None,
+                 refinement_results=RefinementResults(), relevant_results=RelevantResults(),
                  query_rule_id=None, special_term_results=SpecialTermResults()):
         """
         :param str query_id: Specifies the identifier for the search query
@@ -26,7 +27,7 @@ class QueryResult(ClientValue):
         """
         self.QueryId = query_id
         self.QueryRuleId = query_rule_id
-        self.RefinementResults = RefinementResults()
+        self.RefinementResults = refinement_results
         self.CustomResults = ClientValueCollection(CustomResult, custom_results)
         self.RelevantResults = relevant_results
         self.SpecialTermResults = special_term_results

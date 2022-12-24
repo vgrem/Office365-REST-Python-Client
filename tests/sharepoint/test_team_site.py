@@ -37,17 +37,22 @@ class TestTeamSite(TestCase):
         result = self.client.group_site_manager.notebook(group_id).execute_query()
         self.assertIsNotNone(result.value)
 
-    def test5_delete_site(self):
+    #def test5_get_team_channels(self):
+    #    group_id = self.__class__.target_site.group_id
+    #    result = self.client.group_site_manager.get_team_channels(group_id).execute_query()
+    #    self.assertIsNotNone(result.value)
+
+    def test6_delete_site(self):
         self.__class__.target_site.delete_object().execute_query()
 
-    def test6_get_current_user_joined_teams(self):
+    def test7_get_current_user_joined_teams(self):
         result = self.client.group_site_manager.get_current_user_joined_teams().execute_query()
         self.assertIsNotNone(result.value)
 
-    def test7_get_group_creation_context(self):
+    def test8_get_group_creation_context(self):
         result = self.client.group_site_manager.get_group_creation_context().execute_query()
         self.assertIsNotNone(result.value)
 
-    def test8_get_current_user_shared_channel_member_groups(self):
+    def test9_get_current_user_shared_channel_member_groups(self):
         result = self.client.group_site_manager.get_current_user_shared_channel_member_groups().execute_query()
         self.assertIsNotNone(result.value)

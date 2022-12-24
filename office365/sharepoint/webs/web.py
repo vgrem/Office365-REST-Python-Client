@@ -149,6 +149,19 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
+    def get_client_side_components_by_component_type(self, component_types):
+        """
+        :param str component_types:
+        """
+        return_type = ClientResult(self.context, ClientValueCollection(SPClientSideComponentIdentifier))
+        payload = {
+            "componentTypesString": component_types
+        }
+        qry = ServiceOperationQuery(self, "GetClientSideComponentsByComponentType", None, payload,
+                                    None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def get_push_notification_subscribers_by_user(self, user):
         """
         Queries for the push notification subscribers for the site  for the specified user.
@@ -318,18 +331,20 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
-    def get_client_side_web_parts(self, project, include_errors=False):
+    def get_client_side_web_parts(self, project=None, include_errors=False):
         """
-        :param str project:
+        It MUST return an array of 3rd party webpart components installed on this site
+
         :param bool include_errors: If true, webparts with errors MUST be included in the results of the request.
            If false, webparts with errors MUST be excluded in the results of the request.
+        :param str project:
         """
         return_type = ClientResult(self.context, ClientValueCollection(SPClientSideComponentQueryResult))
         params = {
             "includeErrors": include_errors,
             "project": project
         }
-        qry = ServiceOperationQuery(self, "getClientSideWebParts", None, params, None, return_type)
+        qry = ServiceOperationQuery(self, "GetClientSideWebParts", None, params, None, return_type)
         self.context.add_query(qry)
         return return_type
 
