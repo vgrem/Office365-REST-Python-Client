@@ -283,7 +283,7 @@ class DriveItem(BaseItem):
 
         result = ClientResult(self.context)
         qry = ServiceOperationQuery(self,
-                                    "move",
+                                    "",
                                     None,
                                     {
                                         "name": name,
