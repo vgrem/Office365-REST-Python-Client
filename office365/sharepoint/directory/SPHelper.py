@@ -38,14 +38,13 @@ class SPHelper(BaseEntity):
         :param str site_url: Site Url
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
         """
-        helper = SPHelper(context)
-        result = ClientResult(context)
-        qry = ServiceOperationQuery(helper, "CheckSiteAvailability",
+        return_type = ClientResult(context)
+        qry = ServiceOperationQuery(SPHelper(context), "CheckSiteAvailability",
                                     None, {"siteUrl": site_url},
-                                    None, result)
+                                    None, return_type)
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def get_members_info(context, group_id, row_limit, result=None):

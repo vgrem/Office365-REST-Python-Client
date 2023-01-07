@@ -8,9 +8,11 @@ class ClientWebPart(BaseEntity):
 
     def render(self, properties=None):
         """
-        :param dict properties:
+        Renders the ClientWebPart.  Returns HTML that can be inserted in a page.
+
+        :param dict properties: Properties for the ClientWebPart, including edit mode.
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, str())
         qry = ServiceOperationQuery(self, "Render", None, properties, None, return_type)
         self.context.add_query(qry)
         return return_type

@@ -55,7 +55,7 @@ class TestUserProfile(TestCase):
         if result.value:
             people_manager.stop_following(target_user.login_name).execute_query()
         else:
-            people_manager.follow(target_user.login_name)
+            people_manager.follow(target_user.login_name).execute_query()
 
     def test8_get_followers_for(self):
         target_user = self.my_client.web.ensure_user(test_user_principal_name).execute_query()

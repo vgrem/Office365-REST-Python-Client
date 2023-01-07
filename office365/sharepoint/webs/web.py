@@ -61,7 +61,8 @@ from office365.sharepoint.webs.context_web_information import ContextWebInformat
 from office365.sharepoint.fields.datetime_field_format_type import DateTimeFieldFormatType
 from office365.sharepoint.webs.multilingual_settings import MultilingualSettings
 from office365.sharepoint.webs.regional_settings import RegionalSettings
-from office365.sharepoint.sitescripts.types import SiteScriptSerializationResult, SiteScriptSerializationInfo
+from office365.sharepoint.sitescripts.serialization_info import SiteScriptSerializationInfo
+from office365.sharepoint.sitescripts.serialization_result import SiteScriptSerializationResult
 from office365.sharepoint.webs.information_collection import WebInformationCollection
 from office365.sharepoint.webs.template_collection import WebTemplateCollection
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath

@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from office365.runtime.auth.authentication_context import AuthenticationContext
+from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.odata.type import ODataType
 from office365.runtime.odata.query_options import QueryOptions
@@ -144,3 +145,8 @@ class TestSharePointClient(TestCase):
         client.execute_query()
         self.assertIsNotNone(me.login_name)
         self.assertIsNotNone(lib.title)
+
+    def test_17_test_client_result(self):
+        client = ClientContext(test_site_url).with_credentials(test_user_credentials)
+        result = ClientResult(client, StringCollection())
+        self.assertIsInstance(result.value, StringCollection)

@@ -5,9 +5,11 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.sitedesigns.metadata import SiteDesignMetadata
+from office365.sharepoint.sitedesigns.task import SiteDesignTask
 from office365.sharepoint.sitescripts.metadata import SiteScriptMetadata
 from office365.sharepoint.sitedesigns.principal import SiteDesignPrincipal
-from office365.sharepoint.sitescripts.types import SiteScriptSerializationResult, SiteScriptActionResult
+from office365.sharepoint.sitescripts.serialization_result import SiteScriptSerializationResult
+from office365.sharepoint.sitescripts.action_result import SiteScriptActionResult
 
 
 class SiteScriptUtility(BaseEntity):
@@ -20,11 +22,28 @@ class SiteScriptUtility(BaseEntity):
         super(SiteScriptUtility, self).__init__(context, path)
 
     @staticmethod
+    def add_site_design_task(context, web_url, site_design_id):
+        """
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
+        :param str web_url:
+        :param str site_design_id: The ID of the site design to apply
+        """
+        return_type = ClientResult(context, SiteDesignTask())
+        utility = SiteScriptUtility(context)
+        payload = {
+            "webUrl": web_url,
+            "siteDesignId": site_design_id
+        }
+        qry = ServiceOperationQuery(utility, "AddSiteDesignTask", None, payload, None, return_type, True)
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
     def get_site_script_from_list(context, list_url, options=None, return_type=None):
         """
         Creates site script syntax from an existing SharePoint list.
 
-        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
         :param str list_url:  URL of the list.
         :param dict or None options:
         :param ClientResult return_type:  Return type
@@ -36,8 +55,7 @@ class SiteScriptUtility(BaseEntity):
             "options": options
         }
         utility = SiteScriptUtility(context)
-        qry = ServiceOperationQuery(utility, "GetSiteScriptFromList", None, payload, None, return_type)
-        qry.static = True
+        qry = ServiceOperationQuery(utility, "GetSiteScriptFromList", None, payload, None, return_type, True)
         context.add_query(qry)
         return return_type
 
@@ -58,8 +76,7 @@ class SiteScriptUtility(BaseEntity):
             "info": info
         }
         utility = SiteScriptUtility(context)
-        qry = ServiceOperationQuery(utility, "GetSiteScriptFromWeb", None, payload, None, return_type)
-        qry.static = True
+        qry = ServiceOperationQuery(utility, "GetSiteScriptFromWeb", None, payload, None, return_type, True)
         context.add_query(qry)
         return return_type
 
@@ -218,8 +235,7 @@ class SiteScriptUtility(BaseEntity):
             "id": _id,
             "store": store
         }
-        qry = ServiceOperationQuery(utility, "GetSiteDesignMetadata", None, payload, None, return_type)
-        qry.static = True
+        qry = ServiceOperationQuery(utility, "GetSiteDesignMetadata", None, payload, None, return_type, True)
         context.add_query(qry)
         return return_type
 
@@ -229,7 +245,7 @@ class SiteScriptUtility(BaseEntity):
         Gets a list of principals that have access to a site design.
 
         :type _id: str
-        :param office365.sharepoint.client_context.ClientContext context: SharePoint client
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
 
         """
         return_type = BaseEntityCollection(context, SiteDesignPrincipal)

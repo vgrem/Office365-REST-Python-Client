@@ -27,7 +27,7 @@ def get_total_count(target_list):
     """
     #all_items = target_list.items.top(50).get().execute_query()
     #all_items = target_list.items.get_all(500).execute_query()
-    all_items = target_list.items.get_all(50, print_progress).execute_query()
+    all_items = target_list.items.get_all(5000, print_progress).execute_query()
     print("Total items count: {0}".format(len(all_items)))
 
 

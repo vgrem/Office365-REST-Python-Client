@@ -87,6 +87,11 @@ class PersonProperties(BaseEntity):
         return self.properties.get('UserUrl', None)
 
     @property
+    def user_profile_properties(self):
+        """"""
+        return self.properties.get("UserProfileProperties", None)
+
+    @property
     def entity_type_name(self):
         return "SP.UserProfiles.PersonProperties"
 

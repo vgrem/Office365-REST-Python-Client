@@ -1,3 +1,10 @@
+from typing import TypeVar
+
+from office365.runtime.client_value import ClientValue
+
+T = TypeVar("T", int, str, bytes, bool, ClientValue)
+
+
 class ClientResult(object):
     """Client result"""
 
@@ -6,7 +13,7 @@ class ClientResult(object):
         Client result
 
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
-        :type default_value: int or str or bytes or bool or dict or office365.runtime.client_value.ClientValue
+        :type default_value: T
         """
         self._context = context
         self._value = default_value
@@ -19,10 +26,16 @@ class ClientResult(object):
             """
             resp.raise_for_status()
             action(self, *args, **kwargs)
+
         self._context.after_execute(_process_response, True)
         return self
 
     def set_property(self, key, value, persist_changes=False):
+        """
+        :type key: str
+        :type value: T
+        :type persist_changes: bool
+        """
         from office365.runtime.client_value import ClientValue
         if isinstance(self.value, ClientValue):
             self.value.set_property(key, value, persist_changes)
