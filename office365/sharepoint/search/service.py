@@ -1,12 +1,14 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.compat import is_string_type
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.search.query.auto_completion_results import QueryAutoCompletionResults
 from office365.sharepoint.search.query.popular_tenant_query import PopularTenantQuery
+from office365.sharepoint.search.query.sort.sort import Sort
 from office365.sharepoint.search.query.suggestion_results import QuerySuggestionResults
 from office365.sharepoint.search.query.tenant_custom_query_suggestions import TenantCustomQuerySuggestions
 from office365.sharepoint.search.request import SearchRequest
@@ -19,21 +21,34 @@ class SearchService(BaseEntity):
     def __init__(self, context):
         super(SearchService, self).__init__(context, ResourcePath("Microsoft.Office.Server.Search.REST.SearchService"))
 
-    def export(self, user_name, start_time):
+    def export(self, user, start_time):
         """
         The operation is used by the administrator to retrieve the query log entries,
         issued after a specified date, for a specified user.
 
         :param datetime.datetime start_time: The timestamp of the oldest query log entry returned.
-        :param str user_name: The name of the user that issued the queries."""
-        result = ClientResult(self.context)
-        payload = {
-            "userName": user_name,
-            "startTime": start_time.isoformat()
-        }
-        qry = ServiceOperationQuery(self, "export", None, payload, None, result)
-        self.context.add_query(qry)
-        return result
+        :param str or User user: The name of the user or user object that issued the queries."""
+        return_type = ClientResult(self.context, str())
+
+        def _create_query(user_name):
+            """
+            :type user_name: str
+            """
+            payload = {
+                "userName": user_name,
+                "startTime": start_time.isoformat()
+            }
+            return ServiceOperationQuery(self, "export", None, payload, None, return_type)
+
+        if isinstance(user, User):
+            def _user_loaded():
+                next_qry = _create_query(user.user_principal_name)
+                self.context.add_query(next_qry)
+            user.ensure_property("UserPrincipalName", _user_loaded)
+        else:
+            qry = _create_query(user)
+            self.context.add_query(qry)
+        return return_type
 
     def export_manual_suggestions(self):
         return_type = ClientResult(self.context, TenantCustomQuerySuggestions())
@@ -52,17 +67,54 @@ class SearchService(BaseEntity):
         self.context.add_query(qry)
         return return_type
 
-    def query(self, request_or_query):
+    def query(self, query_text, source_id=None, ranking_model_id=None,
+              start_row=None, row_limit=None, rows_per_page=None,
+              select_properties=None, refinement_filters=None, refiners=None, sort_list=None,
+              trim_duplicates=None, enable_query_rules=None, enable_sorting=None, **kwargs):
         """The operation is used to retrieve search results by using the HTTP protocol with the GET method.
 
-        :type request_or_query: office365.sharepoint.search.request.SearchRequest or str
+        :param str query_text: The query text of the search query.
+        :param str source_id: Specifies the unique identifier for result source to use for executing the search query.
+            If no value is specified then the protocol server MUST use the id for the default result source.
+        :param str ranking_model_id: The GUID of the ranking model that SHOULD be used for this search query. If this
+            element is not present or a value is not specified, the protocol server MUST use the default ranking model,
+            according to protocol server configuration.
+        :param int start_row: A zero-based index of the first search result in the list of all search results the
+            protocol server returns. The StartRow value MUST be greater than or equal to zero.
+        :param int rows_per_page: The number of result items the protocol client displays per page. If this element is
+            set to an integer value less than 1, the value of the RowLimit element MUST be used as the default value.
+        :param int row_limit: The number of search results the protocol client wants to receive, starting at the index
+            specified in the StartRow element. The RowLimit value MUST be greater than or equal to zero.
+        :param list[str] select_properties: Specifies a property bag of key value pairs.
+        :param list[str] refinement_filters:  The list of refinement tokens for drilldown into search results
+        :param list[str] refiners:  Specifies a list of refiners
+         :param list[Sort] sort_list:  Specifies the list of properties with which to sort the search results.
+        :param bool trim_duplicates:  Specifies whether duplicates are removed by the protocol server before sorting,
+             selecting, and sending the search results.
+        :param bool enable_sorting: Specifies whether sorting of results is enabled or not.
+            MUST ignore the SortList specified if this value is set to false.
+        :param bool enable_query_rules: Specifies whether query rules are included when a search query is executed.
+            If the value is true, query rules are applied in the search query. If the value is false, query rules
+            MUST NOT be applied in the search query.
         """
-        if is_string_type(request_or_query):
-            params = SearchRequest(query_text=request_or_query)
-        else:
-            params = request_or_query
-        result = ClientResult(self.context, SearchResult())
-        qry = ServiceOperationQuery(self, "query", params.to_json(), None, "query", result)
+        params = {
+            "querytext": query_text,
+            "sourceId": source_id,
+            "rankingModelId": ranking_model_id,
+            "startRow": start_row,
+            "rowsPerPage": rows_per_page,
+            "selectProperties": str(StringCollection(select_properties)),
+            "refinementFilters": str(StringCollection(refinement_filters)),
+            "refiners": str(StringCollection(refiners)),
+            "sortList": str(StringCollection([str(s) for s in sort_list])) if sort_list else None,
+            "trimDuplicates": trim_duplicates,
+            "rowLimit": row_limit,
+            "enableQueryRules": enable_query_rules,
+            "enableSorting": enable_sorting
+        }
+        params.update(**kwargs)
+        return_type = ClientResult(self.context, SearchResult())
+        qry = ServiceOperationQuery(self, "query", params, None, "query", return_type)
         self.context.add_query(qry)
 
         def _construct_request(request):
@@ -72,7 +124,7 @@ class SearchService(BaseEntity):
             request.method = HttpMethod.Get
 
         self.context.before_execute(_construct_request)
-        return result
+        return return_type
 
     def post_query(self, query_text, select_properties=None, trim_duplicates=None, row_limit=None, **kwargs):
         """The operation is used to retrieve search results through the use of the HTTP protocol
@@ -126,7 +178,10 @@ class SearchService(BaseEntity):
     def results_page_address(self):
         """The operation is used to get the URI address of the result page by using the HTTP protocol
         with the GET method. The operation returns the URI of the result page."""
-        pass
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(self, "resultspageaddress", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def suggest(self, query_text):
         """

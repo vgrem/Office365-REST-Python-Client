@@ -5,7 +5,10 @@ from office365.sharepoint.search.query.personal_result_suggestion import Persona
 
 
 class QuerySuggestionQuery(ClientValue):
-    pass
+
+    @property
+    def entity_type_name(self):
+        return "Microsoft.SharePoint.Client.Search.Query.QuerySuggestionQuery"
 
 
 class QuerySuggestionResults(ClientValue):

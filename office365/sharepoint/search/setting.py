@@ -13,15 +13,22 @@ class SearchSetting(BaseEntity):
     def __init__(self, context):
         super(SearchSetting, self).__init__(context, ResourcePath("Microsoft.Office.Server.Search.REST.SearchSetting"))
 
-    def get_query_configuration(self, call_local_search_farms_only=True):
+    def get_query_configuration(self, call_local_search_farms_only=True, skip_group_object_id_lookup=None,
+                                throw_on_remote_api_check=None):
         """
-        This REST operation gets the query configuration. See section 3.1.5.18.2.1.6.
+        This operation gets the query configuration from the server. This operation requires that the Search Service
+        Application is partitioned. If the Search Service Application is not partitioned the operations returns
+        HTTP code 400, not authorized.
 
         :param bool call_local_search_farms_only: This is a flag that indicates to only call the local search farm.
+        :param bool skip_group_object_id_lookup:
+        :param bool throw_on_remote_api_check:
         """
         return_type = ClientResult(self.context, QueryConfiguration())
         payload = {
-            "callLocalSearchFarmsOnly": call_local_search_farms_only
+            "callLocalSearchFarmsOnly": call_local_search_farms_only,
+            "skipGroupObjectIdLookup": skip_group_object_id_lookup,
+            "throwOnRemoteApiCheck": throw_on_remote_api_check
         }
         qry = ServiceOperationQuery(self, "getqueryconfiguration", None, payload, None, return_type)
         self.context.add_query(qry)
@@ -51,6 +58,9 @@ class SearchSetting(BaseEntity):
         return return_type
 
     def ping_admin_endpoint(self):
+        """
+
+        """
         return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "PingAdminEndpoint", None, None, None, return_type)
         self.context.add_query(qry)

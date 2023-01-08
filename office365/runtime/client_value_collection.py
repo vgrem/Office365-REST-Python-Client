@@ -38,6 +38,9 @@ class ClientValueCollection(ClientValue):
     def __repr__(self):
         return repr(self._data)
 
+    def __str__(self):
+        return ",".join(self._data)
+
     def to_json(self, json_format=None):
         """
         Serializes a client value's collection
