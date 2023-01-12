@@ -27,7 +27,7 @@ class TestDirectorySession(TestCase):
 
     def test_3_get_my_groups(self):
         result = self.__class__.session.me.get_my_groups().execute_query()
-        self.assertIsNotNone(result.value)
+        self.assertIsNotNone(result)
         #self.assertGreater(len(result.value), 0)
 
     #def test_4_user_member_of(self):
