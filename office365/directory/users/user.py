@@ -79,7 +79,7 @@ class User(DirectoryObject):
         self.context.add_query(qry)
         return self
 
-    def send_mail(self, subject, body, to_recipients, cc_recipients=None, bcc_recipients=None, save_to_sent_items=False):
+    def send_mail(self, subject, body, to_recipients, cc_recipients=[], bcc_recipients=[], save_to_sent_items=False):
         """Send a new message on the fly
 
         :param str subject: The subject of the message.
@@ -94,12 +94,8 @@ class User(DirectoryObject):
         message.subject = subject
         message.body = body
         [message.to_recipients.add(Recipient.from_email(email)) for email in to_recipients]
-
-        if bcc_recipients is not None:
-            [message.bcc_recipients.add(Recipient.from_email(email)) for email in bcc_recipients]
-
-        if cc_recipients is not None:
-            [message.cc_recipients.add(Recipient.from_email(email)) for email in cc_recipients]
+        [message.bcc_recipients.add(Recipient.from_email(email)) for email in bcc_recipients]
+        [message.cc_recipients.add(Recipient.from_email(email)) for email in cc_recipients]
 
         payload = {
             "message": message,
