@@ -1,5 +1,6 @@
 from office365.runtime.client_result import ClientResult
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.directory.my_groups_result import MyGroupsResult
 
 
 class User(BaseEntity):
@@ -15,10 +16,10 @@ class User(BaseEntity):
         return result
 
     def get_my_groups(self):
-        result = ClientResult(self.context)
+        return_type = MyGroupsResult(self.context)
 
         def _user_loaded():
             from office365.sharepoint.directory.SPHelper import SPHelper
-            SPHelper.get_my_groups(self.context, self.properties["principalName"], 0, 10, result)
+            SPHelper.get_my_groups(self.context, self.properties["principalName"], 0, 10, return_type)
         self.ensure_property('principalName', _user_loaded)
-        return result
+        return return_type
