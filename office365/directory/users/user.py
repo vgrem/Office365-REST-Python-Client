@@ -79,12 +79,14 @@ class User(DirectoryObject):
         self.context.add_query(qry)
         return self
 
-    def send_mail(self, subject, body, to_recipients, save_to_sent_items=False):
+    def send_mail(self, subject, body, to_recipients, cc_recipients=None, bcc_recipients=None, save_to_sent_items=False):
         """Send a new message on the fly
 
         :param str subject: The subject of the message.
         :param str body: The body of the message. It can be in HTML or text format
         :param list[str] to_recipients: The To: recipients for the message.
+        :param list[str] cc_recipients: The CC: recipients for the message.
+        :param list[str] bcc_recipients: The BCC: recipients for the message.
         :param bool save_to_sent_items: Indicates whether to save the message in Sent Items. Specify it only if
             the parameter is false; default is true
         """
@@ -92,6 +94,12 @@ class User(DirectoryObject):
         message.subject = subject
         message.body = body
         [message.to_recipients.add(Recipient.from_email(email)) for email in to_recipients]
+
+        if bcc_recipients is not None:
+            [message.bcc_recipients.add(Recipient.from_email(email)) for email in bcc_recipients]
+
+        if cc_recipients is not None:
+            [message.cc_recipients.add(Recipient.from_email(email)) for email in cc_recipients]
 
         payload = {
             "message": message,
