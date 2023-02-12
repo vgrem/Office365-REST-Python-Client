@@ -225,6 +225,16 @@ class Message(OutlookItem):
         """The To: recipients for the message."""
         return self.get_property('toRecipients', ClientValueCollection(Recipient), True)
 
+    @property
+    def bcc_recipients(self):
+        """The BCC: recipients for the message."""
+        return self.get_property('bccRecipients', ClientValueCollection(Recipient), True)
+
+    @property
+    def cc_recipients(self):
+        """The CC: recipients for the message."""
+        return self.get_property('ccRecipients', ClientValueCollection(Recipient), True)
+
     def get_property(self, name, default_value=None, track_changes=False):
         if default_value is None:
             property_type_mapping = {
