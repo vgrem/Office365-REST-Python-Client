@@ -40,6 +40,14 @@ class GroupLifecyclePolicy(Entity):
         return return_type
 
     @property
+    def alternate_notification_emails(self):
+        """
+        List of email address to send notifications for groups without owners.
+        Multiple email address can be defined by separating email address with a semicolon.
+        """
+        return self.properties.get("alternateNotificationEmails", None)
+
+    @property
     def managed_group_types(self):
         """The group type for which the expiration policy applies. Possible values are All, Selected or None."""
         return self.properties.get("managedGroupTypes", None)
