@@ -33,6 +33,16 @@ pip install Office365-REST-Python-Client
 >pip install git+https://github.com/vgrem/Office365-REST-Python-Client.git
 >```
 
+# Authentication Credentials
+For the following examples, relevant credentials can be found in the Azure Portal.
+
+Steps to access:
+1. Login to the home page of the Azure Portal
+2. Navigate to "Azure Active Directory" using the three bars in the top right corner of the portal
+3. Select "App registrations" in the navigation panel on the left
+4. Search for and select your relevant application
+5. In the application's "Overview" page, the client id can be found under "Application (client) id"
+6. In the application's "Certificates & Secrets" page, the client secret can be found under the "Value" of the "Client Secrets." If there is no client secret yet, create one here.
 
 # Working with SharePoint API
 
@@ -154,8 +164,8 @@ is used as a default library to obtain tokens to call Microsoft Graph API.
 
 Using [Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/)
 
-> Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
-> in the provided examples
+> Note: access token is getting acquired via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
+> in the provided examples. Other forms of token aquisition can be found here: https://msal-python.readthedocs.io/en/latest/
 
 ```python
 import msal
@@ -222,6 +232,19 @@ client.me.send_mail(
 ).execute_query()
 
 ```
+
+> How to enable sending emails on behalf of another user in your organization: https://learn.microsoft.com/en-us/microsoft-365/solutions/allow-members-to-send-as-or-send-on-behalf-of-group?view=o365-worldwide&viewFallbackFrom=o365-worldwide%3FWT.mc_id%3D365AdminCSH_globalsearch
+
+Additional examples:
+
+-  [download a message](examples/outlook/download_messages.py) 
+-  [list messages](examples/outlook/list_message.py)
+-  [move messages to a different folder](examples/outlook/move_message.py)
+-  [search messages](examples/outlook/search_message.py)   
+-  [send messages](examples/outlook/send_message.py)
+-  [send messages with attachments](examples/outlook/send_message_with_attachment.py) 
+  
+Refer to [examples section](examples/outlook) for other scenarios
 
 
 # Working with OneDrive API
@@ -297,8 +320,16 @@ def download_files(remote_folder, local_path):
                 drive_item.download(local_file).execute_query()
 ```
 
+Additional examples:
 
-Refer [OneDrive examples section](examples/onedrive) for a more examples.
+-  [create list column](examples/onedrive/create_list_column.py) 
+-  [download file](examples/onedrive/download_file_default.py)
+-  [export files](examples/onedrive/export_files.py)
+-  [import files](examples/onedrive/import_files.py)   
+-  [list drives](examples/onedrive/list_drives.py)
+-  [list files](examples/onedrive/list_files.py)
+
+Refer to [OneDrive examples section](examples/onedrive) for more examples.
 
 
 # Working with Microsoft Teams API
@@ -320,6 +351,16 @@ from office365.graph_client import GraphClient
 client = GraphClient(acquire_token_func)
 new_team = client.groups["{group_id}"].add_team().execute_query_retry()
 ```
+
+Additional examples:
+
+-  [create a team](examples/teams/create_team.py) 
+-  [create team from group](examples/teams/create_team_from_group.py)
+-  [list all teams](examples/teams/list_all_teams.py)
+-  [list my teams](examples/teams/list_my_teams.py)   
+-  [send messages](examples/teams/send_message.py)
+  
+Refer to [examples section](examples/teams) for other scenarios
 
 # Working with Microsoft Onenote API
 
