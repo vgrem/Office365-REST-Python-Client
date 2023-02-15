@@ -76,11 +76,11 @@ class DriveItem(BaseItem):
             "expirationDateTime": expiration_datetime,
             "password": password
         }
-        permission = Permission(self.context)
-        self.permissions.add_child(permission)
-        qry = ServiceOperationQuery(self, "createLink", None, payload, None, permission)
+        return_type = Permission(self.context)
+        self.permissions.add_child(return_type)
+        qry = ServiceOperationQuery(self, "createLink", None, payload, None, return_type)
         self.context.add_query(qry)
-        return permission
+        return return_type
 
     def follow(self):
         """

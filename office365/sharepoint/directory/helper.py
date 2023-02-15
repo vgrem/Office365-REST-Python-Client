@@ -22,15 +22,13 @@ class SPHelper(BaseEntity):
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
         :param ClientResult or None result: Client result
         """
-        helper = SPHelper(context)
         if result is None:
             result = ClientResult(context)
         payload = {
             "principalName": principal_name,
             "groupId": group_id
         }
-        qry = ServiceOperationQuery(helper, "IsMemberOf", None, payload, None, result)
-        qry.static = True
+        qry = ServiceOperationQuery(SPHelper(context), "IsMemberOf", None, payload, None, result, True)
         context.add_query(qry)
         return result
 

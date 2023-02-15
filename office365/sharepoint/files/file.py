@@ -561,8 +561,6 @@ class File(AbstractFile):
     def modified_by(self):
         """
         Gets a value that returns the user who last modified the file.
-
-        :rtype: office365.sharepoint.directory.user.User
         """
         return self.properties.get("ModifiedBy", User(self.context, ResourcePath("ModifiedBy", self.resource_path)))
 
@@ -570,8 +568,6 @@ class File(AbstractFile):
     def locked_by_user(self):
         """
         Gets a value that returns the user that owns the current lock on the file.
-
-        :rtype: office365.sharepoint.directory.user.User
         """
         return self.properties.get("LockedByUser", User(self.context, ResourcePath("LockedByUser", self.resource_path)))
 

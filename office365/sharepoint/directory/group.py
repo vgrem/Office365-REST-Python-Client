@@ -1,6 +1,6 @@
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.directory.SPHelper import SPHelper
+from office365.sharepoint.directory.helper import SPHelper
 from office365.sharepoint.directory.members_info import MembersInfo
 
 
@@ -10,7 +10,7 @@ class Group(BaseEntity):
         result = MembersInfo(self.context)
 
         def _user_loaded():
-            from office365.sharepoint.directory.SPHelper import SPHelper
+            from office365.sharepoint.directory.helper import SPHelper
             SPHelper.get_members_info(self.context, self.properties["Id"], row_limit, result)
         self.ensure_property('Id', _user_loaded)
         return result

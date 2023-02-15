@@ -345,6 +345,12 @@ class ClientContext(ClientRuntimeContext):
         return MicroServiceManager(self, ResourcePath("microServiceManager"))
 
     @property
+    def directory_session(self):
+        """Alias to DirectorySession"""
+        from office365.sharepoint.directory.session import DirectorySession
+        return DirectorySession(self)
+
+    @property
     def models(self):
         """Alias to collection of SPMachineLearningModel"""
         from office365.sharepoint.contentcenter.machinelearning.models.collection import SPMachineLearningModelCollection
