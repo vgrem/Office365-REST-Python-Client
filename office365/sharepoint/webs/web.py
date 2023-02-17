@@ -285,14 +285,17 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
-    def list_acs_service_principals(self):
+    def get_acs_service_principals(self, app_ids=None):
         """
         List service principals
+        :para, list[str] appIds:
         """
+        payload = {"appIds": app_ids}
         return_type = ClientResult(self.context, ClientValueCollection(SPACSServicePrincipalInfo))
-        qry = ServiceOperationQuery(self, "ListACSServicePrincipals", None, None, None, return_type)
+        qry = ServiceOperationQuery(self, "GetACSServicePrincipals", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
+
 
     def sync_flow_instances(self, target_web_url):
         """
@@ -315,10 +318,10 @@ class Web(SecurableObject):
         return return_type
 
     def get_all_client_side_components(self):
-        result = ClientResult(self.context, str())
-        qry = ServiceOperationQuery(self, "GetAllClientSideComponents", None, None, None, result)
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(self, "GetAllClientSideComponents", None, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def get_app_bdc_catalog(self):
         """

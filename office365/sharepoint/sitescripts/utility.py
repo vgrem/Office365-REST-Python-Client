@@ -22,6 +22,20 @@ class SiteScriptUtility(BaseEntity):
         super(SiteScriptUtility, self).__init__(context, path)
 
     @staticmethod
+    def create_list_design(context, info):
+        """
+        Creates a new list design available to users when they create a new list from the SharePoint start page.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param office365.sharepoint.sitedesigns.creation_info.SiteDesignCreationInfo info:
+        """
+        return_type = ClientResult(context, SiteDesignMetadata())
+        utility = SiteScriptUtility(context)
+        qry = ServiceOperationQuery(utility, "CreateListDesign", None, info, "info", return_type, True)
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
     def add_site_design_task(context, web_url, site_design_id):
         """
         :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
@@ -165,8 +179,7 @@ class SiteScriptUtility(BaseEntity):
         """
         return_type = ClientResult(context, SiteDesignMetadata())
         utility = SiteScriptUtility(context)
-        qry = ServiceOperationQuery(utility, "CreateSiteDesign", None, info, "info", return_type)
-        qry.static = True
+        qry = ServiceOperationQuery(utility, "CreateSiteDesign", None, info, "info", return_type, True)
         context.add_query(qry)
         return return_type
 
