@@ -209,6 +209,7 @@ class ClientObject(object):
 
     @property
     def parent_collection(self):
+        """Parent collection"""
         return self._parent_collection
 
     def to_json(self, json_format=None):

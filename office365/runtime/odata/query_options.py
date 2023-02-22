@@ -1,15 +1,9 @@
 import copy
 
 
-def _normalize(key, value):
-    if key == "select" or key == "expand":
-        return ",".join(value)
-    return value
-
-
 class QueryOptions(object):
 
-    def __init__(self, select=None, expand=None, filter_expr=None, order_by=None, top=None, skip=None):
+    def __init__(self, select=None, expand=None, filter_expr=None, order_by=None, top=None, skip=None, custom=None):
         """
         A query option is a set of query string parameters applied to a resource that can help control the amount
         of data being returned for the resource in the URL
@@ -26,6 +20,7 @@ class QueryOptions(object):
         be included in the result.
         :param int skip: The $skip query option requests the number of items in the queried collection that
         are to be skipped and not included in the result.
+        :param dict custom: A custom query options
         """
         if expand is None:
             expand = []
@@ -37,6 +32,9 @@ class QueryOptions(object):
         self.orderBy = order_by
         self.skip = skip
         self.top = top
+        if custom is None:
+            custom = {}
+        self.custom = custom
 
     @staticmethod
     def build(client_object, properties_to_include=None):
@@ -79,10 +77,21 @@ class QueryOptions(object):
         self.orderBy = None
         self.skip = None
         self.top = None
+        self.custom = {}
 
     def to_url(self):
         """Convert query options to url
         :return: str
         """
-        return '&'.join(['$%s=%s' % (key, _normalize(key, value))
-                         for (key, value) in self.__dict__.items() if value is not None and value])
+        return '&'.join(['$%s=%s' % (key, value) for (key, value) in self])
+
+    def __iter__(self):
+        for k, v in self.__dict__.items():
+            if v:
+                if k == "select" or k == "expand":
+                    yield k, ",".join(v)
+                elif k == "custom":
+                    for c_k, c_v in self.custom.items():
+                        yield c_k, c_v
+                else:
+                    yield k, v

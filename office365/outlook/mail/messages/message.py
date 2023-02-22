@@ -235,6 +235,14 @@ class Message(OutlookItem):
         """The CC: recipients for the message."""
         return self.get_property('ccRecipients', ClientValueCollection(Recipient), True)
 
+    @property
+    def sender(self):
+        """The account that is actually used to generate the message. In most cases, this value is the same as the
+        from property. You can set this property to a different value when sending a message from a shared mailbox,
+        for a shared calendar, or as a delegate. In any case, the value must correspond to the actual mailbox used.
+        Find out more about setting the from and sender properties of a message."""
+        return self.get_property('sender', Recipient())
+
     def get_property(self, name, default_value=None, track_changes=False):
         if default_value is None:
             property_type_mapping = {
