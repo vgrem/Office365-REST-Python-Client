@@ -1,5 +1,5 @@
+from office365.delta_path import DeltaPath
 from office365.entity_collection import EntityCollection
-from office365.runtime.paths.resource_path import ResourcePath
 
 
 class DeltaCollection(EntityCollection):
@@ -19,5 +19,4 @@ class DeltaCollection(EntityCollection):
         Get newly created, updated, or deleted entities (changes)
         """
         return self.properties.get('delta',
-                                   DeltaCollection(self.context, self._item_type,
-                                                   ResourcePath("delta", self.resource_path)))
+                                   DeltaCollection(self.context, self._item_type, DeltaPath(self.resource_path)))

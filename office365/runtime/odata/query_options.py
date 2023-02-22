@@ -67,7 +67,7 @@ class QueryOptions(object):
 
     @property
     def is_empty(self):
-        result = {k: v for (k, v) in self.__dict__.items() if v is not None and v}
+        result = {k: v for (k, v) in self}
         return not result
 
     def reset(self):

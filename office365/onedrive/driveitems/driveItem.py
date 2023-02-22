@@ -1,5 +1,6 @@
 import os
 
+from office365.delta_path import DeltaPath
 from office365.onedrive.driveitems.audio import Audio
 from office365.onedrive.driveitems.geo_coordinates import GeoCoordinates
 from office365.onedrive.driveitems.image import Image
@@ -480,10 +481,8 @@ class DriveItem(BaseItem):
     def children(self):
         """Collection containing Item objects for the immediate children of Item. Only items representing folders
         have children.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('children',
+        return self.properties.get('children',
                                  EntityCollection(self.context, DriveItem, ChildrenPath(self.resource_path)))
 
     @property
@@ -540,7 +539,7 @@ class DriveItem(BaseItem):
     def delta(self):
         """This method allows your app to track changes to a drive item and its children over time."""
         return self.properties.get('delta',
-                                   EntityCollection(self.context, DriveItem, ResourcePath("delta", self.resource_path)))
+                                   EntityCollection(self.context, DriveItem, DeltaPath(self.resource_path)))
 
     @property
     def subscriptions(self):

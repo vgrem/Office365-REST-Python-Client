@@ -150,3 +150,7 @@ class TestSharePointClient(TestCase):
         client = ClientContext(test_site_url).with_credentials(test_user_credentials)
         result = ClientResult(client, StringCollection())
         self.assertIsInstance(result.value, StringCollection)
+
+    def test_18_query_options_is_empty(self):
+        options = QueryOptions()
+        self.assertTrue(options.is_empty)
