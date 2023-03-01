@@ -10,6 +10,7 @@ from office365.onedrive.workbooks.tables.collection import WorkbookTableCollecti
 from office365.onedrive.workbooks.worksheets.collection import WorkbookWorksheetCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
@@ -18,11 +19,11 @@ class Workbook(Entity):
 
     def session_info_resource(self):
         return_type = ClientResult(self.context, WorkbookSessionInfo())
-        qry = ServiceOperationQuery(self, "sessionInfoResource", None, None, None, return_type)
+        qry = FunctionQuery(self, "sessionInfoResource", None, return_type)
         self.context.add_query(qry)
         return return_type
 
-    def create_session(self):
+    def create_session(self, persist_changes=None):
         """
         Create a new workbook session.
 
@@ -34,21 +35,45 @@ class Workbook(Entity):
                 API session. When the Excel session expires, the changes are lost. This mode is useful for apps that
                 need to do analysis or obtain the results of a calculation or a chart image, but not affect the
                 document state.
+
+        :param bool persist_changes: Determines whether persist changes
         """
+        payload = {"persistChanges": persist_changes}
         return_type = ClientResult(self.context, WorkbookSessionInfo())
-        qry = ServiceOperationQuery(self, "createSession", None, None, None, return_type)
+        qry = ServiceOperationQuery(self, "createSession", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 
-    def refresh_session(self):
-        """Use this API to refresh an existing workbook session."""
+    def refresh_session(self, session_id):
+        """Use this API to refresh an existing workbook session.
+
+        :param str session_id: Identifier of the workbook session
+        """
         qry = ServiceOperationQuery(self, "refreshSession")
         self.context.add_query(qry)
+        def _construct_request(request):
+            """
+            :type request: office365.runtime.http.request_options.RequestOptions
+            """
+            request.set_header("workbook-session-id", session_id)
+
+        self.context.before_execute(_construct_request)
         return self
 
-    def close_session(self):
-        """Use this API to close an existing workbook session."""
+    def close_session(self, session_id):
+        """Use this API to close an existing workbook session.
+
+        :param str session_id: Identifier of the workbook session
+        """
         qry = ServiceOperationQuery(self, "closeSession")
+
+        def _construct_request(request):
+            """
+            :type request: office365.runtime.http.request_options.RequestOptions
+            """
+            request.set_header("workbook-session-id", session_id)
+
+        self.context.before_execute(_construct_request)
         self.context.add_query(qry)
         return self
 

@@ -326,12 +326,46 @@
             <Member Name="resourceOwner" Value="6"/>
             <Member Name="unknownFutureValue" Value="7"/>
          </EnumType>
+         <EnumType Name="lobbyBypassScope">
+            <Member Name="organizer" Value="0"/>
+            <Member Name="organization" Value="1"/>
+            <Member Name="organizationAndFederated" Value="2"/>
+            <Member Name="everyone" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+            <Member Name="invited" Value="5"/>
+            <Member Name="organizationExcludingGuests" Value="6"/>
+         </EnumType>
+         <EnumType Name="meetingChatMode">
+            <Member Name="enabled" Value="0"/>
+            <Member Name="disabled" Value="1"/>
+            <Member Name="limited" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="onlineMeetingPresenters">
+            <Member Name="everyone" Value="0"/>
+            <Member Name="organization" Value="1"/>
+            <Member Name="roleIsPresenter" Value="2"/>
+            <Member Name="organizer" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
          <EnumType Name="allowInvitesFrom">
             <Member Name="none" Value="0"/>
             <Member Name="adminsAndGuestInviters" Value="1"/>
             <Member Name="adminsGuestInvitersAndAllMembers" Value="2"/>
             <Member Name="everyone" Value="3"/>
             <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
+         <EnumType Name="appCredentialRestrictionType">
+            <Member Name="passwordAddition" Value="0"/>
+            <Member Name="passwordLifetime" Value="1"/>
+            <Member Name="symmetricKeyAddition" Value="2"/>
+            <Member Name="symmetricKeyLifetime" Value="3"/>
+            <Member Name="customPasswordAddition" Value="4"/>
+            <Member Name="unknownFutureValue" Value="99"/>
+         </EnumType>
+         <EnumType Name="appKeyCredentialRestrictionType">
+            <Member Name="asymmetricKeyLifetime" Value="0"/>
+            <Member Name="unknownFutureValue" Value="99"/>
          </EnumType>
          <EnumType Name="authenticationProtocol">
             <Member Name="wsFed" Value="0"/>
@@ -353,6 +387,12 @@
             <Member Name="acceptIfMfaDoneByFederatedIdp" Value="0"/>
             <Member Name="enforceMfaByFederatedIdp" Value="1"/>
             <Member Name="rejectMfaByFederatedIdp" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="onPremisesDirectorySynchronizationDeletionPreventionType">
+            <Member Name="disabled" Value="0"/>
+            <Member Name="enabledForCount" Value="1"/>
+            <Member Name="enabledForPercentage" Value="2"/>
             <Member Name="unknownFutureValue" Value="3"/>
          </EnumType>
          <EnumType Name="partnerTenantType">
@@ -2065,6 +2105,7 @@
             <Member Name="drive" Value="8"/>
             <Member Name="unknownFutureValue" Value="9"/>
             <Member Name="chatMessage" Value="10"/>
+            <Member Name="person" Value="11"/>
          </EnumType>
          <EnumType Name="searchAlterationType">
             <Member Name="suggestion" Value="0"/>
@@ -3411,15 +3452,6 @@
             <Member Name="skypeForBusinessVoipPhone" Value="3"/>
             <Member Name="unknownFutureValue" Value="4"/>
          </EnumType>
-         <EnumType Name="lobbyBypassScope">
-            <Member Name="organizer" Value="0"/>
-            <Member Name="organization" Value="1"/>
-            <Member Name="organizationAndFederated" Value="2"/>
-            <Member Name="everyone" Value="3"/>
-            <Member Name="unknownFutureValue" Value="4"/>
-            <Member Name="invited" Value="5"/>
-            <Member Name="organizationExcludingGuests" Value="6"/>
-         </EnumType>
          <EnumType Name="mediaDirection">
             <Member Name="inactive" Value="0"/>
             <Member Name="sendOnly" Value="1"/>
@@ -3431,25 +3463,12 @@
             <Member Name="inactive" Value="1"/>
             <Member Name="unknownFutureValue" Value="2"/>
          </EnumType>
-         <EnumType Name="meetingChatMode">
-            <Member Name="enabled" Value="0"/>
-            <Member Name="disabled" Value="1"/>
-            <Member Name="limited" Value="2"/>
-            <Member Name="unknownFutureValue" Value="3"/>
-         </EnumType>
          <EnumType Name="modality">
             <Member Name="audio" Value="1"/>
             <Member Name="video" Value="2"/>
             <Member Name="videoBasedScreenSharing" Value="3"/>
             <Member Name="data" Value="4"/>
             <Member Name="unknownFutureValue" Value="5"/>
-         </EnumType>
-         <EnumType Name="onlineMeetingPresenters">
-            <Member Name="everyone" Value="0"/>
-            <Member Name="organization" Value="1"/>
-            <Member Name="roleIsPresenter" Value="2"/>
-            <Member Name="organizer" Value="3"/>
-            <Member Name="unknownFutureValue" Value="4"/>
          </EnumType>
          <EnumType Name="onlineMeetingRole">
             <Member Name="attendee" Value="0"/>
@@ -4734,6 +4753,7 @@
             <Property Name="tokenEncryptionKeyId" Type="Edm.Guid"/>
             <Property Name="verifiedPublisher" Type="graph.verifiedPublisher"/>
             <Property Name="web" Type="graph.webApplication"/>
+            <NavigationProperty Name="appManagementPolicies" Type="Collection(graph.appManagementPolicy)"/>
             <NavigationProperty Name="createdOnBehalfOf" Type="graph.directoryObject"/>
             <NavigationProperty Name="extensionProperties" Type="Collection(graph.extensionProperty)" ContainsTarget="true"/>
             <NavigationProperty Name="federatedIdentityCredentials" Type="Collection(graph.federatedIdentityCredential)" ContainsTarget="true"/>
@@ -4790,6 +4810,7 @@
             <Property Name="tags" Type="Collection(Edm.String)" Nullable="false"/>
             <Property Name="tokenEncryptionKeyId" Type="Edm.Guid"/>
             <Property Name="verifiedPublisher" Type="graph.verifiedPublisher"/>
+            <NavigationProperty Name="appManagementPolicies" Type="Collection(graph.appManagementPolicy)"/>
             <NavigationProperty Name="appRoleAssignedTo" Type="Collection(graph.appRoleAssignment)" ContainsTarget="true"/>
             <NavigationProperty Name="appRoleAssignments" Type="Collection(graph.appRoleAssignment)" ContainsTarget="true"/>
             <NavigationProperty Name="claimsMappingPolicies" Type="Collection(graph.claimsMappingPolicy)"/>
@@ -4909,6 +4930,15 @@
             <Property Name="redirectUris" Type="Collection(Edm.String)" Nullable="false"/>
             <Property Name="redirectUriSettings" Type="Collection(graph.redirectUriSettings)" Nullable="false"/>
          </ComplexType>
+         <EntityType Name="policyBase" BaseType="graph.directoryObject" Abstract="true">
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="appManagementPolicy" BaseType="graph.policyBase">
+            <Property Name="isEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="restrictions" Type="graph.appManagementConfiguration"/>
+            <NavigationProperty Name="appliesTo" Type="Collection(graph.directoryObject)"/>
+         </EntityType>
          <EntityType Name="extensionProperty" BaseType="graph.directoryObject" OpenType="true">
             <Property Name="appDisplayName" Type="Edm.String"/>
             <Property Name="dataType" Type="Edm.String" Nullable="false"/>
@@ -4922,10 +4952,6 @@
             <Property Name="issuer" Type="Edm.String" Nullable="false"/>
             <Property Name="name" Type="Edm.String" Nullable="false"/>
             <Property Name="subject" Type="Edm.String" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="policyBase" BaseType="graph.directoryObject" Abstract="true">
-            <Property Name="description" Type="Edm.String"/>
-            <Property Name="displayName" Type="Edm.String"/>
          </EntityType>
          <EntityType Name="stsPolicy" BaseType="graph.policyBase" Abstract="true">
             <Property Name="definition" Type="Collection(Edm.String)" Nullable="false"/>
@@ -5066,9 +5092,11 @@
             <NavigationProperty Name="authenticationMethodsPolicy" Type="graph.authenticationMethodsPolicy" ContainsTarget="true"/>
             <NavigationProperty Name="authenticationFlowsPolicy" Type="graph.authenticationFlowsPolicy" ContainsTarget="true"/>
             <NavigationProperty Name="activityBasedTimeoutPolicies" Type="Collection(graph.activityBasedTimeoutPolicy)" ContainsTarget="true"/>
+            <NavigationProperty Name="appManagementPolicies" Type="Collection(graph.appManagementPolicy)" ContainsTarget="true"/>
             <NavigationProperty Name="authorizationPolicy" Type="graph.authorizationPolicy" ContainsTarget="true"/>
             <NavigationProperty Name="claimsMappingPolicies" Type="Collection(graph.claimsMappingPolicy)" ContainsTarget="true"/>
             <NavigationProperty Name="crossTenantAccessPolicy" Type="graph.crossTenantAccessPolicy" ContainsTarget="true"/>
+            <NavigationProperty Name="defaultAppManagementPolicy" Type="graph.tenantAppManagementPolicy" ContainsTarget="true"/>
             <NavigationProperty Name="homeRealmDiscoveryPolicies" Type="Collection(graph.homeRealmDiscoveryPolicy)" ContainsTarget="true"/>
             <NavigationProperty Name="permissionGrantPolicies" Type="Collection(graph.permissionGrantPolicy)" ContainsTarget="true"/>
             <NavigationProperty Name="tokenIssuancePolicies" Type="Collection(graph.tokenIssuancePolicy)" ContainsTarget="true"/>
@@ -5099,6 +5127,11 @@
             <Property Name="allowedCloudEndpoints" Type="Collection(Edm.String)" Nullable="false"/>
             <NavigationProperty Name="default" Type="graph.crossTenantAccessPolicyConfigurationDefault" ContainsTarget="true"/>
             <NavigationProperty Name="partners" Type="Collection(graph.crossTenantAccessPolicyConfigurationPartner)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="tenantAppManagementPolicy" BaseType="graph.policyBase">
+            <Property Name="applicationRestrictions" Type="graph.appManagementConfiguration"/>
+            <Property Name="isEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="servicePrincipalRestrictions" Type="graph.appManagementConfiguration"/>
          </EntityType>
          <EntityType Name="permissionGrantPolicy" BaseType="graph.policyBase">
             <NavigationProperty Name="excludes" Type="Collection(graph.permissionGrantConditionSet)" ContainsTarget="true"/>
@@ -5986,6 +6019,10 @@
             <Property Name="identityProviderType" Type="Edm.String"/>
          </EntityType>
          <EntityType Name="userFlowLanguagePage" BaseType="graph.entity" HasStream="true"/>
+         <ComplexType Name="lobbyBypassSettings">
+            <Property Name="isDialInBypassEnabled" Type="Edm.Boolean"/>
+            <Property Name="scope" Type="graph.lobbyBypassScope"/>
+         </ComplexType>
          <ComplexType Name="alternativeSecurityId">
             <Property Name="identityProvider" Type="Edm.String"/>
             <Property Name="key" Type="Edm.Binary"/>
@@ -5994,6 +6031,20 @@
          <ComplexType Name="preAuthorizedApplication">
             <Property Name="appId" Type="Edm.String"/>
             <Property Name="delegatedPermissionIds" Type="Collection(Edm.String)" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="appManagementConfiguration">
+            <Property Name="keyCredentials" Type="Collection(graph.keyCredentialConfiguration)"/>
+            <Property Name="passwordCredentials" Type="Collection(graph.passwordCredentialConfiguration)"/>
+         </ComplexType>
+         <ComplexType Name="keyCredentialConfiguration">
+            <Property Name="maxLifetime" Type="Edm.Duration"/>
+            <Property Name="restrictForAppsCreatedAfterDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="restrictionType" Type="graph.appKeyCredentialRestrictionType"/>
+         </ComplexType>
+         <ComplexType Name="passwordCredentialConfiguration">
+            <Property Name="maxLifetime" Type="Edm.Duration"/>
+            <Property Name="restrictForAppsCreatedAfterDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="restrictionType" Type="graph.appCredentialRestrictionType"/>
          </ComplexType>
          <ComplexType Name="certificateAuthority">
             <Property Name="certificate" Type="Edm.Binary" Nullable="false"/>
@@ -6048,6 +6099,34 @@
             <Property Name="enabled" Type="Edm.Int32"/>
             <Property Name="suspended" Type="Edm.Int32"/>
             <Property Name="warning" Type="Edm.Int32"/>
+         </ComplexType>
+         <ComplexType Name="onPremisesAccidentalDeletionPrevention">
+            <Property Name="alertThreshold" Type="Edm.Int32"/>
+            <Property Name="synchronizationPreventionType" Type="graph.onPremisesDirectorySynchronizationDeletionPreventionType"/>
+         </ComplexType>
+         <ComplexType Name="onPremisesDirectorySynchronizationConfiguration">
+            <Property Name="accidentalDeletionPrevention" Type="graph.onPremisesAccidentalDeletionPrevention"/>
+         </ComplexType>
+         <ComplexType Name="onPremisesDirectorySynchronizationFeature">
+            <Property Name="blockCloudObjectTakeoverThroughHardMatchEnabled" Type="Edm.Boolean"/>
+            <Property Name="blockSoftMatchEnabled" Type="Edm.Boolean"/>
+            <Property Name="bypassDirSyncOverridesEnabled" Type="Edm.Boolean"/>
+            <Property Name="cloudPasswordPolicyForPasswordSyncedUsersEnabled" Type="Edm.Boolean"/>
+            <Property Name="concurrentCredentialUpdateEnabled" Type="Edm.Boolean"/>
+            <Property Name="concurrentOrgIdProvisioningEnabled" Type="Edm.Boolean"/>
+            <Property Name="deviceWritebackEnabled" Type="Edm.Boolean"/>
+            <Property Name="directoryExtensionsEnabled" Type="Edm.Boolean"/>
+            <Property Name="fopeConflictResolutionEnabled" Type="Edm.Boolean"/>
+            <Property Name="groupWriteBackEnabled" Type="Edm.Boolean"/>
+            <Property Name="passwordSyncEnabled" Type="Edm.Boolean"/>
+            <Property Name="passwordWritebackEnabled" Type="Edm.Boolean"/>
+            <Property Name="quarantineUponProxyAddressesConflictEnabled" Type="Edm.Boolean"/>
+            <Property Name="quarantineUponUpnConflictEnabled" Type="Edm.Boolean"/>
+            <Property Name="softMatchOnUpnEnabled" Type="Edm.Boolean"/>
+            <Property Name="synchronizeUpnForManagedUsersEnabled" Type="Edm.Boolean"/>
+            <Property Name="unifiedGroupWritebackEnabled" Type="Edm.Boolean"/>
+            <Property Name="userForcePasswordChangeOnLogonEnabled" Type="Edm.Boolean"/>
+            <Property Name="userWritebackEnabled" Type="Edm.Boolean"/>
          </ComplexType>
          <ComplexType Name="optionalClaim">
             <Property Name="additionalProperties" Type="Collection(Edm.String)"/>
@@ -6203,6 +6282,11 @@
             <NavigationProperty Name="administrativeUnits" Type="Collection(graph.administrativeUnit)" ContainsTarget="true"/>
             <NavigationProperty Name="deletedItems" Type="Collection(graph.directoryObject)" ContainsTarget="true"/>
             <NavigationProperty Name="federationConfigurations" Type="Collection(graph.identityProviderBase)" ContainsTarget="true"/>
+            <NavigationProperty Name="onPremisesSynchronization" Type="Collection(graph.onPremisesDirectorySynchronization)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="onPremisesDirectorySynchronization" BaseType="graph.entity">
+            <Property Name="configuration" Type="graph.onPremisesDirectorySynchronizationConfiguration"/>
+            <Property Name="features" Type="graph.onPremisesDirectorySynchronizationFeature" Nullable="false"/>
          </EntityType>
          <EntityType Name="directoryObjectPartnerReference" BaseType="graph.directoryObject">
             <Property Name="description" Type="Edm.String"/>
@@ -12415,10 +12499,6 @@
             <Property Name="joinMeetingId" Type="Edm.String"/>
             <Property Name="passcode" Type="Edm.String"/>
          </ComplexType>
-         <ComplexType Name="lobbyBypassSettings">
-            <Property Name="isDialInBypassEnabled" Type="Edm.Boolean"/>
-            <Property Name="scope" Type="graph.lobbyBypassScope"/>
-         </ComplexType>
          <ComplexType Name="mediaInfo">
             <Property Name="resourceId" Type="Edm.String"/>
             <Property Name="uri" Type="Edm.String" Nullable="false"/>
@@ -12916,6 +12996,9 @@
             <NavigationProperty Name="team" Type="graph.team"/>
          </EntityType>
          <EntityType Name="associatedTeamInfo" BaseType="graph.teamInfo"/>
+         <EntityType Name="azureCommunicationServicesUserConversationMember" BaseType="graph.conversationMember">
+            <Property Name="azureCommunicationServicesId" Type="Edm.String"/>
+         </EntityType>
          <EntityType Name="chatMessage" BaseType="graph.entity">
             <Property Name="attachments" Type="Collection(graph.chatMessageAttachment)"/>
             <Property Name="body" Type="graph.itemBody" Nullable="false"/>
@@ -12967,6 +13050,9 @@
             <Property Name="contentType" Type="Edm.String"/>
          </EntityType>
          <EntityType Name="chatMessageHostedContent" BaseType="graph.teamworkHostedContent"/>
+         <EntityType Name="deletedTeam" BaseType="graph.entity">
+            <NavigationProperty Name="channels" Type="Collection(graph.channel)" ContainsTarget="true"/>
+         </EntityType>
          <EntityType Name="microsoftAccountUserConversationMember" BaseType="graph.conversationMember">
             <Property Name="userId" Type="Edm.String"/>
          </EntityType>
@@ -12991,6 +13077,7 @@
          <EntityType Name="teamworkBot" BaseType="graph.entity"/>
          <EntityType Name="teamwork" BaseType="graph.entity">
             <NavigationProperty Name="workforceIntegrations" Type="Collection(graph.workforceIntegration)" ContainsTarget="true"/>
+            <NavigationProperty Name="deletedTeams" Type="Collection(graph.deletedTeam)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="workforceIntegration" BaseType="graph.changeTrackedEntity">
             <Property Name="apiVersion" Type="Edm.Int32"/>
@@ -13512,9 +13599,10 @@
             <Parameter Name="types" Type="Collection(Edm.String)" Unicode="false"/>
             <ReturnType Type="Collection(graph.directoryObject)" Nullable="false"/>
          </Action>
-         <Action Name="resetToSystemDefault" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.crossTenantAccessPolicyConfigurationDefault" Nullable="false"/>
-         </Action>
+         <Function Name="delta" IsBound="true">
+            <Parameter Name="bindingParameter" Type="Collection(graph.directoryObject)"/>
+            <ReturnType Type="Collection(graph.directoryObject)"/>
+         </Function>
          <Function Name="delta" IsBound="true">
             <Parameter Name="bindingParameter" Type="Collection(graph.administrativeUnit)"/>
             <ReturnType Type="Collection(graph.administrativeUnit)"/>
@@ -13618,6 +13706,9 @@
             <Parameter Name="bindingParameter" Type="Collection(graph.todoTaskList)"/>
             <ReturnType Type="Collection(graph.todoTaskList)"/>
          </Function>
+         <Action Name="resetToSystemDefault" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.crossTenantAccessPolicyConfigurationDefault" Nullable="false"/>
+         </Action>
          <Action Name="setUpFeedbackResourcesFolder" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.educationAssignment"/>
             <ReturnType Type="graph.educationAssignment"/>
@@ -16366,10 +16457,10 @@
             <ReturnType Type="graph.workbookTableRow"/>
          </Function>
          <Action Name="protect" IsBound="true">
-            <Parameter Name="bindparameter" Type="graph.workbookWorksheetProtection"/>
+            <Parameter Name="bindparameter" Type="graph."/>
             <Parameter Name="options" Type="graph.workbookWorksheetProtectionOptions"/>
          </Action>
-         <Action Name="unprotect" IsBound="true">
+         <Action Name="unprotect" IsBound="true">workbookWorksheetProtection
             <Parameter Name="bindparameter" Type="graph.workbookWorksheetProtection"/>
          </Action>
          <Action Name="refresh" IsBound="true">
@@ -18219,6 +18310,10 @@
             <Parameter Name="bindingParameter" Type="Collection(graph.chat)"/>
             <ReturnType Type="Collection(graph.chatMessage)"/>
          </Function>
+         <Function Name="getAllMessages" IsBound="true" EntitySetPath="bindingParameter/channels/messages">
+            <Parameter Name="bindingParameter" Type="Collection(graph.deletedTeam)"/>
+            <ReturnType Type="Collection(graph.chatMessage)"/>
+         </Function>
          <Action Name="approve" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.scheduleChangeRequest"/>
             <Parameter Name="message" Type="Edm.String" Unicode="false"/>
@@ -18247,6 +18342,7 @@
             <EntitySet Name="authenticationMethodConfigurations" EntityType="microsoft.graph.authenticationMethodConfiguration"/>
             <EntitySet Name="identityProviders" EntityType="microsoft.graph.identityProvider"/>
             <EntitySet Name="applications" EntityType="microsoft.graph.application">
+               <NavigationPropertyBinding Path="appManagementPolicies" Target="policies/appManagementPolicies"/>
                <NavigationPropertyBinding Path="createdOnBehalfOf" Target="directoryObjects"/>
                <NavigationPropertyBinding Path="owners" Target="directoryObjects"/>
             </EntitySet>
@@ -18290,6 +18386,7 @@
             <EntitySet Name="permissionGrants" EntityType="microsoft.graph.resourceSpecificPermissionGrant"/>
             <EntitySet Name="scopedRoleMemberships" EntityType="microsoft.graph.scopedRoleMembership"/>
             <EntitySet Name="servicePrincipals" EntityType="microsoft.graph.servicePrincipal">
+               <NavigationPropertyBinding Path="appManagementPolicies" Target="policies/appManagementPolicies"/>
                <NavigationPropertyBinding Path="createdObjects" Target="directoryObjects"/>
                <NavigationPropertyBinding Path="memberOf" Target="directoryObjects"/>
                <NavigationPropertyBinding Path="oauth2PermissionGrants" Target="oauth2PermissionGrants"/>
@@ -20901,6 +20998,11 @@
             <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="true"/>
          </Annotations>
          <Annotations Target="microsoft.graph.directoryObject">
+            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
+               <Record>
+                  <PropertyValue Property="Supported" Bool="true"/>
+               </Record>
+            </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
                <Record>
                   <PropertyValue Property="Countable" Bool="false"/>
