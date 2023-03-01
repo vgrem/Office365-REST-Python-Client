@@ -10,7 +10,7 @@ from office365.directory.permissions.grants.resource_specific import ResourceSpe
 from office365.entity_collection import EntityCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onenote.onenote import Onenote
-from office365.outlook.calendar.event import Event
+from office365.outlook.calendar.events.event import Event
 from office365.outlook.mail.conversation_thread import ConversationThread
 from office365.planner.group import PlannerGroup
 from office365.runtime.client_result import ClientResult

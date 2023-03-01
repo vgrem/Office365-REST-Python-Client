@@ -1,7 +1,8 @@
+from office365.delta_collection import DeltaCollection
 from office365.directory.extensions.extended_property import SingleValueLegacyExtendedProperty
 from office365.entity_collection import EntityCollection
-from office365.outlook.calendar.attendee import Attendee
 from office365.directory.extensions.extension import Extension
+from office365.outlook.calendar.attendees.attendee import Attendee
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.outlook.calendar.email_address import EmailAddress
 from office365.outlook.item import OutlookItem
@@ -37,7 +38,7 @@ class Event(OutlookItem):
 
         The action moves the event to the Deleted Items folder. The organizer can also cancel an occurrence
         of a recurring meeting by providing the occurrence event ID.
-        An attendee calling this action gets an error (HTTP 400 Bad Request), with the following error message:
+        An attendees calling this action gets an error (HTTP 400 Bad Request), with the following error message:
             Your request can't be completed. You need to be an organizer to cancel a meeting.
 
         :param str comment: Text included in the response.
@@ -224,7 +225,7 @@ class Event(OutlookItem):
     def instances(self):
         """The collection of open extensions defined for the event. Nullable."""
         return self.properties.get('instances',
-                                   EntityCollection(self.context, Event, ResourcePath("instances", self.resource_path)))
+                                   DeltaCollection(self.context, Event, ResourcePath("instances", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:

@@ -1,8 +1,8 @@
-from office365.entity_collection import EntityCollection
+from office365.delta_collection import DeltaCollection
 from office365.todo.task_list import TodoTaskList
 
 
-class TodoTaskListCollection(EntityCollection):
+class TodoTaskListCollection(DeltaCollection):
 
     def __init__(self, context, resource_path=None):
         super(TodoTaskListCollection, self).__init__(context, TodoTaskList, resource_path)

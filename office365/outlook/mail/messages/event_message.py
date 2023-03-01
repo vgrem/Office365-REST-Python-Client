@@ -12,7 +12,7 @@ class EventMessage(Message):
         """The event associated with the event message. The assumption for attendees or room resources is that
         the Calendar Attendant is set to automatically update the calendar with an event when meeting request event
         messages arrive. Navigation property. Read-only."""
-        from office365.outlook.calendar.event import Event
+        from office365.outlook.calendar.events.event import Event
         return self.properties.get('event',
                                    Event(self.context, ResourcePath("event", self.resource_path)))
 

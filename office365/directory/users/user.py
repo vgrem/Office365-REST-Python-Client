@@ -9,12 +9,12 @@ from office365.directory.permissions.grants.oauth2 import OAuth2PermissionGrant
 from office365.directory.users.settings import UserSettings
 from office365.onedrive.sites.site import Site
 from office365.onenote.onenote import Onenote
-from office365.outlook.calendar.attendee_base import AttendeeBase
+from office365.outlook.calendar.attendees.base import AttendeeBase
 from office365.outlook.calendar.calendar import Calendar
 from office365.outlook.calendar.group import CalendarGroup
-from office365.outlook.calendar.event import Event
-from office365.outlook.calendar.meeting_time_suggestions_result import MeetingTimeSuggestionsResult
-from office365.outlook.calendar.reminder import Reminder
+from office365.outlook.calendar.events.event import Event
+from office365.outlook.calendar.meetingtimes.suggestions_result import MeetingTimeSuggestionsResult
+from office365.outlook.calendar.events.reminder import Reminder
 from office365.directory.licenses.assigned_license import AssignedLicense
 from office365.directory.object import DirectoryObject
 from office365.directory.object_collection import DirectoryObjectCollection
@@ -122,7 +122,7 @@ class User(DirectoryObject):
 
     def find_meeting_times(self, attendees=None, location_constraint=None):
         """
-        Suggest meeting times and locations based on organizer and attendee availability, and time or location
+        Suggest meeting times and locations based on organizer and attendees availability, and time or location
         constraints specified as parameters.
 
         If findMeetingTimes cannot return any meeting suggestions, the response would indicate a reason in the
@@ -134,7 +134,7 @@ class User(DirectoryObject):
         that the suggested results may differ over time.
 
         :param list[AttendeeBase] or None attendees: A collection of attendees or resources for the meeting.
-            Since findMeetingTimes assumes that any attendee who is a person is always required, specify required
+            Since findMeetingTimes assumes that any attendees who is a person is always required, specify required
             for a person and resource for a resource in the corresponding type property. An empty collection causes
             findMeetingTimes to look for free time slots for only the organizer. Optional.
         :param office365.outlook.calendar.location_constraint.LocationConstraint or None location_constraint:
@@ -145,10 +145,10 @@ class User(DirectoryObject):
             "attendees": ClientValueCollection(AttendeeBase, attendees),
             "locationConstraint": location_constraint
         }
-        result = ClientResult(self.context, MeetingTimeSuggestionsResult())
-        qry = ServiceOperationQuery(self, "findMeetingTimes", None, payload, None, result)
+        return_type = ClientResult(self.context, MeetingTimeSuggestionsResult())
+        qry = ServiceOperationQuery(self, "findMeetingTimes", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def get_calendar_view(self, start_dt, end_dt):
         """Get the occurrences, exceptions, and single instances of events in a calendar view defined by a time range,
