@@ -1,12 +1,12 @@
 import os
 
-from examples import acquire_token_by_client_credentials, test_user_principal_name_alt
+from examples import acquire_token_by_client_credentials, sample_user_principal_name_alt
 from office365.graph_client import GraphClient
 
 
 client = GraphClient(acquire_token_by_client_credentials)
 
-remote_drive = client.users[test_user_principal_name_alt].drive.root.get_by_path("archive")
+remote_drive = client.users[sample_user_principal_name_alt].drive.root.get_by_path("archive")
 
 local_path = "../../tests/data/SharePoint User Guide.docx"
 # local_path = "../data/countries.json"

@@ -7,7 +7,7 @@ https://developer.microsoft.com/en-us/office/blogs/controlling-app-access-on-spe
 """
 import sys
 
-from examples import acquire_token_by_client_credentials, test_user_principal_name_alt
+from examples import acquire_token_by_client_credentials, sample_user_principal_name_alt
 from office365.graph_client import GraphClient
 from office365.onedrive.permissions.permission import Permission
 from office365.sharepoint.client_context import ClientContext
@@ -45,7 +45,7 @@ def assign_site_access(site_url, roles=None, clear_existing=False):
 
 def verify_site_access():
     ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
-    site = ctx.web.site_users.get_by_email(test_user_principal_name_alt).get_personal_site().execute_query()
+    site = ctx.web.site_users.get_by_email(sample_user_principal_name_alt).get_personal_site().execute_query()
     print(site.url)
 
 

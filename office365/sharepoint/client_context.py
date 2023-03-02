@@ -504,6 +504,12 @@ class ClientContext(ClientRuntimeContext):
         return TenantSettings.current(self)
 
     @property
+    def workflow_services_manager(self):
+        """Alias to WorkflowServicesManager"""
+        from office365.sharepoint.workflowservices.manager import WorkflowServicesManager
+        return WorkflowServicesManager.current(self)
+
+    @property
     def work_items(self):
         from office365.sharepoint.contentcenter.machinelearning.workitems.collection import \
             SPMachineLearningWorkItemCollection

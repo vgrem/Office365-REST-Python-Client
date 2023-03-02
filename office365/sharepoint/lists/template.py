@@ -18,10 +18,10 @@ class ListTemplate(BaseEntity):
 
     def get_global_schema_xml(self):
         """Retrieves the global schema.xml file."""
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "GetGlobalSchemaXml", None, None, None, result)
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "GetGlobalSchemaXml", None, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     @property
     def internal_name(self):
