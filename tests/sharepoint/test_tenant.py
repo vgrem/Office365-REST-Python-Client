@@ -1,4 +1,3 @@
-from random import randint
 from unittest import TestCase
 
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -6,23 +5,21 @@ from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
 from office365.sharepoint.tenant.administration.settings_service import TenantAdminSettingsService
 from office365.sharepoint.tenant.administration.sharing_capabilities import SharingCapabilities
-from office365.sharepoint.tenant.cdn_api import TenantCdnApi
-from office365.sharepoint.tenant.management.office365_tenant import Office365Tenant
 from office365.sharepoint.tenant.administration.site_properties import SiteProperties
 from office365.sharepoint.tenant.administration.site_properties_collection import SitePropertiesCollection
 from office365.sharepoint.tenant.administration.tenant import Tenant
+from office365.sharepoint.tenant.cdn_api import TenantCdnApi
+from office365.sharepoint.tenant.management.office365_tenant import Office365Tenant
 from office365.sharepoint.tenant.settings import TenantSettings
-from tests import test_site_url, test_admin_site_url, test_user_credentials, test_team_site_url
+from tests import test_site_url, test_admin_site_url, test_team_site_url, test_admin_credentials
 
 
 class TestTenant(TestCase):
     target_site_props = None  # type: SiteProperties
-    target_site_url = "{base_url}sites/{site_name}".format(base_url=test_site_url,
-                                                           site_name="Site_" + str(randint(0, 10000)))
 
     @classmethod
     def setUpClass(cls):
-        client = ClientContext(test_admin_site_url).with_credentials(test_user_credentials)
+        client = ClientContext(test_admin_site_url).with_credentials(test_admin_credentials)
         cls.tenant = Tenant(client)
         cls.client = client
 
@@ -140,3 +137,7 @@ class TestTenant(TestCase):
     #def test_21_get_onedrive_site_sharing_insights(self):
     #    result = self.tenant.get_onedrive_site_sharing_insights(1).execute_query()
     #    self.assertIsNotNone(result.value)
+
+    def test_22_get_home_site_url(self):
+        result = self.tenant.get_home_site_url().execute_query()
+        self.assertIsNotNone(result.value)

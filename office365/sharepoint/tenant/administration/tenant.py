@@ -114,13 +114,17 @@ class Tenant(BaseEntity):
         self.context.add_query(qry)
         return return_type
 
-    def remove_home_site(self):
+    def remove_home_site(self, home_site_url):
         """
+        Remove home site
+
+        :param str home_site_url:
         """
-        return_type = ClientResult(self.context, str())
-        qry = ServiceOperationQuery(self, "RemoveSPHSite", None, None, None, return_type)
+        payload = {"homeSiteUrl": home_site_url}
+        qry = ServiceOperationQuery(self, "RemoveHomeSite", None, payload)
         self.context.add_query(qry)
-        return return_type
+        return self
+
 
     def has_valid_education_license(self):
         """"""
