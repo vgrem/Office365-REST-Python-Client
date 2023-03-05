@@ -10,16 +10,16 @@ folder_item = client.me.drive.root.get_by_path("archive")
 chunk_size = 5 * 1024 * 1024
 
 
-def upload_file(local_path, remove_folder):
+def upload_file(local_path, remote_folder):
     """
     :type local_path: str
-    :type remove_folder: office365.onedrive.driveitems.driveItem.DriveItem
+    :type remote_folder: office365.onedrive.driveitems.driveItem.DriveItem
     """
 
     def print_progress(range_pos):
         print("{0} bytes uploaded".format(range_pos))
 
-    remote_file = remove_folder.resumable_upload(local_path, chunk_size=chunk_size,
+    remote_file = remote_folder.resumable_upload(local_path, chunk_size=chunk_size,
                                                  chunk_uploaded=print_progress).get().execute_query()
     print(f"File {remote_file.web_url} has been uploaded")
 
