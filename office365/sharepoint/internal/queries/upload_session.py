@@ -20,18 +20,21 @@ def create_upload_session_query_ex(binding_type, path_or_file, chunk_size, chunk
         return create_upload_session_query(binding_type, f, chunk_size, chunk_uploaded, True, **kwargs)
 
 
-def create_upload_session_query(binding_type, file_object, chunk_size, chunk_uploaded, force_close=False, **kwargs):
+def create_upload_session_query(binding_type, file_object, chunk_size, chunk_uploaded, force_close=False,
+                                file_size=None, file_name=None, **kwargs):
     """
     :type binding_type: office365.sharepoint.files.collection.FileCollection
     :type file_object: typing.IO
     :type chunk_size: int
     :type force_close: bool
     :type chunk_uploaded: (int, *)->None
+    :type file_size: int
+    :type file_name: str
     """
 
     upload_id = str(uuid.uuid4())
-    file_size = os.fstat(file_object.fileno()).st_size
-    file_name = os.path.basename(file_object.name)
+    file_size = file_size if file_size else os.fstat(file_object.fileno()).st_size
+    file_name = file_name if file_name else os.path.basename(file_object.name)
 
     def _read_next():
         return file_object.read(chunk_size)
