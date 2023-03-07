@@ -21,7 +21,7 @@ class TestGraphClient(GraphTestCase):
 
     def test3_build_url_resource_path(self):
         path = UrlPath("Sample.docx", ResourcePath("root", ResourcePath("drive", self.client.me.resource_path)))
-        self.assertEqual(path.to_url(), "/me/drive/root:/Sample.docx:/")
+        self.assertEqual(str(path), "/me/drive/root:/Sample.docx:/")
 
     def test4_build_url_nested_resource_path(self):
         parent_path = ResourcePath("root", ResourcePath("drive", self.client.me.resource_path))
