@@ -5,6 +5,7 @@ from office365.directory.authentication.authentication import Authentication
 from office365.directory.extensions.extension import Extension
 from office365.directory.insights.office_graph import OfficeGraphInsights
 from office365.directory.licenses.assigned_plan import AssignedPlan
+from office365.directory.licenses.assignment_state import LicenseAssignmentState
 from office365.directory.permissions.grants.oauth2 import OAuth2PermissionGrant
 from office365.directory.users.settings import UserSettings
 from office365.onedrive.sites.site import Site
@@ -320,6 +321,14 @@ class User(DirectoryObject):
         or self-service sign-up using email verification (EmailVerified). Read-only.
         """
         return self.properties.get('creationType', None)
+
+    @property
+    def license_assignment_states(self):
+        """
+        State of license assignments for this user. Also indicates licenses that are directly-assigned and those
+        that the user has inherited through group memberships.
+        """
+        return self.properties.get('licenseAssignmentStates', ClientValueCollection(LicenseAssignmentState))
 
     @property
     def mail(self):

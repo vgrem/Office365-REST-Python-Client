@@ -164,7 +164,7 @@ class ServicePrincipal(DirectoryObject):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
-                "app_role_assigned_to": self.app_role_assigned_to,
+                "appRoleAssignedTo": self.app_role_assigned_to,
                 "created_objects": self.created_objects,
                 "oauth2PermissionScopes": self.oauth2_permission_scopes,
                 "ownedObjects": self.owned_objects,

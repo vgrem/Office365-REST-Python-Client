@@ -1,3 +1,4 @@
+from office365.directory.audit.signins.location import SignInLocation
 from office365.directory.audit.signins.status import SignInStatus
 from office365.entity import Entity
 
@@ -6,6 +7,14 @@ class SignIn(Entity):
     """Details user and application sign-in activity for a tenant (directory).
     You must have an Azure AD Premium P1 or P2 license to download sign-in logs using the Microsoft Graph API.
     """
+
+    @property
+    def location(self):
+        """
+        Provides the city, state, and country code where the sign-in originated.
+        Supports $filter (eq and startsWith operators only) on city, state, and countryOrRegion properties.
+        """
+        return self.properties.get("status", SignInLocation())
 
     @property
     def user_id(self):

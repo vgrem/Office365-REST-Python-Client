@@ -1,9 +1,6 @@
 from unittest import TestCase
 
-import msal
-
 from office365.graph_client import GraphClient
-from tests import load_settings
 from tests.graph_case import acquire_token_by_client_credentials
 
 

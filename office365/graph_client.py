@@ -5,6 +5,7 @@ from office365.directory.applications.template import ApplicationTemplate
 from office365.directory.applications.service_principal import ServicePrincipal
 from office365.directory.audit.log_root import AuditLogRoot
 from office365.directory.directory import Directory
+from office365.directory.domains.domain import Domain
 from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.groups.collection import GroupCollection
 from office365.directory.groups.lifecycle_policy import GroupLifecyclePolicy
@@ -129,6 +130,11 @@ class GraphClient(ClientRuntimeContext):
     def users(self):
         """Get users"""
         return UserCollection(self, ResourcePath("users"))
+
+    @property
+    def domains(self):
+        """Alias to domains"""
+        return EntityCollection(self, Domain, ResourcePath("domains"))
 
     @property
     def groups(self):
