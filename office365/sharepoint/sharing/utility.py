@@ -19,15 +19,15 @@ class SharingUtility(BaseEntity):
         :param str email: The email address of a user.
         :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
         """
-        result = ClientResult(context, UserDirectoryInfo())
+        return_type = ClientResult(context, UserDirectoryInfo())
         payload = {
             "email": email
         }
         utility = SharingUtility(context)
-        qry = ServiceOperationQuery(utility, "GetUserDirectoryInfoByEmail", None, payload, None, result)
+        qry = ServiceOperationQuery(utility, "GetUserDirectoryInfoByEmail", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def validate_same_user_emails(context, primary_email, other_email, principal_name):

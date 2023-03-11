@@ -1,9 +1,10 @@
 from office365.runtime.client_result import ClientResult
-from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.viva.app_configuration import AppConfiguration
+from office365.sharepoint.viva.home import VivaHome
 
 
 class EmployeeEngagement(BaseEntity):
@@ -23,15 +24,14 @@ class EmployeeEngagement(BaseEntity):
 
     def viva_home_configuration(self):
         return_type = ClientResult(self.context, dict())
-        qry = ServiceOperationQuery(self, "VivaHomeConfiguration", None, None, None, return_type)
+        qry = FunctionQuery(self, "VivaHomeConfiguration", None, return_type)
         self.context.add_query(qry)
+        return return_type
 
-        def _construct_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
-            request.method = HttpMethod.Get
-        self.context.before_execute(_construct_request)
+    def viva_home(self):
+        return_type = VivaHome(self.context)
+        qry = ServiceOperationQuery(self, "VivaHome",  return_type=return_type)
+        self.context.add_query(qry)
         return return_type
 
     @property

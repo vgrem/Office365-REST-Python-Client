@@ -131,12 +131,12 @@ print("Web title: {0}".format(web_title))
 The list of examples:
 
 - Working with files
-  - [download a file](examples/sharepoint/files/download_file.py) 
-  - [upload a file](examples/sharepoint/files/upload_file.py)
+  - [download a file](examples/sharepoint/files/download.py) 
+  - [upload a file](examples/sharepoint/files/upload.py)
 
 - Working with lists and list items
   -  [create a list item](examples/sharepoint/lists/data_generator.py)
-  -  [read a list item](examples/sharepoint/lists/read_large_list.py)   
+  -  [read a list item](examples/sharepoint/lists/read_large.py)   
   -  [update a list item](examples/sharepoint/listitems/update_items_batch.py)
   -  [delete a list item](examples/sharepoint/listitems/delete_list_item.py) 
   
@@ -165,7 +165,7 @@ is used as a default library to obtain tokens to call Microsoft Graph API.
 Using [Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/)
 
 > Note: access token is getting acquired via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
-> in the provided examples. Other forms of token aquisition can be found here: https://msal-python.readthedocs.io/en/latest/
+> in the provided examples. Other forms of token acquisition can be found here: https://msal-python.readthedocs.io/en/latest/
 
 ```python
 import msal
@@ -233,9 +233,8 @@ client.me.send_mail(
 
 ```
 
-> How to enable sending emails on behalf of another user in your organization: https://learn.microsoft.com/en-us/microsoft-365/solutions/allow-members-to-send-as-or-send-on-behalf-of-group?view=o365-worldwide&viewFallbackFrom=o365-worldwide%3FWT.mc_id%3D365AdminCSH_globalsearch
 
-Additional examples:
+Additional examples & scenarios:
 
 -  [download a message](examples/outlook/download_messages.py) 
 -  [list messages](examples/outlook/list_message.py)
@@ -243,7 +242,8 @@ Additional examples:
 -  [search messages](examples/outlook/search_message.py)   
 -  [send messages](examples/outlook/send_message.py)
 -  [send messages with attachments](examples/outlook/send_message_with_attachment.py) 
-  
+-  [enable sending emails on behalf of another user in your organization](https://learn.microsoft.com/en-us/microsoft-365/solutions/allow-members-to-send-as-or-send-on-behalf-of-group)
+
 Refer to [examples section](examples/outlook) for other scenarios
 
 
@@ -355,8 +355,8 @@ new_team = client.groups["{group_id}"].add_team().execute_query_retry()
 Additional examples:
 
 -  [create a team](examples/teams/create_team.py) 
--  [create team from group](examples/teams/create_team_from_group.py)
--  [list all teams](examples/teams/list_all_teams.py)
+-  [create team from group](examples/teams/create_from_group.py)
+-  [list all teams](examples/teams/list_all.py)
 -  [list my teams](examples/teams/list_my_teams.py)   
 -  [send messages](examples/teams/send_message.py)
   

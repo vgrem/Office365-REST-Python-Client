@@ -318,6 +318,7 @@ class Web(SecurableObject):
         return return_type
 
     def get_all_client_side_components(self):
+        """"""
         return_type = ClientResult(self.context, str())
         qry = ServiceOperationQuery(self, "GetAllClientSideComponents", None, None, None, return_type)
         self.context.add_query(qry)
@@ -362,10 +363,13 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return self
 
-    def get_lists(self):
+    def get_lists(self, row_limit=100):
+        """
+        :param int row_limit: Specifies a limit for the number of lists in the query that are returned per page
+        """
         return_type = ListCollection(self.context)
         payload = {
-            "getListsParams": GetListsParameters()
+            "getListsParams": GetListsParameters(row_limit=row_limit)
         }
         qry = ServiceOperationQuery(self, "GetLists", None, payload, None, return_type)
         self.context.add_query(qry)
@@ -1324,6 +1328,12 @@ class Web(SecurableObject):
         """
         payload = {"title": title, "source": source}
         qry = ServiceOperationQuery(self, "SetGlobalNavSettings", None, payload)
+        self.context.add_query(qry)
+        return self
+
+    def sync_hub_site_theme(self):
+        """"""
+        qry = ServiceOperationQuery(self, "SyncHubSiteTheme")
         self.context.add_query(qry)
         return self
 
