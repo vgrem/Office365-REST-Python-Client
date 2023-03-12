@@ -1,12 +1,19 @@
 from office365.directory.audit.signins.location import SignInLocation
 from office365.directory.audit.signins.status import SignInStatus
 from office365.entity import Entity
+from office365.intune.devices.detail import DeviceDetail
 
 
 class SignIn(Entity):
     """Details user and application sign-in activity for a tenant (directory).
     You must have an Azure AD Premium P1 or P2 license to download sign-in logs using the Microsoft Graph API.
     """
+
+    @property
+    def device_detail(self):
+        """Device information from where the sign-in occurred; includes device ID, operating system, and browser.
+        Supports $filter (eq and startsWith operators only) on browser and operatingSytem properties."""
+        return self.properties.get("deviceDetail", DeviceDetail())
 
     @property
     def location(self):

@@ -53,6 +53,23 @@ class DirectoryObject(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def check_member_groups(self, group_ids=None):
+        """Check for membership in the specified list of groups. Returns from the list those groups of which
+        the specified group has a direct or transitive membership.
+
+        You can check up to a maximum of 20 groups per request. This function supports Microsoft 365 and other types
+        of groups provisioned in Azure AD. Note that Microsoft 365 groups cannot contain groups.
+        So membership in a Microsoft 365 group is always direct.
+
+        :param list[str] group_ids: A collection that contains the object IDs of the groups in which to
+            check membership. Up to 20 groups may be specified.
+        """
+        return_type = ClientResult(self.context, StringCollection())
+        payload = {"groupIds" : group_ids}
+        qry = ServiceOperationQuery(self, "checkMemberGroups", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def restore(self):
         """
         Restore a recently deleted application, group, servicePrincipal, administrative unit, or user object from

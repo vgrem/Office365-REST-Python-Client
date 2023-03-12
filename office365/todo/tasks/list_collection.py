@@ -1,5 +1,5 @@
 from office365.delta_collection import DeltaCollection
-from office365.todo.task_list import TodoTaskList
+from office365.todo.tasks.list import TodoTaskList
 
 
 class TodoTaskListCollection(DeltaCollection):

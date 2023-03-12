@@ -233,6 +233,12 @@ class File(AbstractFile):
         qry = ServiceOperationQuery(self, "unpublish", {"comment": comment})
         self.context.add_query(qry)
         return self
+    
+    def check_access_and_post_view_audit_event(self):
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(self, "CheckAccessAndPostViewAuditEvent", return_type=return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def checkout(self):
         """Checks out the file from a document library based on the check-out type."""

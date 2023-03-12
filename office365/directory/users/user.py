@@ -8,6 +8,8 @@ from office365.directory.licenses.assigned_plan import AssignedPlan
 from office365.directory.licenses.assignment_state import LicenseAssignmentState
 from office365.directory.permissions.grants.oauth2 import OAuth2PermissionGrant
 from office365.directory.users.settings import UserSettings
+from office365.intune.devices.managed import ManagedDevice
+from office365.intune.devices.managed_app_diagnostic_status import ManagedAppDiagnosticStatus
 from office365.onedrive.sites.site import Site
 from office365.onenote.onenote import Onenote
 from office365.outlook.calendar.attendees.base import AttendeeBase
@@ -190,6 +192,13 @@ class User(DirectoryObject):
             "endDateTime": end_dt.isoformat(),
         }
         qry = FunctionQuery(self, "reminderView", params, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_managed_app_diagnostic_statuses(self):
+        """Gets diagnostics validation status for a given user."""
+        return_type = ClientResult(self.context, ClientValueCollection(ManagedAppDiagnosticStatus))
+        qry = FunctionQuery(self, "getManagedAppDiagnosticStatuses", None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -475,6 +484,13 @@ class User(DirectoryObject):
                                    TeamCollection(self.context, ResourcePath("joinedTeams", self.resource_path)))
 
     @property
+    def managed_devices(self):
+        """"""
+        return self.properties.get('managedDevices',
+                                   EntityCollection(self.context, ManagedDevice,
+                                                    ResourcePath("managedDevices", self.resource_path)))
+
+    @property
     def member_of(self):
         """Get groups and directory roles that the user is a direct member of."""
         return self.properties.get('memberOf',
@@ -579,6 +595,7 @@ class User(DirectoryObject):
                 "contactFolders": self.contact_folders,
                 "followedSites": self.followed_sites,
                 "licenseDetails": self.license_details,
+                "managedDevices": self.managed_devices,
                 "memberOf": self.member_of,
                 "transitiveMemberOf": self.transitive_member_of,
                 "joinedTeams": self.joined_teams,

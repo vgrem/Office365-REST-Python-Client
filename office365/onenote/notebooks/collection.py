@@ -13,6 +13,16 @@ class NotebookCollection(EntityCollection):
     def __init__(self, context, resource_path=None):
         super(NotebookCollection, self).__init__(context, Notebook, resource_path)
 
+    def add(self, display_name):
+        """
+        Create a new OneNote notebook.
+
+        :param str display_name: Name for the notebook. Notebook names must be unique. The name cannot contain more
+            than 128 characters or contain the following characters: ?*/:<>|'"
+        :rtype: Notebook
+        """
+        return super(NotebookCollection, self).add(displayName=display_name)
+
     def get_notebook_from_web_url(self, web_url):
         """
         Retrieve the properties and relationships of a notebook object by using its URL path.

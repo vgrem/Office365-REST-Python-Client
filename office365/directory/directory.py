@@ -1,5 +1,7 @@
+from office365.directory.administrative_unit import AdministrativeUnit
 from office365.directory.object_collection import DirectoryObjectCollection
 from office365.entity import Entity
+from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 
@@ -18,6 +20,13 @@ class Directory(Entity):
             return self.properties.get('deletedItems',
                                        DirectoryObjectCollection(self.context,
                                                                  ResourcePath("deletedItems", self.resource_path)))
+
+    @property
+    def administrative_units(self):
+        """	Conceptual container for user and group directory objects."""
+        return self.properties.get('administrativeUnits',
+                                   EntityCollection(self.context, AdministrativeUnit,
+                                                    ResourcePath("administrativeUnits", self.resource_path)))
 
     @property
     def deleted_groups(self):

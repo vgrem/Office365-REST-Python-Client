@@ -7,6 +7,9 @@ class ProvisionedPlan(ClientValue):
     """
 
     def __init__(self, service=None):
+        """
+        :param str service:
+        """
         self.service = service
 
     def __repr__(self):

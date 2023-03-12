@@ -11,5 +11,8 @@ class ClientCertificateAuthentication(ApiAuthenticationConfigurationBase):
     """
 
     def __init__(self, certificates=None):
+        """
+        :param list[Pkcs12CertificateInformation] certificates:
+        """
         super(ClientCertificateAuthentication, self).__init__()
         self.certificateList = ClientValueCollection(Pkcs12CertificateInformation, certificates)

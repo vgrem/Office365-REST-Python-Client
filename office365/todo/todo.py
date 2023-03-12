@@ -1,6 +1,6 @@
 from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.todo.task_list_collection import TodoTaskListCollection
+from office365.todo.tasks.list_collection import TodoTaskListCollection
 
 
 class Todo(Entity):

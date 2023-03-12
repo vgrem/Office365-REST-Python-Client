@@ -6,6 +6,7 @@ from office365.directory.applications.service_principal import ServicePrincipal
 from office365.directory.audit.log_root import AuditLogRoot
 from office365.directory.directory import Directory
 from office365.directory.domains.domain import Domain
+from office365.directory.identities.protection_root import IdentityProtectionRoot
 from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.groups.collection import GroupCollection
 from office365.directory.groups.lifecycle_policy import GroupLifecyclePolicy
@@ -17,6 +18,7 @@ from office365.directory.licenses.subscribed_sku import SubscribedSku
 from office365.directory.permissions.grants.resource_specific import ResourceSpecificPermissionGrant
 from office365.directory.roles.management import RoleManagement
 from office365.directory.roles.role import DirectoryRole
+from office365.directory.users.invitation import InvitationCollection
 from office365.intune.devices.app_management import DeviceAppManagement
 from office365.intune.devices.management import DeviceManagement
 from office365.intune.organizations.contact import OrgContact
@@ -140,6 +142,14 @@ class GraphClient(ClientRuntimeContext):
     def groups(self):
         """Get groups"""
         return GroupCollection(self, ResourcePath("groups"))
+
+    @property
+    def invitations(self):
+        """Get invitations"""
+        return InvitationCollection(self, ResourcePath("invitations"))
+
+    def identity_protection(self):
+        return IdentityProtectionRoot(self, ResourcePath("identityProtection"))
 
     @property
     def sites(self):
@@ -307,7 +317,7 @@ class GraphClient(ClientRuntimeContext):
 
     @property
     def external(self):
-        """A logical container  for external sources."""
+        """A logical container for external sources."""
         return External(self, ResourcePath("external"))
 
     @property

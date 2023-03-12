@@ -13,11 +13,10 @@ from office365.onenote.onenote import Onenote
 from office365.outlook.calendar.events.event import Event
 from office365.outlook.mail.conversation_thread import ConversationThread
 from office365.planner.group import PlannerGroup
-from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.teams.internal.paths.team import TeamPath
 from office365.teams.team import Team
 
@@ -76,22 +75,6 @@ class Group(DirectoryObject):
         qry = ServiceOperationQuery(self, "unsubscribeByMail")
         self.context.add_query(qry)
         return self
-
-    def check_member_groups(self, group_ids):
-        """Check for membership in the specified list of groups. Returns from the list those groups of which
-        the specified group has a direct or transitive membership.
-
-        You can check up to a maximum of 20 groups per request. This function supports Microsoft 365 and other types
-        of groups provisioned in Azure AD. Note that Microsoft 365 groups cannot contain groups.
-        So membership in a Microsoft 365 group is always direct.
-
-        :param list[str] group_ids: A collection that contains the object IDs of the groups in which to
-            check membership. Up to 20 groups may be specified.
-        """
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "checkMemberGroups", None, group_ids, None, result)
-        self.context.add_query(qry)
-        return result
 
     def add_team(self):
         """Create a new team under a group."""
