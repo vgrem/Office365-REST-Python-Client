@@ -1,5 +1,5 @@
 from office365.base_item import BaseItem
-from office365.directory.identities.identity_set import IdentitySet
+from office365.directory.permissions.identity_set import IdentitySet
 from office365.onedrive.permissions.permission import Permission
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.lists.list import List

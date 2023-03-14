@@ -1,4 +1,4 @@
-from office365.directory.identities.identity_set import IdentitySet
+from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.teams.bots.teamwork_bot import TeamworkBot

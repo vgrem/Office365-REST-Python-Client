@@ -1,4 +1,4 @@
-from office365.directory.identities.identity_set import IdentitySet
+from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.planner.buckets.bucket import PlannerBucket

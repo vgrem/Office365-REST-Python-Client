@@ -5,4 +5,4 @@ file_abs_url = "https://{0}.sharepoint.com/sites/team/Shared Documents/big_buck_
 
 client = GraphClient(acquire_token_by_username_password)
 file_item = client.shares.by_url(file_abs_url).drive_item.get().execute_query()
-print(file_item.web_url)
+print(f"Drive item Id: {file_item.id}")

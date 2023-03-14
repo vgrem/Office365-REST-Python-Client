@@ -1,4 +1,4 @@
-from office365.directory.identities.identity import Identity
+from office365.directory.permissions.identity import Identity
 
 
 class ProvisioningServicePrincipal(Identity):

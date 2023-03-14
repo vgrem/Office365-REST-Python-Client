@@ -16,7 +16,7 @@ class TestNotebook(GraphTestCase):
 
     def test1_create_notebook(self):
         notebook_name = create_unique_name("My Private notebook")
-        new_notebook = self.client.me.onenote.notebooks.add(displayName=notebook_name).execute_query()
+        new_notebook = self.client.me.onenote.notebooks.add(notebook_name).execute_query()
         self.assertIsNotNone(new_notebook.resource_path)
         self.__class__.target_notebook = new_notebook
 

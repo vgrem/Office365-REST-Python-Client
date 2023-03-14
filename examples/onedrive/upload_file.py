@@ -6,6 +6,7 @@ from office365.graph_client import GraphClient
 
 client = GraphClient(acquire_token_by_client_credentials)
 
+
 remote_drive = client.users[sample_user_principal_name_alt].drive.root.get_by_path("archive")
 
 local_path = "../../tests/data/SharePoint User Guide.docx"

@@ -2,7 +2,7 @@ from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.onenote.notebooks.collection import NotebookCollection
 from office365.onenote.operations.onenote import OnenoteOperation
-from office365.onenote.pages.page_collection import OnenotePageCollection
+from office365.onenote.pages.collection import OnenotePageCollection
 from office365.onenote.resources.resource import OnenoteResource
 from office365.onenote.sectiongroups.section_group import SectionGroup
 from office365.onenote.sections.section import OnenoteSection

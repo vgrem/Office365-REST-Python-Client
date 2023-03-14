@@ -1,6 +1,6 @@
 from office365.onenote.entity_schema_object_model import OnenoteEntitySchemaObjectModel
 from office365.onenote.notebooks.notebook import Notebook
-from office365.onenote.pages.page_links import PageLinks
+from office365.onenote.pages.links import PageLinks
 from office365.onenote.sections.section import OnenoteSection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.function import FunctionQuery

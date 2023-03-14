@@ -1,7 +1,7 @@
 from office365.entity_collection import EntityCollection
 from office365.onenote.entity_hierarchy_model import OnenoteEntityHierarchyModel
 from office365.onenote.operations.onenote import OnenoteOperation
-from office365.onenote.pages.page_links import PageLinks
+from office365.onenote.pages.links import PageLinks
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 

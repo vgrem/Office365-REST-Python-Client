@@ -1,8 +1,9 @@
-from office365.directory.identities.identity_set import IdentitySet
+from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.onedrive.drives.recipient import DriveRecipient
 from office365.onedrive.listitems.item_reference import ItemReference
+from office365.onedrive.permissions.sharepoint_identity_set import SharePointIdentitySet
 from office365.onedrive.permissions.sharing_invitation import SharingInvitation
 from office365.onedrive.permissions.sharing_link import SharingLink
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -42,9 +43,19 @@ class Permission(Entity):
         return self.properties.get('grantedTo', IdentitySet())
 
     @property
+    def granted_to_v2(self):
+        """For user type permissions, the details of the users and applications for this permission."""
+        return self.properties.get('grantedToV2', SharePointIdentitySet())
+
+    @property
     def granted_to_identities(self):
         """For link type permissions, the details of the users to whom permission was granted. Read-only."""
         return self.properties.get('grantedToIdentities', ClientValueCollection(IdentitySet))
+
+    @property
+    def granted_to_identities_v2(self):
+        """For link type permissions, the details of the users to whom permission was granted. """
+        return self.properties.get('grantedToIdentitiesV2', ClientValueCollection(SharePointIdentitySet))
 
     @property
     def link(self):
@@ -95,7 +106,9 @@ class Permission(Entity):
             property_mapping = {
                 "inheritedFrom": self.inherited_from,
                 "grantedTo": self.granted_to,
-                "grantedToIdentities": self.granted_to_identities
+                "grantedToV2": self.granted_to_v2,
+                "grantedToIdentities": self.granted_to_identities,
+                "grantedToIdentitiesV2": self.granted_to_identities_v2
             }
             default_value = property_mapping.get(name, None)
         return super(Permission, self).get_property(name, default_value)

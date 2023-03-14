@@ -1,4 +1,5 @@
 from office365.base_item import BaseItem
+from office365.onedrive.columns.boolean import BooleanColumn
 from office365.onedrive.columns.calculated import CalculatedColumn
 from office365.onedrive.columns.choice import ChoiceColumn
 from office365.onedrive.columns.default_value import DefaultColumnValue
@@ -50,6 +51,11 @@ class ColumnDefinition(BaseItem):
     def column_group(self):
         """For site columns, the name of the group this column belongs to. Helps organize related columns."""
         return self.properties.get('columnGroup', None)
+
+    @property
+    def boolean(self):
+        """This column stores boolean values."""
+        return self.properties.get('boolean', BooleanColumn())
 
     @property
     def geolocation(self):

@@ -17,7 +17,6 @@ class DocumentSet(ClientValue):
             content types.
         :param bool should_prefix_name_to_file:  Indicates whether to add the name of the document set to each file name.
         """
-        super().__init__()
         self.welcomePageUrl = welcome_page_url
         self.allowedContentTypes = ClientValueCollection(ContentTypeInfo, allowed_content_types)
         self.defaultContents = ClientValueCollection(DocumentSetContent, default_contents)

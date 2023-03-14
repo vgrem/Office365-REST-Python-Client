@@ -1,4 +1,4 @@
-from office365.directory.identities.identity_set import IdentitySet
+from office365.directory.permissions.identity_set import IdentitySet
 from office365.onedrive.documentsets.version_item import DocumentSetVersionItem
 from office365.onedrive.versions.list_item import ListItemVersion
 from office365.runtime.client_value_collection import ClientValueCollection
