@@ -505,6 +505,21 @@ class User(DirectoryObject):
                                                    ResourcePath("oauth2PermissionGrants", self.resource_path)))
 
     @property
+    def owned_devices(self):
+        """Devices that are owned by the user. Read-only. Nullable. Supports $expand and $filter
+        (/$count eq 0, /$count ne 0, /$count eq 1, /$count ne 1). """
+        return self.properties.get('ownedDevices',
+                                   DirectoryObjectCollection(self.context,
+                                                             ResourcePath("ownedDevices", self.resource_path)))
+
+    @property
+    def owned_objects(self):
+        """Directory objects that are owned by the user. Read-only. Nullable. Supports $expand. """
+        return self.properties.get('ownedObjects',
+                                   DirectoryObjectCollection(self.context,
+                                                             ResourcePath("ownedObjects", self.resource_path)))
+
+    @property
     def transitive_member_of(self):
         """Get groups, directory roles that the user is a member of. This API request is transitive, and will also
         return all groups the user is a nested member of. """
@@ -604,7 +619,9 @@ class User(DirectoryObject):
                 "mailboxSettings": self.mailbox_settings,
                 "directReports": self.direct_reports,
                 "onlineMeetings": self.online_meetings,
-                "oauth2PermissionGrants": self.oauth2_permission_grants
+                "oauth2PermissionGrants": self.oauth2_permission_grants,
+                "ownedDevices": self.owned_devices,
+                "ownedObjects": self.owned_objects
             }
             default_value = property_mapping.get(name, None)
         return super(User, self).get_property(name, default_value)

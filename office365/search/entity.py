@@ -46,5 +46,11 @@ class SearchEntity(Entity):
         """
         return self.query(query_string, entity_types=[EntityType.event])
 
+    def query_drive_items(self, query_string):
+        """Searches OneDrive items.
+        Alias to query method
 
+        :param str query_string: Contains the query terms.
+        """
+        return self.query(query_string, entity_types=[EntityType.driveItem])
 

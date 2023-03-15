@@ -1,4 +1,5 @@
 from office365.directory.certificates.auth_configuration import CertificateBasedAuthConfiguration
+from office365.directory.domains.verified import VerifiedDomain
 from office365.directory.object import DirectoryObject
 from office365.directory.extensions.extension import Extension
 from office365.entity_collection import EntityCollection
@@ -42,12 +43,18 @@ class Organization(DirectoryObject):
     def provisioned_plans(self):
         return self.properties.get("provisionedPlans", ClientValueCollection(ProvisionedPlan))
 
+    @property
+    def verified_domains(self):
+        """The collection of domains associated with this tenant."""
+        return self.properties.get("verifiedDomains", ClientValueCollection(VerifiedDomain))
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "certificateBasedAuthConfiguration": self.certificate_based_auth_configuration,
                 "businessPhones": self.business_phones,
-                "provisionedPlans": self.provisioned_plans
+                "provisionedPlans": self.provisioned_plans,
+                "verifiedDomains": self.verified_domains
             }
             default_value = property_mapping.get(name, None)
         return super(Organization, self).get_property(name, default_value)

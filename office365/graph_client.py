@@ -6,6 +6,7 @@ from office365.directory.applications.service_principal import ServicePrincipal
 from office365.directory.audit.log_root import AuditLogRoot
 from office365.directory.directory import Directory
 from office365.directory.domains.domain import Domain
+from office365.directory.identities.governance import IdentityGovernance
 from office365.directory.identities.protection_root import IdentityProtectionRoot
 from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.groups.collection import GroupCollection
@@ -240,6 +241,13 @@ class GraphClient(ClientRuntimeContext):
         Cloud communications API endpoint
         """
         return CloudCommunications(self, ResourcePath("communications"))
+
+    @property
+    def identity_governance(self):
+        """
+        The identity governance singleton
+        """
+        return IdentityGovernance(self, ResourcePath("identityGovernance"))
 
     @property
     def subscriptions(self):

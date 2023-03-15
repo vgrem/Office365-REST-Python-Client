@@ -1,5 +1,6 @@
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.types.collections import StringCollection
 from office365.search.hits_container import SearchHitsContainer
 
 
@@ -13,5 +14,5 @@ class SearchResponse(ClientValue):
 
         """
         super(SearchResponse, self).__init__()
-        self.searchTerms = search_terms
+        self.searchTerms = StringCollection(search_terms)
         self.hitsContainers = ClientValueCollection(SearchHitsContainer, hits_containers)
