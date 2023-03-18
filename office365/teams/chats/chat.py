@@ -5,6 +5,7 @@ from office365.teams.apps.installation import TeamsAppInstallation
 from office365.teams.members.conversation import ConversationMember
 from office365.teams.chats.message import ChatMessage
 from office365.teams.operations.async_operation import TeamsAsyncOperation
+from office365.teams.tabs.tab import TeamsTab
 
 
 class Chat(Entity):
@@ -49,6 +50,12 @@ class Chat(Entity):
         return self.properties.get('operations',
                                    EntityCollection(self.context, TeamsAsyncOperation,
                                                     ResourcePath("operations", self.resource_path)))
+
+    @property
+    def tabs(self):
+        """A collection of all the tabs in the chat."""
+        return self.properties.get('tabs',
+                                   EntityCollection(self.context, TeamsTab, ResourcePath("tabs", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:

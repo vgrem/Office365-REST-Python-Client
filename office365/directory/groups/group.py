@@ -11,13 +11,13 @@ from office365.entity_collection import EntityCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onenote.onenote import Onenote
 from office365.outlook.calendar.events.event import Event
+from office365.outlook.mail.conversation import Conversation
 from office365.outlook.mail.conversation_thread import ConversationThread
 from office365.planner.group import PlannerGroup
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.teams.internal.paths.team import TeamPath
 from office365.teams.team import Team
 
 
@@ -78,20 +78,18 @@ class Group(DirectoryObject):
 
     def add_team(self):
         """Create a new team under a group."""
-        team = Team(self.context, TeamPath(self.resource_path))
-        team._parent_collection = self.parent_collection
-        qry = ServiceOperationQuery(self, "team", None, team, None, team)
-        self.context.add_query(qry)
+        qry = ServiceOperationQuery(self, "team", None, self.team, None, self.team)
 
         def _construct_create_team_request(request):
-            cur_qry = self.context.pending_request().current_query
-            if cur_qry.id == qry.id:
-                request.method = HttpMethod.Put
-                request.set_header('Content-Type', "application/json")
-                request.data = json.dumps(request.data)
-
-        self.context.before_execute(_construct_create_team_request, False)
-        return team
+            """
+            :type request: office365.runtime.http.request_options.RequestOptions
+            """
+            request.method = HttpMethod.Put
+            request.set_header('Content-Type', "application/json")
+            request.data = json.dumps(request.data)
+        self.context.before_execute_if_query(qry, _construct_create_team_request)
+        self.context.add_query(qry)
+        return self.team
 
     def delete_object(self, permanent_delete=False):
         """
@@ -104,6 +102,13 @@ class Group(DirectoryObject):
             deleted_item = self.context.directory.deleted_groups[self.id]
             deleted_item.delete_object()
         return self
+
+    @property
+    def conversations(self):
+        """The group's conversations."""
+        return self.properties.get('conversations',
+                                   EntityCollection(self.context, Conversation,
+                                                    ResourcePath("threads", self.resource_path)))
 
     @property
     def extensions(self):
@@ -198,6 +203,12 @@ class Group(DirectoryObject):
         """The plannerGroup resource provide access to Planner resources for a group."""
         return self.properties.get('planner',
                                    PlannerGroup(self.context, ResourcePath("planner", self.resource_path)))
+
+    @property
+    def team(self):
+        """The team associated with this group."""
+        return self.properties.get('team',
+                                   Team(self.context, ResourcePath(self.id, ResourcePath("teams"))))
 
     @property
     def assigned_licenses(self):

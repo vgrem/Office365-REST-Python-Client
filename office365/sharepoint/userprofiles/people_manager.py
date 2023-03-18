@@ -44,6 +44,16 @@ class PeopleManager(BaseEntity):
         context.add_query(qry)
         return return_type
 
+    def get_user_onedrive_quota_max(self, account_name):
+        """
+        :param str account_name: Account name of the specified user.
+        """
+        return_type = ClientResult(self.context, int())
+        params = {"accountName": account_name}
+        qry = ServiceOperationQuery(self, "GetUserOneDriveQuotaMax", params, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def am_i_following(self, account_name):
         """
         Checks whether the current user is following the specified user.
@@ -75,7 +85,7 @@ class PeopleManager(BaseEntity):
         :param str account_name: Account name of the specified user.
         :param str site_id: Site Identifier.
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, dict())
         params = {"accountName": account_name, "siteId": site_id}
         qry = ServiceOperationQuery(self, "GetSPUserInformation", params, None, None, return_type)
         self.context.add_query(qry)

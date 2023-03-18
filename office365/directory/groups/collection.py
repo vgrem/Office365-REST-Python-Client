@@ -33,12 +33,11 @@ class GroupCollection(DeltaCollection):
         grp_properties.groupTypes = ["Unified"]
         return_type = self.context.groups.add(grp_properties)
 
-        def _group_created(resp):
+        def _after_group_created(resp):
             """
             :type resp: requests.Response
             """
-            new_team = return_type.add_team()
-            return_type.set_property("team", new_team, False)
-
-        self.context.after_execute(_group_created)
+            resp.raise_for_status()
+            return_type.add_team()
+        self.context.after_execute(_after_group_created)
         return return_type

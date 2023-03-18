@@ -46,6 +46,7 @@ from office365.sharepoint.sharing.links.access_request import SharingLinkAccessR
 from office365.sharepoint.sharing.object_sharing_settings import ObjectSharingSettings
 from office365.sharepoint.sharing.links.data import SharingLinkData
 from office365.sharepoint.sharing.result import SharingResult
+from office365.sharepoint.sharing.shared_document_info import SharedDocumentInfo
 from office365.sharepoint.sitescripts.utility import SiteScriptUtility
 from office365.sharepoint.marketplace.sitecollection.appcatalog.accessor import SiteCollectionCorporateCatalogAccessor
 from office365.sharepoint.marketplace.tenant.appcatalog.accessor import TenantCorporateCatalogAccessor
@@ -1482,6 +1483,12 @@ class Web(SecurableObject):
                                    ListCollection(self.context, ResourcePath("lists", self.resource_path)))
 
     @property
+    def onedrive_shared_items(self):
+        return self.properties.get('OneDriveSharedItems',
+                                   BaseEntityCollection(self.context, SharedDocumentInfo,
+                                                        ResourcePath("OneDriveSharedItems", self.resource_path)))
+
+    @property
     def site_users(self):
         """
         Specifies the collection of users in the site collection that contains the site
@@ -1830,6 +1837,7 @@ class Web(SecurableObject):
                 "HostedApps": self.hosted_apps,
                 "ListTemplates": self.list_templates,
                 "MultilingualSettings": self.multilingual_settings,
+                "OneDriveSharedItems": self.onedrive_shared_items,
                 "ParentWeb": self.parent_web,
                 "PushNotificationSubscribers": self.push_notification_subscribers,
                 "RootFolder": self.root_folder,
