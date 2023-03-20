@@ -1,6 +1,5 @@
 from office365.runtime.client_value import ClientValue
 from office365.sharepoint.social.posts.post import SocialPost
-from office365.sharepoint.social.thread import SocialThread
 
 
 class SocialPostReference(ClientValue):
@@ -9,7 +8,7 @@ class SocialPostReference(ClientValue):
     a SocialPostReference in the PostReference property (see section 3.1.5.42.1.1.6) are threads with root posts that
     are generated on the server and not created by a client."""
 
-    def __init__(self, digest=SocialThread(), post=SocialPost(), thread_id=None, thread_owner_index=None):
+    def __init__(self, digest=None, post=SocialPost(), thread_id=None, thread_owner_index=None):
         """
         :param SocialThread digest: The Digest property provides a digest of the thread containing the referenced post.
         :param SocialPost post: The Post property provides access to the post being referenced

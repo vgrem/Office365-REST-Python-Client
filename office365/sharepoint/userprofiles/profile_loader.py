@@ -18,8 +18,7 @@ class ProfileLoader(ClientObject):
         :type: office365.sharepoint.client_context.ClientContext context
         """
         return_type = ProfileLoader(context)
-        qry = ServiceOperationQuery(return_type, "GetProfileLoader", None, None, None, return_type)
-        qry.static = True
+        qry = ServiceOperationQuery(return_type, "GetProfileLoader", None, None, None, return_type, True)
         context.add_query(qry)
         return return_type
 

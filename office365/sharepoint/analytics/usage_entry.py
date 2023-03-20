@@ -19,8 +19,7 @@ class AnalyticsUsageEntry(BaseEntity):
             "itemId": item_id,
         }
         binding_type = AnalyticsUsageEntry(context)
-        qry = ServiceOperationQuery(binding_type, "LogAnalyticsEvent", None, payload)
-        qry.static = True
+        qry = ServiceOperationQuery(binding_type, "LogAnalyticsEvent", None, payload, is_static=True)
         context.add_query(qry)
         return binding_type
 

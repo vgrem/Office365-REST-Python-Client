@@ -66,8 +66,7 @@ class SitePageService(BaseEntity):
         """
         return_type = ClientResult(context, StringCollection())
         svc = SitePageService(context)
-        qry = ServiceOperationQuery(svc, "GetCurrentUserMemberships", None, None, None, return_type)
-        qry.static = True
+        qry = ServiceOperationQuery(svc, "GetCurrentUserMemberships", None, None, None, return_type, True)
         context.add_query(qry)
         return return_type
 

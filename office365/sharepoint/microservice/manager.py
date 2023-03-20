@@ -20,8 +20,7 @@ class MicroServiceManager(BaseEntity):
             "properties": properties
         }
         manager = MicroServiceManager(context)
-        qry = ServiceOperationQuery(manager, "AddMicroserviceWorkItem", None, payload, None, return_type)
-        qry.static = True
+        qry = ServiceOperationQuery(manager, "AddMicroserviceWorkItem", None, payload, None, return_type, True)
         context.add_query(qry)
         return return_type
 

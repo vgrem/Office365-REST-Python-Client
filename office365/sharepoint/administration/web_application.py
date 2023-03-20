@@ -15,8 +15,7 @@ class WebApplication(BaseEntity):
         """
         return_type = WebApplication(context)
         payload = {"requestUri": request_uri}
-        qry = ServiceOperationQuery(return_type, "Lookup", None, payload, None, return_type)
-        qry.static = True
+        qry = ServiceOperationQuery(return_type, "Lookup", None, payload, None, return_type, True)
         context.add_query(qry)
         return return_type
 

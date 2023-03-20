@@ -10,9 +10,6 @@ from office365.sharepoint.ui.applicationpages.peoplepicker.query_parameters impo
 class ClientPeoplePickerWebServiceInterface(BaseEntity):
     """Specifies an interface that can be used to query principals."""
 
-    def __init__(self, context):
-        super(ClientPeoplePickerWebServiceInterface, self).__init__(context)
-
     @staticmethod
     def get_search_results(context, search_pattern, provider_id=None, hierarchy_node_id=None, entity_types=None):
         """
@@ -115,8 +112,8 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
                                     None,
                                     request,
                                     "entityInformationRequest",
-                                    return_type)
-        qry.static = True
+                                    return_type,
+                                    True)
         context.add_query(qry)
         return return_type
 

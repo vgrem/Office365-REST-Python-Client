@@ -39,8 +39,7 @@ class PeopleManager(BaseEntity):
         """
         return_type = HashTagCollection(context)
         manager = PeopleManager(context)
-        qry = ServiceOperationQuery(manager, "GetTrendingTags", None, None, None, return_type)
-        qry.static = True
+        qry = ServiceOperationQuery(manager, "GetTrendingTags", None, None, None, return_type, True)
         context.add_query(qry)
         return return_type
 

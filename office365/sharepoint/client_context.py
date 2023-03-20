@@ -463,6 +463,12 @@ class ClientContext(ClientRuntimeContext):
         return SPSiteManager(self, ResourcePath("spSiteManager"))
 
     @property
+    def social_feed_manager(self):
+        """Alias to SocialFeedManager."""
+        from office365.sharepoint.social.feed.manager import SocialFeedManager
+        return SocialFeedManager(self)
+
+    @property
     def home_service(self):
         """Alias to SharePointHomeServiceContextBuilder."""
         from office365.sharepoint.portal.home.service_context_builder import SharePointHomeServiceContextBuilder

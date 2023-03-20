@@ -4,6 +4,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.social.actor import SocialActor
 from office365.sharepoint.social.attachment import SocialAttachment
+from office365.sharepoint.social.feed.feed import SocialFeed
 from office365.sharepoint.social.thread import SocialThread
 
 
@@ -60,6 +61,26 @@ class SocialFeedManager(BaseEntity):
         return_type = ClientResult(self.context, SocialAttachment())
         payload = {"name": name, "description": description, "fileData": file_data}
         qry = ServiceOperationQuery(self, "CreateFileAttachment", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_feed(self, feed_type=None, options=None):
+        """
+        The GetFeed method returns a feed for the current user. The feed consists of an array of message threads.
+        Each thread consists of a root post and an array of reply posts. See section 3.1.5.17 for details on
+        the SocialFeed type. The server selects a set of posts to return in the feed based on the type
+        and options parameters, but this protocol does require any specific algorithm to select the set of posts
+        from all posts that meet the specified type and options.
+
+        :param int feed_type: Specifies the type of feed to be returned. Feeds can be viewed using a personal view, news
+            view, timeline view, or likes view. If the type is not specified, GetFeed returns the news view.
+        :param SocialFeedOptions options: Specifies the maximum number of threads to get in the feed, the sort order
+            of the threads, and how the threads are to be selected based on the date and time that the threads were
+            created.
+        """
+        return_type = ClientResult(self.context, SocialFeed())
+        payload = {"type": feed_type, "options": options}
+        qry = ServiceOperationQuery(self, "GetFeed", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 
