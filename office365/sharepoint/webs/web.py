@@ -188,7 +188,7 @@ class Web(SecurableObject):
         return return_type
 
     @staticmethod
-    def create_organization_sharing_link(context, url, is_edit_link):
+    def create_organization_sharing_link(context, url, is_edit_link=False):
         """ Creates and returns an organization-internal link that can be used to access a document and gain permissions
            to it.
 
@@ -197,7 +197,7 @@ class Web(SecurableObject):
             string parameters, forSharing set to 1 if sharing, and bypass set to 1 to bypass any mobile logic.
         :param bool is_edit_link: If true, the link will allow the logged in user to edit privileges on the item.
         """
-        return_type = ClientResult(context)
+        return_type = ClientResult(context, str())
         params = {"url": url, "isEditLink": is_edit_link}
         qry = ServiceOperationQuery(context.web, "CreateOrganizationSharingLink", None, params, None, return_type)
         qry.static = True
