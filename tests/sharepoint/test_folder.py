@@ -141,3 +141,8 @@ class TestSharePointFolder(SPTestCase):
             .get().execute_query()
         self.assertIsNotNone(folder.resource_path)
         self.assertIsNotNone(folder.unique_id)
+
+    #def test_18_get_by_path_with_props(self):
+    #    folder = self.client.web.folders.get_by_path('Shared Documents')
+    #    self.client.load(folder, ["Folders"]).execute_query()
+    #    self.assertIsNotNone(folder.resource_path)

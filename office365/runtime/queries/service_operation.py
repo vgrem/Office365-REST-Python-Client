@@ -1,4 +1,4 @@
-from office365.runtime.odata.path_builder import ODataPathBuilder
+from office365.runtime.odata.url_builder import ODataUrlBuilder
 from office365.runtime.queries.client_query import ClientQuery
 
 
@@ -30,11 +30,11 @@ class ServiceOperationQuery(ClientQuery):
     def url(self):
         orig_url = super(ServiceOperationQuery, self).url
         if self.static:
-            normalized_name = ".".join([self.binding_type.entity_type_name, self.method_name])
+            static_name = ".".join([self.binding_type.entity_type_name, self.method_name])
             return "/".join([self.context.service_root_url(),
-                             ODataPathBuilder.build(normalized_name, self._method_params)])
+                             ODataUrlBuilder.build(static_name, self._method_params)])
         else:
-            return "/".join([orig_url, ODataPathBuilder.build(self._method_name, self._method_params)])
+            return "/".join([orig_url, ODataUrlBuilder.build(self._method_name, self._method_params)])
 
     @property
     def method_name(self):

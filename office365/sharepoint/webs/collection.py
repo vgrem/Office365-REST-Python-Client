@@ -18,11 +18,11 @@ class WebCollection(BaseEntityCollection):
 
         :type web_creation_information: office365.sharepoint.webs.creation_information.WebCreationInformation
         """
-        target_web = Web(self.context)
-        self.add_child(target_web)
-        qry = ServiceOperationQuery(self, "add", None, web_creation_information, "parameters", target_web)
+        return_type = Web(self.context)
+        self.add_child(return_type)
+        qry = ServiceOperationQuery(self, "add", None, web_creation_information, "parameters", return_type)
         self.context.add_query(qry)
-        return target_web
+        return return_type
 
     @property
     def resource_url(self):

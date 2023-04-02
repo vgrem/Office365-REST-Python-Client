@@ -4,7 +4,7 @@ from office365.runtime.client_value import ClientValue
 from office365.runtime.compat import is_string_type
 
 
-class ODataPathBuilder(object):
+class ODataUrlBuilder(object):
 
     @staticmethod
     def build(name, parameters=None):
@@ -20,10 +20,10 @@ class ODataPathBuilder(object):
         elif parameters is not None:
             url += "("
             if isinstance(parameters, dict):
-                url += ','.join(['%s=%s' % (key, ODataPathBuilder.encode_method_value(value)) for (key, value) in
+                url += ','.join(['%s=%s' % (key, ODataUrlBuilder.encode_method_value(value)) for (key, value) in
                                  parameters.items() if value is not None])
             else:
-                url += ','.join(['%s' % (ODataPathBuilder.encode_method_value(value)) for (i, value) in
+                url += ','.join(['%s' % (ODataUrlBuilder.encode_method_value(value)) for (i, value) in
                                  enumerate(parameters) if value is not None])
             url += ")"
         return url
