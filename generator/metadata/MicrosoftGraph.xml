@@ -121,6 +121,12 @@
             <Member Name="disabled" Value="2"/>
             <Member Name="unknownFutureValue" Value="3"/>
          </EnumType>
+         <EnumType Name="authenticationMethodsPolicyMigrationState">
+            <Member Name="preMigration" Value="0"/>
+            <Member Name="migrationInProgress" Value="1"/>
+            <Member Name="migrationComplete" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
          <EnumType Name="authenticationMethodState">
             <Member Name="enabled" Value="0"/>
             <Member Name="disabled" Value="1"/>
@@ -853,6 +859,11 @@
             <Member Name="unknownFutureValue" Value="6"/>
             <Member Name="linux" Value="7"/>
          </EnumType>
+         <EnumType Name="conditionalAccessExternalTenantsMembershipKind">
+            <Member Name="all" Value="0"/>
+            <Member Name="enumerated" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
          <EnumType Name="conditionalAccessGrantControl">
             <Member Name="block" Value="0"/>
             <Member Name="mfa" Value="1"/>
@@ -862,6 +873,16 @@
             <Member Name="compliantApplication" Value="5"/>
             <Member Name="passwordChange" Value="6"/>
             <Member Name="unknownFutureValue" Value="7"/>
+         </EnumType>
+         <EnumType Name="conditionalAccessGuestOrExternalUserTypes" IsFlags="true">
+            <Member Name="none" Value="0"/>
+            <Member Name="internalGuest" Value="1"/>
+            <Member Name="b2bCollaborationGuest" Value="2"/>
+            <Member Name="b2bCollaborationMember" Value="4"/>
+            <Member Name="b2bDirectConnectUser" Value="8"/>
+            <Member Name="otherExternalUser" Value="16"/>
+            <Member Name="serviceProvider" Value="32"/>
+            <Member Name="unknownFutureValue" Value="64"/>
          </EnumType>
          <EnumType Name="conditionalAccessPolicyState">
             <Member Name="enabled" Value="0"/>
@@ -1019,6 +1040,10 @@
             <Member Name="configured" Value="0"/>
             <Member Name="proposed" Value="1"/>
             <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
+         <EnumType Name="certificateStatus">
+            <Member Name="notProvisioned" Value="0"/>
+            <Member Name="provisioned" Value="1"/>
          </EnumType>
          <EnumType Name="complianceStatus">
             <Member Name="unknown" Value="0"/>
@@ -3911,6 +3936,12 @@
          <ComplexType Name="provisioningSystem" BaseType="graph.identity" OpenType="true">
             <Property Name="details" Type="graph.detailsInfo"/>
          </ComplexType>
+         <ComplexType Name="signInActivity">
+            <Property Name="lastNonInteractiveSignInDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="lastNonInteractiveSignInRequestId" Type="Edm.String"/>
+            <Property Name="lastSignInDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="lastSignInRequestId" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="signInLocation">
             <Property Name="city" Type="Edm.String"/>
             <Property Name="countryOrRegion" Type="Edm.String"/>
@@ -3991,34 +4022,11 @@
             <Property Name="userId" Type="Edm.String" Nullable="false"/>
             <Property Name="userPrincipalName" Type="Edm.String"/>
          </EntityType>
-         <ComplexType Name="emailAddress">
-            <Property Name="address" Type="Edm.String"/>
-            <Property Name="name" Type="Edm.String"/>
-         </ComplexType>
-         <ComplexType Name="invitedUserMessageInfo">
-            <Property Name="ccRecipients" Type="Collection(graph.recipient)"/>
-            <Property Name="customizedMessageBody" Type="Edm.String"/>
-            <Property Name="messageLanguage" Type="Edm.String"/>
-         </ComplexType>
-         <ComplexType Name="recipient">
-            <Property Name="emailAddress" Type="graph.emailAddress"/>
-         </ComplexType>
-         <EntityType Name="invitation" BaseType="graph.entity">
-            <Property Name="invitedUserDisplayName" Type="Edm.String"/>
-            <Property Name="invitedUserEmailAddress" Type="Edm.String" Nullable="false"/>
-            <Property Name="invitedUserMessageInfo" Type="graph.invitedUserMessageInfo"/>
-            <Property Name="invitedUserType" Type="Edm.String"/>
-            <Property Name="inviteRedeemUrl" Type="Edm.String"/>
-            <Property Name="inviteRedirectUrl" Type="Edm.String" Nullable="false"/>
-            <Property Name="resetRedemption" Type="Edm.Boolean"/>
-            <Property Name="sendInvitationMessage" Type="Edm.Boolean"/>
-            <Property Name="status" Type="Edm.String"/>
-            <NavigationProperty Name="invitedUser" Type="graph.user"/>
-         </EntityType>
          <EntityType Name="directoryObject" BaseType="graph.entity" OpenType="true">
             <Property Name="deletedDateTime" Type="Edm.DateTimeOffset"/>
          </EntityType>
          <EntityType Name="user" BaseType="graph.directoryObject" OpenType="true">
+            <Property Name="signInActivity" Type="graph.signInActivity"/>
             <Property Name="accountEnabled" Type="Edm.Boolean"/>
             <Property Name="ageGroup" Type="Edm.String"/>
             <Property Name="assignedLicenses" Type="Collection(graph.assignedLicense)" Nullable="false"/>
@@ -4713,6 +4721,30 @@
          <EntityType Name="todo" BaseType="graph.entity">
             <NavigationProperty Name="lists" Type="Collection(graph.todoTaskList)" ContainsTarget="true"/>
          </EntityType>
+         <ComplexType Name="emailAddress">
+            <Property Name="address" Type="Edm.String"/>
+            <Property Name="name" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="invitedUserMessageInfo">
+            <Property Name="ccRecipients" Type="Collection(graph.recipient)"/>
+            <Property Name="customizedMessageBody" Type="Edm.String"/>
+            <Property Name="messageLanguage" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="recipient">
+            <Property Name="emailAddress" Type="graph.emailAddress"/>
+         </ComplexType>
+         <EntityType Name="invitation" BaseType="graph.entity">
+            <Property Name="invitedUserDisplayName" Type="Edm.String"/>
+            <Property Name="invitedUserEmailAddress" Type="Edm.String" Nullable="false"/>
+            <Property Name="invitedUserMessageInfo" Type="graph.invitedUserMessageInfo"/>
+            <Property Name="invitedUserType" Type="Edm.String"/>
+            <Property Name="inviteRedeemUrl" Type="Edm.String"/>
+            <Property Name="inviteRedirectUrl" Type="Edm.String" Nullable="false"/>
+            <Property Name="resetRedemption" Type="Edm.Boolean"/>
+            <Property Name="sendInvitationMessage" Type="Edm.Boolean"/>
+            <Property Name="status" Type="Edm.String"/>
+            <NavigationProperty Name="invitedUser" Type="graph.user"/>
+         </EntityType>
          <ComplexType Name="applicationServicePrincipal">
             <NavigationProperty Name="application" Type="graph.application"/>
             <NavigationProperty Name="servicePrincipal" Type="graph.servicePrincipal"/>
@@ -5056,12 +5088,14 @@
             <Property Name="x509CertificateField" Type="Edm.String"/>
          </ComplexType>
          <EntityType Name="authenticationMethodConfiguration" BaseType="graph.entity" Abstract="true">
+            <Property Name="excludeTargets" Type="Collection(graph.excludeTarget)"/>
             <Property Name="state" Type="graph.authenticationMethodState"/>
          </EntityType>
          <EntityType Name="authenticationMethodsPolicy" BaseType="graph.entity">
             <Property Name="description" Type="Edm.String"/>
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="policyMigrationState" Type="graph.authenticationMethodsPolicyMigrationState"/>
             <Property Name="policyVersion" Type="Edm.String"/>
             <Property Name="reconfirmationInDays" Type="Edm.Int32"/>
             <Property Name="registrationEnforcement" Type="graph.registrationEnforcement"/>
@@ -5083,6 +5117,7 @@
          </EntityType>
          <EntityType Name="microsoftAuthenticatorAuthenticationMethodConfiguration" BaseType="graph.authenticationMethodConfiguration">
             <Property Name="featureSettings" Type="graph.microsoftAuthenticatorFeatureSettings"/>
+            <Property Name="isSoftwareOathEnabled" Type="Edm.Boolean"/>
             <NavigationProperty Name="includeTargets" Type="Collection(graph.microsoftAuthenticatorAuthenticationMethodTarget)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="microsoftAuthenticatorAuthenticationMethodTarget" BaseType="graph.authenticationMethodTarget">
@@ -5119,6 +5154,7 @@
             <Property Name="allowedToUseSSPR" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="allowEmailVerifiedUsersToJoinOrganization" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="allowInvitesFrom" Type="graph.allowInvitesFrom"/>
+            <Property Name="allowUserConsentForRiskyApps" Type="Edm.Boolean"/>
             <Property Name="blockMsolPowerShell" Type="Edm.Boolean"/>
             <Property Name="defaultUserRolePermissions" Type="graph.defaultUserRolePermissions" Nullable="false"/>
             <Property Name="guestUserRoleId" Type="Edm.Guid"/>
@@ -5184,12 +5220,25 @@
             <Property Name="scopeType" Type="Edm.String" Nullable="false"/>
             <NavigationProperty Name="policy" Type="graph.unifiedRoleManagementPolicy"/>
          </EntityType>
+         <EntityType Name="smsAuthenticationMethodConfiguration" BaseType="graph.authenticationMethodConfiguration">
+            <NavigationProperty Name="includeTargets" Type="Collection(graph.smsAuthenticationMethodTarget)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="smsAuthenticationMethodTarget" BaseType="graph.authenticationMethodTarget">
+            <Property Name="isUsableForSignIn" Type="Edm.Boolean" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="softwareOathAuthenticationMethodConfiguration" BaseType="graph.authenticationMethodConfiguration">
+            <NavigationProperty Name="includeTargets" Type="Collection(graph.authenticationMethodTarget)" ContainsTarget="true"/>
+         </EntityType>
          <EntityType Name="temporaryAccessPassAuthenticationMethodConfiguration" BaseType="graph.authenticationMethodConfiguration">
             <Property Name="defaultLength" Type="Edm.Int32"/>
             <Property Name="defaultLifetimeInMinutes" Type="Edm.Int32"/>
             <Property Name="isUsableOnce" Type="Edm.Boolean"/>
             <Property Name="maximumLifetimeInMinutes" Type="Edm.Int32"/>
             <Property Name="minimumLifetimeInMinutes" Type="Edm.Int32"/>
+            <NavigationProperty Name="includeTargets" Type="Collection(graph.authenticationMethodTarget)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="voiceAuthenticationMethodConfiguration" BaseType="graph.authenticationMethodConfiguration">
+            <Property Name="isOfficePhoneAllowed" Type="Edm.Boolean"/>
             <NavigationProperty Name="includeTargets" Type="Collection(graph.authenticationMethodTarget)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="x509CertificateAuthenticationMethodConfiguration" BaseType="graph.authenticationMethodConfiguration">
@@ -5716,6 +5765,8 @@
             <NavigationProperty Name="alerts_v2" Type="Collection(microsoft.graph.security.alert)" ContainsTarget="true"/>
             <NavigationProperty Name="incidents" Type="Collection(microsoft.graph.security.incident)" ContainsTarget="true"/>
             <NavigationProperty Name="attackSimulation" Type="graph.attackSimulationRoot" ContainsTarget="true"/>
+            <NavigationProperty Name="triggers" Type="microsoft.graph.security.triggersRoot" ContainsTarget="true"/>
+            <NavigationProperty Name="triggerTypes" Type="microsoft.graph.security.triggerTypesRoot" ContainsTarget="true"/>
             <NavigationProperty Name="alerts" Type="Collection(graph.alert)" ContainsTarget="true"/>
             <NavigationProperty Name="secureScoreControlProfiles" Type="Collection(graph.secureScoreControlProfile)" ContainsTarget="true"/>
             <NavigationProperty Name="secureScores" Type="Collection(graph.secureScore)" ContainsTarget="true"/>
@@ -6075,6 +6126,7 @@
          <ComplexType Name="defaultUserRolePermissions">
             <Property Name="allowedToCreateApps" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="allowedToCreateSecurityGroups" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="allowedToReadBitlockerKeysForOwnedDevice" Type="Edm.Boolean"/>
             <Property Name="allowedToReadOtherUsers" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="permissionGrantPoliciesAssigned" Type="Collection(Edm.String)"/>
          </ComplexType>
@@ -6464,6 +6516,7 @@
             <Property Name="resourceApplication" Type="Edm.String"/>
          </EntityType>
          <EntityType Name="rbacApplication" BaseType="graph.entity">
+            <NavigationProperty Name="resourceNamespaces" Type="Collection(graph.unifiedRbacResourceNamespace)" ContainsTarget="true"/>
             <NavigationProperty Name="roleAssignments" Type="Collection(graph.unifiedRoleAssignment)" ContainsTarget="true"/>
             <NavigationProperty Name="roleDefinitions" Type="Collection(graph.unifiedRoleDefinition)" ContainsTarget="true"/>
             <NavigationProperty Name="roleAssignmentScheduleInstances" Type="Collection(graph.unifiedRoleAssignmentScheduleInstance)" ContainsTarget="true"/>
@@ -6472,6 +6525,10 @@
             <NavigationProperty Name="roleEligibilityScheduleInstances" Type="Collection(graph.unifiedRoleEligibilityScheduleInstance)" ContainsTarget="true"/>
             <NavigationProperty Name="roleEligibilityScheduleRequests" Type="Collection(graph.unifiedRoleEligibilityScheduleRequest)" ContainsTarget="true"/>
             <NavigationProperty Name="roleEligibilitySchedules" Type="Collection(graph.unifiedRoleEligibilitySchedule)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="unifiedRbacResourceNamespace" BaseType="graph.entity">
+            <Property Name="name" Type="Edm.String" Nullable="false"/>
+            <NavigationProperty Name="resourceActions" Type="Collection(graph.unifiedRbacResourceAction)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="unifiedRoleAssignment" BaseType="graph.entity">
             <Property Name="appScopeId" Type="Edm.String"/>
@@ -6602,6 +6659,14 @@
             <Property Name="servicePlans" Type="Collection(graph.servicePlanInfo)" Nullable="false"/>
             <Property Name="skuId" Type="Edm.Guid"/>
             <Property Name="skuPartNumber" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="unifiedRbacResourceAction" BaseType="graph.entity">
+            <Property Name="actionVerb" Type="Edm.String"/>
+            <Property Name="authenticationContextId" Type="Edm.String"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="isAuthenticationContextSettable" Type="Edm.Boolean"/>
+            <Property Name="name" Type="Edm.String" Nullable="false"/>
+            <Property Name="resourceScopeId" Type="Edm.String"/>
          </EntityType>
          <ComplexType Name="educationAssignmentRecipient" Abstract="true"/>
          <ComplexType Name="educationAssignmentClassRecipient" BaseType="graph.educationAssignmentRecipient"/>
@@ -8410,6 +8475,10 @@
          <ComplexType Name="cloudAppSecuritySessionControl" BaseType="graph.conditionalAccessSessionControl">
             <Property Name="cloudAppSecurityType" Type="graph.cloudAppSecuritySessionControlType"/>
          </ComplexType>
+         <ComplexType Name="conditionalAccessExternalTenants" Abstract="true">
+            <Property Name="membershipKind" Type="graph.conditionalAccessExternalTenantsMembershipKind"/>
+         </ComplexType>
+         <ComplexType Name="conditionalAccessAllExternalTenants" BaseType="graph.conditionalAccessExternalTenants"/>
          <ComplexType Name="conditionalAccessApplications">
             <Property Name="excludeApplications" Type="Collection(Edm.String)" Nullable="false"/>
             <Property Name="includeApplications" Type="Collection(Edm.String)" Nullable="false"/>
@@ -8445,9 +8514,11 @@
          </ComplexType>
          <ComplexType Name="conditionalAccessUsers">
             <Property Name="excludeGroups" Type="Collection(Edm.String)" Nullable="false"/>
+            <Property Name="excludeGuestsOrExternalUsers" Type="graph.conditionalAccessGuestsOrExternalUsers"/>
             <Property Name="excludeRoles" Type="Collection(Edm.String)" Nullable="false"/>
             <Property Name="excludeUsers" Type="Collection(Edm.String)" Nullable="false"/>
             <Property Name="includeGroups" Type="Collection(Edm.String)" Nullable="false"/>
+            <Property Name="includeGuestsOrExternalUsers" Type="graph.conditionalAccessGuestsOrExternalUsers"/>
             <Property Name="includeRoles" Type="Collection(Edm.String)" Nullable="false"/>
             <Property Name="includeUsers" Type="Collection(Edm.String)" Nullable="false"/>
          </ComplexType>
@@ -8455,11 +8526,18 @@
             <Property Name="mode" Type="graph.filterMode" Nullable="false"/>
             <Property Name="rule" Type="Edm.String" Nullable="false"/>
          </ComplexType>
+         <ComplexType Name="conditionalAccessEnumeratedExternalTenants" BaseType="graph.conditionalAccessExternalTenants">
+            <Property Name="members" Type="Collection(Edm.String)" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="conditionalAccessGrantControls">
             <Property Name="builtInControls" Type="Collection(graph.conditionalAccessGrantControl)" Nullable="false"/>
             <Property Name="customAuthenticationFactors" Type="Collection(Edm.String)" Nullable="false"/>
             <Property Name="operator" Type="Edm.String"/>
             <Property Name="termsOfUse" Type="Collection(Edm.String)" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="conditionalAccessGuestsOrExternalUsers">
+            <Property Name="externalTenants" Type="graph.conditionalAccessExternalTenants"/>
+            <Property Name="guestOrExternalUserTypes" Type="graph.conditionalAccessGuestOrExternalUserTypes" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="conditionalAccessPolicyDetail">
             <Property Name="conditions" Type="graph.conditionalAccessConditionSet" Nullable="false"/>
@@ -9165,6 +9243,16 @@
             <Property Name="revokeOnMdmHandoffDisabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="windowsHelloForBusinessBlocked" Type="Edm.Boolean" Nullable="false"/>
          </EntityType>
+         <EntityType Name="enterpriseCodeSigningCertificate" BaseType="graph.entity">
+            <Property Name="content" Type="Edm.Binary"/>
+            <Property Name="expirationDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="issuer" Type="Edm.String"/>
+            <Property Name="issuerName" Type="Edm.String"/>
+            <Property Name="status" Type="graph.certificateStatus" Nullable="false"/>
+            <Property Name="subject" Type="Edm.String"/>
+            <Property Name="subjectName" Type="Edm.String"/>
+            <Property Name="uploadDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+         </EntityType>
          <EntityType Name="iosiPadOSWebClip" BaseType="graph.mobileApp">
             <Property Name="appUrl" Type="Edm.String"/>
             <Property Name="useManagedBrowser" Type="Edm.Boolean" Nullable="false"/>
@@ -9176,6 +9264,9 @@
             <Property Name="expirationDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="minimumSupportedOperatingSystem" Type="graph.iosMinimumOperatingSystem"/>
             <Property Name="versionNumber" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="iosLobAppProvisioningConfigurationAssignment" BaseType="graph.entity">
+            <Property Name="target" Type="graph.deviceAndAppManagementAssignmentTarget"/>
          </EntityType>
          <EntityType Name="iosMobileAppConfiguration" BaseType="graph.managedDeviceMobileAppConfiguration">
             <Property Name="encodedSettingXml" Type="Edm.Binary"/>
@@ -9332,6 +9423,15 @@
             <Property Name="rules" Type="Collection(graph.win32LobAppRule)"/>
             <Property Name="setupFilePath" Type="Edm.String"/>
             <Property Name="uninstallCommandLine" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="windowsAppX" BaseType="graph.mobileLobApp">
+            <Property Name="applicableArchitectures" Type="graph.windowsArchitecture" Nullable="false"/>
+            <Property Name="identityName" Type="Edm.String"/>
+            <Property Name="identityPublisherHash" Type="Edm.String" Nullable="false"/>
+            <Property Name="identityResourceIdentifier" Type="Edm.String"/>
+            <Property Name="identityVersion" Type="Edm.String"/>
+            <Property Name="isBundle" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="minimumSupportedOperatingSystem" Type="graph.windowsMinimumOperatingSystem" Nullable="false"/>
          </EntityType>
          <EntityType Name="windowsMicrosoftEdgeApp" BaseType="graph.mobileApp">
             <Property Name="channel" Type="graph.microsoftEdgeChannel" Nullable="false"/>
@@ -13269,6 +13369,52 @@
             <NavigationProperty Name="extensions" Type="Collection(graph.extension)" ContainsTarget="true"/>
             <NavigationProperty Name="linkedResources" Type="Collection(graph.linkedResource)" ContainsTarget="true"/>
          </EntityType>
+         <EntityType Name="employeeExperience">
+            <NavigationProperty Name="learningProviders" Type="Collection(graph.learningProvider)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="learningProvider" BaseType="graph.entity">
+            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="loginWebUrl" Type="Edm.String"/>
+            <Property Name="longLogoWebUrlForDarkTheme" Type="Edm.String" Nullable="false"/>
+            <Property Name="longLogoWebUrlForLightTheme" Type="Edm.String" Nullable="false"/>
+            <Property Name="squareLogoWebUrlForDarkTheme" Type="Edm.String" Nullable="false"/>
+            <Property Name="squareLogoWebUrlForLightTheme" Type="Edm.String" Nullable="false"/>
+            <NavigationProperty Name="learningContents" Type="Collection(graph.learningContent)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="learningContent" BaseType="graph.entity">
+            <Property Name="additionalTags" Type="Collection(Edm.String)"/>
+            <Property Name="contentWebUrl" Type="Edm.String" Nullable="false"/>
+            <Property Name="contributors" Type="Collection(Edm.String)"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="duration" Type="Edm.Duration"/>
+            <Property Name="externalId" Type="Edm.String" Nullable="false"/>
+            <Property Name="format" Type="Edm.String"/>
+            <Property Name="isActive" Type="Edm.Boolean"/>
+            <Property Name="isPremium" Type="Edm.Boolean"/>
+            <Property Name="isSearchable" Type="Edm.Boolean"/>
+            <Property Name="languageTag" Type="Edm.String" Nullable="false"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="numberOfPages" Type="Edm.Int32"/>
+            <Property Name="skillTags" Type="Collection(Edm.String)"/>
+            <Property Name="sourceName" Type="Edm.String"/>
+            <Property Name="thumbnailWebUrl" Type="Edm.String"/>
+            <Property Name="title" Type="Edm.String" Nullable="false"/>
+            <Annotation Term="OData.Community.Keys.V1.AlternateKeys">
+               <Collection>
+                  <Record Type="OData.Community.Keys.V1.AlternateKey">
+                     <PropertyValue Property="Key">
+                        <Collection>
+                           <Record Type="OData.Community.Keys.V1.PropertyRef">
+                              <PropertyValue Property="Alias" String="externalId"/>
+                              <PropertyValue Property="Name" PropertyPath="externalId"/>
+                           </Record>
+                        </Collection>
+                     </PropertyValue>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </EntityType>
          <Term Name="downloadUrl" Type="Edm.String" AppliesTo="microsoft.graph.driveItem"/>
          <Term Name="sourceUrl" Type="Edm.String" AppliesTo="microsoft.graph.driveItem"/>
          <Term Name="conflictBehavior" Type="Edm.String" AppliesTo="microsoft.graph.driveItem"/>
@@ -16457,10 +16603,10 @@
             <ReturnType Type="graph.workbookTableRow"/>
          </Function>
          <Action Name="protect" IsBound="true">
-            <Parameter Name="bindparameter" Type="graph."/>
+            <Parameter Name="bindparameter" Type="graph.workbookWorksheetProtection"/>
             <Parameter Name="options" Type="graph.workbookWorksheetProtectionOptions"/>
          </Action>
-         <Action Name="unprotect" IsBound="true">workbookWorksheetProtection
+         <Action Name="unprotect" IsBound="true">
             <Parameter Name="bindparameter" Type="graph.workbookWorksheetProtection"/>
          </Action>
          <Action Name="refresh" IsBound="true">
@@ -18477,6 +18623,7 @@
             <Singleton Name="appCatalogs" Type="microsoft.graph.appCatalogs"/>
             <Singleton Name="teamwork" Type="microsoft.graph.teamwork"/>
             <Singleton Name="informationProtection" Type="microsoft.graph.informationProtection"/>
+            <Singleton Name="employeeExperience" Type="microsoft.graph.employeeExperience"/>
          </EntityContainer>
          <Annotations Target="microsoft.graph.bookingPriceType">
             <Annotation Term="Org.OData.Core.V1.Description" String="Represents the type of pricing of a booking service."/>
@@ -23788,7 +23935,7 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="Contains properties used when assigning a Windows AppX mobile app to a group."/>
          </Annotations>
          <Annotations Target="microsoft.graph.windowsAppXAppAssignmentSettings/useDeviceContext">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Whether or not to use device execution context for Windows AppX mobile app."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="When TRUE, indicates that device execution context will be used for the AppX mobile app. When FALSE, indicates that user context will be used for the AppX mobile app. By default, this property is set to FALSE. Once this property has been set to TRUE it cannot be changed."/>
          </Annotations>
          <Annotations Target="microsoft.graph.windowsMinimumOperatingSystem">
             <Annotation Term="Org.OData.Core.V1.Description" String="The minimum operating system required for a Windows mobile app."/>
@@ -23946,6 +24093,30 @@
          <Annotations Target="microsoft.graph.deviceAppManagement/windowsInformationProtectionPolicies">
             <Annotation Term="Org.OData.Core.V1.Description" String="Windows information protection for apps running on devices which are not MDM enrolled."/>
          </Annotations>
+         <Annotations Target="microsoft.graph.enterpriseCodeSigningCertificate/content">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The Windows Enterprise Code-Signing Certificate in the raw data format. Set to null once certificate has been uploaded and other properties have been populated."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.enterpriseCodeSigningCertificate/expirationDateTime">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The cert expiration date and time (using ISO 8601 format, in UTC time). Uploading a valid cert file through the Intune admin console will automatically populate this value in the HTTP response. Supports: $filter, $select, $top, $OrderBy, $skip. $Search is not supported."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.enterpriseCodeSigningCertificate/issuer">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The issuer value for the cert. This might contain information such as country (C), state or province (S), locality (L), common name of the cert (CN), organization (O), and organizational unit (OU). Uploading a valid cert file through the Intune admin console will automatically populate this value in the HTTP response. Supports: $filter, $select, $top, $OrderBy, $skip. $Search is not supported."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.enterpriseCodeSigningCertificate/issuerName">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The issuer name for the cert. This might contain information such as country (C), state or province (S), locality (L), common name of the cert (CN), organization (O), and organizational unit (OU). Uploading a valid cert file through the Intune admin console will automatically populate this value in the HTTP response. Supports: $filter, $select, $top, $OrderBy, $skip. $Search is not supported."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.enterpriseCodeSigningCertificate/status">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Whether the Certificate Status Provisioned or not Provisioned. Possible values are: notProvisioned, provisioned. Default is notProvisioned. Uploading a valid cert file through the Intune admin console will automatically populate this value in the HTTP response. Supports: $filter, $select, $top, $OrderBy, $skip. $Search is not supported."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.enterpriseCodeSigningCertificate/subject">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The subject value for the cert. This might contain information such as country (C), state or province (S), locality (L), common name of the cert (CN), organization (O), and organizational unit (OU). Uploading a valid cert file through the Intune admin console will automatically populate this value in the HTTP response. Supports: $filter, $select, $top, $OrderBy, $skip. $Search is not supported."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.enterpriseCodeSigningCertificate/subjectName">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The subject name for the cert. This might contain information such as country (C), state or province (S), locality (L), common name of the cert (CN), organization (O), and organizational unit (OU). Uploading a valid cert file through the Intune admin console will automatically populate this value in the HTTP response. Supports: $filter, $select, $top, $OrderBy, $skip. $Search is not supported."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.enterpriseCodeSigningCertificate/uploadDateTime">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The date time of CodeSigning Cert when it is uploaded (using ISO 8601 format, in UTC time). Uploading a valid cert file through the Intune admin console will automatically populate this value in the HTTP response. Supports: $filter, $select, $top, $OrderBy, $skip. $Search is not supported."/>
+         </Annotations>
          <Annotations Target="microsoft.graph.iosiPadOSWebClip">
             <Annotation Term="Org.OData.Core.V1.Description" String="Contains properties and inherited properties for iOS web apps."/>
          </Annotations>
@@ -23975,6 +24146,12 @@
          </Annotations>
          <Annotations Target="microsoft.graph.iosLobApp/versionNumber">
             <Annotation Term="Org.OData.Core.V1.Description" String="The version number of iOS Line of Business (LoB) app."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.iosLobAppProvisioningConfigurationAssignment">
+            <Annotation Term="Org.OData.Core.V1.Description" String="A class containing the properties used for Group Assignment of an iOS LOB App Provisioning and Configuration."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.iosLobAppProvisioningConfigurationAssignment/target">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The target group assignment defined by the admin."/>
          </Annotations>
          <Annotations Target="microsoft.graph.iosMobileAppConfiguration">
             <Annotation Term="Org.OData.Core.V1.Description" String="Contains properties, inherited properties and actions for iOS mobile app configurations."/>
@@ -24474,6 +24651,30 @@
          <Annotations Target="microsoft.graph.win32LobApp/uninstallCommandLine">
             <Annotation Term="Org.OData.Core.V1.Description" String="The command line to uninstall this app"/>
          </Annotations>
+         <Annotations Target="microsoft.graph.windowsAppX">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Contains properties and inherited properties for Windows AppX Line Of Business apps."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.windowsAppX/applicableArchitectures">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The Windows architecture(s) on which this app can run. Possible values are: `none`, `x86`, `x64`, `arm`, `neutral`; default value is `none`."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.windowsAppX/identityName">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The identity name of the uploaded app package. For example: &quot;Contoso.DemoApp&quot;."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.windowsAppX/identityPublisherHash">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The identity publisher hash of the uploaded app package. This is the hash of the publisher from the manifest. For example: &quot;AB82CD0XYZ&quot;."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.windowsAppX/identityResourceIdentifier">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The identity resource identifier of the uploaded app package. For example: &quot;TestResourceId&quot;."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.windowsAppX/identityVersion">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The identity version of the uploaded app package. For example: &quot;1.0.0.0&quot;."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.windowsAppX/isBundle">
+            <Annotation Term="Org.OData.Core.V1.Description" String="When TRUE, indicates that the app is a bundle. When FALSE, indicates that the app is not a bundle. By default, property is set to FALSE."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.windowsAppX/minimumSupportedOperatingSystem">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The value for the minimum applicable operating system. Valid values for a WindowsAppX app include `v8_0`, `v8_1` and `v10_0`. If the app is a bundle, the minimum supported OS has to be at least `v8_1`."/>
+         </Annotations>
          <Annotations Target="microsoft.graph.windowsMicrosoftEdgeApp">
             <Annotation Term="Org.OData.Core.V1.Description" String="Contains properties and inherited properties for the Microsoft Edge app on Windows."/>
          </Annotations>
@@ -24721,7 +24922,7 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="The list of Exchange Connectors configured by the tenant."/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileThreatDefenseConnector">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Entity which represents a connection to Mobile threat defense partner."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Entity which represents a connection to Mobile Threat Defense partner."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagement/mobileThreatDefenseConnectors">
             <Annotation Term="Org.OData.Core.V1.Description" String="The list of Mobile threat Defense connectors configured by the tenant."/>
@@ -28972,49 +29173,49 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="Represents an assignment to managed devices in the tenant"/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileThreatDefenseConnector/allowPartnerToCollectIOSApplicationMetadata">
-            <Annotation Term="Org.OData.Core.V1.Description" String="When TRUE, indicates the data sync partner may collect metadata about installed applications from Intune for IOS devices. When FALSE, indicates the data sync partner may not collect metadata about installed applications from Intune for IOS devices. Default value is FALSE."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="When TRUE, indicates the Mobile Threat Defense partner may collect metadata about installed applications from Intune for IOS devices. When FALSE, indicates the Mobile Threat Defense partner may not collect metadata about installed applications from Intune for IOS devices. Default value is FALSE."/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileThreatDefenseConnector/allowPartnerToCollectIOSPersonalApplicationMetadata">
-            <Annotation Term="Org.OData.Core.V1.Description" String="When TRUE, indicates the data sync partner may collect metadata about personally installed applications from Intune for IOS devices. When FALSE, indicates the data sync partner may not collect metadata about personally installed applications from Intune for IOS devices. Default value is FALSE."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="When TRUE, indicates the Mobile Threat Defense partner may collect metadata about personally installed applications from Intune for IOS devices. When FALSE, indicates the Mobile Threat Defense partner may not collect metadata about personally installed applications from Intune for IOS devices. Default value is FALSE."/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileThreatDefenseConnector/androidDeviceBlockedOnMissingPartnerData">
-            <Annotation Term="Org.OData.Core.V1.Description" String="For Android, set whether Intune must receive data from the data sync partner prior to marking a device compliant"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="For Android, set whether Intune must receive data from the Mobile Threat Defense partner prior to marking a device compliant"/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileThreatDefenseConnector/androidEnabled">
-            <Annotation Term="Org.OData.Core.V1.Description" String="For Android, set whether data from the data sync partner should be used during compliance evaluations"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="For Android, set whether data from the Mobile Threat Defense partner should be used during compliance evaluations"/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileThreatDefenseConnector/androidMobileApplicationManagementEnabled">
-            <Annotation Term="Org.OData.Core.V1.Description" String="When TRUE, inidicates that data from the data sync partner can be used during Mobile Application Management (MAM) evaluations for Android devices. When FALSE, inidicates that data from the data sync partner should not be used during Mobile Application Management (MAM) evaluations for Android devices. Only one partner per platform may be enabled for Mobile Application Management (MAM) evaluation. Default value is FALSE."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="When TRUE, inidicates that data from the Mobile Threat Defense partner can be used during Mobile Application Management (MAM) evaluations for Android devices. When FALSE, inidicates that data from the Mobile Threat Defense partner should not be used during Mobile Application Management (MAM) evaluations for Android devices. Only one partner per platform may be enabled for Mobile Application Management (MAM) evaluation. Default value is FALSE."/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileThreatDefenseConnector/iosDeviceBlockedOnMissingPartnerData">
-            <Annotation Term="Org.OData.Core.V1.Description" String="For IOS, set whether Intune must receive data from the data sync partner prior to marking a device compliant"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="For IOS, set whether Intune must receive data from the Mobile Threat Defense partner prior to marking a device compliant"/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileThreatDefenseConnector/iosEnabled">
-            <Annotation Term="Org.OData.Core.V1.Description" String="For IOS, get or set whether data from the data sync partner should be used during compliance evaluations"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="For IOS, get or set whether data from the Mobile Threat Defense partner should be used during compliance evaluations"/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileThreatDefenseConnector/iosMobileApplicationManagementEnabled">
-            <Annotation Term="Org.OData.Core.V1.Description" String="When TRUE, inidicates that data from the data sync partner can be used during Mobile Application Management (MAM) evaluations for IOS devices. When FALSE, inidicates that data from the data sync partner should not be used during Mobile Application Management (MAM) evaluations for IOS devices. Only one partner per platform may be enabled for Mobile Application Management (MAM) evaluation. Default value is FALSE."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="When TRUE, inidicates that data from the Mobile Threat Defense partner can be used during Mobile Application Management (MAM) evaluations for IOS devices. When FALSE, inidicates that data from the Mobile Threat Defense partner should not be used during Mobile Application Management (MAM) evaluations for IOS devices. Only one partner per platform may be enabled for Mobile Application Management (MAM) evaluation. Default value is FALSE."/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileThreatDefenseConnector/lastHeartbeatDateTime">
-            <Annotation Term="Org.OData.Core.V1.Description" String="DateTime of last Heartbeat recieved from the Data Sync Partner"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="DateTime of last Heartbeat recieved from the Mobile Threat Defense partner"/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileThreatDefenseConnector/microsoftDefenderForEndpointAttachEnabled">
             <Annotation Term="Org.OData.Core.V1.Description" String="When TRUE, inidicates that configuration profile management via Microsoft Defender for Endpoint is enabled. When FALSE, inidicates that configuration profile management via Microsoft Defender for Endpoint is disabled. Default value is FALSE."/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileThreatDefenseConnector/partnerState">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Data Sync Partner state for this account"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Mobile Threat Defense partner state for this account"/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileThreatDefenseConnector/partnerUnresponsivenessThresholdInDays">
             <Annotation Term="Org.OData.Core.V1.Description" String="Get or Set days the per tenant tolerance to unresponsiveness for this partner integration"/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileThreatDefenseConnector/partnerUnsupportedOsVersionBlocked">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Get or set whether to block devices on the enabled platforms that do not meet the minimum version requirements of the Data Sync Partner"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Get or set whether to block devices on the enabled platforms that do not meet the minimum version requirements of the Mobile Threat Defense partner"/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileThreatDefenseConnector/windowsDeviceBlockedOnMissingPartnerData">
-            <Annotation Term="Org.OData.Core.V1.Description" String="When TRUE, inidicates that Intune must receive data from the data sync partner prior to marking a device compliant for Windows. When FALSE, inidicates that Intune may make a device compliant without receiving data from the data sync partner for Windows. Default value is FALSE."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="When TRUE, inidicates that Intune must receive data from the Mobile Threat Defense partner prior to marking a device compliant for Windows. When FALSE, inidicates that Intune may make a device compliant without receiving data from the Mobile Threat Defense partner for Windows. Default value is FALSE."/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileThreatDefenseConnector/windowsEnabled">
-            <Annotation Term="Org.OData.Core.V1.Description" String="When TRUE, inidicates that data from the data sync partner can be used during compliance evaluations for Windows. When FALSE, inidicates that data from the data sync partner should not be used during compliance evaluations for Windows. Default value is FALSE."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="When TRUE, inidicates that data from the Mobile Threat Defense partner can be used during compliance evaluations for Windows. When FALSE, inidicates that data from the Mobile Threat Defense partner should not be used during compliance evaluations for Windows. Default value is FALSE."/>
          </Annotations>
          <Annotations Target="microsoft.graph.onPremisesConditionalAccessSettings/enabled">
             <Annotation Term="Org.OData.Core.V1.Description" String="Indicates if on premises conditional access is enabled for this organization"/>
@@ -30905,6 +31106,32 @@
             <Member Name="azure" Value="1"/>
             <Member Name="unknownFutureValue" Value="15"/>
          </EnumType>
+         <EnumType Name="eventPropagationStatus">
+            <Member Name="none" Value="0"/>
+            <Member Name="inProcessing" Value="1"/>
+            <Member Name="failed" Value="2"/>
+            <Member Name="success" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
+         <EnumType Name="eventStatusType">
+            <Member Name="pending" Value="0"/>
+            <Member Name="error" Value="1"/>
+            <Member Name="success" Value="2"/>
+            <Member Name="notAvaliable" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
+         <EnumType Name="queryType">
+            <Member Name="files" Value="0"/>
+            <Member Name="messages" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
+         <EnumType Name="retentionTrigger">
+            <Member Name="dateLabeled" Value="0"/>
+            <Member Name="dateCreated" Value="1"/>
+            <Member Name="dateModified" Value="2"/>
+            <Member Name="dateOfEvent" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
          <EntityType Name="casesRoot" BaseType="graph.entity">
             <NavigationProperty Name="ediscoveryCases" Type="Collection(microsoft.graph.security.ediscoveryCase)" ContainsTarget="true"/>
          </EntityType>
@@ -30953,6 +31180,12 @@
             <Property Name="status" Type="microsoft.graph.security.incidentStatus" Nullable="false"/>
             <Property Name="tenantId" Type="Edm.String"/>
             <NavigationProperty Name="alerts" Type="Collection(microsoft.graph.security.alert)"/>
+         </EntityType>
+         <EntityType Name="triggersRoot" BaseType="graph.entity">
+            <NavigationProperty Name="retentionEvents" Type="Collection(microsoft.graph.security.retentionEvent)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="triggerTypesRoot" BaseType="graph.entity">
+            <NavigationProperty Name="retentionEventTypes" Type="Collection(microsoft.graph.security.retentionEventType)" ContainsTarget="true"/>
          </EntityType>
          <ComplexType Name="ocrSettings">
             <Property Name="isEnabled" Type="Edm.Boolean"/>
@@ -31257,6 +31490,42 @@
          <ComplexType Name="userEvidence" BaseType="microsoft.graph.security.alertEvidence">
             <Property Name="userAccount" Type="microsoft.graph.security.userAccount"/>
          </ComplexType>
+         <ComplexType Name="eventPropagationResult">
+            <Property Name="location" Type="Edm.String"/>
+            <Property Name="serviceName" Type="Edm.String"/>
+            <Property Name="status" Type="microsoft.graph.security.eventPropagationStatus"/>
+            <Property Name="statusInformation" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="eventQuery">
+            <Property Name="query" Type="Edm.String" Nullable="false"/>
+            <Property Name="queryType" Type="microsoft.graph.security.queryType"/>
+         </ComplexType>
+         <ComplexType Name="retentionEventStatus">
+            <Property Name="error" Type="graph.publicError"/>
+            <Property Name="status" Type="microsoft.graph.security.eventStatusType"/>
+         </ComplexType>
+         <EntityType Name="retentionEvent" BaseType="graph.entity">
+            <Property Name="createdBy" Type="graph.identitySet"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="eventPropagationResults" Type="Collection(microsoft.graph.security.eventPropagationResult)"/>
+            <Property Name="eventQueries" Type="Collection(microsoft.graph.security.eventQuery)"/>
+            <Property Name="eventStatus" Type="microsoft.graph.security.retentionEventStatus"/>
+            <Property Name="eventTriggerDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="lastModifiedBy" Type="graph.identitySet"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="lastStatusUpdateDateTime" Type="Edm.DateTimeOffset"/>
+            <NavigationProperty Name="retentionEventType" Type="microsoft.graph.security.retentionEventType"/>
+         </EntityType>
+         <EntityType Name="retentionEventType" BaseType="graph.entity">
+            <Property Name="createdBy" Type="graph.identitySet"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="lastModifiedBy" Type="graph.identitySet"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+         </EntityType>
          <Action Name="activate" IsBound="true">
             <Parameter Name="bindingParameter" Type="microsoft.graph.security.ediscoveryCustodian"/>
          </Action>

@@ -15,9 +15,9 @@ def export_to_file(path, content):
 
 parser = ArgumentParser()
 parser.add_argument("-e", "--endpoint", dest="endpoint",
-                    help="Import metadata endpoint", default="sharepoint")
+                    help="Import metadata endpoint", default="microsoftgraph")
 parser.add_argument("-p", "--path",
-                    dest="path", default="./metadata/SharePoint.xml",
+                    dest="path", default="./metadata/MicrosoftGraph.xml",
                     help="Import metadata endpoint")
 
 args = parser.parse_args()

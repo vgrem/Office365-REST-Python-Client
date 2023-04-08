@@ -5,6 +5,7 @@ from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.driveitems.system_facet import SystemFacet
 from office365.onedrive.internal.paths.root import RootPath
 from office365.onedrive.lists.list import List
+from office365.onedrive.sharepoint_ids import SharePointIds
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
 
@@ -55,7 +56,7 @@ class Drive(BaseItem):
     @property
     def sharepoint_ids(self):
         """Returns identifiers useful for SharePoint REST compatibility."""
-        return self.properties.get('sharepointIds', None)
+        return self.properties.get('sharepointIds', SharePointIds())
 
     @property
     def system(self):
