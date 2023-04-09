@@ -123,12 +123,25 @@ class Message(OutlookItem):
         self.context.add_query(qry)
         return self
 
+    def create_reply(self, comment=None):
+        """
+        Create a draft to reply to the sender of a message in either JSON or MIME format.
+
+        :param str comment:
+        """
+        return_type = Message(self.context)
+        payload = {
+            "comment" : comment
+        }
+        qry = ServiceOperationQuery(self, "createReply", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return self
+
     def create_reply_all(self):
         """
         Create a draft to reply to the sender and all the recipients of the specified message.
         You can then update the draft to add reply content to the body or change other message properties, or,
         simply send the draft.
-        :return:
         """
         qry = ServiceOperationQuery(self, "createReplyAll")
         self.context.add_query(qry)
@@ -242,6 +255,11 @@ class Message(OutlookItem):
         for a shared calendar, or as a delegate. In any case, the value must correspond to the actual mailbox used.
         Find out more about setting the from and sender properties of a message."""
         return self.get_property('sender', Recipient())
+
+    @property
+    def parent_folder_id(self):
+        """The unique identifier for the message's parent mailFolder."""
+        return self.get_property('parentFolderId', None)
 
     def get_property(self, name, default_value=None, track_changes=False):
         if default_value is None:

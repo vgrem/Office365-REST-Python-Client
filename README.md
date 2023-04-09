@@ -236,12 +236,12 @@ client.me.send_mail(
 
 Additional examples & scenarios:
 
--  [download a message](examples/outlook/download_messages.py) 
--  [list messages](examples/outlook/list_message.py)
--  [move messages to a different folder](examples/outlook/move_message.py)
--  [search messages](examples/outlook/search_message.py)   
--  [send messages](examples/outlook/send_message.py)
--  [send messages with attachments](examples/outlook/send_message_with_attachment.py) 
+-  [download a message](examples/outlook/messages/download.py) 
+-  [list messages](examples/outlook/messages/list_all.py)
+-  [move messages to a different folder](examples/outlook/messages/move.py)
+-  [search messages](examples/outlook/messages/search.py)   
+-  [send messages](examples/outlook/messages/send.py)
+-  [send messages with attachments](examples/outlook/messages/send_with_attachment.py) 
 -  [enable sending emails on behalf of another user in your organization](https://learn.microsoft.com/en-us/microsoft-365/solutions/allow-members-to-send-as-or-send-on-behalf-of-group)
 
 Refer to [examples section](examples/outlook) for other scenarios

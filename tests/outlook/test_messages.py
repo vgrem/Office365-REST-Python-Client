@@ -23,6 +23,10 @@ class TestGraphMail(GraphTestCase):
         message.update()
         message.send().execute_query()
 
+    #def test4_create_reply(self):
+    #    message = self.__class__.target_message.create_reply().execute_query()
+    #    self.assertIsNotNone(message.resource_path)
+
     # def test4_forward_message(self):
     #    self.__class__.target_message.forward([test_user_principal_name_alt]).execute_query()
 
