@@ -7,3 +7,8 @@ class TaskFileAttachment(AttachmentBase):
     When you create a file attachment on a task, include "@odata.type": "#microsoft.graph.taskFileAttachment"
     and the properties name and contentBytes.
     """
+
+    @property
+    def content_bytes(self):
+        """The base64-encoded contents of the file."""
+        return self.properties.get("contentBytes", None)

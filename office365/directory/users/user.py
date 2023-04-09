@@ -93,20 +93,20 @@ class User(DirectoryObject):
         :param bool save_to_sent_items: Indicates whether to save the message in Sent Items. Specify it only if
             the parameter is false; default is true
         """
-        message = Message(self.context)
-        message.subject = subject
-        message.body = body
-        [message.to_recipients.add(Recipient.from_email(email)) for email in to_recipients]
-        [message.bcc_recipients.add(Recipient.from_email(email)) for email in bcc_recipients]
-        [message.cc_recipients.add(Recipient.from_email(email)) for email in cc_recipients]
+        return_type = Message(self.context)
+        return_type.subject = subject
+        return_type.body = body
+        [return_type.to_recipients.add(Recipient.from_email(email)) for email in to_recipients]
+        [return_type.bcc_recipients.add(Recipient.from_email(email)) for email in bcc_recipients]
+        [return_type.cc_recipients.add(Recipient.from_email(email)) for email in cc_recipients]
 
         payload = {
-            "message": message,
+            "message": return_type,
             "saveToSentItems": save_to_sent_items
         }
         qry = ServiceOperationQuery(self, "sendmail", None, payload)
         self.context.add_query(qry)
-        return message
+        return return_type
 
     def export_personal_data(self, storage_location):
         """
