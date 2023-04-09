@@ -1,3 +1,6 @@
+import base64
+import io
+
 from office365.outlook.mail.messages.message import Message
 from office365.outlook.mail.recipient import Recipient
 from tests import test_user_principal_name, test_user_principal_name_alt
@@ -40,3 +43,27 @@ class TestGraphMail(GraphTestCase):
         messages = self.client.me.messages.top(1).get().execute_query()
         message_to_delete = messages[0]
         message_to_delete.delete_object().execute_query()
+
+    def test_8_create_draft_message_with_attachments(self):
+        content = base64.b64encode(
+            io.BytesIO(b"This is some file content").read()
+        ).decode()
+        draft = (
+            self.client.me
+            .messages.add(
+                subject="Check out this attachment", body="The new cafeteria is open."
+            )
+            .add_file_attachment("test.txt", "Hello World!")
+            .add_file_attachment("test2.txt", base64_content=content)
+            .execute_query()
+        )
+        assert (
+            len(
+                self.client.me
+                .messages[draft.id]
+                .attachments.get()
+                .execute_query()
+            )
+            == 2
+        )
+        draft.delete_object().execute_query()
