@@ -60,16 +60,21 @@ class Message(OutlookItem):
         self.context.add_query(qry)
         return return_type
 
-    def add_file_attachment(self, name, content, content_type=None):
+    def add_file_attachment(
+        self, name, content=None, content_type=None, base64_content=None
+    ):
         """
         Attach a file to message
 
         :param str name: The name representing the text that is displayed below the icon representing the
              embedded attachment
-        :param str content: The contents of the file
+        :param str or None content: The contents of the file
         :param str or None content_type: The content type of the attachment.
+        :param str or None base64_content: The contents of the file in the form of a base64 string.
         """
-        self.attachments.add_file(name, content, content_type)
+        if not content and not base64_content:
+            raise TypeError("Either content or base64_content is required")
+        self.attachments.add_file(name, content, content_type, base64_content)
         return self
 
     def upload_attachment(self, file_path, chunk_uploaded=None):
