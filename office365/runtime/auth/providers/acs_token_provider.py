@@ -42,8 +42,8 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
             url_info = urlparse(self.url)
             return self._get_app_only_access_token(url_info.hostname, realm)
         except requests.exceptions.RequestException as e:
-            self.error = e.response.text
-            raise ValueError(e.response.text)
+            self.error = e.response.text if e.response else None
+            raise ValueError(self.error)
 
     def _get_app_only_access_token(self, target_host, target_realm):
         """
