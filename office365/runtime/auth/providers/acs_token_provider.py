@@ -42,14 +42,16 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
             url_info = urlparse(self.url)
             return self._get_app_only_access_token(url_info.hostname, realm)
         except requests.exceptions.RequestException as e:
-            self.error = e.response.text if e.response else None
+            self.error = e.response.text if e.response is not None else "Acquire app-only access token failed."
             raise ValueError(self.error)
 
     def _get_app_only_access_token(self, target_host, target_realm):
         """
+        Retrieves an app-only access token from ACS to call the specified principal
+        at the specified targetHost. The targetHost must be registered for target principal.
 
-        :type target_host: str
-        :type target_realm: str
+        :param str target_host: Url authority of the target principal
+        :param str target_realm: Realm to use for the access token's nameid and audience
         """
         resource = self.get_formatted_principal(self.SharePointPrincipal, target_host, target_realm)
         principal_id = self.get_formatted_principal(self._client_id, None, target_realm)
@@ -67,11 +69,15 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         return TokenResponse.from_json(response.json())
 
     def _get_realm_from_target_url(self):
+        """Get the realm for the URL"""
         response = requests.head(url=self.url, headers={'Authorization': 'Bearer'})
         return self.process_realm_response(response)
 
     @staticmethod
     def process_realm_response(response):
+        """
+        :type response: requests.Response
+        """
         header_key = "WWW-Authenticate"
         if header_key in response.headers:
             auth_values = response.headers[header_key].split(",")

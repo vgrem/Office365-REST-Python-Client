@@ -7,7 +7,6 @@ from office365.runtime.client_value import ClientValue
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
-from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -65,8 +64,6 @@ class ODataRequest(ClientRequest):
             if isinstance(json_format, JsonLightFormat):
                 if isinstance(query, ServiceOperationQuery):
                     json_format.function = query.method_name
-                elif isinstance(return_type.resource_path, ServiceOperationPath):
-                    json_format.function = return_type.resource_path.name
 
             self.map_json(response.json(), return_type, json_format)
 
