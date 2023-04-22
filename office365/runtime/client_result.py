@@ -1,3 +1,4 @@
+import copy
 from typing import TypeVar
 
 from office365.runtime.client_value import ClientValue
@@ -16,7 +17,7 @@ class ClientResult(object):
         :type default_value: T
         """
         self._context = context
-        self._value = default_value
+        self._value = copy.deepcopy(default_value)
 
     def after_execute(self, action, *args, **kwargs):
 
@@ -37,8 +38,8 @@ class ClientResult(object):
         :type persist_changes: bool
         """
         from office365.runtime.client_value import ClientValue
-        if isinstance(self.value, ClientValue):
-            self.value.set_property(key, value, persist_changes)
+        if isinstance(self._value, ClientValue):
+            self._value.set_property(key, value, persist_changes)
         else:
             self._value = value
 
