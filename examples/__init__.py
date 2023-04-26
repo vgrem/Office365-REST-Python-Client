@@ -6,7 +6,7 @@ from tests import load_settings
 
 settings = load_settings()
 
-#aliases
+# aliases
 sample_client_id = settings.get('client_credentials', 'client_id')
 sample_client_secret = settings.get('client_credentials', 'client_secret')
 sample_user_principal_name = settings.get('users', 'test_user1')

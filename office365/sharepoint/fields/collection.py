@@ -129,7 +129,7 @@ class FieldCollection(BaseEntityCollection):
         """
         Creates a field based on the values defined in the parameters input parameter.
 
-        :param str schema_xml:
+        :param str schema_xml: Specifies the schema that defines the field
         :type return_type: Field
         """
         if return_type is None:
