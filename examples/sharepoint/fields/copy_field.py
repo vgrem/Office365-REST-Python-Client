@@ -15,7 +15,6 @@ source_field = source_ctx.web.default_document_library().fields.get_by_internal_
 source_ctx.load(source_field, ["SchemaXml"]).execute_query()
 
 target_ctx = ClientContext(target_site_url).with_credentials(test_client_credentials)
-target_field = target_ctx.web.default_document_library().fields.create_field_as_xml(
-    source_field.schema_xml).execute_query()
-print(target_field.title)
+target_list = target_ctx.web.default_document_library()
+target_field = target_list.fields.create_field_as_xml(source_field.schema_xml).execute_query()
 clean_up(target_field)

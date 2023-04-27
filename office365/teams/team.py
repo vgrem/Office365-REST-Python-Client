@@ -226,6 +226,6 @@ class Team(Entity):
     def set_property(self, name, value, persist_changes=True):
         super(Team, self).set_property(name, value, persist_changes)
         # fallback: determine whether resource path is resolved
-        if name == "id" and self._resource_path.name == "team":
+        if name == "id" and self._resource_path.key == "team":
             self._resource_path = ResourcePath(value, ResourcePath("teams"))
         return self

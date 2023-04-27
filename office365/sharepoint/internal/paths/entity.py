@@ -6,4 +6,6 @@ class EntityPath(ResourcePath):
 
     @property
     def segments(self):
-        return ["(", "'{0}'".format(self.name), ")"]
+        if isinstance(self.key, int):
+            return ["(", "{0}".format(self.key), ")"]
+        return ["(", "'{0}'".format(self.key), ")"]

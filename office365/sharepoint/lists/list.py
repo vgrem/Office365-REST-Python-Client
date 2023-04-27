@@ -208,13 +208,13 @@ class List(SecurableObject):
         :param str view_xml:  Specifies the query as XML that conforms to the ViewDefinition type as specified in
             [MS-WSSCAML] section 2.3.2.17.
         """
-        result = ClientResult(self.context)
+        return_type = ClientResult(self.context)
         payload = {
             "viewXml": view_xml
         }
-        qry = ServiceOperationQuery(self, "RenderListData", None, payload, None, result)
+        qry = ServiceOperationQuery(self, "RenderListData", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def get_list_data_as_stream(context, list_full_url, parameters=None):
@@ -267,14 +267,14 @@ class List(SecurableObject):
         :param str target_field_name:
         :param str paging_info:
         """
-        result = ClientResult(self.context, str())
+        return_type = ClientResult(self.context, str())
         params = {
             "targetFieldName": target_field_name,
             "pagingInfo": paging_info
         }
-        qry = ServiceOperationQuery(self, "GetLookupFieldChoices", params, None, None, result)
+        qry = ServiceOperationQuery(self, "GetLookupFieldChoices", params, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def get_list_item_changes_since_token(self, query):
         """
@@ -374,13 +374,13 @@ class List(SecurableObject):
          as shown in ListItemCollection request examples.
 
          :type list_item_creation_information: ListItemCreationInformation or dict"""
-        item = ListItem(self.context, None, self)
+        return_type = ListItem(self.context, None, self)
         if isinstance(list_item_creation_information, dict):
             for k, v in list_item_creation_information.items():
-                item.set_property(k, v, True)
-            self.items.add_child(item)
-            item.ensure_type_name(self)
-            qry = ServiceOperationQuery(self, "items", None, item, None, item)
+                return_type.set_property(k, v, True)
+            self.items.add_child(return_type)
+            return_type.ensure_type_name(self)
+            qry = ServiceOperationQuery(self, "items", None, return_type, None, return_type)
             self.context.add_query(qry)
         else:
             def _resolve_folder_url():
@@ -391,12 +391,12 @@ class List(SecurableObject):
                     None,
                     list_item_creation_information,
                     "parameters",
-                    item
+                    return_type
                 )
                 self.context.add_query(add_item_qry)
 
             self.root_folder.ensure_property("ServerRelativeUrl", _resolve_folder_url)
-        return item
+        return return_type
 
     def create_wiki_page(self, page_name, page_content):
         """

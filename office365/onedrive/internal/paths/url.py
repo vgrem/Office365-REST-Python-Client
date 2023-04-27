@@ -23,9 +23,9 @@ class UrlPath(EntityPath):
         cur_delimiter = self.delimiter if self._nested else self.url_delimiter
         if isinstance(self.parent, UrlPath):
             self.parent._nested = True
-            return [self._name, cur_delimiter]
+            return [self._key, cur_delimiter]
         else:
-            return [self.url_delimiter, self._name, cur_delimiter]
+            return [self.url_delimiter, self._key, cur_delimiter]
 
     @property
     def url_delimiter(self):

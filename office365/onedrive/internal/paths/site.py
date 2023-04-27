@@ -8,8 +8,8 @@ class SitePath(EntityPath):
 
     @property
     def segments(self):
-        if is_absolute_url(self.name):
-            url_result = urlparse(self.name)
+        if is_absolute_url(self.key):
+            url_result = urlparse(self.key)
             return [self.delimiter, url_result.hostname, ":", url_result.path]
         else:
             return super(SitePath, self).segments
@@ -19,4 +19,3 @@ class SitePath(EntityPath):
         if self._collection is None:
             self._collection = ResourcePath("sites")
         return self._collection
-

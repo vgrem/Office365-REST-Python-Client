@@ -1,12 +1,12 @@
 class ResourcePath(object):
     """OData resource path"""
 
-    def __init__(self, name, parent=None):
+    def __init__(self, key, parent=None):
         """
-        :type name: str
+        :type key: int or str
         :type parent: ResourcePath or None
         """
-        self._name = name
+        self._key = key
         self._parent = parent
 
     def __iter__(self):
@@ -38,11 +38,11 @@ class ResourcePath(object):
 
     @property
     def segments(self):
-        return [self.delimiter, str(self.name)]
+        return [self.delimiter, str(self.key)]
 
     @property
-    def name(self):
-        return self._name
+    def key(self):
+        return self._key
 
     @property
     def delimiter(self):

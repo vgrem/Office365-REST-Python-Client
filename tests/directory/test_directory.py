@@ -6,15 +6,15 @@ class TestDirectory(GraphTestCase):
 
     def test1_get_deleted_groups(self):
         deleted_groups = self.client.directory.deleted_groups.get().execute_query()
-        self.assertEqual(deleted_groups.resource_path.name, 'microsoft.graph.group')
+        self.assertEqual(deleted_groups.resource_path.key, 'microsoft.graph.group')
 
     def test2_get_deleted_users(self):
         deleted_users = self.client.directory.deleted_users.get().execute_query()
-        self.assertEqual(deleted_users.resource_path.name, 'microsoft.graph.user')
+        self.assertEqual(deleted_users.resource_path.key, 'microsoft.graph.user')
 
     def test3_get_deleted_applications(self):
         deleted_apps = self.client.directory.deleted_applications.get().execute_query()
-        self.assertEqual(deleted_apps.resource_path.name, 'microsoft.graph.application')
+        self.assertEqual(deleted_apps.resource_path.key, 'microsoft.graph.application')
 
     def test4_get_member_objects(self):
         result = self.client.me.get_member_objects().execute_query()
