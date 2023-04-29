@@ -11,10 +11,16 @@ class ChangeList(Change):
 
     @property
     def base_template(self):
+        """An SP.ListTemplateType object that returns the list template type of the list."""
         return self.properties.get("BaseTemplate", None)
 
     @property
     def list_id(self):
+        """
+        Identifies the changed list
+
+        :rtype: str or None
+        """
         return self.properties.get("ListId", None)
 
     @property

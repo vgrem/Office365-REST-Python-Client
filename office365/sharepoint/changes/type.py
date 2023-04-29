@@ -8,14 +8,16 @@ class ChangeType:
     """Indicates that no change has taken place."""
 
     Add = "Add"
-    """Specifies that an object has been added within the scope of a list, site, site collection, or content database."""
+    """Specifies that an object has been added within the scope of a list, site, site collection, or content database"""
 
     Update = "Update"
     """Specifies that an object has been modified within the scope of a list, site, site collection,
     or content database."""
 
     DeleteObject = "DeleteObject"
-    """Specifies that an object has been deleted within the scope of a list, site, site collection, or content database."""
+    """
+    Specifies that an object has been deleted within the scope of a list, site, site collection, or content database
+    """
 
     Rename = "Rename"
     """The leaf in a URL has been renamed."""
@@ -45,7 +47,7 @@ class ChangeType:
     its parent."""
 
     AssignmentDelete = "AssignmentDelete"
-    """Specifies that a user has lost permissions to a list. The list MUST have different permissions from its parent."""
+    """Specifies that a user has lost permissions to a list. The list MUST have different permissions from its parent"""
 
     MemberAdd = "MemberAdd"
     """Specifies that a user has been added to a group."""

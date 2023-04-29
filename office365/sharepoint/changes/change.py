@@ -32,3 +32,11 @@ class Change(BaseEntity):
         Gets a value that specifies the time that the object was modified.
         """
         return self.properties.get("Time", None)
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "ChangeToken": self.change_token
+            }
+            default_value = property_mapping.get(name, None)
+        return super(Change, self).get_property(name, default_value)

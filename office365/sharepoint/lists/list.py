@@ -283,7 +283,7 @@ class List(SecurableObject):
 
         :type query: office365.sharepoint.changes.log_item_query.ChangeLogItemQuery
         """
-        result = ClientResult(self.context)
+        result = ClientResult(self.context, bytes())
         qry = ServiceOperationQuery(self, "getListItemChangesSinceToken", None, query, "query", result)
         self.context.add_query(qry)
         return result

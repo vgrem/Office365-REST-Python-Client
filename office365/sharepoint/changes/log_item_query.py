@@ -22,7 +22,7 @@ class ChangeLogItemQuery(ClientValue):
         self.QueryOptions = query_options
         self.ChangeToken = change_token
         self.Contains = contains
-        self.RowLimit = str(row_limit)
+        self.RowLimit = str(row_limit) if row_limit else None
 
     @property
     def entity_type_name(self):

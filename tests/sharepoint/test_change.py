@@ -12,8 +12,7 @@ class TestChange(SPTestCase):
         self.assertIsInstance(changes, ChangeCollection)
 
     def test_2_get_site_changes(self):
-        target_list = self.client.site.root_web.default_document_library()
-        changes = target_list.get_changes(query=ChangeQuery(site=True)).execute_query()
+        changes = self.client.site.get_changes(query=ChangeQuery(site=True, fetch_limit=100)).execute_query()
         self.assertIsInstance(changes, ChangeCollection)
 
     def test_3_get_list_item_changes_since_token(self):

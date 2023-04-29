@@ -58,7 +58,7 @@ class ChangeQuery(ClientValue):
         self.DeleteObject = delete_object
         self.RoleAssignmentAdd = role_assignment_add
         self.RoleAssignmentDelete = role_assignment_delete
-        self.FetchLimit = fetch_limit
+        self.FetchLimit = str(fetch_limit) if fetch_limit else None
 
     @property
     def entity_type_name(self):
