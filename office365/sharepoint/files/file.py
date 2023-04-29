@@ -7,13 +7,13 @@ from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.sharepoint.activities.capabilities import ActivityCapabilities
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.files.version_event import FileVersionEvent
+from office365.sharepoint.files.versions.event import FileVersionEvent
 from office365.sharepoint.internal.queries.download_file import create_download_file_query
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.permissions.irm.effective_settings import EffectiveInformationRightsManagementSettings
 from office365.sharepoint.permissions.irm.settings import InformationRightsManagementSettings
 from office365.sharepoint.principal.users.user import User
-from office365.sharepoint.files.version_collection import FileVersionCollection
+from office365.sharepoint.files.versions.collection import FileVersionCollection
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.utilities.wopi_frame_action import SPWOPIFrameAction
 from office365.sharepoint.webparts.limited_manager import LimitedWebPartManager
@@ -233,7 +233,7 @@ class File(AbstractFile):
         qry = ServiceOperationQuery(self, "unpublish", {"comment": comment})
         self.context.add_query(qry)
         return self
-    
+
     def check_access_and_post_view_audit_event(self):
         return_type = ClientResult(self.context, bool())
         qry = ServiceOperationQuery(self, "CheckAccessAndPostViewAuditEvent", return_type=return_type)

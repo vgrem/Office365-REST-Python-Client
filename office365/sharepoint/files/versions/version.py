@@ -3,6 +3,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.internal.paths.entity import EntityPath
 
 
 class FileVersion(BaseEntity):
@@ -28,17 +29,17 @@ class FileVersion(BaseEntity):
 
     def open_binary_stream(self):
         """Opens the file as a stream."""
-        return_stream = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "OpenBinaryStream", None, None, None, return_stream)
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "OpenBinaryStream", None, None, None, return_type)
         self.context.add_query(qry)
-        return return_stream
+        return return_type
 
     def open_binary_stream_with_options(self, open_options):
         """Opens the file as a stream."""
-        return_stream = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "OpenBinaryStreamWithOptions", [open_options], None, None, return_stream)
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "OpenBinaryStreamWithOptions", [open_options], None, None, return_type)
         self.context.add_query(qry)
-        return return_stream
+        return return_type
 
     @property
     def created_by(self):
@@ -68,7 +69,10 @@ class FileVersion(BaseEntity):
 
     @property
     def checkin_comment(self):
-        """Gets a value that specifies the check-in comment."""
+        """Gets a value that specifies the check-in comment.
+
+        :rtype: str or None
+        """
         return self.properties.get("CheckInComment", None)
 
     def get_property(self, name, default_value=None):
@@ -79,10 +83,9 @@ class FileVersion(BaseEntity):
             default_value = property_mapping.get(name, None)
         return super(FileVersion, self).get_property(name, default_value)
 
-    def set_property(self, name, value, persist_changes=True):
-        super(FileVersion, self).set_property(name, value, persist_changes)
+    def set_property(self, key, value, persist_changes=True):
+        super(FileVersion, self).set_property(key, value, persist_changes)
         if self._resource_path is None:
-            if name == "ID":
-                self._resource_path = ServiceOperationPath(
-                    "GetById", [value], self._parent_collection.resource_path)
+            if key == "ID":
+                self._resource_path = EntityPath(value, self.parent_collection.resource_path)
         return self
