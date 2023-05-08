@@ -20,7 +20,7 @@ from office365.sharepoint.sites.sph_site import SPHSite
 from office365.sharepoint.sites.azure_container_Info import ProvisionedTemporaryAzureContainerInfo
 from office365.sharepoint.sites.upgrade_info import UpgradeInfo
 from office365.sharepoint.sites.usage_info import UsageInfo
-from office365.sharepoint.tenant.administration.site_administrators_info import SiteAdministratorsInfo
+from office365.sharepoint.tenant.administration.sites.administrators_info import SiteAdministratorsInfo
 from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
 from office365.sharepoint.webs.web import Web
 from office365.sharepoint.webs.template_collection import WebTemplateCollection

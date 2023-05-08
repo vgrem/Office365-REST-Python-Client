@@ -1,6 +1,6 @@
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.tenant.administration.site_properties import SiteProperties
+from office365.sharepoint.tenant.administration.sites.properties import SiteProperties
 from office365.sharepoint.tenant.administration.tenant import Tenant
 from tests import test_admin_site_url, test_user_principal_name, test_admin_credentials
 

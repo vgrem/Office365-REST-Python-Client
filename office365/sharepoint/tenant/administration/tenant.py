@@ -18,14 +18,15 @@ from office365.sharepoint.tenant.administration.insights.onedrive_site_sharing i
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
     SecondaryAdministratorsFieldsData
 from office365.sharepoint.tenant.administration.secondary_administrators_info import SecondaryAdministratorsInfo
-from office365.sharepoint.tenant.administration.site_administrators_info import SiteAdministratorsInfo
-from office365.sharepoint.tenant.administration.site_creation_properties import SiteCreationProperties
-from office365.sharepoint.tenant.administration.site_properties import SiteProperties
-from office365.sharepoint.tenant.administration.site_properties_collection import SitePropertiesCollection
-from office365.sharepoint.tenant.administration.site_properties_enumerable_filter import SitePropertiesEnumerableFilter
+from office365.sharepoint.tenant.administration.sites.administrators_info import SiteAdministratorsInfo
+from office365.sharepoint.tenant.administration.sites.creation_properties import SiteCreationProperties
+from office365.sharepoint.tenant.administration.sites.properties import SiteProperties
+from office365.sharepoint.tenant.administration.sites.properties_collection import SitePropertiesCollection
+from office365.sharepoint.tenant.administration.sites.properties_enumerable_filter import SitePropertiesEnumerableFilter
 from office365.sharepoint.tenant.administration.siteinfo_for_site_picker import SiteInfoForSitePicker
 from office365.sharepoint.tenant.administration.spo_operation import SpoOperation
 from office365.sharepoint.tenant.administration.insights.top_files_sharing import TopFilesSharingInsights
+from office365.sharepoint.tenant.administration.webs.templates.collection import SPOTenantWebTemplateCollection
 
 
 class Tenant(BaseEntity):
@@ -50,6 +51,12 @@ class Tenant(BaseEntity):
         qry = ServiceOperationQuery(self, "DeleteRecentAdminActionReport", None, {"reportId": report_id})
         self.context.add_query(qry)
         return self
+
+    def get_spo_tenant_all_web_templates(self):
+        return_type = SPOTenantWebTemplateCollection(self.context)
+        qry = ServiceOperationQuery(self, "GetSPOTenantAllWebTemplates", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def get_onedrive_site_sharing_insights(self, query_mode):
         return_type = ClientResult(self.context, OneDriveSiteSharingInsights())
@@ -124,7 +131,6 @@ class Tenant(BaseEntity):
         qry = ServiceOperationQuery(self, "RemoveHomeSite", None, payload)
         self.context.add_query(qry)
         return self
-
 
     def has_valid_education_license(self):
         """"""
@@ -307,6 +313,7 @@ class Tenant(BaseEntity):
             """
             :type resp: requests.Response
             """
+            resp.raise_for_status()
             if items is None:
                 is_complete = op.is_complete
             else:
@@ -317,6 +324,7 @@ class Tenant(BaseEntity):
                 self.context.after_execute(_verify_site_status, items=items)
 
             return_type.set_property("__siteUrl", url)
+
         self.context.after_execute(_verify_site_status)
         return return_type
 

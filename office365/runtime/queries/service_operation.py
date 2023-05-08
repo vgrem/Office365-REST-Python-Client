@@ -39,7 +39,3 @@ class ServiceOperationQuery(ClientQuery):
     @property
     def method_name(self):
         return self._method_name
-
-    @property
-    def method_parameters(self):
-        return self._method_params
