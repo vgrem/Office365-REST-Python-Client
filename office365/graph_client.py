@@ -35,7 +35,7 @@ from office365.onedrive.shares.collection import SharesCollection
 from office365.onedrive.sites.sites_with_root import SitesWithRoot
 from office365.outlook.calendar.place import Place
 from office365.planner.planner import Planner
-from office365.reports.report_root import ReportRoot
+from office365.reports.root import ReportRoot
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
@@ -51,6 +51,7 @@ from office365.subscriptions.subscription import Subscription
 from office365.teams.chats.collection import ChatCollection
 from office365.teams.collection import TeamCollection
 from office365.teams.template import TeamsTemplate
+from office365.teams.viva.employee_experience import EmployeeExperience
 
 
 class GraphClient(ClientRuntimeContext):
@@ -310,6 +311,13 @@ class GraphClient(ClientRuntimeContext):
         The search endpoint is the entry point for Microsoft Search API to query data.
         """
         return SearchEntity(self, ResourcePath("search"))
+
+    @property
+    def employee_experience(self):
+        """
+        An alias to EmployeeExperience
+        """
+        return EmployeeExperience(self, ResourcePath("employeeExperience"))
 
     @property
     def education(self):

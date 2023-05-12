@@ -55,12 +55,11 @@ class Utility(BaseEntity):
 
         :type context: office365.sharepoint.client_context.ClientContext
         """
-        result = ClientResult(context, StringCollection())
+        return_type = ClientResult(context, StringCollection())
         utility = Utility(context)
-        qry = ServiceOperationQuery(utility, "GetUserPermissionLevels", None, None, None, result)
-        qry.static = True
+        qry = ServiceOperationQuery(utility, "GetUserPermissionLevels", None, None, None, return_type, True)
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def search_principals_using_context_web(context, s_input, sources, scopes, max_count, group_name=None):

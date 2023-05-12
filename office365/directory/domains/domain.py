@@ -21,7 +21,7 @@ class Domain(Entity):
         """Validates the ownership of the domain."""
         return_type = Domain(self.context)
         self.parent_collection.add_child(return_type)
-        qry = ServiceOperationQuery(self,"verify", return_type=return_type)
+        qry = ServiceOperationQuery(self, "verify", return_type=return_type)
         self.context.add_query(qry)
         return return_type
 
