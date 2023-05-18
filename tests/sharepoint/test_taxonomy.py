@@ -2,10 +2,10 @@ from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.fields.field import Field
 from office365.sharepoint.taxonomy.field import TaxonomyField
 from office365.sharepoint.taxonomy.service import TaxonomyService
-from office365.sharepoint.taxonomy.set import TermSet
-from office365.sharepoint.taxonomy.group import TermGroup
-from office365.sharepoint.taxonomy.store import TermStore
-from office365.sharepoint.taxonomy.term import Term
+from office365.sharepoint.taxonomy.groups.group import TermGroup
+from office365.sharepoint.taxonomy.sets.set import TermSet
+from office365.sharepoint.taxonomy.stores.store import TermStore
+from office365.sharepoint.taxonomy.terms.term import Term
 from tests import test_team_site_url, test_client_credentials
 from tests.sharepoint.sharepoint_case import SPTestCase
 

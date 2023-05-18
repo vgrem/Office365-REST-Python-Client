@@ -1,31 +1,28 @@
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.taxonomy.item import TaxonomyItem
 from office365.sharepoint.taxonomy.item_collection import TaxonomyItemCollection
-from office365.sharepoint.taxonomy.group import TermGroup
+from office365.sharepoint.taxonomy.groups.group import TermGroup
+from office365.sharepoint.taxonomy.terms.term import Term
 
 
 class TermStore(TaxonomyItem):
     """Represents a hierarchical or flat set of Term objects known as a 'TermSet'."""
 
-    @property
-    def id(self):
+    def search_term(self, label, set_id=None, parent_term_id=None, language_tag=None):
         """
-        Gets the unique identifier.
 
-        :rtype: str
+        :param str label:
+        :param str set_id:
+        :param str or None parent_term_id:
+        :param str or None language_tag:
         """
-        return self.properties.get("id", None)
-
-    @property
-    def name(self):
-        """
-        Gets the name
-
-        :rtype: str
-        """
-        return self.properties.get("name", None)
+        return_type = TaxonomyItemCollection(self.context, Term, self.resource_path)
+        params = {"label": label, "setId": set_id, "parentTermId": parent_term_id, "languageTag": language_tag}
+        qry = FunctionQuery(self, "searchTerm", params, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     @property
     def default_language_tag(self):
@@ -51,8 +48,10 @@ class TermStore(TaxonomyItem):
                                                           ResourcePath("termGroups", self.resource_path)))
 
     def get_property(self, name, default_value=None):
-        if name == "termGroups":
-            default_value = self.term_groups
-        elif name == "languageTags":
-            default_value = self.language_tags
+        if default_value is None:
+            property_mapping = {
+                "termGroups": self.term_groups,
+                "languageTags": self.language_tags
+            }
+            default_value = property_mapping.get(name, None)
         return super(TermStore, self).get_property(name, default_value)

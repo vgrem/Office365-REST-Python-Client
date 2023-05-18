@@ -14,6 +14,9 @@ class TaxonomyItemCollection(ClientObjectCollection):
         self.add_child(return_type)
 
         def _after_get_by_name(col):
+            """
+            :type col: TaxonomyItemCollection
+            """
             if len(col) != 1:
                 message = "Taxonomy Item not found or ambiguous match found for name: {0}".format(name)
                 raise ValueError(message)
@@ -22,4 +25,3 @@ class TaxonomyItemCollection(ClientObjectCollection):
         self.filter("name eq '{0}'".format(name))
         self.context.load(self, after_loaded=_after_get_by_name)
         return return_type
-

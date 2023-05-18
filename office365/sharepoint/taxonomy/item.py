@@ -1,7 +1,5 @@
 from office365.runtime.client_object import ClientObject
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.taxonomy.item_collection import TaxonomyItemCollection
 
 
 class TaxonomyItem(ClientObject):
@@ -9,27 +7,21 @@ class TaxonomyItem(ClientObject):
     A TaxonomyItem has a name and a unique identifier. It also contains date and time of when the item is created and
     when the item is last modified."""
 
-    def search_term(self, label, set_id=None, parent_term_id=None, language_tag=None):
+    @property
+    def id(self):
+        """Gets the Id of the current TaxonomyItem
+
+        :rtype: str
         """
+        return self.properties.get("id", None)
 
-        :param str label:
-        :param str set_id:
-        :param str or None parent_term_id:
-        :param str or None language_tag:
+    @property
+    def name(self):
+        """Gets the name of the current TaxonomyItem object
+
+        :rtype: str
         """
-        return_type = TaxonomyItemCollection(self.context, TaxonomyItem, self.resource_path)
-        params = {"label": label, "setId": set_id, "parentTermId": parent_term_id, "languageTag": language_tag}
-        qry = ServiceOperationQuery(self, "searchTerm", None, params, None, return_type)
-        self.context.add_query(qry)
-
-        def _construct_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
-            pass
-
-        self.context.before_execute(_construct_request)
-        return return_type
+        return self.properties.get("name", None)
 
     def set_property(self, name, value, persist_changes=True):
         super(TaxonomyItem, self).set_property(name, value, persist_changes)

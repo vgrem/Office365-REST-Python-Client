@@ -19,7 +19,6 @@ class Invitation(Entity):
         return self.properties.get('invitedUser',
                                    User(self.context, ResourcePath("invitedUser", self.resource_path)))
 
-
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
@@ -61,4 +60,3 @@ class InvitationCollection(EntityCollection):
         self.context.add_query(qry)
         self.add_child(return_type)
         return return_type
-
