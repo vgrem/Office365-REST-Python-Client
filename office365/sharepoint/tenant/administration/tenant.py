@@ -180,18 +180,26 @@ class Tenant(BaseEntity):
     def hub_sites(self, site_url):
         pass
 
+    def check_tenant_intune_license(self):
+        """
+        Checks whether a tenant has the Intune license.
+        """
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(self, "CheckTenantIntuneLicense", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def check_tenant_licenses(self, licenses):
         """
         Checks whether a tenant has the specified licenses.
 
         :param list[str] licenses: The list of licenses to check for.
-        :return:
         """
-        result = ClientResult(self.context)
+        return_type = ClientResult(self.context, bool())
         params = ClientValueCollection(str, licenses)
-        qry = ServiceOperationQuery(self, "CheckTenantLicenses", None, params, "licenses", result)
+        qry = ServiceOperationQuery(self, "CheckTenantLicenses", None, params, "licenses", return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def get_site_status(self, url):
         """

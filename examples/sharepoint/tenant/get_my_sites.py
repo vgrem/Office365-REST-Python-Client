@@ -8,11 +8,12 @@ admin_client = ClientContext(test_admin_site_url).with_credentials(test_admin_cr
 tenant = Tenant(admin_client)
 result = tenant.get_site_properties_from_sharepoint_by_filters("").execute_query()
 
+
 def try_get_user_permissions(site_url, user_name):
     ctx = ClientContext(site_url).with_credentials(test_admin_credentials)
     try:
         perms_result = ctx.web.get_user_effective_permissions(user_name).execute_query()
-        #todo: determine user permissions from result
+        # todo: determine user permissions from result
         return True
     except ClientRequestException as e:
         if e.response.status_code == 404:
