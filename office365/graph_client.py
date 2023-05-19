@@ -30,6 +30,7 @@ from office365.directory.users.collection import UserCollection
 from office365.education.root import EducationRoot
 from office365.entity_collection import EntityCollection
 from office365.external.external import External
+from office365.onedrive.admin import Admin
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.shares.collection import SharesCollection
 from office365.onedrive.sites.sites_with_root import SitesWithRoot
@@ -111,6 +112,11 @@ class GraphClient(ClientRuntimeContext):
         request.ensure_header('Authorization', 'Bearer {0}'.format(token.accessToken))
 
     @property
+    def admin(self):
+        """A container for administrator functionality for SharePoint and OneDrive."""
+        return Admin(self, ResourcePath("admin"))
+
+    @property
     def me(self):
         """The Me endpoint is provided as a shortcut for specifying the current user"""
         return User(self, MePath())
@@ -132,7 +138,7 @@ class GraphClient(ClientRuntimeContext):
 
     @property
     def users(self):
-        """Get users"""
+        """Users container"""
         return UserCollection(self, ResourcePath("users"))
 
     @property
@@ -155,27 +161,27 @@ class GraphClient(ClientRuntimeContext):
 
     @property
     def sites(self):
-        """Get sites"""
+        """Sites container"""
         return SitesWithRoot(self, ResourcePath("sites"))
 
     @property
     def shares(self):
-        """Get shares"""
+        """Shares container"""
         return SharesCollection(self, ResourcePath("shares"))
 
     @property
     def directory_objects(self):
-        """Get Directory Objects"""
+        """Directory Objects container"""
         return DirectoryObjectCollection(self, ResourcePath("directoryObjects"))
 
     @property
     def teams(self):
-        """Get teams"""
+        """Teams container"""
         return TeamCollection(self, ResourcePath("teams"))
 
     @property
     def chats(self):
-        """Get chats"""
+        """Chats container"""
         return ChatCollection(self, ResourcePath("chats"))
 
     @property

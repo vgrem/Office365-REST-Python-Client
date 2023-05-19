@@ -1,6 +1,6 @@
 from office365.entity_collection import EntityCollection
-from office365.onedrive.termstore.localized_name import LocalizedName
-from office365.onedrive.termstore.set import Set
+from office365.onedrive.termstore.sets.name import LocalizedName
+from office365.onedrive.termstore.sets.set import Set
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
@@ -9,7 +9,7 @@ class SetCollection(EntityCollection):
 
     def __init__(self, context, resource_path=None, parent_group=None):
         """
-        :param office365.onedrive.termstore.group.Group parent_group: The parent group that contains the set
+        :param office365.onedrive.termstore.groups.group.Group parent_group: The parent group that contains the set
         """
         super(SetCollection, self).__init__(context, Set, resource_path)
         self._parent_group = parent_group

@@ -1,23 +1,6 @@
 from office365.entity import Entity
-from office365.entity_collection import EntityCollection
-from office365.onedrive.termstore.set_collection import SetCollection
+from office365.onedrive.termstore.sets.collection import SetCollection
 from office365.runtime.paths.resource_path import ResourcePath
-
-
-class GroupCollection(EntityCollection):
-
-    def __init__(self, context, resource_path=None):
-        super(GroupCollection, self).__init__(context, Group, resource_path)
-
-    def add(self, display_name):
-        """
-        Create a new group object in a term store.
-
-        :param str display_name: Name of the group to be created.
-        :rtype: Group
-        """
-        props = {"displayName": display_name}
-        return super(GroupCollection, self).add(**props)
 
 
 class Group(Entity):

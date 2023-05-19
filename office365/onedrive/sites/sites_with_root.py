@@ -35,6 +35,20 @@ class SitesWithRoot(EntityCollection):
         self.context.add_query(qry)
         return return_type
 
+    def search(self, query_text):
+        """
+        Search across a SharePoint tenant for sites that match keywords provided.
+
+        The only property that works for sorting is createdDateTime. The search filter is a free text search that uses
+        multiple properties when retrieving the search results.
+
+        :param str query_text: str
+        """
+        return_type = SitesWithRoot(self.context, ResourcePath("sites"))
+        return_type.query_options.custom["search"] = query_text
+        self.context.load(return_type)
+        return return_type
+
     @property
     def root(self):
         return self.properties.get('root', Site(self.context, RootPath(self.resource_path, ResourcePath("sites"))))

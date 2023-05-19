@@ -1,3 +1,6 @@
+"""
+Get a collection of sites.
+"""
 from examples import acquire_token_by_client_credentials
 from office365.graph_client import GraphClient
 from office365.onedrive.sites.site import Site

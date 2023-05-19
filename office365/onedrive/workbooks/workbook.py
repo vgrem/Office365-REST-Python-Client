@@ -51,6 +51,7 @@ class Workbook(Entity):
         """
         qry = ServiceOperationQuery(self, "refreshSession")
         self.context.add_query(qry)
+
         def _construct_request(request):
             """
             :type request: office365.runtime.http.request_options.RequestOptions

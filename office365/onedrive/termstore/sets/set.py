@@ -1,9 +1,9 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.onedrive.internal.paths.children import ChildrenPath
-from office365.onedrive.termstore.localized_name import LocalizedName
+from office365.onedrive.termstore.sets.name import LocalizedName
 from office365.onedrive.termstore.relation import Relation
-from office365.onedrive.termstore.term_collection import TermCollection
+from office365.onedrive.termstore.terms.collection import TermCollection
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -23,12 +23,13 @@ class Set(Entity):
 
     @property
     def localized_names(self):
+        """"""
         return self.properties.get("localizedNames", ClientValueCollection(LocalizedName))
 
     @property
     def parent_group(self):
         """The parent group that contains the set."""
-        from office365.onedrive.termstore.group import Group
+        from office365.onedrive.termstore.groups.group import Group
         return self.properties.get('parentGroup',
                                    Group(self.context, ResourcePath("parentGroup", self.resource_path)))
 
