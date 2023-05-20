@@ -7,22 +7,18 @@ https://developer.microsoft.com/en-us/office/blogs/controlling-app-access-on-spe
 """
 import sys
 
-from examples import acquire_token_by_client_credentials, sample_user_principal_name_alt
+from examples import acquire_token_by_client_credentials
 from office365.graph_client import GraphClient
 from office365.onedrive.permissions.permission import Permission
-from office365.sharepoint.client_context import ClientContext
 from tests import test_client_credentials, test_team_site_url
 
 
-def assign_site_access(site_url, roles=None, clear_existing=False):
+def assign_site_access(site, roles=None, clear_existing=False):
     """
-    :param str site_url: Site Url
+    :param office365.onedrive.sites.site.Site site: Site the permissions to grant
     :param list[str] roles: The list of roles to add
     :param bool clear_existing: Clear existing permissions first
     """
-
-    client = GraphClient(acquire_token_by_client_credentials)
-    target_site = client.sites.get_by_url(site_url).get().execute_query()
     apps = client.applications.filter(f"appId eq '{test_client_credentials.clientId}'").get().execute_query()
     if len(apps) == 0:
         sys.exit("App not found")
@@ -40,17 +36,10 @@ def assign_site_access(site_url, roles=None, clear_existing=False):
                 "displayName": apps[0].properties["displayName"]
             }
         }]
-        target_site.permissions.add(roles=roles, grantedToIdentities=identities).execute_query()
+        site.permissions.add(roles=roles, grantedToIdentities=identities).execute_query()
 
 
-def verify_site_access():
-    ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
-    site = ctx.web.site_users.get_by_email(sample_user_principal_name_alt).get_personal_site().execute_query()
-    print(site.url)
-
-
-# assign permissions
+client = GraphClient(acquire_token_by_client_credentials)
+target_site = client.sites.get_by_url(test_team_site_url)
 # assign_site_access(user_site_url, [], True)
-# assign_site_access(user_site_url, ["read", "write"])
-# verify site access
-verify_site_access()
+assign_site_access(target_site, ["read", "write"])

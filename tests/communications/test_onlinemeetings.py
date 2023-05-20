@@ -23,7 +23,9 @@ class TestOnlineMeetings(GraphTestCase):
         self.__class__.target_meeting = meeting
 
     def test2_get_meeting(self):
-        pass
+        meeting_id = self.__class__.target_meeting.id
+        existing_meeting = self.client.me.online_meetings[meeting_id].get().execute_query()
+        self.assertIsNotNone(existing_meeting.resource_path)
 
     def test3_update_meeting(self):
         now = datetime.now(pytz.utc)

@@ -27,7 +27,8 @@ class Permission(Entity):
             "recipients": ClientValueCollection(DriveRecipient, [DriveRecipient.from_email(r) for r in recipients]),
             "roles": StringCollection(roles)
         }
-        return_type = EntityCollection(self.context, Permission, ResourcePath("permissions", self.resource_path))
+        from office365.onedrive.permissions.collection import PermissionCollection
+        return_type = PermissionCollection(self.context, ResourcePath("permissions", self.resource_path))
         qry = ServiceOperationQuery(self, "grant", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type

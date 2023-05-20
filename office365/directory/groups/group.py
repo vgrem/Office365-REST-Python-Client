@@ -108,7 +108,7 @@ class Group(DirectoryObject):
         """The group's conversations."""
         return self.properties.get('conversations',
                                    EntityCollection(self.context, Conversation,
-                                                    ResourcePath("threads", self.resource_path)))
+                                                    ResourcePath("conversations", self.resource_path)))
 
     @property
     def extensions(self):

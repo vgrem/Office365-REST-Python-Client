@@ -1,7 +1,10 @@
+from office365.communications.calls.incoming_context import IncomingContext
 from office365.communications.calls.route import CallRoute
 from office365.communications.calls.participant import Participant
 from office365.communications.operations.cancel_media_processing import CancelMediaProcessingOperation
 from office365.communications.operations.comms import CommsOperation
+from office365.communications.operations.unmute_participant import UnmuteParticipantOperation
+from office365.communications.operations.update_recording_status import UpdateRecordingStatusOperation
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -66,6 +69,40 @@ class Call(Entity):
         group call will still continue."""
         return super(Call, self).delete_object()
 
+    def update_recording_status(self, status, client_context):
+        """
+        Update the application's recording status associated with a call.
+        This requires the use of the Teams policy-based recording solution.
+
+        :param str status: The recording status. Possible values are: notRecording, recording, or failed.
+        :param str client_context: Unique client context string. Max limit is 256 chars.
+        """
+        return_type = UpdateRecordingStatusOperation(self.context)
+        payload = {
+            "status": status,
+            "clientContext": client_context
+        }
+        qry = ServiceOperationQuery(self, "updateRecordingStatus", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def unmute(self, client_context):
+        """
+        Allow the application to unmute itself.
+
+        This is a server unmute, meaning that the server will start sending audio packets for this participant
+        to other participants again.
+
+        :param str client_context: Unique Client Context string. Max limit is 256 chars.
+        """
+        return_type = UnmuteParticipantOperation(self.context)
+        payload = {
+            "clientContext": client_context
+        }
+        qry = ServiceOperationQuery(self, "unmute", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     @property
     def callback_uri(self):
         """The callback URL on which callbacks will be delivered. Must be https."""
@@ -75,6 +112,11 @@ class Call(Entity):
     def call_routes(self):
         """The routing information on how the call was retargeted. Read-only."""
         return self.properties.get("callRoutes", ClientValueCollection(CallRoute))
+
+    @property
+    def incoming_context(self):
+        """Call context associated with an incoming call."""
+        return self.properties.get("incomingContext", IncomingContext())
 
     @property
     def participants(self):

@@ -12,6 +12,7 @@ from office365.onedrive.internal.queries.upload_content import create_upload_con
 from office365.base_item import BaseItem
 from office365.onedrive.analytics.item_activity_stat import ItemActivityStat
 from office365.onedrive.analytics.item_analytics import ItemAnalytics
+from office365.onedrive.permissions.collection import PermissionCollection
 from office365.onedrive.permissions.permission import Permission
 from office365.entity_collection import EntityCollection
 from office365.onedrive.internal.paths.children import ChildrenPath
@@ -483,7 +484,7 @@ class DriveItem(BaseItem):
         have children.
         """
         return self.properties.get('children',
-                                 EntityCollection(self.context, DriveItem, ChildrenPath(self.resource_path)))
+                                   EntityCollection(self.context, DriveItem, ChildrenPath(self.resource_path)))
 
     @property
     def listItem(self):
@@ -499,8 +500,7 @@ class DriveItem(BaseItem):
     def permissions(self):
         """The set of permissions for the item. Read-only. Nullable."""
         return self.properties.get('permissions',
-                                   EntityCollection(self.context, Permission,
-                                                    ResourcePath("permissions", self.resource_path)))
+                                   PermissionCollection(self.context, ResourcePath("permissions", self.resource_path)))
 
     @property
     def publication(self):

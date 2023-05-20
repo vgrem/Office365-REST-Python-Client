@@ -7,7 +7,7 @@ from office365.onedrive.contenttypes.collection import ContentTypeCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.lists.collection import ListCollection
-from office365.onedrive.permissions.permission import Permission
+from office365.onedrive.permissions.collection import PermissionCollection
 from office365.onedrive.sharepoint_ids import SharePointIds
 from office365.onedrive.sites.site_collection import SiteCollection
 from office365.onedrive.termstore.store import Store
@@ -122,8 +122,7 @@ class Site(BaseItem):
     def permissions(self):
         """The collection of lists under this site."""
         return self.properties.get('permissions',
-                                   EntityCollection(self.context, Permission,
-                                                    ResourcePath("permissions", self.resource_path)))
+                                   PermissionCollection(self.context, ResourcePath("permissions", self.resource_path)))
 
     @property
     def drive(self):

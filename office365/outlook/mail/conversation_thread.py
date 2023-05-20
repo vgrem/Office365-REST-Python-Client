@@ -10,7 +10,6 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 class ConversationThread(Entity):
     """A conversationThread is a collection of posts."""
 
-
     def reply(self, post):
         """Reply to a thread in a group conversation and add a new post to it. You can specify the parent conversation
         in the request, or, you can specify just the thread without the parent conversation.
@@ -37,9 +36,9 @@ class ConversationThread(Entity):
         """The To: recipients for the thread."""
         return self.properties.get("toRecipients", ClientValueCollection(Recipient))
 
-
     @property
     def posts(self):
+        """"""
         return self.properties.get('posts',
                                    EntityCollection(self.context, Post, ResourcePath("posts", self.resource_path)))
 
