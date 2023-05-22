@@ -583,6 +583,15 @@ class Site(BaseEntity):
         return self.properties.get("ServerRelativePath", SPResPath())
 
     @property
+    def status_bar_link(self):
+        """
+        Gets the status bar message link target for this site.
+
+        :rtype: str or None
+        """
+        return self.properties.get("StatusBarLink", None)
+
+    @property
     def secondary_contact(self):
         """Gets or sets the secondary contact that is used for the site collection."""
         return self.properties.get('SecondaryContact', User(self.context,

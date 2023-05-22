@@ -27,6 +27,7 @@ from office365.sharepoint.tenant.administration.siteinfo_for_site_picker import 
 from office365.sharepoint.tenant.administration.spo_operation import SpoOperation
 from office365.sharepoint.tenant.administration.insights.top_files_sharing import TopFilesSharingInsights
 from office365.sharepoint.tenant.administration.webs.templates.collection import SPOTenantWebTemplateCollection
+from office365.sharepoint.tenant.settings import TenantSettings
 
 
 class Tenant(BaseEntity):
@@ -35,6 +36,16 @@ class Tenant(BaseEntity):
     def __init__(self, context):
         static_path = ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Tenant")
         super(Tenant, self).__init__(context, static_path)
+
+    def get_corporate_catalog_site(self):
+        """Retrieves Corporate Catalog Site"""
+        settings = TenantSettings.current(self.context)
+        return_type = Site(self.context)
+
+        def _settings_loaded():
+            return_type.set_property("__siteUrl", settings.corporate_catalog_url)
+        settings.ensure_property("CorporateCatalogUrl", _settings_loaded)
+        return return_type
 
     def delete_policy_definition(self, item_id):
         """

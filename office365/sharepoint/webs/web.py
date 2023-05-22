@@ -30,6 +30,7 @@ from office365.sharepoint.lists.get_parameters import GetListsParameters
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.collection import ListCollection
 from office365.sharepoint.lists.template_collection import ListTemplateCollection
+from office365.sharepoint.marketplace.corporatecuratedgallery.available_addins_response import SPAvailableAddinsResponse
 from office365.sharepoint.navigation.navigation import Navigation
 from office365.sharepoint.permissions.base_permissions import BasePermissions
 from office365.sharepoint.permissions.roles.definitions.collection import RoleDefinitionCollection
@@ -60,6 +61,7 @@ from office365.sharepoint.webparts.client.collection import ClientWebPartCollect
 from office365.sharepoint.webs.calendar_type import CalendarType
 from office365.sharepoint.webs.context_web_information import ContextWebInformation
 from office365.sharepoint.fields.datetime_field_format_type import DateTimeFieldFormatType
+from office365.sharepoint.webs.modernize_homepage_result import ModernizeHomepageResult
 from office365.sharepoint.webs.multilingual_settings import MultilingualSettings
 from office365.sharepoint.webs.regional_settings import RegionalSettings
 from office365.sharepoint.sitescripts.serialization_info import SiteScriptSerializationInfo
@@ -85,6 +87,16 @@ class Web(SecurableObject):
             resource_path = ResourcePath("Web")
         super(Web, self).__init__(context, resource_path)
         self._web_url = None
+
+    def available_addins(self, server_relative_urls=None):
+        """
+        :param list[str] server_relative_urls:
+        """
+        payload = {"serverRelativeUrls": server_relative_urls}
+        return_type = ClientResult(self.context, SPAvailableAddinsResponse())
+        qry = ServiceOperationQuery(self, "AvailableAddins", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def add_cross_farm_message(self, message):
         """
@@ -296,7 +308,6 @@ class Web(SecurableObject):
         qry = ServiceOperationQuery(self, "GetACSServicePrincipals", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
-
 
     def sync_flow_instances(self, target_web_url):
         """
@@ -1531,6 +1542,13 @@ class Web(SecurableObject):
         """Gets or sets the group of users who have been given contribute permissions to the Web site."""
         return self.properties.get('AssociatedMemberGroup',
                                    Group(self.context, ResourcePath("AssociatedMemberGroup", self.resource_path)))
+
+    @property
+    def can_modernize_homepage(self):
+        """Specifies the site theme associated with the site"""
+        return self.properties.get('CanModernizeHomepage',
+                                   ModernizeHomepageResult(self.context,
+                                                           ResourcePath("CanModernizeHomepage", self.resource_path)))
 
     @property
     def fields(self):
