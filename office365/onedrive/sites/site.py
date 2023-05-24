@@ -120,7 +120,7 @@ class Site(BaseItem):
 
     @property
     def permissions(self):
-        """The collection of lists under this site."""
+        """The permissions associated with the site."""
         return self.properties.get('permissions',
                                    PermissionCollection(self.context, ResourcePath("permissions", self.resource_path)))
 

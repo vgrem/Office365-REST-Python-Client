@@ -22,22 +22,4 @@ class GroupCollection(EntityCollection):
 
         :param str name: Group name
         """
-        return_type = Group(self.context)
-        self.add_child(return_type)
-
-        def _after_get_by_name(col):
-            """
-            :type col: GroupCollection
-            """
-            if len(col) == 0:
-                message = "Group not found for name: {0}".format(name)
-                raise ValueError(message)
-            elif len(col) != 1:
-                message = "Ambiguous match found for name: {0}".format(name)
-                raise ValueError(message)
-            return_type.set_property("id", col[0].get_property("id"))
-
-        self.filter("displayName eq '{0}'".format(name))
-        self.context.load(self, after_loaded=_after_get_by_name)
-        return return_type
-
+        return self._find_by_unique_prop("displayName", name)

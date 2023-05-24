@@ -896,6 +896,203 @@
             <Member Name="certificateBasedAuthentication" Value="5"/>
             <Member Name="multiFactorAuthentication" Value="6"/>
          </EnumType>
+         <EnumType Name="attributeDefinitionMetadata">
+            <Member Name="BaseAttributeName" Value="0"/>
+            <Member Name="ComplexObjectDefinition" Value="1"/>
+            <Member Name="IsContainer" Value="2"/>
+            <Member Name="IsCustomerDefined" Value="3"/>
+            <Member Name="IsDomainQualified" Value="4"/>
+            <Member Name="LinkPropertyNames" Value="5"/>
+            <Member Name="LinkTypeName" Value="6"/>
+            <Member Name="MaximumLength" Value="7"/>
+            <Member Name="ReferencedProperty" Value="8"/>
+         </EnumType>
+         <EnumType Name="attributeFlowBehavior">
+            <Member Name="FlowWhenChanged" Value="0"/>
+            <Member Name="FlowAlways" Value="1"/>
+         </EnumType>
+         <EnumType Name="attributeFlowType">
+            <Member Name="Always" Value="0"/>
+            <Member Name="ObjectAddOnly" Value="1"/>
+            <Member Name="MultiValueAddOnly" Value="2"/>
+            <Member Name="ValueAddOnly" Value="3"/>
+            <Member Name="AttributeAddOnly" Value="4"/>
+         </EnumType>
+         <EnumType Name="attributeMappingSourceType">
+            <Member Name="Attribute" Value="0"/>
+            <Member Name="Constant" Value="1"/>
+            <Member Name="Function" Value="2"/>
+         </EnumType>
+         <EnumType Name="attributeType">
+            <Member Name="String" Value="0"/>
+            <Member Name="Integer" Value="1"/>
+            <Member Name="Reference" Value="2"/>
+            <Member Name="Binary" Value="3"/>
+            <Member Name="Boolean" Value="4"/>
+            <Member Name="DateTime" Value="5"/>
+         </EnumType>
+         <EnumType Name="directoryDefinitionDiscoverabilities" IsFlags="true">
+            <Member Name="None" Value="0"/>
+            <Member Name="AttributeNames" Value="1"/>
+            <Member Name="AttributeDataTypes" Value="2"/>
+            <Member Name="AttributeReadOnly" Value="4"/>
+            <Member Name="ReferenceAttributes" Value="8"/>
+            <Member Name="UnknownFutureValue" Value="16"/>
+         </EnumType>
+         <EnumType Name="entryExportStatus">
+            <Member Name="Noop" Value="0"/>
+            <Member Name="Success" Value="1"/>
+            <Member Name="RetryableError" Value="2"/>
+            <Member Name="PermanentError" Value="3"/>
+            <Member Name="Error" Value="4"/>
+         </EnumType>
+         <EnumType Name="entrySyncOperation">
+            <Member Name="None" Value="0"/>
+            <Member Name="Add" Value="1"/>
+            <Member Name="Delete" Value="2"/>
+            <Member Name="Update" Value="3"/>
+         </EnumType>
+         <EnumType Name="escrowBehavior">
+            <Member Name="Default" Value="1"/>
+            <Member Name="IgnoreLookupReferenceResolutionFailure" Value="2"/>
+         </EnumType>
+         <EnumType Name="mutability">
+            <Member Name="ReadWrite" Value="0"/>
+            <Member Name="ReadOnly" Value="1"/>
+            <Member Name="Immutable" Value="2"/>
+            <Member Name="WriteOnly" Value="3"/>
+         </EnumType>
+         <EnumType Name="objectDefinitionMetadata">
+            <Member Name="PropertyNameAccountEnabled" Value="0"/>
+            <Member Name="PropertyNameSoftDeleted" Value="1"/>
+            <Member Name="IsSoftDeletionSupported" Value="2"/>
+            <Member Name="IsSynchronizeAllSupported" Value="3"/>
+            <Member Name="ConnectorDataStorageRequired" Value="4"/>
+            <Member Name="Extensions" Value="5"/>
+            <Member Name="BaseObjectName" Value="6"/>
+         </EnumType>
+         <EnumType Name="objectFlowTypes" IsFlags="true">
+            <Member Name="None" Value="0"/>
+            <Member Name="Add" Value="1"/>
+            <Member Name="Update" Value="2"/>
+            <Member Name="Delete" Value="4"/>
+         </EnumType>
+         <EnumType Name="objectMappingMetadata">
+            <Member Name="EscrowBehavior" Value="0"/>
+            <Member Name="DisableMonitoringForChanges" Value="1"/>
+            <Member Name="OriginalJoiningProperty" Value="2"/>
+            <Member Name="Disposition" Value="3"/>
+            <Member Name="IsCustomerDefined" Value="4"/>
+            <Member Name="ExcludeFromReporting" Value="5"/>
+            <Member Name="Unsynchronized" Value="6"/>
+         </EnumType>
+         <EnumType Name="quarantineReason">
+            <Member Name="EncounteredBaseEscrowThreshold" Value="0"/>
+            <Member Name="EncounteredTotalEscrowThreshold" Value="1"/>
+            <Member Name="EncounteredEscrowProportionThreshold" Value="2"/>
+            <Member Name="EncounteredQuarantineException" Value="4"/>
+            <Member Name="Unknown" Value="8"/>
+            <Member Name="QuarantinedOnDemand" Value="16"/>
+            <Member Name="TooManyDeletes" Value="32"/>
+            <Member Name="IngestionInterrupted" Value="64"/>
+         </EnumType>
+         <EnumType Name="scopeOperatorMultiValuedComparisonType">
+            <Member Name="All" Value="0"/>
+            <Member Name="Any" Value="1"/>
+         </EnumType>
+         <EnumType Name="scopeOperatorType">
+            <Member Name="Binary" Value="0"/>
+            <Member Name="Unary" Value="1"/>
+         </EnumType>
+         <EnumType Name="synchronizationDisposition">
+            <Member Name="Normal" Value="0"/>
+            <Member Name="Discard" Value="1"/>
+            <Member Name="Escrow" Value="2"/>
+         </EnumType>
+         <EnumType Name="synchronizationJobRestartScope" IsFlags="true">
+            <Member Name="None" Value="0"/>
+            <Member Name="ConnectorDataStore" Value="1"/>
+            <Member Name="Escrows" Value="2"/>
+            <Member Name="Watermark" Value="4"/>
+            <Member Name="QuarantineState" Value="8"/>
+            <Member Name="Full" Value="15"/>
+            <Member Name="ForceDeletes" Value="32"/>
+         </EnumType>
+         <EnumType Name="synchronizationMetadata">
+            <Member Name="GalleryApplicationIdentifier" Value="0"/>
+            <Member Name="GalleryApplicationKey" Value="1"/>
+            <Member Name="IsOAuthEnabled" Value="2"/>
+            <Member Name="IsSynchronizationAgentAssignmentRequired" Value="3"/>
+            <Member Name="IsSynchronizationAgentRequired" Value="4"/>
+            <Member Name="IsSynchronizationInPreview" Value="5"/>
+            <Member Name="OAuthSettings" Value="6"/>
+            <Member Name="SynchronizationLearnMoreIbizaFwLink" Value="7"/>
+            <Member Name="ConfigurationFields" Value="8"/>
+         </EnumType>
+         <EnumType Name="synchronizationScheduleState">
+            <Member Name="Active" Value="0"/>
+            <Member Name="Disabled" Value="1"/>
+            <Member Name="Paused" Value="2"/>
+         </EnumType>
+         <EnumType Name="synchronizationSecret">
+            <Member Name="None" Value="0"/>
+            <Member Name="UserName" Value="1"/>
+            <Member Name="Password" Value="2"/>
+            <Member Name="SecretToken" Value="3"/>
+            <Member Name="AppKey" Value="4"/>
+            <Member Name="BaseAddress" Value="5"/>
+            <Member Name="ClientIdentifier" Value="6"/>
+            <Member Name="ClientSecret" Value="7"/>
+            <Member Name="SingleSignOnType" Value="11"/>
+            <Member Name="Sandbox" Value="12"/>
+            <Member Name="Url" Value="13"/>
+            <Member Name="Domain" Value="14"/>
+            <Member Name="ConsumerKey" Value="15"/>
+            <Member Name="ConsumerSecret" Value="16"/>
+            <Member Name="TokenKey" Value="17"/>
+            <Member Name="TokenExpiration" Value="18"/>
+            <Member Name="Oauth2AccessToken" Value="19"/>
+            <Member Name="Oauth2AccessTokenCreationTime" Value="20"/>
+            <Member Name="Oauth2RefreshToken" Value="21"/>
+            <Member Name="SyncAll" Value="22"/>
+            <Member Name="InstanceName" Value="24"/>
+            <Member Name="Oauth2ClientId" Value="27"/>
+            <Member Name="Oauth2ClientSecret" Value="28"/>
+            <Member Name="CompanyId" Value="29"/>
+            <Member Name="UpdateKeyOnSoftDelete" Value="30"/>
+            <Member Name="SynchronizationSchedule" Value="33"/>
+            <Member Name="SystemOfRecord" Value="34"/>
+            <Member Name="SandboxName" Value="35"/>
+            <Member Name="EnforceDomain" Value="36"/>
+            <Member Name="SyncNotificationSettings" Value="37"/>
+            <Member Name="SkipOutOfScopeDeletions" Value="40"/>
+            <Member Name="Oauth2AuthorizationCode" Value="62"/>
+            <Member Name="Oauth2RedirectUri" Value="63"/>
+            <Member Name="ApplicationTemplateIdentifier" Value="64"/>
+            <Member Name="Oauth2TokenExchangeUri" Value="65"/>
+            <Member Name="Oauth2AuthorizationUri" Value="66"/>
+            <Member Name="AuthenticationType" Value="67"/>
+            <Member Name="Server" Value="70"/>
+            <Member Name="PerformInboundEntitlementGrants" Value="100"/>
+            <Member Name="HardDeletesEnabled" Value="101"/>
+            <Member Name="SyncAgentCompatibilityKey" Value="102"/>
+            <Member Name="SyncAgentADContainer" Value="103"/>
+            <Member Name="ValidateDomain" Value="206"/>
+            <Member Name="TestReferences" Value="207"/>
+            <Member Name="ConnectionString" Value="250"/>
+         </EnumType>
+         <EnumType Name="synchronizationStatusCode">
+            <Member Name="NotConfigured" Value="0"/>
+            <Member Name="NotRun" Value="1"/>
+            <Member Name="Active" Value="2"/>
+            <Member Name="Paused" Value="3"/>
+            <Member Name="Quarantine" Value="4"/>
+         </EnumType>
+         <EnumType Name="synchronizationTaskExecutionResult">
+            <Member Name="Succeeded" Value="0"/>
+            <Member Name="Failed" Value="1"/>
+            <Member Name="EntryLevelErrors" Value="2"/>
+         </EnumType>
          <EnumType Name="accessReviewHistoryDecisionFilter">
             <Member Name="approve" Value="0"/>
             <Member Name="deny" Value="1"/>
@@ -2243,6 +2440,8 @@
             <Member Name="listItem" Value="7"/>
             <Member Name="drive" Value="8"/>
             <Member Name="unknownFutureValue" Value="9"/>
+            <Member Name="acronym" Value="12"/>
+            <Member Name="bookmark" Value="13"/>
             <Member Name="chatMessage" Value="10"/>
             <Member Name="person" Value="11"/>
          </EnumType>
@@ -3609,12 +3808,20 @@
             <Member Name="data" Value="4"/>
             <Member Name="unknownFutureValue" Value="5"/>
          </EnumType>
+         <EnumType Name="onlineMeetingContentSharingDisabledReason" IsFlags="true">
+            <Member Name="watermarkProtection" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
          <EnumType Name="onlineMeetingRole">
             <Member Name="attendee" Value="0"/>
             <Member Name="presenter" Value="1"/>
             <Member Name="unknownFutureValue" Value="2"/>
             <Member Name="producer" Value="3"/>
             <Member Name="coorganizer" Value="4"/>
+         </EnumType>
+         <EnumType Name="onlineMeetingVideoDisabledReason" IsFlags="true">
+            <Member Name="watermarkProtection" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
          </EnumType>
          <EnumType Name="recordingStatus">
             <Member Name="unknown" Value="0"/>
@@ -4918,6 +5125,7 @@
             <NavigationProperty Name="owners" Type="Collection(graph.directoryObject)"/>
             <NavigationProperty Name="tokenIssuancePolicies" Type="Collection(graph.tokenIssuancePolicy)"/>
             <NavigationProperty Name="tokenLifetimePolicies" Type="Collection(graph.tokenLifetimePolicy)"/>
+            <NavigationProperty Name="synchronization" Type="graph.synchronization" ContainsTarget="true"/>
             <Annotation Term="OData.Community.Keys.V1.AlternateKeys">
                <Collection>
                   <Record Type="OData.Community.Keys.V1.AlternateKey">
@@ -4983,6 +5191,7 @@
             <NavigationProperty Name="tokenIssuancePolicies" Type="Collection(graph.tokenIssuancePolicy)"/>
             <NavigationProperty Name="tokenLifetimePolicies" Type="Collection(graph.tokenLifetimePolicy)"/>
             <NavigationProperty Name="transitiveMemberOf" Type="Collection(graph.directoryObject)"/>
+            <NavigationProperty Name="synchronization" Type="graph.synchronization" ContainsTarget="true"/>
             <Annotation Term="OData.Community.Keys.V1.AlternateKeys">
                <Collection>
                   <Record Type="OData.Community.Keys.V1.AlternateKey">
@@ -5118,6 +5327,11 @@
          <EntityType Name="homeRealmDiscoveryPolicy" BaseType="graph.stsPolicy"/>
          <EntityType Name="tokenIssuancePolicy" BaseType="graph.stsPolicy"/>
          <EntityType Name="tokenLifetimePolicy" BaseType="graph.stsPolicy"/>
+         <EntityType Name="synchronization" BaseType="graph.entity">
+            <Property Name="secrets" Type="Collection(graph.synchronizationSecretKeyStringValuePair)"/>
+            <NavigationProperty Name="jobs" Type="Collection(graph.synchronizationJob)" ContainsTarget="true"/>
+            <NavigationProperty Name="templates" Type="Collection(graph.synchronizationTemplate)" ContainsTarget="true"/>
+         </EntityType>
          <EntityType Name="applicationTemplate" BaseType="graph.entity">
             <Property Name="categories" Type="Collection(Edm.String)"/>
             <Property Name="description" Type="Edm.String"/>
@@ -6307,6 +6521,7 @@
          <ComplexType Name="defaultUserRolePermissions">
             <Property Name="allowedToCreateApps" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="allowedToCreateSecurityGroups" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="allowedToCreateTenants" Type="Edm.Boolean"/>
             <Property Name="allowedToReadBitlockerKeysForOwnedDevice" Type="Edm.Boolean"/>
             <Property Name="allowedToReadOtherUsers" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="permissionGrantPoliciesAssigned" Type="Collection(Edm.String)"/>
@@ -6872,6 +7087,8 @@
             <NavigationProperty Name="domains" Type="Collection(graph.externalDomainName)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="subscribedSku" BaseType="graph.entity">
+            <Property Name="accountId" Type="Edm.String"/>
+            <Property Name="accountName" Type="Edm.String"/>
             <Property Name="appliesTo" Type="Edm.String"/>
             <Property Name="capabilityStatus" Type="Edm.String"/>
             <Property Name="consumedUnits" Type="Edm.Int32"/>
@@ -6879,6 +7096,7 @@
             <Property Name="servicePlans" Type="Collection(graph.servicePlanInfo)" Nullable="false"/>
             <Property Name="skuId" Type="Edm.Guid"/>
             <Property Name="skuPartNumber" Type="Edm.String"/>
+            <Property Name="subscriptionIds" Type="Collection(Edm.String)"/>
          </EntityType>
          <EntityType Name="unifiedRbacResourceAction" BaseType="graph.entity">
             <Property Name="actionVerb" Type="Edm.String"/>
@@ -8495,6 +8713,253 @@
             <Property Name="properties" Type="Collection(graph.extensionSchemaProperty)" Nullable="false"/>
             <Property Name="status" Type="Edm.String" Nullable="false"/>
             <Property Name="targetTypes" Type="Collection(Edm.String)" Nullable="false"/>
+         </EntityType>
+         <ComplexType Name="attributeDefinition">
+            <Property Name="anchor" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="apiExpressions" Type="Collection(graph.stringKeyStringValuePair)"/>
+            <Property Name="caseExact" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="defaultValue" Type="Edm.String"/>
+            <Property Name="flowNullValues" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="metadata" Type="Collection(graph.attributeDefinitionMetadataEntry)"/>
+            <Property Name="multivalued" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="mutability" Type="graph.mutability" Nullable="false"/>
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="referencedObjects" Type="Collection(graph.referencedObject)"/>
+            <Property Name="required" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="type" Type="graph.attributeType" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="stringKeyStringValuePair">
+            <Property Name="key" Type="Edm.String"/>
+            <Property Name="value" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="attributeDefinitionMetadataEntry">
+            <Property Name="key" Type="graph.attributeDefinitionMetadata"/>
+            <Property Name="value" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="referencedObject">
+            <Property Name="referencedObjectName" Type="Edm.String"/>
+            <Property Name="referencedProperty" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="attributeMapping">
+            <Property Name="defaultValue" Type="Edm.String"/>
+            <Property Name="exportMissingReferences" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="flowBehavior" Type="graph.attributeFlowBehavior" Nullable="false"/>
+            <Property Name="flowType" Type="graph.attributeFlowType" Nullable="false"/>
+            <Property Name="matchingPriority" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="source" Type="graph.attributeMappingSource"/>
+            <Property Name="targetAttributeName" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="attributeMappingSource">
+            <Property Name="expression" Type="Edm.String"/>
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="parameters" Type="Collection(graph.stringKeyAttributeMappingSourceValuePair)"/>
+            <Property Name="type" Type="graph.attributeMappingSourceType" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="attributeMappingParameterSchema">
+            <Property Name="allowMultipleOccurrences" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="required" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="type" Type="graph.attributeType" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="stringKeyAttributeMappingSourceValuePair">
+            <Property Name="key" Type="Edm.String"/>
+            <Property Name="value" Type="graph.attributeMappingSource"/>
+         </ComplexType>
+         <ComplexType Name="containerFilter">
+            <Property Name="includedContainers" Type="Collection(Edm.String)"/>
+         </ComplexType>
+         <ComplexType Name="expressionInputObject">
+            <Property Name="definition" Type="graph.objectDefinition"/>
+            <Property Name="properties" Type="Collection(graph.stringKeyObjectValuePair)"/>
+         </ComplexType>
+         <ComplexType Name="objectDefinition">
+            <Property Name="attributes" Type="Collection(graph.attributeDefinition)"/>
+            <Property Name="metadata" Type="Collection(graph.objectDefinitionMetadataEntry)"/>
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="supportedApis" Type="Collection(Edm.String)"/>
+         </ComplexType>
+         <ComplexType Name="stringKeyObjectValuePair" OpenType="true">
+            <Property Name="key" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="filter">
+            <Property Name="categoryFilterGroups" Type="Collection(graph.filterGroup)"/>
+            <Property Name="groups" Type="Collection(graph.filterGroup)"/>
+            <Property Name="inputFilterGroups" Type="Collection(graph.filterGroup)"/>
+         </ComplexType>
+         <ComplexType Name="filterGroup">
+            <Property Name="clauses" Type="Collection(graph.filterClause)"/>
+            <Property Name="name" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="filterClause">
+            <Property Name="operatorName" Type="Edm.String"/>
+            <Property Name="sourceOperandName" Type="Edm.String"/>
+            <Property Name="targetOperand" Type="graph.filterOperand"/>
+         </ComplexType>
+         <ComplexType Name="filterOperand">
+            <Property Name="values" Type="Collection(Edm.String)"/>
+         </ComplexType>
+         <ComplexType Name="groupFilter">
+            <Property Name="includedGroups" Type="Collection(Edm.String)"/>
+         </ComplexType>
+         <ComplexType Name="objectDefinitionMetadataEntry">
+            <Property Name="key" Type="graph.objectDefinitionMetadata"/>
+            <Property Name="value" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="objectMapping">
+            <Property Name="attributeMappings" Type="Collection(graph.attributeMapping)"/>
+            <Property Name="enabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="flowTypes" Type="graph.objectFlowTypes" Nullable="false"/>
+            <Property Name="metadata" Type="Collection(graph.objectMappingMetadataEntry)"/>
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="scope" Type="graph.filter"/>
+            <Property Name="sourceObjectName" Type="Edm.String"/>
+            <Property Name="targetObjectName" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="objectMappingMetadataEntry">
+            <Property Name="key" Type="graph.objectMappingMetadata"/>
+            <Property Name="value" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="parseExpressionResponse">
+            <Property Name="error" Type="graph.publicError"/>
+            <Property Name="evaluationResult" Type="Collection(Edm.String)"/>
+            <Property Name="evaluationSucceeded" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="parsedExpression" Type="graph.attributeMappingSource"/>
+            <Property Name="parsingSucceeded" Type="Edm.Boolean" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="publicErrorResponse">
+            <Property Name="error" Type="graph.publicError"/>
+         </ComplexType>
+         <ComplexType Name="stringKeyLongValuePair">
+            <Property Name="key" Type="Edm.String"/>
+            <Property Name="value" Type="Edm.Int64" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="synchronizationError">
+            <Property Name="code" Type="Edm.String"/>
+            <Property Name="message" Type="Edm.String"/>
+            <Property Name="tenantActionable" Type="Edm.Boolean" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="synchronizationJobApplicationParameters">
+            <Property Name="ruleId" Type="Edm.String"/>
+            <Property Name="subjects" Type="Collection(graph.synchronizationJobSubject)"/>
+         </ComplexType>
+         <ComplexType Name="synchronizationJobSubject">
+            <Property Name="links" Type="graph.synchronizationLinkedObjects"/>
+            <Property Name="objectId" Type="Edm.String"/>
+            <Property Name="objectTypeName" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="synchronizationJobRestartCriteria">
+            <Property Name="resetScope" Type="graph.synchronizationJobRestartScope"/>
+         </ComplexType>
+         <ComplexType Name="synchronizationLinkedObjects">
+            <Property Name="manager" Type="graph.synchronizationJobSubject"/>
+            <Property Name="members" Type="Collection(graph.synchronizationJobSubject)"/>
+            <Property Name="owners" Type="Collection(graph.synchronizationJobSubject)"/>
+         </ComplexType>
+         <ComplexType Name="synchronizationMetadataEntry">
+            <Property Name="key" Type="graph.synchronizationMetadata"/>
+            <Property Name="value" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="synchronizationProgress">
+            <Property Name="completedUnits" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="progressObservationDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="totalUnits" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="units" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="synchronizationQuarantine">
+            <Property Name="currentBegan" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="error" Type="graph.synchronizationError"/>
+            <Property Name="nextAttempt" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="reason" Type="graph.quarantineReason" Nullable="false"/>
+            <Property Name="seriesBegan" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="seriesCount" Type="Edm.Int64" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="synchronizationRule">
+            <Property Name="containerFilter" Type="graph.containerFilter"/>
+            <Property Name="editable" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="groupFilter" Type="graph.groupFilter"/>
+            <Property Name="id" Type="Edm.String"/>
+            <Property Name="metadata" Type="Collection(graph.stringKeyStringValuePair)"/>
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="objectMappings" Type="Collection(graph.objectMapping)"/>
+            <Property Name="priority" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="sourceDirectoryName" Type="Edm.String"/>
+            <Property Name="targetDirectoryName" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="synchronizationSchedule">
+            <Property Name="expiration" Type="Edm.DateTimeOffset"/>
+            <Property Name="interval" Type="Edm.Duration" Nullable="false"/>
+            <Property Name="state" Type="graph.synchronizationScheduleState" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="synchronizationSecretKeyStringValuePair">
+            <Property Name="key" Type="graph.synchronizationSecret" Nullable="false"/>
+            <Property Name="value" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="synchronizationStatus">
+            <Property Name="code" Type="graph.synchronizationStatusCode" Nullable="false"/>
+            <Property Name="countSuccessiveCompleteFailures" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="escrowsPruned" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="lastExecution" Type="graph.synchronizationTaskExecution"/>
+            <Property Name="lastSuccessfulExecution" Type="graph.synchronizationTaskExecution"/>
+            <Property Name="lastSuccessfulExecutionWithExports" Type="graph.synchronizationTaskExecution"/>
+            <Property Name="progress" Type="Collection(graph.synchronizationProgress)"/>
+            <Property Name="quarantine" Type="graph.synchronizationQuarantine"/>
+            <Property Name="steadyStateFirstAchievedTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="steadyStateLastAchievedTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="synchronizedEntryCountByType" Type="Collection(graph.stringKeyLongValuePair)"/>
+            <Property Name="troubleshootingUrl" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="synchronizationTaskExecution">
+            <Property Name="activityIdentifier" Type="Edm.String"/>
+            <Property Name="countEntitled" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="countEntitledForProvisioning" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="countEscrowed" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="countEscrowedRaw" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="countExported" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="countExports" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="countImported" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="countImportedDeltas" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="countImportedReferenceDeltas" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="error" Type="graph.synchronizationError"/>
+            <Property Name="state" Type="graph.synchronizationTaskExecutionResult" Nullable="false"/>
+            <Property Name="timeBegan" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="timeEnded" Type="Edm.DateTimeOffset" Nullable="false"/>
+         </ComplexType>
+         <EntityType Name="attributeMappingFunctionSchema" BaseType="graph.entity">
+            <Property Name="parameters" Type="Collection(graph.attributeMappingParameterSchema)"/>
+         </EntityType>
+         <EntityType Name="directoryDefinition" BaseType="graph.entity">
+            <Property Name="discoverabilities" Type="graph.directoryDefinitionDiscoverabilities" Nullable="false"/>
+            <Property Name="discoveryDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="objects" Type="Collection(graph.objectDefinition)"/>
+            <Property Name="readOnly" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="version" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="filterOperatorSchema" BaseType="graph.entity">
+            <Property Name="arity" Type="graph.scopeOperatorType" Nullable="false"/>
+            <Property Name="multivaluedComparisonType" Type="graph.scopeOperatorMultiValuedComparisonType" Nullable="false"/>
+            <Property Name="supportedAttributeTypes" Type="Collection(graph.attributeType)" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="synchronizationJob" BaseType="graph.entity">
+            <Property Name="schedule" Type="graph.synchronizationSchedule"/>
+            <Property Name="status" Type="graph.synchronizationStatus"/>
+            <Property Name="synchronizationJobSettings" Type="Collection(graph.keyValuePair)"/>
+            <Property Name="templateId" Type="Edm.String"/>
+            <NavigationProperty Name="schema" Type="graph.synchronizationSchema" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="synchronizationTemplate" BaseType="graph.entity">
+            <Property Name="applicationId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="default" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="discoverable" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="factoryTag" Type="Edm.String"/>
+            <Property Name="metadata" Type="Collection(graph.synchronizationMetadataEntry)"/>
+            <NavigationProperty Name="schema" Type="graph.synchronizationSchema" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="synchronizationSchema" BaseType="graph.entity">
+            <Property Name="synchronizationRules" Type="Collection(graph.synchronizationRule)"/>
+            <Property Name="version" Type="Edm.String"/>
+            <NavigationProperty Name="directories" Type="Collection(graph.directoryDefinition)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="cloudCommunications">
             <NavigationProperty Name="callRecords" Type="Collection(microsoft.graph.callRecords.callRecord)" ContainsTarget="true"/>
@@ -11796,6 +12261,10 @@
             <Property Name="from" Type="Edm.String" Nullable="false"/>
             <Property Name="to" Type="Edm.String" Nullable="false"/>
          </ComplexType>
+         <ComplexType Name="collapseProperty">
+            <Property Name="fields" Type="Collection(Edm.String)" Nullable="false"/>
+            <Property Name="limit" Type="Edm.Int16" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="resultTemplate">
             <Property Name="body" Type="graph.Json"/>
             <Property Name="displayName" Type="Edm.String"/>
@@ -11821,6 +12290,7 @@
          <ComplexType Name="searchHit">
             <Property Name="contentSource" Type="Edm.String"/>
             <Property Name="hitId" Type="Edm.String"/>
+            <Property Name="isCollapsed" Type="Edm.Boolean"/>
             <Property Name="rank" Type="Edm.Int32"/>
             <Property Name="resultTemplateId" Type="Edm.String"/>
             <Property Name="summary" Type="Edm.String"/>
@@ -11839,6 +12309,7 @@
          <ComplexType Name="searchRequest">
             <Property Name="aggregationFilters" Type="Collection(Edm.String)"/>
             <Property Name="aggregations" Type="Collection(graph.aggregationOption)"/>
+            <Property Name="collapseProperties" Type="Collection(graph.collapseProperty)"/>
             <Property Name="contentSources" Type="Collection(Edm.String)"/>
             <Property Name="enableTopResults" Type="Edm.Boolean"/>
             <Property Name="entityTypes" Type="Collection(graph.entityType)"/>
@@ -12945,6 +13416,10 @@
             <Property Name="role" Type="graph.onlineMeetingRole"/>
             <Property Name="upn" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="onlineMeetingRestricted">
+            <Property Name="contentSharingDisabled" Type="graph.onlineMeetingContentSharingDisabledReason"/>
+            <Property Name="videoDisabled" Type="graph.onlineMeetingVideoDisabledReason"/>
+         </ComplexType>
          <ComplexType Name="organizerMeetingInfo" BaseType="graph.meetingInfo" OpenType="true">
             <Property Name="organizer" Type="graph.identitySet" Nullable="false"/>
          </ComplexType>
@@ -13043,6 +13518,7 @@
             <Property Name="mediaStreams" Type="Collection(graph.mediaStream)"/>
             <Property Name="metadata" Type="Edm.String"/>
             <Property Name="recordingInfo" Type="graph.recordingInfo"/>
+            <Property Name="restrictedExperience" Type="graph.onlineMeetingRestricted"/>
          </EntityType>
          <EntityType Name="cancelMediaProcessingOperation" BaseType="graph.commsOperation" OpenType="true"/>
          <EntityType Name="inviteParticipantsOperation" BaseType="graph.commsOperation" OpenType="true">
@@ -17333,6 +17809,62 @@
             <Parameter Name="groupId" Type="Edm.String" Nullable="false" Unicode="false"/>
             <ReturnType Type="Edm.Boolean" Nullable="false"/>
          </Action>
+         <Action Name="acquireAccessToken" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.synchronization"/>
+            <Parameter Name="credentials" Type="Collection(graph.synchronizationSecretKeyStringValuePair)"/>
+         </Action>
+         <Action Name="discover" IsBound="true" EntitySetPath="bindingParameter">
+            <Parameter Name="bindingParameter" Type="graph.directoryDefinition"/>
+            <ReturnType Type="graph.directoryDefinition"/>
+         </Action>
+         <Action Name="parseExpression" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.synchronizationSchema"/>
+            <Parameter Name="expression" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="testInputObject" Type="graph.expressionInputObject"/>
+            <Parameter Name="targetAttributeDefinition" Type="graph.attributeDefinition"/>
+            <ReturnType Type="graph.parseExpressionResponse"/>
+         </Action>
+         <Function Name="filterOperators" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.synchronizationSchema"/>
+            <ReturnType Type="Collection(graph.filterOperatorSchema)"/>
+         </Function>
+         <Function Name="functions" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.synchronizationSchema"/>
+            <ReturnType Type="Collection(graph.attributeMappingFunctionSchema)"/>
+         </Function>
+         <Action Name="pause" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.synchronizationJob"/>
+         </Action>
+         <Action Name="provisionOnDemand" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.synchronizationJob"/>
+            <Parameter Name="parameters" Type="Collection(graph.synchronizationJobApplicationParameters)"/>
+            <ReturnType Type="graph.stringKeyStringValuePair" Nullable="false"/>
+         </Action>
+         <Action Name="restart" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.synchronizationJob"/>
+            <Parameter Name="criteria" Type="graph.synchronizationJobRestartCriteria"/>
+         </Action>
+         <Action Name="start" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.synchronizationJob"/>
+         </Action>
+         <Action Name="start" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.printJob"/>
+            <ReturnType Type="graph.printJobStatus"/>
+         </Action>
+         <Action Name="validateCredentials" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.synchronizationJob"/>
+            <Parameter Name="applicationIdentifier" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="templateId" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="useSavedCredentials" Type="Edm.Boolean"/>
+            <Parameter Name="credentials" Type="Collection(graph.synchronizationSecretKeyStringValuePair)"/>
+         </Action>
+         <Action Name="validateCredentials" IsBound="true">
+            <Parameter Name="bindingParameter" Type="Collection(graph.synchronizationJob)"/>
+            <Parameter Name="applicationIdentifier" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="templateId" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="useSavedCredentials" Type="Edm.Boolean"/>
+            <Parameter Name="credentials" Type="Collection(graph.synchronizationSecretKeyStringValuePair)"/>
+         </Action>
          <Action Name="acceptRecommendations" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.accessReviewInstance"/>
          </Action>
@@ -18543,10 +19075,6 @@
             <Parameter Name="timeout" Type="Edm.Int32"/>
             <Parameter Name="callbackUri" Type="Edm.String" Unicode="false"/>
          </Action>
-         <Action Name="start" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.printJob"/>
-            <ReturnType Type="graph.printJobStatus"/>
-         </Action>
          <Action Name="create" IsBound="true">
             <Parameter Name="bindingParameter" Type="Collection(graph.printer)"/>
             <Parameter Name="displayName" Type="Edm.String" Nullable="false" Unicode="false"/>
@@ -18924,6 +19452,8 @@
             </EntitySet>
             <EntitySet Name="schemaExtensions" EntityType="microsoft.graph.schemaExtension"/>
             <EntitySet Name="groupLifecyclePolicies" EntityType="microsoft.graph.groupLifecyclePolicy"/>
+            <EntitySet Name="filterOperators" EntityType="microsoft.graph.filterOperatorSchema"/>
+            <EntitySet Name="functions" EntityType="microsoft.graph.attributeMappingFunctionSchema"/>
             <EntitySet Name="agreementAcceptances" EntityType="microsoft.graph.agreementAcceptance"/>
             <EntitySet Name="agreements" EntityType="microsoft.graph.agreement"/>
             <EntitySet Name="dataPolicyOperations" EntityType="microsoft.graph.dataPolicyOperation"/>
@@ -22119,6 +22649,15 @@
                      </PropertyValue>
                   </Record>
                </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.synchronization">
+            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+               <Record>
+                  <PropertyValue Property="UpdateMethod">
+                     <EnumMember>Org.OData.Capabilities.V1.HttpMethod/PUT</EnumMember>
+                  </PropertyValue>
+               </Record>
             </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.authenticationContextClassReference">

@@ -30,6 +30,29 @@ class EntityCollection(ClientObjectCollection):
         self.context.add_query(qry)
         return return_type
 
+    def _find_by_unique_prop(self, name, val):
+        """Retrieves entity by unique identifier
+
+        :param str name: Property name
+        :param str val: Property value
+        """
+        return_type = self.create_typed_object()
+        self.add_child(return_type)
+        filter_text = "{0} eq '{1}'".format(name, val)
+
+        def _after_loaded(col):
+            """
+            :type col: EntityCollection
+            """
+            if len(col) != 1:
+                message = "Not found or ambiguous match found for filter: {0}".format(filter_text)
+                raise ValueError(message)
+            return_type.set_property("id", col[0].get_property("id"))
+
+        self.filter(filter_text)
+        self.context.load(self, after_loaded=_after_loaded)
+        return return_type
+
     @property
     def context(self):
         """

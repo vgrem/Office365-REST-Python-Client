@@ -7,3 +7,13 @@ class PermissionCollection(EntityCollection):
 
     def __init__(self, context, resource_path=None):
         super(PermissionCollection, self).__init__(context, Permission, resource_path)
+
+    def delete_all(self):
+        """
+        Remove all access to resource
+        """
+        def _after_loaded(return_type):
+            for permission in return_type:  # type: Permission
+                permission.delete_object()
+        self.context.load(self, after_loaded=_after_loaded)
+        return self

@@ -7,6 +7,7 @@ from office365.directory.insights.office_graph import OfficeGraphInsights
 from office365.directory.licenses.assigned_plan import AssignedPlan
 from office365.directory.licenses.assignment_state import LicenseAssignmentState
 from office365.directory.permissions.grants.oauth2 import OAuth2PermissionGrant
+from office365.directory.users.activities.collection import UserActivityCollection
 from office365.directory.users.settings import UserSettings
 from office365.intune.devices.managed import ManagedDevice
 from office365.intune.devices.managed_app_diagnostic_status import ManagedAppDiagnosticStatus
@@ -362,6 +363,12 @@ class User(DirectoryObject):
            Supports $filter.
         """
         return self.properties.get('identities', ClientValueCollection(ObjectIdentity))
+
+    @property
+    def activities(self):
+        """The user's activities across devices."""
+        return self.properties.get('activities',
+                                   UserActivityCollection(self.context, ResourcePath("activities", self.resource_path)))
 
     @property
     def assigned_licenses(self):

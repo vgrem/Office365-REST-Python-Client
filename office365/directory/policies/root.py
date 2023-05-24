@@ -29,6 +29,14 @@ class PolicyRoot(Entity):
                                                        ResourcePath("authorizationPolicy", self.resource_path)))
 
     @property
+    def app_management_policies(self):
+        """The policies that enforce app management restrictions for specific applications and service principals,
+        overriding the defaultAppManagementPolicy."""
+        return self.properties.get('appManagementPolicies',
+                                   AuthorizationPolicy(self.context,
+                                                       ResourcePath("appManagementPolicies", self.resource_path)))
+
+    @property
     def permission_grant_policies(self):
         """"
         The policy that specifies the conditions under which consent can be granted.
@@ -49,6 +57,7 @@ class PolicyRoot(Entity):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "appManagementPolicies": self.app_management_policies,
                 "authenticationMethodsPolicy": self.authentication_methods_policy,
                 "authorizationPolicy": self.authorization_policy,
                 "conditional_access_policies": self.conditional_access_policies,

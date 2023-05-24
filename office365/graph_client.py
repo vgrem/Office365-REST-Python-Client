@@ -1,35 +1,36 @@
 from office365.communications.cloud_communications import CloudCommunications
 from office365.delta_collection import DeltaCollection
-from office365.directory.applications.application import Application
-from office365.directory.applications.template import ApplicationTemplate
+from office365.directory.applications.collection import ApplicationCollection
 from office365.directory.applications.service_principal import ServicePrincipal
+from office365.directory.applications.template import ApplicationTemplate
 from office365.directory.audit.log_root import AuditLogRoot
 from office365.directory.directory import Directory
 from office365.directory.domains.domain import Domain
-from office365.directory.identities.governance import IdentityGovernance
-from office365.directory.identities.protection_root import IdentityProtectionRoot
-from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.groups.collection import GroupCollection
 from office365.directory.groups.lifecycle_policy import GroupLifecyclePolicy
 from office365.directory.groups.setting_template import GroupSettingTemplate
 from office365.directory.identities.container import IdentityContainer
+from office365.directory.identities.governance import IdentityGovernance
+from office365.directory.identities.protection_root import IdentityProtectionRoot
 from office365.directory.identities.provider import IdentityProvider
 from office365.directory.internal.paths.me import MePath
 from office365.directory.licenses.subscribed_sku import SubscribedSku
+from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.permissions.grants.resource_specific import ResourceSpecificPermissionGrant
+from office365.directory.policies.root import PolicyRoot
 from office365.directory.roles.management import RoleManagement
 from office365.directory.roles.role import DirectoryRole
+from office365.directory.security.security import Security
+from office365.directory.users.collection import UserCollection
 from office365.directory.users.invitation import InvitationCollection
+from office365.directory.users.user import User
+from office365.education.root import EducationRoot
+from office365.entity_collection import EntityCollection
+from office365.external.external import External
 from office365.intune.devices.app_management import DeviceAppManagement
 from office365.intune.devices.management import DeviceManagement
 from office365.intune.organizations.contact import OrgContact
 from office365.intune.organizations.organization import Organization
-from office365.directory.policies.root import PolicyRoot
-from office365.directory.users.user import User
-from office365.directory.users.collection import UserCollection
-from office365.education.root import EducationRoot
-from office365.entity_collection import EntityCollection
-from office365.external.external import External
 from office365.onedrive.admin import Admin
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.shares.collection import SharesCollection
@@ -47,7 +48,6 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.search.entity import SearchEntity
-from office365.directory.security.security import Security
 from office365.subscriptions.subscription import Subscription
 from office365.teams.chats.collection import ChatCollection
 from office365.teams.collection import TeamCollection
@@ -220,7 +220,7 @@ class GraphClient(ClientRuntimeContext):
     @property
     def applications(self):
         """Get the list of applications in this organization."""
-        return DeltaCollection(self, Application, ResourcePath("applications"))
+        return ApplicationCollection(self, ResourcePath("applications"))
 
     @property
     def service_principals(self):

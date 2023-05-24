@@ -5,6 +5,7 @@ ctx = ClientContext(test_site_url).with_credentials(test_client_credentials)
 
 
 def disable_ssl(request):
+    print("Disabling certification verification...")
     request.verify = False  # Disable certification verification
 
 
