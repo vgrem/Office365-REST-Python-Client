@@ -11,28 +11,22 @@ from office365.graph_client import GraphClient
 from tests import test_client_credentials, test_team_site_url
 
 
-def assign_site_access(site, roles=None, clear_existing=False):
+def assign_site_access(site, application, roles=None, clear_existing=False):
     """
     :param office365.onedrive.sites.site.Site site: Site the permissions to grant
+    :param office365.onedrive.directory.applications.Application application: Application
     :param list[str] roles: The list of roles to add
     :param bool clear_existing: Clear existing permissions first
     """
-    app = client.applications.get_by_client_id(test_client_credentials.clientId).get().execute_query()
-
     if clear_existing:
         target_site.permissions.delete_all().execute_query()
 
     if roles:
-        identities = [{
-            "application": {
-                "id": app.properties["appId"],
-                "displayName": app.properties["displayName"]
-            }
-        }]
-        site.permissions.add(roles=roles, grantedToIdentities=identities).execute_query()
+        site.permissions.add(roles, application).execute_query()
 
 
 client = GraphClient(acquire_token_by_client_credentials)
 target_site = client.sites.get_by_url(test_team_site_url)
+app = client.applications.get_by_app_id(test_client_credentials.clientId)
 # assign_site_access(user_site_url, [], True)
-assign_site_access(target_site, ["read", "write"])
+assign_site_access(target_site, app, ["read", "write"], True)

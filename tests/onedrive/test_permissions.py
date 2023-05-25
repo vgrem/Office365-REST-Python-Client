@@ -2,7 +2,7 @@ import uuid
 from unittest import TestCase
 
 from office365.graph_client import GraphClient
-from tests import test_team_site_url, test_user_principal_name_alt
+from tests import test_team_site_url, test_user_principal_name_alt, test_client_credentials
 from tests.graph_case import acquire_token_by_client_credentials
 
 from office365.onedrive.permissions.permission import Permission
@@ -70,15 +70,8 @@ class TestPermissions(TestCase):
         self.assertIsNotNone(permissions.resource_path)
 
     def test9_create_site_permission(self):
-        new_site_permission = self.client.sites.root.permissions.add(
-            roles=["write"],
-            grantedToIdentities=[{
-                "application": {
-                    "id": "89ea5c94-7736-4e25-95ad-3fa95f62b66e",
-                    "displayName": "Contoso Time Manager App"
-                }
-            }]
-        ).execute_query()
+        app = self.client.applications.get_by_app_id(test_client_credentials.clientId)
+        new_site_permission = self.client.sites.root.permissions.add(["write"], app).execute_query()
         self.assertIsNotNone(new_site_permission.resource_path)
         self.target_permission = new_site_permission
 

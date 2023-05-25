@@ -165,6 +165,8 @@ class ClientObject(object):
         """
 
         names_to_include = [n for n in names if not self.is_property_available(n)]
+        if self.property_ref_name is not None and self.property_ref_name not in names_to_include:
+            names_to_include.append(self.property_ref_name)
         if len(names_to_include) > 0:
             from office365.runtime.queries.read_entity import ReadEntityQuery
             qry = ReadEntityQuery(self, names_to_include)
@@ -179,6 +181,14 @@ class ClientObject(object):
         if self._entity_type_name is None:
             self._entity_type_name = type(self).__name__
         return self._entity_type_name
+
+    @property
+    def property_ref_name(self):
+        """Returns property reference name
+
+        :rtype: str
+        """
+        return None
 
     @property
     def resource_url(self):

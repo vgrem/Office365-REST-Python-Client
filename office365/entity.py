@@ -42,9 +42,13 @@ class Entity(ClientObject):
         """
         return self.properties.get('id', None)
 
+    @property
+    def property_ref_name(self):
+        return "id"
+
     def set_property(self, name, value, persist_changes=True):
         super(Entity, self).set_property(name, value, persist_changes)
-        if name == "id":
+        if name == self.property_ref_name:
             if self._resource_path is None:
                 if isinstance(self.parent_collection.resource_path, EntityPath):
                     self._resource_path = self.parent_collection.resource_path.normalize(value)
