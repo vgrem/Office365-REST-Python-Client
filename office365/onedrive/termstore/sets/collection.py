@@ -14,6 +14,15 @@ class SetCollection(EntityCollection):
         super(SetCollection, self).__init__(context, Set, resource_path)
         self._parent_group = parent_group
 
+    def get_by_name(self, name):
+        """
+        Returns the TermSet specified by its name.
+
+        :param str name: Term set name
+        :rtype: Set
+        """
+        return self._find_by_unique_prop("displayName", name)
+
     def add(self, name, parent_group=None):
         """Create a new set object.
 

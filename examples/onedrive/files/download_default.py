@@ -1,3 +1,8 @@
+"""
+Download the contents of a DriveItem
+
+https://learn.microsoft.com/en-us/graph/api/driveitem-get-content?view=graph-rest-1.0&tabs=http
+"""
 import os
 import tempfile
 

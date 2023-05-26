@@ -21,5 +21,6 @@ class GroupCollection(EntityCollection):
         """Returns the group with the specified name.
 
         :param str name: Group name
+        :rtype: Group
         """
         return self._find_by_unique_prop("displayName", name)

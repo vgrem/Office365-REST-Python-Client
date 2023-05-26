@@ -1,5 +1,4 @@
 from office365.onedrive.columns.definition import ColumnDefinition
-from office365.onedrive.lists.list import List
 from tests import create_unique_name
 from tests.graph_case import GraphTestCase
 
@@ -10,7 +9,7 @@ class TestColumn(GraphTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestColumn, cls).setUpClass()
-        cls.doclib = cls.client.sites.root.lists["Documents"]  # type: List
+        cls.doclib = cls.client.sites.root.lists["Documents"]
 
     def test1_get_list_columns(self):
         columns = self.doclib.columns.get().execute_query()

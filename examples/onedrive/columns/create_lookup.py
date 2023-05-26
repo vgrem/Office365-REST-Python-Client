@@ -1,6 +1,5 @@
 from examples import acquire_token_by_username_password
 from office365.graph_client import GraphClient
-from office365.onedrive.lists.list import List
 from tests import create_unique_name
 
 
@@ -12,7 +11,7 @@ def clean_up(columns):
 
 
 client = GraphClient(acquire_token_by_username_password)
-lib = client.sites.root.lists["Docs"]  # type: List
+lib = client.sites.root.lists["Docs"]
 
 column_name = create_unique_name("LookupColumn")
 lookup_column = lib.columns.add_lookup(column_name, lib).execute_query()

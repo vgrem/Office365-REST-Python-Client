@@ -12,7 +12,7 @@ class SharePointIdentitySet(IdentitySet):
     such as created by or last modified by.
     """
 
-    def __init__(self, group = Identity(), site_group = SharePointIdentity(), site_user = SharePointIdentity()):
+    def __init__(self, group=Identity(), site_group=SharePointIdentity(), site_user=SharePointIdentity()):
         """
         :param Identity group: The group associated with this action.
         :param SharePointIdentity site_group: The SharePoint group associated with this action

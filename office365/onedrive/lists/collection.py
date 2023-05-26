@@ -9,6 +9,14 @@ class ListCollection(EntityCollection):
     def __init__(self, context, resource_path=None):
         super(ListCollection, self).__init__(context, List, resource_path)
 
+    def __getitem__(self, key):
+        """
+        Address List by identifier or name
+        :param str key: List identifier or name
+        :rtype: List
+        """
+        return super(ListCollection, self).__getitem__(key)
+
     def add(self, creation_information):
         """
         Creates a Drive list resource

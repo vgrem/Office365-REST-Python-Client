@@ -12,8 +12,7 @@ def clean_up(columns):
 
 
 client = GraphClient(acquire_token_by_username_password)
-lib = client.sites.root.lists["Docs"]  # type: List
-
+lib = client.sites.root.lists["Docs"]
 column_name = create_unique_name("TextColumn")
 text_column = lib.columns.add_text(column_name).execute_query()
 print(text_column.display_name)

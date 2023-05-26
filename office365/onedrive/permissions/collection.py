@@ -1,4 +1,5 @@
 from office365.directory.permissions.identity import Identity
+from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.onedrive.permissions.permission import Permission
@@ -16,7 +17,7 @@ class PermissionCollection(EntityCollection):
         Create a new permission object.
 
         :param list[str] roles: Permission types
-        :param Application or User or Device or str identity: Identity object or identifier
+        :param Application or User or Device or User or Group or str identity: Identity object or identifier
         :param str identity_type: Identity type
         """
 
@@ -25,7 +26,8 @@ class PermissionCollection(EntityCollection):
         known_identity_endpoints = {
             "application": self.context.applications,
             "user": self.context.users,
-            "device": self.context.device_app_management
+            "device": self.context.device_app_management,
+            "group": self.context.groups
         }
 
         if isinstance(identity, Entity):
@@ -45,6 +47,7 @@ class PermissionCollection(EntityCollection):
                     identity_type: Identity(display_name=identity.display_name, _id=identity.id)
                 }]
             }
+
             self.add_child(return_type)
             qry = CreateEntityQuery(self, payload, return_type)
             self.context.add_query(qry)

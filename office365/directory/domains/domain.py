@@ -1,4 +1,5 @@
 from office365.directory.domains.dns_record import DomainDnsRecord
+from office365.directory.domains.state import DomainState
 from office365.directory.object_collection import DirectoryObjectCollection
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
@@ -65,8 +66,12 @@ class Domain(Entity):
         """
         return self.properties.get('verificationDnsRecords',
                                    EntityCollection(self.context, DomainDnsRecord,
-                                                             ResourcePath("verificationDnsRecords", self.resource_path)))
+                                                    ResourcePath("verificationDnsRecords", self.resource_path)))
 
+    @property
+    def state(self):
+        """Status of asynchronous operations scheduled for the domain."""
+        return self.properties.get("state", DomainState())
 
     def get_property(self, name, default_value=None):
         if default_value is None:

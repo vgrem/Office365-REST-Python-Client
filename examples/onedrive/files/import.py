@@ -27,4 +27,4 @@ client = GraphClient(acquire_token_by_client_credentials)
 test_user_principal_name_alt = settings.get('users', 'test_user2')
 target_drive = client.users[test_user_principal_name_alt].drive  # get target drive
 # import local files into OneDrive
-upload_files(target_drive, "../data")
+upload_files(target_drive, "../../data")

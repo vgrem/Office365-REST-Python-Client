@@ -323,10 +323,10 @@ def download_files(remote_folder, local_path):
 Additional examples:
 
 -  [create list column](examples/onedrive/columns/create_text.py) 
--  [download file](examples/onedrive/download_file_default.py)
--  [export files](examples/onedrive/export_files.py)
--  [import files](examples/onedrive/import_files.py)   
--  [list drives](examples/onedrive/list_drives.py)
+-  [download file](examples/onedrive/files/download_default.py)
+-  [export files](examples/onedrive/files/export.py)
+-  [import files](examples/onedrive/files/import.py)   
+-  [list drives](examples/onedrive/drives/list.py)
 -  [list files](examples/onedrive/list_files.py)
 
 Refer to [OneDrive examples section](examples/onedrive) for more examples.

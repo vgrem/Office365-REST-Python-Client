@@ -1,3 +1,8 @@
+"""
+
+https://learn.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0
+"""
+
 from examples import acquire_token_by_username_password
 from office365.graph_client import GraphClient
 
@@ -10,7 +15,7 @@ def print_progress(range_pos):
     print("{0} bytes uploaded".format(range_pos))
 
 
-local_path = "../../tests/data/big_buck_bunny.mp4"
+local_path = "../../../tests/data/big_buck_bunny.mp4"
 remote_folder = client.me.drive.root.get_by_path("archive")
 remote_file = remote_folder.resumable_upload(local_path, chunk_size=chunk_size,
                                              chunk_uploaded=print_progress).get().execute_query()
