@@ -1,18 +1,42 @@
 from office365.base_item import BaseItem
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity_collection import EntityCollection
+from office365.onedrive.driveitems.conflict_behavior import ConflictBehavior
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.driveitems.system_facet import SystemFacet
 from office365.onedrive.internal.paths.root import RootPath
 from office365.onedrive.lists.list import List
 from office365.onedrive.sharepoint_ids import SharePointIds
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.function import FunctionQuery
 
 
 class Drive(BaseItem):
     """The drive resource is the top level object representing a user's OneDrive or a document library in
     SharePoint. """
+
+    def create_bundle(self, name, children=None):
+        """
+        Add a new bundle to the user's drive.
+
+        :param str name: Bundle name
+        :param list children: the list of file facets if creating a files or a folder facets if creating a folder
+            or a remoteItem facets if adding a shared folders
+        """
+        return_type = DriveItem(self.context)
+        self.bundles.add_child(return_type)
+        payload = {
+            "name": name,
+            "@microsoft.graph.conflictBehavior": ConflictBehavior.Rename,
+            "bundle": {},
+            "children": [
+                {"id": item_id} for item_id in children
+            ]
+        }
+        qry = CreateEntityQuery(self.bundles, payload, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def search(self, query_text):
         """Search the hierarchy of items for items matching a query.
@@ -78,6 +102,13 @@ class Drive(BaseItem):
         """For drives in SharePoint, the underlying document library list.
         """
         return self.properties.get('list', List(self.context, ResourcePath("list", self.resource_path)))
+
+    @property
+    def bundles(self):
+        """Bundle metadata, if the item is a bundle."""
+        return self.properties.get('bundles',
+                                   EntityCollection(self.context, DriveItem,
+                                                    ResourcePath("bundles", self.resource_path)))
 
     @property
     def items(self):

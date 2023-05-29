@@ -118,6 +118,10 @@ class Application(DirectoryObject):
         self.context.add_query(qry)
         return self
 
+    def update(self):
+        self._ser_property_names.append("keyCredentials")
+        return super(Application, self).update()
+
     @property
     def app_id(self):
         """The unique identifier for the application that is assigned to an application by Azure AD. Not nullable. """
@@ -154,7 +158,7 @@ class Application(DirectoryObject):
     def key_credentials(self):
         """The collection of key credentials associated with the application. Not nullable.
         """
-        return self.properties.get('keyCredentials', ClientValueCollection(KeyCredential))
+        return self.properties.setdefault('keyCredentials', ClientValueCollection(KeyCredential))
 
     @property
     def display_name(self):

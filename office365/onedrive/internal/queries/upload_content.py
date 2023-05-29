@@ -11,8 +11,8 @@ def create_upload_content_query(folder_item, name, content=None):
     :param str content: a file content
     """
     from office365.onedrive.driveitems.driveItem import DriveItem
-    file_item = DriveItem(folder_item.context, UrlPath(name, folder_item.resource_path))
-    qry = ServiceOperationQuery(file_item, "content", None, content, None, file_item)
+    return_type = DriveItem(folder_item.context, UrlPath(name, folder_item.resource_path))
+    qry = ServiceOperationQuery(return_type, "content", None, content, None, return_type)
 
     def _modify_query(request):
         """

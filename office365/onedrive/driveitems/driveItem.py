@@ -261,7 +261,7 @@ class DriveItem(BaseItem):
         :type name: str
         :type parent_reference: office365.onedrive.listitems.item_reference.ItemReference or None
         """
-        result = ClientResult(self.context)
+        return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(self,
                                     "copy",
                                     None,
@@ -270,10 +270,10 @@ class DriveItem(BaseItem):
                                         "parentReference": parent_reference
                                     },
                                     None,
-                                    result
+                                    return_type
                                     )
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def move(self, name, parent_reference=None):
         """To move a DriveItem to a new parent item, your app requests to update the parentReference of the DriveItem
@@ -392,10 +392,10 @@ class DriveItem(BaseItem):
             "page": page,
             "zoom": zoom
         }
-        result = ClientResult(self.context, ItemPreviewInfo())
-        qry = ServiceOperationQuery(self, "preview", None, payload, None, result)
+        return_type = ClientResult(self.context, ItemPreviewInfo())
+        qry = ServiceOperationQuery(self, "preview", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def validate_permission(self, challenge_token=None, password=None):
         """

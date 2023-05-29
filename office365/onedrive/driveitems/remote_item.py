@@ -11,5 +11,10 @@ class RemoteItem(ClientValue):
     or on items returned from hetrogenous collections of items (like search results).
     """
 
-    def __init__(self, created_by=IdentitySet()):
+    def __init__(self, created_by=IdentitySet(), created_datetime=None):
+        """
+        :param IdentitySet created_by:
+        :param datetime.datetime created_datetime:
+        """
         self.createdBy = created_by
+        self.createdDateTime = created_datetime

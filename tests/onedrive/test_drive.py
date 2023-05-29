@@ -40,3 +40,7 @@ class TestDrive(GraphTestCase):
     def test5_shared_with_me(self):
         col = self.client.me.drive.shared_with_me().execute_query()
         self.assertIsNotNone(col.resource_path)
+
+    #def test6_list_bundles(self):
+    #    result = self.client.me.drive.bundles.get().execute_query()
+    #    self.assertIsNotNone(result.resource_path)

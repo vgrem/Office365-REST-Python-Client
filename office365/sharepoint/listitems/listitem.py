@@ -474,9 +474,6 @@ class ListItem(SecurableObject):
         # fallback: create a new resource path
         if self._resource_path is None and self.parent_collection is not None:
             if name == "Id":
-                #self._resource_path = ServiceOperationPath("getItemById", [value], self._parent_collection.resource_path.parent)
-                #if self.parent_list is not None:
-                #    self._resource_path = self.parent_list.get_item_by_id(value).resource_path
                 self._resource_path = EntityPath(value, self.parent_collection.resource_path)
         return self
 

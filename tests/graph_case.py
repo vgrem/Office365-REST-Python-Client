@@ -13,6 +13,7 @@ def acquire_token_by_username_password():
         authority=authority_url,
         client_id=settings.get('client_credentials', 'client_id')
     )
+
     result = app.acquire_token_by_username_password(username=settings.get('user_credentials', "username"),
                                                     password=settings.get('user_credentials', "password"),
                                                     scopes=["https://graph.microsoft.com/.default"])
