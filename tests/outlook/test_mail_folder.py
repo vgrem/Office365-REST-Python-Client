@@ -1,4 +1,4 @@
-from office365.outlook.mail.folder import MailFolder
+from office365.outlook.mail.folders.folder import MailFolder
 from tests.graph_case import GraphTestCase
 
 

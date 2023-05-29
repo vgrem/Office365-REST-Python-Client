@@ -29,7 +29,8 @@ from office365.entity_collection import EntityCollection
 from office365.outlook.contacts.contact import Contact
 from office365.outlook.contacts.folder import ContactFolder
 from office365.outlook.convert_id_result import ConvertIdResult
-from office365.outlook.mail.folder import MailFolder
+from office365.outlook.mail.folders.collection import MailFolderCollection
+from office365.outlook.mail.folders.folder import MailFolder
 from office365.onedrive.drives.drive import Drive
 from office365.outlook.mail.mailbox_settings import MailboxSettings
 from office365.outlook.mail.messages.collection import MessageCollection
@@ -538,8 +539,7 @@ class User(DirectoryObject):
     def mail_folders(self):
         """Get the mail folder collection under the root folder of the signed-in user. """
         return self.properties.get('mailFolders',
-                                   DeltaCollection(self.context, MailFolder,
-                                                   ResourcePath("mailFolders", self.resource_path)))
+                                   MailFolderCollection(self.context, ResourcePath("mailFolders", self.resource_path)))
 
     @property
     def outlook(self):

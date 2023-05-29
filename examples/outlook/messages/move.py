@@ -1,18 +1,21 @@
-import sys
+"""
+Move a message to another folder within the specified user's mailbox.
+This creates a new copy of the message in the destination folder and removes the original message.
 
-from examples import acquire_token_by_username_password
+https://learn.microsoft.com/en-us/graph/api/message-move?view=graph-rest-1.0&tabs=http
+"""
+
 from office365.graph_client import GraphClient
-from office365.outlook.mail.recipient import Recipient
+from tests.graph_case import acquire_token_by_username_password
 
 client = GraphClient(acquire_token_by_username_password)
+folder_name = "Archive"
+to_folder = client.me.mail_folders[folder_name].get().execute_query()
 
-my_mail_folders = client.me.mail_folders.filter("displayName eq 'Archive'").get().execute_query()
-if len(my_mail_folders) == 0:
-    sys.exit("Mail folder not found")
-
-message = client.me.messages.add()
-#message.subject = "Meet for lunch?",
-message.body = "The new cafeteria is open."
-message.to_recipients.add(Recipient.from_email("fannyd@contoso.onmicrosoft.com"))
-message.move(my_mail_folders[0].id).execute_query()
-print("Draft message is created && moved into {0} folder".format(my_mail_folders[0].display_name))
+message = client.me.messages.add(
+    subject="Meet for lunch?",
+    body="The new cafeteria is open.",
+    to_recipients=["fannyd@contoso.onmicrosoft.com"]
+)
+message.move(to_folder.id).execute_query()
+print("Draft message is created && moved into {0} folder".format(to_folder.display_name))

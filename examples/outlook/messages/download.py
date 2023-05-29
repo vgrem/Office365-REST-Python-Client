@@ -1,14 +1,19 @@
+"""
+Get MIME content of a message
+
+https://learn.microsoft.com/en-us/graph/outlook-get-mime-message
+Requires Mail.ReadWrite permission
+"""
+
 import os
 import tempfile
 
-from examples import acquire_token_by_client_credentials, sample_user_principal_name
 from office365.graph_client import GraphClient
 from office365.outlook.mail.messages.message import Message
+from tests.graph_case import acquire_token_by_username_password
 
-client = GraphClient(acquire_token_by_client_credentials)
-# requires Mail.ReadWrite permission
-user = client.users[sample_user_principal_name]
-messages = user.messages.select(["id"]).top(2).get().execute_query()
+client = GraphClient(acquire_token_by_username_password)
+messages = client.me.messages.select(["id"]).top(2).get().execute_query()
 with tempfile.TemporaryDirectory() as local_path:
     for message in messages:  # type: Message
         with open(os.path.join(local_path, message.id + ".eml"), 'wb') as local_file:
