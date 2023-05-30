@@ -8,7 +8,7 @@ class GetListsParameters(ClientValue):
         """
         :param ListCollectionPosition position:
         """
-        self.ListCollectionPosition =  position
+        self.ListCollectionPosition = position
         self.RowLimit = row_limit
 
     @property

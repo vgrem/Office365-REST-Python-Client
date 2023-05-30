@@ -1,8 +1,17 @@
-from examples import acquire_token_by_username_password
+"""
+Delete group
+
+Notes:
+
+    - Group.delete_object() Microsoft 365 groups are moved to a temporary container and can be restored within 30 days
+    - Group.delete_object(permanent_delete=True) Microsoft 365 permanently deleted
+
+https://learn.microsoft.com/en-us/graph/api/group-delete?view=graph-rest-1.0&tabs=http
+"""
 from office365.graph_client import GraphClient
+from tests.graph_case import acquire_token_by_username_password
 
 client = GraphClient(acquire_token_by_username_password)
-
 groups = client.groups.get().top(1).execute_query()
 deletedCount = 0
 groups_count = len(groups)

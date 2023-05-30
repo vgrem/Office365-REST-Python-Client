@@ -20,7 +20,7 @@ class OfficeGraphInsights(Entity):
         This also includes URLs and reference attachments to Teams conversations. Ordered by recency of share.
         """
         return self.properties.get('shared', EntityCollection(self.context, SharedInsight,
-                                                    ResourcePath("shared", self.resource_path)))
+                                                              ResourcePath("shared", self.resource_path)))
 
     @property
     def trending(self):
@@ -40,4 +40,4 @@ class OfficeGraphInsights(Entity):
         including OneDrive for Business and SharePoint documents, ranked by recency of use.
         """
         return self.properties.get('used', EntityCollection(self.context, UsedInsight,
-                                                                ResourcePath("used", self.resource_path)))
+                                                            ResourcePath("used", self.resource_path)))

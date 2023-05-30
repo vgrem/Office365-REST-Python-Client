@@ -7,7 +7,6 @@ import base64
 
 from office365.directory.key_credential import KeyCredential
 from office365.graph_client import GraphClient
-from office365.runtime.client_value_collection import ClientValueCollection
 from tests import test_client_credentials
 from tests.graph_case import acquire_token_by_username_password
 
@@ -34,7 +33,7 @@ def read_certificate(path):
     )
 
 
-cert_path = '../selfsigncert.pem'
+cert_path = '../../selfsigncert.pem'
 key_cred = read_certificate(cert_path)
 
 client = GraphClient(acquire_token_by_username_password)

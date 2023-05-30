@@ -1,12 +1,12 @@
 """
-Creates a lookup column
+Creates a lookup column in a list
 
-
+https://learn.microsoft.com/en-us/graph/api/list-post-columns?view=graph-rest-1.0
 """
 
-from examples import acquire_token_by_username_password
 from office365.graph_client import GraphClient
 from tests import create_unique_name
+from tests.graph_case import acquire_token_by_username_password
 
 
 def clean_up(columns):

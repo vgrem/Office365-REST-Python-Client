@@ -23559,6 +23559,13 @@
             </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="true"/>
             <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="true"/>
+            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+               <Record>
+                  <PropertyValue Property="UpdateMethod">
+                     <EnumMember>Org.OData.Capabilities.V1.HttpMethod/PUT</EnumMember>
+                  </PropertyValue>
+               </Record>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.device">
             <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
