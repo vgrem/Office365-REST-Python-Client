@@ -200,6 +200,13 @@ class List(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
+    def start_recycle(self):
+        """Moves the list to the Recycle Bin and returns the identifier of the new Recycle Bin item."""
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(self, "StartRecycle", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def render_list_data(self, view_xml):
         """
         Returns the data for the specified query view.<56> The result is implementation-specific, used for
@@ -573,6 +580,22 @@ class List(SecurableObject):
         return self.properties.get("DefaultDisplayFormUrl", None)
 
     @property
+    def default_view_path(self):
+        """
+        Specifies the server-relative URL of the default view for the list.
+        """
+        return self.properties.get("DefaultViewPath", SPResPath())
+
+    @property
+    def default_view_url(self):
+        """
+        Specifies the server-relative URL of the default view for the list.
+
+        :rtype: str or None
+        """
+        return self.properties.get("DefaultViewUrl", None)
+
+    @property
     def crawl_non_default_views(self):
         """
         Specifies whether or not the crawler indexes the non-default views of the list.
@@ -817,6 +840,7 @@ class List(SecurableObject):
                 "DataSource": self.data_source,
                 "DescriptionResource": self.description_resource,
                 "DefaultView": self.default_view,
+                "DefaultViewPath": self.default_view_path,
                 "EventReceivers": self.event_receivers,
                 "ParentWeb": self.parent_web,
                 "ParentWebPath": self.parent_web_path,

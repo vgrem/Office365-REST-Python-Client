@@ -1,3 +1,10 @@
+"""
+Creating a list.
+
+To create a list object, use the ListCreationInformation class to define its properties,
+and then pass this object to the add(ListCreationInformation) method
+"""
+
 from random import randint
 
 from office365.sharepoint.client_context import ClientContext

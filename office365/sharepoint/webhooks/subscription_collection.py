@@ -15,19 +15,25 @@ class SubscriptionCollection(BaseEntityCollection):
         """Gets the subscription with the specified ID."""
         return Subscription(self.context, ServiceOperationPath("getById", [_id], self.resource_path))
 
-    def add(self, information_or_notification):
+    def add(self, parameters):
         """
-        :type information_or_notification: SubscriptionInformation or str
+        :param SubscriptionInformation or str parameters: Subscription information object or notification string
         """
         return_type = Subscription(self.context)
         self.add_child(return_type)
-        if isinstance(information_or_notification, SubscriptionInformation):
-            qry = ServiceOperationQuery(self, "Add", None, information_or_notification, "parameters", return_type)
+
+        def _create_query(information):
+            """
+            :type information: SubscriptionInformation
+            """
+            return ServiceOperationQuery(self, "Add", None, information, "parameters", return_type)
+
+        if isinstance(parameters, SubscriptionInformation):
+            qry = _create_query(parameters)
             self.context.add_query(qry)
         else:
             def _parent_loaded():
-                information = SubscriptionInformation(information_or_notification, self._parent.properties["Id"])
-                next_qry = ServiceOperationQuery(self, "Add", None, information, "parameters", return_type)
+                next_qry = _create_query(SubscriptionInformation(parameters, self._parent.properties["Id"]))
                 self.context.add_query(next_qry)
             self._parent.ensure_property("Id", _parent_loaded)
         return return_type
