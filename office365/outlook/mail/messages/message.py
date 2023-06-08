@@ -90,7 +90,6 @@ class Message(OutlookItem):
         if file_size > max_upload_chunk:
             def _message_loaded():
                 self.attachments.resumable_upload(file_path, max_upload_chunk, chunk_uploaded)
-
             self.ensure_property("id", _message_loaded)
         else:
             with open(file_path, 'rb') as file_object:
@@ -136,7 +135,7 @@ class Message(OutlookItem):
         """
         return_type = Message(self.context)
         payload = {
-            "comment" : comment
+            "comment": comment
         }
         qry = ServiceOperationQuery(self, "createReply", None, payload, None, return_type)
         self.context.add_query(qry)
@@ -196,9 +195,10 @@ class Message(OutlookItem):
     def attachments(self):
         """The fileAttachment and itemAttachment attachments for the message.
         """
-        return self.get_property('attachments',
-                                 AttachmentCollection(self.context, ResourcePath("attachments", self.resource_path)),
-                                 True)
+        self._persist_changes('attachments')
+        return self.properties.setdefault('attachments',
+                                          AttachmentCollection(self.context,
+                                                               ResourcePath("attachments", self.resource_path)))
 
     @property
     def extensions(self):
@@ -241,17 +241,20 @@ class Message(OutlookItem):
     @property
     def to_recipients(self):
         """The To: recipients for the message."""
-        return self.get_property('toRecipients', ClientValueCollection(Recipient), True)
+        self._persist_changes('toRecipients')
+        return self.properties.setdefault('toRecipients', ClientValueCollection(Recipient))
 
     @property
     def bcc_recipients(self):
         """The BCC: recipients for the message."""
-        return self.get_property('bccRecipients', ClientValueCollection(Recipient), True)
+        self._persist_changes('bccRecipients')
+        return self.properties.setdefault('bccRecipients', ClientValueCollection(Recipient))
 
     @property
     def cc_recipients(self):
         """The CC: recipients for the message."""
-        return self.get_property('ccRecipients', ClientValueCollection(Recipient), True)
+        self._persist_changes('ccRecipients')
+        return self.properties.setdefault('ccRecipients', ClientValueCollection(Recipient))
 
     @property
     def sender(self):
@@ -266,14 +269,13 @@ class Message(OutlookItem):
         """The unique identifier for the message's parent mailFolder."""
         return self.get_property('parentFolderId', None)
 
-    def get_property(self, name, default_value=None, track_changes=False):
+    def get_property(self, name, default_value=None):
         if default_value is None:
             property_type_mapping = {
-                "toRecipients": self.to_recipients
+                "toRecipients": self.to_recipients,
+                "bccRecipients": self.bcc_recipients,
+                "ccRecipients": self.cc_recipients
             }
             default_value = property_type_mapping.get(name, None)
 
-        value = super(Message, self).get_property(name, default_value)
-        if track_changes:
-            self.track_changes(name, value)
-        return value
+        return super(Message, self).get_property(name, default_value)

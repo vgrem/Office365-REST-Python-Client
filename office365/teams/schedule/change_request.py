@@ -1,5 +1,5 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.teams.shifts.change_tracked_entity import ChangeTrackedEntity
+from office365.teams.schedule.change_tracked_entity import ChangeTrackedEntity
 
 
 class ScheduleChangeRequest(ChangeTrackedEntity):

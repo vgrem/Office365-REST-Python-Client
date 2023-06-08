@@ -439,6 +439,11 @@
             <Member Name="rejectMfaByFederatedIdp" Value="2"/>
             <Member Name="unknownFutureValue" Value="3"/>
          </EnumType>
+         <EnumType Name="layoutTemplateType">
+            <Member Name="default" Value="0"/>
+            <Member Name="verticalSplit" Value="1"/>
+            <Member Name="unknownFutureValue" Value="10"/>
+         </EnumType>
          <EnumType Name="onPremisesDirectorySynchronizationDeletionPreventionType">
             <Member Name="disabled" Value="0"/>
             <Member Name="enabledForCount" Value="1"/>
@@ -6552,6 +6557,19 @@
             <Property Name="suspended" Type="Edm.Int32"/>
             <Property Name="warning" Type="Edm.Int32"/>
          </ComplexType>
+         <ComplexType Name="loginPageLayoutConfiguration">
+            <Property Name="isFooterShown" Type="Edm.Boolean"/>
+            <Property Name="isHeaderShown" Type="Edm.Boolean"/>
+            <Property Name="layoutTemplateType" Type="graph.layoutTemplateType"/>
+         </ComplexType>
+         <ComplexType Name="loginPageTextVisibilitySettings">
+            <Property Name="hideAccountResetCredentials" Type="Edm.Boolean"/>
+            <Property Name="hideCannotAccessYourAccount" Type="Edm.Boolean"/>
+            <Property Name="hideForgotMyPassword" Type="Edm.Boolean"/>
+            <Property Name="hidePrivacyAndCookies" Type="Edm.Boolean"/>
+            <Property Name="hideResetItNow" Type="Edm.Boolean"/>
+            <Property Name="hideTermsOfUse" Type="Edm.Boolean"/>
+         </ComplexType>
          <ComplexType Name="onPremisesAccidentalDeletionPrevention">
             <Property Name="alertThreshold" Type="Edm.Int32"/>
             <Property Name="synchronizationPreventionType" Type="graph.onPremisesDirectorySynchronizationDeletionPreventionType"/>
@@ -6911,8 +6929,28 @@
             <Property Name="bannerLogo" Type="Edm.Stream"/>
             <Property Name="bannerLogoRelativeUrl" Type="Edm.String"/>
             <Property Name="cdnList" Type="Collection(Edm.String)"/>
+            <Property Name="customAccountResetCredentialsUrl" Type="Edm.String"/>
+            <Property Name="customCannotAccessYourAccountText" Type="Edm.String"/>
+            <Property Name="customCannotAccessYourAccountUrl" Type="Edm.String"/>
+            <Property Name="customCSS" Type="Edm.Stream"/>
+            <Property Name="customCSSRelativeUrl" Type="Edm.String"/>
+            <Property Name="customForgotMyPasswordText" Type="Edm.String"/>
+            <Property Name="customPrivacyAndCookiesText" Type="Edm.String"/>
+            <Property Name="customPrivacyAndCookiesUrl" Type="Edm.String"/>
+            <Property Name="customResetItNowText" Type="Edm.String"/>
+            <Property Name="customTermsOfUseText" Type="Edm.String"/>
+            <Property Name="customTermsOfUseUrl" Type="Edm.String"/>
+            <Property Name="favicon" Type="Edm.Stream"/>
+            <Property Name="faviconRelativeUrl" Type="Edm.String"/>
+            <Property Name="headerBackgroundColor" Type="Edm.String"/>
+            <Property Name="headerLogo" Type="Edm.Stream"/>
+            <Property Name="headerLogoRelativeUrl" Type="Edm.String"/>
+            <Property Name="loginPageLayoutConfiguration" Type="graph.loginPageLayoutConfiguration"/>
+            <Property Name="loginPageTextVisibilitySettings" Type="graph.loginPageTextVisibilitySettings"/>
             <Property Name="signInPageText" Type="Edm.String"/>
             <Property Name="squareLogo" Type="Edm.Stream"/>
+            <Property Name="squareLogoDark" Type="Edm.Stream"/>
+            <Property Name="squareLogoDarkRelativeUrl" Type="Edm.String"/>
             <Property Name="squareLogoRelativeUrl" Type="Edm.String"/>
             <Property Name="usernameHintText" Type="Edm.String"/>
          </EntityType>
@@ -19472,7 +19510,6 @@
             <Singleton Name="compliance" Type="microsoft.graph.compliance"/>
             <Singleton Name="security" Type="microsoft.graph.security"/>
             <Singleton Name="identity" Type="microsoft.graph.identityContainer"/>
-            <Singleton Name="branding" Type="microsoft.graph.organizationalBranding"/>
             <Singleton Name="directory" Type="microsoft.graph.directory">
                <NavigationPropertyBinding Path="administrativeUnits/members" Target="directoryObjects"/>
             </Singleton>
@@ -32294,6 +32331,7 @@
             <Member Name="appGovernancePolicy" Value="1048576"/>
             <Member Name="appGovernanceDetection" Value="2097152"/>
             <Member Name="unknownFutureValue" Value="4194303"/>
+            <Member Name="microsoftDefenderForCloud" Value="4194304"/>
          </EnumType>
          <EnumType Name="detectionStatus">
             <Member Name="detected" Value="0"/>
@@ -32351,12 +32389,20 @@
             <Member Name="noThreatsFound" Value="3"/>
             <Member Name="unknownFutureValue" Value="4"/>
          </EnumType>
+         <EnumType Name="googleCloudLocationType">
+            <Member Name="unknown" Value="0"/>
+            <Member Name="regional" Value="1"/>
+            <Member Name="zonal" Value="2"/>
+            <Member Name="global" Value="3"/>
+            <Member Name="unknownFutureValue" Value="31"/>
+         </EnumType>
          <EnumType Name="incidentStatus">
             <Member Name="active" Value="1"/>
             <Member Name="resolved" Value="2"/>
             <Member Name="inProgress" Value="4"/>
             <Member Name="redirected" Value="64"/>
             <Member Name="unknownFutureValue" Value="127"/>
+            <Member Name="awaitingAction" Value="128"/>
          </EnumType>
          <EnumType Name="onboardingStatus">
             <Member Name="insufficientInfo" Value="0"/>
@@ -32376,6 +32422,7 @@
             <Member Name="microsoftAppGovernance" Value="64"/>
             <Member Name="dataLossPrevention" Value="128"/>
             <Member Name="unknownFutureValue" Value="255"/>
+            <Member Name="microsoftDefenderForCloud" Value="256"/>
          </EnumType>
          <EnumType Name="vmCloudProvider">
             <Member Name="unknown" Value="0"/>
@@ -32614,11 +32661,18 @@
          </ComplexType>
          <ComplexType Name="alertEvidence">
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="detailedRoles" Type="Collection(Edm.String)"/>
             <Property Name="remediationStatus" Type="microsoft.graph.security.evidenceRemediationStatus" Nullable="false"/>
             <Property Name="remediationStatusDetails" Type="Edm.String"/>
             <Property Name="roles" Type="Collection(microsoft.graph.security.evidenceRole)" Nullable="false"/>
             <Property Name="tags" Type="Collection(Edm.String)"/>
             <Property Name="verdict" Type="microsoft.graph.security.evidenceVerdict" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="amazonResourceEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="amazonAccountId" Type="Edm.String"/>
+            <Property Name="amazonResourceId" Type="Edm.String"/>
+            <Property Name="resourceName" Type="Edm.String"/>
+            <Property Name="resourceType" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="analyzedMessageEvidence" BaseType="microsoft.graph.security.alertEvidence">
             <Property Name="antiSpamDirection" Type="Edm.String"/>
@@ -32645,6 +32699,11 @@
             <Property Name="domainName" Type="Edm.String"/>
             <Property Name="emailAddress" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="azureResourceEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="resourceId" Type="Edm.String"/>
+            <Property Name="resourceName" Type="Edm.String"/>
+            <Property Name="resourceType" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="cloudApplicationEvidence" BaseType="microsoft.graph.security.alertEvidence">
             <Property Name="appId" Type="Edm.Int64"/>
             <Property Name="displayName" Type="Edm.String"/>
@@ -32658,6 +32717,7 @@
             <Property Name="deviceDnsName" Type="Edm.String"/>
             <Property Name="firstSeenDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="healthStatus" Type="microsoft.graph.security.deviceHealthStatus"/>
+            <Property Name="ipInterfaces" Type="Collection(Edm.String)"/>
             <Property Name="loggedOnUsers" Type="Collection(microsoft.graph.security.loggedOnUser)"/>
             <Property Name="mdeDeviceId" Type="Edm.String"/>
             <Property Name="onboardingStatus" Type="microsoft.graph.security.onboardingStatus"/>
@@ -32693,6 +32753,14 @@
             <Property Name="detectionStatus" Type="microsoft.graph.security.detectionStatus"/>
             <Property Name="fileDetails" Type="microsoft.graph.security.fileDetails"/>
             <Property Name="mdeDeviceId" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="googleCloudResourceEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="location" Type="Edm.String"/>
+            <Property Name="locationType" Type="microsoft.graph.security.googleCloudLocationType"/>
+            <Property Name="projectId" Type="Edm.String"/>
+            <Property Name="projectNumber" Type="Edm.Int64"/>
+            <Property Name="resourceName" Type="Edm.String"/>
+            <Property Name="resourceType" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="huntingQueryResults">
             <Property Name="results" Type="Collection(microsoft.graph.security.huntingRowResult)"/>
@@ -32751,6 +32819,7 @@
             <Property Name="registryKey" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="registryValueEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="mdeDeviceId" Type="Edm.String"/>
             <Property Name="registryHive" Type="Edm.String"/>
             <Property Name="registryKey" Type="Edm.String"/>
             <Property Name="registryValue" Type="Edm.String"/>

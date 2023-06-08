@@ -8,7 +8,7 @@ class ChatCollection(EntityCollection):
     def __init__(self, context, resource_path=None):
         super(ChatCollection, self).__init__(context, Chat, resource_path)
 
-    def add(self, chat_type, members):
+    def add(self, chat_type):
         """
         Create a new chat object.
 
@@ -16,10 +16,8 @@ class ChatCollection(EntityCollection):
         this operation will return the existing chat and not create a new one.
 
         :param str chat_type: Specifies the type of chat. Possible values are: group and oneOnOne.
-        :param list[] members: List of conversation members that should be added. Every user who will participate
-            in the chat, including the user who initiates the create request, must be specified in this list.
-            Each member must be assigned a role of owner or guest. Guest tenant members must be assigned the guest role
+        :rtype: Chat
         """
-        return super(ChatCollection, self).add(chatType=chat_type, members=members)
+        return super(ChatCollection, self).add(chatType=chat_type)
 
 

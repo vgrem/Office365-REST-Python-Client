@@ -2,8 +2,8 @@ from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.teams.apps.installation import TeamsAppInstallation
-from office365.teams.members.conversation import ConversationMember
 from office365.teams.chats.message import ChatMessage
+from office365.teams.members.conversation_collection import ConversationMemberCollection
 from office365.teams.operations.async_operation import TeamsAsyncOperation
 from office365.teams.tabs.tab import TeamsTab
 
@@ -19,22 +19,18 @@ class Chat(Entity):
     @property
     def installed_apps(self):
         """A collection of all the apps in the chat. Nullable.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('installedApps',
-                                 EntityCollection(self.context, TeamsAppInstallation,
-                                                  ResourcePath("installedApps", self.resource_path)))
+        return self.properties.get('installedApps',
+                                   EntityCollection(self.context, TeamsAppInstallation,
+                                                    ResourcePath("installedApps", self.resource_path)))
 
     @property
     def members(self):
         """A collection of membership records associated with the chat.
-
-        :rtype: EntityCollection
         """
-        return self.properties.get('members',
-                                   EntityCollection(self.context, ConversationMember,
-                                                    ResourcePath("members", self.resource_path)))
+        return self.properties.setdefault('members',
+                                          ConversationMemberCollection(self.context,
+                                                                       ResourcePath("members", self.resource_path)))
 
     @property
     def messages(self):

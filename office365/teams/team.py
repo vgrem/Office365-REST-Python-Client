@@ -4,7 +4,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.teams.channels.channel import Channel
 from office365.teams.channels.collection import ChannelCollection
-from office365.teams.shifts.schedule import Schedule
+from office365.teams.schedule.schedule import Schedule
 from office365.teams.fun_settings import TeamFunSettings
 from office365.teams.guest_settings import TeamGuestSettings
 from office365.teams.member_settings import TeamMemberSettings

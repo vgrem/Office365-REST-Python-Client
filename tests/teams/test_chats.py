@@ -3,12 +3,12 @@ from tests.graph_case import GraphTestCase
 
 
 class TestTeamChats(GraphTestCase):
-    """Tests for team Apps"""
+    """Tests for team Chats"""
     target_chat = None  # type: Chat
 
     #def test1_create(self):
-    #    new_chat = self.client.chats.add(chat_type="oneOnOne",
-    #                                     members=[{"user": self.client.me, "roles": ["owner"]}]).execute_query()
+    #    new_chat = self.client.chats.add(chat_type="oneOnOne").members.add(self.client.me, ["owner"])
+    #    self.client.execute_query()
     #    self.assertIsNotNone(new_chat.resource_path)
     #    self.__class__.target_chat = new_chat
 

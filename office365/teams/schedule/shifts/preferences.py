@@ -1,6 +1,6 @@
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.teams.shifts.availability import ShiftAvailability
-from office365.teams.shifts.change_tracked_entity import ChangeTrackedEntity
+from office365.teams.schedule.shifts.availability import ShiftAvailability
+from office365.teams.schedule.change_tracked_entity import ChangeTrackedEntity
 
 
 class ShiftPreferences(ChangeTrackedEntity):

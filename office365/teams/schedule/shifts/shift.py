@@ -1,5 +1,5 @@
-from office365.teams.shifts.change_tracked_entity import ChangeTrackedEntity
-from office365.teams.shifts.shift_item import ShiftItem
+from office365.teams.schedule.change_tracked_entity import ChangeTrackedEntity
+from office365.teams.schedule.shifts.item import ShiftItem
 
 
 class Shift(ChangeTrackedEntity):

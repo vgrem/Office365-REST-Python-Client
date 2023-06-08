@@ -1,5 +1,5 @@
 from office365.runtime.types.collections import StringCollection
-from office365.teams.shifts.change_tracked_entity import ChangeTrackedEntity
+from office365.teams.schedule.change_tracked_entity import ChangeTrackedEntity
 
 
 class SchedulingGroup(ChangeTrackedEntity):

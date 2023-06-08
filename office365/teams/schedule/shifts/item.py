@@ -1,6 +1,6 @@
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.teams.shifts.schedule_entity import ScheduleEntity
-from office365.teams.shifts.shift_activity import ShiftActivity
+from office365.teams.schedule.entity import ScheduleEntity
+from office365.teams.schedule.shifts.activity import ShiftActivity
 
 
 class ShiftItem(ScheduleEntity):

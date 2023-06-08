@@ -101,10 +101,12 @@ class ClientObject(object):
         self._parent_collection.remove_child(self)
         return self
 
-    def track_changes(self, name, value):
+    def _persist_changes(self, name):
+        """
+        :param str name: A property name
+        """
         if name not in self._ser_property_names:
             self._ser_property_names.append(name)
-            self._properties[name] = value
         return self
 
     def get_property(self, name, default_value=None):
