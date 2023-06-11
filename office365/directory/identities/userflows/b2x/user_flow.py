@@ -19,23 +19,21 @@ class B2XIdentityUserFlow(IdentityUserFlow):
     def languages(self):
         """The languages supported for customization within the user flow. Language customization is enabled by default
         in self-service sign-up user flow. You cannot create custom languages in self-service sign-up user flows.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('languages',
-                                 EntityCollection(self.context, UserFlowLanguageConfiguration,
-                                                  ResourcePath("languages", self.resource_path)))
+        return self.properties.get('languages',
+                                   EntityCollection(self.context, UserFlowLanguageConfiguration,
+                                                    ResourcePath("languages", self.resource_path)))
 
     @property
     def user_attribute_assignments(self):
-        """The user attribute assignments included in the user flow.
-
-        :rtype: IdentityUserFlowAttributeAssignmentCollection
         """
-        return self.get_property('userAttributeAssignments',
-                                 IdentityUserFlowAttributeAssignmentCollection(self.context,
-                                                                               ResourcePath("userAttributeAssignments",
-                                                                                            self.resource_path)))
+        The user attribute assignments included in the user flow.
+        """
+        return self.properties.get('userAttributeAssignments',
+                                   IdentityUserFlowAttributeAssignmentCollection(self.context,
+                                                                                 ResourcePath(
+                                                                                     "userAttributeAssignments",
+                                                                                     self.resource_path)))
 
     @property
     def user_flow_type(self):

@@ -213,7 +213,7 @@ class Message(OutlookItem):
 
         :rtype: ItemBody
         """
-        return self.get_property("body", ItemBody())
+        return self.properties.setdefault("body", ItemBody())
 
     @body.setter
     def body(self, value):
@@ -262,12 +262,14 @@ class Message(OutlookItem):
         from property. You can set this property to a different value when sending a message from a shared mailbox,
         for a shared calendar, or as a delegate. In any case, the value must correspond to the actual mailbox used.
         Find out more about setting the from and sender properties of a message."""
-        return self.get_property('sender', Recipient())
+        return self.properties.get('sender', Recipient())
 
     @property
     def parent_folder_id(self):
-        """The unique identifier for the message's parent mailFolder."""
-        return self.get_property('parentFolderId', None)
+        """The unique identifier for the message's parent mailFolder.
+        :rtype: str or None
+        """
+        return self.properties.get('parentFolderId', None)
 
     def get_property(self, name, default_value=None):
         if default_value is None:

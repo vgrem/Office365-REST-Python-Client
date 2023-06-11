@@ -10,9 +10,9 @@ class TeamsApp(Entity):
     @property
     def app_definitions(self):
         """The details for each version of the app."""
-        return self.get_property('appDefinitions',
-                                 EntityCollection(self.context, TeamsAppDefinition,
-                                                  ResourcePath("appDefinitions", self.resource_path)))
+        return self.properties.get('appDefinitions',
+                                   EntityCollection(self.context, TeamsAppDefinition,
+                                                    ResourcePath("appDefinitions", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:

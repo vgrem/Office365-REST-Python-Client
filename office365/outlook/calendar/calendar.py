@@ -1,14 +1,14 @@
-from office365.outlook.calendar.permission import CalendarPermission
-from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
-from office365.outlook.calendar.email_address import EmailAddress
-from office365.outlook.calendar.events.event import Event
-from office365.outlook.calendar.schedule.information import ScheduleInformation
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
+from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
+from office365.outlook.calendar.email_address import EmailAddress
+from office365.outlook.calendar.events.collection import EventCollection
+from office365.outlook.calendar.permission import CalendarPermission
+from office365.outlook.calendar.schedule.information import ScheduleInformation
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class Calendar(Entity):
@@ -70,17 +70,14 @@ class Calendar(Entity):
     def events(self):
         """The events in the calendar. Navigation property. Read-only."""
         return self.properties.get('events',
-                                   EntityCollection(self.context, Event, ResourcePath("events", self.resource_path)))
+                                   EventCollection(self.context, ResourcePath("events", self.resource_path)))
 
     @property
     def calendar_view(self):
         """The calendar view for the calendar. Navigation property. Read-only.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('calendarView',
-                                 EntityCollection(self.context, Event,
-                                                  ResourcePath("calendarView", self.resource_path)))
+        return self.properties.get('calendarView',
+                                   EventCollection(self.context, ResourcePath("calendarView", self.resource_path)))
 
     @property
     def calendar_permissions(self):

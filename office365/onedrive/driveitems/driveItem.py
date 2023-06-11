@@ -12,6 +12,7 @@ from office365.onedrive.internal.queries.upload_content import create_upload_con
 from office365.base_item import BaseItem
 from office365.onedrive.analytics.item_activity_stat import ItemActivityStat
 from office365.onedrive.analytics.item_analytics import ItemAnalytics
+from office365.onedrive.listitems.item_reference import ItemReference
 from office365.onedrive.permissions.collection import PermissionCollection
 from office365.onedrive.permissions.permission import Permission
 from office365.entity_collection import EntityCollection
@@ -183,6 +184,9 @@ class DriveItem(BaseItem):
 
     def download(self, file_object):
         """
+        Download the contents of the primary stream (file) of a DriveItem. Only driveItems with the file property
+        can be downloaded
+
         :type file_object: typing.IO
         """
         result = self.get_content()
@@ -226,17 +230,18 @@ class DriveItem(BaseItem):
         self.context.add_query(qry)
         return self
 
-    def create_folder(self, name):
+    def create_folder(self, name, conflict_behavior=ConflictBehavior.Rename):
         """Create a new folder or DriveItem in a Drive with a specified parent item or path.
 
         :param str name: Folder name
+        :param str conflict_behavior: query parameter to customize the behavior when a conflict occurs.
         """
         return_type = DriveItem(self.context)
         self.children.add_child(return_type)
         payload = {
             "name": name,
             "folder": {},
-            "@microsoft.graph.conflictBehavior": ConflictBehavior.Rename
+            "@microsoft.graph.conflictBehavior": conflict_behavior
         }
         qry = CreateEntityQuery(self.children, payload, return_type)
         self.context.add_query(qry)
@@ -254,53 +259,84 @@ class DriveItem(BaseItem):
         self.context.add_query(qry)
         return qry.return_type
 
-    def copy(self, name, parent_reference=None):
+    def copy(self, name=None, parent=None, conflict_behavior=ConflictBehavior.Fail):
         """Asynchronously creates a copy of an driveItem (including any children), under a new parent item or with a
         new name.
 
-        :type name: str
-        :type parent_reference: office365.onedrive.listitems.item_reference.ItemReference or None
+        :param str or None name: The new name for the copy. If this isn't provided, the same name will be used as the
+             original.
+        :param office365.onedrive.listitems.item_reference.ItemReference or DriveItem or None parent:  Reference to the
+             parent item the copy will be created in.
+        :param str conflict_behavior: query parameter to customize the behavior when a conflict occurs.
+
+        Returns location for details about how to monitor the progress of the copy, upon accepting the request.
         """
-        return_type = ClientResult(self.context)
-        qry = ServiceOperationQuery(self,
-                                    "copy",
-                                    None,
-                                    {
-                                        "name": name,
-                                        "parentReference": parent_reference
-                                    },
-                                    None,
-                                    return_type
-                                    )
-        self.context.add_query(qry)
+        return_type = ClientResult(self.context, str())
+
+        def _create_request(request):
+            """
+            :type request: office365.runtime.http.request_options.RequestOptions
+            """
+            request.url += "?@microsoft.graph.conflictBehavior={0}".format(conflict_behavior)
+
+        def _process_response(resp):
+            """
+            :type resp: requests.Response
+            """
+            resp.raise_for_status()
+            location = resp.headers.get("Location", None)
+            if location is None:
+                return
+            return_type.set_property("__value", location)
+
+        def _create_query(parent_reference):
+            """
+            :param office365.onedrive.listitems.item_reference.ItemReference or None parent_reference:  Reference to the
+             parent item the copy will be created in.
+            """
+            payload = {
+                "name": name,
+                "parentReference": parent_reference
+            }
+            self.context.before_execute(_create_request)
+            self.context.after_execute(_process_response)
+            return ServiceOperationQuery(self, "copy", None, payload, None, return_type)
+
+        if isinstance(parent, DriveItem):
+            def _drive_item_loaded():
+                parent_reference = ItemReference(drive_id=parent.parent_reference.driveId, _id=parent.id)
+                next_qry = _create_query(parent_reference)
+                self.context.add_query(next_qry)
+
+            parent.ensure_property("parentReference", _drive_item_loaded)
+        else:
+            qry = _create_query(parent)
+            self.context.add_query(qry)
         return return_type
 
-    def move(self, name, parent_reference=None):
+    def move(self, name=None, parent_reference=None):
         """To move a DriveItem to a new parent item, your app requests to update the parentReference of the DriveItem
         to move.
 
-        :type name: str
-        :type parent_reference: office365.onedrive.listitems.item_reference.ItemReference
+        :param str name: The new name for the move. If this isn't provided, the same name will be used as the
+             original.
+        :param office365.onedrive.listitems.item_reference.ItemReference parent_reference: Reference to the
+             parent item the move will be created in.
         """
 
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self,
-                                    "move",
-                                    None,
-                                    {
-                                        "name": name,
-                                        "parentReference": parent_reference
-                                    },
-                                    None,
-                                    result
-                                    )
+        return_type = ClientResult(self.context, str())
+        payload = {
+            "name": name,
+            "parentReference": parent_reference
+        }
+        qry = ServiceOperationQuery(self, "move", None, payload, None, return_type)
         self.context.add_query(qry)
 
         def _construct_request(request):
             request.method = HttpMethod.Patch
 
         self.context.before_execute(_construct_request)
-        return result
+        return return_type
 
     def search(self, query_text):
         """Search the hierarchy of items for items matching a query. You can search within a folder hierarchy,

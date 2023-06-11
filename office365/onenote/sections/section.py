@@ -48,32 +48,29 @@ class OnenoteSection(OnenoteEntityHierarchyModel):
     def pages(self):
         """
         The collection of pages in the section. Read-only. Nullable.
-
-        :rtype: EntityCollection
         """
         from office365.onenote.pages.page import OnenotePage
-        return self.get_property('pages',
-                                 EntityCollection(self.context, OnenotePage, ResourcePath("pages", self.resource_path)))
+        return self.properties.get('pages',
+                                   EntityCollection(self.context, OnenotePage,
+                                                    ResourcePath("pages", self.resource_path)))
 
     @property
     def parent_notebook(self):
-        """The notebook that contains the page. Read-only.
-
-        :rtype: Notebook
+        """
+        The notebook that contains the page. Read-only.
         """
         from office365.onenote.notebooks.notebook import Notebook
-        return self.get_property('parentNotebook',
-                                 Notebook(self.context, ResourcePath("parentNotebook", self.resource_path)))
+        return self.properties.get('parentNotebook',
+                                   Notebook(self.context, ResourcePath("parentNotebook", self.resource_path)))
 
     @property
     def parent_section_group(self):
-        """The section group that contains the section. Read-only.
-
-        :rtype: SectionGroup
+        """
+        The section group that contains the section. Read-only.
         """
         from office365.onenote.sectiongroups.section_group import SectionGroup
-        return self.get_property('parentSectionGroup',
-                                 SectionGroup(self.context, ResourcePath("parentSectionGroup", self.resource_path)))
+        return self.properties.get('parentSectionGroup',
+                                   SectionGroup(self.context, ResourcePath("parentSectionGroup", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:

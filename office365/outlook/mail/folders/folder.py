@@ -47,22 +47,18 @@ class MailFolder(Entity):
     @property
     def multi_value_extended_properties(self):
         """The collection of multi-value extended properties defined for the MailFolder.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('multiValueExtendedProperties',
-                                 EntityCollection(self.context, MultiValueLegacyExtendedProperty,
-                                                  ResourcePath("multiValueExtendedProperties", self.resource_path)))
+        return self.properties.get('multiValueExtendedProperties',
+                                   EntityCollection(self.context, MultiValueLegacyExtendedProperty,
+                                                    ResourcePath("multiValueExtendedProperties", self.resource_path)))
 
     @property
     def single_value_extended_properties(self):
         """The collection of single-value extended properties defined for the MailFolder.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('singleValueExtendedProperties',
-                                 EntityCollection(self.context, SingleValueLegacyExtendedProperty,
-                                                  ResourcePath("singleValueExtendedProperties", self.resource_path)))
+        return self.properties.get('singleValueExtendedProperties',
+                                   EntityCollection(self.context, SingleValueLegacyExtendedProperty,
+                                                    ResourcePath("singleValueExtendedProperties", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:

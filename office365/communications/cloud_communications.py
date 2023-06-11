@@ -48,9 +48,9 @@ class CloudCommunications(Entity):
     def presences(self):
         """"
         """
-        return self.get_property('presences',
-                                 EntityCollection(self.context, Presence,
-                                                  ResourcePath("presences", self.resource_path)))
+        return self.properties.get('presences',
+                                   EntityCollection(self.context, Presence,
+                                                    ResourcePath("presences", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:

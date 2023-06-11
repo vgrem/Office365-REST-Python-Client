@@ -1,5 +1,6 @@
 from office365.delta_collection import DeltaCollection
-from office365.directory.extensions.extended_property import SingleValueLegacyExtendedProperty
+from office365.directory.extensions.extended_property import SingleValueLegacyExtendedProperty, \
+    MultiValueLegacyExtendedProperty
 from office365.entity_collection import EntityCollection
 from office365.directory.extensions.extension import Extension
 from office365.outlook.calendar.attendees.attendee import Attendee
@@ -88,7 +89,7 @@ class Event(OutlookItem):
 
         :rtype: DateTimeTimeZone
         """
-        return self.get_property("start", DateTimeTimeZone())
+        return self.properties.get("start", DateTimeTimeZone())
 
     @start.setter
     def start(self, value):
@@ -106,7 +107,7 @@ class Event(OutlookItem):
 
         :rtype: DateTimeTimeZone
         """
-        return self.get_property("end", DateTimeTimeZone())
+        return self.properties.get("end", DateTimeTimeZone())
 
     @end.setter
     def end(self, value):
@@ -120,19 +121,24 @@ class Event(OutlookItem):
     @property
     def single_value_extended_properties(self):
         """The collection of single-value extended properties defined for the event.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('singleValueExtendedProperties',
+        return self.properties.get('singleValueExtendedProperties',
                                  EntityCollection(self.context, SingleValueLegacyExtendedProperty,
                                                   ResourcePath("singleValueExtendedProperties", self.resource_path)))
+
+    @property
+    def multi_value_extended_properties(self):
+        """The collection of multi-value extended properties defined for the event."""
+        return self.properties.get('multiValueExtendedProperties',
+                                   EntityCollection(self.context, MultiValueLegacyExtendedProperty,
+                                                    ResourcePath("multiValueExtendedProperties", self.resource_path)))
 
     @property
     def body(self):
         """
         The body of the message associated with the event. It can be in HTML or text format.
         """
-        return self.get_property("body", ItemBody())
+        return self.properties.get("body", ItemBody())
 
     @body.setter
     def body(self, value):
@@ -196,17 +202,7 @@ class Event(OutlookItem):
     @property
     def attendees(self):
         """The collection of attendees for the event."""
-        return self.properties.get('attendees', ClientValueCollection(Attendee))
-
-    @attendees.setter
-    def attendees(self, value):
-        """Sets the collection of attendees for the event.
-
-        :type value: list[str]
-        """
-        self.set_property('attendees',
-                          ClientValueCollection(Attendee,
-                                                [Attendee(EmailAddress(v), attendee_type="required") for v in value]))
+        return self.properties.setdefault('attendees', ClientValueCollection(Attendee))
 
     @property
     def attachments(self):
@@ -223,13 +219,17 @@ class Event(OutlookItem):
 
     @property
     def instances(self):
-        """The collection of open extensions defined for the event. Nullable."""
+        """The occurrences of a recurring series, if the event is a series master. This property includes occurrences
+        that are part of the recurrence pattern, and exceptions that have been modified, but does not include
+        occurrences that have been cancelled from the series"""
+        from office365.outlook.calendar.events.collection import EventCollection
         return self.properties.get('instances',
-                                   DeltaCollection(self.context, Event, ResourcePath("instances", self.resource_path)))
+                                   EventCollection(self.context, ResourcePath("instances", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "multiValueExtendedProperties": self.multi_value_extended_properties,
                 "singleValueExtendedProperties": self.single_value_extended_properties
             }
             default_value = property_mapping.get(name, None)

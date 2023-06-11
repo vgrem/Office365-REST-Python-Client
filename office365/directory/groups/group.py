@@ -1,6 +1,5 @@
 import json
 
-from office365.delta_collection import DeltaCollection
 from office365.directory.applications.roles.assignment import AppRoleAssignmentCollection
 from office365.directory.extensions.extension import Extension
 from office365.directory.licenses.assigned_license import AssignedLicense
@@ -10,7 +9,7 @@ from office365.directory.permissions.grants.resource_specific import ResourceSpe
 from office365.entity_collection import EntityCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onenote.onenote import Onenote
-from office365.outlook.calendar.events.event import Event
+from office365.outlook.calendar.events.collection import EventCollection
 from office365.outlook.mail.conversation import Conversation
 from office365.outlook.mail.conversation_thread import ConversationThread
 from office365.planner.group import PlannerGroup
@@ -171,9 +170,8 @@ class Group(DirectoryObject):
 
     @property
     def sites(self):
-        """The list of SharePoint sites in this group. Access the default site with /sites/root.
-
-        :rtype: SiteCollection
+        """
+        The list of SharePoint sites in this group. Access the default site with /sites/root.
         """
         from office365.onedrive.sites.sites_with_root import SitesWithRoot
         return self.properties.get('sites',
@@ -182,8 +180,7 @@ class Group(DirectoryObject):
     @property
     def events(self):
         """Get an event collection or an event."""
-        return self.properties.get('events', DeltaCollection(self.context, Event,
-                                                             ResourcePath("events", self.resource_path)))
+        return self.properties.get('events', EventCollection(self.context, ResourcePath("events", self.resource_path)))
 
     @property
     def app_role_assignments(self):

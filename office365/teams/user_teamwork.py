@@ -13,9 +13,9 @@ class UserTeamwork(Entity):
         """
         The apps installed in the personal scope of this user.
         """
-        return self.get_property('installedApps',
-                                 EntityCollection(self.context, UserScopeTeamsAppInstallation,
-                                                  ResourcePath("installedApps", self.resource_path)))
+        return self.properties.get('installedApps',
+                                   EntityCollection(self.context, UserScopeTeamsAppInstallation,
+                                                    ResourcePath("installedApps", self.resource_path)))
 
     def send_activity_notification(self, topic, activity_type, chain_id, preview_text, template_parameters=None):
         """

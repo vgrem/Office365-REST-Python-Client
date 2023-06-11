@@ -20,7 +20,7 @@ class CheckedOutFile(BaseEntity):
 
         :rtype: int or None
         """
-        return self.get_property("CheckedOutById", None)
+        return self.properties.get("CheckedOutById", None)
 
     @property
     def checked_out_by(self):

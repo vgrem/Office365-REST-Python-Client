@@ -26,31 +26,29 @@ class PlannerPlan(Entity):
 
     @property
     def buckets(self):
-        """Read-only. Nullable. Collection of buckets in the plan.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('buckets',
-                                 EntityCollection(self.context, PlannerBucket,
-                                                  ResourcePath("buckets", self.resource_path)))
+        Read-only. Nullable. Collection of buckets in the plan.
+        """
+        return self.properties.get('buckets',
+                                   EntityCollection(self.context, PlannerBucket,
+                                                    ResourcePath("buckets", self.resource_path)))
 
     @property
     def details(self):
-        """Read-only. Nullable. Additional details about the plan.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('details',
-                                 PlannerPlanDetails(self.context, ResourcePath("details", self.resource_path)))
+        Read-only. Nullable. Additional details about the plan.
+        """
+        return self.properties.get('details',
+                                   PlannerPlanDetails(self.context, ResourcePath("details", self.resource_path)))
 
     @property
     def tasks(self):
-        """Read-only. Nullable. Collection of tasks in the plan.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('tasks',
-                                 EntityCollection(self.context, PlannerTask, ResourcePath("tasks", self.resource_path)))
+        Read-only. Nullable. Collection of tasks in the plan.
+        """
+        return self.properties.get('tasks',
+                                   EntityCollection(self.context, PlannerTask,
+                                                    ResourcePath("tasks", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:

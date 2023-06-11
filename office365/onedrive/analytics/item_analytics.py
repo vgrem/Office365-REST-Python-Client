@@ -1,4 +1,5 @@
 from office365.entity import Entity
+from office365.entity_collection import EntityCollection
 from office365.onedrive.analytics.item_activity_stat import ItemActivityStat
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -14,6 +15,12 @@ class ItemAnalytics(Entity):
                                    ItemActivityStat(self.context, ResourcePath("allTime", self.resource_path)))
 
     @property
+    def item_activity_stats(self):
+        return self.properties.get('itemActivityStats',
+                                   EntityCollection(self.context, ItemActivityStat,
+                                                    ResourcePath("itemActivityStats", self.resource_path)))
+
+    @property
     def last_seven_days(self):
         """Analytics for the last seven days."""
         return self.properties.get('lastSevenDays',
@@ -23,6 +30,7 @@ class ItemAnalytics(Entity):
         if default_value is None:
             property_mapping = {
                 "allTime": self.all_time,
+                "itemActivityStats": self.item_activity_stats,
                 "lastSevenDays": self.last_seven_days
             }
             default_value = property_mapping.get(name, None)

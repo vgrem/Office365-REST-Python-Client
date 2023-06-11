@@ -14,30 +14,27 @@ class Planner(Entity):
 
     @property
     def buckets(self):
-        """Read-only. Nullable. Returns the plannerBuckets assigned to the user.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('buckets',
-                                 EntityCollection(self.context, PlannerBucket,
-                                                  ResourcePath("buckets", self.resource_path)))
+        Read-only. Nullable. Returns the plannerBuckets assigned to the user.
+        """
+        return self.properties.get('buckets',
+                                   EntityCollection(self.context, PlannerBucket,
+                                                    ResourcePath("buckets", self.resource_path)))
 
     @property
     def tasks(self):
-        """Read-only. Nullable. Returns the plannerTasks assigned to the user.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('tasks',
-                                 EntityCollection(self.context, PlannerTask,
-                                                  ResourcePath("tasks", self.resource_path)))
+        Read-only. Nullable. Returns the plannerTasks assigned to the user.
+        """
+        return self.properties.get('tasks',
+                                   EntityCollection(self.context, PlannerTask,
+                                                    ResourcePath("tasks", self.resource_path)))
 
     @property
     def plans(self):
-        """Read-only. Nullable. Returns the plannerTasks assigned to the user.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('plans',
-                                 EntityCollection(self.context, PlannerPlan,
-                                                  ResourcePath("plans", self.resource_path)))
+        Read-only. Nullable. Returns the plannerTasks assigned to the user.
+        """
+        return self.properties.get('plans',
+                                   EntityCollection(self.context, PlannerPlan,
+                                                    ResourcePath("plans", self.resource_path)))

@@ -22,23 +22,20 @@ class UserFlowLanguageConfiguration(Entity):
 
     @property
     def default_pages(self):
-        """Collection of pages with the default content to display in a user flow for a specified language.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('defaultPages',
-                                 EntityCollection(self.context, UserFlowLanguagePage,
-                                                  ResourcePath("defaultPages", self.resource_path)))
+        Collection of pages with the default content to display in a user flow for a specified language.
+        """
+        return self.properties.get('defaultPages',
+                                   EntityCollection(self.context, UserFlowLanguagePage,
+                                                    ResourcePath("defaultPages", self.resource_path)))
 
     @property
     def overrides_pages(self):
         """Collection of pages with the default content to display in a user flow for a specified language.
-
-        :rtype: EntityCollection
         """
-        return self.get_property('overridesPages',
-                                 EntityCollection(self.context, UserFlowLanguagePage,
-                                                  ResourcePath("overridesPages", self.resource_path)))
+        return self.properties.get('overridesPages',
+                                   EntityCollection(self.context, UserFlowLanguagePage,
+                                                    ResourcePath("overridesPages", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:

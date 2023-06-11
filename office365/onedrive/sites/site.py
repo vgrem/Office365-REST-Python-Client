@@ -7,6 +7,7 @@ from office365.onedrive.contenttypes.collection import ContentTypeCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.lists.collection import ListCollection
+from office365.onedrive.operations.rich_long_running import RichLongRunningOperation
 from office365.onedrive.permissions.collection import PermissionCollection
 from office365.onedrive.sharepoint_ids import SharePointIds
 from office365.onedrive.sites.site_collection import SiteCollection
@@ -87,8 +88,8 @@ class Site(BaseItem):
     @property
     def items(self):
         """Used to address any item contained in this site. This collection cannot be enumerated."""
-        return self.get_property('items',
-                                 EntityCollection(self.context, ListItem, ResourcePath("items", self.resource_path)))
+        return self.properties.get('items',
+                                   EntityCollection(self.context, ListItem, ResourcePath("items", self.resource_path)))
 
     @property
     def columns(self):
@@ -117,6 +118,13 @@ class Site(BaseItem):
         """The collection of lists under this site."""
         return self.properties.get('lists',
                                    ListCollection(self.context, ResourcePath("lists", self.resource_path)))
+
+    @property
+    def operations(self):
+        """The collection of long-running operations on the site."""
+        return self.properties.get('operations',
+                                   EntityCollection(self.context, RichLongRunningOperation,
+                                                    ResourcePath("operations", self.resource_path)))
 
     @property
     def permissions(self):
