@@ -21,7 +21,7 @@ class SetCollection(EntityCollection):
         :param str name: Term set name
         :rtype: Set
         """
-        return self._find_by_unique_prop("displayName", name)
+        return self.filter("displayName eq '{0}'".format(name)).one()
 
     def add(self, name, parent_group=None):
         """Create a new set object.

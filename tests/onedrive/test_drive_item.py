@@ -1,23 +1,20 @@
 import os
 import uuid
 from datetime import datetime, timedelta
-
 from tests.graph_case import GraphTestCase
-
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.driveitems.driveItem import DriveItem
 
 
-def create_list_drive(client):
+def create_lib(client):
     """
-    :type client: GraphClient
+    :type client: office365.graph_client.GraphClient
     """
     list_info = {
         "displayName": "Lib_" + uuid.uuid4().hex,
         "list": {"template": "documentLibrary"}
     }
-    new_list = client.sites.root.lists.add(list_info).execute_query()
-    return new_list.drive
+    return client.sites.root.lists.add(list_info)
 
 
 class TestDriveItem(GraphTestCase):
@@ -29,11 +26,11 @@ class TestDriveItem(GraphTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestDriveItem, cls).setUpClass()
-        cls.target_drive = create_list_drive(cls.client)
+        cls.target_drive = create_lib(cls.client).execute_query().drive
 
     @classmethod
     def tearDownClass(cls):
-        pass
+        cls.target_drive.list.delete_object().execute_query()
 
     def test1_create_folder(self):
         target_folder_name = "New_" + uuid.uuid4().hex
@@ -113,8 +110,7 @@ class TestDriveItem(GraphTestCase):
     def test_15_get_activities_by_interval(self):
         end_time = datetime.utcnow()
         start_time = end_time - timedelta(days=14)
-        result = self.__class__.target_file.get_activities_by_interval(start_dt=start_time, end_dt=end_time, interval='day')
-        self.client.execute_query()
+        result = self.__class__.target_file.get_activities_by_interval(start_time, end_time, 'day').execute_query()
         self.assertIsNotNone(result)
 
     def test_16_get_item_analytics(self):
@@ -123,4 +119,5 @@ class TestDriveItem(GraphTestCase):
 
     def test_17_delete_file(self):
         items = self.target_drive.root.children.top(2).get().execute_query()
-        items[1].delete_object().execute_query()
+        for item in items:
+            item.delete_object().execute_query()

@@ -23,4 +23,4 @@ class GroupCollection(EntityCollection):
         :param str name: Group name
         :rtype: Group
         """
-        return self._find_by_unique_prop("displayName", name)
+        return self.filter("displayName eq '{0}'".format(name)).one()

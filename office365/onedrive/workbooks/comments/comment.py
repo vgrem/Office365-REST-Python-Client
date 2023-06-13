@@ -8,6 +8,20 @@ class WorkbookComment(Entity):
     """Represents a comment in workbook."""
 
     @property
+    def content(self):
+        """The content of comment.
+        :rtype: str or None
+        """
+        return self.properties.get('content', None)
+
+    @property
+    def content_type(self):
+        """Indicates the type for the comment.
+        :rtype: str or None
+        """
+        return self.properties.get('contentType', None)
+
+    @property
     def replies(self):
         """"""
         return self.properties.get('replies',

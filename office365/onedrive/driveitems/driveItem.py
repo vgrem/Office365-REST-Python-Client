@@ -7,6 +7,7 @@ from office365.onedrive.driveitems.image import Image
 from office365.onedrive.driveitems.item_preview_info import ItemPreviewInfo
 from office365.onedrive.driveitems.photo import Photo
 from office365.onedrive.driveitems.special_folder import SpecialFolder
+from office365.onedrive.internal.paths.root import RootPath
 from office365.onedrive.internal.queries.resumable_file_upload import create_resumable_file_upload_query
 from office365.onedrive.internal.queries.upload_content import create_upload_content_query
 from office365.base_item import BaseItem
@@ -314,29 +315,47 @@ class DriveItem(BaseItem):
             self.context.add_query(qry)
         return return_type
 
-    def move(self, name=None, parent_reference=None):
+    def move(self, name=None, parent=None):
         """To move a DriveItem to a new parent item, your app requests to update the parentReference of the DriveItem
         to move.
 
         :param str name: The new name for the move. If this isn't provided, the same name will be used as the
              original.
-        :param office365.onedrive.listitems.item_reference.ItemReference parent_reference: Reference to the
+        :param ItemReference or DriveItem or None parent: Reference to the
              parent item the move will be created in.
         """
 
         return_type = ClientResult(self.context, str())
-        payload = {
-            "name": name,
-            "parentReference": parent_reference
-        }
-        qry = ServiceOperationQuery(self, "move", None, payload, None, return_type)
-        self.context.add_query(qry)
 
-        def _construct_request(request):
-            request.method = HttpMethod.Patch
+        def _create_query(parent_reference):
+            payload = {
+                "name": name,
+                "parentReference": parent_reference
+            }
 
-        self.context.before_execute(_construct_request)
+            def _construct_request(request):
+                request.method = HttpMethod.Patch
+
+            self.context.before_execute(_construct_request)
+            return ServiceOperationQuery(self, "move", None, payload, None, return_type)
+
+        if isinstance(parent, DriveItem):
+            def _drive_item_loaded():
+                parent_reference = ItemReference(_id=parent.id)
+                next_qry = _create_query(parent_reference)
+                self.context.add_query(next_qry)
+
+            parent.ensure_property("parentReference", _drive_item_loaded)
+        else:
+            qry = _create_query(parent)
+            self.context.add_query(qry)
         return return_type
+
+    def rename(self, new_name):
+        """Rename a DriveItem
+        :param str new_name: The new name for the rename.
+        """
+        return self.move(name=new_name)
 
     def search(self, query_text):
         """Search the hierarchy of items for items matching a query. You can search within a folder hierarchy,
@@ -386,23 +405,37 @@ class DriveItem(BaseItem):
         :param datetime.datetime end_dt: The end time over which to aggregate activities.
         :param str interval: The aggregation interval.
         """
-        params = {
-            "startDateTime": start_dt.strftime('%m-%d-%Y') if start_dt else None,
-            "endDateTime": end_dt.strftime('%m-%d-%Y') if end_dt else None,
-            "interval": interval
-        }
         return_type = EntityCollection(self.context, ItemActivityStat, self.resource_path)
-        qry = FunctionQuery(self, "getActivitiesByInterval", params, return_type)
+
+        def _create_query(binding_type):
+            params = {
+                "startDateTime": start_dt.strftime('%m-%d-%Y') if start_dt else None,
+                "endDateTime": end_dt.strftime('%m-%d-%Y') if end_dt else None,
+                "interval": interval
+            }
+            return FunctionQuery(binding_type, "getActivitiesByInterval", params, return_type)
+
+        # if isinstance(self.resource_path, RootPath):
+        #    def _loaded():
+        #        drive_item = self.context.drives[self.parent_reference.driveId].items[self.id]
+        #        next_qry = _create_query(drive_item)
+        #        self.context.add_query(next_qry)
+        #    self.ensure_property("parentReference", _loaded)
+        # else:
+        qry = _create_query(self)
         self.context.add_query(qry)
+
         return return_type
 
-    def restore(self, parent_reference, name):
+    def restore(self, parent_reference=None, name=None):
         """
         Restore a driveItem that has been deleted and is currently in the recycle bin.
         NOTE: This functionality is currently only available for OneDrive Personal.
 
-        :type name: str
-        :type parent_reference: office365.onedrive.listitems.item_reference.ItemReference or None
+        :param str name: Optional. The new name for the restored item. If this isn't provided,
+             the same name will be used as the original.
+        :param ItemReference or None parent_reference: Optional. Reference to the parent item the deleted item will
+             be restored to.
         """
         payload = {
             "name": name,

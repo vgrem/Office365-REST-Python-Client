@@ -1,5 +1,4 @@
 import uuid
-
 from office365.onedrive.internal.paths.url import UrlPath
 from office365.runtime.paths.resource_path import ResourcePath
 from tests import test_team_site_url
@@ -69,18 +68,18 @@ class TestGraphClient(GraphTestCase):
         path = path.normalize(term_id)
         self.assertEqual(f"/sites/root/termStore/groups/{group_id}/sets/{set_id}/terms/{term_id}", str(path))
 
-    # def test_12_build_operation_resource_path(self):
-    #    result = self.client.me.drive.root.get_activities_by_interval().execute_query()
+    #def test_12_build_operation_resource_path(self):
+    #    result = self.client.me.drive.root.get_by_path("archive/Sample.rtf").get_activities_by_interval().execute_query()
     #    self.assertEqual("/me/drive/root/getActivitiesByInterval()", str(result.resource_path))
 
     def test_13_resolve_me_resource_path(self):
         current_user = self.client.me.get().execute_query()
         self.assertEqual("/users/{0}".format(current_user.id), str(current_user.resource_path))
 
-    def test_14_resolve_my_drive_resource_path(self):
+    def test_15_resolve_my_drive_resource_path(self):
         my_drive = self.client.me.drive.get().execute_query()
         self.assertEqual("/drives/{0}".format(my_drive.id), str(my_drive.resource_path))
 
-    def test_15_resolve_entity_type_name(self):
+    def test_16_resolve_entity_type_name(self):
         name = self.client.me.joined_teams.entity_type_name
         self.assertEqual("Collection(microsoft.graph.team)", name)

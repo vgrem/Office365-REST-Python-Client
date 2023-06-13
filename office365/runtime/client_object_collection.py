@@ -204,6 +204,47 @@ class ClientObjectCollection(ClientObject):
         self.context.load(self, before_loaded=_construct_next_query, after_loaded=after_loaded)
         return self
 
+    def first(self):
+        """Return the first Entity instance that matches current query"""
+        return_type = self.create_typed_object()
+        self.add_child(return_type)
+        key = return_type.property_ref_name
+
+        def _after_loaded(col):
+            """
+            :type col: ClientObjectCollection
+            """
+            if len(col) != 1:
+                message = "Not found for filter: {0}".format(self.query_options.filter)
+                raise ValueError(message)
+            return_type.set_property(key, col[0].get_property(key))
+
+        self.top(1)
+        self.context.load(self, [key], after_loaded=_after_loaded)
+        return return_type
+
+    def one(self):
+        """Return only one resulting Entity"""
+        return_type = self.create_typed_object()
+        self.add_child(return_type)
+        key = return_type.property_ref_name
+
+        def _after_loaded(col):
+            """
+            :type col: ClientObjectCollection
+            """
+            if len(col) == 0:
+                message = "Not found for filter: {0}".format(self.query_options.filter)
+                raise ValueError(message)
+            elif len(col) > 1:
+                message = "Ambiguous match found for filter: {0}".format(self.query_options.filter)
+                raise ValueError(message)
+            return_type.set_property(key, col[0].get_property(key), False)
+
+        self.top(2)
+        self.context.load(self, after_loaded=_after_loaded)
+        return return_type
+
     @property
     def parent(self):
         return self._parent

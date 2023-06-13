@@ -6554,6 +6554,7 @@
          </ComplexType>
          <ComplexType Name="licenseUnitsDetail">
             <Property Name="enabled" Type="Edm.Int32"/>
+            <Property Name="lockedOut" Type="Edm.Int32"/>
             <Property Name="suspended" Type="Edm.Int32"/>
             <Property Name="warning" Type="Edm.Int32"/>
          </ComplexType>
@@ -14210,6 +14211,7 @@
          </EntityType>
          <EntityType Name="learningProvider" BaseType="graph.entity">
             <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="isCourseActivitySyncEnabled" Type="Edm.Boolean"/>
             <Property Name="loginWebUrl" Type="Edm.String"/>
             <Property Name="longLogoWebUrlForDarkTheme" Type="Edm.String" Nullable="false"/>
             <Property Name="longLogoWebUrlForLightTheme" Type="Edm.String" Nullable="false"/>
@@ -14403,17 +14405,9 @@
             <Parameter Name="bindingParameter" Type="Collection(graph.identityProviderBase)"/>
             <ReturnType Type="Collection(Edm.String)" Unicode="false"/>
          </Function>
-         <Action Name="addTokenSigningCertificate" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.servicePrincipal" Nullable="false"/>
-            <Parameter Name="displayName" Type="Edm.String" Unicode="false"/>
-            <Parameter Name="endDateTime" Type="Edm.DateTimeOffset"/>
-            <ReturnType Type="graph.selfSignedCertificate" Nullable="false"/>
-         </Action>
-         <Action Name="assignLicense" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.group" Nullable="false"/>
-            <Parameter Name="addLicenses" Type="Collection(graph.assignedLicense)" Nullable="false"/>
-            <Parameter Name="removeLicenses" Type="Collection(Edm.Guid)" Nullable="false"/>
-            <ReturnType Type="graph.group"/>
+         <Action Name="setMobileDeviceManagementAuthority" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.organization"/>
+            <ReturnType Type="Edm.Int32" Nullable="false"/>
          </Action>
          <Action Name="assignLicense" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.user" Nullable="false"/>
@@ -14421,40 +14415,11 @@
             <Parameter Name="removeLicenses" Type="Collection(Edm.Guid)" Nullable="false"/>
             <ReturnType Type="graph.user"/>
          </Action>
-         <Action Name="checkGrantedPermissionsForApp" IsBound="true">
+         <Action Name="assignLicense" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.group" Nullable="false"/>
-            <ReturnType Type="Collection(graph.resourceSpecificPermissionGrant)"/>
-         </Action>
-         <Action Name="validateProperties" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.group" Nullable="false"/>
-            <Parameter Name="displayName" Type="Edm.String" Unicode="false"/>
-            <Parameter Name="mailNickname" Type="Edm.String" Unicode="false"/>
-            <Parameter Name="onBehalfOfUserId" Type="Edm.Guid"/>
-         </Action>
-         <Action Name="validateProperties" IsBound="true" EntitySetPath="bindingParameter">
-            <Parameter Name="bindingParameter" Type="Collection(graph.directoryObject)" Nullable="false"/>
-            <Parameter Name="entityType" Type="Edm.String" Unicode="false"/>
-            <Parameter Name="displayName" Type="Edm.String" Unicode="false"/>
-            <Parameter Name="mailNickname" Type="Edm.String" Unicode="false"/>
-            <Parameter Name="onBehalfOfUserId" Type="Edm.Guid"/>
-         </Action>
-         <Action Name="addFavorite" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.group"/>
-         </Action>
-         <Action Name="removeFavorite" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.group"/>
-         </Action>
-         <Action Name="resetUnseenCount" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.group"/>
-         </Action>
-         <Action Name="subscribeByMail" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.group"/>
-         </Action>
-         <Action Name="unsubscribeByMail" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.group"/>
-         </Action>
-         <Action Name="renew" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.group"/>
+            <Parameter Name="addLicenses" Type="Collection(graph.assignedLicense)" Nullable="false"/>
+            <Parameter Name="removeLicenses" Type="Collection(Edm.Guid)" Nullable="false"/>
+            <ReturnType Type="graph.group"/>
          </Action>
          <Action Name="changePassword" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.user" Nullable="false"/>
@@ -14538,6 +14503,47 @@
             <Parameter Name="bindingParameter" Type="graph.user"/>
             <Parameter Name="storageLocation" Type="Edm.String" Unicode="false"/>
          </Action>
+         <Action Name="addTokenSigningCertificate" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.servicePrincipal" Nullable="false"/>
+            <Parameter Name="displayName" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="endDateTime" Type="Edm.DateTimeOffset"/>
+            <ReturnType Type="graph.selfSignedCertificate" Nullable="false"/>
+         </Action>
+         <Action Name="checkGrantedPermissionsForApp" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.group" Nullable="false"/>
+            <ReturnType Type="Collection(graph.resourceSpecificPermissionGrant)"/>
+         </Action>
+         <Action Name="validateProperties" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.group" Nullable="false"/>
+            <Parameter Name="displayName" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="mailNickname" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="onBehalfOfUserId" Type="Edm.Guid"/>
+         </Action>
+         <Action Name="validateProperties" IsBound="true" EntitySetPath="bindingParameter">
+            <Parameter Name="bindingParameter" Type="Collection(graph.directoryObject)" Nullable="false"/>
+            <Parameter Name="entityType" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="displayName" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="mailNickname" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="onBehalfOfUserId" Type="Edm.Guid"/>
+         </Action>
+         <Action Name="addFavorite" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.group"/>
+         </Action>
+         <Action Name="removeFavorite" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.group"/>
+         </Action>
+         <Action Name="resetUnseenCount" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.group"/>
+         </Action>
+         <Action Name="subscribeByMail" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.group"/>
+         </Action>
+         <Action Name="unsubscribeByMail" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.group"/>
+         </Action>
+         <Action Name="renew" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.group"/>
+         </Action>
          <Action Name="checkMemberGroups" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.directoryObject" Nullable="false"/>
             <Parameter Name="groupIds" Type="Collection(Edm.String)" Nullable="false" Unicode="false"/>
@@ -14570,10 +14576,6 @@
          </Action>
          <Action Name="restore" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.documentSetVersion"/>
-         </Action>
-         <Action Name="setMobileDeviceManagementAuthority" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.organization"/>
-            <ReturnType Type="Edm.Int32" Nullable="false"/>
          </Action>
          <Action Name="forceDelete" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.domain" Nullable="false"/>
@@ -32084,6 +32086,9 @@
                </Collection>
             </Annotation>
          </Annotations>
+         <Annotations Target="microsoft.graph.setMobileDeviceManagementAuthority(microsoft.graph.organization)">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Set mobile device management authority"/>
+         </Annotations>
          <Annotations Target="microsoft.graph.removeAllDevicesFromManagement(microsoft.graph.user)">
             <Annotation Term="Org.OData.Core.V1.Description" String="Retire all devices from management for this user"/>
          </Annotations>
@@ -32098,9 +32103,6 @@
          </Annotations>
          <Annotations Target="microsoft.graph.getManagedDevicesWithAppFailures(microsoft.graph.user)">
             <Annotation Term="Org.OData.Core.V1.Description" String="Retrieves the list of devices with failed apps"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.setMobileDeviceManagementAuthority(microsoft.graph.organization)">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Set mobile device management authority"/>
          </Annotations>
          <Annotations Target="microsoft.graph.commit(microsoft.graph.mobileAppContentFile, microsoft.graph.fileEncryptionInfo)">
             <Annotation Term="Org.OData.Core.V1.Description" String="Commits a file of a given app."/>

@@ -51,4 +51,4 @@ class SitesWithRoot(EntityCollection):
 
     @property
     def root(self):
-        return self.properties.get('root', Site(self.context, RootPath(self.resource_path, ResourcePath("sites"))))
+        return self.properties.get('root', Site(self.context, RootPath(self.resource_path, self.resource_path)))

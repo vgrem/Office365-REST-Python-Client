@@ -1,5 +1,6 @@
 from office365.base_item import BaseItem
 from office365.directory.permissions.identity_set import IdentitySet
+from office365.entity_collection import EntityCollection
 from office365.onedrive.permissions.permission import Permission
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.lists.list import List
@@ -11,6 +12,12 @@ from office365.runtime.paths.resource_path import ResourcePath
 
 class SharedDriveItem(BaseItem):
     """The sharedDriveItem resource is returned when using the Shares API to access a shared driveItem."""
+
+    @property
+    def items(self):
+        """All driveItems contained in the sharing root. This collection cannot be enumerated."""
+        return self.properties.get('items',
+                                   EntityCollection(self.context, DriveItem, ResourcePath("items", self.resource_path)))
 
     @property
     def list_item(self):
@@ -42,7 +49,8 @@ class SharedDriveItem(BaseItem):
         Deprecated -- use driveItem instead.
         """
         return self.properties.get('root',
-                                   DriveItem(self.context, RootPath(self.resource_path)))
+                                   DriveItem(self.context,
+                                             RootPath(self.resource_path, self.items.resource_path)))
 
     @property
     def site(self):

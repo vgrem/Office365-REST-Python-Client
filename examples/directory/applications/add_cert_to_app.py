@@ -37,6 +37,6 @@ cert_path = '../../selfsigncert.pem'
 key_cred = read_certificate(cert_path)
 
 client = GraphClient(acquire_token_by_username_password)
-app = client.applications.get_by_app_id(test_client_credentials.clientId)
+app = client.applications.get_by_app_id(test_client_credentials.clientId).get().execute_query()
 app.key_credentials.add(key_cred)
 app.update().execute_query()

@@ -12,7 +12,6 @@ class ApplicationCollection(DeltaCollection):
         """Retrieves application by Application client identifier
 
         :param str app_id: Application client identifier
-
         :rtype: Application
         """
-        return self._find_by_unique_prop("appId", app_id)
+        return self.filter("appId eq '{0}'".format(app_id)).one()
