@@ -15,5 +15,5 @@ class ServiceOperationPath(ResourcePath):
         self._parameters = parameters
 
     @property
-    def segments(self):
-        return [self.delimiter, ODataUrlBuilder.build(self._key, self._parameters)]
+    def segment(self):
+        return ODataUrlBuilder.build(self._key, self._parameters)

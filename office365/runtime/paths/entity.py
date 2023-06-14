@@ -16,8 +16,8 @@ class EntityPath(ResourcePath):
         return self._collection
 
     @property
-    def segments(self):
-        return [self.delimiter, str(self.key or '<key>')]
+    def segment(self):
+        return str(self.key or '<key>')
 
     def normalize(self, key, inplace=False):
         """

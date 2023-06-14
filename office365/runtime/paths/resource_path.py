@@ -29,7 +29,9 @@ class ResourcePath(object):
         """
         segments = []
         for path in self:
-            segments = path.segments + segments
+            segments.insert(0, path.segment)
+            if path.delimiter:
+                segments.insert(0, path.delimiter)
         return "".join(segments)
 
     @property
@@ -37,8 +39,8 @@ class ResourcePath(object):
         return self._parent
 
     @property
-    def segments(self):
-        return [self.delimiter, str(self.key)]
+    def segment(self):
+        return str(self.key)
 
     @property
     def key(self):

@@ -7,12 +7,12 @@ class SitePath(EntityPath):
     """Resource path for addressing Site resource"""
 
     @property
-    def segments(self):
+    def segment(self):
         if is_absolute_url(self.key):
             url_result = urlparse(self.key)
-            return [self.delimiter, url_result.hostname, ":", url_result.path]
+            return ":".join([url_result.hostname, url_result.path])
         else:
-            return super(SitePath, self).segments
+            return super(SitePath, self).segment
 
     @property
     def collection(self):

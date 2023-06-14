@@ -1,7 +1,6 @@
 from office365.communications.cloud_communications import CloudCommunications
 from office365.delta_collection import DeltaCollection
 from office365.directory.applications.collection import ApplicationCollection
-from office365.directory.applications.service_principal import ServicePrincipal
 from office365.directory.applications.template import ApplicationTemplate
 from office365.directory.audit.log_root import AuditLogRoot
 from office365.directory.directory import Directory
@@ -21,6 +20,7 @@ from office365.directory.policies.root import PolicyRoot
 from office365.directory.roles.management import RoleManagement
 from office365.directory.roles.role import DirectoryRole
 from office365.directory.security.security import Security
+from office365.directory.serviceprincipals.collection import ServicePrincipalCollection
 from office365.directory.users.collection import UserCollection
 from office365.directory.users.invitation import InvitationCollection
 from office365.directory.users.user import User
@@ -225,7 +225,7 @@ class GraphClient(ClientRuntimeContext):
     @property
     def service_principals(self):
         """Retrieve a list of servicePrincipal objects."""
-        return DeltaCollection(self, ServicePrincipal, ResourcePath("servicePrincipals"))
+        return ServicePrincipalCollection(self, ResourcePath("servicePrincipals"))
 
     @property
     def organization(self):
