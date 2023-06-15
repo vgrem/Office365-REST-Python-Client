@@ -28,6 +28,10 @@ class CheckedOutFile(BaseEntity):
         return self.properties.get('CheckedOutBy',
                                    User(self.context, ResourcePath("CheckedOutBy", self.resource_path)))
 
+    @property
+    def property_ref_name(self):
+        return "CheckedOutById"
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {

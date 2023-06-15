@@ -22,6 +22,7 @@ class JsonLightFormat(ODataJsonFormat):
 
     @property
     def collection_next(self):
+        """Property name for a reference to the next page of results"""
         return "__next"
 
     @property

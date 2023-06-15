@@ -13,6 +13,7 @@ from office365.directory.identities.governance import IdentityGovernance
 from office365.directory.identities.protection_root import IdentityProtectionRoot
 from office365.directory.identities.provider import IdentityProvider
 from office365.directory.internal.paths.me import MePath
+from office365.directory.invitations.collection import InvitationCollection
 from office365.directory.licenses.subscribed_sku import SubscribedSku
 from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.permissions.grants.resource_specific import ResourceSpecificPermissionGrant
@@ -22,7 +23,6 @@ from office365.directory.roles.role import DirectoryRole
 from office365.directory.security.security import Security
 from office365.directory.serviceprincipals.collection import ServicePrincipalCollection
 from office365.directory.users.collection import UserCollection
-from office365.directory.users.invitation import InvitationCollection
 from office365.directory.users.user import User
 from office365.education.root import EducationRoot
 from office365.entity_collection import EntityCollection

@@ -17,12 +17,22 @@ class Security(Entity):
                                    EntityCollection(self.context, Alert, ResourcePath("alerts", self.resource_path)))
 
     @property
+    def alerts_v2(self):
+        """
+        A collection of alerts in Microsoft 365 Defender.
+        """
+        return self.properties.get('alerts_v2',
+                                   EntityCollection(self.context, Alert, ResourcePath("alerts_v2", self.resource_path)))
+
+    @property
     def cases(self):
+        """"""
         return self.properties.get('cases',
                                    CasesRoot(self.context, ResourcePath("cases", self.resource_path)))
 
     @property
     def attack_simulation(self):
+        """"""
         return self.properties.get('attackSimulation',
                                    AttackSimulationRoot(self.context,
                                                         ResourcePath("attackSimulation", self.resource_path)))
@@ -35,6 +45,7 @@ class Security(Entity):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "alerts_v2": self.alerts_v2,
                 "attackSimulation": self.attack_simulation
             }
             default_value = property_mapping.get(name, None)

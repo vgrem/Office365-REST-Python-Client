@@ -6,6 +6,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.gtp.request_options import ChatGptRequestOptions
 from office365.sharepoint.listitems.collection import ListItemCollection
 from office365.sharepoint.lists.render_data_parameters import RenderListDataParameters
 from office365.sharepoint.lists.render_override_parameters import RenderListDataOverrideParameters
@@ -45,6 +46,14 @@ class Tenant(BaseEntity):
         def _settings_loaded():
             return_type.set_property("__siteUrl", settings.corporate_catalog_url)
         settings.ensure_property("CorporateCatalogUrl", _settings_loaded)
+        return return_type
+
+    def get_chat_gpt_response(self):
+        """"""
+        return_type = ClientResult(self.context)
+        payload = ChatGptRequestOptions()
+        qry = ServiceOperationQuery(self, "GetChatGptResponse", None, payload, "requestOptions", return_type)
+        self.context.add_query(qry)
         return return_type
 
     def delete_policy_definition(self, item_id):

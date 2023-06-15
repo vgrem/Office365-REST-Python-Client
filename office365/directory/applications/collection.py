@@ -14,4 +14,4 @@ class ApplicationCollection(DeltaCollection):
         :param str app_id: Application client identifier
         :rtype: Application
         """
-        return self.filter("appId eq '{0}'".format(app_id)).one()
+        return self.filter("appId eq '{0}'".format(app_id)).single()

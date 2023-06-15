@@ -84,6 +84,15 @@ class ServicePrincipal(DirectoryObject):
         self.context.add_query(qry)
         return return_type
 
+    def remove_password(self, key_id):
+        """Remove a password from a servicePrincipal object..
+
+        :param str key_id: The unique identifier for the password.
+        """
+        qry = ServiceOperationQuery(self, "removePassword", None, {"keyId": key_id})
+        self.context.add_query(qry)
+        return self
+
     @property
     def app_display_name(self):
         """The collection of key credentials associated with the application. Not nullable.
@@ -160,6 +169,16 @@ class ServicePrincipal(DirectoryObject):
         return self.properties.get('ownedObjects',
                                    DirectoryObjectCollection(self.context,
                                                              ResourcePath("ownedObjects", self.resource_path)))
+
+    @property
+    def token_encryption_key_id(self):
+        """
+        Specifies the keyId of a public key from the keyCredentials collection. When configured, Azure AD issues tokens
+        for this application encrypted using the key specified by this property. The application code that receives
+        the encrypted token must use the matching private key to decrypt the token before it can be used
+        for the signed-in user.
+        """
+        return self.properties.get("tokenEncryptionKeyId", None)
 
     def get_property(self, name, default_value=None):
         if default_value is None:

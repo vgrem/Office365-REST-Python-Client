@@ -145,3 +145,4 @@ class TestTenant(TestCase):
     def test_23_get_tenant_all_web_templates(self):
         result = self.tenant.get_spo_tenant_all_web_templates().execute_query()
         self.assertIsNotNone(result.items)
+

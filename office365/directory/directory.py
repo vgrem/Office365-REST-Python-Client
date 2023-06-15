@@ -42,3 +42,8 @@ class Directory(Entity):
     def deleted_applications(self):
         """Recently deleted applications"""
         return self.deleted_items("microsoft.graph.application")
+
+    @property
+    def deleted_service_principals(self):
+        """Recently deleted service Principals"""
+        return self.deleted_items("microsoft.graph.servicePrincipal")

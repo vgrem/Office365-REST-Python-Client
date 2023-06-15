@@ -1,9 +1,10 @@
-from typing import TypeVar
+from typing import TypeVar, Iterator
 
 from office365.runtime.client_object import ClientObject
 from office365.runtime.types.event_handler import EventHandler
 
 T = TypeVar('T', bound='ClientObjectCollection')
+P_T = TypeVar("P_T", bound=ClientObject)
 
 
 class ClientObjectCollection(ClientObject):
@@ -34,12 +35,13 @@ class ClientObjectCollection(ClientObject):
 
     def create_typed_object(self, initial_properties=None, resource_path=None):
         """
-        :type initial_properties: dict[str, P_T] or None
+        :type self: T
+        :type initial_properties: dict or None
         :type resource_path: office365.runtime.paths.resource_path.ResourcePath or None
         """
         if self._item_type is None:
             raise AttributeError("No class model for entity type '{0}' was found".format(self._item_type))
-        client_object = self._item_type(context=self.context, resource_path=resource_path)  # type: ClientObject
+        client_object = self._item_type(context=self.context, resource_path=resource_path)   # type: ClientObject
         if initial_properties is not None:
             [client_object.set_property(k, v) for k, v in initial_properties.items() if v is not None]
         return client_object
@@ -77,7 +79,8 @@ class ClientObjectCollection(ClientObject):
 
     def __iter__(self):
         """
-        :rtype: collections.Iterable[ClientObject]
+        :type self: T
+        :rtype: Iterator[ClientObject]
         """
         for item in self._data:
             yield item
@@ -214,7 +217,7 @@ class ClientObjectCollection(ClientObject):
             """
             :type col: ClientObjectCollection
             """
-            if len(col) != 1:
+            if len(col) < 1:
                 message = "Not found for filter: {0}".format(self.query_options.filter)
                 raise ValueError(message)
             return_type.set_property(key, col[0].get_property(key))
@@ -223,8 +226,10 @@ class ClientObjectCollection(ClientObject):
         self.context.load(self, [key], after_loaded=_after_loaded)
         return return_type
 
-    def one(self):
-        """Return only one resulting Entity"""
+    def single(self):
+        """
+        Return only one resulting Entity
+        """
         return_type = self.create_typed_object()
         self.add_child(return_type)
         key = return_type.property_ref_name
@@ -251,6 +256,7 @@ class ClientObjectCollection(ClientObject):
 
     @property
     def has_next(self):
+        """"""
         return self._next_request_url is not None
 
     @property
