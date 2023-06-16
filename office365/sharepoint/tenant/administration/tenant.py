@@ -51,8 +51,8 @@ class Tenant(BaseEntity):
     def get_chat_gpt_response(self):
         """"""
         return_type = ClientResult(self.context)
-        payload = ChatGptRequestOptions()
-        qry = ServiceOperationQuery(self, "GetChatGptResponse", None, payload, "requestOptions", return_type)
+        payload = {"requestOptions": ChatGptRequestOptions()}
+        qry = ServiceOperationQuery(self, "GetChatGptResponse", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -270,9 +270,8 @@ class Tenant(BaseEntity):
         :type site_id: str
         """
         return_type = ClientResult(self.context, ClientValueCollection(SecondaryAdministratorsInfo))
-        payload = SecondaryAdministratorsFieldsData(site_id)
-        qry = ServiceOperationQuery(self, "GetSiteSecondaryAdministrators", None, payload,
-                                    "secondaryAdministratorsFieldsData", return_type)
+        payload = {"secondaryAdministratorsFieldsData": SecondaryAdministratorsFieldsData(site_id)}
+        qry = ServiceOperationQuery(self, "GetSiteSecondaryAdministrators", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -284,9 +283,8 @@ class Tenant(BaseEntity):
         :type emails: list[str]
         :type site_id: str
         """
-        payload = SecondaryAdministratorsFieldsData(site_id, emails, names)
-        qry = ServiceOperationQuery(self, "SetSiteSecondaryAdministrators", None, payload,
-                                    "secondaryAdministratorsFieldsData", None)
+        payload = {"secondaryAdministratorsFieldsData": SecondaryAdministratorsFieldsData(site_id, emails, names)}
+        qry = ServiceOperationQuery(self, "SetSiteSecondaryAdministrators", None, payload, None, None)
         self.context.add_query(qry)
         return self
 
@@ -322,8 +320,8 @@ class Tenant(BaseEntity):
         :param str owner: Sets the login name of the owner of the new site.
         """
         return_type = SpoOperation(self.context)
-        payload = SiteCreationProperties(title=title, url=url, owner=owner)
-        qry = ServiceOperationQuery(self, "CreateSite", None, payload, "siteCreationProperties", return_type)
+        payload = {"siteCreationProperties": SiteCreationProperties(title=title, url=url, owner=owner)}
+        qry = ServiceOperationQuery(self, "CreateSite", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -423,11 +421,8 @@ class Tenant(BaseEntity):
         :param str _filter:
         """
         return_type = SitePropertiesCollection(self.context)
-        qry = ServiceOperationQuery(self, "getSitePropertiesFromSharePointByFilters",
-                                    None,
-                                    SitePropertiesEnumerableFilter(_filter, start_index, include_detail),
-                                    "speFilter",
-                                    return_type)
+        payload = {"speFilter": SitePropertiesEnumerableFilter(_filter, start_index, include_detail)}
+        qry = ServiceOperationQuery(self, "getSitePropertiesFromSharePointByFilters", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 

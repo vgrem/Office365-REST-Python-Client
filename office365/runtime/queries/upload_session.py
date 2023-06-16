@@ -5,8 +5,8 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 class UploadSessionQuery(ServiceOperationQuery):
 
-    def __init__(self, binding_type, parameter_type):
-        super(UploadSessionQuery, self).__init__(binding_type, "createUploadSession", None, parameter_type)
+    def __init__(self, binding_type, parameters_type):
+        super(UploadSessionQuery, self).__init__(binding_type, "createUploadSession", None, parameters_type)
 
     @property
     def upload_session_url(self):

@@ -5,7 +5,7 @@ from office365.runtime.queries.client_query import ClientQuery
 class ReadEntityQuery(ClientQuery):
     def __init__(self, entity, properties_to_include=None):
         """
-        Read entity query
+        Read client object query
 
         :type properties_to_include: list[str] or None
         :type entity: office365.runtime.client_object.ClientObject

@@ -40,20 +40,29 @@ class ClientContext(ClientRuntimeContext):
         self._ctx_web_info = None
         self._pending_request = None
 
-    def create_safe_url(self, orig_url, relative=True):
+    def to_absolute_url(self, orig_url):
         """
-        Creates a safe url
+        Converts to absolute url
 
         :type orig_url: str
-        :type relative: bool
         """
-        if is_absolute_url(orig_url) and not relative:
+        if is_absolute_url(orig_url):
             return orig_url
 
         site_path = urlparse(self.base_url).path
         root_site_url = self.base_url.replace(site_path, "")
         url = orig_url if orig_url.startswith(site_path) else "/".join([site_path, orig_url])
-        return url if relative else "".join([root_site_url, url])
+        return "".join([root_site_url, url])
+
+    def to_server_relative_url(self, orig_url):
+        """
+        Converts to server relative url
+
+        :type orig_url: str
+        """
+        site_path = urlparse(self.base_url).path
+        url = orig_url if orig_url.startswith(site_path) else "/".join([site_path, orig_url])
+        return url
 
     @staticmethod
     def from_url(full_url):

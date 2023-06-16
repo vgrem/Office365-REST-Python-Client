@@ -31,7 +31,8 @@ class SiteScriptUtility(BaseEntity):
         """
         return_type = ClientResult(context, SiteDesignMetadata())
         utility = SiteScriptUtility(context)
-        qry = ServiceOperationQuery(utility, "CreateListDesign", None, info, "info", return_type, True)
+        payload = {"info": info}
+        qry = ServiceOperationQuery(utility, "CreateListDesign", None, payload, None, return_type, True)
         context.add_query(qry)
         return return_type
 
@@ -179,7 +180,8 @@ class SiteScriptUtility(BaseEntity):
         """
         return_type = ClientResult(context, SiteDesignMetadata())
         utility = SiteScriptUtility(context)
-        qry = ServiceOperationQuery(utility, "CreateSiteDesign", None, info, "info", return_type, True)
+        payload = {"info": info}
+        qry = ServiceOperationQuery(utility, "CreateSiteDesign", None, payload, None, return_type, True)
         context.add_query(qry)
         return return_type
 
@@ -193,7 +195,8 @@ class SiteScriptUtility(BaseEntity):
         """
         return_type = ClientResult(context, SiteDesignMetadata())
         utility = SiteScriptUtility(context)
-        qry = ServiceOperationQuery(utility, "UpdateSiteDesign", None, update_info, "updateInfo", return_type)
+        payload = {"updateInfo": update_info}
+        qry = ServiceOperationQuery(utility, "UpdateSiteDesign", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
         return return_type

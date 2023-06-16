@@ -29,11 +29,11 @@ class SitePageCollection(SitePageMetadataCollection):
         """
         :param str web_part_data:
         """
-        result = ClientResult(self.context)
+        return_type = ClientResult(self.context)
         payload = {"webPartDataAsJson": web_part_data}
-        qry = ServiceOperationQuery(self, "CreateAppPage", None, payload, None, result)
+        qry = ServiceOperationQuery(self, "CreateAppPage", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def get_translations(self, source_item_id=None):
         """

@@ -8,8 +8,8 @@ class ServiceOperationQuery(ClientQuery):
     def __init__(self, binding_type,
                  method_name=None,
                  method_params=None,
-                 parameter_type=None,
-                 parameter_name=None,
+                 parameters_type=None,
+                 parameters_name=None,
                  return_type=None,
                  is_static=False):
         """
@@ -19,8 +19,8 @@ class ServiceOperationQuery(ClientQuery):
         """
         super(ServiceOperationQuery, self).__init__(binding_type.context,
                                                     binding_type,
-                                                    parameter_type,
-                                                    parameter_name,
+                                                    parameters_type,
+                                                    parameters_name,
                                                     return_type)
         self._method_name = method_name
         self._method_params = method_params

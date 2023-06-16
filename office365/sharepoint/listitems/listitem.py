@@ -59,11 +59,12 @@ class ListItem(SecurableObject):
             between the local and UTC time. Midnight is represented as 00:00:00. A null value indicates no expiry.
             This value is only applicable to tokenized sharing links that are anonymous access links.
         """
-        result = ClientResult(self.context, ShareLinkResponse())
-        payload = ShareLinkRequest(settings=ShareLinkSettings(link_kind=link_kind, expiration=expiration))
-        qry = ServiceOperationQuery(self, "ShareLink", None, payload, "request", result)
+        return_type = ClientResult(self.context, ShareLinkResponse())
+        request = ShareLinkRequest(settings=ShareLinkSettings(link_kind=link_kind, expiration=expiration))
+        payload = {"request": request}
+        qry = ServiceOperationQuery(self, "ShareLink", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def unshare_link(self, link_kind, share_id=None):
         """
@@ -152,10 +153,11 @@ class ListItem(SecurableObject):
         """
         if query is None:
             query = ChangeQuery(item=True)
-        changes = ChangeCollection(self.context)
-        qry = ServiceOperationQuery(self, "getChanges", None, query, "query", changes)
+        return_type = ChangeCollection(self.context)
+        payload = {"query": query}
+        qry = ServiceOperationQuery(self, "getChanges", None, payload, None, return_type)
         self.context.add_query(qry)
-        return changes
+        return return_type
 
     def share(self, user_principal_name,
               share_option=ExternalSharingSiteOption.View,
@@ -495,9 +497,8 @@ class ListItem(SecurableObject):
 
         :param office365.sharepoint.lists.list.List target_list: List resource
         """
-
-        def _init_item_type():
-            self._entity_type_name = target_list.properties['ListItemEntityTypeFullName']
-
-        if not self._entity_type_name:
-            target_list.ensure_property("ListItemEntityTypeFullName", _init_item_type)
+        if self._entity_type_name is None:
+            def _list_loaded():
+                self._entity_type_name = target_list.properties['ListItemEntityTypeFullName']
+            target_list.ensure_property("ListItemEntityTypeFullName", _list_loaded)
+        return self

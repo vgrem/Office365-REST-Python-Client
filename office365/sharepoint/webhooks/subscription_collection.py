@@ -26,7 +26,8 @@ class SubscriptionCollection(BaseEntityCollection):
             """
             :type information: SubscriptionInformation
             """
-            return ServiceOperationQuery(self, "Add", None, information, "parameters", return_type)
+            payload = {"parameters": information}
+            return ServiceOperationQuery(self, "Add", None, payload, None, return_type)
 
         if isinstance(parameters, SubscriptionInformation):
             qry = _create_query(parameters)

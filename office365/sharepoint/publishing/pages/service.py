@@ -37,6 +37,47 @@ class SitePageService(BaseEntity):
     def entity_type_name(self):
         return "SP.Publishing.SitePageService"
 
+    def create_page(self, title):
+        """Create a new sitePage in the site pages list in a site.
+
+        :param str title: The title of Site Page
+        """
+        return_type = self.pages.add()
+
+        def _draft_saved(resp):
+            """
+            :type resp: requests.Response
+            """
+            resp.raise_for_status()
+            return_type.get()
+
+        def _page_created(resp):
+            """
+            :type resp: requests.Response
+            """
+            resp.raise_for_status()
+            return_type.save_draft(title=title)
+            self.context.after_execute(_draft_saved)
+        self.context.after_execute(_page_created)
+        return return_type
+
+    def create_and_publish_page(self, title):
+        """
+        Create and publish a new sitePage in the site pages list in a site.
+
+        :param str title: The title of Site Page
+        """
+        return_type = self.create_page(title)
+
+        def _page_created(resp):
+            """
+            :type resp: requests.Response
+            """
+            resp.raise_for_status()
+            return_type.publish()
+        self.context.after_execute(_page_created)
+        return return_type
+
     def can_create_page(self):
         """
         Checks if the current user has permission to create a site page on the site pages document library.
@@ -79,9 +120,9 @@ class SitePageService(BaseEntity):
         :param str city_name: The name of the city.
         """
         return_type = PrimaryCityTime(context)
-        svc = SitePageService(context)
+        binding_type = SitePageService(context)
         params = {"cityName": city_name}
-        qry = ServiceOperationQuery(svc, "GetTimeZone", params, None, None, return_type, True)
+        qry = ServiceOperationQuery(binding_type, "GetTimeZone", params, None, None, return_type, True)
         context.add_query(qry)
         return return_type
 
@@ -93,10 +134,9 @@ class SitePageService(BaseEntity):
         :param str title: The title of the page.
         """
         return_type = ClientResult(context)
-        svc = SitePageService(context)
+        binding_type = SitePageService(context)
         params = {"title": title}
-        qry = ServiceOperationQuery(svc, "ComputeFileName", params, None, None, return_type)
-        qry.static = True
+        qry = ServiceOperationQuery(binding_type, "ComputeFileName", params, None, None, return_type, True)
         context.add_query(qry)
         return return_type
 
@@ -111,8 +151,9 @@ class SitePageService(BaseEntity):
         :param office365.sharepoint.client_context.ClientContext context: Client context
         """
         return_type = ClientResult(context)
-        svc = SitePageService(context)
-        qry = ServiceOperationQuery(svc, "IsFilePickerExternalImageSearchEnabled", None, None, None, return_type, True)
+        binding_type = SitePageService(context)
+        qry = ServiceOperationQuery(binding_type, "IsFilePickerExternalImageSearchEnabled", None, None, None,
+                                    return_type, True)
         context.add_query(qry)
         return return_type
 

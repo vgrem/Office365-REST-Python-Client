@@ -162,7 +162,8 @@ class Site(BaseEntity):
         :param office365.sharepoint.changes.query.ChangeQuery query: Specifies which changes to return
         """
         return_type = ChangeCollection(self.context)
-        qry = ServiceOperationQuery(self, "getChanges", None, query, "query", return_type)
+        payload = {"query": query}
+        qry = ServiceOperationQuery(self, "getChanges", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -170,19 +171,24 @@ class Site(BaseEntity):
         """
         Returns a collection of recycle bin items based on the specified query.
 
-        :param int row_limit:
-        :param bool is_ascending:
+        :param int row_limit: The maximum number of Recycle Bin items to retrieve.
+        :param bool is_ascending: Specifies whether the Recycle Bin items are sorted in ascending order by the column
+            specified in the orderBy parameter. A value of true indicates ascending order, and a value of false
+            indicates descending order.
         """
-        result = RecycleBinItemCollection(self.context)
+        return_type = RecycleBinItemCollection(self.context)
         payload = {
             "rowLimit": row_limit,
             "isAscending": is_ascending
         }
-        qry = ServiceOperationQuery(self, "GetRecycleBinItems", None, payload, None, result)
+        qry = ServiceOperationQuery(self, "GetRecycleBinItems", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def get_site_administrators(self):
+        """
+        Gets site collection administrators
+        """
         return_type = ClientResult(self.context, ClientValueCollection(SiteAdministratorsInfo))
 
         def _site_loaded():

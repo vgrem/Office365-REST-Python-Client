@@ -1,4 +1,5 @@
 from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.runtime.paths.resource_path import ResourcePath
@@ -7,6 +8,8 @@ from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.listitems.listitem import ListItem
+from office365.sharepoint.sharing.document_manager import DocumentSharingManager
+from office365.sharepoint.sharing.user_sharing_result import UserSharingResult
 from office365.sharepoint.storagemetrics.storage_metrics import StorageMetrics
 from office365.sharepoint.utilities.move_copy_options import MoveCopyOptions
 from office365.sharepoint.utilities.move_copy_util import MoveCopyUtil
@@ -64,8 +67,7 @@ class Folder(BaseEntity):
         """
         return_type = Folder(self.context)
         return_type.set_property("ServerRelativeUrl", new_url)
-        payload = {"newUrl": new_url}
-        qry = ServiceOperationQuery(self, "MoveTo", payload)
+        qry = ServiceOperationQuery(self, "MoveTo", {"newUrl": new_url})
         self.context.add_query(qry)
         return return_type
 
@@ -133,33 +135,36 @@ class Folder(BaseEntity):
 
         :type parameters: office365.sharepoint.folders.delete_parameters.FolderDeleteParameters
         """
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "RecycleWithParameters", None, parameters, "parameters", result)
+        return_type = ClientResult(self.context)
+        payload = {"parameters": parameters}
+        qry = ServiceOperationQuery(self, "RecycleWithParameters", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def get_changes(self, query=None):
         """Returns the collection of changes from the change log that have occurred within the folder,
            based on the specified query.
 
-        :param office365.sharepoint.changeQuery.ChangeQuery query: Specifies which changes to return
+        :param office365.sharepoint.changes.query.ChangeQuery query: Specifies which changes to return
         """
         if query is None:
             query = ChangeQuery(folder=True)
-        changes = ChangeCollection(self.context)
-        qry = ServiceOperationQuery(self, "getChanges", None, query, "query", changes)
+        return_type = ChangeCollection(self.context)
+        payload = {"query": query}
+        qry = ServiceOperationQuery(self, "getChanges", None, payload, None, return_type)
         self.context.add_query(qry)
-        return changes
+        return return_type
 
     def get_list_item_changes(self, query):
         """
         Gets the collection of all changes from the change log that have occurred within the scope of the SharePoint
         folder based on the specified query.
 
-        :param office365.sharepoint.changeQuery.ChangeQuery query: Specifies which changes to return
+        :param office365.sharepoint.changes.query.ChangeQuery query: Specifies which changes to return
         """
         return_type = ChangeCollection(self.context)
-        qry = ServiceOperationQuery(self, "getListItemChanges", None, query, "query", return_type)
+        payload = {"query": query}
+        qry = ServiceOperationQuery(self, "getListItemChanges", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -189,6 +194,28 @@ class Folder(BaseEntity):
         :type content: str
         """
         return self.files.add(file_name, content, True)
+
+    def update_document_sharing_info(self, user_role_assignments,
+                                     validate_existing_permissions=None, additive_mode=None,
+                                     send_server_managed_notification=None, custom_message=None,
+                                     include_anonymous_links_in_notification=None, propagate_acl=None):
+        """
+        This method allows a caller with the 'ManagePermission' permission to update sharing information about a
+        document to enable document sharing with a set of users. It returns an array of
+        UserSharingResult (section 3.2.5.190) elements where each element contains the sharing status for each user.
+        """
+
+        return_type = ClientResult(self.context, ClientValueCollection(UserSharingResult))
+
+        def _loaded():
+            resource_address = self.context.to_absolute_url(str(self.server_relative_path))
+            DocumentSharingManager.update_document_sharing_info(self.context, resource_address, user_role_assignments,
+                                                                validate_existing_permissions, additive_mode,
+                                                                send_server_managed_notification, custom_message,
+                                                                include_anonymous_links_in_notification, propagate_acl,
+                                                                return_type)
+        self.ensure_property("ServerRelativePath", _loaded)
+        return return_type
 
     def copy_to(self, new_relative_url, keep_both=False, reset_author_and_created=False):
         """Copies the folder with files to the destination URL.

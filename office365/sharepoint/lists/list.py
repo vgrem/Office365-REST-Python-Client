@@ -99,7 +99,7 @@ class List(SecurableObject):
         return_type = ClientResult(self.context)
 
         def _list_loaded():
-            list_abs_url = self.context.create_safe_url(self.root_folder.serverRelativeUrl, False)
+            list_abs_url = self.context.to_absolute_url(self.root_folder.serverRelativeUrl)
             SiteScriptUtility.get_site_script_from_list(self.context, list_abs_url, options, return_type=return_type)
         self.ensure_property("RootFolder", _list_loaded)
         return return_type
@@ -290,10 +290,11 @@ class List(SecurableObject):
 
         :type query: office365.sharepoint.changes.log_item_query.ChangeLogItemQuery
         """
-        result = ClientResult(self.context, bytes())
-        qry = ServiceOperationQuery(self, "getListItemChangesSinceToken", None, query, "query", result)
+        return_type = ClientResult(self.context, bytes())
+        payload = {"query": query}
+        qry = ServiceOperationQuery(self, "getListItemChangesSinceToken", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def save_as_new_view(self, old_name, new_name, private_view, uri):
         """
@@ -343,7 +344,6 @@ class List(SecurableObject):
         Returns the list item with the specified ID.
 
         :param str unique_id: The unique ID that is associated with the list item.
-
         """
         return ListItem(self.context,
                         ServiceOperationPath("getItemByUniqueId", [unique_id], self.resource_path))
@@ -356,7 +356,7 @@ class List(SecurableObject):
         :return: ClientResult
         """
 
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, str())
         payload = {
             "sourceUrl": source_url
         }
@@ -371,38 +371,33 @@ class List(SecurableObject):
         """
         if not caml_query:
             caml_query = CamlQuery.create_all_items_query()
-        return_type = ListItemCollection(self.context, ResourcePath("items", self.resource_path))
-        qry = ServiceOperationQuery(self, "GetItems", None, caml_query, "query", return_type)
+        return_type = ListItemCollection(self.context, self.items.resource_path)
+        payload = {"query": caml_query}
+        qry = ServiceOperationQuery(self, "GetItems", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 
-    def add_item(self, list_item_creation_information):
+    def add_item(self, creation_information):
         """The recommended way to add a list item is to send a POST request to the ListItemCollection resource endpoint,
          as shown in ListItemCollection request examples.
 
-         :type list_item_creation_information: ListItemCreationInformation or dict"""
+         :type creation_information: ListItemCreationInformation or dict"""
         return_type = ListItem(self.context, None, self)
-        if isinstance(list_item_creation_information, dict):
-            for k, v in list_item_creation_information.items():
+        self.items.add_child(return_type)
+        if isinstance(creation_information, dict):
+            for k, v in creation_information.items():
                 return_type.set_property(k, v, True)
-            self.items.add_child(return_type)
             return_type.ensure_type_name(self)
             qry = ServiceOperationQuery(self, "items", None, return_type, None, return_type)
             self.context.add_query(qry)
         else:
-            def _resolve_folder_url():
-                list_item_creation_information.FolderUrl = self.context.base_url + self.root_folder.serverRelativeUrl
-                add_item_qry = ServiceOperationQuery(
-                    self,
-                    "addItem",
-                    None,
-                    list_item_creation_information,
-                    "parameters",
-                    return_type
-                )
-                self.context.add_query(add_item_qry)
+            def _folder_loaded():
+                creation_information.FolderUrl = self.context.base_url + self.root_folder.serverRelativeUrl
+                payload = {"parameters": creation_information}
+                next_qry = ServiceOperationQuery(self, "addItem", None, payload, None, return_type)
+                self.context.add_query(next_qry)
 
-            self.root_folder.ensure_property("ServerRelativeUrl", _resolve_folder_url)
+            self.root_folder.ensure_property("ServerRelativeUrl", _folder_loaded)
         return return_type
 
     def create_wiki_page(self, page_name, page_content):
@@ -436,7 +431,8 @@ class List(SecurableObject):
         """
         parameters = ListItemCreationInformationUsingPath(leaf_name, object_type, folder_path=folder_url)
         return_type = ListItem(self.context)
-        qry = ServiceOperationQuery(self, "AddItemUsingPath", None, parameters, "parameters", return_type)
+        payload = {"parameters": parameters}
+        qry = ServiceOperationQuery(self, "AddItemUsingPath", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -482,7 +478,8 @@ class List(SecurableObject):
         if query is None:
             query = ChangeQuery(list_=True)
         return_type = ChangeCollection(self.context)
-        qry = ServiceOperationQuery(self, "getChanges", None, query, "query", return_type)
+        payload = {"query": query}
+        qry = ServiceOperationQuery(self, "getChanges", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -497,7 +494,7 @@ class List(SecurableObject):
         """
         Reserves the returned list item identifier for the idempotent creation of a list item.
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, int())
         qry = ServiceOperationQuery(self, "ReserveListItemId", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
@@ -522,7 +519,7 @@ class List(SecurableObject):
             "bForceCreate": force_create,
             "existingFolderGuid": existing_folder_guid
         }
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, str())
         qry = ServiceOperationQuery(self, "GetSpecialFolderUrl", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type

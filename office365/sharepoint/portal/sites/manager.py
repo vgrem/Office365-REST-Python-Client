@@ -31,7 +31,8 @@ class SPSiteManager(BaseEntity):
 
         def _create_query(owner_string=None):
             request = SPSiteCreationRequest(title, site_url, owner_string)
-            return ServiceOperationQuery(self, "Create", None, request, "request", return_type)
+            payload = {"request": request}
+            return ServiceOperationQuery(self, "Create", None, payload, None, return_type)
 
         from office365.sharepoint.principal.users.user import User
         if isinstance(owner, User):

@@ -71,9 +71,9 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
         """
         return_type = ClientResult(context, str())
         binding_type = ClientPeoplePickerWebServiceInterface(context)
-        params = ClientPeoplePickerQueryParameters(query_string=query_string)
-        qry = ServiceOperationQuery(binding_type, "ClientPeoplePickerResolveUser", None, params,
-                                    "queryParams", return_type, True)
+        payload = {"queryParams": ClientPeoplePickerQueryParameters(query_string=query_string)}
+        qry = ServiceOperationQuery(binding_type, "ClientPeoplePickerResolveUser", None, payload, None,
+                                    return_type, True)
         context.add_query(qry)
         return return_type
 
@@ -91,8 +91,9 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
         binding_type = ClientPeoplePickerWebServiceInterface(context)
         params = ClientPeoplePickerQueryParameters(query_string=query_string,
                                                    maximum_entity_suggestions=maximum_entity_suggestions)
-        qry = ServiceOperationQuery(binding_type, "ClientPeoplePickerSearchUser", None, params,
-                                    "queryParams", return_type, True)
+        payload = {"queryParams": params}
+        qry = ServiceOperationQuery(binding_type, "ClientPeoplePickerSearchUser", None, payload,
+                                    None, return_type, True)
         context.add_query(qry)
         return return_type
 
@@ -107,13 +108,9 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
         """
         request = PickerEntityInformationRequest(email_address=email_address)
         return_type = PickerEntityInformation(context)
-        svc = ClientPeoplePickerWebServiceInterface(context)
-        qry = ServiceOperationQuery(svc, "GetPickerEntityInformation",
-                                    None,
-                                    request,
-                                    "entityInformationRequest",
-                                    return_type,
-                                    True)
+        binding_type = ClientPeoplePickerWebServiceInterface(context)
+        payload = {"entityInformationRequest": request}
+        qry = ServiceOperationQuery(binding_type, "GetPickerEntityInformation", None, payload, None, return_type, True)
         context.add_query(qry)
         return return_type
 

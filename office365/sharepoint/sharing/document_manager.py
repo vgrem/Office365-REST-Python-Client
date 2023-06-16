@@ -49,7 +49,8 @@ class DocumentSharingManager(BaseEntity):
     def update_document_sharing_info(context, resource_address, user_role_assignments,
                                      validate_existing_permissions=None, additive_mode=None,
                                      send_server_managed_notification=None, custom_message=None,
-                                     include_anonymous_links_in_notification=None, propagate_acl=None):
+                                     include_anonymous_links_in_notification=None, propagate_acl=None,
+                                     return_type=None):
         """
         This method allows a caller with the 'ManagePermission' permission to update sharing information about a
         document to enable document sharing with a set of users. It returns an array of
@@ -80,8 +81,10 @@ class DocumentSharingManager(BaseEntity):
             the document update is completed successfully. If the value is "true", the protocol server will include
             an anonymous access link in the email notification, and if the value is "false", no link will be included.
         :param bool propagate_acl: A flag to determine if permissions SHOULD be pushed to items with unique permission.
+        :param ClientResult return_type:
         """
-        return_type = ClientResult(context, ClientValueCollection(UserSharingResult))
+        if return_type is None:
+            return_type = ClientResult(context, ClientValueCollection(UserSharingResult))
         payload = {
             "resourceAddress": resource_address,
             "userRoleAssignments": user_role_assignments,

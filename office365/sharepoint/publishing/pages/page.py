@@ -24,10 +24,10 @@ class SitePage(SitePageMetadata):
 
     def checkout_page(self):
         """Checks out the current Site Page if it is available to be checked out."""
-        site_page = SitePage(self.context)
-        qry = ServiceOperationQuery(self, "CheckoutPage", None, None, None, site_page)
+        return_type = SitePage(self.context)
+        qry = ServiceOperationQuery(self, "CheckoutPage", None, None, None, return_type)
         self.context.add_query(qry)
-        return site_page
+        return return_type
 
     def copy(self):
         """Creates a copy of the current Site Page and returns the resulting new SitePage."""
@@ -142,10 +142,10 @@ class SitePage(SitePageMetadata):
         Publishes a major version of the current Site Page.  Returns TRUE on success, FALSE otherwise.
 
         """
-        result = ClientResult(self.context, bool())
-        qry = ServiceOperationQuery(self, "Publish", None, None, None, result)
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(self, "Publish", None, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def schedule_publish(self, publish_start_date):
         """
@@ -170,6 +170,7 @@ class SitePage(SitePageMetadata):
         return self
 
     def start_co_auth(self):
+        """"""
         return_type = SitePage(self.context, self.resource_path)
         qry = ServiceOperationQuery(self, "StartCoAuth", None, None, None, return_type)
         self.context.add_query(qry)

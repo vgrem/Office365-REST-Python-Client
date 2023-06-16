@@ -9,6 +9,7 @@ from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 
@@ -40,7 +41,7 @@ class ODataRequest(ClientRequest):
             request.method = HttpMethod.Post
         elif isinstance(query, (CreateEntityQuery, UpdateEntityQuery, ServiceOperationQuery)):
             request.method = HttpMethod.Post
-            if query.parameter_type is not None:
+            if query.parameters_type is not None:
                 request.data = self._build_payload(query)
         return request
 
@@ -62,7 +63,7 @@ class ODataRequest(ClientRequest):
                 return_type.set_property("__value", response.content)
         else:
             if isinstance(json_format, JsonLightFormat):
-                if isinstance(query, ServiceOperationQuery):
+                if isinstance(query, ServiceOperationQuery) or isinstance(query, FunctionQuery):
                     json_format.function = query.method_name
 
             self.map_json(response.json(), return_type, json_format)
@@ -132,9 +133,9 @@ class ODataRequest(ClientRequest):
                 return [_normalize_payload(item) for item in payload]
             return payload
 
-        json = _normalize_payload(query.parameter_type)
-        if isinstance(query, ServiceOperationQuery) and query.parameter_name is not None:
-            json = {query.parameter_name: json}
+        json = _normalize_payload(query.parameters_type)
+        if isinstance(query, ServiceOperationQuery) and query.parameters_name is not None:
+            json = {query.parameters_name: json}
         return json
 
     def _ensure_json_format(self, request):

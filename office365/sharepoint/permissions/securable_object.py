@@ -1,4 +1,5 @@
 from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
@@ -6,6 +7,8 @@ from office365.sharepoint.permissions.base_permissions import BasePermissions
 from office365.sharepoint.permissions.roles.assignments.assignment import RoleAssignment
 from office365.sharepoint.permissions.roles.assignments.collection import RoleAssignmentCollection
 from office365.sharepoint.principal.users.user import User
+from office365.sharepoint.sharing.document_manager import DocumentSharingManager
+from office365.sharepoint.sharing.user_sharing_result import UserSharingResult
 
 
 class SecurableObject(BaseEntity):
@@ -57,6 +60,7 @@ class SecurableObject(BaseEntity):
         def _principal_loaded():
             def _role_def_loaded():
                 self.role_assignments.remove_role_assignment(principal.id, role_def.id)
+
             role_def.ensure_property("Id", _role_def_loaded)
 
         principal.ensure_property("Id", _principal_loaded)
@@ -110,6 +114,7 @@ class SecurableObject(BaseEntity):
                 next_qry = ServiceOperationQuery(self, "GetUserEffectivePermissions", [user_or_name.login_name],
                                                  None, None, return_type)
                 self.context.add_query(next_qry)
+
             user_or_name.ensure_property("LoginName", _user_loaded)
         else:
             qry = ServiceOperationQuery(self, "GetUserEffectivePermissions", [user_or_name], None, None, return_type)

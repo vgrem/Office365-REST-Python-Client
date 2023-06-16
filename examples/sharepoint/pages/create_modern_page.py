@@ -1,15 +1,14 @@
-import uuid
+"""
+Creates a modern page on a SharePoint site
+
+https://support.microsoft.com/en-gb/office/create-and-use-modern-pages-on-a-sharepoint-site-b3d46deb-27a6-4b1e-87b8-df851e503dec
+"""
 
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.publishing.pages.page import SitePage
-from tests import test_client_credentials, test_team_site_url
+from tests import test_client_credentials, test_team_site_url, create_unique_name
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
-page_title = "Site Page {0}".format(uuid.uuid4().hex)
-new_page = ctx.site_pages.pages.add()
-new_page.save_draft(title=page_title)
-new_page.publish().execute_query()
-
-pages = ctx.site_pages.pages.get().execute_query()
-for page in pages:  # type: SitePage
-    print(page.file_name)
+page_title = create_unique_name("Site Page ")
+print("Creating and publishing a site page: {0} ...".format(page_title))
+new_page = ctx.site_pages.create_and_publish_page(page_title).execute_query()
+print("A site page has been created at url: {0} ...".format(new_page.absolute_url))

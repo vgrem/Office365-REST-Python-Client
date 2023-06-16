@@ -112,7 +112,8 @@ class FieldCollection(BaseEntityCollection):
         """
         return_type = Field(self.context)
         self.add_child(return_type)
-        qry = ServiceOperationQuery(self, "AddField", None, parameters, "parameters", return_type)
+        payload = {"parameters": parameters}
+        qry = ServiceOperationQuery(self, "AddField", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -135,8 +136,8 @@ class FieldCollection(BaseEntityCollection):
         if return_type is None:
             return_type = Field(self.context)
         self.add_child(return_type)
-        field_schema = XmlSchemaFieldCreationInformation(schema_xml)
-        qry = ServiceOperationQuery(self, "CreateFieldAsXml", None, field_schema, "parameters", return_type)
+        payload = {"parameters": XmlSchemaFieldCreationInformation(schema_xml)}
+        qry = ServiceOperationQuery(self, "CreateFieldAsXml", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -144,7 +145,7 @@ class FieldCollection(BaseEntityCollection):
         """
         Gets the fields with the specified ID.
 
-        :type _id: str
+        :param str _id: The field identifier.
         """
         return Field(self.context, ServiceOperationPath("getById", [_id], self.resource_path))
 
@@ -161,6 +162,6 @@ class FieldCollection(BaseEntityCollection):
         """
         Returns the first fields object in the collection based on the title of the specified fields.
 
-        :type title: str
+        :param str title: The title to look up the field by
         """
         return Field(self.context, ServiceOperationPath("getByTitle", [title], self.resource_path))

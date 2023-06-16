@@ -1,8 +1,8 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.function import FunctionQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.principal.users.user import User
@@ -51,13 +51,19 @@ class SearchService(BaseEntity):
         return return_type
 
     def export_manual_suggestions(self):
+        """
+
+        """
         return_type = ClientResult(self.context, TenantCustomQuerySuggestions())
         qry = ServiceOperationQuery(self, "exportmanualsuggestions", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
 
     def export_popular_tenant_queries(self, count):
-        """This method is used to get a list of popular search queries executed on the tenant.
+        """
+        This method is used to get a list of popular search queries executed on the tenant.
+
+        :param int count:
         """
         return_type = ClientResult(self.context, ClientValueCollection(PopularTenantQuery))
         payload = {
@@ -114,16 +120,8 @@ class SearchService(BaseEntity):
         }
         params.update(**kwargs)
         return_type = ClientResult(self.context, SearchResult())
-        qry = ServiceOperationQuery(self, "query", params, None, "query", return_type)
+        qry = FunctionQuery(self, "query", params, return_type)
         self.context.add_query(qry)
-
-        def _construct_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
-            request.method = HttpMethod.Get
-
-        self.context.before_execute(_construct_request)
         return return_type
 
     def post_query(self, query_text, select_properties=None, trim_duplicates=None, row_limit=None, **kwargs):
@@ -140,7 +138,8 @@ class SearchService(BaseEntity):
         return_type = ClientResult(self.context, SearchResult())
         request = SearchRequest(query_text=query_text, select_properties=select_properties,
                                 trim_duplicates=trim_duplicates, row_limit=row_limit, **kwargs)
-        qry = ServiceOperationQuery(self, "postquery", None, request, "request", return_type)
+        payload = {"request": request}
+        qry = ServiceOperationQuery(self, "postquery", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 

@@ -18,7 +18,8 @@ class ViewCollection(BaseEntityCollection):
         """
         return_type = View(self.context, None, self.parent_list)
         self.add_child(return_type)
-        qry = ServiceOperationQuery(self, "Add", None, view_creation_information, "parameters", return_type)
+        payload = {"parameters": view_creation_information}
+        qry = ServiceOperationQuery(self, "Add", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 

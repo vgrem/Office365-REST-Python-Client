@@ -75,7 +75,8 @@ class ContentTypeCollection(BaseEntityCollection):
             :type parent_content_type_id: str
             """
             parameters = ContentTypeEntityData(name, description, group, parent_content_type_id)
-            return ServiceOperationQuery(self, "Create", None, parameters, "parameters", return_type)
+            payload = {"parameters": parameters}
+            return ServiceOperationQuery(self, "Create", None, payload, None, return_type)
 
         return_type = ContentType(self.context)
         self.add_child(return_type)

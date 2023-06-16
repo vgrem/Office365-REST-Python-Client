@@ -256,14 +256,14 @@ class Web(SecurableObject):
         :type context: office365.sharepoint.client_context.ClientContext
         :param str page_full_url: Specifies the URL from which to return the site URL.
         """
-        result = ClientResult(context)
+        return_type = ClientResult(context, str())
         payload = {
             "pageFullUrl": page_full_url
         }
-        qry = ServiceOperationQuery(context.web, "GetWebUrlFromPageUrl", None, payload, None, result)
+        qry = ServiceOperationQuery(context.web, "GetWebUrlFromPageUrl", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     def create_default_associated_groups(self, user_login, user_login2, group_name_seed):
         """
@@ -454,10 +454,10 @@ class Web(SecurableObject):
 
         :param str decoded_url: Contains the site-relative path for a list, for example, /Lists/Announcements.
         """
-        safe_decoded_url = self.context.create_safe_url(decoded_url)
+        path = SPResPath(self.context.to_server_relative_url(decoded_url))
         return_type = List(self.context)
         self.lists.add_child(return_type)
-        qry = ServiceOperationQuery(self, "GetListUsingPath", SPResPath(safe_decoded_url), None, None, return_type)
+        qry = ServiceOperationQuery(self, "GetListUsingPath", path, None, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -517,11 +517,11 @@ class Web(SecurableObject):
 
         :type context: office365.sharepoint.client_context.ClientContext
         """
-        result = ClientResult(context, str())
-        qry = ServiceOperationQuery(context.web, "GetContextWebThemeData", None, None, None, result)
+        return_type = ClientResult(context, str())
+        qry = ServiceOperationQuery(context.web, "GetContextWebThemeData", None, None, None, return_type)
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     def create_site_page(self, page_metadata):
         """Create a site page
@@ -545,7 +545,7 @@ class Web(SecurableObject):
         """
         return_type = ClientResult(context, str())
         payload = {
-            "url": context.create_safe_url(url, False),
+            "url": context.to_absolute_url(url),
             "isEditLink": is_edit_link
         }
         qry = ServiceOperationQuery(context.web, "CreateAnonymousLink", None, payload, None, return_type)
@@ -569,7 +569,7 @@ class Web(SecurableObject):
         """
         return_type = ClientResult(context, str())
         payload = {
-            "url": context.create_safe_url(url, False),
+            "url": context.to_absolute_url(url),
             "isEditLink": is_edit_link,
             "expirationString": expiration_string
         }
@@ -744,7 +744,7 @@ class Web(SecurableObject):
 
         :param str path: A string that contains the site-relative URL for a list, for example, /Lists/Announcements.
         """
-        safe_path = self.context.create_safe_url(path)
+        safe_path = self.context.to_server_relative_url(path)
         return List(self.context, ServiceOperationPath("getList", [safe_path], self.resource_path))
 
     def get_changes(self, query):
@@ -754,7 +754,8 @@ class Web(SecurableObject):
         :param office365.sharepoint.changes.query.ChangeQuery query: Specifies which changes to return
         """
         return_type = ChangeCollection(self.context)
-        qry = ServiceOperationQuery(self, "getChanges", None, query, "query", return_type)
+        payload = {"query": query}
+        qry = ServiceOperationQuery(self, "getChanges", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -1240,7 +1241,7 @@ class Web(SecurableObject):
         for example, "/sites/MySite/Shared Documents/MyDocument.docx".
         :return: ListItem
         """
-        path = SPResPath(self.context.create_safe_url(decoded_url))
+        path = SPResPath(self.context.to_server_relative_url(decoded_url))
         return ListItem(self.context,
                         ServiceOperationPath("GetListItemUsingPath", path, self.resource_path))
 

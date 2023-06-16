@@ -108,6 +108,14 @@ class SiteProperties(BaseEntity):
         """
         return self.properties.get('SharingCapability', None)
 
+    @sharing_capability.setter
+    def sharing_capability(self, value):
+        """
+        Sets the level of sharing for the site.
+
+        """
+        self.set_property('SharingCapability', value)
+
     @property
     def time_zone_id(self):
         """

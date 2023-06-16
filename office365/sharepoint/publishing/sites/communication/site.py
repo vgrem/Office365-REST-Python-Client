@@ -29,7 +29,7 @@ class CommunicationSite(BaseEntity):
         """
         request = CommunicationSiteCreationRequest(title, site_url, description)
         return_type = ClientResult(self.context, CommunicationSiteCreationResponse())
-        qry = ServiceOperationQuery(self, "Create", None, request, "request", return_type)
+        qry = ServiceOperationQuery(self, "Create", None, {"request": request}, None, return_type)
         self.context.add_query(qry)
         return return_type
 

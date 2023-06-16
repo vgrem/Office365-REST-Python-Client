@@ -20,7 +20,8 @@ class WebCollection(BaseEntityCollection):
         """
         return_type = Web(self.context)
         self.add_child(return_type)
-        qry = ServiceOperationQuery(self, "add", None, web_creation_information, "parameters", return_type)
+        payload = {"parameters": web_creation_information}
+        qry = ServiceOperationQuery(self, "add", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 

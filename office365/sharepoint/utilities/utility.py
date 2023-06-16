@@ -24,14 +24,12 @@ class Utility(BaseEntity):
         :type context: office365.sharepoint.client_context.ClientContext
         :param str page_address: Specifies part of the display name for the document or resource.
         """
-        result = ClientResult(context)
+        return_type = ClientResult(context)
         utility = Utility(context)
-        safe_page_address = context.create_safe_url(page_address, False)
-        payload = {"pageAddress": safe_page_address}
-        qry = ServiceOperationQuery(utility, "CreateEmailBodyForInvitation", None, payload, None, result)
-        qry.static = True
+        payload = {"pageAddress": context.to_absolute_url(page_address)}
+        qry = ServiceOperationQuery(utility, "CreateEmailBodyForInvitation", None, payload, None, return_type, True)
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def get_current_user_email_addresses(context):
@@ -102,7 +100,8 @@ class Utility(BaseEntity):
         if return_type is None:
             return_type = File(context)
         utility = Utility(context)
-        qry = ServiceOperationQuery(utility, "CreateWikiPageInContextWeb", None, parameters, "parameters", return_type)
+        payload = {"parameters": parameters}
+        qry = ServiceOperationQuery(utility, "CreateWikiPageInContextWeb", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
         return return_type
@@ -116,8 +115,8 @@ class Utility(BaseEntity):
         :type properties: office365.sharepoint.utilities.email_properties.EmailProperties
         """
         utility = Utility(context)
-        qry = ServiceOperationQuery(utility, "SendEmail", None, properties, "properties")
-        qry.static = True
+        payload = {"properties": properties}
+        qry = ServiceOperationQuery(utility, "SendEmail", None, payload, None, None, True)
         context.add_query(qry)
         return utility
 
