@@ -77,10 +77,9 @@ class TestSharePointFolder(SPTestCase):
         folder_to_url = "/".join([parent_folder.serverRelativeUrl, folder_name])
 
         # 3. copy folder with files
-        folder_to = self.__class__.target_folder.copy_to(folder_to_url)
-        self.client.load(folder_to, ["Files"])
-        self.client.execute_query()
-        self.assertGreater(len(folder_to.files), 0)
+        folder_to = self.__class__.target_folder.copy_to(folder_to_url).execute_query()
+        files_to = folder_to.files.get().execute_query()
+        self.assertGreater(len(files_to), 0)
 
     def test9_rename_folder(self):
         folder_to_rename = self.__class__.target_folder

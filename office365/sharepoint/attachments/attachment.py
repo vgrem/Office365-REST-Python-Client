@@ -9,7 +9,7 @@ class Attachment(BaseEntity):
     """Represents an attachment file in a SharePoint List Item."""
 
     def download(self, file_object, use_path=True):
-        """Download attachment file content
+        """Download attachment file
 
         :type file_object: typing.IO
         :param bool use_path: Use Path instead of Url for addressing attachments
@@ -90,6 +90,10 @@ class Attachment(BaseEntity):
         The server-relative-path of the attachment.
         """
         return self.properties.get("ServerRelativePath", SPResPath())
+
+    @property
+    def property_ref_name(self):
+        return "FileName"
 
     def set_property(self, name, value, persist_changes=True):
         super(Attachment, self).set_property(name, value, persist_changes)

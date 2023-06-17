@@ -173,6 +173,10 @@ class ContentType(BaseEntity):
         return self.properties.get('FieldLinks',
                                    FieldLinkCollection(self.context, ResourcePath("FieldLinks", self.resource_path)))
 
+    @property
+    def property_ref_name(self):
+        return "StringId"
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
@@ -186,6 +190,6 @@ class ContentType(BaseEntity):
     def set_property(self, name, value, persist_changes=True):
         super(ContentType, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
-        if name == "StringId" and self._resource_path is None:
+        if name == self.property_ref_name and self._resource_path is None:
             self._resource_path = self.parent_collection.get_by_id(value).resource_path
         return self

@@ -31,6 +31,30 @@ class PushNotificationSubscriber(BaseEntity):
         self.set_property("ServiceToken", value)
 
     @property
+    def device_app_instance_id(self):
+        """Specifies a device app instance identifier.
+
+        :rtype: str
+        """
+        return self.properties.get("DeviceAppInstanceId", None)
+
+    @property
+    def last_modified_time_stamp(self):
+        """Specifies the time and date when the subscriber was last updated.
+
+        :rtype: str
+        """
+        return self.properties.get("LastModifiedTimeStamp", None)
+
+    @property
+    def registration_time_stamp(self):
+        """Specifies the time and date when the subscriber registered for push notifications.
+
+        :rtype: str
+        """
+        return self.properties.get("RegistrationTimeStamp", None)
+
+    @property
     def user(self):
         """Gets the SharePoint user who created this subscriber."""
         from office365.sharepoint.principal.users.user import User

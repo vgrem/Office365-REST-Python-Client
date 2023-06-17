@@ -15,22 +15,31 @@ class FieldCollection(BaseEntityCollection):
     def __init__(self, context, resource_path=None, parent=None):
         super(FieldCollection, self).__init__(context, Field, resource_path, parent)
 
+    def add_geolocation_field(self, title, description=None):
+        """
+        Creates Geolocation field
+
+        :param str title: Specifies the display name of the field
+        :param str or None description: Specifies the description of the field
+        """
+        return self.add(FieldCreationInformation(title=title,
+                                                 description=description,
+                                                 field_type_kind=FieldType.Geolocation))
+
     def add_url_field(self, title, description=None):
         """
-        Adds Url field
+        Creates Url field
 
         :param str title:
         :param str or None description:
-        :return:
         """
-        create_field_info = FieldCreationInformation(title=title,
-                                                     description=description,
-                                                     field_type_kind=FieldType.URL)
-        return self.add(create_field_info)
+        return self.add(FieldCreationInformation(title=title,
+                                                 description=description,
+                                                 field_type_kind=FieldType.URL))
 
     def add_lookup_field(self, title, lookup_list_id, lookup_field_name, allow_multiple_values=False):
         """
-        Adds Lookup field
+        Creates a Lookup field
 
         :param bool allow_multiple_values:
         :param str lookup_field_name:
@@ -43,18 +52,16 @@ class FieldCollection(BaseEntityCollection):
                         ShowField="{lookup_field_name}" List="{{{lookup_list_id}}}" StaticName="{title}" Name="{title}">
                         </Field>
                         '''.format(title=title, lookup_field_name=lookup_field_name, lookup_list_id=lookup_list_id)
-            target_field = self.create_field_as_xml(field_schema)
+            return self.create_field_as_xml(field_schema)
         else:
-            create_field_info = FieldCreationInformation(title=title,
-                                                         lookup_list_id=lookup_list_id,
-                                                         lookup_field_name=lookup_field_name,
-                                                         field_type_kind=FieldType.Lookup)
-            target_field = self.add_field(create_field_info)
-        return target_field
+            return self.add_field(FieldCreationInformation(title=title,
+                                                           lookup_list_id=lookup_list_id,
+                                                           lookup_field_name=lookup_field_name,
+                                                           field_type_kind=FieldType.Lookup))
 
     def add_choice_field(self, title, values, multiple_values=False):
         """
-        Adds Choice field
+        Created Choice field
 
         :param bool multiple_values:
         :param list[str] values:
@@ -67,12 +74,11 @@ class FieldCollection(BaseEntityCollection):
 
     def add_user_field(self, title):
         """
-        Adds a user field
+        Creates a User field
 
         :param str title: specifies the display name of the field
         """
-        create_field_info = FieldCreationInformation(title, FieldType.User)
-        return self.add_field(create_field_info)
+        return self.add_field(FieldCreationInformation(title, FieldType.User))
 
     def add_dependent_lookup_field(self, display_name, primary_lookup_field, lookup_field):
         """Adds a secondary lookup field to a field (2) collection.
@@ -83,16 +89,16 @@ class FieldCollection(BaseEntityCollection):
             lookup field.
         :param str display_name: Title of the added field
         """
-        return_field = Field(self.context)
-        self.add_child(return_field)
+        return_type = Field(self.context)
+        self.add_child(return_type)
         parameters = {
             "displayName": display_name,
             "primaryLookupField": primary_lookup_field,
             "lookupField": lookup_field
         }
-        qry = ServiceOperationQuery(self, "AddDependentLookupField", None, parameters, None, return_field)
+        qry = ServiceOperationQuery(self, "AddDependentLookupField", None, parameters, None, return_type)
         self.context.add_query(qry)
-        return return_field
+        return return_type
 
     def add(self, field_create_information):
         """Adds a fields to the fields collection.
@@ -119,7 +125,7 @@ class FieldCollection(BaseEntityCollection):
 
     def create_taxonomy_field(self, name, term_set_id):
         """
-        Creates a taxonomy field
+        Creates a Taxonomy field
 
         :param str name: Field name
         :param str term_set_id: TermSet Id
@@ -149,14 +155,14 @@ class FieldCollection(BaseEntityCollection):
         """
         return Field(self.context, ServiceOperationPath("getById", [_id], self.resource_path))
 
-    def get_by_internal_name_or_title(self, name_title):
+    def get_by_internal_name_or_title(self, value):
         """Returns the first field (2) in the collection based on the internal name or the title specified
         by the parameter.
 
-        :param str name_title:  The title or internal name to look up the field (2) by.
+        :param str value:  The title or internal name to look up the field (2) by.
         """
         return Field(self.context,
-                     ServiceOperationPath("getByInternalNameOrTitle", [name_title], self.resource_path))
+                     ServiceOperationPath("getByInternalNameOrTitle", [value], self.resource_path))
 
     def get_by_title(self, title):
         """

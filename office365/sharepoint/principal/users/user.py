@@ -9,7 +9,7 @@ class User(Principal):
     """Represents a user in Microsoft SharePoint Foundation. A user is a type of SP.Principal."""
 
     def get_personal_site(self):
-        """Get Personal Site"""
+        """Get personal site for a user"""
         from office365.sharepoint.sites.site import Site
         return_type = Site(self.context)
 

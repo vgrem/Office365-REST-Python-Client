@@ -101,23 +101,27 @@ class SecurableObject(BaseEntity):
         self.context.add_query(qry)
         return self
 
-    def get_user_effective_permissions(self, user_or_name):
+    def get_user_effective_permissions(self, user):
         """
         Returns the user permissions for this list.
 
-        :param str or User user_or_name: Specifies the user login name or User object.
+        :param str or User user: Specifies the user login name or User object.
         """
         return_type = ClientResult(self.context, BasePermissions())
 
-        if isinstance(user_or_name, User):
-            def _user_loaded():
-                next_qry = ServiceOperationQuery(self, "GetUserEffectivePermissions", [user_or_name.login_name],
-                                                 None, None, return_type)
-                self.context.add_query(next_qry)
+        def _create_query(login_name):
+            """
+            :param str login_name:
+            """
+            return ServiceOperationQuery(self, "GetUserEffectivePermissions", [login_name], None, None, return_type)
 
-            user_or_name.ensure_property("LoginName", _user_loaded)
+        if isinstance(user, User):
+            def _user_loaded():
+                next_qry = _create_query(user.login_name)
+                self.context.add_query(next_qry)
+            user.ensure_property("LoginName", _user_loaded)
         else:
-            qry = ServiceOperationQuery(self, "GetUserEffectivePermissions", [user_or_name], None, None, return_type)
+            qry = _create_query(user)
             self.context.add_query(qry)
         return return_type
 

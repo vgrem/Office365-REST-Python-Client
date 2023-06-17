@@ -2,6 +2,7 @@
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
@@ -692,10 +693,18 @@ class Web(SecurableObject):
 
         :param str user_name: Specifies the user login name.
         """
-        result = ClientResult(self.context, BasePermissions())
-        qry = ServiceOperationQuery(self, "GetUserEffectivePermissions", [user_name], None, None, result)
+        return_type = ClientResult(self.context, BasePermissions())
+        qry = ServiceOperationQuery(self, "GetUserEffectivePermissions", [user_name], None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
+
+    def get_list_by_title(self, title):
+        """
+        Returns the list with the specified display name.
+
+        :param str title: Specifies the display name
+        """
+        return List(self.context, ServiceOperationPath("GetListByTitle", [title], self.resource_path))
 
     def does_user_have_permissions(self, permission_mask):
         """Returns whether the current user has the given set of permissions.

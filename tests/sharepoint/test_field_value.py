@@ -124,8 +124,7 @@ class TestFieldValue(SPTestCase):
         # self.assertIsInstance(updated.properties.get('DocumentationLink'), FieldUrlValue)
 
     def test_13_create_list_geolocation_field(self):
-        create_field_info = FieldCreationInformation(self.geo_field_name, FieldType.Geolocation)
-        geo_field = self.target_list.fields.add(create_field_info).execute_query()
+        geo_field = self.target_list.fields.add_geolocation_field(self.geo_field_name).execute_query()
         self.assertIsNotNone(geo_field.resource_path)
         self.assertEqual(geo_field.type_as_string, 'Geolocation')
         # self.assertIsInstance(geo_field, FieldGeolocation)

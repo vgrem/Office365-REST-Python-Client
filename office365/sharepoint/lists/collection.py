@@ -12,9 +12,10 @@ class ListCollection(BaseEntityCollection):
         super(ListCollection, self).__init__(context, List, resource_path)
 
     def get_by_title(self, list_title):
-        """Retrieve List client object by title
+        """
+        Returns the list with the specified display name.
 
-        :type list_title: str
+        :param str list_title: Specifies the display name
         """
         return List(self.context,
                     ServiceOperationPath("GetByTitle", [list_title], self.resource_path))

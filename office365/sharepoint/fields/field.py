@@ -80,10 +80,10 @@ class Field(BaseEntity):
         """
 
         """
-        result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "disableIndex", None, None, None, result)
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "disableIndex", None, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def set_show_in_display_form(self, flag):
         """Sets the value of the ShowInDisplayForm property for this fields.

@@ -220,7 +220,7 @@ class Folder(BaseEntity):
     def copy_to(self, new_relative_url, keep_both=False, reset_author_and_created=False):
         """Copies the folder with files to the destination URL.
 
-        :type new_relative_url: str
+        :param str new_relative_url:
         :type keep_both: bool
         :type reset_author_and_created: bool
         """
@@ -398,6 +398,10 @@ class Folder(BaseEntity):
         :rtype: SPResPath or None
         """
         return self.properties.get("ServerRelativePath", SPResPath())
+
+    @property
+    def property_ref_name(self):
+        return "ServerRelativeUrl"
 
     def get_property(self, name, default_value=None):
         if default_value is None:

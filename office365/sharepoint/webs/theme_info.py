@@ -19,3 +19,19 @@ class ThemeInfo(BaseEntity):
         qry = ServiceOperationQuery(self, "GetThemeFontByName", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
+
+    @property
+    def accessible_description(self):
+        """Specifies the accessible description for this theme.
+
+        :rtype: str or None
+        """
+        return self.properties.get("AccessibleDescription", None)
+
+    @property
+    def theme_background_image_uri(self):
+        """Specifies the URI of the background image for this theme.
+
+        :rtype: str or None
+        """
+        return self.properties.get("ThemeBackgroundImageUri", None)

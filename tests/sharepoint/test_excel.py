@@ -1,6 +1,5 @@
 import os
 
-from office365.sharepoint.excel.excel_rest import ExcelService
 from office365.sharepoint.files.file import File
 from tests.sharepoint.sharepoint_case import SPTestCase
 

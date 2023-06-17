@@ -39,3 +39,7 @@ class BaseEntity(ClientObject):
         if self._entity_type_name is None:
             self._entity_type_name = ".".join(["SP", type(self).__name__])
         return self._entity_type_name
+
+    @property
+    def property_ref_name(self):
+        return "Id"

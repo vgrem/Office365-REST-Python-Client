@@ -1,5 +1,5 @@
 """
-Creating a list.
+Creating a list in SharePoint site
 
 To create a list object, use the ListCreationInformation class to define its properties,
 and then pass this object to the add(ListCreationInformation) method

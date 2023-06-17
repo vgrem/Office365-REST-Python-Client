@@ -24,7 +24,7 @@ class TestSPList(SPTestCase):
 
     def test1_get_default_library(self):
         default_lib = self.client.web.default_document_library().get().execute_query()
-        self.assertIsNotNone(default_lib.properties["Id"])
+        self.assertIsNotNone(default_lib.id)
 
     def test2_has_library_unique_perms(self):
         default_lib = self.client.web.default_document_library()
@@ -100,9 +100,8 @@ class TestSPList(SPTestCase):
         self.assertEqual(len(result), 1)
 
     def test_13_get_list_permissions(self):
-        current_user = self.client.web.current_user.get().execute_query()
-        self.assertIsNotNone(current_user.login_name)
-        result = self.__class__.target_list.get_user_effective_permissions(current_user.login_name).execute_query()
+        current_user = self.client.web.current_user
+        result = self.__class__.target_list.get_user_effective_permissions(current_user).execute_query()
         self.assertIsInstance(result.value, BasePermissions)
 
     def test_14_get_list_changes(self):
@@ -140,3 +139,7 @@ class TestSPList(SPTestCase):
         lib = self.client.web.default_document_library()
         result = lib.create_document_and_get_edit_link().execute_query()
         self.assertIsNotNone(result.value)
+
+    def test_21_get_list_by_title(self):
+        site_pages = self.client.web.get_list_by_title("Site Pages").get().execute_query()
+        self.assertIsNotNone(site_pages.resource_path)

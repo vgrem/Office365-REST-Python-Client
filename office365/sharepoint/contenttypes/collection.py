@@ -17,22 +17,9 @@ class ContentTypeCollection(BaseEntityCollection):
         Returns the content type with the given name from the collection.
 
         :param str name: Content type name
+        :rtype: ContentType
         """
-        return_type = ContentType(self.context)
-        self.add_child(return_type)
-
-        def _after_get_by_name(col):
-            """
-            :type col: ContentTypeCollection
-            """
-            if len(col) != 1:
-                message = "Content type not found or ambiguous match found for name: {0}".format(name)
-                raise ValueError(message)
-            return_type.set_property("StringId", col[0].get_property("StringId"))
-
-        self.filter("Name eq '{0}'".format(name))
-        self.context.load(self, after_loaded=_after_get_by_name)
-        return return_type
+        return self.filter("Name eq '{0}'".format(name)).single()
 
     def get_by_id(self, content_type_id):
         """

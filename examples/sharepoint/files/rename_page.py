@@ -1,10 +1,12 @@
 """
-Get current user personal site
-
+Demonstrates how to rename a page
 """
 from office365.sharepoint.client_context import ClientContext
 from tests import test_user_credentials, test_team_site_url
 
+from_url = "Home_Archive.aspx"
+to_url = "Home.aspx"
 ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
-my_site = ctx.web.current_user.get_personal_site().execute_query()
-print(my_site.url)
+file = ctx.web.lists.get_by_title("Site Pages").root_folder.files.get_by_url(from_url)
+file.rename(to_url).execute_query()
+

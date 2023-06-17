@@ -15,10 +15,10 @@ class FieldUserValue(FieldLookupValue):
         :param office365.sharepoint.principal.user.User user: User entity
         :return: FieldUserValue
         """
-        value = FieldUserValue(-1)
+        return_type = FieldUserValue(-1)
 
-        def _init_from_user():
-            value.LookupId = user.id
-            value.LookupValue = user.login_name
-        user.ensure_properties(["Id", "LoginName"], _init_from_user)
-        return value
+        def _user_loaded():
+            return_type.LookupId = user.id
+            return_type.LookupValue = user.login_name
+        user.ensure_properties(["Id", "LoginName"], _user_loaded)
+        return return_type
