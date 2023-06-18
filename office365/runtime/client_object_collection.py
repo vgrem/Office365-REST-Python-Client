@@ -27,6 +27,7 @@ class ClientObjectCollection(ClientObject):
         self._parent = parent
 
     def clear(self):
+        """Clears client object collection"""
         if not self._paged_mode:
             self._data = []
         self._next_request_url = None

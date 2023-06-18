@@ -3,7 +3,8 @@ from office365.sharepoint.marketplace.sitecollection.appcatalog.allowed_item imp
 
 
 class SiteCollectionAppCatalogAllowedItems(BaseEntityCollection):
+    """An entry in the site collection app catalog allow list."""
 
     def __init__(self, context, resource_path=None):
         super(SiteCollectionAppCatalogAllowedItems, self).__init__(context,
-                                                                   SiteCollectionAppCatalogAllowedItem,resource_path)
+                                                                   SiteCollectionAppCatalogAllowedItem, resource_path)

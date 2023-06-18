@@ -91,6 +91,7 @@ class Site(BaseEntity):
         return ClientContext(url).site
 
     def get_available_tags(self):
+        """"""
         return_type = ClientResult(self.context, ClientValueCollection(ComplianceTag))
 
         def _site_loaded():

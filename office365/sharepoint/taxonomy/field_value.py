@@ -30,6 +30,9 @@ class TaxonomyFieldValueCollection(ClientValueCollection):
     """Represents the multi-value object for the taxonomy column."""
 
     def __init__(self, initial_values):
+        """
+        :param list[TaxonomyFieldValue] initial_values:
+        """
         super(TaxonomyFieldValueCollection, self).__init__(TaxonomyFieldValue, initial_values)
 
     def __str__(self):

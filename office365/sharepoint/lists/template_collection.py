@@ -4,6 +4,7 @@ from office365.sharepoint.lists.template import ListTemplate
 
 
 class ListTemplateCollection(BaseEntityCollection):
+    """Specifies a collection of list templates"""
 
     def __init__(self, context, resource_path=None):
         """Specifies a collection of list templates"""

@@ -22,7 +22,7 @@ class ObjectSharingInformation(BaseEntity):
         payload = {
             "docId": doc_id
         }
-        return_type = ClientResult(context)
+        return_type = ClientResult(context, int())
         qry = ServiceOperationQuery(binding_type, "CanCurrentUserShare", None, payload, None, return_type, True)
         context.add_query(qry)
         return return_type

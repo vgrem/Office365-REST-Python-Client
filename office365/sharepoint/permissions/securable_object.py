@@ -60,7 +60,6 @@ class SecurableObject(BaseEntity):
         def _principal_loaded():
             def _role_def_loaded():
                 self.role_assignments.remove_role_assignment(principal.id, role_def.id)
-
             role_def.ensure_property("Id", _role_def_loaded)
 
         principal.ensure_property("Id", _principal_loaded)

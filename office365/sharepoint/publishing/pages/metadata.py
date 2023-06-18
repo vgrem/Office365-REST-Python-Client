@@ -1,3 +1,4 @@
+from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.publishing.pages.version_info import SitePageVersionInfo
 from office365.sharepoint.publishing.user_info import UserInfo
@@ -13,6 +14,10 @@ class SitePageMetadata(BaseEntity):
         :rtype: str or None
         """
         return self.properties.get('AbsoluteUrl', None)
+
+    @property
+    def author_byline(self):
+        return self.properties.get("AuthorByline", StringCollection())
 
     @property
     def created_by(self):
@@ -132,6 +137,7 @@ class SitePageMetadata(BaseEntity):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "AuthorByline": self.author_byline,
                 "CreatedBy": self.created_by,
                 "LastModifiedBy": self.last_modified_by,
                 "VersionInfo": self.version_info

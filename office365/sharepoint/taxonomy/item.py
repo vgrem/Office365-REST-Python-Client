@@ -23,10 +23,14 @@ class TaxonomyItem(ClientObject):
         """
         return self.properties.get("name", None)
 
+    @property
+    def property_ref_name(self):
+        return "id"
+
     def set_property(self, name, value, persist_changes=True):
         super(TaxonomyItem, self).set_property(name, value, persist_changes)
         if self._resource_path is None:
-            if name == "id":
+            if name == self.property_ref_name:
                 self._resource_path = ResourcePath(value, self.parent_collection.resource_path)
         return self
 

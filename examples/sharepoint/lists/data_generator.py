@@ -3,7 +3,6 @@ import os
 from faker import Faker
 
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.lists.template_type import ListTemplateType
 from tests import test_team_site_url, test_user_credentials
 
 

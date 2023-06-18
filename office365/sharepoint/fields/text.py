@@ -2,9 +2,7 @@ from office365.sharepoint.fields.field import Field
 
 
 class FieldText(Field):
-
-    def __init__(self, context):
-        super(FieldText, self).__init__(context)
+    """Specifies a field that contains a single line of text. """
 
     @property
     def max_length(self):

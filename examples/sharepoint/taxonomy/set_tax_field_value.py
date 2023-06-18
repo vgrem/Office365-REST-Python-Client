@@ -11,4 +11,4 @@ item_to_create = tasks_list.add_item({
     "Country": tax_field_value,
     "Countries": TaxonomyFieldValueCollection([tax_field_value])
 }).execute_query()
-print("List item created.")
+print("List item added.")

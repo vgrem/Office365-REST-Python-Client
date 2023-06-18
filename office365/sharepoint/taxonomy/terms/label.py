@@ -13,3 +13,6 @@ class Label(ClientValue):
         self.name = name
         self.isDefault = is_default
         self.languageTag = language_tag
+
+    def __str__(self):
+        return self.name

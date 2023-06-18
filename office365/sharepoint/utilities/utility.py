@@ -130,14 +130,14 @@ class Utility(BaseEntity):
         :param int max_count: Specifies the maximum number of principals to be returned.
         :type return_type: ClientResult
         """
-        utility = Utility(context)
+        binding_type = Utility(context)
         payload = {
             "inputs": inputs,
             "maxCount": max_count
         }
         if return_type is None:
             return_type = ClientResult(context, ClientValueCollection(PrincipalInfo))
-        qry = ServiceOperationQuery(utility, "ExpandGroupsToPrincipals", None, payload, None, return_type)
+        qry = ServiceOperationQuery(binding_type, "ExpandGroupsToPrincipals", None, payload, None, return_type)
         qry.static = True
         context.add_query(qry)
         return return_type

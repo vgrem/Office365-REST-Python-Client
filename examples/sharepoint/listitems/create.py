@@ -20,7 +20,7 @@ def create_tasks_list(client):
 
     target_list = client.web.lists.add(list_create_info).execute_query()
     field_info = FieldCreationInformation("Manager", FieldType.User)
-    user_field = target_list.fields.add(field_info).execute_query()
+    target_list.fields.add(field_info).execute_query()
     return target_list
 
 

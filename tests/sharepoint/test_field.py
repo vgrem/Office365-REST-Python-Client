@@ -1,11 +1,8 @@
 import uuid
 
-from tests.sharepoint.sharepoint_case import SPTestCase
-
 from office365.sharepoint.fields.field import Field
-from office365.sharepoint.fields.creation_information import FieldCreationInformation
 from office365.sharepoint.fields.text import FieldText
-from office365.sharepoint.fields.type import FieldType
+from tests.sharepoint.sharepoint_case import SPTestCase
 
 
 class TestField(SPTestCase):
@@ -31,10 +28,10 @@ class TestField(SPTestCase):
 
     def test_4_create_site_field(self):
         field_name = "Title_" + uuid.uuid4().hex
-        create_field_info = FieldCreationInformation(field_name, FieldType.Text)
-        created_field = self.client.site.root_web.fields.add(create_field_info).execute_query()
-        self.assertEqual(created_field.properties["Title"], field_name)
-        self.__class__.target_field = created_field
+        field = self.client.site.root_web.fields.add_text_field(field_name).execute_query()
+        self.assertEqual(field.title, field_name)
+        self.assertIsInstance(field, FieldText)
+        self.__class__.target_field = field
 
     def test_5_update_site_field(self):
         field_to_update = self.__class__.target_field

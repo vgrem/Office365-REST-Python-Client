@@ -1,10 +1,12 @@
+"""
+ How to determine whether folder exist?
+"""
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.sharepoint.client_context import ClientContext
 from tests import test_client_credentials, test_team_site_url
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 
-# How to determine whether folder exist?
 
 # Approach 1: explicitly specify Exists property
 folder_rel_url = "/sites/team/Shared Documents/2022"

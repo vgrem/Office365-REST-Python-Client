@@ -3,6 +3,7 @@ from office365.sharepoint.changes.token import ChangeToken
 
 
 class Change(BaseEntity):
+    """Base class for a change. installation."""
 
     @property
     def change_token(self):

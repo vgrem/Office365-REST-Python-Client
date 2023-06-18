@@ -1,9 +1,9 @@
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.types.collections import StringCollection
+from office365.sharepoint.taxonomy.groups.collection import TermGroupCollection
 from office365.sharepoint.taxonomy.item import TaxonomyItem
 from office365.sharepoint.taxonomy.item_collection import TaxonomyItemCollection
-from office365.sharepoint.taxonomy.groups.group import TermGroup
 from office365.sharepoint.taxonomy.terms.term import Term
 
 
@@ -12,6 +12,7 @@ class TermStore(TaxonomyItem):
 
     def search_term(self, label, set_id=None, parent_term_id=None, language_tag=None):
         """
+        Search term by name
 
         :param str label:
         :param str set_id:
@@ -23,6 +24,14 @@ class TermStore(TaxonomyItem):
         qry = FunctionQuery(self, "searchTerm", params, return_type)
         self.context.add_query(qry)
         return return_type
+
+    def search_term_set(self, label):
+        """
+        Search term set by name
+
+        :param str label:
+        """
+        return self.term_groups.expand(["TermSets"]).get()
 
     @property
     def default_language_tag(self):
@@ -44,8 +53,7 @@ class TermStore(TaxonomyItem):
     def term_groups(self):
         """Gets a collection of the child Group objects"""
         return self.properties.get("termGroups",
-                                   TaxonomyItemCollection(self.context, TermGroup,
-                                                          ResourcePath("termGroups", self.resource_path)))
+                                   TermGroupCollection(self.context, ResourcePath("termGroups", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:

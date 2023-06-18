@@ -7,6 +7,7 @@ from office365.sharepoint.fields.creation_information import FieldCreationInform
 from office365.sharepoint.fields.type import FieldType
 from office365.sharepoint.fields.xmlSchemaFieldCreationInformation import XmlSchemaFieldCreationInformation
 from office365.sharepoint.taxonomy.field import TaxonomyField
+from office365.sharepoint.taxonomy.sets.set import TermSet
 
 
 class FieldCollection(BaseEntityCollection):
@@ -80,6 +81,15 @@ class FieldCollection(BaseEntityCollection):
         """
         return self.add_field(FieldCreationInformation(title, FieldType.User))
 
+    def add_text_field(self, title):
+        """
+        Creates a Text field
+
+        :param str title: specifies the display name of the field
+        :rtype: office365.sharepoint.fields.text.FieldText
+        """
+        return self.add_field(FieldCreationInformation(title, FieldType.Text))
+
     def add_dependent_lookup_field(self, display_name, primary_lookup_field, lookup_field):
         """Adds a secondary lookup field to a field (2) collection.
         A reference (3) to the SP.Field that was added is returned.
@@ -123,14 +133,22 @@ class FieldCollection(BaseEntityCollection):
         self.context.add_query(qry)
         return return_type
 
-    def create_taxonomy_field(self, name, term_set_id):
+    def create_taxonomy_field(self, name, term_set):
         """
         Creates a Taxonomy field
 
         :param str name: Field name
-        :param str term_set_id: TermSet Id
+        :param str or TermSet term_set: TermSet identifier or object
         """
-        return TaxonomyField.create(self, name, term_set_id)
+        if isinstance(term_set, TermSet):
+            return_type = TaxonomyField(self.context)
+
+            def _term_set_loaded():
+                TaxonomyField.create(self, name, term_set.id, return_type)
+            term_set.ensure_property("id", _term_set_loaded)
+            return return_type
+        else:
+            return TaxonomyField.create(self, name, term_set)
 
     def create_field_as_xml(self, schema_xml, return_type=None):
         """

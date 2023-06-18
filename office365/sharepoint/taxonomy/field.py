@@ -8,13 +8,15 @@ class TaxonomyField(FieldLookup):
     """Represents a taxonomy field."""
 
     @staticmethod
-    def create(fields, name, term_set_id):
+    def create(fields, name, term_set_id, return_type=None):
         """
         :type fields: office365.sharepoint.fields.collection.FieldCollection
         :param str name:
         :param str term_set_id:
+        :param TaxonomyField return_type: Return type
         """
-        return_type = TaxonomyField(fields.context)
+        if return_type is None:
+            return_type = TaxonomyField(fields.context)
         fields.add_child(return_type)
         params = TaxonomyFieldCreateXmlParameters(name, term_set_id)
 
