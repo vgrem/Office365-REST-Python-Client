@@ -21,8 +21,8 @@ class MoveCopyUtil(BaseEntity):
         return_type = ClientResult(context)
         binding_type = MoveCopyUtil(context)
         payload = {
-            "srcUrl": context.to_absolute_url(src_url),
-            "destUrl": context.to_absolute_url(dest_url),
+            "srcUrl": str(SPResPath.create_absolute(context.base_url, src_url)),
+            "destUrl": str(SPResPath.create_absolute(context.base_url, dest_url)),
             "options": options
         }
         qry = ServiceOperationQuery(binding_type, "CopyFolder", None, payload, None, return_type, True)
@@ -40,14 +40,12 @@ class MoveCopyUtil(BaseEntity):
         :param office365.sharepoint.utilities.move_copy_options.MoveCopyOptions or None options:
         """
         return_type = ClientResult(context)
-        util = MoveCopyUtil(context)
         payload = {
-            "srcPath": SPResPath(context.to_absolute_url(src_path)),
-            "destPath": SPResPath(context.to_absolute_url(dest_path)),
+            "srcPath": SPResPath.create_absolute(context.base_url, src_path),
+            "destPath": SPResPath.create_absolute(context.base_url, dest_path),
             "options": options
         }
-        qry = ServiceOperationQuery(util, "CopyFolderByPath", None, payload, None, return_type)
-        qry.static = True
+        qry = ServiceOperationQuery(MoveCopyUtil(context), "CopyFolderByPath", None, payload, None, return_type, True)
         context.add_query(qry)
         return return_type
 
@@ -62,16 +60,15 @@ class MoveCopyUtil(BaseEntity):
         :param office365.sharepoint.utilities.move_copy_options.MoveCopyOptions options: Contains options used to
             modify the behavior.
         """
-        util = MoveCopyUtil(context)
+        binding_type = MoveCopyUtil(context)
         payload = {
-            "srcUrl": context.to_absolute_url(src_url),
-            "destUrl": context.to_absolute_url(dest_url),
+            "srcUrl": str(SPResPath.create_absolute(context.base_url, src_url)),
+            "destUrl": str(SPResPath.create_absolute(context.base_url, dest_url)),
             "options": options
         }
-        qry = ServiceOperationQuery(util, "MoveFolder", None, payload)
-        qry.static = True
+        qry = ServiceOperationQuery(binding_type, "MoveFolder", None, payload, None, None, True)
         context.add_query(qry)
-        return util
+        return binding_type
 
     @staticmethod
     def move_folder_by_path(context, src_path, dest_path, options):
@@ -86,8 +83,8 @@ class MoveCopyUtil(BaseEntity):
         """
         binding_type = MoveCopyUtil(context)
         payload = {
-            "srcPath": SPResPath(context.to_absolute_url(src_path)),
-            "destPath": SPResPath(context.to_absolute_url(dest_path)),
+            "srcPath": SPResPath.create_absolute(context.base_url, src_path),
+            "destPath": SPResPath.create_absolute(context.base_url, dest_path),
             "options": options
         }
         qry = ServiceOperationQuery(binding_type, "MoveFolderByPath", None, payload, None, None, True)

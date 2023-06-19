@@ -8,7 +8,8 @@ class SharingLinkInfo(ClientValue):
 
     def __init__(self, allows_anonymous_access=None, application_id=None, created=None, created_by=Principal(),
                  password_protected=None, invitations=None, redeemed_users=None,
-                 last_modified_by=Principal(), password_last_modified_by=Principal()):
+                 last_modified_by=Principal(), password_last_modified_by=Principal(),
+                 url=None):
         """
         Specifies the information about the tokenized sharing link.
 
@@ -36,6 +37,13 @@ class SharingLinkInfo(ClientValue):
         self.RedeemedUsers = ClientValueCollection(LinkInvitation, redeemed_users)
         self.LastModifiedBy = last_modified_by
         self.PasswordLastModifiedBy = password_last_modified_by
+        self.Url = url
+
+    def __str__(self):
+        return self.Url
+
+    def __repr__(self):
+        return self.Url
 
     @property
     def entity_type_name(self):

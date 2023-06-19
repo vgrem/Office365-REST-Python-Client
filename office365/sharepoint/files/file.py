@@ -56,6 +56,19 @@ class File(AbstractFile):
         file = ctx.web.get_file_by_server_relative_url(file_relative_url)
         return file
 
+    def create_anonymous_link(self, is_edit_link=False):
+        """Create an anonymous link which can be used to access a document without needing to authenticate.
+
+        :param bool is_edit_link: If true, the link will allow the guest user edit privileges on the item.
+        """
+        return_type = ClientResult(self.context, str())
+
+        def _file_loaded():
+            from office365.sharepoint.webs.web import Web
+            Web.create_anonymous_link(self.context, self.serverRelativeUrl, is_edit_link, return_type)
+        self.ensure_property("ServerRelativeUrl", _file_loaded)
+        return return_type
+
     def get_sharing_information(self):
         """Gets the sharing information for a file."""
         return self.listItemAllFields.get_sharing_information()
@@ -109,15 +122,15 @@ class File(AbstractFile):
         :param int height: The desired height of the resolution.
         :param str client_type: The client type. Used for logging.
         """
-        result = ClientResult(self.context, str())
+        return_type = ClientResult(self.context, str())
         payload = {
             "width": width,
             "height": height,
             "clientType": client_type
         }
-        qry = ServiceOperationQuery(self, "GetImagePreviewUri", None, payload, None, result)
+        qry = ServiceOperationQuery(self, "GetImagePreviewUri", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def get_image_preview_url(self, width, height, client_type=None):
         """

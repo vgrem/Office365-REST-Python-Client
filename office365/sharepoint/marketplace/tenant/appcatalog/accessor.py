@@ -66,6 +66,14 @@ class TenantCorporateCatalogAccessor(BaseEntity):
         self.context.add_query(qry)
         return return_type
 
+    def send_app_request_status_notification_email(self, request_guid):
+        """
+        :param str request_guid:
+        """
+        qry = ServiceOperationQuery(self, "SendAppRequestStatusNotificationEmail", [request_guid])
+        self.context.add_query(qry)
+        return self
+
     @property
     def available_apps(self):
         """Returns the apps available in this corporate catalog."""

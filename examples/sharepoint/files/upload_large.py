@@ -9,7 +9,7 @@ target_url = "/sites/team/Shared Documents"
 target_folder = ctx.web.get_folder_by_server_relative_url(target_url)
 size_chunk = 1000000
 local_path = "../../../tests/data/big_buck_bunny.mp4"
-#local_path = "../../../tests/data/SharePoint User Guide.docx"
+# local_path = "../../../tests/data/SharePoint User Guide.docx"
 
 
 def print_upload_progress(offset):

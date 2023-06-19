@@ -31,14 +31,13 @@ class SecurableObject(BaseEntity):
         return return_type
 
     def add_role_assignment(self, principal, role_def):
-        """Adds a role assignment to securable resource.<81>
+        """Adds a role assignment to securable resource.
 
         :param office365.sharepoint.permissions.roles.definitions.definition.RoleDefinition role_def: Specifies the
             role definition of the role assignment.
         :param office365.sharepoint.principal.principal.Principal principal: Specifies the user or group of the
             role assignment.
         """
-
         def _principal_loaded():
             role_def.ensure_property("Id", _role_def_loaded)
 

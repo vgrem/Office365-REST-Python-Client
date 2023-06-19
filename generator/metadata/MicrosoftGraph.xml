@@ -33294,6 +33294,7 @@
             <Property Name="averageAudioDegradation" Type="Edm.Single"/>
             <Property Name="averageAudioNetworkJitter" Type="Edm.Duration"/>
             <Property Name="averageBandwidthEstimate" Type="Edm.Int64"/>
+            <Property Name="averageFreezeDuration" Type="Edm.Duration"/>
             <Property Name="averageJitter" Type="Edm.Duration"/>
             <Property Name="averagePacketLossRate" Type="Edm.Single"/>
             <Property Name="averageRatioOfConcealedSamples" Type="Edm.Single"/>
@@ -33303,6 +33304,7 @@
             <Property Name="averageVideoFrameRate" Type="Edm.Single"/>
             <Property Name="averageVideoPacketLossRate" Type="Edm.Single"/>
             <Property Name="endDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="isAudioForwardErrorCorrectionUsed" Type="Edm.Boolean"/>
             <Property Name="lowFrameRateRatio" Type="Edm.Single"/>
             <Property Name="lowVideoProcessingCapabilityRatio" Type="Edm.Single"/>
             <Property Name="maxAudioNetworkJitter" Type="Edm.Duration"/>
@@ -33312,6 +33314,7 @@
             <Property Name="maxRoundTripTime" Type="Edm.Duration"/>
             <Property Name="packetUtilization" Type="Edm.Int64"/>
             <Property Name="postForwardErrorCorrectionPacketLossRate" Type="Edm.Single"/>
+            <Property Name="rmsFreezeDuration" Type="Edm.Duration"/>
             <Property Name="startDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="streamDirection" Type="microsoft.graph.callRecords.mediaStreamDirection" Nullable="false"/>
             <Property Name="streamId" Type="Edm.String"/>
@@ -33324,8 +33327,12 @@
             <Property Name="roundTripTime" Type="Edm.Duration"/>
          </ComplexType>
          <ComplexType Name="participantEndpoint" BaseType="microsoft.graph.callRecords.endpoint">
+            <Property Name="cpuCoresCount" Type="Edm.Int32"/>
+            <Property Name="cpuName" Type="Edm.String"/>
+            <Property Name="cpuProcessorSpeedInMhz" Type="Edm.Int32"/>
             <Property Name="feedback" Type="microsoft.graph.callRecords.userFeedback"/>
             <Property Name="identity" Type="graph.identitySet"/>
+            <Property Name="name" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="userFeedback">
             <Property Name="rating" Type="microsoft.graph.callRecords.userFeedbackRating" Nullable="false"/>
@@ -33366,6 +33373,7 @@
             <Property Name="caller" Type="microsoft.graph.callRecords.endpoint"/>
             <Property Name="endDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
             <Property Name="failureInfo" Type="microsoft.graph.callRecords.failureInfo"/>
+            <Property Name="isTest" Type="Edm.Boolean"/>
             <Property Name="modalities" Type="Collection(microsoft.graph.callRecords.modality)" Nullable="false"/>
             <Property Name="startDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
             <NavigationProperty Name="segments" Type="Collection(microsoft.graph.callRecords.segment)" ContainsTarget="true"/>

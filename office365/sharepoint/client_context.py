@@ -3,7 +3,7 @@ import copy
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.auth.user_credential import UserCredential
 from office365.runtime.client_runtime_context import ClientRuntimeContext
-from office365.runtime.compat import urlparse, is_absolute_url, get_absolute_url
+from office365.runtime.compat import urlparse, get_absolute_url
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.request import ODataRequest
@@ -39,30 +39,6 @@ class ClientContext(ClientRuntimeContext):
         self._site = None
         self._ctx_web_info = None
         self._pending_request = None
-
-    def to_absolute_url(self, orig_url):
-        """
-        Converts to absolute url
-
-        :type orig_url: str
-        """
-        if is_absolute_url(orig_url):
-            return orig_url
-
-        site_path = urlparse(self.base_url).path
-        root_site_url = self.base_url.replace(site_path, "")
-        url = orig_url if orig_url.startswith(site_path) else "/".join([site_path, orig_url])
-        return "".join([root_site_url, url])
-
-    def to_server_relative_url(self, orig_url):
-        """
-        Converts to server relative url
-
-        :type orig_url: str
-        """
-        site_path = urlparse(self.base_url).path
-        url = orig_url if orig_url.startswith(site_path) else "/".join([site_path, orig_url])
-        return url
 
     @staticmethod
     def from_url(full_url):

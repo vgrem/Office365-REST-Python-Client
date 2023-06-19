@@ -455,7 +455,7 @@ class Web(SecurableObject):
 
         :param str decoded_url: Contains the site-relative path for a list, for example, /Lists/Announcements.
         """
-        path = SPResPath(self.context.to_server_relative_url(decoded_url))
+        path = SPResPath.create_relative(self.context.base_url, decoded_url)
         return_type = List(self.context)
         self.lists.add_child(return_type)
         qry = ServiceOperationQuery(self, "GetListUsingPath", path, None, None, return_type)
@@ -536,21 +536,22 @@ class Web(SecurableObject):
         return return_type
 
     @staticmethod
-    def create_anonymous_link(context, url, is_edit_link):
+    def create_anonymous_link(context, url, is_edit_link, return_type=None):
         """Create an anonymous link which can be used to access a document without needing to authenticate.
 
         :param bool is_edit_link: If true, the link will allow the guest user edit privileges on the item.
         :param str url: The URL of the site, with the path of the object in SharePoint represented as query
         string parameters
         :param office365.sharepoint.client_context.ClientContext context: client context
+        :param ClientResult return_type: Return type
         """
-        return_type = ClientResult(context, str())
+        if return_type is None:
+            return_type = ClientResult(context, str())
         payload = {
-            "url": context.to_absolute_url(url),
+            "url": str(SPResPath.create_absolute(context.base_url, url)),
             "isEditLink": is_edit_link
         }
-        qry = ServiceOperationQuery(context.web, "CreateAnonymousLink", None, payload, None, return_type)
-        qry.static = True
+        qry = ServiceOperationQuery(context.web, "CreateAnonymousLink", None, payload, None, return_type, True)
         context.add_query(qry)
         return return_type
 
@@ -570,7 +571,7 @@ class Web(SecurableObject):
         """
         return_type = ClientResult(context, str())
         payload = {
-            "url": context.to_absolute_url(url),
+            "url": str(SPResPath.create_absolute(context.base_url, url)),
             "isEditLink": is_edit_link,
             "expirationString": expiration_string
         }
@@ -631,13 +632,14 @@ class Web(SecurableObject):
         """
         return File(self.context, ServiceOperationPath("getFileByServerRelativeUrl", [url], self.resource_path))
 
-    def get_file_by_server_relative_path(self, decoded_url):
+    def get_file_by_server_relative_path(self, path):
         """Returns the file object located at the specified server-relative path.
-        Prefer this method over get_folder_by_server_relative_url since it supports % and # symbols in names
+        Note: prefer this method over get_folder_by_server_relative_url since it supports % and # symbols in names
 
-        :param str or SPResPath decoded_url: Contains the server-relative path of the file.
+        :param str or SPResPath path: Contains the server-relative path of the file.
         """
-        path = decoded_url if isinstance(decoded_url, SPResPath) else SPResPath(decoded_url)
+        if not isinstance(path, SPResPath):
+            path = SPResPath.create_relative(self.context.base_url, path)
         return File(self.context,
                     ServiceOperationPath("getFileByServerRelativePath", path.to_json(), self.resource_path))
 
@@ -753,8 +755,8 @@ class Web(SecurableObject):
 
         :param str path: A string that contains the site-relative URL for a list, for example, /Lists/Announcements.
         """
-        safe_path = self.context.to_server_relative_url(path)
-        return List(self.context, ServiceOperationPath("getList", [safe_path], self.resource_path))
+        safe_path = SPResPath.create_relative(self.context.base_url, path)
+        return List(self.context, ServiceOperationPath("getList", [str(safe_path)], self.resource_path))
 
     def get_changes(self, query):
         """Returns the collection of all changes from the change log that have occurred within the scope of the site,
@@ -1247,12 +1249,11 @@ class Web(SecurableObject):
         Returns the list item that is associated with the specified server-relative path.
 
         :param str decoded_url: A string that contains the server-relative path,
-        for example, "/sites/MySite/Shared Documents/MyDocument.docx".
+        for example, "/sites/MySite/Shared Documents/MyDocument.docx" or "Shared Documents/MyDocument.docx".
         :return: ListItem
         """
-        path = SPResPath(self.context.to_server_relative_url(decoded_url))
-        return ListItem(self.context,
-                        ServiceOperationPath("GetListItemUsingPath", path, self.resource_path))
+        params = SPResPath.create_relative(self.context.base_url, decoded_url)
+        return ListItem(self.context, ServiceOperationPath("GetListItemUsingPath", params, self.resource_path))
 
     def get_catalog(self, type_catalog):
         """Gets the list template gallery, site template gallery, or Web Part gallery for the Web site.

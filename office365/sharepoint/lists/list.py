@@ -99,14 +99,14 @@ class List(SecurableObject):
         return_type = ClientResult(self.context)
 
         def _list_loaded():
-            list_abs_url = self.context.to_absolute_url(self.root_folder.serverRelativeUrl)
-            SiteScriptUtility.get_site_script_from_list(self.context, list_abs_url, options, return_type=return_type)
+            list_abs_path = SPResPath.create_absolute(self.context.base_url, self.root_folder.serverRelativeUrl)
+            SiteScriptUtility.get_site_script_from_list(self.context, str(list_abs_path), options, return_type=return_type)
         self.ensure_property("RootFolder", _list_loaded)
         return return_type
 
     def get_all_rules(self):
         """
-
+        Retrieves rules of a List
         """
         return_type = ClientResult(self.context, ClientValueCollection(SPListRule))
         qry = ServiceOperationQuery(self, "GetAllRules", None, None, None, return_type)

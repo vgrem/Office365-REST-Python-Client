@@ -6,6 +6,7 @@ from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.files.file import File
 from office365.sharepoint.utilities.principal_info import PrincipalInfo
+from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
 class Utility(BaseEntity):
@@ -24,9 +25,9 @@ class Utility(BaseEntity):
         :type context: office365.sharepoint.client_context.ClientContext
         :param str page_address: Specifies part of the display name for the document or resource.
         """
-        return_type = ClientResult(context)
+        return_type = ClientResult(context, str())
         utility = Utility(context)
-        payload = {"pageAddress": context.to_absolute_url(page_address)}
+        payload = {"pageAddress": str(SPResPath.create_absolute(context.base_url, page_address))}
         qry = ServiceOperationQuery(utility, "CreateEmailBodyForInvitation", None, payload, None, return_type, True)
         context.add_query(qry)
         return return_type

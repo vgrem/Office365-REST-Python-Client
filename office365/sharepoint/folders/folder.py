@@ -203,16 +203,44 @@ class Folder(BaseEntity):
         This method allows a caller with the 'ManagePermission' permission to update sharing information about a
         document to enable document sharing with a set of users. It returns an array of
         UserSharingResult (section 3.2.5.190) elements where each element contains the sharing status for each user.
+
+        :param list[UserRoleAssignment] user_role_assignments:An array of recipients and assigned roles on the securable
+            object pointed to by the resourceAddress parameter.
+        :param bool validate_existing_permissions: A Boolean flag indicating how to honor a requested permission
+            for a user. If this value is "true", the protocol server will not grant the requested permission if a user
+            already has sufficient permissions, and if this value is "false", the protocol server will grant the
+            requested permission whether or not a user already has the same or more permissions.
+            This parameter is applicable only when the parameter additiveMode is set to true.
+        :param bool additive_mode: A Boolean flag indicating whether the permission setting uses the additive or strict
+            mode. If this value is "true", the permission setting uses the additive mode, which means that the
+            specified permission will be added to the user's current list of permissions if it is not there already,
+            and if this value is "false", the permission setting uses the strict mode, which means that the specified
+            permission will replace the user's current permissions.
+        :param bool send_server_managed_notification: A Boolean flag to indicate whether or not to generate an email
+            notification to each recipient in the "userRoleAssignments" array after the document update is completed
+            successfully. If this value is "true", the protocol server will send an email notification if an email
+            server is configured, and if the value is "false", no email notification will be sent.
+        :param str custom_message: A custom message to be included in the email notification.
+        :param bool include_anonymous_links_in_notification: A Boolean flag that indicates whether or not to include
+            anonymous access links in the email notification to each recipient in the userRoleAssignments array after
+            the document update is completed successfully. If the value is "true", the protocol server will include
+            an anonymous access link in the email notification, and if the value is "false", no link will be included.
+        :param bool propagate_acl: A flag to determine if permissions SHOULD be pushed to items with unique permission.
         """
 
         return_type = ClientResult(self.context, ClientValueCollection(UserSharingResult))
 
         def _loaded():
-            resource_address = self.context.to_absolute_url(str(self.server_relative_path))
-            DocumentSharingManager.update_document_sharing_info(self.context, resource_address, user_role_assignments,
-                                                                validate_existing_permissions, additive_mode,
-                                                                send_server_managed_notification, custom_message,
-                                                                include_anonymous_links_in_notification, propagate_acl,
+            resource_address = SPResPath.create_absolute(self.context.base_url, str(self.server_relative_path))
+            DocumentSharingManager.update_document_sharing_info(self.context,
+                                                                str(resource_address),
+                                                                user_role_assignments,
+                                                                validate_existing_permissions,
+                                                                additive_mode,
+                                                                send_server_managed_notification,
+                                                                custom_message,
+                                                                include_anonymous_links_in_notification,
+                                                                propagate_acl,
                                                                 return_type)
         self.ensure_property("ServerRelativePath", _loaded)
         return return_type

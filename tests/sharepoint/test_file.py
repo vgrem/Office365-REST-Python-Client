@@ -1,15 +1,13 @@
 import os
 
-from tests import test_client_credentials, create_unique_name, test_root_site_url
-from tests.sharepoint.sharepoint_case import SPTestCase
-
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.files.file import File
-from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.creation_information import ListCreationInformation
+from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.template_type import ListTemplateType
 from office365.sharepoint.pages.template_file_type import TemplateFileType
-from office365.sharepoint.webs.web import Web
+from tests import test_client_credentials, create_unique_name, test_root_site_url
+from tests.sharepoint.sharepoint_case import SPTestCase
 
 
 def normalize_response(response):
@@ -70,8 +68,7 @@ class TestSharePointFile(SPTestCase):
         self.assertIsNotNone(file.serverRelativeUrl)
 
     def test5_create_file_anon_link(self):
-        file_url = self.__class__.target_file.serverRelativeUrl
-        result = Web.create_anonymous_link(self.client, file_url, False).execute_query()
+        result = self.__class__.target_file.create_anonymous_link(False).execute_query()
         self.assertIsNotNone(result.value)
 
     def test6_load_file_metadata(self):
@@ -175,5 +172,3 @@ class TestSharePointFile(SPTestCase):
 
         file_col = self.__class__.target_list.root_folder.files.get().execute_query()
         self.assertEqual(len(file_col), 0)
-
-
