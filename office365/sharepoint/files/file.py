@@ -15,6 +15,7 @@ from office365.sharepoint.permissions.irm.settings import InformationRightsManag
 from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.files.versions.collection import FileVersionCollection
 from office365.sharepoint.listitems.listitem import ListItem
+from office365.sharepoint.utilities.upload_status import UploadStatus
 from office365.sharepoint.utilities.wopi_frame_action import SPWOPIFrameAction
 from office365.sharepoint.webparts.limited_manager import LimitedWebPartManager
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
@@ -66,6 +67,27 @@ class File(AbstractFile):
         def _file_loaded():
             from office365.sharepoint.webs.web import Web
             Web.create_anonymous_link(self.context, self.serverRelativeUrl, is_edit_link, return_type)
+
+        self.ensure_property("ServerRelativeUrl", _file_loaded)
+        return return_type
+
+    def create_anonymous_link_with_expiration(self, expiration, is_edit_link=False):
+        """Creates and returns an anonymous link that can be used to access a document without needing to authenticate.
+
+        :param bool is_edit_link: If true, the link will allow the guest user edit privileges on the item.
+        string parameters
+        :param datetime.datetime expiration: A date/time string for which the format conforms to the ISO 8601:2004(E) complete
+        representation for calendar date and time of day, and which represents the time and date of expiry for the
+        anonymous link. Both the minutes and hour value MUST be specified for the difference between the local and
+        UTC time. Midnight is represented as 00:00:00.
+        """
+        return_type = ClientResult(self.context, str())
+
+        def _file_loaded():
+            from office365.sharepoint.webs.web import Web
+            Web.create_anonymous_link_with_expiration(self.context, self.serverRelativeUrl, is_edit_link,
+                                                      expiration.isoformat(timespec='seconds'), return_type)
+
         self.ensure_property("ServerRelativeUrl", _file_loaded)
         return return_type
 
@@ -209,8 +231,7 @@ class File(AbstractFile):
                                     {
                                         "DecodedUrl": decoded_url,
                                         "bOverWrite": overwrite
-                                    },
-                                    None)
+                                    })
         self.context.add_query(qry)
         return self
 
@@ -220,13 +241,11 @@ class File(AbstractFile):
         :param str new_relative_url: Specifies the destination URL.
         :param int flag: Specifies the kind of move operation.
         """
-        qry = ServiceOperationQuery(self,
-                                    "moveto",
-                                    {
-                                        "newurl": new_relative_url,
-                                        "flags": flag
-                                    },
-                                    None)
+        params = {
+            "newurl": new_relative_url,
+            "flags": flag
+        }
+        qry = ServiceOperationQuery(self, "moveto", params)
         self.context.add_query(qry)
         return self
 
@@ -237,6 +256,7 @@ class File(AbstractFile):
         """
         qry = ServiceOperationQuery(self, "Publish", {"comment": comment})
         self.context.add_query(qry)
+        return self
 
     def unpublish(self, comment):
         """Removes the file from content approval or unpublish a major version.
@@ -319,7 +339,7 @@ class File(AbstractFile):
         payload = {
             "uploadId": upload_id,
         }
-        return_type = File(self.context)
+        return_type = UploadStatus(self.context)
         qry = ServiceOperationQuery(self, "GetUploadStatus", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
@@ -403,16 +423,11 @@ class File(AbstractFile):
         :param int file_offset: File offset
         :param bytes content: File content
         """
-        qry = ServiceOperationQuery(self,
-                                    "finishUpload",
-                                    {
-                                        "uploadID": upload_id,
-                                        "fileOffset": file_offset,
-                                    },
-                                    content,
-                                    None,
-                                    self
-                                    )
+        params = {
+            "uploadID": upload_id,
+            "fileOffset": file_offset
+        }
+        qry = ServiceOperationQuery(self, "finishUpload", params, content, None, self)
         self.context.add_query(qry)
         return self
 
@@ -712,7 +727,8 @@ class File(AbstractFile):
                 "EffectiveInformationRightsManagementSettings": self.effective_information_rights_management_settings,
                 "InformationRightsManagementSettings": self.information_rights_management_settings,
                 "LockedByUser": self.locked_by_user,
-                "ModifiedBy": self.modified_by
+                "ModifiedBy": self.modified_by,
+                "ServerRelativePath": self.server_relative_path
             }
             default_value = property_mapping.get(name, None)
         return super(File, self).get_property(name, default_value)

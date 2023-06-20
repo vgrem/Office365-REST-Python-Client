@@ -1,8 +1,8 @@
 from office365.runtime.client_result import ClientResult
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.publishing.pages.metadata_collection import SitePageMetadataCollection
 from office365.sharepoint.publishing.pages.page import SitePage
 from office365.sharepoint.translation.status_collection import TranslationStatusCollection
@@ -69,9 +69,18 @@ class SitePageCollection(SitePageMetadataCollection):
     def get_by_url(self, url):
         """Gets the site page with the specified server relative url.
 
-        :param int url: Specifies the server relative url of the site page.
+        :param str url: Specifies the server relative url of the site page.
         """
         return SitePage(self.context, ServiceOperationPath("GetByUrl", [url], self.resource_path))
+
+    def get_by_name(self, name):
+        """Gets the site page with the specified file name.
+
+        :param str name: Specifies the name of the site page.
+
+        :rtype: SitePage
+        """
+        return self.filter("FileName eq '{0}'".format(name)).single()
 
     def templates(self):
         return SitePageMetadataCollection(self.context, SitePage,

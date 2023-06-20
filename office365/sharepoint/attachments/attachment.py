@@ -16,7 +16,7 @@ class Attachment(BaseEntity):
         """
 
         def _download_file_by_path():
-            file = self.context.web.get_file_by_server_relative_path(self.server_relative_path)
+            file = self.context.web.get_file_by_server_relative_path(str(self.server_relative_path))
             qry = create_download_file_query(file, file_object)
             self.context.add_query(qry)
 
@@ -51,7 +51,7 @@ class Attachment(BaseEntity):
             self.context.add_query(qry)
 
         def _upload_file_by_path():
-            target_file = self.context.web.get_file_by_server_relative_path(self.server_relative_path)
+            target_file = self.context.web.get_file_by_server_relative_path(str(self.server_relative_path))
             qry = create_upload_file_query(target_file, file_object)
             self.context.add_query(qry)
 

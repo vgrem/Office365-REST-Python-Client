@@ -556,7 +556,7 @@ class Web(SecurableObject):
         return return_type
 
     @staticmethod
-    def create_anonymous_link_with_expiration(context, url, is_edit_link, expiration_string):
+    def create_anonymous_link_with_expiration(context, url, is_edit_link, expiration_string, return_type=None):
         """
         Creates and returns an anonymous link that can be used to access a document without needing to authenticate.
 
@@ -568,8 +568,10 @@ class Web(SecurableObject):
         anonymous link. Both the minutes and hour value MUST be specified for the difference between the local and
         UTC time. Midnight is represented as 00:00:00.
         :param office365.sharepoint.client_context.ClientContext context: client context
+        :param ClientResult return_type: Return type
         """
-        return_type = ClientResult(context, str())
+        if return_type is None:
+            return_type = ClientResult(context, str())
         payload = {
             "url": str(SPResPath.create_absolute(context.base_url, url)),
             "isEditLink": is_edit_link,
@@ -624,22 +626,26 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
-    def get_file_by_server_relative_url(self, url):
+    def get_file_by_server_relative_url(self, server_relative_url):
         """
-        Returns the file object located at the specified server-relative URL.
+        Returns the file object located at the specified server-relative URL, for example:
+            - "/sites/MySite/Shared Documents/MyDocument.docx"
+            - "Shared Documents/MyDocument.docx"
 
-        :param str url: Specifies the server-relative URL for the file.
+        :param str server_relative_url: Specifies the server-relative URL for the file.
         """
-        return File(self.context, ServiceOperationPath("getFileByServerRelativeUrl", [url], self.resource_path))
+        path = SPResPath.create_relative(self.context.base_url, server_relative_url)
+        return File(self.context, ServiceOperationPath("getFileByServerRelativeUrl", [str(path)], self.resource_path))
 
     def get_file_by_server_relative_path(self, path):
-        """Returns the file object located at the specified server-relative path.
+        """Returns the file object located at the specified server-relative path, for example:
+            - "/sites/MySite/Shared Documents/MyDocument.docx"
+            - "Shared Documents/MyDocument.docx"
         Note: prefer this method over get_folder_by_server_relative_url since it supports % and # symbols in names
 
-        :param str or SPResPath path: Contains the server-relative path of the file.
+        :param str path: Contains the server-relative path of the file.
         """
-        if not isinstance(path, SPResPath):
-            path = SPResPath.create_relative(self.context.base_url, path)
+        path = SPResPath.create_relative(self.context.base_url, path)
         return File(self.context,
                     ServiceOperationPath("getFileByServerRelativePath", path.to_json(), self.resource_path))
 
@@ -651,10 +657,12 @@ class Web(SecurableObject):
         return Folder(self.context, ServiceOperationPath("getFolderByServerRelativeUrl", [url], self.resource_path))
 
     def get_folder_by_server_relative_path(self, decoded_url):
-        """Returns the folder object located at the specified server-relative URL.
+        """Returns the folder object located at the specified server-relative URL, for example:
+             - "/sites/MySite/Shared Documents"
+             - "Shared Documents"
         Prefer this method over get_folder_by_server_relative_url since it supports % and # symbols
 
-        :param str decoded_url: Contains the server-relative URL for the folder.
+        :param str decoded_url: Contains the server-relative URL for the folder
         """
         path = SPResPath(decoded_url)
         return Folder(self.context,

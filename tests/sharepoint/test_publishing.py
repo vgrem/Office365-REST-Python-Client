@@ -1,5 +1,4 @@
 from office365.sharepoint.publishing.pages.collection import SitePageCollection
-from office365.sharepoint.publishing.pages.page import SitePage
 from office365.sharepoint.publishing.pages.service import SitePageService
 from office365.sharepoint.publishing.video.service_discoverer import VideoServiceDiscoverer
 from tests.sharepoint.sharepoint_case import SPTestCase
@@ -19,7 +18,7 @@ class TestPublishing(SPTestCase):
         svc = self.client.site_pages.get().execute_query()
         self.assertIsNotNone(svc.resource_path)
 
-    def test2_get_site_pages(self):
+    def test2_list_site_pages(self):
         pages = self.client.site_pages.pages.get().execute_query()
         self.assertIsInstance(pages, SitePageCollection)
 
@@ -43,13 +42,9 @@ class TestPublishing(SPTestCase):
         discoverer = VideoServiceDiscoverer(self.client).get().execute_query()
         self.assertIsNotNone(discoverer.video_portal_url)
 
-    def test8_get_page_translations(self):
-        pages = self.client.site_pages.pages.get().filter("FileName eq 'Home.aspx'").execute_query()
-        self.assertEqual(len(pages), 1)
-        first_page = pages[0]  # type: SitePage
-
-        # translations = first_page.translations.get().execute_query()
-        # self.assertIsNotNone(translations.resource_path)
+    def test8_get_page_by_name(self):
+        page = self.client.site_pages.pages.get_by_name("Home.aspx").get().execute_query()
+        self.assertIsNotNone(page.resource_path)
 
     def test9_can_create_page(self):
         result = self.client.site_pages.can_create_page().execute_query()

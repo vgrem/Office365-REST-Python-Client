@@ -1,5 +1,5 @@
 """
-
+Retrieves a Content Type by name on a Web site
 """
 
 from office365.sharepoint.client_context import ClientContext

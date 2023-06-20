@@ -28,3 +28,11 @@ class UploadStatus(BaseEntity):
         :rtype: str or None
         """
         return self.properties.get('UploadId', None)
+
+    @property
+    def property_ref_name(self):
+        return "ExpectedContentRange"
+
+    @property
+    def entity_type_name(self):
+        return "SP.Utilities.UploadStatus"
