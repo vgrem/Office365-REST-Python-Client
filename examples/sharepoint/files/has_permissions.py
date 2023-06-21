@@ -1,9 +1,12 @@
+"""
+Demonstrates how to determine whether user has the permissions for a list
+"""
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.permissions.kind import PermissionKind
 from tests import test_team_site_url, test_user_principal_name_alt, test_user_credentials
 
 client = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
-file_url = "/sites/team/Shared Documents/report #123.csv"
+file_url = "Shared Documents/report #123.csv"
 
 target_user = client.web.site_users.get_by_email(test_user_principal_name_alt)
 target_file = client.web.get_file_by_server_relative_path(file_url)

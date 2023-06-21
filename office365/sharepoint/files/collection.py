@@ -1,24 +1,37 @@
+import os
+
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.internal.queries.upload_session import create_upload_session_query_ex
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.files.file import File
 from office365.sharepoint.files.creation_information import FileCreationInformation
+from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
 class FileCollection(BaseEntityCollection):
     """Represents a collection of File resources."""
 
-    def __init__(self, context, resource_path=None):
-        super(FileCollection, self).__init__(context, File, resource_path)
+    def __init__(self, context, resource_path=None, parent=None):
+        super(FileCollection, self).__init__(context, File, resource_path, parent)
 
-    def upload(self, file_name, content):
-        """Uploads a file into folder
+    def upload(self, path_or_file):
+        """Uploads a file into folder.
 
-        :type file_name: str
-        :type content: bytes or str
+        Note: This method only supports files up to 4MB in size!
+        Consider create_upload_session method instead for larger files
+
+        :param str or typing.IO path_or_file: path where file to upload resides or file handle
         """
-        return self.add(file_name, content, True)
+        if hasattr(path_or_file, 'read'):
+            content = path_or_file.read()
+            name = os.path.basename(path_or_file.name)
+            return self.add(name, content, True)
+        else:
+            with open(path_or_file, 'rb') as f:
+                content = f.read()
+            name = os.path.basename(path_or_file)
+            return self.add(name, content, True)
 
     def create_upload_session(self, path_or_file, chunk_size, chunk_uploaded=None, **kwargs):
         """Upload a file as multiple chunks
@@ -46,8 +59,8 @@ class FileCollection(BaseEntityCollection):
         """
         return_type = File(self.context)
         self.add_child(return_type)
-        create_info = FileCreationInformation(url=url, overwrite=overwrite)
-        qry = ServiceOperationQuery(self, "add", create_info.to_json(), content, None, return_type)
+        params = FileCreationInformation(url=url, overwrite=overwrite)
+        qry = ServiceOperationQuery(self, "add", params.to_json(), content, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -59,12 +72,16 @@ class FileCollection(BaseEntityCollection):
         """
         return_type = File(self.context)
         self.add_child(return_type)
-        params = {
-            "urlOfFile": url_of_file,
-            "templateFileType": template_file_type
-        }
-        qry = ServiceOperationQuery(self, "addTemplateFile", params, None, None, return_type)
-        self.context.add_query(qry)
+
+        def _parent_folder_loaded():
+            params = {
+                "urlOfFile": str(SPResPath.create_relative(self.parent.properties["ServerRelativeUrl"], url_of_file)),
+                "templateFileType": template_file_type
+            }
+            qry = ServiceOperationQuery(self, "addTemplateFile", params, None, None, return_type)
+            self.context.add_query(qry)
+
+        self.parent.ensure_property("ServerRelativeUrl", _parent_folder_loaded)
         return return_type
 
     def get_by_url(self, url):

@@ -8,7 +8,7 @@ from office365.onedrive.driveitems.driveItem import DriveItem
 
 def upload_excel(target_drive):
     """
-    :type target_drive: office365.onedrive.drive.Drive
+    :type target_drive: office365.onedrive.drives.drive.Drive
     """
     path = "{0}/../data/Financial Sample.xlsx".format(os.path.dirname(__file__))
     with open(path, 'rb') as content_file:

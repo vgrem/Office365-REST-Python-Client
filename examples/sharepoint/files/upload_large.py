@@ -1,3 +1,7 @@
+"""
+Demonstrates how to upload large files
+"""
+
 import os
 
 from office365.sharepoint.client_context import ClientContext

@@ -1,6 +1,8 @@
 from office365.runtime.client_result import ClientResult
+from office365.runtime.compat import is_string_type
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
@@ -54,8 +56,8 @@ class File(AbstractFile):
         from office365.sharepoint.client_context import ClientContext
         ctx = ClientContext.from_url(abs_url)
         file_relative_url = abs_url.replace(ctx.base_url, "")
-        file = ctx.web.get_file_by_server_relative_url(file_relative_url)
-        return file
+        return_type = ctx.web.get_file_by_server_relative_url(file_relative_url)
+        return return_type
 
     def create_anonymous_link(self, is_edit_link=False):
         """Create an anonymous link which can be used to access a document without needing to authenticate.
@@ -89,6 +91,32 @@ class File(AbstractFile):
                                                       expiration.isoformat(timespec='seconds'), return_type)
 
         self.ensure_property("ServerRelativeUrl", _file_loaded)
+        return return_type
+
+    def get_content(self):
+        """Downloads a file content"""
+        return_type = ClientResult(self.context, bytes())
+
+        qry = FunctionQuery(self, "$value")
+        self.context.add_query(qry)
+
+        def _process_response(response):
+            """
+            :type response: requests.Response
+            """
+            response.raise_for_status()
+            return_type.set_property("__value", response.content)
+        self.context.after_execute(_process_response)
+        return return_type
+
+    def get_absolute_url(self):
+        """Gets absolute url of a File"""
+        return_type = ClientResult(self.context, str())
+        list_item = self.listItemAllFields
+
+        def _loaded():
+            return_type.set_property("__value", list_item.properties.get("EncodedAbsUrl"))
+        list_item.ensure_property("EncodedAbsUrl", _loaded)
         return return_type
 
     def get_sharing_information(self):
@@ -199,21 +227,34 @@ class File(AbstractFile):
         self.context.add_query(qry)
         return self
 
-    def copyto(self, new_relative_url, overwrite):
+    def copyto(self, new_relative_url, overwrite, parent_folder=None):
         """Copies the file to the destination URL.
 
         :param str new_relative_url: Specifies the destination URL.
         :param bool overwrite: Specifies whether a file with the same name is overwritten.
+        :param office365.sharepoint.folders.folder.Folder or None parent_folder: The existing destination folder
+             where to copy file. If omitted, file gets copied to the same folder
         """
-        params = {
-            "strNewUrl": new_relative_url,
-            "boverwrite": overwrite
-        }
-        qry = ServiceOperationQuery(self, "CopyTo", params)
-        self.context.add_query(qry)
-        return self
+        if parent_folder is None:
+            parent_folder = self.parent_folder
 
-    def copyto_using_path(self, decoded_url, overwrite):
+        return_type = File(self.context)
+
+        def _parent_loaded():
+            new_path = SPResPath.create_relative(parent_folder.serverRelativeUrl, new_relative_url)
+            return_type.set_property("ServerRelativeUrl", str(new_path))
+
+            params = {
+                "strNewUrl": str(new_path),
+                "boverwrite": overwrite
+            }
+            qry = ServiceOperationQuery(self, "CopyTo", params)
+            self.context.add_query(qry)
+
+        parent_folder.ensure_property("ServerRelativeUrl", _parent_loaded)
+        return return_type
+
+    def copyto_using_path(self, file_url, overwrite, parent_folder=None):
         """
         Copies the file to the destination path. Server MUST overwrite an existing file of the same name
         if bOverwrite is true.
@@ -223,31 +264,74 @@ class File(AbstractFile):
            2147018894, Microsoft.SharePoint.SPFileLockException, There is a shared lock on the file
            2147018887, Microsoft.SharePoint.SPFileLockException, There is an exclusive lock on the file
 
-        :param str decoded_url: Specifies the destination path.
+        :param str file_url: Specifies the destination file name.
         :param bool overwrite: Specifies whether a file with the same name is overwritten.
+        :param office365.sharepoint.folders.folder.Folder or None parent_folder: The destination folder
+            where to copy file. If omitted, file gets copied to the same folder
         """
-        qry = ServiceOperationQuery(self,
-                                    "CopyToUsingPath",
-                                    {
-                                        "DecodedUrl": decoded_url,
-                                        "bOverWrite": overwrite
-                                    })
-        self.context.add_query(qry)
-        return self
+        if parent_folder is None:
+            parent_folder = self.parent_folder
 
-    def moveto(self, new_relative_url, flag):
+        return_type = File(self.context)
+
+        def _parent_loaded():
+            file_path = SPResPath.create_relative(str(parent_folder.server_relative_path), file_url)
+            return_type.set_property("ServerRelativePath", str(file_path))
+
+            params = {
+                "DecodedUrl": str(file_path),
+                "bOverWrite": overwrite
+            }
+            qry = ServiceOperationQuery(self, "CopyToUsingPath", params)
+            self.context.add_query(qry)
+        parent_folder.ensure_property("ServerRelativePath", _parent_loaded)
+        return return_type
+
+    def moveto(self, new_relative_url, flag, parent_folder=None):
         """Moves the file to the specified destination URL.
 
         :param str new_relative_url: Specifies the destination URL.
         :param int flag: Specifies the kind of move operation.
+        :param office365.sharepoint.folders.folder.Folder or None parent_folder: The existing parent folder where to
+             move folder. If omitted, file gets moved to the same folder
         """
-        params = {
-            "newurl": new_relative_url,
-            "flags": flag
-        }
-        qry = ServiceOperationQuery(self, "moveto", params)
-        self.context.add_query(qry)
-        return self
+        if parent_folder is None:
+            parent_folder = self.parent_folder
+        return_type = File(self.context)
+
+        def _parent_loaded():
+            new_path = SPResPath.create_relative(parent_folder.serverRelativeUrl, new_relative_url)
+            return_type.set_property("ServerRelativeUrl", str(new_path))
+            params = {
+                "newurl": str(new_path),
+                "flags": flag
+            }
+            qry = ServiceOperationQuery(self, "moveto", params)
+            self.context.add_query(qry)
+        parent_folder.ensure_property("ServerRelativeUrl", _parent_loaded)
+        return return_type
+
+    def move_to_using_path(self, new_path, flag, parent_folder=None):
+        """
+        Moves the file to the specified destination path.
+
+        :param str new_path: Specifies the destination path.
+        :param int flag: Specifies the kind of move operation.
+        :param office365.sharepoint.folders.folder.Folder or None parent_folder: The existing parent folder where to
+             move folder. If omitted, file gets moved to the same folder
+        """
+        if parent_folder is None:
+            parent_folder = self.parent_folder
+        return_type = File(self.context)
+
+        def _parent_loaded():
+            safe_path = SPResPath.create_relative(str(parent_folder.server_relative_path), new_path)
+            return_type.set_property("ServerRelativePath", str(safe_path))
+            qry = ServiceOperationQuery(self, "MoveToUsingPath", safe_path)
+            self.context.add_query(qry)
+
+        parent_folder.ensure_property("ServerRelativePath", _parent_loaded)
+        return return_type
 
     def publish(self, comment):
         """Submits the file for content approval with the specified comment.
@@ -327,7 +411,7 @@ class File(AbstractFile):
 
         :param str or bytes stream: A stream containing the contents of the specified file.
         """
-        qry = ServiceOperationQuery(self, "SaveBinaryStream", None, {"file": stream})
+        qry = ServiceOperationQuery(self, "SaveBinaryStream", None, stream)
         self.context.add_query(qry)
         return self
 
@@ -381,15 +465,8 @@ class File(AbstractFile):
         :param str upload_id: Upload session id
         """
         return_type = ClientResult(self.context, int())
-        qry = ServiceOperationQuery(self,
-                                    "startUpload",
-                                    {
-                                        "uploadID": upload_id
-                                    },
-                                    content,
-                                    None,
-                                    return_type
-                                    )
+        params = {"uploadID": upload_id}
+        qry = ServiceOperationQuery(self, "startUpload", params, content, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -718,6 +795,15 @@ class File(AbstractFile):
         :rtype: int or None
         """
         return self.properties.get("CustomizedPageStatus", None)
+
+    @property
+    def parent_folder(self):
+        """
+        :rtype: office365.sharepoint.folders.folder.Folder
+        """
+        if self.parent_collection is None:
+            return None
+        return self.parent_collection.parent
 
     def get_property(self, name, default_value=None):
         if default_value is None:

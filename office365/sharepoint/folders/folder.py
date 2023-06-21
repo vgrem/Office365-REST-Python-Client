@@ -38,7 +38,7 @@ class Folder(BaseEntity):
         :param bool recursive: Determines whether to enumerate folders recursively
         """
         from office365.sharepoint.files.collection import FileCollection
-        return_type = FileCollection(self.context, self.files.resource_path)
+        return_type = FileCollection(self.context, self.files.resource_path, self)
 
         def _loaded(parent):
             """
@@ -197,10 +197,11 @@ class Folder(BaseEntity):
         return self
 
     def upload_file(self, file_name, content):
-        """Uploads a file into folder
+        """Uploads a file into folder.
+        Note: This method only supports files up to 4MB in size!
 
-        :type file_name: str
-        :type content: str
+        :param str file_name: Specifies the URL of the file to be added
+        :param str or bytes content: Specifies the binary content of the file to be added.
         """
         return self.files.add(file_name, content, True)
 
@@ -330,7 +331,7 @@ class Folder(BaseEntity):
         """Specifies the collection of files contained in the list folder."""
         from office365.sharepoint.files.collection import FileCollection
         return self.properties.get("Files",
-                                   FileCollection(self.context, ResourcePath("Files", self.resource_path)))
+                                   FileCollection(self.context, ResourcePath("Files", self.resource_path), self))
 
     @property
     def folders(self):
