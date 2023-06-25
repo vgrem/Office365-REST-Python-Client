@@ -17,7 +17,7 @@ def cleanup(team):
         """
         :type group: office365.directory.groups.group.Group
         """
-        print(f"team has been deleted")
+        print(f"Team has been deleted")
 
     team.delete_object().execute_query_retry(success_callback=print_success)
 

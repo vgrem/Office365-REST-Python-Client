@@ -33,8 +33,10 @@ class TeamCollection(EntityCollection):
     def create(self, display_name, description=None):
         """Create a new team.
 
+        This is async operation.
+
         :param str display_name: The name of the team.
-        :param str or None description: 	An optional description for the team. Maximum length: 1024 characters.
+        :param str or None description: An optional description for the team. Maximum length: 1024 characters.
 
         :rtype: Team
         """

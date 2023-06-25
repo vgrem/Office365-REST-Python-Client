@@ -79,15 +79,16 @@ class Group(DirectoryObject):
         """Create a new team under a group."""
         qry = ServiceOperationQuery(self, "team", None, self.team, None, self.team)
 
-        def _construct_create_team_request(request):
+        def _construct_request(request):
             """
             :type request: office365.runtime.http.request_options.RequestOptions
             """
             request.method = HttpMethod.Put
             request.set_header('Content-Type', "application/json")
             request.data = json.dumps(request.data)
-        self.context.before_execute_if_query(qry, _construct_create_team_request)
+
         self.context.add_query(qry)
+        self.context.before_query_execute(_construct_request)
         return self.team
 
     def delete_object(self, permanent_delete=False):
@@ -204,8 +205,8 @@ class Group(DirectoryObject):
     @property
     def team(self):
         """The team associated with this group."""
-        return self.properties.get('team',
-                                   Team(self.context, ResourcePath(self.id, ResourcePath("teams"))))
+        return self.properties.setdefault('team',
+                                          Team(self.context, ResourcePath(self.id, ResourcePath("teams"))))
 
     @property
     def assigned_licenses(self):

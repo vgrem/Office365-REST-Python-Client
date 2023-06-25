@@ -89,23 +89,27 @@ class ClientRuntimeContext(object):
         if callable(before_loaded):
             self.before_execute(before_loaded)
         if callable(after_loaded):
-            def _action():
-                after_loaded(client_object)
-            self.after_query_execute(qry, _action)
+            self.after_query_execute(after_loaded, client_object)
         return self
 
-    def before_execute_if_query(self, query, action, *args, **kwargs):
+    def before_query_execute(self, action, query=None, *args, **kwargs):
         """
         Attach an event handler which is triggered before query is submitted to server
 
-        :type query: office365.runtime.queries.client_query.ClientQuery
         :type action: (office365.runtime.http.request_options.RequestOptions, *args, **kwargs) -> None
+        :type query: office365.runtime.queries.client_query.ClientQuery or None
         """
+
+        if query is None:
+            query = self._queries[-1]
 
         def _prepare_request(request):
             """
             :type request: office365.runtime.http.request_options.RequestOptions
             """
+            if query.id == self.current_query.id:
+                print(query.url)
+
             if self.current_query.id == query.id:
                 action(request, *args, **kwargs)
             else:
@@ -130,13 +134,13 @@ class ClientRuntimeContext(object):
         self.pending_request().beforeExecute += _process_request
         return self
 
-    def after_query_execute(self, query, action, *args, **kwargs):
+    def after_query_execute(self, action, *args, **kwargs):
         """
         Attach an event handler which is triggered after query is submitted to server
 
-        :type query: office365.runtime.queries.client_query.ClientQuery
         :type action: (Response, *args, **kwargs) -> None
         """
+        query = self._queries[-1]
 
         def _process_response(resp):
             """

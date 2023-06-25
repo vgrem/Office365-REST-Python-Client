@@ -167,10 +167,8 @@ class ClientObjectCollection(ClientObject):
         """
         :type self: T
         """
-
         def _loaded(items):
             self._page_loaded.notify(self)
-
         self.context.load(self, after_loaded=_loaded)
         return self
 

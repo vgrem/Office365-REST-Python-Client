@@ -27,17 +27,13 @@ class GroupCollection(DeltaCollection):
 
         :param str group_name:
         """
-        grp_properties = GroupProfile(group_name)
-        grp_properties.securityEnabled = False
-        grp_properties.mailEnabled = True
-        grp_properties.groupTypes = ["Unified"]
-        return_type = self.context.groups.add(grp_properties)
+        params = GroupProfile(group_name)
+        params.securityEnabled = False
+        params.mailEnabled = True
+        params.groupTypes = ["Unified"]
+        return_type = self.context.groups.add(params)
 
-        def _after_group_created(resp):
-            """
-            :type resp: requests.Response
-            """
-            resp.raise_for_status()
+        def _after_group_created():
             return_type.add_team()
-        self.context.after_execute(_after_group_created)
+        self.context.after_query_execute(_after_group_created)
         return return_type
