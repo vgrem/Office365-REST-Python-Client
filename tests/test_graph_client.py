@@ -1,5 +1,7 @@
 import uuid
+
 from office365.onedrive.internal.paths.url import UrlPath
+from office365.runtime.odata.path_builder import ODataPathBuilder
 from office365.runtime.paths.resource_path import ResourcePath
 from tests import test_team_site_url
 from tests.graph_case import GraphTestCase
@@ -82,3 +84,10 @@ class TestGraphClient(GraphTestCase):
     def test_16_resolve_entity_type_name(self):
         name = self.client.me.joined_teams.entity_type_name
         self.assertEqual("Collection(microsoft.graph.team)", name)
+
+    def test_17_(self):
+        path_str = "/teams('7f919b9f-c220-4290-a4d8-5ff9300d1296')/operations('dc97f61a-0040-436f-ac09-427cd2456fd8')"
+        path = ODataPathBuilder.parse(path_str)
+        self.assertIsNotNone(path.key)
+
+

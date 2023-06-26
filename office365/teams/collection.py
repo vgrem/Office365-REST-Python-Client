@@ -1,6 +1,9 @@
 from office365.directory.groups.group import Group
 from office365.entity_collection import EntityCollection
+from office365.runtime.odata.path_builder import ODataPathBuilder
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.create_entity import CreateEntityQuery
+from office365.teams.operations.async_operation import TeamsAsyncOperation
 from office365.teams.team import Team
 
 
@@ -18,7 +21,7 @@ class TeamCollection(EntityCollection):
         """
         def _init_teams(groups):
             """
-            :type groups: GroupCollection
+            :type groups:  office365.directory.groups.collection.GroupCollection
             """
             for grp in groups:  # type: Group
                 if "Team" in grp.properties["resourceProvisioningOptions"]:
@@ -37,23 +40,30 @@ class TeamCollection(EntityCollection):
 
         :param str display_name: The name of the team.
         :param str or None description: An optional description for the team. Maximum length: 1024 characters.
-
-        :rtype: Team
         """
+        return_type = Team(self.context)
+        self.add_child(return_type)
+
         payload = {
             "displayName": display_name,
             "description": description,
             "template@odata.bind": "https://graph.microsoft.com/v1.0/teamsTemplates('standard')",
         }
-
-        return_type = self.add(**payload)
+        qry = CreateEntityQuery(self, payload, return_type)
+        self.context.add_query(qry)
 
         def _process_response(resp):
             """
             :type resp: requests.Response
             """
             content_loc = resp.headers.get('Content-Location', None)
-            team_id = content_loc[content_loc.find("(") + 2:content_loc.find(")") - 1]
-            return_type.set_property("id", team_id)
+            team_path = ODataPathBuilder.parse(content_loc)
+            return_type.set_property("id", team_path.segment)
+
+            loc = resp.headers.get('Location', None)
+            operation_path = ODataPathBuilder.parse(loc)
+            operation = TeamsAsyncOperation(self.context, operation_path)
+            return_type.operations.add_child(operation)
+
         self.context.after_execute(_process_response)
         return return_type

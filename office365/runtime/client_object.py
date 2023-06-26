@@ -30,6 +30,9 @@ class ClientObject(object):
         self._resource_path = resource_path
 
     def clear(self):
+        """
+        Resets client object's state
+        """
         self._properties = {k: v for k, v in self._properties.items() if k not in self._ser_property_names}
         self._ser_property_names = []
         self._query_options = QueryOptions()
@@ -50,6 +53,13 @@ class ClientObject(object):
                             failure_callback=None):
         """
         Executes the current set of data retrieval queries and method invocations and retries it if needed.
+
+        :param int max_retry: Number of times to retry the request
+        :param int timeout_secs: Seconds to wait before retrying the request.
+        :param (office365.runtime.client_object.ClientObject)-> None success_callback: A callback to call
+            if the request executes successfully.
+        :param (int, requests.exceptions.RequestException)-> None failure_callback: A callback to call if the request
+            fails to execute
         """
         self.context.execute_query_retry(max_retry=max_retry,
                                          timeout_secs=timeout_secs,
@@ -59,9 +69,8 @@ class ClientObject(object):
 
     def get(self):
         """
-        :type self: T
-
         Retrieves a client object from the server
+        :type self: T
         """
         self.context.load(self)
         return self
@@ -103,6 +112,7 @@ class ClientObject(object):
 
     def _persist_changes(self, name):
         """
+        Marks a property as a serializable
         :param str name: A property name
         """
         if name not in self._ser_property_names:

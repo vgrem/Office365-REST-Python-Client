@@ -1,3 +1,5 @@
+import time
+
 from office365.entity import Entity
 
 
@@ -13,6 +15,42 @@ class TeamsAsyncOperation(Entity):
     the targetResourceLocation will point to the created/modified resource.
 
     """
+
+    def poll_for_status(self, status_type="succeeded", max_polling_count=5, polling_interval_secs=15,
+                        success_callback=None, failure_callback=None):
+        """
+        Poll to check for completion of an async Teams create call
+
+        :param int polling_interval_secs:
+        :param int max_polling_count:
+        :param str status_type: The status of a teamsAsyncOperation
+        :param (TeamsAsyncOperation)-> None success_callback: A callback to call
+            if the request executes successfully.
+        :param (TeamsAsyncOperation)-> None failure_callback: A callback to call if the request
+            fails to execute
+        """
+
+        def _poll_for_status(polling_number):
+            """
+            :type polling_number: int
+            """
+            if polling_number > max_polling_count:
+                if callable(failure_callback):
+                    failure_callback(self)
+                else:
+                    raise TypeError("The maximum polling count has been reached")
+
+            def _verify_status(return_type):
+                if self.status != status_type:
+                    time.sleep(polling_interval_secs)
+                    _poll_for_status(polling_number + 1)
+                else:
+                    if callable(success_callback):
+                        success_callback(self)
+            self.context.load(self, after_loaded=_verify_status)
+
+        self.ensure_property("id", _poll_for_status, 1)
+        return self
 
     @property
     def target_resource_id(self):
@@ -30,3 +68,12 @@ class TeamsAsyncOperation(Entity):
         :rtype: str or None
         """
         return self.properties.get("targetResourceLocation", None)
+
+    @property
+    def status(self):
+        """
+        Operation status.
+
+        :rtype: str
+        """
+        return self.properties.get("status", None)

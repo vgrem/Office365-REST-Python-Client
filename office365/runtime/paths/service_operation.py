@@ -1,5 +1,5 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.runtime.odata.url_builder import ODataUrlBuilder
+from office365.runtime.odata.path_builder import ODataPathBuilder
 
 
 class ServiceOperationPath(ResourcePath):
@@ -16,4 +16,4 @@ class ServiceOperationPath(ResourcePath):
 
     @property
     def segment(self):
-        return ODataUrlBuilder.build(self._key, self._parameters)
+        return ODataPathBuilder.build(self._key, self._parameters)

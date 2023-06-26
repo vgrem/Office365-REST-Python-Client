@@ -2,7 +2,7 @@ from office365.runtime.queries.client_query import ClientQuery
 
 
 class CreateEntityQuery(ClientQuery):
-    def __init__(self, parent_entity, parameters, entity_to_create):
+    def __init__(self, parent_entity, parameters, entity_to_create=None):
         """
         Create entity query
 

@@ -18,6 +18,17 @@ class Team(Entity):
     """A team in Microsoft Teams is a collection of channel objects. A channel represents a topic, and therefore a
     logical isolation of discussion, within a team. """
 
+    def ensure_created(self):
+        """
+        Ensure Teams has been created
+        """
+
+        def _loaded():
+            self.operations[0].poll_for_status(status_type="succeeded")
+
+        self.ensure_property("id", _loaded)
+        return self
+
     def delete_object(self):
         """Deletes a team"""
 
@@ -151,9 +162,9 @@ class Team(Entity):
     def operations(self):
         """The async operations that ran or are running on this team.
         """
-        return self.properties.get('operations',
-                                   EntityCollection(self.context, TeamsAsyncOperation,
-                                                    ResourcePath("operations", self.resource_path)))
+        return self.properties.setdefault('operations',
+                                          EntityCollection(self.context, TeamsAsyncOperation,
+                                                           ResourcePath("operations", self.resource_path)))
 
     @property
     def template(self):
