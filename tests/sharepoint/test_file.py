@@ -1,9 +1,9 @@
 import os
+from io import BytesIO
 
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.files.file import File
 from office365.sharepoint.folders.folder import Folder
-from office365.sharepoint.pages.template_file_type import TemplateFileType
 from tests import test_client_credentials
 from tests.sharepoint.sharepoint_case import SPTestCase
 
@@ -72,7 +72,13 @@ class TestSharePointFile(SPTestCase):
         result = self.__class__.target_file.get_content().execute_query()
         self.assertEqual(result.value, self.text_content)
 
-    def test_14_copy_file(self):
+    def test_14_download_file_content_alt(self):
+        with BytesIO() as f:
+            self.__class__.target_file.download(f).execute_query()
+            content = f.getvalue()
+        self.assertEqual(content, self.text_content)
+
+    def test_15_copy_file(self):
         file = self.__class__.target_file.get().execute_query()
         file_url = file.serverRelativeUrl
         path, file_name = os.path.split(file_url)
@@ -80,7 +86,7 @@ class TestSharePointFile(SPTestCase):
         copied_file = file.copyto(new_file_url, True).execute_query()
         self.assertEqual(new_file_url, copied_file.serverRelativeUrl)
 
-    def test_15_move_file(self):
+    def test_16_move_file(self):
         file = self.__class__.target_file.get().execute_query()
         file_url = file.properties["ServerRelativeUrl"]
         path, file_name = os.path.split(file_url)
@@ -88,7 +94,7 @@ class TestSharePointFile(SPTestCase):
         moved_file = file.moveto(new_file_url, 1).execute_query()
         self.assertEqual(new_file_url, moved_file.serverRelativeUrl)
 
-    def test_16_recycle_file(self):
+    def test_17_recycle_file(self):
         files_before = self.parent_folder.files.get().execute_query()
         file = self.__class__.target_file
         result = file.recycle().execute_query()
@@ -97,7 +103,7 @@ class TestSharePointFile(SPTestCase):
         self.assertEqual(len(files_before) - 1, len(files_after))
         self.__class__.deleted_file_guid = result.value
 
-    def test_17_restore_file(self):
+    def test_18_restore_file(self):
         recycle_item = self.client.web.recycle_bin.get_by_id(self.__class__.deleted_file_guid)
         recycle_item.restore().execute_query()
         self.assertIsNotNone(recycle_item.resource_path)

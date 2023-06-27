@@ -10,7 +10,6 @@ from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.sharepoint.activities.capabilities import ActivityCapabilities
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.files.versions.event import FileVersionEvent
-from office365.sharepoint.internal.queries.download_file import create_download_file_query
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.permissions.irm.effective_settings import EffectiveInformationRightsManagementSettings
 from office365.sharepoint.permissions.irm.settings import InformationRightsManagementSettings
@@ -96,27 +95,17 @@ class File(AbstractFile):
     def get_content(self):
         """Downloads a file content"""
         return_type = ClientResult(self.context, bytes())
-
-        qry = FunctionQuery(self, "$value")
+        qry = FunctionQuery(self, "$value", return_type=return_type)
         self.context.add_query(qry)
-
-        def _process_response(response):
-            """
-            :type response: requests.Response
-            """
-            response.raise_for_status()
-            return_type.set_property("__value", response.content)
-        self.context.after_execute(_process_response)
         return return_type
 
     def get_absolute_url(self):
         """Gets absolute url of a File"""
         return_type = ClientResult(self.context, str())
-        list_item = self.listItemAllFields
 
         def _loaded():
-            return_type.set_property("__value", list_item.properties.get("EncodedAbsUrl"))
-        list_item.ensure_property("EncodedAbsUrl", _loaded)
+            return_type.set_property("__value", self.listItemAllFields.properties.get("EncodedAbsUrl"))
+        self.listItemAllFields.ensure_property("EncodedAbsUrl", _loaded)
         return return_type
 
     def get_sharing_information(self):
@@ -543,24 +532,27 @@ class File(AbstractFile):
 
     def download(self, file_object):
         """
-        Download a file content
+        Download a file content. Use this method to download a content of a small size
 
         :type file_object: typing.IO
         """
+        def _save_content(return_type):
+            file_object.write(return_type.value)
 
         def _download_inner():
-            qry = create_download_file_query(self, file_object)
-            self.context.add_query(qry)
+            return_type = self.get_content().after_execute(_save_content)
 
         self.ensure_property("ServerRelativePath", _download_inner)
         return self
 
     def download_session(self, file_object, chunk_downloaded=None, chunk_size=1024 * 1024, use_path=True):
         """
+        Download a file content. Use this method to download a content of a large size
+
         :type file_object: typing.IO
         :type chunk_downloaded: (int)->None or None
         :type chunk_size: int
-        :param bool use_path: Use Path instead of Url for addressing files
+        :param bool use_path: File addressing by path flag
         """
 
         def _download_as_stream():
@@ -659,7 +651,7 @@ class File(AbstractFile):
     @property
     def listItemAllFields(self):
         """Gets a value that specifies the list item fields values for the list item corresponding to the file."""
-        return self.properties.get('ListItemAllFields',
+        return self.properties.setdefault('ListItemAllFields',
                                    ListItem(self.context, ResourcePath("listItemAllFields", self.resource_path)))
 
     @property

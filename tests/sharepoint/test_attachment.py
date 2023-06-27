@@ -54,12 +54,14 @@ class TestListItemAttachment(SPTestCase):
         self.assertIsNotNone(f.read())
 
     def test5_update_attachment(self):
-        f_in = BytesIO(b'new attachment content goes here')
-        self.__class__.target_attachment.upload(f_in).execute_query()
+        local_f = BytesIO(b'new attachment content goes here')
+        self.__class__.target_attachment.upload(local_f).execute_query()
 
-        f_out = BytesIO()
-        self.__class__.target_attachment.download(f_out).execute_query()
-        self.assertEqual(f_in.read(), f_out.read())
+        remote_f = BytesIO()
+        self.__class__.target_attachment.download(remote_f).execute_query()
+        local_content = local_f.getvalue()
+        remote_content = remote_f.getvalue()
+        self.assertEqual(local_content, remote_content)
 
     def test6_delete_attachments(self):
         self.__class__.target_attachment.delete_object().execute_query()

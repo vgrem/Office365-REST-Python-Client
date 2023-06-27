@@ -11,16 +11,10 @@ class Attachment(Entity):
 
         :type file_object: typing.IO
         """
-        result = self.get_content()
+        def _save_content(return_type):
+            file_object.write(return_type.value)
 
-        def _content_downloaded(resp):
-            """
-            :type resp: requests.Response
-            """
-            resp.raise_for_status()
-            file_object.write(result.value)
-
-        self.context.after_execute(_content_downloaded)
+        self.get_content().after_execute(_save_content)
         return self
 
     def get_content(self):

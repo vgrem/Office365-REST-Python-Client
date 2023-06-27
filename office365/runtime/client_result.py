@@ -20,15 +20,10 @@ class ClientResult(object):
         self._value = copy.deepcopy(default_value)
 
     def after_execute(self, action, *args, **kwargs):
-
-        def _process_response(resp):
-            """
-            :type resp: requests.Response
-            """
-            resp.raise_for_status()
-            action(self, *args, **kwargs)
-
-        self._context.after_execute(_process_response, True)
+        """
+        Attach an event handler which is triggered after query is submitted to server
+        """
+        self._context.after_query_execute(action, self, *args, **kwargs)
         return self
 
     def set_property(self, key, value, persist_changes=False):

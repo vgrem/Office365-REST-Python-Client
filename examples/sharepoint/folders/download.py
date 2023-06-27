@@ -1,3 +1,6 @@
+"""
+Demonstrates how to download folders content
+"""
 import os
 import tempfile
 

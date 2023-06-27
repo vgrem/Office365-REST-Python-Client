@@ -1,6 +1,5 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.internal.queries.download_file import create_download_file_query
 from office365.sharepoint.internal.queries.upload_file import create_upload_file_query
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
@@ -15,15 +14,16 @@ class Attachment(BaseEntity):
         :param bool use_path: Use Path instead of Url for addressing attachments
         """
 
+        def _save_content(return_type):
+            file_object.write(return_type.value)
+
         def _download_file_by_path():
             file = self.context.web.get_file_by_server_relative_path(str(self.server_relative_path))
-            qry = create_download_file_query(file, file_object)
-            self.context.add_query(qry)
+            file.get_content().after_execute(_save_content)
 
         def _download_file_by_url():
             file = self.context.web.get_file_by_server_relative_url(self.server_relative_url)
-            qry = create_download_file_query(file, file_object)
-            self.context.add_query(qry)
+            file.get_content().after_execute(_save_content)
 
         if use_path:
             self.ensure_property("ServerRelativePath", _download_file_by_path)
