@@ -58,7 +58,7 @@ class TeamCollection(EntityCollection):
             """
             content_loc = resp.headers.get('Content-Location', None)
             team_path = ODataPathBuilder.parse(content_loc)
-            return_type.set_property("id", team_path.segment)
+            return_type.set_property("id", team_path.segment, False)
 
             loc = resp.headers.get('Location', None)
             operation_path = ODataPathBuilder.parse(loc)

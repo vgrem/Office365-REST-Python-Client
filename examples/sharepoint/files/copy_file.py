@@ -11,8 +11,8 @@ path = "../../data/report #123.csv"
 file_from = ctx.web.default_document_library().root_folder.files.upload(path).execute_query()
 
 # copies the file with a new name into folder
-new_file_name = "report copied.csv"
-file_to = file_from.copyto_using_path(new_file_name, True).execute_query()
+destination_url = "Shared Documents/archive/2002/01"
+file_to = file_from.copyto_using_path(destination_url).execute_query()
 print("Folder has been copied into '{0}'".format(file_to.server_relative_path))
 
 # clean up

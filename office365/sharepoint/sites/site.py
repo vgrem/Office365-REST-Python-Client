@@ -662,7 +662,7 @@ class Site(BaseEntity):
 
     def set_property(self, name, value, persist_changes=True):
         if name == "__siteUrl":
-            super(Site, self).set_property("Url", value)
+            super(Site, self).set_property("Url", value, False)
             self._context = self.context.clone(value)
         else:
             super(Site, self).set_property(name, value, persist_changes)

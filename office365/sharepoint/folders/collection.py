@@ -1,5 +1,3 @@
-import os
-
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
@@ -29,21 +27,21 @@ class FolderCollection(BaseEntityCollection):
         self.context.add_query(qry)
         return target_folder
 
-    def ensure_folder_path(self, path):
+    def ensure_path(self, path):
         """
-        Ensures a nested folder hierarchy exist
+        Ensures a folder exist
 
-        :param str path: relative server URL (path) to a folder
+        :param str path: server or site relative url to a folder
         """
+        names = [name for name in path.split("/") if name]
+        if not names:
+            raise ValueError("Invalid server or site relative url")
 
-        url_component = os.path.normpath(path).split(os.path.sep)
-        url_component = [part for part in url_component if part]
-        if not url_component:
-            raise NotADirectoryError("Wrong relative URL provided")
-        child_folder = self
-        for url_part in url_component:
-            child_folder = child_folder.add(url_part)
-        return child_folder
+        name, child_names = names[0], names[1:]
+        folder = self.add(name)
+        for name in child_names:
+            folder = folder.add(name)
+        return folder
 
     def add(self, name):
         """Adds the folder that is located at the specified URL to the collection.

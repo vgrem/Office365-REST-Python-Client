@@ -11,11 +11,14 @@ from office365.sharepoint.activities.capabilities import ActivityCapabilities
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.files.versions.event import FileVersionEvent
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.permissions.irm.effective_settings import EffectiveInformationRightsManagementSettings
 from office365.sharepoint.permissions.irm.settings import InformationRightsManagementSettings
 from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.files.versions.collection import FileVersionCollection
 from office365.sharepoint.listitems.listitem import ListItem
+from office365.sharepoint.utilities.move_copy_options import MoveCopyOptions
+from office365.sharepoint.utilities.move_copy_util import MoveCopyUtil
 from office365.sharepoint.utilities.upload_status import UploadStatus
 from office365.sharepoint.utilities.wopi_frame_action import SPWOPIFrameAction
 from office365.sharepoint.webparts.limited_manager import LimitedWebPartManager
@@ -243,37 +246,41 @@ class File(AbstractFile):
         parent_folder.ensure_property("ServerRelativeUrl", _parent_loaded)
         return return_type
 
-    def copyto_using_path(self, file_url, overwrite, parent_folder=None):
+    def copyto_using_path(self, destination, overwrite=True):
         """
         Copies the file to the destination path. Server MUST overwrite an existing file of the same name
-        if bOverwrite is true.
-        Exceptions:
-           Error Code, Error Type Name, Condition
-           2147024729, Microsoft.SharePoint.SPFileLockException, The file is not locked
-           2147018894, Microsoft.SharePoint.SPFileLockException, There is a shared lock on the file
-           2147018887, Microsoft.SharePoint.SPFileLockException, There is an exclusive lock on the file
+        if overwrite is true.
 
-        :param str file_url: Specifies the destination file name.
         :param bool overwrite: Specifies whether a file with the same name is overwritten.
-        :param office365.sharepoint.folders.folder.Folder or None parent_folder: The destination folder
-            where to copy file. If omitted, file gets copied to the same folder
+        :param office365.sharepoint.folders.folder.Folder or str destination: Specifies the destination folder or
+            folder server relative url where to copy a file.
         """
-        if parent_folder is None:
-            parent_folder = self.parent_folder
 
         return_type = File(self.context)
+        self.parent_collection.add_child(return_type)
 
-        def _parent_loaded():
-            file_path = SPResPath.create_relative(str(parent_folder.server_relative_path), file_url)
-            return_type.set_property("ServerRelativePath", str(file_path))
+        def _copyto_using_path(destination_folder):
+            """
+            :type destination_folder: Folder
+            """
+            file_path = "/".join([str(destination_folder.server_relative_path), self.name])
+            return_type.set_property("ServerRelativePath", file_path)
 
             params = {
-                "DecodedUrl": str(file_path),
+                "DecodedUrl": file_path,
                 "bOverWrite": overwrite
             }
             qry = ServiceOperationQuery(self, "CopyToUsingPath", params)
             self.context.add_query(qry)
-        parent_folder.ensure_property("ServerRelativePath", _parent_loaded)
+
+        def _source_file_resolved():
+            if isinstance(destination, Folder):
+                destination.ensure_property("ServerRelativePath", _copyto_using_path, destination)
+            else:
+                self.context.web.ensure_folder_path(destination).get().select(["ServerRelativePath"])\
+                    .after_execute(_copyto_using_path)
+
+        self.ensure_properties(["ServerRelativePath", "Name"], _source_file_resolved)
         return return_type
 
     def moveto(self, new_relative_url, flag, parent_folder=None):

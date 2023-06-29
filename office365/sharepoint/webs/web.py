@@ -674,7 +674,7 @@ class Web(SecurableObject):
 
         :param str path: relative server URL (path) to a folder
         """
-        return self.root_folder.folders.ensure_folder_path(path)
+        return self.root_folder.folders.ensure_path(path)
 
     def ensure_user(self, login_name):
         """Checks whether the specified logon name belongs to a valid user of the website, and if the logon name does

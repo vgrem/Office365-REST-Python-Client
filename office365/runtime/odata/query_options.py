@@ -1,6 +1,3 @@
-import copy
-
-
 class QueryOptions(object):
 
     def __init__(self, select=None, expand=None, filter_expr=None, order_by=None, top=None, skip=None, custom=None):
@@ -39,10 +36,12 @@ class QueryOptions(object):
     @staticmethod
     def build(client_object, properties_to_include=None):
         """
+        Builds query options
+
         :param office365.runtime.client_object.ClientObject client_object: Client object
         :param list[str] or None properties_to_include: The list of properties to include
         """
-        query_options = copy.deepcopy(client_object.query_options)
+        query_options = client_object.query_options
         if properties_to_include is None:
             return query_options
 

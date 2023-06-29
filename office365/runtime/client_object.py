@@ -67,6 +67,13 @@ class ClientObject(object):
                                          failure_callback=failure_callback)
         return self
 
+    def after_execute(self, action, *args, **kwargs):
+        """
+        Attach an event handler to client object which gets triggered after query is submitted to server
+        """
+        self._context.after_query_execute(action, self, *args, **kwargs)
+        return self
+
     def get(self):
         """
         Retrieves a client object from the server
@@ -170,7 +177,7 @@ class ClientObject(object):
 
     def ensure_properties(self, names, action, *args, **kwargs):
         """
-        Ensure if list of properties are loaded
+        Ensure if list of properties are retrieved from the server
 
         :type action: (any) -> None
         :type names: str or list[str]

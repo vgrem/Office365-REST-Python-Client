@@ -19,5 +19,9 @@ class HubSiteProperties(BaseEntity):
         return self.properties.get("SiteId", None)
 
     @property
+    def property_ref_name(self):
+        return "SiteId"
+
+    @property
     def entity_type_name(self):
         return "Microsoft.Online.SharePoint.TenantAdministration.HubSiteProperties"

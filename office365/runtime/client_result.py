@@ -40,6 +40,7 @@ class ClientResult(object):
 
     @property
     def value(self):
+        """Returns the value"""
         return self._value
 
     def execute_query(self):

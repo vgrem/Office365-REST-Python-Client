@@ -8,6 +8,28 @@ class MoveCopyUtil(BaseEntity):
     """A container class for static move/copy methods."""
 
     @staticmethod
+    def copy_file_by_path(context, src_path, dest_path, overwrite, options=None):
+        """
+        Copies a file from a source URL to a destination URL.
+
+        :param office365.sharepoint.client_context.ClientContext context: client context
+        :param str src_path: A full or server relative path that represents the source file.
+        :param str dest_path:  A full or server relative url that represents the destination file.
+        :param bool overwrite: Overwrites the destination file when it exists.
+        :param office365.sharepoint.utilities.move_copy_options.MoveCopyOptions or None options:
+        """
+        return_type = ClientResult(context)
+        payload = {
+            "srcPath": SPResPath.create_absolute(context.base_url, src_path),
+            "destPath": SPResPath.create_absolute(context.base_url, dest_path),
+            "overwrite": overwrite,
+            "options": options
+        }
+        qry = ServiceOperationQuery(MoveCopyUtil(context), "CopyFileByPath", None, payload, None, return_type, True)
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
     def copy_folder(context, src_url, dest_url, options=None):
         """
         Copies a folder from a source URL to a destination URL.
