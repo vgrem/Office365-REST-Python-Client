@@ -7,17 +7,17 @@ from tests import test_user_credentials, test_team_site_url, create_unique_name
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
 
-print("Creating and uploading into it a temporary file...")
+print("Creating temporary folders and uploading a file...")
 path = "../../data/report #123.csv"
-root_folder = ctx.web.default_document_library().root_folder
-folder_name = create_unique_name("Temp folder")
-file = root_folder.add(folder_name).files.upload(path).execute_query()
+folder_from = ctx.web.default_document_library().root_folder.add(create_unique_name("from"))
+folder_to = ctx.web.default_document_library().root_folder.add(create_unique_name("to"))
+file = folder_from.files.upload(path).execute_query()
 
 # copies the file with a new name into folder
 print("Moving file to parent folder...")
-file_to = file.move_to_using_path("report moved.csv", MoveOperations.overwrite).execute_query()
-print("File has been copied from '{0}' into '{1}'".format(file.server_relative_path, file_to.server_relative_path))
+file_to = file.move_to_using_path(folder_to, MoveOperations.overwrite).execute_query()
+print("File has been copied from '{0}' into '{1}'".format(file.server_relative_path, folder_to.serverRelativeUrl))
 
 print("Cleaning up...")
-file_to.delete_object().execute_query()
-file.parent_folder.delete_object().execute_query()
+folder_from.delete_object().execute_query()
+folder_to.delete_object().execute_query()

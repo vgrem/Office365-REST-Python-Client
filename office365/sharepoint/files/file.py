@@ -219,34 +219,40 @@ class File(AbstractFile):
         self.context.add_query(qry)
         return self
 
-    def copyto(self, new_relative_url, overwrite, parent_folder=None):
+    def copyto(self, destination, overwrite=False):
         """Copies the file to the destination URL.
 
-        :param str new_relative_url: Specifies the destination URL.
+        :param office365.sharepoint.folders.folder.Folder or str destination: Specifies the destination folder or
+            folder server relative url where to copy a file.
         :param bool overwrite: Specifies whether a file with the same name is overwritten.
-        :param office365.sharepoint.folders.folder.Folder or None parent_folder: The existing destination folder
-             where to copy file. If omitted, file gets copied to the same folder
         """
-        if parent_folder is None:
-            parent_folder = self.parent_folder
-
         return_type = File(self.context)
+        self.parent_collection.add_child(return_type)
 
-        def _parent_loaded():
-            new_path = SPResPath.create_relative(parent_folder.serverRelativeUrl, new_relative_url)
-            return_type.set_property("ServerRelativeUrl", str(new_path))
+        def _copyto(destination_folder):
+            """
+            :type destination_folder: Folder
+            """
+            file_path = "/".join([str(destination_folder.serverRelativeUrl), self.name])
+            return_type.set_property("ServerRelativeUrl", file_path)
 
             params = {
-                "strNewUrl": str(new_path),
+                "strNewUrl": file_path,
                 "boverwrite": overwrite
             }
             qry = ServiceOperationQuery(self, "CopyTo", params)
             self.context.add_query(qry)
 
-        parent_folder.ensure_property("ServerRelativeUrl", _parent_loaded)
+        def _source_file_resolved():
+            if isinstance(destination, Folder):
+                destination.ensure_property("ServerRelativeUrl", _copyto, destination)
+            else:
+                self.context.web.ensure_folder_path(destination).get().after_execute(_copyto)
+
+        self.ensure_property("ServerRelativeUrl", _source_file_resolved)
         return return_type
 
-    def copyto_using_path(self, destination, overwrite=True):
+    def copyto_using_path(self, destination, overwrite=False):
         """
         Copies the file to the destination path. Server MUST overwrite an existing file of the same name
         if overwrite is true.
@@ -283,51 +289,72 @@ class File(AbstractFile):
         self.ensure_properties(["ServerRelativePath", "Name"], _source_file_resolved)
         return return_type
 
-    def moveto(self, new_relative_url, flag, parent_folder=None):
-        """Moves the file to the specified destination URL.
+    def moveto(self, destination, flag):
+        """Moves the file to the specified destination url.
 
-        :param str new_relative_url: Specifies the destination URL.
+        :param str or office365.sharepoint.folders.folder.Folder destination: Specifies the existing folder or folder
+             site relative url.
         :param int flag: Specifies the kind of move operation.
-        :param office365.sharepoint.folders.folder.Folder or None parent_folder: The existing parent folder where to
-             move folder. If omitted, file gets moved to the same folder
         """
-        if parent_folder is None:
-            parent_folder = self.parent_folder
-        return_type = File(self.context)
 
-        def _parent_loaded():
-            new_path = SPResPath.create_relative(parent_folder.serverRelativeUrl, new_relative_url)
-            return_type.set_property("ServerRelativeUrl", str(new_path))
+        def _update_file(return_type, new_file_url):
+            return_type.set_property("ServerRelativeUrl", new_file_url)
+
+
+        def _moveto(destination_folder):
+            """
+            :type destination_folder: Folder
+            """
+            file_path = "/".join([str(destination_folder.serverRelativeUrl), self.name])
+
             params = {
-                "newurl": str(new_path),
+                "newurl": file_path,
                 "flags": flag
             }
             qry = ServiceOperationQuery(self, "moveto", params)
             self.context.add_query(qry)
-        parent_folder.ensure_property("ServerRelativeUrl", _parent_loaded)
-        return return_type
+            self.context.after_query_execute(_update_file, self, file_path)
 
-    def move_to_using_path(self, new_path, flag, parent_folder=None):
+        def _source_file_resolved():
+            if isinstance(destination, Folder):
+                destination.ensure_property("ServerRelativeUrl", _moveto, destination)
+            else:
+                self.context.web.ensure_folder_path(destination).get().after_execute(_moveto)
+
+        self.ensure_properties(["ServerRelativeUrl", "Name"], _source_file_resolved)
+        return self
+
+    def move_to_using_path(self, destination, flag):
         """
         Moves the file to the specified destination path.
 
-        :param str new_path: Specifies the destination path.
+        :param str or office365.sharepoint.folders.folder.Folder destination: Specifies the destination folder path or
+            existing folder object
         :param int flag: Specifies the kind of move operation.
-        :param office365.sharepoint.folders.folder.Folder or None parent_folder: The existing parent folder where to
-             move folder. If omitted, file gets moved to the same folder
         """
-        if parent_folder is None:
-            parent_folder = self.parent_folder
-        return_type = File(self.context)
 
-        def _parent_loaded():
-            safe_path = SPResPath.create_relative(str(parent_folder.server_relative_path), new_path)
-            return_type.set_property("ServerRelativePath", str(safe_path))
-            qry = ServiceOperationQuery(self, "MoveToUsingPath", safe_path)
+        def _update_file(return_type, new_file_url):
+            return_type.set_property("ServerRelativePath", new_file_url)
+
+        def _move_to_using_path(destination_folder):
+            file_path = "/".join([str(destination_folder.server_relative_path), self.name])
+            params = {
+                "DecodedUrl": file_path,
+                "moveOperations": flag
+            }
+            qry = ServiceOperationQuery(self, "MoveToUsingPath", params)
             self.context.add_query(qry)
+            self.context.after_query_execute(_update_file, self, file_path)
 
-        parent_folder.ensure_property("ServerRelativePath", _parent_loaded)
-        return return_type
+        def _source_file_resolved():
+            if isinstance(destination, Folder):
+                destination.ensure_property("ServerRelativePath", _move_to_using_path, destination)
+            else:
+                self.context.web.ensure_folder_path(destination).get().select(["ServerRelativePath"])\
+                    .after_execute(_move_to_using_path)
+
+        self.ensure_properties(["ServerRelativePath", "Name"], _source_file_resolved)
+        return self
 
     def publish(self, comment):
         """Submits the file for content approval with the specified comment.

@@ -189,16 +189,12 @@ class DriveItem(BaseItem):
 
         :type file_object: typing.IO
         """
-        result = self.get_content()
-
-        def _content_downloaded(resp):
+        def _save_content(return_type):
             """
-            :type resp: requests.Response
+            :type return_type: ClientResult
             """
-            resp.raise_for_status()
-            file_object.write(result.value)
-
-        self.context.after_execute(_content_downloaded)
+            file_object.write(return_type.value)
+        self.get_content().after_execute(_save_content)
         return self
 
     def download_session(self, file_object, chunk_downloaded=None, chunk_size=1024 * 1024):

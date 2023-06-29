@@ -15,7 +15,10 @@ class ReadEntityQuery(ClientQuery):
         self._query_options = QueryOptions.build(return_type, properties_to_include)
 
     @property
+    def query_options(self):
+        return self._query_options
+
+    @property
     def url(self):
-        print(self._query_options)
         orig_url = super(ReadEntityQuery, self).url
         return orig_url if self._query_options.is_empty else orig_url + "?" + str(self._query_options)
