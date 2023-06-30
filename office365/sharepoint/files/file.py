@@ -366,15 +366,16 @@ class File(AbstractFile):
         return self
 
     def unpublish(self, comment):
-        """Removes the file from content approval or unpublish a major version.
+        """Removes the file from content approval or unpublishes a major version.
 
-        :type comment: str
+        :param str comment: Specifies the comment for UnPublish. Its length MUST be equal to or less than 1023.
         """
         qry = ServiceOperationQuery(self, "unpublish", {"comment": comment})
         self.context.add_query(qry)
         return self
 
     def check_access_and_post_view_audit_event(self):
+        """"""
         return_type = ClientResult(self.context, bool())
         qry = ServiceOperationQuery(self, "CheckAccessAndPostViewAuditEvent", return_type=return_type)
         self.context.add_query(qry)
@@ -396,13 +397,11 @@ class File(AbstractFile):
             https://docs.microsoft.com/en-us/previous-versions/office/sharepoint-csom/ee542953(v%3Doffice.15)
         :param int checkin_type: Specifies the type of check-in.
         """
-        qry = ServiceOperationQuery(self,
-                                    "checkin",
-                                    {
-                                        "comment": comment,
-                                        "checkInType": checkin_type
-                                    }
-                                    )
+        params = {
+           "comment": comment,
+           "checkInType": checkin_type
+        }
+        qry = ServiceOperationQuery(self, "checkin", params)
         self.context.add_query(qry)
         return self
 

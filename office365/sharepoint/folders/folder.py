@@ -56,56 +56,81 @@ class Folder(BaseEntity):
         """Gets the sharing information for a folder."""
         return self.list_item_all_fields.get_sharing_information()
 
-    def move_to(self, new_url, parent_folder=None):
+    def move_to(self, destination):
         """
-        Moves the folder and its contents to a new folder at the specified URL.
+        Moves the folder and its contents under a new folder at the specified destination.
         This method applies only to the context of a single site.
 
         An exception is thrown if a folder with the same name as specified in the parameter already exists.
 
-        :param str new_url: A string that specifies the URL for the new folder.
-        :param Folder or None parent_folder: The existing parent folder where to move folder
+        :param str or Folder destination: Specifies the server relative url or an existing folder
+            where to move a folder.
         """
-        if parent_folder is None:
-            parent_folder = self.parent_folder
 
-        return_type = Folder(self.context)
+        def _update_folder(url):
+            self.set_property("ServerRelativeUrl", url)
 
-        def _parent_folder_resolved():
-            new_path = SPResPath.create_relative(parent_folder.serverRelativeUrl, new_url)
-            return_type.set_property("ServerRelativeUrl", str(new_path))
-            qry = ServiceOperationQuery(self, "MoveTo", {"newUrl": str(new_path)})
-            self.context.add_query(qry)
+        def _move_to(destination_folder):
+            """
+            :type destination_folder: Folder
+            """
+            destination_url = "/".join([destination_folder.serverRelativeUrl, self.name])
+            qry = ServiceOperationQuery(self, "MoveTo", {"newUrl": destination_url})
+            self.context.add_query(qry).after_query_execute(_update_folder, destination_url)
 
-        parent_folder.ensure_property("ServerRelativeUrl", _parent_folder_resolved)
-        return return_type
+        def _source_folder_resolved():
+            if isinstance(destination, Folder):
+                destination.ensure_property("ServerRelativeUrl", _move_to, destination)
+            else:
+                self.context.web.ensure_folder_path(destination).after_execute(_move_to)
 
-    def move_to_with_parameters(self, new_relative_url, retain_editor_and_modified=False):
-        """Moves the folder with files to the destination URL.
+        self.ensure_properties(["ServerRelativeUrl", "Name"], _source_folder_resolved)
+        return self
 
-        :type new_relative_url: str
-        :type retain_editor_and_modified: bool
-        """
-        return_type = Folder(self.context)
-        return_type.set_property("ServerRelativeUrl", new_relative_url)
-
-        def _move_folder():
-            opt = MoveCopyOptions(retain_editor_and_modified_on_move=retain_editor_and_modified)
-            MoveCopyUtil.move_folder(self.context, self.serverRelativeUrl, new_relative_url, opt)
-
-        self.ensure_property("ServerRelativeUrl", _move_folder)
-        return return_type
-
-    def move_to_using_path(self, new_path):
+    def move_to_using_path(self, destination):
         """
         Moves the folder and its contents to a new folder at the specified path.
         An exception is thrown if a folder with the same name as specified in the parameter already exists.
 
-        :param str new_path: Specifies the destination path.
+        :param str or Folder destination: Specifies the server relative url or an existing folder
+            where to move a folder.
         """
-        qry = ServiceOperationQuery(self, "MoveToUsingPath", SPResPath(new_path))
-        self.context.add_query(qry)
+
+        def _update_folder(url):
+            self.set_property("ServerRelativePath", url)
+
+        def _move_to_using_path(destination_folder):
+            """
+            :type destination_folder: Folder
+            """
+            destination_url = "/".join([str(destination_folder.server_relative_path), self.name])
+            qry = ServiceOperationQuery(self, "MoveToUsingPath", {"DecodedUrl": destination_url})
+            self.context.add_query(qry).after_query_execute(_update_folder, destination_url)
+
+        def _source_folder_resolved():
+            if isinstance(destination, Folder):
+                destination.ensure_property("ServerRelativePath", _move_to_using_path, destination)
+            else:
+                self.context.web.ensure_folder_path(destination).after_execute(_move_to_using_path)
+
+        self.ensure_properties(["ServerRelativePath", "Name"], _source_folder_resolved)
         return self
+
+    def move_to_using_path_with_parameters(self, new_relative_path, retain_editor_and_modified=False):
+        """Moves the folder with files to the destination Path.
+
+        :param str new_relative_path: A full URL path that represents the destination folder.
+        :param bool retain_editor_and_modified:
+        """
+        return_type = Folder(self.context)
+        return_type.set_property("ServerRelativePath", SPResPath(new_relative_path))
+
+        def _move_folder():
+            opt = MoveCopyOptions(retain_editor_and_modified_on_move=retain_editor_and_modified)
+            MoveCopyUtil.move_folder_by_path(self.context, self.server_relative_path.DecodedUrl, new_relative_path, opt)
+
+        self.ensure_property("ServerRelativePath", _move_folder)
+        return return_type
 
     def share_link(self, link_kind, expiration=None):
         """Creates a tokenized sharing link for a folder based on the specified parameters and optionally
@@ -252,66 +277,65 @@ class Folder(BaseEntity):
                                                                 include_anonymous_links_in_notification,
                                                                 propagate_acl,
                                                                 return_type)
+
         self.ensure_property("ServerRelativePath", _loaded)
         return return_type
 
-    def copy_to(self, new_relative_url, keep_both=False, reset_author_and_created=False, parent_folder=None):
+    def copy_to(self, destination, keep_both=False, reset_author_and_created=False):
         """Copies the folder with files to the destination URL.
 
-        :param str new_relative_url: Folder name or server relative url
+        :param str or Folder destination: Parent folder object or server relative folder url
         :param bool keep_both: bool
         :param bool reset_author_and_created:
-        :param Folder or None parent_folder: The existing parent folder
         """
-        if parent_folder is None:
-            parent_folder = self.parent_folder
         return_type = Folder(self.context)
+        self.parent_collection.add_child(return_type)
 
-        def _parent_folder_resolved():
-            new_path = SPResPath.create_relative(parent_folder.serverRelativeUrl, new_relative_url)
-            return_type.set_property("ServerRelativeUrl", str(new_path))
-            self.ensure_property("ServerRelativeUrl", _copy_to, folder_path=new_path)
-        parent_folder.ensure_property("ServerRelativeUrl", _parent_folder_resolved)
-
-        def _copy_to(folder_path):
+        def _copy_folder(destination_folder):
+            """
+            :type destination_folder: Folder
+            """
+            destination_url = "/".join([destination_folder.serverRelativeUrl, self.name])
+            return_type.set_property("ServerRelativeUrl", destination_url)
             opts = MoveCopyOptions(keep_both=keep_both, reset_author_and_created_on_copy=reset_author_and_created)
-            MoveCopyUtil.copy_folder(self.context, self.serverRelativeUrl, str(folder_path), opts)
+            MoveCopyUtil.copy_folder(self.context, self.serverRelativeUrl, destination_url, opts)
 
+        def _source_folder_resolved():
+            if isinstance(destination, Folder):
+                destination.ensure_property("ServerRelativeUrl", _copy_folder, destination)
+            else:
+                self.context.web.ensure_folder_path(destination).after_execute(_copy_folder)
+
+        self.ensure_property("ServerRelativeUrl", _source_folder_resolved)
         return return_type
 
-    def copy_to_using_path(self, new_relative_path, keep_both=False, reset_author_and_created=False):
+    def copy_to_using_path(self, destination, keep_both=False, reset_author_and_created=False):
         """Copies the folder with files to the destination Path.
 
-        :type new_relative_path: str
+        :param str or Folder destination: Parent folder object or server relative folder url
         :type keep_both: bool
         :type reset_author_and_created: bool
         """
 
         return_type = Folder(self.context)
-        return_type.set_property("ServerRelativePath", new_relative_path)
+        self.parent_collection.add_child(return_type)
 
-        def _copy_folder():
+        def _copy_folder_by_path(destination_folder):
+            """
+            :type destination_folder: Folder
+            """
+            destination_url = "/".join([str(destination_folder.server_relative_path), self.name])
+            return_type.set_property("ServerRelativePath", destination_url)
             opts = MoveCopyOptions(keep_both=keep_both, reset_author_and_created_on_copy=reset_author_and_created)
-            MoveCopyUtil.copy_folder_by_path(self.context, str(self.server_relative_path), new_relative_path,
-                                             opts)
+            MoveCopyUtil.copy_folder_by_path(self.context, str(self.server_relative_path), destination_url, opts)
 
-        self.ensure_property("ServerRelativePath", _copy_folder)
-        return return_type
+        def _source_folder_resolved():
+            if isinstance(destination, Folder):
+                destination.ensure_property("ServerRelativePath", _copy_folder_by_path, destination)
+            else:
+                self.context.web.ensure_folder_path(destination).after_execute(_copy_folder_by_path)
 
-    def move_to_using_path_with_parameters(self, new_relative_path, retain_editor_and_modified=False):
-        """Moves the folder with files to the destination Path.
-
-        :param str new_relative_path: A full URL path that represents the destination folder.
-        :param bool retain_editor_and_modified:
-        """
-        return_type = Folder(self.context)
-        return_type.set_property("ServerRelativePath", SPResPath(new_relative_path))
-
-        def _move_folder():
-            opt = MoveCopyOptions(retain_editor_and_modified_on_move=retain_editor_and_modified)
-            MoveCopyUtil.move_folder_by_path(self.context, self.server_relative_path.DecodedUrl, new_relative_path, opt)
-
-        self.ensure_property("ServerRelativePath", _move_folder)
+        self.ensure_properties(["ServerRelativePath", "Name"], _source_folder_resolved)
         return return_type
 
     @property

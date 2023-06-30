@@ -7,13 +7,12 @@ from tests import test_user_credentials, test_team_site_url, create_unique_name
 ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
 
 # creates a temporary folder first in a Documents library
-folder_name = create_unique_name("New folder")
-folder_from = ctx.web.default_document_library().root_folder.add(folder_name)
+folder_from = ctx.web.default_document_library().root_folder.add(create_unique_name("from"))
+folder_to = ctx.web.default_document_library().root_folder.add(create_unique_name("to"))
 
 # copies the folder with a new name
-new_folder_name = create_unique_name("Copied folder")
-folder_to = folder_from.copy_to(new_folder_name).execute_query()
-print("Folder has been copied from '{0}' into '{1}'".format(folder_from.serverRelativeUrl, folder_to.serverRelativeUrl))
+folder = folder_from.copy_to_using_path(folder_to).execute_query()
+print("Folder has been copied from '{0}' into '{1}'".format(folder_from.serverRelativeUrl, folder.serverRelativeUrl))
 
 # clean up
 folder_from.delete_object().execute_query()
