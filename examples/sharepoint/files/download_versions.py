@@ -31,7 +31,7 @@ def download_specific_file_version(source_file, version, target_path):
 
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
-file_url = "/sites/team/Shared Documents/report #123.csv"
+file_url = "Shared Documents/report.csv"
 remote_file = ctx.web.get_file_by_server_relative_path(file_url)
 local_path = os.path.join(tempfile.mkdtemp(), os.path.basename(file_url))
 #download_file_versions(remote_file, local_path)
