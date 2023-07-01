@@ -37,6 +37,10 @@ class ClientQuery(object):
             return self.context.service_root_url()
 
     @property
+    def query_options(self):
+        return self.binding_type.query_options
+
+    @property
     def path(self):
         if self.binding_type is not None:
             return self.binding_type.resource_path

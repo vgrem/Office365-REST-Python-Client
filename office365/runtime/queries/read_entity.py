@@ -19,5 +19,13 @@ class ReadEntityQuery(ClientQuery):
 
     @property
     def url(self):
-        orig_url = super(ReadEntityQuery, self).url
-        return orig_url if self._query_options.is_empty else orig_url + "?" + str(self._query_options)
+        if not self.query_options.is_empty:
+            delimiter = "?"
+            from office365.runtime.paths.service_operation import ServiceOperationPath
+            from office365.runtime.client_value import ClientValue
+            if isinstance(self.path, ServiceOperationPath) and isinstance(self.path.parameters, ClientValue):
+                delimiter = "&"
+            return self.binding_type.resource_url + delimiter + str(self.query_options)
+        else:
+            return self.binding_type.resource_url
+
