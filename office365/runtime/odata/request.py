@@ -32,10 +32,11 @@ class ODataRequest(ClientRequest):
 
     def build_request(self, query):
         """
+        Builds a request
+
         :type query: office365.runtime.queries.client_query.ClientQuery
         """
         request = RequestOptions(query.url)
-        # set method
         request.method = HttpMethod.Get
         if isinstance(query, DeleteEntityQuery):
             request.method = HttpMethod.Post
@@ -64,7 +65,7 @@ class ODataRequest(ClientRequest):
         else:
             if isinstance(json_format, JsonLightFormat):
                 if isinstance(query, ServiceOperationQuery) or isinstance(query, FunctionQuery):
-                    json_format.function = query.method_name
+                    json_format.function = query.name
 
             self.map_json(response.json(), return_type, json_format)
 

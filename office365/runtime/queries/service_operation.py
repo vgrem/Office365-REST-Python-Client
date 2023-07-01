@@ -1,4 +1,4 @@
-from office365.runtime.odata.path_builder import ODataPathBuilder
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.client_query import ClientQuery
 
 
@@ -27,15 +27,21 @@ class ServiceOperationQuery(ClientQuery):
         self.static = is_static
 
     @property
+    def path(self):
+        if self.static:
+            static_name = ".".join([self.binding_type.entity_type_name, self._method_name])
+            return ServiceOperationPath(static_name, self._method_params)
+        else:
+            return ServiceOperationPath(self._method_name, self._method_params, self.binding_type.resource_path)
+
+    @property
     def url(self):
         orig_url = super(ServiceOperationQuery, self).url
         if self.static:
-            static_name = ".".join([self.binding_type.entity_type_name, self.method_name])
-            return "/".join([self.context.service_root_url(),
-                             ODataPathBuilder.build(static_name, self._method_params)])
+            return "".join([self.context.service_root_url(), str(self.path)])
         else:
-            return "/".join([orig_url, ODataPathBuilder.build(self._method_name, self._method_params)])
+            return "/".join([orig_url, self.path.segment])
 
     @property
-    def method_name(self):
+    def name(self):
         return self._method_name

@@ -1,3 +1,6 @@
+"""
+Creates a modern site
+"""
 import uuid
 
 from office365.sharepoint.client_context import ClientContext
@@ -8,3 +11,6 @@ owner = client.web.site_users.get_by_email(test_user_principal_name_alt)
 site_alias = "commsite_{0}".format(uuid.uuid4().hex)
 site = client.create_modern_site("Comm Site", site_alias, owner).execute_query()
 print("Site has been created at url: {0}".format(site.url))
+
+print("Cleaning up resources...")
+site.delete_object().execute_query()

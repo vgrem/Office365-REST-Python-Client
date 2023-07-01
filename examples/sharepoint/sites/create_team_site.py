@@ -1,9 +1,11 @@
-from random import randint
+"""
+Creates Team site
+"""
 
 from office365.sharepoint.client_context import ClientContext
-from tests import test_site_url, test_user_credentials
+from tests import test_site_url, test_user_credentials, create_unique_name
 
-alias = str(randint(0, 10000))
+alias = create_unique_name("teamsite")
 title = "Team Site"
 ctx = ClientContext(test_site_url).with_credentials(test_user_credentials)
 

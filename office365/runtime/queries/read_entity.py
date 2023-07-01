@@ -11,7 +11,6 @@ class ReadEntityQuery(ClientQuery):
         :type return_type: office365.runtime.client_object.ClientObject
         """
         super(ReadEntityQuery, self).__init__(return_type.context, return_type, None, None, return_type)
-        self._properties_to_include = properties_to_include
         self._query_options = QueryOptions.build(return_type, properties_to_include)
 
     @property

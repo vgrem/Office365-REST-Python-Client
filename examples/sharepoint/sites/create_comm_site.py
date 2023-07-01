@@ -8,3 +8,6 @@ alias = str(randint(0, 10000))
 title = "Communication Site"
 site = ctx.create_communication_site(alias, title).execute_query()
 print(site.url)
+
+print("Cleaning up resources...")
+site.delete_object().execute_query()

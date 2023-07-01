@@ -1,4 +1,4 @@
-from office365.runtime.odata.path_builder import ODataPathBuilder
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.client_query import ClientQuery
 
 
@@ -24,10 +24,14 @@ class FunctionQuery(ClientQuery):
         self._method_params = method_params
 
     @property
-    def url(self):
-        orig_url = super(FunctionQuery, self).url
-        return "/".join([orig_url, ODataPathBuilder.build(self._method_name, self._method_params)])
+    def path(self):
+        return ServiceOperationPath(self._method_name, self._method_params, self.binding_type.resource_path)
 
     @property
-    def method_name(self):
+    def url(self):
+        orig_url = super(FunctionQuery, self).url
+        return "/".join([orig_url, self.path.segment])
+
+    @property
+    def name(self):
         return self._method_name

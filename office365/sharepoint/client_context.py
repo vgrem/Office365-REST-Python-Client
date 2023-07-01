@@ -269,18 +269,17 @@ class ClientContext(ClientRuntimeContext):
         """
         return_type = Site(self)
         site_url = "{base_url}/sites/{alias}".format(base_url=get_absolute_url(self.base_url), alias=alias)
-        site_result = self.site_pages.communication_site.create(title, site_url)
 
-        def _after_site_create(resp):
+        def _after_site_created(result):
             """
-            :type resp: requests.Response
+            :type result: ClientResult
             """
-            resp.raise_for_status()
-            if site_result.value.SiteStatus == SiteStatus.Error:
+            if result.value.SiteStatus == SiteStatus.Error:
                 raise ValueError("Site creation error")
-            elif site_result.value.SiteStatus == SiteStatus.Ready:
-                return_type.set_property("__siteUrl", site_result.value.SiteUrl)
-        self.after_execute(_after_site_create)
+            elif result.value.SiteStatus == SiteStatus.Ready:
+                return_type.set_property("__siteUrl", result.value.SiteUrl)
+
+        self.site_pages.communication_site.create(title, site_url).after_execute(_after_site_created)
         return return_type
 
     @property
