@@ -7,10 +7,10 @@ from office365.teams.channels.collection import ChannelCollection
 from office365.teams.schedule.schedule import Schedule
 from office365.teams.fun_settings import TeamFunSettings
 from office365.teams.guest_settings import TeamGuestSettings
-from office365.teams.member_settings import TeamMemberSettings
 from office365.teams.messaging_settings import TeamMessagingSettings
 from office365.teams.apps.installation import TeamsAppInstallation
 from office365.teams.operations.async_operation import TeamsAsyncOperation
+from office365.teams.summary import TeamSummary
 from office365.teams.template import TeamsTemplate
 
 
@@ -165,6 +165,16 @@ class Team(Entity):
         return self.properties.setdefault('operations',
                                           EntityCollection(self.context, TeamsAsyncOperation,
                                                            ResourcePath("operations", self.resource_path)))
+
+    @property
+    def summary(self):
+        """Contains summary information about the team, including number of owners, members, and guests."""
+        return self.properties.get("summary", TeamSummary())
+
+    @property
+    def tenant_id(self):
+        """The ID of the Azure Active Directory tenant."""
+        return self.properties.get("tenantId", None)
 
     @property
     def template(self):

@@ -1,3 +1,4 @@
+from office365.booking.solutions_root import SolutionsRoot
 from office365.communications.cloud_communications import CloudCommunications
 from office365.delta_collection import DeltaCollection
 from office365.directory.applications.collection import ApplicationCollection
@@ -49,6 +50,7 @@ from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.search.entity import SearchEntity
 from office365.subscriptions.subscription import Subscription
+from office365.teams.apps.catalog import AppCatalogs
 from office365.teams.chats.collection import ChatCollection
 from office365.teams.collection import TeamCollection
 from office365.teams.template import TeamsTemplate
@@ -115,6 +117,11 @@ class GraphClient(ClientRuntimeContext):
     def admin(self):
         """A container for administrator functionality for SharePoint and OneDrive."""
         return Admin(self, ResourcePath("admin"))
+
+    @property
+    def app_catalogs(self):
+        """A container for apps from the Microsoft Teams app catalog."""
+        return AppCatalogs(self, ResourcePath("appCatalogs"))
 
     @property
     def me(self):
@@ -288,6 +295,10 @@ class GraphClient(ClientRuntimeContext):
     @property
     def role_management(self):
         return RoleManagement(self, ResourcePath("roleManagement"))
+
+    @property
+    def solutions(self):
+        return SolutionsRoot(self, ResourcePath("solutions"))
 
     @property
     def teams_templates(self):

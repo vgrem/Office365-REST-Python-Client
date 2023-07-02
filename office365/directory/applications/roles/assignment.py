@@ -1,5 +1,6 @@
+from datetime import datetime
+
 from office365.directory.object import DirectoryObject
-from office365.entity_collection import EntityCollection
 
 
 class AppRoleAssignment(DirectoryObject):
@@ -9,10 +10,33 @@ class AppRoleAssignment(DirectoryObject):
     An app role assignment is a relationship between the assigned principal (a user, a group, or a service principal),
     a resource application (the app's service principal) and an app role defined on the resource application.
     """
-    pass
+
+    @property
+    def app_role_id(self):
+        """
+        The identifier (id) for the app role which is assigned to the principal.
+        This app role must be exposed in the appRoles property on
+        the resource application's service principal (resourceId). If the resource application has not declared
+        any app roles, a default app role ID of 00000000-0000-0000-0000-000000000000 can be specified to signal
+        that the principal is assigned to the resource app without any specific app roles. Required on create.
+        :rtype: str
+        """
+        return self.properties.get("appRoleId", None)
+
+    @property
+    def created_datetime(self):
+        """The time when the app role assignment was created."""
+        return self.properties.get('createdDateTime', datetime.min)
+
+    @property
+    def principal_display_name(self):
+        """The display name of the user, group, or service principal that was granted the app role assignment."""
+        return self.properties.get('principalDisplayName', None)
+
+    @property
+    def principal_id(self):
+        """The unique identifier (id) for the user, security group, or service principal being granted the app role.
+        Security groups with dynamic memberships are supported. Required on create.."""
+        return self.properties.get('principalId', None)
 
 
-class AppRoleAssignmentCollection(EntityCollection):
-
-    def __init__(self, context, resource_path=None):
-        super(AppRoleAssignmentCollection, self).__init__(context, AppRoleAssignment, resource_path)

@@ -1,6 +1,7 @@
 import json
+from datetime import datetime
 
-from office365.directory.applications.roles.assignment import AppRoleAssignmentCollection
+from office365.directory.applications.roles.assignment_collection import AppRoleAssignmentCollection
 from office365.directory.extensions.extension import Extension
 from office365.directory.licenses.assigned_license import AssignedLicense
 from office365.directory.object import DirectoryObject
@@ -88,7 +89,7 @@ class Group(DirectoryObject):
             request.data = json.dumps(request.data)
 
         self.context.add_query(qry)
-        self.context.before_query_execute(_construct_request)
+        self.context.before_query_execute(_construct_request, qry)
         return self.team
 
     def delete_object(self, permanent_delete=False):
@@ -104,11 +105,23 @@ class Group(DirectoryObject):
         return self
 
     @property
+    def display_name(self):
+        """
+        :rtype: str
+        """
+        return self.properties.get("displayName", None)
+
+    @property
     def conversations(self):
         """The group's conversations."""
         return self.properties.get('conversations',
                                    EntityCollection(self.context, Conversation,
                                                     ResourcePath("conversations", self.resource_path)))
+
+    @property
+    def created_datetime(self):
+        """Timestamp of when the group was created."""
+        return self.properties.get('createdDateTime', datetime.min)
 
     @property
     def extensions(self):
@@ -217,6 +230,7 @@ class Group(DirectoryObject):
             property_mapping = {
                 "appRoleAssignments": self.app_role_assignments,
                 "assignedLicenses": self.assigned_licenses,
+                "createdDateTime": self.created_datetime,
                 "transitiveMembers": self.transitive_members,
                 "transitiveMemberOf": self.transitive_member_of,
             }

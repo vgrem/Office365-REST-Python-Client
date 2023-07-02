@@ -8,5 +8,14 @@ class LinkedResource(Entity):
 
     @property
     def application_name(self):
-        """Field indicating the app name of the source that is sending the linkedResource."""
+        """Field indicating the app name of the source that is sending the linkedResource.
+        :rtype: str
+        """
         return self.properties.get("applicationName", None)
+
+    @property
+    def display_name(self):
+        """The title of the linkedResource..
+        :rtype: str
+        """
+        return self.properties.get("displayName", None)

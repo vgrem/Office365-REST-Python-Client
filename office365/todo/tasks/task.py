@@ -30,6 +30,10 @@ class TodoTask(Entity):
                                    EntityCollection(self.context, LinkedResource,
                                                     ResourcePath("linkedResources", self.resource_path)))
 
+    @property
+    def entity_type_name(self):
+        return None
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {

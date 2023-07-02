@@ -1,6 +1,9 @@
+import json
+
 from office365.communications.onlinemeetings.collection import OnlineMeetingCollection
 from office365.communications.presences.presence import Presence
 from office365.delta_collection import DeltaCollection
+from office365.directory.applications.roles.assignment_collection import AppRoleAssignmentCollection
 from office365.directory.authentication.authentication import Authentication
 from office365.directory.extensions.extension import Extension
 from office365.directory.insights.office_graph import OfficeGraphInsights
@@ -70,6 +73,41 @@ class User(DirectoryObject):
         qry = ServiceOperationQuery(self, "assignLicense", None, params, None, self)
         self.context.add_query(qry)
         return self
+
+    def assign_manager(self, user):
+        """
+        Assign a user's manager.
+
+        :param str or User user: User object or identifier
+        """
+        def _create_query(user_id):
+            """
+            :type user_id: str
+            """
+            payload = {
+                "@odata.id": "https://graph.microsoft.com/v1.0/users/{0}".format(user_id)
+            }
+            return ServiceOperationQuery(self.manager, "$ref", None, payload)
+
+        def _construct_request(request):
+            """
+            :type request: office365.runtime.http.request_options.RequestOptions
+            """
+            request.method = HttpMethod.Put
+            request.set_header('Content-Type', "application/json")
+            request.set_header('Accept', "application/json")
+            request.data = json.dumps(request.data)
+
+        def _user_loaded():
+            next_qry = _create_query(user.id)
+            self.context.add_query(next_qry).before_query_execute(_construct_request)
+
+        if isinstance(user, User):
+            user.ensure_property("id", _user_loaded)
+        else:
+            qry = _create_query(user)
+            self.context.add_query(qry).before_query_execute(_construct_request)
+        return self.manager
 
     def change_password(self, current_password, new_password):
         """
@@ -275,6 +313,13 @@ class User(DirectoryObject):
         return self.properties.get('accountEnabled', None)
 
     @property
+    def app_role_assignments(self):
+        """Get the apps and app roles which this user has been assigned."""
+        return self.properties.get('appRoleAssignments',
+                                   AppRoleAssignmentCollection(self.context,
+                                                               ResourcePath("appRoleAssignments", self.resource_path)))
+
+    @property
     def chats(self):
         """The user's chats."""
         return self.properties.get('chats',
@@ -420,8 +465,6 @@ class User(DirectoryObject):
     def mailbox_settings(self):
         """
         Get the user's mailboxSettings.
-
-        :rtype: str or None
         """
         return self.properties.get('mailboxSettings', MailboxSettings())
 
@@ -612,6 +655,7 @@ class User(DirectoryObject):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "appRoleAssignments": self.app_role_assignments,
                 "businessPhones": self.business_phones,
                 "calendarGroups": self.calendar_groups,
                 "contactFolders": self.contact_folders,

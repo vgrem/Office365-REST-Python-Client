@@ -107,13 +107,10 @@ class ClientRuntimeContext(object):
             """
             :type request: office365.runtime.http.request_options.RequestOptions
             """
-            if query.id == self.current_query.id:
-                print(query.url)
 
             if self.current_query.id == query.id:
-                action(request, *args, **kwargs)
-            else:
                 self.pending_request().beforeExecute -= _prepare_request
+                action(request, *args, **kwargs)
 
         self.pending_request().beforeExecute += _prepare_request
         return self
@@ -148,7 +145,7 @@ class ClientRuntimeContext(object):
             """
             resp.raise_for_status()
             if self.current_query.id == query.id:
-                self.pending_request().afterExecute -= _process_response
+                #self.pending_request().afterExecute -= _process_response
                 action(*args, **kwargs)
 
         self.pending_request().afterExecute += _process_response
