@@ -31,9 +31,7 @@ class GroupCollection(DeltaCollection):
         params.securityEnabled = False
         params.mailEnabled = True
         params.groupTypes = ["Unified"]
-        return_type = self.context.groups.add(params)
 
-        def _after_group_created():
+        def _after_group_created(return_type):
             return_type.add_team()
-        self.context.after_query_execute(_after_group_created)
-        return return_type
+        return self.context.groups.add(params).after_execute(_after_group_created)

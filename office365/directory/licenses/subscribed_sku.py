@@ -7,6 +7,21 @@ class SubscribedSku(Entity):
     """Contains information about a service SKU that a company is subscribed to."""
 
     @property
+    def account_id(self):
+        """
+        :rtype: str
+        """
+        return self.properties.get("accountId", None)
+
+    @property
+    def sku_id(self):
+        """
+        The unique identifier (GUID) for the service SKU.
+        :rtype: str
+        """
+        return self.properties.get("skuId", None)
+
+    @property
     def service_plans(self):
         """Information about the service plans that are available with the SKU. Not nullable"""
         return self.properties.get('servicePlans', ClientValueCollection(ServicePlanInfo))

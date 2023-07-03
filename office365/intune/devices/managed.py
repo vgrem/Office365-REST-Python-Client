@@ -20,6 +20,22 @@ class ManagedDevice(Entity):
                                                                     ResourcePath("deviceCategory", self.resource_path)))
 
     @property
+    def manufacturer(self):
+        """
+        Manufacturer of the device.
+        :rtype: str
+        """
+        return self.properties.get("manufacturer", None)
+
+    @property
+    def operating_system(self):
+        """
+        Manufacturer of the device.
+        :rtype: str
+        """
+        return self.properties.get("operatingSystem", None)
+
+    @property
     def users(self):
         """The primary users associated with the managed device."""
         from office365.directory.users.collection import UserCollection

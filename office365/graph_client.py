@@ -49,7 +49,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.search.entity import SearchEntity
-from office365.subscriptions.subscription import Subscription
+from office365.subscriptions.collection import SubscriptionCollection
 from office365.teams.apps.catalog import AppCatalogs
 from office365.teams.chats.collection import ChatCollection
 from office365.teams.collection import TeamCollection
@@ -241,7 +241,7 @@ class GraphClient(ClientRuntimeContext):
 
     @property
     def subscribed_skus(self):
-        """Retrieve a list of servicePrincipal objects."""
+        """Get the list of commercial subscriptions that an organization has acquired"""
         return EntityCollection(self, SubscribedSku, ResourcePath("subscribedSkus"))
 
     @property
@@ -269,7 +269,7 @@ class GraphClient(ClientRuntimeContext):
         Retrieve the properties and relationships of webhook subscriptions,
         based on the app ID, the user, and the user's role with a tenant.
         """
-        return EntityCollection(self, Subscription, ResourcePath("subscriptions"))
+        return SubscriptionCollection(self, ResourcePath("subscriptions"))
 
     @property
     def audit_logs(self):

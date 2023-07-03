@@ -1,5 +1,5 @@
 """
-Create a new permission object on a site.
+Grant permissions on a site.
 
 https://learn.microsoft.com/en-us/graph/api/site-post-permissions?view=graph-rest-1.0&tabs=http
 """

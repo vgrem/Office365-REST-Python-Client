@@ -19,14 +19,9 @@ def ensure_workbook_sample(graph_client):
             raise ValueError(e.response.text)
 
 
-
 client = GraphClient(acquire_token_by_username_password)
 workbook = ensure_workbook_sample(client)
 
 result = workbook.create_session().execute_query()
 result_new = workbook.refresh_session(result.value.id).execute_query()
 workbook.close_session(result.value.id).execute_query()
-
-
-
-

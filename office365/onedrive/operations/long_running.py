@@ -10,3 +10,10 @@ class LongRunningOperation(Entity):
         :rtype: str or None
         """
         return self.properties.get('resourceLocation', None)
+
+    @property
+    def status_detail(self):
+        """Details about the status of the operation.
+        :rtype: str or None
+        """
+        return self.properties.get('statusDetail', None)

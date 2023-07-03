@@ -36,7 +36,23 @@ class AppRoleAssignment(DirectoryObject):
     @property
     def principal_id(self):
         """The unique identifier (id) for the user, security group, or service principal being granted the app role.
-        Security groups with dynamic memberships are supported. Required on create.."""
+        Security groups with dynamic memberships are supported. Required on create."""
         return self.properties.get('principalId', None)
+
+    @property
+    def principal_type(self):
+        """The type of the assigned principal. This can either be User, Group, or ServicePrincipal."""
+        return self.properties.get('principalType', None)
+
+    @property
+    def resource_display_name(self):
+        """The display name of the resource app's service principal to which the assignment is made."""
+        return self.properties.get('resourceDisplayName', None)
+
+    @property
+    def resource_id(self):
+        """The unique identifier (id) for the resource service principal for which the assignment is made.
+        Required on create. """
+        return self.properties.get('resourceId', None)
 
 

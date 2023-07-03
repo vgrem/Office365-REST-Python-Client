@@ -20,7 +20,6 @@ from office365.onedrive.folders.folder import Folder
 from office365.onedrive.internal.paths.children import ChildrenPath
 from office365.onedrive.internal.paths.url import UrlPath
 from office365.onedrive.internal.queries.resumable_file_upload import create_resumable_file_upload_query
-from office365.onedrive.internal.queries.upload_content import create_upload_content_query
 from office365.onedrive.listitems.item_reference import ItemReference
 from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.permissions.collection import PermissionCollection
@@ -58,7 +57,8 @@ class DriveItem(BaseItem):
         """
         return self.upload(name, None)
 
-    def create_link(self, link_type, scope="", expiration_datetime=None, password=None, message=None):
+    def create_link(self, link_type, scope="", expiration_datetime=None, password=None, message=None,
+                    retain_inherited_permissions=None):
         """
         The createLink action will create a new sharing link if the specified link type doesn't already exist
         for the calling application. If a sharing link of the specified type already exists for the app,
@@ -71,13 +71,17 @@ class DriveItem(BaseItem):
         :param str password: The password of the sharing link that is set by the creator. Optional
             and OneDrive Personal only.
         :param str message:
+        :param bool retain_inherited_permissions: Optional. If true (default), any existing inherited permissions
+            are retained on the shared item when sharing this item for the first time.
+            If false, all existing permissions are removed when sharing for the first time.
         """
         payload = {
             "type": link_type,
             "scope": scope,
             "message": message,
             "expirationDateTime": expiration_datetime,
-            "password": password
+            "password": password,
+            "retainInheritedPermissions": retain_inherited_permissions
         }
         return_type = Permission(self.context)
         self.permissions.add_child(return_type)
@@ -161,18 +165,41 @@ class DriveItem(BaseItem):
 
     def upload(self, name, content):
         """The simple upload API allows you to provide the contents of a new file or update the contents of an
-        existing file in a single API call. This method only supports files up to 4MB in size.
+        existing file in a single API call.
+
+        Note: This method only supports files up to 4MB in size.
 
         :param name: The contents of the request body should be the binary stream of the file to be uploaded.
         :type name: str
         :param content: The contents of the request body should be the binary stream of the file to be uploaded.
         :type content: str or bytes or None
-        :rtype: DriveItem
         """
-        qry = create_upload_content_query(self, name, content)
+        return_type = DriveItem(self.context, UrlPath(name, self.resource_path))
+        qry = ServiceOperationQuery(return_type, "content", None, content, None, return_type)
         self.children.add_child(qry.return_type)
-        self.context.add_query(qry)
-        return qry.return_type
+
+        def _modify_query(request):
+            """
+            :type request: office365.runtime.http.request_options.RequestOptions
+            """
+            request.method = HttpMethod.Put
+        self.context.add_query(qry).before_query_execute(_modify_query)
+        return return_type
+
+    def upload_file(self, path_or_file):
+        """Uploads a file
+
+        :param str or typing.IO path_or_file:
+        """
+        if hasattr(path_or_file, 'read'):
+            content = path_or_file.read()
+            name = os.path.basename(path_or_file.name)
+            return self.upload(name, content)
+        else:
+            with open(path_or_file, 'rb') as f:
+                content = f.read()
+            name = os.path.basename(path_or_file)
+            return self.upload(name, content)
 
     def get_content(self):
         """Download the contents of the primary stream (file) of a DriveItem. Only driveItems with the file property
@@ -402,22 +429,14 @@ class DriveItem(BaseItem):
         """
         return_type = EntityCollection(self.context, ItemActivityStat, self.resource_path)
 
-        def _create_query(binding_type):
+        def _create_query():
             params = {
                 "startDateTime": start_dt.strftime('%m-%d-%Y') if start_dt else None,
                 "endDateTime": end_dt.strftime('%m-%d-%Y') if end_dt else None,
                 "interval": interval
             }
-            return FunctionQuery(binding_type, "getActivitiesByInterval", params, return_type)
-
-        # if isinstance(self.resource_path, RootPath):
-        #    def _loaded():
-        #        drive_item = self.context.drives[self.parent_reference.driveId].items[self.id]
-        #        next_qry = _create_query(drive_item)
-        #        self.context.add_query(next_qry)
-        #    self.ensure_property("parentReference", _loaded)
-        # else:
-        qry = _create_query(self)
+            return FunctionQuery(self, "getActivitiesByInterval", params, return_type)
+        qry = _create_query()
         self.context.add_query(qry)
 
         return return_type

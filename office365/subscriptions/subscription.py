@@ -6,7 +6,7 @@ class Subscription(Entity):
     """A subscription allows a client app to receive change notifications about changes to data in Microsoft Graph"""
 
     def reauthorize(self):
-        """"""
+        """Reauthorize a subscription when you receive a reauthorizationRequired challenge."""
         qry = ServiceOperationQuery(self, "reauthorize")
         self.context.add_query(qry)
         return self

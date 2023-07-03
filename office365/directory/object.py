@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from office365.entity import Entity
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -85,4 +87,4 @@ class DirectoryObject(Entity):
     @property
     def deleted_datetime(self):
         """Date and time when this object was deleted. Always null when the object hasn't been deleted."""
-        return self.properties.get('deletedDateTime', None)
+        return self.properties.get('deletedDateTime', datetime.min)

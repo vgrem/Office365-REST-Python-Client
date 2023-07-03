@@ -6,35 +6,34 @@ from office365.delta_collection import DeltaCollection
 from office365.directory.applications.roles.assignment_collection import AppRoleAssignmentCollection
 from office365.directory.authentication.authentication import Authentication
 from office365.directory.extensions.extension import Extension
+from office365.directory.identities.object_identity import ObjectIdentity
 from office365.directory.insights.office_graph import OfficeGraphInsights
+from office365.directory.licenses.assigned_license import AssignedLicense
 from office365.directory.licenses.assigned_plan import AssignedPlan
 from office365.directory.licenses.assignment_state import LicenseAssignmentState
+from office365.directory.licenses.details import LicenseDetails
+from office365.directory.object import DirectoryObject
+from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.permissions.grants.oauth2 import OAuth2PermissionGrant
+from office365.directory.profile_photo import ProfilePhoto
 from office365.directory.users.activities.collection import UserActivityCollection
 from office365.directory.users.settings import UserSettings
+from office365.entity_collection import EntityCollection
 from office365.intune.devices.managed import ManagedDevice
 from office365.intune.devices.managed_app_diagnostic_status import ManagedAppDiagnosticStatus
+from office365.onedrive.drives.drive import Drive
 from office365.onedrive.sites.site import Site
 from office365.onenote.onenote import Onenote
 from office365.outlook.calendar.attendees.base import AttendeeBase
 from office365.outlook.calendar.calendar import Calendar
-from office365.outlook.calendar.group import CalendarGroup
 from office365.outlook.calendar.events.event import Event
-from office365.outlook.calendar.meetingtimes.suggestions_result import MeetingTimeSuggestionsResult
 from office365.outlook.calendar.events.reminder import Reminder
-from office365.directory.licenses.assigned_license import AssignedLicense
-from office365.directory.object import DirectoryObject
-from office365.directory.object_collection import DirectoryObjectCollection
-from office365.directory.licenses.details import LicenseDetails
-from office365.directory.identities.object_identity import ObjectIdentity
-from office365.directory.profile_photo import ProfilePhoto
-from office365.entity_collection import EntityCollection
+from office365.outlook.calendar.group import CalendarGroup
+from office365.outlook.calendar.meetingtimes.suggestions_result import MeetingTimeSuggestionsResult
 from office365.outlook.contacts.contact import Contact
 from office365.outlook.contacts.folder import ContactFolder
 from office365.outlook.convert_id_result import ConvertIdResult
 from office365.outlook.mail.folders.collection import MailFolderCollection
-from office365.outlook.mail.folders.folder import MailFolder
-from office365.onedrive.drives.drive import Drive
 from office365.outlook.mail.mailbox_settings import MailboxSettings
 from office365.outlook.mail.messages.collection import MessageCollection
 from office365.outlook.mail.messages.message import Message
@@ -45,9 +44,9 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.paths.entity import EntityPath
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
 from office365.teams.chats.collection import ChatCollection
 from office365.teams.collection import TeamCollection
@@ -78,16 +77,9 @@ class User(DirectoryObject):
         """
         Assign a user's manager.
 
-        :param str or User user: User object or identifier
+        :param str or User or OrgContact user: User or office365.intune.organizations.contact.OrgContact
+            or identifier
         """
-        def _create_query(user_id):
-            """
-            :type user_id: str
-            """
-            payload = {
-                "@odata.id": "https://graph.microsoft.com/v1.0/users/{0}".format(user_id)
-            }
-            return ServiceOperationQuery(self.manager, "$ref", None, payload)
 
         def _construct_request(request):
             """
@@ -98,16 +90,37 @@ class User(DirectoryObject):
             request.set_header('Accept', "application/json")
             request.data = json.dumps(request.data)
 
-        def _user_loaded():
-            next_qry = _create_query(user.id)
-            self.context.add_query(next_qry).before_query_execute(_construct_request)
+        def _assign_manager(user_id):
+            """
+            :type user_id: str
+            """
+            payload = {
+                "@odata.id": "https://graph.microsoft.com/v1.0/users/{0}".format(user_id)
+            }
+            qry = ServiceOperationQuery(self.manager, "$ref", None, payload)
+            self.context.add_query(qry).before_query_execute(_construct_request)
 
         if isinstance(user, User):
+            def _user_loaded():
+                _assign_manager(user.id)
+
             user.ensure_property("id", _user_loaded)
         else:
-            qry = _create_query(user)
-            self.context.add_query(qry).before_query_execute(_construct_request)
+            _assign_manager(user)
         return self.manager
+
+    def remove_manager(self):
+        """Remove a user's manager."""
+        qry = ServiceOperationQuery(self.manager, "$ref")
+
+        def _construct_request(request):
+            """
+            :type request: office365.runtime.http.request_options.RequestOptions
+            """
+            request.method = HttpMethod.Delete
+
+        self.context.add_query(qry).before_query_execute(_construct_request)
+        return self
 
     def change_password(self, current_password, new_password):
         """
@@ -641,6 +654,13 @@ class User(DirectoryObject):
                                    Presence(self.context, ResourcePath("presence", self.resource_path)))
 
     @property
+    def registered_devices(self):
+        """Get the devices that are retistered for the user from the registeredDevices navigation property."""
+        return self.properties.get('registeredDevices',
+                                   DirectoryObjectCollection(self.context,
+                                                             ResourcePath("registeredDevices", self.resource_path)))
+
+    @property
     def teamwork(self):
         """A container for the range of Microsoft Teams functionalities that are available per user in the tenant."""
         return self.properties.get('teamwork',
@@ -672,7 +692,8 @@ class User(DirectoryObject):
                 "onlineMeetings": self.online_meetings,
                 "oauth2PermissionGrants": self.oauth2_permission_grants,
                 "ownedDevices": self.owned_devices,
-                "ownedObjects": self.owned_objects
+                "ownedObjects": self.owned_objects,
+                "registeredDevices": self.registered_devices
             }
             default_value = property_mapping.get(name, None)
         return super(User, self).get_property(name, default_value)

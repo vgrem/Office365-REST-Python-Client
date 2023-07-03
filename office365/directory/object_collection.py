@@ -57,18 +57,17 @@ class DirectoryObjectCollection(DeltaCollection):
     def remove(self, user_id):
         """Remove a user from the group.
 
-        :type user_id: str
+        :param str user_id: User identifier
         """
 
         qry = ServiceOperationQuery(self, "{0}/$ref".format(user_id))
-        self.context.add_query(qry)
 
-        def _construct_remove_user_request(request):
+        def _construct_request(request):
             """
             :type request: RequestOptions
             """
             request.method = HttpMethod.Delete
-        self.context.before_execute(_construct_remove_user_request)
+        self.context.add_query(qry).before_query_execute(_construct_request)
         return self
 
     def validate_properties(self, entity_type=None, display_name=None, mail_nickname=None, on_behalf_of_userid=None):

@@ -9,7 +9,8 @@ ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
 
 list_title = "Documents"
 folder = ctx.web.lists.get_by_title(list_title).root_folder
-path = "../../data/SharePoint User Guide.docx"
+# path = "../../data/SharePoint User Guide.docx"
+path = "../../data/Sample.pdf"
 with open(path, 'rb') as f:
     file = folder.files.upload(f).execute_query()
 print("File has been uploaded into: {0}".format(file.serverRelativeUrl))

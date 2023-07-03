@@ -36,7 +36,11 @@ class TestGraphUser(GraphTestCase):
     def test5_user_remove_license(self):
         pass
 
-    def test6_update_user(self):
+    def test6_list_app_role_assignments(self):
+        result = self.__class__.test_user.app_role_assignments.get().execute_query()
+        self.assertIsNotNone(result.resource_path)
+
+    def test7_update_user(self):
         user_to_update = self.__class__.test_user
         prop_name = 'city'
         prop_val = create_unique_name("city_")
@@ -45,19 +49,19 @@ class TestGraphUser(GraphTestCase):
         result = self.client.users.filter("{0} eq '{1}'".format(prop_name, prop_val)).get().execute_query()
         self.assertEqual(1, len(result))
 
-    #def test7_check_member_groups(self):
+    #def test8_check_member_groups(self):
     #    result = self.__class__.test_user.check_member_groups(["fee2c45b-915a-4a64b130f4eb9e75525e"]).execute_query()
     #    self.assertIsNotNone(result.value)
 
-    def test8_delete_user(self):
+    def test9_delete_user(self):
         user_to_delete = self.__class__.test_user
         user_to_delete.delete_object(True).execute_query()
 
-    def test9_get_user_changes(self):
+    def test_10_get_user_changes(self):
         changed_users = self.client.users.delta.get().execute_query()
         self.assertGreater(len(changed_users), 0)
 
-    def test_10_get_my_member_groups(self):
+    def test_11_get_my_member_groups(self):
         result = self.client.me.get_member_groups().execute_query()
         self.assertIsNotNone(result.value)
 

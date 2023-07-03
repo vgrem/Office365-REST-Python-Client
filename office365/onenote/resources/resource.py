@@ -2,6 +2,7 @@ from office365.onenote.entity_base_model import OnenoteEntityBaseModel
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.function import FunctionQuery
 
+
 class OnenoteResource(OnenoteEntityBaseModel):
     """An image or other file resource on a OneNote page."""
 
