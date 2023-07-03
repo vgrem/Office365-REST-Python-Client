@@ -2,11 +2,9 @@ import time
 import uuid
 
 from office365.teams.channels.channel import Channel
-from office365.teams.channels.membership_type import ChannelMembershipType
-from office365.teams.chats.message import ChatMessage
 from office365.outlook.mail.item_body import ItemBody
+from office365.teams.chats.messages.message import ChatMessage
 from office365.teams.team import Team
-from tests import test_user_principal_name_alt
 from tests.graph_case import GraphTestCase
 
 

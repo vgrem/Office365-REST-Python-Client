@@ -2,7 +2,9 @@ from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.teams.apps.installation import TeamsAppInstallation
-from office365.teams.chats.message import ChatMessage
+from office365.teams.chats.messages.message import ChatMessage
+
+from office365.teams.chats.messages.info import ChatMessageInfo
 from office365.teams.members.conversation_collection import ConversationMemberCollection
 from office365.teams.operations.async_operation import TeamsAsyncOperation
 from office365.teams.tabs.tab import TeamsTab
@@ -23,6 +25,13 @@ class Chat(Entity):
         return self.properties.get('installedApps',
                                    EntityCollection(self.context, TeamsAppInstallation,
                                                     ResourcePath("installedApps", self.resource_path)))
+
+    @property
+    def last_message_preview(self):
+        """Preview of the last message sent in the chat. Null if no messages have been sent in the chat."""
+        return self.properties.get('lastMessagePreview',
+                                   ChatMessageInfo(self.context,
+                                                   ResourcePath("lastMessagePreview", self.resource_path)))
 
     @property
     def members(self):
@@ -56,7 +65,8 @@ class Chat(Entity):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
-                "installedApps": self.installed_apps
+                "installedApps": self.installed_apps,
+                "lastMessagePreview": self.last_message_preview
             }
             default_value = property_mapping.get(name, None)
         return super(Chat, self).get_property(name, default_value)

@@ -111,6 +111,14 @@ class ContentType(BaseItem):
         return self.properties.get('parentId', None)
 
     @property
+    def propagate_changes(self):
+        """If 'true', changes to this column will be propagated to lists that implement the column.
+
+        :rtype: bool or None
+        """
+        return self.properties.get('propagateChanges', None)
+
+    @property
     def read_only(self):
         """
         If true, the content type cannot be modified unless this value is first set to false.

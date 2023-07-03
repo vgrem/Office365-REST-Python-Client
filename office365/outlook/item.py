@@ -43,5 +43,3 @@ class OutlookItem(Entity):
             }
             default_value = property_mapping.get(name, None)
         return super(OutlookItem, self).get_property(name, default_value)
-
-

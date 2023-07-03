@@ -1,7 +1,7 @@
 from office365.entity_collection import EntityCollection
 from office365.runtime.queries.function import FunctionQuery
 from office365.teams.channels.channel import Channel
-from office365.teams.chats.message import ChatMessage
+from office365.teams.chats.messages.message import ChatMessage
 
 
 class ChannelCollection(EntityCollection):

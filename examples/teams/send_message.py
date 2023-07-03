@@ -1,5 +1,5 @@
 """
-Send a new chatMessage in the specified channel or a chat.
+Send a new message in the specified channel or a chat.
 https://learn.microsoft.com/en-us/graph/api/chatmessage-post?view=graph-rest-1.0&tabs=http
 """
 import sys

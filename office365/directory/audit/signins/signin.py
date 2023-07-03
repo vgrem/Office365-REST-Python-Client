@@ -47,3 +47,11 @@ class SignIn(Entity):
         :rtype: str or None
         """
         return self.properties.get("status", SignInStatus())
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "deviceDetail": self.device_detail
+            }
+            default_value = property_mapping.get(name, None)
+        return super(SignIn, self).get_property(name, default_value)

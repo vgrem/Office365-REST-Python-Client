@@ -11,7 +11,8 @@ from office365.directory.groups.lifecycle_policy import GroupLifecyclePolicy
 from office365.directory.groups.setting_template import GroupSettingTemplate
 from office365.directory.identities.container import IdentityContainer
 from office365.directory.identities.governance import IdentityGovernance
-from office365.directory.identities.protection_root import IdentityProtectionRoot
+from office365.directory.protection.information import InformationProtection
+from office365.directory.protection.root import IdentityProtectionRoot
 from office365.directory.identities.provider import IdentityProvider
 from office365.directory.internal.paths.me import MePath
 from office365.directory.invitations.collection import InvitationCollection
@@ -19,10 +20,11 @@ from office365.directory.licenses.subscribed_sku import SubscribedSku
 from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.permissions.grants.resource_specific import ResourceSpecificPermissionGrant
 from office365.directory.policies.root import PolicyRoot
-from office365.directory.roles.management import RoleManagement
-from office365.directory.roles.role import DirectoryRole
+from office365.directory.rolemanagement.management import RoleManagement
+from office365.directory.rolemanagement.role import DirectoryRole
 from office365.directory.security.security import Security
 from office365.directory.serviceprincipals.collection import ServicePrincipalCollection
+from office365.directory.tenant_relationship import TenantRelationship
 from office365.directory.users.collection import UserCollection
 from office365.directory.users.user import User
 from office365.education.root import EducationRoot
@@ -163,6 +165,7 @@ class GraphClient(ClientRuntimeContext):
         """Get invitations"""
         return InvitationCollection(self, ResourcePath("invitations"))
 
+    @property
     def identity_protection(self):
         return IdentityProtectionRoot(self, ResourcePath("identityProtection"))
 
@@ -264,12 +267,24 @@ class GraphClient(ClientRuntimeContext):
         return IdentityGovernance(self, ResourcePath("identityGovernance"))
 
     @property
+    def information_protection(self):
+        """
+        Exposes methods that you can use to get Microsoft Purview Information Protection labels and label policies.
+        """
+        return InformationProtection(self, ResourcePath("informationProtection"))
+
+    @property
     def subscriptions(self):
         """
         Retrieve the properties and relationships of webhook subscriptions,
         based on the app ID, the user, and the user's role with a tenant.
         """
         return SubscriptionCollection(self, ResourcePath("subscriptions"))
+
+    @property
+    def tenant_relationships(self):
+        """Represent the various type of tenant relationships."""
+        return TenantRelationship(self, ResourcePath("tenantRelationships"))
 
     @property
     def audit_logs(self):
@@ -294,6 +309,7 @@ class GraphClient(ClientRuntimeContext):
 
     @property
     def role_management(self):
+        """Represents a Microsoft 365 role-based access control (RBAC) role management container"""
         return RoleManagement(self, ResourcePath("roleManagement"))
 
     @property
