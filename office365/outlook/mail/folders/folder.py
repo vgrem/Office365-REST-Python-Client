@@ -3,7 +3,7 @@ from office365.directory.extensions.extended_property import SingleValueLegacyEx
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.outlook.mail.messages.collection import MessageCollection
-from office365.outlook.mail.messages.message_rule import MessageRule
+from office365.outlook.mail.messages.rules.rule import MessageRule
 from office365.runtime.paths.resource_path import ResourcePath
 
 

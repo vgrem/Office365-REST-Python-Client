@@ -57,8 +57,7 @@ class Message(OutlookItem):
         return return_type
 
     def add_file_attachment(
-        self, name, content=None, content_type=None, base64_content=None
-    ):
+        self, name, content=None, content_type=None, base64_content=None):
         """
         Attach a file to message
 

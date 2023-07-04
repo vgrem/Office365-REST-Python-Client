@@ -15,13 +15,14 @@ class AuditEventCollection(EntityCollection):
         super(AuditEventCollection, self).__init__(context, AuditEvent, resource_path)
 
     def get_audit_categories(self):
+        """Not yet documented"""
         return_type = ClientResult(self.context, StringCollection())
         qry = FunctionQuery(self, "getAuditCategories", None, return_type)
         self.context.add_query(qry)
         return return_type
 
     def get_audit_activity_types(self, category):
-        """"""
+        """Not yet documented"""
         return_type = ClientResult(self.context, StringCollection())
         params = {"category": category}
         qry = FunctionQuery(self, "getAuditActivityTypes", params, return_type)

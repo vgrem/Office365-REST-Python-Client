@@ -1,11 +1,13 @@
+from office365.directory.authentication.methods.root import AuthenticationMethodsRoot
 from office365.entity import Entity
 from office365.reports.internal.queries.create_report_query import create_report_query
 from office365.runtime.client_result import ClientResult
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
 
 
 class ReportRoot(Entity):
-    """The resource that represents an instance of History Reports."""
+    """Represents a container for Azure Active Directory (Azure AD) reporting resources."""
 
     def get_email_activity_counts(self, period):
         """
@@ -174,3 +176,10 @@ class ReportRoot(Entity):
         qry = create_report_query(self, "getSharePointActivityUserDetail", period)
         self.context.add_query(qry)
         return qry.return_type
+
+    @property
+    def authentication_methods(self):
+        """Container for navigation properties for Azure AD authentication methods resources."""
+        return self.properties.get('authenticationMethods',
+                                   AuthenticationMethodsRoot(self.context,
+                                                             ResourcePath("authenticationMethods", self.resource_path)))

@@ -8,6 +8,20 @@ class Invitation(Entity):
     """Represents an invitation that is used to add external users to an organization."""
 
     @property
+    def invited_user_display_name(self):
+        """The display name of the user being invited.
+        :rtype: str
+        """
+        return self.properties.get("invitedUserDisplayName", None)
+
+    @property
+    def invited_user_email_address(self):
+        """The email address of the user being invited.
+        :rtype: str
+        """
+        return self.properties.get("invitedUserEmailAddress", None)
+
+    @property
     def invited_user_message_info(self):
         return self.properties.get("invitedUserMessageInfo", InvitedUserMessageInfo())
 

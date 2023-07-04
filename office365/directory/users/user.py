@@ -445,7 +445,7 @@ class User(DirectoryObject):
 
     @property
     def insights(self):
-        """"""
+        """Insights are relationships calculated using advanced analytics and machine learning techniques."""
         return self.properties.get('insights',
                                    OfficeGraphInsights(self.context, ResourcePath("insights", self.resource_path)))
 

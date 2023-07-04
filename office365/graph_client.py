@@ -249,7 +249,7 @@ class GraphClient(ClientRuntimeContext):
 
     @property
     def group_lifecycle_policies(self):
-        """"""
+        """A collection of lifecycle policies for a Microsoft 365 groups."""
         return EntityCollection(self, GroupLifecyclePolicy, ResourcePath("groupLifecyclePolicies"))
 
     @property
@@ -302,9 +302,7 @@ class GraphClient(ClientRuntimeContext):
 
     @property
     def reports(self):
-        """
-        The resource that represents an instance of History Reports.
-        """
+        """Represents a container for Azure Active Directory (Azure AD) reporting resources."""
         return ReportRoot(self, ResourcePath("reports"))
 
     @property
