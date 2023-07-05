@@ -4,15 +4,15 @@ For example, to sign in, perform multi-factor authentication (MFA), or to grant 
 to more resource access permissions.
 
 Note:
-    in AAD portal ensure Mobile and Desktop application is added for application
-    and http://localhost is set as redirect uri
+    in AAD portal ensure Mobile and Desktop application is added and http://localhost is set as redirect uri
 
 https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-authentication-flows#interactive-and-non-interactive-authentication
 """
 import msal
 
-from office365.graph_client import GraphClient
-from tests import test_tenant, test_client_id
+from office365.runtime.auth.token_response import TokenResponse
+from office365.sharepoint.client_context import ClientContext
+from tests import test_tenant, test_client_id, test_site_url, test_tenant_name
 
 
 def acquire_token():
@@ -21,11 +21,11 @@ def acquire_token():
         authority='https://login.microsoftonline.com/{0}'.format(test_tenant),
         client_credential=None
     )
-    scopes = ["https://graph.microsoft.com/.default"]
+    scopes = ["https://{0}.sharepoint.com/.default".format(test_tenant_name)]
     result = app.acquire_token_interactive(scopes=scopes)
-    return result
+    return TokenResponse.from_json(result)
 
 
-client = GraphClient(acquire_token)
-me = client.me.get().execute_query()
-print(me.user_principal_name)
+ctx = ClientContext(test_site_url).with_access_token(acquire_token)
+me = ctx.web.current_user.get().execute_query()
+print(me.login_name)

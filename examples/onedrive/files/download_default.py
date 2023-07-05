@@ -1,17 +1,17 @@
 """
-Download the contents of a DriveItem
+Download the contents of a DriveItem (file)
 
 https://learn.microsoft.com/en-us/graph/api/driveitem-get-content?view=graph-rest-1.0&tabs=http
 """
 import os
 import tempfile
 
-from examples import acquire_token_by_username_password
 from office365.graph_client import GraphClient
+from tests.graph_case import acquire_token_by_username_password
 
 client = GraphClient(acquire_token_by_username_password)
 # 1. address file by path
-#remote_path = "archive/countries.json"
+# remote_path = "archive/countries.json"
 remote_path = "archive/Sample.rtf"
 remote_file = client.me.drive.root.get_by_path(remote_path)
 # 2. download file content

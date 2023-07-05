@@ -1,8 +1,14 @@
+"""
+Demonstrates how to acquire access token via ADAL library
+
+Note: ADAL for Python is no longer receive new feature improvement. Its successor, MSAL for Python,
+are now generally available.
+"""
 from office365.graph_client import GraphClient
 from tests import load_settings
 
 
-def get_token_for_user():
+def acquire_token():
     import adal
     settings = load_settings()
     authority_url = 'https://login.microsoftonline.com/{0}'.format(settings['default']['tenant'])
@@ -15,6 +21,6 @@ def get_token_for_user():
     return token
 
 
-client = GraphClient(get_token_for_user)
+client = GraphClient(acquire_token)
 me = client.me.get().execute_query()
 print(me.properties('displayName'))

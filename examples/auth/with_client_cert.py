@@ -4,11 +4,12 @@ Demonstrates how to acquire a token by using certificate credentials.
 https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-authentication-flows#certificates
 """
 
-from examples import sample_tenant_name, sample_client_id, sample_thumbprint, sample_cert_path
+from examples import sample_tenant_name, sample_thumbprint, sample_cert_path
 from office365.graph_client import GraphClient
+from tests import test_client_id
 
 
-def acquire_token_with_client_certificate():
+def acquire_token():
     with open(sample_cert_path, 'r') as f:
         private_key = open(sample_cert_path).read()
 
@@ -16,7 +17,7 @@ def acquire_token_with_client_certificate():
     credentials = {"thumbprint": sample_thumbprint, "private_key": private_key}
     import msal
     app = msal.ConfidentialClientApplication(
-        sample_client_id,
+        test_client_id,
         authority=authority_url,
         client_credential=credentials,
     )
@@ -24,7 +25,7 @@ def acquire_token_with_client_certificate():
     return result
 
 
-client = GraphClient(acquire_token_with_client_certificate)
+client = GraphClient(acquire_token)
 drives = client.drives.get().top(10).execute_query()
 for drive in drives:
     print(drive.web_url)

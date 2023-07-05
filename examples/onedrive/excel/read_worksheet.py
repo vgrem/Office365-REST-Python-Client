@@ -1,7 +1,7 @@
 import sys
 
-from examples import acquire_token_by_username_password
 from office365.graph_client import GraphClient
+from tests.graph_case import acquire_token_by_username_password
 
 
 def upload_sample(graph_client):

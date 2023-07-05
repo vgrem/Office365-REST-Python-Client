@@ -22,6 +22,7 @@ class ClientResult(object):
     def after_execute(self, action, *args, **kwargs):
         """
         Attach an event handler which is triggered after query is submitted to server
+        :param (ClientResult) -> None action: Event handler
         """
         self._context.after_query_execute(action, self, *args, **kwargs)
         return self

@@ -1,25 +1,29 @@
+from office365.runtime.auth.authentication_provider import AuthenticationProvider
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
-from office365.runtime.auth.providers.oauth_token_provider import OAuthTokenProvider
 from office365.runtime.auth.providers.saml_token_provider import SamlTokenProvider
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.auth.user_credential import UserCredential
 from office365.runtime.compat import get_absolute_url
 
 
+def _get_authorization_header(token):
+    return '{token_type} {access_token}'.format(token_type=token.tokenType, access_token=token.accessToken)
+
+
 class AuthenticationContext(object):
+    """Authentication context for SharePoint Online/OneDrive For Business"""
 
     def __init__(self, url):
         """
-        Authentication context for SharePoint Online/OneDrive For Business
-
-        :param str url:  Absolute Web or Site Url
+        :param str url: SharePoint absolute web or site Url
         """
         self.url = url.rstrip("/")
-        self._provider = None
+        self._token_provider = None
+        self._cached_token = None
 
     def with_client_certificate(self, tenant, client_id, thumbprint, cert_path=None, private_key=None, scopes=None):
-        """Creates authenticated SharePoint context via certificate credentials
+        """Initializes a client to acquire a token via certificate credentials
 
         :param str tenant: Tenant name, for example {}@
         :param str client_id: The OAuth client id of the calling application.
@@ -53,45 +57,60 @@ class AuthenticationContext(object):
         return self
 
     def with_access_token(self, token_func):
-        self._provider = OAuthTokenProvider(token_func)
+        self._token_provider = token_func
 
     def with_credentials(self, credentials, **kwargs):
+        """
+        :param credentials:
+        """
         if isinstance(credentials, ClientCredential):
-            self._provider = ACSTokenProvider(self.url, credentials.clientId, credentials.clientSecret)
+            self._token_provider = ACSTokenProvider(self.url, credentials.clientId, credentials.clientSecret)
         elif isinstance(credentials, UserCredential):
             allow_ntlm = kwargs.get('allow_ntlm', False)
             if allow_ntlm:
                 from office365.runtime.auth.providers.ntlm_provider import NtlmProvider
-                self._provider = NtlmProvider(credentials.userName, credentials.password)
+                self._token_provider = NtlmProvider(credentials.userName, credentials.password)
             else:
                 browser_mode = kwargs.get('browser_mode', False)
-                self._provider = SamlTokenProvider(self.url, credentials.userName, credentials.password, browser_mode)
+                self._token_provider = SamlTokenProvider(self.url, credentials.userName, credentials.password, browser_mode)
         else:
             raise ValueError("Unknown credential type")
 
     def acquire_token_for_user(self, username, password, browser_mode=False):
-        """Acquire token via user credentials
+        """
+        Initializes a client to acquire a token via user credentials
         Status: deprecated!
 
-        :type password: str
-        :type username: str
-        :type browser_mode: str
+        :param str password: The user password
+        :param str username: Typically a UPN in the form of an email address
+        :param bool browser_mode:
         """
-        self._provider = SamlTokenProvider(url=self.url, username=username, password=password,
-                                           browser_mode=browser_mode)
-        return self._provider.ensure_authentication_cookie()
+        self._token_provider = SamlTokenProvider(url=self.url, username=username, password=password,
+                                                 browser_mode=browser_mode)
+        return self._token_provider.ensure_authentication_cookie()
 
     def acquire_token_for_app(self, client_id, client_secret):
-        """Acquire token via client credentials (SharePoint App Principal)
-        Status: deprecated!
         """
-        self._provider = ACSTokenProvider(url=self.url, client_id=client_id, client_secret=client_secret)
-        return self._provider.ensure_app_only_access_token()
+        Initializes a client to acquire a token via client credentials (SharePoint App-Only)
+
+        Status: deprecated!
+
+        :param str client_id: The OAuth client id of the calling application.
+        :param str client_secret: Secret string that the application uses to prove its identity when requesting a token
+        """
+        self._token_provider = ACSTokenProvider(url=self.url, client_id=client_id, client_secret=client_secret)
+        return self._token_provider.ensure_app_only_access_token()
 
     def authenticate_request(self, request):
         """
         Authenticate request
-
         :type request: office365.runtime.http.request_options.RequestOptions
         """
-        self._provider.authenticate_request(request)
+        if isinstance(self._token_provider, AuthenticationProvider):
+            self._token_provider.authenticate_request(request)
+        elif callable(self._token_provider):
+            if self._cached_token is None:
+                self._cached_token = self._token_provider()
+            request.set_header('Authorization', _get_authorization_header(self._cached_token))
+        else:
+            raise ValueError("Authentication credentials are missing or invalid")

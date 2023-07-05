@@ -6,7 +6,7 @@ Office 365 & Microsoft Graph library for Python
 1. [Installation](#Installation)
 2. [Working with SharePoint API](#Working-with-SharePoint-API) 
 3. [Working with Outlook API](#Working-with-Outlook-API) 
-4. [Working with OneDrive and SharePoint API v2 APIs](#Working-with-OneDrive-API)
+4. [Working with OneDrive and SharePoint API v2 APIs](#working-with-onedrive-and-sharepoint-v2-apis)
 5. [Working with Teams API](#Working-with-Microsoft-Teams-API)
 6. [Working with OneNote API](#Working-with-Microsoft-OneNote-API)
 7. [Working with Planner API](#Working-with-Microsoft-Planner-API)  

@@ -1,8 +1,12 @@
+"""
+Demonstrates how to download a large file
+"""
+
 import os
 import tempfile
 
-from examples import acquire_token_by_username_password
 from office365.graph_client import GraphClient
+from tests.graph_case import acquire_token_by_username_password
 
 
 def print_download_progress(offset):

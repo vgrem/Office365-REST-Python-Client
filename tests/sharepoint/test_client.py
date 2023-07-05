@@ -20,18 +20,18 @@ class TestSharePointClient(TestCase):
 
     def test1_connect_with_app_principal(self):
         ctx = ClientContext(test_site_url).with_credentials(test_client_credentials)
-        self.assertIsInstance(ctx.authentication_context._provider, ACSTokenProvider)
+        self.assertIsInstance(ctx.authentication_context._token_provider, ACSTokenProvider)
 
     def test2_connect_with_app_principal_alt(self):
         context_auth = AuthenticationContext(url=test_site_url)
         context_auth.acquire_token_for_app(client_id=settings.get('client_credentials', 'client_id'),
                                            client_secret=settings.get('client_credentials', 'client_secret'))
         ctx = ClientContext(test_site_url, context_auth)
-        self.assertIsInstance(ctx.authentication_context._provider, ACSTokenProvider)
+        self.assertIsInstance(ctx.authentication_context._token_provider, ACSTokenProvider)
 
     def test4_connect_with_user_credentials(self):
         ctx = ClientContext(test_site_url).with_credentials(test_user_credentials)
-        self.assertIsInstance(ctx.authentication_context._provider, SamlTokenProvider)
+        self.assertIsInstance(ctx.authentication_context._token_provider, SamlTokenProvider)
 
     def test5_init_from_url(self):
         page_url = "{site_url}/SitePages/Home.aspx".format(site_url=test_team_site_url)

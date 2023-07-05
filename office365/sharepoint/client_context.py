@@ -22,7 +22,7 @@ from office365.sharepoint.webs.web import Web
 
 
 class ClientContext(ClientRuntimeContext):
-    """SharePoint client context"""
+    """SharePoint client context (used for SharePoint v1 API)"""
 
     def __init__(self, base_url, auth_context=None):
         """
@@ -43,23 +43,16 @@ class ClientContext(ClientRuntimeContext):
     @staticmethod
     def from_url(full_url):
         """
-        Constructs ClientContext from absolute Url
+        Constructs a client from absolute resource url
 
-        :param str full_url: Full Url to a resource
-        :return: ClientContext
+        :param str full_url: Absolute Url to a resource
         """
         root_site_url = get_absolute_url(full_url)
         ctx = ClientContext(root_site_url)
-        result = Web.get_web_url_from_page_url(ctx, full_url)
 
-        def _init_context_for_web(resp):
-            """
-            :type resp: requests.Response
-            """
-            resp.raise_for_status()
-            ctx._auth_context.url = result.value
-
-        ctx.after_execute(_init_context_for_web)
+        def _init_context(return_type):
+            ctx._auth_context.url = return_type.value
+        Web.get_web_url_from_page_url(ctx, full_url).after_execute(_init_context)
         return ctx
 
     def with_client_certificate(self, tenant, client_id, thumbprint, cert_path=None, private_key=None, scopes=None):
@@ -86,12 +79,12 @@ class ClientContext(ClientRuntimeContext):
 
     def with_user_credentials(self, username, password, allow_ntlm=False, browser_mode=False):
         """
-        Assigns credentials
+        Gets a token for a given resource via user credentials
 
-        :type username: str
-        :type password: str
-        :type allow_ntlm: bool
-        :type browser_mode: bool
+        :param str username: Typically a UPN in the form of an email address
+        :param str password: The password
+        :param bool allow_ntlm: Flag indicates whether NTLM scheme is enabled. Disabled by default
+        :parm bool browser_mode:
         """
         self.authentication_context.with_credentials(
             UserCredential(username, password),
@@ -101,7 +94,7 @@ class ClientContext(ClientRuntimeContext):
 
     def with_credentials(self, credentials):
         """
-        Assigns credentials
+        Gets a token via user or client credentials
 
         :type credentials: UserCredential or ClientCredential
         """
@@ -110,7 +103,7 @@ class ClientContext(ClientRuntimeContext):
 
     def execute_batch(self, items_per_batch=100):
         """
-        Construct and submit a batch request
+        Construct and submit to a server a batch request
 
         :param int items_per_batch: Maximum to be selected for bulk operation
         """
@@ -143,7 +136,9 @@ class ClientContext(ClientRuntimeContext):
         request.set_header('X-RequestDigest', self._ctx_web_info.FormDigestValue)
 
     def _get_context_web_information(self):
-        """Returns an ContextWebInformation object that specifies metadata about the site"""
+        """
+        Returns an ContextWebInformation object that specifies metadata about the site
+        """
         client = ODataRequest(JsonLightFormat())
         client.beforeExecute += self._authenticate_request
         request = RequestOptions("{0}/contextInfo".format(self.service_root_url()))
@@ -284,9 +279,8 @@ class ClientContext(ClientRuntimeContext):
 
     @property
     def context_info(self):
-        """Returns an ContextWebInformation object that specifies metadata about the site
-
-        :rtype: ContextWebInformation
+        """
+        Returns an ContextWebInformation object that specifies metadata about the site
         """
         if self._ctx_web_info is None:
             self._ctx_web_info = ContextWebInformation()
@@ -294,20 +288,21 @@ class ClientContext(ClientRuntimeContext):
 
     @property
     def web(self):
-        """Get Web client object"""
+        """Get Web object"""
         if not self._web:
             self._web = Web(self)
         return self._web
 
     @property
     def site(self):
-        """Get Site client object"""
+        """Get Site object"""
         if not self._site:
             self._site = Site(self)
         return self._site
 
     @property
     def apps(self):
+        """"""
         from office365.sharepoint.apps.app_collection import AppCollection
         return AppCollection(self, ResourcePath("Apps"))
 

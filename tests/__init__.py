@@ -39,7 +39,12 @@ def load_settings():
 settings = load_settings()
 
 # shortcuts
+test_tenant_name = settings.get('default', 'tenant_prefix')
 test_tenant = settings.get('default', 'tenant')
+
+test_client_id = settings.get('client_credentials', 'client_id')
+test_client_secret = settings.get('client_credentials', 'client_secret')
+
 
 test_client_credentials = ClientCredential(settings.get('client_credentials', 'client_id'),
                                            settings.get('client_credentials', 'client_secret'))

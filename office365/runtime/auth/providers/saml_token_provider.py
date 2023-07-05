@@ -30,18 +30,22 @@ def xml_escape(s_val):
 
 
 def is_valid_auth_cookies(values):
+    """
+    Validates authorization cookies
+    """
     return any(values) and (values.get('FedAuth', None) is not None or values.get('SPOIDCRL', None) is not None)
 
 
 class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
 
     def __init__(self, url, username, password, browser_mode):
-        """SAML Security Token Service provider
+        """
+        SAML Security Token Service provider (claims-based authentication)
 
-        :type url: str
-        :type username: str
-        :type password: str
-        :type browser_mode: str
+        :param str url: Site or Web absolute url
+        :param str username: Typically a UPN in the form of an email address
+        :param str password: The password
+        :param bool browser_mode:
         """
         # Security Token Service info
         self._sts_profile = STSProfile(resolve_base_url(url))
@@ -70,8 +74,7 @@ class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
 
     def authenticate_request(self, request):
         """
-
-        :param request:
+        Authenticate request handler
         """
         logger = self.logger(self.authenticate_request.__name__)
         self.ensure_authentication_cookie()

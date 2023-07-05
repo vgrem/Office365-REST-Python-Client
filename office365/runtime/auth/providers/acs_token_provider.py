@@ -12,9 +12,9 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         """
         Provider to acquire the access token from a Microsoft Azure Access Control Service (ACS)
 
-        :type client_id: str
-        :type client_secret: str
-        :type url: str
+        :param str client_id: The OAuth client id of the calling application.
+        :param str client_secret: Secret string that the application uses to prove its identity when requesting a token
+        :param str url: SharePoint web or site url
         """
         self.url = url
         self.redirect_url = None
@@ -37,6 +37,9 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         return self._cached_token and self._cached_token.is_valid
 
     def get_app_only_access_token(self):
+        """
+        Retrieves an app-only access token from ACS
+        """
         try:
             realm = self._get_realm_from_target_url()
             url_info = urlparse(self.url)
