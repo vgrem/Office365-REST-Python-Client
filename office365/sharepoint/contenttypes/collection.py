@@ -19,7 +19,7 @@ class ContentTypeCollection(BaseEntityCollection):
         :param str name: Content type name
         :rtype: ContentType
         """
-        return self.filter("Name eq '{0}'".format(name)).single()
+        return self.single("Name eq '{0}'".format(name))
 
     def get_by_id(self, content_type_id):
         """

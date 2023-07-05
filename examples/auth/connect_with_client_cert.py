@@ -1,3 +1,9 @@
+"""
+Demonstrates how to acquire a token by using certificate credentials.
+
+https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-authentication-flows#certificates
+"""
+
 from examples import sample_tenant_name, sample_client_id, sample_thumbprint, sample_cert_path
 from office365.graph_client import GraphClient
 

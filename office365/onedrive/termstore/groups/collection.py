@@ -23,4 +23,4 @@ class GroupCollection(EntityCollection):
         :param str name: Group name
         :rtype: Group
         """
-        return self.filter("displayName eq '{0}'".format(name)).single()
+        return self.single("displayName eq '{0}'".format(name))

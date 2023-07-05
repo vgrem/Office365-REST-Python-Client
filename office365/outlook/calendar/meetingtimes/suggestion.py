@@ -1,5 +1,5 @@
 from office365.outlook.calendar.attendees.availability import AttendeeAvailability
-from office365.outlook.calendar.time_slot import TimeSlot
+from office365.outlook.calendar.meetingtimes.time_slot import TimeSlot
 from office365.outlook.mail.location import Location
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection

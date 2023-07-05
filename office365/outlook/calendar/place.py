@@ -7,6 +7,13 @@ class Place(Entity):
     This is the base type for richer location types such as room and roomList."""
 
     @property
+    def display_name(self):
+        """The name associated with the place.
+        :rtype: str or None
+        """
+        return self.properties.get("displayName", None)
+
+    @property
     def address(self):
         """The street address of the place."""
         return self.properties.get("address", PhysicalAddress())

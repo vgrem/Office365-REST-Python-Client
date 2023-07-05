@@ -15,4 +15,4 @@ class TermGroupCollection(TaxonomyItemCollection):
         :param str name: The name of the TermGroup.
         :rtype: TermGroup
         """
-        return self.filter("name eq '{0}'".format(name)).single()
+        return self.single("name eq '{0}'".format(name))

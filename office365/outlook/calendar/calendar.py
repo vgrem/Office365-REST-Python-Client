@@ -16,8 +16,7 @@ class Calendar(Entity):
     A calendar which is a container for events. It can be a calendar for a user, or the default calendar
         of a Microsoft 365 group.
     """
-
-    def get_schedule(self, schedules, start_time=None, end_time=None, availability_view_interval=30):
+    def get_schedule(self, schedules, start_time, end_time, availability_view_interval=30):
         """
         Get the free/busy availability information for a collection of users, distributions lists, or resources
         (rooms or equipment) for a specified time period.

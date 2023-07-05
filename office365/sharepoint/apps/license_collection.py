@@ -6,6 +6,5 @@ from office365.sharepoint.apps.license import AppLicense
 class AppLicenseCollection(ClientValue):
     """Specifies a collection of marketplace licenses."""
 
-    def __init__(self, items = ClientValueCollection(AppLicense)):
+    def __init__(self, items=ClientValueCollection(AppLicense)):
         self.Items = items
-

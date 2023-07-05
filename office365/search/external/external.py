@@ -1,6 +1,6 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
-from office365.external.connection import ExternalConnection
+from office365.search.external.connection import ExternalConnection
 from office365.runtime.paths.resource_path import ResourcePath
 
 

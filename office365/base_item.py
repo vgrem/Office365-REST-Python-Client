@@ -4,7 +4,7 @@ from office365.onedrive.listitems.item_reference import ItemReference
 
 
 class BaseItem(Entity):
-    """The baseItem resource is an abstract resource that contains a common set of properties shared among several
+    """The baseItem resource is an abstract resource that contains a auth set of properties shared among several
     other resources types """
 
     @property

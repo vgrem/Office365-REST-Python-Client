@@ -16885,6 +16885,15 @@
             <Member Name="serviceManaged" Value="3"/>
             <Member Name="unknownFutureValue" Value="4"/>
          </EnumType>
+         <EnumType Name="accessPackageCustomExtensionStage">
+            <Member Name="assignmentRequestCreated" Value="1"/>
+            <Member Name="assignmentRequestApproved" Value="2"/>
+            <Member Name="assignmentRequestGranted" Value="3"/>
+            <Member Name="assignmentRequestRemoved" Value="4"/>
+            <Member Name="assignmentFourteenDaysBeforeExpiration" Value="5"/>
+            <Member Name="assignmentOneDayBeforeExpiration" Value="6"/>
+            <Member Name="unknownFutureValue" Value="7"/>
+         </EnumType>
          <EnumType Name="accessPackageExternalUserLifecycleAction">
             <Member Name="none" Value="0"/>
             <Member Name="blockSignIn" Value="1"/>
@@ -16944,6 +16953,14 @@
             <Member Name="allConfiguredConnectedOrganizationUsers" Value="7"/>
             <Member Name="allExternalUsers" Value="8"/>
             <Member Name="unknownFutureValue" Value="10"/>
+         </EnumType>
+         <EnumType Name="customExtensionCalloutInstanceStatus">
+            <Member Name="calloutSent" Value="1"/>
+            <Member Name="callbackReceived" Value="2"/>
+            <Member Name="calloutFailed" Value="3"/>
+            <Member Name="callbackTimedOut" Value="4"/>
+            <Member Name="waitingForCallback" Value="5"/>
+            <Member Name="unknownFutureValue" Value="6"/>
          </EnumType>
          <EnumType Name="expirationPatternType">
             <Member Name="notSpecified" Value="0"/>
@@ -25216,12 +25233,14 @@
             <Property Name="specificAllowedTargets" Type="Collection(graph.subjectSet)"/>
             <NavigationProperty Name="accessPackage" Type="graph.accessPackage"/>
             <NavigationProperty Name="catalog" Type="graph.accessPackageCatalog"/>
+            <NavigationProperty Name="customExtensionStageSettings" Type="Collection(graph.customExtensionStageSetting)"/>
             <NavigationProperty Name="questions" Type="Collection(graph.accessPackageQuestion)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="accessPackageAssignmentRequest" BaseType="graph.entity">
             <Property Name="answers" Type="Collection(graph.accessPackageAnswer)"/>
             <Property Name="completedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="customExtensionCalloutInstances" Type="Collection(graph.customExtensionCalloutInstance)"/>
             <Property Name="requestType" Type="graph.accessPackageRequestType"/>
             <Property Name="schedule" Type="graph.entitlementManagementSchedule"/>
             <Property Name="state" Type="graph.accessPackageRequestState"/>
@@ -25231,6 +25250,7 @@
             <NavigationProperty Name="requestor" Type="graph.accessPackageSubject"/>
          </EntityType>
          <EntityType Name="accessPackageAssignment" BaseType="graph.entity">
+            <Property Name="customExtensionCalloutInstances" Type="Collection(graph.customExtensionCalloutInstance)"/>
             <Property Name="expiredDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="schedule" Type="graph.entitlementManagementSchedule"/>
             <Property Name="state" Type="graph.accessPackageAssignmentState"/>
@@ -25248,6 +25268,7 @@
             <Property Name="modifiedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="state" Type="graph.accessPackageCatalogState"/>
             <NavigationProperty Name="accessPackages" Type="Collection(graph.accessPackage)" ContainsTarget="true"/>
+            <NavigationProperty Name="customWorkflowExtensions" Type="Collection(graph.customCalloutExtension)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="connectedOrganization" BaseType="graph.entity">
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
@@ -25539,6 +25560,12 @@
             <Property Name="isApprovalRequiredForUpdate" Type="Edm.Boolean"/>
             <Property Name="stages" Type="Collection(graph.accessPackageApprovalStage)"/>
          </ComplexType>
+         <ComplexType Name="accessPackageAssignmentRequestCallbackData" BaseType="graph.customExtensionData">
+            <Property Name="customExtensionStageInstanceDetail" Type="Edm.String"/>
+            <Property Name="customExtensionStageInstanceId" Type="Edm.String"/>
+            <Property Name="stage" Type="graph.accessPackageCustomExtensionStage"/>
+            <Property Name="state" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="accessPackageAssignmentRequestorSettings">
             <Property Name="allowCustomAssignmentSchedule" Type="Edm.Boolean"/>
             <Property Name="enableOnBehalfRequestorsToAddAccess" Type="Edm.Boolean"/>
@@ -25590,6 +25617,13 @@
          <ComplexType Name="connectionInfo">
             <Property Name="url" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="customExtensionCalloutInstance">
+            <Property Name="customExtensionId" Type="Edm.String"/>
+            <Property Name="detail" Type="Edm.String"/>
+            <Property Name="externalCorrelationId" Type="Edm.String"/>
+            <Property Name="id" Type="Edm.String"/>
+            <Property Name="status" Type="graph.customExtensionCalloutInstanceStatus"/>
+         </ComplexType>
          <ComplexType Name="expirationPattern">
             <Property Name="duration" Type="Edm.Duration"/>
             <Property Name="endDateTime" Type="Edm.DateTimeOffset"/>
@@ -25624,6 +25658,24 @@
             <Property Name="principalName" Type="Edm.String"/>
             <Property Name="subjectType" Type="graph.accessPackageSubjectType"/>
             <NavigationProperty Name="connectedOrganization" Type="graph.connectedOrganization"/>
+         </EntityType>
+         <EntityType Name="customExtensionStageSetting" BaseType="graph.entity">
+            <Property Name="stage" Type="graph.accessPackageCustomExtensionStage" Nullable="false"/>
+            <NavigationProperty Name="customExtension" Type="graph.customCalloutExtension"/>
+         </EntityType>
+         <EntityType Name="accessPackageAssignmentRequestWorkflowExtension" BaseType="graph.customCalloutExtension">
+            <Property Name="callbackConfiguration" Type="graph.customExtensionCallbackConfiguration"/>
+            <Property Name="createdBy" Type="Edm.String"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="lastModifiedBy" Type="Edm.String"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+         </EntityType>
+         <EntityType Name="accessPackageAssignmentWorkflowExtension" BaseType="graph.customCalloutExtension">
+            <Property Name="callbackConfiguration" Type="graph.customExtensionCallbackConfiguration"/>
+            <Property Name="createdBy" Type="Edm.String"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="lastModifiedBy" Type="Edm.String"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
          </EntityType>
          <EntityType Name="accessPackageMultipleChoiceQuestion" BaseType="graph.accessPackageQuestion">
             <Property Name="choices" Type="Collection(graph.accessPackageAnswerChoice)"/>
@@ -34487,6 +34539,12 @@
          </Action>
          <Action Name="reprocess" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.accessPackageAssignment"/>
+         </Action>
+         <Action Name="resume" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.accessPackageAssignmentRequest"/>
+            <Parameter Name="source" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="type" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="data" Type="graph.customExtensionData"/>
          </Action>
          <Action Name="getApplicablePolicyRequirements" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.accessPackage"/>

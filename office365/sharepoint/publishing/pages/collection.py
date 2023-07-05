@@ -80,7 +80,7 @@ class SitePageCollection(SitePageMetadataCollection):
 
         :rtype: SitePage
         """
-        return self.filter("FileName eq '{0}'".format(name)).single()
+        return self.single("FileName eq '{0}'".format(name))
 
     def templates(self):
         return SitePageMetadataCollection(self.context, SitePage,

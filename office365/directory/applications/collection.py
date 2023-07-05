@@ -1,5 +1,6 @@
 from office365.delta_collection import DeltaCollection
 from office365.directory.applications.application import Application
+from office365.runtime.paths.appid import AppIdPath
 
 
 class ApplicationCollection(DeltaCollection):
@@ -14,4 +15,4 @@ class ApplicationCollection(DeltaCollection):
         :param str app_id: Application client identifier
         :rtype: Application
         """
-        return self.filter("appId eq '{0}'".format(app_id)).single()
+        return Application(self.context, AppIdPath(app_id, self.resource_path))

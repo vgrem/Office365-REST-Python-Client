@@ -127,7 +127,7 @@ class Drive(BaseItem):
 
     @property
     def special(self):
-        """Collection of common folders available in OneDrive. Read-only. Nullable."""
+        """Collection of auth folders available in OneDrive. Read-only. Nullable."""
         return self.properties.get('special',
                                    EntityCollection(self.context, DriveItem,
                                                     ResourcePath("special", self.resource_path)))

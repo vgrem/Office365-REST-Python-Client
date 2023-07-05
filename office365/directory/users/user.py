@@ -19,6 +19,7 @@ from office365.directory.profile_photo import ProfilePhoto
 from office365.directory.users.activities.collection import UserActivityCollection
 from office365.directory.users.settings import UserSettings
 from office365.entity_collection import EntityCollection
+from office365.intune.devices.data import DeviceAndAppManagementData
 from office365.intune.devices.managed import ManagedDevice
 from office365.intune.devices.managed_app_diagnostic_status import ManagedAppDiagnosticStatus
 from office365.onedrive.drives.drive import Drive
@@ -135,7 +136,7 @@ class User(DirectoryObject):
         self.context.add_query(qry)
         return self
 
-    def send_mail(self, subject, body, to_recipients, cc_recipients=[], bcc_recipients=[], save_to_sent_items=False):
+    def send_mail(self, subject, body, to_recipients, cc_recipients=None, bcc_recipients=None, save_to_sent_items=False):
         """Send a new message on the fly
 
         :param str subject: The subject of the message.
@@ -150,8 +151,10 @@ class User(DirectoryObject):
         return_type.subject = subject
         return_type.body = body
         [return_type.to_recipients.add(Recipient.from_email(email)) for email in to_recipients]
-        [return_type.bcc_recipients.add(Recipient.from_email(email)) for email in bcc_recipients]
-        [return_type.cc_recipients.add(Recipient.from_email(email)) for email in cc_recipients]
+        if bcc_recipients is not None:
+            [return_type.bcc_recipients.add(Recipient.from_email(email)) for email in bcc_recipients]
+        if cc_recipients is not None:
+            [return_type.cc_recipients.add(Recipient.from_email(email)) for email in cc_recipients]
 
         payload = {
             "message": return_type,
@@ -176,7 +179,16 @@ class User(DirectoryObject):
         self.context.add_query(qry)
         return self
 
-    def find_meeting_times(self, attendees=None, location_constraint=None):
+    def export_device_and_app_management_data(self):
+        """"""
+        return_type = ClientResult(self.context, ClientValueCollection(DeviceAndAppManagementData))
+        qry = FunctionQuery(self, "exportDeviceAndAppManagementData", None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def find_meeting_times(self, attendees=None, location_constraint=None, time_constraint=None,
+                           meeting_duration=None, max_candidates=None, is_organizer_optional=None,
+                           return_suggestion_reasons=None, minimum_attendee_percentage=None):
         """
         Suggest meeting times and locations based on organizer and attendees availability, and time or location
         constraints specified as parameters.
@@ -196,10 +208,31 @@ class User(DirectoryObject):
         :param office365.outlook.calendar.location_constraint.LocationConstraint or None location_constraint:
             The organizer's requirements about the meeting location, such as whether a suggestion for a meeting
             location is required, or there are specific locations only where the meeting can take place. Optional.
+        :param TimeConstraint time_constraint: Any time restrictions for a meeting, which can include the nature
+            of the meeting (activityDomain property) and possible meeting time periods (timeSlots property).
+            findMeetingTimes assumes activityDomain as work if you don't specify this parameter. Optional.
+        :param str meeting_duration: The length of the meeting, denoted in ISO8601 format.
+             For example, 1 hour is denoted as 'PT1H', where 'P' is the duration designator,
+             'T' is the time designator, and 'H' is the hour designator.
+             Use M to indicate minutes for the duration; for example, 2 hours and 30 minutes would be 'PT2H30M'.
+             If no meeting duration is specified, findMeetingTimes uses the default of 30 minutes. Optional.
+        :param int max_candidates: The maximum number of meeting time suggestions to be returned. Optional.
+        :param bool is_organizer_optional: Specify True if the organizer doesn't necessarily have to attend.
+             The default is false. Optiona
+        :param bool return_suggestion_reasons: Specify True to return a reason for each meeting suggestion in
+             the suggestionReason property. The default is false to not return that property. Optional.
+        :param float minimum_attendee_percentage: The minimum required confidence for a time slot to be returned
+            in the response. It is a % value ranging from 0 to 100. Optional.
         """
         payload = {
             "attendees": ClientValueCollection(AttendeeBase, attendees),
-            "locationConstraint": location_constraint
+            "locationConstraint": location_constraint,
+            "timeConstraint": time_constraint,
+            "meeting_duration": meeting_duration,
+            "maxCandidates": max_candidates,
+            "isOrganizerOptional": is_organizer_optional,
+            "returnSuggestionReasons": return_suggestion_reasons,
+            "minimumAttendeePercentage": minimum_attendee_percentage
         }
         return_type = ClientResult(self.context, MeetingTimeSuggestionsResult())
         qry = ServiceOperationQuery(self, "findMeetingTimes", None, payload, None, return_type)
@@ -218,7 +251,6 @@ class User(DirectoryObject):
         """
         return_type = EntityCollection(self.context, Event, ResourcePath("calendarView", self.resource_path))
         qry = ServiceOperationQuery(self, "calendarView", None, None, None, return_type)
-        self.context.add_query(qry)
 
         def _construct_request(request):
             """
@@ -227,7 +259,7 @@ class User(DirectoryObject):
             request.method = HttpMethod.Get
             request.url += "?startDateTime={0}&endDateTime={1}".format(start_dt.isoformat(), end_dt.isoformat())
 
-        self.context.before_execute(_construct_request)
+        self.context.add_query(qry).before_execute(_construct_request)
         return return_type
 
     def get_reminder_view(self, start_dt, end_dt):

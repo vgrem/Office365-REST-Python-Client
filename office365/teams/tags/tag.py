@@ -5,7 +5,7 @@ class TeamworkTag(Entity):
     """
     Represents a tag associated with a team.
 
-    Tags provide a flexible way for customers to classify users or groups based on a common attribute within a team.
+    Tags provide a flexible way for customers to classify users or groups based on a auth attribute within a team.
     For example, a Nurse, Manager, or Designer tag will enable users to reach groups of people in Teams without
     having to type every single name.
 

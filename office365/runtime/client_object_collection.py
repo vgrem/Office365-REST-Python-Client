@@ -206,8 +206,11 @@ class ClientObjectCollection(ClientObject):
         self.context.load(self, before_loaded=_construct_next_query, after_loaded=after_loaded)
         return self
 
-    def first(self):
-        """Return the first Entity instance that matches current query"""
+    def first(self, expression):
+        """Return the first Entity instance that matches current query
+
+        :param str expression: Filter expression
+        """
         return_type = self.create_typed_object()
         self.add_child(return_type)
         key = return_type.property_ref_name
@@ -221,13 +224,15 @@ class ClientObjectCollection(ClientObject):
                 raise ValueError(message)
             return_type.set_property(key, col[0].get_property(key))
 
-        self.top(1)
+        self.filter(expression).top(1)
         self.context.load(self, [key], after_loaded=_after_loaded)
         return return_type
 
-    def single(self):
+    def single(self, expression):
         """
         Return only one resulting Entity
+
+        :param str expression: Filter expression
         """
         return_type = self.create_typed_object()
         self.add_child(return_type)
@@ -238,14 +243,14 @@ class ClientObjectCollection(ClientObject):
             :type col: ClientObjectCollection
             """
             if len(col) == 0:
-                message = "Not found for filter: {0}".format(self.query_options.filter)
+                message = "Not found for filter: {0}".format(expression)
                 raise ValueError(message)
             elif len(col) > 1:
-                message = "Ambiguous match found for filter: {0}".format(self.query_options.filter)
+                message = "Ambiguous match found for filter: {0}".format(expression)
                 raise ValueError(message)
             return_type.set_property(key, col[0].get_property(key), False)
 
-        self.top(2)
+        self.filter(expression).top(2)
         self.context.load(self, after_loaded=_after_loaded)
         return return_type
 

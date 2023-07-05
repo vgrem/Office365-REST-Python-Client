@@ -247,7 +247,7 @@ Additional examples & scenarios:
 Refer to [examples section](examples/outlook) for other scenarios
 
 
-# Working with OneDrive and SharePoint API v2 APIs
+# Working with OneDrive and SharePoint v2 APIs
 
 #### Documentation 
 

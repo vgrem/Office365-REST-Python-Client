@@ -29,7 +29,7 @@ from office365.directory.users.collection import UserCollection
 from office365.directory.users.user import User
 from office365.education.root import EducationRoot
 from office365.entity_collection import EntityCollection
-from office365.external.external import External
+from office365.search.external.external import External
 from office365.intune.devices.app_management import DeviceAppManagement
 from office365.intune.devices.management import DeviceManagement
 from office365.intune.organizations.contact import OrgContact
