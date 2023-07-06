@@ -1,8 +1,8 @@
 class TokenResponse(object):
 
-    def __init__(self, accessToken=None, tokenType=None, **kwargs):
-        self.accessToken = accessToken
-        self.tokenType = tokenType
+    def __init__(self, access_token=None, token_type=None, **kwargs):
+        self.accessToken = access_token
+        self.tokenType = token_type
         for key, value in kwargs.items():
             setattr(self, key, value)
 

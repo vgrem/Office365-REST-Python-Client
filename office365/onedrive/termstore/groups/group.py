@@ -4,6 +4,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 
 
 class Group(Entity):
+    """Term Group"""
 
     @property
     def display_name(self):

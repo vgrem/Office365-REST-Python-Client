@@ -53,7 +53,7 @@ class DriveItem(BaseItem):
         """
         Creates a PowerPoint file
 
-        :param str name:
+        :param str name: File name
         """
         return self.upload(name, None)
 

@@ -3,35 +3,37 @@ from unittest import TestCase
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.odata.type import ODataType
 from office365.runtime.odata.query_options import QueryOptions
+from office365.runtime.odata.type import ODataType
 from office365.runtime.types.collections import StringCollection, GuidCollection
+from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.principal.users.id_info import UserIdInfo
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
     SecondaryAdministratorsFieldsData
+from office365.sharepoint.webs.web import Web
 from tests import test_site_url, test_client_credentials, test_user_credentials, settings, create_unique_name, \
     create_unique_file_name, test_team_site_url
-from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
-from office365.runtime.auth.providers.saml_token_provider import SamlTokenProvider
-from office365.sharepoint.client_context import ClientContext
 
 
 class TestSharePointClient(TestCase):
 
     def test1_connect_with_app_principal(self):
         ctx = ClientContext(test_site_url).with_credentials(test_client_credentials)
-        self.assertIsInstance(ctx.authentication_context._token_provider, ACSTokenProvider)
+        result = Web.get_context_web_information(ctx).execute_query()
+        self.assertIsNotNone(result.value.WebFullUrl)
 
     def test2_connect_with_app_principal_alt(self):
         context_auth = AuthenticationContext(url=test_site_url)
         context_auth.acquire_token_for_app(client_id=settings.get('client_credentials', 'client_id'),
                                            client_secret=settings.get('client_credentials', 'client_secret'))
         ctx = ClientContext(test_site_url, context_auth)
-        self.assertIsInstance(ctx.authentication_context._token_provider, ACSTokenProvider)
+        result = Web.get_context_web_information(ctx).execute_query()
+        self.assertIsNotNone(result.value.WebFullUrl)
 
     def test4_connect_with_user_credentials(self):
         ctx = ClientContext(test_site_url).with_credentials(test_user_credentials)
-        self.assertIsInstance(ctx.authentication_context._token_provider, SamlTokenProvider)
+        result = Web.get_context_web_information(ctx).execute_query()
+        self.assertIsNotNone(result.value.WebFullUrl)
 
     def test5_init_from_url(self):
         page_url = "{site_url}/SitePages/Home.aspx".format(site_url=test_team_site_url)

@@ -56,7 +56,8 @@ class ClientContext(ClientRuntimeContext):
         return ctx
 
     def with_client_certificate(self, tenant, client_id, thumbprint, cert_path=None, private_key=None, scopes=None):
-        """Creates authenticated SharePoint context via certificate credentials
+        """
+        Creates authenticated SharePoint context via certificate credentials
 
         :param str tenant: Tenant name
         :param str or None cert_path: Path to A PEM encoded certificate private key.
@@ -70,21 +71,37 @@ class ClientContext(ClientRuntimeContext):
                                                             scopes)
         return self
 
+    def with_interactive(self, tenant, client_id, scopes=None):
+        """
+        Initializes a client to acquire a token interactively i.e. via a local browser.
+
+        Prerequisite: In Azure Portal, configure the Redirect URI of your
+        "Mobile and Desktop application" as ``http://localhost``.
+
+        :param str tenant: Tenant name, for example: contoso.onmicrosoft.com
+        :param str client_id: The OAuth client id of the calling application.
+        :param list[str] or None scopes:  Scopes requested to access a protected API (a resource)
+        """
+        self.authentication_context.with_interactive(tenant, client_id, scopes)
+        return self
+
     def with_access_token(self, token_func):
         """
-        :type token_func: () -> TokenResponse
+        Initializes a client to acquire a token from a callback
+
+        :param () -> TokenResponse token_func: A callback
         """
         self.authentication_context.with_access_token(token_func)
         return self
 
     def with_user_credentials(self, username, password, allow_ntlm=False, browser_mode=False):
         """
-        Gets a token for a given resource via user credentials
+        Initializes a client to acquire a token via user credentials
 
-        :param str username: Typically a UPN in the form of an email address
+        :param str username: Typically, a UPN in the form of an email address
         :param str password: The password
         :param bool allow_ntlm: Flag indicates whether NTLM scheme is enabled. Disabled by default
-        :parm bool browser_mode:
+        :param bool browser_mode:
         """
         self.authentication_context.with_credentials(
             UserCredential(username, password),
@@ -94,7 +111,7 @@ class ClientContext(ClientRuntimeContext):
 
     def with_credentials(self, credentials):
         """
-        Gets a token via user or client credentials
+        Initializes a client to acquire a token via user or client credentials
 
         :type credentials: UserCredential or ClientCredential
         """
@@ -189,6 +206,10 @@ class ClientContext(ClientRuntimeContext):
         return ctx
 
     def _authenticate_request(self, request):
+        """
+        Authenticate request
+        :type request: office365.runtime.http.request_options.RequestOptions
+        """
         self.authentication_context.authenticate_request(request)
 
     def _build_modification_query(self, request):

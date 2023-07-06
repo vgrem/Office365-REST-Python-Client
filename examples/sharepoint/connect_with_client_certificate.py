@@ -1,5 +1,6 @@
 """
 Example: Azure AD App-Only auth flow
+
 https://learn.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread
 """
 
