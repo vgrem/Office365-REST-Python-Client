@@ -11,7 +11,7 @@ class ListCollection(EntityCollection):
 
     def __getitem__(self, key):
         """
-        Address List by identifier or name
+        Gets List by it's identifier or name
         :param str key: List identifier or name
         :rtype: List
         """

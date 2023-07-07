@@ -22,7 +22,7 @@ class PermissionCollection(EntityCollection):
 
         return_type = Permission(self.context)
 
-        known_identity_endpoints = {
+        known_identities = {
             "application": self.context.applications,
             "user": self.context.users,
             "device": self.context.device_app_management,
@@ -34,10 +34,10 @@ class PermissionCollection(EntityCollection):
         else:
             if identity_type is None:
                 raise ValueError("Identity type is a mandatory when identity identifier is specified")
-            known_identity_endpoint = known_identity_endpoints.get(identity_type, None)
-            if known_identity_endpoint is None:
+            known_identity = known_identities.get(identity_type, None)
+            if known_identity is None:
                 raise ValueError("Unknown identity type")
-            identity = known_identity_endpoint[identity]
+            identity = known_identity[identity]
 
         def _create():
             payload = {

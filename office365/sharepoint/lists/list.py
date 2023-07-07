@@ -391,13 +391,13 @@ class List(SecurableObject):
             qry = ServiceOperationQuery(self, "items", None, return_type, None, return_type)
             self.context.add_query(qry)
         else:
-            def _folder_loaded():
+            def _add_item():
                 creation_information.FolderUrl = self.context.base_url + self.root_folder.serverRelativeUrl
                 payload = {"parameters": creation_information}
                 next_qry = ServiceOperationQuery(self, "addItem", None, payload, None, return_type)
                 self.context.add_query(next_qry)
 
-            self.root_folder.ensure_property("ServerRelativeUrl", _folder_loaded)
+            self.root_folder.ensure_property("ServerRelativeUrl", _add_item)
         return return_type
 
     def create_wiki_page(self, page_name, page_content):

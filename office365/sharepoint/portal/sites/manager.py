@@ -29,20 +29,19 @@ class SPSiteManager(BaseEntity):
         """
         return_type = ClientResult(self.context, SPSiteCreationResponse())
 
-        def _create_query(owner_string=None):
+        def _create(owner_string=None):
             request = SPSiteCreationRequest(title, site_url, owner_string)
             payload = {"request": request}
-            return ServiceOperationQuery(self, "Create", None, payload, None, return_type)
+            qry = ServiceOperationQuery(self, "Create", None, payload, None, return_type)
+            self.context.add_query(qry)
 
         from office365.sharepoint.principal.users.user import User
         if isinstance(owner, User):
             def _owner_loaded():
-                next_qry = _create_query(owner.user_principal_name)
-                self.context.add_query(next_qry)
+                _create(owner.user_principal_name)
             owner.ensure_property("UserPrincipalName", _owner_loaded)
         else:
-            qry = _create_query(owner)
-            self.context.add_query(qry)
+            _create(owner)
         return return_type
 
     def delete(self, site_id):

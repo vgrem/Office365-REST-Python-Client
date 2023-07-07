@@ -241,6 +241,9 @@ class DriveItem(BaseItem):
             request.method = HttpMethod.Get
 
         def _process_download_response(response):
+            """
+            :type response: requests.Response
+            """
             bytes_read = 0
             for chunk in response.iter_content(chunk_size=chunk_size):
                 bytes_read += len(chunk)
@@ -312,7 +315,7 @@ class DriveItem(BaseItem):
                 return
             return_type.set_property("__value", location)
 
-        def _create_query(parent_reference):
+        def _create_and_add_query(parent_reference):
             """
             :param office365.onedrive.listitems.item_reference.ItemReference or None parent_reference:  Reference to the
              parent item the copy will be created in.
@@ -323,18 +326,16 @@ class DriveItem(BaseItem):
             }
             self.context.before_execute(_create_request)
             self.context.after_execute(_process_response)
-            return ServiceOperationQuery(self, "copy", None, payload, None, return_type)
+            qry = ServiceOperationQuery(self, "copy", None, payload, None, return_type)
+            self.context.add_query(qry)
 
         if isinstance(parent, DriveItem):
             def _drive_item_loaded():
                 parent_reference = ItemReference(drive_id=parent.parent_reference.driveId, _id=parent.id)
-                next_qry = _create_query(parent_reference)
-                self.context.add_query(next_qry)
-
+                _create_and_add_query(parent_reference)
             parent.ensure_property("parentReference", _drive_item_loaded)
         else:
-            qry = _create_query(parent)
-            self.context.add_query(qry)
+            _create_and_add_query(parent)
         return return_type
 
     def move(self, name=None, parent=None):
@@ -349,7 +350,7 @@ class DriveItem(BaseItem):
 
         return_type = ClientResult(self.context, str())
 
-        def _create_query(parent_reference):
+        def _create_and_add_query(parent_reference):
             payload = {
                 "name": name,
                 "parentReference": parent_reference
@@ -359,18 +360,15 @@ class DriveItem(BaseItem):
                 request.method = HttpMethod.Patch
 
             self.context.before_execute(_construct_request)
-            return ServiceOperationQuery(self, "move", None, payload, None, return_type)
+            qry = ServiceOperationQuery(self, "move", None, payload, None, return_type)
+            self.context.add_query(qry)
 
         if isinstance(parent, DriveItem):
             def _drive_item_loaded():
-                parent_reference = ItemReference(_id=parent.id)
-                next_qry = _create_query(parent_reference)
-                self.context.add_query(next_qry)
-
+                _create_and_add_query(ItemReference(_id=parent.id))
             parent.ensure_property("parentReference", _drive_item_loaded)
         else:
-            qry = _create_query(parent)
-            self.context.add_query(qry)
+            _create_and_add_query(parent)
         return return_type
 
     def rename(self, new_name):
