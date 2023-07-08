@@ -20,16 +20,6 @@ sample_username = settings.get('user_credentials', "username")
 sample_password = settings.get('user_credentials', "password")
 
 
-def acquire_token_by_client_credentials():
-    authority_url = 'https://login.microsoftonline.com/{0}'.format(sample_tenant_name)
-    app = msal.ConfidentialClientApplication(
-        authority=authority_url,
-        client_id=sample_client_id,
-        client_credential=settings.get('client_credentials', 'client_secret')
-    )
-    return app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
-
-
 def acquire_token_by_username_password():
     authority_url = 'https://login.microsoftonline.com/{0}'.format(sample_tenant_name)
     app = msal.PublicClientApplication(

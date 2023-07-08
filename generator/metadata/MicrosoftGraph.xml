@@ -20276,6 +20276,10 @@
             <NavigationProperty Name="assignments" Type="Collection(graph.accessPackageAssignment)" ContainsTarget="true"/>
             <NavigationProperty Name="catalogs" Type="Collection(graph.accessPackageCatalog)" ContainsTarget="true"/>
             <NavigationProperty Name="connectedOrganizations" Type="Collection(graph.connectedOrganization)" ContainsTarget="true"/>
+            <NavigationProperty Name="resourceEnvironments" Type="Collection(graph.accessPackageResourceEnvironment)" ContainsTarget="true"/>
+            <NavigationProperty Name="resourceRequests" Type="Collection(graph.accessPackageResourceRequest)" ContainsTarget="true"/>
+            <NavigationProperty Name="resourceRoleScopes" Type="Collection(graph.accessPackageResourceRoleScope)" ContainsTarget="true"/>
+            <NavigationProperty Name="resources" Type="Collection(graph.accessPackageResource)" ContainsTarget="true"/>
             <NavigationProperty Name="settings" Type="graph.entitlementManagementSettings" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="user" BaseType="graph.directoryObject" OpenType="true">
@@ -25218,6 +25222,7 @@
             <NavigationProperty Name="catalog" Type="graph.accessPackageCatalog"/>
             <NavigationProperty Name="incompatibleAccessPackages" Type="Collection(graph.accessPackage)"/>
             <NavigationProperty Name="incompatibleGroups" Type="Collection(graph.group)" ContainsTarget="true"/>
+            <NavigationProperty Name="resourceRoleScopes" Type="Collection(graph.accessPackageResourceRoleScope)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="accessPackageAssignmentPolicy" BaseType="graph.entity">
             <Property Name="allowedTargetScope" Type="graph.allowedTargetScope"/>
@@ -25269,6 +25274,9 @@
             <Property Name="state" Type="graph.accessPackageCatalogState"/>
             <NavigationProperty Name="accessPackages" Type="Collection(graph.accessPackage)" ContainsTarget="true"/>
             <NavigationProperty Name="customWorkflowExtensions" Type="Collection(graph.customCalloutExtension)" ContainsTarget="true"/>
+            <NavigationProperty Name="resourceRoles" Type="Collection(graph.accessPackageResourceRole)" ContainsTarget="true"/>
+            <NavigationProperty Name="resources" Type="Collection(graph.accessPackageResource)" ContainsTarget="true"/>
+            <NavigationProperty Name="resourceScopes" Type="Collection(graph.accessPackageResourceScope)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="connectedOrganization" BaseType="graph.entity">
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
@@ -25279,6 +25287,39 @@
             <Property Name="state" Type="graph.connectedOrganizationState"/>
             <NavigationProperty Name="externalSponsors" Type="Collection(graph.directoryObject)" ContainsTarget="true"/>
             <NavigationProperty Name="internalSponsors" Type="Collection(graph.directoryObject)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="accessPackageResourceEnvironment" BaseType="graph.entity">
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="isDefaultEnvironment" Type="Edm.Boolean"/>
+            <Property Name="modifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="originId" Type="Edm.String"/>
+            <Property Name="originSystem" Type="Edm.String"/>
+            <NavigationProperty Name="resources" Type="Collection(graph.accessPackageResource)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="accessPackageResourceRequest" BaseType="graph.entity">
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="requestType" Type="graph.accessPackageRequestType"/>
+            <Property Name="state" Type="graph.accessPackageRequestState"/>
+            <NavigationProperty Name="catalog" Type="graph.accessPackageCatalog" ContainsTarget="true"/>
+            <NavigationProperty Name="resource" Type="graph.accessPackageResource" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="accessPackageResourceRoleScope" BaseType="graph.entity">
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <NavigationProperty Name="role" Type="graph.accessPackageResourceRole" ContainsTarget="true"/>
+            <NavigationProperty Name="scope" Type="graph.accessPackageResourceScope" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="accessPackageResource" BaseType="graph.entity">
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="modifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="originId" Type="Edm.String"/>
+            <Property Name="originSystem" Type="Edm.String"/>
+            <NavigationProperty Name="environment" Type="graph.accessPackageResourceEnvironment"/>
+            <NavigationProperty Name="roles" Type="Collection(graph.accessPackageResourceRole)" ContainsTarget="true"/>
+            <NavigationProperty Name="scopes" Type="Collection(graph.accessPackageResourceScope)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="entitlementManagementSettings" BaseType="graph.entity">
             <Property Name="durationUntilExternalUserDeletedAfterBlocked" Type="Edm.Duration"/>
@@ -25676,6 +25717,21 @@
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="lastModifiedBy" Type="Edm.String"/>
             <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+         </EntityType>
+         <EntityType Name="accessPackageResourceRole" BaseType="graph.entity">
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="originId" Type="Edm.String"/>
+            <Property Name="originSystem" Type="Edm.String"/>
+            <NavigationProperty Name="resource" Type="graph.accessPackageResource" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="accessPackageResourceScope" BaseType="graph.entity">
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="isRootScope" Type="Edm.Boolean"/>
+            <Property Name="originId" Type="Edm.String"/>
+            <Property Name="originSystem" Type="Edm.String"/>
+            <NavigationProperty Name="resource" Type="graph.accessPackageResource" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="accessPackageMultipleChoiceQuestion" BaseType="graph.accessPackageQuestion">
             <Property Name="choices" Type="Collection(graph.accessPackageAnswerChoice)"/>
@@ -36154,6 +36210,19 @@
             <Member Name="allCaseNoncustodialDataSources" Value="8"/>
             <Member Name="unknownFutureValue" Value="16"/>
          </EnumType>
+         <EnumType Name="exportFileStructure">
+            <Member Name="none" Value="0"/>
+            <Member Name="directory" Value="1"/>
+            <Member Name="pst" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="exportOptions" IsFlags="true">
+            <Member Name="originalFiles" Value="1"/>
+            <Member Name="text" Value="2"/>
+            <Member Name="pdfReplacement" Value="4"/>
+            <Member Name="tags" Value="16"/>
+            <Member Name="unknownFutureValue" Value="32"/>
+         </EnumType>
          <EnumType Name="purgeAreas" IsFlags="true">
             <Member Name="mailboxes" Value="1"/>
             <Member Name="teamsMessages" Value="2"/>
@@ -36467,6 +36536,11 @@
             <NavigationProperty Name="passiveDnsRecords" Type="Collection(microsoft.graph.security.passiveDnsRecord)" ContainsTarget="true"/>
             <NavigationProperty Name="vulnerabilities" Type="Collection(microsoft.graph.security.vulnerability)" ContainsTarget="true"/>
          </EntityType>
+         <ComplexType Name="exportFileMetadata">
+            <Property Name="downloadUrl" Type="Edm.String"/>
+            <Property Name="fileName" Type="Edm.String"/>
+            <Property Name="size" Type="Edm.Int64"/>
+         </ComplexType>
          <ComplexType Name="ocrSettings">
             <Property Name="isEnabled" Type="Edm.Boolean"/>
             <Property Name="maxImageSize" Type="Edm.Int32"/>
@@ -36607,9 +36681,18 @@
             <Property Name="unindexedItemsSize" Type="Edm.Int64"/>
             <NavigationProperty Name="search" Type="microsoft.graph.security.ediscoverySearch"/>
          </EntityType>
+         <EntityType Name="ediscoveryExportOperation" BaseType="microsoft.graph.security.caseOperation">
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="exportFileMetadata" Type="Collection(microsoft.graph.security.exportFileMetadata)"/>
+            <Property Name="exportOptions" Type="microsoft.graph.security.exportOptions"/>
+            <Property Name="exportStructure" Type="microsoft.graph.security.exportFileStructure"/>
+            <Property Name="outputName" Type="Edm.String"/>
+            <NavigationProperty Name="reviewSet" Type="microsoft.graph.security.ediscoveryReviewSet"/>
+            <NavigationProperty Name="reviewSetQuery" Type="microsoft.graph.security.ediscoveryReviewSetQuery"/>
+         </EntityType>
+         <EntityType Name="ediscoveryReviewSetQuery" BaseType="microsoft.graph.security.search"/>
          <EntityType Name="ediscoveryHoldOperation" BaseType="microsoft.graph.security.caseOperation"/>
          <EntityType Name="ediscoveryPurgeDataOperation" BaseType="microsoft.graph.security.caseOperation"/>
-         <EntityType Name="ediscoveryReviewSetQuery" BaseType="microsoft.graph.security.search"/>
          <EntityType Name="ediscoveryTagOperation" BaseType="microsoft.graph.security.caseOperation"/>
          <ComplexType Name="alertComment">
             <Property Name="comment" Type="Edm.String"/>
@@ -37020,6 +37103,20 @@
             <Parameter Name="bindingParameter" Type="microsoft.graph.security.ediscoveryReviewSet"/>
             <Parameter Name="search" Type="microsoft.graph.security.ediscoverySearch"/>
             <Parameter Name="additionalDataOptions" Type="microsoft.graph.security.additionalDataOptions"/>
+         </Action>
+         <Action Name="export" IsBound="true">
+            <Parameter Name="bindingParameter" Type="microsoft.graph.security.ediscoveryReviewSet"/>
+            <Parameter Name="outputName" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="description" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="exportOptions" Type="microsoft.graph.security.exportOptions"/>
+            <Parameter Name="exportStructure" Type="microsoft.graph.security.exportFileStructure"/>
+         </Action>
+         <Action Name="export" IsBound="true">
+            <Parameter Name="bindingParameter" Type="microsoft.graph.security.ediscoveryReviewSetQuery"/>
+            <Parameter Name="outputName" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="description" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="exportOptions" Type="microsoft.graph.security.exportOptions"/>
+            <Parameter Name="exportStructure" Type="microsoft.graph.security.exportFileStructure"/>
          </Action>
          <Action Name="applyTags" IsBound="true">
             <Parameter Name="bindingParameter" Type="microsoft.graph.security.ediscoveryReviewSetQuery"/>

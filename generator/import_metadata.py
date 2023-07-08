@@ -1,10 +1,10 @@
 from xml.dom import minidom
 from argparse import ArgumentParser
 
-from examples import acquire_token_by_client_credentials
 from office365.graph_client import GraphClient
 from office365.sharepoint.client_context import ClientContext
 from tests import test_site_url, test_client_credentials
+from tests.graph_case import acquire_token_by_client_credentials
 
 
 def export_to_file(path, content):
@@ -15,9 +15,9 @@ def export_to_file(path, content):
 
 parser = ArgumentParser()
 parser.add_argument("-e", "--endpoint", dest="endpoint",
-                    help="Import metadata endpoint", default="sharepoint")
+                    help="Import metadata endpoint", default="microsoftgraph")
 parser.add_argument("-p", "--path",
-                    dest="path", default="./metadata/SharePoint.xml",
+                    dest="path", default="./metadata/MicrosoftGraph.xml",
                     help="Import metadata endpoint")
 
 args = parser.parse_args()

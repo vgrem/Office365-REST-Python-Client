@@ -1,7 +1,7 @@
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.key import KeyPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.internal.paths.entity import EntityPath
 from office365.sharepoint.principal.users.user import User
 
 
@@ -44,4 +44,5 @@ class CheckedOutFile(BaseEntity):
         super(CheckedOutFile, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "CheckedOutById":
-            self._resource_path = EntityPath(value, self.parent_collection.resource_path)
+            self._resource_path = KeyPath(value, self.parent_collection.resource_path)
+        return self

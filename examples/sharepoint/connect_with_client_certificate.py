@@ -1,5 +1,10 @@
 """
-Example: Azure AD App-Only auth flow
+When using SharePoint Online you can define applications in Azure AD and these applications can
+be granted permissions to SharePoint, but also to all the other services in Office 365.
+This model is the preferred model in case you're using SharePoint Online, if you're using SharePoint on-premises
+you have to use the SharePoint Only model via based Azure ACS as described in here:
+
+Demonstrates how to use Azure AD App-Only auth flow
 
 https://learn.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread
 """

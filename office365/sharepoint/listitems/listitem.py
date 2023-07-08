@@ -2,6 +2,7 @@ import json
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.paths.key import KeyPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
@@ -13,7 +14,6 @@ from office365.sharepoint.fields.image_value import ImageFieldValue
 from office365.sharepoint.fields.lookup_value import FieldLookupValue
 from office365.sharepoint.fields.multi_lookup_value import FieldMultiLookupValue
 from office365.sharepoint.fields.string_values import FieldStringValues
-from office365.sharepoint.internal.paths.entity import EntityPath
 from office365.sharepoint.likes.liked_by_information import LikedByInformation
 from office365.sharepoint.listitems.compliance_info import ListItemComplianceInfo
 from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateValue
@@ -476,7 +476,7 @@ class ListItem(SecurableObject):
         # fallback: create a new resource path
         if self._resource_path is None and self.parent_collection is not None:
             if name == "Id":
-                self._resource_path = EntityPath(value, self.parent_collection.resource_path)
+                self._resource_path = KeyPath(value, self.parent_collection.resource_path)
         return self
 
     def _set_taxonomy_field_value(self, name, value):

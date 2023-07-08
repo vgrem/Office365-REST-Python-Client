@@ -3,7 +3,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.internal.paths.entity import EntityPath
+from office365.runtime.paths.key import KeyPath
 
 
 class FileVersion(BaseEntity):
@@ -15,15 +15,13 @@ class FileVersion(BaseEntity):
         :type file_object: typing.IO
         """
         def _file_version_loaded():
-            result = self.open_binary_stream()
+            def _save_file(return_type):
+                """
+                :type return_type:ClientResult
+                """
+                file_object.write(return_type.value)
+            self.open_binary_stream().after_execute(_save_file)
 
-            def _process_response(response):
-                """
-                :type response: requests.Response
-                """
-                response.raise_for_status()
-                file_object.write(result.value)
-            self.context.after_execute(_process_response)
         self.ensure_property("ID", _file_version_loaded)
         return self
 
@@ -87,5 +85,5 @@ class FileVersion(BaseEntity):
         super(FileVersion, self).set_property(key, value, persist_changes)
         if self._resource_path is None:
             if key == "ID":
-                self._resource_path = EntityPath(value, self.parent_collection.resource_path)
+                self._resource_path = KeyPath(value, self.parent_collection.resource_path)
         return self

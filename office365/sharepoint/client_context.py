@@ -1,6 +1,7 @@
 import copy
 
 from office365.runtime.auth.authentication_context import AuthenticationContext
+from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.user_credential import UserCredential
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.compat import urlparse, get_absolute_url
@@ -96,7 +97,8 @@ class ClientContext(ClientRuntimeContext):
 
     def with_user_credentials(self, username, password, allow_ntlm=False, browser_mode=False):
         """
-        Initializes a client to acquire a token via user credentials
+        Initializes a client to acquire a token via user credentials.
+
 
         :param str username: Typically, a UPN in the form of an email address
         :param str password: The password
@@ -107,6 +109,19 @@ class ClientContext(ClientRuntimeContext):
             UserCredential(username, password),
             allow_ntlm=allow_ntlm,
             browser_mode=browser_mode)
+        return self
+
+    def with_client_credentials(self, client_id, client_secret):
+        """
+        Initializes a client to acquire a token via client credentials (SharePoint App-Only)
+
+        SharePoint App-Only is the older, but still very relevant, model of setting up app-principals.
+        This model works for both SharePoint Online and SharePoint 2013/2016/2019 on-premises
+
+        :param str client_id: The OAuth client id of the calling application
+        :param str client_secret: Secret string that the application uses to prove its identity when requesting a token
+        """
+        self.authentication_context.with_credentials(ClientCredential(client_id, client_secret))
         return self
 
     def with_credentials(self, credentials):

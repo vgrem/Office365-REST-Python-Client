@@ -33,7 +33,11 @@ pip install Office365-REST-Python-Client
 >pip install git+https://github.com/vgrem/Office365-REST-Python-Client.git
 >```
 
-# Authentication Credentials
+
+# Working with SharePoint API
+
+
+## Authentication
 For the following examples, relevant credentials can be found in the Azure Portal.
 
 Steps to access:
@@ -44,7 +48,6 @@ Steps to access:
 5. In the application's "Overview" page, the client id can be found under "Application (client) id"
 6. In the application's "Certificates & Secrets" page, the client secret can be found under the "Value" of the "Client Secrets." If there is no client secret yet, create one here.
 
-# Working with SharePoint API
 
 The list of supported API versions: 
 -   [SharePoint 2013 REST API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and above 

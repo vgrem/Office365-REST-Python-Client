@@ -1,7 +1,7 @@
+from office365.runtime.paths.key import KeyPath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.internal.paths.entity import EntityPath
 from office365.sharepoint.sites.site import Site
 from office365.sharepoint.tenant.administration.deny_add_and_customize_pages_status import \
     DenyAddAndCustomizePagesStatus
@@ -29,25 +29,26 @@ class SiteProperties(BaseEntity):
         site.set_property("__siteUrl", self.url)
 
         def _site_loaded(return_type):
-            self._resource_path = EntityPath(site.id, self.parent_collection.resource_path)
+            self._resource_path = KeyPath(site.id, self.parent_collection.resource_path)
             super(SiteProperties, self).update()
         self.context.load(site, after_loaded=_site_loaded)
         return self
 
     @property
     def deny_add_and_customize_pages(self):
-        enum_value = self.properties.get("DenyAddAndCustomizePages", None)
-        if enum_value is None:
-            return enum_value
-        return enum_value == DenyAddAndCustomizePagesStatus.Enabled
+        """
+        Represents the status of the [DenyAddAndCustomizePages] feature on a site collection.
+        """
+        return self.properties.get("DenyAddAndCustomizePages", DenyAddAndCustomizePagesStatus.Unknown)
 
     @deny_add_and_customize_pages.setter
     def deny_add_and_customize_pages(self, value):
         """
-        :param bool value:
+        Sets the status of the [DenyAddAndCustomizePages] feature on a site collection.
+
+        :param int value:
         """
-        enum_value = DenyAddAndCustomizePagesStatus.Enabled if value else DenyAddAndCustomizePagesStatus.Disabled
-        self.set_property("DenyAddAndCustomizePages", enum_value)
+        self.set_property("DenyAddAndCustomizePages", value)
 
     @property
     def owner_login_name(self):
@@ -59,6 +60,7 @@ class SiteProperties(BaseEntity):
     @property
     def webs_count(self):
         """
+        Gets the number of Web objects in the site.
         :rtype: int
         """
         return self.properties.get('WebsCount', None)
@@ -112,7 +114,7 @@ class SiteProperties(BaseEntity):
     def sharing_capability(self, value):
         """
         Sets the level of sharing for the site.
-
+        :type value: int
         """
         self.set_property('SharingCapability', value)
 

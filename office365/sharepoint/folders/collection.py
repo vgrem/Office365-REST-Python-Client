@@ -1,8 +1,8 @@
+from office365.runtime.paths.key import KeyPath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.folders.folder import Folder
-from office365.sharepoint.internal.paths.entity import EntityPath
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
@@ -48,7 +48,7 @@ class FolderCollection(BaseEntityCollection):
 
         :param str name: Specifies the Name of the folder.
         """
-        return_type = Folder(self.context, EntityPath(name, self.resource_path))
+        return_type = Folder(self.context, KeyPath(name, self.resource_path))
         self.add_child(return_type)
         qry = ServiceOperationQuery(self, "Add", [name], None, None, return_type)
         self.context.add_query(qry)
