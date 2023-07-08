@@ -6,7 +6,6 @@ from office365.sharepoint.base_entity import BaseEntity
 class WorkflowServicesManager(BaseEntity):
     """Describes the workflow host configuration states and provides service objects that interact with the workflow."""
 
-
     def get_workflow_instance_service(self):
         """Returns the WorkflowInstanceService (manages and reads workflow instances from the workflow host),
         which manages workflow instances."""
@@ -15,7 +14,6 @@ class WorkflowServicesManager(BaseEntity):
         qry = ServiceOperationQuery(self, "GetWorkflowInstanceService", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
-
 
     @staticmethod
     def current(context):

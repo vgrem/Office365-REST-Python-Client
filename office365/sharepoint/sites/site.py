@@ -28,7 +28,14 @@ from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
 class Site(BaseEntity):
-    """Represents a collection of sites in a Web application, including a top-level website and all its sub sites."""
+    """
+    Represents a collection of sites in a Web application, including a top-level website and all its sub sites.
+
+    A set of websites that are in the same content database, have the same owner, and share administration settings.
+    A site collection can be identified by a GUID or the URL of the top-level site for the site collection.
+    Each site collection contains a top-level site, can contain one or more subsites, and can have a shared
+    navigational structure.
+    """
 
     def __init__(self, context, resource_path=None):
         super(Site, self).__init__(context, ResourcePath("Site", resource_path))

@@ -92,17 +92,15 @@ class ClientRuntimeContext(object):
             self.after_query_execute(after_loaded, client_object)
         return self
 
-    def before_query_execute(self, action, query=None, once=True, *args, **kwargs):
+    def before_query_execute(self, action, once=True, *args, **kwargs):
         """
         Attach an event handler which is triggered before query is submitted to server
 
         :type action: (office365.runtime.http.request_options.RequestOptions, *args, **kwargs) -> None
-        :type query: office365.runtime.queries.client_query.ClientQuery or None
         :param bool once: Flag which determines whether action is executed once or multiple times
         """
 
-        if query is None:
-            query = self._queries[-1]
+        query = self._queries[-1]
 
         def _prepare_request(request):
             """

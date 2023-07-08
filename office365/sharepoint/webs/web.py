@@ -74,8 +74,13 @@ from office365.sharepoint.webs.theme_info import ThemeInfo
 
 
 class Web(SecurableObject):
-    """Represents a SharePoint site. A site is a type of SP.SecurableObject.
-    Refer this link https://msdn.microsoft.com/en-us/library/office/dn499819.aspx for a details"""
+    """
+    Represents a SharePoint site. A site is a type of SecurableObject.
+
+    A group of related webpages that is hosted by a server on the World Wide Web or an intranet.
+    Each website has its own entry points, metadata, administration settings, and workflows.
+    Also referred to as web site.
+    """
 
     def __init__(self, context, resource_path=None):
         """

@@ -9,7 +9,13 @@ from office365.sharepoint.translation.user_resource import UserResource
 
 
 class ContentType(BaseEntity):
-    """Specifies a content type."""
+    """
+    Specifies a content type.
+
+    A named and uniquely identifiable collection of settings and fields that store metadata for individual items
+    in a SharePoint list. One or more content types can be associated with a list, which restricts the contents
+    to items of those types
+    """
 
     def reorder_fields(self, field_names):
         """

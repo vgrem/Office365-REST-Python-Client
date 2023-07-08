@@ -33,11 +33,7 @@ pip install Office365-REST-Python-Client
 >pip install git+https://github.com/vgrem/Office365-REST-Python-Client.git
 >```
 
-
-# Working with SharePoint API
-
-
-## Authentication
+# Authentication
 For the following examples, relevant credentials can be found in the Azure Portal.
 
 Steps to access:
@@ -49,42 +45,76 @@ Steps to access:
 6. In the application's "Certificates & Secrets" page, the client secret can be found under the "Value" of the "Client Secrets." If there is no client secret yet, create one here.
 
 
-The list of supported API versions: 
--   [SharePoint 2013 REST API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and above 
--   SharePoint Online & OneDrive for Business REST API
+# Working with SharePoint API
 
-#### Authentication
+   The `ClientContext` client provides the support for a legacy SharePoint REST and OneDrive for Business REST APIs, 
+   the list of supported versions: 
+   -   [SharePoint 2013 REST API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and above 
+   -   [SharePoint Online REST API](https://learn.microsoft.com/en-us/sharepoint/dev/sp-add-ins/get-to-know-the-sharepoint-rest-service)
+   -   OneDrive for Business REST API
 
-The following auth flows are supported:
+### Authentication
 
-- app principals flow: 
-  `ClientContext.with_credentials(client_credentials)`
+   The following auth flows are supported:
+
+#### 1. Using a SharePoint App-Only principal (client credentials flow)
+
+   This auth method is compatible with SharePoint on-premises and still relevant 
+   model in both SharePoint on-premises as SharePoint Online, 
+   the following methods are available: 
+
+   - `ClientContext.with_credentials(client_credentials)` 
+   - `ClientContext.with_client_credentials(client_id, client_secret)`
   
-  Usage:
-  ``` 
-  client_credentials = ClientCredential('{client_id}','{client_secret}')
-  ctx = ClientContext('{url}').with_credentials(client_credentials)
-  ```
-  Documentation: refer [Granting access using SharePoint App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs) for a details  
+   Usage:
+   ``` 
+   client_credentials = ClientCredential('{client_id}','{client_secret}')
+   ctx = ClientContext('{url}').with_credentials(client_credentials)
+   ```
   
-  Example: [connect_with_app_principal.py](examples/sharepoint/connect_with_app_only_principal.py)
+   Documentation:
+   - [Granting access using SharePoint App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs)  
+   - [wiki](https://github.com/vgrem/Office365-REST-Python-Client/wiki/How-to-connect-to-SharePoint-Online-and-and-SharePoint-2013-2016-2019-on-premises--with-app-principal)
   
-- user credentials flow: `ClientContext.with_credentials(user_credentials)`
+   Example: [connect_with_app_principal.py](examples/sharepoint/connect_with_app_only_principal.py)
+  
+#### 2. Using username and password 
 
-  Usage:
-  ``` 
-  user_credentials = UserCredential('{username}','{password}')
-  ctx = ClientContext('{url}').with_credentials(user_credentials)
-  ```
-  Example: [connect_with_user_credential.py](examples/sharepoint/connect_with_user_credential.py)
+   Usage:
+   ``` 
+   user_credentials = UserCredential('{username}','{password}')
+   ctx = ClientContext('{url}').with_credentials(user_credentials)
+   ```
   
-- certificate credentials flow: `ClientContext.with_certificate(tenant, client_id, thumbprint, cert_path)`
+   Example: [connect_with_user_credential.py](examples/sharepoint/connect_with_user_credential.py)
+  
+#### 3. Using an Azure AD application (certificate credentials flow) 
 
-  Documentation: [Granting access via Azure AD App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread)  
+  Documentation: 
+   - [Granting access via Azure AD App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread)  
+   - [wiki](https://github.com/vgrem/Office365-REST-Python-Client/wiki/How-to-connect-to-SharePoint-Online-with-certificate-credentials) 
   
   Example: [connect_with_client_certificate.py](examples/sharepoint/connect_with_client_certificate.py)
 
-#### Examples
+#### 4. interactive
+
+   to login interactively i.e. via a local browser
+
+   Prerequisite: 
+   
+   > In Azure Portal, configure the Redirect URI of your
+   "Mobile and Desktop application" as ``http://localhost``.
+
+  Example: [connect_interactive.py](examples/sharepoint/connect_interactive.py)
+
+  Usage:
+  ```python
+  ctx = ClientContext(site_url).with_interactive(tenant_name_or_id, client_id)
+  me = ctx.web.current_user.get().execute_query()
+  print(me.login_name)
+  ```
+
+### Examples
  
 There are **two approaches** available to perform API queries:
 
@@ -130,7 +160,6 @@ web_title = json['d']['Title']
 print("Web title: {0}".format(web_title))
 ```
 
-
 The list of examples:
 
 - Working with files
@@ -160,7 +189,7 @@ the following clients are available:
 ~~- `OutlookClient` which targets Outlook API `v1.0` version (not recommended for usage since `v1.0` version is being deprecated.)~~
 
 
-#### Authentication
+### Authentication
 
 [The Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/) which comes as a dependency 
 is used as a default library to obtain tokens to call Microsoft Graph API. 

@@ -151,24 +151,28 @@ class Office365Tenant(BaseEntity):
         self.context.add_query(qry)
         return self
 
-    def revoke_all_user_sessions(self, user_or_username):
+    def revoke_all_user_sessions(self, user):
         """
         Provides IT administrators the ability to invalidate a particular users' O365 sessions across all their devices.
 
-        :param str or User user_or_username: Specifies a user name
+        :param str or User user: Specifies a user name or user object
               (for example, user1@contoso.com) or User object
         """
         return_type = SPOUserSessionRevocationResult(self.context)
-        if isinstance(user_or_username, User):
-            def _user_loaded():
-                next_qry = ServiceOperationQuery(self, "RevokeAllUserSessions", [user_or_username.login_name], None,
-                                                 None, return_type)
-                self.context.add_query(next_qry)
 
-            user_or_username.ensure_property("LoginName", _user_loaded)
-        else:
-            qry = ServiceOperationQuery(self, "RevokeAllUserSessions", [user_or_username], None, None, return_type)
+        def _revoke_all_user_sessions(login_name):
+            """
+            :type login_name: str
+            """
+            qry = ServiceOperationQuery(self, "RevokeAllUserSessions", [login_name], None, None, return_type)
             self.context.add_query(qry)
+
+        if isinstance(user, User):
+            def _user_loaded():
+                _revoke_all_user_sessions(user.login_name)
+            user.ensure_property("LoginName", _user_loaded)
+        else:
+            _revoke_all_user_sessions(user)
         return return_type
 
     def get_external_users(self, position=0, page_size=50, _filter=None, sort_order=0):

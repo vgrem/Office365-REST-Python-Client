@@ -1,3 +1,6 @@
+"""
+
+"""
 from office365.sharepoint.tenant.administration.tenant import Tenant
 from tests import test_admin_site_url, test_user_credentials
 

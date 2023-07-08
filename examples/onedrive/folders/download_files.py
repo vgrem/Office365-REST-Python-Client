@@ -1,3 +1,9 @@
+"""
+Download the contents of the driveItem (folder facet)
+
+https://learn.microsoft.com/en-us/graph/api/driveitem-get-content?view=graph-rest-1.0
+"""
+
 import os
 import tempfile
 
@@ -6,7 +12,6 @@ from office365.onedrive.driveitems.driveItem import DriveItem
 from tests.graph_case import acquire_token_by_username_password
 
 client = GraphClient(acquire_token_by_username_password)
-# address folder by path
 folder_item = client.me.drive.root.get_by_path("archive").get().execute_query()
 
 with tempfile.TemporaryDirectory() as local_path:

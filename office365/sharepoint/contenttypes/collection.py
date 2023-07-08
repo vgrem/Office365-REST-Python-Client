@@ -57,24 +57,23 @@ class ContentTypeCollection(BaseEntityCollection):
         :param str group: Specifies the group of the content type
         :param str or ContentType parent_content_type: Specifies the parent content type (string identifier or object)
         """
-        def _create_query(parent_content_type_id):
+        def _create_and_add_query(parent_content_type_id):
             """
             :type parent_content_type_id: str
             """
             parameters = ContentTypeEntityData(name, description, group, parent_content_type_id)
             payload = {"parameters": parameters}
-            return ServiceOperationQuery(self, "Create", None, payload, None, return_type)
+            qry = ServiceOperationQuery(self, "Create", None, payload, None, return_type)
+            self.context.add_query(qry)
 
         return_type = ContentType(self.context)
         self.add_child(return_type)
         if isinstance(parent_content_type, ContentType):
             def _ct_loaded():
-                next_qry = _create_query(parent_content_type.string_id)
-                self.context.add_query(next_qry)
+                _create_and_add_query(parent_content_type.string_id)
             parent_content_type.ensure_property("StringId", _ct_loaded)
         else:
-            qry = _create_query(parent_content_type)
-            self.context.add_query(qry)
+            _create_and_add_query(parent_content_type)
         return return_type
 
     def add_available_content_type(self, content_type_id):

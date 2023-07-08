@@ -267,7 +267,7 @@ class Tenant(BaseEntity):
         """
         Gets site collection administrators
 
-        :type site_id: str
+        :param str site_id: Site identifier
         """
         return_type = ClientResult(self.context, ClientValueCollection(SecondaryAdministratorsInfo))
         payload = {"secondaryAdministratorsFieldsData": SecondaryAdministratorsFieldsData(site_id)}

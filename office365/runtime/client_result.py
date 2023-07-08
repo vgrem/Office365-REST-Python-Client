@@ -19,6 +19,14 @@ class ClientResult(object):
         self._context = context
         self._value = copy.deepcopy(default_value)
 
+    def before_execute(self, action, *args, **kwargs):
+        """
+        Attach an event handler which is triggered before query is submitted to server
+        :param (office365.runtime.http.request_options.RequestOptions) -> None action: Event handler
+        """
+        self._context.before_query_execute(action, *args, **kwargs)
+        return self
+
     def after_execute(self, action, *args, **kwargs):
         """
         Attach an event handler which is triggered after query is submitted to server

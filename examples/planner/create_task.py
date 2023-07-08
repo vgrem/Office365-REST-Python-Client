@@ -1,6 +1,6 @@
-from examples import acquire_token_by_username_password
 from office365.graph_client import GraphClient
 from office365.planner.plans.plan import PlannerPlan
+from tests.graph_case import acquire_token_by_username_password
 
 
 def ensure_plan(planner, name):

@@ -201,13 +201,20 @@ class DriveItem(BaseItem):
             name = os.path.basename(path_or_file)
             return self.upload(name, content)
 
-    def get_content(self):
-        """Download the contents of the primary stream (file) of a DriveItem. Only driveItems with the file property
-        can be downloaded. """
-        from office365.onedrive.internal.queries.download_content import create_download_content_query
-        qry = create_download_content_query(self)
+    def get_content(self, format_name=None):
+        """
+        Download the contents of the primary stream (file) of a DriveItem. O
+        nly driveItems with the file property can be downloaded.
+
+        :type format_name: str or None
+        """
+        return_type = ClientResult(self.context)
+        action_name = "content"
+        if format_name is not None:
+            action_name = action_name + r"?format={0}".format(format_name)
+        qry = FunctionQuery(self, action_name, None, return_type)
         self.context.add_query(qry)
-        return qry.return_type
+        return return_type
 
     def download(self, file_object):
         """
@@ -226,21 +233,23 @@ class DriveItem(BaseItem):
 
     def download_session(self, file_object, chunk_downloaded=None, chunk_size=1024 * 1024):
         """
-        :type file_object: typing.IO
-        :type chunk_downloaded: (int)->None or None
-        :type chunk_size: int
-        """
-        from office365.onedrive.internal.queries.download_content import create_download_session_content_query
-        qry = create_download_session_content_query(self)
+        By default, file gets downloaded immediately.
+        For a large files reading the whole content of a file at once into memory should be avoided.
 
-        def _construct_download_request(request):
+        This method allows to stream content into the file
+
+        :type file_object: typing.IO
+        :param (int)->None or None chunk_downloaded: A callback
+        :param int chunk_size: The number of bytes it should read into memory.
+        """
+
+        def _construct_request(request):
             """
             :type request: office365.runtime.http.request_options.RequestOptions
             """
             request.stream = True
-            request.method = HttpMethod.Get
 
-        def _process_download_response(response):
+        def _process_response(response):
             """
             :type response: requests.Response
             """
@@ -251,9 +260,8 @@ class DriveItem(BaseItem):
                     chunk_downloaded(bytes_read)
                 file_object.write(chunk)
 
-        self.context.before_execute(_construct_download_request)
-        self.context.after_execute(_process_download_response)
-        self.context.add_query(qry)
+        self.get_content().before_execute(_construct_request)
+        self.context.after_execute(_process_response)
         return self
 
     def create_folder(self, name, conflict_behavior=ConflictBehavior.Rename):
@@ -278,12 +286,8 @@ class DriveItem(BaseItem):
 
         :param format_name: Specify the format the item's content should be downloaded as.
         :type format_name: str
-        :rtype: ClientResult
         """
-        from office365.onedrive.internal.queries.download_content import create_download_content_query
-        qry = create_download_content_query(self, format_name)
-        self.context.add_query(qry)
-        return qry.return_type
+        return self.get_content(format_name)
 
     def copy(self, name=None, parent=None, conflict_behavior=ConflictBehavior.Fail):
         """Asynchronously creates a copy of an driveItem (including any children), under a new parent item or with a

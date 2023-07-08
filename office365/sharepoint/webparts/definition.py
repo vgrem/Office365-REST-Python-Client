@@ -20,7 +20,7 @@ class WebPartDefinition(BaseEntity):
 
     @property
     def web_part(self):
-        """The WebPart object (1), as specified in section 3.2.5.148, associated with this WebPartDefinition.
+        """The WebPart object, as specified in section 3.2.5.148, associated with this WebPartDefinition.
         The WebPart object (1) contains additional properties relating to the Web Part represented by this
         WebPartDefinition object"""
         return self.properties.get('WebPart',
