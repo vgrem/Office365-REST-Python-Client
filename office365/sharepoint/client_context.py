@@ -324,14 +324,19 @@ class ClientContext(ClientRuntimeContext):
 
     @property
     def web(self):
-        """Get Web object"""
+        """
+        A group of related webpages that is hosted by a server on the World Wide Web or an intranet.
+        Each website has its own entry points, metadata, administration settings, and workflows.
+        """
         if not self._web:
             self._web = Web(self)
         return self._web
 
     @property
     def site(self):
-        """Get Site object"""
+        """
+        Represents a collection of sites in a Web application, including a top-level website and all its sub sites.
+        """
         if not self._site:
             self._site = Site(self)
         return self._site
@@ -538,6 +543,7 @@ class ClientContext(ClientRuntimeContext):
 
     @property
     def work_items(self):
+        """"""
         from office365.sharepoint.contentcenter.machinelearning.workitems.collection import \
             SPMachineLearningWorkItemCollection
         return SPMachineLearningWorkItemCollection(self, ResourcePath("workitems"))

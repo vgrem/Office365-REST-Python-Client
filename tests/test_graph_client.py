@@ -33,13 +33,13 @@ class TestGraphClient(GraphTestCase):
         parent_path = self.client.me.drive.root.resource_path
         path = UrlPath("Sample.docx", UrlPath("2018", UrlPath("archive", parent_path)))
         item_id = uuid.uuid4().hex
-        path.normalize(item_id, inplace=True)
+        path.patch(item_id, inplace=True)
         self.assertEqual(f"/me/drive/items/{item_id}", str(path))
 
     def test6_resolve_drive_children_path(self):
         path = self.client.me.drive.root.children.resource_path
         item_id = uuid.uuid4().hex
-        path.normalize(item_id, inplace=True)
+        path.patch(item_id, inplace=True)
         self.assertEqual(f"/me/drive/items/{item_id}", str(path))
 
     def test7_build_drive_children_path(self):
@@ -54,7 +54,7 @@ class TestGraphClient(GraphTestCase):
     def test9_resolve_drive_root_path(self):
         path = self.client.me.drive.root.resource_path
         item_id = uuid.uuid4().hex
-        path.normalize(item_id, inplace=True)
+        path.patch(item_id, inplace=True)
         self.assertEqual(f"/me/drive/items/{item_id}", str(path))
 
     def test_10_build_site_root_path(self):
@@ -66,7 +66,7 @@ class TestGraphClient(GraphTestCase):
         set_id = uuid.uuid4().hex
         term_id = uuid.uuid4().hex
         path = self.client.sites.root.term_store.groups[group_id].sets[set_id].children.resource_path
-        path = path.normalize(term_id)
+        path = path.patch(term_id)
         self.assertEqual(f"/sites/root/termStore/groups/{group_id}/sets/{set_id}/terms/{term_id}", str(path))
 
     #def test_12_build_operation_resource_path(self):

@@ -10,8 +10,5 @@ class ChildrenPath(EntityPath):
     @property
     def collection(self):
         if self._collection is None:
-            if isinstance(self.parent, EntityPath):
-                self._collection = self.parent.collection
-            else:
-                self._collection = self.parent.parent
+            self._collection = self.parent.collection
         return self._collection

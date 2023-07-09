@@ -183,6 +183,7 @@ class DriveItem(BaseItem):
             :type request: office365.runtime.http.request_options.RequestOptions
             """
             request.method = HttpMethod.Put
+
         self.context.add_query(qry).before_query_execute(_modify_query)
         return return_type
 
@@ -223,11 +224,13 @@ class DriveItem(BaseItem):
 
         :type file_object: typing.IO
         """
+
         def _save_content(return_type):
             """
             :type return_type: ClientResult
             """
             file_object.write(return_type.value)
+
         self.get_content().after_execute(_save_content)
         return self
 
@@ -337,6 +340,7 @@ class DriveItem(BaseItem):
             def _drive_item_loaded():
                 parent_reference = ItemReference(drive_id=parent.parent_reference.driveId, _id=parent.id)
                 _create_and_add_query(parent_reference)
+
             parent.ensure_property("parentReference", _drive_item_loaded)
         else:
             _create_and_add_query(parent)
@@ -370,6 +374,7 @@ class DriveItem(BaseItem):
         if isinstance(parent, DriveItem):
             def _drive_item_loaded():
                 _create_and_add_query(ItemReference(_id=parent.id))
+
             parent.ensure_property("parentReference", _drive_item_loaded)
         else:
             _create_and_add_query(parent)
@@ -438,6 +443,7 @@ class DriveItem(BaseItem):
                 "interval": interval
             }
             return FunctionQuery(self, "getActivitiesByInterval", params, return_type)
+
         qry = _create_query()
         self.context.add_query(qry)
 

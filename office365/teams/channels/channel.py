@@ -125,6 +125,5 @@ class Channel(Entity):
         super(Channel, self).set_property(name, value, persist_changes)
         # fallback: fix resource path
         if name == "id":
-            channel_id = quote(value)
-            self._resource_path = ResourcePath(channel_id, self.resource_path.parent)
+            self._resource_path = ResourcePath(quote(value), self.resource_path.parent)
         return self

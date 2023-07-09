@@ -9,6 +9,9 @@ class ResourcePath(object):
         self._key = key
         self._parent = parent
 
+    def patch(self, key, inplace=False):
+        return self
+
     def __iter__(self):
         current = self
         while current:

@@ -19,9 +19,9 @@ class EntityPath(ResourcePath):
     def segment(self):
         return str(self.key or '<key>')
 
-    def normalize(self, key, inplace=False):
+    def patch(self, key, inplace=False):
         """
-        Normalizes entity path
+        Patches path
 
         :type key: str or None
         :type inplace: bool

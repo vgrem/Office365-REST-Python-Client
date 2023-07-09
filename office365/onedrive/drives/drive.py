@@ -4,6 +4,7 @@ from office365.entity_collection import EntityCollection
 from office365.onedrive.driveitems.conflict_behavior import ConflictBehavior
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.driveitems.system_facet import SystemFacet
+from office365.onedrive.drives.quota import Quota
 from office365.onedrive.internal.paths.root import RootPath
 from office365.onedrive.lists.list import List
 from office365.onedrive.sharepoint_ids import SharePointIds
@@ -124,6 +125,11 @@ class Drive(BaseItem):
         return self.properties.get('following',
                                    EntityCollection(self.context, DriveItem,
                                                     ResourcePath("following", self.resource_path)))
+
+    @property
+    def quota(self):
+        """Optional. Information about the drive's storage space quota. Read-only."""
+        return self.properties.get("quota", Quota())
 
     @property
     def special(self):
