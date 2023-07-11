@@ -110,6 +110,12 @@ class FieldCollection(BaseEntityCollection):
         self.context.add_query(qry)
         return return_type
 
+    def add_taxonomy_field(self, title, description=None):
+        """
+        Adds a taxonomy field
+        """
+        pass
+
     def add(self, field_create_information):
         """Adds a fields to the fields collection.
 
@@ -133,22 +139,28 @@ class FieldCollection(BaseEntityCollection):
         self.context.add_query(qry)
         return return_type
 
-    def create_taxonomy_field(self, name, term_set):
+    def create_taxonomy_field(self, name, term_set, allow_multiple_values=False):
         """
         Creates a Taxonomy field
 
         :param str name: Field name
         :param str or TermSet term_set: TermSet identifier or object
+        :param bool allow_multiple_values: Specifies whether the column will allow more than one value
         """
-        if isinstance(term_set, TermSet):
-            return_type = TaxonomyField(self.context)
+        return_type = TaxonomyField(self.context)
 
+        if isinstance(term_set, TermSet):
             def _term_set_loaded():
-                TaxonomyField.create(self, name, term_set.id, return_type)
+                TaxonomyField.create(self, name, term_set.id, None, allow_multiple_values, return_type=return_type)
             term_set.ensure_property("id", _term_set_loaded)
             return return_type
         else:
-            return TaxonomyField.create(self, name, term_set)
+
+            def _term_store_loaded(term_store):
+                TaxonomyField.create(self, name, term_set, term_store.id, allow_multiple_values,
+                                     return_type=return_type)
+            self.context.load(self.context.taxonomy.term_store, after_loaded=_term_store_loaded)
+        return return_type
 
     def create_field_as_xml(self, schema_xml, return_type=None):
         """

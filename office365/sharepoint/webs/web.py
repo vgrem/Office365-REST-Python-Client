@@ -26,11 +26,13 @@ from office365.sharepoint.flows.synchronization_result import FlowSynchronizatio
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.folders.collection import FolderCollection
 from office365.sharepoint.listitems.listitem import ListItem
+from office365.sharepoint.lists.creation_information import ListCreationInformation
 from office365.sharepoint.lists.document_library_information import DocumentLibraryInformation
 from office365.sharepoint.lists.get_parameters import GetListsParameters
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.collection import ListCollection
 from office365.sharepoint.lists.template_collection import ListTemplateCollection
+from office365.sharepoint.lists.template_type import ListTemplateType
 from office365.sharepoint.marketplace.corporatecuratedgallery.available_addins_response import SPAvailableAddinsResponse
 from office365.sharepoint.navigation.navigation import Navigation
 from office365.sharepoint.permissions.base_permissions import BasePermissions
@@ -94,6 +96,16 @@ class Web(SecurableObject):
         super(Web, self).__init__(context, resource_path)
         self._web_url = None
 
+    def add_list(self, title, template_type=ListTemplateType.GenericList):
+        """
+        Creates a new list and adds it to the web.
+
+        :param str title: Specifies the display name of the new list.
+        :param int template_type: Specifies the list server template of the new list.
+        """
+        info = ListCreationInformation(title, None, template_type)
+        return self.lists.add(info)
+
     def available_addins(self, server_relative_urls=None):
         """
         :param list[str] server_relative_urls:
@@ -136,6 +148,7 @@ class Web(SecurableObject):
         return result
 
     def consent_to_power_platform(self):
+        """"""
         return_type = FlowSynchronizationResult(self.context)
         qry = ServiceOperationQuery(self, "ConsentToPowerPlatform", None, None, None, return_type)
         self.context.add_query(qry)

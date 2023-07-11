@@ -8,6 +8,13 @@ class TermGroupCollection(TaxonomyItemCollection):
     def __init__(self, context, resource_path=None):
         super(TermGroupCollection, self).__init__(context, TermGroup, resource_path)
 
+    def __getitem__(self, index):
+        """
+        :type index: int
+        :rtype: TermGroup
+        """
+        return self._data[index]
+
     def get_by_name(self, name):
         """
         Returns the term group with the specified name.

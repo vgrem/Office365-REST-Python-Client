@@ -5,27 +5,33 @@ from office365.runtime.client_value import ClientValue
 
 class TaxonomyFieldCreateXmlParameters(ClientValue):
 
-    def __init__(self, name, term_set_id, anchor_id="00000000-0000-0000-0000-000000000000"):
+    def __init__(self, name, term_set_id, term_store_id=None, anchor_id="00000000-0000-0000-0000-000000000000",
+                 allow_multiple_values=False):
         """
         :param str name:
         """
-        self.name = name
-        self.ssp_id = None
-        self.term_set_id = term_set_id
-        self.anchor_id = anchor_id
-        self.field_id = str(uuid.uuid1())
-        self.text_field_id = None
-        self.web_id = None
-        self.list_id = None
+        self.Name = name
+        self.SspId = term_store_id
+        self.TermSetId = term_set_id
+        self.AnchorId = anchor_id
+        self.FieldId = str(uuid.uuid1())
+        self.TextFieldId = None
+        self.WebId = None
+        self.ListId = None
+        self.AllowMultipleValues = allow_multiple_values
+
+    @property
+    def type_name(self):
+        return "TaxonomyFieldTypeMulti" if self.AllowMultipleValues else "TaxonomyFieldType"
 
     @property
     def schema_xml(self):
-        list_attr = 'List="{{{list_id}}}"'.format(list_id=self.list_id) if self.list_id is not None else ""
+        list_attr = 'List="{{{list_id}}}"'.format(list_id=self.ListId) if self.ListId is not None else ""
 
         return '''
-            <Field Type="TaxonomyFieldType" DisplayName="{name}" {list_attr}
+            <Field Type="{type_name}" DisplayName="{name}" {list_attr}
                    WebId="{web_id}" Required="FALSE" EnforceUniqueValues="FALSE"
-                   ID="{{{field_id}}}" StaticName="{name}" Name="{name}">
+                   ID="{{{field_id}}}" StaticName="{name}" Name="{name}" Mult="{allow_multiple_values}">
                 <Default/>
                 <Customization>
                     <ArrayOfProperty>
@@ -117,6 +123,7 @@ class TaxonomyFieldCreateXmlParameters(ClientValue):
                     </ArrayOfProperty>
                 </Customization>
             </Field>
-            '''.format(name=self.name, list_attr=list_attr, web_id=self.web_id, field_id=self.field_id,
-                       ssp_id=self.ssp_id, term_set_id=self.term_set_id, anchor_id=self.anchor_id,
-                       text_field_id=self.text_field_id)
+            '''.format(name=self.Name, list_attr=list_attr, web_id=self.WebId, field_id=self.FieldId,
+                       ssp_id=self.SspId, term_set_id=self.TermSetId, anchor_id=self.AnchorId,
+                       text_field_id=self.TextFieldId, allow_multiple_values=str(self.AllowMultipleValues).upper(),
+                       type_name=self.type_name)

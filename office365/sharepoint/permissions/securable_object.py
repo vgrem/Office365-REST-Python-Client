@@ -107,20 +107,19 @@ class SecurableObject(BaseEntity):
         """
         return_type = ClientResult(self.context, BasePermissions())
 
-        def _create_query(login_name):
+        def _create_and_add_query(login_name):
             """
             :param str login_name:
             """
-            return ServiceOperationQuery(self, "GetUserEffectivePermissions", [login_name], None, None, return_type)
+            qry = ServiceOperationQuery(self, "GetUserEffectivePermissions", [login_name], None, None, return_type)
+            self.context.add_query(qry)
 
         if isinstance(user, User):
             def _user_loaded():
-                next_qry = _create_query(user.login_name)
-                self.context.add_query(next_qry)
+                _create_and_add_query(user.login_name)
             user.ensure_property("LoginName", _user_loaded)
         else:
-            qry = _create_query(user)
-            self.context.add_query(qry)
+            _create_and_add_query(user)
         return return_type
 
     @property

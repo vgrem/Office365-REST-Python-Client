@@ -480,6 +480,12 @@ class ListItem(SecurableObject):
         return self
 
     def _set_taxonomy_field_value(self, name, value):
+        """
+        Sets taxonomy field value
+
+        :param str name: Taxonomy field name
+        :param TaxonomyFieldValueCollection value: Taxonomy field value
+        """
         tax_field = self.parent_list.fields.get_by_internal_name_or_title(name)
 
         def _tax_field_loaded():

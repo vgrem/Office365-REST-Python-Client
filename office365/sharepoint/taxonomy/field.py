@@ -8,17 +8,20 @@ class TaxonomyField(FieldLookup):
     """Represents a taxonomy field."""
 
     @staticmethod
-    def create(fields, name, term_set_id, return_type=None):
+    def create(fields, name, term_set_id, term_store_id=None, allow_multiple_values=False, return_type=None):
         """
         :type fields: office365.sharepoint.fields.collection.FieldCollection
-        :param str name:
-        :param str term_set_id:
+        :param str name: Field name
+        :param str term_set_id: Term set identifier
+        :param str term_store_id: Term store identifier
+        :param bool allow_multiple_values: Specifies whether the column will allow more than one value
         :param TaxonomyField return_type: Return type
         """
         if return_type is None:
             return_type = TaxonomyField(fields.context)
         fields.add_child(return_type)
-        params = TaxonomyFieldCreateXmlParameters(name, term_set_id)
+        params = TaxonomyFieldCreateXmlParameters(name, term_set_id, term_store_id=term_store_id,
+                                                  allow_multiple_values=allow_multiple_values)
 
         def _create_taxonomy_field_inner():
             from office365.sharepoint.lists.list import List
@@ -36,12 +39,11 @@ class TaxonomyField(FieldLookup):
                     fields.create_field_as_xml(params.schema_xml, return_type)
                 fields.context.web.ensure_property("Id", _web_loaded)
 
-        text_field = return_type._create_text_field(name)
-
-        def _after_text_field_created(resp):
+        def _after_text_field_created(text_field):
             params.text_field_id = text_field.id
             _create_taxonomy_field_inner()
-        fields.context.after_execute(_after_text_field_created)
+
+        return_type._create_text_field(name).after_execute(_after_text_field_created)
         return return_type
 
     def _create_text_field(self, name):

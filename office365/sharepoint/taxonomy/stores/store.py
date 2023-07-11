@@ -25,14 +25,6 @@ class TermStore(TaxonomyItem):
         self.context.add_query(qry)
         return return_type
 
-    def search_term_set(self, label):
-        """
-        Search term set by name
-
-        :param str label:
-        """
-        return self.term_groups.expand(["TermSets"]).get()
-
     @property
     def default_language_tag(self):
         """

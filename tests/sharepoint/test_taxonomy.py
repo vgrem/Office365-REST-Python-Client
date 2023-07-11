@@ -54,6 +54,7 @@ class TestSPTaxonomy(SPTestCase):
         tax_field = self.client.web.default_document_library().fields \
             .create_taxonomy_field(name="Category123", term_set=term_set_id).execute_query()
         self.assertIsNotNone(tax_field.resource_path)
+        #self.assertTrue(tax_field.properties.get('IsTermSetValid'))
         self.__class__.target_field = tax_field
 
     def test7_get_tax_field(self):

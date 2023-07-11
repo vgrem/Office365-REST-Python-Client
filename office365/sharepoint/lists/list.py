@@ -39,7 +39,8 @@ from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
 class List(SecurableObject):
-    """Represents a list on a SharePoint Web site.
+    """
+    Represents a list on a SharePoint Web site.
 
     A container within a SharePoint site that stores list items. A list has a customizable schema that is
     composed of one or more fields.
