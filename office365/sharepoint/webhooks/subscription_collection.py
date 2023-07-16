@@ -22,20 +22,19 @@ class SubscriptionCollection(BaseEntityCollection):
         return_type = Subscription(self.context)
         self.add_child(return_type)
 
-        def _create_query(information):
+        def _create_and_add_query(information):
             """
             :type information: SubscriptionInformation
             """
             payload = {"parameters": information}
-            return ServiceOperationQuery(self, "Add", None, payload, None, return_type)
+            qry = ServiceOperationQuery(self, "Add", None, payload, None, return_type)
+            self.context.add_query(qry)
 
         if isinstance(parameters, SubscriptionInformation):
-            qry = _create_query(parameters)
-            self.context.add_query(qry)
+            _create_and_add_query(parameters)
         else:
             def _parent_loaded():
-                next_qry = _create_query(SubscriptionInformation(parameters, self._parent.properties["Id"]))
-                self.context.add_query(next_qry)
+                _create_and_add_query(SubscriptionInformation(parameters, self._parent.properties["Id"]))
             self._parent.ensure_property("Id", _parent_loaded)
         return return_type
 

@@ -268,9 +268,9 @@ class ListItem(SecurableObject):
 
     def set_comments_disabled(self, value):
         """
-        Sets the value of CommentsDisabled (section 3.2.5.87.1.1.8) for the item.
+        Sets the value of CommentsDisabled for the item.
 
-        :type value: bool
+        :param bool value: Indicates whether comments for this item are disabled or not.
         """
         qry = ServiceOperationQuery(self, "SetCommentsDisabled", [value])
         self.context.add_query(qry)
@@ -491,20 +491,26 @@ class ListItem(SecurableObject):
         def _tax_field_loaded():
             tax_text_field = self.parent_list.fields.get_by_id(tax_field.properties["TextField"])
 
-            def _tax_text_field_loaded():
+            def _tax_text_field_loaded(return_type):
                 self.set_property(tax_text_field.properties["StaticName"], str(value))
-            tax_text_field.ensure_property("StaticName", _tax_text_field_loaded)
+            tax_text_field.select(["StaticName"]).get().after_execute(_tax_text_field_loaded, execute_first=True)
 
         tax_field.ensure_property("TextField", _tax_field_loaded)
 
-    def ensure_type_name(self, target_list):
+    def ensure_type_name(self, target_list, action=None):
         """
         Determine metadata annotation for ListItem entity
 
         :param office365.sharepoint.lists.list.List target_list: List resource
+        :param () -> None action: Event handler
         """
         if self._entity_type_name is None:
             def _list_loaded():
                 self._entity_type_name = target_list.properties['ListItemEntityTypeFullName']
+                if callable(action):
+                    action()
             target_list.ensure_property("ListItemEntityTypeFullName", _list_loaded)
+        else:
+            if callable(action):
+                action()
         return self

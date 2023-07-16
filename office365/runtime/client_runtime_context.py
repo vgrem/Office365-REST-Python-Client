@@ -149,6 +149,11 @@ class ClientRuntimeContext(object):
                 action(*args, **kwargs)
 
         self.pending_request().afterExecute += _process_response
+
+        execute_first = kwargs.pop("execute_first", False)
+        if execute_first and len(self._queries) > 1:
+            self._queries.insert(0, self._queries.pop())
+
         return self
 
     def after_execute(self, action, once=True, *args, **kwargs):
