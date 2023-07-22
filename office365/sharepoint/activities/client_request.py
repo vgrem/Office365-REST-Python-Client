@@ -2,4 +2,7 @@ from office365.runtime.client_value import ClientValue
 
 
 class ActivityClientRequest(ClientValue):
-    pass
+
+    @property
+    def entity_type_name(self):
+        return "Microsoft.SharePoint.Activities.ActivityClientRequest"

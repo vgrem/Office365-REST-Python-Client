@@ -22640,6 +22640,12 @@
             <Property Name="certificateUpdateResult" Type="Edm.String"/>
             <Property Name="lastRunDateTime" Type="Edm.DateTimeOffset"/>
          </ComplexType>
+         <ComplexType Name="tenantInformation">
+            <Property Name="defaultDomainName" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="federationBrandName" Type="Edm.String"/>
+            <Property Name="tenantId" Type="Edm.String" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="unifiedRolePermission">
             <Property Name="allowedResourceActions" Type="Collection(Edm.String)" Nullable="false"/>
             <Property Name="condition" Type="Edm.String"/>
@@ -23120,6 +23126,29 @@
             <Property Name="skuId" Type="Edm.Guid"/>
             <Property Name="skuPartNumber" Type="Edm.String"/>
             <Property Name="subscriptionIds" Type="Collection(Edm.String)"/>
+         </EntityType>
+         <EntityType Name="tenantRelationship">
+            <NavigationProperty Name="delegatedAdminCustomers" Type="Collection(graph.delegatedAdminCustomer)" ContainsTarget="true"/>
+            <NavigationProperty Name="delegatedAdminRelationships" Type="Collection(graph.delegatedAdminRelationship)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="delegatedAdminCustomer" BaseType="graph.entity">
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="tenantId" Type="Edm.String" Nullable="false"/>
+            <NavigationProperty Name="serviceManagementDetails" Type="Collection(graph.delegatedAdminServiceManagementDetail)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="delegatedAdminRelationship" BaseType="graph.entity">
+            <Property Name="accessDetails" Type="graph.delegatedAdminAccessDetails" Nullable="false"/>
+            <Property Name="activatedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="customer" Type="graph.delegatedAdminRelationshipCustomerParticipant"/>
+            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="duration" Type="Edm.Duration" Nullable="false"/>
+            <Property Name="endDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="status" Type="graph.delegatedAdminRelationshipStatus"/>
+            <NavigationProperty Name="accessAssignments" Type="Collection(graph.delegatedAdminAccessAssignment)" ContainsTarget="true"/>
+            <NavigationProperty Name="operations" Type="Collection(graph.delegatedAdminRelationshipOperation)" ContainsTarget="true"/>
+            <NavigationProperty Name="requests" Type="Collection(graph.delegatedAdminRelationshipRequest)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="unifiedRbacResourceAction" BaseType="graph.entity">
             <Property Name="actionVerb" Type="Edm.String"/>
@@ -29188,28 +29217,9 @@
             <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="status" Type="graph.delegatedAdminAccessAssignmentStatus"/>
          </EntityType>
-         <EntityType Name="delegatedAdminCustomer" BaseType="graph.entity">
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="tenantId" Type="Edm.String" Nullable="false"/>
-            <NavigationProperty Name="serviceManagementDetails" Type="Collection(graph.delegatedAdminServiceManagementDetail)" ContainsTarget="true"/>
-         </EntityType>
          <EntityType Name="delegatedAdminServiceManagementDetail" BaseType="graph.entity">
             <Property Name="serviceManagementUrl" Type="Edm.String" Nullable="false"/>
             <Property Name="serviceName" Type="Edm.String" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="delegatedAdminRelationship" BaseType="graph.entity">
-            <Property Name="accessDetails" Type="graph.delegatedAdminAccessDetails" Nullable="false"/>
-            <Property Name="activatedDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="customer" Type="graph.delegatedAdminRelationshipCustomerParticipant"/>
-            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
-            <Property Name="duration" Type="Edm.Duration" Nullable="false"/>
-            <Property Name="endDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="status" Type="graph.delegatedAdminRelationshipStatus"/>
-            <NavigationProperty Name="accessAssignments" Type="Collection(graph.delegatedAdminAccessAssignment)" ContainsTarget="true"/>
-            <NavigationProperty Name="operations" Type="Collection(graph.delegatedAdminRelationshipOperation)" ContainsTarget="true"/>
-            <NavigationProperty Name="requests" Type="Collection(graph.delegatedAdminRelationshipRequest)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="delegatedAdminRelationshipOperation" BaseType="graph.entity">
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
@@ -29223,10 +29233,6 @@
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="status" Type="graph.delegatedAdminRelationshipRequestStatus"/>
-         </EntityType>
-         <EntityType Name="tenantRelationship">
-            <NavigationProperty Name="delegatedAdminCustomers" Type="Collection(graph.delegatedAdminCustomer)" ContainsTarget="true"/>
-            <NavigationProperty Name="delegatedAdminRelationships" Type="Collection(graph.delegatedAdminRelationship)" ContainsTarget="true"/>
          </EntityType>
          <ComplexType Name="approvalSettings">
             <Property Name="approvalMode" Type="Edm.String"/>
@@ -31257,6 +31263,16 @@
          <Action Name="resetToSystemDefault" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.crossTenantAccessPolicyConfigurationDefault" Nullable="false"/>
          </Action>
+         <Function Name="findTenantInformationByDomainName" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.tenantRelationship" Nullable="false"/>
+            <Parameter Name="domainName" Type="Edm.String" Unicode="false"/>
+            <ReturnType Type="graph.tenantInformation"/>
+         </Function>
+         <Function Name="findTenantInformationByTenantId" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.tenantRelationship" Nullable="false"/>
+            <Parameter Name="tenantId" Type="Edm.String" Unicode="false"/>
+            <ReturnType Type="graph.tenantInformation"/>
+         </Function>
          <Action Name="setUpFeedbackResourcesFolder" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.educationAssignment"/>
             <ReturnType Type="graph.educationAssignment"/>
@@ -34283,6 +34299,9 @@
             <Parameter Name="clientContext" Type="Edm.String" Unicode="false"/>
             <ReturnType Type="graph.inviteParticipantsOperation"/>
          </Action>
+         <Action Name="permanentDelete" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.driveItem"/>
+         </Action>
          <Action Name="preview" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.driveItem"/>
             <Parameter Name="page" Type="Edm.String" Unicode="false"/>
@@ -36066,12 +36085,7 @@
             <EntitySet Name="places" EntityType="microsoft.graph.place"/>
             <EntitySet Name="drives" EntityType="microsoft.graph.drive"/>
             <EntitySet Name="shares" EntityType="microsoft.graph.sharedDriveItem"/>
-            <EntitySet Name="sites" EntityType="microsoft.graph.site">
-               <NavigationPropertyBinding Path="sites/contentTypes/columns/term/parentTerm" Target="sites/microsoft.graph.termStore.set/termStore/sets/terms"/>
-               <NavigationPropertyBinding Path="sites/contentTypes/columns/term/termSet" Target="sites/microsoft.graph.termStore.store/termStore/sets"/>
-               <NavigationPropertyBinding Path="sites/contentTypes/documentSet/sharedColumns" Target="sites/microsoft.graph.contentType/contentTypes/columns"/>
-               <NavigationPropertyBinding Path="sites/contentTypes/documentSet/welcomePageColumns" Target="sites/microsoft.graph.contentType/contentTypes/columns"/>
-            </EntitySet>
+            <EntitySet Name="sites" EntityType="microsoft.graph.site"/>
             <EntitySet Name="schemaExtensions" EntityType="microsoft.graph.schemaExtension"/>
             <EntitySet Name="groupLifecyclePolicies" EntityType="microsoft.graph.groupLifecyclePolicy"/>
             <EntitySet Name="filterOperators" EntityType="microsoft.graph.filterOperatorSchema"/>
@@ -36110,6 +36124,7 @@
                <NavigationPropertyBinding Path="transitiveMemberOf" Target="directoryObjects"/>
             </Singleton>
             <Singleton Name="policies" Type="microsoft.graph.policyRoot"/>
+            <Singleton Name="tenantRelationships" Type="microsoft.graph.tenantRelationship"/>
             <Singleton Name="admin" Type="microsoft.graph.admin"/>
             <Singleton Name="education" Type="microsoft.graph.educationRoot">
                <NavigationPropertyBinding Path="classes/group" Target="directoryObjects"/>
@@ -36140,7 +36155,6 @@
                <NavigationPropertyBinding Path="plans/buckets" Target="planner/buckets"/>
                <NavigationPropertyBinding Path="plans/tasks" Target="planner/tasks"/>
             </Singleton>
-            <Singleton Name="tenantRelationships" Type="microsoft.graph.tenantRelationship"/>
             <Singleton Name="print" Type="microsoft.graph.print"/>
             <Singleton Name="external" Type="microsoft.graph.externalConnectors.external"/>
             <Singleton Name="appCatalogs" Type="microsoft.graph.appCatalogs"/>

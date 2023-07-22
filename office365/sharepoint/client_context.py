@@ -172,7 +172,9 @@ class ClientContext(ClientRuntimeContext):
         Returns an ContextWebInformation object that specifies metadata about the site
         """
         client = ODataRequest(JsonLightFormat())
-        client.beforeExecute += self._authenticate_request
+        for e in self.pending_request().beforeExecute:
+            client.beforeExecute += e
+        client.beforeExecute -= self._build_modification_query
         request = RequestOptions("{0}/contextInfo".format(self.service_root_url()))
         request.method = HttpMethod.Post
         response = client.execute_request_direct(request)
@@ -236,7 +238,7 @@ class ClientContext(ClientRuntimeContext):
         if request.method == HttpMethod.Post:
             self._ensure_form_digest(request)
         # set custom SharePoint control headers
-        if isinstance(self.pending_request().default_json_format, JsonLightFormat):
+        if isinstance(self.pending_request().json_format, JsonLightFormat):
             if isinstance(self.current_query, DeleteEntityQuery):
                 request.ensure_header("X-HTTP-Method", "DELETE")
                 request.ensure_header("IF-MATCH", '*')
@@ -534,6 +536,11 @@ class ClientContext(ClientRuntimeContext):
         """Alias to TenantSettings"""
         from office365.sharepoint.tenant.settings import TenantSettings
         return TenantSettings.current(self)
+
+    @property
+    def viva_site_manager(self):
+        from office365.sharepoint.viva.site_manager import VivaSiteManager
+        return VivaSiteManager(self)
 
     @property
     def workflow_services_manager(self):

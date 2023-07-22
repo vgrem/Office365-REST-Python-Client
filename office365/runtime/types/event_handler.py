@@ -3,6 +3,12 @@ class EventHandler:
         self._listeners = []
         self._once = once
 
+    def __contains__(self, e):
+        return e in self._listeners
+
+    def __iter__(self):
+        return iter(self._listeners)
+
     def __iadd__(self, listener):
         self._listeners.append(listener)
         return self

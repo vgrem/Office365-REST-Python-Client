@@ -6,8 +6,9 @@ class RequestOptions(object):
 
     def __init__(self, url):
         """
+        Request options
 
-        :type url: str
+        :param str url: URL for the new :class:`requests.Request` object
         """
         self.url = url
         self.data = None

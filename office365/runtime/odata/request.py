@@ -27,7 +27,7 @@ class ODataRequest(ClientRequest):
         self.beforeExecute += self._ensure_json_format
 
     @property
-    def default_json_format(self):
+    def json_format(self):
         return self._default_json_format
 
     def build_request(self, query):
@@ -51,7 +51,7 @@ class ODataRequest(ClientRequest):
         :type response: requests.Response
         :type query: office365.runtime.queries.client_query.ClientQuery
         """
-        json_format = copy.deepcopy(self.default_json_format)
+        json_format = copy.deepcopy(self.json_format)
         return_type = query.return_type
         if return_type is None:
             return
@@ -76,7 +76,7 @@ class ODataRequest(ClientRequest):
         :type json_format: office365.runtime.odata.json_format.ODataJsonFormat
         """
         if json_format is None:
-            json_format = self.default_json_format
+            json_format = self.json_format
 
         if json and return_type is not None:
             for k, v in self._next_property(json, json_format):
@@ -143,6 +143,6 @@ class ODataRequest(ClientRequest):
         """
         :type request: RequestOptions
         """
-        media_type = self.default_json_format.media_type
+        media_type = self.json_format.media_type
         request.ensure_header('Content-Type', media_type)
         request.ensure_header('Accept', media_type)
