@@ -86,6 +86,17 @@ class ClientContext(ClientRuntimeContext):
         self.authentication_context.with_interactive(tenant, client_id, scopes)
         return self
 
+    def with_device_flow(self, tenant, client_id, scopes=None):
+        """
+        Initializes a client to acquire a token via device flow auth.
+
+        :param str tenant: Tenant name, for example: contoso.onmicrosoft.com
+        :param str client_id: The OAuth client id of the calling application.
+        :param list[str] or None scopes:  Scopes requested to access a protected API (a resource)
+        """
+        self.authentication_context.with_device_flow(tenant, client_id, scopes)
+        return self
+
     def with_access_token(self, token_func):
         """
         Initializes a client to acquire a token from a callback

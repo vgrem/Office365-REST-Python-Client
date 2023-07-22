@@ -1,3 +1,6 @@
+import json
+import sys
+
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
 from office365.runtime.auth.providers.saml_token_provider import SamlTokenProvider
@@ -78,6 +81,39 @@ class AuthenticationContext(object):
                 client_credential=None
             )
             result = app.acquire_token_interactive(scopes=scopes)
+            return TokenResponse.from_json(result)
+        self.with_access_token(_acquire_token)
+        return self
+
+    def with_device_flow(self, tenant, client_id, scopes=None):
+        """
+        Obtain token by a device flow object, with customizable polling effect.
+
+        :param str tenant: Tenant name, for example: contoso.onmicrosoft.com
+        :param str client_id: The OAuth client id of the calling application.
+        :param list[str] or None scopes:  Scopes requested to access a protected API (a resource)
+        """
+        if scopes is None:
+            resource = get_absolute_url(self.url)
+            scopes = ["{url}/.default".format(url=resource)]
+
+        def _acquire_token():
+            import msal
+            app = msal.PublicClientApplication(
+                client_id,
+                authority='https://login.microsoftonline.com/{0}'.format(tenant),
+                client_credential=None
+            )
+
+            flow = app.initiate_device_flow(scopes=scopes)
+            if "user_code" not in flow:
+                raise ValueError(
+                    "Failed to create device flow: %s" % json.dumps(flow, indent=4))
+
+            print(flow["message"])
+            sys.stdout.flush()
+
+            result = app.acquire_token_by_device_flow(flow)
             return TokenResponse.from_json(result)
         self.with_access_token(_acquire_token)
         return self

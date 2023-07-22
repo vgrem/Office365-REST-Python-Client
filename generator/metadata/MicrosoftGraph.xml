@@ -25406,14 +25406,20 @@
          </ComplexType>
          <ComplexType Name="conditionalAccessAllExternalTenants" BaseType="graph.conditionalAccessExternalTenants"/>
          <ComplexType Name="conditionalAccessApplications">
+            <Property Name="applicationFilter" Type="graph.conditionalAccessFilter"/>
             <Property Name="excludeApplications" Type="Collection(Edm.String)" Nullable="false"/>
             <Property Name="includeApplications" Type="Collection(Edm.String)" Nullable="false"/>
             <Property Name="includeAuthenticationContextClassReferences" Type="Collection(Edm.String)" Nullable="false"/>
             <Property Name="includeUserActions" Type="Collection(Edm.String)" Nullable="false"/>
          </ComplexType>
+         <ComplexType Name="conditionalAccessFilter">
+            <Property Name="mode" Type="graph.filterMode" Nullable="false"/>
+            <Property Name="rule" Type="Edm.String" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="conditionalAccessClientApplications">
             <Property Name="excludeServicePrincipals" Type="Collection(Edm.String)" Nullable="false"/>
             <Property Name="includeServicePrincipals" Type="Collection(Edm.String)" Nullable="false"/>
+            <Property Name="servicePrincipalFilter" Type="graph.conditionalAccessFilter"/>
          </ComplexType>
          <ComplexType Name="conditionalAccessConditionSet">
             <Property Name="applications" Type="graph.conditionalAccessApplications"/>
@@ -25447,10 +25453,6 @@
             <Property Name="includeGuestsOrExternalUsers" Type="graph.conditionalAccessGuestsOrExternalUsers"/>
             <Property Name="includeRoles" Type="Collection(Edm.String)" Nullable="false"/>
             <Property Name="includeUsers" Type="Collection(Edm.String)" Nullable="false"/>
-         </ComplexType>
-         <ComplexType Name="conditionalAccessFilter">
-            <Property Name="mode" Type="graph.filterMode" Nullable="false"/>
-            <Property Name="rule" Type="Edm.String" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="conditionalAccessEnumeratedExternalTenants" BaseType="graph.conditionalAccessExternalTenants">
             <Property Name="members" Type="Collection(Edm.String)" Nullable="false"/>
@@ -30510,9 +30512,13 @@
             <NavigationProperty Name="bot" Type="graph.teamworkBot" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="teamworkBot" BaseType="graph.entity"/>
+         <EntityType Name="teamsAppSettings" BaseType="graph.entity">
+            <Property Name="allowUserRequestsForAppAccess" Type="Edm.Boolean"/>
+         </EntityType>
          <EntityType Name="teamwork" BaseType="graph.entity">
             <NavigationProperty Name="workforceIntegrations" Type="Collection(graph.workforceIntegration)" ContainsTarget="true"/>
             <NavigationProperty Name="deletedTeams" Type="Collection(graph.deletedTeam)" ContainsTarget="true"/>
+            <NavigationProperty Name="teamsAppSettings" Type="graph.teamsAppSettings" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="workforceIntegration" BaseType="graph.changeTrackedEntity">
             <Property Name="apiVersion" Type="Edm.Int32"/>
@@ -36065,7 +36071,6 @@
             </EntitySet>
             <EntitySet Name="groupSettings" EntityType="microsoft.graph.groupSetting"/>
             <EntitySet Name="groupSettingTemplates" EntityType="microsoft.graph.groupSettingTemplate"/>
-            <EntitySet Name="localizations" EntityType="microsoft.graph.organizationalBrandingLocalization"/>
             <EntitySet Name="oauth2PermissionGrants" EntityType="microsoft.graph.oAuth2PermissionGrant"/>
             <EntitySet Name="organization" EntityType="microsoft.graph.organization">
                <NavigationPropertyBinding Path="certificateBasedAuthConfiguration" Target="certificateBasedAuthConfiguration"/>
@@ -36292,6 +36297,12 @@
             <Member Name="resolved" Value="8"/>
             <Member Name="unknownFutureValue" Value="31"/>
          </EnumType>
+         <EnumType Name="containerPortProtocol">
+            <Member Name="udp" Value="0"/>
+            <Member Name="tcp" Value="1"/>
+            <Member Name="sctp" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
          <EnumType Name="defenderAvStatus">
             <Member Name="notReporting" Value="0"/>
             <Member Name="disabled" Value="1"/>
@@ -36378,6 +36389,14 @@
             <Member Name="noThreatsFound" Value="3"/>
             <Member Name="unknownFutureValue" Value="4"/>
          </EnumType>
+         <EnumType Name="fileHashAlgorithm">
+            <Member Name="unknown" Value="0"/>
+            <Member Name="md5" Value="1"/>
+            <Member Name="sha1" Value="2"/>
+            <Member Name="sha256" Value="3"/>
+            <Member Name="sha256ac" Value="4"/>
+            <Member Name="unknownFutureValue" Value="5"/>
+         </EnumType>
          <EnumType Name="googleCloudLocationType">
             <Member Name="unknown" Value="0"/>
             <Member Name="regional" Value="1"/>
@@ -36392,6 +36411,22 @@
             <Member Name="redirected" Value="64"/>
             <Member Name="unknownFutureValue" Value="127"/>
             <Member Name="awaitingAction" Value="128"/>
+         </EnumType>
+         <EnumType Name="kubernetesPlatform">
+            <Member Name="unknown" Value="0"/>
+            <Member Name="aks" Value="1"/>
+            <Member Name="eks" Value="2"/>
+            <Member Name="gke" Value="3"/>
+            <Member Name="arc" Value="4"/>
+            <Member Name="unknownFutureValue" Value="5"/>
+         </EnumType>
+         <EnumType Name="kubernetesServiceType">
+            <Member Name="unknown" Value="0"/>
+            <Member Name="clusterIP" Value="1"/>
+            <Member Name="externalName" Value="2"/>
+            <Member Name="nodePort" Value="3"/>
+            <Member Name="loadBalancer" Value="4"/>
+            <Member Name="unknownFutureValue" Value="31"/>
          </EnumType>
          <EnumType Name="onboardingStatus">
             <Member Name="insufficientInfo" Value="0"/>
@@ -36758,12 +36793,56 @@
             <Property Name="resourceName" Type="Edm.String"/>
             <Property Name="resourceType" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="blobContainerEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="storageResource" Type="microsoft.graph.security.azureResourceEvidence"/>
+            <Property Name="url" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="blobEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="blobContainer" Type="microsoft.graph.security.blobContainerEvidence"/>
+            <Property Name="etag" Type="Edm.String"/>
+            <Property Name="fileHashes" Type="Collection(microsoft.graph.security.fileHash)"/>
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="url" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="fileHash">
+            <Property Name="algorithm" Type="microsoft.graph.security.fileHashAlgorithm" Nullable="false"/>
+            <Property Name="value" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="cloudApplicationEvidence" BaseType="microsoft.graph.security.alertEvidence">
             <Property Name="appId" Type="Edm.Int64"/>
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="instanceId" Type="Edm.Int64"/>
             <Property Name="instanceName" Type="Edm.String"/>
             <Property Name="saasAppId" Type="Edm.Int64"/>
+         </ComplexType>
+         <ComplexType Name="containerEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="args" Type="Collection(Edm.String)"/>
+            <Property Name="command" Type="Collection(Edm.String)"/>
+            <Property Name="containerId" Type="Edm.String"/>
+            <Property Name="image" Type="microsoft.graph.security.containerImageEvidence"/>
+            <Property Name="isPrivileged" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="pod" Type="microsoft.graph.security.kubernetesPodEvidence"/>
+         </ComplexType>
+         <ComplexType Name="containerImageEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="digestImage" Type="microsoft.graph.security.containerImageEvidence"/>
+            <Property Name="imageId" Type="Edm.String"/>
+            <Property Name="registry" Type="microsoft.graph.security.containerRegistryEvidence"/>
+         </ComplexType>
+         <ComplexType Name="kubernetesPodEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="containers" Type="Collection(microsoft.graph.security.containerEvidence)"/>
+            <Property Name="controller" Type="microsoft.graph.security.kubernetesControllerEvidence"/>
+            <Property Name="ephemeralContainers" Type="Collection(microsoft.graph.security.containerEvidence)"/>
+            <Property Name="initContainers" Type="Collection(microsoft.graph.security.containerEvidence)"/>
+            <Property Name="labels" Type="microsoft.graph.security.dictionary"/>
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="namespace" Type="microsoft.graph.security.kubernetesNamespaceEvidence"/>
+            <Property Name="podIp" Type="microsoft.graph.security.ipEvidence"/>
+            <Property Name="serviceAccount" Type="microsoft.graph.security.kubernetesServiceAccountEvidence"/>
+         </ComplexType>
+         <ComplexType Name="containerRegistryEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="registry" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="deviceEvidence" BaseType="microsoft.graph.security.alertEvidence">
             <Property Name="azureAdDeviceId" Type="Edm.String"/>
@@ -36793,6 +36872,7 @@
             <Property Name="subscriptionId" Type="Edm.String"/>
             <Property Name="vmId" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="dictionary" OpenType="true"/>
          <ComplexType Name="dynamicColumnValue" OpenType="true"/>
          <ComplexType Name="fileDetails">
             <Property Name="fileName" Type="Edm.String"/>
@@ -36829,6 +36909,51 @@
          <ComplexType Name="ipEvidence" BaseType="microsoft.graph.security.alertEvidence">
             <Property Name="countryLetterCode" Type="Edm.String"/>
             <Property Name="ipAddress" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="kubernetesClusterEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="cloudResource" Type="microsoft.graph.security.alertEvidence"/>
+            <Property Name="distribution" Type="Edm.String"/>
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="platform" Type="microsoft.graph.security.kubernetesPlatform"/>
+            <Property Name="version" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="kubernetesControllerEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="labels" Type="microsoft.graph.security.dictionary"/>
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="namespace" Type="microsoft.graph.security.kubernetesNamespaceEvidence"/>
+            <Property Name="type" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="kubernetesNamespaceEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="cluster" Type="microsoft.graph.security.kubernetesClusterEvidence"/>
+            <Property Name="labels" Type="microsoft.graph.security.dictionary"/>
+            <Property Name="name" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="kubernetesServiceAccountEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="namespace" Type="microsoft.graph.security.kubernetesNamespaceEvidence"/>
+         </ComplexType>
+         <ComplexType Name="kubernetesSecretEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="namespace" Type="microsoft.graph.security.kubernetesNamespaceEvidence"/>
+            <Property Name="secretType" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="kubernetesServiceEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="clusterIP" Type="microsoft.graph.security.ipEvidence"/>
+            <Property Name="externalIPs" Type="Collection(microsoft.graph.security.ipEvidence)"/>
+            <Property Name="labels" Type="microsoft.graph.security.dictionary"/>
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="namespace" Type="microsoft.graph.security.kubernetesNamespaceEvidence"/>
+            <Property Name="selector" Type="microsoft.graph.security.dictionary"/>
+            <Property Name="servicePorts" Type="Collection(microsoft.graph.security.kubernetesServicePort)"/>
+            <Property Name="serviceType" Type="microsoft.graph.security.kubernetesServiceType" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="kubernetesServicePort">
+            <Property Name="appProtocol" Type="Edm.String"/>
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="nodePort" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="port" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="protocol" Type="microsoft.graph.security.containerPortProtocol"/>
+            <Property Name="targetPort" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="mailboxEvidence" BaseType="microsoft.graph.security.alertEvidence">
             <Property Name="displayName" Type="Edm.String"/>
