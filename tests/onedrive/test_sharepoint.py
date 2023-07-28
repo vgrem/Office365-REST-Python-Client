@@ -8,4 +8,8 @@ class TestSharePoint(GraphTestCase):
         result = self.client.admin.sharepoint.settings.get().execute_query()
         self.assertIsNotNone(result.resource_path)
 
+    def test2_list_issues(self):
+        result = self.client.admin.service_announcement.issues.get().execute_query()
+        self.assertIsNotNone(result.resource_path)
+
 

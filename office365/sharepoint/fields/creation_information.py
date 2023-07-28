@@ -15,10 +15,11 @@ class FieldCreationInformation(ClientValue):
         :param str lookup_web_id: Specifies the identifier of the site (2) that contains the list that is the
             source for the field (2) value.
         :param bool required: Specifies whether the field (2) requires a value.
-        :param str lookup_field_name:
-        :param str lookup_list_id: A CSOM GUID that specifies the target list for the lookup field (2).
-        :param str title:
-        :param int field_type_kind: Specifies the type of the field (2).
+        :param str lookup_field_name: Specifies the name of the field in the other data source when creating
+            a lookup field.
+        :param str lookup_list_id: A CSOM GUID that specifies the target list for the lookup field.
+        :param str title: Specifies the display name of the field.
+        :param int field_type_kind: Specifies the type of the field.
         :type description: str or None
         :param str formula:
         :param list[str] or None choices:

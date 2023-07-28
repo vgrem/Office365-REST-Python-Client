@@ -1,4 +1,5 @@
 from office365.directory.licenses.service_plan_info import ServicePlanInfo
+from office365.directory.licenses.units_detail import LicenseUnitsDetail
 from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
 
@@ -9,9 +10,19 @@ class SubscribedSku(Entity):
     @property
     def account_id(self):
         """
+        The unique ID of the account this SKU belongs to.
         :rtype: str
         """
         return self.properties.get("accountId", None)
+
+    @property
+    def applies_to(self):
+        """
+        The target class for this SKU. Only SKUs with target class User are assignable.
+        Possible values are: "User", "Company".
+        :rtype: str
+        """
+        return self.properties.get("appliesTo", None)
 
     @property
     def sku_id(self):
@@ -22,6 +33,20 @@ class SubscribedSku(Entity):
         return self.properties.get("skuId", None)
 
     @property
+    def sku_part_number(self):
+        """
+        The SKU part number; for example: "AAD_PREMIUM" or "RMSBASIC".
+        To get a list of commercial subscriptions that an organization has acquired, see List subscribedSkus.
+        :rtype: str
+        """
+        return self.properties.get("skuPartNumber", None)
+
+    @property
+    def prepaid_units(self):
+        """Information about the number and status of prepaid licenses."""
+        return self.properties.get("prepaidUnits", LicenseUnitsDetail())
+
+    @property
     def service_plans(self):
         """Information about the service plans that are available with the SKU. Not nullable"""
         return self.properties.get('servicePlans', ClientValueCollection(ServicePlanInfo))
@@ -29,6 +54,7 @@ class SubscribedSku(Entity):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "prepaidUnits": self.prepaid_units,
                 "servicePlans": self.service_plans
             }
             default_value = property_mapping.get(name, None)

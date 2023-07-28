@@ -20,23 +20,22 @@ class FieldLinkCollection(BaseEntityCollection):
 
         :param str or office365.sharepoint.fields.field.Field field: Specifies the internal name of the field or type
         """
-        def _create_query(field_internal_name):
+        def _create_and_add_query(field_internal_name):
             """
             :type field_internal_name: str
             """
             return_type.set_property("FieldInternalName", field_internal_name)
-            return CreateEntityQuery(self, return_type, return_type)
+            qry = CreateEntityQuery(self, return_type, return_type)
+            self.context.add_query(qry)
 
         return_type = FieldLink(self.context)
         self.add_child(return_type)
         if isinstance(field, Field):
             def _field_loaded():
-                next_qry = _create_query(field.internal_name)
-                self.context.add_query(next_qry)
+                _create_and_add_query(field.internal_name)
             field.ensure_property("InternalName", _field_loaded)
         else:
-            qry = _create_query(field)
-            self.context.add_query(qry)
+            _create_and_add_query(field)
         return return_type
 
     def get_by_id(self, _id):

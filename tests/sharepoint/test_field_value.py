@@ -60,7 +60,7 @@ class TestFieldValue(SPTestCase):
 
     def test3_create_multi_lookup_field(self):
         lookup_field = self.target_list.fields.add_lookup_field(title=self.multi_lookup_field_name,
-                                                                lookup_list_id=self.target_list.properties['Id'],
+                                                                lookup_list=self.target_list.properties['Id'],
                                                                 lookup_field_name='Title',
                                                                 allow_multiple_values=True).execute_query()
         self.assertEqual(lookup_field.type_as_string, 'LookupMulti')
@@ -150,7 +150,7 @@ class TestFieldValue(SPTestCase):
 
     def test_17_create_list_lookup_field(self):
         lookup_field = self.target_list.fields.add_lookup_field(title=self.lookup_field_name,
-                                                                lookup_list_id=self.lookup_list.properties['Id'],
+                                                                lookup_list=self.lookup_list.properties['Id'],
                                                                 lookup_field_name='Title').execute_query()
         self.assertEqual(lookup_field.type_as_string, 'Lookup')
 

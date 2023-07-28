@@ -337,6 +337,14 @@ class GraphClient(ClientRuntimeContext):
         return EntityCollection(self, ResourceSpecificPermissionGrant, ResourcePath("permissionGrants"))
 
     @property
+    def print(self):
+        """
+        Used to manage printers and print jobs within Universal Print.
+        """
+        from office365.intune.printing.print import Print
+        return Print(self, ResourcePath("print"))
+
+    @property
     def search(self):
         """
         The search endpoint is the entry point for Microsoft Search API to query data.

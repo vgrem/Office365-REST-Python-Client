@@ -1,6 +1,7 @@
 from office365.directory.security.alerts.alert import Alert
 from office365.directory.security.attacksimulations.root import AttackSimulationRoot
 from office365.directory.security.cases_root import CasesRoot
+from office365.directory.security.incidents.incident import Incident
 from office365.directory.security.triggers.root import TriggersRoot
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
@@ -36,6 +37,14 @@ class Security(Entity):
         return self.properties.get('attackSimulation',
                                    AttackSimulationRoot(self.context,
                                                         ResourcePath("attackSimulation", self.resource_path)))
+
+    @property
+    def incidents(self):
+        """A collection of correlated alert instances and associated metadata that reflects the story of
+        an attack in a tenant"""
+        return self.properties.get('incidents',
+                                   EntityCollection(self.context, Incident,
+                                                    ResourcePath("incidents", self.resource_path)))
 
     @property
     def triggers(self):

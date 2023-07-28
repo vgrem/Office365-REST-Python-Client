@@ -38,35 +38,53 @@ class FieldCollection(BaseEntityCollection):
                                                  description=description,
                                                  field_type_kind=FieldType.URL))
 
-    def add_lookup_field(self, title, lookup_list_id, lookup_field_name, allow_multiple_values=False):
+    def add_lookup_field(self, title, lookup_list, lookup_field_name, allow_multiple_values=False):
         """
         Creates a Lookup field
 
-        :param bool allow_multiple_values:
-        :param str lookup_field_name:
-        :param str lookup_list_id:
-        :param str title:
+        :param bool allow_multiple_values: Flag determines whether to create multi lookup field or not
+        :param str lookup_field_name: Specifies the name of the field in the other data source when creating
+            a lookup field
+        :param str or office365.sharepoint.lists.list.List lookup_list: Lookup List object or identifier
+        :param str title: Specifies the display name of the field.
         """
-        if allow_multiple_values:
-            field_schema = '''
-                        <Field Type="LookupMulti" Mult="TRUE" DisplayName="{title}" Required="FALSE" Hidden="TRUE" \
-                        ShowField="{lookup_field_name}" List="{{{lookup_list_id}}}" StaticName="{title}" Name="{title}">
-                        </Field>
-                        '''.format(title=title, lookup_field_name=lookup_field_name, lookup_list_id=lookup_list_id)
-            return self.create_field_as_xml(field_schema)
+        return_type = Field(self.context)
+
+        def _add_lookup_field(lookup_list_id):
+            """
+            :type lookup_list_id: str
+            """
+            if allow_multiple_values:
+                field_schema = '''
+                            <Field Type="LookupMulti" Mult="TRUE" DisplayName="{title}" Required="FALSE" Hidden="TRUE" \
+                            ShowField="{lookup_field_name}" List="{{{lookup_list_id}}}" StaticName="{title}" Name="{title}">
+                            </Field>
+                            '''.format(title=title, lookup_field_name=lookup_field_name, lookup_list_id=lookup_list_id)
+                self.create_field_as_xml(field_schema, return_type=return_type)
+            else:
+                self.add_field(FieldCreationInformation(title=title,
+                                                        lookup_list_id=lookup_list_id,
+                                                        lookup_field_name=lookup_field_name,
+                                                        field_type_kind=FieldType.Lookup),
+                               return_type=return_type)
+
+        from office365.sharepoint.lists.list import List
+        if isinstance(lookup_list, List):
+
+            def _lookup_list_loaded():
+                _add_lookup_field(lookup_list.id)
+            lookup_list.ensure_property("Id", _lookup_list_loaded)
         else:
-            return self.add_field(FieldCreationInformation(title=title,
-                                                           lookup_list_id=lookup_list_id,
-                                                           lookup_field_name=lookup_field_name,
-                                                           field_type_kind=FieldType.Lookup))
+            _add_lookup_field(lookup_list)
+        return return_type
 
     def add_choice_field(self, title, values, multiple_values=False):
         """
-        Created Choice field
+        Creates a Choice field
 
         :param bool multiple_values:
         :param list[str] values:
-        :param str title:
+        :param str title: Specifies the display name of the field.
         """
         fld_type = FieldType.MultiChoice if multiple_values else FieldType.Choice
         create_field_info = FieldCreationInformation(title, fld_type)
@@ -77,7 +95,7 @@ class FieldCollection(BaseEntityCollection):
         """
         Creates a User field
 
-        :param str title: specifies the display name of the field
+        :param str title: Specifies the display name of the field
         """
         return self.add_field(FieldCreationInformation(title, FieldType.User))
 
@@ -106,15 +124,10 @@ class FieldCollection(BaseEntityCollection):
             "primaryLookupField": primary_lookup_field,
             "lookupField": lookup_field
         }
-        qry = ServiceOperationQuery(self, "AddDependentLookupField", None, parameters, None, return_type)
+        qry = ServiceOperationQuery(self, "AddDependentLookupField", None, parameters,
+                                    None, return_type)
         self.context.add_query(qry)
         return return_type
-
-    def add_taxonomy_field(self, title, description=None):
-        """
-        Adds a taxonomy field
-        """
-        pass
 
     def add(self, field_create_information):
         """Adds a fields to the fields collection.
@@ -127,15 +140,18 @@ class FieldCollection(BaseEntityCollection):
         self.context.add_query(qry)
         return return_type
 
-    def add_field(self, parameters):
+    def add_field(self, parameters, return_type=None):
         """Adds a fields to the fields collection.
 
         :type parameters: office365.sharepoint.fields.creation_information.FieldCreationInformation
+        :param Field or None return_type: Return type
         """
-        return_type = Field(self.context)
+        if return_type is None:
+            return_type = Field(self.context)
         self.add_child(return_type)
         payload = {"parameters": parameters}
-        qry = ServiceOperationQuery(self, "AddField", None, payload, None, return_type)
+        qry = ServiceOperationQuery(self, "AddField", None, payload, None,
+                                    return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -151,7 +167,9 @@ class FieldCollection(BaseEntityCollection):
 
         if isinstance(term_set, TermSet):
             def _term_set_loaded():
-                TaxonomyField.create(self, name, term_set.id, None, allow_multiple_values, return_type=return_type)
+                TaxonomyField.create(self, name, term_set.id, None, allow_multiple_values,
+                                     return_type=return_type)
+
             term_set.ensure_property("id", _term_set_loaded)
             return return_type
         else:
@@ -159,6 +177,7 @@ class FieldCollection(BaseEntityCollection):
             def _term_store_loaded(term_store):
                 TaxonomyField.create(self, name, term_set, term_store.id, allow_multiple_values,
                                      return_type=return_type)
+
             self.context.load(self.context.taxonomy.term_store, after_loaded=_term_store_loaded)
         return return_type
 
@@ -167,7 +186,7 @@ class FieldCollection(BaseEntityCollection):
         Creates a field based on the values defined in the parameters input parameter.
 
         :param str schema_xml: Specifies the schema that defines the field
-        :type return_type: Field
+        :param Field or None return_type: Return type
         """
         if return_type is None:
             return_type = Field(self.context)

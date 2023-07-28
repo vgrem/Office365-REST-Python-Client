@@ -1,4 +1,7 @@
+from office365.directory.policies.app_management import AppManagementPolicy
+from office365.directory.policies.authentication_flows import AuthenticationFlowsPolicy
 from office365.directory.policies.authentication_methods import AuthenticationMethodsPolicy
+from office365.directory.policies.authentication_strength import AuthenticationStrengthPolicy
 from office365.directory.policies.permission_grant import PermissionGrantPolicy
 from office365.directory.policies.authorization import AuthorizationPolicy
 from office365.directory.policies.conditional_access import ConditionalAccessPolicy
@@ -21,6 +24,22 @@ class PolicyRoot(Entity):
                                                                ResourcePath("authenticationMethodsPolicy",
                                                                             self.resource_path)))
 
+    def authentication_strength_policies(self):
+        """
+        The authentication method combinations that are to be used in scenarios defined by Azure AD Conditional Access.
+        """
+        return self.properties.get('authenticationStrengthPolicies',
+                                   EntityCollection(self.context, AuthenticationStrengthPolicy,
+                                                    ResourcePath("authenticationStrengthPolicies", self.resource_path)))
+
+    @property
+    def authentication_flows_policy(self):
+        """	The policy configuration of the self-service sign-up experience of external users."""
+        return self.properties.get('authenticationFlowsPolicy',
+                                   AuthenticationFlowsPolicy(self.context,
+                                                             ResourcePath("authenticationFlowsPolicy",
+                                                                          self.resource_path)))
+
     @property
     def authorization_policy(self):
         """The policy that controls Azure AD authorization settings."""
@@ -33,8 +52,8 @@ class PolicyRoot(Entity):
         """The policies that enforce app management restrictions for specific applications and service principals,
         overriding the defaultAppManagementPolicy."""
         return self.properties.get('appManagementPolicies',
-                                   AuthorizationPolicy(self.context,
-                                                       ResourcePath("appManagementPolicies", self.resource_path)))
+                                   EntityCollection(self.context, AppManagementPolicy,
+                                                    ResourcePath("appManagementPolicies", self.resource_path)))
 
     @property
     def permission_grant_policies(self):
@@ -57,6 +76,8 @@ class PolicyRoot(Entity):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "authenticationStrengthPolicies": self.authentication_strength_policies,
+                "authenticationFlowsPolicy": self.authentication_flows_policy,
                 "appManagementPolicies": self.app_management_policies,
                 "authenticationMethodsPolicy": self.authentication_methods_policy,
                 "authorizationPolicy": self.authorization_policy,

@@ -20296,6 +20296,7 @@
             <Property Name="country" Type="Edm.String"/>
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="creationType" Type="Edm.String"/>
+            <Property Name="customSecurityAttributes" Type="graph.customSecurityAttributeValue"/>
             <Property Name="department" Type="Edm.String"/>
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="employeeHireDate" Type="Edm.DateTimeOffset"/>
@@ -20425,6 +20426,7 @@
          <ComplexType Name="authorizationInfo">
             <Property Name="certificateUserIds" Type="Collection(Edm.String)"/>
          </ComplexType>
+         <ComplexType Name="customSecurityAttributeValue" OpenType="true"/>
          <ComplexType Name="employeeOrgData">
             <Property Name="costCenter" Type="Edm.String"/>
             <Property Name="division" Type="Edm.String"/>
@@ -20902,6 +20904,7 @@
             <Property Name="allowAttendeeToEnableMic" Type="Edm.Boolean"/>
             <Property Name="allowedPresenters" Type="graph.onlineMeetingPresenters"/>
             <Property Name="allowMeetingChat" Type="graph.meetingChatMode"/>
+            <Property Name="allowParticipantsToChangeName" Type="Edm.Boolean"/>
             <Property Name="allowTeamworkReactions" Type="Edm.Boolean"/>
             <Property Name="attendeeReport" Type="Edm.Stream"/>
             <Property Name="audioConferencing" Type="graph.audioConferencing"/>
@@ -20953,6 +20956,7 @@
             <NavigationProperty Name="lastMessagePreview" Type="graph.chatMessageInfo" ContainsTarget="true"/>
             <NavigationProperty Name="members" Type="Collection(graph.conversationMember)" ContainsTarget="true"/>
             <NavigationProperty Name="messages" Type="Collection(graph.chatMessage)" ContainsTarget="true"/>
+            <NavigationProperty Name="permissionGrants" Type="Collection(graph.resourceSpecificPermissionGrant)" ContainsTarget="true"/>
             <NavigationProperty Name="pinnedMessages" Type="Collection(graph.pinnedChatMessageInfo)" ContainsTarget="true"/>
             <NavigationProperty Name="tabs" Type="Collection(graph.teamsTab)" ContainsTarget="true"/>
          </EntityType>
@@ -20979,6 +20983,7 @@
             <NavigationProperty Name="installedApps" Type="Collection(graph.teamsAppInstallation)" ContainsTarget="true"/>
             <NavigationProperty Name="members" Type="Collection(graph.conversationMember)" ContainsTarget="true"/>
             <NavigationProperty Name="operations" Type="Collection(graph.teamsAsyncOperation)" ContainsTarget="true"/>
+            <NavigationProperty Name="permissionGrants" Type="Collection(graph.resourceSpecificPermissionGrant)" ContainsTarget="true"/>
             <NavigationProperty Name="photo" Type="graph.profilePhoto" ContainsTarget="true"/>
             <NavigationProperty Name="primaryChannel" Type="graph.channel" ContainsTarget="true"/>
             <NavigationProperty Name="tags" Type="Collection(graph.teamworkTag)" ContainsTarget="true"/>
@@ -21224,6 +21229,7 @@
          </EntityType>
          <EntityType Name="printUsageByPrinter" BaseType="graph.printUsage">
             <Property Name="printerId" Type="Edm.String" Nullable="false"/>
+            <Property Name="printerName" Type="Edm.String"/>
          </EntityType>
          <EntityType Name="printUsageByUser" BaseType="graph.printUsage">
             <Property Name="userPrincipalName" Type="Edm.String" Nullable="false"/>
@@ -21268,6 +21274,7 @@
             <Property Name="appOwnerOrganizationId" Type="Edm.Guid"/>
             <Property Name="appRoleAssignmentRequired" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="appRoles" Type="Collection(graph.appRole)" Nullable="false"/>
+            <Property Name="customSecurityAttributes" Type="graph.customSecurityAttributeValue"/>
             <Property Name="description" Type="Edm.String"/>
             <Property Name="disabledByMicrosoftStatus" Type="Edm.String"/>
             <Property Name="displayName" Type="Edm.String"/>
@@ -22060,6 +22067,13 @@
             <Property Name="targetResourceId" Type="Edm.String"/>
             <Property Name="targetResourceLocation" Type="Edm.String"/>
          </EntityType>
+         <EntityType Name="resourceSpecificPermissionGrant" BaseType="graph.directoryObject">
+            <Property Name="clientAppId" Type="Edm.String"/>
+            <Property Name="clientId" Type="Edm.String"/>
+            <Property Name="permission" Type="Edm.String"/>
+            <Property Name="permissionType" Type="Edm.String"/>
+            <Property Name="resourceAppId" Type="Edm.String"/>
+         </EntityType>
          <EntityType Name="teamworkTag" BaseType="graph.entity">
             <Property Name="description" Type="Edm.String"/>
             <Property Name="displayName" Type="Edm.String"/>
@@ -22103,13 +22117,6 @@
          <ComplexType Name="licenseProcessingState">
             <Property Name="state" Type="Edm.String"/>
          </ComplexType>
-         <EntityType Name="resourceSpecificPermissionGrant" BaseType="graph.directoryObject">
-            <Property Name="clientAppId" Type="Edm.String"/>
-            <Property Name="clientId" Type="Edm.String"/>
-            <Property Name="permission" Type="Edm.String"/>
-            <Property Name="permissionType" Type="Edm.String"/>
-            <Property Name="resourceAppId" Type="Edm.String"/>
-         </EntityType>
          <EntityType Name="groupSetting" BaseType="graph.entity" OpenType="true">
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="templateId" Type="Edm.String"/>
@@ -29301,6 +29308,7 @@
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
             <Property Name="id" Type="Edm.String" Nullable="false"/>
             <Property Name="printerId" Type="Edm.String"/>
+            <Property Name="printerName" Type="Edm.String"/>
             <Property Name="processingState" Type="graph.printJobProcessingState" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="integerRange">
@@ -35980,11 +35988,19 @@
             <Parameter Name="templateParameters" Type="Collection(graph.keyValuePair)"/>
             <Parameter Name="recipients" Type="Collection(graph.teamworkNotificationRecipient)"/>
          </Action>
+         <Action Name="setReaction" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.chatMessage"/>
+            <Parameter Name="reactionType" Type="Edm.String" Unicode="false"/>
+         </Action>
          <Action Name="softDelete" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.chatMessage"/>
          </Action>
          <Action Name="undoSoftDelete" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.chatMessage"/>
+         </Action>
+         <Action Name="unsetReaction" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.chatMessage"/>
+            <Parameter Name="reactionType" Type="Edm.String" Unicode="false"/>
          </Action>
          <Action Name="upgrade" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.teamsAppInstallation"/>

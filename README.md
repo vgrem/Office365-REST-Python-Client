@@ -96,7 +96,7 @@ Steps to access:
   
   Example: [connect_with_client_certificate.py](examples/sharepoint/connect_with_client_certificate.py)
 
-#### 4. interactive
+#### 4. Interactive
 
    to login interactively i.e. via a local browser
 
@@ -108,11 +108,12 @@ Steps to access:
   Example: [connect_interactive.py](examples/sharepoint/connect_interactive.py)
 
   Usage:
-  ```python
-  ctx = ClientContext(site_url).with_interactive(tenant_name_or_id, client_id)
-  me = ctx.web.current_user.get().execute_query()
-  print(me.login_name)
-  ```
+```python
+from office365.sharepoint.client_context import ClientContext
+ctx = ClientContext(site_url).with_interactive(tenant_name_or_id, client_id)
+me = ctx.web.current_user.get().execute_query()
+print(me.login_name)
+```
 
 ### Examples
  
