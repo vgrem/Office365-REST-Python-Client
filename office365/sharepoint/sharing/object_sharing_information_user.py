@@ -17,6 +17,15 @@ class ObjectSharingInformationUser(BaseEntity):
         return self.properties.get("Email", None)
 
     @property
+    def sip_address(self):
+        """
+        Specifies the SIP address of the user.
+
+        :rtype: str or None
+        """
+        return self.properties.get("SipAddress", None)
+
+    @property
     def login_name(self):
         """
         Specifies the login name for the principal.

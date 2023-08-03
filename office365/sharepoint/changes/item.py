@@ -7,6 +7,20 @@ class ChangeItem(Change):
     """A change on an item."""
 
     @property
+    def activity_type(self):
+        """
+        Returns activity type defined in ChangeActivityType
+        """
+        return self.properties.get("ActivityType", None)
+
+    @property
+    def content_type_id(self):
+        """
+        Specifies an identifier for the content type
+        """
+        return self.properties.get("ContentTypeId", None)
+
+    @property
     def shared_by_user(self):
         """Return the sharedBy User Information in sharing action for change log."""
         return self.properties.get("SharedByUser", SharedWithUser())

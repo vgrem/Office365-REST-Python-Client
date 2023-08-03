@@ -24,6 +24,7 @@ from office365.onedrive.listitems.item_reference import ItemReference
 from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.permissions.collection import PermissionCollection
 from office365.onedrive.permissions.permission import Permission
+from office365.onedrive.sensitivitylabels.extract_result import ExtractSensitivityLabelsResult
 from office365.onedrive.shares.shared import Shared
 from office365.onedrive.versions.drive_item import DriveItemVersion
 from office365.onedrive.workbooks.workbook import Workbook
@@ -66,7 +67,7 @@ class DriveItem(BaseItem):
 
         :param str link_type: The type of sharing link to create. Either view, edit, or embed.
         :param str scope:  The scope of link to create. Either anonymous or organization.
-        :param str expiration_datetime: A String with format of yyyy-MM-ddTHH:mm:ssZ of DateTime indicates
+        :param str or datetime.datetime expiration_datetime: A String with format of yyyy-MM-ddTHH:mm:ssZ of DateTime indicates
             the expiration time of the permission.
         :param str password: The password of the sharing link that is set by the creator. Optional
             and OneDrive Personal only.
@@ -86,6 +87,17 @@ class DriveItem(BaseItem):
         return_type = Permission(self.context)
         self.permissions.add_child(return_type)
         qry = ServiceOperationQuery(self, "createLink", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def extract_sensitivity_labels(self):
+        """
+        Extract one or more sensitivity labels assigned to a drive item and update the metadata of a drive
+        item with the latest details of the assigned label. In case of failure to extract the sensitivity labels
+        of a file, an extraction error will be thrown with the applicable error code and message.
+        """
+        return_type = ClientResult(self.context, ExtractSensitivityLabelsResult())
+        qry = ServiceOperationQuery(self, "extractSensitivityLabels", return_type=return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -448,6 +460,16 @@ class DriveItem(BaseItem):
         self.context.add_query(qry)
 
         return return_type
+
+    def permanent_delete(self):
+        """
+        Permanently delete a driveItem.
+        Note that if you delete items using this method, they will be permanently removed and won't be sent to the
+        recycle bin. Therefore, they cannot be restored afterward.
+        """
+        qry = ServiceOperationQuery(self, "permanentDelete")
+        self.context.add_query(qry)
+        return self
 
     def restore(self, parent_reference=None, name=None):
         """

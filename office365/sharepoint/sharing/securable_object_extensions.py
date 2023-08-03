@@ -5,6 +5,7 @@ from office365.sharepoint.sharing.information_request import SharingInformationR
 
 
 class SecurableObjectExtensions(BaseEntity):
+    """Contains extension methods of securable object."""
 
     @staticmethod
     def get_sharing_information(context):

@@ -7,4 +7,11 @@ class SharingLinkData(ClientValue):
     about the object the link URL refers to and any additional sharing link data if the link URL
     is a tokenized sharing link.
     """
-    pass
+
+    def __init__(self, blocks_download=None, description=None):
+        """
+        :param bool blocks_download:
+        :param str description:
+        """
+        self.BlocksDownload = blocks_download
+        self.Description = description
