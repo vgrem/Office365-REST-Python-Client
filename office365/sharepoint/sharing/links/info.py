@@ -43,7 +43,7 @@ class SharingLinkInfo(ClientValue):
         return self.Url
 
     def __repr__(self):
-        return self.Url
+        return self.Url or ""
 
     @property
     def entity_type_name(self):

@@ -1,31 +1,27 @@
 from office365.entity import Entity
-from office365.entity_collection import EntityCollection
-from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.function import FunctionQuery
-from office365.runtime.types.collections import StringCollection
+from office365.intune.audit.actor import AuditActor
+from office365.intune.audit.resource import AuditResource
+from office365.runtime.client_value_collection import ClientValueCollection
 
 
 class AuditEvent(Entity):
     """A class containing the properties for Audit Event."""
 
+    @property
+    def activity(self):
+        """Friendly name of the activity.
+        :rtype: str
+        """
+        return self.properties.get("activity", None)
 
-class AuditEventCollection(EntityCollection):
+    @property
+    def actor(self):
+        """
+        AAD user and application that are associated with the audit event.
+        """
+        return self.properties.get("actor", AuditActor())
 
-    def __init__(self, context, resource_path=None):
-        super(AuditEventCollection, self).__init__(context, AuditEvent, resource_path)
-
-    def get_audit_categories(self):
-        """Not yet documented"""
-        return_type = ClientResult(self.context, StringCollection())
-        qry = FunctionQuery(self, "getAuditCategories", None, return_type)
-        self.context.add_query(qry)
-        return return_type
-
-    def get_audit_activity_types(self, category):
-        """Not yet documented"""
-        return_type = ClientResult(self.context, StringCollection())
-        params = {"category": category}
-        qry = FunctionQuery(self, "getAuditActivityTypes", params, return_type)
-        self.context.add_query(qry)
-        return return_type
-
+    @property
+    def resources(self):
+        """Resources being modified"""
+        return self.properties.get("resources", ClientValueCollection(AuditResource))

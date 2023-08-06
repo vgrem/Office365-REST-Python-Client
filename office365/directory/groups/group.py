@@ -40,8 +40,9 @@ class Group(DirectoryObject):
         return self
 
     def check_granted_permissions_for_app(self):
+        """"""
         return_type = EntityCollection(self.context, ResourceSpecificPermissionGrant)
-        qry = ServiceOperationQuery(self, "checkGrantedPermissionsForApp", None, None, None, return_type)
+        qry = ServiceOperationQuery(self, "checkGrantedPermissionsForApp", return_type=return_type)
         self.context.add_query(qry)
         return return_type
 

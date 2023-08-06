@@ -1,8 +1,10 @@
 from office365.directory.certificates.auth_configuration import CertificateBasedAuthConfiguration
 from office365.directory.domains.verified import VerifiedDomain
+from office365.directory.licenses.assigned_plan import AssignedPlan
 from office365.directory.object import DirectoryObject
 from office365.directory.extensions.extension import Extension
 from office365.entity_collection import EntityCollection
+from office365.intune.organizations.branding import OrganizationalBranding
 from office365.intune.provisioned_plan import ProvisionedPlan
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
@@ -14,6 +16,17 @@ class Organization(DirectoryObject):
     The organization resource represents an instance of global settings and resources
     which operate and are provisioned at the tenant-level.
     """
+
+    @property
+    def assigned_plans(self):
+        """The plans that are assigned to the organization."""
+        return self.properties.get('assignedPlans', ClientValueCollection(AssignedPlan))
+
+    @property
+    def branding(self):
+        return self.properties.get('branding',
+                                   OrganizationalBranding(self.context,
+                                                          ResourcePath("branding", self.resource_path)))
 
     @property
     def business_phones(self):
@@ -51,6 +64,7 @@ class Organization(DirectoryObject):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "assignedPlans": self.assigned_plans,
                 "certificateBasedAuthConfiguration": self.certificate_based_auth_configuration,
                 "businessPhones": self.business_phones,
                 "provisionedPlans": self.provisioned_plans,

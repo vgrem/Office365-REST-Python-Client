@@ -20,6 +20,23 @@ class PermissionGrantConditionSet(Entity):
         return self.properties.get("clientApplicationIds", StringCollection())
 
     @property
+    def client_application_publisher_ids(self):
+        """
+        A list of Microsoft Partner Network (MPN) IDs for verified publishers of the client application,  or a list
+        with the single value all to match with client apps from any publisher. Default is the single value all.
+        """
+        return self.properties.get("clientApplicationPublisherIds", StringCollection())
+
+    @property
+    def client_applications_from_verified_publisher_only(self):
+        """
+        Set to true to only match on client applications with a verified publisher. Set to false to match on any client
+        app, even if it does not have a verified publisher. Default is false.
+        :rtype: bool
+        """
+        return self.properties.get("clientApplicationsFromVerifiedPublisherOnly", None)
+
+    @property
     def permissions(self):
         """
         The list of id values for the specific permissions to match with, or a list with the single value all to
@@ -30,3 +47,12 @@ class PermissionGrantConditionSet(Entity):
         Default is the single value all.
         """
         return self.properties.get("permissions", StringCollection())
+
+    @property
+    def resource_application(self):
+        """
+        The appId of the resource application (e.g. the API) for which a permission is being granted, or any to match
+        with any resource application or API. Default is any.
+        :rtype: str
+        """
+        return self.properties.get("resourceApplication", None)

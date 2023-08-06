@@ -110,8 +110,7 @@ class ObjectSharingInformation(BaseEntity):
         :param str list_id: The list identifier for the list which contains the list item for which
         the sharing state is requested.
         :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
-        :param BaseEntity return_type: Return type
-        :return: ObjectSharingInformation
+        :param ObjectSharingInformation return_type: Return type
         """
         binding_type = ObjectSharingInformation(context)
         payload = {
@@ -130,6 +129,70 @@ class ObjectSharingInformation(BaseEntity):
         qry.static = True
         context.add_query(qry)
         return return_type
+
+    @property
+    def anonymous_edit_link(self):
+        """
+        Provides the URL that allows an anonymous user to edit the securable object.
+        If such a URL is not available, this property will provide an empty string.
+
+        :rtype: str
+        """
+        return self.properties.get('AnonymousEditLink', None)
+
+    @property
+    def anonymous_view_link(self):
+        """
+        Provides the URL that allows an anonymous user to view the securable object.
+        If such a URL is not available, this property will provide an empty string.
+
+        :rtype: str
+        """
+        return self.properties.get('AnonymousViewLink', None)
+
+    @property
+    def can_be_shared(self):
+        """
+        Indicates whether the current securable object can be shared.
+        :rtype: bool
+        """
+        return self.properties.get('CanBeShared', None)
+
+    @property
+    def can_be_unshared(self):
+        """
+        Indicates whether the current securable object can be unshared.
+        :rtype: bool
+        """
+        return self.properties.get('CanBeUnshared', None)
+
+    @property
+    def can_manage_permissions(self):
+        """
+        Specifies whether the current user is allowed to change the permissions of the securable object.
+        :rtype: bool
+        """
+        return self.properties.get('CanManagePermissions', None)
+
+    @property
+    def has_pending_access_requests(self):
+        """
+        Provides information about whether there are any pending access requests for the securable object.
+
+        This information is only provided if the current user has sufficient permissions to view any pending
+        access requests. If the current user does not have such permissions, this property will return false.
+        :rtype: bool
+        """
+        return self.properties.get('HasPendingAccessRequests', None)
+
+    @property
+    def has_permission_levels(self):
+        """
+        Indicates whether the object sharing information contains permissions information in addition to the identities
+        of the users who have access to the securable object.
+        :rtype: bool
+        """
+        return self.properties.get('HasPermissionLevels', None)
 
     @property
     def sharing_links(self):

@@ -1,4 +1,5 @@
 from office365.directory.security.alerts.evidence import AlertEvidence
+from office365.directory.security.alerts.history_state import AlertHistoryState
 from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
 
@@ -12,3 +13,8 @@ class Alert(Entity):
     def evidence(self):
         """Collection of evidence related to the alert."""
         return self.properties.get("evidence", ClientValueCollection(AlertEvidence))
+
+    @property
+    def history_states(self):
+        """Collection of changes for the alert."""
+        return self.properties.get("historyStates", ClientValueCollection(AlertHistoryState))

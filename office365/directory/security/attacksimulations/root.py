@@ -30,4 +30,3 @@ class AttackSimulationRoot(Entity):
             }
             default_value = property_mapping.get(name, None)
         return super(AttackSimulationRoot, self).get_property(name, default_value)
-

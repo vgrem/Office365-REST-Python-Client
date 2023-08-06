@@ -10,6 +10,24 @@ class UnifiedRoleAssignment(Entity):
     """
 
     @property
+    def app_scope_id(self):
+        """
+        Identifier of the app-specific scope when the assignment scope is app-specific. Either this property or
+        directoryScopeId is required. App scopes are scopes that are defined and understood by this application only.
+        Use / for tenant-wide app scopes. Use directoryScopeId to limit the scope to particular directory objects,
+        for example, administrative units. Supports $filter (eq, in).
+        :rtype: str
+        """
+        return self.properties.get("appScopeId", None)
+
+    @property
+    def condition(self):
+        """
+        :rtype: str
+        """
+        return self.properties.get("condition", None)
+
+    @property
     def role_definition(self):
         """
         The roleDefinition the assignment is for. Supports $expand. roleDefinition.Id will be auto expanded.

@@ -23,25 +23,38 @@ class ObjectSharingSettings(BaseEntity):
     def access_request_mode(self):
         """
         Boolean indicating whether the sharing context operates under the access request mode.
-
         :rtype: bool
         """
         return self.properties.get("AccessRequestMode", None)
 
     @property
+    def block_people_picker_and_sharing(self):
+        """
+        Boolean indicating whether the current user can use the People Picker to do any sharing.
+        :rtype: bool
+        """
+        return self.properties.get("BlockPeoplePickerAndSharing", None)
+
+    @property
     def can_send_email(self):
         """
         Boolean indicating whether email invitations can be sent.
-
-        :return: bool
+        :rtype: bool
         """
         return self.properties.get("CanSendEmail", None)
+
+    @property
+    def can_send_link(self):
+        """
+        Boolean indicating whether the current user can make use of Share-By-Link.
+        :rtype: bool
+        """
+        return self.properties.get("CanSendLink", None)
 
     @property
     def is_user_site_admin(self):
         """
         Boolean that indicates whether or not the current user is a site collection administrator.
-
         :return: bool
         """
         return self.properties.get("IsUserSiteAdmin", None)
