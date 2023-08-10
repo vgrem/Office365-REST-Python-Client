@@ -414,6 +414,15 @@ class Site(BaseEntity):
         return self
 
     @property
+    def allow_create_declarative_workflow(self):
+        """
+        Specifies whether a designer can be used to create declarative workflows on this site collection
+
+        :rtype: bool or None
+        """
+        return self.properties.get("AllowCreateDeclarativeWorkflow", None)
+
+    @property
     def allow_designer(self):
         """
         Specifies whether a designer can be used on this site collection.
@@ -485,7 +494,6 @@ class Site(BaseEntity):
     def lock_issue(self):
         """
         Specifies the comment that is used when a site collection is locked
-
         :rtype: str or None
         """
         return self.properties.get("LockIssue", None)
@@ -533,7 +541,6 @@ class Site(BaseEntity):
     def server_relative_url(self):
         """
         Specifies the server-relative URL of the top-level site in the site collection.
-
         :rtype: str
         """
         return self.properties.get("ServerRelativeUrl", None)
@@ -542,16 +549,22 @@ class Site(BaseEntity):
     def share_by_email_enabled(self):
         """
         When true, users will be able to grant permissions to guests for resources within the site collection.
-
         :rtype: bool or none
         """
         return self.properties.get('ShareByEmailEnabled', None)
 
     @property
+    def status_bar_text(self):
+        """
+        Gets or sets the status bar message text for this site.
+        :rtype: str or none
+        """
+        return self.properties.get('StatusBarText', None)
+
+    @property
     def trim_audit_log(self):
         """
         When this flag is set for the site, the audit events are trimmed periodically.
-
         :rtype: bool or none
         """
         return self.properties.get('TrimAuditLog', None)
@@ -583,7 +596,6 @@ class Site(BaseEntity):
     def is_hub_site(self):
         """
         Returns whether the specified site is a hub site
-
         :rtype: bool
         """
         return self.properties.get("IsHubSite", None)
@@ -591,7 +603,6 @@ class Site(BaseEntity):
     @property
     def server_relative_path(self):
         """Gets the server-relative Path of the Site.
-
         :rtype: SPResPath or None
         """
         return self.properties.get("ServerRelativePath", SPResPath())
@@ -624,6 +635,23 @@ class Site(BaseEntity):
         return self.properties.get('Features',
                                    FeatureCollection(self.context,
                                                      ResourcePath("Features", self.resource_path), self))
+
+    @property
+    def max_items_per_throttled_operation(self):
+        """
+        Specifies the maximum number of list items allowed to be returned for each retrieve request before throttling
+        occurs. If throttling occurs, list items MUST NOT be returned.
+        :rtype: int or None
+        """
+        return self.properties.get("MaxItemsPerThrottledOperation", None)
+
+    @property
+    def needs_b2b_upgrade(self):
+        """
+        Specifies whether the site needs a Build-to-Build upgrade.
+        :rtype: bool or None
+        """
+        return self.properties.get("NeedsB2BUpgrade", None)
 
     @property
     def event_receivers(self):

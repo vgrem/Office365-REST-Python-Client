@@ -25,9 +25,13 @@ result = remote_file.share_link(SharingLinkKind.AnonymousView).execute_query()
 print(json.dumps(result.value.to_json(), indent=4))
 link_url = result.value.sharingLinkInfo.Url
 
-# Verify a link
+print("Verifyng sharing link ...")
 result = Web.get_sharing_link_kind(ctx, link_url).execute_query()
 print(sharing_messages.get(result.value, "Unknown sharing link"))
+
+print("Retrieving sharing link data ...")
+result = ctx.web.get_sharing_link_data(link_url).execute_query()
+print(json.dumps(result.value.to_json(), indent=4))
 
 print("Unsharing a file link...")
 remote_file.unshare_link(SharingLinkKind.AnonymousView).execute_query()

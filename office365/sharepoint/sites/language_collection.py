@@ -4,6 +4,7 @@ from office365.sharepoint.sites.language import Language
 
 
 class LanguageCollection(BaseEntity):
+    """Represents a collection of SPLanguage objects"""
 
     def __init__(self, context, resource_path=None):
         """Represents a collection of SPLanguage objects."""

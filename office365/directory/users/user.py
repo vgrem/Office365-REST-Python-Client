@@ -4,6 +4,7 @@ from office365.communications.onlinemeetings.collection import OnlineMeetingColl
 from office365.communications.presences.presence import Presence
 from office365.delta_collection import DeltaCollection
 from office365.directory.applications.roles.assignment_collection import AppRoleAssignmentCollection
+from office365.directory.audit.signins.activity import SignInActivity
 from office365.directory.authentication.authentication import Authentication
 from office365.directory.extensions.extension import Extension
 from office365.directory.identities.object_identity import ObjectIdentity
@@ -353,9 +354,22 @@ class User(DirectoryObject):
         return return_type
 
     @property
+    def sign_in_activity(self):
+        """Get the last signed-in date and request ID of the sign-in for a given user. Read-only."""
+        return self.properties.get('signInActivity', SignInActivity())
+
+    @property
     def account_enabled(self):
         """True if the account is enabled; otherwise, false. This property is required when a user is created."""
         return self.properties.get('accountEnabled', None)
+
+    @property
+    def age_group(self):
+        """
+        Gets the age group of the user.
+        :rtype: str or None
+        """
+        return self.properties.get('ageGroup', None)
 
     @property
     def app_role_assignments(self):
@@ -725,7 +739,8 @@ class User(DirectoryObject):
                 "oauth2PermissionGrants": self.oauth2_permission_grants,
                 "ownedDevices": self.owned_devices,
                 "ownedObjects": self.owned_objects,
-                "registeredDevices": self.registered_devices
+                "registeredDevices": self.registered_devices,
+                "signInActivity": self.sign_in_activity
             }
             default_value = property_mapping.get(name, None)
         return super(User, self).get_property(name, default_value)

@@ -396,6 +396,12 @@ class ClientContext(ClientRuntimeContext):
         return SPMachineLearningModelCollection(self, ResourcePath("models"))
 
     @property
+    def folder_coloring(self):
+        """Alias to FolderColoring"""
+        from examples.sharepoint.folders.coloring import FolderColoring
+        return FolderColoring(self, ResourcePath("foldercoloring"))
+
+    @property
     def group_site_manager(self):
         """Alias to GroupSiteManager"""
         from office365.sharepoint.portal.groups.site_manager import GroupSiteManager
