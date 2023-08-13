@@ -14,5 +14,12 @@ class CampaignPublication(SitePage):
         return return_type
 
     @property
+    def email_endpoint(self):
+        """
+        :rtype: str
+        """
+        return self.properties.get("EmailEndpoint", None)
+
+    @property
     def entity_type_name(self):
         return "SP.Publishing.CampaignPublication"

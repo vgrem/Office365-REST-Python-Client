@@ -8,6 +8,17 @@ class ColumnDefinitionCollection(EntityCollection):
     def __init__(self, context, resource_path, parent):
         super(ColumnDefinitionCollection, self).__init__(context, ColumnDefinition, resource_path, parent)
 
+    def add_number(self, name, minimum=None, maximum=None):
+        """
+        Creates a number column
+        :param str name: The API-facing name of the column as it appears in the fields on a listItem
+        :param float minimum: The minimum permitted value.
+        :param float maximum: The maximum permitted value.
+        :rtype: ColumnDefinition
+        """
+        from office365.onedrive.columns.number import NumberColumn
+        return self.add(name=name, number=NumberColumn(minimum, maximum))
+
     def add_text(self, name, max_length=None, text_type=None):
         """
         Creates a text column

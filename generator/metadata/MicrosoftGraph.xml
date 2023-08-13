@@ -19609,6 +19609,11 @@
             <Member Name="inactive" Value="1"/>
             <Member Name="unknownFutureValue" Value="2"/>
          </EnumType>
+         <EnumType Name="meetingChatHistoryDefaultMode">
+            <Member Name="none" Value="0"/>
+            <Member Name="all" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
          <EnumType Name="modality">
             <Member Name="audio" Value="1"/>
             <Member Name="video" Value="2"/>
@@ -20921,6 +20926,7 @@
             <Property Name="lobbyBypassSettings" Type="graph.lobbyBypassSettings"/>
             <Property Name="participants" Type="graph.meetingParticipants"/>
             <Property Name="recordAutomatically" Type="Edm.Boolean"/>
+            <Property Name="shareMeetingChatHistoryDefault" Type="graph.meetingChatHistoryDefaultMode"/>
             <Property Name="startDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="subject" Type="Edm.String"/>
             <Property Name="videoTeleconferenceId" Type="Edm.String"/>
@@ -23721,6 +23727,7 @@
             <Property Name="takenDateTime" Type="Edm.DateTimeOffset"/>
          </ComplexType>
          <ComplexType Name="publicationFacet">
+            <Property Name="checkedOutBy" Type="graph.identitySet"/>
             <Property Name="level" Type="Edm.String"/>
             <Property Name="versionId" Type="Edm.String"/>
          </ComplexType>
@@ -36539,6 +36546,8 @@
          </EntityType>
          <EntityType Name="alert" BaseType="graph.entity">
             <Property Name="actorDisplayName" Type="Edm.String"/>
+            <Property Name="additionalData" Type="microsoft.graph.security.dictionary"/>
+            <Property Name="alertPolicyId" Type="Edm.String"/>
             <Property Name="alertWebUrl" Type="Edm.String"/>
             <Property Name="assignedTo" Type="Edm.String"/>
             <Property Name="category" Type="Edm.String"/>
@@ -36576,6 +36585,7 @@
             <Property Name="determination" Type="microsoft.graph.security.alertDetermination"/>
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="incidentWebUrl" Type="Edm.String"/>
+            <Property Name="lastModifiedBy" Type="Edm.String"/>
             <Property Name="lastUpdateDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
             <Property Name="redirectIncidentId" Type="Edm.String"/>
             <Property Name="severity" Type="microsoft.graph.security.alertSeverity" Nullable="false"/>

@@ -1,5 +1,6 @@
 from office365.entity_collection import EntityCollection
 from office365.onedrive.lists.list import List
+from office365.runtime.paths.item import ItemPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
 
@@ -17,14 +18,19 @@ class ListCollection(EntityCollection):
         """
         return super(ListCollection, self).__getitem__(key)
 
-    def add(self, creation_information):
+    def add(self, display_name, list_template="genericList"):
         """
-        Creates a Drive list resource
+        Create a new list.
 
-        :param Any creation_information:
+        :param str display_name: The displayable title of the list.
+        :param str list_template: The base list template used in creating the list
         """
-        return_type = List(self.context)
+        return_type = List(self.context, ItemPath(self.resource_path))
         self.add_child(return_type)
-        qry = CreateEntityQuery(self, creation_information, return_type)
+        payload = {
+            "displayName": display_name,
+            "list": {"template": list_template},
+        }
+        qry = CreateEntityQuery(self, payload, return_type)
         self.context.add_query(qry)
         return return_type

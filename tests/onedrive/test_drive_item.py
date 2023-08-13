@@ -1,20 +1,11 @@
 import os
 import uuid
 from datetime import datetime, timedelta
+
+from tests import create_unique_name
 from tests.graph_case import GraphTestCase
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.driveitems.driveItem import DriveItem
-
-
-def create_lib(client):
-    """
-    :type client: office365.graph_client.GraphClient
-    """
-    list_info = {
-        "displayName": "Lib_" + uuid.uuid4().hex,
-        "list": {"template": "documentLibrary"}
-    }
-    return client.sites.root.lists.add(list_info)
 
 
 class TestDriveItem(GraphTestCase):
@@ -26,7 +17,9 @@ class TestDriveItem(GraphTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestDriveItem, cls).setUpClass()
-        cls.target_drive = create_lib(cls.client).execute_query().drive
+        lib_name = create_unique_name("Lib")
+        lib = cls.client.sites.root.lists.add(lib_name, "documentLibrary").execute_query()
+        cls.target_drive = lib.drive
 
     @classmethod
     def tearDownClass(cls):

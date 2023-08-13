@@ -46,6 +46,30 @@ class ContentType(BaseEntity):
         return self
 
     @property
+    def client_form_custom_formatter(self):
+        """
+        :rtype: str
+        """
+        return self.properties.get("ClientFormCustomFormatter", None)
+
+    @property
+    def display_form_client_side_component_id(self):
+        """
+        The component ID of an SPFx Form Customizer to connect to this content type for usage with display forms.
+        :rtype: str
+        """
+        return self.properties.get("DisplayFormClientSideComponentId", None)
+
+    @property
+    def display_form_client_side_component_properties(self):
+        """
+        The component properties of an SPFx Form Customizer to connect to this content type for usage with display forms
+        :rtype: str
+        """
+        return self.properties.get("DisplayFormClientSideComponentProperties", None)
+
+
+    @property
     def display_form_template_name(self):
         """
         Specifies the name of a custom display form template to use for list items that have been assigned
@@ -59,6 +83,23 @@ class ContentType(BaseEntity):
         Specifies the URL of a custom display form to use for list items that have been assigned the content type.
         """
         return self.properties.get("DisplayFormUrl", None)
+
+    @property
+    def edit_form_client_side_component_id(self):
+        """
+        The component properties of an SPFx Form Customizer to connect to this content type for usage with edit item
+            forms
+        :rtype: str
+        """
+        return self.properties.get("EditFormClientSideComponentId", None)
+
+    @property
+    def edit_form_client_side_component_properties(self):
+        """
+        The component ID of an SPFx Form Customizer to connect to this content type for usage with edit item forms
+        :rtype: str
+        """
+        return self.properties.get("EditFormClientSideComponentProperties", None)
 
     @property
     def id(self):
@@ -91,6 +132,7 @@ class ContentType(BaseEntity):
     @property
     def new_form_client_side_component_properties(self):
         """
+        The component properties of an SPFx Form Customizer to connect to this content type for usage with new item forms
         :rtype: str or None
         """
         return self.properties.get("NewFormClientSideComponentProperties", None)

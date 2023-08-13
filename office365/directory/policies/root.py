@@ -2,6 +2,7 @@ from office365.directory.policies.app_management import AppManagementPolicy
 from office365.directory.policies.authentication_flows import AuthenticationFlowsPolicy
 from office365.directory.policies.authentication_methods import AuthenticationMethodsPolicy
 from office365.directory.policies.authentication_strength import AuthenticationStrengthPolicy
+from office365.directory.policies.cross_tenant_access import CrossTenantAccessPolicy
 from office365.directory.policies.permission_grant import PermissionGrantPolicy
 from office365.directory.policies.authorization import AuthorizationPolicy
 from office365.directory.policies.conditional_access import ConditionalAccessPolicy
@@ -56,6 +57,16 @@ class PolicyRoot(Entity):
                                                     ResourcePath("appManagementPolicies", self.resource_path)))
 
     @property
+    def cross_tenant_access_policy(self):
+        """
+        The custom rules that define an access scenario when interacting with external Azure AD tenants.
+        """
+        return self.properties.get('crossTenantAccessPolicy',
+                                   CrossTenantAccessPolicy(self.context,
+                                                           ResourcePath("crossTenantAccessPolicy",
+                                                                        self.resource_path)))
+
+    @property
     def permission_grant_policies(self):
         """"
         The policy that specifies the conditions under which consent can be granted.
@@ -82,6 +93,7 @@ class PolicyRoot(Entity):
                 "authenticationMethodsPolicy": self.authentication_methods_policy,
                 "authorizationPolicy": self.authorization_policy,
                 "conditional_access_policies": self.conditional_access_policies,
+                "crossTenantAccessPolicy": self.cross_tenant_access_policy,
                 "permissionGrantPolicies": self.permission_grant_policies,
             }
             default_value = property_mapping.get(name, None)

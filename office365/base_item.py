@@ -1,3 +1,4 @@
+from datetime import datetime
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity import Entity
 from office365.onedrive.listitems.item_reference import ItemReference
@@ -25,12 +26,12 @@ class BaseItem(Entity):
     @property
     def created_datetime(self):
         """Gets date and time of item creation."""
-        return self.properties.get('createdDateTime', None)
+        return self.properties.get('createdDateTime', datetime.min)
 
     @property
     def last_modified_datetime(self):
         """Gets date and time the item was last modified."""
-        return self.properties.get('lastModifiedDateTime', None)
+        return self.properties.get('lastModifiedDateTime', datetime.min)
 
     @property
     def name(self):
@@ -81,6 +82,7 @@ class BaseItem(Entity):
         if default_value is None:
             property_mapping = {
                 "createdBy": self.created_by,
+                "createdDateTime": self.created_datetime,
                 "lastModifiedBy": self.last_modified_by,
                 "parentReference": self.parent_reference
             }

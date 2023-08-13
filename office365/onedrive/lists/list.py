@@ -4,6 +4,7 @@ from office365.onedrive.columns.definition_collection import ColumnDefinitionCol
 from office365.onedrive.contenttypes.collection import ContentTypeCollection
 from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.lists.info import ListInfo
+from office365.onedrive.operations.rich_long_running import RichLongRunningOperation
 from office365.onedrive.sharepoint_ids import SharePointIds
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.subscriptions.subscription import Subscription
@@ -42,9 +43,9 @@ class List(BaseItem):
     @property
     def columns(self):
         """The collection of columns under this site."""
-        return self.properties.get('columns',
-                                   ColumnDefinitionCollection(self.context,
-                                                              ResourcePath("columns", self.resource_path), self))
+        return self.properties.setdefault('columns',
+                                          ColumnDefinitionCollection(self.context,
+                                                                     ResourcePath("columns", self.resource_path), self))
 
     @property
     def content_types(self):
@@ -57,7 +58,15 @@ class List(BaseItem):
     def items(self):
         """All items contained in the list."""
         return self.properties.get('items',
-                                   EntityCollection(self.context, ListItem, ResourcePath("items", self.resource_path)))
+                                   EntityCollection(self.context, ListItem,
+                                                    ResourcePath("items", self.resource_path)))
+
+    @property
+    def operations(self):
+        """The collection of long-running operations on the list."""
+        return self.properties.get('operations',
+                                   EntityCollection(self.context, RichLongRunningOperation,
+                                                    ResourcePath("operations", self.resource_path)))
 
     @property
     def subscriptions(self):

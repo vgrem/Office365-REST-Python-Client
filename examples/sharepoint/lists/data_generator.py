@@ -61,5 +61,5 @@ def generate_contacts(context, amount):
 
 if __name__ == '__main__':
     ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
-    generate_contacts(ctx, 5000)
-    # generate_documents(ctx, 100)
+    # generate_contacts(ctx, 5000)
+    generate_documents(ctx, 100)
