@@ -11,6 +11,14 @@ class Authentication(Entity):
     """
 
     @property
+    def email_methods(self):
+        """The email address registered to a user for authentication."""
+        from office365.directory.authentication.methods.email import EmailAuthenticationMethod
+        return self.properties.get('emailMethods',
+                                   EntityCollection(self.context, EmailAuthenticationMethod,
+                                                    ResourcePath("emailMethods", self.resource_path)))
+
+    @property
     def fido2_methods(self):
         """Represents the FIDO2 security keys registered to a user for authentication."""
         from office365.directory.authentication.methods.fido import Fido2AuthenticationMethod
@@ -45,6 +53,7 @@ class Authentication(Entity):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "emailMethods": self.email_methods,
                 "fido2Methods": self.fido2_methods,
                 "passwordMethods": self.password_methods,
                 "phoneMethods": self.phone_methods

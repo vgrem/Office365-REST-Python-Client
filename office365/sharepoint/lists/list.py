@@ -25,6 +25,7 @@ from office365.sharepoint.lists.bloom_filter import ListBloomFilter
 from office365.sharepoint.lists.creatables_info import CreatablesInfo
 from office365.sharepoint.lists.data_source import ListDataSource
 from office365.sharepoint.lists.rule import SPListRule
+from office365.sharepoint.navigation.configured_metadata_items import ConfiguredMetadataNavigationItemCollection
 from office365.sharepoint.pages.wiki_page_creation_information import WikiPageCreationInformation
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.principal.users.user import User
@@ -90,6 +91,20 @@ class List(SecurableObject):
         payload = {"startItemId": start_item_id}
         qry = ServiceOperationQuery(self, "GetBloomFilter", None, payload, None, return_type)
         self.context.add_query(qry)
+        return return_type
+
+    def get_metadata_navigation_settings(self):
+        """
+        Retrieves the configured metadata navigation settings for the list.
+        """
+        from office365.sharepoint.navigation.metadata_settings import MetadataNavigationSettings
+        return_type = ClientResult(self.context, ConfiguredMetadataNavigationItemCollection())
+
+        def _loaded():
+           MetadataNavigationSettings.get_configured_settings(self.context, self.root_folder.serverRelativeUrl,
+                                                              return_type)
+
+        self.root_folder.ensure_property("ServerRelativeUrl", _loaded)
         return return_type
 
     def get_site_script(self, options=None):
@@ -668,7 +683,7 @@ class List(SecurableObject):
     @property
     def root_folder(self):
         """Get a root folder"""
-        return self.properties.get("RootFolder",
+        return self.properties.setdefault("RootFolder",
                                    Folder(self.context, ResourcePath("RootFolder", self.resource_path)))
 
     @property

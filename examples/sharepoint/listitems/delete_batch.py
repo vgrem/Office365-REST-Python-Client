@@ -3,7 +3,7 @@ from office365.sharepoint.listitems.listitem import ListItem
 from tests import test_team_site_url, test_client_credentials
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
-items_count = 2
+items_count = 100
 
 # 1. Load existing list items
 list_tasks = ctx.web.lists.get_by_title("Tasks")

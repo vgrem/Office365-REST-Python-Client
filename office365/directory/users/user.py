@@ -18,6 +18,7 @@ from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.permissions.grants.oauth2 import OAuth2PermissionGrant
 from office365.directory.profile_photo import ProfilePhoto
 from office365.directory.users.activities.collection import UserActivityCollection
+from office365.directory.users.password_profile import PasswordProfile
 from office365.directory.users.settings import UserSettings
 from office365.entity_collection import EntityCollection
 from office365.intune.devices.data import DeviceAndAppManagementData
@@ -354,6 +355,13 @@ class User(DirectoryObject):
         return return_type
 
     @property
+    def device_enrollment_limit(self):
+        """
+        :rtype: str
+        """
+        return self.properties.get('deviceEnrollmentLimit', None)
+
+    @property
     def sign_in_activity(self):
         """Get the last signed-in date and request ID of the sign-in for a given user. Read-only."""
         return self.properties.get('signInActivity', SignInActivity())
@@ -458,6 +466,11 @@ class User(DirectoryObject):
         for example: ["bob@contoso.com", "Robert@fabrikam.com"]. Supports $filter.
         """
         return self.properties.get('otherMails', StringCollection())
+
+    @property
+    def interests(self):
+        """A list for the user to describe their interests."""
+        return self.properties.get("interests", StringCollection())
 
     @property
     def identities(self):
@@ -615,9 +628,28 @@ class User(DirectoryObject):
                                                    ResourcePath("oauth2PermissionGrants", self.resource_path)))
 
     @property
+    def on_premises_distinguished_name(self):
+        """
+        Contains the on-premises Active Directory distinguished name or DN. The property is only populated for
+        customers who are synchronizing their on-premises directory to Azure Active Directory via Azure AD Connect
+        :rtype: str
+        """
+        return self.properties.get('onPremisesDistinguishedName', None)
+
+    @property
+    def on_premises_domain_name(self):
+        """
+        Contains the on-premises domainFQDN, also called dnsDomainName synchronized from the on-premises directory.
+        The property is only populated for customers who are synchronizing their on-premises directory to
+        Azure Active Directory via Azure AD Connect.
+        :rtype: str
+        """
+        return self.properties.get('onPremisesDomainName', None)
+
+    @property
     def owned_devices(self):
-        """Devices that are owned by the user. Read-only. Nullable. Supports $expand and $filter
-        (/$count eq 0, /$count ne 0, /$count eq 1, /$count ne 1). """
+        """Devices that are owned by the user. Read-only. Nullable.
+        Supports $expand and $filter (/$count eq 0, /$count ne 0, /$count eq 1, /$count ne 1). """
         return self.properties.get('ownedDevices',
                                    DirectoryObjectCollection(self.context,
                                                              ResourcePath("ownedDevices", self.resource_path)))
@@ -628,6 +660,18 @@ class User(DirectoryObject):
         return self.properties.get('ownedObjects',
                                    DirectoryObjectCollection(self.context,
                                                              ResourcePath("ownedObjects", self.resource_path)))
+
+    @property
+    def proxy_addresses(self):
+        """
+        For example: ["SMTP: bob@contoso.com", "smtp: bob@sales.contoso.com"]. Changes to the mail property will
+        also update this collection to include the value as an SMTP address. For more information, see mail and
+        proxyAddresses properties. The proxy address prefixed with SMTP (capitalized) is the primary proxy address
+        while those prefixed with smtp are the secondary proxy addresses. For Azure AD B2C accounts, this
+        property has a limit of ten unique addresses. Read-only in Microsoft Graph; you can update this property
+        only through the Microsoft 365 admin center. Not nullable.
+        """
+        return self.properties.get('proxyAddresses', StringCollection())
 
     @property
     def transitive_member_of(self):
@@ -694,6 +738,26 @@ class User(DirectoryObject):
                                                            ResourcePath("onlineMeetings", self.resource_path)))
 
     @property
+    def password_policies(self):
+        """
+        Specifies password policies for the user. This value is an enumeration with one possible value being
+        DisableStrongPassword, which allows weaker passwords than the default policy to be specified.
+        DisablePasswordExpiration can also be specified. The two may be specified together; for example:
+        DisablePasswordExpiration, DisableStrongPassword.
+        :rtype: str
+        """
+        return self.properties.get('passwordPolicies', None)
+
+    @property
+    def password_profile(self):
+        """
+        Specifies the password profile for the user. The profile contains the user's password.
+        This property is required when a user is created. The password in the profile must satisfy minimum
+        requirements as specified by the passwordPolicies property. By default, a strong password is required.
+        """
+        return self.properties.get('passwordProfile', PasswordProfile())
+
+    @property
     def presence(self):
         """Get a user's presence information."""
         return self.properties.get('presence',
@@ -701,10 +765,26 @@ class User(DirectoryObject):
 
     @property
     def registered_devices(self):
-        """Get the devices that are retistered for the user from the registeredDevices navigation property."""
+        """Get the devices that are registered for the user from the registeredDevices navigation property."""
         return self.properties.get('registeredDevices',
                                    DirectoryObjectCollection(self.context,
                                                              ResourcePath("registeredDevices", self.resource_path)))
+
+    @property
+    def street_address(self):
+        """
+        The street address of the user's place of business. Maximum length is 1024 characters.
+        :rtype: str
+        """
+        return self.properties.get('streetAddress', None)
+
+    @property
+    def security_identifier(self):
+        """
+        Security identifier (SID) of the user, used in Windows scenarios.
+        :rtype: str
+        """
+        return self.properties.get('securityIdentifier', None)
 
     @property
     def teamwork(self):
@@ -717,6 +797,15 @@ class User(DirectoryObject):
         """Represents the To Do services available to a user."""
         return self.properties.get('todo',
                                    Todo(self.context, ResourcePath("todo", self.resource_path)))
+
+    @property
+    def usage_location(self):
+        """
+        A two letter country code (ISO standard 3166). Required for users that will be assigned licenses due to
+        legal requirement to check for availability of services in countries. Examples include: US, JP, and GB.
+        :rtype: str
+        """
+        return self.properties.get('usageLocation', None)
 
     def get_property(self, name, default_value=None):
         if default_value is None:
@@ -739,6 +828,7 @@ class User(DirectoryObject):
                 "oauth2PermissionGrants": self.oauth2_permission_grants,
                 "ownedDevices": self.owned_devices,
                 "ownedObjects": self.owned_objects,
+                "passwordProfile": self.password_profile,
                 "registeredDevices": self.registered_devices,
                 "signInActivity": self.sign_in_activity
             }

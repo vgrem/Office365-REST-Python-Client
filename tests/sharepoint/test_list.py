@@ -143,3 +143,8 @@ class TestSPList(SPTestCase):
     def test_21_get_list_by_title(self):
         site_pages = self.client.web.get_list_by_title("Site Pages").get().execute_query()
         self.assertIsNotNone(site_pages.resource_path)
+
+    def test_22_get_metadata_navigation_settings(self):
+        site_pages = self.client.web.get_list_by_title("Site Pages")
+        result = site_pages.get_metadata_navigation_settings().execute_query()
+        self.assertIsNotNone(result.value)

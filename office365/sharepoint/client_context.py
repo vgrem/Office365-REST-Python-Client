@@ -398,7 +398,7 @@ class ClientContext(ClientRuntimeContext):
     @property
     def folder_coloring(self):
         """Alias to FolderColoring"""
-        from examples.sharepoint.folders.coloring import FolderColoring
+        from office365.sharepoint.folders.coloring import FolderColoring
         return FolderColoring(self, ResourcePath("foldercoloring"))
 
     @property

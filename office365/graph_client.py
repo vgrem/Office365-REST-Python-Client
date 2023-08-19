@@ -215,7 +215,14 @@ class GraphClient(ClientRuntimeContext):
         return DeltaCollection(self, DirectoryRole, ResourcePath("directoryRoles"))
 
     @property
+    def directory_role_templates(self):
+        """Represents a directory role templates in the directory"""
+        from office365.directory.rolemanagement.template import DirectoryRoleTemplate
+        return EntityCollection(self, DirectoryRoleTemplate, ResourcePath("directoryRoleTemplates"))
+
+    @property
     def identity_providers(self):
+        """"""
         return EntityCollection(self, IdentityProvider, ResourcePath("identityProviders"))
 
     @property
@@ -253,6 +260,12 @@ class GraphClient(ClientRuntimeContext):
         return EntityCollection(self, GroupLifecyclePolicy, ResourcePath("groupLifecyclePolicies"))
 
     @property
+    def group_settings(self):
+        """Represents a directory roles in the directory"""
+        from office365.directory.groups.setting import GroupSetting
+        return GroupSetting(self, ResourcePath("groupSettings"))
+
+    @property
     def communications(self):
         """
         Cloud communications API endpoint
@@ -280,6 +293,12 @@ class GraphClient(ClientRuntimeContext):
         based on the app ID, the user, and the user's role with a tenant.
         """
         return SubscriptionCollection(self, ResourcePath("subscriptions"))
+
+    @property
+    def connections(self):
+        """Get a list of the externalConnection objects and their properties."""
+        from office365.search.external.connection import ExternalConnection
+        return EntityCollection(self, ExternalConnection, ResourcePath("connections"))
 
     @property
     def tenant_relationships(self):

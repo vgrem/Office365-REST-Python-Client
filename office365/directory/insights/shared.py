@@ -1,5 +1,7 @@
 from office365.directory.insights.resource_reference import ResourceReference
+from office365.directory.insights.sharing_detail import SharingDetail
 from office365.entity import Entity
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 
@@ -13,6 +15,11 @@ class SharedInsight(Entity):
     """
 
     @property
+    def last_shared(self):
+        """Details about the shared item. Read-only"""
+        return self.properties.get("lastShared", SharingDetail())
+
+    @property
     def resource_reference(self):
         """Reference properties of the used document, such as the url and type of the document. Read-only"""
         return self.properties.get("resourceReference", ResourceReference())
@@ -24,10 +31,17 @@ class SharedInsight(Entity):
         return self.properties.get('resource',
                                    Entity(self.context, ResourcePath("resource", self.resource_path)))
 
+    @property
+    def sharing_history(self):
+        """Details about the sharing history. Read-only"""
+        return self.properties.get("sharingHistory", ClientValueCollection(SharingDetail))
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
-                "resourceReference": self.resource_reference
+                "lastShared": self.last_shared,
+                "resourceReference": self.resource_reference,
+                "sharingHistory": self.sharing_history
             }
             default_value = property_mapping.get(name, None)
         return super(SharedInsight, self).get_property(name, default_value)

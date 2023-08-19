@@ -104,3 +104,8 @@ class TestUserProfile(TestCase):
         self.my_client.execute_batch()
         after_result = PromotedSites.get_promoted_links_as_tiles(self.my_client).execute_query()
         self.assertEqual(len(after_result.value), 0)
+
+    #def test_17_shared_with_me(self):
+    #    from office365.sharepoint.userprofiles.sharedwithme.items import SharedWithMeItems
+    #    result = SharedWithMeItems.shared_with_me(self.my_client).execute_query()
+    #    self.assertIsNotNone(result)

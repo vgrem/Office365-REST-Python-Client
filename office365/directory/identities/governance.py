@@ -11,3 +11,5 @@ class IdentityGovernance(Entity):
        - App consent
        - Terms of use
     """
+
+

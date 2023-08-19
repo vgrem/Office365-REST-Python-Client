@@ -30,6 +30,7 @@ class SiteSharingReportHelper(BaseEntity):
             "folderUrl": folder_url
         }
         binding_type = SiteSharingReportHelper(context)
-        qry = ServiceOperationQuery(binding_type, "CreateSharingReportJob", None, payload, None, return_type, True)
+        qry = ServiceOperationQuery(binding_type, "CreateSharingReportJob", None, payload,
+                                    None, return_type, True)
         context.add_query(qry)
         return return_type

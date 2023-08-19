@@ -38,3 +38,7 @@ class TestDirectory(GraphTestCase):
 
     #def test9_delete_administrative_unit(self):
     #    self.__class__.administrative_unit.delete_object().execute_query()
+
+    def test9_list_directory_role_templates(self):
+        result = self.client.directory_role_templates.get().execute_query()
+        self.assertIsNotNone(result.resource_path)

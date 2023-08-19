@@ -6,7 +6,7 @@ from office365.sharepoint.folders.folder import Folder
 class FolderColoring(BaseEntity):
     """"""
 
-    def create_folder(self, decoded_url, ensure_unique_file_name, overwrite, coloring_information):
+    def create_folder(self, decoded_url, ensure_unique_file_name=True, overwrite=True, coloring_information=None):
         """
         :param str decoded_url:
         :param bool ensure_unique_file_name:
