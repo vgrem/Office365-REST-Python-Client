@@ -1,6 +1,7 @@
 from office365.directory.authentication.methods.root import AuthenticationMethodsRoot
 from office365.entity import Entity
 from office365.reports.internal.queries.create_report_query import create_report_query
+from office365.reports.security.root import SecurityReportsRoot
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
@@ -182,4 +183,11 @@ class ReportRoot(Entity):
         """Container for navigation properties for Azure AD authentication methods resources."""
         return self.properties.get('authenticationMethods',
                                    AuthenticationMethodsRoot(self.context,
-                                                             ResourcePath("authenticationMethods", self.resource_path)))
+                                                             ResourcePath("authenticationMethods",
+                                                                          self.resource_path)))
+
+    @property
+    def security(self):
+        """Container for navigation properties for Azure AD authentication methods resources."""
+        return self.properties.get('security',
+                                   SecurityReportsRoot(self.context, ResourcePath("security", self.resource_path)))

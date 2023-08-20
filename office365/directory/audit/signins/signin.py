@@ -10,6 +10,31 @@ class SignIn(Entity):
     """
 
     @property
+    def app_display_name(self):
+        """
+        App name displayed in the Azure Portal.
+        :rtype: str
+        """
+        return self.properties.get("appDisplayName", None)
+
+    @property
+    def app_id(self):
+        """
+        Unique GUID representing the app ID in the Azure Active Directory.
+        :rtype: str
+        """
+        return self.properties.get("appId", None)
+
+    @property
+    def client_app_used(self):
+        """
+        Identifies the client used for the sign-in activity. Modern authentication clients include Browser, modern
+        clients. Legacy authentication clients include Exchange ActiveSync, IMAP, MAPI, SMTP, POP, and other clients.
+        :rtype: str
+        """
+        return self.properties.get("clientAppUsed", None)
+
+    @property
     def device_detail(self):
         """Device information from where the sign-in occurred; includes device ID, operating system, and browser.
         Supports $filter (eq and startsWith operators only) on browser and operatingSytem properties."""

@@ -6,7 +6,7 @@ from office365.runtime.queries.create_entity import CreateEntityQuery
 
 
 class PermissionCollection(EntityCollection):
-    """Drive list's collection"""
+    """Permission's collection"""
 
     def __init__(self, context, resource_path=None):
         super(PermissionCollection, self).__init__(context, Permission, resource_path)

@@ -110,7 +110,11 @@ class TestDriveItem(GraphTestCase):
         result = self.__class__.target_file.analytics.get().execute_query()
         self.assertIsNotNone(result.resource_path)
 
-    def test_17_delete_file(self):
+    def test_17_extract_sensitivity_labels(self):
+        result = self.__class__.target_file.extract_sensitivity_labels().execute_query()
+        self.assertIsNotNone(result.value)
+
+    def test_18_delete_file(self):
         items = self.target_drive.root.children.top(2).get().execute_query()
         for item in items:
             item.delete_object().execute_query()

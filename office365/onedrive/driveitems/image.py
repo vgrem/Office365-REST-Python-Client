@@ -8,4 +8,11 @@ class Image(ClientValue):
 
     Note: If the service is unable to determine the width and height of the image, the Image resource may be empty.
     """
-    pass
+
+    def __init__(self, height=None, width=None):
+        """
+        :param int height:
+        :param int width:
+        """
+        self.height = height
+        self.width = width

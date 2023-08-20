@@ -10,6 +10,8 @@ from tests.graph_case import acquire_token_by_username_password
 
 client = GraphClient(acquire_token_by_username_password)
 
+existing_subscriptions = client.subscriptions.get().execute_query()
+
 expires = datetime.datetime.now() + datetime.timedelta(hours=120)
 notification_url = "https://webhook.azurewebsites.net/api/send/myNotifyClient"
 subscription = client.subscriptions.add("created",

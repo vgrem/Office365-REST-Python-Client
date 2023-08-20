@@ -12,8 +12,10 @@ from office365.onedrive.driveitems.image import Image
 from office365.onedrive.driveitems.item_preview_info import ItemPreviewInfo
 from office365.onedrive.driveitems.photo import Photo
 from office365.onedrive.driveitems.publication_facet import PublicationFacet
+from office365.onedrive.driveitems.remote_item import RemoteItem
 from office365.onedrive.driveitems.special_folder import SpecialFolder
 from office365.onedrive.driveitems.thumbnail_set import ThumbnailSet
+from office365.onedrive.drives.recipient import DriveRecipient
 from office365.onedrive.files.file import File
 from office365.onedrive.files.system_info import FileSystemInfo
 from office365.onedrive.folders.folder import Folder
@@ -22,6 +24,7 @@ from office365.onedrive.internal.paths.url import UrlPath
 from office365.onedrive.internal.queries.resumable_file_upload import create_resumable_file_upload_query
 from office365.onedrive.listitems.item_reference import ItemReference
 from office365.onedrive.listitems.list_item import ListItem
+from office365.onedrive.operations.pending import PendingOperations
 from office365.onedrive.permissions.collection import PermissionCollection
 from office365.onedrive.permissions.permission import Permission
 from office365.onedrive.sensitivitylabels.extract_result import ExtractSensitivityLabelsResult
@@ -29,13 +32,14 @@ from office365.onedrive.shares.shared import Shared
 from office365.onedrive.versions.drive_item import DriveItemVersion
 from office365.onedrive.workbooks.workbook import Workbook
 from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.queries.upload_session import UploadSessionQuery
-from office365.subscriptions.subscription import Subscription
+from office365.subscriptions.collection import SubscriptionCollection
 
 
 class DriveItem(BaseItem):
@@ -409,31 +413,43 @@ class DriveItem(BaseItem):
         self.context.add_query(qry)
         return return_type
 
-    def invite(self, recipients, message, require_sign_in=True, send_invitation=True, roles=None):
-        """Sends a sharing invitation for a driveItem. A sharing invitation provides permissions to the recipients
+    def invite(self, recipients, message, require_sign_in=True, send_invitation=True, roles=None,
+               expiration_datetime=None, password=None, retain_inherited_permissions=None):
+        """
+        Sends a sharing invitation for a driveItem. A sharing invitation provides permissions to the recipients
         and optionally sends them an email with a sharing link.
 
-        :param list[DriveRecipient] recipients: A collection of recipients who will receive access and the sharing
-        invitation.
+        :param list[str] recipients: A collection of recipients who will receive access and the sharing
+            invitation.
         :param str message: A plain text formatted message that is included in the sharing invitation.
-        Maximum length 2000 characters.
+            Maximum length 2000 characters.
         :param bool require_sign_in: Specifies whether the recipient of the invitation is required to sign-in to view
-        the shared item.
+            the shared item.
         :param bool send_invitation: If true, a sharing link is sent to the recipient. Otherwise, a permission is
-        granted directly without sending a notification.
+            granted directly without sending a notification.
         :param list[str] roles: Specify the roles that are to be granted to the recipients of the sharing invitation.
+        :param datetime.datetime expiration_datetime: Specifies the dateTime after which the permission expires.
+            For OneDrive for Business and SharePoint, expirationDateTime is only applicable for sharingLink permissions.
+            Available on OneDrive for Business, SharePoint, and premium personal OneDrive accounts.
+        :param str password: The password set on the invite by the creator. Optional and OneDrive Personal only.
+        :param bool retain_inherited_permissions: Optional. If true (default), any existing inherited permissions
+            are retained on the shared item when sharing this item for the first time. If false, all existing
+            permissions are removed when sharing for the first time.
         """
         if roles is None:
             roles = ["read"]
-        return_type = EntityCollection(self.context, Permission)
+        return_type = PermissionCollection(self.context)
         payload = {
             "requireSignIn": require_sign_in,
             "sendInvitation": send_invitation,
             "roles": roles,
-            "recipients": recipients,
-            "message": message
+            "recipients": ClientValueCollection(DriveRecipient, [DriveRecipient.from_email(r) for r in recipients]),
+            "message": message,
+            "expirationDateTime": expiration_datetime.isoformat() + "Z" if expiration_datetime else None,
+            "password": password,
+            "retainInheritedPermissions": retain_inherited_permissions
         }
-        qry = ServiceOperationQuery(self, "invite", payload, None, None, return_type)
+        qry = ServiceOperationQuery(self, "invite", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -610,6 +626,12 @@ class DriveItem(BaseItem):
         return self.properties.get('workbook', Workbook(self.context, ResourcePath("workbook", self.resource_path)))
 
     @property
+    def pending_operations(self):
+        """If present, indicates that one or more operations that might affect the state of the driveItem are pending
+        completion. Read-only."""
+        return self.properties.get('pendingOperations', PendingOperations())
+
+    @property
     def permissions(self):
         """The set of permissions for the item. Read-only. Nullable."""
         return self.properties.get('permissions',
@@ -620,6 +642,11 @@ class DriveItem(BaseItem):
         """Provides information about the published or checked-out state of an item,
         in locations that support such actions. This property is not returned by default. Read-only."""
         return self.properties.get('publication', PublicationFacet())
+
+    @property
+    def remote_item(self):
+        """Remote item data, if the item is shared from a drive other than the one being accessed. Read-only."""
+        return self.properties.get('remoteItem', RemoteItem())
 
     @property
     def special_folder(self):
@@ -659,13 +686,15 @@ class DriveItem(BaseItem):
         """The set of subscriptions on the driveItem.
         """
         return self.properties.get('subscriptions',
-                                   EntityCollection(self.context, Subscription,
-                                                    ResourcePath("subscriptions", self.resource_path)))
+                                   SubscriptionCollection(self.context,
+                                                          ResourcePath("subscriptions", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "fileSystemInfo": self.file_system_info,
+                "remoteItem": self.remote_item,
+                "specialFolder": self.special_folder
             }
             default_value = property_mapping.get(name, None)
         return super(DriveItem, self).get_property(name, default_value)
