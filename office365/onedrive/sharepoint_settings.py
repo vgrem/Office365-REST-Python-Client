@@ -20,6 +20,31 @@ class SharepointSettings(Entity):
         """Collection of file extensions not uploaded by the OneDrive sync app. """
         return self.properties.get("excludedFileExtensionsForSyncApp", StringCollection())
 
+    @property
+    def site_creation_default_managed_path(self):
+        """
+        The value of the team site managed path. This is the path under which new team sites will be created.
+        :rtype: str
+        """
+        return self.properties.get("siteCreationDefaultManagedPath", None)
+
+    @property
+    def site_creation_default_storage_limit_in_mb(self):
+        """
+        The default storage quota for a new site upon creation. Measured in megabytes (MB).
+        :rtype: int
+        """
+        return self.properties.get("siteCreationDefaultStorageLimitInMB", None)
+
+    @property
+    def tenant_default_timezone(self):
+        """
+        The default timezone of a tenant for newly created sites. For a list of possible values,
+        see SPRegionalSettings.TimeZones property.
+        :rtype: str
+        """
+        return self.properties.get("tenantDefaultTimezone", None)
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {

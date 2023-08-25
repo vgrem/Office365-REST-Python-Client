@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -453,23 +455,24 @@ class Folder(BaseEntity):
 
     @property
     def time_created(self):
-        """Gets when the folder was created in UTC.
-
+        """
+        Gets when the folder was created in UTC.
         :rtype: datetime or None
         """
-        return self.properties.get("TimeCreated", None)
+        return self.properties.get("TimeCreated", datetime.min)
 
     @property
     def serverRelativeUrl(self):
-        """Gets the server-relative URL of the list folder.
-
+        """
+        Gets the server-relative URL of the list folder.
         :rtype: str or None
         """
         return self.properties.get("ServerRelativeUrl", None)
 
     @property
     def server_relative_path(self):
-        """Gets the server-relative Path of the list folder.
+        """
+        Gets the server-relative Path of the list folder.
         :rtype: SPResPath or None
         """
         return self.properties.get("ServerRelativePath", SPResPath())
@@ -486,7 +489,8 @@ class Folder(BaseEntity):
                 "ListItemAllFields": self.list_item_all_fields,
                 "ParentFolder": self.parent_folder,
                 "ServerRelativePath": self.server_relative_path,
-                "StorageMetrics": self.storage_metrics
+                "StorageMetrics": self.storage_metrics,
+                "TimeCreated": self.time_created
             }
             default_value = property_mapping.get(name, None)
         return super(Folder, self).get_property(name, default_value)

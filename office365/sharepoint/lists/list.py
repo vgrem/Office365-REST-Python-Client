@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -550,6 +552,14 @@ class List(SecurableObject):
         return self.properties.get("Id", None)
 
     @property
+    def additional_ux_properties(self):
+        """
+
+        :rtype: str
+        """
+        return self.properties.get("AdditionalUXProperties", None)
+
+    @property
     def author(self):
         """Specifies the user who created the list."""
         return self.properties.get('Author',
@@ -559,16 +569,22 @@ class List(SecurableObject):
     def allow_content_types(self):
         """
         Specifies whether the list supports content types.
-
         :rtype: bool or None
         """
         return self.properties.get("AllowContentTypes", None)
 
     @property
+    def allow_deletion(self):
+        """
+        Specifies whether the list could be deleted.
+        :rtype: bool or None
+        """
+        return self.properties.get("AllowDeletion", None)
+
+    @property
     def base_template(self):
         """
         Specifies the list server template of the list.
-
         :rtype: int or None
         """
         return self.properties.get("BaseTemplate", None)
@@ -578,10 +594,25 @@ class List(SecurableObject):
         """
         Specifies the base type of the list.
         It MUST be one of the following values: GenericList, DocumentLibrary, DiscussionBoard, Survey, or Issue.
-
         :rtype: int or None
         """
         return self.properties.get("BaseType", None)
+
+    @property
+    def browser_file_handling(self):
+        """
+        Specifies the override at the list level for the BrowserFileHandling property of the Web application.
+        If the BrowserFileHandling property of the Web application is BrowserFileHandling.Strict,
+        then this setting MUST be ignored. If the BrowserFileHandling property of the Web application is
+        BrowserFileHandling.Permissive, then this setting MUST be respected.
+        :rtype: int or None
+        """
+        return self.properties.get("BrowserFileHandling", None)
+
+    @property
+    def created(self):
+        """Specifies when the list was created."""
+        return self.properties.get("Created", datetime.min)
 
     @property
     def default_display_form_url(self):
@@ -646,15 +677,6 @@ class List(SecurableObject):
         return self.properties.get("DataSource", ListDataSource())
 
     @property
-    def enable_folder_creation(self):
-        """
-        Specifies whether new list folders can be added to the list.
-
-        :rtype: bool or None
-        """
-        return self.properties.get("EnableFolderCreation", None)
-
-    @property
     def default_edit_form_url(self):
         """
         Gets a value that specifies the URL of the edit form to use for list items in the list.
@@ -670,9 +692,65 @@ class List(SecurableObject):
         """
         return self.properties.get("DefaultItemOpenInBrowser", None)
 
+    @property
+    def default_item_open_use_list_setting(self):
+        """
+        This property returns whether to use the List setting or the server wide setting for
+        DefaultItemOpen (BrowserEnabledDocuments setting) in the Web application. This property can only be set to
+        false, thereby using the server-wide setting. To set it to use List setting, set the value for DefaultItemOpen.
+        :rtype: bool or None
+        """
+        return self.properties.get("DefaultItemOpenUseListSetting", None)
+
+    @property
+    def disable_commenting(self):
+        """
+        :rtype: bool or None
+        """
+        return self.properties.get("DisableCommenting", None)
+
+    @property
+    def disable_grid_editing(self):
+        """
+        :rtype: bool or None
+        """
+        return self.properties.get("DisableGridEditing", None)
+
+    @property
+    def enable_folder_creation(self):
+        """
+        Specifies whether new list folders can be added to the list.
+        :rtype: bool or None
+        """
+        return self.properties.get("EnableFolderCreation", None)
+
     @enable_folder_creation.setter
     def enable_folder_creation(self, value):
         self.set_property("EnableFolderCreation", value, True)
+
+    @property
+    def enable_minor_versions(self):
+        """
+        Specifies whether minor versions are enabled for the list.
+        :rtype: bool or None
+        """
+        return self.properties.get("EnableMinorVersions", None)
+
+    @property
+    def enable_moderation(self):
+        """
+        Specifies whether content approval is enabled for the list.
+        :rtype: bool or None
+        """
+        return self.properties.get("EnableModeration", None)
+
+    @property
+    def enable_versioning(self):
+        """
+        Specifies whether content approval is enabled for the list.
+        :rtype: bool or None
+        """
+        return self.properties.get("EnableVersioning", None)
 
     @property
     def items(self):
@@ -779,6 +857,16 @@ class List(SecurableObject):
     def title(self, val):
         """Sets the displayed title for the list."""
         self.set_property('Title', val)
+
+
+    @property
+    def default_content_approval_workflow_id(self):
+        """
+        Specifies the default workflow identifier for content approval on the list. It MUST be an empty GUID
+        if there is no default content approval workflow.
+        :rtype: str
+        """
+        return self.properties.get("DefaultContentApprovalWorkflowId", None)
 
     @property
     def description(self):

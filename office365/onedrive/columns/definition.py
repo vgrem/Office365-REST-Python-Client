@@ -2,6 +2,9 @@ from office365.base_item import BaseItem
 from office365.onedrive.columns.boolean import BooleanColumn
 from office365.onedrive.columns.calculated import CalculatedColumn
 from office365.onedrive.columns.choice import ChoiceColumn
+from office365.onedrive.columns.content_approval_status import ContentApprovalStatusColumn
+from office365.onedrive.columns.currency import CurrencyColumn
+from office365.onedrive.columns.datetime import DateTimeColumn
 from office365.onedrive.columns.default_value import DefaultColumnValue
 from office365.onedrive.columns.geolocation import GeolocationColumn
 from office365.onedrive.columns.hyperlink_or_picture import HyperlinkOrPictureColumn
@@ -48,6 +51,11 @@ class ColumnDefinition(BaseItem):
         return self.properties.get('indexed', None)
 
     @property
+    def content_approval_status(self):
+        """This column stores content approval status."""
+        return self.properties.get('contentApprovalStatus', ContentApprovalStatusColumn())
+
+    @property
     def column_group(self):
         """For site columns, the name of the group this column belongs to. Helps organize related columns."""
         return self.properties.get('columnGroup', None)
@@ -71,6 +79,16 @@ class ColumnDefinition(BaseItem):
     def choice(self):
         """This column stores data from a list of choices."""
         return self.properties.get('choice', ChoiceColumn())
+
+    @property
+    def currency(self):
+        """This column stores currency values."""
+        return self.properties.get('currency', CurrencyColumn())
+
+    @property
+    def datetime(self):
+        """This column stores DateTime values."""
+        return self.properties.get('dateTime', DateTimeColumn())
 
     @property
     def person_or_group(self):
@@ -108,17 +126,30 @@ class ColumnDefinition(BaseItem):
         return self.properties.get('hyperlinkOrPicture', HyperlinkOrPictureColumn())
 
     @property
+    def hidden(self):
+        """Specifies whether the column is displayed in the user interface.
+        :rtype: bool or None
+        """
+        return self.properties.get('hidden', None)
+
+    @property
     def is_deletable(self):
         """Indicates whether this column can be deleted.
-
         :rtype: bool or None
         """
         return self.properties.get('isDeletable', None)
 
     @property
+    def is_reorderable(self):
+        """
+        Indicates whether values in the column can be reordered. Read-only.
+        :rtype: bool or None
+        """
+        return self.properties.get('isReorderable', None)
+
+    @property
     def is_sealed(self):
         """Specifies whether the column can be changed.
-
         :rtype: bool or None
         """
         return self.properties.get('isSealed', None)
@@ -126,10 +157,16 @@ class ColumnDefinition(BaseItem):
     @property
     def propagate_changes(self):
         """If 'true', changes to this column will be propagated to lists that implement the column.
-
         :rtype: bool or None
         """
         return self.properties.get('propagateChanges', None)
+
+    @property
+    def read_only(self):
+        """Specifies whether the column values can be modified.
+        :rtype: bool or None
+        """
+        return self.properties.get('readOnly', None)
 
     @property
     def thumbnail(self):
@@ -151,9 +188,18 @@ class ColumnDefinition(BaseItem):
         """This column stores taxonomy terms."""
         return self.properties.get('term', TermColumn())
 
+    @property
+    def type(self):
+        """
+        For site columns, the type of column.
+        :rtype: str
+        """
+        return self.properties.get('type', None)
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "contentApprovalStatus": self.content_approval_status,
                 "defaultValue": self.default_value,
                 "hyperlinkOrPicture": self.hyperlink_or_picture,
                 "personOrGroup": self.person_or_group,

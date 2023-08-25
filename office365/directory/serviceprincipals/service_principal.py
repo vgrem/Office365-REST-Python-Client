@@ -7,10 +7,12 @@ from office365.directory.object import DirectoryObject
 from office365.directory.password_credential import PasswordCredential
 from office365.directory.permissions.grants.oauth2 import OAuth2PermissionGrant
 from office365.directory.permissions.scope import PermissionScope
+from office365.directory.synchronization.synchronization import Synchronization
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.runtime.types.collections import StringCollection
 
 
 class ServicePrincipal(DirectoryObject):
@@ -85,8 +87,8 @@ class ServicePrincipal(DirectoryObject):
         return return_type
 
     def remove_password(self, key_id):
-        """Remove a password from a servicePrincipal object..
-
+        """
+        Remove a password from a servicePrincipal object.
         :param str key_id: The unique identifier for the password.
         """
         qry = ServiceOperationQuery(self, "removePassword", None, {"keyId": key_id})
@@ -94,8 +96,35 @@ class ServicePrincipal(DirectoryObject):
         return self
 
     @property
+    def account_enabled(self):
+        """
+        true if the service principal account is enabled; otherwise, false. If set to false, then no users will be
+        able to sign in to this app, even if they are assigned to it. Supports $filter (eq, ne, not, in).
+        :rtype: bool
+        """
+        return self.properties.get('accountEnabled', None)
+
+    @property
+    def alternative_names(self):
+        """
+        Used to retrieve service principals by subscription, identify resource group and full resource ids for
+        managed identities. Supports $filter (eq, not, ge, le, startsWith).
+        """
+        return self.properties.get('alternativeNames', StringCollection())
+
+    @property
+    def app_description(self):
+        """
+        The description exposed by the associated application.
+        :rtype: str
+        """
+        return self.properties.get('appDescription', None)
+
+    @property
     def app_display_name(self):
-        """The collection of key credentials associated with the application. Not nullable.
+        """
+        The display name exposed by the associated application.
+        :rtype: str
         """
         return self.properties.get('appDisplayName', None)
 
@@ -107,6 +136,51 @@ class ServicePrincipal(DirectoryObject):
         return self.properties.get('appRoleAssignedTo',
                                    AppRoleAssignmentCollection(self.context,
                                                                ResourcePath("appRoleAssignedTo", self.resource_path)))
+
+    @property
+    def homepage(self):
+        """
+        Home page or landing page of the application.
+        :rtype: str
+        """
+        return self.properties.get('homepage', None)
+
+    @property
+    def key_credentials(self):
+        """
+        The collection of key credentials associated with the service principal. Not nullable.
+        Supports $filter (eq, not, ge, le).
+        """
+        return self.properties.setdefault('keyCredentials', ClientValueCollection(KeyCredential))
+
+    @property
+    def login_url(self):
+        """
+        Specifies the URL where the service provider redirects the user to Azure AD to authenticate.
+        Azure AD uses the URL to launch the application from Microsoft 365 or the Azure AD My Apps. When blank,
+        Azure AD performs IdP-initiated sign-on for applications configured with SAML-based single sign-on.
+        The user launches the application from Microsoft 365, the Azure AD My Apps, or the Azure AD SSO URL.
+        :rtype: str
+        """
+        return self.properties.get('loginUrl', None)
+
+    @property
+    def logout_url(self):
+        """
+        Specifies the URL that will be used by Microsoft's authorization service to logout an user using
+        OpenId Connect front-channel, back-channel or SAML logout protocols.
+        :rtype: str
+        """
+        return self.properties.get('logoutUrl', None)
+
+    @property
+    def notification_email_addresses(self):
+        """
+        Specifies the list of email addresses where Azure AD sends a notification when the active certificate is near
+        the expiration date. This is only for the certificates used to sign the SAML token issued for Azure
+        AD Gallery applications.
+        """
+        return self.properties.get('notificationEmailAddresses', StringCollection())
 
     @property
     def service_principal_type(self):
@@ -171,6 +245,16 @@ class ServicePrincipal(DirectoryObject):
                                                              ResourcePath("ownedObjects", self.resource_path)))
 
     @property
+    def synchronization(self):
+        """
+        Represents the capability for Azure Active Directory (Azure AD) identity synchronization through
+        the Microsoft Graph API.
+        """
+        return self.properties.get('synchronization',
+                                   Synchronization(self.context,
+                                                   ResourcePath("synchronization", self.resource_path)))
+
+    @property
     def token_encryption_key_id(self):
         """
         Specifies the keyId of a public key from the keyCredentials collection. When configured, Azure AD issues tokens
@@ -185,6 +269,7 @@ class ServicePrincipal(DirectoryObject):
             property_mapping = {
                 "appRoleAssignedTo": self.app_role_assigned_to,
                 "created_objects": self.created_objects,
+                "keyCredentials": self.key_credentials,
                 "oauth2PermissionScopes": self.oauth2_permission_scopes,
                 "ownedObjects": self.owned_objects,
                 "oauth2PermissionGrants": self.oauth2_permission_grants

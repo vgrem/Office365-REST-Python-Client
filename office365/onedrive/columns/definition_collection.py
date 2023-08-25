@@ -41,27 +41,27 @@ class ColumnDefinitionCollection(EntityCollection):
         from office365.onedrive.columns.hyperlink_or_picture import HyperlinkOrPictureColumn
         return self.add(name=name, hyperlinkOrPicture=HyperlinkOrPictureColumn(is_picture=is_picture))
 
-    def add_lookup(self, name, list_or_id, column_name=None):
+    def add_lookup(self, name, lookup_list, column_name=None):
         """
         Creates a lookup column
 
         :param str name: The API-facing name of the column as it appears in the fields on a listItem
-        :param office365.onedrive.lists.list.List or str list_or_id: Lookup source list or identifier
+        :param office365.onedrive.lists.list.List or str lookup_list: Lookup source list or identifier
         :param str column_name: The name of the lookup source column.
         :rtype: ColumnDefinition
         """
         from office365.onedrive.columns.lookup import LookupColumn
         from office365.onedrive.lists.list import List
 
-        if isinstance(list_or_id, List):
+        if isinstance(lookup_list, List):
             return_type = ColumnDefinition(self.context)
             self.add_child(return_type)
 
             def _list_loaded():
-                params = {"name": name, "lookup": LookupColumn(list_or_id.id, column_name)}
+                params = {"name": name, "lookup": LookupColumn(lookup_list.id, column_name)}
                 qry = CreateEntityQuery(self, params, return_type)
                 self.context.add_query(qry)
-            list_or_id.ensure_property("id", _list_loaded)
+            lookup_list.ensure_property("id", _list_loaded)
             return return_type
         else:
-            return self.add(name=name, lookup=LookupColumn(list_or_id, column_name))
+            return self.add(name=name, lookup=LookupColumn(lookup_list, column_name))

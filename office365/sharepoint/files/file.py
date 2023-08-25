@@ -13,6 +13,7 @@ from office365.sharepoint.files.versions.event import FileVersionEvent
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.permissions.irm.effective_settings import EffectiveInformationRightsManagementSettings
+from office365.sharepoint.permissions.irm.file_settings import InformationRightsManagementFileSettings
 from office365.sharepoint.permissions.irm.settings import InformationRightsManagementSettings
 from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.files.versions.collection import FileVersionCollection
@@ -680,7 +681,7 @@ class File(AbstractFile):
         Returns the Information Rights Management (IRM) settings for the file.
         """
         return self.properties.get('InformationRightsManagementSettings',
-                                   InformationRightsManagementSettings(self.context,
+                                   InformationRightsManagementFileSettings(self.context,
                                                                        ResourcePath(
                                                                            "InformationRightsManagementSettings",
                                                                            self.resource_path)))
