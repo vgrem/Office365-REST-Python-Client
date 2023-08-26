@@ -4,6 +4,7 @@ from office365.intune.audit.event_collection import AuditEventCollection
 from office365.intune.devices.category import DeviceCategory
 from office365.intune.devices.enrollment.configuration import DeviceEnrollmentConfiguration
 from office365.intune.devices.managed import ManagedDevice
+from office365.intune.devices.management.reports.reports import DeviceManagementReports
 from office365.runtime.paths.resource_path import ResourcePath
 
 
@@ -42,6 +43,13 @@ class DeviceManagement(Entity):
         return self.properties.get('managedDevices',
                                    EntityCollection(self.context, ManagedDevice,
                                                     ResourcePath("managedDevices", self.resource_path)))
+
+    @property
+    def reports(self):
+        """"""
+        return self.properties.get("reports",
+                                   DeviceManagementReports(self.context,
+                                                           ResourcePath("reports", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:

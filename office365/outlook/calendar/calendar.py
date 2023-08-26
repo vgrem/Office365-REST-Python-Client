@@ -3,12 +3,14 @@ from office365.entity_collection import EntityCollection
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.outlook.calendar.email_address import EmailAddress
 from office365.outlook.calendar.events.collection import EventCollection
-from office365.outlook.calendar.permission import CalendarPermission
+from office365.outlook.calendar.permissions.collection import CalendarPermissionCollection
+from office365.outlook.calendar.permissions.permission import CalendarPermission
 from office365.outlook.calendar.schedule.information import ScheduleInformation
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.runtime.types.collections import StringCollection
 
 
 class Calendar(Entity):
@@ -16,6 +18,7 @@ class Calendar(Entity):
     A calendar which is a container for events. It can be a calendar for a user, or the default calendar
         of a Microsoft 365 group.
     """
+
     def get_schedule(self, schedules, start_time, end_time, availability_view_interval=30):
         """
         Get the free/busy availability information for a collection of users, distributions lists, or resources
@@ -40,20 +43,64 @@ class Calendar(Entity):
         return return_type
 
     @property
+    def allowed_online_meeting_providers(self):
+        """
+        Represent the online meeting service providers that can be used to create online meetings in this calendar.
+        Possible values are: unknown, skypeForBusiness, skypeForConsumer, teamsForBusiness.
+        """
+        return self.properties.get('allowedOnlineMeetingProviders', StringCollection())
+
+    @property
     def can_edit(self):
         """
         true if the user can write to the calendar, false otherwise.
         This property is true for the user who created the calendar.
         This property is also true for a user who has been shared a calendar and granted write access.
-
         :rtype: bool or None
         """
         return self.properties.get('canEdit', None)
 
     @property
+    def can_share(self):
+        """
+        true if the user has the permission to share the calendar, false otherwise.
+        Only the user who created the calendar can share it.
+        :rtype: bool or None
+        """
+        return self.properties.get('canShare', None)
+
+    @property
+    def can_view_private_items(self):
+        """
+        true if the user can read calendar items that have been marked private, false otherwise.
+        :rtype: bool or None
+        """
+        return self.properties.get('canViewPrivateItems', None)
+
+    @property
+    def change_key(self):
+        """
+        Identifies the version of the calendar object. Every time the calendar is changed, changeKey changes as well.
+        This allows Exchange to apply changes to the correct version of the object.
+        :rtype: str
+        """
+        return self.properties.get('changeKey', None)
+
+    @property
+    def color(self):
+        """
+        Specifies the color theme to distinguish the calendar from other calendars in a UI.
+        The property values are: auto, lightBlue, lightGreen, lightOrange, lightGray, lightYellow, lightTeal,
+        lightPink, lightBrown, lightRed, maxColor.
+        :rtype: str
+        """
+        return self.properties.get('color', None)
+
+    @property
     def name(self):
         """
         The calendar name.
+        :rtype: str
         """
         return self.properties.get('name', None)
 
@@ -82,12 +129,14 @@ class Calendar(Entity):
     def calendar_permissions(self):
         """The permissions of the users with whom the calendar is shared."""
         return self.properties.get('calendarPermissions',
-                                   EntityCollection(self.context, CalendarPermission,
-                                                    ResourcePath("calendarPermissions", self.resource_path)))
+                                   CalendarPermissionCollection(self.context,
+                                                                ResourcePath("calendarPermissions",
+                                                                             self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "allowedOnlineMeetingProviders": self.allowed_online_meeting_providers,
                 "calendarView": self.calendar_view,
                 "calendarPermissions": self.calendar_permissions
             }

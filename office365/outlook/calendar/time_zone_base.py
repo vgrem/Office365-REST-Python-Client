@@ -10,3 +10,6 @@ class TimeZoneBase(ClientValue):
             "Hawaii-Aleutian Standard Time", or "Customized Time Zone" for a custom time zone.
         """
         self.name = name
+
+    def __repr__(self):
+        return self.name

@@ -1,6 +1,10 @@
+from datetime import datetime
+
 from office365.directory.security.alerts.alert import Alert
+from office365.directory.security.alerts.comment import AlertComment
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 
@@ -19,13 +23,45 @@ class Incident(Entity):
 
     @property
     def assigned_to(self):
-        """Owner of the incident, or null if no owner is assigned. Free editable text.
+        """
+        Owner of the incident, or null if no owner is assigned. Free editable text.
         :rtype: str or None
         """
         return self.properties.get("assignedTo", None)
+
+    @property
+    def classification(self):
+        """
+        The specification for the incident.
+        Possible values are: unknown, falsePositive, truePositive, informationalExpectedActivity, unknownFutureValue.
+        :rtype: str or None
+        """
+        return self.properties.get("classification", None)
+
+    @property
+    def comments(self):
+        """
+        Array of comments created by the Security Operations (SecOps) team when the incident is managed.
+        """
+        return self.properties.get("comments", ClientValueCollection(AlertComment))
+
+    @property
+    def created_datetime(self):
+        """
+        Time when the incident was first created.
+        """
+        return self.properties("createdDateTime", datetime.min)
 
     @property
     def alerts(self):
         """The list of related alerts. Supports $expand."""
         return self.properties.get('alerts',
                                    EntityCollection(self.context, Alert, ResourcePath("alerts", self.resource_path)))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "createdDateTime": self.created_datetime
+            }
+            default_value = property_mapping.get(name, None)
+        return super(Incident, self).get_property(name, default_value)

@@ -1,5 +1,6 @@
 from office365.entity import Entity
 from office365.outlook.calendar.email_address import EmailAddress
+from office365.runtime.types.collections import StringCollection
 
 
 class CalendarPermission(Entity):
@@ -15,8 +16,16 @@ class CalendarPermission(Entity):
     the permissions of a sharee or delegate. You cannot update the allowedRoles, emailAddress, isInsideOrganization,
     or isRemovable property. To change these properties, you should delete the corresponding calendarPermission
     object and create another sharee or delegate in an Outlook client.
-
     """
+
+    @property
+    def allowed_roles(self):
+        """
+        List of allowed sharing or delegating permission levels for the calendar.
+        Possible values are: none, freeBusyRead, limitedRead, read, write, delegateWithoutPrivateEventAccess,
+        delegateWithPrivateEventAccess, custom.
+        """
+        return self.properties.get("allowedRoles", StringCollection())
 
     @property
     def email_address(self):
@@ -27,12 +36,36 @@ class CalendarPermission(Entity):
         return self.properties.get("emailAddress", EmailAddress())
 
     @property
+    def is_inside_organization(self):
+        """
+        True if the user in context (sharee or delegate) is inside the same organization as the calendar owner.
+        :rtype: bool or None
+        """
+        return self.properties.get("isInsideOrganization", None)
+
+    @property
     def is_removable(self):
         """
         True if the user can be removed from the list of sharees or delegates for the specified calendar,
         false otherwise. The "My organization" user determines the permissions other people within your organization
         have to the given calendar. You cannot remove "My organization" as a sharee to a calendar.
-
         :rtype: bool or None
         """
         return self.properties.get("isRemovable", None)
+
+    @property
+    def role(self):
+        """
+        Current permission level of the calendar sharee or delegate.
+        :rtype: str or None
+        """
+        return self.properties.get("role", None)
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "allowedRoles": self.allowed_roles,
+                "emailAddress": self.email_address
+            }
+            default_value = property_mapping.get(name, None)
+        return super(CalendarPermission, self).get_property(name, default_value)

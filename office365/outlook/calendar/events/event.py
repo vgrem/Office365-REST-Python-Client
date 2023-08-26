@@ -86,8 +86,6 @@ class Event(OutlookItem):
     def start(self):
         """
         The date, time, and time zone that the event starts. By default, the start time is in UTC.
-
-        :rtype: DateTimeTimeZone
         """
         return self.properties.get("start", DateTimeTimeZone())
 
@@ -104,8 +102,6 @@ class Event(OutlookItem):
     def end(self):
         """
         The date, time, and time zone that the event starts. By default, the start time is in UTC.
-
-        :rtype: DateTimeTimeZone
         """
         return self.properties.get("end", DateTimeTimeZone())
 

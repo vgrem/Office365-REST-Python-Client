@@ -8,8 +8,11 @@ class OutlookItem(Entity):
 
     @property
     def change_key(self):
-        """Identifies the version of the item. Every time the item is changed, changeKey changes as well.
-        This allows Exchange to apply changes to the correct version of the object. """
+        """
+        Identifies the version of the item. Every time the item is changed, changeKey changes as well.
+        This allows Exchange to apply changes to the correct version of the object.
+        :rtype: str
+        """
         return self.properties.get('ChangeKey', None)
 
     @property

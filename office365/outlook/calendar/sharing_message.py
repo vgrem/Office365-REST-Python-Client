@@ -1,5 +1,5 @@
-from office365.entity import Entity
+from office365.outlook.mail.messages.message import Message
 
 
-class CalendarSharingMessage(Entity):
+class CalendarSharingMessage(Message):
     """"""

@@ -14,3 +14,6 @@ class LocaleInfo(ClientValue):
         """
         self.displayName = display_name
         self.locale = locale
+
+    def __repr__(self):
+        return self.locale

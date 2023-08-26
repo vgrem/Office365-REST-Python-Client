@@ -1,4 +1,5 @@
 from office365.directory.insights.resource_reference import ResourceReference
+from office365.directory.insights.usage_details import UsageDetails
 from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -10,6 +11,11 @@ class UsedInsight(Entity):
       OneDrive for Business
       SharePoint
     """
+
+    @property
+    def last_used(self):
+        """Information about when the item was last viewed or modified by the user."""
+        return self.properties.get("lastUsed", UsageDetails())
 
     @property
     def resource_reference(self):
@@ -26,6 +32,7 @@ class UsedInsight(Entity):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "lastUsed": self.last_used,
                 "resourceReference": self.resource_reference
             }
             default_value = property_mapping.get(name, None)
