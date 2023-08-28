@@ -108,21 +108,21 @@ class FieldCollection(BaseEntityCollection):
         """
         return self.add_field(FieldCreationInformation(title, FieldType.Text))
 
-    def add_dependent_lookup_field(self, display_name, primary_lookup_field, lookup_field):
-        """Adds a secondary lookup field to a field (2) collection.
-        A reference (3) to the SP.Field that was added is returned.
-        :param str lookup_field: Name of the field (2) from the target list (1) to include data from.
-        :param Field primary_lookup_field: Main lookup field to associate the dependent lookup field with.
-            A dependent lookup field will include data from the list item referred to from the instance of the main
-            lookup field.
-        :param str display_name: Title of the added field
+    def add_dependent_lookup_field(self, display_name, primary_lookup_field_id, show_field):
+        """Adds a secondary lookup field to a field collection (target). 
+        Args:
+            display_name (str): title of the added field in the target FieldCollection.
+            primary_lookup_field_id (str): ID of the main lookup-field in the target to associate the dependent lookup field with.
+            show_field (str): name of the field from the source list to include data from.
+        Returns:
+            Field: reference to the SP.Field that was added.
         """
         return_type = Field(self.context)
         self.add_child(return_type)
         parameters = {
             "displayName": display_name,
-            "primaryLookupField": primary_lookup_field,
-            "lookupField": lookup_field
+            "primaryLookupFieldId": primary_lookup_field_id,
+            "showField": show_field
         }
         qry = ServiceOperationQuery(self, "AddDependentLookupField", None, parameters,
                                     None, return_type)
