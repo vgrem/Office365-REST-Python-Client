@@ -10,6 +10,21 @@ class Alert(Entity):
     or a security provider integrated with Microsoft 365 Defender, has identified."""
 
     @property
+    def actor_display_name(self):
+        """
+        The adversary or activity group that is associated with this alert.
+        :rtype: str
+        """
+        return self.properties.get("actorDisplayName", None)
+
+    @property
+    def alert_policy_id(self):
+        """
+        :rtype: str
+        """
+        return self.properties.get("alertPolicyId", None)
+
+    @property
     def evidence(self):
         """Collection of evidence related to the alert."""
         return self.properties.get("evidence", ClientValueCollection(AlertEvidence))

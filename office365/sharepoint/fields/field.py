@@ -69,7 +69,8 @@ class Field(BaseEntity):
 
     def enable_index(self):
         """
-
+        Enables the index for a field
+        An index speeds up queries on the indexed fields as well as sorting and grouping operations
         """
         return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "enableIndex", None, None, None, return_type)
@@ -78,7 +79,7 @@ class Field(BaseEntity):
 
     def disable_index(self):
         """
-
+        Disables the index for a field
         """
         return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "disableIndex", None, None, None, return_type)
@@ -119,6 +120,14 @@ class Field(BaseEntity):
         :rtype: str or None
         """
         return self.properties.get('Id', None)
+
+    @property
+    def auto_indexed(self):
+        """
+        Gets a Boolean value that specifies whether the field is auto-indexed.
+        :rtype: str or None
+        """
+        return self.properties.get('AutoIndexed', None)
 
     @property
     def default_formula(self):
@@ -166,16 +175,16 @@ class Field(BaseEntity):
 
     @title.setter
     def title(self, val):
-        """Sets a value that specifies the display name of the field.
-
+        """
+        Sets a value that specifies the display name of the field.
         :rtype: str or None
         """
         self.set_property("Title", val)
 
     @property
     def group(self):
-        """Gets a value that specifies the field group.
-
+        """
+        Gets a value that specifies the field group.
         :rtype: str or None
         """
         return self.properties.get('Group', None)
@@ -183,23 +192,22 @@ class Field(BaseEntity):
     @group.setter
     def group(self, val):
         """Sets a value that specifies the field group.
-
         :rtype: str or None
         """
         self.set_property("Group", val)
 
     @property
     def internal_name(self):
-        """Gets a value that specifies the field internal name.
-
+        """
+        Gets a value that specifies the field internal name.
         :rtype: str or None
         """
         return self.properties.get('InternalName', None)
 
     @property
     def can_be_deleted(self):
-        """Gets a value that specifies whether the field can be deleted
-
+        """
+        Gets a value that specifies whether the field can be deleted
         :rtype: bool or None
         """
         return self.properties.get('CanBeDeleted', None)
@@ -219,11 +227,41 @@ class Field(BaseEntity):
         return self.properties.get('ClientSideComponentProperties', None)
 
     @property
+    def client_validation_formula(self):
+        """
+        :rtype: str or None
+        """
+        return self.properties.get('ClientValidationFormula', None)
+
+    @property
+    def enforce_unique_values(self):
+        """
+        Specifies whether the field enforces unique values.
+        :rtype: bool or None
+        """
+        return self.properties.get('enforceUniqueValues', None)
+
+    @property
+    def filterable(self):
+        """
+        Specifies whether list items in the list can be filtered by the field value.
+        :rtype: bool or None
+        """
+        return self.properties.get('Filterable', None)
+
+    @property
+    def from_base_type(self):
+        """
+        Gets a Boolean value that indicates whether the field derives from a base field type.
+        :rtype: bool or None
+        """
+        return self.properties.get('FromBaseType', None)
+
+    @property
     def js_link(self):
         """
         When implemented in a derived class, gets or sets the name of an external JavaScript file that contains
         any client rendering logic for fields of the derived type.
-
         :rtype: str or None
         """
         return self.properties.get('JSLink', None)
@@ -232,7 +270,6 @@ class Field(BaseEntity):
     def hidden(self):
         """
         Gets a value that specifies whether the field is hidden in list views and list forms.
-
         :rtype: bool or None
         """
         return self.properties.get('Hidden', None)
@@ -245,10 +282,25 @@ class Field(BaseEntity):
         self.set_property("Hidden", val)
 
     @property
+    def no_crawl(self):
+        """
+        Gets value that specifies whether the field can be crawled by a search engine.
+        :rtype: bool or None
+        """
+        return self.properties.get('NoCrawl', None)
+
+    @property
+    def read_only_field(self):
+        """
+        Specifies whether the value of the field is read-only.
+        :rtype: bool or None
+        """
+        return self.properties.get('ReadOnlyField', None)
+
+    @property
     def default_value(self):
         """
         Gets  a value that specifies the default value for the field.
-
         :rtype: str or None
         """
         return self.properties.get('DefaultValue', None)
@@ -261,10 +313,16 @@ class Field(BaseEntity):
         self.set_property("DefaultValue", val)
 
     @property
+    def indexed(self):
+        """
+        :rtype: str or None
+        """
+        return self.properties.get('Indexed', None)
+
+    @property
     def type_display_name(self):
         """
         Gets a value that specifies the display name for the type of the field.
-
         :rtype: str or None
         """
         return self.properties.get('TypeDisplayName', None)

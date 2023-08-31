@@ -1,6 +1,6 @@
 from office365.directory.security.alerts.alert import Alert
 from office365.directory.security.attacksimulations.root import AttackSimulationRoot
-from office365.directory.security.cases_root import CasesRoot
+from office365.directory.security.cases.root import CasesRoot
 from office365.directory.security.incidents.incident import Incident
 from office365.directory.security.triggers.root import TriggersRoot
 from office365.entity import Entity

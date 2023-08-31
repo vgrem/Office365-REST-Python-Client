@@ -9,7 +9,6 @@ class ListBloomFilter(BaseEntity):
     def bloom_filter_size(self):
         """
         The length of the Bloom Filter
-
         :rtype: int or None
         """
         return self.properties.get("BloomFilterSize", None)

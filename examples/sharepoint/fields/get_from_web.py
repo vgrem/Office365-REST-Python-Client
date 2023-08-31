@@ -1,3 +1,6 @@
+"""
+This example retrieves all of the fields in a SharePoint site.
+"""
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.fields.field import Field
 from tests import test_client_credentials, test_team_site_url

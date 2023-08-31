@@ -1416,8 +1416,8 @@ class Web(SecurableObject):
 
     @property
     def allow_rss_feeds(self):
-        """Gets a Boolean value that specifies whether the site collection allows RSS feeds.
-
+        """
+        Gets a Boolean value that specifies whether the site collection allows RSS feeds.
         :rtype: str
         """
         return self.properties.get("AllowRssFeeds", None)

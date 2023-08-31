@@ -10,6 +10,13 @@ class MessageCollection(DeltaCollection):
     def __init__(self, context, resource_path=None):
         super(MessageCollection, self).__init__(context, Message, resource_path)
 
+    def __getitem__(self, key):
+        """
+        :param int or str key: Message identifier oo index
+        :rtype: Message
+        """
+        return super(MessageCollection, self).__getitem__(key)
+
     def add(self, subject=None, body=None, to_recipients=None, **kwargs):
         """
         Create a draft of a new message in either JSON or MIME format.

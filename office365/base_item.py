@@ -2,6 +2,7 @@ from datetime import datetime
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity import Entity
 from office365.onedrive.listitems.item_reference import ItemReference
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class BaseItem(Entity):
@@ -19,9 +20,27 @@ class BaseItem(Entity):
         return self.properties.get('createdBy', IdentitySet())
 
     @property
+    def created_by_user(self):
+        """
+        Identity of the user who created the item
+        """
+        from office365.directory.users.user import User
+        return self.properties.get('createdByUser',
+                                   User(self.context, ResourcePath("createdByUser", self.resource_path)))
+
+    @property
     def last_modified_by(self):
         """Identity of the user, device, and application which last modified the item."""
         return self.properties.get('lastModifiedBy', IdentitySet())
+
+    @property
+    def last_modified_by_user(self):
+        """
+        Identity of the user who last modified the item.
+        """
+        from office365.directory.users.user import User
+        return self.properties.get('lastModifiedByUser',
+                                   User(self.context, ResourcePath("lastModifiedByUser", self.resource_path)))
 
     @property
     def created_datetime(self):
@@ -51,7 +70,6 @@ class BaseItem(Entity):
     def description(self):
         """
         Provides a user-visible description of the item.
-
         :rtype: str or None
         """
         return self.properties.get('description', None)
@@ -64,7 +82,6 @@ class BaseItem(Entity):
     def web_url(self):
         """
         URL that displays the resource in the browser.
-
         :rtype: str or None
         """
         return self.properties.get('webUrl', None)
@@ -82,8 +99,11 @@ class BaseItem(Entity):
         if default_value is None:
             property_mapping = {
                 "createdBy": self.created_by,
+                "createdByUser": self.created_by_user,
                 "createdDateTime": self.created_datetime,
+                "lastModifiedDateTime": self.last_modified_datetime,
                 "lastModifiedBy": self.last_modified_by,
+                "lastModifiedByUser": self.last_modified_by_user,
                 "parentReference": self.parent_reference
             }
             default_value = property_mapping.get(name, None)

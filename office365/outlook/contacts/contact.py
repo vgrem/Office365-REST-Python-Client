@@ -8,16 +8,32 @@ from office365.outlook.item import OutlookItem
 from office365.outlook.mail.physical_address import PhysicalAddress
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.types.collections import StringCollection
 
 
 class Contact(OutlookItem):
     """User's contact."""
 
     @property
+    def business_phones(self):
+        """The contact's business phone numbers."""
+        return self.properties.setdefault("businessPhones", StringCollection())
+
+    @property
+    def display_name(self):
+        """
+        The contact's display name. You can specify the display name in a create or update operation.
+        Note that later updates to other properties may cause an automatically generated value to overwrite the
+        displayName value you have specified. To preserve a pre-existing value, always include it as displayName
+        in an update operation.
+        :rtype: str or None
+        """
+        return self.properties.get('displayName', None)
+
+    @property
     def manager(self):
         """
         The name of the contact's manager.
-
         :rtype: str or None
         """
         return self.properties.get("manager", None)
@@ -26,7 +42,6 @@ class Contact(OutlookItem):
     def manager(self, value):
         """
         Sets name of the contact's manager.
-
         :type value: str
         """
         self.set_property("manager", value)
@@ -49,20 +64,13 @@ class Contact(OutlookItem):
 
     @property
     def home_address(self):
+        """The contact's home address."""
         return self.properties.get("homeAddress", PhysicalAddress())
 
     @property
     def email_addresses(self):
         """The contact's email addresses."""
-        return self.properties.get("emailAddresses", ClientValueCollection(EmailAddress))
-
-    @email_addresses.setter
-    def email_addresses(self, value):
-        """Sets contact's email addresses.
-
-        :type value: list[str]
-        """
-        self.set_property("emailAddresses", value)
+        return self.properties.setdefault("emailAddresses", ClientValueCollection(EmailAddress))
 
     @property
     def extensions(self):
@@ -94,7 +102,9 @@ class Contact(OutlookItem):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "businessPhones": self.business_phones,
                 "emailAddresses": self.email_addresses,
+                "homeAddress": self.home_address,
                 "multiValueExtendedProperties": self.multi_value_extended_properties,
                 "singleValueExtendedProperties": self.single_value_extended_properties
             }

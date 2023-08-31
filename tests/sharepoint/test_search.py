@@ -82,3 +82,4 @@ class TestSearch(TestCase):
     def test_12_results_page_address(self):
         result = self.client.search.results_page_address().execute_query()
         self.assertIsNotNone(result.value)
+

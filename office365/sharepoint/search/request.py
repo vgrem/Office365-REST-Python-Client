@@ -1,6 +1,7 @@
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.types.collections import StringCollection
+from office365.sharepoint.search.query.property import QueryProperty
 from office365.sharepoint.search.query.reordering_rule import ReorderingRule
 from office365.sharepoint.search.query.sort.sort import Sort
 
@@ -17,7 +18,9 @@ class SearchRequest(ClientValue):
                  row_limit=None, rows_per_page=None, start_row=None,
                  enable_sorting=None, sort_list=None, query_template=None, ranking_model_id=None,
                  summary_length=None, collapse_specification=None, client_type=None,
-                 enable_query_rules=None, source_id=None, reordering_rules=None, **kwargs):
+                 enable_query_rules=None, source_id=None, reordering_rules=None,
+                 properties=None, ui_language=None, hit_highlighted_properties=None,
+                 hit_highlighted_multivalue_property_limit=None, **kwargs):
         """
         :param str query_text: The query text of the search query. If this element is not present or a value is not
             specified, a default value of an empty string MUST be used, and the server MUST return a
@@ -66,7 +69,14 @@ class SearchRequest(ClientValue):
         :param str or None source_id: Specifies the unique identifier for result source to use for executing the
             search query. If no value is specified then the protocol server MUST use the id for the default
             result source.
-        :param [ReorderingRule] reordering_rules:
+        :param list[ReorderingRule] reordering_rules: Specifies the list of rules used to reorder search results.
+        :param list[QueryProperty] properties: Used to transport additional and custom search query data, in a
+             name-value structure, from the caller to the server.
+        :param int ui_language: Specifies the LCID for UI culture.
+        :param list[str] hit_highlighted_properties: A list of properties that the protocol server includes in the
+             HitHighlightedProperties for each result
+        :param int hit_highlighted_multivalue_property_limit: Specifies the maximum number of hit highlighted values
+             of multi-value properties to be returned.
         """
         super(SearchRequest, self).__init__()
         self.Querytext = query_text
@@ -86,6 +96,10 @@ class SearchRequest(ClientValue):
         self.EnableQueryRules = enable_query_rules
         self.SourceId = source_id
         self.ReorderingRules = ClientValueCollection(ReorderingRule, reordering_rules)
+        self.Properties = ClientValueCollection(QueryProperty, properties)
+        self.UILanguage = ui_language
+        self.HitHighlightedProperties = StringCollection(hit_highlighted_properties)
+        self.HitHighlightedMultivaluePropertyLimit = hit_highlighted_multivalue_property_limit
         self.__dict__.update(**kwargs)
 
     @property

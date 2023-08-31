@@ -265,8 +265,6 @@ class PeopleManager(BaseEntity):
     def set_multi_valued_profile_property(self, account_name, property_name, property_values):
         """
         Sets the value of a multivalued user profile property.
-
-
         :param str account_name: Specifies the user by account name.
         :param str property_name: The name of the property to set.
         :param list[str] property_values: The values being set on the property.

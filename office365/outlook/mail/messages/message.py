@@ -1,10 +1,16 @@
 import os
+import uuid
+from datetime import datetime
 
+from office365.directory.extensions.extended_property import SingleValueLegacyExtendedProperty, \
+    MultiValueLegacyExtendedProperty
 from office365.directory.extensions.extension import Extension
 from office365.entity_collection import EntityCollection
 from office365.outlook.item import OutlookItem
 from office365.outlook.mail.attachments.collection import AttachmentCollection
 from office365.outlook.mail.item_body import ItemBody
+from office365.outlook.mail.messages.followup_flag import FollowupFlag
+from office365.outlook.mail.messages.internet_header import InternetMessageHeader
 from office365.outlook.mail.recipient import Recipient
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -15,6 +21,23 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 class Message(OutlookItem):
     """A message in a mailbox folder."""
+
+    def add_extended_property(self, name, value):
+        """
+        Create a single-value extended property for a message
+        :param str name: A property name
+        :param str value:
+        """
+        prop_id = str(uuid.uuid4())
+        prop_type = "String"
+        prop_value = [
+            {
+                "id":"{0} {{{1}}} Name {2}".format(prop_type, prop_id, name),
+                "value": value
+            }
+        ]
+        self.set_property("singleValueExtendedProperties", prop_value)
+        return self
 
     def create_forward(self, to_recipients=None, message=None, comment=None):
         """
@@ -221,14 +244,133 @@ class Message(OutlookItem):
         self.set_property("body", value)
 
     @property
+    def body_preview(self):
+        """
+        The first 255 characters of the message body. It is in text format.
+        :rtype: str or None
+        """
+        return self.properties.get("bodyPreview", None)
+
+    @property
+    def conversation_id(self):
+        """
+        The ID of the conversation the email belongs to.
+        :rtype: str or None
+        """
+        return self.properties.get("conversationId", None)
+
+    @property
+    def conversation_index(self):
+        """
+        Indicates the position of the message within the conversation.
+        :rtype: str or None
+        """
+        return self.properties.get("conversationIndex", None)
+
+    @property
+    def flag(self):
+        """
+        The flag value that indicates the status, start date, due date, or completion date for the message.
+        """
+        return self.properties.get("flag", FollowupFlag())
+
+    @property
+    def sent_from(self):
+        """
+        The owner of the mailbox from which the message is sent. In most cases, this value is the same as the sender
+        property, except for sharing or delegation scenarios. The value must correspond to the actual mailbox used.
+        Find out more about setting the from and sender properties of a message.
+        """
+        return self.properties.get("from", Recipient())
+
+    @property
+    def importance(self):
+        """
+        The importance of the message.
+        :rtype: str
+        """
+        return self.properties.get("importance", None)
+
+    @property
+    def inference_classification(self):
+        """
+        The classification of the message for the user, based on inferred relevance or importance,
+        or on an explicit override. The possible values are: focused or other.
+        :rtype: str
+        """
+        return self.properties.get("inferenceClassification", None)
+
+    @property
+    def internet_message_headers(self):
+        """
+        A collection of message headers defined by RFC5322. The set includes message headers indicating the network
+        path taken by a message from the sender to the recipient. It can also contain custom message headers that
+        hold app data for the message.
+        """
+        return self.properties.get("internetMessageHeaders", ClientValueCollection(InternetMessageHeader))
+
+    @property
+    def internet_message_id(self):
+        """
+        The message ID in the format specified by RFC2822
+        :rtype: str
+        """
+        return self.properties.get("internetMessageId", None)
+
+    @property
+    def is_delivery_receipt_requested(self):
+        """
+        Indicates whether a read receipt is requested for the message.
+        :rtype: bool
+        """
+        return self.properties.get("isDeliveryReceiptRequested", None)
+
+    @property
+    def is_draft(self):
+        """
+        Indicates whether the message is a draft. A message is a draft if it hasn't been sent yet.
+        :rtype: bool
+        """
+        return self.properties.get("isDraft", None)
+
+    @property
+    def is_read(self):
+        """
+        Indicates whether the message has been read.
+        :rtype: bool
+        """
+        return self.properties.get("isRead", None)
+
+    @property
+    def is_read_receipt_requested(self):
+        """
+        Indicates whether a read receipt is requested for the message.
+        :rtype: bool
+        """
+        return self.properties.get("isReadReceiptRequested", None)
+
+    @property
+    def received_datetime(self):
+        """The date and time the message was received."""
+        return self.properties.get("receivedDateTime", datetime.min)
+
+    @property
+    def sent_datetime(self):
+        """The date and time the message was sent."""
+        return self.properties.get("sentDateTime", datetime.min)
+
+    @property
     def subject(self):
-        """The subject of the message."""
+        """
+        The subject of the message.
+        :rtype: str
+        """
         return self.properties.get("subject", None)
 
     @subject.setter
     def subject(self, value):
-        """The subject of the message.
-
+        """
+        The subject of the message.
         :type value: str
         """
         self.set_property("subject", value)
@@ -266,12 +408,49 @@ class Message(OutlookItem):
         """
         return self.properties.get('parentFolderId', None)
 
+    @property
+    def web_link(self):
+        """
+        The URL to open the message in Outlook on the web.
+
+        You can append an ispopout argument to the end of the URL to change how the message is displayed.
+        If ispopout is not present or if it is set to 1, then the message is shown in a popout window.
+        If ispopout is set to 0, then the browser will show the message in the Outlook on the web review pane.
+
+        The message will open in the browser if you are logged in to your mailbox via Outlook on the web.
+        You will be prompted to login if you are not already logged in with the browser.
+
+        This URL cannot be accessed from within an iFrame.
+        :rtype: str or None
+        """
+        return self.properties.get("webLink", None)
+
+    @property
+    def multi_value_extended_properties(self):
+        """The collection of multi-value extended properties defined for the event."""
+        return self.properties.get('multiValueExtendedProperties',
+                                   EntityCollection(self.context, MultiValueLegacyExtendedProperty,
+                                                    ResourcePath("multiValueExtendedProperties", self.resource_path)))
+
+    @property
+    def single_value_extended_properties(self):
+        """The collection of single-value extended properties defined for the message"""
+        return self.properties.get('singleValueExtendedProperties',
+                                   EntityCollection(self.context, SingleValueLegacyExtendedProperty,
+                                                    ResourcePath("singleValueExtendedProperties", self.resource_path)))
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_type_mapping = {
                 "toRecipients": self.to_recipients,
                 "bccRecipients": self.bcc_recipients,
-                "ccRecipients": self.cc_recipients
+                "ccRecipients": self.cc_recipients,
+                "from": self.sent_from,
+                "internetMessageHeaders": self.internet_message_headers,
+                "multiValueExtendedProperties": self.multi_value_extended_properties,
+                "receivedDateTime": self.received_datetime,
+                "sentDateTime": self.sent_datetime,
+                "singleValueExtendedProperties": self.single_value_extended_properties
             }
             default_value = property_type_mapping.get(name, None)
 

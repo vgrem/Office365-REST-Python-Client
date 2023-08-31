@@ -12,6 +12,9 @@ class Recipient(ClientValue):
         super(Recipient, self).__init__()
         self.emailAddress = email_address
 
+    def __repr__(self):
+        return repr(self.emailAddress)
+
     @staticmethod
     def from_email(value):
         """

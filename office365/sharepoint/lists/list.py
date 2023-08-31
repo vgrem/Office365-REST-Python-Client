@@ -761,7 +761,7 @@ class List(SecurableObject):
     @property
     def root_folder(self):
         """Get a root folder"""
-        return self.properties.setdefault("RootFolder",
+        return self.properties.get("RootFolder",
                                    Folder(self.context, ResourcePath("RootFolder", self.resource_path)))
 
     @property

@@ -1,5 +1,5 @@
 """
-
+This example retrieves all of the fields in a SharePoint list.
 """
 
 from office365.sharepoint.client_context import ClientContext

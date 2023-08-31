@@ -33,7 +33,7 @@ from office365.outlook.calendar.events.event import Event
 from office365.outlook.calendar.events.reminder import Reminder
 from office365.outlook.calendar.group import CalendarGroup
 from office365.outlook.calendar.meetingtimes.suggestions_result import MeetingTimeSuggestionsResult
-from office365.outlook.contacts.contact import Contact
+from office365.outlook.contacts.collection import ContactCollection
 from office365.outlook.contacts.folder import ContactFolder
 from office365.outlook.convert_id_result import ConvertIdResult
 from office365.outlook.mail.folders.collection import MailFolderCollection
@@ -578,8 +578,7 @@ class User(DirectoryObject):
         """Get a contact collection from the default Contacts folder of the signed-in user (.../me/contacts),
         or from the specified contact folder."""
         return self.properties.get('contacts',
-                                   DeltaCollection(self.context, Contact,
-                                                   ResourcePath("contacts", self.resource_path)))
+                                   ContactCollection(self.context, ResourcePath("contacts", self.resource_path)))
 
     @property
     def contact_folders(self):

@@ -5,25 +5,73 @@ from office365.entity_collection import EntityCollection
 from office365.outlook.mail.messages.collection import MessageCollection
 from office365.outlook.mail.messages.rules.rule import MessageRule
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class MailFolder(Entity):
     """A mail folder in a user's mailbox, such as Inbox and Drafts. Mail folders can contain messages,
     other Outlook items, and child mail folders."""
 
+    def copy(self, destination_id):
+        """
+        Copy a mailfolder and its contents to another mailfolder.
+        :param str destination_id: The folder ID, or a well-known folder name. For a list of supported well-known folder
+            names, see mailFolder resource type.
+        """
+        return_type = MailFolder(self.context)
+        payload = {"DestinationId": destination_id}
+        qry = ServiceOperationQuery(self, "copy", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    @property
+    def child_folder_count(self):
+        """
+        The number of immediate child mailFolders in the current mailFolder.
+        :rtype: int or None
+        """
+        return self.properties.get("childFolderCount", None)
+
     @property
     def display_name(self):
         """
         The name of the Mail folder
-
         :rtype: str or None
         """
         return self.properties.get("displayName", None)
 
     @property
+    def is_hidden(self):
+        """
+        Indicates whether the mailFolder is hidden. This property can be set only when creating the folder.
+        Find more information in Hidden mail folders.
+        :rtype: bool or None
+        """
+        return self.properties.get("isHidden", None)
+
+    @property
+    def parent_folder_id(self):
+        """
+        The unique identifier for the mailFolder's parent mailFolder.
+        :rtype: str or None
+        """
+        return self.properties.get('parentFolderId', None)
+
+    @property
     def total_item_count(self):
-        """The number of items in the mailFolder."""
+        """
+        The number of items in the mailFolder.
+        :rtype: int
+        """
         return self.properties.get("totalItemCount", None)
+
+    @property
+    def unread_item_count(self):
+        """
+        The number of items in the mailFolder marked as unread.
+        :rtype: int
+        """
+        return self.properties.get("unreadItemCount", None)
 
     @property
     def child_folders(self):
@@ -34,6 +82,7 @@ class MailFolder(Entity):
 
     @property
     def message_rules(self):
+        """"""
         return self.properties.get('messageRules',
                                    EntityCollection(self.context, MessageRule,
                                                     ResourcePath("messageRules", self.resource_path)))

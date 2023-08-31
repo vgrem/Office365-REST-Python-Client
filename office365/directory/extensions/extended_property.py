@@ -4,7 +4,14 @@ from office365.runtime.types.collections import StringCollection
 
 class SingleValueLegacyExtendedProperty(Entity):
     """An extended property that contains a single value."""
-    pass
+
+    @property
+    def value(self):
+        """
+        A property value.
+        :rtype: str
+        """
+        return self.properties.get("value", None)
 
 
 class MultiValueLegacyExtendedProperty(Entity):
