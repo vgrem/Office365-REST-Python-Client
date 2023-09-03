@@ -618,7 +618,6 @@ class List(SecurableObject):
     def default_display_form_url(self):
         """
         Specifies the location of the default display form for the list.
-
         :rtype: str or None
         """
         return self.properties.get("DefaultDisplayFormUrl", None)
@@ -634,7 +633,6 @@ class List(SecurableObject):
     def default_view_url(self):
         """
         Specifies the server-relative URL of the default view for the list.
-
         :rtype: str or None
         """
         return self.properties.get("DefaultViewUrl", None)
@@ -644,7 +642,6 @@ class List(SecurableObject):
         """
         Specifies whether or not the crawler indexes the non-default views of the list.
         Specify a value of true if the crawler indexes the list's non-default views; specify false if otherwise.
-
         :rtype: bool or None
         """
         return self.properties.get("CrawlNonDefaultViews", None)
@@ -800,10 +797,36 @@ class List(SecurableObject):
     @property
     def content_types_enabled(self):
         """Specifies whether content types are enabled for the list.
-
         :rtype: bool or None
         """
         return self.properties.get('ContentTypesEnabled', None)
+
+    @property
+    def is_private(self):
+        """
+        Specifies whether the list is a private list with restricted permissions.
+        True if the list is a private list, otherwise False.
+        :rtype: bool or None
+        """
+        return self.properties.get('IsPrivate', None)
+
+    @property
+    def is_site_assets_library(self):
+        """
+        Specifies whether the list is designated as a default asset location for images or other files which the
+        users upload to their wiki pages.
+        :rtype: bool or None
+        """
+        return self.properties.get('IsSiteAssetsLibrary', None)
+
+    @property
+    def is_system_list(self):
+        """
+        Indicates whether the list is system list that does not contain end user data and created by system account.
+        A value of True means yes.
+        :rtype: bool or None
+        """
+        return self.properties.get('IsSystemList', None)
 
     @property
     def user_custom_actions(self):
@@ -839,16 +862,65 @@ class List(SecurableObject):
 
     @property
     def item_count(self):
-        """Gets a value that specifies the number of list items in the list.
-
+        """
+        Gets a value that specifies the number of list items in the list.
         :rtype: int or None
         """
         return self.properties.get('ItemCount', None)
 
     @property
-    def title(self):
-        """Gets the displayed title for the list.
+    def last_item_deleted_date(self):
+        """
+        Specifies the last time a list item was deleted from the list. It MUST return Created if no list item has
+        been deleted from the list yet.
+        """
+        return self.properties.get('LastItemDeletedDate', datetime.min)
 
+    @property
+    def last_item_modified_date(self):
+        """
+        Specifies the last time a list item, field, or property of the list was modified.
+        It MUST return Created if the list has not been modified.
+        """
+        return self.properties.get('LastItemModifiedDate', datetime.min)
+
+    @property
+    def list_form_customized(self):
+        """
+        :rtype: bool or None
+        """
+        return self.properties.get('ListFormCustomized', None)
+
+    @property
+    def list_item_entity_type_full_name(self):
+        """
+        Specifies the full type name of the list item.
+        :rtype: str or None
+        """
+        return self.properties.get('ListItemEntityTypeFullName', None)
+
+    @property
+    def major_version_limit(self):
+        """
+        Gets the maximum number of major versions allowed for an item in a document library that uses version
+        control with major versions only.
+        :rtype: int or None
+        """
+        return self.properties.get('MajorVersionLimit', None)
+
+    @property
+    def major_with_minor_versions_limit(self):
+        """
+        Gets the maximum number of major versions that are allowed for an item in a document library that uses
+        version control with both major and minor versions.
+        :rtype: int or None
+        """
+        return self.properties.get('MajorWithMinorVersionsLimit', None)
+
+    @property
+    def title(self):
+        """
+        Gets the displayed title for the list.
         :rtype: str or None
         """
         return self.properties.get('Title', None)
@@ -893,8 +965,8 @@ class List(SecurableObject):
 
     @property
     def schema_xml(self):
-        """Specifies the list schema of the list.
-
+        """
+        Specifies the list schema of the list.
         :rtype: str or None
         """
         return self.properties.get("SchemaXml", None)
@@ -904,7 +976,6 @@ class List(SecurableObject):
         """
         Specifies the feature identifier of the feature that contains the list schema for the list.
         It MUST be an empty GUID if the list schema for the list is not contained within a feature.
-
         :rtype: str or None
         """
         return self.properties.get("TemplateFeatureId", None)
@@ -919,7 +990,6 @@ class List(SecurableObject):
     def validation_formula(self):
         """
         Specifies the data validation criteria for a list item.
-
         :rtype: str or None
         """
         return self.properties.get("ValidationFormula", None)
@@ -943,6 +1013,8 @@ class List(SecurableObject):
                 "DefaultView": self.default_view,
                 "DefaultViewPath": self.default_view_path,
                 "EventReceivers": self.event_receivers,
+                "LastItemDeletedDate": self.last_item_deleted_date,
+                "LastItemModifiedDate": self.last_item_modified_date,
                 "ParentWeb": self.parent_web,
                 "ParentWebPath": self.parent_web_path,
                 "RootFolder": self.root_folder,

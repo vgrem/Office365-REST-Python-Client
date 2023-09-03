@@ -242,7 +242,6 @@ class Office365Tenant(BaseEntity):
     def delete_tenant_theme(self, name):
         """
         Removes a theme from tenant
-
         :type name: str
         """
         payload = {

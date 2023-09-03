@@ -1,6 +1,6 @@
 import json
 
-from examples.sharepoint import upload_sample
+from examples.sharepoint import upload_sample_file
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.sharing.links.kind import SharingLinkKind
 from office365.sharepoint.webs.web import Web
@@ -18,7 +18,7 @@ sharing_messages = {
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
 
-remote_file = upload_sample(ctx, "../../data/SharePoint User Guide.docx")
+remote_file = upload_sample_file(ctx, "../../data/SharePoint User Guide.docx")
 
 print("Creating a sharing link for a file...")
 result = remote_file.share_link(SharingLinkKind.AnonymousView).execute_query()

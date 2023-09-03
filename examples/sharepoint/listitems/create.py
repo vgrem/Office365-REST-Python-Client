@@ -1,4 +1,4 @@
-from examples import create_sample_tasks_list
+from examples.sharepoint import create_sample_tasks_list
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.fields.multi_user_value import FieldMultiUserValue
 from office365.sharepoint.fields.user_value import FieldUserValue
