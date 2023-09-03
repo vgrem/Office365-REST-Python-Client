@@ -7,3 +7,11 @@ class OpenTypeExtension(Extension):
     an extensibility option that provides an easy way to directly add untyped properties to a resource
     in Microsoft Graph.
     """
+
+    @property
+    def extension_name(self):
+        """
+        A unique text identifier for an open type data extension. Optional.
+        :rtype: str
+        """
+        return self.properties.get("extensionName", None)

@@ -1,7 +1,9 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
+from office365.outlook.mail.item_body import ItemBody
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.teams.channels.iIdentity import ChannelIdentity
 from office365.teams.chats.messages.attachment import ChatMessageAttachment
 
 
@@ -17,6 +19,21 @@ class ChatMessage(Entity):
         return self.properties.get("attachments", ClientValueCollection(ChatMessageAttachment))
 
     @property
+    def body(self):
+        """
+        Plaintext/HTML representation of the content of the chat message. Representation is specified by the
+        contentType inside the body. The content is always in HTML if the chat message contains a chatMessageMention.
+        """
+        return self.properties.get("body", ItemBody())
+
+    @property
+    def channel_identity(self):
+        """
+        If the message was sent in a channel, represents identity of the channel.
+        """
+        return self.properties.get("channelIdentity", ChannelIdentity())
+
+    @property
     def replies(self):
         """
         The collection of replies.
@@ -29,7 +46,6 @@ class ChatMessage(Entity):
     def web_url(self):
         """
         Link to the message in Microsoft Teams.
-
         :rtype: str
         """
         return self.properties.get("webUrl", None)
@@ -38,7 +54,6 @@ class ChatMessage(Entity):
     def importance(self):
         """
         The importance of the chat message. The possible values are: normal, high, urgent.
-
         :rtype: str
         """
         return self.properties.get("importance", None)

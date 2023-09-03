@@ -1,6 +1,7 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.intune.audit.event_collection import AuditEventCollection
+from office365.intune.brand import IntuneBrand
 from office365.intune.devices.category import DeviceCategory
 from office365.intune.devices.enrollment.configuration import DeviceEnrollmentConfiguration
 from office365.intune.devices.managed import ManagedDevice
@@ -38,6 +39,10 @@ class DeviceManagement(Entity):
                                                                  self.resource_path)))
 
     @property
+    def intune_brand(self):
+        return self.properties.get("intuneBrand", IntuneBrand())
+
+    @property
     def managed_devices(self):
         """"""
         return self.properties.get('managedDevices',
@@ -57,6 +62,7 @@ class DeviceManagement(Entity):
                 "auditEvents": self.audit_events,
                 "deviceCategories": self.device_categories,
                 "deviceEnrollmentConfigurations": self.device_enrollment_configurations,
+                "intuneBrand": self.intune_brand,
                 "managedDevices": self.managed_devices
             }
             default_value = property_mapping.get(name, None)

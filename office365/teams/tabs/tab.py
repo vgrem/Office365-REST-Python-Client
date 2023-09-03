@@ -19,7 +19,6 @@ class TeamsTab(Entity):
     def configuration(self):
         """
         Container for custom settings applied to a tab. The tab is considered configured only once this property is set.
-        :rtype: TeamsTabConfiguration
         """
         return self.properties.get("configuration", TeamsTabConfiguration())
 

@@ -1,14 +1,16 @@
+from office365.directory.extensions.extended_property import MultiValueLegacyExtendedProperty, \
+    SingleValueLegacyExtendedProperty
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.outlook.calendar.email_address import EmailAddress
 from office365.outlook.calendar.events.collection import EventCollection
 from office365.outlook.calendar.permissions.collection import CalendarPermissionCollection
-from office365.outlook.calendar.permissions.permission import CalendarPermission
 from office365.outlook.calendar.schedule.information import ScheduleInformation
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 
@@ -18,6 +20,16 @@ class Calendar(Entity):
     A calendar which is a container for events. It can be a calendar for a user, or the default calendar
         of a Microsoft 365 group.
     """
+
+    def allowed_calendar_sharing_roles(self, user):
+        """
+        :param str user: User identifier or principal name
+        """
+        params = {"user": user}
+        return_type = ClientResult(self.context, StringCollection())
+        qry = FunctionQuery(self, "allowedCalendarSharingRoles", params, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def get_schedule(self, schedules, start_time, end_time, availability_view_interval=30):
         """
@@ -97,12 +109,46 @@ class Calendar(Entity):
         return self.properties.get('color', None)
 
     @property
+    def default_online_meeting_provider(self):
+        """
+        The default online meeting provider for meetings sent from this calendar.
+        Possible values are: unknown, skypeForBusiness, skypeForConsumer, teamsForBusiness.
+        :rtype: str
+        """
+        return self.properties.get('defaultOnlineMeetingProvider', None)
+
+    @property
     def name(self):
         """
         The calendar name.
         :rtype: str
         """
         return self.properties.get('name', None)
+
+    @property
+    def is_default_calendar(self):
+        """
+        true if this is the default calendar where new events are created by default, false otherwise.
+        :rtype: bool or None
+        """
+        return self.properties.get('isDefaultCalendar', None)
+
+    @property
+    def is_removable(self):
+        """
+        Indicates whether this user calendar can be deleted from the user mailbox.
+        :rtype: bool or None
+        """
+        return self.properties.get("isRemovable", None)
+
+    @property
+    def is_tallying_responses(self):
+        """
+        Indicates whether this user calendar supports tracking of meeting responses.
+        Only meeting invites sent from users' primary calendars support tracking of meeting responses.
+        :rtype: bool or None
+        """
+        return self.properties.get("isTallyingResponses", None)
 
     @property
     def owner(self):
@@ -133,12 +179,28 @@ class Calendar(Entity):
                                                                 ResourcePath("calendarPermissions",
                                                                              self.resource_path)))
 
+    @property
+    def multi_value_extended_properties(self):
+        """The collection of multi-value extended properties defined for the Calendar."""
+        return self.properties.get('multiValueExtendedProperties',
+                                   EntityCollection(self.context, MultiValueLegacyExtendedProperty,
+                                                    ResourcePath("multiValueExtendedProperties", self.resource_path)))
+
+    @property
+    def single_value_extended_properties(self):
+        """The collection of single-value extended properties defined for the calendar. Read-only. Nullable."""
+        return self.properties.get('singleValueExtendedProperties',
+                                   EntityCollection(self.context, SingleValueLegacyExtendedProperty,
+                                                    ResourcePath("singleValueExtendedProperties", self.resource_path)))
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "allowedOnlineMeetingProviders": self.allowed_online_meeting_providers,
                 "calendarView": self.calendar_view,
-                "calendarPermissions": self.calendar_permissions
+                "calendarPermissions": self.calendar_permissions,
+                "multiValueExtendedProperties": self.multi_value_extended_properties,
+                "singleValueExtendedProperties": self.single_value_extended_properties
             }
             default_value = property_mapping.get(name, None)
         return super(Calendar, self).get_property(name, default_value)

@@ -26,7 +26,11 @@ class TestPresence(GraphTestCase):
         presences = self.client.communications.get_presences_by_user_id([me.id]).execute_query()
         self.assertIsNotNone(presences.resource_path)
 
-    def test4_clear_my_presence(self):
+    def test4_set_status_message(self):
+        my_presence = self.client.me.presence.set_status_message("On vacation").execute_query()
+        self.assertIsNotNone(my_presence.resource_path)
+
+    def test5_clear_my_presence(self):
         my_presence = self.client.me.presence
         my_presence.clear_user_preferred_presence().execute_query()
         self.assertIsNotNone(my_presence.resource_path)

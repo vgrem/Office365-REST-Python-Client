@@ -13,3 +13,6 @@ class ItemBody(ClientValue):
         super(ItemBody, self).__init__()
         self.content = content
         self.contentType = content_type
+
+    def __repr__(self):
+        return self.content

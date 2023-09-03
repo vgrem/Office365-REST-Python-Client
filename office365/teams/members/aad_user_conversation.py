@@ -7,8 +7,8 @@ class AadUserConversationMember(ConversationMember):
 
     @property
     def user_id(self):
-        """The guid of the user.
-
+        """
+        The guid of the user.
         :rtype: str or None
         """
         return self.properties.get("userId", None)

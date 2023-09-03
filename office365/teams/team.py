@@ -12,7 +12,9 @@ from office365.teams.messaging_settings import TeamMessagingSettings
 from office365.teams.apps.installation import TeamsAppInstallation
 from office365.teams.operations.async_operation import TeamsAsyncOperation
 from office365.teams.summary import TeamSummary
+from office365.teams.teamwork.tags.tag import TeamworkTag
 from office365.teams.template import TeamsTemplate
+from office365.directory.permissions.grants.resource_specific import ResourceSpecificPermissionGrant
 
 
 class Team(Entity):
@@ -168,14 +170,33 @@ class Team(Entity):
                                                            ResourcePath("operations", self.resource_path)))
 
     @property
+    def permission_grants(self):
+        """
+        List all resource-specific permission grants
+        """
+        return self.properties.setdefault('permissionGrants',
+                                          EntityCollection(self.context, ResourceSpecificPermissionGrant,
+                                                           ResourcePath("permissionGrants")))
+
+    @property
     def summary(self):
         """Contains summary information about the team, including number of owners, members, and guests."""
         return self.properties.get("summary", TeamSummary())
 
     @property
     def tenant_id(self):
-        """The ID of the Azure Active Directory tenant."""
+        """
+        The ID of the Azure Active Directory tenant.
+        :rtype: str
+        """
         return self.properties.get("tenantId", None)
+
+    @property
+    def tags(self):
+        """	The tags associated with the team."""
+        return self.properties.get('tags',
+                                   EntityCollection(self.context, TeamworkTag,
+                                                    ResourcePath("tags", self.resource_path)))
 
     @property
     def template(self):
@@ -240,6 +261,7 @@ class Team(Entity):
                 "allChannels": self.all_channels,
                 "incomingChannels": self.incoming_channels,
                 "installedApps": self.installed_apps,
+                "permissionGrants": self.permission_grants,
                 "primaryChannel": self.primary_channel
             }
             default_value = property_mapping.get(name, None)

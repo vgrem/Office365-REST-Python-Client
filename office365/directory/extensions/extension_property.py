@@ -15,7 +15,6 @@ class ExtensionProperty(DirectoryObject):
     def name(self):
         """
         Name of the extension property.
-
         :rtype: str
         """
         return self.properties.get("name", None)
@@ -24,7 +23,6 @@ class ExtensionProperty(DirectoryObject):
     def app_display_name(self):
         """
         Display name of the application object on which this extension property is defined. Read-only.
-
         :rtype: str
         """
         return self.properties.get("appDisplayName", None)
@@ -39,7 +37,6 @@ class ExtensionProperty(DirectoryObject):
             Integer - 32-bit value.
             LargeInteger - 64-bit value.
             String - 256 characters maximum
-
         :rtype: str
         """
         return self.properties.get("dataType", None)

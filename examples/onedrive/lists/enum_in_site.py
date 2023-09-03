@@ -1,7 +1,7 @@
 """
 Enumerate lists in a site
 
-https://learn.microsoft.com/en-us/graph/api/list-list?view=graph-rest-1.0&tabs=http
+https://learn.microsoft.com/en-us/graph/api/list-list?view=graph-rest-1.0
 """
 
 from office365.graph_client import GraphClient

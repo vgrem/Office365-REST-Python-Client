@@ -18,7 +18,6 @@ class List(BaseItem):
     def display_name(self):
         """
         The displayable title of the list.
-
         :rtype: str or None
         """
         return self.properties.get("displayName", None)

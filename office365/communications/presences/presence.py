@@ -1,4 +1,6 @@
+from office365.communications.presences.status_message import PresenceStatusMessage
 from office365.entity import Entity
+from office365.outlook.mail.item_body import ItemBody
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
@@ -43,6 +45,18 @@ class Presence(Entity):
             "expirationDuration": expiration_duration
         }
         qry = ServiceOperationQuery(self, "setPresence", None, payload)
+        self.context.add_query(qry)
+        return self
+
+    def set_status_message(self, message):
+        """
+        Set a presence status message for a user. An optional expiration date and time can be supplied.
+        :param str message: Status message item.
+        """
+        payload = {
+            "statusMessage": PresenceStatusMessage(ItemBody(message))
+        }
+        qry = ServiceOperationQuery(self, "setStatusMessage", None, payload)
         self.context.add_query(qry)
         return self
 

@@ -18,6 +18,5 @@ class ChatCollection(EntityCollection):
         :param str chat_type: Specifies the type of chat. Possible values are: group and oneOnOne.
         :rtype: Chat
         """
+
         return super(ChatCollection, self).add(chatType=chat_type)
-
-

@@ -80,3 +80,7 @@ class TestCalendar(GraphTestCase):
     def test_11_delete_cal(self):
         cal_to_del = self.__class__.target_cal
         cal_to_del.delete_object().execute_query()
+
+    def test_12_allowed_calendar_sharing_roles(self):
+        result = self.client.me.calendar.allowed_calendar_sharing_roles(test_user_principal_name).execute_query()
+        self.assertIsNotNone(result.value)

@@ -48,17 +48,33 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.paths.entity import EntityPath
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.teams.chats.collection import ChatCollection
 from office365.teams.collection import TeamCollection
-from office365.teams.user_teamwork import UserTeamwork
+from office365.teams.teamwork.user import UserTeamwork
 from office365.todo.todo import Todo
+from office365.teams.viva.employee_experience_user import EmployeeExperienceUser
 
 
 class User(DirectoryObject):
     """Represents an Azure AD user account. Inherits from directoryObject."""
+
+    def add_extension(self, name):
+        """
+        Creates an open extension (openTypeExtension object) and add custom properties in a new or existing instance
+        of a User resource.
+        :param str name:
+        """
+        from office365.directory.extensions.open_type import OpenTypeExtension
+        return_type = OpenTypeExtension(self.context)
+        return_type.set_property("extensionName", name)
+        self.extensions.add_child(return_type)
+        qry = CreateEntityQuery(self.extensions, return_type, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def assign_license(self, add_licenses, remove_licenses):
         """
@@ -798,6 +814,13 @@ class User(DirectoryObject):
                                    Todo(self.context, ResourcePath("todo", self.resource_path)))
 
     @property
+    def employee_experience(self):
+        """Represents the To Do services available to a user."""
+        return self.properties.get('employeeExperience',
+                                   EmployeeExperienceUser(self.context,
+                                                          ResourcePath("employeeExperience", self.resource_path)))
+
+    @property
     def usage_location(self):
         """
         A two letter country code (ISO standard 3166). Required for users that will be assigned licenses due to
@@ -813,6 +836,7 @@ class User(DirectoryObject):
                 "businessPhones": self.business_phones,
                 "calendarGroups": self.calendar_groups,
                 "contactFolders": self.contact_folders,
+                "employeeExperience": self.employee_experience,
                 "followedSites": self.followed_sites,
                 "licenseDetails": self.license_details,
                 "managedDevices": self.managed_devices,

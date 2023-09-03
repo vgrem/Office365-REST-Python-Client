@@ -1,3 +1,4 @@
+from office365.directory.extensions.open_type import OpenTypeExtension
 from office365.runtime.client_value_collection import ClientValueCollection
 from tests import create_unique_name, test_tenant
 from tests.graph_case import GraphTestCase
@@ -10,6 +11,7 @@ class TestGraphUser(GraphTestCase):
     """Tests for Azure Active Directory (Azure AD) users"""
 
     test_user = None  # type: User
+    test_extension = None  # type: OpenTypeExtension
 
     def test1_get_user_list(self):
         users = self.client.users.top(1).get().execute_query()
@@ -64,4 +66,20 @@ class TestGraphUser(GraphTestCase):
     def test_11_get_my_member_groups(self):
         result = self.client.me.get_member_groups().execute_query()
         self.assertIsNotNone(result.value)
+
+    def test_12_create_extension(self):
+        result = self.client.me.add_extension("Com.Contoso.SSN").execute_query()
+        self.assertIsNotNone(result.resource_path)
+        self.__class__.test_extension = result
+
+    def test_13_get_extension(self):
+        result = self.client.me.extensions.get().execute_query()
+        self.assertGreater(len(result), 0)
+
+    def test_14_delete_extension(self):
+        #result = self.client.me.extensions["Com.Contoso.SSN"].delete_object().execute_query()
+        result = self.__class__.test_extension.delete_object().execute_query()
+        self.assertIsNotNone(result.resource_path)
+
+
 

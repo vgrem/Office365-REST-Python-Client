@@ -13,7 +13,6 @@ class CalendarGroup(Entity):
     def name(self):
         """
         The group name.
-
         :rtype: str
         """
         return self.properties.get("name", None)
@@ -22,7 +21,6 @@ class CalendarGroup(Entity):
     def class_id(self):
         """
         The class identifier
-
         :rtype: str
         """
         return self.properties.get("classId", None)
