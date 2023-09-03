@@ -11,6 +11,10 @@ from office365.sharepoint.translation.status_collection import TranslationStatus
 class SharePagePreviewByEmailFieldsData(ClientValue):
 
     def __init__(self, message=None, recipient_emails=None):
+        """
+        :param str message:
+        :param list[str] recipient_emails:
+        """
         self.message = message
         self.recipientEmails = StringCollection(recipient_emails)
 
@@ -150,7 +154,6 @@ class SitePage(SitePageMetadata):
     def schedule_publish(self, publish_start_date):
         """
         Schedules the page publication for a certain date
-
         :param datetime.datetime publish_start_date: The pending publication scheduled date
         """
         payload = SitePageFieldsData(publish_start_date=publish_start_date)

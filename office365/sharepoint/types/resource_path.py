@@ -17,6 +17,7 @@ class ResourcePath(ClientValue):
     @staticmethod
     def create_absolute(site_url, path):
         """
+        Creates absolute path
         :param str site_url: Site url
         :param str path: Resource path
         """
@@ -29,11 +30,12 @@ class ResourcePath(ClientValue):
     @staticmethod
     def create_relative(site_url, path):
         """
+        Creates server relative path
         :param str site_url: Site url
         :param str path: Resource path
         """
         site_path = urlparse(site_url).path
-        if not path.startswith(site_path):
+        if not path.lower().startswith(site_path.lower()):
             return ResourcePath("/".join([site_path, path]))
         else:
             return ResourcePath(path)
