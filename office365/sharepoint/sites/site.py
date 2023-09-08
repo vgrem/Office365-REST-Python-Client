@@ -1,3 +1,5 @@
+import datetime
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -417,7 +419,6 @@ class Site(BaseEntity):
     def allow_create_declarative_workflow(self):
         """
         Specifies whether a designer can be used to create declarative workflows on this site collection
-
         :rtype: bool or None
         """
         return self.properties.get("AllowCreateDeclarativeWorkflow", None)
@@ -428,10 +429,36 @@ class Site(BaseEntity):
         Specifies whether a designer can be used on this site collection.
         See Microsoft.SharePoint.Client.Web.AllowDesignerForCurrentUser, which is the scalar property used
         to determine the behavior for the current user. The default, if not disabled on the Web application, is "true".
-
         :rtype: bool or None
         """
         return self.properties.get("AllowDesigner", None)
+
+    @property
+    def allowed_external_domains(self):
+        """
+        :rtype: bool or None
+        """
+        return self.properties.get("AllowedExternalDomains", None)
+
+    @property
+    def allow_master_page_editing(self):
+        """
+        Specifies whether master page editing is allowed on this site collection.
+        See Web.AllowMasterPageEditingForCurrentUser, which is the scalar property used to
+        determine the behavior for the current user. The default, if not disabled on the Web application, is "false".
+        :rtype: bool or None
+        """
+        return self.properties.get("AllowMasterPageEditing", None)
+
+    @property
+    def allow_revert_from_template(self):
+        """
+        Specifies whether this site collection can be reverted to its base template.
+        See Web.AllowRevertFromTemplateForCurrentUser, which is the scalar property used to determine the behavior
+        for the current user. The default, if not disabled on the Web application, is "false".
+        :rtype: bool or None
+        """
+        return self.properties.get("AllowRevertFromTemplate", None)
 
     @property
     def audit(self):
@@ -473,7 +500,6 @@ class Site(BaseEntity):
     def comments_on_site_pages_disabled(self):
         """
         Indicates whether comments on site pages are disabled or not.
-
         :rtype: bool
         """
         return self.properties.get('CommentsOnSitePagesDisabled', None)
@@ -664,6 +690,16 @@ class Site(BaseEntity):
                                                                      self))
 
     @property
+    def show_url_structure(self):
+        """
+        Specifies whether the URL structure of this site collection is viewable.
+        See Web.ShowURLStructureForCurrentUser, which is the scalar property used to determine the behavior for the
+        current user. The default, if not disabled on the Web application, is "false".
+        :rtype: bool or None
+        """
+        return self.properties.get("ShowUrlStructure", None)
+
+    @property
     def usage_info(self):
         """Provides fields used to access information regarding site collection usage."""
         return self.properties.get("UsageInfo", UsageInfo())
@@ -672,6 +708,13 @@ class Site(BaseEntity):
     def upgrade_info(self):
         """Specifies the upgrade information of this site collection."""
         return self.properties.get("UpgradeInfo", UpgradeInfo())
+
+    @property
+    def upgrade_reminder_date(self):
+        """
+        Specifies a date, after which site collection administrators will be reminded to upgrade the site collection.
+        """
+        return self.properties.get("UpgradeReminderDate", datetime.datetime.min)
 
     @property
     def user_custom_actions(self):
@@ -690,6 +733,7 @@ class Site(BaseEntity):
                 "SecondaryContact": self.secondary_contact,
                 "UsageInfo": self.usage_info,
                 "UpgradeInfo": self.upgrade_info,
+                "UpgradeReminderDate": self.upgrade_reminder_date,
                 "UserCustomActions": self.user_custom_actions
             }
             default_value = property_mapping.get(name, None)

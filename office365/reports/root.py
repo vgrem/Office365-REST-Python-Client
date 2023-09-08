@@ -11,6 +11,15 @@ from office365.runtime.queries.function import FunctionQuery
 class ReportRoot(Entity):
     """Represents a container for Azure Active Directory (Azure AD) reporting resources."""
 
+    def device_configuration_user_activity(self):
+        """
+        Metadata for the device configuration user activity report
+        """
+        return_type = ClientResult(self.context, Report())
+        qry = FunctionQuery(self, "deviceConfigurationUserActivity", None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def managed_device_enrollment_top_failures(self, period=None):
         """
         Note: The Microsoft Graph API for Intune requires an active Intune license for the tenant.

@@ -126,6 +126,17 @@ class SPHelper(BaseEntity):
         context.add_query(qry)
         return return_type
 
+    @staticmethod
+    def remove_external_members(context, group_id):
+        """
+        :param str group_id: Group identifier
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        """
+        binding_type = SPHelper(context)
+        qry = ServiceOperationQuery(binding_type, "RemoveExternalMembers", [group_id], is_static=True)
+        context.add_query(qry)
+        return binding_type
+
     @property
     def entity_type_name(self):
         return "SP.Directory.SPHelper"

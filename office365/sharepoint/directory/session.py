@@ -17,10 +17,16 @@ class DirectorySession(BaseEntity):
         """
         :type principal_name: str
         """
-        user = User(self.context)
-        qry = ServiceOperationQuery(self, "GetGraphUser", [principal_name], None, None, user)
+        return_type = User(self.context)
+        qry = ServiceOperationQuery(self, "GetGraphUser", [principal_name], None, None, return_type)
         self.context.add_query(qry)
-        return user
+        return return_type
+
+    def get_sharepoint_data_for_user(self, user_id):
+        return_type = User(self.context)
+        qry = ServiceOperationQuery(self, "GetSharePointDataForUser", [user_id], None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     @property
     def entity_type_name(self):

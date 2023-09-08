@@ -51,5 +51,13 @@ class SharedWithMeDocument(BaseEntity):
         return self.properties.get("Modified", datetime.min)
 
     @property
+    def file_leaf_ref(self):
+        """
+        Specifies the name of the document.
+        :rtype: str
+        """
+        return self.properties.get('FileLeafRef', None)
+
+    @property
     def entity_type_name(self):
         return "Microsoft.SharePoint.Portal.UserProfiles.SharedWithMeDocument"

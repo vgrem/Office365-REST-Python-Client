@@ -602,7 +602,6 @@ class DriveItem(BaseItem):
     def web_dav_url(self):
         """
         WebDAV compatible URL for the item.
-
         :rtype: str or None
         """
         return self.properties.get("webDavUrl", None)

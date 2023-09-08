@@ -54,23 +54,29 @@ class ODataType(object):
         return result
 
     @staticmethod
-    def parse_datetime(value):
+    def try_parse_datetime(value):
         """
-        Converts the specified string representation of an Edm.DateTime to its datetime equivalent
+        Converts the specified string representation of an Edm.DateTime or Edm.DateTimeOffset to its datetime equivalent
 
         :param str value: Represents date and time with values ranging from 12:00:00 midnight, January 1, 1753 A.D.
             through 11:59:59 P.M, December 9999 A.D.
         """
+
         try:
             return datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
         except ValueError:
-            return None
+            try:
+                return datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%fZ")
+            except ValueError as e:
+                try:
+                    return datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%S")
+                except ValueError as e:
+                    return None
 
     @staticmethod
     def resolve_type(client_type):
         """
         Resolves OData type name
-
         :param T client_type: Client value type
         """
         from office365.runtime.client_value import ClientValue

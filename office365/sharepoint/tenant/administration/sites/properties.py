@@ -69,7 +69,6 @@ class SiteProperties(BaseEntity):
     def url(self):
         """
         Gets the URL of the site.
-
         :rtype: str
         """
         return self.properties.get('Url', None)
@@ -78,7 +77,6 @@ class SiteProperties(BaseEntity):
     def compatibility_level(self):
         """
         Gets the compatibility level of the site.
-
         :rtype: str
         """
         return self.properties.get('CompatibilityLevel', None)
@@ -104,8 +102,6 @@ class SiteProperties(BaseEntity):
             - ExternalUserSharingOnly - External user sharing (share by email) is enabled, but guest link sharing
                  is disabled.
             - ExistingExternalUserSharingOnly - Only guests already in your organization's directory.
-
-
         :rtype: int
         """
         return self.properties.get('SharingCapability', None)
@@ -122,7 +118,6 @@ class SiteProperties(BaseEntity):
     def time_zone_id(self):
         """
         Gets the time zone ID of the site.
-
         :rtype: str
         """
         return self.properties.get('TimeZoneId', None)

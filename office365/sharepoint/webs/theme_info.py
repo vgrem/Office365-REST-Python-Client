@@ -10,11 +10,10 @@ class ThemeInfo(BaseEntity):
         """
         Returns the name of the theme font for the specified font slot name and language code identifier (LCID).
         MUST return null if the font slot does not exist.
-
         :param str name: Name of the font slot.
         :param int lcid: The language code identifier (LCID) for the required language.
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, str())
         payload = {"name": name, "lcid": lcid}
         qry = ServiceOperationQuery(self, "GetThemeFontByName", None, payload, None, return_type)
         self.context.add_query(qry)
@@ -23,7 +22,6 @@ class ThemeInfo(BaseEntity):
     @property
     def accessible_description(self):
         """Specifies the accessible description for this theme.
-
         :rtype: str or None
         """
         return self.properties.get("AccessibleDescription", None)
@@ -31,7 +29,6 @@ class ThemeInfo(BaseEntity):
     @property
     def theme_background_image_uri(self):
         """Specifies the URI of the background image for this theme.
-
         :rtype: str or None
         """
         return self.properties.get("ThemeBackgroundImageUri", None)

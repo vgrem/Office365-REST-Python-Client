@@ -361,6 +361,18 @@ class ClientContext(ClientRuntimeContext):
         return AppCollection(self, ResourcePath("Apps"))
 
     @property
+    def announcements(self):
+        """Announcements controller"""
+        from office365.sharepoint.publishing.announcements.controller import AnnouncementsController
+        return AnnouncementsController(self, ResourcePath("Announcements"))
+
+    @property
+    def consumer_permissions(self):
+        """Consumer permissions alias"""
+        from office365.sharepoint.convergence.consumer_permissions import ConsumerPermissions
+        return ConsumerPermissions(self, ResourcePath("ConsumerPermissions"))
+
+    @property
     def me(self):
         """Gets the user context for the present request"""
         return RequestUserContext(self, ResourcePath("Me"))

@@ -3,7 +3,7 @@ from unittest import TestCase
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.directory.helper import SPHelper
 from office365.sharepoint.directory.session import DirectorySession
-from tests import test_user_credentials, test_site_url
+from tests import test_user_credentials, test_site_url, test_user_principal_name
 
 
 class TestDirectorySession(TestCase):
@@ -35,3 +35,7 @@ class TestDirectorySession(TestCase):
     def test_5_check_site_availability(self):
         result = SPHelper.check_site_availability(self.client, test_site_url).execute_query()
         self.assertIsNotNone(result.value)
+
+    #def test_6_get_graph_user(self):
+    #    result = self.client.directory_session.get_graph_user(test_user_principal_name).execute_query()
+    #    self.assertIsNotNone(result.resource_path)

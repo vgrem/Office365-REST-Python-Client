@@ -687,6 +687,31 @@ class Web(SecurableObject):
         return Folder(self.context,
                       ServiceOperationPath("getFolderByServerRelativePath", path.to_json(), self.resource_path))
 
+
+    def get_site_page_copy_to_status(self, work_item_id):
+        """
+        :param str work_item_id:
+        """
+        return_type = ClientResult(self.context, str())
+        payload = {
+            "workItemId": work_item_id
+        }
+        qry = ServiceOperationQuery(self, "GetSitePageCopyToStatus", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_site_page_move_status(self, work_item_id):
+        """
+        :param str work_item_id:
+        """
+        return_type = ClientResult(self.context, str())
+        payload = {
+            "workItemId": work_item_id
+        }
+        qry = ServiceOperationQuery(self, "GetSitePageMoveStatus", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def ensure_folder_path(self, path):
         """
         Ensures a nested folder hierarchy exist

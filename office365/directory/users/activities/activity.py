@@ -16,7 +16,9 @@ class UserActivity(Entity):
     @property
     def activation_url(self):
         """URL used to launch the activity in the best native experience represented by the appId.
-        Might launch a web-based app if no native app exists"""
+        Might launch a web-based app if no native app exists
+        :rtype: str or None
+        """
         return self.properties.get("activationUrl", None)
 
     @property
@@ -27,19 +29,23 @@ class UserActivity(Entity):
         either at the top level domain or include a sub domain.
         For example: https://contoso.com or https://myapp.contoso.com but NOT https://myapp.contoso.com/somepath.
         You must have a unique file and domain (or sub domain) per cross-platform app identity.
-        For example, a separate file and domain is needed for Word vs. PowerPoint."""
+        For example, a separate file and domain is needed for Word vs. PowerPoint.
+        :rtype: str or None
+        """
         return self.properties.get("activitySourceHost", None)
 
     @property
     def app_activity_id(self):
-        """The unique activity ID in the context of the app - supplied by caller and immutable thereafter.
+        """
+        The unique activity ID in the context of the app - supplied by caller and immutable thereafter.
         :rtype: str
         """
         return self.properties.get("appActivityId", None)
 
     @property
     def app_display_name(self):
-        """Short text description of the app used to generate the activity for use in cases when the app is
+        """
+        Short text description of the app used to generate the activity for use in cases when the app is
         not installed on the user’s local device.
         :rtype: str
         """
@@ -57,3 +63,11 @@ class UserActivity(Entity):
         return self.properties.get('historyItems',
                                    EntityCollection(self.context, ActivityHistoryItem,
                                                     ResourcePath("historyItems", self.resource_path)))
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "historyItems": self.history_items
+            }
+            default_value = property_mapping.get(name, None)
+        return super(UserActivity, self).get_property(name, default_value)

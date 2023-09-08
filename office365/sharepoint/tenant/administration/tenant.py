@@ -27,6 +27,7 @@ from office365.sharepoint.tenant.administration.sites.properties_enumerable_filt
 from office365.sharepoint.tenant.administration.siteinfo_for_site_picker import SiteInfoForSitePicker
 from office365.sharepoint.tenant.administration.spo_operation import SpoOperation
 from office365.sharepoint.tenant.administration.insights.top_files_sharing import TopFilesSharingInsights
+from office365.sharepoint.tenant.administration.syntex.billing_context import SyntexBillingContext
 from office365.sharepoint.tenant.administration.webs.templates.collection import SPOTenantWebTemplateCollection
 from office365.sharepoint.tenant.settings import TenantSettings
 
@@ -453,7 +454,16 @@ class Tenant(BaseEntity):
         return return_type
 
     @property
+    def ai_builder_enabled(self):
+        """
+        Gets the value if the AIBuilder settings should be shown in the tenant
+        :rtype: bool or None
+        """
+        return self.properties.get("AIBuilderEnabled", None)
+
+    @property
     def ai_builder_site_info_list(self):
+        """"""
         return self.properties.get("AIBuilderSiteInfoList", ClientValueCollection(SiteInfoForSitePicker))
 
     @property
@@ -465,7 +475,6 @@ class Tenant(BaseEntity):
         """
         When enabled, the email notification that a user receives when is mentioned,
             includes the surrounding document context
-
         :rtype: bool or None
         """
         return self.properties.get('AllowCommentsTextOnEmailEnabled', None)
@@ -473,6 +482,8 @@ class Tenant(BaseEntity):
     @property
     def allow_everyone_except_external_users_claim_in_private_site(self):
         """
+        Gets the value if EveryoneExceptExternalUsers claim is allowed or not in people picker in a private group site.
+        False value means it is blocked
         :rtype: bool or None
         """
         return self.properties.get('AllowEveryoneExceptExternalUsersClaimInPrivateSite', None)
@@ -482,19 +493,19 @@ class Tenant(BaseEntity):
         """
         Prevents users from editing Office files in the browser and copying and pasting Office file contents
         out of the browser window.
-
         :rtype: bool or None
         """
         return self.properties.get('AllowEditing', None)
 
     @property
     def default_content_center_site(self):
+        """"""
         return self.properties.get("DefaultContentCenterSite", SiteInfoForSitePicker())
 
     @property
     def root_site_url(self):
         """
-
+        The tenant's root site url
         :rtype: str or None
         """
         return self.properties.get('RootSiteUrl', None)
@@ -504,6 +515,11 @@ class Tenant(BaseEntity):
         """Gets a collection of sites."""
         return self.properties.get('sites',
                                    SitePropertiesCollection(self.context, ResourcePath("sites", self.resource_path)))
+
+    @property
+    def syntex_billing_subscription_settings(self):
+        """"""
+        return self.properties.get("SyntexBillingSubscriptionSettings", SyntexBillingContext())
 
     @property
     def entity_type_name(self):

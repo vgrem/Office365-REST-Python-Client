@@ -161,7 +161,7 @@ class ClientObject(object):
                 self._properties[name] = value
         else:
             if isinstance(typed_value, datetime.datetime):
-                self._properties[name] = ODataType.parse_datetime(value)
+                self._properties[name] = ODataType.try_parse_datetime(value)
             else:
                 self._properties[name] = value
         return self

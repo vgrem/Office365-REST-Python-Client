@@ -4,15 +4,18 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.tenant.administration.smtp_server import SmtpServer
+from office365.sharepoint.tenant.administration.types import DisableGroupify
 
 
 class TenantAdminSettingsService(BaseEntity):
+    """"""
 
     def __init__(self, context):
         static_path = ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.TenantAdminSettingsService")
         super(TenantAdminSettingsService, self).__init__(context, static_path)
 
     def get_tenant_sharing_status(self):
+        """"""
         return_type = ClientResult(self.context, int())
         qry = ServiceOperationQuery(self, "GetTenantSharingStatus", None, None, None, return_type)
         self.context.add_query(qry)
@@ -20,10 +23,17 @@ class TenantAdminSettingsService(BaseEntity):
 
     @property
     def available_managed_paths_for_site_creation(self):
+        """"""
         return self.properties.get("AvailableManagedPathsForSiteCreation", StringCollection())
 
     @property
+    def disable_groupify(self):
+        """"""
+        return self.properties.get("DisableGroupify", DisableGroupify())
+
+    @property
     def smtp_server(self):
+        """"""
         return self.properties.get("SmtpServer", SmtpServer())
 
     @property

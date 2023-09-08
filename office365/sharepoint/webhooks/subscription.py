@@ -8,10 +8,17 @@ class Subscription(BaseEntity):
     """A subscription for receiving notifications at a specified endpoint."""
 
     @property
+    def application_id(self):
+        """
+        Identifier of the application used to create the subscription.
+        :rtype: str
+        """
+        return self.properties.get("applicationId", None)
+
+    @property
     def notification_url(self):
         """
         Gets endpoint that will be called when an event occurs.
-
         :rtype: str
         """
         return self.properties.get("notificationUrl", None)

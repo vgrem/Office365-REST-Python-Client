@@ -8,3 +8,7 @@ class RenameFacet(ClientValue):
         :param str old_name:
         """
         self.oldName = old_name
+
+    @property
+    def entity_type_name(self):
+        return "Microsoft.SharePoint.Activities.RenameFacet"

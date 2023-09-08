@@ -7,6 +7,7 @@ from office365.sharepoint.directory.members_info import MembersInfo
 class Group(BaseEntity):
 
     def get_members_info(self, row_limit):
+        """"""
         result = MembersInfo(self.context)
 
         def _user_loaded():
@@ -16,6 +17,7 @@ class Group(BaseEntity):
         return result
 
     def get_members(self):
+        """"""
         from office365.directory.users.user import User
         members = BaseEntityCollection(self.context, User)
 
@@ -25,6 +27,7 @@ class Group(BaseEntity):
         return members
 
     def get_owners(self):
+        """"""
         from office365.directory.users.user import User
         owners = BaseEntityCollection(self.context, User)
 
@@ -32,3 +35,7 @@ class Group(BaseEntity):
             SPHelper.get_owners(self.context, self.properties["Id"], owners)
         self.ensure_property("Id", _group_loaded)
         return owners
+
+    @property
+    def entity_type_name(self):
+        return "SP.Directory.Group"

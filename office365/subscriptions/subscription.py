@@ -136,7 +136,6 @@ class Subscription(Entity):
         Specifies the resource that will be monitored for changes.
         Do not include the base URL (https://graph.microsoft.com/v1.0/). See the possible resource path values for
         each supported resource.
-
         :rtype: str or None
         """
         return self.properties.get("resource", None)

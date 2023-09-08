@@ -54,7 +54,7 @@ class Presence(Entity):
         :param str message: Status message item.
         """
         payload = {
-            "statusMessage": PresenceStatusMessage(ItemBody(message))
+            "statusMessage": PresenceStatusMessage(message=ItemBody(message))
         }
         qry = ServiceOperationQuery(self, "setStatusMessage", None, payload)
         self.context.add_query(qry)
