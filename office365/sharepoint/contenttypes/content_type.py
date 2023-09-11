@@ -20,7 +20,6 @@ class ContentType(BaseEntity):
     def reorder_fields(self, field_names):
         """
         The ReorderFields method is called to change the order in which fields appear in a content type.
-
         :param list[str] field_names: Rearranges the collection of fields in the order in which field internal
              names are specified.
         """
@@ -35,7 +34,6 @@ class ContentType(BaseEntity):
         """
         Updates the content type, and any child objects  of the content type if specified,
         with any changes made to the content type.
-
         :param bool update_children: Specifies whether changes propagate to child objects of the content type.
         """
         super(ContentType, self).update()
@@ -74,6 +72,7 @@ class ContentType(BaseEntity):
         """
         Specifies the name of a custom display form template to use for list items that have been assigned
         the content type.
+        :rtype: str or None
         """
         return self.properties.get("DisplayFormTemplateName", None)
 
@@ -81,6 +80,7 @@ class ContentType(BaseEntity):
     def display_form_url(self):
         """
         Specifies the URL of a custom display form to use for list items that have been assigned the content type.
+        :rtype: str or None
         """
         return self.properties.get("DisplayFormUrl", None)
 
@@ -89,7 +89,7 @@ class ContentType(BaseEntity):
         """
         The component properties of an SPFx Form Customizer to connect to this content type for usage with edit item
             forms
-        :rtype: str
+        :rtype: str or None
         """
         return self.properties.get("EditFormClientSideComponentId", None)
 
@@ -103,10 +103,17 @@ class ContentType(BaseEntity):
 
     @property
     def id(self):
-        """Specifies an identifier for the content type as specified in [MS-WSSTS] section 2.1.2.8.1.
-        :rtype: ContentTypeId
+        """
+        Specifies an identifier for the content type as specified in [MS-WSSTS] section 2.1.2.8.1.
         """
         return self.properties.get("Id", ContentTypeId())
+
+    @property
+    def sealed(self):
+        """Specifies whether the content type can be changed.
+        :rtype: bool or None
+        """
+        return self.properties.get('Sealed', None)
 
     @property
     def string_id(self):
@@ -159,9 +166,33 @@ class ContentType(BaseEntity):
                                    UserResource(self.context, ResourcePath("DescriptionResource", self.resource_path)))
 
     @property
+    def document_template(self):
+        """
+        Specifies the file path to the document template (1) used for a new list item that has been assigned
+            the content type.
+        :rtype: str or None
+        """
+        return self.properties.get("DocumentTemplate", None)
+
+    @property
+    def document_template_url(self):
+        """
+        Specifies the URL of the document template assigned to the content type.
+        :rtype: str or None
+        """
+        return self.properties.get("DocumentTemplateUrl", None)
+
+    @property
+    def edit_form_url(self):
+        """
+        Specifies the URL of a custom edit form to use for list items that have been assigned the content type.
+        :rtype: str or None
+        """
+        return self.properties.get("EditFormUrl", None)
+
+    @property
     def group(self):
         """Gets the group of the content type.
-
         :rtype: str or None
         """
         return self.properties.get("Group", None)
@@ -169,8 +200,7 @@ class ContentType(BaseEntity):
     @group.setter
     def group(self, value):
         """Sets the group of the content type.
-
-        :type value: str
+        :type value: str or None
         """
         self.set_property("Group", value)
 
@@ -181,12 +211,16 @@ class ContentType(BaseEntity):
 
     @property
     def js_link(self):
-        """Gets or sets the JSLink for the content type custom form template"""
+        """Gets or sets the JSLink for the content type custom form template
+        :rtype: str or None
+        """
         return self.properties.get("JSLink", None)
 
     @property
     def read_only(self):
-        """Specifies whether changes to the content type properties are denied."""
+        """Specifies whether changes to the content type properties are denied.
+        :rtype: bool or None
+        """
         return self.properties.get("ReadOnly", None)
 
     @property
@@ -198,7 +232,6 @@ class ContentType(BaseEntity):
     @property
     def schema_xml(self):
         """Specifies the XML schema that represents the content type.
-
         :rtype: str or None
         """
         return self.properties.get("SchemaXml", None)

@@ -25,7 +25,7 @@ class SPSiteManager(BaseEntity):
 
         :param str title: Site title
         :param str site_url: Site url
-        :param str or office365.sharepoint.principal.user.User owner: Site owner
+        :param str or office365.sharepoint.principal.user.User owner: Site owner object or principal name
         """
         return_type = ClientResult(self.context, SPSiteCreationResponse())
 

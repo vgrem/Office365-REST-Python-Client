@@ -3,7 +3,6 @@ import uuid
 
 
 class ODataType(object):
-
     primitive_types = {
         bool: "Edm.Boolean",
         int: "Edm.Int32",
@@ -61,17 +60,16 @@ class ODataType(object):
         :param str value: Represents date and time with values ranging from 12:00:00 midnight, January 1, 1753 A.D.
             through 11:59:59 P.M, December 9999 A.D.
         """
+        known_formats = ["%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S.%f"]
 
-        try:
-            return datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
-        except ValueError:
+        result = None
+        for cur_format in known_formats:
             try:
-                return datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%fZ")
-            except ValueError as e:
-                try:
-                    return datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%S")
-                except ValueError as e:
-                    return None
+                result = datetime.datetime.strptime(value, cur_format)
+                break
+            except ValueError:
+                pass
+        return result
 
     @staticmethod
     def resolve_type(client_type):

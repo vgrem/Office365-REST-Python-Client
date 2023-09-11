@@ -25,6 +25,12 @@ class User(Principal):
         self.ensure_property("LoginName", _user_loaded)
         return return_type
 
+    def get_recent_files(self, top=100):
+        """"""
+        from office365.sharepoint.files.recent_file_collection import RecentFileCollection
+        return_type = RecentFileCollection.get_recent_files(self.context, top)
+        return return_type
+
     def get_user_profile_properties(self, property_names=None):
         """
         :param list[str] property_names:
@@ -38,12 +44,17 @@ class User(Principal):
         self.ensure_property("UserPrincipalName", _user_loaded)
         return return_type
 
+    def expire(self):
+        """"""
+        qry = ServiceOperationQuery(self, "Expire")
+        self.context.add_query(qry)
+        return self
+
     @property
-    def groups(self):
-        """Gets a collection of group objects that represents all of the groups for the user."""
-        from office365.sharepoint.principal.groups.collection import GroupCollection
-        return self.properties.get('Groups',
-                                   GroupCollection(self.context, ResourcePath("Groups", self.resource_path)))
+    def aad_object_id(self):
+        """Gets the information of the user that contains the user's name identifier and the issuer of the
+         user's name identifier."""
+        return self.properties.get('AadObjectId', UserIdInfo())
 
     @property
     def alerts(self):
@@ -52,8 +63,17 @@ class User(Principal):
                                    AlertCollection(self.context, ResourcePath("Alerts", self.resource_path)))
 
     @property
+    def groups(self):
+        """Gets a collection of group objects that represents all of the groups for the user."""
+        from office365.sharepoint.principal.groups.collection import GroupCollection
+        return self.properties.get('Groups',
+                                   GroupCollection(self.context, ResourcePath("Groups", self.resource_path)))
+
+    @property
     def is_site_admin(self):
-        """Gets a Boolean value that specifies whether the user is a site collection administrator."""
+        """Gets a Boolean value that specifies whether the user is a site collection administrator.
+        :rtype: bool or None
+        """
         return self.properties.get('IsSiteAdmin', None)
 
     @property
@@ -67,20 +87,54 @@ class User(Principal):
         """
         Specifies the e-mail address of the user.
         It MUST NOT be NULL. Its length MUST be equal to or less than 255.
-
         :rtype: str or None
         """
         return self.properties.get('Email', None)
 
-    def expire(self):
-        """"""
-        qry = ServiceOperationQuery(self, "Expire")
-        self.context.add_query(qry)
-        return self
+    @property
+    def email_with_fallback(self):
+        """
+        :rtype: str or None
+        """
+        return self.properties.get('EmailWithFallback', None)
+
+    @property
+    def expiration(self):
+        """
+        :rtype: str or None
+        """
+        return self.properties.get('Expiration', None)
+
+    @property
+    def is_email_authentication_guest_user(self):
+        """
+        Indicates whether the User is a share by email guest user using time of access authentication.
+        If this instance is an email authentication guest user, this value MUST be true, otherwise it MUST be false.
+        :rtype: bool or None
+        """
+        return self.properties.get('IsEmailAuthenticationGuestUser', None)
+
+    @property
+    def is_share_by_email_guest_user(self):
+        """
+        Gets a value indicating whether this User is a share by email guest user.
+        If this instance is a share by email guest user, it's true; otherwise, false.
+        :rtype: bool or None
+        """
+        return self.properties.get('IsShareByEmailGuestUser', None)
+
+    @property
+    def user_principal_name(self):
+        """
+        User principal name of the user that initiated the sign-in.
+        :rtype: str or None
+        """
+        return self.properties.get("UserPrincipalName", None)
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "AadObjectId": self.aad_object_id,
                 "UserId": self.user_id,
             }
             default_value = property_mapping.get(name, None)

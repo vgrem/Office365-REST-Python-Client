@@ -5,6 +5,9 @@ class SiteDesignRun(BaseEntity):
 
     @property
     def site_design_id(self):
+        """
+        :rtype: str or None
+        """
         return self.properties.get("SiteDesignID", None)
 
     @property

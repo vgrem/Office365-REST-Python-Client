@@ -9,7 +9,7 @@ class SharingLinkInfo(ClientValue):
     def __init__(self, allows_anonymous_access=None, application_id=None, created=None, created_by=Principal(),
                  password_protected=None, invitations=None, redeemed_users=None,
                  last_modified_by=Principal(), password_last_modified_by=Principal(),
-                 url=None):
+                 track_link_users=None, url=None):
         """
         Specifies the information about the tokenized sharing link.
 
@@ -26,6 +26,7 @@ class SharingLinkInfo(ClientValue):
         :param Principal last_modified_by: Indicates the principal who last modified the tokenized sharing link.
              This value MUST be null if the last modified by value is not recorded.
         :param Principal password_last_modified_by:
+        :param bool track_link_users:
         """
         super(SharingLinkInfo, self).__init__()
         self.AllowsAnonymousAccess = allows_anonymous_access
@@ -37,6 +38,7 @@ class SharingLinkInfo(ClientValue):
         self.RedeemedUsers = ClientValueCollection(LinkInvitation, redeemed_users)
         self.LastModifiedBy = last_modified_by
         self.PasswordLastModifiedBy = password_last_modified_by
+        self.TrackLinkUsers = track_link_users
         self.Url = url
 
     def __str__(self):

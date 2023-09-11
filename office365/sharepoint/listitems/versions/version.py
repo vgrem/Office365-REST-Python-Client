@@ -1,3 +1,5 @@
+import datetime
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity import BaseEntity
@@ -13,13 +15,14 @@ class ListItemVersion(BaseEntity):
 
     @property
     def version_label(self):
-        """Gets the version number of the item version."""
-        return self.properties.get("VersionLabel")
+        """Gets the version number of the item version.
+        :rtype: str or None
+        """
+        return self.properties.get("VersionLabel", None)
 
     @property
     def is_current_version(self):
         """Gets a value that specifies whether the file version is the current version.
-
         :rtype: bool
         """
         return self.properties.get("IsCurrentVersion", None)
@@ -27,7 +30,7 @@ class ListItemVersion(BaseEntity):
     @property
     def created(self):
         """Gets the creation date and time for the item version."""
-        return self.properties.get("Created", None)
+        return self.properties.get("Created", datetime.datetime.min)
 
     @property
     def created_by(self):
@@ -43,9 +46,21 @@ class ListItemVersion(BaseEntity):
 
     @property
     def file_version(self):
+        """"""
         from office365.sharepoint.files.versions.version import FileVersion
         return self.properties.get("FileVersion",
                                    FileVersion(self.context, ResourcePath("FileVersion", self.resource_path)))
+
+    @property
+    def property_ref_name(self):
+        return "VersionId"
+
+    @property
+    def parent_collection(self):
+        """
+        :rtype: office365.sharepoint.listitems.versions.collection.ListItemVersionCollection
+        """
+        return self._parent_collection
 
     def get_property(self, name, default_value=None):
         if default_value is None:
@@ -59,6 +74,5 @@ class ListItemVersion(BaseEntity):
     def set_property(self, name, value, persist_changes=True):
         if self._resource_path is None:
             if name == "VersionId":
-                self._resource_path = ServiceOperationPath(
-                    "GetById", [value], self._parent_collection.resource_path)
+                self._resource_path = self.parent_collection.get_by_id(value).resource_path
         return super(ListItemVersion, self).set_property(name, value, persist_changes)

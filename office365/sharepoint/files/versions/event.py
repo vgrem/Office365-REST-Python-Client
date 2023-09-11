@@ -14,7 +14,6 @@ class FileVersionEvent(BaseEntity):
     @property
     def editor(self):
         """Returns the name of the user who initiated the event.
-
         :rtype: str or None
         """
         return self.properties.get("Editor", None)

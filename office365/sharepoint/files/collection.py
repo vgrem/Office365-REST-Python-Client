@@ -20,7 +20,6 @@ class FileCollection(BaseEntityCollection):
 
         Note: This method only supports files up to 4MB in size!
         Consider create_upload_session method instead for larger files
-
         :param str or typing.IO path_or_file: path where file to upload resides or file handle
         """
         if hasattr(path_or_file, 'read'):

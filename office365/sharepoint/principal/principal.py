@@ -8,7 +8,6 @@ class Principal(BaseEntity):
     @property
     def id(self):
         """Gets a value that specifies the member identifier for the user or group.
-
         :rtype: int or None
         """
         return self.properties.get('Id', None)
@@ -16,7 +15,6 @@ class Principal(BaseEntity):
     @property
     def title(self):
         """Gets a value that specifies the name of the principal.
-
         :rtype: str or None
         """
         return self.properties.get('Title', None)
@@ -25,7 +23,6 @@ class Principal(BaseEntity):
     def title(self, value):
         """
         Sets a value that specifies the name of the principal.
-
         :type value: str
         """
         self.set_property('Title', value)
@@ -33,7 +30,6 @@ class Principal(BaseEntity):
     @property
     def login_name(self):
         """Gets the login name of the principal.
-
         :rtype: str or None
         """
         return self.properties.get('LoginName', None)
@@ -41,7 +37,6 @@ class Principal(BaseEntity):
     @property
     def user_principal_name(self):
         """Gets the UPN of the principal.
-
         :rtype: str or None
         """
         return self.properties.get('UserPrincipalName', None)
@@ -49,7 +44,6 @@ class Principal(BaseEntity):
     @property
     def is_hidden_in_ui(self):
         """Gets the login name of the principal.
-
         :rtype: bool or None
         """
         return self.properties.get('IsHiddenInUI', None)
@@ -57,7 +51,6 @@ class Principal(BaseEntity):
     @property
     def principal_type(self):
         """Gets the type of the principal.
-
         :rtype: int or None
         """
         return self.properties.get('PrincipalType', None)

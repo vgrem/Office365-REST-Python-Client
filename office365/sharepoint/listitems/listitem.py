@@ -17,7 +17,7 @@ from office365.sharepoint.fields.string_values import FieldStringValues
 from office365.sharepoint.likes.liked_by_information import LikedByInformation
 from office365.sharepoint.listitems.compliance_info import ListItemComplianceInfo
 from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateValue
-from office365.sharepoint.listitems.version import ListItemVersion
+from office365.sharepoint.listitems.versions.collection import ListItemVersionCollection
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.policy.dlp_policy_tip import DlpPolicyTip
 from office365.sharepoint.reputationmodel.reputation import Reputation
@@ -436,8 +436,8 @@ class ListItem(SecurableObject):
     def versions(self):
         """Gets the collection of item version objects that represent the versions of the item."""
         return self.properties.get('Versions',
-                                   BaseEntityCollection(self.context, ListItemVersion,
-                                                        ResourcePath("versions", self.resource_path)))
+                                   ListItemVersionCollection(self.context,
+                                                             ResourcePath("versions", self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:

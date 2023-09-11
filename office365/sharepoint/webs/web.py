@@ -1,4 +1,5 @@
 # coding=utf-8
+import datetime
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -322,7 +323,7 @@ class Web(SecurableObject):
     def get_acs_service_principals(self, app_ids=None):
         """
         List service principals
-        :para, list[str] appIds:
+        :param list[str] appIds:
         """
         payload = {"appIds": app_ids}
         return_type = ClientResult(self.context, ClientValueCollection(SPACSServicePrincipalInfo))
@@ -1471,11 +1472,10 @@ class Web(SecurableObject):
 
     @property
     def created(self):
-        """Specifies when the site was created.
-
-        :rtype: datetime or None
         """
-        return self.properties.get("Created", None)
+        Specifies when the site was created.
+        """
+        return self.properties.get("Created", datetime.datetime.min)
 
     @property
     def custom_master_url(self):
@@ -1496,13 +1496,13 @@ class Web(SecurableObject):
     def id(self):
         """
         Specifies the site identifier for the site
-
         :rtype: str
         """
         return self.properties.get("Id", None)
 
     @property
     def access_requests_list(self):
+        """"""
         return self.properties.get('AccessRequestsList',
                                    List(self.context, ResourcePath("AccessRequestsList", self.resource_path)))
 
@@ -1512,6 +1512,30 @@ class Web(SecurableObject):
         :rtype: str or None
         """
         return self.properties.get("AccessRequestListUrl", None)
+
+    @property
+    def allow_designer_for_current_user(self):
+        """
+        Specifies whether the current user is allowed to use a designer application to customize this site
+        :rtype: bool or None
+        """
+        return self.properties.get("AllowDesignerForCurrentUser", None)
+
+    @property
+    def allow_master_page_editing_for_current_user(self):
+        """
+        Specifies whether the current user is allowed to edit the master page.
+        :rtype: bool or None
+        """
+        return self.properties.get("AllowMasterPageEditingForCurrentUser", None)
+
+    @property
+    def allow_revert_from_template_for_current_user(self):
+        """
+        Specifies whether the current user is allowed to revert the site (2) to a default site template.
+        :rtype: bool or None
+        """
+        return self.properties.get("AllowRevertFromTemplateForCurrentUser", None)
 
     @property
     def effective_base_permissions(self):
@@ -1546,6 +1570,7 @@ class Web(SecurableObject):
 
     @property
     def hosted_apps(self):
+        """"""
         return self.properties.get('HostedApps',
                                    HostedAppsManager(self.context, ResourcePath("HostedApps", self.resource_path)))
 
@@ -1558,6 +1583,7 @@ class Web(SecurableObject):
 
     @property
     def onedrive_shared_items(self):
+        """"""
         return self.properties.get('OneDriveSharedItems',
                                    BaseEntityCollection(self.context, SharedDocumentInfo,
                                                         ResourcePath("OneDriveSharedItems", self.resource_path)))

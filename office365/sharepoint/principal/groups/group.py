@@ -12,7 +12,6 @@ class Group(Principal):
     def expand_to_principals(self, max_count=10):
         """
         Expands current group to a collection of principals.
-
         :param int max_count: Specifies the maximum number of principals to be returned.
         """
         return_type = ClientResult(self.context, ClientValueCollection(PrincipalInfo))
@@ -23,48 +22,86 @@ class Group(Principal):
         self.ensure_property("LoginName", _group_loaded)
         return return_type
 
-    def set_user_as_owner(self, user_or_id):
+    def set_user_as_owner(self, user):
         """
-        :type user_or_id: long or Principal
+        Sets the user as group owner
+        :param long or Principal user: User object or identifier
         """
 
         def _set_user_as_owner(owner_id):
             qry = ServiceOperationQuery(self, "SetUserAsOwner", None, {"ownerId": owner_id})
             self.context.add_query(qry)
 
-        if isinstance(user_or_id, Principal):
+        if isinstance(user, Principal):
             def _user_loaded():
-                _set_user_as_owner(user_or_id.id)
-            user_or_id.ensure_property("Id", _user_loaded)
+                _set_user_as_owner(user.id)
+            user.ensure_property("Id", _user_loaded)
         else:
-            _set_user_as_owner(user_or_id)
+            _set_user_as_owner(user)
         return self
 
     @property
     def allow_members_edit_membership(self):
-        """Specifies whether a member of the group can add and remove members from the group."""
+        """Specifies whether a member of the group can add and remove members from the group.
+        :rtype: bool or None
+        """
         return self.properties.get('AllowMembersEditMembership', None)
 
     @property
     def allow_request_to_join_leave(self):
-        """Specifies whether to allow users to request to join or leave in the group."""
+        """Specifies whether to allow users to request to join or leave in the group.
+        :rtype: bool or None
+        """
         return self.properties.get('AllowRequestToJoinLeave', None)
+
+    @property
+    def auto_accept_request_to_join_leave(self):
+        """Specifies whether requests to join or leave the group are automatically accepted.
+        :rtype: bool or None
+        """
+        return self.properties.get('AutoAcceptRequestToJoinLeave', None)
+
+    @property
+    def can_current_user_edit_membership(self):
+        """Specifies whether the current user can add and remove members from the group.
+        :rtype: bool or None
+        """
+        return self.properties.get('CanCurrentUserEditMembership', None)
+
+    @property
+    def can_current_user_manage_group(self):
+        """Gets a Boolean value that indicates whether the current user can manage the group.
+        :rtype: bool or None
+        """
+        return self.properties.get('CanCurrentUserManageGroup', None)
+
+    @property
+    def can_current_user_view_membership(self):
+        """Specifies whether the current user can view the membership of the group.
+        :rtype: bool or None
+        """
+        return self.properties.get('CanCurrentUserViewMembership', None)
+
+    @property
+    def only_allow_members_view_membership(self):
+        """Specifies whether viewing the membership of the group is restricted to members of the group.
+        :rtype: bool or None
+        """
+        return self.properties.get('OnlyAllowMembersViewMembership', None)
 
     @property
     def owner_title(self):
         """Specifies the name of the owner of the group.
-
         :rtype: str or None
         """
         return self.properties.get('OwnerTitle', None)
 
     @property
-    def can_current_user_manage_group(self):
-        """Gets a Boolean value that indicates whether the current user can manage the group.
-
-        :rtype: bool or None
+    def request_to_join_leave_email_setting(self):
+        """Specifies the e-mail address to which requests to join or leave the group are sent.
+        :rtype: str or None
         """
-        return self.properties.get('CanCurrentUserManageGroup', None)
+        return self.properties.get('RequestToJoinLeaveEmailSetting', None)
 
     @property
     def owner(self):

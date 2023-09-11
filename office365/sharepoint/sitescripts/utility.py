@@ -256,17 +256,17 @@ class SiteScriptUtility(BaseEntity):
         return return_type
 
     @staticmethod
-    def get_site_design_rights(context, _id):
+    def get_site_design_rights(context, id_):
         """
         Gets a list of principals that have access to a site design.
 
-        :type _id: str
+        :param str id_:
         :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
 
         """
         return_type = BaseEntityCollection(context, SiteDesignPrincipal)
         utility = SiteScriptUtility(context)
-        qry = ServiceOperationQuery(utility, "GetSiteDesignRights", [_id], None, None, return_type)
+        qry = ServiceOperationQuery(utility, "GetSiteDesignRights", [id_], None, None, return_type)
         qry.static = True
         context.add_query(qry)
         return return_type

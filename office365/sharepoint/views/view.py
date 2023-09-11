@@ -43,12 +43,52 @@ class View(BaseEntity):
     def set_view_xml(self, view_xml):
         """
         Sets the view schema.
-
         :param str view_xml: The view XML to set.
         """
         qry = ServiceOperationQuery(self, "SetViewXml", None, {"viewXml": view_xml})
         self.context.add_query(qry)
         return self
+
+    @property
+    def aggregations(self):
+        """
+        Specifies fields (2) and functions that define totals shown in a list view.
+        :rtype: str or None
+        """
+        return self.properties.get('Aggregations', None)
+
+    @property
+    def aggregations_status(self):
+        """
+        Specifies whether totals are shown in the list view.
+        It MUST be NULL If Aggregations is NULL; otherwise it MUST be "On" or "Off".
+        :rtype: str or None
+        """
+        return self.properties.get('AggregationsStatus', None)
+
+    @property
+    def associated_content_type_id(self):
+        """
+        Represents the content type identifier associated with the view.
+        :rtype: str or None
+        """
+        return self.properties.get('AssociatedContentTypeId', None)
+
+    @property
+    def calendar_view_styles(self):
+        """
+        Represents an object specifying the style of a SharePoint calendar view.
+        :rtype: str or None
+        """
+        return self.properties.get('CalendarViewStyles', None)
+
+    @property
+    def column_width(self):
+        """
+        Specifies the width of columns.
+        :rtype: str or None
+        """
+        return self.properties.get('ColumnWidth', None)
 
     @property
     def parent_list(self):
@@ -66,7 +106,6 @@ class View(BaseEntity):
     def js_link(self):
         """
         Specifies the JavaScript files used for the view.
-
         :rtype: str or None
         """
         return self.properties.get('JSLink', None)
@@ -82,6 +121,21 @@ class View(BaseEntity):
     def content_type_id(self, value):
         """Sets the identifier of the content type with which the view is associated."""
         self.set_property("ContentTypeId", value)
+
+    @property
+    def custom_formatter(self):
+        """
+        Specifies the Custom Formatter used for the view.
+        :rtype: str or None
+        """
+        return self.properties.get("CustomFormatter", None)
+
+    @property
+    def custom_order(self):
+        """
+        :rtype: str or None
+        """
+        return self.properties.get("CustomOrder", None)
 
     @property
     def editor_modified(self):
@@ -120,6 +174,13 @@ class View(BaseEntity):
         """Sets whether the list view is the default list view.
         """
         self.set_property("DefaultView", value)
+
+    @property
+    def default_view_for_content_type(self):
+        """Specifies whether the list view is the default list view for the content type specified by ContentTypeId.
+        :rtype: bool or None
+        """
+        return self.properties.get("DefaultViewForContentType", None)
 
     @property
     def view_fields(self):

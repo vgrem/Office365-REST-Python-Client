@@ -1,6 +1,7 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.principal.type import PrincipalType
 from office365.sharepoint.ui.applicationpages.peoplepicker.entity_information import PickerEntityInformation
 from office365.sharepoint.ui.applicationpages.peoplepicker.entity_information_request import \
     PickerEntityInformationRequest
@@ -101,12 +102,11 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
     def get_picker_entity_information(context, email_address):
         """
         Gets information of the specified principal.
-
         :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
         :param str email_address: Specifies the principal for which information is being requested.
 
         """
-        request = PickerEntityInformationRequest(email_address=email_address)
+        request = PickerEntityInformationRequest(email_address=email_address, principal_type=PrincipalType.All)
         return_type = PickerEntityInformation(context)
         binding_type = ClientPeoplePickerWebServiceInterface(context)
         payload = {"entityInformationRequest": request}

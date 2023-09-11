@@ -15,7 +15,7 @@ class RecentFileCollection(BaseEntity):
         :type context: office365.sharepoint.client_context.ClientContext
         :param int top:
         """
-        return_type = ClientResult(context)
+        return_type = ClientResult(context, str())
         payload = {
             "top": top
         }

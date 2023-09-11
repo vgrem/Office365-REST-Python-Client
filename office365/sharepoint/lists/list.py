@@ -83,6 +83,12 @@ class List(SecurableObject):
         self.context.add_query(qry)
         return self
 
+    def get_async_action_config(self):
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(self, "GetAsyncActionConfig", return_type=return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def get_bloom_filter(self, start_item_id=None):
         """
         Generates a Bloom filter (probabilistic structure for checking the existence of list items) for the current list
@@ -677,7 +683,6 @@ class List(SecurableObject):
     def default_edit_form_url(self):
         """
         Gets a value that specifies the URL of the edit form to use for list items in the list.
-
         :rtype: str or None
         """
         return self.properties.get("DefaultEditFormUrl", None)
@@ -714,6 +719,41 @@ class List(SecurableObject):
         return self.properties.get("DisableGridEditing", None)
 
     @property
+    def effective_base_permissions(self):
+        """
+        Specifies the effective permissions on the list that are assigned to the current user.
+        """
+        from office365.sharepoint.permissions.base_permissions import BasePermissions
+        return self.properties.get("EffectiveBasePermissions", BasePermissions())
+
+    @property
+    def effective_base_permissions_for_ui(self):
+        """
+        Specifies the effective base permissions for the current user as they SHOULD be displayed in user interface (UI)
+        If the list is not in read-only UI mode, the value of EffectiveBasePermissionsForUI MUST be the same as the
+        value of EffectiveBasePermissions (section 3.2.5.79.1.1.17). If the list is in read-only UI mode, the value
+        of EffectiveBasePermissionsForUI MUST be a subset of the value of EffectiveBasePermissions.
+        """
+        from office365.sharepoint.permissions.base_permissions import BasePermissions
+        return self.properties.get("EffectiveBasePermissionsForUI", BasePermissions())
+
+    @property
+    def enable_assign_to_email(self):
+        """
+        Gets or sets a Boolean value specifying whether e-mail notification is enabled for the list.
+        :rtype: bool or None
+        """
+        return self.properties.get("EnableAssignToEmail", None)
+
+    @property
+    def enable_attachments(self):
+        """
+        Specifies whether list item attachments are enabled for the list.
+        :rtype: bool or None
+        """
+        return self.properties.get("EnableAttachments", None)
+
+    @property
     def enable_folder_creation(self):
         """
         Specifies whether new list folders can be added to the list.
@@ -742,12 +782,61 @@ class List(SecurableObject):
         return self.properties.get("EnableModeration", None)
 
     @property
+    def enable_request_sign_off(self):
+        """
+        :rtype: bool or None
+        """
+        return self.properties.get("EnableRequestSignOff", None)
+
+    @property
     def enable_versioning(self):
         """
         Specifies whether content approval is enabled for the list.
         :rtype: bool or None
         """
         return self.properties.get("EnableVersioning", None)
+
+    @property
+    def exclude_from_offline_client(self):
+        """
+        This doesn't block sync but acts as a recommendation to the client to not take this list offline.
+        This gets returned as part of list properties in GetListSchema soap call.
+        :rtype: bool or None
+        """
+        return self.properties.get("ExcludeFromOfflineClient", None)
+
+    @property
+    def exempt_from_block_download_of_non_viewable_files(self):
+        """
+        Property indicating whether the list is exempt from the policy to block download of non-server handled files.
+        This SHOULD be set using the SetExemptFromBlockDownloadOfNonViewableFiles (section 3.2.5.79.2.1.25) method.
+        :rtype: bool or None
+        """
+        return self.properties.get("ExemptFromBlockDownloadOfNonViewableFiles", None)
+
+    @property
+    def file_save_post_processing_enabled(self):
+        """
+        Specifies whether or not the files in the list can be processed in asynchronous manner
+        Specify a value of true if the list files can be processed asynchronously; specify false if otherwise.
+        :rtype: bool or None
+        """
+        return self.properties.get("FileSavePostProcessingEnabled", None)
+
+    @property
+    def force_checkout(self):
+        """
+        Specifies whether check out is required when adding or editing documents in the list.
+        :rtype: bool or None
+        """
+        return self.properties.get("ForceCheckout", None)
+
+    @property
+    def has_content_assembly_templates(self):
+        """
+        :rtype: bool or None
+        """
+        return self.properties.get("HasContentAssemblyTemplates", None)
 
     @property
     def items(self):
@@ -885,6 +974,23 @@ class List(SecurableObject):
         return self.properties.get('LastItemModifiedDate', datetime.min)
 
     @property
+    def last_item_user_modified_date(self):
+        """
+        Specifies when an item of the list was last modified by a non-system update. A non-system update is a change
+        to a list item that is visible to end users. If no item has been created in the list, the list creation time
+        is returned.
+        """
+        return self.properties.get('LastItemUserModifiedDate', datetime.min)
+
+    @property
+    def list_experience_options(self):
+        """
+        Gets or sets the list to new experience, classic experience or default experience set by my administrator.
+        :rtype: int or None
+        """
+        return self.properties.get('ListExperienceOptions', None)
+
+    @property
     def list_form_customized(self):
         """
         :rtype: bool or None
@@ -909,6 +1015,13 @@ class List(SecurableObject):
         return self.properties.get('MajorVersionLimit', None)
 
     @property
+    def list_schema_version(self):
+        """
+        :rtype: str or None
+        """
+        return self.properties.get('ListSchemaVersion', None)
+
+    @property
     def major_with_minor_versions_limit(self):
         """
         Gets the maximum number of major versions that are allowed for an item in a document library that uses
@@ -916,6 +1029,74 @@ class List(SecurableObject):
         :rtype: int or None
         """
         return self.properties.get('MajorWithMinorVersionsLimit', None)
+
+    @property
+    def no_crawl(self):
+        """
+        Specifies that the crawler MUST NOT crawl the list.
+        :rtype: bool or None
+        """
+        return self.properties.get('NoCrawl', None)
+
+    @property
+    def on_quick_launch(self):
+        """
+        Specifies whether the list appears on the Quick Launch of the site (2). If the value is set to "true",
+        the protocol server MUST set the Hidden property of the list to "false".
+        :rtype: bool or None
+        """
+        return self.properties.get('OnQuickLaunch', None)
+
+    @property
+    def page_render_type(self):
+        """
+        Returns the render type of the current file. If the file will render in the modern experience it will return
+        ListPageRenderType.Modern. If the file will render in the classic experience, it will return the reason
+        for staying in classic, as specified by ListPageRenderType enumeration (section 3.2.5.413).
+        :rtype: int or None
+        """
+        return self.properties.get('PageRenderType', None)
+
+    @property
+    def parent_web_url(self):
+        """
+        Specifies the server-relative URL of the site (2) that contains the list.
+        It MUST be a URL of server-relative form.
+        :rtype: str or None
+        """
+        return self.properties.get('ParentWebUrl', None)
+
+    @property
+    def parser_disabled(self):
+        """
+        Specifies whether or not the document parser is enabled on the list.
+        Specify a value of true if the document parser is enabled on the list; specify false if otherwise.
+        :rtype: bool or None
+        """
+        return self.properties.get('ParserDisabled', None)
+
+    @property
+    def read_security(self):
+        """
+        Gets or sets the Read security setting for the list.
+        :rtype: int or None
+        """
+        return self.properties.get('ReadSecurity', None)
+
+    @property
+    def server_template_can_create_folders(self):
+        """
+        Specifies whether the list template the list is based on allows the creation of folders.
+        :rtype: bool or None
+        """
+        return self.properties.get('ServerTemplateCanCreateFolders', None)
+
+    @property
+    def show_hidden_fields_in_modern_form(self):
+        """
+        :rtype: bool or None
+        """
+        return self.properties.get('ShowHiddenFieldsInModernForm', None)
 
     @property
     def title(self):
@@ -1012,9 +1193,12 @@ class List(SecurableObject):
                 "DescriptionResource": self.description_resource,
                 "DefaultView": self.default_view,
                 "DefaultViewPath": self.default_view_path,
+                "EffectiveBasePermissions": self.effective_base_permissions,
+                "EffectiveBasePermissionsForUI": self.effective_base_permissions_for_ui,
                 "EventReceivers": self.event_receivers,
                 "LastItemDeletedDate": self.last_item_deleted_date,
                 "LastItemModifiedDate": self.last_item_modified_date,
+                "LastItemUserModifiedDate": self.last_item_user_modified_date,
                 "ParentWeb": self.parent_web,
                 "ParentWebPath": self.parent_web_path,
                 "RootFolder": self.root_folder,

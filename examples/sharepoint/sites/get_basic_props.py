@@ -9,4 +9,4 @@ site = client.site.get().execute_query()
 print("Site url: {}".format(site.url))
 
 result = site.is_valid_home_site().execute_query()
-print("Landing Intranet site: {}".format(result.value))
+print("Is home site: {}".format(result.value))

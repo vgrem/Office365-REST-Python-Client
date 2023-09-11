@@ -11,8 +11,6 @@ class MetadataNavigationSettings(BaseEntity):
     def get_configured_settings(context, url, return_type=None):
         """
         Retrieves the configured metadata navigation settings for the list with the specified url.
-
-
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
         :param str url: Specifies list url
         :param ClientResult return_type: Return type

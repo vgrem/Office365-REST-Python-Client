@@ -13,9 +13,8 @@ class UserCollection(BaseEntityCollection):
 
     def add_user(self, login_name):
         """
-        Creates a user
-
-        :type login_name: str
+        Creates the user
+        :param str login_name: Specifies the login name of the principal.
         """
         return_type = User(self.context)
         self.add_child(return_type)
@@ -27,7 +26,6 @@ class UserCollection(BaseEntityCollection):
     def get_by_email(self, email):
         """
         Returns the user with the specified e-mail address.
-
         :param str email: A string that contains the e-mail address of the user.
         """
         return User(self.context, ServiceOperationPath("GetByEmail", [email], self.resource_path))
@@ -35,7 +33,6 @@ class UserCollection(BaseEntityCollection):
     def get_by_id(self, user_id):
         """
         Returns the user with the specified member identifier.
-
         :param int user_id: Specifies the member identifier.
         """
         return User(self.context, ServiceOperationPath("GetById", [user_id], self.resource_path))
@@ -43,7 +40,6 @@ class UserCollection(BaseEntityCollection):
     def get_by_login_name(self, login_name):
         """
         Retrieve User object by login name
-
         :param str login_name: A string that contains the login name of the user.
         """
         return User(self.context, ServiceOperationPath("GetByLoginName", [login_name], self.resource_path))
@@ -51,7 +47,6 @@ class UserCollection(BaseEntityCollection):
     def remove_by_id(self, user_id):
         """
         Retrieve User object by id
-
         :param int user_id: Specifies the member identifier.
         """
         qry = ServiceOperationQuery(self, "RemoveById", [user_id])
@@ -61,7 +56,6 @@ class UserCollection(BaseEntityCollection):
     def remove_by_login_name(self, login_name):
         """
         Remove User object by login name
-
         :param str login_name: A string that contains the user name.
         """
         qry = ServiceOperationQuery(self, "RemoveByLoginName", [login_name])

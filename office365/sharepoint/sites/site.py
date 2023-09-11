@@ -7,6 +7,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.audit.audit import Audit
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.token import ChangeToken
 from office365.sharepoint.compliance.store_proxy import SPPolicyStoreProxy
@@ -14,6 +15,7 @@ from office365.sharepoint.compliance.tag import ComplianceTag
 from office365.sharepoint.eventreceivers.definition_collection import EventReceiverDefinitionCollection
 from office365.sharepoint.features.collection import FeatureCollection
 from office365.sharepoint.lists.list import List
+from office365.sharepoint.migration.job_status import SPMigrationJobStatus
 from office365.sharepoint.portal.sites.icon_manager import SiteIconManager
 from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.recyclebin.item_collection import RecycleBinItemCollection
@@ -22,6 +24,7 @@ from office365.sharepoint.sites.sph_site import SPHSite
 from office365.sharepoint.sites.azure_container_Info import ProvisionedTemporaryAzureContainerInfo
 from office365.sharepoint.sites.upgrade_info import UpgradeInfo
 from office365.sharepoint.sites.usage_info import UsageInfo
+from office365.sharepoint.sites.version_policy_manager import SiteVersionPolicyManager
 from office365.sharepoint.tenant.administration.sites.administrators_info import SiteAdministratorsInfo
 from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
 from office365.sharepoint.webs.web import Web
@@ -107,6 +110,12 @@ class Site(BaseEntity):
             SPPolicyStoreProxy.get_available_tags_for_site(self.context, self.url, return_type)
 
         self.ensure_property("Url", _site_loaded)
+        return return_type
+
+    def get_migration_status(self):
+        return_type = BaseEntityCollection(self.context, SPMigrationJobStatus)
+        qry = ServiceOperationQuery(self, "GetMigrationStatus", None, None, None, return_type)
+        self.context.add_query(qry)
         return return_type
 
     def get_site_logo(self):
@@ -606,7 +615,6 @@ class Site(BaseEntity):
     def id(self):
         """
         Specifies the GUID that identifies the site collection.
-
         :rtype: str
         """
         return self.properties.get("Id", None)
@@ -700,6 +708,14 @@ class Site(BaseEntity):
         return self.properties.get("ShowUrlStructure", None)
 
     @property
+    def ui_version_configuration_enabled(self):
+        """
+        Specifies whether the visual upgrade UI for this site collection is displayed.
+        :rtype: bool or None
+        """
+        return self.properties.get("UIVersionConfigurationEnabled", None)
+
+    @property
     def usage_info(self):
         """Provides fields used to access information regarding site collection usage."""
         return self.properties.get("UsageInfo", UsageInfo())
@@ -717,11 +733,44 @@ class Site(BaseEntity):
         return self.properties.get("UpgradeReminderDate", datetime.datetime.min)
 
     @property
+    def upgrade_scheduled(self):
+        """
+        Specifies whether the upgrade has been scheduled. It can only be set to false by a farm administrator.
+        To set it to true, set the UpgradeScheduledDate to a future time.
+        :rtype: bool or None
+        """
+        return self.properties.get("UpgradeScheduled", None)
+
+    @property
+    def upgrade_scheduled_date(self):
+        """
+        Specifies the upgrade scheduled date in UTC (Coordinated Universal Time). Only the Date part is used.
+        If UpgradeScheduled is false, returns SqlDateTime.MinValue.
+        """
+        return self.properties.get("UpgradeScheduledDate", datetime.datetime.min)
+
+    @property
+    def upgrading(self):
+        """
+        Specifies whether the user will be able to share links to the documents that can be accessed without signing in.
+        :rtype: bool or None
+        """
+        return self.properties.get("Upgrading", None)
+
+    @property
     def user_custom_actions(self):
         """Gets the User Custom Actions that are associated with the site."""
         return self.properties.get('UserCustomActions',
                                    UserCustomActionCollection(self.context,
                                                               ResourcePath("UserCustomActions", self.resource_path)))
+
+    @property
+    def version_policy_for_new_libraries_template(self):
+        """"""
+        return self.properties.get('VersionPolicyForNewLibrariesTemplate',
+                                   SiteVersionPolicyManager(self.context,
+                                                              ResourcePath("VersionPolicyForNewLibrariesTemplate",
+                                                                           self.resource_path)))
 
     def get_property(self, name, default_value=None):
         if default_value is None:
@@ -734,7 +783,9 @@ class Site(BaseEntity):
                 "UsageInfo": self.usage_info,
                 "UpgradeInfo": self.upgrade_info,
                 "UpgradeReminderDate": self.upgrade_reminder_date,
-                "UserCustomActions": self.user_custom_actions
+                "UpgradeScheduledDate": self.upgrade_scheduled_date,
+                "UserCustomActions": self.user_custom_actions,
+                "VersionPolicyForNewLibrariesTemplate": self.version_policy_for_new_libraries_template
             }
             default_value = property_mapping.get(name, None)
         return super(Site, self).get_property(name, default_value)

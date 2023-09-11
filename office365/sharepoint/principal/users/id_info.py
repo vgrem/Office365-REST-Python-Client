@@ -12,3 +12,4 @@ class UserIdInfo(ClientValue):
         super(UserIdInfo, self).__init__()
         self.NameId = name_id
         self.NameIdIssuer = name_id_issuer
+

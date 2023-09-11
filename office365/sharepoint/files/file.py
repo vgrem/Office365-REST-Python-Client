@@ -1,3 +1,5 @@
+import datetime
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.compat import is_string_type
 from office365.runtime.http.http_method import HttpMethod
@@ -655,6 +657,13 @@ class File(AbstractFile):
                                    User(self.context, ResourcePath("CheckedOutByUser", self.resource_path)))
 
     @property
+    def expiration_date(self):
+        """
+        Required. Specifies the date and time when the file expires.
+        """
+        return self.properties.get("ExpirationDate", datetime.datetime.min)
+
+    @property
     def version_events(self):
         """Gets the history of events on this version object."""
         return self.properties.get("VersionEvents",
@@ -691,6 +700,13 @@ class File(AbstractFile):
         """Gets a value that specifies the list item fields values for the list item corresponding to the file."""
         return self.properties.setdefault('ListItemAllFields',
                                    ListItem(self.context, ResourcePath("listItemAllFields", self.resource_path)))
+
+    @property
+    def version_expiration_report(self):
+        """"""
+        return self.properties.get('VersionExpirationReport',
+                                   FileVersionCollection(self.context,
+                                                         ResourcePath("VersionExpirationReport", self.resource_path)))
 
     @property
     def versions(self):
@@ -739,16 +755,36 @@ class File(AbstractFile):
     @property
     def exists(self):
         """Specifies whether the file exists.
-
         :rtype: bool or None
         """
         return self.properties.get("Exists", None)
 
     @property
+    def irm_enabled(self):
+        """Specifies whether or not Information Rights Management (IRM) is enabled at the file level.
+        A value of true indicates IRM is enabled; a value of false indicates IRM is disabled.
+        :rtype: bool or None
+        """
+        return self.properties.get("IrmEnabled", None)
+
+    @property
+    def level(self):
+        """Specifies the publishing level of the file.
+        :rtype: str or None
+        """
+        return self.properties.get("Level", None)
+
+    @property
+    def linking_uri(self):
+        """Specifies the URL that is suitable for durable linking to the file.
+        :rtype: str or None
+        """
+        return self.properties.get("LinkingUri", None)
+
+    @property
     def name(self):
         """Specifies the file name including the extension.
             It MUST NOT be NULL. Its length MUST be equal to or less than 260.
-
         :rtype: str or None
         """
         return self.properties.get("Name", None)
@@ -756,7 +792,6 @@ class File(AbstractFile):
     @property
     def list_id(self):
         """Gets the GUID that identifies the List containing the file.
-
         :rtype: str or None
         """
         return self.properties.get("ListId", None)
@@ -764,7 +799,6 @@ class File(AbstractFile):
     @property
     def site_id(self):
         """Gets the GUID that identifies the site collection containing the file.
-
         :rtype: str or None
         """
         return self.properties.get("SiteId", None)
@@ -780,18 +814,15 @@ class File(AbstractFile):
     @property
     def time_created(self):
         """Gets a value that specifies when the file was created.
-
         :rtype: str or None
         """
-        return self.properties.get("TimeCreated", None)
+        return self.properties.get("TimeCreated", datetime.datetime.min)
 
     @property
     def time_last_modified(self):
         """Specifies when the file was last modified.
-
-        :rtype: str or None
         """
-        return self.properties.get("TimeLastModified", None)
+        return self.properties.get("TimeLastModified", datetime.datetime.min)
 
     @property
     def minor_version(self):
@@ -804,7 +835,6 @@ class File(AbstractFile):
     def major_version(self):
         """
         Gets a value that specifies the major version of the file.
-
         :rtype: int or None
         """
         return int(self.properties.get("MajorVersion", -1))
@@ -813,7 +843,6 @@ class File(AbstractFile):
     def unique_id(self):
         """
         Gets a value that specifies the a file unique identifier
-
         :rtype: str or None
         """
         return self.properties.get("UniqueId", None)
@@ -821,7 +850,6 @@ class File(AbstractFile):
     @property
     def customized_page_status(self):
         """Specifies the customization status of the file.
-
         :rtype: int or None
         """
         return self.properties.get("CustomizedPageStatus", None)
@@ -841,10 +869,14 @@ class File(AbstractFile):
                 "CheckedOutByUser": self.checked_out_by_user,
                 "VersionEvents": self.version_events,
                 "EffectiveInformationRightsManagementSettings": self.effective_information_rights_management_settings,
+                "ExpirationDate": self.expiration_date,
                 "InformationRightsManagementSettings": self.information_rights_management_settings,
                 "LockedByUser": self.locked_by_user,
                 "ModifiedBy": self.modified_by,
-                "ServerRelativePath": self.server_relative_path
+                "ServerRelativePath": self.server_relative_path,
+                "TimeCreated": self.time_created,
+                "TimeLastModified": self.time_last_modified,
+                "VersionExpirationReport": self.version_expiration_report
             }
             default_value = property_mapping.get(name, None)
         return super(File, self).get_property(name, default_value)

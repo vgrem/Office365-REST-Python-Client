@@ -7,7 +7,6 @@ class ChangeAlert(Change):
     @property
     def alert_id(self):
         """Identifies the changed alert.
-
         :rtype: str or None
         """
         return self.properties.get("AlertId", None)

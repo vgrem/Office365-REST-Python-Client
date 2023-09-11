@@ -7,6 +7,7 @@ class TenantSettings(BaseEntity):
     """Specifies the tenant properties."""
 
     def clear_corporate_catalog(self):
+        """"""
         qry = ServiceOperationQuery(self, "ClearCorporateCatalog", None, None, None, None)
         self.context.add_query(qry)
         return self
@@ -23,7 +24,6 @@ class TenantSettings(BaseEntity):
     @property
     def corporate_catalog_url(self):
         """Specifies the URL of the corporate catalog site collection.
-
         :rtype: str or None
         """
         return self.properties.get('CorporateCatalogUrl', None)
@@ -32,7 +32,6 @@ class TenantSettings(BaseEntity):
     def current(context):
         """
         Specifies the current instance for the SP.TenantSettings.
-
         :type context: office365.sharepoint.client_context.ClientContext
         """
         return TenantSettings(context, ResourcePath("SP.TenantSettings.Current"))
