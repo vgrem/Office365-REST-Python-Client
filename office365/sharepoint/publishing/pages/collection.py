@@ -47,7 +47,6 @@ class SitePageCollection(SitePageMetadataCollection):
     def is_site_page(self, url):
         """
         Indicates whether a specific item is a modern site page.
-
         :param str url: URL of the SitePage to be checked.
         """
         return_type = ClientResult(self.context, bool())
@@ -83,5 +82,19 @@ class SitePageCollection(SitePageMetadataCollection):
         return self.single("FileName eq '{0}'".format(name))
 
     def templates(self):
+        """"""
         return SitePageMetadataCollection(self.context, SitePage,
                                           ServiceOperationPath("Templates", None, self.resource_path))
+
+    def update_full_page_app(self, server_relative_url, web_part_data_as_json):
+        """
+        :param str server_relative_url:
+        :param str web_part_data_as_json:
+        """
+        payload = {
+            "serverRelativeUrl": server_relative_url,
+            "webPartDataAsJson": web_part_data_as_json
+        }
+        qry = ServiceOperationQuery(self, "UpdateFullPageApp", None, payload)
+        self.context.add_query(qry)
+        return self

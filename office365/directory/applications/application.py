@@ -1,3 +1,6 @@
+import base64
+import datetime
+
 from office365.directory.applications.api import ApiApplication
 from office365.directory.applications.public_client import PublicClientApplication
 from office365.directory.applications.roles.role import AppRole
@@ -8,6 +11,7 @@ from office365.directory.object import DirectoryObject
 from office365.directory.extensions.extension_property import ExtensionProperty
 from office365.directory.key_credential import KeyCredential
 from office365.directory.password_credential import PasswordCredential
+from office365.directory.policies.token_issuance import TokenIssuancePolicy
 from office365.entity_collection import EntityCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -24,6 +28,37 @@ class Application(DirectoryObject):
     the URI to identify your application, and more. For more information, see Basics of Registering
     an Application in Azure AD
     """
+    def add_certificate(self, cert_data, display_name, start_datetime=None, end_datetime=None):
+        """Adds a certificate to an application.
+
+        :param str display_name: Friendly name for the key.
+        :param bytes cert_data: The certificate's raw data or path.
+        :param datetime.datetime start_datetime: The date and time at which the credential becomes valid. Default: now
+        :param datetime.datetime end_datetime: The date and time at which the credential expires. Default: now + 180days
+        """
+        if start_datetime is None:
+            start_datetime = datetime.datetime.utcnow()
+        if end_datetime is None:
+            end_datetime = start_datetime + datetime.timedelta(days=180)
+
+        params = KeyCredential(
+            usage="Verify",
+            key_type="AsymmetricX509Cert",
+            start_datetime=start_datetime.isoformat(),
+            end_datetime=end_datetime.isoformat(),
+            key=base64.b64encode(cert_data).decode("utf-8"),
+            display_name="CN={0}".format(display_name)
+        )
+        self.key_credentials.add(params)
+        self.update()
+        return self
+
+    def remove_certificate(self, thumbprint):
+        """
+        Remove a certificate from an application.
+        :param str thumbprint: The unique identifier for the password.
+        """
+        raise NotImplemented("")
 
     def add_password(self, display_name):
         """Adds a strong password to an application.
@@ -118,14 +153,19 @@ class Application(DirectoryObject):
         self.context.add_query(qry)
         return self
 
-    def update(self):
-        self._ser_property_names.append("keyCredentials")
-        return super(Application, self).update()
-
     @property
     def app_id(self):
-        """The unique identifier for the application that is assigned to an application by Azure AD. Not nullable. """
+        """The unique identifier for the application that is assigned to an application by Azure AD. Not nullable.
+        :rtype: str
+        """
         return self.properties.get("appId", None)
+
+    @property
+    def application_template_id(self):
+        """Unique identifier of the applicationTemplate
+        :rtype: str
+        """
+        return self.properties.get("applicationTemplateId", None)
 
     @property
     def app_roles(self):
@@ -148,6 +188,20 @@ class Application(DirectoryObject):
         return self.properties.get("certification", Certification())
 
     @property
+    def created_datetime(self):
+        """
+        The date and time the application was registered.
+        """
+        return self.properties.get("createdDateTime", datetime.datetime.min)
+
+    @property
+    def default_redirect_uri(self):
+        """
+        :rtype: str
+        """
+        return self.properties.get("defaultRedirectUri", None)
+
+    @property
     def spa(self):
         """
         Specifies settings for a single-page application, including sign out URLs and redirect URIs for
@@ -158,6 +212,7 @@ class Application(DirectoryObject):
     def key_credentials(self):
         """The collection of key credentials associated with the application. Not nullable.
         """
+        self._ser_property_names.append("keyCredentials")
         return self.properties.setdefault('keyCredentials', ClientValueCollection(KeyCredential))
 
     @property
@@ -165,7 +220,6 @@ class Application(DirectoryObject):
         """
         The display name for the application.
         Supports $filter (eq, ne, NOT, ge, le, in, startsWith), $search, and $orderBy.
-
         :rtype: str or None
         """
         return self.properties.get('displayName', None)
@@ -218,14 +272,23 @@ class Application(DirectoryObject):
                                    EntityCollection(self.context, ExtensionProperty,
                                                     ResourcePath("extensionProperties", self.resource_path)))
 
+    @property
+    def token_issuance_policies(self):
+        """Get all tokenIssuancePolicies assigned to this object. """
+        return self.properties.get('tokenIssuancePolicies',
+                                   EntityCollection(self.context, TokenIssuancePolicy,
+                                                    ResourcePath("tokenIssuancePolicies", self.resource_path)))
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "appRoles": self.app_roles,
+                "createdDateTime": self.created_datetime,
                 "createdOnBehalfOf": self.created_on_behalf_of,
                 "extensionProperties": self.extension_properties,
                 "keyCredentials": self.key_credentials,
-                "publicClient": self.public_client
+                "publicClient": self.public_client,
+                "tokenIssuancePolicies": self.token_issuance_policies
             }
             default_value = property_mapping.get(name, None)
         return super(Application, self).get_property(name, default_value)

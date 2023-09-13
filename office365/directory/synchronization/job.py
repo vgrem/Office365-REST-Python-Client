@@ -1,5 +1,7 @@
+from office365.directory.synchronization.schema import SynchronizationSchema
 from office365.directory.synchronization.status import SynchronizationStatus
 from office365.entity import Entity
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class SynchronizationJob(Entity):
@@ -14,3 +16,9 @@ class SynchronizationJob(Entity):
     def status(self):
         """Status of the job, which includes when the job was last run, current job state, and errors."""
         return self.properties.get("status", SynchronizationStatus())
+
+    @property
+    def schema(self):
+        """The synchronization schema configured for the job."""
+        return self.properties.get('schema',
+                                   SynchronizationSchema(self.context, ResourcePath("schema", self.resource_path)))

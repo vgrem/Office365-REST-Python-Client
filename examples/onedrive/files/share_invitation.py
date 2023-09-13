@@ -9,7 +9,6 @@ https://learn.microsoft.com/en-us/graph/api/driveitem-invite?view=graph-rest-1.0
 import json
 from datetime import datetime, timedelta
 
-from examples import upload_sample_files
 from office365.graph_client import GraphClient
 from tests.graph_case import acquire_token_by_username_password
 

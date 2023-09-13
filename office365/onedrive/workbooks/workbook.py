@@ -46,7 +46,6 @@ class Workbook(Entity):
 
     def refresh_session(self, session_id):
         """Use this API to refresh an existing workbook session.
-
         :param str session_id: Identifier of the workbook session
         """
         qry = ServiceOperationQuery(self, "refreshSession")

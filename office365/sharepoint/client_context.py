@@ -138,17 +138,16 @@ class ClientContext(ClientRuntimeContext):
     def with_credentials(self, credentials):
         """
         Initializes a client to acquire a token via user or client credentials
-
         :type credentials: UserCredential or ClientCredential
         """
         self.authentication_context.with_credentials(credentials)
         return self
 
-    def execute_batch(self, items_per_batch=100):
+    def execute_batch(self, items_per_batch=100, success_callback=None):
         """
         Construct and submit to a server a batch request
-
         :param int items_per_batch: Maximum to be selected for bulk operation
+        :param (int)-> None success_callback: A callback
         """
         batch_request = ODataBatchV3Request(JsonLightFormat())
         batch_request.beforeExecute += self._authenticate_request
@@ -156,6 +155,8 @@ class ClientContext(ClientRuntimeContext):
         while self.has_pending_request:
             qry = self._get_next_query(items_per_batch)
             batch_request.execute_query(qry)
+            if callable(success_callback):
+                success_callback(items_per_batch)
         return self
 
     def pending_request(self):

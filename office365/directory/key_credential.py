@@ -13,8 +13,8 @@ class KeyCredential(ClientValue):
         :param str custom_key_identifier: A 40-character binary type that can be used to identify the credential.
            Optional. When not provided in the payload, defaults to the thumbprint of the certificate.
         :param str display_name: Friendly name for the key. Optional.
-        :param datetime.datetime or str end_datetime: The date and time at which the credential expires. The DateTimeOffset type
-            represents date and time information using ISO 8601 format and is always in UTC time.
+        :param datetime.datetime or str end_datetime: The date and time at which the credential expires.
+            The DateTimeOffset type represents date and time information using ISO 8601 format and is always in UTC time
             For example, midnight UTC on Jan 1, 2014 is 2014-01-01T00:00:00Z.
         :param bytes or str key: The certificate's raw data in byte array converted to Base64 string.
             Returned only on $select for a single object, that is,

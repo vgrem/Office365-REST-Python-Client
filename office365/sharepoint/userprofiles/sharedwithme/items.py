@@ -5,6 +5,7 @@ from office365.sharepoint.userprofiles.sharedwithme.document import SharedWithMe
 
 
 class SharedWithMeItems(BaseEntity):
+    """"""
 
     @staticmethod
     def shared_with_me(context):

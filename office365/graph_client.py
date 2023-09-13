@@ -6,11 +6,12 @@ from office365.directory.applications.template import ApplicationTemplate
 from office365.directory.audit.log_root import AuditLogRoot
 from office365.directory.directory import Directory
 from office365.directory.domains.domain import Domain
+from office365.directory.extensions.schema import SchemaExtension
 from office365.directory.groups.collection import GroupCollection
 from office365.directory.groups.lifecycle_policy import GroupLifecyclePolicy
 from office365.directory.groups.setting_template import GroupSettingTemplate
 from office365.directory.identities.container import IdentityContainer
-from office365.directory.identities.governance import IdentityGovernance
+from office365.directory.identitygovernance.governance import IdentityGovernance
 from office365.directory.protection.information import InformationProtection
 from office365.directory.protection.root import IdentityProtectionRoot
 from office365.directory.identities.provider import IdentityProvider
@@ -399,3 +400,9 @@ class GraphClient(ClientRuntimeContext):
         """The security resource is the entry point for the Security object model.
         It returns a singleton security resource. It doesn't contain any usable properties."""
         return Security(self, ResourcePath("security"))
+
+    @property
+    def schema_extensions(self):
+        """Get a list of schemaExtension objects in your tenant"""
+        return EntityCollection(self, SchemaExtension, ResourcePath("schemaExtensions"))
+

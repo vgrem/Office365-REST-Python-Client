@@ -1,6 +1,7 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.sharing.reports.site_capabilities import SiteSharingReportCapabilities
 from office365.sharepoint.sharing.site_sharing_report_status import SiteSharingReportStatus
 
 
@@ -34,3 +35,19 @@ class SiteSharingReportHelper(BaseEntity):
                                     None, return_type, True)
         context.add_query(qry)
         return return_type
+
+    @staticmethod
+    def get_site_sharing_report_capabilities(context):
+        """
+        :type context: office365.sharepoint.client_context.ClientContext
+        """
+        return_type = ClientResult(context, SiteSharingReportCapabilities())
+        binding_type = SiteSharingReportHelper(context)
+        qry = ServiceOperationQuery(binding_type, "GetSiteSharingReportCapabilities", None, None,
+                                    None, return_type, True)
+        context.add_query(qry)
+        return return_type
+
+    @property
+    def entity_type_name(self):
+        return "SP.Sharing.SiteSharingReportHelper"

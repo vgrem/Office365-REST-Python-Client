@@ -14,7 +14,6 @@ class UserProfile(BaseEntity):
     def account_name(self):
         """
         The account name of the user.
-
         :rtype: str or None
         """
         return self.properties.get("AccountName", None)
@@ -23,7 +22,6 @@ class UserProfile(BaseEntity):
     def display_name(self):
         """
         The title of the user.
-
         :rtype: str or None
         """
         return self.properties.get("DisplayName", None)
@@ -32,7 +30,6 @@ class UserProfile(BaseEntity):
     def my_site_host_url(self):
         """
         Specifies the URL for the personal site of the current user.
-
         :rtype: str or None
         """
         return self.properties.get("MySiteHostUrl", None)
@@ -41,7 +38,6 @@ class UserProfile(BaseEntity):
     def public_url(self):
         """
         Specifies the public URL for the personal site of the current user.
-
         :rtype: str or None
         """
         return self.properties.get("PublicUrl", None)
@@ -50,7 +46,6 @@ class UserProfile(BaseEntity):
     def url_to_create_personal_site(self):
         """
         The UrlToCreatePersonalSite property specifies the URL to allow the current user to create a personal site.
-
         :rtype: str or None
         """
         return self.properties.get("UrlToCreatePersonalSite", None)
@@ -87,8 +82,8 @@ class UserProfile(BaseEntity):
         """
         Enqueues creating a personal site for this user, which can be used to share documents, web pages,
             and other files.
-
-        :type is_interactive: bool
+        :param bool is_interactive: Has a true value if the request is from a web browser and a false value if the
+        request is from a client application.
         """
         payload = {"isInteractive": is_interactive}
         qry = ServiceOperationQuery(self, "CreatePersonalSiteEnque", None, payload)
@@ -98,7 +93,6 @@ class UserProfile(BaseEntity):
     def set_my_site_first_run_experience(self, value):
         """
         Sets the personal site First Run flag for the user.
-
         :param str value: The value to be set for the First Run flag.
         """
         payload = {"value": value}
@@ -109,7 +103,6 @@ class UserProfile(BaseEntity):
     def share_all_social_data(self, share_all):
         """
         The ShareAllSocialData method specifies whether the current user's social data is to be shared.
-
         :param bool share_all:  If true, social data is shared; if false, social data is not shared.
         """
         payload = {"shareAll": share_all}

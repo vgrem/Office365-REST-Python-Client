@@ -1,3 +1,5 @@
+import datetime
+
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.onedrive.documentsets.version_item import DocumentSetVersionItem
 from office365.onedrive.versions.list_item import ListItemVersion
@@ -18,6 +20,13 @@ class DocumentSetVersion(ListItemVersion):
         return self.properties.get("createdBy", IdentitySet())
 
     @property
+    def created_datetime(self):
+        """
+        Date and time when this version was created.
+        """
+        return self.properties("createdDateTime", datetime.datetime.min)
+
+    @property
     def items(self):
         """Items within the document set that are captured as part of this version."""
         return self.properties.get("items", ClientValueCollection(DocumentSetVersionItem))
@@ -29,3 +38,12 @@ class DocumentSetVersion(ListItemVersion):
         Default value is false.
         """
         return self.properties.get("shouldCaptureMinorVersion", None)
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "createdBy": self.created_by,
+                "createdDateTime": self.created_datetime
+            }
+            default_value = property_mapping.get(name, None)
+        return super(DocumentSetVersion, self).get_property(name, default_value)

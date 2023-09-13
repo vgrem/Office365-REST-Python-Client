@@ -8,6 +8,7 @@ from office365.sharepoint.sharing.object_sharing_information import ObjectSharin
 from office365.sharepoint.sharing.operation_status_code import SharingOperationStatusCode
 from office365.sharepoint.sharing.role_type import RoleType
 from office365.sharepoint.sharing.result import SharingResult
+from office365.sharepoint.sharing.site_sharing_report_helper import SiteSharingReportHelper
 from office365.sharepoint.webs.web import Web
 from tests import test_site_url, test_user_credentials
 
@@ -61,3 +62,7 @@ class TestSharePointSharing(TestCase):
     def test8_get_web_sharing_information(self):
         result = ObjectSharingInformation.get_web_sharing_information(self.client).execute_query()
         self.assertIsNotNone(result.properties)
+
+    def test9_get_site_sharing_report_capabilities(self):
+        result = SiteSharingReportHelper.get_site_sharing_report_capabilities(self.client).execute_query()
+        self.assertIsNotNone(result.value)

@@ -13,6 +13,14 @@ class AdministrativeUnit(DirectoryObject):
     """
 
     @property
+    def display_name(self):
+        """
+        Display name for the administrative unit
+        :rtype: str or None
+        """
+        return self.properties.get("displayName", None)
+
+    @property
     def members(self):
         """
         Users and groups that are members of this administrative unit

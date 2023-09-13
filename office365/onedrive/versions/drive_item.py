@@ -17,7 +17,6 @@ class DriveItemVersion(BaseItemVersion):
     def content(self):
         """
         The content stream for this version of the item.
-
         :rtype: str or bytes
         """
         return self.properties.get('content', None)
@@ -26,7 +25,6 @@ class DriveItemVersion(BaseItemVersion):
     def size(self):
         """
         Indicates the size of the content stream for this version of the item.
-
         :rtype: int
         """
         return self.properties.get('size', None)

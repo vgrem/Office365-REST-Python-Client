@@ -13,6 +13,7 @@ class RoleManagement(Entity):
 
     @property
     def directory(self):
+        """"""
         return self.properties.get('directory',
                                    RbacApplication(self.context, ResourcePath("directory", self.resource_path)))
 
