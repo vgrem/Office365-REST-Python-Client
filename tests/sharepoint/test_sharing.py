@@ -20,6 +20,7 @@ class TestSharePointSharing(TestCase):
     @classmethod
     def setUpClass(cls):
         client = ClientContext(test_site_url).with_credentials(test_user_credentials)
+        client.web.lists.ensure_site_pages_library().execute_query()
         current_user = client.web.current_user.get().execute_query()
         cls.target_user = current_user
         cls.client = client

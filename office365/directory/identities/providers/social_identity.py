@@ -11,7 +11,6 @@ class SocialIdentityProvider(IdentityProviderBase):
     def client_id(self):
         """
         The client identifier for the application obtained when registering the application with the identity provider.
-
         :rtype: str or None
         """
         return self.properties.get('clientId', None)
@@ -21,7 +20,6 @@ class SocialIdentityProvider(IdentityProviderBase):
         """
         The client secret for the application that is obtained when the application is registered
         with the identity provider. This is write-only. A read operation returns ****.
-
         :rtype: str or None
         """
         return self.properties.get('clientSecret', None)
@@ -32,7 +30,6 @@ class SocialIdentityProvider(IdentityProviderBase):
         For a B2B scenario, possible values: Google, Facebook.
         For a B2C scenario, possible values: Microsoft, Google, Amazon, LinkedIn, Facebook, GitHub, Twitter, Weibo,
         QQ, WeChat.
-
         :rtype: str or None
         """
         return self.properties.get('identityProviderType', None)

@@ -13,5 +13,8 @@ class EmailAddress(ClientValue):
         self.address = address
         self.name = name
 
+    def __str__(self):
+        return self.address
+
     def __repr__(self):
         return "{0} <{1}>".format(self.name, self.address)

@@ -8,6 +8,7 @@ class StsPolicy(PolicyBase):
 
     @property
     def applies_to(self):
+        """"""
         return self.properties.get('appliesTo',
                                    DirectoryObjectCollection(self.context,
                                                              ResourcePath("appliesTo", self.resource_path)))

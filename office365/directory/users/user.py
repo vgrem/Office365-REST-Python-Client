@@ -24,6 +24,7 @@ from office365.entity_collection import EntityCollection
 from office365.intune.devices.data import DeviceAndAppManagementData
 from office365.intune.devices.managed import ManagedDevice
 from office365.intune.devices.managed_app_diagnostic_status import ManagedAppDiagnosticStatus
+from office365.intune.policies.managed_app import ManagedAppPolicy
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.sites.site import Site
 from office365.onenote.onenote import Onenote
@@ -305,11 +306,17 @@ class User(DirectoryObject):
         self.context.add_query(qry)
         return return_type
 
+    def get_managed_app_policies(self):
+        """Gets app restrictions for a given user."""
+        return_type = EntityCollection(self.context, ManagedAppPolicy)
+        qry = FunctionQuery(self, "getManagedAppPolicies", None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def delete_object(self, permanent_delete=False):
         """
         :param permanent_delete: Permanently deletes the user from directory
         :type permanent_delete: bool
-
         """
         super(User, self).delete_object()
         if permanent_delete:
@@ -347,6 +354,16 @@ class User(DirectoryObject):
         Retire all devices from management for this user
         """
         qry = ServiceOperationQuery(self, "removeAllDevicesFromManagement")
+        self.context.add_query(qry)
+        return self
+
+    def wipe_managed_app_registrations_by_device_tag(self, device_tag):
+        """
+        Issues a wipe operation on an app registration with specified device tag.
+        :param str device_tag: device tag
+        """
+        payload = {"deviceTag": device_tag}
+        qry = ServiceOperationQuery(self, "wipeManagedAppRegistrationsByDeviceTag", None, payload)
         self.context.add_query(qry)
         return self
 
@@ -544,7 +561,6 @@ class User(DirectoryObject):
     def preferred_language(self):
         """
         The preferred language for the user. Should follow ISO 639-1 Code; for example en-US.
-
         :rtype: str or None
         """
         return self.properties.get('preferredLanguage', None)

@@ -11,16 +11,28 @@ class UserCollection(BaseEntityCollection):
         """Represents a collection of User resources."""
         super(UserCollection, self).__init__(context, User, resource_path)
 
-    def add_user(self, login_name):
+    def add_user(self, user):
         """
         Creates the user
-        :param str login_name: Specifies the login name of the principal.
+        :param str or User user: Specifies the user login name or User object.
         """
         return_type = User(self.context)
         self.add_child(return_type)
-        return_type.set_property('LoginName', login_name)
-        qry = CreateEntityQuery(self, return_type, return_type)
-        self.context.add_query(qry)
+
+        def _create_and_add_query(login_name):
+            """
+            :type login_name: str
+            """
+            return_type.set_property('LoginName', login_name)
+            qry = CreateEntityQuery(self, return_type, return_type)
+            self.context.add_query(qry)
+
+        if isinstance(user, User):
+            def _user_loaded():
+                _create_and_add_query(user.login_name)
+            user.ensure_property("LoginName", _user_loaded)
+        else:
+            _create_and_add_query(user)
         return return_type
 
     def get_by_email(self, email):

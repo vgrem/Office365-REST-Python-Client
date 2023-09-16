@@ -5,6 +5,14 @@ class SpoOperation(ClientObject):
     """Represents an operation on a site collection."""
 
     @property
+    def has_timedout(self):
+        """
+        Gets a value that indicates whether the maximum wait time for the operation has been exceeded.
+        :rtype: bool or None
+        """
+        return self.properties.get("HasTimedout", None)
+
+    @property
     def is_complete(self):
         """Gets a value that indicates whether the operation has completed."""
         if self.is_property_available("IsComplete"):

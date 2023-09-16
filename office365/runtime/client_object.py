@@ -182,10 +182,10 @@ class ClientObject(object):
         :type action: (any) -> None
         :type names: str or list[str]
         """
+        if self.property_ref_name is not None and self.property_ref_name not in names:
+            names.append(self.property_ref_name)
 
         names_to_include = [n for n in names if not self.is_property_available(n)]
-        if self.property_ref_name is not None and self.property_ref_name not in names_to_include:
-            names_to_include.append(self.property_ref_name)
         if len(names_to_include) > 0:
             from office365.runtime.queries.read_entity import ReadEntityQuery
             qry = ReadEntityQuery(self, names_to_include)

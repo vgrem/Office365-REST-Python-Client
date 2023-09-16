@@ -60,7 +60,7 @@ class GroupCollection(BaseEntityCollection):
     def remove_by_id(self, group_id):
         """Removes the group with the specified member ID from the collection.
 
-        :param str group_id: Specifies the member identifier.
+        :param int group_id: Specifies the member identifier.
         """
         qry = ServiceOperationQuery(self, "RemoveById", [group_id])
         self.context.add_query(qry)

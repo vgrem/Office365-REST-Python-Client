@@ -23,3 +23,40 @@ class UserRegistrationDetails(Entity):
         :rtype: bool
         """
         return self.properties.get("isMfaRegistered", None)
+
+    @property
+    def is_passwordless_capable(self):
+        """
+        Indicates whether the user has registered a passwordless strong authentication method (including FIDO2,
+        Windows Hello for Business, and Microsoft Authenticator (Passwordless)) that is allowed by the authentication
+        methods policy.
+        :rtype: bool
+        """
+        return self.properties.get("isPasswordlessCapable", None)
+
+    @property
+    def is_sspr_capable(self):
+        """
+        Indicates whether the user has registered the required number of authentication methods for self-service
+        password reset and the user is allowed to perform self-service password reset by policy.
+        :rtype: bool
+        """
+        return self.properties.get("isSsprCapable", None)
+
+    @property
+    def is_sspr_enabled(self):
+        """
+        Indicates whether the user is allowed to perform self-service password reset by policy. The user may not
+        necessarily have registered the required number of authentication methods for self-service password reset.
+        :rtype: bool
+        """
+        return self.properties.get("isSsprEnabled", None)
+
+    @property
+    def user_type(self):
+        """
+        Identifies whether the user is a member or guest in the tenant.
+        The possible values are: member, guest, unknownFutureValue.
+        :rtype: str or None
+        """
+        return self.properties.get("userType", None)

@@ -6,6 +6,7 @@ from office365.directory.policies.cross_tenant_access import CrossTenantAccessPo
 from office365.directory.policies.permission_grant import PermissionGrantPolicy
 from office365.directory.policies.authorization import AuthorizationPolicy
 from office365.directory.policies.conditional_access import ConditionalAccessPolicy
+from office365.directory.policies.tenant_app_management import TenantAppManagementPolicy
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
@@ -67,6 +68,16 @@ class PolicyRoot(Entity):
                                                                         self.resource_path)))
 
     @property
+    def default_app_management_policy(self):
+        """
+        The tenant-wide policy that enforces app management restrictions for all applications and service principals.
+        """
+        return self.properties.get('defaultAppManagementPolicy',
+                                   TenantAppManagementPolicy(self.context,
+                                                             ResourcePath("defaultAppManagementPolicy",
+                                                                          self.resource_path)))
+
+    @property
     def permission_grant_policies(self):
         """"
         The policy that specifies the conditions under which consent can be granted.
@@ -94,6 +105,7 @@ class PolicyRoot(Entity):
                 "authorizationPolicy": self.authorization_policy,
                 "conditional_access_policies": self.conditional_access_policies,
                 "crossTenantAccessPolicy": self.cross_tenant_access_policy,
+                "defaultAppManagementPolicy": self.default_app_management_policy,
                 "permissionGrantPolicies": self.permission_grant_policies,
             }
             default_value = property_mapping.get(name, None)

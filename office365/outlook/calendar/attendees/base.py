@@ -4,7 +4,7 @@ from office365.outlook.mail.recipient import Recipient
 class AttendeeBase(Recipient):
     """The type of attendees."""
 
-    def __init__(self, email_address, attendee_type=None):
+    def __init__(self, email_address=None, attendee_type=None):
         """
 
         :param office365.mail.emailAddress.EmailAddress email_address: Includes the name and SMTP address of the attendees

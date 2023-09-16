@@ -55,7 +55,6 @@ class TeamsAsyncOperation(Entity):
     @property
     def target_resource_id(self):
         """The ID of the object that's created or modified as result of this async operation, typically a team.
-
         :rtype: str or None
         """
         return self.properties.get("targetResourceId", None)
@@ -64,7 +63,6 @@ class TeamsAsyncOperation(Entity):
     def target_resource_location(self):
         """The location of the object that's created or modified as result of this async operation.
         This URL should be treated as an opaque value and not parsed into its component paths.
-
         :rtype: str or None
         """
         return self.properties.get("targetResourceLocation", None)
@@ -73,7 +71,6 @@ class TeamsAsyncOperation(Entity):
     def status(self):
         """
         Operation status.
-
         :rtype: str
         """
         return self.properties.get("status", None)

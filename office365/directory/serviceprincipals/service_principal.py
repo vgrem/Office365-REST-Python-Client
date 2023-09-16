@@ -1,5 +1,6 @@
 from office365.delta_collection import DeltaCollection
 from office365.directory.applications.roles.assignment_collection import AppRoleAssignmentCollection
+from office365.directory.applications.roles.role import AppRole
 from office365.directory.certificates.self_signed import SelfSignedCertificate
 from office365.directory.key_credential import KeyCredential
 from office365.directory.object_collection import DirectoryObjectCollection
@@ -138,6 +139,13 @@ class ServicePrincipal(DirectoryObject):
                                                                ResourcePath("appRoleAssignedTo", self.resource_path)))
 
     @property
+    def app_roles(self):
+        """
+        The roles exposed by the application which this service principal represents.
+        """
+        return self.properties.get("appRoles", ClientValueCollection(AppRole))
+
+    @property
     def homepage(self):
         """
         Home page or landing page of the application.
@@ -267,6 +275,7 @@ class ServicePrincipal(DirectoryObject):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "appRoles": self.app_roles,
                 "appRoleAssignedTo": self.app_role_assigned_to,
                 "created_objects": self.created_objects,
                 "keyCredentials": self.key_credentials,

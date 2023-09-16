@@ -9,6 +9,21 @@ from office365.sharepoint.utilities.principal_info import PrincipalInfo
 class Group(Principal):
     """Represents a collection of members in a SharePoint site. A group is a type of SP.Principal."""
 
+    def delete_object(self):
+        """
+        Deletes the group
+        A custom operation since the default type SP.Group does not support HTTP DELETE method.
+        """
+        if self.id:
+            self.parent_collection.remove_by_id(self.id)
+        elif self.login_name:
+            self.parent_collection.remove_by_login_name(self.login_name)
+        else:
+            def _group_loaded():
+                self.parent_collection.remove_by_id(self.id)
+            self.ensure_property("Id", _group_loaded)
+        return self
+
     def expand_to_principals(self, max_count=10):
         """
         Expands current group to a collection of principals.
@@ -39,6 +54,13 @@ class Group(Principal):
         else:
             _set_user_as_owner(user)
         return self
+
+    @property
+    def parent_collection(self):
+        """
+        :rtype: office365.sharepoint.principal.groups.collection.GroupCollection
+        """
+        return self._parent_collection
 
     @property
     def allow_members_edit_membership(self):

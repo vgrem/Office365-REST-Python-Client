@@ -44,10 +44,22 @@ class GroupLifecyclePolicy(Entity):
         """
         List of email address to send notifications for groups without owners.
         Multiple email address can be defined by separating email address with a semicolon.
+        :rtype: str or None
         """
         return self.properties.get("alternateNotificationEmails", None)
 
     @property
+    def group_lifetime_in_days(self):
+        """
+        Number of days before a group expires and needs to be renewed. Once renewed, the group expiration is extended
+        by the number of days defined.
+        :rtype: int or None
+        """
+        return self.properties.get("groupLifetimeInDays", None)
+
+    @property
     def managed_group_types(self):
-        """The group type for which the expiration policy applies. Possible values are All, Selected or None."""
+        """The group type for which the expiration policy applies. Possible values are All, Selected or None.
+        :rtype: str or None
+        """
         return self.properties.get("managedGroupTypes", None)

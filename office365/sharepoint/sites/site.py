@@ -113,6 +113,7 @@ class Site(BaseEntity):
         return return_type
 
     def get_migration_status(self):
+        """"""
         return_type = BaseEntityCollection(self.context, SPMigrationJobStatus)
         qry = ServiceOperationQuery(self, "GetMigrationStatus", None, None, None, return_type)
         self.context.add_query(qry)

@@ -15,7 +15,6 @@ class UserFlowLanguageConfiguration(Entity):
     def display_name(self):
         """
         The language name to display.
-
         :rtype: str or None
         """
         return self.properties.get("displayName", None)

@@ -88,7 +88,6 @@ class ContentType(BaseItem):
     def name(self):
         """
         The name of the content type.
-
         :rtype: str or None
         """
         return self.properties.get('name', None)
@@ -97,7 +96,6 @@ class ContentType(BaseItem):
     def description(self):
         """
         The descriptive text for the item.
-
         :rtype: str or None
         """
         return self.properties.get('description', None)
@@ -105,7 +103,6 @@ class ContentType(BaseItem):
     @property
     def parent_id(self):
         """The unique identifier of the content type.
-
         :rtype: str or None
         """
         return self.properties.get('parentId', None)
@@ -113,7 +110,6 @@ class ContentType(BaseItem):
     @property
     def propagate_changes(self):
         """If 'true', changes to this column will be propagated to lists that implement the column.
-
         :rtype: bool or None
         """
         return self.properties.get('propagateChanges', None)
@@ -122,7 +118,6 @@ class ContentType(BaseItem):
     def read_only(self):
         """
         If true, the content type cannot be modified unless this value is first set to false.
-
         :rtype: bool or None
         """
         return self.properties.get('readOnly', None)

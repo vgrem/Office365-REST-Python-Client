@@ -10,4 +10,10 @@ class ProvisioningObjectSummary(Entity):
         """Represents the service principal used for provisioning."""
         return self.properties.get("servicePrincipal", ProvisioningServicePrincipal())
 
-
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "servicePrincipal": self.service_principal
+            }
+            default_value = property_mapping.get(name, None)
+        return super(ProvisioningObjectSummary, self).get_property(name, default_value)

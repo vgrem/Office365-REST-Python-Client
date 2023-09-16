@@ -19,14 +19,14 @@ https://learn.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-appo
 import os
 
 from office365.sharepoint.client_context import ClientContext
-from tests import test_client_id, test_cert_thumbprint, test_site_url, test_tenant_name
+from tests import test_client_id, test_cert_thumbprint, test_site_url, test_tenant
 
-cert_path = '{0}/selfsigncert.pem'.format(os.path.dirname(__file__))
+cert_path = '{0}/../selfsignkey.pem'.format(os.path.dirname(__file__))
 with open(cert_path, 'r') as f:
     private_key = open(cert_path).read()
 
 cert_credentials = {
-    'tenant': test_tenant_name,
+    'tenant': test_tenant,
     'client_id': test_client_id,
     'thumbprint': test_cert_thumbprint,
     'private_key': private_key

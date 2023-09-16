@@ -12,3 +12,11 @@ class DirectoryRoleTemplate(DirectoryObject):
         :rtype: str
         """
         return self.properties.get("displayName", None)
+
+    @property
+    def description(self):
+        """
+        The display name to set for the directory role
+        :rtype: str
+        """
+        return self.properties.get("description", None)

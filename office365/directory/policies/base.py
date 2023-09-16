@@ -8,7 +8,6 @@ class PolicyBase(DirectoryObject):
     def display_name(self):
         """
         Display name for this policy
-
         :rtype: str or None
         """
         return self.properties.get("displayName", None)

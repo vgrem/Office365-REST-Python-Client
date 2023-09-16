@@ -1,3 +1,8 @@
+"""
+List users
+
+https://learn.microsoft.com/en-us/graph/api/user-list?view=graph-rest-1.0
+"""
 import json
 
 from office365.graph_client import GraphClient

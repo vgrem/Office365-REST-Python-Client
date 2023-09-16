@@ -7,18 +7,21 @@ you have to use the SharePoint Only model via based Azure ACS as described in he
 Demonstrates how to use Azure AD App-Only auth flow
 
 https://learn.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread
+
+Refer wiki for a more details:
+https://github.com/vgrem/Office365-REST-Python-Client/wiki/How-to-connect-to-SharePoint-Online-with-certificate-credentials
 """
 
 import os
 
 from office365.sharepoint.client_context import ClientContext
-from tests import test_client_id, test_tenant_name, test_site_url, test_cert_thumbprint
+from tests import test_client_id, test_tenant_name, test_site_url, test_cert_thumbprint, test_tenant
 
 cert_credentials = {
-    'tenant': test_tenant_name,
+    'tenant': test_tenant,
     'client_id': test_client_id,
     'thumbprint': test_cert_thumbprint,
-    'cert_path': '{0}/selfsigncert.pem'.format(os.path.dirname(__file__)),
+    'cert_path': '{0}/../selfsignkey.pem'.format(os.path.dirname(__file__)),
 }
 ctx = ClientContext(test_site_url).with_client_certificate(**cert_credentials)
 current_web = ctx.web.get().execute_query()
