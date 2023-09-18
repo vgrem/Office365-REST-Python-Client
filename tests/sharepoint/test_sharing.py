@@ -67,3 +67,7 @@ class TestSharePointSharing(TestCase):
     def test9_get_site_sharing_report_capabilities(self):
         result = SiteSharingReportHelper.get_site_sharing_report_capabilities(self.client).execute_query()
         self.assertIsNotNone(result.value)
+
+    def test_10_get_get_list_sharing_settings(self):
+        result = self.client.web.default_document_library().get_sharing_settings().execute_query()
+        self.assertIsNotNone(result.list_id)

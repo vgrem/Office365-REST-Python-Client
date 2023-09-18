@@ -1,10 +1,13 @@
+"""
+Creates a list item and uploads an attachment
+"""
+
 import os
 from office365.sharepoint.attachments.creation_information import AttachmentCreationInformation
 from office365.sharepoint.client_context import ClientContext
 from tests import test_client_credentials, test_team_site_url
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
-
 list_title = "Company Tasks"
 tasks_list = ctx.web.lists.get_by_title(list_title)
 

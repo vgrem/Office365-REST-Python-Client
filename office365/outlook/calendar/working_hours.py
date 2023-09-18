@@ -1,4 +1,4 @@
-from office365.outlook.calendar.time_zone_base import TimeZoneBase
+from office365.outlook.calendar.timezones.base import TimeZoneBase
 from office365.runtime.client_value import ClientValue
 from office365.runtime.types.collections import StringCollection
 

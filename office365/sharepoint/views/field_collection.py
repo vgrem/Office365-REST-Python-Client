@@ -1,16 +1,30 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.base_entity import BaseEntity
 
 
-class ViewFieldCollection(BaseEntityCollection):
+class ViewFieldCollection(BaseEntity):
     """Represents a collection of Field resources."""
 
     def __init__(self, context, resource_path=None):
-        super(ViewFieldCollection, self).__init__(context, str, resource_path)
+        super(ViewFieldCollection, self).__init__(context, resource_path)
+
+    def __len__(self):
+        return len(self.items)
+
+    def __getitem__(self, index):
+        """
+        Gets view field by index
+        :param int index: Index
+        """
+        return self.items[index]
+
+    def __repr__(self):
+        return repr(self.items)
 
     @property
     def schema_xml(self):
-        """Gets Schema Xml.
+        """
+        Gets Schema Xml.
         :rtype: str or None
         """
         return self.properties.get('SchemaXml', None)
@@ -18,15 +32,14 @@ class ViewFieldCollection(BaseEntityCollection):
     @property
     def items(self):
         """Gets items.
-
         :rtype: list[str] or None
         """
         return self.properties.get('Items', None)
 
     def set_property(self, name, value, persist_changes=False):
-        self._properties[name] = value
         if name == "Items":
-            self._data = list(value.values())
+            value = list(value.values())
+        super(ViewFieldCollection, self).set_property(name, value, persist_changes)
         return self
 
     def add_view_field(self, field_name):
@@ -41,7 +54,6 @@ class ViewFieldCollection(BaseEntityCollection):
     def move_view_field_to(self, name, index):
         """
         Moves the field with the specified field internal name to the specified position in the collection
-
         :param str name: Specifies the field internal name.
         :param int index: Specifies the new position for the field (2). The first position is 0.
         """
@@ -66,3 +78,7 @@ class ViewFieldCollection(BaseEntityCollection):
         qry = ServiceOperationQuery(self, "RemoveViewField", [field_name])
         self.context.add_query(qry)
         return self
+
+    @property
+    def entity_type_name(self):
+        return "SP.ViewFieldCollection"

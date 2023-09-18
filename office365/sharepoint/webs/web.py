@@ -603,7 +603,7 @@ class Web(SecurableObject):
         return return_type
 
     @staticmethod
-    def get_object_sharing_settings(context, object_url, group_id, use_simplified_roles):
+    def get_object_sharing_settings(context, object_url, group_id=None, use_simplified_roles=None, return_type=None):
         """Given a path to an object in SharePoint, this will generate a sharing settings object which contains
         necessary information for rendering sharing information
 
@@ -619,8 +619,10 @@ class Web(SecurableObject):
         :param int group_id: The id value of the permissions group if adding to a group, 0 otherwise.
         :param bool use_simplified_roles: A Boolean value indicating whether to use the SharePoint
         simplified roles (Edit, View) or not.
+        :param ObjectSharingSettings return_type: Return type
         """
-        return_type = ObjectSharingSettings(context)
+        if return_type is None:
+            return_type = ObjectSharingSettings(context)
         payload = {
             "objectUrl": object_url,
             "groupId": group_id,

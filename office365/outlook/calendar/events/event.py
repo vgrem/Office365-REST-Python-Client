@@ -83,6 +83,58 @@ class Event(OutlookItem):
         return self
 
     @property
+    def allow_new_time_proposals(self):
+        """
+        true if the meeting organizer allows invitees to propose a new time when responding; otherwise, false.
+        Optional. Default is true.
+        :rtype: bool or None
+        """
+        return self.properties.get("allowNewTimeProposals", None)
+
+    @property
+    def has_attachments(self):
+        """
+        Set to true if the event has attachments.
+        :rtype: bool or None
+        """
+        return self.properties.get("hasAttachments", None)
+
+    @property
+    def hide_attendees(self):
+        """
+        When set to true, each attendee only sees themselves in the meeting request and meeting Tracking list.
+        Default is false.
+        :rtype: bool or None
+        """
+        return self.properties.get("hideAttendees", None)
+
+    @property
+    def ical_uid(self):
+        """
+        A unique identifier for an event across calendars. This ID is different for each occurrence in a recurring
+        series. Read-only.
+        :rtype: str or None
+        """
+        return self.properties.get("iCalUId", None)
+
+    @property
+    def importance(self):
+        """
+        The importance of the event. The possible values are: low, normal, high.
+        :rtype: str
+        """
+        return self.properties.get("importance", None)
+
+    @property
+    def is_all_day(self):
+        """
+        Set to true if the event lasts all day. If true, regardless of whether it's a single-day or multi-day event,
+        start and end time must be set to midnight and be in the same time zone.
+        :rtype: bool or None
+        """
+        return self.properties.get("isAllDay", None)
+
+    @property
     def start(self):
         """
         The date, time, and time zone that the event starts. By default, the start time is in UTC.

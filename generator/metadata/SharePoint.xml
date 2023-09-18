@@ -22329,7 +22329,7 @@
          <Annotations Target="SP.Publishing.SitePage/CanvasJson1">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.Publishing.SitePage/CheckIn">
+         <Annotations Target="SP.Publishing.SitePage/"CheckIn"">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Publishing.SitePage/CoAuthState">

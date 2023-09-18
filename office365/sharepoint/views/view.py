@@ -28,7 +28,7 @@ class View(BaseEntity):
             caml_query = CamlQuery.parse(self.view_query)
             qry = ServiceOperationQuery(self.parent_list, "GetItems", None, caml_query, "query", return_type)
             self.context.add_query(qry)
-        self.ensure_property("ViewQuery", _get_items_inner)
+        self.ensure_properties(["ViewQuery", "ViewFields"], _get_items_inner)
         return return_type
 
     def render_as_html(self):
@@ -139,12 +139,13 @@ class View(BaseEntity):
 
     @property
     def editor_modified(self):
-        """Specifies whether the list view was modified in an editor."""
+        """Specifies whether the list view was modified in an editor.
+        :rtype: bool or None
+        """
         return self.properties.get("EditorModified", None)
 
     def formats(self):
         """Specifies the column and row formatting for the list view.
-
         :stype: str or None
         """
         return self.properties.get("Formats", None)
@@ -171,13 +172,15 @@ class View(BaseEntity):
 
     @default_view.setter
     def default_view(self, value):
-        """Sets whether the list view is the default list view.
+        """
+        Sets whether the list view is the default list view.
         """
         self.set_property("DefaultView", value)
 
     @property
     def default_view_for_content_type(self):
-        """Specifies whether the list view is the default list view for the content type specified by ContentTypeId.
+        """
+        Specifies whether the list view is the default list view for the content type specified by ContentTypeId.
         :rtype: bool or None
         """
         return self.properties.get("DefaultViewForContentType", None)
@@ -190,7 +193,10 @@ class View(BaseEntity):
 
     @property
     def view_query(self):
-        """Gets or sets a value that specifies the query that is used by the list view."""
+        """
+        Gets or sets a value that specifies the query that is used by the list view.
+        :rtype: str or None
+        """
         return self.properties.get('ViewQuery', None)
 
     @property
@@ -210,7 +216,10 @@ class View(BaseEntity):
 
     @property
     def view_joins(self):
-        """Specifies the joins that are used in the list view."""
+        """
+        Specifies the joins that are used in the list view
+        :rtype: str or None
+        """
         return self.properties.get("ViewJoins", None)
 
     @property
@@ -220,13 +229,14 @@ class View(BaseEntity):
 
     def get_property(self, name, default_value=None):
         property_mapping = {
+            "ContentTypeId": self.content_type_id,
             "ViewFields": self.view_fields,
             "DefaultView": self.default_view,
             "ServerRelativePath": self.server_relative_path,
             "VisualizationInfo": self.visualization_info
         }
         if name in property_mapping:
-            default_value = property_mapping[name]
+            default_value = property_mapping.get(name, None)
         return super(View, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):

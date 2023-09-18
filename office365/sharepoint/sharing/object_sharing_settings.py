@@ -14,7 +14,6 @@ class ObjectSharingSettings(BaseEntity):
     def web_url(self):
         """
         The URL pointing to the containing SP.Web object.
-
         :rtype: str
         """
         return self.properties.get("WebUrl", None)
@@ -34,6 +33,30 @@ class ObjectSharingSettings(BaseEntity):
         :rtype: bool
         """
         return self.properties.get("BlockPeoplePickerAndSharing", None)
+
+    @property
+    def can_current_user_manage_organization_readonly_link(self):
+        """
+        Boolean indicating whether the current user can create or disable an organization View link.
+        :rtype: bool
+        """
+        return self.properties.get("CanCurrentUserManageOrganizationReadonlyLink", None)
+
+    @property
+    def can_current_user_manage_organization_read_write_link(self):
+        """
+        Boolean indicating whether the current user can create or disable an organization Edit link.
+        :rtype: bool
+        """
+        return self.properties.get("CanCurrentUserManageOrganizationReadWriteLink", None)
+
+    @property
+    def can_current_user_manage_readonly_link(self):
+        """
+        Boolean indicating whether the current user can create or disable an anonymous View link.
+        :rtype: bool
+        """
+        return self.properties.get("CanCurrentUserManageReadonlyLink", None)
 
     @property
     def can_send_email(self):
@@ -58,6 +81,14 @@ class ObjectSharingSettings(BaseEntity):
         :return: bool
         """
         return self.properties.get("IsUserSiteAdmin", None)
+
+    @property
+    def list_id(self):
+        """
+        The unique ID of the parent list (if applicable).
+        :rtype: str
+        """
+        return self.properties.get("ListId", None)
 
     @property
     def roles(self):

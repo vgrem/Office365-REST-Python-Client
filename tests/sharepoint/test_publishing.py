@@ -58,6 +58,18 @@ class TestPublishing(SPTestCase):
         result = self.client.page_diagnostics.by_page("/sites/team/SitePages/Home.aspx").execute_query()
         self.assertIsNotNone(result.value)
 
+    def test_12_checkout_page(self):
+        page = self.client.site_pages.pages.get_by_name("Home.aspx")
+        page.checkout_page().execute_query()
+        self.assertIsNotNone(page.resource_path)
+        self.assertTrue(page.is_page_checked_out_to_current_user)
+
+    def test_13_discard_page(self):
+        page = self.client.site_pages.pages.get_by_name("Home.aspx")
+        page.discard_page().execute_query()
+        self.assertFalse(page.is_page_checked_out_to_current_user, "Page is expected to be checked in")
+
+
     #def test_12_share_page_preview_by_email(self):
     #    page = self.client.site_pages.pages.get_by_url("/sites/team/SitePages/Home.aspx")
     #    page.share_page_preview_by_email("This page has been shared with you",

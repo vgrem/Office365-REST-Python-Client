@@ -9,6 +9,7 @@ from office365.sharepoint.translation.status_collection import TranslationStatus
 
 
 class SharePagePreviewByEmailFieldsData(ClientValue):
+    """This class contains the information used by SharePagePreviewByEmail method"""
 
     def __init__(self, message=None, recipient_emails=None):
         """
@@ -28,10 +29,9 @@ class SitePage(SitePageMetadata):
 
     def checkout_page(self):
         """Checks out the current Site Page if it is available to be checked out."""
-        return_type = SitePage(self.context)
-        qry = ServiceOperationQuery(self, "CheckoutPage", None, None, None, return_type)
+        qry = ServiceOperationQuery(self, "CheckoutPage", None, None, None, self)
         self.context.add_query(qry)
-        return return_type
+        return self
 
     def copy(self):
         """Creates a copy of the current Site Page and returns the resulting new SitePage."""
@@ -41,11 +41,12 @@ class SitePage(SitePageMetadata):
 
     def discard_page(self):
         """Discards the current checked out version of the Site Page.  Returns the resulting SitePage after discard."""
-        qry = ServiceOperationQuery(self, "DiscardPage")
+        qry = ServiceOperationQuery(self, "DiscardPage", return_type=self)
         self.context.add_query(qry)
         return self
 
     def ensure_title_resource(self):
+        """"""
         qry = ServiceOperationQuery(self, "EnsureTitleResource")
         self.context.add_query(qry)
         return self

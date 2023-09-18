@@ -77,7 +77,6 @@ class TestGraphUser(GraphTestCase):
         self.assertGreater(len(result), 0)
 
     def test_14_delete_extension(self):
-        #result = self.client.me.extensions["Com.Contoso.SSN"].delete_object().execute_query()
         result = self.__class__.test_extension.delete_object().execute_query()
         self.assertIsNotNone(result.resource_path)
 

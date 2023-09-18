@@ -31,6 +31,7 @@ from office365.sharepoint.navigation.configured_metadata_items import Configured
 from office365.sharepoint.pages.wiki_page_creation_information import WikiPageCreationInformation
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.principal.users.user import User
+from office365.sharepoint.sharing.object_sharing_settings import ObjectSharingSettings
 from office365.sharepoint.sitescripts.utility import SiteScriptUtility
 from office365.sharepoint.translation.user_resource import UserResource
 from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
@@ -113,6 +114,20 @@ class List(SecurableObject):
                                                               return_type)
 
         self.root_folder.ensure_property("ServerRelativeUrl", _loaded)
+        return return_type
+
+    def get_sharing_settings(self):
+        """
+        Retrieves a sharing settings for a List
+        """
+        return_type = ObjectSharingSettings(self.context)
+
+        def _list_loaded():
+            from office365.sharepoint.webs.web import Web
+            list_abs_path = SPResPath.create_absolute(self.context.base_url, self.root_folder.serverRelativeUrl)
+            Web.get_object_sharing_settings(self.context, str(list_abs_path), return_type=return_type)
+
+        self.ensure_property("RootFolder", _list_loaded)
         return return_type
 
     def get_site_script(self, options=None):

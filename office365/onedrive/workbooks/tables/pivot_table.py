@@ -25,7 +25,6 @@ class WorkbookPivotTable(Entity):
     @property
     def name(self):
         """Name of the PivotTable.
-
         :rtype: str or None
         """
         return self.properties.get("Name", None)

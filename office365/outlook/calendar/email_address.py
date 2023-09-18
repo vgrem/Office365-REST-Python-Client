@@ -6,8 +6,8 @@ class EmailAddress(ClientValue):
 
     def __init__(self, address=None, name=None):
         """
-        :param str address:
-        :param str name:
+        :param str address: The email address of the person or entity.
+        :param str name: The display name of the person or entity.
         """
         super(EmailAddress, self).__init__()
         self.address = address

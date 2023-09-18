@@ -101,6 +101,7 @@ class CamlQuery(ClientValue):
 
     @staticmethod
     def create_all_items_query():
+        """Constructs a query"""
         return CamlQuery.parse("", ViewScope.RecursiveAll)
 
     @staticmethod

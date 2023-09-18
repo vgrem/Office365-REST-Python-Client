@@ -7,8 +7,8 @@ class AttachmentCreationInformation(ClientValue):
         """
         Represents properties that can be set when creating a file by using the AttachmentFiles.Add method.
 
-        :type filename: str
-        :type content: str or bytes
+        :param str filename: Specifies the file name of the list item attachment.
+        :param str or bytes content: The contents of the file as a stream.
         """
         super(AttachmentCreationInformation, self).__init__()
         self._filename = filename

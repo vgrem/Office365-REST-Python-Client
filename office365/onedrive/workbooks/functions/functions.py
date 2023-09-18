@@ -9,7 +9,6 @@ class WorkbookFunctions(Entity):
     def abs(self, number):
         """
         Returns the absolute value of a number. The absolute value of a number is the number without its sign
-
         :param float number: The real number of which you want the absolute value.
         """
         return_type = WorkbookFunctionResult(self.context)
