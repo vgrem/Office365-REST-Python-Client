@@ -1,3 +1,4 @@
+from office365.directory.security.attacksimulations.report import SimulationReport
 from office365.entity import Entity
 
 
@@ -15,3 +16,8 @@ class Simulation(Entity):
     The attack simulation and training API enables tenant administrators to list launched simulation exercises
     and trainings, and get reports on derived insights into online behaviors of users in the phishing simulations.
     """
+
+    @property
+    def report(self):
+        """Report of the attack simulation and training campaign."""
+        return self.properties.get("report", SimulationReport())

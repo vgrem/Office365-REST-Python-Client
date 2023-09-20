@@ -1,3 +1,5 @@
+import datetime
+
 from office365.sharepoint.base_entity import BaseEntity
 
 
@@ -8,17 +10,15 @@ class StorageMetrics(BaseEntity):
     def last_modified(self):
         """
         Last modified date for all the items under the corresponding folder.
-
         :rtype: int or None
         """
-        return self.properties.get("LastModified", None)
+        return self.properties.get("LastModified", datetime.datetime.min)
 
     @property
     def total_file_count(self):
         """
         Aggregate number of files within the corresponding folder and its sub-folders.
         Excludes versions, list item attachments, and non-customized documents.
-
         :rtype: int or None
         """
         return self.properties.get("TotalFileCount", None)

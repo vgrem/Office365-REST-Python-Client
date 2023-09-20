@@ -7,6 +7,6 @@ from office365.graph_client import GraphClient
 from tests.graph_case import acquire_token_by_username_password
 
 client = GraphClient(acquire_token_by_username_password)
-activities = client.me.activities.get().execute_query()
+activities = client.me.activities.get().top(5).execute_query()
 for activity in activities:  # type: UserActivity
     print(activity)

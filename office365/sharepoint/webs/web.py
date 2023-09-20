@@ -21,6 +21,7 @@ from office365.sharepoint.clientsidecomponent.query_result import SPClientSideCo
 from office365.sharepoint.clientsidecomponent.identifier import SPClientSideComponentIdentifier
 from office365.sharepoint.contenttypes.collection import ContentTypeCollection
 from office365.sharepoint.eventreceivers.definition_collection import EventReceiverDefinitionCollection
+from office365.sharepoint.features.collection import FeatureCollection
 from office365.sharepoint.fields.collection import FieldCollection
 from office365.sharepoint.files.file import File
 from office365.sharepoint.flows.synchronization_result import FlowSynchronizationResult
@@ -723,6 +724,17 @@ class Web(SecurableObject):
         """
         return self.root_folder.folders.ensure_path(path)
 
+
+    def ensure_edu_class_setup(self, bypass_for_automation):
+        """
+        :param bool bypass_for_automation:
+        """
+        return_type = ClientResult(self.context, bool())
+        payload = {"byPassForAutomation": bypass_for_automation}
+        qry = ServiceOperationQuery(self, "EnsureEduClassSetup", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def ensure_user(self, login_name):
         """Checks whether the specified logon name belongs to a valid user of the website, and if the logon name does
         not already exist, adds it to the website.
@@ -1369,7 +1381,6 @@ class Web(SecurableObject):
     def remove_storage_entity(self, key):
         """
         This will remove the storage entity identified by the given key
-
         :param str key: Id of the storage entity to be removed.
         """
         params = {
@@ -1379,10 +1390,38 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return self
 
+    def register_push_notification_subscriber(self, device_app_instance_id, service_token):
+        """
+        Registers the push notification subscriber for the site. If the registration already exists,
+        the service token is updated with the new value.
+        :param str device_app_instance_id: Device  app instance identifier.
+        :param str service_token: Token provided by the notification service to the device to receive notifications.
+        """
+        payload = {
+            "deviceAppInstanceId": device_app_instance_id,
+            "serviceToken": service_token
+        }
+        return_type = PushNotificationSubscriber(self.context)
+        qry = ServiceOperationQuery(self, "RegisterPushNotificationSubscriber", None, payload,
+                                    None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def unregister_push_notification_subscriber(self, device_app_instance_id):
+        """
+        Unregisters the push notification subscriber from the site
+        :param str device_app_instance_id: Device  app instance identifier.
+        """
+        payload = {
+            "deviceAppInstanceId": device_app_instance_id,
+        }
+        qry = ServiceOperationQuery(self, "UnregisterPushNotificationSubscriber", None, payload)
+        self.context.add_query(qry)
+        return self
+
     def remove_supported_ui_language(self, lcid):
         """
         Removes a supported UI language by its language identifier.
-
         :param str lcid: Specifies the language identifier to be removed.
         """
         params = {"lcid": lcid}
@@ -1438,6 +1477,7 @@ class Web(SecurableObject):
 
     @property
     def activity_logger(self):
+        """"""
         return self.properties.get("ActivityLogger",
                                    ActivityLogger(self.context, ResourcePath("ActivityLogger", self.resource_path)))
 
@@ -1482,7 +1522,6 @@ class Web(SecurableObject):
     @property
     def custom_master_url(self):
         """Gets the URL for a custom master page to apply to the Web site
-
         :rtype: str or None
         """
         return self.properties.get("CustomMasterUrl", None)
@@ -1695,6 +1734,13 @@ class Web(SecurableObject):
                                                            ResourcePath("ClientWebParts", self.resource_path)))
 
     @property
+    def features(self):
+        """Get web features"""
+        return self.properties.get('Features',
+                                   FeatureCollection(self.context,
+                                                     ResourcePath("Features", self.resource_path), self))
+
+    @property
     def tenant_app_catalog(self):
         """Returns the tenant app catalog for the given tenant if it exists."""
         return self.properties.get('TenantAppCatalog',
@@ -1724,7 +1770,6 @@ class Web(SecurableObject):
     @property
     def url(self):
         """Gets the absolute URL for the website.
-
         :rtype: str or None
         """
         return self.properties.get('Url', None)
@@ -1732,10 +1777,16 @@ class Web(SecurableObject):
     @property
     def quick_launch_enabled(self):
         """Gets a value that specifies whether the Quick Launch area is enabled on the site.
-
         :rtype: bool or None
         """
         return self.properties.get('QuickLaunchEnabled', None)
+
+    @property
+    def mega_menu_enabled(self):
+        """Gets a value that specifies whether the Mega menu is enabled on the site.
+        :rtype: bool or None
+        """
+        return self.properties.get('MegaMenuEnabled', None)
 
     @quick_launch_enabled.setter
     def quick_launch_enabled(self, value):
@@ -1748,7 +1799,6 @@ class Web(SecurableObject):
     @property
     def site_logo_url(self):
         """Gets a value that specifies Site logo url.
-
         :rtype: str or None
         """
         return self.properties.get('SiteLogoUrl', None)

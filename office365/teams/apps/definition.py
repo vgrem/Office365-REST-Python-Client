@@ -1,3 +1,5 @@
+import datetime
+
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
@@ -26,7 +28,7 @@ class TeamsAppDefinition(Entity):
     @property
     def last_modified_datetime(self):
         """Gets date and time the teamsApp was last modified."""
-        return self.properties.get('lastModifiedDateTime', None)
+        return self.properties.get('lastModifiedDateTime', datetime.datetime.min)
 
     @property
     def teams_app_id(self):
@@ -37,6 +39,7 @@ class TeamsAppDefinition(Entity):
         if default_value is None:
             property_mapping = {
                 "createdBy": self.created_by,
+                "lastModifiedDateTime": self.last_modified_datetime
             }
             default_value = property_mapping.get(name, None)
         return super(TeamsAppDefinition, self).get_property(name, default_value)

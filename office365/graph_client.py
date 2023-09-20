@@ -1,4 +1,4 @@
-from office365.booking.solutions_root import SolutionsRoot
+from office365.booking.solutions.root import SolutionsRoot
 from office365.communications.cloud_communications import CloudCommunications
 from office365.delta_collection import DeltaCollection
 from office365.directory.applications.collection import ApplicationCollection

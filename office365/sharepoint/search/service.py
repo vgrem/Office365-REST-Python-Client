@@ -30,7 +30,7 @@ class SearchService(BaseEntity):
         :param str or User user: The name of the user or user object that issued the queries."""
         return_type = ClientResult(self.context, str())
 
-        def _create_query(user_name):
+        def _export(user_name):
             """
             :type user_name: str
             """
@@ -38,16 +38,15 @@ class SearchService(BaseEntity):
                 "userName": user_name,
                 "startTime": start_time.isoformat()
             }
-            return ServiceOperationQuery(self, "export", None, payload, None, return_type)
+            qry = ServiceOperationQuery(self, "export", None, payload, None, return_type)
+            self.context.add_query(qry)
 
         if isinstance(user, User):
             def _user_loaded():
-                next_qry = _create_query(user.user_principal_name)
-                self.context.add_query(next_qry)
+                _export(user.user_principal_name)
             user.ensure_property("UserPrincipalName", _user_loaded)
         else:
-            qry = _create_query(user)
-            self.context.add_query(qry)
+            _export(user)
         return return_type
 
     def export_manual_suggestions(self):

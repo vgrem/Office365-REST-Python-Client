@@ -151,3 +151,10 @@ class TestSharePointListItem(SPTestCase):
         self.client.execute_batch()
         items_after = self.target_list.items.get().execute_query()
         self.assertEqual(len(items_after), 0)
+
+    def test_21_get_all_items(self):
+        users_list = self.client.web.lists.get_by_title("User Information List")
+        items = users_list.items.get_all(page_size=1000).execute_query()
+        items_count = len(items)
+        items = users_list.items.get_all(page_size=1000).execute_query()
+        self.assertEqual(len(items), items_count)

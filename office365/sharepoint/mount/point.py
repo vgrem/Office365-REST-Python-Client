@@ -1,5 +1,5 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.addtoonedrive.mounted_folder_info import MountedFolderInfo
+from office365.sharepoint.mount.folder_info import MountedFolderInfo
 from office365.sharepoint.base_entity import BaseEntity
 
 

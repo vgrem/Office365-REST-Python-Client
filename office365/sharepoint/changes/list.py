@@ -18,7 +18,6 @@ class ChangeList(Change):
     def list_id(self):
         """
         Identifies the changed list
-
         :rtype: str or None
         """
         return self.properties.get("ListId", None)

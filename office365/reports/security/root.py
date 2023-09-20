@@ -1,5 +1,5 @@
 from office365.directory.security.attacksimulations.repeat_offender import AttackSimulationRepeatOffender
-from office365.directory.security.attacksimulations.simulation_user_coverage import \
+from office365.directory.security.attacksimulations.user_coverage import \
     AttackSimulationSimulationUserCoverage
 from office365.entity import Entity
 from office365.runtime.client_result import ClientResult

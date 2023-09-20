@@ -1,4 +1,4 @@
-from office365.booking.business import BookingBusiness
+from office365.booking.business.collection import BookingBusinessCollection
 from office365.booking.currency import BookingCurrency
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
@@ -12,8 +12,8 @@ class SolutionsRoot(Entity):
     def booking_businesses(self):
         """	Get a collection of bookingBusiness objects that has been created for the tenant."""
         return self.properties.get('bookingBusinesses',
-                                   EntityCollection(self.context, BookingBusiness,
-                                                    ResourcePath("bookingBusinesses", self.resource_path)))
+                                   BookingBusinessCollection(self.context,
+                                                             ResourcePath("bookingBusinesses", self.resource_path)))
 
     @property
     def booking_currencies(self):

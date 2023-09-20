@@ -8,7 +8,6 @@ class Feature(BaseEntity):
     def definition_id(self):
         """
         Gets the GUID that identifies this feature.
-
         :rtype: str or None
         """
         return self.properties.get("DefinitionId", None)
@@ -17,7 +16,6 @@ class Feature(BaseEntity):
     def display_name(self):
         """
         Gets the GUID that identifies this feature.
-
         :rtype: str or None
         """
         return self.properties.get("DisplayName", None)

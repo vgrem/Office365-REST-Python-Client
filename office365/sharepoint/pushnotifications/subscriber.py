@@ -1,3 +1,5 @@
+import datetime
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 
@@ -8,7 +10,6 @@ class PushNotificationSubscriber(BaseEntity):
     @property
     def custom_args(self):
         """Gets the custom arguments specified by the app.
-
         :rtype: str
         """
         return self.properties.get("CustomArgs", None)
@@ -16,7 +17,6 @@ class PushNotificationSubscriber(BaseEntity):
     @property
     def service_token(self):
         """Specifies the delivery channel URI for push notifications. It must not be null. It must not be empty.
-
         :rtype: str
         """
         return self.properties.get("ServiceToken", None)
@@ -41,18 +41,14 @@ class PushNotificationSubscriber(BaseEntity):
     @property
     def last_modified_time_stamp(self):
         """Specifies the time and date when the subscriber was last updated.
-
-        :rtype: str
         """
-        return self.properties.get("LastModifiedTimeStamp", None)
+        return self.properties.get("LastModifiedTimeStamp", datetime.datetime.min)
 
     @property
     def registration_time_stamp(self):
         """Specifies the time and date when the subscriber registered for push notifications.
-
-        :rtype: str
         """
-        return self.properties.get("RegistrationTimeStamp", None)
+        return self.properties.get("RegistrationTimeStamp", datetime.datetime.min)
 
     @property
     def user(self):

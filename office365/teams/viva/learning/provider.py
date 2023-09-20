@@ -1,7 +1,7 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.teams.viva.learning_content import LearningContent
+from office365.teams.viva.learning.content import LearningContent
 
 
 class LearningProvider(Entity):

@@ -1,3 +1,5 @@
+import datetime
+
 from office365.directory.audit.signins.location import SignInLocation
 from office365.directory.audit.signins.status import SignInStatus
 from office365.entity import Entity
@@ -35,10 +37,39 @@ class SignIn(Entity):
         return self.properties.get("clientAppUsed", None)
 
     @property
+    def correlation_id(self):
+        """
+        The request ID sent from the client when the sign-in is initiated; used to troubleshoot sign-in activity.
+        :rtype: str
+        """
+        return self.properties.get("correlationId", None)
+
+    @property
+    def created_datetime(self):
+        """	Date and time (UTC) the sign-in was initiated. """
+        return self.properties.get('createdDateTime', datetime.datetime.min)
+
+    @property
     def device_detail(self):
         """Device information from where the sign-in occurred; includes device ID, operating system, and browser.
         Supports $filter (eq and startsWith operators only) on browser and operatingSytem properties."""
         return self.properties.get("deviceDetail", DeviceDetail())
+
+    @property
+    def ip_address(self):
+        """
+        IP address of the client used to sign in.
+        :rtype: str
+        """
+        return self.properties.get("ipAddress", None)
+
+    @property
+    def is_interactive(self):
+        """
+        Indicates if a sign-in is interactive or not.
+        :rtype: bool or None
+        """
+        return self.properties.get("isInteractive", None)
 
     @property
     def location(self):
@@ -47,6 +78,30 @@ class SignIn(Entity):
         Supports $filter (eq and startsWith operators only) on city, state, and countryOrRegion properties.
         """
         return self.properties.get("status", SignInLocation())
+
+    @property
+    def resource_display_name(self):
+        """
+        Name of the resource the user signed into.
+        :rtype: str or None
+        """
+        return self.properties.get("resourceDisplayName", None)
+
+    @property
+    def resource_id(self):
+        """
+        ID of the resource that the user signed into.
+        :rtype: str or None
+        """
+        return self.properties.get("resourceId", None)
+
+    @property
+    def risk_detail(self):
+        """
+        Provides the 'reason' behind a specific state of a risky user, sign-in or a risk event.
+        :rtype: str or None
+        """
+        return self.properties.get("riskDetail", None)
 
     @property
     def user_id(self):
@@ -76,6 +131,7 @@ class SignIn(Entity):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "createdDateTime": self.created_datetime,
                 "deviceDetail": self.device_detail
             }
             default_value = property_mapping.get(name, None)

@@ -1,5 +1,6 @@
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.changes.change import Change
+from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.sharing.shared_with_user import SharedWithUser
 
 
@@ -10,6 +11,7 @@ class ChangeItem(Change):
     def activity_type(self):
         """
         Returns activity type defined in ChangeActivityType
+        :rtype: str or None
         """
         return self.properties.get("ActivityType", None)
 
@@ -18,7 +20,7 @@ class ChangeItem(Change):
         """
         Specifies an identifier for the content type
         """
-        return self.properties.get("ContentTypeId", None)
+        return self.properties.get("ContentTypeId", ContentTypeId())
 
     @property
     def shared_by_user(self):
@@ -33,6 +35,7 @@ class ChangeItem(Change):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "ContentTypeId": self.content_type_id,
                 "SharedByUser": self.shared_by_user,
                 "SharedWithUsers": self.shared_with_users
             }
