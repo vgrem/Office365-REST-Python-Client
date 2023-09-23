@@ -10,7 +10,6 @@ class WorkbookNamedItem(Entity):
     @property
     def name(self):
         """The name of the object. Read-only.
-
         :rtype str or None
         """
         return self.properties.get('name', None)
@@ -18,7 +17,6 @@ class WorkbookNamedItem(Entity):
     @property
     def comment(self):
         """Represents the comment associated with this name.
-
         :rtype str or None
         """
         return self.properties.get('comment', None)

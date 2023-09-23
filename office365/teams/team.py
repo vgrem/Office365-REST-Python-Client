@@ -23,15 +23,18 @@ class Team(Entity):
     """A team in Microsoft Teams is a collection of channel objects. A channel represents a topic, and therefore a
     logical isolation of discussion, within a team. """
 
-    def ensure_created(self):
+    def execute_query_and_wait(self):
         """
-        Ensure Teams has been created
+        Submit request(s) to the server and waits until operation is completed
+
+        :type self: T
         """
 
         def _loaded():
             self.operations[0].poll_for_status(status_type="succeeded")
-
         self.ensure_property("id", _loaded)
+
+        self.context.execute_query()
         return self
 
     def delete_object(self):
@@ -40,7 +43,6 @@ class Team(Entity):
         def _team_loaded():
             group = self.context.groups[self.id]
             group.delete_object(False)
-
         self.ensure_property("id", _team_loaded)
         return self
 

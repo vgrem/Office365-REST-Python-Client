@@ -1,12 +1,10 @@
 import unittest
-import uuid
 
-from tests import test_user_principal_name
-from tests.graph_case import GraphTestCase
 from office365.directory.groups.group import Group
-from office365.directory.groups.profile import GroupProfile
 from office365.directory.users.user import User
 from office365.runtime.client_request_exception import ClientRequestException
+from tests import test_user_principal_name, create_unique_name
+from tests.graph_case import GraphTestCase
 
 
 class TestGraphGroup(GraphTestCase):
@@ -18,23 +16,18 @@ class TestGraphGroup(GraphTestCase):
 
     def test1_create_group(self):
         try:
-            grp_name = "Group_" + uuid.uuid4().hex
-            properties = GroupProfile(grp_name)
-            properties.securityEnabled = False
-            properties.mailEnabled = False
-            properties.groupTypes = ["Unified"]
-            new_group = self.client.groups.add(properties).execute_query()
+            name = create_unique_name("Group")
+            new_group = self.client.groups.create_m365_group(name).execute_query()
             self.assertIsNotNone(new_group.id)
             self.__class__.target_group = new_group
         except ClientRequestException as e:
             if e.code == 'Directory_QuotaExceeded':
                 self.directory_quota_exceeded = True
                 result = self.client.me.get_member_groups().execute_query()
-                if result.value:
-                    self.assertIsNotNone(result.value)
-                    filter_expr = "displayName eq '{0}'".format(result.value[0])
-                    result = self.client.groups.filter(filter_expr).get().execute_query()
-                    self.__class__.target_group = result[0]
+                self.assertIsNotNone(result.value)
+                filter_expr = "displayName eq '{0}'".format(result.value[0])
+                result = self.client.groups.filter(filter_expr).get().execute_query()
+                self.__class__.target_group = result[0]
 
     @unittest.skipIf(directory_quota_exceeded, "Skipping, group was not be created")
     def test2_list_groups(self):
@@ -67,9 +60,9 @@ class TestGraphGroup(GraphTestCase):
         grp = self.__class__.target_group
         grp.owners.remove(owner_id).execute_query()
 
-    @unittest.skipIf(directory_quota_exceeded, "Skipping, group was created")
+    @unittest.skipIf(directory_quota_exceeded, "Skipping, group was not created")
     def test7_add_group_member(self):
-        member_id = self.__class__.target_user.properties["id"]
+        member_id = self.__class__.target_user.id
         grp = self.__class__.target_group
         grp.members.add(member_id).execute_query()
 

@@ -67,7 +67,7 @@ class DirectoryObject(Entity):
             check membership. Up to 20 groups may be specified.
         """
         return_type = ClientResult(self.context, StringCollection())
-        payload = {"groupIds" : group_ids}
+        payload = {"groupIds": group_ids}
         qry = ServiceOperationQuery(self, "checkMemberGroups", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type

@@ -99,7 +99,8 @@ class ClientRuntimeContext(object):
         :type action: (office365.runtime.http.request_options.RequestOptions, *args, **kwargs) -> None
         :param bool once: Flag which determines whether action is executed once or multiple times
         """
-
+        if len(self._queries) == 0:
+            return
         query = self._queries[-1]
 
         def _prepare_request(request):
@@ -137,6 +138,8 @@ class ClientRuntimeContext(object):
 
         :type action: (Response, *args, **kwargs) -> None
         """
+        if len(self._queries) == 0:
+            return
         query = self._queries[-1]
 
         def _process_response(resp):
@@ -185,6 +188,7 @@ class ClientRuntimeContext(object):
         while self.has_pending_request:
             qry = self._get_next_query()
             self.pending_request().execute_query(qry)
+        return self
 
     def add_query(self, query):
         """

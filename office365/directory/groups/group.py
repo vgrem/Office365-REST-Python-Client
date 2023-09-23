@@ -3,10 +3,13 @@ from datetime import datetime
 
 from office365.directory.applications.roles.assignment_collection import AppRoleAssignmentCollection
 from office365.directory.extensions.extension import Extension
+from office365.directory.groups.assigned_label import AssignedLabel
 from office365.directory.licenses.assigned_license import AssignedLicense
+from office365.directory.licenses.processing_state import LicenseProcessingState
 from office365.directory.object import DirectoryObject
 from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.permissions.grants.resource_specific import ResourceSpecificPermissionGrant
+from office365.directory.profile_photo import ProfilePhoto
 from office365.entity_collection import EntityCollection
 from office365.onedrive.drives.drive import Drive
 from office365.onenote.onenote import Onenote
@@ -18,11 +21,15 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.runtime.types.collections import StringCollection
 from office365.teams.team import Team
 
 
 class Group(DirectoryObject):
     """Represents an Azure Active Directory (Azure AD) group, which can be an Office 365 group, or a security group."""
+
+    def __repr__(self):
+        return self.display_name
 
     def renew(self):
         """
@@ -105,11 +112,112 @@ class Group(DirectoryObject):
         return self
 
     @property
+    def assigned_labels(self):
+        """
+        The list of sensitivity label pairs (label ID, label name) associated with a Microsoft 365 group.
+        """
+        return self.properties.get("assignedLabels", ClientValueCollection(AssignedLabel))
+
+    @property
+    def classification(self):
+        """Describes a classification for the group (such as low, medium or high business impact). Valid values for
+        this property are defined by creating a ClassificationList setting value, based on the template definition.
+        :rtype: str or None
+        """
+        return self.properties.get('classification', None)
+
+    @property
     def display_name(self):
         """
+        The display name for the group. This property is required when a group is created and cannot be cleared during
+        updates. Maximum length is 256 characters.
+
+        Returned by default. Supports $filter (eq, ne, not, ge, le, in, startsWith, and eq on null values), $search,
+        and $orderby.
         :rtype: str
         """
         return self.properties.get("displayName", None)
+
+    @property
+    def group_types(self):
+        """
+        Specifies the group type and its membership.
+
+        If the collection contains Unified, the group is a Microsoft 365 group; otherwise, it's either a security group
+        or distribution group. For details, see groups overview.
+
+        If the collection includes DynamicMembership, the group has dynamic membership; otherwise, membership is static.
+
+        Returned by default. Supports $filter (eq, not).
+        """
+        return self.properties.get("groupTypes", StringCollection())
+
+    @property
+    def has_members_with_license_errors(self):
+        """
+        Indicates whether there are members in this group that have license errors from its group-based license
+        assignment.
+
+        This property is never returned on a GET operation. You can use it as a $filter argument to get groups that
+        have members with license errors (that is, filter for this property being true)
+        :rtype: bool or None
+        """
+        return self.properties.get('hasMembersWithLicenseErrors', None)
+
+    @property
+    def is_assignable_to_role(self):
+        """
+        Indicates whether this group can be assigned to an Azure Active Directory role or not. Optional.
+
+        This property can only be set while creating the group and is immutable. If set to true, the securityEnabled
+        property must also be set to true, visibility must be Hidden, and the group cannot be a dynamic group
+        (that is, groupTypes cannot contain DynamicMembership).
+
+        Only callers in Global Administrator and Privileged Role Administrator roles can set this property.
+        The caller must also be assigned the RoleManagement.ReadWrite.Directory permission to set this property or
+        update the membership of such groups. For more, see Using a group to manage Azure AD role assignments
+        :rtype: bool or None
+        """
+        return self.properties.get('isAssignableToRole', None)
+
+    @property
+    def license_processing_state(self):
+        """Indicates status of the group license assignment to all members of the group. Default value is false.
+        Read-only. Possible values: QueuedForProcessing, ProcessingInProgress, and ProcessingComplete.
+        """
+        return self.properties.get('licenseProcessingState', LicenseProcessingState())
+
+    @property
+    def mail(self):
+        """
+        The SMTP address for the group, for example, "serviceadmins@contoso.onmicrosoft.com".
+        :rtype: str or None
+        """
+        return self.properties.get('mail', None)
+
+    @property
+    def mail_enabled(self):
+        """
+        Specifies whether the group is mail-enabled. Required.
+        :rtype: bool or None
+        """
+        return self.properties.get('mailEnabled', None)
+
+    @property
+    def mail_nickname(self):
+        """
+        The mail alias for the group, unique for Microsoft 365 groups in the organization. Maximum length is 64
+        characters.
+        :rtype: str or None
+        """
+        return self.properties.get('mailNickname', None)
+
+    @property
+    def on_premises_domain_name(self):
+        """
+        :rtype: str or None
+        """
+        return self.properties.get('onPremisesDomainName', None)
 
     @property
     def conversations(self):
@@ -177,7 +285,8 @@ class Group(DirectoryObject):
 
     @property
     def drives(self):
-        """The group's drives. Read-only.
+        """
+        The group's drives. Read-only.
         """
         return self.properties.get('drives',
                                    EntityCollection(self.context, Drive, ResourcePath("drives", self.resource_path)))
@@ -216,6 +325,23 @@ class Group(DirectoryObject):
                                    PlannerGroup(self.context, ResourcePath("planner", self.resource_path)))
 
     @property
+    def permission_grants(self):
+        """
+        List permissions that have been granted to apps to access the group.
+        """
+        return self.properties.setdefault('permissionGrants',
+                                          EntityCollection(self.context, ResourceSpecificPermissionGrant,
+                                                           ResourcePath("permissionGrants")))
+
+    @property
+    def photo(self):
+        """
+        The group's profile photo
+        """
+        return self.properties.get('photo',
+                                   ProfilePhoto(self.context, ResourcePath("photo", self.resource_path)))
+
+    @property
     def team(self):
         """The team associated with this group."""
         return self.properties.setdefault('team',
@@ -223,14 +349,22 @@ class Group(DirectoryObject):
 
     @property
     def assigned_licenses(self):
+        """
+        The licenses that are assigned to the group.
+        Returned only on $select. Supports $filter (eq).Read-only.
+        """
         return self.properties.get('assignedLicenses', ClientValueCollection(AssignedLicense))
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "assignedLabels": self.assigned_labels,
                 "appRoleAssignments": self.app_role_assignments,
                 "assignedLicenses": self.assigned_licenses,
                 "createdDateTime": self.created_datetime,
+                "groupTypes": self.group_types,
+                "licenseProcessingState": self.license_processing_state,
+                "permissionGrants": self.permission_grants,
                 "transitiveMembers": self.transitive_members,
                 "transitiveMemberOf": self.transitive_member_of,
             }
