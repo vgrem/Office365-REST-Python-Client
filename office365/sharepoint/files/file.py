@@ -570,14 +570,20 @@ class File(AbstractFile):
         response = context.pending_request().execute_request_direct(request)
         return response
 
-    def download(self, file_object):
+    def download(self, file_object, after_downloaded=None):
         """
         Download a file content. Use this method to download a content of a small size
 
-        :type file_object: typing.IO
+        :param typing.IO file_object: File object
+        :param (File) -> None after_downloaded: A download callback
         """
         def _save_content(return_type):
+            """
+            :type return_type: ClientResult
+            """
             file_object.write(return_type.value)
+            if callable(after_downloaded):
+                after_downloaded(self)
 
         def _download_inner():
             return_type = self.get_content().after_execute(_save_content)
@@ -642,6 +648,7 @@ class File(AbstractFile):
 
     @property
     def activity_capabilities(self):
+        """"""
         return self.properties.get("ActivityCapabilities", ActivityCapabilities())
 
     @property

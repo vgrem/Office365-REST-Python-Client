@@ -1,3 +1,5 @@
+import os
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
@@ -112,3 +114,43 @@ class MoveCopyUtil(BaseEntity):
         qry = ServiceOperationQuery(binding_type, "MoveFolderByPath", None, payload, None, None, True)
         context.add_query(qry)
         return binding_type
+
+    @staticmethod
+    def download_folder_as_zip(parent_folder, download_file, after_file_downloaded=None, recursive=True):
+        """
+        Downloads a folder into a zip file
+        :param office365.sharepoint.folders.folder.Folder parent_folder: Parent folder
+        :param typing.IO download_file: A download zip file object
+        :param (office365.sharepoint.files.file.File)->None after_file_downloaded: A download callback
+        :param bool recursive: Determines whether to traverse folders recursively
+        """
+        import zipfile
+
+        def _get_file_name(file):
+            return os.path.join(file.parent_folder.serverRelativeUrl.replace(parent_folder.serverRelativeUrl, ""),
+                                file.name)
+
+        def _after_downloaded(result, file):
+            """
+            :type result: ClientResult
+            :type file: office365.sharepoint.files.file.File
+            """
+            filename = _get_file_name(file)
+            if callable(after_file_downloaded):
+                after_file_downloaded(file)
+            with zipfile.ZipFile(download_file.name, 'a', zipfile.ZIP_DEFLATED) as zf:
+                zf.writestr(filename, result.value)
+
+        def _download_folder(folder):
+            """
+            :type folder: office365.sharepoint.folders.folder.Folder
+            """
+            def _download_files(rt):
+                [file.get_content().after_execute(_after_downloaded, file) for file in folder.files]
+                if recursive:
+                    [_download_folder(sub_folder) for sub_folder in folder.folders]
+
+            folder.expand(["Files", "Folders"]).get().after_execute(_download_files)
+
+        _download_folder(parent_folder)
+        return parent_folder

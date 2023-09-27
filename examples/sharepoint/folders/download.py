@@ -9,10 +9,13 @@ from office365.sharepoint.files.file import File
 from tests import test_team_site_url, test_client_credentials
 
 
+def print_progress(file):
+    print("File {0} has been  downloaded".format(file.serverRelativeUrl))
+
+
 def download_files(source_folder, download_path):
     """
     Demonstrates how to enumerate folder files and download file's content
-
     :type source_folder: Folder
     :type download_path: str
     """

@@ -180,11 +180,11 @@
             <Property Name="ProvisioningStatus" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="CAAEFieldElement">
-            <Property Name="FieldId" Type="Edm.String"/>
+            <Property Name="Id" Type="Edm.String"/>
             <Property Name="Version" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="CAAESnippetElement">
-            <Property Name="ListItemId" Type="Edm.String"/>
+            <Property Name="Id" Type="Edm.String"/>
             <Property Name="Version" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="ColumnTypeInfo">
@@ -272,14 +272,14 @@
             <Property Name="AdditionalFieldsData" Type="Edm.String"/>
             <Property Name="ColumnId" Type="Edm.String"/>
             <Property Name="DataType" Type="Edm.String"/>
-            <Property Name="FieldId" Type="Edm.String"/>
+            <Property Name="FieldLibraryMappedId" Type="Edm.String"/>
+            <Property Name="FieldLibraryMappedVersion" Type="Edm.String"/>
             <Property Name="Id" Type="Edm.String"/>
             <Property Name="IsColumnMappingActive" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="IsMandatory" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="Name" Type="Edm.String"/>
             <Property Name="QuestionTitle" Type="Edm.String"/>
             <Property Name="Source" Type="Edm.String"/>
-            <Property Name="Version" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="Placeholder">
             <Property Name="DataType" Type="Edm.String"/>
@@ -298,10 +298,10 @@
          </ComplexType>
          <ComplexType Name="Snippet">
             <Property Name="Id" Type="Edm.String"/>
-            <Property Name="ListItemId" Type="Edm.String"/>
             <Property Name="Name" Type="Edm.String"/>
             <Property Name="Placeholders" Type="Collection(SP.PlaceholderV2)"/>
-            <Property Name="Version" Type="Edm.String"/>
+            <Property Name="SnippetLibraryMappedId" Type="Edm.String"/>
+            <Property Name="SnippetLibraryMappedVersion" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="PublishSnippetPayload">
             <Property Name="Placeholders" Type="Collection(SP.PlaceholderV2)"/>
@@ -11091,6 +11091,9 @@
                <Parameter Name="this" Type="SP.EmployeeEngagement"/>
                <Parameter Name="oobContentChoice" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
+            <FunctionImport Name="FullDashboardContent" ReturnType="Microsoft.SharePoint.EmployeeEngagement.DashboardConfiguration" IsSideEffecting="false" IsBindable="true">
+               <Parameter Name="this" Type="SP.EmployeeEngagement"/>
+            </FunctionImport>
             <FunctionImport Name="GetDashboardPersonalization" ReturnType="Edm.Boolean" IsSideEffecting="false" IsBindable="true">
                <Parameter Name="this" Type="SP.EmployeeEngagement"/>
             </FunctionImport>
@@ -15764,6 +15767,10 @@
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.TenantAdminSettingsService"/>
             </FunctionImport>
             <FunctionImport Name="Microsoft_Online_SharePoint_TenantAdministration_Tenant" ReturnType="Microsoft.Online.SharePoint.TenantAdministration.Tenant" IsComposable="true" EntitySet="Tenants"/>
+            <FunctionImport Name="AddBrandFontPackage" ReturnType="SP.FontPackage" IsBindable="true" EntitySet="Fontpackages">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+               <Parameter Name="creationInformation" Type="SP.FontPackageCreationParameters"/>
+            </FunctionImport>
             <FunctionImport Name="AddHomeSite" ReturnType="SP.TargetedSiteDetails" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="homeSiteUrl" Type="Edm.String"/>
@@ -15867,6 +15874,9 @@
             <FunctionImport Name="GetAdminListViews" ReturnType="Collection(SP.View)" IsComposable="true" IsBindable="true" EntitySet="Views">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
             </FunctionImport>
+            <FunctionImport Name="GetBrandFontPackages" ReturnType="Collection(SP.FontPackage)" IsComposable="true" IsBindable="true" EntitySet="Fontpackages">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+            </FunctionImport>
             <FunctionImport Name="GetChatGptResponse" ReturnType="Microsoft.SharePoint.Internal.ChatGptResponse" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="requestOptions" Type="Microsoft.SharePoint.Internal.ChatGptRequestOptions"/>
@@ -15908,6 +15918,9 @@
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="queryMode" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
+            <FunctionImport Name="GetOrgAssetBrandNames" ReturnType="Collection(Edm.String)" IsSideEffecting="false" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+            </FunctionImport>
             <FunctionImport Name="GetOrgAssets" ReturnType="Microsoft.SharePoint.Administration.OrgAssets" IsSideEffecting="false" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
             </FunctionImport>
@@ -15923,9 +15936,16 @@
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="parameters" Type="SP.RenderListDataParameters"/>
             </FunctionImport>
+            <FunctionImport Name="GetRansomwareActivitiesOverview" ReturnType="Microsoft.SharePoint.Administration.TenantAdmin.TenantAdminRansomwareActivitiesOverview" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+               <Parameter Name="eventId" Type="Edm.String"/>
+            </FunctionImport>
             <FunctionImport Name="GetRansomwareEvents" ReturnType="Edm.Stream" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="parameters" Type="SP.RenderListDataParameters"/>
+            </FunctionImport>
+            <FunctionImport Name="GetRansomwareEventsOverview" ReturnType="Microsoft.SharePoint.Administration.TenantAdmin.TenantAdminRansomwareEventsOverview" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
             </FunctionImport>
             <FunctionImport Name="GetSharePointSiteSharingInsights" ReturnType="Collection(Microsoft.Online.SharePoint.TenantAdministration.SharePointSiteSharingInsights)" IsComposable="true" IsBindable="true" EntitySet="SharePointSiteSharingInsightss">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -18698,6 +18718,7 @@
             <EntitySet Name="TaxonomyHiddenListListItems" EntityType="SP.Data.TaxonomyHiddenListListItem"/>
             <EntitySet Name="PackagesMetaInfoListListItems" EntityType="SP.Data.PackagesMetaInfoListListItem"/>
             <EntitySet Name="ProjectPolicyItemListItems" EntityType="SP.Data.ProjectPolicyItemListItem"/>
+            <EntitySet Name="OData__x005f_private_x002f_PhonePNSubscriptionsItems" EntityType="SP.Data.OData__x005f_private_x002f_PhonePNSubscriptionsItem"/>
             <EntitySet Name="PackageListListItems" EntityType="SP.Data.PackageListListItem"/>
             <EntitySet Name="SharePointHomeOrgLinksListItems" EntityType="SP.Data.SharePointHomeOrgLinksListItem"/>
             <EntitySet Name="Sharing_x0020_LinksItems" EntityType="SP.Data.Sharing_x0020_LinksItem"/>
@@ -18890,6 +18911,14 @@
             </AssociationSet>
             <AssociationSet Name="SP_Data_ProjectPolicyItemListItem_Editor_SP_Data_UserInfoItem_EditorPartnerSet" Association="SP.Data.SP_Data_ProjectPolicyItemListItem_Editor_SP_Data_UserInfoItem_EditorPartner">
                <End Role="EditorPartner" EntitySet="ProjectPolicyItemListItems"/>
+               <End Role="Editor" EntitySet="UserInfoItems"/>
+            </AssociationSet>
+            <AssociationSet Name="SP_Data_OData____x005f__private__x002f__PhonePNSubscriptionsItem_Author_SP_Data_UserInfoItem_AuthorPartnerSet" Association="SP.Data.SP_Data_OData____x005f__private__x002f__PhonePNSubscriptionsItem_Author_SP_Data_UserInfoItem_AuthorPartner">
+               <End Role="AuthorPartner" EntitySet="OData__x005f_private_x002f_PhonePNSubscriptionsItems"/>
+               <End Role="Author" EntitySet="UserInfoItems"/>
+            </AssociationSet>
+            <AssociationSet Name="SP_Data_OData____x005f__private__x002f__PhonePNSubscriptionsItem_Editor_SP_Data_UserInfoItem_EditorPartnerSet" Association="SP.Data.SP_Data_OData____x005f__private__x002f__PhonePNSubscriptionsItem_Editor_SP_Data_UserInfoItem_EditorPartner">
+               <End Role="EditorPartner" EntitySet="OData__x005f_private_x002f_PhonePNSubscriptionsItems"/>
                <End Role="Editor" EntitySet="UserInfoItems"/>
             </AssociationSet>
             <AssociationSet Name="SP_Data_PackageListListItem_Author_SP_Data_UserInfoItem_AuthorPartnerSet" Association="SP.Data.SP_Data_PackageListListItem_Author_SP_Data_UserInfoItem_AuthorPartner">
@@ -19423,6 +19452,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Publishing.TopicPageFieldsData/VerifiedTopicAllowedEditors">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.Publishing.PageCopyWithAssets.PageDeepCopyWarning">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.SharePoint.Portal.ChannelInfoCollection">
@@ -19995,6 +20027,12 @@
          <Annotations Target="SP.ResourcePath/DecodedUrl">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="Microsoft.SharePoint.EmployeeEngagement.DashboardConfiguration">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.ClientSideComponent.SPClientSideComponentQueryResult">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.DashboardItemInfo">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -20017,9 +20055,6 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.SharePoint.Comments.Client.Identity">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
-         <Annotations Target="Microsoft.SharePoint.ClientSideComponent.SPClientSideComponentQueryResult">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.SharePoint.Campaigns.CampaignCommunicationEntity">
@@ -31012,6 +31047,7 @@
             <Property Name="NewPageUniqueId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="NewPageUrl" Type="Edm.String"/>
             <Property Name="TotalAssetsToMove" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="Warnings" Type="Collection(Microsoft.SharePoint.Publishing.PageCopyWithAssets.PageDeepCopyWarning)"/>
             <Property Name="WorkItemId" Type="Edm.Guid" Nullable="false"/>
          </EntityType>
          <EntityType Name="PersonMagazine" Abstract="true">
@@ -31396,6 +31432,28 @@
                <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
             </Key>
             <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
+         </EntityType>
+      </Schema>
+      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.Publishing.PageCopyWithAssets">
+         <ComplexType Name="PageDeepCopyWarning">
+            <Property Name="WarningMessage" Type="Edm.String"/>
+            <Property Name="WarningType" Type="Edm.Int32" Nullable="false"/>
+         </ComplexType>
+         <EntityType Name="PageCopyResponse">
+            <Key>
+               <PropertyRef Name="CanvasString"/>
+            </Key>
+            <Property Name="CanvasString" Type="Edm.String" Nullable="false"/>
+            <Property Name="CompletedAssets" Type="Collection(Edm.String)"/>
+            <Property Name="CopyToStatusAPI" Type="Edm.String"/>
+            <Property Name="ErrorMessage" Type="Edm.String"/>
+            <Property Name="ErrorType" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="JobState" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="NewPageUniqueId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="NewPageUrl" Type="Edm.String"/>
+            <Property Name="TotalAssetsToCopy" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="Warnings" Type="Collection(Microsoft.SharePoint.Publishing.PageCopyWithAssets.PageDeepCopyWarning)"/>
+            <Property Name="WorkItemId" Type="Edm.Guid" Nullable="false"/>
          </EntityType>
       </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="SP.Publishing.Navigation">
@@ -32944,11 +33002,11 @@
          </EntityType>
          <EntityType Name="CorporateCatalogAppMetadata">
             <Key>
-               <PropertyRef Name="AppCatalogVersion"/>
+               <PropertyRef Name="AadAppId"/>
             </Key>
-            <Property Name="AadAppId" Type="Edm.String"/>
+            <Property Name="AadAppId" Type="Edm.String" Nullable="false"/>
             <Property Name="AadPermissions" Type="Edm.String"/>
-            <Property Name="AppCatalogVersion" Type="Edm.String" Nullable="false"/>
+            <Property Name="AppCatalogVersion" Type="Edm.String"/>
             <Property Name="CanUpgrade" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CDNLocation" Type="Edm.String"/>
             <Property Name="ContainsTenantWideExtension" Type="Edm.Boolean" Nullable="false"/>
@@ -33194,6 +33252,84 @@
             <Property Name="shouldRemoveEntry" Type="Edm.Boolean" Nullable="false"/>
          </ComplexType>
       </Schema>
+      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.EmployeeEngagement">
+         <ComplexType Name="DashboardConfiguration">
+            <Property Name="canvasContent" Type="Edm.String"/>
+            <Property Name="dashboardUrl" Type="Edm.String"/>
+            <Property Name="extraComponents" Type="Collection(Microsoft.SharePoint.ClientSideComponent.SPClientSideComponentQueryResult)"/>
+         </ComplexType>
+         <EntityType Name="VivaResources">
+            <Key>
+               <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
+            </Key>
+            <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="VivaHome">
+            <Key>
+               <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
+            </Key>
+            <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
+         </EntityType>
+         <Association Name="SP_EmployeeEngagement_VivaResources_Microsoft_SharePoint_EmployeeEngagement_VivaResources_VivaResourcesPartner">
+            <End Type="Microsoft.SharePoint.EmployeeEngagement.VivaResources" Role="VivaResources" Multiplicity="0..1"/>
+            <End Type="SP.EmployeeEngagement" Role="VivaResourcesPartner" Multiplicity="0..1"/>
+         </Association>
+      </Schema>
+      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.ClientSideComponent">
+         <ComplexType Name="SPClientSideComponentQueryResult">
+            <Property Name="ComponentType" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="Id" Type="Edm.String"/>
+            <Property Name="Manifest" Type="Edm.String"/>
+            <Property Name="ManifestActivatedTime" Type="Edm.DateTime"/>
+            <Property Name="ManifestType" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="Name" Type="Edm.String"/>
+            <Property Name="Status" Type="Edm.Int32" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="SPClientSideComponentIdentifier">
+            <Property Name="id" Type="Edm.String"/>
+            <Property Name="version" Type="Edm.String"/>
+         </ComplexType>
+         <EntityType Name="HostedAppsManager">
+            <Key>
+               <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
+            </Key>
+            <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="Spfx3rdPartyCustomPrincipalInfo">
+            <Key>
+               <PropertyRef Name="AppId"/>
+            </Key>
+            <Property Name="AppId" Type="Edm.String" Nullable="false"/>
+            <Property Name="AppUri" Type="Edm.String"/>
+            <Property Name="ClientSecret" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="HostedAppAddResponse">
+            <Key>
+               <PropertyRef Name="itemId"/>
+            </Key>
+            <Property Name="itemId" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="shareLinkUrl" Type="Edm.String"/>
+            <Property Name="shareWebPath" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="HostedApp">
+            <Key>
+               <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
+            </Key>
+            <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="StorageEntity">
+            <Key>
+               <PropertyRef Name="Comment"/>
+            </Key>
+            <Property Name="Comment" Type="Edm.String" Nullable="false"/>
+            <Property Name="Description" Type="Edm.String"/>
+            <Property Name="Value" Type="Edm.String"/>
+         </EntityType>
+         <Association Name="SP_Web_HostedApps_Microsoft_SharePoint_ClientSideComponent_HostedAppsManager_HostedAppsPartner">
+            <End Type="Microsoft.SharePoint.ClientSideComponent.HostedAppsManager" Role="HostedApps" Multiplicity="0..1"/>
+            <End Type="SP.Web" Role="HostedAppsPartner" Multiplicity="0..1"/>
+         </Association>
+      </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.EmployeeEngagement.Experience">
          <ComplexType Name="AnnouncementAction">
             <Property Name="Type" Type="Edm.String"/>
@@ -33270,61 +33406,6 @@
             <Property Name="loginName" Type="Edm.String"/>
             <Property Name="name" Type="Edm.String"/>
          </ComplexType>
-      </Schema>
-      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.ClientSideComponent">
-         <ComplexType Name="SPClientSideComponentIdentifier">
-            <Property Name="id" Type="Edm.String"/>
-            <Property Name="version" Type="Edm.String"/>
-         </ComplexType>
-         <ComplexType Name="SPClientSideComponentQueryResult">
-            <Property Name="ComponentType" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="Id" Type="Edm.String"/>
-            <Property Name="Manifest" Type="Edm.String"/>
-            <Property Name="ManifestActivatedTime" Type="Edm.DateTime"/>
-            <Property Name="ManifestType" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="Name" Type="Edm.String"/>
-            <Property Name="Status" Type="Edm.Int32" Nullable="false"/>
-         </ComplexType>
-         <EntityType Name="HostedAppsManager">
-            <Key>
-               <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
-            </Key>
-            <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="Spfx3rdPartyCustomPrincipalInfo">
-            <Key>
-               <PropertyRef Name="AppId"/>
-            </Key>
-            <Property Name="AppId" Type="Edm.String" Nullable="false"/>
-            <Property Name="AppUri" Type="Edm.String"/>
-            <Property Name="ClientSecret" Type="Edm.String"/>
-         </EntityType>
-         <EntityType Name="HostedAppAddResponse">
-            <Key>
-               <PropertyRef Name="itemId"/>
-            </Key>
-            <Property Name="itemId" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="shareLinkUrl" Type="Edm.String"/>
-            <Property Name="shareWebPath" Type="Edm.String"/>
-         </EntityType>
-         <EntityType Name="HostedApp">
-            <Key>
-               <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
-            </Key>
-            <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="StorageEntity">
-            <Key>
-               <PropertyRef Name="Comment"/>
-            </Key>
-            <Property Name="Comment" Type="Edm.String" Nullable="false"/>
-            <Property Name="Description" Type="Edm.String"/>
-            <Property Name="Value" Type="Edm.String"/>
-         </EntityType>
-         <Association Name="SP_Web_HostedApps_Microsoft_SharePoint_ClientSideComponent_HostedAppsManager_HostedAppsPartner">
-            <End Type="Microsoft.SharePoint.ClientSideComponent.HostedAppsManager" Role="HostedApps" Multiplicity="0..1"/>
-            <End Type="SP.Web" Role="HostedAppsPartner" Multiplicity="0..1"/>
-         </Association>
       </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.Campaigns">
          <ComplexType Name="CampaignCommunicationEntity">
@@ -33652,6 +33733,7 @@
             <Property Name="progressPercentage" Type="Edm.Double" Nullable="false"/>
             <Property Name="queryEndDate" Type="Edm.DateTime" Nullable="false"/>
             <Property Name="queryStartDate" Type="Edm.DateTime" Nullable="false"/>
+            <Property Name="reportType" Type="Edm.Int32" Nullable="false"/>
             <Property Name="requestId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="sites" Type="Edm.String"/>
             <Property Name="sPOCorrelationId" Type="Edm.Guid" Nullable="false"/>
@@ -33694,6 +33776,14 @@
             <Property Name="reportCreationTime" Type="Edm.DateTime" Nullable="false"/>
             <Property Name="reportUpdationTime" Type="Edm.DateTime"/>
          </ComplexType>
+         <ComplexType Name="TenantAdminRansomwareActivitiesOverview">
+            <Property Name="impactedAssetsCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="oneDriveActivityCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="sharePointActivityCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="totalActivitiesCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="unresolvedActivitiesCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="usersCount" Type="Edm.Int32" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="TenantAdminRansomwareActivity">
             <Property Name="activityGeneratedOn" Type="Edm.DateTime"/>
             <Property Name="activityId" Type="Edm.Guid" Nullable="false"/>
@@ -33717,6 +33807,10 @@
             <Property Name="syncStatus" Type="Edm.Int32" Nullable="false"/>
             <Property Name="tagId" Type="Edm.String"/>
             <Property Name="updatedBy" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="TenantAdminRansomwareEventsOverview">
+            <Property Name="activeEventsCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="openEventsCount" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="TenantAdminRansomwareEvent">
             <Property Name="assignedTo" Type="Edm.String"/>
@@ -33816,7 +33910,6 @@
          </ComplexType>
          <ComplexType Name="PlacesUserEntity">
             <Property Name="email" Type="Edm.String"/>
-            <Property Name="id" Type="Edm.Int32" Nullable="false"/>
             <Property Name="loginName" Type="Edm.String"/>
             <Property Name="name" Type="Edm.String"/>
          </ComplexType>
@@ -34929,6 +35022,7 @@
             <Property Name="name" Type="Edm.String"/>
             <Property Name="queryEndDate" Type="Edm.DateTime" Nullable="false"/>
             <Property Name="queryStartDate" Type="Edm.DateTime" Nullable="false"/>
+            <Property Name="reportType" Type="Edm.Int32" Nullable="false"/>
             <Property Name="sites" Type="Edm.String"/>
             <Property Name="users" Type="Edm.String"/>
          </ComplexType>
@@ -35392,10 +35486,10 @@
          </EntityType>
          <EntityType Name="TenantAdminEndpoints">
             <Key>
-               <PropertyRef Name="CdnDefaultEndpoint"/>
+               <PropertyRef Name="AADAdminCenterEndpoint"/>
             </Key>
-            <Property Name="AADAdminCenterEndpoint" Type="Edm.String"/>
-            <Property Name="CdnDefaultEndpoint" Type="Edm.String" Nullable="false"/>
+            <Property Name="AADAdminCenterEndpoint" Type="Edm.String" Nullable="false"/>
+            <Property Name="CdnDefaultEndpoint" Type="Edm.String"/>
             <Property Name="CFRMSGraphEndpoint" Type="Edm.String"/>
             <Property Name="MigrationAgentUrl" Type="Edm.String"/>
             <Property Name="MiniMavenEndpoint" Type="Edm.String"/>
@@ -36980,23 +37074,6 @@
             <Property Name="Value" Type="Edm.String"/>
          </EntityType>
       </Schema>
-      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.Publishing.PageCopyWithAssets">
-         <EntityType Name="PageCopyResponse">
-            <Key>
-               <PropertyRef Name="CanvasString"/>
-            </Key>
-            <Property Name="CanvasString" Type="Edm.String" Nullable="false"/>
-            <Property Name="CompletedAssets" Type="Collection(Edm.String)"/>
-            <Property Name="CopyToStatusAPI" Type="Edm.String"/>
-            <Property Name="ErrorMessage" Type="Edm.String"/>
-            <Property Name="ErrorType" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="JobState" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="NewPageUniqueId" Type="Edm.Guid" Nullable="false"/>
-            <Property Name="NewPageUrl" Type="Edm.String"/>
-            <Property Name="TotalAssetsToCopy" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="WorkItemId" Type="Edm.Guid" Nullable="false"/>
-         </EntityType>
-      </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.Client.Search.Administration">
          <EntityType Name="DocumentCrawlLog">
             <Key>
@@ -37432,24 +37509,6 @@
          <EntityType Name="SPTenantIBInsightsReportSharePoint" BaseType="Microsoft.SharePoint.Insights.SPTenantIBInsightsReport">
             <Property Name="Implicit" Type="Collection(Edm.String)"/>
          </EntityType>
-      </Schema>
-      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.EmployeeEngagement">
-         <EntityType Name="VivaResources">
-            <Key>
-               <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
-            </Key>
-            <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="VivaHome">
-            <Key>
-               <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
-            </Key>
-            <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
-         </EntityType>
-         <Association Name="SP_EmployeeEngagement_VivaResources_Microsoft_SharePoint_EmployeeEngagement_VivaResources_VivaResourcesPartner">
-            <End Type="Microsoft.SharePoint.EmployeeEngagement.VivaResources" Role="VivaResources" Multiplicity="0..1"/>
-            <End Type="SP.EmployeeEngagement" Role="VivaResourcesPartner" Multiplicity="0..1"/>
-         </Association>
       </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.Convergence">
          <EntityType Name="ConsumerPermissions">
@@ -39366,6 +39425,69 @@
             <NavigationProperty Name="Author" Relationship="SP.Data.SP_Data_ProjectPolicyItemListItem_Author_SP_Data_UserInfoItem_AuthorPartner" ToRole="Author" FromRole="AuthorPartner"/>
             <NavigationProperty Name="Editor" Relationship="SP.Data.SP_Data_ProjectPolicyItemListItem_Editor_SP_Data_UserInfoItem_EditorPartner" ToRole="Editor" FromRole="EditorPartner"/>
          </EntityType>
+         <EntityType Name="OData__x005f_private_x002f_PhonePNSubscriptionsItem" BaseType="SP.ListItem">
+            <Property Name="ID" Type="Edm.Int32"/>
+            <Property Name="ContentTypeId" Type="Edm.String"/>
+            <Property Name="Title" Type="Edm.String"/>
+            <Property Name="Modified" Type="Edm.DateTime"/>
+            <Property Name="Created" Type="Edm.DateTime"/>
+            <Property Name="AuthorId" Type="Edm.Int32"/>
+            <Property Name="EditorId" Type="Edm.Int32"/>
+            <Property Name="OData__HasCopyDestinations" Type="Edm.Boolean"/>
+            <Property Name="OData__CopySource" Type="Edm.String"/>
+            <Property Name="owshiddenversion" Type="Edm.Int32"/>
+            <Property Name="WorkflowVersion" Type="Edm.Int32"/>
+            <Property Name="OData__UIVersion" Type="Edm.Int32"/>
+            <Property Name="OData__UIVersionString" Type="Edm.String"/>
+            <Property Name="Attachments" Type="Edm.Boolean"/>
+            <Property Name="OData__ModerationStatus" Type="Edm.Int32"/>
+            <Property Name="OData__ModerationComments" Type="Edm.String"/>
+            <Property Name="Edit" Type="Edm.String"/>
+            <Property Name="LinkTitleNoMenu" Type="Edm.String"/>
+            <Property Name="LinkTitle" Type="Edm.String"/>
+            <Property Name="LinkTitle2" Type="Edm.String"/>
+            <Property Name="SelectTitle" Type="Edm.String"/>
+            <Property Name="InstanceID" Type="Edm.Int32"/>
+            <Property Name="Order" Type="Edm.Double"/>
+            <Property Name="GUID" Type="Edm.Guid"/>
+            <Property Name="WorkflowInstanceID" Type="Edm.Guid"/>
+            <Property Name="FileRef" Type="Edm.String"/>
+            <Property Name="FileDirRef" Type="Edm.String"/>
+            <Property Name="Last_x0020_Modified" Type="Edm.DateTime"/>
+            <Property Name="Created_x0020_Date" Type="Edm.DateTime"/>
+            <Property Name="FSObjType" Type="Edm.Int32"/>
+            <Property Name="PermMask" Type="Edm.String"/>
+            <Property Name="PrincipalCount" Type="Edm.String"/>
+            <Property Name="FileLeafRef" Type="Edm.String"/>
+            <Property Name="UniqueId" Type="Edm.Guid"/>
+            <Property Name="File_x0020_Type" Type="Edm.String"/>
+            <Property Name="HTML_x0020_File_x0020_Type" Type="Edm.String"/>
+            <Property Name="OData__EditMenuTableStart" Type="Edm.String"/>
+            <Property Name="OData__EditMenuTableStart2" Type="Edm.String"/>
+            <Property Name="OData__EditMenuTableEnd" Type="Edm.String"/>
+            <Property Name="LinkFilenameNoMenu" Type="Edm.String"/>
+            <Property Name="LinkFilename" Type="Edm.String"/>
+            <Property Name="LinkFilename2" Type="Edm.String"/>
+            <Property Name="DocIcon" Type="Edm.String"/>
+            <Property Name="ServerUrl" Type="Edm.String"/>
+            <Property Name="EncodedAbsUrl" Type="Edm.String"/>
+            <Property Name="BaseName" Type="Edm.String"/>
+            <Property Name="OData__Level" Type="Edm.Int32"/>
+            <Property Name="OData__IsCurrentVersion" Type="Edm.Boolean"/>
+            <Property Name="OData__IsRecord" Type="Edm.String"/>
+            <Property Name="OData__ColorHex" Type="Edm.String"/>
+            <Property Name="OData__ColorTag" Type="Edm.String"/>
+            <Property Name="OData__Emoji" Type="Edm.String"/>
+            <Property Name="AppAuthorId" Type="Edm.Int32"/>
+            <Property Name="AppEditorId" Type="Edm.Int32"/>
+            <Property Name="ComplianceAssetId" Type="Edm.String"/>
+            <Property Name="DeviceAppInstanceId" Type="Edm.String"/>
+            <Property Name="ServiceToken" Type="Edm.String"/>
+            <Property Name="CustomArgs" Type="Edm.String"/>
+            <Property Name="SubscriberType" Type="Edm.String"/>
+            <NavigationProperty Name="Author" Relationship="SP.Data.SP_Data_OData____x005f__private__x002f__PhonePNSubscriptionsItem_Author_SP_Data_UserInfoItem_AuthorPartner" ToRole="Author" FromRole="AuthorPartner"/>
+            <NavigationProperty Name="Editor" Relationship="SP.Data.SP_Data_OData____x005f__private__x002f__PhonePNSubscriptionsItem_Editor_SP_Data_UserInfoItem_EditorPartner" ToRole="Editor" FromRole="EditorPartner"/>
+         </EntityType>
          <EntityType Name="PackageListListItem" BaseType="SP.ListItem">
             <Property Name="ContentTypeId" Type="Edm.String"/>
             <Property Name="Title" Type="Edm.String"/>
@@ -40247,6 +40369,14 @@
          <Association Name="SP_Data_ProjectPolicyItemListItem_Editor_SP_Data_UserInfoItem_EditorPartner">
             <End Type="SP.Data.UserInfoItem" Role="Editor" Multiplicity="0..1"/>
             <End Type="SP.Data.ProjectPolicyItemListItem" Role="EditorPartner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_Data_OData____x005f__private__x002f__PhonePNSubscriptionsItem_Author_SP_Data_UserInfoItem_AuthorPartner">
+            <End Type="SP.Data.UserInfoItem" Role="Author" Multiplicity="0..1"/>
+            <End Type="SP.Data.OData__x005f_private_x002f_PhonePNSubscriptionsItem" Role="AuthorPartner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_Data_OData____x005f__private__x002f__PhonePNSubscriptionsItem_Editor_SP_Data_UserInfoItem_EditorPartner">
+            <End Type="SP.Data.UserInfoItem" Role="Editor" Multiplicity="0..1"/>
+            <End Type="SP.Data.OData__x005f_private_x002f_PhonePNSubscriptionsItem" Role="EditorPartner" Multiplicity="0..1"/>
          </Association>
          <Association Name="SP_Data_PackageListListItem_Author_SP_Data_UserInfoItem_AuthorPartner">
             <End Type="SP.Data.UserInfoItem" Role="Author" Multiplicity="0..1"/>

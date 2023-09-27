@@ -13,6 +13,9 @@ class WorkbookWorksheet(Entity):
     An Excel worksheet is a grid of cells. It can contain data, tables, charts, etc
     """
 
+    def __repr__(self):
+        return self.name
+
     @property
     def charts(self):
         """Returns collection of charts that are part of the worksheet"""
@@ -24,7 +27,6 @@ class WorkbookWorksheet(Entity):
     def name(self):
         """
         The display name of the worksheet.
-
         :rtype: str or None
         """
         return self.properties.get('name', None)
