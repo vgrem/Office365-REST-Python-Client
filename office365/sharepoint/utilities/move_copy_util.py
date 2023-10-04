@@ -138,12 +138,12 @@ class MoveCopyUtil(BaseEntity):
         return binding_type
 
     @staticmethod
-    def download_folder_as_zip(
-        parent_folder, download_file, after_file_downloaded=None, recursive=True
+    def download_folder(
+        remove_folder, download_file, after_file_downloaded=None, recursive=True
     ):
         """
         Downloads a folder into a zip file
-        :param office365.sharepoint.folders.folder.Folder parent_folder: Parent folder
+        :param office365.sharepoint.folders.folder.Folder remove_folder: Parent folder
         :param typing.IO download_file: A download zip file object
         :param (office365.sharepoint.files.file.File)->None after_file_downloaded: A download callback
         :param bool recursive: Determines whether to traverse folders recursively
@@ -153,7 +153,7 @@ class MoveCopyUtil(BaseEntity):
         def _get_file_name(file):
             return os.path.join(
                 file.parent_folder.serverRelativeUrl.replace(
-                    parent_folder.serverRelativeUrl, ""
+                    remove_folder.serverRelativeUrl, ""
                 ),
                 file.name,
             )
@@ -184,5 +184,5 @@ class MoveCopyUtil(BaseEntity):
 
             folder.expand(["Files", "Folders"]).get().after_execute(_download_files)
 
-        _download_folder(parent_folder)
-        return parent_folder
+        _download_folder(remove_folder)
+        return remove_folder

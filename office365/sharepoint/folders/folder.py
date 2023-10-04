@@ -34,6 +34,19 @@ class Folder(BaseEntity):
         relative_url = abs_url.replace(ctx.base_url, "")
         return ctx.web.get_folder_by_server_relative_url(relative_url)
 
+    def download_folder(
+        self, download_file, after_file_downloaded=None, recursive=True
+    ):
+        """
+        Downloads a folder into a zip file
+        :param typing.IO download_file: A download zip file object
+        :param (office365.sharepoint.files.file.File)->None after_file_downloaded: A download callback
+        :param bool recursive: Determines whether to traverse folders recursively
+        """
+        return MoveCopyUtil.download_folder(
+            self, download_file, after_file_downloaded, recursive
+        )
+
     def get_files(self, recursive=False):
         """
         Retrieves files
