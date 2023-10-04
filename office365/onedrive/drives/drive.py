@@ -95,6 +95,7 @@ class Drive(BaseItem):
 
     @property
     def root(self):
+        # type: () -> DriveItem
         """The root folder of the drive."""
         return self.properties.get('root',
                                    DriveItem(self.context, RootPath(self.resource_path, self.items.resource_path)))
