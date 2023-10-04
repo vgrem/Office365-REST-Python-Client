@@ -2,7 +2,6 @@ from office365.runtime.client_value import ClientValue
 
 
 class ReportBase(ClientValue):
-
     def __init__(self, farm_id=None):
         self.FarmId = farm_id
 

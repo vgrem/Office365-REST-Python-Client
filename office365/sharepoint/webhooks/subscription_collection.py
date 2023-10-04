@@ -1,19 +1,25 @@
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.webhooks.subscription import Subscription
-from office365.sharepoint.webhooks.subscription_information import SubscriptionInformation
+from office365.sharepoint.webhooks.subscription_information import (
+    SubscriptionInformation,
+)
 
 
 class SubscriptionCollection(BaseEntityCollection):
     """Represents a collection of Subscription (WebHook) resources."""
 
     def __init__(self, context, resource_path=None, parent=None):
-        super(SubscriptionCollection, self).__init__(context, Subscription, resource_path, parent)
+        super(SubscriptionCollection, self).__init__(
+            context, Subscription, resource_path, parent
+        )
 
     def get_by_id(self, _id):
         """Gets the subscription with the specified ID."""
-        return Subscription(self.context, ServiceOperationPath("getById", [_id], self.resource_path))
+        return Subscription(
+            self.context, ServiceOperationPath("getById", [_id], self.resource_path)
+        )
 
     def add(self, parameters):
         """
@@ -33,8 +39,12 @@ class SubscriptionCollection(BaseEntityCollection):
         if isinstance(parameters, SubscriptionInformation):
             _create_and_add_query(parameters)
         else:
+
             def _parent_loaded():
-                _create_and_add_query(SubscriptionInformation(parameters, self._parent.properties["Id"]))
+                _create_and_add_query(
+                    SubscriptionInformation(parameters, self._parent.properties["Id"])
+                )
+
             self._parent.ensure_property("Id", _parent_loaded)
         return return_type
 

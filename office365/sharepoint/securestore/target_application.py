@@ -5,7 +5,8 @@ from office365.sharepoint.base_entity import BaseEntity
 class TargetApplication(BaseEntity):
     """A logical entity that represents a software system for which credentials are maintained.
     It consists of metadata including the number and type of credentials that are required by the software system and
-    a set of claims (2) that identify the administrators who can update, read, and delete the entity."""
+    a set of claims (2) that identify the administrators who can update, read, and delete the entity.
+    """
 
     @staticmethod
     def create(context, application_id, friendly_name):
@@ -17,11 +18,10 @@ class TargetApplication(BaseEntity):
         :param str friendly_name:
         """
         return_type = TargetApplication(context)
-        payload = {
-            "applicationId": application_id,
-            "friendlyName": friendly_name
-        }
-        qry = ServiceOperationQuery(return_type, "", None, payload, None, return_type, True)
+        payload = {"applicationId": application_id, "friendlyName": friendly_name}
+        qry = ServiceOperationQuery(
+            return_type, "", None, payload, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 

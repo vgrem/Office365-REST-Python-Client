@@ -1,11 +1,13 @@
 import os
 
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.internal.queries.upload_session import create_upload_session_query_ex
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.files.file import File
 from office365.sharepoint.files.creation_information import FileCreationInformation
+from office365.sharepoint.files.file import File
+from office365.sharepoint.internal.queries.upload_session import (
+    create_upload_session_query_ex,
+)
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
@@ -22,17 +24,19 @@ class FileCollection(BaseEntityCollection):
         Consider create_upload_session method instead for larger files
         :param str or typing.IO path_or_file: path where file to upload resides or file handle
         """
-        if hasattr(path_or_file, 'read'):
+        if hasattr(path_or_file, "read"):
             content = path_or_file.read()
             name = os.path.basename(path_or_file.name)
             return self.add(name, content, True)
         else:
-            with open(path_or_file, 'rb') as f:
+            with open(path_or_file, "rb") as f:
                 content = f.read()
             name = os.path.basename(path_or_file)
             return self.add(name, content, True)
 
-    def create_upload_session(self, path_or_file, chunk_size, chunk_uploaded=None, **kwargs):
+    def create_upload_session(
+        self, path_or_file, chunk_size, chunk_uploaded=None, **kwargs
+    ):
         """Upload a file as multiple chunks
 
         :param str or typing.IO path_or_file: path where file to upload resides or file handle
@@ -41,7 +45,9 @@ class FileCollection(BaseEntityCollection):
         :param kwargs: arguments to pass to chunk_uploaded function
         """
 
-        qry = create_upload_session_query_ex(self, path_or_file, chunk_size, chunk_uploaded, **kwargs)
+        qry = create_upload_session_query_ex(
+            self, path_or_file, chunk_size, chunk_uploaded, **kwargs
+        )
         self.context.add_query(qry)
         return qry.return_type
 
@@ -59,7 +65,9 @@ class FileCollection(BaseEntityCollection):
         return_type = File(self.context)
         self.add_child(return_type)
         params = FileCreationInformation(url=url, overwrite=overwrite)
-        qry = ServiceOperationQuery(self, "add", params.to_json(), content, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "add", params.to_json(), content, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -74,10 +82,16 @@ class FileCollection(BaseEntityCollection):
 
         def _parent_folder_loaded():
             params = {
-                "urlOfFile": str(SPResPath.create_relative(self.parent.properties["ServerRelativeUrl"], url_of_file)),
-                "templateFileType": template_file_type
+                "urlOfFile": str(
+                    SPResPath.create_relative(
+                        self.parent.properties["ServerRelativeUrl"], url_of_file
+                    )
+                ),
+                "templateFileType": template_file_type,
             }
-            qry = ServiceOperationQuery(self, "addTemplateFile", params, None, None, return_type)
+            qry = ServiceOperationQuery(
+                self, "addTemplateFile", params, None, None, return_type
+            )
             self.context.add_query(qry)
 
         self.parent.ensure_property("ServerRelativeUrl", _parent_folder_loaded)
@@ -85,8 +99,12 @@ class FileCollection(BaseEntityCollection):
 
     def get_by_url(self, url):
         """Retrieve File object by url"""
-        return File(self.context, ServiceOperationPath("GetByUrl", [url], self.resource_path))
+        return File(
+            self.context, ServiceOperationPath("GetByUrl", [url], self.resource_path)
+        )
 
     def get_by_id(self, _id):
         """Gets the File with the specified ID."""
-        return File(self.context, ServiceOperationPath("getById", [_id], self.resource_path))
+        return File(
+            self.context, ServiceOperationPath("getById", [_id], self.resource_path)
+        )

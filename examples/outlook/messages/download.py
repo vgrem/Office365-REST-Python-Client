@@ -16,6 +16,8 @@ client = GraphClient(acquire_token_by_username_password)
 messages = client.me.messages.select(["id", "subject"]).top(2).get().execute_query()
 with tempfile.TemporaryDirectory() as local_path:
     for message in messages:  # type: Message
-        with open(os.path.join(local_path, message.id + ".eml"), 'wb') as local_file:
-            message.download(local_file).execute_query()  # download MIME representation of a message
+        with open(os.path.join(local_path, message.id + ".eml"), "wb") as local_file:
+            message.download(
+                local_file
+            ).execute_query()  # download MIME representation of a message
         print("Message downloaded into {0}".format(local_file.name))

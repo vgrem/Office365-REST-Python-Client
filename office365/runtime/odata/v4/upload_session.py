@@ -4,9 +4,11 @@ from office365.runtime.types.collections import StringCollection
 
 class UploadSession(ClientValue):
     """The UploadSession resource provides information about how to upload large files to OneDrive, OneDrive for
-    Business, or SharePoint document libraries. """
+    Business, or SharePoint document libraries."""
 
-    def __init__(self, upload_url=None, expiration_datetime=None, next_expected_ranges=None):
+    def __init__(
+        self, upload_url=None, expiration_datetime=None, next_expected_ranges=None
+    ):
         """
         :param str upload_url: The URL endpoint that accepts PUT requests for byte ranges of the file.
         :param datetime expiration_datetime: The date and time in UTC that the upload session will expire.

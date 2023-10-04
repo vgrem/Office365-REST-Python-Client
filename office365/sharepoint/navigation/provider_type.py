@@ -1,5 +1,4 @@
 class NavigationProviderType:
-
     def __init__(self):
         pass
 

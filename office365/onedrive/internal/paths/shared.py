@@ -11,7 +11,7 @@ def _url_to_shared_token(url):
     value = base64.b64encode(url.encode("ascii")).decode("ascii")
     if value.endswith("="):
         value = value[:-1]
-    return "u!" + value.replace('/', '_').replace('+', '-')
+    return "u!" + value.replace("/", "_").replace("+", "-")
 
 
 class SharedPath(ResourcePath):

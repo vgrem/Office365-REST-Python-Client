@@ -8,7 +8,9 @@ class RankingLabeling(BaseEntity):
     """Provides methods for getting and adding relevance judgments"""
 
     def __init__(self, context):
-        static_path = ResourcePath("Microsoft.SharePoint.Client.Search.Query.RankingLabeling")
+        static_path = ResourcePath(
+            "Microsoft.SharePoint.Client.Search.Query.RankingLabeling"
+        )
         super(RankingLabeling, self).__init__(context, static_path)
 
     def add_judgment(self, user_query, url, label_id):
@@ -20,11 +22,7 @@ class RankingLabeling(BaseEntity):
         :param str label_id: The judgment for this query-URL pair as represented by an Int16. This value MUST
             be between 1 and 5 inclusive.
         """
-        payload = {
-            "userQuery": user_query,
-            "url": url,
-            "labelId": label_id
-        }
+        payload = {"userQuery": user_query, "url": url, "labelId": label_id}
         qry = ServiceOperationQuery(self, "AddJudgment", None, payload)
         self.context.add_query(qry)
         return self
@@ -36,10 +34,10 @@ class RankingLabeling(BaseEntity):
         :param str url: The URL for which the relevance judgment is added.
         """
         return_type = ClientResult(self.context)
-        payload = {
-            "url": url
-        }
-        qry = ServiceOperationQuery(self, "NormalizeResultUrl", None, payload, None, return_type)
+        payload = {"url": url}
+        qry = ServiceOperationQuery(
+            self, "NormalizeResultUrl", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 

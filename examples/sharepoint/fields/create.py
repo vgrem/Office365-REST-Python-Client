@@ -32,4 +32,3 @@ client = ClientContext(test_team_site_url).with_credentials(test_client_credenti
 field = create_date_field(client.site.root_web)
 print(f"Field  {field.internal_name} has been created")
 clean_up(field)
-

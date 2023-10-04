@@ -9,7 +9,12 @@ class UnifiedRolePermission(ClientValue):
     support create, update, delete, and reset password actions.
     """
 
-    def __init__(self, allowed_resource_actions=None, condition=None, excluded_resource_actions=None):
+    def __init__(
+        self,
+        allowed_resource_actions=None,
+        condition=None,
+        excluded_resource_actions=None,
+    ):
         """
         :param list[str] allowed_resource_actions: Set of tasks that can be performed on a resource. Required.
         :param str condition: Optional constraints that must be met for the permission to be effective.

@@ -1,4 +1,2 @@
-
-
 class WellknownListName:
     pass

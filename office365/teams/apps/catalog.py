@@ -10,14 +10,15 @@ class AppCatalogs(Entity):
     @property
     def teams_apps(self):
         """List apps from the Microsoft Teams app catalog."""
-        return self.properties.get('teamsApps',
-                                   EntityCollection(self.context, TeamsApp,
-                                                    ResourcePath("teamsApps", self.resource_path)))
+        return self.properties.get(
+            "teamsApps",
+            EntityCollection(
+                self.context, TeamsApp, ResourcePath("teamsApps", self.resource_path)
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
-            property_mapping = {
-                "teamsApps": self.teams_apps
-            }
+            property_mapping = {"teamsApps": self.teams_apps}
             default_value = property_mapping.get(name, None)
         return super(AppCatalogs, self).get_property(name, default_value)

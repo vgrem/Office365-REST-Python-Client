@@ -1,5 +1,6 @@
 class ExternalSharingSiteOption:
     """Defines the options for Sharing Site"""
+
     def __init__(self):
         pass
 

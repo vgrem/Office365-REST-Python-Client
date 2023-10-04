@@ -7,4 +7,3 @@ class AppPrincipalIdentityProvider(BaseEntity):
     @staticmethod
     def external(context):
         pass
-

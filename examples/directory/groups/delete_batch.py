@@ -20,4 +20,3 @@ print("Groups have been deleted")
 
 result = client.groups.get_all().execute_query()
 print("Total groups count (after): {0}".format(len(result)))
-

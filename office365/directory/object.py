@@ -8,7 +8,7 @@ from office365.runtime.types.collections import StringCollection
 
 class DirectoryObject(Entity):
     """Represents an Azure Active Directory object. The directoryObject type is the base type for many other
-    directory entity types. """
+    directory entity types."""
 
     def check_member_objects(self, ids=None):
         """
@@ -18,10 +18,10 @@ class DirectoryObject(Entity):
         :param list[str] ids: The unique identifiers for the objects
         """
         return_type = ClientResult(self.context, StringCollection())
-        payload = {
-            "ids": StringCollection(ids)
-        }
-        qry = ServiceOperationQuery(self, "checkMemberObjects", None, payload, None, return_type)
+        payload = {"ids": StringCollection(ids)}
+        qry = ServiceOperationQuery(
+            self, "checkMemberObjects", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -31,10 +31,10 @@ class DirectoryObject(Entity):
 
         :type security_enabled_only: bool"""
         return_type = ClientResult(self.context, StringCollection())
-        payload = {
-            "securityEnabledOnly": security_enabled_only
-        }
-        qry = ServiceOperationQuery(self, "getMemberObjects", None, payload, None, return_type)
+        payload = {"securityEnabledOnly": security_enabled_only}
+        qry = ServiceOperationQuery(
+            self, "getMemberObjects", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -48,10 +48,10 @@ class DirectoryObject(Entity):
             groups.
         """
         return_type = ClientResult(self.context, StringCollection())
-        payload = {
-            "securityEnabledOnly": security_enabled_only
-        }
-        qry = ServiceOperationQuery(self, "getMemberGroups", None, payload, None, return_type)
+        payload = {"securityEnabledOnly": security_enabled_only}
+        qry = ServiceOperationQuery(
+            self, "getMemberGroups", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -68,7 +68,9 @@ class DirectoryObject(Entity):
         """
         return_type = ClientResult(self.context, StringCollection())
         payload = {"groupIds": group_ids}
-        qry = ServiceOperationQuery(self, "checkMemberGroups", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "checkMemberGroups", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -87,4 +89,4 @@ class DirectoryObject(Entity):
     @property
     def deleted_datetime(self):
         """Date and time when this object was deleted. Always null when the object hasn't been deleted."""
-        return self.properties.get('deletedDateTime', datetime.min)
+        return self.properties.get("deletedDateTime", datetime.min)

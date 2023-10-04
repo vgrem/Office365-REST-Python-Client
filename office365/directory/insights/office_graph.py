@@ -19,8 +19,12 @@ class OfficeGraphInsights(Entity):
         and reference attachments to OneDrive for Business and SharePoint files found in Outlook messages and meetings.
         This also includes URLs and reference attachments to Teams conversations. Ordered by recency of share.
         """
-        return self.properties.get('shared', EntityCollection(self.context, SharedInsight,
-                                                              ResourcePath("shared", self.resource_path)))
+        return self.properties.get(
+            "shared",
+            EntityCollection(
+                self.context, SharedInsight, ResourcePath("shared", self.resource_path)
+            ),
+        )
 
     @property
     def trending(self):
@@ -30,8 +34,12 @@ class OfficeGraphInsights(Entity):
         files stored in OneDrive for Business and SharePoint. Trending insights help the user to discover
         potentially useful content that the user has access to, but has never viewed before.
         """
-        return self.properties.get('trending', EntityCollection(self.context, Trending,
-                                                                ResourcePath("trending", self.resource_path)))
+        return self.properties.get(
+            "trending",
+            EntityCollection(
+                self.context, Trending, ResourcePath("trending", self.resource_path)
+            ),
+        )
 
     @property
     def used(self):
@@ -39,5 +47,9 @@ class OfficeGraphInsights(Entity):
         Calculated relationship identifying the latest documents viewed or modified by a user,
         including OneDrive for Business and SharePoint documents, ranked by recency of use.
         """
-        return self.properties.get('used', EntityCollection(self.context, UsedInsight,
-                                                            ResourcePath("used", self.resource_path)))
+        return self.properties.get(
+            "used",
+            EntityCollection(
+                self.context, UsedInsight, ResourcePath("used", self.resource_path)
+            ),
+        )

@@ -9,4 +9,3 @@ class SelfSignedCertificate(ClientValue):
         :param str display_name:
         """
         self.displayName = display_name
-

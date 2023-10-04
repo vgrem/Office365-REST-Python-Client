@@ -8,8 +8,15 @@ class ScheduleItem(ClientValue):
     This item applies to a resource (room or equipment) as well.
     """
 
-    def __init__(self, start=DateTimeTimeZone(), end=DateTimeTimeZone(),
-                 location=None, is_private=None, subject=None, status=None):
+    def __init__(
+        self,
+        start=DateTimeTimeZone(),
+        end=DateTimeTimeZone(),
+        location=None,
+        is_private=None,
+        subject=None,
+        status=None,
+    ):
         """
         :param DateTimeTimeZone start: The date, time, and time zone that the corresponding event starts.
         :param DateTimeTimeZone end: The date, time, and time zone that the corresponding event ends.

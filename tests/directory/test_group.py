@@ -3,7 +3,7 @@ import unittest
 from office365.directory.groups.group import Group
 from office365.directory.users.user import User
 from office365.runtime.client_request_exception import ClientRequestException
-from tests import test_user_principal_name, create_unique_name
+from tests import create_unique_name, test_user_principal_name
 from tests.graph_case import GraphTestCase
 
 
@@ -11,7 +11,7 @@ class TestGraphGroup(GraphTestCase):
     """Tests for Azure Active Directory (Azure AD) groups"""
 
     target_group = None  # type: Group
-    target_user = None   # type: User
+    target_user = None  # type: User
     directory_quota_exceeded = False
 
     def test1_create_group(self):
@@ -21,7 +21,7 @@ class TestGraphGroup(GraphTestCase):
             self.assertIsNotNone(new_group.id)
             self.__class__.target_group = new_group
         except ClientRequestException as e:
-            if e.code == 'Directory_QuotaExceeded':
+            if e.code == "Directory_QuotaExceeded":
                 self.directory_quota_exceeded = True
                 result = self.client.me.get_member_groups().execute_query()
                 self.assertIsNotNone(result.value)
@@ -42,7 +42,13 @@ class TestGraphGroup(GraphTestCase):
 
     @unittest.skipIf(directory_quota_exceeded, "Skipping, group was not be created")
     def test4_add_group_owner(self):
-        users = self.client.users.filter("mail eq '{mail}'".format(mail=test_user_principal_name)).get().execute_query()
+        users = (
+            self.client.users.filter(
+                "mail eq '{mail}'".format(mail=test_user_principal_name)
+            )
+            .get()
+            .execute_query()
+        )
         self.assertEqual(len(users), 1)
 
         owner_id = users[0].id
@@ -78,5 +84,7 @@ class TestGraphGroup(GraphTestCase):
         grp_to_delete.delete_object(True).execute_query()
 
     def test_10_get_changes(self):
-        changed_groups = self.client.groups.delta.select(["displayName"]).get().execute_query()
+        changed_groups = (
+            self.client.groups.delta.select(["displayName"]).get().execute_query()
+        )
         self.assertGreater(len(changed_groups), 0)

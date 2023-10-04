@@ -5,8 +5,9 @@ from office365.search.hit import SearchHit
 
 
 class SearchHitsContainer(ClientValue):
-
-    def __init__(self, hits=None, more_results_available=None, total=None, aggregations=None):
+    def __init__(
+        self, hits=None, more_results_available=None, total=None, aggregations=None
+    ):
         """
         Represent the list of search results.
 

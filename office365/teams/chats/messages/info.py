@@ -18,4 +18,4 @@ class ChatMessageInfo(Entity):
     @property
     def created_datetime(self):
         """Date time object representing the time at which message was created."""
-        return self.properties.get('createdDateTime', datetime.min)
+        return self.properties.get("createdDateTime", datetime.min)

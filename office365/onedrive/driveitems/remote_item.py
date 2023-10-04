@@ -15,8 +15,16 @@ class RemoteItem(ClientValue):
     or on items returned from heterogeneous collections of items (like search results).
     """
 
-    def __init__(self, _id=None, created_by=IdentitySet(), created_datetime=None,
-                 file=File(), file_system_info=FileSystemInfo(), folder=Folder(), image=Image()):
+    def __init__(
+        self,
+        _id=None,
+        created_by=IdentitySet(),
+        created_datetime=None,
+        file=File(),
+        file_system_info=FileSystemInfo(),
+        folder=Folder(),
+        image=Image(),
+    ):
         """
         :param str _id: Unique identifier for the remote item in its drive. Read-only.
         :param IdentitySet created_by: Identity of the user, device, and application which created the item. Read-only.

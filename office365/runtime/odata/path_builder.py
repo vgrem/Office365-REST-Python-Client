@@ -7,7 +7,6 @@ from office365.runtime.paths.resource_path import ResourcePath
 
 
 class ODataPathBuilder(object):
-
     @staticmethod
     def parse(path_str):
         """

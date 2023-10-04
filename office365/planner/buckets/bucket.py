@@ -11,8 +11,10 @@ class PlannerBucket(Entity):
 
     @property
     def tasks(self):
-        """Read-only. Nullable. Collection of tasks in the bucket.
-        """
-        return self.properties.get('tasks',
-                                 EntityCollection(self.context, PlannerTask, ResourcePath("tasks", self.resource_path)))
-
+        """Read-only. Nullable. Collection of tasks in the bucket."""
+        return self.properties.get(
+            "tasks",
+            EntityCollection(
+                self.context, PlannerTask, ResourcePath("tasks", self.resource_path)
+            ),
+        )

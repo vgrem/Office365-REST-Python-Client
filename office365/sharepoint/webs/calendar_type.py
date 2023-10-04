@@ -6,4 +6,3 @@ class CalendarType:
 
     Gregorian = 1
     """Specifies a Gregorian (localized) calendar type."""
-

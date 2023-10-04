@@ -10,7 +10,9 @@ class DirectoryObjectCollection(DeltaCollection):
     """DirectoryObject's collection"""
 
     def __init__(self, context, resource_path=None):
-        super(DirectoryObjectCollection, self).__init__(context, DirectoryObject, resource_path)
+        super(DirectoryObjectCollection, self).__init__(
+            context, DirectoryObject, resource_path
+        )
 
     def get_by_ids(self, ids):
         """
@@ -19,9 +21,7 @@ class DirectoryObjectCollection(DeltaCollection):
         :type ids: list[str]
         """
         return_type = ClientResult(self.context)
-        params = {
-            "ids": ids
-        }
+        params = {"ids": ids}
         qry = ServiceOperationQuery(self, "getByIds", params, None, None, return_type)
         self.context.add_query(qry)
         return return_type
@@ -46,11 +46,16 @@ class DirectoryObjectCollection(DeltaCollection):
         and servicePrincipal.
         """
         from office365.directory.extensions.extension_property import ExtensionProperty
-        return_type = EntityCollection(self.context, ExtensionProperty, self.context.directory_objects.resource_path)
-        payload = {
-            "isSyncedFromOnPremises": is_synced_from_on_premises
-        }
-        qry = ServiceOperationQuery(self, "getAvailableExtensionProperties", None, payload, None, return_type)
+
+        return_type = EntityCollection(
+            self.context,
+            ExtensionProperty,
+            self.context.directory_objects.resource_path,
+        )
+        payload = {"isSyncedFromOnPremises": is_synced_from_on_premises}
+        qry = ServiceOperationQuery(
+            self, "getAvailableExtensionProperties", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -67,10 +72,17 @@ class DirectoryObjectCollection(DeltaCollection):
             :type request: RequestOptions
             """
             request.method = HttpMethod.Delete
+
         self.context.add_query(qry).before_query_execute(_construct_request)
         return self
 
-    def validate_properties(self, entity_type=None, display_name=None, mail_nickname=None, on_behalf_of_userid=None):
+    def validate_properties(
+        self,
+        entity_type=None,
+        display_name=None,
+        mail_nickname=None,
+        on_behalf_of_userid=None,
+    ):
         """
         Validate that a Microsoft 365 group's display name or mail nickname complies with naming policies.
         Clients can use this API to determine whether a display name or mail nickname is valid before trying to
@@ -90,7 +102,7 @@ class DirectoryObjectCollection(DeltaCollection):
             "entityType": entity_type,
             "displayName": display_name,
             "mailNickname": mail_nickname,
-            "onBehalfOfUserId": on_behalf_of_userid
+            "onBehalfOfUserId": on_behalf_of_userid,
         }
         qry = ServiceOperationQuery(self, "validateProperties", None, payload)
         self.context.add_query(qry)

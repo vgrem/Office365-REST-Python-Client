@@ -4,8 +4,15 @@ from office365.runtime.client_value import ClientValue
 class PrincipalInfo(ClientValue):
     """Provides access to information about a principal."""
 
-    def __init__(self, principal_id=None, display_name=None, email=None, login_name=None,
-                 department=None, job_title=None):
+    def __init__(
+        self,
+        principal_id=None,
+        display_name=None,
+        email=None,
+        login_name=None,
+        department=None,
+        job_title=None,
+    ):
         """
         :param str principal_id: Specifies an identifier for the principal. It MUST be -1 if the principal
             does not belong to the current site.

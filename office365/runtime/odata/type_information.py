@@ -1,5 +1,4 @@
 class TypeInformation(object):
-
     def __init__(self):
         self.BaseTypeFullName = None
         self.FullName = None

@@ -1,12 +1,12 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.files.file import File
-from office365.sharepoint.utilities.principal_info import PrincipalInfo
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
+from office365.sharepoint.utilities.principal_info import PrincipalInfo
 
 
 class Utility(BaseEntity):
@@ -26,8 +26,20 @@ class Utility(BaseEntity):
         """
         return_type = ClientResult(context, str())
         utility = Utility(context)
-        payload = {"pageAddress": str(SPResPath.create_absolute(context.base_url, page_address))}
-        qry = ServiceOperationQuery(utility, "CreateEmailBodyForInvitation", None, payload, None, return_type, True)
+        payload = {
+            "pageAddress": str(
+                SPResPath.create_absolute(context.base_url, page_address)
+            )
+        }
+        qry = ServiceOperationQuery(
+            utility,
+            "CreateEmailBodyForInvitation",
+            None,
+            payload,
+            None,
+            return_type,
+            True,
+        )
         context.add_query(qry)
         return return_type
 
@@ -40,7 +52,9 @@ class Utility(BaseEntity):
         """
         result = ClientResult(context)
         utility = Utility(context)
-        qry = ServiceOperationQuery(utility, "GetCurrentUserEmailAddresses", None, None, None, result)
+        qry = ServiceOperationQuery(
+            utility, "GetCurrentUserEmailAddresses", None, None, None, result
+        )
         qry.static = True
         context.add_query(qry)
         return result
@@ -53,12 +67,16 @@ class Utility(BaseEntity):
         """
         return_type = ClientResult(context, StringCollection())
         utility = Utility(context)
-        qry = ServiceOperationQuery(utility, "GetUserPermissionLevels", None, None, None, return_type, True)
+        qry = ServiceOperationQuery(
+            utility, "GetUserPermissionLevels", None, None, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
     @staticmethod
-    def search_principals_using_context_web(context, s_input, sources, scopes, max_count, group_name=None):
+    def search_principals_using_context_web(
+        context, s_input, sources, scopes, max_count, group_name=None
+    ):
         """
         Returns the collection of principals that partially or uniquely matches the specified search criteria in the
         context of the current Web site
@@ -78,9 +96,11 @@ class Utility(BaseEntity):
             "sources": sources,
             "scopes": scopes,
             "maxCount": max_count,
-            "groupName": group_name
+            "groupName": group_name,
         }
-        qry = ServiceOperationQuery(utility, "SearchPrincipalsUsingContextWeb", params, None, None, return_type)
+        qry = ServiceOperationQuery(
+            utility, "SearchPrincipalsUsingContextWeb", params, None, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type
@@ -97,7 +117,9 @@ class Utility(BaseEntity):
             return_type = File(context)
         utility = Utility(context)
         payload = {"parameters": parameters}
-        qry = ServiceOperationQuery(utility, "CreateWikiPageInContextWeb", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            utility, "CreateWikiPageInContextWeb", None, payload, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type
@@ -111,7 +133,9 @@ class Utility(BaseEntity):
         """
         utility = Utility(context)
         payload = {"properties": properties}
-        qry = ServiceOperationQuery(utility, "SendEmail", None, payload, None, None, True)
+        qry = ServiceOperationQuery(
+            utility, "SendEmail", None, payload, None, None, True
+        )
         context.add_query(qry)
         return utility
 
@@ -125,13 +149,12 @@ class Utility(BaseEntity):
         :type return_type: ClientResult
         """
         binding_type = Utility(context)
-        payload = {
-            "inputs": inputs,
-            "maxCount": max_count
-        }
+        payload = {"inputs": inputs, "maxCount": max_count}
         if return_type is None:
             return_type = ClientResult(context, ClientValueCollection(PrincipalInfo))
-        qry = ServiceOperationQuery(binding_type, "ExpandGroupsToPrincipals", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            binding_type, "ExpandGroupsToPrincipals", None, payload, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type
@@ -150,15 +173,23 @@ class Utility(BaseEntity):
             "error": error,
         }
         return_type = ClientResult(context)
-        qry = ServiceOperationQuery(utility, "LogCustomAppError", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            utility, "LogCustomAppError", None, payload, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type
 
     @staticmethod
-    def resolve_principal_in_current_context(context, string_input, scopes=None, sources=None,
-                                             input_is_email_only=None, add_to_user_info_list=None,
-                                             match_user_info_list=None):
+    def resolve_principal_in_current_context(
+        context,
+        string_input,
+        scopes=None,
+        sources=None,
+        input_is_email_only=None,
+        add_to_user_info_list=None,
+        match_user_info_list=None,
+    ):
         """
         Returns information about a principal that matches the specified search criteria in the context of the current
         Web site.
@@ -179,10 +210,17 @@ class Utility(BaseEntity):
             "sources": sources,
             "inputIsEmailOnly": input_is_email_only,
             "addToUserInfoList": add_to_user_info_list,
-            "matchUserInfoList": match_user_info_list
+            "matchUserInfoList": match_user_info_list,
         }
         return_type = ClientResult(context)
-        qry = ServiceOperationQuery(utility, "ResolvePrincipalInCurrentContext", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            utility,
+            "ResolvePrincipalInCurrentContext",
+            None,
+            payload,
+            None,
+            return_type,
+        )
         qry.static = True
         context.add_query(qry)
         return return_type

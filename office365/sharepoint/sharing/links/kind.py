@@ -1,5 +1,4 @@
 class SharingLinkKind:
-
     def __init__(self):
         """Specifies the kind of tokenized sharing link"""
         pass

@@ -3,8 +3,9 @@ from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.sites.site import Site
-from office365.sharepoint.tenant.administration.deny_add_and_customize_pages_status import \
-    DenyAddAndCustomizePagesStatus
+from office365.sharepoint.tenant.administration.deny_add_and_customize_pages_status import (
+    DenyAddAndCustomizePagesStatus,
+)
 
 
 class SiteProperties(BaseEntity):
@@ -18,7 +19,9 @@ class SiteProperties(BaseEntity):
         """
         payload = {"siteUrl": site_url}
         binding_type = SiteProperties(context)
-        qry = ServiceOperationQuery(binding_type, "ClearSharingLockDown", None, payload, None, None, True)
+        qry = ServiceOperationQuery(
+            binding_type, "ClearSharingLockDown", None, payload, None, None, True
+        )
         context.add_query(qry)
         return binding_type
 
@@ -31,6 +34,7 @@ class SiteProperties(BaseEntity):
         def _site_loaded(return_type):
             self._resource_path = KeyPath(site.id, self.parent_collection.resource_path)
             super(SiteProperties, self).update()
+
         self.context.load(site, after_loaded=_site_loaded)
         return self
 
@@ -39,7 +43,9 @@ class SiteProperties(BaseEntity):
         """
         Represents the status of the [DenyAddAndCustomizePages] feature on a site collection.
         """
-        return self.properties.get("DenyAddAndCustomizePages", DenyAddAndCustomizePagesStatus.Unknown)
+        return self.properties.get(
+            "DenyAddAndCustomizePages", DenyAddAndCustomizePagesStatus.Unknown
+        )
 
     @deny_add_and_customize_pages.setter
     def deny_add_and_customize_pages(self, value):
@@ -55,7 +61,7 @@ class SiteProperties(BaseEntity):
         """
         :rtype: str
         """
-        return self.properties.get('OwnerLoginName', None)
+        return self.properties.get("OwnerLoginName", None)
 
     @property
     def webs_count(self):
@@ -63,7 +69,7 @@ class SiteProperties(BaseEntity):
         Gets the number of Web objects in the site.
         :rtype: int
         """
-        return self.properties.get('WebsCount', None)
+        return self.properties.get("WebsCount", None)
 
     @property
     def url(self):
@@ -71,7 +77,7 @@ class SiteProperties(BaseEntity):
         Gets the URL of the site.
         :rtype: str
         """
-        return self.properties.get('Url', None)
+        return self.properties.get("Url", None)
 
     @property
     def compatibility_level(self):
@@ -79,7 +85,7 @@ class SiteProperties(BaseEntity):
         Gets the compatibility level of the site.
         :rtype: str
         """
-        return self.properties.get('CompatibilityLevel', None)
+        return self.properties.get("CompatibilityLevel", None)
 
     @property
     def lock_state(self):
@@ -88,7 +94,7 @@ class SiteProperties(BaseEntity):
 
         :rtype: str
         """
-        return self.properties.get('LockState', None)
+        return self.properties.get("LockState", None)
 
     @property
     def sharing_capability(self):
@@ -104,7 +110,7 @@ class SiteProperties(BaseEntity):
             - ExistingExternalUserSharingOnly - Only guests already in your organization's directory.
         :rtype: int
         """
-        return self.properties.get('SharingCapability', None)
+        return self.properties.get("SharingCapability", None)
 
     @sharing_capability.setter
     def sharing_capability(self, value):
@@ -112,7 +118,7 @@ class SiteProperties(BaseEntity):
         Sets the level of sharing for the site.
         :type value: int
         """
-        self.set_property('SharingCapability', value)
+        self.set_property("SharingCapability", value)
 
     @property
     def time_zone_id(self):
@@ -120,7 +126,7 @@ class SiteProperties(BaseEntity):
         Gets the time zone ID of the site.
         :rtype: str
         """
-        return self.properties.get('TimeZoneId', None)
+        return self.properties.get("TimeZoneId", None)
 
     @property
     def entity_type_name(self):
@@ -130,5 +136,7 @@ class SiteProperties(BaseEntity):
         super(SiteProperties, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "Url" and self._resource_path is None:
-            self._resource_path = ServiceOperationPath(self.entity_type_name, {"Url": value})
+            self._resource_path = ServiceOperationPath(
+                self.entity_type_name, {"Url": value}
+            )
         return self

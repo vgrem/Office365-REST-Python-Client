@@ -3,7 +3,7 @@ from unittest import TestCase
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.directory.helper import SPHelper
 from office365.sharepoint.directory.session import DirectorySession
-from tests import test_user_credentials, test_site_url, test_user_principal_name
+from tests import test_site_url, test_user_credentials, test_user_principal_name
 
 
 class TestDirectorySession(TestCase):
@@ -26,16 +26,18 @@ class TestDirectorySession(TestCase):
     def test_3_get_my_groups(self):
         result = self.client.directory_session.me.get_my_groups().execute_query()
         self.assertIsNotNone(result)
-        #self.assertGreater(len(result.value), 0)
+        # self.assertGreater(len(result.value), 0)
 
-    #def test_4_user_member_of(self):
+    # def test_4_user_member_of(self):
     #    result = self.__class__.session.me.is_member_of("").execute_query()
     #    self.assertIsNotNone(result.value)
 
     def test_5_check_site_availability(self):
-        result = SPHelper.check_site_availability(self.client, test_site_url).execute_query()
+        result = SPHelper.check_site_availability(
+            self.client, test_site_url
+        ).execute_query()
         self.assertIsNotNone(result.value)
 
-    #def test_6_get_graph_user(self):
+    # def test_6_get_graph_user(self):
     #    result = self.client.directory_session.get_graph_user(test_user_principal_name).execute_query()
     #    self.assertIsNotNone(result.resource_path)

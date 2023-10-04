@@ -9,5 +9,9 @@ class Sharepoint(Entity):
     @property
     def settings(self):
         """Represents the tenant-level settings for SharePoint and OneDrive."""
-        return self.properties.get('settings',
-                                   SharepointSettings(self.context, ResourcePath("settings", self.resource_path)))
+        return self.properties.get(
+            "settings",
+            SharepointSettings(
+                self.context, ResourcePath("settings", self.resource_path)
+            ),
+        )

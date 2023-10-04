@@ -17,7 +17,7 @@ class IdentityProvider(Entity):
 
         :rtype: str or None
         """
-        return self.properties.get('clientId', None)
+        return self.properties.get("clientId", None)
 
     @property
     def client_secret(self):
@@ -27,4 +27,4 @@ class IdentityProvider(Entity):
 
         :rtype: str or None
         """
-        return self.properties.get('clientSecret', None)
+        return self.properties.get("clientSecret", None)

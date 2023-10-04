@@ -1,5 +1,4 @@
 class PageType:
-
     def __init__(self):
         """As specified in [MS-WSSFO3] section 2.2.1.2.14."""
         pass

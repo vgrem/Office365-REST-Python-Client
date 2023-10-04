@@ -11,7 +11,13 @@ class MeetingTimeSuggestion(ClientValue):
     and available meeting locations.
     """
 
-    def __init__(self, attendee_availability=None, confidence=None, locations=None, meeting_timeslot=TimeSlot()):
+    def __init__(
+        self,
+        attendee_availability=None,
+        confidence=None,
+        locations=None,
+        meeting_timeslot=TimeSlot(),
+    ):
         """
         :param list[AttendeeAvailability] attendee_availability: An array that shows the availability status of each
             attendees for this meeting suggestion.
@@ -20,7 +26,9 @@ class MeetingTimeSuggestion(ClientValue):
              for this meeting suggestion.
         :param TimeSlot meeting_timeslot: A time period suggested for the meeting.
         """
-        self.attendeeAvailability = ClientValueCollection(AttendeeAvailability, attendee_availability)
+        self.attendeeAvailability = ClientValueCollection(
+            AttendeeAvailability, attendee_availability
+        )
         self.confidence = confidence
         self.locations = ClientValueCollection(Location, locations)
         self.meetingTimeSlot = meeting_timeslot

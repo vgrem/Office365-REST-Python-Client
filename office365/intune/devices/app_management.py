@@ -10,9 +10,14 @@ class DeviceAppManagement(Entity):
     @property
     def managed_app_registrations(self):
         """"""
-        return self.properties.get('managedAppRegistrations',
-                                   EntityCollection(self.context, ManagedAppRegistration,
-                                                    ResourcePath("managedAppRegistrations", self.resource_path)))
+        return self.properties.get(
+            "managedAppRegistrations",
+            EntityCollection(
+                self.context,
+                ManagedAppRegistration,
+                ResourcePath("managedAppRegistrations", self.resource_path),
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:

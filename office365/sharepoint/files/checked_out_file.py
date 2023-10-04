@@ -1,5 +1,5 @@
-from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.key import KeyPath
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.principal.users.user import User
@@ -24,8 +24,10 @@ class CheckedOutFile(BaseEntity):
     @property
     def checked_out_by(self):
         """Returns the user name of the account used to check out the file."""
-        return self.properties.get('CheckedOutBy',
-                                   User(self.context, ResourcePath("CheckedOutBy", self.resource_path)))
+        return self.properties.get(
+            "CheckedOutBy",
+            User(self.context, ResourcePath("CheckedOutBy", self.resource_path)),
+        )
 
     @property
     def property_ref_name(self):
@@ -33,9 +35,7 @@ class CheckedOutFile(BaseEntity):
 
     def get_property(self, name, default_value=None):
         if default_value is None:
-            property_mapping = {
-                "CheckedOutBy": self.checked_out_by
-            }
+            property_mapping = {"CheckedOutBy": self.checked_out_by}
             default_value = property_mapping.get(name, None)
         return super(CheckedOutFile, self).get_property(name, default_value)
 

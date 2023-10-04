@@ -26,7 +26,11 @@ class TestSPTaxonomy(SPTestCase):
         self.assertIsNotNone(term_store.name)
 
     def test2_get_term_groups(self):
-        term_group = self.client.taxonomy.term_store.term_groups.get_by_name('Geography').get().execute_query()
+        term_group = (
+            self.client.taxonomy.term_store.term_groups.get_by_name("Geography")
+            .get()
+            .execute_query()
+        )
         self.assertIsNotNone(term_group.resource_path)
         self.assertIsInstance(term_group, TermGroup)
         self.__class__.target_term_group = term_group
@@ -48,15 +52,18 @@ class TestSPTaxonomy(SPTestCase):
 
     def test6_create_list_tax_field(self):
         term_set_id = "b49f64b3-4722-4336-9a5c-56c326b344d4"
-        tax_field = self.client.web.default_document_library().fields \
-            .create_taxonomy_field(name="Category123", term_set=term_set_id).execute_query()
+        tax_field = (
+            self.client.web.default_document_library()
+            .fields.create_taxonomy_field(name="Category123", term_set=term_set_id)
+            .execute_query()
+        )
         self.assertIsNotNone(tax_field.resource_path)
-        #self.assertTrue(tax_field.properties.get('IsTermSetValid'))
+        # self.assertTrue(tax_field.properties.get('IsTermSetValid'))
         self.__class__.target_field = tax_field
 
     def test7_get_tax_field(self):
         existing_field = self.__class__.target_field.get().execute_query()
-        self.assertTrue(existing_field.type_as_string, 'TaxonomyFieldType')
+        self.assertTrue(existing_field.type_as_string, "TaxonomyFieldType")
         self.assertIsInstance(existing_field, TaxonomyField)
         self.assertIsNotNone(existing_field.text_field_id)
         self.assertIsNotNone(existing_field.lookup_list)

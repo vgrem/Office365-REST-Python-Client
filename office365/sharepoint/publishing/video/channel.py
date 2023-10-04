@@ -4,10 +4,11 @@ from office365.sharepoint.base_entity import BaseEntity
 
 
 class VideoChannel(BaseEntity):
-
     def get_video_count(self):
         return_type = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "GetVideoCount", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetVideoCount", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 

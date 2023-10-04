@@ -6,7 +6,9 @@ class BookingBusinessCollection(EntityCollection):
     """"""
 
     def __init__(self, context, resource_path=None):
-        super(BookingBusinessCollection, self).__init__(context, BookingBusiness, resource_path)
+        super(BookingBusinessCollection, self).__init__(
+            context, BookingBusiness, resource_path
+        )
 
     def add(self, display_name):
         """

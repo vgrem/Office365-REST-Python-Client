@@ -7,7 +7,9 @@ class PushNotificationSubscriberCollection(BaseEntityCollection):
     """Specifies the collection of push notification subscribers for the site"""
 
     def __init__(self, context, resource_path=None):
-        super(PushNotificationSubscriberCollection, self).__init__(context, PushNotificationSubscriber, resource_path)
+        super(PushNotificationSubscriberCollection, self).__init__(
+            context, PushNotificationSubscriber, resource_path
+        )
 
     def get_by_store_id(self, _id):
         """
@@ -15,4 +17,7 @@ class PushNotificationSubscriberCollection(BaseEntityCollection):
 
         :param str _id: Store identifier for the notification subscriber.
         """
-        return PushNotificationSubscriber(self.context, ServiceOperationPath("GetByStoreId", [_id], self.resource_path))
+        return PushNotificationSubscriber(
+            self.context,
+            ServiceOperationPath("GetByStoreId", [_id], self.resource_path),
+        )

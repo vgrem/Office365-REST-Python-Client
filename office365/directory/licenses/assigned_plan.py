@@ -6,7 +6,13 @@ class AssignedPlan(ClientValue):
     The assignedPlans property of both the user entity and the organization entity is a collection of assignedPlan.
     """
 
-    def __init__(self, assigned_datetime=None, capability_status=None, service=None, service_plan_id=None):
+    def __init__(
+        self,
+        assigned_datetime=None,
+        capability_status=None,
+        service=None,
+        service_plan_id=None,
+    ):
         """
         :param datetime.datetime assigned_datetime: The date and time at which the plan was assigned.
         :param str capability_status: Condition of the capability assignment.
@@ -23,4 +29,3 @@ class AssignedPlan(ClientValue):
 
     def __repr__(self):
         return self.service
-

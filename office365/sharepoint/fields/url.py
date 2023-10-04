@@ -11,4 +11,4 @@ class FieldUrl(Field):
 
         :rtype: int or None
         """
-        return self.properties.get('DisplayFormat', None)
+        return self.properties.get("DisplayFormat", None)

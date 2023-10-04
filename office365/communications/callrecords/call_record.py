@@ -25,6 +25,9 @@ class CallRecord(Entity):
         List of sessions involved in the call. Peer-to-peer calls typically only have one session, whereas group
         calls typically have at least one session per participant.
         """
-        return self.properties.get('sessions',
-                                   EntityCollection(self.context, Session,
-                                                    ResourcePath("sessions", self.resource_path)))
+        return self.properties.get(
+            "sessions",
+            EntityCollection(
+                self.context, Session, ResourcePath("sessions", self.resource_path)
+            ),
+        )

@@ -5,8 +5,14 @@ from office365.runtime.client_value import ClientValue
 class InvitationParticipantInfo(ClientValue):
     """This resource is used to represent the entity that is being invited to a group call."""
 
-    def __init__(self, hidden=None, identity=IdentitySet(), participant_id=None,
-                 remove_from_default_audio_routing_group=None, replaces_call_id=None):
+    def __init__(
+        self,
+        hidden=None,
+        identity=IdentitySet(),
+        participant_id=None,
+        remove_from_default_audio_routing_group=None,
+        replaces_call_id=None,
+    ):
         """
         :param bool hidden: Optional. Whether to hide the participant from the roster.
         :param IdentitySet identity: The identitySet associated with this invitation.
@@ -18,5 +24,7 @@ class InvitationParticipantInfo(ClientValue):
         self.hidden = hidden
         self.identity = identity
         self.participantId = participant_id
-        self.removeFromDefaultAudioRoutingGroup = remove_from_default_audio_routing_group
+        self.removeFromDefaultAudioRoutingGroup = (
+            remove_from_default_audio_routing_group
+        )
         self.replacesCallId = replaces_call_id

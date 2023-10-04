@@ -42,6 +42,7 @@ class ClientResult(object):
         :type persist_changes: bool
         """
         from office365.runtime.client_value import ClientValue
+
         if isinstance(self._value, ClientValue):
             self._value.set_property(key, value, persist_changes)
         else:
@@ -57,12 +58,16 @@ class ClientResult(object):
         self._context.execute_query()
         return self
 
-    def execute_query_retry(self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None):
+    def execute_query_retry(
+        self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None
+    ):
         """
         Executes the current set of data retrieval queries and method invocations and retries it if needed.
         """
-        self._context.execute_query_retry(max_retry=max_retry,
-                                          timeout_secs=timeout_secs,
-                                          success_callback=success_callback,
-                                          failure_callback=failure_callback)
+        self._context.execute_query_retry(
+            max_retry=max_retry,
+            timeout_secs=timeout_secs,
+            success_callback=success_callback,
+            failure_callback=failure_callback,
+        )
         return self

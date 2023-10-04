@@ -8,6 +8,7 @@ from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 class FolderCollection(BaseEntityCollection):
     """Represents a collection of Folder resources."""
+
     def __init__(self, context, resource_path=None, parent=None):
         super(FolderCollection, self).__init__(context, Folder, resource_path, parent)
 
@@ -18,12 +19,11 @@ class FolderCollection(BaseEntityCollection):
         :param str decoded_url: Specifies the path for the folder.
         :param bool overwrite:  bool
         """
-        parameters = {
-            "DecodedUrl": decoded_url,
-            "Overwrite": overwrite
-        }
+        parameters = {"DecodedUrl": decoded_url, "Overwrite": overwrite}
         target_folder = Folder(self.context)
-        qry = ServiceOperationQuery(self, "AddUsingPath", parameters, None, None, target_folder)
+        qry = ServiceOperationQuery(
+            self, "AddUsingPath", parameters, None, None, target_folder
+        )
         self.context.add_query(qry)
         return target_folder
 
@@ -61,7 +61,9 @@ class FolderCollection(BaseEntityCollection):
             a site-relative URL relative to the site (2) containing the collection of list folders, or relative to the
             list folder that directly contains this collection of list folders.
         """
-        return Folder(self.context, ServiceOperationPath("GetByUrl", [url], self.resource_path))
+        return Folder(
+            self.context, ServiceOperationPath("GetByUrl", [url], self.resource_path)
+        )
 
     def get_by_path(self, decoded_url):
         """
@@ -69,4 +71,9 @@ class FolderCollection(BaseEntityCollection):
 
         :param str decoded_url: Specifies the path for the folder.
         """
-        return Folder(self.context, ServiceOperationPath("GetByPath", SPResPath(decoded_url), self.resource_path))
+        return Folder(
+            self.context,
+            ServiceOperationPath(
+                "GetByPath", SPResPath(decoded_url), self.resource_path
+            ),
+        )

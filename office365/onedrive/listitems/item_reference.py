@@ -1,12 +1,21 @@
-from office365.runtime.client_value import ClientValue
 from office365.onedrive.sharepoint_ids import SharePointIds
+from office365.runtime.client_value import ClientValue
 
 
 class ItemReference(ClientValue):
     """The ItemReference resource provides information necessary to address a DriveItem via the API."""
 
-    def __init__(self, _id=None, name=None, path=None, drive_id=None, drive_type=None,
-                 site_id=None, sharepoint_ids=SharePointIds(), share_id=None):
+    def __init__(
+        self,
+        _id=None,
+        name=None,
+        path=None,
+        drive_id=None,
+        drive_type=None,
+        site_id=None,
+        sharepoint_ids=SharePointIds(),
+        share_id=None,
+    ):
         """
         :param str _id: Unique identifier of the driveItem in the drive or a listItem in a list. Read-only.
         :param str name: The name of the item being referenced. Read-only.

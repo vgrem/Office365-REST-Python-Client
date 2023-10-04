@@ -1,5 +1,9 @@
-from office365.directory.authentication.configuration_base import ApiAuthenticationConfigurationBase
-from office365.directory.certificates.pkcs12_information import Pkcs12CertificateInformation
+from office365.directory.authentication.configuration_base import (
+    ApiAuthenticationConfigurationBase,
+)
+from office365.directory.certificates.pkcs12_information import (
+    Pkcs12CertificateInformation,
+)
 from office365.runtime.client_value_collection import ClientValueCollection
 
 
@@ -15,4 +19,6 @@ class ClientCertificateAuthentication(ApiAuthenticationConfigurationBase):
         :param list[Pkcs12CertificateInformation] certificates:
         """
         super(ClientCertificateAuthentication, self).__init__()
-        self.certificateList = ClientValueCollection(Pkcs12CertificateInformation, certificates)
+        self.certificateList = ClientValueCollection(
+            Pkcs12CertificateInformation, certificates
+        )

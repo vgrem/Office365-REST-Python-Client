@@ -37,5 +37,7 @@ class WorkbookTableColumn(Entity):
     @property
     def filter(self):
         """Retrieve the filter applied to the column."""
-        return self.properties.get('filter',
-                                   WorkbookFilter(self.context, ResourcePath("filter", self.resource_path)))
+        return self.properties.get(
+            "filter",
+            WorkbookFilter(self.context, ResourcePath("filter", self.resource_path)),
+        )

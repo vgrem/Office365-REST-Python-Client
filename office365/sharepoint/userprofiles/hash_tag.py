@@ -4,7 +4,6 @@ from office365.sharepoint.base_entity import BaseEntity
 
 
 class HashTag(ClientValue):
-
     def __init__(self, name=None, use_count=None):
         """
         The HashTag type specifies a string that is being used as a hash tag and a count of the tags use.
@@ -27,4 +26,3 @@ class HashTagCollection(BaseEntity):
     @property
     def items(self):
         return self.properties.get("Items", ClientValueCollection(HashTag))
-

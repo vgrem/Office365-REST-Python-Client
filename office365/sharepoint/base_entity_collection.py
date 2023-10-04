@@ -2,7 +2,6 @@ from office365.runtime.client_object_collection import ClientObjectCollection
 
 
 class BaseEntityCollection(ClientObjectCollection):
-
     @property
     def context(self):
         """

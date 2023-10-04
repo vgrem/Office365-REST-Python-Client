@@ -2,7 +2,6 @@ from office365.runtime.client_value import ClientValue
 
 
 class VivaSiteRequestInfo(ClientValue):
-
     def __init__(self, is_already_added=None, site_url=None):
         """
         :param bool is_already_added:

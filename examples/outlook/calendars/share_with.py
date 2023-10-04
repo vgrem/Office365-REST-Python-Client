@@ -11,5 +11,7 @@ from tests.graph_case import acquire_token_by_username_password
 
 client = GraphClient(acquire_token_by_username_password)
 my_cal = client.me.calendar
-cal_perm = my_cal.calendar_permissions.add("samanthab@adatum.onmicrosoft.com", CalendarRoleType.read).execute_query()
+cal_perm = my_cal.calendar_permissions.add(
+    "samanthab@adatum.onmicrosoft.com", CalendarRoleType.read
+).execute_query()
 print(cal_perm)

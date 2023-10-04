@@ -10,9 +10,14 @@ class EmployeeExperience(Entity):
     @property
     def learning_providers(self):
         """A collection of learning providers."""
-        return self.properties.get('learningProviders',
-                                   EntityCollection(self.context, LearningProvider,
-                                                    ResourcePath("learningProviders", self.resource_path)))
+        return self.properties.get(
+            "learningProviders",
+            EntityCollection(
+                self.context,
+                LearningProvider,
+                ResourcePath("learningProviders", self.resource_path),
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:

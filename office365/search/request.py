@@ -8,8 +8,16 @@ from office365.search.sort_property import SortProperty
 class SearchRequest(ClientValue):
     """A search request formatted in a JSON blob."""
 
-    def __init__(self, query, entity_types=None, fields=None, search_from=None, sort_properties=None,
-                 content_sources=None, sharepoint_onedrive_options=SharePointOneDriveOptions()):
+    def __init__(
+        self,
+        query,
+        entity_types=None,
+        fields=None,
+        search_from=None,
+        sort_properties=None,
+        content_sources=None,
+        sharepoint_onedrive_options=SharePointOneDriveOptions(),
+    ):
         """
         :param office365.search.query.SearchQuery query: Contains the query terms.
         :param list[str] entity_types: One or more types of resources expected in the response.
@@ -35,4 +43,3 @@ class SearchRequest(ClientValue):
         self.sortProperties = ClientValueCollection(SortProperty, sort_properties)
         self.contentSources = StringCollection(content_sources)
         self.sharePointOneDriveOptions = sharepoint_onedrive_options
-

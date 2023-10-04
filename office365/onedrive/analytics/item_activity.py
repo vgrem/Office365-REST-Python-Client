@@ -18,8 +18,11 @@ class ItemActivity(Entity):
     def drive_item(self):
         """Exposes the driveItem that was the target of this activity."""
         from office365.onedrive.driveitems.driveItem import DriveItem
-        return self.properties.get('driveItem',
-                                   DriveItem(self.context, ResourcePath("driveItem", self.resource_path)))
+
+        return self.properties.get(
+            "driveItem",
+            DriveItem(self.context, ResourcePath("driveItem", self.resource_path)),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:

@@ -1,6 +1,10 @@
 from office365.directory.identitygovernance.accessreview.set import AccessReviewSet
-from office365.directory.identitygovernance.appconsent.approval_route import AppConsentApprovalRoute
-from office365.directory.identitygovernance.termsofuse.container import TermsOfUseContainer
+from office365.directory.identitygovernance.appconsent.approval_route import (
+    AppConsentApprovalRoute,
+)
+from office365.directory.identitygovernance.termsofuse.container import (
+    TermsOfUseContainer,
+)
 from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -22,17 +26,24 @@ class IdentityGovernance(Entity):
         Container for base resources that expose the app consent request API and features.
         Currently, exposes only the appConsentRequests resource.
         """
-        return self.properties.get('appConsent',
-                                   AppConsentApprovalRoute(self.context,
-                                                           ResourcePath("appConsent", self.resource_path)))
+        return self.properties.get(
+            "appConsent",
+            AppConsentApprovalRoute(
+                self.context, ResourcePath("appConsent", self.resource_path)
+            ),
+        )
 
     @property
     def access_reviews(self):
         """
         Container for the base resources that expose the access reviews API and features.
         """
-        return self.properties.get('accessReviews',
-                                   AccessReviewSet(self.context, ResourcePath("accessReviews", self.resource_path)))
+        return self.properties.get(
+            "accessReviews",
+            AccessReviewSet(
+                self.context, ResourcePath("accessReviews", self.resource_path)
+            ),
+        )
 
     @property
     def terms_of_use(self):
@@ -40,8 +51,9 @@ class IdentityGovernance(Entity):
         Container for the resources that expose the terms of use API and its features, including agreements
         and agreementAcceptances.
         """
-        return self.properties.get('termsOfUse',
-                                   TermsOfUseContainer(self.context, ResourcePath("termsOfUse", self.resource_path)))
-
-
-
+        return self.properties.get(
+            "termsOfUse",
+            TermsOfUseContainer(
+                self.context, ResourcePath("termsOfUse", self.resource_path)
+            ),
+        )

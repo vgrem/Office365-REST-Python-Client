@@ -27,7 +27,9 @@ class Presence(Entity):
         self.context.add_query(qry)
         return self
 
-    def set_presence(self, session_id, availability=None, activity=None, expiration_duration=None):
+    def set_presence(
+        self, session_id, availability=None, activity=None, expiration_duration=None
+    ):
         """
         Set the state of a user's presence session as an application.
 
@@ -42,7 +44,7 @@ class Presence(Entity):
             "sessionId": session_id,
             "availability": availability,
             "activity": activity,
-            "expirationDuration": expiration_duration
+            "expirationDuration": expiration_duration,
         }
         qry = ServiceOperationQuery(self, "setPresence", None, payload)
         self.context.add_query(qry)
@@ -53,14 +55,14 @@ class Presence(Entity):
         Set a presence status message for a user. An optional expiration date and time can be supplied.
         :param str message: Status message item.
         """
-        payload = {
-            "statusMessage": PresenceStatusMessage(message=ItemBody(message))
-        }
+        payload = {"statusMessage": PresenceStatusMessage(message=ItemBody(message))}
         qry = ServiceOperationQuery(self, "setStatusMessage", None, payload)
         self.context.add_query(qry)
         return self
 
-    def set_user_preferred_presence(self, availability="Available", activity="Available", expiration_duration=None):
+    def set_user_preferred_presence(
+        self, availability="Available", activity="Available", expiration_duration=None
+    ):
         """
         Set the preferred availability and activity status for a user. If the preferred presence of a user is set,
         the user's presence shows as the preferred status.
@@ -78,7 +80,7 @@ class Presence(Entity):
         payload = {
             "availability": availability,
             "activity": activity,
-            "expirationDuration": expiration_duration
+            "expirationDuration": expiration_duration,
         }
         qry = ServiceOperationQuery(self, "setUserPreferredPresence", None, payload)
         self.context.add_query(qry)

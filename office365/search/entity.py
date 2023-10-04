@@ -22,10 +22,10 @@ class SearchEntity(Entity):
         :param list[str] entity_types: One or more types of resources expected in the response.
             Possible values are: list, site, listItem, message, event, drive, driveItem, externalItem.
         """
-        search_request = SearchRequest(query=SearchQuery(query_string), entity_types=entity_types)
-        payload = {
-            "requests": ClientValueCollection(SearchRequest, [search_request])
-        }
+        search_request = SearchRequest(
+            query=SearchQuery(query_string), entity_types=entity_types
+        )
+        payload = {"requests": ClientValueCollection(SearchRequest, [search_request])}
         return_type = ClientResult(self.context, ClientValueCollection(SearchResponse))
         qry = ServiceOperationQuery(self, "query", None, payload, None, return_type)
         self.context.add_query(qry)
@@ -53,4 +53,3 @@ class SearchEntity(Entity):
         :param str query_string: Contains the query terms.
         """
         return self.query(query_string, entity_types=[EntityType.driveItem])
-

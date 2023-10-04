@@ -15,11 +15,11 @@ class ProfilePhoto(Entity):
         """
         The height of the photo. Read-only.
         """
-        return self.properties.get('height', None)
+        return self.properties.get("height", None)
 
     @property
     def width(self):
         """
         The width of the photo. Read-only.
         """
-        return self.properties.get('width', None)
+        return self.properties.get("width", None)

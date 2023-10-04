@@ -27,24 +27,34 @@ class SectionGroup(OnenoteEntityHierarchyModel):
     @property
     def parent_notebook(self):
         """The notebook that contains the section group. Read-only."""
-        return self.properties.get('parentNotebook',
-                                   Notebook(self.context, ResourcePath("parentNotebook", self.resource_path)))
+        return self.properties.get(
+            "parentNotebook",
+            Notebook(self.context, ResourcePath("parentNotebook", self.resource_path)),
+        )
 
     @property
     def sections(self):
-        """The sections in the section group. Read-only. Nullable.
-        """
-        return self.properties.get('sections',
-                                   EntityCollection(self.context, OnenoteSection,
-                                                    ResourcePath("sections", self.resource_path)))
+        """The sections in the section group. Read-only. Nullable."""
+        return self.properties.get(
+            "sections",
+            EntityCollection(
+                self.context,
+                OnenoteSection,
+                ResourcePath("sections", self.resource_path),
+            ),
+        )
 
     @property
     def section_groups(self):
-        """Retrieve a list of onenoteSection objects from the specified notebook.
-        """
-        return self.properties.get('sectionGroups',
-                                   EntityCollection(self.context, SectionGroup,
-                                                    ResourcePath("sectionGroups", self.resource_path)))
+        """Retrieve a list of onenoteSection objects from the specified notebook."""
+        return self.properties.get(
+            "sectionGroups",
+            EntityCollection(
+                self.context,
+                SectionGroup,
+                ResourcePath("sectionGroups", self.resource_path),
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:

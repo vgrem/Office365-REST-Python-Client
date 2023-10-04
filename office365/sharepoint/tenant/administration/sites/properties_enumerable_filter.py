@@ -2,9 +2,15 @@ from office365.runtime.client_value import ClientValue
 
 
 class SitePropertiesEnumerableFilter(ClientValue):
-
-    def __init__(self, _filter, start_index=None, include_detail=None, include_personal_site=None,
-                 group_id_defined=None, template=None):
+    def __init__(
+        self,
+        _filter,
+        start_index=None,
+        include_detail=None,
+        include_personal_site=None,
+        group_id_defined=None,
+        template=None,
+    ):
         """
         :param str _filter:
         :param str start_index:

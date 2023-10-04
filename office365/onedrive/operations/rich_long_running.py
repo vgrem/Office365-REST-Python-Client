@@ -9,4 +9,4 @@ class RichLongRunningOperation(LongRunningOperation):
         """The unique identifier for the result.
         :rtype: str or None
         """
-        return self.properties.get('resourceId', None)
+        return self.properties.get("resourceId", None)

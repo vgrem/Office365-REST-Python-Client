@@ -4,7 +4,6 @@ from office365.sharepoint.folders.folder import Folder
 
 
 class DocumentSet(Folder):
-
     @staticmethod
     def create(context, parent_folder, name, ct_id="0x0120D520"):
         """
@@ -21,7 +20,7 @@ class DocumentSet(Folder):
 
         def _parent_folder_loaded():
             custom_props = parent_folder.get_property("Properties")
-            list_id = custom_props.get('vti_x005f_listname')
+            list_id = custom_props.get("vti_x005f_listname")
             target_list = context.web.lists.get_by_id(list_id)
             target_list.ensure_property("Title", _create, target_list=target_list)
 
@@ -31,7 +30,7 @@ class DocumentSet(Folder):
             """
             qry = ClientQuery(context, return_type=return_type)
             context.add_query(qry)
-            folder_url = parent_folder.serverRelativeUrl + '/' + name
+            folder_url = parent_folder.serverRelativeUrl + "/" + name
             return_type.set_property("ServerRelativeUrl", folder_url)
 
             def _construct_request(request):
@@ -39,12 +38,17 @@ class DocumentSet(Folder):
                 :type request: office365.runtime.http.request_options.RequestOptions
                 """
                 list_name = target_list.title.replace(" ", "")
-                request.url = r"{0}/_vti_bin/listdata.svc/{1}".format(context.base_url, list_name)
-                request.set_header('Slug', '{0}|{1}'.format(folder_url, ct_id))
+                request.url = r"{0}/_vti_bin/listdata.svc/{1}".format(
+                    context.base_url, list_name
+                )
+                request.set_header("Slug", "{0}|{1}".format(folder_url, ct_id))
                 request.method = HttpMethod.Post
+
             context.before_execute(_construct_request)
 
-        parent_folder.ensure_properties(["UniqueId", "Properties", "ServerRelativeUrl"], _parent_folder_loaded)
+        parent_folder.ensure_properties(
+            ["UniqueId", "Properties", "ServerRelativeUrl"], _parent_folder_loaded
+        )
         return return_type
 
     @staticmethod

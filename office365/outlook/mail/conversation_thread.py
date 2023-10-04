@@ -39,14 +39,18 @@ class ConversationThread(Entity):
     @property
     def posts(self):
         """"""
-        return self.properties.get('posts',
-                                   EntityCollection(self.context, Post, ResourcePath("posts", self.resource_path)))
+        return self.properties.get(
+            "posts",
+            EntityCollection(
+                self.context, Post, ResourcePath("posts", self.resource_path)
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "ccRecipients": self.cc_recipients,
-                "toRecipients": self.to_recipients
+                "toRecipients": self.to_recipients,
             }
             default_value = property_mapping.get(name, None)
         return super(ConversationThread, self).get_property(name, default_value)

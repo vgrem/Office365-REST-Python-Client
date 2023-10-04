@@ -6,11 +6,15 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.principal.users.user import User
-from office365.sharepoint.search.query.auto_completion_results import QueryAutoCompletionResults
+from office365.sharepoint.search.query.auto_completion_results import (
+    QueryAutoCompletionResults,
+)
 from office365.sharepoint.search.query.popular_tenant_query import PopularTenantQuery
 from office365.sharepoint.search.query.sort.sort import Sort
 from office365.sharepoint.search.query.suggestion_results import QuerySuggestionResults
-from office365.sharepoint.search.query.tenant_custom_query_suggestions import TenantCustomQuerySuggestions
+from office365.sharepoint.search.query.tenant_custom_query_suggestions import (
+    TenantCustomQuerySuggestions,
+)
 from office365.sharepoint.search.request import SearchRequest
 from office365.sharepoint.search.result import SearchResult
 
@@ -19,7 +23,9 @@ class SearchService(BaseEntity):
     """SearchService exposes OData Service Operations."""
 
     def __init__(self, context):
-        super(SearchService, self).__init__(context, ResourcePath("Microsoft.Office.Server.Search.REST.SearchService"))
+        super(SearchService, self).__init__(
+            context, ResourcePath("Microsoft.Office.Server.Search.REST.SearchService")
+        )
 
     def export(self, user, start_time):
         """
@@ -27,34 +33,36 @@ class SearchService(BaseEntity):
         issued after a specified date, for a specified user.
 
         :param datetime.datetime start_time: The timestamp of the oldest query log entry returned.
-        :param str or User user: The name of the user or user object that issued the queries."""
+        :param str or User user: The name of the user or user object that issued the queries.
+        """
         return_type = ClientResult(self.context, str())
 
         def _export(user_name):
             """
             :type user_name: str
             """
-            payload = {
-                "userName": user_name,
-                "startTime": start_time.isoformat()
-            }
-            qry = ServiceOperationQuery(self, "export", None, payload, None, return_type)
+            payload = {"userName": user_name, "startTime": start_time.isoformat()}
+            qry = ServiceOperationQuery(
+                self, "export", None, payload, None, return_type
+            )
             self.context.add_query(qry)
 
         if isinstance(user, User):
+
             def _user_loaded():
                 _export(user.user_principal_name)
+
             user.ensure_property("UserPrincipalName", _user_loaded)
         else:
             _export(user)
         return return_type
 
     def export_manual_suggestions(self):
-        """
-
-        """
+        """ """
         return_type = ClientResult(self.context, TenantCustomQuerySuggestions())
-        qry = ServiceOperationQuery(self, "exportmanualsuggestions", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "exportmanualsuggestions", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -64,18 +72,35 @@ class SearchService(BaseEntity):
 
         :param int count:
         """
-        return_type = ClientResult(self.context, ClientValueCollection(PopularTenantQuery))
+        return_type = ClientResult(
+            self.context, ClientValueCollection(PopularTenantQuery)
+        )
         payload = {
             "count": count,
         }
-        qry = ServiceOperationQuery(self, "exportpopulartenantqueries", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "exportpopulartenantqueries", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
-    def query(self, query_text, source_id=None, ranking_model_id=None,
-              start_row=None, row_limit=None, rows_per_page=None,
-              select_properties=None, refinement_filters=None, refiners=None, sort_list=None,
-              trim_duplicates=None, enable_query_rules=None, enable_sorting=None, **kwargs):
+    def query(
+        self,
+        query_text,
+        source_id=None,
+        ranking_model_id=None,
+        start_row=None,
+        row_limit=None,
+        rows_per_page=None,
+        select_properties=None,
+        refinement_filters=None,
+        refiners=None,
+        sort_list=None,
+        trim_duplicates=None,
+        enable_query_rules=None,
+        enable_sorting=None,
+        **kwargs
+    ):
         """The operation is used to retrieve search results by using the HTTP protocol with the GET method.
 
         :param str query_text: The query text of the search query.
@@ -111,11 +136,13 @@ class SearchService(BaseEntity):
             "selectProperties": str(StringCollection(select_properties)),
             "refinementFilters": str(StringCollection(refinement_filters)),
             "refiners": str(StringCollection(refiners)),
-            "sortList": str(StringCollection([str(s) for s in sort_list])) if sort_list else None,
+            "sortList": str(StringCollection([str(s) for s in sort_list]))
+            if sort_list
+            else None,
             "trimDuplicates": trim_duplicates,
             "rowLimit": row_limit,
             "enableQueryRules": enable_query_rules,
-            "enableSorting": enable_sorting
+            "enableSorting": enable_sorting,
         }
         params.update(**kwargs)
         return_type = ClientResult(self.context, SearchResult())
@@ -123,7 +150,14 @@ class SearchService(BaseEntity):
         self.context.add_query(qry)
         return return_type
 
-    def post_query(self, query_text, select_properties=None, trim_duplicates=None, row_limit=None, **kwargs):
+    def post_query(
+        self,
+        query_text,
+        select_properties=None,
+        trim_duplicates=None,
+        row_limit=None,
+        **kwargs
+    ):
         """The operation is used to retrieve search results through the use of the HTTP protocol
         with method type POST.
 
@@ -135,8 +169,13 @@ class SearchService(BaseEntity):
             specified in the StartRow element. The RowLimit value MUST be greater than or equal to zero.
         """
         return_type = ClientResult(self.context, SearchResult())
-        request = SearchRequest(query_text=query_text, select_properties=select_properties,
-                                trim_duplicates=trim_duplicates, row_limit=row_limit, **kwargs)
+        request = SearchRequest(
+            query_text=query_text,
+            select_properties=select_properties,
+            trim_duplicates=trim_duplicates,
+            row_limit=row_limit,
+            **kwargs
+        )
         payload = {"request": request}
         qry = ServiceOperationQuery(self, "postquery", None, payload, None, return_type)
         self.context.add_query(qry)
@@ -159,7 +198,7 @@ class SearchService(BaseEntity):
         payload = {
             "pageInfo": page_info,
             "clickType": click_type,
-            "blockType": block_type
+            "blockType": block_type,
         }
         qry = ServiceOperationQuery(self, "RecordPageClick", None, payload)
         self.context.add_query(qry)
@@ -167,9 +206,12 @@ class SearchService(BaseEntity):
 
     def search_center_url(self):
         """The operation is used to get the URI address of the search center by using the HTTP protocol
-        with the GET method. The operation returns the URI of the of the search center."""
+        with the GET method. The operation returns the URI of the of the search center.
+        """
         return_type = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "searchCenterUrl", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "searchCenterUrl", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -177,7 +219,9 @@ class SearchService(BaseEntity):
         """The operation is used to get the URI address of the result page by using the HTTP protocol
         with the GET method. The operation returns the URI of the result page."""
         return_type = ClientResult(self.context, str())
-        qry = ServiceOperationQuery(self, "resultspageaddress", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "resultspageaddress", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -188,14 +232,14 @@ class SearchService(BaseEntity):
              FaultException<ExceptionDetail> message.
         """
         return_type = ClientResult(self.context, QuerySuggestionResults())
-        payload = {
-            "querytext": query_text
-        }
+        payload = {"querytext": query_text}
         qry = ServiceOperationQuery(self, "suggest", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 
-    def auto_completions(self, query_text, sources=None, number_of_completions=None, cursor_position=None):
+    def auto_completions(
+        self, query_text, sources=None, number_of_completions=None, cursor_position=None
+    ):
         """
         The operation is used to retrieve auto completion results by using the HTTP protocol with the GET method.
 
@@ -218,8 +262,10 @@ class SearchService(BaseEntity):
             "querytext": query_text,
             "sources": sources,
             "numberOfCompletions": number_of_completions,
-            "cursorPosition": cursor_position
+            "cursorPosition": cursor_position,
         }
-        qry = ServiceOperationQuery(self, "autocompletions", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "autocompletions", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type

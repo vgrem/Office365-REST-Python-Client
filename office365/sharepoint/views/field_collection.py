@@ -27,14 +27,14 @@ class ViewFieldCollection(BaseEntity):
         Gets Schema Xml.
         :rtype: str or None
         """
-        return self.properties.get('SchemaXml', None)
+        return self.properties.get("SchemaXml", None)
 
     @property
     def items(self):
         """Gets items.
         :rtype: list[str] or None
         """
-        return self.properties.get('Items', None)
+        return self.properties.get("Items", None)
 
     def set_property(self, name, value, persist_changes=False):
         if name == "Items":

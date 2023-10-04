@@ -1,5 +1,6 @@
 class TemplateFileType:
     """Specifies the type of ghosted file template to use"""
+
     def __init__(self):
         pass
 

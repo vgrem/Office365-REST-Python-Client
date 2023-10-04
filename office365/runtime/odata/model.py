@@ -1,5 +1,6 @@
 class ODataModel(object):
     """OData model"""
+
     _types = {}
 
     @property

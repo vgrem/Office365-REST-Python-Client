@@ -12,18 +12,23 @@ class WorkbookComment(Entity):
         """The content of comment.
         :rtype: str or None
         """
-        return self.properties.get('content', None)
+        return self.properties.get("content", None)
 
     @property
     def content_type(self):
         """Indicates the type for the comment.
         :rtype: str or None
         """
-        return self.properties.get('contentType', None)
+        return self.properties.get("contentType", None)
 
     @property
     def replies(self):
         """"""
-        return self.properties.get('replies',
-                                   EntityCollection(self.context, WorkbookCommentReply,
-                                                    ResourcePath("replies", self.resource_path)))
+        return self.properties.get(
+            "replies",
+            EntityCollection(
+                self.context,
+                WorkbookCommentReply,
+                ResourcePath("replies", self.resource_path),
+            ),
+        )

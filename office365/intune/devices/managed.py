@@ -28,10 +28,13 @@ class ManagedDevice(Entity):
 
     @property
     def device_category(self):
-        """	Device category"""
-        return self.properties.get('deviceCategory',
-                                   DeviceCategory(self.context,
-                                                  ResourcePath("deviceCategory", self.resource_path)))
+        """Device category"""
+        return self.properties.get(
+            "deviceCategory",
+            DeviceCategory(
+                self.context, ResourcePath("deviceCategory", self.resource_path)
+            ),
+        )
 
     @property
     def manufacturer(self):
@@ -54,22 +57,30 @@ class ManagedDevice(Entity):
         """
         Device compliance policy states for this device
         """
-        return self.properties.get('deviceCompliancePolicyStates',
-                                   EntityCollection(self.context, DeviceCompliancePolicyState,
-                                                    ResourcePath("deviceCompliancePolicyStates",
-                                                                 self.resource_path)))
+        return self.properties.get(
+            "deviceCompliancePolicyStates",
+            EntityCollection(
+                self.context,
+                DeviceCompliancePolicyState,
+                ResourcePath("deviceCompliancePolicyStates", self.resource_path),
+            ),
+        )
 
     @property
     def users(self):
         """The primary users associated with the managed device."""
         from office365.directory.users.collection import UserCollection
-        return self.properties.get('users', UserCollection(self.context, ResourcePath("users", self.resource_path)))
+
+        return self.properties.get(
+            "users",
+            UserCollection(self.context, ResourcePath("users", self.resource_path)),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "deviceCategory": self.device_category,
-                "deviceCompliancePolicyStates": self.device_compliance_policy_states
+                "deviceCompliancePolicyStates": self.device_compliance_policy_states,
             }
             default_value = property_mapping.get(name, None)
         return super(ManagedDevice, self).get_property(name, default_value)

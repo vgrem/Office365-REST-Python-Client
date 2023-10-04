@@ -9,11 +9,10 @@ from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.read_entity import ReadEntityQuery
 
-T = TypeVar('T', bound='ClientObject')
+T = TypeVar("T", bound="ClientObject")
 
 
 class ClientRuntimeContext(object):
-
     def __init__(self):
         self._queries = []
         self._current_query = None
@@ -38,8 +37,14 @@ class ClientRuntimeContext(object):
         self._current_query = query
         return self.pending_request().build_custom_request(query)
 
-    def execute_query_retry(self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None,
-                            exceptions=(ClientRequestException,)):
+    def execute_query_retry(
+        self,
+        max_retry=5,
+        timeout_secs=5,
+        success_callback=None,
+        failure_callback=None,
+        exceptions=(ClientRequestException,),
+    ):
         """
         Executes the current set of data retrieval queries and method invocations and retries it if needed.
 
@@ -76,7 +81,13 @@ class ClientRuntimeContext(object):
         """
         pass
 
-    def load(self, client_object, properties_to_retrieve=None, before_loaded=None, after_loaded=None):
+    def load(
+        self,
+        client_object,
+        properties_to_retrieve=None,
+        before_loaded=None,
+        after_loaded=None,
+    ):
         """Prepare retrieval query
 
         :type properties_to_retrieve: list[str] or None
@@ -233,6 +244,7 @@ class ClientRuntimeContext(object):
             qry = self._queries.pop(0)
         else:
             from office365.runtime.queries.batch import BatchQuery
+
             qry = BatchQuery(self)
             while self.has_pending_request and count > 0:
                 qry.add(self._queries.pop(0))

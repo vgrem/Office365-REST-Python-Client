@@ -10,4 +10,3 @@ class FollowedItem(ClientValue):
         :param int file_type:
         """
         self.FileType = file_type
-

@@ -6,4 +6,6 @@ class ExecutionHistoryResponse(ClientValue):
 
     @property
     def entity_type_name(self):
-        return "Microsoft.Online.SharePoint.TenantAdministration.ExecutionHistoryResponse"
+        return (
+            "Microsoft.Online.SharePoint.TenantAdministration.ExecutionHistoryResponse"
+        )

@@ -7,8 +7,16 @@ from office365.runtime.client_value import ClientValue
 class MailboxSettings(ClientValue):
     """Settings for the primary mailbox of a user."""
 
-    def __init__(self, time_format=None, time_zone=None, automatic_replies_setting=AutomaticRepliesSetting(),
-                 archive_folder=None, date_format=None, language=LocaleInfo(), working_hours=WorkingHours()):
+    def __init__(
+        self,
+        time_format=None,
+        time_zone=None,
+        automatic_replies_setting=AutomaticRepliesSetting(),
+        archive_folder=None,
+        date_format=None,
+        language=LocaleInfo(),
+        working_hours=WorkingHours(),
+    ):
         """
         :param str time_format: The time format for the user's mailbox.
         :param str time_zone: The default time zone for the user's mailbox.

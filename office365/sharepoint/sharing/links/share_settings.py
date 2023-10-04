@@ -4,9 +4,18 @@ from office365.runtime.client_value import ClientValue
 class ShareLinkSettings(ClientValue):
     """Represents the settings the retrieval or creation/update of a tokenized sharing link"""
 
-    def __init__(self, allow_anonymous_access=None, application_link=None, link_kind=None, expiration=None,
-                 password=None, password_protected=None, role=None,
-                 track_link_users=None, share_id=None):
+    def __init__(
+        self,
+        allow_anonymous_access=None,
+        application_link=None,
+        link_kind=None,
+        expiration=None,
+        password=None,
+        password_protected=None,
+        role=None,
+        track_link_users=None,
+        share_id=None,
+    ):
         """
         :param bool allow_anonymous_access: Indicates if the tokenized sharing link supports anonymous access.
              This value is optional and defaults to false for Flexible links (section 3.2.5.315.1.7) and is ignored

@@ -4,12 +4,22 @@ from office365.sharepoint.principal.type import PrincipalType
 
 
 class ClientPeoplePickerQueryParameters(ClientValue):
-
-    def __init__(self, query_string, allow_emai_addresses=True, allow_multiple_entities=True,
-                 allow_only_email_addresses=False,
-                 all_url_zones=False, enabled_claim_providers=None, force_claims=False, maximum_entity_suggestions=1,
-                 principal_source=PrincipalSource.All, principal_type=PrincipalType.All, url_zone=0,
-                 url_zone_specified=False, sharepoint_group_id=0):
+    def __init__(
+        self,
+        query_string,
+        allow_emai_addresses=True,
+        allow_multiple_entities=True,
+        allow_only_email_addresses=False,
+        all_url_zones=False,
+        enabled_claim_providers=None,
+        force_claims=False,
+        maximum_entity_suggestions=1,
+        principal_source=PrincipalSource.All,
+        principal_type=PrincipalType.All,
+        url_zone=0,
+        url_zone_specified=False,
+        sharepoint_group_id=0,
+    ):
         """
         Specifies the properties of a principal query
 

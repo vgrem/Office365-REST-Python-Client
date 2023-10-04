@@ -3,7 +3,6 @@ from office365.entity_collection import EntityCollection
 
 
 class DeltaCollection(EntityCollection):
-
     def change_type(self, type_name):
         """
         Specifies a custom query option to filter the delta response based on the type of change.
@@ -18,5 +17,9 @@ class DeltaCollection(EntityCollection):
         """
         Get newly created, updated, or deleted entities (changes)
         """
-        return self.properties.get('delta',
-                                   DeltaCollection(self.context, self._item_type, DeltaPath(self.resource_path)))
+        return self.properties.get(
+            "delta",
+            DeltaCollection(
+                self.context, self._item_type, DeltaPath(self.resource_path)
+            ),
+        )

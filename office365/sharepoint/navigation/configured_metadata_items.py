@@ -5,8 +5,15 @@ from office365.runtime.client_value_collection import ClientValueCollection
 class ConfiguredMetadataNavigationItem(ClientValue):
     """Represents a configured metadata navigation item."""
 
-    def __init__(self, field_display_name=None, field_title=None, field_type_as_string=None,
-                 is_content_type_field=None, is_folder_hierarchy=None, is_hierarchy=None):
+    def __init__(
+        self,
+        field_display_name=None,
+        field_title=None,
+        field_type_as_string=None,
+        is_content_type_field=None,
+        is_folder_hierarchy=None,
+        is_hierarchy=None,
+    ):
         """
         :param str field_display_name: The display name of the field that this item refers to.
         :param str field_title: The internal name of the field that this item refers to.

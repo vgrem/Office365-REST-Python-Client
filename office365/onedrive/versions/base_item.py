@@ -10,24 +10,24 @@ class BaseItemVersion(Entity):
 
     @property
     def last_modified_by(self):
-        """	Identity of the user which last modified the version. Read-only."""
-        return self.properties.get('lastModifiedBy', IdentitySet())
+        """Identity of the user which last modified the version. Read-only."""
+        return self.properties.get("lastModifiedBy", IdentitySet())
 
     @property
     def last_modified_datetime(self):
         """Gets date and time the item was last modified."""
-        return self.properties.get('lastModifiedDateTime', 	datetime.datetime.min)
+        return self.properties.get("lastModifiedDateTime", datetime.datetime.min)
 
     @property
     def publication(self):
         """Indicates the publication status of this particular version. Read-only."""
-        return self.properties.get('publication', PublicationFacet())
+        return self.properties.get("publication", PublicationFacet())
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "lastModifiedBy": self.last_modified_by,
-                "lastModifiedDateTime": self.last_modified_datetime
+                "lastModifiedDateTime": self.last_modified_datetime,
             }
             default_value = property_mapping.get(name, None)
         return super(BaseItemVersion, self).get_property(name, default_value)

@@ -11,7 +11,13 @@ class PermissionScope(ClientValue):
     application object.
     """
 
-    def __init__(self, admin_consent_display_name=None, admin_consent_description=None, _id=None, is_enabled=None):
+    def __init__(
+        self,
+        admin_consent_display_name=None,
+        admin_consent_description=None,
+        _id=None,
+        is_enabled=None,
+    ):
         """
         :param str admin_consent_display_name: The permission's title, intended to be read by an administrator granting
             the permission on behalf of all users.

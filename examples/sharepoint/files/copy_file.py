@@ -2,13 +2,15 @@
 Demonstrates how to copy a folder within a site
 """
 from office365.sharepoint.client_context import ClientContext
-from tests import test_user_credentials, test_team_site_url
+from tests import test_team_site_url, test_user_credentials
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
 
 # uploads a temporary folder first in a Documents library
 path = "../../data/report.csv"
-file_from = ctx.web.default_document_library().root_folder.files.upload(path).execute_query()
+file_from = (
+    ctx.web.default_document_library().root_folder.files.upload(path).execute_query()
+)
 
 # copies the file with a new name into folder
 destination_url = "Shared Documents/archive/2002/01"

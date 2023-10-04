@@ -9,7 +9,7 @@ from office365.runtime.odata.request import ODataRequest
 
 
 class ODataV4BatchRequest(ODataRequest):
-    """ JSON batch request """
+    """JSON batch request"""
 
     def build_request(self, query):
         """
@@ -19,8 +19,8 @@ class ODataV4BatchRequest(ODataRequest):
         """
         request = RequestOptions(query.url)
         request.method = HttpMethod.Post
-        request.ensure_header('Content-Type', "application/json")
-        request.ensure_header('Accept', "application/json")
+        request.ensure_header("Content-Type", "application/json")
+        request.ensure_header("Accept", "application/json")
         request.data = self._prepare_payload(query)
         return request
 
@@ -43,9 +43,9 @@ class ODataV4BatchRequest(ODataRequest):
         json_responses = response.json()
         for json_resp in json_responses["responses"]:
             resp = requests.Response()
-            resp.status_code = int(json_resp['status'])
-            resp.headers = CaseInsensitiveDict(json_resp['headers'])
-            resp._content = json.dumps(json_resp["body"]).encode('utf-8')
+            resp.status_code = int(json_resp["status"])
+            resp.headers = CaseInsensitiveDict(json_resp["headers"])
+            resp._content = json.dumps(json_resp["body"]).encode("utf-8")
             qry_id = int(json_resp["id"])
             qry = query.ordered_queries[qry_id]
             yield qry, resp
@@ -72,9 +72,15 @@ class ODataV4BatchRequest(ODataRequest):
         """
         request = query.build_request()
         allowed_props = ["id", "method", "headers", "url", "body"]
-        request_json = dict((k, v) for k, v in vars(request).items() if v is not None and k in allowed_props)
+        request_json = dict(
+            (k, v)
+            for k, v in vars(request).items()
+            if v is not None and k in allowed_props
+        )
         request_json["id"] = query_id
         if depends_on is not None:
             request_json["dependsOn"] = depends_on
-        request_json["url"] = request_json["url"].replace(query.context.service_root_url(), "")
+        request_json["url"] = request_json["url"].replace(
+            query.context.service_root_url(), ""
+        )
         return request_json

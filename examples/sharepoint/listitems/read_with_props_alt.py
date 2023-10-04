@@ -8,4 +8,4 @@ items = lib.items
 ctx.load(items, ["EncodedAbsUrl"])
 ctx.execute_query()
 for item in items:  # type:ListItem
-    print("{0}".format(item.properties.get('EncodedAbsUrl')))
+    print("{0}".format(item.properties.get("EncodedAbsUrl")))

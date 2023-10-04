@@ -11,10 +11,12 @@ class TeamInfo(Entity):
         The name of the team.
         :rtype: str or None
         """
-        return self.properties.get('displayName', None)
+        return self.properties.get("displayName", None)
 
     @property
     def team(self):
         from office365.teams.team import Team
-        return self.properties.get('team',
-                                   Team(self.context, ResourcePath("team", self.resource_path)))
+
+        return self.properties.get(
+            "team", Team(self.context, ResourcePath("team", self.resource_path))
+        )

@@ -27,7 +27,3 @@ class TestTaskList(GraphTestCase):
     def test5_delete_task_list(self):
         list_to_del = self.__class__.task_list
         list_to_del.delete_object().execute_query()
-
-
-
-

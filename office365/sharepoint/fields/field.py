@@ -18,6 +18,7 @@ class Field(BaseEntity):
         from office365.sharepoint.fields.choice import FieldChoice
         from office365.sharepoint.fields.computed import FieldComputed
         from office365.sharepoint.fields.currency import FieldCurrency
+        from office365.sharepoint.fields.date_time import FieldDateTime
         from office365.sharepoint.fields.guid import FieldGuid
         from office365.sharepoint.fields.lookup import FieldLookup
         from office365.sharepoint.fields.multi_choice import FieldMultiChoice
@@ -26,7 +27,7 @@ class Field(BaseEntity):
         from office365.sharepoint.fields.url import FieldUrl
         from office365.sharepoint.fields.user import FieldUser
         from office365.sharepoint.taxonomy.field import TaxonomyField
-        from office365.sharepoint.fields.date_time import FieldDateTime
+
         field_known_types = {
             FieldType.Text: FieldText,
             FieldType.Calculated: FieldCalculated,
@@ -39,15 +40,19 @@ class Field(BaseEntity):
             FieldType.Guid: FieldGuid,
             FieldType.Currency: FieldCurrency,
             FieldType.Note: FieldMultiLineText,
-            FieldType.DateTime: FieldDateTime
+            FieldType.DateTime: FieldDateTime,
         }
         if isinstance(type_id_or_name, int):
             return field_known_types.get(type_id_or_name, Field)
         else:
-            if type_id_or_name == "TaxonomyFieldType" or type_id_or_name == "TaxonomyFieldTypeMulti":
+            if (
+                type_id_or_name == "TaxonomyFieldType"
+                or type_id_or_name == "TaxonomyFieldTypeMulti"
+            ):
                 return TaxonomyField
             elif type_id_or_name == "Thumbnail":
                 from office365.sharepoint.fields.thumbnail import FieldThumbnail
+
                 return FieldThumbnail
             else:
                 return Field
@@ -119,7 +124,7 @@ class Field(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('Id', None)
+        return self.properties.get("Id", None)
 
     @property
     def auto_indexed(self):
@@ -127,20 +132,24 @@ class Field(BaseEntity):
         Gets a Boolean value that specifies whether the field is auto-indexed.
         :rtype: str or None
         """
-        return self.properties.get('AutoIndexed', None)
+        return self.properties.get("AutoIndexed", None)
 
     @property
     def default_formula(self):
         """
         :rtype: str or None
         """
-        return self.properties.get('DefaultFormula', None)
+        return self.properties.get("DefaultFormula", None)
 
     @property
     def description_resource(self):
         """Gets the resource object corresponding to the Description property for a field"""
-        return self.properties.get('DescriptionResource',
-                                   UserResource(self.context, ResourcePath("DescriptionResource", self.resource_path)))
+        return self.properties.get(
+            "DescriptionResource",
+            UserResource(
+                self.context, ResourcePath("DescriptionResource", self.resource_path)
+            ),
+        )
 
     @property
     def schema_xml(self):
@@ -148,14 +157,12 @@ class Field(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('SchemaXml', None)
+        return self.properties.get("SchemaXml", None)
 
     @schema_xml.setter
     def schema_xml(self, val):
-        """Sets a value that specifies the XML schema that defines the field.
-
-        """
-        self.set_property('SchemaXml', val)
+        """Sets a value that specifies the XML schema that defines the field."""
+        self.set_property("SchemaXml", val)
 
     @property
     def type_as_string(self):
@@ -163,7 +170,7 @@ class Field(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('TypeAsString', None)
+        return self.properties.get("TypeAsString", None)
 
     @property
     def title(self):
@@ -171,7 +178,7 @@ class Field(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('Title', None)
+        return self.properties.get("Title", None)
 
     @title.setter
     def title(self, val):
@@ -187,7 +194,7 @@ class Field(BaseEntity):
         Gets a value that specifies the field group.
         :rtype: str or None
         """
-        return self.properties.get('Group', None)
+        return self.properties.get("Group", None)
 
     @group.setter
     def group(self, val):
@@ -202,7 +209,7 @@ class Field(BaseEntity):
         Gets a value that specifies the field internal name.
         :rtype: str or None
         """
-        return self.properties.get('InternalName', None)
+        return self.properties.get("InternalName", None)
 
     @property
     def can_be_deleted(self):
@@ -210,28 +217,28 @@ class Field(BaseEntity):
         Gets a value that specifies whether the field can be deleted
         :rtype: bool or None
         """
-        return self.properties.get('CanBeDeleted', None)
+        return self.properties.get("CanBeDeleted", None)
 
     @property
     def client_side_component_id(self):
         """
         :rtype: str or None
         """
-        return self.properties.get('ClientSideComponentId', None)
+        return self.properties.get("ClientSideComponentId", None)
 
     @property
     def client_side_component_properties(self):
         """
         :rtype: str or None
         """
-        return self.properties.get('ClientSideComponentProperties', None)
+        return self.properties.get("ClientSideComponentProperties", None)
 
     @property
     def client_validation_formula(self):
         """
         :rtype: str or None
         """
-        return self.properties.get('ClientValidationFormula', None)
+        return self.properties.get("ClientValidationFormula", None)
 
     @property
     def enforce_unique_values(self):
@@ -239,7 +246,7 @@ class Field(BaseEntity):
         Specifies whether the field enforces unique values.
         :rtype: bool or None
         """
-        return self.properties.get('enforceUniqueValues', None)
+        return self.properties.get("enforceUniqueValues", None)
 
     @property
     def filterable(self):
@@ -247,7 +254,7 @@ class Field(BaseEntity):
         Specifies whether list items in the list can be filtered by the field value.
         :rtype: bool or None
         """
-        return self.properties.get('Filterable', None)
+        return self.properties.get("Filterable", None)
 
     @property
     def from_base_type(self):
@@ -255,7 +262,7 @@ class Field(BaseEntity):
         Gets a Boolean value that indicates whether the field derives from a base field type.
         :rtype: bool or None
         """
-        return self.properties.get('FromBaseType', None)
+        return self.properties.get("FromBaseType", None)
 
     @property
     def js_link(self):
@@ -264,7 +271,7 @@ class Field(BaseEntity):
         any client rendering logic for fields of the derived type.
         :rtype: str or None
         """
-        return self.properties.get('JSLink', None)
+        return self.properties.get("JSLink", None)
 
     @property
     def hidden(self):
@@ -272,7 +279,7 @@ class Field(BaseEntity):
         Gets a value that specifies whether the field is hidden in list views and list forms.
         :rtype: bool or None
         """
-        return self.properties.get('Hidden', None)
+        return self.properties.get("Hidden", None)
 
     @hidden.setter
     def hidden(self, val):
@@ -287,7 +294,7 @@ class Field(BaseEntity):
         Gets value that specifies whether the field can be crawled by a search engine.
         :rtype: bool or None
         """
-        return self.properties.get('NoCrawl', None)
+        return self.properties.get("NoCrawl", None)
 
     @property
     def read_only_field(self):
@@ -295,7 +302,7 @@ class Field(BaseEntity):
         Specifies whether the value of the field is read-only.
         :rtype: bool or None
         """
-        return self.properties.get('ReadOnlyField', None)
+        return self.properties.get("ReadOnlyField", None)
 
     @property
     def default_value(self):
@@ -303,7 +310,7 @@ class Field(BaseEntity):
         Gets  a value that specifies the default value for the field.
         :rtype: str or None
         """
-        return self.properties.get('DefaultValue', None)
+        return self.properties.get("DefaultValue", None)
 
     @default_value.setter
     def default_value(self, val):
@@ -317,7 +324,7 @@ class Field(BaseEntity):
         """
         :rtype: str or None
         """
-        return self.properties.get('Indexed', None)
+        return self.properties.get("Indexed", None)
 
     @property
     def type_display_name(self):
@@ -325,13 +332,17 @@ class Field(BaseEntity):
         Gets a value that specifies the display name for the type of the field.
         :rtype: str or None
         """
-        return self.properties.get('TypeDisplayName', None)
+        return self.properties.get("TypeDisplayName", None)
 
     @property
     def title_resource(self):
         """Gets the resource object corresponding to the Title property for a field"""
-        return self.properties.get('TitleResource',
-                                   UserResource(self.context, ResourcePath("TitleResource", self.resource_path)))
+        return self.properties.get(
+            "TitleResource",
+            UserResource(
+                self.context, ResourcePath("TitleResource", self.resource_path)
+            ),
+        )
 
     @property
     def type_short_description(self):
@@ -340,13 +351,13 @@ class Field(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('TypeShortDescription', None)
+        return self.properties.get("TypeShortDescription", None)
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "DescriptionResource": self.description_resource,
-                "TitleResource": self.title_resource
+                "TitleResource": self.title_resource,
             }
             default_value = property_mapping.get(name, None)
         return super(Field, self).get_property(name, default_value)
@@ -358,6 +369,6 @@ class Field(BaseEntity):
             self._resource_path = self.parent_collection.get_by_id(value).resource_path
         if name == "FieldTypeKind":
             self.__class__ = self.resolve_field_type(value)
-        elif name == "TypeAsString" and self.properties.get('FieldTypeKind', 0) == 0:
+        elif name == "TypeAsString" and self.properties.get("FieldTypeKind", 0) == 0:
             self.__class__ = self.resolve_field_type(value)
         return self

@@ -8,8 +8,15 @@ class AppRole(ClientValue):
     or that can be used to assign an application to users or groups in a specified role.
     """
 
-    def __init__(self, allowed_member_types=None, description=None, display_name=None, is_enabled=None, origin=None,
-                 value=None):
+    def __init__(
+        self,
+        allowed_member_types=None,
+        description=None,
+        display_name=None,
+        is_enabled=None,
+        origin=None,
+        value=None,
+    ):
         """
         :param list[str] allowed_member_types: Specifies whether this app role can be assigned to users and groups
             (by setting to ["User"]), to other application's (by setting to ["Application"], or both (by setting to
@@ -27,4 +34,3 @@ class AppRole(ClientValue):
 
     def __repr__(self):
         return self.value
-

@@ -19,7 +19,9 @@ class SPSocialSwitch(BaseEntity):
         """
         binding_type = SPSocialSwitch(context)
         return_type = ClientResult(context)
-        qry = ServiceOperationQuery(binding_type, "IsFollowingFeatureEnabled", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            binding_type, "IsFollowingFeatureEnabled", None, None, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type

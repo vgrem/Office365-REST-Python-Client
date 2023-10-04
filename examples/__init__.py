@@ -6,5 +6,3 @@ def upload_sample_files(drive):
     for local_path in local_paths:
         file = drive.root.resumable_upload(local_path).get().execute_query()
         print(f"File {file.web_url} has been uploaded")
-
-

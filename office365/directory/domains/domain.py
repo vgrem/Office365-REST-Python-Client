@@ -44,9 +44,12 @@ class Domain(Entity):
         For example /domains/{domainId}/domainNameReferences/microsoft.graph.user
         and /domains/{domainId}/domainNameReferences/microsoft.graph.group.
         """
-        return self.properties.get('domainNameReferences',
-                                   DirectoryObjectCollection(self.context,
-                                                             ResourcePath("domainNameReferences", self.resource_path)))
+        return self.properties.get(
+            "domainNameReferences",
+            DirectoryObjectCollection(
+                self.context, ResourcePath("domainNameReferences", self.resource_path)
+            ),
+        )
 
     @property
     def service_configuration_records(self):
@@ -54,9 +57,14 @@ class Domain(Entity):
         DNS records the customer adds to the DNS zone file of the domain before the domain can be used by
         Microsoft Online services. Read-only, Nullable. Supports $expand.
         """
-        return self.properties.get('serviceConfigurationRecords',
-                                   EntityCollection(self.context, DomainDnsRecord,
-                                                    ResourcePath("serviceConfigurationRecords", self.resource_path)))
+        return self.properties.get(
+            "serviceConfigurationRecords",
+            EntityCollection(
+                self.context,
+                DomainDnsRecord,
+                ResourcePath("serviceConfigurationRecords", self.resource_path),
+            ),
+        )
 
     @property
     def verification_dns_records(self):
@@ -64,9 +72,14 @@ class Domain(Entity):
         DNS records that the customer adds to the DNS zone file of the domain before the customer can complete
         domain ownership verification with Azure AD. Read-only, Nullable. Supports $expand.
         """
-        return self.properties.get('verificationDnsRecords',
-                                   EntityCollection(self.context, DomainDnsRecord,
-                                                    ResourcePath("verificationDnsRecords", self.resource_path)))
+        return self.properties.get(
+            "verificationDnsRecords",
+            EntityCollection(
+                self.context,
+                DomainDnsRecord,
+                ResourcePath("verificationDnsRecords", self.resource_path),
+            ),
+        )
 
     @property
     def state(self):
@@ -78,7 +91,7 @@ class Domain(Entity):
             property_mapping = {
                 "domainNameReferences": self.domain_name_references,
                 "serviceConfigurationRecords": self.service_configuration_records,
-                "verificationDnsRecords": self.verification_dns_records
+                "verificationDnsRecords": self.verification_dns_records,
             }
             default_value = property_mapping.get(name, None)
         return super(Domain, self).get_property(name, default_value)

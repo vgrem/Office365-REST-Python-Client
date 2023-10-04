@@ -11,14 +11,19 @@ class TermSet(TaxonomyItem):
 
     @property
     def localized_names(self):
-        return self.properties.get("localizedNames", ClientValueCollection(LocalizedName))
+        return self.properties.get(
+            "localizedNames", ClientValueCollection(LocalizedName)
+        )
 
     @property
     def terms(self):
         """Gets a collection of the child Term objects"""
-        return self.properties.get("terms",
-                                   TaxonomyItemCollection(self.context, Term,
-                                                          ResourcePath("terms", self.resource_path)))
+        return self.properties.get(
+            "terms",
+            TaxonomyItemCollection(
+                self.context, Term, ResourcePath("terms", self.resource_path)
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:

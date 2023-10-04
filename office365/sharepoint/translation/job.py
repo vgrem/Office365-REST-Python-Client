@@ -8,12 +8,17 @@ class TranslationJob(BaseEntity):
     """
     The TranslationJob type is used to create new translation jobs.
     """
+
     def __init__(self, context, target_language):
         """
         :param str target_language: This value MUST be a valid language tag to test as specified in RFC1766
         """
-        super().__init__(context, ServiceOperationPath("SP.Translation.TranslationJob",
-                                                       {"targetLanguage": target_language}))
+        super().__init__(
+            context,
+            ServiceOperationPath(
+                "SP.Translation.TranslationJob", {"targetLanguage": target_language}
+            ),
+        )
 
     @staticmethod
     def is_service_enabled(context, target_language):
@@ -27,7 +32,9 @@ class TranslationJob(BaseEntity):
 
         return_type = ClientResult(context, bool())
         binding_type = TranslationJob(context, target_language)
-        qry = ServiceOperationQuery(binding_type, "IsServiceEnabled", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            binding_type, "IsServiceEnabled", None, None, None, return_type
+        )
         context.add_query(qry)
         return return_type
 

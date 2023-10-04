@@ -6,7 +6,7 @@ class ChangeField(Change):
 
     @property
     def field_id(self):
-        """"
+        """ "
         Identifies the changed field
 
         :rtype: str or None

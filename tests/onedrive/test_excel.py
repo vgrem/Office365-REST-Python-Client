@@ -1,9 +1,8 @@
 import os
 
+from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.workbooks.tables.table import WorkbookTable
 from tests.graph_case import GraphTestCase
-
-from office365.onedrive.driveitems.driveItem import DriveItem
 
 
 def upload_excel(target_drive):
@@ -11,7 +10,7 @@ def upload_excel(target_drive):
     :type target_drive: office365.onedrive.drives.drive.Drive
     """
     path = "{0}/../data/Financial Sample.xlsx".format(os.path.dirname(__file__))
-    with open(path, 'rb') as content_file:
+    with open(path, "rb") as content_file:
         file_content = content_file.read()
     file_name = os.path.basename(path)
     return target_drive.root.upload(file_name, file_content).execute_query()
@@ -19,6 +18,7 @@ def upload_excel(target_drive):
 
 class TestExcel(GraphTestCase):
     """OneDrive specific test case base class"""
+
     target_item = None  # type: DriveItem
     table = None  # type: WorkbookTable
 
@@ -37,7 +37,9 @@ class TestExcel(GraphTestCase):
         self.assertIsNotNone(workbook.resource_path)
 
     def test2_create_workbook_table(self):
-        table = self.__class__.target_item.workbook.tables.add("A10000:C10002", True).execute_query()
+        table = self.__class__.target_item.workbook.tables.add(
+            "A10000:C10002", True
+        ).execute_query()
         self.assertIsNotNone(table.resource_path)
         self.__class__.table = table
 
@@ -63,7 +65,9 @@ class TestExcel(GraphTestCase):
         self.assertIsNotNone(rows.resource_path)
 
     def test8_create_table_rows(self):
-        rows = self.__class__.table.rows.add([["Val11", "Val12", "Val13", "Val14"]]).execute_query()
+        rows = self.__class__.table.rows.add(
+            [["Val11", "Val12", "Val13", "Val14"]]
+        ).execute_query()
         self.assertIsNotNone(rows.resource_path)
 
     def test9_table_range(self):
@@ -73,13 +77,9 @@ class TestExcel(GraphTestCase):
     def test_10_delete_workbook_table(self):
         self.__class__.table.delete_object().execute_query()
 
-    #def test_11_workbook_create_session(self):
+    # def test_11_workbook_create_session(self):
     #    result = self.__class__.target_item.workbook.create_session().execute_query()
     #    self.assertIsNotNone(result.value)
 
-    #def test_12_workbook_close_session(self):
+    # def test_12_workbook_close_session(self):
     #    self.__class__.target_item.workbook.close_session().execute_query()
-
-
-
-

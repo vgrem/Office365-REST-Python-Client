@@ -6,7 +6,6 @@ from office365.sharepoint.publishing.diagnostics.page_diagnostics import PageDia
 
 
 class PageDiagnosticsController(BaseEntity):
-
     def __init__(self, context):
         static_path = ResourcePath("SP.Publishing.PageDiagnosticsController")
         super(PageDiagnosticsController, self).__init__(context, static_path)

@@ -11,7 +11,9 @@ class LicenseDetails(Entity):
         """
         Information about the service plans assigned with the license. Read-only, Not nullable
         """
-        return self.properties.get('servicePlans', ClientValueCollection(ServicePlanInfo))
+        return self.properties.get(
+            "servicePlans", ClientValueCollection(ServicePlanInfo)
+        )
 
     @property
     def sku_id(self):
@@ -20,7 +22,7 @@ class LicenseDetails(Entity):
         Read-only
         :rtype: str or None
         """
-        return self.properties.get('skuId', None)
+        return self.properties.get("skuId", None)
 
     @property
     def sku_part_number(self):
@@ -29,4 +31,4 @@ class LicenseDetails(Entity):
         for example: "AAD_Premium". Read-only
         :rtype: str or None
         """
-        return self.properties.get('skuPartNumber', None)
+        return self.properties.get("skuPartNumber", None)

@@ -1,6 +1,6 @@
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.teams.schedule.shifts.availability import ShiftAvailability
 from office365.teams.schedule.change_tracked_entity import ChangeTrackedEntity
+from office365.teams.schedule.shifts.availability import ShiftAvailability
 
 
 class ShiftPreferences(ChangeTrackedEntity):
@@ -11,4 +11,6 @@ class ShiftPreferences(ChangeTrackedEntity):
         """
         Availability of the user to be scheduled for work and its recurrence pattern.
         """
-        return self.properties.get('availability', ClientValueCollection(ShiftAvailability))
+        return self.properties.get(
+            "availability", ClientValueCollection(ShiftAvailability)
+        )

@@ -1,16 +1,16 @@
-from typing import TypeVar, Optional, Generic, Iterator
+from typing import Generic, Iterator, Optional, TypeVar
+
 from typing_extensions import Self
 
 from office365.runtime.client_object import ClientObject
-from office365.runtime.types.event_handler import EventHandler
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.types.event_handler import EventHandler
 
 T = TypeVar("T")
 
 
 class ClientObjectCollection(ClientObject, Generic[T]):
-
     def __init__(self, context, item_type, resource_path=None, parent=None):
         # type: (ClientRuntimeContext, T, Optional[ResourcePath], Optional[ClientObject]) -> None
         """A collection container which represents a named collections of objects."""
@@ -35,10 +35,18 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         # type: (Optional[dict], Optional[ResourcePath]) -> T
         """Create an object from the item_type."""
         if self._item_type is None:
-            raise AttributeError("No class model for entity type '{0}' was found".format(self._item_type))
-        client_object = self._item_type(context=self.context, resource_path=resource_path)   # type: ClientObject
+            raise AttributeError(
+                "No class model for entity type '{0}' was found".format(self._item_type)
+            )
+        client_object = self._item_type(
+            context=self.context, resource_path=resource_path
+        )  # type: ClientObject
         if initial_properties is not None:
-            [client_object.set_property(k, v) for k, v in initial_properties.items() if v is not None]
+            [
+                client_object.set_property(k, v)
+                for k, v in initial_properties.items()
+                if v is not None
+            ]
         return client_object
 
     def set_property(self, key, value, persist_changes=False):
@@ -48,7 +56,10 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         else:
             client_object = self.create_typed_object()
             self.add_child(client_object)
-            [client_object.set_property(k, v, persist_changes) for k, v in value.items()]
+            [
+                client_object.set_property(k, v, persist_changes)
+                for k, v in value.items()
+            ]
         return self
 
     def add_child(self, client_object):
@@ -74,7 +85,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         if self._paged_mode:
             while self.has_next:
                 self._get_next().execute_query()
-                next_items = self._data[self._current_pos:]
+                next_items = self._data[self._current_pos :]
                 for next_item in next_items:
                     yield next_item
 
@@ -154,8 +165,10 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         """
         :type self: T
         """
+
         def _loaded(items):
             self._page_loaded.notify(self)
+
         self.context.load(self, after_loaded=_loaded)
         return self
 
@@ -191,7 +204,9 @@ class ClientObjectCollection(ClientObject, Generic[T]):
             """
             request.url = self._next_request_url
 
-        self.context.load(self, before_loaded=_construct_next_query, after_loaded=after_loaded)
+        self.context.load(
+            self, before_loaded=_construct_next_query, after_loaded=after_loaded
+        )
         return self
 
     def first(self, expression):
@@ -261,5 +276,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         """Returns server type name for the collection of entities"""
         if self._entity_type_name is None:
             client_object = self.create_typed_object()
-            self._entity_type_name = "Collection({0})".format(client_object.entity_type_name)
+            self._entity_type_name = "Collection({0})".format(
+                client_object.entity_type_name
+            )
         return self._entity_type_name

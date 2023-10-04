@@ -2,7 +2,6 @@ from office365.runtime.client_value import ClientValue
 
 
 class ContentTypeCreationInformation(ClientValue):
-
     def __init__(self, name, description=None, group=None, ct_id=None):
         """Specifies properties that are used as parameters to initialize a new content type.
 

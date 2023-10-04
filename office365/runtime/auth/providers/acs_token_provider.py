@@ -7,7 +7,6 @@ from office365.runtime.compat import urlparse
 
 
 class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
-
     def __init__(self, url, client_id, client_secret):
         """
         Provider to acquire the access token from a Microsoft Azure Access Control Service (ACS)
@@ -29,7 +28,7 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         :type request: office365.runtime.http.request_options.RequestOptions
         """
         self.ensure_app_only_access_token()
-        request.set_header('Authorization', self._get_authorization_header())
+        request.set_header("Authorization", self._get_authorization_header())
 
     def ensure_app_only_access_token(self):
         if self._cached_token is None:
@@ -45,7 +44,11 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
             url_info = urlparse(self.url)
             return self._get_app_only_access_token(url_info.hostname, realm)
         except requests.exceptions.RequestException as e:
-            self.error = e.response.text if e.response is not None else "Acquire app-only access token failed."
+            self.error = (
+                e.response.text
+                if e.response is not None
+                else "Acquire app-only access token failed."
+            )
             raise ValueError(self.error)
 
     def _get_app_only_access_token(self, target_host, target_realm):
@@ -56,24 +59,29 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         :param str target_host: Url authority of the target principal
         :param str target_realm: Realm to use for the access token's nameid and audience
         """
-        resource = self.get_formatted_principal(self.SharePointPrincipal, target_host, target_realm)
+        resource = self.get_formatted_principal(
+            self.SharePointPrincipal, target_host, target_realm
+        )
         principal_id = self.get_formatted_principal(self._client_id, None, target_realm)
         sts_url = self.get_security_token_service_url(target_realm)
         oauth2_request = {
-            'grant_type': 'client_credentials',
-            'client_id': principal_id,
-            'client_secret': self._client_secret,
-            'scope': resource,
-            'resource': resource
+            "grant_type": "client_credentials",
+            "client_id": principal_id,
+            "client_secret": self._client_secret,
+            "scope": resource,
+            "resource": resource,
         }
-        response = requests.post(url=sts_url, headers={'Content-Type': 'application/x-www-form-urlencoded'},
-                                 data=oauth2_request)
+        response = requests.post(
+            url=sts_url,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            data=oauth2_request,
+        )
         response.raise_for_status()
         return TokenResponse.from_json(response.json())
 
     def _get_realm_from_target_url(self):
         """Get the realm for the URL"""
-        response = requests.head(url=self.url, headers={'Authorization': 'Bearer'})
+        response = requests.head(url=self.url, headers={"Authorization": "Bearer"})
         return self.process_realm_response(response)
 
     @staticmethod
@@ -85,7 +93,7 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         if header_key in response.headers:
             auth_values = response.headers[header_key].split(",")
             bearer = auth_values[0].split("=")
-            return bearer[1].replace('"', '')
+            return bearer[1].replace('"', "")
         return None
 
     @staticmethod
@@ -96,10 +104,12 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
 
     @staticmethod
     def get_security_token_service_url(realm):
-        return "https://accounts.accesscontrol.windows.net/{0}/tokens/OAuth/2".format(realm)
+        return "https://accounts.accesscontrol.windows.net/{0}/tokens/OAuth/2".format(
+            realm
+        )
 
     def _get_authorization_header(self):
-        return 'Bearer {0}'.format(self._cached_token.accessToken)
+        return "Bearer {0}".format(self._cached_token.accessToken)
 
     def get_last_error(self):
         return self.error

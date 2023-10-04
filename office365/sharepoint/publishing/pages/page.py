@@ -5,7 +5,9 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.publishing.pages.fields_data import SitePageFieldsData
 from office365.sharepoint.publishing.pages.metadata import SitePageMetadata
-from office365.sharepoint.translation.status_collection import TranslationStatusCollection
+from office365.sharepoint.translation.status_collection import (
+    TranslationStatusCollection,
+)
 
 
 class SharePagePreviewByEmailFieldsData(ClientValue):
@@ -51,7 +53,9 @@ class SitePage(SitePageMetadata):
         self.context.add_query(qry)
         return self
 
-    def save_page(self, title, canvas_content=None, banner_image_url=None, topic_header=None):
+    def save_page(
+        self, title, canvas_content=None, banner_image_url=None, topic_header=None
+    ):
         """
         Updates the current Site Page with the provided pageStream content.
 
@@ -60,15 +64,19 @@ class SitePage(SitePageMetadata):
         :param str banner_image_url:
         :param str topic_header:
         """
-        payload = SitePageFieldsData(title=title,
-                                     canvas_content=canvas_content,
-                                     banner_image_url=banner_image_url,
-                                     topic_header=topic_header)
+        payload = SitePageFieldsData(
+            title=title,
+            canvas_content=canvas_content,
+            banner_image_url=banner_image_url,
+            topic_header=topic_header,
+        )
         qry = ServiceOperationQuery(self, "SavePage", None, payload, "pageStream")
         self.context.add_query(qry)
         return self
 
-    def save_draft(self, title, canvas_content=None, banner_image_url=None, topic_header=None):
+    def save_draft(
+        self, title, canvas_content=None, banner_image_url=None, topic_header=None
+    ):
         """
         Updates the Site Page with the provided sitePage metadata and checks in a minor version if the page library
         has minor versions enabled.
@@ -78,16 +86,22 @@ class SitePage(SitePageMetadata):
         :param str banner_image_url:
         :param str topic_header:
         """
-        payload = SitePageFieldsData(title=title,
-                                     canvas_content=canvas_content,
-                                     banner_image_url=banner_image_url,
-                                     topic_header=topic_header)
+        payload = SitePageFieldsData(
+            title=title,
+            canvas_content=canvas_content,
+            banner_image_url=banner_image_url,
+            topic_header=topic_header,
+        )
         return_type = ClientResult(self.context, bool())
-        qry = ServiceOperationQuery(self, "SaveDraft", None, payload, "sitePage", return_type)
+        qry = ServiceOperationQuery(
+            self, "SaveDraft", None, payload, "sitePage", return_type
+        )
         self.context.add_query(qry)
         return return_type
 
-    def save_page_as_draft(self, title, canvas_content=None, banner_image_url=None, topic_header=None):
+    def save_page_as_draft(
+        self, title, canvas_content=None, banner_image_url=None, topic_header=None
+    ):
         """
         Updates the Site Page with the provided pageStream content and checks in a minor version if the page library
         has minor versions enabled.
@@ -97,21 +111,25 @@ class SitePage(SitePageMetadata):
         :param str banner_image_url:
         :param str topic_header:
         """
-        payload = SitePageFieldsData(title=title,
-                                     canvas_content=canvas_content,
-                                     banner_image_url=banner_image_url,
-                                     topic_header=topic_header)
+        payload = SitePageFieldsData(
+            title=title,
+            canvas_content=canvas_content,
+            banner_image_url=banner_image_url,
+            topic_header=topic_header,
+        )
         return_type = ClientResult(self.context, bool())
-        qry = ServiceOperationQuery(self, "SavePageAsDraft", None, payload, "pageStream", return_type)
+        qry = ServiceOperationQuery(
+            self, "SavePageAsDraft", None, payload, "pageStream", return_type
+        )
         self.context.add_query(qry)
         return return_type
 
     def save_page_as_template(self):
-        """
-
-        """
+        """ """
         return_type = SitePage(self.context)
-        qry = ServiceOperationQuery(self, "SavePageAsTemplate", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "SavePageAsTemplate", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -159,7 +177,9 @@ class SitePage(SitePageMetadata):
         """
         payload = SitePageFieldsData(publish_start_date=publish_start_date)
         result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "SchedulePublish", None, payload, "sitePage", result)
+        qry = ServiceOperationQuery(
+            self, "SchedulePublish", None, payload, "sitePage", result
+        )
         self.context.add_query(qry)
         return result
 
@@ -218,9 +238,12 @@ class SitePage(SitePageMetadata):
 
     @property
     def translations(self):
-        return self.properties.get('Translations',
-                                   TranslationStatusCollection(self.context,
-                                                               ResourcePath("Translations", self.resource_path)))
+        return self.properties.get(
+            "Translations",
+            TranslationStatusCollection(
+                self.context, ResourcePath("Translations", self.resource_path)
+            ),
+        )
 
     @property
     def entity_type_name(self):

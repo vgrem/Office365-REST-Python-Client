@@ -7,7 +7,6 @@ from office365.sharepoint.base_entity import BaseEntity
 
 
 class GroupService(BaseEntity):
-
     def __init__(self, context, resource_path=None):
         super(GroupService, self).__init__(context, resource_path)
 
@@ -20,7 +19,9 @@ class GroupService(BaseEntity):
         return_type = ClientResult(self.context)
         if image_hash is None:
             image_hash = random.getrandbits(64)
-        qry = ServiceOperationQuery(self, "GetGroupImage", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetGroupImage", None, None, None, return_type
+        )
 
         def _modify_request(request):
             """
@@ -28,6 +29,7 @@ class GroupService(BaseEntity):
             """
             request.url += "?id='{0}'&hash={1}".format(group_id, image_hash)
             request.method = HttpMethod.Get
+
         self.context.before_execute(_modify_request)
         self.context.add_query(qry)
         return return_type

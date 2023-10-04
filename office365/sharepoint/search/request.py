@@ -14,13 +14,31 @@ class SearchRequest(ClientValue):
     Uniform Resource Locator (URL) length limitations that some clients experience with HTTP GET operations.
     """
 
-    def __init__(self, query_text, select_properties=None, culture=None, trim_duplicates=False,
-                 row_limit=None, rows_per_page=None, start_row=None,
-                 enable_sorting=None, sort_list=None, query_template=None, ranking_model_id=None,
-                 summary_length=None, collapse_specification=None, client_type=None,
-                 enable_query_rules=None, source_id=None, reordering_rules=None,
-                 properties=None, ui_language=None, hit_highlighted_properties=None,
-                 hit_highlighted_multivalue_property_limit=None, **kwargs):
+    def __init__(
+        self,
+        query_text,
+        select_properties=None,
+        culture=None,
+        trim_duplicates=False,
+        row_limit=None,
+        rows_per_page=None,
+        start_row=None,
+        enable_sorting=None,
+        sort_list=None,
+        query_template=None,
+        ranking_model_id=None,
+        summary_length=None,
+        collapse_specification=None,
+        client_type=None,
+        enable_query_rules=None,
+        source_id=None,
+        reordering_rules=None,
+        properties=None,
+        ui_language=None,
+        hit_highlighted_properties=None,
+        hit_highlighted_multivalue_property_limit=None,
+        **kwargs
+    ):
         """
         :param str query_text: The query text of the search query. If this element is not present or a value is not
             specified, a default value of an empty string MUST be used, and the server MUST return a
@@ -99,7 +117,9 @@ class SearchRequest(ClientValue):
         self.Properties = ClientValueCollection(QueryProperty, properties)
         self.UILanguage = ui_language
         self.HitHighlightedProperties = StringCollection(hit_highlighted_properties)
-        self.HitHighlightedMultivaluePropertyLimit = hit_highlighted_multivalue_property_limit
+        self.HitHighlightedMultivaluePropertyLimit = (
+            hit_highlighted_multivalue_property_limit
+        )
         self.__dict__.update(**kwargs)
 
     @property

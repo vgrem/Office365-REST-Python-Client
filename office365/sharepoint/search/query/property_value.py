@@ -5,7 +5,14 @@ class QueryPropertyValue(ClientValue):
     """This object is used to store values of predefined types. The object MUST have a value set for only
     one of the property."""
 
-    def __init__(self, bool_val=None, int_val=None, str_array=None, str_val=None, query_property_value_type_index=None):
+    def __init__(
+        self,
+        bool_val=None,
+        int_val=None,
+        str_array=None,
+        str_val=None,
+        query_property_value_type_index=None,
+    ):
         """
         :param bool bool_val: Specifies any arbitrary value of type CSOM Boolean. This property MUST have a value only
             if QueryPropertyValueTypeIndex is set to 3.

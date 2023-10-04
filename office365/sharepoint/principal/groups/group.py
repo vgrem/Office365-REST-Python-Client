@@ -1,7 +1,7 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.principal.principal import Principal
 from office365.sharepoint.utilities.principal_info import PrincipalInfo
 
@@ -19,8 +19,10 @@ class Group(Principal):
         elif self.login_name:
             self.parent_collection.remove_by_login_name(self.login_name)
         else:
+
             def _group_loaded():
                 self.parent_collection.remove_by_id(self.id)
+
             self.ensure_property("Id", _group_loaded)
         return self
 
@@ -33,7 +35,11 @@ class Group(Principal):
 
         def _group_loaded():
             from office365.sharepoint.utilities.utility import Utility
-            Utility.expand_groups_to_principals(self.context, [self.login_name], max_count, return_type)
+
+            Utility.expand_groups_to_principals(
+                self.context, [self.login_name], max_count, return_type
+            )
+
         self.ensure_property("LoginName", _group_loaded)
         return return_type
 
@@ -44,12 +50,16 @@ class Group(Principal):
         """
 
         def _set_user_as_owner(owner_id):
-            qry = ServiceOperationQuery(self, "SetUserAsOwner", None, {"ownerId": owner_id})
+            qry = ServiceOperationQuery(
+                self, "SetUserAsOwner", None, {"ownerId": owner_id}
+            )
             self.context.add_query(qry)
 
         if isinstance(user, Principal):
+
             def _user_loaded():
                 _set_user_as_owner(user.id)
+
             user.ensure_property("Id", _user_loaded)
         else:
             _set_user_as_owner(user)
@@ -67,71 +77,77 @@ class Group(Principal):
         """Specifies whether a member of the group can add and remove members from the group.
         :rtype: bool or None
         """
-        return self.properties.get('AllowMembersEditMembership', None)
+        return self.properties.get("AllowMembersEditMembership", None)
 
     @property
     def allow_request_to_join_leave(self):
         """Specifies whether to allow users to request to join or leave in the group.
         :rtype: bool or None
         """
-        return self.properties.get('AllowRequestToJoinLeave', None)
+        return self.properties.get("AllowRequestToJoinLeave", None)
 
     @property
     def auto_accept_request_to_join_leave(self):
         """Specifies whether requests to join or leave the group are automatically accepted.
         :rtype: bool or None
         """
-        return self.properties.get('AutoAcceptRequestToJoinLeave', None)
+        return self.properties.get("AutoAcceptRequestToJoinLeave", None)
 
     @property
     def can_current_user_edit_membership(self):
         """Specifies whether the current user can add and remove members from the group.
         :rtype: bool or None
         """
-        return self.properties.get('CanCurrentUserEditMembership', None)
+        return self.properties.get("CanCurrentUserEditMembership", None)
 
     @property
     def can_current_user_manage_group(self):
         """Gets a Boolean value that indicates whether the current user can manage the group.
         :rtype: bool or None
         """
-        return self.properties.get('CanCurrentUserManageGroup', None)
+        return self.properties.get("CanCurrentUserManageGroup", None)
 
     @property
     def can_current_user_view_membership(self):
         """Specifies whether the current user can view the membership of the group.
         :rtype: bool or None
         """
-        return self.properties.get('CanCurrentUserViewMembership', None)
+        return self.properties.get("CanCurrentUserViewMembership", None)
 
     @property
     def only_allow_members_view_membership(self):
         """Specifies whether viewing the membership of the group is restricted to members of the group.
         :rtype: bool or None
         """
-        return self.properties.get('OnlyAllowMembersViewMembership', None)
+        return self.properties.get("OnlyAllowMembersViewMembership", None)
 
     @property
     def owner_title(self):
         """Specifies the name of the owner of the group.
         :rtype: str or None
         """
-        return self.properties.get('OwnerTitle', None)
+        return self.properties.get("OwnerTitle", None)
 
     @property
     def request_to_join_leave_email_setting(self):
         """Specifies the e-mail address to which requests to join or leave the group are sent.
         :rtype: str or None
         """
-        return self.properties.get('RequestToJoinLeaveEmailSetting', None)
+        return self.properties.get("RequestToJoinLeaveEmailSetting", None)
 
     @property
     def owner(self):
         """Specifies the owner of the group."""
-        return self.properties.get('Owner', Principal(self.context, ResourcePath("Owner", self.resource_path)))
+        return self.properties.get(
+            "Owner", Principal(self.context, ResourcePath("Owner", self.resource_path))
+        )
 
     @property
     def users(self):
         """Gets a collection of user objects that represents all of the members in the group."""
         from office365.sharepoint.principal.users.collection import UserCollection
-        return self.properties.get('Users', UserCollection(self.context, ResourcePath("Users", self.resource_path)))
+
+        return self.properties.get(
+            "Users",
+            UserCollection(self.context, ResourcePath("Users", self.resource_path)),
+        )

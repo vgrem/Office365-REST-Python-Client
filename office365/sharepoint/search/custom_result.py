@@ -6,7 +6,13 @@ class CustomResult(ClientValue):
     This contains a list of query results, all of which are of the type specified in TableType.
     """
 
-    def __init__(self, group_template_id=None, item_template_id=None, result_title=None, properties=None):
+    def __init__(
+        self,
+        group_template_id=None,
+        item_template_id=None,
+        result_title=None,
+        properties=None,
+    ):
         """
         :param str group_template_id: Specifies the identifier of the layout template that specifies how the results
             returned will be arranged.

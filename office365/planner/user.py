@@ -14,8 +14,13 @@ class PlannerUser(Entity):
         Returns the plannerTasks assigned to the user.
         """
         from office365.planner.plans.collection import PlannerPlanCollection
-        return self.properties.get('plans',
-                                   PlannerPlanCollection(self.context, ResourcePath("plans", self.resource_path)))
+
+        return self.properties.get(
+            "plans",
+            PlannerPlanCollection(
+                self.context, ResourcePath("plans", self.resource_path)
+            ),
+        )
 
     @property
     def tasks(self):
@@ -23,6 +28,9 @@ class PlannerUser(Entity):
 
         :rtype: EntityCollection
         """
-        return self.properties.get('tasks',
-                                   EntityCollection(self.context, PlannerTask,
-                                                    ResourcePath("tasks", self.resource_path)))
+        return self.properties.get(
+            "tasks",
+            EntityCollection(
+                self.context, PlannerTask, ResourcePath("tasks", self.resource_path)
+            ),
+        )

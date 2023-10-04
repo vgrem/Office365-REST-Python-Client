@@ -3,7 +3,7 @@ Creates Team site
 """
 
 from office365.sharepoint.client_context import ClientContext
-from tests import test_site_url, test_user_credentials, create_unique_name
+from tests import create_unique_name, test_site_url, test_user_credentials
 
 alias = create_unique_name("teamsite")
 title = "Team Site"

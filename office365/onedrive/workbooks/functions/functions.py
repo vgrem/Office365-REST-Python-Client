@@ -39,7 +39,7 @@ class WorkbookFunctions(Entity):
             "settlement": settlement,
             "rate": rate,
             "par": par,
-            "frequency": frequency
+            "frequency": frequency,
         }
         qry = ServiceOperationQuery(self, "accrInt", None, payload, None, return_type)
         self.context.add_query(qry)
@@ -52,10 +52,7 @@ class WorkbookFunctions(Entity):
         :param datetime end_date: Two dates between which you want to know the number of days.
         """
         return_type = WorkbookFunctionResult(self.context)
-        payload = {
-            "startDate": start_date,
-            "endDate": end_date
-        }
+        payload = {"startDate": start_date, "endDate": end_date}
         qry = ServiceOperationQuery(self, "days", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type

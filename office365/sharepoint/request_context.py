@@ -16,6 +16,8 @@ class RequestContext(ClientObject):
         Returns null if this is not an attempt to render or act upon a mounted folder.
         """
         return_type = RequestContext(self.context)
-        qry = ServiceOperationQuery(self, "GetRemoteContext", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetRemoteContext", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type

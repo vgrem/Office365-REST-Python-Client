@@ -21,7 +21,6 @@ class KeyValue(ClientValue):
 
 
 class KeyValueCollection(ClientValueCollection):
-
     def __init__(self, initial_values=None):
         """
         :type initial_values: list[KeyValue] or None

@@ -4,6 +4,7 @@ from tests.graph_case import GraphTestCase
 
 class TestSite(GraphTestCase):
     """OneDrive specific test case base class"""
+
     test_site = None  # type: Site
 
     @classmethod

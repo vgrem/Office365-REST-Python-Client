@@ -7,4 +7,3 @@ class OnenotePagePreviewLinks(ClientValue):
 
     def __init__(self, preview_image_url=ExternalLink()):
         self.previewImageUrl = preview_image_url
-

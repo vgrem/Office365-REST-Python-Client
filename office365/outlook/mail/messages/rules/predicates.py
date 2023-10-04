@@ -7,8 +7,15 @@ from office365.runtime.types.collections import StringCollection
 class MessageRulePredicates(ClientValue):
     """Represents the set of conditions and exceptions that are available for a rule."""
 
-    def __init__(self, body_contains=None, body_or_subject_contains=None, categories=None,
-                 from_addresses=None, has_attachments=None, header_contains=None):
+    def __init__(
+        self,
+        body_contains=None,
+        body_or_subject_contains=None,
+        categories=None,
+        from_addresses=None,
+        has_attachments=None,
+        header_contains=None,
+    ):
         """
         :param list[str] body_contains: Represents the strings that should appear in the body of an incoming message
             in order for the condition or exception to apply.

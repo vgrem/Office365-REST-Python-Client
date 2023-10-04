@@ -9,5 +9,3 @@ class TestGraphMail(GraphTestCase):
         available_mail_folders = self.client.me.mail_folders.get().execute_query()
         self.assertIsNotNone(available_mail_folders.resource_path)
         # self.__class__.target_message = draft_message
-
-

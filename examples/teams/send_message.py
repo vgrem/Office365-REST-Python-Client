@@ -16,5 +16,7 @@ if len(my_teams) == 0:
 
 target_team = my_teams[1]  # type: Team
 
-message = target_team.primary_channel.messages.add(itemBody=ItemBody("Hello world!")).execute_query()
+message = target_team.primary_channel.messages.add(
+    itemBody=ItemBody("Hello world!")
+).execute_query()
 print(message.web_url)

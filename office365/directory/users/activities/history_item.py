@@ -26,10 +26,12 @@ class ActivityHistoryItem(Entity):
     @property
     def created_datetime(self):
         """Set by the server. DateTime in UTC when the object was created on the server."""
-        return self.properties.get('createdDateTime', datetime.datetime.min)
+        return self.properties.get("createdDateTime", datetime.datetime.min)
 
     @property
     def activity(self):
         """NavigationProperty/Containment; navigation property to the associated activity."""
-        return self.properties.get('activity',
-                                   UserActivity(self.context, ResourcePath("activity", self.resource_path)))
+        return self.properties.get(
+            "activity",
+            UserActivity(self.context, ResourcePath("activity", self.resource_path)),
+        )

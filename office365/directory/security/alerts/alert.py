@@ -32,4 +32,6 @@ class Alert(Entity):
     @property
     def history_states(self):
         """Collection of changes for the alert."""
-        return self.properties.get("historyStates", ClientValueCollection(AlertHistoryState))
+        return self.properties.get(
+            "historyStates", ClientValueCollection(AlertHistoryState)
+        )

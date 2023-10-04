@@ -3,13 +3,16 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.publishing.pages.metadata_collection import SitePageMetadataCollection
+from office365.sharepoint.publishing.pages.metadata_collection import (
+    SitePageMetadataCollection,
+)
 from office365.sharepoint.publishing.pages.page import SitePage
-from office365.sharepoint.translation.status_collection import TranslationStatusCollection
+from office365.sharepoint.translation.status_collection import (
+    TranslationStatusCollection,
+)
 
 
 class SitePageCollection(SitePageMetadataCollection):
-
     def __init__(self, context, resource_path=None):
         """Specifies a collection of site pages."""
         if resource_path is None:
@@ -31,7 +34,9 @@ class SitePageCollection(SitePageMetadataCollection):
         """
         return_type = ClientResult(self.context)
         payload = {"webPartDataAsJson": web_part_data}
-        qry = ServiceOperationQuery(self, "CreateAppPage", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "CreateAppPage", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -40,7 +45,9 @@ class SitePageCollection(SitePageMetadataCollection):
         :param str source_item_id:
         """
         return_type = TranslationStatusCollection(self.context)
-        qry = ServiceOperationQuery(self, "GetTranslations", [source_item_id], None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetTranslations", [source_item_id], None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -55,13 +62,15 @@ class SitePageCollection(SitePageMetadataCollection):
         return return_type
 
     def get_page_column_state(self, url):
-        """"
+        """ "
         Determines whether a specific SitePage is a single or multicolumn page.
 
         :param str url: URL of the SitePage for which to return state.
         """
         return_type = ClientResult(self.context, int())
-        qry = ServiceOperationQuery(self, "GetPageColumnState", [url], None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetPageColumnState", [url], None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -70,7 +79,9 @@ class SitePageCollection(SitePageMetadataCollection):
 
         :param str url: Specifies the server relative url of the site page.
         """
-        return SitePage(self.context, ServiceOperationPath("GetByUrl", [url], self.resource_path))
+        return SitePage(
+            self.context, ServiceOperationPath("GetByUrl", [url], self.resource_path)
+        )
 
     def get_by_name(self, name):
         """Gets the site page with the specified file name.
@@ -83,8 +94,11 @@ class SitePageCollection(SitePageMetadataCollection):
 
     def templates(self):
         """"""
-        return SitePageMetadataCollection(self.context, SitePage,
-                                          ServiceOperationPath("Templates", None, self.resource_path))
+        return SitePageMetadataCollection(
+            self.context,
+            SitePage,
+            ServiceOperationPath("Templates", None, self.resource_path),
+        )
 
     def update_full_page_app(self, server_relative_url, web_part_data_as_json):
         """
@@ -93,7 +107,7 @@ class SitePageCollection(SitePageMetadataCollection):
         """
         payload = {
             "serverRelativeUrl": server_relative_url,
-            "webPartDataAsJson": web_part_data_as_json
+            "webPartDataAsJson": web_part_data_as_json,
         }
         qry = ServiceOperationQuery(self, "UpdateFullPageApp", None, payload)
         self.context.add_query(qry)

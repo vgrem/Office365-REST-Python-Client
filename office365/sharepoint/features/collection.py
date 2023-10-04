@@ -26,7 +26,7 @@ class FeatureCollection(BaseEntityCollection):
             payload = {
                 "featureId": feature_id,
                 "force": force,
-                "featdefScope": featdef_scope
+                "featdefScope": featdef_scope,
             }
             return ServiceOperationQuery(self, "Add", None, payload, None, return_type)
 
@@ -51,4 +51,7 @@ class FeatureCollection(BaseEntityCollection):
 
         :param str feature_id:  The feature identifier of the feature to be returned.
         """
-        return Feature(self.context, ServiceOperationPath("GetById", [feature_id], self.resource_path))
+        return Feature(
+            self.context,
+            ServiceOperationPath("GetById", [feature_id], self.resource_path),
+        )

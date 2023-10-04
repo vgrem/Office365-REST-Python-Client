@@ -22,5 +22,6 @@ permissions = file_item.invite(
     message="Here's the file that we're collaborating on.",
     roles=["read"],
     expiration_datetime=None,
-    password="password123").execute_query()
+    password="password123",
+).execute_query()
 print(json.dumps(permissions.to_json(), indent=4))

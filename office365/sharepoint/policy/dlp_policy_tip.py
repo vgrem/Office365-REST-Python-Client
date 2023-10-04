@@ -39,4 +39,3 @@ class DlpPolicyTip(BaseEntity):
     def two_letter_iso_language_name(self):
         """The two-letter language code of the generated policy tip detail."""
         return self.properties.get("TwoLetterISOLanguageName", None)
-

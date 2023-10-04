@@ -54,6 +54,8 @@ class GroupCollection(DeltaCollection):
         execute_query_retry instead of execute_query when using this method.
         :param str group_name: The display name for the group
         """
+
         def _after_group_created(return_type):
             return_type.add_team()
+
         return self.create_m365_group(group_name).after_execute(_after_group_created)

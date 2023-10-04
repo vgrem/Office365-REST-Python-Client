@@ -19,20 +19,26 @@ class BookingBusiness(Entity):
     It contains business information and related business objects such as appointments, customers, services,
     and staff members."""
 
-    def get_staff_availability(self, staff_ids=None, start_datetime=None, end_datetime=None):
+    def get_staff_availability(
+        self, staff_ids=None, start_datetime=None, end_datetime=None
+    ):
         """
         Get the availability information of staff members of a Microsoft Bookings calendar.
         :param list[str] staff_ids: The list of staff IDs
         :param datetime.datetime start_datetime:
         :param datetime.datetime end_datetime:
         """
-        return_type = ClientResult(self.context, ClientValueCollection(StaffAvailabilityItem))
+        return_type = ClientResult(
+            self.context, ClientValueCollection(StaffAvailabilityItem)
+        )
         payload = {
             "staffIds": staff_ids,
             "startDateTime": start_datetime,
-            "endDateTime": end_datetime
+            "endDateTime": end_datetime,
         }
-        qry = ServiceOperationQuery(self, "getStaffAvailability", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "getStaffAvailability", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -50,7 +56,9 @@ class BookingBusiness(Entity):
         """
         The hours of operation for the business.
         """
-        return self.properties.get("businessHours", ClientValueCollection(BookingWorkHours))
+        return self.properties.get(
+            "businessHours", ClientValueCollection(BookingWorkHours)
+        )
 
     def display_name(self):
         """
@@ -58,49 +66,79 @@ class BookingBusiness(Entity):
             scheduling page.
         :rtype: str or None
         """
-        return self.properties.get('displayName', None)
+        return self.properties.get("displayName", None)
 
     @property
     def appointments(self):
         """All the appointments of this business. Read-only. Nullable."""
-        return self.properties.get('appointments',
-                                   EntityCollection(self.context, BookingAppointment,
-                                                    ResourcePath("appointments", self.resource_path)))
+        return self.properties.get(
+            "appointments",
+            EntityCollection(
+                self.context,
+                BookingAppointment,
+                ResourcePath("appointments", self.resource_path),
+            ),
+        )
 
     @property
     def calendar_view(self):
         """The set of appointments of this business in a specified date range. Read-only. Nullable."""
-        return self.properties.get('calendarView',
-                                   EntityCollection(self.context, BookingAppointment,
-                                                    ResourcePath("calendarView", self.resource_path)))
+        return self.properties.get(
+            "calendarView",
+            EntityCollection(
+                self.context,
+                BookingAppointment,
+                ResourcePath("calendarView", self.resource_path),
+            ),
+        )
 
     @property
     def customers(self):
         """All the customers of this business. Read-only. Nullable."""
-        return self.properties.get('customers',
-                                   EntityCollection(self.context, BookingCustomerBase,
-                                                    ResourcePath("customers", self.resource_path)))
+        return self.properties.get(
+            "customers",
+            EntityCollection(
+                self.context,
+                BookingCustomerBase,
+                ResourcePath("customers", self.resource_path),
+            ),
+        )
 
     @property
     def custom_questions(self):
         """All the services offered by this business. Read-only. Nullable."""
-        return self.properties.get('customQuestions',
-                                   EntityCollection(self.context, BookingCustomQuestion,
-                                                    ResourcePath("customQuestions", self.resource_path)))
+        return self.properties.get(
+            "customQuestions",
+            EntityCollection(
+                self.context,
+                BookingCustomQuestion,
+                ResourcePath("customQuestions", self.resource_path),
+            ),
+        )
 
     @property
     def services(self):
         """All the services offered by this business. Read-only. Nullable."""
-        return self.properties.get('services',
-                                   EntityCollection(self.context, BookingService,
-                                                    ResourcePath("services", self.resource_path)))
+        return self.properties.get(
+            "services",
+            EntityCollection(
+                self.context,
+                BookingService,
+                ResourcePath("services", self.resource_path),
+            ),
+        )
 
     @property
     def staff_members(self):
         """The collection of open extensions defined for the message. Nullable."""
-        return self.properties.get('staffMembers',
-                                   EntityCollection(self.context, BookingStaffMemberBase,
-                                                    ResourcePath("staffMembers", self.resource_path)))
+        return self.properties.get(
+            "staffMembers",
+            EntityCollection(
+                self.context,
+                BookingStaffMemberBase,
+                ResourcePath("staffMembers", self.resource_path),
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
@@ -108,7 +146,7 @@ class BookingBusiness(Entity):
                 "businessHours": self.business_hours,
                 "calendarView": self.calendar_view,
                 "customQuestions": self.custom_questions,
-                "staffMembers": self.staff_members
+                "staffMembers": self.staff_members,
             }
             default_value = property_mapping.get(name, None)
         return super(BookingBusiness, self).get_property(name, default_value)

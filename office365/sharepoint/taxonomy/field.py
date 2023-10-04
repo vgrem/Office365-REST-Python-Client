@@ -1,14 +1,23 @@
 import uuid
 
 from office365.sharepoint.fields.lookup import FieldLookup
-from office365.sharepoint.taxonomy.create_xml_parameters import TaxonomyFieldCreateXmlParameters
+from office365.sharepoint.taxonomy.create_xml_parameters import (
+    TaxonomyFieldCreateXmlParameters,
+)
 
 
 class TaxonomyField(FieldLookup):
     """Represents a taxonomy field."""
 
     @staticmethod
-    def create(fields, name, term_set_id, term_store_id=None, allow_multiple_values=False, return_type=None):
+    def create(
+        fields,
+        name,
+        term_set_id,
+        term_store_id=None,
+        allow_multiple_values=False,
+        return_type=None,
+    ):
         """
         :type fields: office365.sharepoint.fields.collection.FieldCollection
         :param str name: Field name
@@ -20,11 +29,16 @@ class TaxonomyField(FieldLookup):
         if return_type is None:
             return_type = TaxonomyField(fields.context)
         fields.add_child(return_type)
-        params = TaxonomyFieldCreateXmlParameters(name, term_set_id, term_store_id=term_store_id,
-                                                  allow_multiple_values=allow_multiple_values)
+        params = TaxonomyFieldCreateXmlParameters(
+            name,
+            term_set_id,
+            term_store_id=term_store_id,
+            allow_multiple_values=allow_multiple_values,
+        )
 
         def _create_taxonomy_field_inner():
             from office365.sharepoint.lists.list import List
+
             if isinstance(fields.parent, List):
                 parent_list = fields.parent
 
@@ -32,11 +46,14 @@ class TaxonomyField(FieldLookup):
                     params.web_id = parent_list.parent_web.id
                     params.list_id = parent_list.id
                     fields.create_field_as_xml(params.schema_xml, return_type)
+
                 fields.parent.ensure_properties(["Id", "ParentWeb"], _list_loaded)
             else:
+
                 def _web_loaded():
                     params.web_id = fields.context.web.id
                     fields.create_field_as_xml(params.schema_xml, return_type)
+
                 fields.context.web.ensure_property("Id", _web_loaded)
 
         def _after_text_field_created(text_field):
@@ -49,11 +66,13 @@ class TaxonomyField(FieldLookup):
     def _create_text_field(self, name):
         """Creates hidden text field"""
         text_field_name = "{name}".format(name=uuid.uuid4().hex)
-        text_field_schema = '''
+        text_field_schema = """
                     <Field Type="Note" DisplayName="{name}_0" Hidden="TRUE" CanBeDeleted="TRUE" ShowInViewForms="FALSE"
                            CanToggleHidden="TRUE" StaticName="{text_field_name}" Name="{text_field_name}">
                     </Field>
-                '''.format(name=name, text_field_name=text_field_name)
+                """.format(
+            name=name, text_field_name=text_field_name
+        )
         return self.parent_collection.create_field_as_xml(text_field_schema)
 
     @property
@@ -61,7 +80,7 @@ class TaxonomyField(FieldLookup):
         """Gets or sets the GUID of the anchor Term object for a TaxonomyField object.
         :rtype: str or None
         """
-        return self.properties.get('AnchorId', None)
+        return self.properties.get("AnchorId", None)
 
     @property
     def create_values_in_edit_form(self):
@@ -70,21 +89,21 @@ class TaxonomyField(FieldLookup):
         TermSet while typing in the TaxonomyField editor control.
         :rtype: bool or None
         """
-        return self.properties.get('CreateValuesInEditForm', None)
+        return self.properties.get("CreateValuesInEditForm", None)
 
     @property
     def is_anchor_valid(self):
         """Gets a Boolean value that specifies whether the Term object identified by the AnchorId property is valid.
         :rtype: bool or None
         """
-        return self.properties.get('IsAnchorValid', None)
+        return self.properties.get("IsAnchorValid", None)
 
     @property
     def is_doc_tags_enabled(self):
         """
         :rtype: bool or None
         """
-        return self.properties.get('IsDocTagsEnabled', None)
+        return self.properties.get("IsDocTagsEnabled", None)
 
     @property
     def is_keyword(self):
@@ -93,7 +112,7 @@ class TaxonomyField(FieldLookup):
         keywords term set  object.
         :rtype: bool or None
         """
-        return self.properties.get('IsKeyword', None)
+        return self.properties.get("IsKeyword", None)
 
     @property
     def is_path_rendered(self):
@@ -103,7 +122,7 @@ class TaxonomyField(FieldLookup):
         addition to the default label of that Term.
         :rtype: bool or None
         """
-        return self.properties.get('IsPathRendered', None)
+        return self.properties.get("IsPathRendered", None)
 
     @property
     def is_term_set_valid(self):
@@ -112,7 +131,7 @@ class TaxonomyField(FieldLookup):
         property exists and is available for tagging.
         :rtype: bool or None
         """
-        return self.properties.get('IsTermSetValid', None)
+        return self.properties.get("IsTermSetValid", None)
 
     @property
     def open(self):
@@ -121,7 +140,7 @@ class TaxonomyField(FieldLookup):
         open TermSet (section 3.1.5.20) object or a closed TermSet.
         :rtype: bool or None
         """
-        return self.properties.get('Open', None)
+        return self.properties.get("Open", None)
 
     @property
     def ssp_id(self):
@@ -130,7 +149,7 @@ class TaxonomyField(FieldLookup):
         keywords for the site that the current TaxonomyField belongs to.
         :rtype: str or None
         """
-        return self.properties.get('SspId', None)
+        return self.properties.get("SspId", None)
 
     @property
     def target_template(self):
@@ -139,7 +158,7 @@ class TaxonomyField(FieldLookup):
         hyperlink on each Term object when the TaxonomyField (section 3.1.5.27) object is rendered.
         :rtype: str or None
         """
-        return self.properties.get('TargetTemplate', None)
+        return self.properties.get("TargetTemplate", None)
 
     @property
     def term_set_id(self):
@@ -148,14 +167,14 @@ class TaxonomyField(FieldLookup):
         objects used by the current TaxonomyField () object.
         :rtype: str or None
         """
-        return self.properties.get('TermSetId', None)
+        return self.properties.get("TermSetId", None)
 
     @property
     def text_field_id(self):
         """Gets the GUID that identifies the hidden text field in an item.
         :rtype: str or None
         """
-        return self.properties.get('TextField', None)
+        return self.properties.get("TextField", None)
 
     @property
     def text_field(self):
@@ -171,7 +190,7 @@ class TaxonomyField(FieldLookup):
         customized TermSet object.
         :rtype: bool or None
         """
-        return self.properties.get('UserCreated', None)
+        return self.properties.get("UserCreated", None)
 
     @property
     def entity_type_name(self):

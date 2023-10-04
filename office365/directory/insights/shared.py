@@ -28,20 +28,24 @@ class SharedInsight(Entity):
     def resource(self):
         """Used for navigating to the item that was shared. For file attachments, the type is fileAttachment.
         For linked attachments, the type is driveItem."""
-        return self.properties.get('resource',
-                                   Entity(self.context, ResourcePath("resource", self.resource_path)))
+        return self.properties.get(
+            "resource",
+            Entity(self.context, ResourcePath("resource", self.resource_path)),
+        )
 
     @property
     def sharing_history(self):
         """Details about the sharing history. Read-only"""
-        return self.properties.get("sharingHistory", ClientValueCollection(SharingDetail))
+        return self.properties.get(
+            "sharingHistory", ClientValueCollection(SharingDetail)
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "lastShared": self.last_shared,
                 "resourceReference": self.resource_reference,
-                "sharingHistory": self.sharing_history
+                "sharingHistory": self.sharing_history,
             }
             default_value = property_mapping.get(name, None)
         return super(SharedInsight, self).get_property(name, default_value)

@@ -5,6 +5,7 @@ https://learn.microsoft.com/en-us/graph/api/user-post-events?view=graph-rest-1.0
 """
 
 from datetime import datetime, timedelta
+
 from office365.graph_client import GraphClient
 from tests.graph_case import acquire_token_by_username_password
 
@@ -15,6 +16,6 @@ new_event = client.me.calendar.events.add(
     body="Does mid month work for you?",
     start=when,
     end=when + timedelta(hours=1),
-    attendees=["samanthab@contoso.onmicrosoft.com"]
+    attendees=["samanthab@contoso.onmicrosoft.com"],
 ).execute_query()
 print("Event created")

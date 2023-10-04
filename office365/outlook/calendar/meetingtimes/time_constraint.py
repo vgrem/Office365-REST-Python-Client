@@ -14,5 +14,3 @@ class TimeConstraint(ClientValue):
         """
         self.activityDomain = activity_domain
         self.timeSlots = ClientValueCollection(TimeSlot, time_slots)
-
-

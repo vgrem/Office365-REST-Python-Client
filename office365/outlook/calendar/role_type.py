@@ -1,5 +1,4 @@
 class CalendarRoleType:
-
     def __init__(self):
         pass
 

@@ -2,7 +2,9 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.principal.groups.collection import GroupCollection
-from office365.sharepoint.sharing.invitation.creation_result import SPInvitationCreationResult
+from office365.sharepoint.sharing.invitation.creation_result import (
+    SPInvitationCreationResult,
+)
 from office365.sharepoint.sharing.user_sharing_result import UserSharingResult
 
 
@@ -69,7 +71,9 @@ class SharingResult(BaseEntity):
 
         :rtype: ClientValueCollection
         """
-        return self.properties.get("InvitedUsers", ClientValueCollection(SPInvitationCreationResult))
+        return self.properties.get(
+            "InvitedUsers", ClientValueCollection(SPInvitationCreationResult)
+        )
 
     @property
     def uniquely_permissioned_users(self):
@@ -77,7 +81,9 @@ class SharingResult(BaseEntity):
 
         :rtype: ClientValueCollection
         """
-        return self.properties.get("UniquelyPermissionedUsers", ClientValueCollection(UserSharingResult))
+        return self.properties.get(
+            "UniquelyPermissionedUsers", ClientValueCollection(UserSharingResult)
+        )
 
     @property
     def groups_shared_with(self):
@@ -85,8 +91,12 @@ class SharingResult(BaseEntity):
 
         :rtype: ClientValueCollection
         """
-        return self.properties.get("GroupsSharedWith",
-                                   GroupCollection(self.context, ResourcePath("GroupsSharedWith", self.resource_path)))
+        return self.properties.get(
+            "GroupsSharedWith",
+            GroupCollection(
+                self.context, ResourcePath("GroupsSharedWith", self.resource_path)
+            ),
+        )
 
     @property
     def users_added_to_group(self):
@@ -95,7 +105,9 @@ class SharingResult(BaseEntity):
 
         :rtype: ClientValueCollection
         """
-        return self.properties.get("UsersAddedToGroup", ClientValueCollection(UserSharingResult))
+        return self.properties.get(
+            "UsersAddedToGroup", ClientValueCollection(UserSharingResult)
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:

@@ -13,7 +13,9 @@ class UserProfilePropertiesForUser(BaseEntity):
         The GetPropertyNames method gets an array of strings that specify the user profile property names.
         """
         return_type = ClientResult(self.context, StringCollection())
-        qry = ServiceOperationQuery(self, "GetPropertyNames", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetPropertyNames", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -24,19 +26,20 @@ class UserProfilePropertiesForUser(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('AccountName', None)
+        return self.properties.get("AccountName", None)
 
     @property
     def property_names(self):
-        return self.properties.get('PropertyNames', None)
+        return self.properties.get("PropertyNames", None)
 
     @property
     def resource_path(self):
         if self._resource_path is None:
             params = {
                 "accountName": self.account_name,
-                "propertyNames": self.property_names
+                "propertyNames": self.property_names,
             }
-            self._resource_path = ServiceOperationPath("SP.UserProfiles.UserProfilePropertiesForUser", params)
+            self._resource_path = ServiceOperationPath(
+                "SP.UserProfiles.UserProfilePropertiesForUser", params
+            )
         return self._resource_path
-

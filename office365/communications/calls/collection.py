@@ -4,7 +4,6 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class CallCollection(EntityCollection):
-
     def __init__(self, context, resource_path=None):
         super(CallCollection, self).__init__(context, Call, resource_path)
 
@@ -30,6 +29,8 @@ class CallCollection(EntityCollection):
 
         :param TeleconferenceDeviceQuality quality : Quality data of VTC media leg.
         """
-        qry = ServiceOperationQuery(self, "logTeleconferenceDeviceQuality", None, quality)
+        qry = ServiceOperationQuery(
+            self, "logTeleconferenceDeviceQuality", None, quality
+        )
         self.context.add_query(qry)
         return self

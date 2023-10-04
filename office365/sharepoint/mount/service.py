@@ -1,11 +1,12 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.mount.requests.get_remote_item_Info import GetRemoteItemInfoRequest
+from office365.sharepoint.mount.requests.get_remote_item_Info import (
+    GetRemoteItemInfoRequest,
+)
 
 
 class MountService(BaseEntity):
-
     @staticmethod
     def get_remote_item_info(context, remote_item_unique_ids):
         """
@@ -13,10 +14,10 @@ class MountService(BaseEntity):
         :param list[str] remote_item_unique_ids:
         """
         return_type = ClientResult(context, str())
-        payload = {
-            "request": GetRemoteItemInfoRequest(remote_item_unique_ids)
-        }
-        qry = ServiceOperationQuery(context.web, "GetRemoteItemInfo", None, payload, None, return_type, True)
+        payload = {"request": GetRemoteItemInfoRequest(remote_item_unique_ids)}
+        qry = ServiceOperationQuery(
+            context.web, "GetRemoteItemInfo", None, payload, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 

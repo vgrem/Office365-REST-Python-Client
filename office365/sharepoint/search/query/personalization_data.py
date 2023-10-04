@@ -9,6 +9,8 @@ class QueryPersonalizationData(BaseEntity):
         """
         :param str user_id:
         """
-        static_path = ServiceOperationPath("Microsoft.SharePoint.Client.Search.Query.QueryPersonalizationData",
-                                           {"guidUserIdString": user_id})
+        static_path = ServiceOperationPath(
+            "Microsoft.SharePoint.Client.Search.Query.QueryPersonalizationData",
+            {"guidUserIdString": user_id},
+        )
         super(QueryPersonalizationData, self).__init__(context, static_path)

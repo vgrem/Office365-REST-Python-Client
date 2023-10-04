@@ -15,13 +15,19 @@ https://github.com/vgrem/Office365-REST-Python-Client/wiki/How-to-connect-to-Sha
 import os
 
 from office365.sharepoint.client_context import ClientContext
-from tests import test_client_id, test_tenant_name, test_site_url, test_cert_thumbprint, test_tenant
+from tests import (
+    test_cert_thumbprint,
+    test_client_id,
+    test_site_url,
+    test_tenant,
+    test_tenant_name,
+)
 
 cert_credentials = {
-    'tenant': test_tenant,
-    'client_id': test_client_id,
-    'thumbprint': test_cert_thumbprint,
-    'cert_path': '{0}/../selfsignkey.pem'.format(os.path.dirname(__file__)),
+    "tenant": test_tenant,
+    "client_id": test_client_id,
+    "thumbprint": test_cert_thumbprint,
+    "cert_path": "{0}/../selfsignkey.pem".format(os.path.dirname(__file__)),
 }
 ctx = ClientContext(test_site_url).with_client_certificate(**cert_credentials)
 current_web = ctx.web.get().execute_query()

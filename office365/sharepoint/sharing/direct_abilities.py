@@ -5,10 +5,13 @@ from office365.sharepoint.sharing.ability_status import SharingAbilityStatus
 class DirectSharingAbilities(ClientValue):
     """Represents the set of capabilities for direct sharing for the current user."""
 
-    def __init__(self, can_add_external_principal=SharingAbilityStatus(),
-                 can_add_internal_principal=SharingAbilityStatus(),
-                 can_request_grant_access=SharingAbilityStatus(),
-                 supports_review_permission=SharingAbilityStatus()):
+    def __init__(
+        self,
+        can_add_external_principal=SharingAbilityStatus(),
+        can_add_internal_principal=SharingAbilityStatus(),
+        can_request_grant_access=SharingAbilityStatus(),
+        supports_review_permission=SharingAbilityStatus(),
+    ):
         """
         :param SharingAbilityStatus can_add_external_principal: Indicates whether the current user can share to new
             external users.

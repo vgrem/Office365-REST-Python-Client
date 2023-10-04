@@ -2,7 +2,6 @@ from office365.runtime.client_value import ClientValue
 
 
 class VivaConnectionsUrlConfiguration(ClientValue):
-
     def __init__(self, content_url=None, dashboard_not_configured_warning=None):
         """
         :param str content_url:

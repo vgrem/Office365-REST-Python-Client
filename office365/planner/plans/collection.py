@@ -5,7 +5,6 @@ from office365.runtime.queries.create_entity import CreateEntityQuery
 
 
 class PlannerPlanCollection(EntityCollection):
-
     def __init__(self, context, resource_path=None):
         super(PlannerPlanCollection, self).__init__(context, PlannerPlan, resource_path)
 
@@ -22,18 +21,23 @@ class PlannerPlanCollection(EntityCollection):
         def _create_query(owner_id):
             payload = {
                 "title": title,
-                "owner": {"@odata.id": "https://graph.microsoft.com/v1.0/users/{0}".format(owner_id)}
+                "owner": {
+                    "@odata.id": "https://graph.microsoft.com/v1.0/users/{0}".format(
+                        owner_id
+                    )
+                },
             }
             return CreateEntityQuery(self, payload, return_type)
 
         if isinstance(owner, User):
+
             def _owner_loaded():
                 next_qry = _create_query(owner.id)
                 self.context.add_query(next_qry)
+
             owner.ensure_property("id", _owner_loaded)
         else:
             qry = _create_query(owner)
             self.context.add_query(qry)
 
         return return_type
-

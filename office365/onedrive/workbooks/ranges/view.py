@@ -9,6 +9,11 @@ class WorkbookRangeView(Entity):
     @property
     def rows(self):
         """Represents a collection of range views associated with the range."""
-        return self.properties.get('rows',
-                                   EntityCollection(self.context, WorkbookRangeView,
-                                                    ResourcePath("rows", self.resource_path)))
+        return self.properties.get(
+            "rows",
+            EntityCollection(
+                self.context,
+                WorkbookRangeView,
+                ResourcePath("rows", self.resource_path),
+            ),
+        )

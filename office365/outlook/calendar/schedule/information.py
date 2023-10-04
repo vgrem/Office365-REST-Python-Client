@@ -8,8 +8,14 @@ class ScheduleInformation(ClientValue):
     """Represents the availability of a user, distribution list, or resource (room or equipment)
     for a specified time period."""
 
-    def __init__(self, schedule_id=None, schedule_items=None, availability_view=None, error=None,
-                 working_hours=WorkingHours()):
+    def __init__(
+        self,
+        schedule_id=None,
+        schedule_items=None,
+        availability_view=None,
+        error=None,
+        working_hours=WorkingHours(),
+    ):
         """
 
         :param WorkingHours working_hours: The days of the week and hours in a specific time zone that the user works.

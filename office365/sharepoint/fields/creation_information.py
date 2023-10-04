@@ -5,10 +5,18 @@ from office365.sharepoint.fields.type import FieldType
 
 
 class FieldCreationInformation(ClientValue):
-
-    def __init__(self, title, field_type_kind, description=None,
-                 lookup_list_id=None, lookup_field_name=None, lookup_web_id=None,
-                 required=False, formula=None, choices=None):
+    def __init__(
+        self,
+        title,
+        field_type_kind,
+        description=None,
+        lookup_list_id=None,
+        lookup_field_name=None,
+        lookup_web_id=None,
+        required=False,
+        formula=None,
+        choices=None,
+    ):
         """
         Represents metadata about fields creation.
 
@@ -28,8 +36,12 @@ class FieldCreationInformation(ClientValue):
         self.Title = title
         self.FieldTypeKind = field_type_kind
         self.Description = description
-        self.Choices = StringCollection(choices) \
-            if field_type_kind == FieldType.MultiChoice or field_type_kind == FieldType.Choice else None
+        self.Choices = (
+            StringCollection(choices)
+            if field_type_kind == FieldType.MultiChoice
+            or field_type_kind == FieldType.Choice
+            else None
+        )
         self.LookupListId = lookup_list_id
         self.LookupFieldName = lookup_field_name
         self.LookupWebId = lookup_web_id

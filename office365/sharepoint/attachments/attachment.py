@@ -18,11 +18,15 @@ class Attachment(BaseEntity):
             file_object.write(return_type.value)
 
         def _download_file_by_path():
-            file = self.context.web.get_file_by_server_relative_path(str(self.server_relative_path))
+            file = self.context.web.get_file_by_server_relative_path(
+                str(self.server_relative_path)
+            )
             file.get_content().after_execute(_save_content)
 
         def _download_file_by_url():
-            file = self.context.web.get_file_by_server_relative_url(self.server_relative_url)
+            file = self.context.web.get_file_by_server_relative_url(
+                self.server_relative_url
+            )
             file.get_content().after_execute(_save_content)
 
         if use_path:
@@ -46,12 +50,16 @@ class Attachment(BaseEntity):
         """
 
         def _upload_file_by_url():
-            target_file = self.context.web.get_file_by_server_relative_url(self.server_relative_url)
+            target_file = self.context.web.get_file_by_server_relative_url(
+                self.server_relative_url
+            )
             qry = create_upload_file_query(target_file, file_object)
             self.context.add_query(qry)
 
         def _upload_file_by_path():
-            target_file = self.context.web.get_file_by_server_relative_path(str(self.server_relative_path))
+            target_file = self.context.web.get_file_by_server_relative_path(
+                str(self.server_relative_path)
+            )
             qry = create_upload_file_query(target_file, file_object)
             self.context.add_query(qry)
 
@@ -100,7 +108,9 @@ class Attachment(BaseEntity):
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "ServerRelativeUrl":
-                self._resource_path = self.context.web.get_file_by_server_relative_url(value).resource_path
+                self._resource_path = self.context.web.get_file_by_server_relative_url(
+                    value
+                ).resource_path
 
     def get_property(self, name, default_value=None):
         if default_value is None:

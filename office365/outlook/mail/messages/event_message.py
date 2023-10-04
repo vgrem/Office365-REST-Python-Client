@@ -13,8 +13,10 @@ class EventMessage(Message):
         the Calendar Attendant is set to automatically update the calendar with an event when meeting request event
         messages arrive. Navigation property. Read-only."""
         from office365.outlook.calendar.events.event import Event
-        return self.properties.get('event',
-                                   Event(self.context, ResourcePath("event", self.resource_path)))
+
+        return self.properties.get(
+            "event", Event(self.context, ResourcePath("event", self.resource_path))
+        )
 
     @property
     def patterned_recurrence(self):

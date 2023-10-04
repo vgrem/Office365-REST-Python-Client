@@ -5,22 +5,25 @@ https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-authentica
 """
 
 from office365.graph_client import GraphClient
-from tests import test_client_id, test_tenant_name, test_cert_path, test_cert_thumbprint
+from tests import test_cert_path, test_cert_thumbprint, test_client_id, test_tenant_name
 
 
 def acquire_token():
-    with open(test_cert_path, 'r') as f:
+    with open(test_cert_path, "r") as f:
         private_key = open(test_cert_path).read()
 
-    authority_url = 'https://login.microsoftonline.com/{0}'.format(test_tenant_name)
+    authority_url = "https://login.microsoftonline.com/{0}".format(test_tenant_name)
     credentials = {"thumbprint": test_cert_thumbprint, "private_key": private_key}
     import msal
+
     app = msal.ConfidentialClientApplication(
         test_client_id,
         authority=authority_url,
         client_credential=credentials,
     )
-    result = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
+    result = app.acquire_token_for_client(
+        scopes=["https://graph.microsoft.com/.default"]
+    )
     return result
 
 

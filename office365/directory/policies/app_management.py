@@ -13,9 +13,12 @@ class AppManagementPolicy(PolicyBase):
     @property
     def applies_to(self):
         """Collection of applications and service principals to which the policy is applied."""
-        return self.properties.get('appliesTo',
-                                   DirectoryObjectCollection(self.context,
-                                                             ResourcePath("appliesTo", self.resource_path)))
+        return self.properties.get(
+            "appliesTo",
+            DirectoryObjectCollection(
+                self.context, ResourcePath("appliesTo", self.resource_path)
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:

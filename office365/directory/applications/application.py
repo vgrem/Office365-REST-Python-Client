@@ -6,17 +6,17 @@ from office365.directory.applications.public_client import PublicClientApplicati
 from office365.directory.applications.roles.role import AppRole
 from office365.directory.applications.spa import SpaApplication
 from office365.directory.certificates.certification import Certification
-from office365.directory.object_collection import DirectoryObjectCollection
-from office365.directory.object import DirectoryObject
 from office365.directory.extensions.extension_property import ExtensionProperty
 from office365.directory.key_credential import KeyCredential
+from office365.directory.object import DirectoryObject
+from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.password_credential import PasswordCredential
 from office365.directory.policies.token_issuance import TokenIssuancePolicy
 from office365.entity_collection import EntityCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 
 
@@ -28,7 +28,10 @@ class Application(DirectoryObject):
     the URI to identify your application, and more. For more information, see Basics of Registering
     an Application in Azure AD
     """
-    def add_certificate(self, cert_data, display_name, start_datetime=None, end_datetime=None):
+
+    def add_certificate(
+        self, cert_data, display_name, start_datetime=None, end_datetime=None
+    ):
         """Adds a certificate to an application.
 
         :param str display_name: Friendly name for the key.
@@ -47,7 +50,7 @@ class Application(DirectoryObject):
             start_datetime=start_datetime.isoformat(),
             end_datetime=end_datetime.isoformat(),
             key=base64.b64encode(cert_data).decode("utf-8"),
-            display_name="CN={0}".format(display_name)
+            display_name="CN={0}".format(display_name),
         )
         self.key_credentials.add(params)
         self.update()
@@ -99,7 +102,12 @@ class Application(DirectoryObject):
         :param str verified_publisher_id: The Microsoft Partner Network ID (MPNID) of the verified publisher
         to be set on the application, from the publisher's Partner Center account.
         """
-        qry = ServiceOperationQuery(self, "setVerifiedPublisher", None, {"verifiedPublisherId": verified_publisher_id})
+        qry = ServiceOperationQuery(
+            self,
+            "setVerifiedPublisher",
+            None,
+            {"verifiedPublisherId": verified_publisher_id},
+        )
         self.context.add_query(qry)
         return self
 
@@ -149,7 +157,9 @@ class Application(DirectoryObject):
                  nbf - Not before time.
                  exp - Expiration time should be "nbf" + 10 mins.
         """
-        qry = ServiceOperationQuery(self, "removeKey", None, {"keyId": key_id, "proof": proof})
+        qry = ServiceOperationQuery(
+            self, "removeKey", None, {"keyId": key_id, "proof": proof}
+        )
         self.context.add_query(qry)
         return self
 
@@ -210,10 +220,11 @@ class Application(DirectoryObject):
 
     @property
     def key_credentials(self):
-        """The collection of key credentials associated with the application. Not nullable.
-        """
+        """The collection of key credentials associated with the application. Not nullable."""
         self._ser_property_names.append("keyCredentials")
-        return self.properties.setdefault('keyCredentials', ClientValueCollection(KeyCredential))
+        return self.properties.setdefault(
+            "keyCredentials", ClientValueCollection(KeyCredential)
+        )
 
     @property
     def display_name(self):
@@ -222,7 +233,7 @@ class Application(DirectoryObject):
         Supports $filter (eq, ne, NOT, ge, le, in, startsWith), $search, and $orderBy.
         :rtype: str or None
         """
-        return self.properties.get('displayName', None)
+        return self.properties.get("displayName", None)
 
     @property
     def identifier_uris(self):
@@ -231,14 +242,14 @@ class Application(DirectoryObject):
         if the application is multi-tenant. For more information see Application Objects and Service Principal Objects.
         The any operator is required for filter expressions on multi-valued properties.
         """
-        return self.properties.get('identifierUris', StringCollection())
+        return self.properties.get("identifierUris", StringCollection())
 
     @property
     def public_client(self):
         """
         Specifies settings for installed clients such as desktop or mobile devices.
         """
-        return self.properties.get('publicClient', PublicClientApplication())
+        return self.properties.get("publicClient", PublicClientApplication())
 
     @property
     def signin_audience(self):
@@ -249,35 +260,51 @@ class Application(DirectoryObject):
 
         :rtype: str or None
         """
-        return self.properties.get('signInAudience', None)
+        return self.properties.get("signInAudience", None)
 
     @property
     def created_on_behalf_of(self):
         """"""
-        return self.properties.get('createdOnBehalfOf',
-                                   DirectoryObject(self.context, ResourcePath("createdOnBehalfOf", self.resource_path)))
+        return self.properties.get(
+            "createdOnBehalfOf",
+            DirectoryObject(
+                self.context, ResourcePath("createdOnBehalfOf", self.resource_path)
+            ),
+        )
 
     @property
     def owners(self):
-        """Directory objects that are owners of the application.
-        """
-        return self.properties.get('owners',
-                                   DirectoryObjectCollection(self.context, ResourcePath("owners", self.resource_path)))
+        """Directory objects that are owners of the application."""
+        return self.properties.get(
+            "owners",
+            DirectoryObjectCollection(
+                self.context, ResourcePath("owners", self.resource_path)
+            ),
+        )
 
     @property
     def extension_properties(self):
-        """List extension properties on an application object.
-        """
-        return self.properties.get('extensionProperties',
-                                   EntityCollection(self.context, ExtensionProperty,
-                                                    ResourcePath("extensionProperties", self.resource_path)))
+        """List extension properties on an application object."""
+        return self.properties.get(
+            "extensionProperties",
+            EntityCollection(
+                self.context,
+                ExtensionProperty,
+                ResourcePath("extensionProperties", self.resource_path),
+            ),
+        )
 
     @property
     def token_issuance_policies(self):
-        """Get all tokenIssuancePolicies assigned to this object. """
-        return self.properties.get('tokenIssuancePolicies',
-                                   EntityCollection(self.context, TokenIssuancePolicy,
-                                                    ResourcePath("tokenIssuancePolicies", self.resource_path)))
+        """Get all tokenIssuancePolicies assigned to this object."""
+        return self.properties.get(
+            "tokenIssuancePolicies",
+            EntityCollection(
+                self.context,
+                TokenIssuancePolicy,
+                ResourcePath("tokenIssuancePolicies", self.resource_path),
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
@@ -288,7 +315,7 @@ class Application(DirectoryObject):
                 "extensionProperties": self.extension_properties,
                 "keyCredentials": self.key_credentials,
                 "publicClient": self.public_client,
-                "tokenIssuancePolicies": self.token_issuance_policies
+                "tokenIssuancePolicies": self.token_issuance_policies,
             }
             default_value = property_mapping.get(name, None)
         return super(Application, self).get_property(name, default_value)

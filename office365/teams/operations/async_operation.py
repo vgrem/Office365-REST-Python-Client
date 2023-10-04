@@ -16,8 +16,14 @@ class TeamsAsyncOperation(Entity):
 
     """
 
-    def poll_for_status(self, status_type="succeeded", max_polling_count=5, polling_interval_secs=15,
-                        success_callback=None, failure_callback=None):
+    def poll_for_status(
+        self,
+        status_type="succeeded",
+        max_polling_count=5,
+        polling_interval_secs=15,
+        success_callback=None,
+        failure_callback=None,
+    ):
         """
         Poll to check for completion of an async Teams create call
 
@@ -47,6 +53,7 @@ class TeamsAsyncOperation(Entity):
                 else:
                     if callable(success_callback):
                         success_callback(self)
+
             self.context.load(self, after_loaded=_verify_status)
 
         self.ensure_property("id", _poll_for_status, 1)

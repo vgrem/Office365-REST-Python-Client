@@ -2,7 +2,6 @@ from office365.sharepoint.publishing.pages.page import SitePage
 
 
 class SitePage3D(SitePage):
-
     @property
     def space_content(self):
         return self.properties.get("SpaceContent", None)

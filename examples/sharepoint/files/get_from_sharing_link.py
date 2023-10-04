@@ -5,7 +5,9 @@ from tests import test_team_site_url, test_user_credentials
 ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
 
 # Generate sharing link url for a file first
-file = ctx.web.get_file_by_server_relative_url("/sites/team/SitePages/How To Use This Library.aspx")
+file = ctx.web.get_file_by_server_relative_url(
+    "/sites/team/SitePages/How To Use This Library.aspx"
+)
 # Share a file
 result = file.share_link(SharingLinkKind.OrganizationView).execute_query()
 

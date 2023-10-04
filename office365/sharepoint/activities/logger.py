@@ -3,9 +3,16 @@ from office365.sharepoint.base_entity import BaseEntity
 
 
 class ActivityLogger(BaseEntity):
-
-    def log_activity(self, operation, list_id, list_item_unique_id, affected_resource_url, item_type,
-                     audit_creation_time, is_offline):
+    def log_activity(
+        self,
+        operation,
+        list_id,
+        list_item_unique_id,
+        affected_resource_url,
+        item_type,
+        audit_creation_time,
+        is_offline,
+    ):
         """
         :param str operation:
         :param str list_id:
@@ -22,7 +29,7 @@ class ActivityLogger(BaseEntity):
             "AffectedResourceUrl": affected_resource_url,
             "ItemType": item_type,
             "AuditCreationTime": audit_creation_time,
-            "IsOffline": is_offline
+            "IsOffline": is_offline,
         }
         qry = ServiceOperationQuery(self, "LogActivity", None, payload)
         self.context.add_query(qry)

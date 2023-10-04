@@ -7,5 +7,4 @@ ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
 result = ctx.group_site_manager.get_current_user_joined_teams().execute_query()
 data = json.loads(result.value)
 for item in data["value"]:
-    print(item['displayName'])
-
+    print(item["displayName"])

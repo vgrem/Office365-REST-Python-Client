@@ -40,18 +40,19 @@ class PushNotificationSubscriber(BaseEntity):
 
     @property
     def last_modified_time_stamp(self):
-        """Specifies the time and date when the subscriber was last updated.
-        """
+        """Specifies the time and date when the subscriber was last updated."""
         return self.properties.get("LastModifiedTimeStamp", datetime.datetime.min)
 
     @property
     def registration_time_stamp(self):
-        """Specifies the time and date when the subscriber registered for push notifications.
-        """
+        """Specifies the time and date when the subscriber registered for push notifications."""
         return self.properties.get("RegistrationTimeStamp", datetime.datetime.min)
 
     @property
     def user(self):
         """Gets the SharePoint user who created this subscriber."""
         from office365.sharepoint.principal.users.user import User
-        return self.properties.get("User", User(self.context, ResourcePath("user", self.resource_path)))
+
+        return self.properties.get(
+            "User", User(self.context, ResourcePath("user", self.resource_path))
+        )

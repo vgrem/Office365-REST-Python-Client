@@ -7,7 +7,7 @@ from tests import test_client_credentials, test_team_site_url
 
 
 def build_custom_query(page_size=100):
-    """"
+    """ "
     :type page_size: int
     """
     from_datetime = datetime.datetime(2022, 1, 20, 0, 0)
@@ -28,11 +28,10 @@ def build_custom_query(page_size=100):
     return qry
 
 
-
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 list_title = "Site Pages"
 site_pages = ctx.web.lists.get_by_title(list_title)
 items = site_pages.get_items(build_custom_query(5)).execute_query()
 print("Total items count: {0}".format(len(items)))
 for index, item in enumerate(items):  # type: int, ListItem
-    print("{0}: {1}".format(index, item.properties['Created']))
+    print("{0}: {1}".format(index, item.properties["Created"]))

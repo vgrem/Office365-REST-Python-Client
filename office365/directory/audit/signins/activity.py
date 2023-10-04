@@ -6,8 +6,13 @@ class SignInActivity(ClientValue):
     describes a property of the user object, Azure AD stores sign in activity for your users for as long as the
     user object exists."""
 
-    def __init__(self, last_non_interactive_sign_in_datetime=None, last_non_interactive_sign_in_request_id=None,
-                 last_sign_in_datetime=None, last_sign_in_request_id=None):
+    def __init__(
+        self,
+        last_non_interactive_sign_in_datetime=None,
+        last_non_interactive_sign_in_request_id=None,
+        last_sign_in_datetime=None,
+        last_sign_in_request_id=None,
+    ):
         """
         :param datetime.datetime last_non_interactive_sign_in_datetime: The last non-interactive sign-in date for a
             specific user. You can use this field to calculate the last time a client attempted to sign into the

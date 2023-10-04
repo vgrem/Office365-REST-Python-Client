@@ -4,7 +4,6 @@ from office365.sharepoint.comments.client.identity import Identity
 
 
 class CommentInformation(ClientValue):
-
     def __init__(self, text=None, mentions=None):
         """
         :param str text:

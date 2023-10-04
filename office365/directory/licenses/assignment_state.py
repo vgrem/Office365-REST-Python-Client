@@ -11,6 +11,7 @@ class LicenseAssignmentState(ClientValue):
         - The current state of the assignment
         - Error details if the assignment state is Error
     """
+
     def __init__(self, assigned_by_group=None):
         """
         :param str assigned_by_group:

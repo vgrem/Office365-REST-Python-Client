@@ -7,6 +7,7 @@ class MeetingTimeSuggestionsResult(ClientValue):
     """
     A collection of meeting suggestions if there is any, or the reason if there isn't.
     """
+
     def __init__(self, meeting_time_suggestions=None, empty_suggestions_reason=None):
         """
 
@@ -17,5 +18,7 @@ class MeetingTimeSuggestionsResult(ClientValue):
             does include any meeting suggestions.
         """
         super(MeetingTimeSuggestionsResult, self).__init__()
-        self.meetingTimeSuggestions = ClientValueCollection(MeetingTimeSuggestion, meeting_time_suggestions)
+        self.meetingTimeSuggestions = ClientValueCollection(
+            MeetingTimeSuggestion, meeting_time_suggestions
+        )
         self.emptySuggestionsReason = empty_suggestions_reason

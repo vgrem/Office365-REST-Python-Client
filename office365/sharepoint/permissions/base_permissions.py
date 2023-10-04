@@ -34,8 +34,7 @@ class BasePermissions(ClientValue):
                 self.High |= low << high - 32
 
     def has(self, perm):
-        """Determines whether the current instance has the specified permission.
-        """
+        """Determines whether the current instance has the specified permission."""
         if perm == PermissionKind.EmptyMask:
             return True
         if perm == PermissionKind.FullMask:
@@ -56,7 +55,7 @@ class BasePermissions(ClientValue):
         self.High = 0
 
     def to_json(self, json_format=None):
-        return {'Low': str(self.High), 'High': str(self.Low)}
+        return {"Low": str(self.High), "High": str(self.Low)}
 
     @property
     def permission_levels(self):

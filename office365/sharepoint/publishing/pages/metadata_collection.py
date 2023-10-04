@@ -11,4 +11,7 @@ class SitePageMetadataCollection(BaseEntityCollection):
 
         :param int site_page_id: Specifies the identifier of the site page.
         """
-        return SitePageMetadata(self.context, ServiceOperationPath("GetById", [site_page_id], self.resource_path))
+        return SitePageMetadata(
+            self.context,
+            ServiceOperationPath("GetById", [site_page_id], self.resource_path),
+        )

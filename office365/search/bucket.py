@@ -17,4 +17,3 @@ class SearchBucket(ClientValue):
         self.aggregationFilterToken = aggregation_filter_token
         self.count = count
         self.key = key
-

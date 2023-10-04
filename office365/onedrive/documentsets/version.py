@@ -29,7 +29,9 @@ class DocumentSetVersion(ListItemVersion):
     @property
     def items(self):
         """Items within the document set that are captured as part of this version."""
-        return self.properties.get("items", ClientValueCollection(DocumentSetVersionItem))
+        return self.properties.get(
+            "items", ClientValueCollection(DocumentSetVersionItem)
+        )
 
     @property
     def should_capture_minor_version(self):
@@ -43,7 +45,7 @@ class DocumentSetVersion(ListItemVersion):
         if default_value is None:
             property_mapping = {
                 "createdBy": self.created_by,
-                "createdDateTime": self.created_datetime
+                "createdDateTime": self.created_datetime,
             }
             default_value = property_mapping.get(name, None)
         return super(DocumentSetVersion, self).get_property(name, default_value)

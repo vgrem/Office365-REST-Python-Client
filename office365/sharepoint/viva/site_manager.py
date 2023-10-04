@@ -4,6 +4,7 @@ from office365.sharepoint.base_entity import BaseEntity
 
 class VivaSiteManager(BaseEntity):
     """"""
+
     def __init__(self, content, resource_path=None):
         if resource_path is None:
             resource_path = ResourcePath("Microsoft.SharePoint.Portal.VivaSiteManager")

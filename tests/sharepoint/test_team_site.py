@@ -22,13 +22,17 @@ class TestTeamSite(TestCase):
 
     def test2_create_site(self):
         site_name = "TeamSite{0}".format(uuid.uuid4().hex)
-        site = self.client.create_team_site(site_name, "Team Site", True).execute_query()
+        site = self.client.create_team_site(
+            site_name, "Team Site", True
+        ).execute_query()
         self.assertIsNotNone(site.url)
         self.__class__.target_site = site
 
     def test3_get_site_status(self):
         site = self.__class__.target_site.get().select(["GroupId"]).execute_query()
-        result = self.client.group_site_manager.get_status(site.group_id).execute_query()
+        result = self.client.group_site_manager.get_status(
+            site.group_id
+        ).execute_query()
         self.assertIsNotNone(result.value.SiteStatus)
         self.assertTrue(result.value.SiteStatus == SiteStatus.Ready)
 
@@ -37,7 +41,7 @@ class TestTeamSite(TestCase):
         result = self.client.group_site_manager.notebook(group_id).execute_query()
         self.assertIsNotNone(result.value)
 
-    #def test5_get_team_channels(self):
+    # def test5_get_team_channels(self):
     #    group_id = self.__class__.target_site.group_id
     #    result = self.client.group_site_manager.get_team_channels(group_id).execute_query()
     #    self.assertIsNotNone(result.value)
@@ -46,13 +50,19 @@ class TestTeamSite(TestCase):
         self.__class__.target_site.delete_object().execute_query()
 
     def test7_get_current_user_joined_teams(self):
-        result = self.client.group_site_manager.get_current_user_joined_teams().execute_query()
+        result = (
+            self.client.group_site_manager.get_current_user_joined_teams().execute_query()
+        )
         self.assertIsNotNone(result.value)
 
     def test8_get_group_creation_context(self):
-        result = self.client.group_site_manager.get_group_creation_context().execute_query()
+        result = (
+            self.client.group_site_manager.get_group_creation_context().execute_query()
+        )
         self.assertIsNotNone(result.value)
 
     def test9_get_current_user_shared_channel_member_groups(self):
-        result = self.client.group_site_manager.get_current_user_shared_channel_member_groups().execute_query()
+        result = (
+            self.client.group_site_manager.get_current_user_shared_channel_member_groups().execute_query()
+        )
         self.assertIsNotNone(result.value)

@@ -52,18 +52,29 @@ class WorkbookRange(Entity):
     @property
     def format(self):
         """Returns a format object, encapsulating the range's font, fill, borders, alignment, and other properties"""
-        return self.properties.get('format',
-                                   WorkbookRangeFormat(self.context, ResourcePath("format", self.resource_path)))
+        return self.properties.get(
+            "format",
+            WorkbookRangeFormat(
+                self.context, ResourcePath("format", self.resource_path)
+            ),
+        )
 
     @property
     def sort(self):
-        """The worksheet containing the current range. """
-        return self.properties.get('sort',
-                                   WorkbookRangeSort(self.context, ResourcePath("sort", self.resource_path)))
+        """The worksheet containing the current range."""
+        return self.properties.get(
+            "sort",
+            WorkbookRangeSort(self.context, ResourcePath("sort", self.resource_path)),
+        )
 
     @property
     def worksheet(self):
-        """The worksheet containing the current range """
+        """The worksheet containing the current range"""
         from office365.onedrive.workbooks.worksheets.worksheet import WorkbookWorksheet
-        return self.properties.get('worksheet',
-                                   WorkbookWorksheet(self.context, ResourcePath("worksheet", self.resource_path)))
+
+        return self.properties.get(
+            "worksheet",
+            WorkbookWorksheet(
+                self.context, ResourcePath("worksheet", self.resource_path)
+            ),
+        )

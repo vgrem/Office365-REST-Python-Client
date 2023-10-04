@@ -16,7 +16,7 @@ class FieldCalculated(Field):
 
         :rtype: int or None
         """
-        return self.properties.get('CurrencyLocaleId', None)
+        return self.properties.get("CurrencyLocaleId", None)
 
     @property
     def formula(self):
@@ -25,7 +25,7 @@ class FieldCalculated(Field):
 
         :rtype: str or None
         """
-        return self.properties.get('Formula', None)
+        return self.properties.get("Formula", None)
 
     @formula.setter
     def formula(self, val):
@@ -33,4 +33,4 @@ class FieldCalculated(Field):
 
         :type val: str
         """
-        self.set_property('Formula', val)
+        self.set_property("Formula", val)

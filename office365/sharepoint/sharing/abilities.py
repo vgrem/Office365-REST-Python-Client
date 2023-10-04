@@ -9,11 +9,14 @@ class SharingAbilities(ClientValue):
     with the state of each capability for the current user.
     """
 
-    def __init__(self, anonymous_link_abilities=SharingLinkAbilities(),
-                 anyone_link_abilities=SharingLinkAbilities(),
-                 direct_sharing_abilities=DirectSharingAbilities(),
-                 organization_link_abilities=SharingLinkAbilities(),
-                 people_sharing_link_abilities=SharingLinkAbilities()):
+    def __init__(
+        self,
+        anonymous_link_abilities=SharingLinkAbilities(),
+        anyone_link_abilities=SharingLinkAbilities(),
+        direct_sharing_abilities=DirectSharingAbilities(),
+        organization_link_abilities=SharingLinkAbilities(),
+        people_sharing_link_abilities=SharingLinkAbilities(),
+    ):
         """
         :param SharingLinkAbilities anonymous_link_abilities: Indicates abilities for anonymous access links.
         :param SharingLinkAbilities anonymous_link_abilities:

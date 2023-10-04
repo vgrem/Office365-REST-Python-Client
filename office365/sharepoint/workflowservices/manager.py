@@ -9,9 +9,14 @@ class WorkflowServicesManager(BaseEntity):
     def get_workflow_instance_service(self):
         """Returns the WorkflowInstanceService (manages and reads workflow instances from the workflow host),
         which manages workflow instances."""
-        from office365.sharepoint.workflowservices.instance_service import WorkflowInstanceService
+        from office365.sharepoint.workflowservices.instance_service import (
+            WorkflowInstanceService,
+        )
+
         return_type = WorkflowInstanceService(self.context)
-        qry = ServiceOperationQuery(self, "GetWorkflowInstanceService", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetWorkflowInstanceService", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -22,7 +27,9 @@ class WorkflowServicesManager(BaseEntity):
 
         :type context: office365.sharepoint.client_context.ClientContext
         """
-        return WorkflowServicesManager(context, ResourcePath("SP.WorkflowServices.WorkflowServicesManager.Current"))
+        return WorkflowServicesManager(
+            context, ResourcePath("SP.WorkflowServices.WorkflowServicesManager.Current")
+        )
 
     @property
     def entity_type_name(self):

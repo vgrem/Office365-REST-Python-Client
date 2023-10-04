@@ -14,7 +14,11 @@ def ensure_workbook_sample(graph_client):
     :type graph_client: office365.graph_client.GraphClient
     """
     try:
-        return graph_client.me.drive.root.get_by_path("Financial Sample.xlsx").workbook.get().execute_query()
+        return (
+            graph_client.me.drive.root.get_by_path("Financial Sample.xlsx")
+            .workbook.get()
+            .execute_query()
+        )
     except ClientRequestException as e:
         if e.response.status_code == 404:
             local_path = "../../data/Financial Sample.xlsx"

@@ -14,8 +14,17 @@ class Location(ClientValue):
     Bing Autosuggest, or Bing local search.
     """
 
-    def __init__(self, address=PhysicalAddress(), coordinates=None, display_name=None, location_email_address=None,
-                 location_type=None, location_uri=None, unique_id=None, unique_id_type=None):
+    def __init__(
+        self,
+        address=PhysicalAddress(),
+        coordinates=None,
+        display_name=None,
+        location_email_address=None,
+        location_type=None,
+        location_uri=None,
+        unique_id=None,
+        unique_id_type=None,
+    ):
         """
         :param PhysicalAddress address: The street address of the location.
         :param list[OutlookGeoCoordinates] coordinates:

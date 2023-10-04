@@ -2,9 +2,9 @@ import datetime
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.audit.audit import Audit
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
@@ -12,7 +12,9 @@ from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.token import ChangeToken
 from office365.sharepoint.compliance.store_proxy import SPPolicyStoreProxy
 from office365.sharepoint.compliance.tag import ComplianceTag
-from office365.sharepoint.eventreceivers.definition_collection import EventReceiverDefinitionCollection
+from office365.sharepoint.eventreceivers.definition_collection import (
+    EventReceiverDefinitionCollection,
+)
 from office365.sharepoint.features.collection import FeatureCollection
 from office365.sharepoint.lists.list import List
 from office365.sharepoint.migration.job_status import SPMigrationJobStatus
@@ -20,16 +22,20 @@ from office365.sharepoint.portal.sites.icon_manager import SiteIconManager
 from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.recyclebin.item_collection import RecycleBinItemCollection
 from office365.sharepoint.sitehealth.summary import SiteHealthSummary
+from office365.sharepoint.sites.azure_container_Info import (
+    ProvisionedTemporaryAzureContainerInfo,
+)
 from office365.sharepoint.sites.sph_site import SPHSite
-from office365.sharepoint.sites.azure_container_Info import ProvisionedTemporaryAzureContainerInfo
 from office365.sharepoint.sites.upgrade_info import UpgradeInfo
 from office365.sharepoint.sites.usage_info import UsageInfo
 from office365.sharepoint.sites.version_policy_manager import SiteVersionPolicyManager
-from office365.sharepoint.tenant.administration.sites.administrators_info import SiteAdministratorsInfo
-from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
-from office365.sharepoint.webs.web import Web
-from office365.sharepoint.webs.template_collection import WebTemplateCollection
+from office365.sharepoint.tenant.administration.sites.administrators_info import (
+    SiteAdministratorsInfo,
+)
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
+from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
+from office365.sharepoint.webs.template_collection import WebTemplateCollection
+from office365.sharepoint.webs.web import Web
 
 
 class Site(BaseEntity):
@@ -56,10 +62,7 @@ class Site(BaseEntity):
             administrators at the completion of the creation of the evaluation site collection. If "false",
             such notification MUST NOT be sent
         """
-        payload = {
-            "upgrade": upgrade,
-            "sendemail": sendemail
-        }
+        payload = {"upgrade": upgrade, "sendemail": sendemail}
         qry = ServiceOperationQuery(self, "CreatePreviewSPSite", None, payload)
         self.context.add_query(qry)
         return self
@@ -100,6 +103,7 @@ class Site(BaseEntity):
         :type url: str
         """
         from office365.sharepoint.client_context import ClientContext
+
         return ClientContext(url).site
 
     def get_available_tags(self):
@@ -107,7 +111,9 @@ class Site(BaseEntity):
         return_type = ClientResult(self.context, ClientValueCollection(ComplianceTag))
 
         def _site_loaded():
-            SPPolicyStoreProxy.get_available_tags_for_site(self.context, self.url, return_type)
+            SPPolicyStoreProxy.get_available_tags_for_site(
+                self.context, self.url, return_type
+            )
 
         self.ensure_property("Url", _site_loaded)
         return return_type
@@ -115,7 +121,9 @@ class Site(BaseEntity):
     def get_migration_status(self):
         """"""
         return_type = BaseEntityCollection(self.context, SPMigrationJobStatus)
-        qry = ServiceOperationQuery(self, "GetMigrationStatus", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetMigrationStatus", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -126,7 +134,10 @@ class Site(BaseEntity):
         return_type = ClientResult(self.context)
 
         def _site_loaded():
-            self.context.site_icon_manager.get_site_logo(self.url, return_type=return_type)
+            self.context.site_icon_manager.get_site_logo(
+                self.url, return_type=return_type
+            )
+
         self.ensure_property("Url", _site_loaded)
         return return_type
 
@@ -170,7 +181,9 @@ class Site(BaseEntity):
         return_type = ClientResult(self.context)
 
         def _site_loaded():
-            self.result = SPHSite.set_as_home_site(self.context, self.url, False, return_type)
+            self.result = SPHSite.set_as_home_site(
+                self.context, self.url, False, return_type
+            )
 
         self.ensure_property("Url", _site_loaded)
         return return_type
@@ -183,7 +196,9 @@ class Site(BaseEntity):
         """
         return_type = ChangeCollection(self.context)
         payload = {"query": query}
-        qry = ServiceOperationQuery(self, "getChanges", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "getChanges", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -197,11 +212,10 @@ class Site(BaseEntity):
             indicates descending order.
         """
         return_type = RecycleBinItemCollection(self.context)
-        payload = {
-            "rowLimit": row_limit,
-            "isAscending": is_ascending
-        }
-        qry = ServiceOperationQuery(self, "GetRecycleBinItems", None, payload, None, return_type)
+        payload = {"rowLimit": row_limit, "isAscending": is_ascending}
+        qry = ServiceOperationQuery(
+            self, "GetRecycleBinItems", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -209,7 +223,9 @@ class Site(BaseEntity):
         """
         Gets site collection administrators
         """
-        return_type = ClientResult(self.context, ClientValueCollection(SiteAdministratorsInfo))
+        return_type = ClientResult(
+            self.context, ClientValueCollection(SiteAdministratorsInfo)
+        )
 
         def _site_loaded():
             self.context.tenant.get_site_administrators(self.id, return_type)
@@ -228,14 +244,15 @@ class Site(BaseEntity):
             to return from the site collection. If this value is 0, the compatibility level of the site (2) is used.
         :return:
         """
-        params = {
-            "LCID": lcid,
-            "overrideCompatLevel": override_compat_level
-        }
-        return_type = WebTemplateCollection(self.context,
-                                            ServiceOperationPath("GetWebTemplates", params, self.resource_path))
+        params = {"LCID": lcid, "overrideCompatLevel": override_compat_level}
+        return_type = WebTemplateCollection(
+            self.context,
+            ServiceOperationPath("GetWebTemplates", params, self.resource_path),
+        )
 
-        qry = ServiceOperationQuery(self, "GetWebTemplates", params, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetWebTemplates", params, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -262,11 +279,15 @@ class Site(BaseEntity):
             "versionUpgrade": version_upgrade,
             "recursive": recursive,
         }
-        qry = ServiceOperationQuery(self, "NeedsUpgradeByType", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "NeedsUpgradeByType", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
-    def join_hub_site(self, hub_site_id, approval_token=None, approval_correlation_id=None):
+    def join_hub_site(
+        self, hub_site_id, approval_token=None, approval_correlation_id=None
+    ):
         """
         Associates a site with an existing hub site.
 
@@ -277,7 +298,7 @@ class Site(BaseEntity):
         payload = {
             "hubSiteId": hub_site_id,
             "approvalToken": approval_token,
-            "approvalCorrelationId": approval_correlation_id
+            "approvalCorrelationId": approval_correlation_id,
         }
         qry = ServiceOperationQuery(self, "JoinHubSite", None, payload)
         self.context.add_query(qry)
@@ -292,11 +313,10 @@ class Site(BaseEntity):
         :type stop_redirect: bool
         """
         return_type = ClientResult(context, str())
-        payload = {
-            "id": site_id,
-            "stopRedirect": stop_redirect
-        }
-        qry = ServiceOperationQuery(context.site, "GetUrlById", None, payload, None, return_type)
+        payload = {"id": site_id, "stopRedirect": stop_redirect}
+        qry = ServiceOperationQuery(
+            context.site, "GetUrlById", None, payload, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type
@@ -311,12 +331,10 @@ class Site(BaseEntity):
         :type web_id: str
         """
         return_type = ClientResult(context)
-        payload = {
-            "id": site_id,
-            "stopRedirect": stop_redirect,
-            "webId": web_id
-        }
-        qry = ServiceOperationQuery(context.site, "GetUrlByIdForWeb", None, payload, None, return_type)
+        payload = {"id": site_id, "stopRedirect": stop_redirect, "webId": web_id}
+        qry = ServiceOperationQuery(
+            context.site, "GetUrlByIdForWeb", None, payload, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type
@@ -329,10 +347,10 @@ class Site(BaseEntity):
         :param str url: The absolute url of a site.
         """
         return_type = ClientResult(context, bool())
-        payload = {
-            "url": url
-        }
-        qry = ServiceOperationQuery(context.site, "Exists", None, payload, None, return_type, True)
+        payload = {"url": url}
+        qry = ServiceOperationQuery(
+            context.site, "Exists", None, payload, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
@@ -343,7 +361,10 @@ class Site(BaseEntity):
 
         :type type_catalog: int
         """
-        return List(self.context, ServiceOperationPath("getCatalog", [type_catalog], self.resource_path))
+        return List(
+            self.context,
+            ServiceOperationPath("getCatalog", [type_catalog], self.resource_path),
+        )
 
     def open_web(self, str_url):
         """Returns the specified Web site from the site collection.
@@ -353,7 +374,9 @@ class Site(BaseEntity):
         while a site-relative URL does not begin with a forward slash.
         """
         return_type = Web(self.context)
-        qry = ServiceOperationQuery(self, "OpenWeb", {"strUrl": str_url}, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "OpenWeb", {"strUrl": str_url}, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -363,14 +386,20 @@ class Site(BaseEntity):
         :param str web_id: An identifier of the Web site
         """
         return_type = Web(self.context)
-        qry = ServiceOperationQuery(self, "OpenWebById", {"gWebId": web_id}, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "OpenWebById", {"gWebId": web_id}, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
     def provision_temporary_azure_container(self):
         """"""
-        return_type = ClientResult(self.context, ProvisionedTemporaryAzureContainerInfo())
-        qry = ServiceOperationQuery(self, "ProvisionTemporaryAzureContainer", None, None, None, return_type)
+        return_type = ClientResult(
+            self.context, ProvisionedTemporaryAzureContainerInfo()
+        )
+        qry = ServiceOperationQuery(
+            self, "ProvisionTemporaryAzureContainer", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -379,7 +408,9 @@ class Site(BaseEntity):
 
         :type create_info: HubSiteCreationInformation
         """
-        qry = ServiceOperationQuery(self, "RegisterHubSite", None, create_info, "creationInformation", None)
+        qry = ServiceOperationQuery(
+            self, "RegisterHubSite", None, create_info, "creationInformation", None
+        )
         self.context.add_query(qry)
         return self
 
@@ -394,13 +425,11 @@ class Site(BaseEntity):
         :param bool run_always: Specifies whether the rules will be run as a result of this call or cached results
              from a previous run can be returned.
         """
-        payload = {
-            "ruleId": rule_id,
-            "bRepair": repair,
-            "bRunAlways": run_always
-        }
+        payload = {"ruleId": rule_id, "bRepair": repair, "bRunAlways": run_always}
         return_type = SiteHealthSummary(self.context)
-        qry = ServiceOperationQuery(self, "RunHealthCheck", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "RunHealthCheck", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -412,7 +441,9 @@ class Site(BaseEntity):
         self.context.add_query(qry)
         return self
 
-    def update_client_object_model_use_remote_apis_permission_setting(self, require_use_remote_apis):
+    def update_client_object_model_use_remote_apis_permission_setting(
+        self, require_use_remote_apis
+    ):
         """
         Sets whether the client-side object model (CSOM) requests that are made in the context of any site inside
         the site collection require UseRemoteAPIs permission.
@@ -421,7 +452,9 @@ class Site(BaseEntity):
             made in the context of any site inside the site collection require UseRemoteAPIs permission
         """
         payload = {"requireUseRemoteAPIs": require_use_remote_apis}
-        qry = ServiceOperationQuery(self, "UpdateClientObjectModelUseRemoteAPIsPermissionSetting", None, payload)
+        qry = ServiceOperationQuery(
+            self, "UpdateClientObjectModelUseRemoteAPIsPermissionSetting", None, payload
+        )
         self.context.add_query(qry)
         return self
 
@@ -475,7 +508,9 @@ class Site(BaseEntity):
         """
         Enables auditing of how site collection is accessed, changed, and used.
         """
-        return self.properties.get("Audit", Audit(self.context, ResourcePath("Audit", self.resource_path)))
+        return self.properties.get(
+            "Audit", Audit(self.context, ResourcePath("Audit", self.resource_path))
+        )
 
     @property
     def can_upgrade(self):
@@ -504,7 +539,7 @@ class Site(BaseEntity):
 
         :rtype: str
         """
-        return self.properties.get('CompatibilityLevel', None)
+        return self.properties.get("CompatibilityLevel", None)
 
     @property
     def comments_on_site_pages_disabled(self):
@@ -512,7 +547,7 @@ class Site(BaseEntity):
         Indicates whether comments on site pages are disabled or not.
         :rtype: bool
         """
-        return self.properties.get('CommentsOnSitePagesDisabled', None)
+        return self.properties.get("CommentsOnSitePagesDisabled", None)
 
     @property
     def current_change_token(self):
@@ -537,12 +572,16 @@ class Site(BaseEntity):
     @property
     def root_web(self):
         """Get root web"""
-        return self.properties.get('RootWeb', Web(self.context, ResourcePath("RootWeb", self.resource_path)))
+        return self.properties.get(
+            "RootWeb", Web(self.context, ResourcePath("RootWeb", self.resource_path))
+        )
 
     @property
     def owner(self):
         """Gets or sets the owner of the site collection. (Read-only in sandboxed solutions.)"""
-        return self.properties.get('Owner', User(self.context, ResourcePath("Owner", self.resource_path)))
+        return self.properties.get(
+            "Owner", User(self.context, ResourcePath("Owner", self.resource_path))
+        )
 
     @property
     def read_only(self):
@@ -571,7 +610,7 @@ class Site(BaseEntity):
 
         :rtype: str
         """
-        return self.properties.get('Url', None)
+        return self.properties.get("Url", None)
 
     @property
     def server_relative_url(self):
@@ -587,7 +626,7 @@ class Site(BaseEntity):
         When true, users will be able to grant permissions to guests for resources within the site collection.
         :rtype: bool or none
         """
-        return self.properties.get('ShareByEmailEnabled', None)
+        return self.properties.get("ShareByEmailEnabled", None)
 
     @property
     def status_bar_text(self):
@@ -595,7 +634,7 @@ class Site(BaseEntity):
         Gets or sets the status bar message text for this site.
         :rtype: str or none
         """
-        return self.properties.get('StatusBarText', None)
+        return self.properties.get("StatusBarText", None)
 
     @property
     def trim_audit_log(self):
@@ -603,14 +642,14 @@ class Site(BaseEntity):
         When this flag is set for the site, the audit events are trimmed periodically.
         :rtype: bool or none
         """
-        return self.properties.get('TrimAuditLog', None)
+        return self.properties.get("TrimAuditLog", None)
 
     @property
     def write_locked(self):
         """
         :rtype: bool or none
         """
-        return self.properties.get('WriteLocked', None)
+        return self.properties.get("WriteLocked", None)
 
     @property
     def id(self):
@@ -654,22 +693,30 @@ class Site(BaseEntity):
     @property
     def secondary_contact(self):
         """Gets or sets the secondary contact that is used for the site collection."""
-        return self.properties.get('SecondaryContact', User(self.context,
-                                                            ResourcePath("SecondaryContact", self.resource_path)))
+        return self.properties.get(
+            "SecondaryContact",
+            User(self.context, ResourcePath("SecondaryContact", self.resource_path)),
+        )
 
     @property
     def recycle_bin(self):
         """Get recycle bin"""
-        return self.properties.get('RecycleBin',
-                                   RecycleBinItemCollection(self.context,
-                                                            ResourcePath("RecycleBin", self.resource_path)))
+        return self.properties.get(
+            "RecycleBin",
+            RecycleBinItemCollection(
+                self.context, ResourcePath("RecycleBin", self.resource_path)
+            ),
+        )
 
     @property
     def features(self):
         """Get features"""
-        return self.properties.get('Features',
-                                   FeatureCollection(self.context,
-                                                     ResourcePath("Features", self.resource_path), self))
+        return self.properties.get(
+            "Features",
+            FeatureCollection(
+                self.context, ResourcePath("Features", self.resource_path), self
+            ),
+        )
 
     @property
     def max_items_per_throttled_operation(self):
@@ -693,10 +740,12 @@ class Site(BaseEntity):
         """
         Provides event receivers for events that occur at the scope of the site collection.
         """
-        return self.properties.get('EventReceivers',
-                                   EventReceiverDefinitionCollection(self.context,
-                                                                     ResourcePath("eventReceivers", self.resource_path),
-                                                                     self))
+        return self.properties.get(
+            "EventReceivers",
+            EventReceiverDefinitionCollection(
+                self.context, ResourcePath("eventReceivers", self.resource_path), self
+            ),
+        )
 
     @property
     def show_url_structure(self):
@@ -761,17 +810,25 @@ class Site(BaseEntity):
     @property
     def user_custom_actions(self):
         """Gets the User Custom Actions that are associated with the site."""
-        return self.properties.get('UserCustomActions',
-                                   UserCustomActionCollection(self.context,
-                                                              ResourcePath("UserCustomActions", self.resource_path)))
+        return self.properties.get(
+            "UserCustomActions",
+            UserCustomActionCollection(
+                self.context, ResourcePath("UserCustomActions", self.resource_path)
+            ),
+        )
 
     @property
     def version_policy_for_new_libraries_template(self):
         """"""
-        return self.properties.get('VersionPolicyForNewLibrariesTemplate',
-                                   SiteVersionPolicyManager(self.context,
-                                                              ResourcePath("VersionPolicyForNewLibrariesTemplate",
-                                                                           self.resource_path)))
+        return self.properties.get(
+            "VersionPolicyForNewLibrariesTemplate",
+            SiteVersionPolicyManager(
+                self.context,
+                ResourcePath(
+                    "VersionPolicyForNewLibrariesTemplate", self.resource_path
+                ),
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
@@ -786,7 +843,7 @@ class Site(BaseEntity):
                 "UpgradeReminderDate": self.upgrade_reminder_date,
                 "UpgradeScheduledDate": self.upgrade_scheduled_date,
                 "UserCustomActions": self.user_custom_actions,
-                "VersionPolicyForNewLibrariesTemplate": self.version_policy_for_new_libraries_template
+                "VersionPolicyForNewLibrariesTemplate": self.version_policy_for_new_libraries_template,
             }
             default_value = property_mapping.get(name, None)
         return super(Site, self).get_property(name, default_value)

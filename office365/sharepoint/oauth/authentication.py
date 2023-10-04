@@ -5,4 +5,5 @@ class Authentication(BaseEntity):
     """
     Exposes relationships that represent the authentication methods.
     """
+
     pass

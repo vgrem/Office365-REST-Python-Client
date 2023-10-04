@@ -4,8 +4,8 @@ from office365.sharepoint.social.actor import SocialActor
 
 class SocialRestActor(BaseEntity):
     """The SocialRestActor type contains information about an actor retrieved from server. An actor is a user, document,
-     site, or tag. The SocialRestActor type is available when the protocol client sends an OData request to a protocol
-     server using [MS-CSOMREST]. It is not available using [MS-CSOM]."""
+    site, or tag. The SocialRestActor type is available when the protocol client sends an OData request to a protocol
+    server using [MS-CSOMREST]. It is not available using [MS-CSOM]."""
 
     @property
     def me(self):

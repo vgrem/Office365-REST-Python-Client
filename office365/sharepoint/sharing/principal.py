@@ -4,8 +4,18 @@ from office365.runtime.client_value import ClientValue
 class Principal(ClientValue):
     """Principal class is a representation of an identity (user/group)."""
 
-    def __init__(self, id_=None, directory_object_id=None, email=None, expiration=None, is_active=None, is_external=None,
-                 job_title=None, login_name=None, name=None):
+    def __init__(
+        self,
+        id_=None,
+        directory_object_id=None,
+        email=None,
+        expiration=None,
+        is_active=None,
+        is_external=None,
+        job_title=None,
+        login_name=None,
+        name=None,
+    ):
         """
         :param int id_: Id of the Principal in SharePoint's UserInfo List.
         :param str directory_object_id:

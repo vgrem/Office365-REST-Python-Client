@@ -2,17 +2,16 @@ import datetime
 from typing import TypeVar
 
 from office365.runtime.client_value import ClientValue
-from office365.runtime.odata.type import ODataType
-from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 from office365.runtime.odata.json_format import ODataJsonFormat
 from office365.runtime.odata.query_options import QueryOptions
+from office365.runtime.odata.type import ODataType
+from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 
-T = TypeVar('T', bound='ClientObject')
-P_T = TypeVar('P_T')
+T = TypeVar("T", bound="ClientObject")
+P_T = TypeVar("P_T")
 
 
 class ClientObject(object):
-
     def __init__(self, context, resource_path=None, parent_collection=None):
         """
         Base client object which define named properties and relationships of an entity
@@ -33,7 +32,11 @@ class ClientObject(object):
         """
         Resets client object's state
         """
-        self._properties = {k: v for k, v in self._properties.items() if k not in self._ser_property_names}
+        self._properties = {
+            k: v
+            for k, v in self._properties.items()
+            if k not in self._ser_property_names
+        }
         self._ser_property_names = []
         self._query_options = QueryOptions()
         return self
@@ -47,10 +50,9 @@ class ClientObject(object):
         self.context.execute_query()
         return self
 
-    def execute_query_retry(self, max_retry=5,
-                            timeout_secs=5,
-                            success_callback=None,
-                            failure_callback=None):
+    def execute_query_retry(
+        self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None
+    ):
         """
         Executes the current set of data retrieval queries and method invocations and retries it if needed.
 
@@ -61,10 +63,12 @@ class ClientObject(object):
         :param (int, requests.exceptions.RequestException)-> None failure_callback: A callback to call if the request
             fails to execute
         """
-        self.context.execute_query_retry(max_retry=max_retry,
-                                         timeout_secs=timeout_secs,
-                                         success_callback=success_callback,
-                                         failure_callback=failure_callback)
+        self.context.execute_query_retry(
+            max_retry=max_retry,
+            timeout_secs=timeout_secs,
+            success_callback=success_callback,
+            failure_callback=failure_callback,
+        )
         return self
 
     def after_execute(self, action, *args, **kwargs):
@@ -150,12 +154,20 @@ class ClientObject(object):
             self._ser_property_names.append(name)
 
         typed_value = self.get_property(name)
-        if isinstance(typed_value, ClientObject) or isinstance(typed_value, ClientValue):
+        if isinstance(typed_value, ClientObject) or isinstance(
+            typed_value, ClientValue
+        ):
             if isinstance(value, list):
-                [typed_value.set_property(i, v, persist_changes) for i, v in enumerate(value)]
+                [
+                    typed_value.set_property(i, v, persist_changes)
+                    for i, v in enumerate(value)
+                ]
                 self._properties[name] = typed_value
             elif isinstance(value, dict):
-                [typed_value.set_property(k, v, persist_changes) for k, v in value.items()]
+                [
+                    typed_value.set_property(k, v, persist_changes)
+                    for k, v in value.items()
+                ]
                 self._properties[name] = typed_value
             else:
                 self._properties[name] = value
@@ -188,6 +200,7 @@ class ClientObject(object):
         names_to_include = [n for n in names if not self.is_property_available(n)]
         if len(names_to_include) > 0:
             from office365.runtime.queries.read_entity import ReadEntityQuery
+
             qry = ReadEntityQuery(self, names_to_include)
             self.context.add_query(qry).after_query_execute(action, *args, **kwargs)
         else:
@@ -252,16 +265,21 @@ class ClientObject(object):
             include_control_info = False
         else:
             ser_prop_names = [n for n in self._ser_property_names]
-            include_control_info = self.entity_type_name is not None and json_format.include_control_information
+            include_control_info = (
+                self.entity_type_name is not None
+                and json_format.include_control_information
+            )
 
-        json = {k: self.get_property(k) for k in self._properties if k in ser_prop_names}
+        json = {
+            k: self.get_property(k) for k in self._properties if k in ser_prop_names
+        }
         for k, v in json.items():
             if isinstance(v, ClientObject) or isinstance(v, ClientValue):
                 json[k] = v.to_json(json_format)
 
         if json and include_control_info:
             if isinstance(json_format, JsonLightFormat):
-                json[json_format.metadata_type] = {'type': self.entity_type_name}
+                json[json_format.metadata_type] = {"type": self.entity_type_name}
             elif isinstance(json_format, ODataJsonFormat):
                 json[json_format.metadata_type] = "#" + self.entity_type_name
         return json

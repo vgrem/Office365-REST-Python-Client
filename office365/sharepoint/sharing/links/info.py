@@ -5,11 +5,20 @@ from office365.sharepoint.sharing.principal import Principal
 
 
 class SharingLinkInfo(ClientValue):
-
-    def __init__(self, allows_anonymous_access=None, application_id=None, created=None, created_by=Principal(),
-                 password_protected=None, invitations=None, redeemed_users=None,
-                 last_modified_by=Principal(), password_last_modified_by=Principal(),
-                 track_link_users=None, url=None):
+    def __init__(
+        self,
+        allows_anonymous_access=None,
+        application_id=None,
+        created=None,
+        created_by=Principal(),
+        password_protected=None,
+        invitations=None,
+        redeemed_users=None,
+        last_modified_by=Principal(),
+        password_last_modified_by=Principal(),
+        track_link_users=None,
+        url=None,
+    ):
         """
         Specifies the information about the tokenized sharing link.
 

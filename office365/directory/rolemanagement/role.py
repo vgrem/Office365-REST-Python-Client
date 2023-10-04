@@ -3,7 +3,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 
 
 class DirectoryRole(DirectoryObject):
-    """Represents an Azure AD directory role. Azure AD directory roles are also known as administrator roles """
+    """Represents an Azure AD directory role. Azure AD directory roles are also known as administrator roles"""
 
     def __repr__(self):
         return self.display_name
@@ -28,6 +28,10 @@ class DirectoryRole(DirectoryObject):
         Users that are members of this directory role.
         """
         from office365.directory.object_collection import DirectoryObjectCollection
-        return self.properties.get('members',
-                                   DirectoryObjectCollection(self.context,
-                                                             ResourcePath("members", self.resource_path)))
+
+        return self.properties.get(
+            "members",
+            DirectoryObjectCollection(
+                self.context, ResourcePath("members", self.resource_path)
+            ),
+        )

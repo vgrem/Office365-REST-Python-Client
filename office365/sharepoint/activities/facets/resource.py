@@ -3,10 +3,20 @@ from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
 class ResourceFacet(ClientValue):
-
-    def __init__(self, content_type_id=None, file_system_object_type=None, file_type=None, item_id=None,
-                 item_unique_id=None, list_id=None, org_id=None, server_relative_path=SPResPath(), site_id=None,
-                 title=None, web_id=None):
+    def __init__(
+        self,
+        content_type_id=None,
+        file_system_object_type=None,
+        file_type=None,
+        item_id=None,
+        item_unique_id=None,
+        list_id=None,
+        org_id=None,
+        server_relative_path=SPResPath(),
+        site_id=None,
+        title=None,
+        web_id=None,
+    ):
         """
         :param str content_type_id: The ID of the content type
         :param int file_system_object_type: List item’s object type in file system.

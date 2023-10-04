@@ -1,10 +1,12 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.principal.groups.creation_information import GroupCreationInformation
+from office365.sharepoint.principal.groups.creation_information import (
+    GroupCreationInformation,
+)
 from office365.sharepoint.principal.groups.group import Group
 from office365.sharepoint.utilities.principal_info import PrincipalInfo
 
@@ -47,15 +49,20 @@ class GroupCollection(BaseEntityCollection):
 
         :param str group_id: Specifies the member identifier.
         """
-        return Group(self.context, ServiceOperationPath("GetById", [group_id], self.resource_path))
+        return Group(
+            self.context,
+            ServiceOperationPath("GetById", [group_id], self.resource_path),
+        )
 
     def get_by_name(self, group_name):
         """Returns a cross-site group from the collection based on the name of the group.
 
         :param str group_name: A string that contains the name of the group.
         """
-        return Group(self.context,
-                     ServiceOperationPath("GetByName", [group_name], self.resource_path))
+        return Group(
+            self.context,
+            ServiceOperationPath("GetByName", [group_name], self.resource_path),
+        )
 
     def remove_by_id(self, group_id):
         """Removes the group with the specified member ID from the collection.

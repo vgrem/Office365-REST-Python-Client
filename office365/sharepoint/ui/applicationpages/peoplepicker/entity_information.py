@@ -1,6 +1,7 @@
 from office365.runtime.client_object import ClientObject
-from office365.sharepoint.ui.applicationpages.peoplepicker.entity_information_request import \
-    PickerEntityInformationRequest
+from office365.sharepoint.ui.applicationpages.peoplepicker.entity_information_request import (
+    PickerEntityInformationRequest,
+)
 
 
 class PickerEntityInformation(ClientObject):

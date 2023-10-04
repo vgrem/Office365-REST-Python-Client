@@ -40,19 +40,25 @@ class Alert(BaseEntity):
     def item(self):
         """Gets the list item or document to which the alert applies."""
         from office365.sharepoint.listitems.listitem import ListItem
-        return self.properties.get('Item',
-                                   ListItem(self.context, ResourcePath("item", self.resource_path)))
+
+        return self.properties.get(
+            "Item", ListItem(self.context, ResourcePath("item", self.resource_path))
+        )
 
     @property
     def user(self):
         """Gets user object that represents User for the alert."""
         from office365.sharepoint.principal.users.user import User
-        return self.properties.get('User',
-                                   User(self.context, ResourcePath("user", self.resource_path)))
+
+        return self.properties.get(
+            "User", User(self.context, ResourcePath("user", self.resource_path))
+        )
 
     @property
     def list(self):
         """Gets list object that represents List for the alert."""
         from office365.sharepoint.lists.list import List
-        return self.properties.get('List',
-                                   List(self.context, ResourcePath("list", self.resource_path)))
+
+        return self.properties.get(
+            "List", List(self.context, ResourcePath("list", self.resource_path))
+        )

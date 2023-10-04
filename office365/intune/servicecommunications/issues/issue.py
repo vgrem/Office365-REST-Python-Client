@@ -1,4 +1,6 @@
-from office365.intune.servicecommunications.announcement_base import ServiceAnnouncementBase
+from office365.intune.servicecommunications.announcement_base import (
+    ServiceAnnouncementBase,
+)
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.function import FunctionQuery
 
@@ -25,5 +27,3 @@ class ServiceHealthIssue(ServiceAnnouncementBase):
         qry = FunctionQuery(self, "incidentReport", None, return_type)
         self.context.add_query(qry)
         return return_type
-
-

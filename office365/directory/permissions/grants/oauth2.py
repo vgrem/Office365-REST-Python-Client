@@ -66,4 +66,3 @@ class OAuth2PermissionGrant(Entity):
         :rtype: str
         """
         return self.properties.get("scope", None)
-

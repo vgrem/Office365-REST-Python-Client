@@ -47,12 +47,12 @@ class CreatablesInfo(BaseEntity):
         Represents a collection of CreatableItemInfo (section 3.2.5.283) objects describing what can be created,
         one CreatableItemInfo for each creatable type.
         """
-        return self.properties.get("CreatablesCollection", CreatableItemInfoCollection())
+        return self.properties.get(
+            "CreatablesCollection", CreatableItemInfoCollection()
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
-            property_mapping = {
-                "CreatablesCollection": self.creatables_collection
-            }
+            property_mapping = {"CreatablesCollection": self.creatables_collection}
             default_value = property_mapping.get(name, None)
         return super(CreatablesInfo, self).get_property(name, default_value)

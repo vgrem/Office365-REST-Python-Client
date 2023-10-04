@@ -12,13 +12,17 @@ class SharepointSettings(Entity):
 
     @property
     def available_managed_paths_for_site_creation(self):
-        """Collection of managed paths available for site creation. """
-        return self.properties.get("availableManagedPathsForSiteCreation", StringCollection())
+        """Collection of managed paths available for site creation."""
+        return self.properties.get(
+            "availableManagedPathsForSiteCreation", StringCollection()
+        )
 
     @property
     def excluded_file_extensions_for_sync_app(self):
-        """Collection of file extensions not uploaded by the OneDrive sync app. """
-        return self.properties.get("excludedFileExtensionsForSyncApp", StringCollection())
+        """Collection of file extensions not uploaded by the OneDrive sync app."""
+        return self.properties.get(
+            "excludedFileExtensionsForSyncApp", StringCollection()
+        )
 
     @property
     def site_creation_default_managed_path(self):
@@ -50,7 +54,7 @@ class SharepointSettings(Entity):
             property_mapping = {
                 "allowedDomainGuidsForSyncApp": self.allowed_domain_guids_for_sync_app,
                 "availableManagedPathsForSiteCreation": self.available_managed_paths_for_site_creation,
-                "excludedFileExtensionsForSyncApp": self.excluded_file_extensions_for_sync_app
+                "excludedFileExtensionsForSyncApp": self.excluded_file_extensions_for_sync_app,
             }
             default_value = property_mapping.get(name, None)
         return super(SharepointSettings, self).get_property(name, default_value)

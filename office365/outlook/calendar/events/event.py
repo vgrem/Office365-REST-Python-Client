@@ -1,8 +1,10 @@
 from office365.delta_collection import DeltaCollection
-from office365.directory.extensions.extended_property import SingleValueLegacyExtendedProperty, \
-    MultiValueLegacyExtendedProperty
-from office365.entity_collection import EntityCollection
+from office365.directory.extensions.extended_property import (
+    MultiValueLegacyExtendedProperty,
+    SingleValueLegacyExtendedProperty,
+)
 from office365.directory.extensions.extension import Extension
+from office365.entity_collection import EntityCollection
 from office365.outlook.calendar.attendees.attendee import Attendee
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.outlook.calendar.email_address import EmailAddress
@@ -11,8 +13,8 @@ from office365.outlook.mail.attachments.collection import AttachmentCollection
 from office365.outlook.mail.item_body import ItemBody
 from office365.outlook.mail.location import Location
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class Event(OutlookItem):
@@ -25,10 +27,7 @@ class Event(OutlookItem):
         :param bool send_response: true if a response is to be sent to the organizer; otherwise, false.
         :param str comment: Text included in the response.
         """
-        payload = {
-            "SendResponse": send_response,
-            "Comment": comment
-        }
+        payload = {"SendResponse": send_response, "Comment": comment}
         qry = ServiceOperationQuery(self, "accept", None, payload)
         self.context.add_query(qry)
         return self
@@ -44,9 +43,7 @@ class Event(OutlookItem):
 
         :param str comment: Text included in the response.
         """
-        payload = {
-            "Comment": comment
-        }
+        payload = {"Comment": comment}
         qry = ServiceOperationQuery(self, "cancel", None, payload)
         self.context.add_query(qry)
         return self
@@ -68,7 +65,7 @@ class Event(OutlookItem):
         payload = {
             "ProposedNewTime": proposed_new_time,
             "SendResponse": send_response,
-            "Comment": comment
+            "Comment": comment,
         }
         qry = ServiceOperationQuery(self, "decline", None, payload)
         self.context.add_query(qry)
@@ -168,18 +165,27 @@ class Event(OutlookItem):
 
     @property
     def single_value_extended_properties(self):
-        """The collection of single-value extended properties defined for the event.
-        """
-        return self.properties.get('singleValueExtendedProperties',
-                                 EntityCollection(self.context, SingleValueLegacyExtendedProperty,
-                                                  ResourcePath("singleValueExtendedProperties", self.resource_path)))
+        """The collection of single-value extended properties defined for the event."""
+        return self.properties.get(
+            "singleValueExtendedProperties",
+            EntityCollection(
+                self.context,
+                SingleValueLegacyExtendedProperty,
+                ResourcePath("singleValueExtendedProperties", self.resource_path),
+            ),
+        )
 
     @property
     def multi_value_extended_properties(self):
         """The collection of multi-value extended properties defined for the event."""
-        return self.properties.get('multiValueExtendedProperties',
-                                   EntityCollection(self.context, MultiValueLegacyExtendedProperty,
-                                                    ResourcePath("multiValueExtendedProperties", self.resource_path)))
+        return self.properties.get(
+            "multiValueExtendedProperties",
+            EntityCollection(
+                self.context,
+                MultiValueLegacyExtendedProperty,
+                ResourcePath("multiValueExtendedProperties", self.resource_path),
+            ),
+        )
 
     @property
     def body(self):
@@ -244,26 +250,36 @@ class Event(OutlookItem):
     def calendar(self):
         """The calendar that contains the event. Navigation property. Read-only."""
         from office365.outlook.calendar.calendar import Calendar
-        return self.properties.get('calendar',
-                                   Calendar(self.context, ResourcePath("calendar", self.resource_path)))
+
+        return self.properties.get(
+            "calendar",
+            Calendar(self.context, ResourcePath("calendar", self.resource_path)),
+        )
 
     @property
     def attendees(self):
         """The collection of attendees for the event."""
-        return self.properties.setdefault('attendees', ClientValueCollection(Attendee))
+        return self.properties.setdefault("attendees", ClientValueCollection(Attendee))
 
     @property
     def attachments(self):
-        """The collection of fileAttachment and itemAttachment attachments for the event. """
-        return self.properties.get('attachments',
-                                   AttachmentCollection(self.context, ResourcePath("attachments", self.resource_path)))
+        """The collection of fileAttachment and itemAttachment attachments for the event."""
+        return self.properties.get(
+            "attachments",
+            AttachmentCollection(
+                self.context, ResourcePath("attachments", self.resource_path)
+            ),
+        )
 
     @property
     def extensions(self):
         """The collection of open extensions defined for the event. Nullable."""
-        return self.properties.get('extensions',
-                                   EntityCollection(self.context, Extension,
-                                                    ResourcePath("extensions", self.resource_path)))
+        return self.properties.get(
+            "extensions",
+            EntityCollection(
+                self.context, Extension, ResourcePath("extensions", self.resource_path)
+            ),
+        )
 
     @property
     def instances(self):
@@ -271,14 +287,19 @@ class Event(OutlookItem):
         that are part of the recurrence pattern, and exceptions that have been modified, but does not include
         occurrences that have been cancelled from the series"""
         from office365.outlook.calendar.events.collection import EventCollection
-        return self.properties.get('instances',
-                                   EventCollection(self.context, ResourcePath("instances", self.resource_path)))
+
+        return self.properties.get(
+            "instances",
+            EventCollection(
+                self.context, ResourcePath("instances", self.resource_path)
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "multiValueExtendedProperties": self.multi_value_extended_properties,
-                "singleValueExtendedProperties": self.single_value_extended_properties
+                "singleValueExtendedProperties": self.single_value_extended_properties,
             }
             default_value = property_mapping.get(name, None)
         return super(Event, self).get_property(name, default_value)

@@ -26,15 +26,22 @@ class AdministrativeUnit(DirectoryObject):
         Users and groups that are members of this administrative unit
         """
         from office365.directory.object_collection import DirectoryObjectCollection
-        return self.properties.get('members',
-                                   DirectoryObjectCollection(self.context, ResourcePath("members", self.resource_path)))
+
+        return self.properties.get(
+            "members",
+            DirectoryObjectCollection(
+                self.context, ResourcePath("members", self.resource_path)
+            ),
+        )
 
     @property
     def extensions(self):
         """
         The collection of open extensions defined for this administrative unit.
         """
-        return self.properties.get('extensions',
-                                   EntityCollection(self.context, Extension,
-                                                    ResourcePath("extensions", self.resource_path)))
-
+        return self.properties.get(
+            "extensions",
+            EntityCollection(
+                self.context, Extension, ResourcePath("extensions", self.resource_path)
+            ),
+        )

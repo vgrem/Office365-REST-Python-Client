@@ -12,7 +12,7 @@ class FieldNumber(Field):
 
         :rtype: int or None
         """
-        return self.properties.get('DisplayFormat', None)
+        return self.properties.get("DisplayFormat", None)
 
     @property
     def comma_separator(self):
@@ -21,7 +21,7 @@ class FieldNumber(Field):
 
         :rtype: str or None
         """
-        return self.properties.get('CommaSeparator', None)
+        return self.properties.get("CommaSeparator", None)
 
     @comma_separator.setter
     def comma_separator(self, value):
@@ -30,7 +30,7 @@ class FieldNumber(Field):
 
         :type value: str
         """
-        self.set_property('CommaSeparator', value)
+        self.set_property("CommaSeparator", value)
 
     @property
     def show_as_percentage(self):
@@ -39,7 +39,7 @@ class FieldNumber(Field):
 
         :rtype: int or None
         """
-        return self.properties.get('ShowAsPercentage', None)
+        return self.properties.get("ShowAsPercentage", None)
 
     @show_as_percentage.setter
     def show_as_percentage(self, value):
@@ -48,4 +48,4 @@ class FieldNumber(Field):
 
         :type value: str
         """
-        self.set_property('ShowAsPercentage', value)
+        self.set_property("ShowAsPercentage", value)

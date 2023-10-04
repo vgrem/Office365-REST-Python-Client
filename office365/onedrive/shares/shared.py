@@ -3,8 +3,13 @@ from office365.runtime.client_value import ClientValue
 
 
 class Shared(ClientValue):
-
-    def __init__(self, owner=IdentitySet(), scope=None, shared_by=IdentitySet(), shared_datetime=None):
+    def __init__(
+        self,
+        owner=IdentitySet(),
+        scope=None,
+        shared_by=IdentitySet(),
+        shared_datetime=None,
+    ):
         """
         The Shared resource indicates a DriveItem has been shared with others. The resource includes information
         about how the item is shared.

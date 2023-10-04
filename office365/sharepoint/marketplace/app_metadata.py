@@ -11,9 +11,7 @@ class CorporateCatalogAppMetadata(BaseEntity):
 
         :param bool skip_feature_deployment: Specifies whether the app can be centrally deployed across the tenant.
         """
-        payload = {
-            "skipFeatureDeployment": skip_feature_deployment
-        }
+        payload = {"skipFeatureDeployment": skip_feature_deployment}
         qry = ServiceOperationQuery(self, "Deploy", None, payload)
         self.context.add_query(qry)
         return self

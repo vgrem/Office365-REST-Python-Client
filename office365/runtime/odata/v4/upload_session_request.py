@@ -7,7 +7,6 @@ from office365.runtime.types.event_handler import EventHandler
 
 
 class UploadSessionRequest(ClientRequest):
-
     def __init__(self, file_object, chunk_size, chunk_uploaded=None):
         """
         :type file_object: typing.IO
@@ -29,10 +28,14 @@ class UploadSessionRequest(ClientRequest):
         range_data = self._read_next()
         request = RequestOptions(query.upload_session_url)
         request.method = HttpMethod.Put
-        request.set_header('Content-Length', str(len(range_data)))
-        request.set_header('Content-Range',
-                           'bytes {0}-{1}/{2}'.format(self._range_start, self._range_end - 1, self.file_size))
-        request.set_header('Accept', '*/*')
+        request.set_header("Content-Length", str(len(range_data)))
+        request.set_header(
+            "Content-Range",
+            "bytes {0}-{1}/{2}".format(
+                self._range_start, self._range_end - 1, self.file_size
+            ),
+        )
+        request.set_header("Accept", "*/*")
         request.data = range_data
         return request
 

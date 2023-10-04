@@ -20,9 +20,14 @@ class Synchronization(Entity):
         Performs synchronization by periodically running in the background, polling for changes in one directory,
         and pushing them to another directory.
         """
-        return self.properties.get('jobs',
-                                   EntityCollection(self.context, SynchronizationJob,
-                                                    ResourcePath("jobs", self.resource_path)))
+        return self.properties.get(
+            "jobs",
+            EntityCollection(
+                self.context,
+                SynchronizationJob,
+                ResourcePath("jobs", self.resource_path),
+            ),
+        )
 
     @property
     def templates(self):
@@ -30,6 +35,11 @@ class Synchronization(Entity):
         Performs synchronization by periodically running in the background, polling for changes in one directory,
         and pushing them to another directory.
         """
-        return self.properties.get('templates',
-                                   EntityCollection(self.context, SynchronizationTemplate,
-                                                    ResourcePath("templates", self.resource_path)))
+        return self.properties.get(
+            "templates",
+            EntityCollection(
+                self.context,
+                SynchronizationTemplate,
+                ResourcePath("templates", self.resource_path),
+            ),
+        )

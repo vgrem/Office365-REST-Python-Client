@@ -54,20 +54,26 @@ class UserActivity(Entity):
     @property
     def created_datetime(self):
         """Set by the server. DateTime in UTC when the object was created on the server."""
-        return self.properties.get('createdDateTime', datetime.min)
+        return self.properties.get("createdDateTime", datetime.min)
 
     @property
     def history_items(self):
         """NavigationProperty/Containment; navigation property to the associated activity."""
-        from office365.directory.users.activities.history_item import ActivityHistoryItem
-        return self.properties.get('historyItems',
-                                   EntityCollection(self.context, ActivityHistoryItem,
-                                                    ResourcePath("historyItems", self.resource_path)))
+        from office365.directory.users.activities.history_item import (
+            ActivityHistoryItem,
+        )
+
+        return self.properties.get(
+            "historyItems",
+            EntityCollection(
+                self.context,
+                ActivityHistoryItem,
+                ResourcePath("historyItems", self.resource_path),
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
-            property_mapping = {
-                "historyItems": self.history_items
-            }
+            property_mapping = {"historyItems": self.history_items}
             default_value = property_mapping.get(name, None)
         return super(UserActivity, self).get_property(name, default_value)

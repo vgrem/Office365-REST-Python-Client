@@ -6,7 +6,13 @@ class Attendee(AttendeeBase):
     """An event attendees. This can be a person or resource such as a meeting room or equipment,
     that has been set up as a resource on the Exchange server for the tenant."""
 
-    def __init__(self, email_address=EmailAddress(), attendee_type=None, proposed_new_time=None, status=None):
+    def __init__(
+        self,
+        email_address=EmailAddress(),
+        attendee_type=None,
+        proposed_new_time=None,
+        status=None,
+    ):
         """
 
         :param office365.mail.emailAddress.EmailAddress emailAddress email_address:

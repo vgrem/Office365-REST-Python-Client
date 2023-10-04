@@ -17,38 +17,48 @@ class PlannerPlan(Entity):
     @property
     def title(self):
         """Required. Title of the plan."""
-        return self.properties.get('title', None)
+        return self.properties.get("title", None)
 
     @property
     def created_by(self):
         """Identity of the user, device, or application which created the plan."""
-        return self.properties.get('createdBy', IdentitySet())
+        return self.properties.get("createdBy", IdentitySet())
 
     @property
     def buckets(self):
         """
         Read-only. Nullable. Collection of buckets in the plan.
         """
-        return self.properties.get('buckets',
-                                   EntityCollection(self.context, PlannerBucket,
-                                                    ResourcePath("buckets", self.resource_path)))
+        return self.properties.get(
+            "buckets",
+            EntityCollection(
+                self.context, PlannerBucket, ResourcePath("buckets", self.resource_path)
+            ),
+        )
 
     @property
     def details(self):
         """
         Read-only. Nullable. Additional details about the plan.
         """
-        return self.properties.get('details',
-                                   PlannerPlanDetails(self.context, ResourcePath("details", self.resource_path)))
+        return self.properties.get(
+            "details",
+            PlannerPlanDetails(
+                self.context, ResourcePath("details", self.resource_path)
+            ),
+        )
 
     @property
     def tasks(self):
         """
         Read-only. Nullable. Collection of tasks in the plan.
         """
-        return self.properties.get('tasks',
-                                   EntityCollection(self.context, PlannerTask,
-                                                    ResourcePath("tasks", self.resource_path)))
+        return self.properties.get(
+            "tasks",
+            EntityCollection(
+                self.context, PlannerTask, ResourcePath("tasks", self.resource_path)
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:

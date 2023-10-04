@@ -8,11 +8,14 @@ class SharingLinkAbilities(ClientValue):
     and whether they are enabled or not.
     """
 
-    def __init__(self, can_add_new_external_principals=SharingAbilityStatus(),
-                 can_delete_edit_link=SharingAbilityStatus(),
-                 can_delete_manage_list_link=SharingAbilityStatus(),
-                 can_get_edit_link=SharingAbilityStatus(),
-                 can_get_read_link=SharingAbilityStatus()):
+    def __init__(
+        self,
+        can_add_new_external_principals=SharingAbilityStatus(),
+        can_delete_edit_link=SharingAbilityStatus(),
+        can_delete_manage_list_link=SharingAbilityStatus(),
+        can_get_edit_link=SharingAbilityStatus(),
+        can_get_read_link=SharingAbilityStatus(),
+    ):
         """
         :param SharingAbilityStatus can_add_new_external_principals:
         :param SharingAbilityStatus can_delete_edit_link:

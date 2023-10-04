@@ -5,7 +5,6 @@ from tests.graph_case import acquire_token_by_client_credentials
 
 
 class TestIdentity(TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.client = GraphClient(acquire_token_by_client_credentials)
@@ -19,12 +18,11 @@ class TestIdentity(TestCase):
         self.assertIsNotNone(result.resource_path)
 
     def test3_available_provider_types(self):
-        result = self.client.identity.identity_providers.available_provider_types().execute_query()
+        result = (
+            self.client.identity.identity_providers.available_provider_types().execute_query()
+        )
         self.assertIsNotNone(result.value)
 
     def test4_list_risky_users(self):
         result = self.client.identity_protection.risky_users.get().execute_query()
         self.assertIsNotNone(result.resource_path)
-
-
-

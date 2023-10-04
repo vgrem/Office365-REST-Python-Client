@@ -18,6 +18,10 @@ with tempfile.TemporaryDirectory() as local_path:
     items = folder_item.children.get().execute_query()
     for drive_item in items:  # type: DriveItem
         if drive_item.is_file:
-            with open(os.path.join(local_path, drive_item.name), 'wb') as local_file:
+            with open(os.path.join(local_path, drive_item.name), "wb") as local_file:
                 drive_item.download(local_file).execute_query()  # download file content
-            print("File '{0}' has been downloaded into {1}".format(drive_item.name, local_file.name))
+            print(
+                "File '{0}' has been downloaded into {1}".format(
+                    drive_item.name, local_file.name
+                )
+            )

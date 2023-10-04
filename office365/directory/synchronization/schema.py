@@ -9,5 +9,3 @@ class SynchronizationSchema(Entity):
 
     The following sections describe the high-level components of the synchronization schema.
     """
-
-

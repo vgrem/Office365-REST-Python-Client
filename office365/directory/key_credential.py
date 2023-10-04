@@ -7,8 +7,17 @@ class KeyCredential(ClientValue):
     The keyCredentials property of the application entity is a collection of keyCredential.
     """
 
-    def __init__(self, custom_key_identifier=None, display_name=None, end_datetime=None, key=None, key_id=None,
-                 start_datetime=None, key_type=None, usage=None):
+    def __init__(
+        self,
+        custom_key_identifier=None,
+        display_name=None,
+        end_datetime=None,
+        key=None,
+        key_id=None,
+        start_datetime=None,
+        key_type=None,
+        usage=None,
+    ):
         """
         :param str custom_key_identifier: A 40-character binary type that can be used to identify the credential.
            Optional. When not provided in the payload, defaults to the thumbprint of the certificate.

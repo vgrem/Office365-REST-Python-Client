@@ -46,13 +46,14 @@ class SignIn(Entity):
 
     @property
     def created_datetime(self):
-        """	Date and time (UTC) the sign-in was initiated. """
-        return self.properties.get('createdDateTime', datetime.datetime.min)
+        """Date and time (UTC) the sign-in was initiated."""
+        return self.properties.get("createdDateTime", datetime.datetime.min)
 
     @property
     def device_detail(self):
         """Device information from where the sign-in occurred; includes device ID, operating system, and browser.
-        Supports $filter (eq and startsWith operators only) on browser and operatingSytem properties."""
+        Supports $filter (eq and startsWith operators only) on browser and operatingSytem properties.
+        """
         return self.properties.get("deviceDetail", DeviceDetail())
 
     @property
@@ -132,7 +133,7 @@ class SignIn(Entity):
         if default_value is None:
             property_mapping = {
                 "createdDateTime": self.created_datetime,
-                "deviceDetail": self.device_detail
+                "deviceDetail": self.device_detail,
             }
             default_value = property_mapping.get(name, None)
         return super(SignIn, self).get_property(name, default_value)

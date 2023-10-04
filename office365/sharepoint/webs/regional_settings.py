@@ -48,26 +48,36 @@ class RegionalSettings(BaseEntity):
     @property
     def time_zone(self):
         """Gets the time zone that is used on the server."""
-        return self.properties.get("TimeZone", TimeZone(self.context, ResourcePath("TimeZone", self.resource_path)))
+        return self.properties.get(
+            "TimeZone",
+            TimeZone(self.context, ResourcePath("TimeZone", self.resource_path)),
+        )
 
     @property
     def time_zones(self):
         """Gets the collection of time zones used in a server farm."""
-        return self.properties.get("TimeZones",
-                                   TimeZoneCollection(self.context, ResourcePath("TimeZones", self.resource_path)))
+        return self.properties.get(
+            "TimeZones",
+            TimeZoneCollection(
+                self.context, ResourcePath("TimeZones", self.resource_path)
+            ),
+        )
 
     @property
     def installed_languages(self):
-        return self.properties.get("InstalledLanguages",
-                                   LanguageCollection(self.context,
-                                                      ResourcePath("InstalledLanguages", self.resource_path)))
+        return self.properties.get(
+            "InstalledLanguages",
+            LanguageCollection(
+                self.context, ResourcePath("InstalledLanguages", self.resource_path)
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "TimeZones": self.time_zones,
                 "TimeZone": self.time_zone,
-                "InstalledLanguages": self.installed_languages
+                "InstalledLanguages": self.installed_languages,
             }
             default_value = property_mapping.get(name, None)
         return super(RegionalSettings, self).get_property(name, default_value)

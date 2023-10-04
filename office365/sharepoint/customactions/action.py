@@ -22,11 +22,19 @@ class UserCustomAction(BaseEntity):
     @property
     def description_resource(self):
         """Gets the SP.UserResource object that corresponds to the Description for this object."""
-        return self.properties.get('DescriptionResource',
-                                   UserResource(self.context, ResourcePath("DescriptionResource", self.resource_path)))
+        return self.properties.get(
+            "DescriptionResource",
+            UserResource(
+                self.context, ResourcePath("DescriptionResource", self.resource_path)
+            ),
+        )
 
     @property
     def title_resource(self):
         """Returns the UserResource object that corresponds to the Title for this object."""
-        return self.properties.get('TitleResource',
-                                   UserResource(self.context, ResourcePath("TitleResource", self.resource_path)))
+        return self.properties.get(
+            "TitleResource",
+            UserResource(
+                self.context, ResourcePath("TitleResource", self.resource_path)
+            ),
+        )

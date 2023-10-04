@@ -15,7 +15,7 @@ from office365.runtime.queries.function import FunctionQuery
 
 class Drive(BaseItem):
     """The drive resource is the top level object representing a user's OneDrive or a document library in
-    SharePoint. """
+    SharePoint."""
 
     def create_bundle(self, name, children=None):
         """
@@ -31,9 +31,7 @@ class Drive(BaseItem):
             "name": name,
             "@microsoft.graph.conflictBehavior": ConflictBehavior.Rename,
             "bundle": {},
-            "children": [
-                {"id": item_id} for item_id in children
-            ]
+            "children": [{"id": item_id} for item_id in children],
         }
         qry = CreateEntityQuery(self.bundles, payload, return_type)
         self.context.add_query(qry)
@@ -44,7 +42,9 @@ class Drive(BaseItem):
 
         :type query_text: str
         """
-        return_type = EntityCollection(self.context, DriveItem, self.items.resource_path)
+        return_type = EntityCollection(
+            self.context, DriveItem, self.items.resource_path
+        )
         qry = FunctionQuery(self, "search", {"q": query_text}, return_type)
         self.context.add_query(qry)
         return return_type
@@ -55,15 +55,18 @@ class Drive(BaseItem):
         This collection includes items that are in the user's drive as well as items
         they have access to from other drives.
         """
-        return_type = EntityCollection(self.context, DriveItem, self.items.resource_path)
+        return_type = EntityCollection(
+            self.context, DriveItem, self.items.resource_path
+        )
         qry = FunctionQuery(self, "recent", None, return_type)
         self.context.add_query(qry)
         return return_type
 
     def shared_with_me(self):
-        """Retrieve a collection of DriveItem resources that have been shared with the owner of the Drive.
-        """
-        return_type = EntityCollection(self.context, DriveItem, self.items.resource_path)
+        """Retrieve a collection of DriveItem resources that have been shared with the owner of the Drive."""
+        return_type = EntityCollection(
+            self.context, DriveItem, self.items.resource_path
+        )
         qry = FunctionQuery(self, "sharedWithMe", None, return_type)
         self.context.add_query(qry)
         return return_type
@@ -81,51 +84,65 @@ class Drive(BaseItem):
     @property
     def sharepoint_ids(self):
         """Returns identifiers useful for SharePoint REST compatibility."""
-        return self.properties.get('sharepointIds', SharePointIds())
+        return self.properties.get("sharepointIds", SharePointIds())
 
     @property
     def system(self):
         """Optional. The user account that owns the drive. Read-only."""
-        return self.properties.get('system', SystemFacet())
+        return self.properties.get("system", SystemFacet())
 
     @property
     def owner(self):
         """If present, indicates that this is a system-managed drive. Read-only."""
-        return self.properties.get('owner', IdentitySet())
+        return self.properties.get("owner", IdentitySet())
 
     @property
     def root(self):
         # type: () -> DriveItem
         """The root folder of the drive."""
-        return self.properties.get('root',
-                                   DriveItem(self.context, RootPath(self.resource_path, self.items.resource_path)))
+        return self.properties.get(
+            "root",
+            DriveItem(
+                self.context, RootPath(self.resource_path, self.items.resource_path)
+            ),
+        )
 
     @property
     def list(self):
-        """For drives in SharePoint, the underlying document library list.
-        """
-        return self.properties.get('list', List(self.context, ResourcePath("list", self.resource_path)))
+        """For drives in SharePoint, the underlying document library list."""
+        return self.properties.get(
+            "list", List(self.context, ResourcePath("list", self.resource_path))
+        )
 
     @property
     def bundles(self):
         """Bundle metadata, if the item is a bundle."""
-        return self.properties.get('bundles',
-                                   EntityCollection(self.context, DriveItem,
-                                                    ResourcePath("bundles", self.resource_path)))
+        return self.properties.get(
+            "bundles",
+            EntityCollection(
+                self.context, DriveItem, ResourcePath("bundles", self.resource_path)
+            ),
+        )
 
     @property
     def items(self):
         """All items contained in the drive."""
-        return self.properties.get('items',
-                                   EntityCollection(self.context, DriveItem, ResourcePath("items", self.resource_path)))
+        return self.properties.get(
+            "items",
+            EntityCollection(
+                self.context, DriveItem, ResourcePath("items", self.resource_path)
+            ),
+        )
 
     @property
     def following(self):
-        """The list of items the user is following. Only in OneDrive for Business.
-        """
-        return self.properties.get('following',
-                                   EntityCollection(self.context, DriveItem,
-                                                    ResourcePath("following", self.resource_path)))
+        """The list of items the user is following. Only in OneDrive for Business."""
+        return self.properties.get(
+            "following",
+            EntityCollection(
+                self.context, DriveItem, ResourcePath("following", self.resource_path)
+            ),
+        )
 
     @property
     def quota(self):
@@ -135,9 +152,12 @@ class Drive(BaseItem):
     @property
     def special(self):
         """Collection of auth folders available in OneDrive. Read-only. Nullable."""
-        return self.properties.get('special',
-                                   EntityCollection(self.context, DriveItem,
-                                                    ResourcePath("special", self.resource_path)))
+        return self.properties.get(
+            "special",
+            EntityCollection(
+                self.context, DriveItem, ResourcePath("special", self.resource_path)
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         return super(Drive, self).get_property(name, default_value)

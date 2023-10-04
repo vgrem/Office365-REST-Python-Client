@@ -3,10 +3,14 @@ from office365.runtime.client_value import ClientValue
 
 class PasswordProfile(ClientValue):
     """Contains the password profile associated with a user. The passwordProfile property of the user entity is a
-    passwordProfile object. """
+    passwordProfile object."""
 
-    def __init__(self, password=None, force_change_password_next_sign_in=None,
-                 force_change_password_next_sign_in_with_mfa=None):
+    def __init__(
+        self,
+        password=None,
+        force_change_password_next_sign_in=None,
+        force_change_password_next_sign_in_with_mfa=None,
+    ):
         """
         :param str password: The password for the user. This property is required when a user is created.
              It can be updated, but the user will be required to change the password on the next login.
@@ -23,4 +27,6 @@ class PasswordProfile(ClientValue):
         super(PasswordProfile, self).__init__()
         self.password = password
         self.forceChangePasswordNextSignIn = force_change_password_next_sign_in
-        self.forceChangePasswordNextSignInWithMfa = force_change_password_next_sign_in_with_mfa
+        self.forceChangePasswordNextSignInWithMfa = (
+            force_change_password_next_sign_in_with_mfa
+        )

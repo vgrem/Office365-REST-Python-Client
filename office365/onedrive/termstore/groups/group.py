@@ -19,8 +19,10 @@ class Group(Entity):
     @property
     def sets(self):
         """Collection of all sets available in the term store."""
-        return self.properties.get('sets',
-                                   SetCollection(self.context, ResourcePath("sets", self.resource_path), self))
+        return self.properties.get(
+            "sets",
+            SetCollection(self.context, ResourcePath("sets", self.resource_path), self),
+        )
 
     @property
     def entity_type_name(self):

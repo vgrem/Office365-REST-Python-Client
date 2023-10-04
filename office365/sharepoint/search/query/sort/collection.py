@@ -22,10 +22,7 @@ class SortCollection(BaseEntity):
             (as specified in section 2.2.4.11) is SearchServer.SharepointSearch and direction is set to
             SortDirection.FQLFormula, the value of strProperty MUST be ignored by the protocol server.
         """
-        payload = {
-            "strProperty": property_name,
-            "direction": direction
-        }
+        payload = {"strProperty": property_name, "direction": direction}
         qry = ServiceOperationQuery(self, "Add", None, payload)
         self.context.add_query(qry)
         return self

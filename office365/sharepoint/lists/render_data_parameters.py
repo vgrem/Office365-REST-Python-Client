@@ -4,10 +4,19 @@ from office365.runtime.client_value import ClientValue
 class RenderListDataParameters(ClientValue):
     """Specifies the parameters to be used to render list data as a JSON string"""
 
-    def __init__(self, add_all_fields=None, add_all_view_fields=None, add_regional_settings=None,
-                 add_required_fields=None, allow_multiple_value_filter_for_taxonomy_fields=None,
-                 audience_target=None, dates_in_utc=None, expand_groups=None, expand_user_field=None,
-                 filter_out_channel_folders_in_default_doc_lib=None):
+    def __init__(
+        self,
+        add_all_fields=None,
+        add_all_view_fields=None,
+        add_regional_settings=None,
+        add_required_fields=None,
+        allow_multiple_value_filter_for_taxonomy_fields=None,
+        audience_target=None,
+        dates_in_utc=None,
+        expand_groups=None,
+        expand_user_field=None,
+        filter_out_channel_folders_in_default_doc_lib=None,
+    ):
         """
         :param bool add_all_fields:
         :param bool add_all_view_fields:
@@ -25,12 +34,16 @@ class RenderListDataParameters(ClientValue):
         self.AddAllViewFields = add_all_view_fields
         self.AddRegionalSettings = add_regional_settings
         self.AddRequiredFields = add_required_fields
-        self.AllowMultipleValueFilterForTaxonomyFields = allow_multiple_value_filter_for_taxonomy_fields
+        self.AllowMultipleValueFilterForTaxonomyFields = (
+            allow_multiple_value_filter_for_taxonomy_fields
+        )
         self.AudienceTarget = audience_target
         self.DatesInUtc = dates_in_utc
         self.ExpandGroups = expand_groups
         self.ExpandUserField = expand_user_field
-        self.FilterOutChannelFoldersInDefaultDocLib = filter_out_channel_folders_in_default_doc_lib
+        self.FilterOutChannelFoldersInDefaultDocLib = (
+            filter_out_channel_folders_in_default_doc_lib
+        )
 
     @property
     def entity_type_name(self):

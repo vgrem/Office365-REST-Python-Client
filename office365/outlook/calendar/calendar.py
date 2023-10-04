@@ -1,11 +1,15 @@
-from office365.directory.extensions.extended_property import MultiValueLegacyExtendedProperty, \
-    SingleValueLegacyExtendedProperty
+from office365.directory.extensions.extended_property import (
+    MultiValueLegacyExtendedProperty,
+    SingleValueLegacyExtendedProperty,
+)
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.outlook.calendar.email_address import EmailAddress
 from office365.outlook.calendar.events.collection import EventCollection
-from office365.outlook.calendar.permissions.collection import CalendarPermissionCollection
+from office365.outlook.calendar.permissions.collection import (
+    CalendarPermissionCollection,
+)
 from office365.outlook.calendar.schedule.information import ScheduleInformation
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -31,7 +35,9 @@ class Calendar(Entity):
         self.context.add_query(qry)
         return return_type
 
-    def get_schedule(self, schedules, start_time, end_time, availability_view_interval=30):
+    def get_schedule(
+        self, schedules, start_time, end_time, availability_view_interval=30
+    ):
         """
         Get the free/busy availability information for a collection of users, distributions lists, or resources
         (rooms or equipment) for a specified time period.
@@ -47,10 +53,14 @@ class Calendar(Entity):
             "schedules": schedules,
             "startTime": DateTimeTimeZone.parse(start_time),
             "endTime": DateTimeTimeZone.parse(end_time),
-            "availabilityViewInterval": availability_view_interval
+            "availabilityViewInterval": availability_view_interval,
         }
-        return_type = ClientResult(self.context, ClientValueCollection(ScheduleInformation))
-        qry = ServiceOperationQuery(self, "getSchedule", None, payload, None, return_type)
+        return_type = ClientResult(
+            self.context, ClientValueCollection(ScheduleInformation)
+        )
+        qry = ServiceOperationQuery(
+            self, "getSchedule", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -60,7 +70,7 @@ class Calendar(Entity):
         Represent the online meeting service providers that can be used to create online meetings in this calendar.
         Possible values are: unknown, skypeForBusiness, skypeForConsumer, teamsForBusiness.
         """
-        return self.properties.get('allowedOnlineMeetingProviders', StringCollection())
+        return self.properties.get("allowedOnlineMeetingProviders", StringCollection())
 
     @property
     def can_edit(self):
@@ -70,7 +80,7 @@ class Calendar(Entity):
         This property is also true for a user who has been shared a calendar and granted write access.
         :rtype: bool or None
         """
-        return self.properties.get('canEdit', None)
+        return self.properties.get("canEdit", None)
 
     @property
     def can_share(self):
@@ -79,7 +89,7 @@ class Calendar(Entity):
         Only the user who created the calendar can share it.
         :rtype: bool or None
         """
-        return self.properties.get('canShare', None)
+        return self.properties.get("canShare", None)
 
     @property
     def can_view_private_items(self):
@@ -87,7 +97,7 @@ class Calendar(Entity):
         true if the user can read calendar items that have been marked private, false otherwise.
         :rtype: bool or None
         """
-        return self.properties.get('canViewPrivateItems', None)
+        return self.properties.get("canViewPrivateItems", None)
 
     @property
     def change_key(self):
@@ -96,7 +106,7 @@ class Calendar(Entity):
         This allows Exchange to apply changes to the correct version of the object.
         :rtype: str
         """
-        return self.properties.get('changeKey', None)
+        return self.properties.get("changeKey", None)
 
     @property
     def color(self):
@@ -106,7 +116,7 @@ class Calendar(Entity):
         lightPink, lightBrown, lightRed, maxColor.
         :rtype: str
         """
-        return self.properties.get('color', None)
+        return self.properties.get("color", None)
 
     @property
     def default_online_meeting_provider(self):
@@ -115,7 +125,7 @@ class Calendar(Entity):
         Possible values are: unknown, skypeForBusiness, skypeForConsumer, teamsForBusiness.
         :rtype: str
         """
-        return self.properties.get('defaultOnlineMeetingProvider', None)
+        return self.properties.get("defaultOnlineMeetingProvider", None)
 
     @property
     def name(self):
@@ -123,7 +133,7 @@ class Calendar(Entity):
         The calendar name.
         :rtype: str
         """
-        return self.properties.get('name', None)
+        return self.properties.get("name", None)
 
     @property
     def is_default_calendar(self):
@@ -131,7 +141,7 @@ class Calendar(Entity):
         true if this is the default calendar where new events are created by default, false otherwise.
         :rtype: bool or None
         """
-        return self.properties.get('isDefaultCalendar', None)
+        return self.properties.get("isDefaultCalendar", None)
 
     @property
     def is_removable(self):
@@ -153,45 +163,62 @@ class Calendar(Entity):
     @property
     def owner(self):
         """If set, this represents the user who created or added the calendar.
-           For a calendar that the user created or added, the owner property is set to the user. For a calendar shared
-           with the user, the owner property is set to the person who shared that calendar with the user.
+        For a calendar that the user created or added, the owner property is set to the user. For a calendar shared
+        with the user, the owner property is set to the person who shared that calendar with the user.
         """
-        return self.properties.get('owner', EmailAddress())
+        return self.properties.get("owner", EmailAddress())
 
     @property
     def events(self):
         """The events in the calendar. Navigation property. Read-only."""
-        return self.properties.get('events',
-                                   EventCollection(self.context, ResourcePath("events", self.resource_path)))
+        return self.properties.get(
+            "events",
+            EventCollection(self.context, ResourcePath("events", self.resource_path)),
+        )
 
     @property
     def calendar_view(self):
-        """The calendar view for the calendar. Navigation property. Read-only.
-        """
-        return self.properties.get('calendarView',
-                                   EventCollection(self.context, ResourcePath("calendarView", self.resource_path)))
+        """The calendar view for the calendar. Navigation property. Read-only."""
+        return self.properties.get(
+            "calendarView",
+            EventCollection(
+                self.context, ResourcePath("calendarView", self.resource_path)
+            ),
+        )
 
     @property
     def calendar_permissions(self):
         """The permissions of the users with whom the calendar is shared."""
-        return self.properties.get('calendarPermissions',
-                                   CalendarPermissionCollection(self.context,
-                                                                ResourcePath("calendarPermissions",
-                                                                             self.resource_path)))
+        return self.properties.get(
+            "calendarPermissions",
+            CalendarPermissionCollection(
+                self.context, ResourcePath("calendarPermissions", self.resource_path)
+            ),
+        )
 
     @property
     def multi_value_extended_properties(self):
         """The collection of multi-value extended properties defined for the Calendar."""
-        return self.properties.get('multiValueExtendedProperties',
-                                   EntityCollection(self.context, MultiValueLegacyExtendedProperty,
-                                                    ResourcePath("multiValueExtendedProperties", self.resource_path)))
+        return self.properties.get(
+            "multiValueExtendedProperties",
+            EntityCollection(
+                self.context,
+                MultiValueLegacyExtendedProperty,
+                ResourcePath("multiValueExtendedProperties", self.resource_path),
+            ),
+        )
 
     @property
     def single_value_extended_properties(self):
         """The collection of single-value extended properties defined for the calendar. Read-only. Nullable."""
-        return self.properties.get('singleValueExtendedProperties',
-                                   EntityCollection(self.context, SingleValueLegacyExtendedProperty,
-                                                    ResourcePath("singleValueExtendedProperties", self.resource_path)))
+        return self.properties.get(
+            "singleValueExtendedProperties",
+            EntityCollection(
+                self.context,
+                SingleValueLegacyExtendedProperty,
+                ResourcePath("singleValueExtendedProperties", self.resource_path),
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
@@ -200,7 +227,7 @@ class Calendar(Entity):
                 "calendarView": self.calendar_view,
                 "calendarPermissions": self.calendar_permissions,
                 "multiValueExtendedProperties": self.multi_value_extended_properties,
-                "singleValueExtendedProperties": self.single_value_extended_properties
+                "singleValueExtendedProperties": self.single_value_extended_properties,
             }
             default_value = property_mapping.get(name, None)
         return super(Calendar, self).get_property(name, default_value)

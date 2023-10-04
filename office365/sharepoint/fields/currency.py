@@ -12,7 +12,7 @@ class FieldCurrency(FieldNumber):
 
         :rtype: int or None
         """
-        return self.properties.get('CurrencyLocaleId', None)
+        return self.properties.get("CurrencyLocaleId", None)
 
     @currency_locale_id.setter
     def currency_locale_id(self, value):
@@ -21,4 +21,4 @@ class FieldCurrency(FieldNumber):
 
         :type value: int
         """
-        self.set_property('CurrencyLocaleId', value)
+        self.set_property("CurrencyLocaleId", value)

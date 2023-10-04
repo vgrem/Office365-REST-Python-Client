@@ -4,7 +4,9 @@ from office365.runtime.client_value import ClientValue
 class Pkcs12CertificateInformation(ClientValue):
     """Represents the public information of a Pkcs12 certificate."""
 
-    def __init__(self, thumbprint=None, is_active=None, not_after=None, not_before=None):
+    def __init__(
+        self, thumbprint=None, is_active=None, not_after=None, not_before=None
+    ):
         """
         :param str thumbprint: The certificate thumbprint
         :param long not_after: The certificate's expiry. This value is a NumericDate as defined in RFC 7519

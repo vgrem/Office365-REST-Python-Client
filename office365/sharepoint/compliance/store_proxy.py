@@ -7,7 +7,6 @@ from office365.sharepoint.compliance.tag import ComplianceTag
 
 
 class SPPolicyStoreProxy(BaseEntity):
-
     @staticmethod
     def get_available_tags_for_site(context, site_url, return_type=None):
         """
@@ -17,11 +16,16 @@ class SPPolicyStoreProxy(BaseEntity):
         """
         if return_type is None:
             return_type = ClientResult(context, ClientValueCollection(ComplianceTag))
-        payload = {
-            "siteUrl": site_url
-        }
-        qry = ServiceOperationQuery(SPPolicyStoreProxy(context), "GetAvailableTagsForSite", None, payload,
-                                    None, return_type, True)
+        payload = {"siteUrl": site_url}
+        qry = ServiceOperationQuery(
+            SPPolicyStoreProxy(context),
+            "GetAvailableTagsForSite",
+            None,
+            payload,
+            None,
+            return_type,
+            True,
+        )
         context.add_query(qry)
         return return_type
 
@@ -30,10 +34,10 @@ class SPPolicyStoreProxy(BaseEntity):
         :param str site_id:
         """
         return_type = ClientResult(self.context, StringCollection())
-        payload = {
-            "siteId": site_id
-        }
-        qry = ServiceOperationQuery(self, "GetDynamicScopeBindingBySiteId", None, payload, None, return_type)
+        payload = {"siteId": site_id}
+        qry = ServiceOperationQuery(
+            self, "GetDynamicScopeBindingBySiteId", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 

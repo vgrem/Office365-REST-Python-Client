@@ -11,4 +11,3 @@ from tests.graph_case import acquire_token_by_username_password
 client = GraphClient(acquire_token_by_username_password)
 result = client.me.insights.used.get().execute_query()
 print(json.dumps(result.to_json(), indent=4))
-

@@ -31,8 +31,12 @@ class LikedByInformation(BaseEntity):
         List of like entries corresponding to individual likes. MUST NOT contain more than one entry
         for the same user in the set.
         """
-        return self.properties.get('likedBy', BaseEntityCollection(self.context, UserEntity,
-                                                                   ResourcePath("likedBy", self.resource_path)))
+        return self.properties.get(
+            "likedBy",
+            BaseEntityCollection(
+                self.context, UserEntity, ResourcePath("likedBy", self.resource_path)
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:

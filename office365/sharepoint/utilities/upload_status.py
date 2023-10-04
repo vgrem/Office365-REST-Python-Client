@@ -11,7 +11,7 @@ class UploadStatus(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('ExpectedContentRange', None)
+        return self.properties.get("ExpectedContentRange", None)
 
     @property
     def expiration_date_time(self):
@@ -19,7 +19,7 @@ class UploadStatus(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('ExpirationDateTime', None)
+        return self.properties.get("ExpirationDateTime", None)
 
     @property
     def upload_id(self):
@@ -27,7 +27,7 @@ class UploadStatus(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('UploadId', None)
+        return self.properties.get("UploadId", None)
 
     @property
     def property_ref_name(self):

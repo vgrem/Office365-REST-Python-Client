@@ -1,5 +1,7 @@
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.ui.applicationpages.peoplepicker.query_settings import PeoplePickerQuerySettings
+from office365.sharepoint.ui.applicationpages.peoplepicker.query_settings import (
+    PeoplePickerQuerySettings,
+)
 
 
 class PickerSettings(BaseEntity):

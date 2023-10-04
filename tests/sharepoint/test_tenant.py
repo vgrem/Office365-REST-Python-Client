@@ -3,15 +3,26 @@ from unittest import TestCase
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
-from office365.sharepoint.tenant.administration.settings_service import TenantAdminSettingsService
-from office365.sharepoint.tenant.administration.sharing_capabilities import SharingCapabilities
+from office365.sharepoint.tenant.administration.settings_service import (
+    TenantAdminSettingsService,
+)
+from office365.sharepoint.tenant.administration.sharing_capabilities import (
+    SharingCapabilities,
+)
 from office365.sharepoint.tenant.administration.sites.properties import SiteProperties
-from office365.sharepoint.tenant.administration.sites.properties_collection import SitePropertiesCollection
+from office365.sharepoint.tenant.administration.sites.properties_collection import (
+    SitePropertiesCollection,
+)
 from office365.sharepoint.tenant.administration.tenant import Tenant
 from office365.sharepoint.tenant.cdn_api import TenantCdnApi
 from office365.sharepoint.tenant.management.office365_tenant import Office365Tenant
 from office365.sharepoint.tenant.settings import TenantSettings
-from tests import test_site_url, test_admin_site_url, test_team_site_url, test_admin_credentials
+from tests import (
+    test_admin_credentials,
+    test_admin_site_url,
+    test_site_url,
+    test_team_site_url,
+)
 
 
 class TestTenant(TestCase):
@@ -19,7 +30,9 @@ class TestTenant(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        client = ClientContext(test_admin_site_url).with_credentials(test_admin_credentials)
+        client = ClientContext(test_admin_site_url).with_credentials(
+            test_admin_credentials
+        )
         cls.tenant = Tenant(client)
         cls.client = client
 
@@ -49,12 +62,16 @@ class TestTenant(TestCase):
         self.assertIsNotNone(result.value)
 
     def test6_list_sites(self):
-        sites = self.tenant.get_site_properties_from_sharepoint_by_filters().execute_query()
+        sites = (
+            self.tenant.get_site_properties_from_sharepoint_by_filters().execute_query()
+        )
         self.assertIsInstance(sites, SitePropertiesCollection)
 
     def test7_get_site_secondary_administrators(self):
         target_site = self.client.site.select(["Id"]).get().execute_query()
-        result = self.tenant.get_site_secondary_administrators(target_site.id).execute_query()
+        result = self.tenant.get_site_secondary_administrators(
+            target_site.id
+        ).execute_query()
         self.assertIsNotNone(result.value)
 
     # def test8_set_site_secondary_administrators(self):
@@ -67,9 +84,9 @@ class TestTenant(TestCase):
 
     def test9_create_site(self):
         pass
-        #current_user = self.client.web.currentUser
-        #self.client.load(current_user)
-        #self.client.execute_query()
+        # current_user = self.client.web.currentUser
+        # self.client.load(current_user)
+        # self.client.execute_query()
 
     #    props = SiteCreationProperties(self.__class__.target_site_url, current_user.properties['UserPrincipalName'])
     #    site_props = self.tenant.ensure_site(props)
@@ -77,18 +94,27 @@ class TestTenant(TestCase):
     #    self.assertIsNotNone(site_props)
 
     def test_10_get_site_by_url(self):
-        site_props = self.tenant.get_site_properties_by_url(test_site_url, True).execute_query()
+        site_props = self.tenant.get_site_properties_by_url(
+            test_site_url, True
+        ).execute_query()
         self.assertIsNotNone(site_props.url)
-        #self.assertIsNotNone(site_props.resource_path)
+        # self.assertIsNotNone(site_props.resource_path)
         self.__class__.target_site_props = site_props
 
     def test_11_update_site(self):
         site_props_to_update = self.__class__.target_site_props
-        site_props_to_update.set_property('SharingCapability', SharingCapabilities.ExternalUserAndGuestSharing)
+        site_props_to_update.set_property(
+            "SharingCapability", SharingCapabilities.ExternalUserAndGuestSharing
+        )
         site_props_to_update.update().execute_query()
 
-        updated_site_props = self.tenant.get_site_properties_by_url(test_site_url, True).execute_query()
-        self.assertTrue(updated_site_props.sharing_capability == SharingCapabilities.ExternalUserAndGuestSharing)
+        updated_site_props = self.tenant.get_site_properties_by_url(
+            test_site_url, True
+        ).execute_query()
+        self.assertTrue(
+            updated_site_props.sharing_capability
+            == SharingCapabilities.ExternalUserAndGuestSharing
+        )
 
     #    self.assertTrue(site_props_to_update.properties['Status'], 'Active')
 
@@ -134,7 +160,7 @@ class TestTenant(TestCase):
         cdn_api = TenantCdnApi(self.client).get().execute_query()
         self.assertIsNotNone(cdn_api.resource_path)
 
-    #def test_21_get_onedrive_site_sharing_insights(self):
+    # def test_21_get_onedrive_site_sharing_insights(self):
     #    result = self.tenant.get_onedrive_site_sharing_insights(1).execute_query()
     #    self.assertIsNotNone(result.value)
 

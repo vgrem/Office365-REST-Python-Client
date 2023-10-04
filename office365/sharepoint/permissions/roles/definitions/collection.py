@@ -2,15 +2,19 @@ from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.permissions.roles.definitions.creation_information import RoleDefinitionCreationInformation
+from office365.sharepoint.permissions.roles.definitions.creation_information import (
+    RoleDefinitionCreationInformation,
+)
 from office365.sharepoint.permissions.roles.definitions.definition import RoleDefinition
 
 
 class RoleDefinitionCollection(BaseEntityCollection):
-    """Represents the collection of role definitions that are available within the site """
+    """Represents the collection of role definitions that are available within the site"""
 
     def __init__(self, context, resource_path=None):
-        super(RoleDefinitionCollection, self).__init__(context, RoleDefinition, resource_path)
+        super(RoleDefinitionCollection, self).__init__(
+            context, RoleDefinition, resource_path
+        )
 
     def add(self, base_permissions, name, description=None, order=None):
         """
@@ -24,7 +28,9 @@ class RoleDefinitionCollection(BaseEntityCollection):
         """
         return_type = RoleDefinition(self.context)
         self.add_child(return_type)
-        payload = RoleDefinitionCreationInformation(base_permissions, name, description, order)
+        payload = RoleDefinitionCreationInformation(
+            base_permissions, name, description, order
+        )
         qry = CreateEntityQuery(self, payload, return_type)
         self.context.add_query(qry)
         return return_type
@@ -51,7 +57,9 @@ class RoleDefinitionCollection(BaseEntityCollection):
 
         :param str name: Specifies name of role definition.
         """
-        return RoleDefinition(self.context, ServiceOperationPath("GetByName", [name], self.resource_path))
+        return RoleDefinition(
+            self.context, ServiceOperationPath("GetByName", [name], self.resource_path)
+        )
 
     def get_by_id(self, _id):
         """
@@ -61,11 +69,16 @@ class RoleDefinitionCollection(BaseEntityCollection):
            correspond to the index of the role definition within the collection, but refers to the value of the
            Id property of the role definition.
         """
-        return RoleDefinition(self.context, ServiceOperationPath("GetById", [_id], self.resource_path))
+        return RoleDefinition(
+            self.context, ServiceOperationPath("GetById", [_id], self.resource_path)
+        )
 
     def get_by_type(self, role_type):
         """Returns role definition of the specified type from the collection.
 
         :param int role_type: Specifies the role type. Role type MUST NOT be None.
         """
-        return RoleDefinition(self.context, ServiceOperationPath("GetByType", [role_type], self.resource_path))
+        return RoleDefinition(
+            self.context,
+            ServiceOperationPath("GetByType", [role_type], self.resource_path),
+        )

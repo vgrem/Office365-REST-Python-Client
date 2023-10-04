@@ -13,7 +13,7 @@ class FieldMultiChoice(Field):
 
         :rtype: bool or None
         """
-        return self.properties.get('FillInChoice', None)
+        return self.properties.get("FillInChoice", None)
 
     @property
     def mappings(self):
@@ -22,11 +22,11 @@ class FieldMultiChoice(Field):
 
         :rtype: str or None
         """
-        return self.properties.get('Mappings', None)
+        return self.properties.get("Mappings", None)
 
     @property
     def choices(self):
         """
         Specifies values that are available for selection in the field
         """
-        return self.properties.get('Choices', StringCollection())
+        return self.properties.get("Choices", StringCollection())

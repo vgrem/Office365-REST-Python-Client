@@ -3,7 +3,7 @@ import sys
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.fields.lookup_value import FieldLookupValue
 from office365.sharepoint.fields.user_value import FieldUserValue
-from tests import test_team_site_url, test_client_credentials
+from tests import test_client_credentials, test_team_site_url
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 
@@ -20,5 +20,3 @@ me = ctx.web.current_user
 # items[0].set_property("AssignedTo", FieldUserValue(me.id)).update().execute_query()
 # items[0].set_property("AssignedTo", FieldUserValue.from_user(me)).update().execute_query()
 print("Item has been updated")
-
-

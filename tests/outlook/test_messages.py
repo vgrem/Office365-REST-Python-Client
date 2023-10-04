@@ -12,8 +12,7 @@ class TestGraphMail(GraphTestCase):
 
     def test2_create_draft_message(self):
         draft_message = self.client.me.messages.add(
-            subject="Meet for lunch?",
-            body="The new cafeteria is open."
+            subject="Meet for lunch?", body="The new cafeteria is open."
         ).execute_query()
         self.assertIsNotNone(draft_message.id)
         self.__class__.target_message = draft_message
@@ -26,7 +25,7 @@ class TestGraphMail(GraphTestCase):
         message.update()
         message.send().execute_query()
 
-    #def test4_create_reply(self):
+    # def test4_create_reply(self):
     #    message = self.__class__.target_message.create_reply().execute_query()
     #    self.assertIsNotNone(message.resource_path)
 
@@ -53,8 +52,7 @@ class TestGraphMail(GraphTestCase):
             io.BytesIO(b"This is some file content").read()
         ).decode()
         draft = (
-            self.client.me
-            .messages.add(
+            self.client.me.messages.add(
                 subject="Check out this attachment", body="The new cafeteria is open."
             )
             .add_file_attachment("test.txt", "Hello World!")
@@ -62,12 +60,7 @@ class TestGraphMail(GraphTestCase):
             .execute_query()
         )
         assert (
-            len(
-                self.client.me
-                .messages[draft.id]
-                .attachments.get()
-                .execute_query()
-            )
+            len(self.client.me.messages[draft.id].attachments.get().execute_query())
             == 2
         )
         draft.delete_object().execute_query()

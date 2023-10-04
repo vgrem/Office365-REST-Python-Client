@@ -24,8 +24,8 @@ class Conversation(Entity):
 
     @property
     def last_delivered_datetime(self):
-        """The Timestamp type represents date and time information using ISO 8601 format and is always in UTC time. """
-        return self.properties.get('lastDeliveredDateTime', datetime.datetime.min)
+        """The Timestamp type represents date and time information using ISO 8601 format and is always in UTC time."""
+        return self.properties.get("lastDeliveredDateTime", datetime.datetime.min)
 
     @property
     def preview(self):
@@ -34,7 +34,7 @@ class Conversation(Entity):
         Supports $filter (eq, ne, le, ge).
         :rtype: str or None
         """
-        return self.properties.get('preview', None)
+        return self.properties.get("preview", None)
 
     @property
     def topic(self):
@@ -43,7 +43,7 @@ class Conversation(Entity):
         updated.
         :rtype: str or None
         """
-        return self.properties.get('topic', None)
+        return self.properties.get("topic", None)
 
     @property
     def unique_senders(self):
@@ -51,19 +51,22 @@ class Conversation(Entity):
         All the users that sent a message to this Conversation.
         :rtype: str or None
         """
-        return self.properties.get('uniqueSenders', StringCollection())
+        return self.properties.get("uniqueSenders", StringCollection())
 
     @property
     def threads(self):
         """A collection of all the conversation threads in the conversation."""
-        return self.properties.get('threads',
-                                   EntityCollection(self.context, ConversationThread,
-                                                    ResourcePath("threads", self.resource_path)))
+        return self.properties.get(
+            "threads",
+            EntityCollection(
+                self.context,
+                ConversationThread,
+                ResourcePath("threads", self.resource_path),
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
-            property_mapping = {
-                "lastDeliveredDateTime": self.last_delivered_datetime
-            }
+            property_mapping = {"lastDeliveredDateTime": self.last_delivered_datetime}
             default_value = property_mapping.get(name, None)
         return super(Conversation, self).get_property(name, default_value)

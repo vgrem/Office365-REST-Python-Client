@@ -15,7 +15,3 @@ except ClientRequestException as e:
         print("Folder '{0}' not found".format(folder_path))
     else:
         raise ValueError(e.response.text)
-
-
-
-

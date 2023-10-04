@@ -8,9 +8,9 @@ class ConversationMember(Entity):
     @property
     def display_name(self):
         """The display name of the user."""
-        return self.properties.get('displayName', None)
+        return self.properties.get("displayName", None)
 
     @property
     def roles(self):
         """The roles for that user."""
-        return self.properties.get('roles', StringCollection())
+        return self.properties.get("roles", StringCollection())

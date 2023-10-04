@@ -24,4 +24,3 @@ class ItemPreviewInfo(ClientValue):
         self.getUrl = get_url
         self.postParameters = post_parameters
         self.postUrl = post_url
-

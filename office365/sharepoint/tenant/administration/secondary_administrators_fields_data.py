@@ -3,7 +3,6 @@ from office365.runtime.types.collections import StringCollection
 
 
 class SecondaryAdministratorsFieldsData(ClientValue):
-
     def __init__(self, site_id=None, emails=None, names=None):
         """
         :type emails: List[str] or None

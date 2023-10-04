@@ -7,7 +7,9 @@ class TeamsTabConfiguration(ClientValue):
     In addition to the properties below, some tab provider applications specify additional custom properties.
     """
 
-    def __init__(self, content_url=None, entity_id=None, remove_url=None, website_url=None):
+    def __init__(
+        self, content_url=None, entity_id=None, remove_url=None, website_url=None
+    ):
         """
         :param str content_url: Url used for rendering tab contents in Teams.
         :param str entity_id: Identifier for the entity hosted by the tab provider.

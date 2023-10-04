@@ -2,8 +2,9 @@ from office365.runtime.client_value import ClientValue
 
 
 class SearchHit(ClientValue):
-
-    def __init__(self, content_source=None, summary=None, resource=None, result_template_id=None):
+    def __init__(
+        self, content_source=None, summary=None, resource=None, result_template_id=None
+    ):
         """
         Represents a single result within the list of search results.
         :param str content_source:

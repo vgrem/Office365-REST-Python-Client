@@ -5,8 +5,13 @@ from office365.runtime.client_value import ClientValue
 class FollowupFlag(ClientValue):
     """Allows setting a flag in an item for the user to follow up on later."""
 
-    def __init__(self, completed_datetime=DateTimeTimeZone(), due_datetime=DateTimeTimeZone(),
-                 flag_status=None, start_datetime=DateTimeTimeZone()):
+    def __init__(
+        self,
+        completed_datetime=DateTimeTimeZone(),
+        due_datetime=DateTimeTimeZone(),
+        flag_status=None,
+        start_datetime=DateTimeTimeZone(),
+    ):
         """
         :param DateTimeTimeZone completed_datetime: The date and time that the follow-up was finished.
         :param DateTimeTimeZone due_datetime: The date and time that the follow up is to be finished.

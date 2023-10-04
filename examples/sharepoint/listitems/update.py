@@ -3,7 +3,7 @@ from random import randint
 
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.taxonomy.field_value import TaxonomyFieldValue
-from tests import test_team_site_url, test_client_credentials
+from tests import test_client_credentials, test_team_site_url
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 
@@ -18,5 +18,3 @@ task_prefix = str(randint(0, 10000))
 # item_to_update.set_property("Country", tax_field_value).update().execute_query()
 item_to_update.set_property("Title", f"Task {task_prefix}").update().execute_query()
 print("Item has been updated")
-
-

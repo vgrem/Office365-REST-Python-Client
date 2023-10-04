@@ -14,4 +14,4 @@ class IdentityProviderBase(Entity):
 
         :rtype: str or None
         """
-        return self.properties.get('displayName', None)
+        return self.properties.get("displayName", None)

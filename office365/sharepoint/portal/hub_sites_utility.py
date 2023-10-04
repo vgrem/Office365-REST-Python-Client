@@ -1,7 +1,9 @@
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.tenant.administration.hubsites.collection import HubSiteCollection
+from office365.sharepoint.tenant.administration.hubsites.collection import (
+    HubSiteCollection,
+)
 
 
 class SPHubSitesUtility(BaseEntity):
@@ -11,7 +13,9 @@ class SPHubSitesUtility(BaseEntity):
 
     def __init__(self, context, resource_path=None):
         if resource_path is None:
-            resource_path = ResourcePath("Microsoft.SharePoint.Portal.SPHubSitesUtility")
+            resource_path = ResourcePath(
+                "Microsoft.SharePoint.Portal.SPHubSitesUtility"
+            )
         super(SPHubSitesUtility, self).__init__(context, resource_path)
 
     def get_hub_sites(self):

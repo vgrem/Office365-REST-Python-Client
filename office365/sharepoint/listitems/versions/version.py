@@ -36,20 +36,31 @@ class ListItemVersion(BaseEntity):
     def created_by(self):
         """Gets the user that created the item version."""
         from office365.sharepoint.principal.users.user import User
-        return self.properties.get("CreatedBy", User(self.context, ResourcePath("CreatedBy", self.resource_path)))
+
+        return self.properties.get(
+            "CreatedBy",
+            User(self.context, ResourcePath("CreatedBy", self.resource_path)),
+        )
 
     @property
     def fields(self):
         """Gets the collection of fields that are used in the list that contains the item version."""
         from office365.sharepoint.fields.collection import FieldCollection
-        return self.properties.get("Fields", FieldCollection(self.context, ResourcePath("Fields", self.resource_path)))
+
+        return self.properties.get(
+            "Fields",
+            FieldCollection(self.context, ResourcePath("Fields", self.resource_path)),
+        )
 
     @property
     def file_version(self):
         """"""
         from office365.sharepoint.files.versions.version import FileVersion
-        return self.properties.get("FileVersion",
-                                   FileVersion(self.context, ResourcePath("FileVersion", self.resource_path)))
+
+        return self.properties.get(
+            "FileVersion",
+            FileVersion(self.context, ResourcePath("FileVersion", self.resource_path)),
+        )
 
     @property
     def property_ref_name(self):
@@ -66,7 +77,7 @@ class ListItemVersion(BaseEntity):
         if default_value is None:
             property_mapping = {
                 "CreatedBy": self.created_by,
-                "FileVersion": self.file_version
+                "FileVersion": self.file_version,
             }
             default_value = property_mapping.get(name, None)
         return super(ListItemVersion, self).get_property(name, default_value)
@@ -74,5 +85,7 @@ class ListItemVersion(BaseEntity):
     def set_property(self, name, value, persist_changes=True):
         if self._resource_path is None:
             if name == "VersionId":
-                self._resource_path = self.parent_collection.get_by_id(value).resource_path
+                self._resource_path = self.parent_collection.get_by_id(
+                    value
+                ).resource_path
         return super(ListItemVersion, self).set_property(name, value, persist_changes)

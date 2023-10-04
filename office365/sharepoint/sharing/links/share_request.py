@@ -4,8 +4,14 @@ from office365.runtime.client_value import ClientValue
 class ShareLinkRequest(ClientValue):
     """Represents a request for the retrieval or creation of a tokenized sharing link."""
 
-    def __init__(self, link_kind=None, expiration=None, people_picker_input=None, settings=None,
-                 create_link=True):
+    def __init__(
+        self,
+        link_kind=None,
+        expiration=None,
+        people_picker_input=None,
+        settings=None,
+        create_link=True,
+    ):
         """
         :param int or None link_kind: The kind of the tokenized sharing link to be created/updated or retrieved.
         :param datetime or None expiration: A date/time string for which the format conforms to the ISO 8601:2004(E)

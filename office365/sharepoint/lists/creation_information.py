@@ -4,9 +4,18 @@ from office365.runtime.client_value import ClientValue
 class ListCreationInformation(ClientValue):
     """Represents metadata about list creation."""
 
-    def __init__(self, title=None, description=None, base_template=None, allow_content_types=False,
-                 custom_schema_xml=None, document_template_type=None, quick_launch_option=None,
-                 template_feature_id=None, template_type=None):
+    def __init__(
+        self,
+        title=None,
+        description=None,
+        base_template=None,
+        allow_content_types=False,
+        custom_schema_xml=None,
+        document_template_type=None,
+        quick_launch_option=None,
+        template_feature_id=None,
+        template_type=None,
+    ):
         """
         :param int or None base_template:
         :param bool allow_content_types:

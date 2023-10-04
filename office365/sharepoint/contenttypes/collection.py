@@ -1,6 +1,6 @@
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.contenttypes.content_type import ContentType
 from office365.sharepoint.contenttypes.entity_data import ContentTypeEntityData
@@ -10,7 +10,9 @@ class ContentTypeCollection(BaseEntityCollection):
     """Content Type resource collection"""
 
     def __init__(self, context, resource_path=None, parent=None):
-        super(ContentTypeCollection, self).__init__(context, ContentType, resource_path, parent)
+        super(ContentTypeCollection, self).__init__(
+            context, ContentType, resource_path, parent
+        )
 
     def get_by_name(self, name):
         """
@@ -28,7 +30,10 @@ class ContentTypeCollection(BaseEntityCollection):
 
         :param str content_type_id: A hexadecimal value representing the identifier of a content type.
         """
-        return ContentType(self.context, ServiceOperationPath("GetById", [content_type_id], self.resource_path))
+        return ContentType(
+            self.context,
+            ServiceOperationPath("GetById", [content_type_id], self.resource_path),
+        )
 
     def add(self, content_type_info):
         """Adds a new content type to the collection and returns a reference to the added SP.ContentType.
@@ -57,20 +62,27 @@ class ContentTypeCollection(BaseEntityCollection):
         :param str group: Specifies the group of the content type
         :param str or ContentType parent_content_type: Specifies the parent content type (string identifier or object)
         """
+
         def _create_and_add_query(parent_content_type_id):
             """
             :type parent_content_type_id: str
             """
-            parameters = ContentTypeEntityData(name, description, group, parent_content_type_id)
+            parameters = ContentTypeEntityData(
+                name, description, group, parent_content_type_id
+            )
             payload = {"parameters": parameters}
-            qry = ServiceOperationQuery(self, "Create", None, payload, None, return_type)
+            qry = ServiceOperationQuery(
+                self, "Create", None, payload, None, return_type
+            )
             self.context.add_query(qry)
 
         return_type = ContentType(self.context)
         self.add_child(return_type)
         if isinstance(parent_content_type, ContentType):
+
             def _ct_loaded():
                 _create_and_add_query(parent_content_type.string_id)
+
             parent_content_type.ensure_property("StringId", _ct_loaded)
         else:
             _create_and_add_query(parent_content_type)
@@ -84,6 +96,8 @@ class ContentTypeCollection(BaseEntityCollection):
         """
         return_type = ContentType(self.context)
         self.add_child(return_type)
-        qry = ServiceOperationQuery(self, "AddAvailableContentType", [content_type_id], None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "AddAvailableContentType", [content_type_id], None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type

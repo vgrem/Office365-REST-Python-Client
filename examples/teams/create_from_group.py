@@ -16,7 +16,9 @@ def print_failure(retry_number, ex):
 client = GraphClient(acquire_token_by_username_password)
 group_name = create_unique_name("Flight")
 group = client.groups.create_m365_group(group_name)
-team = group.add_team().execute_query_retry(max_retry=10, failure_callback=print_failure)
+team = group.add_team().execute_query_retry(
+    max_retry=10, failure_callback=print_failure
+)
 print("Team has been created:  {0}".format(team.web_url))
 
 # clean up resources

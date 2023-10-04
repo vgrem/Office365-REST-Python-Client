@@ -1,4 +1,6 @@
-from office365.directory.authentication.strength_usage import AuthenticationStrengthUsage
+from office365.directory.authentication.strength_usage import (
+    AuthenticationStrengthUsage,
+)
 from office365.entity import Entity
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.function import FunctionQuery

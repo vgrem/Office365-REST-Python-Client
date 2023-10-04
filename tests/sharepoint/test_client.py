@@ -5,18 +5,25 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.odata.query_options import QueryOptions
 from office365.runtime.odata.type import ODataType
-from office365.runtime.types.collections import StringCollection, GuidCollection
+from office365.runtime.types.collections import GuidCollection, StringCollection
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.principal.users.id_info import UserIdInfo
-from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import \
-    SecondaryAdministratorsFieldsData
+from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import (
+    SecondaryAdministratorsFieldsData,
+)
 from office365.sharepoint.webs.web import Web
-from tests import test_site_url, test_client_credentials, test_user_credentials, settings, create_unique_name, \
-    create_unique_file_name, test_team_site_url
+from tests import (
+    create_unique_file_name,
+    create_unique_name,
+    settings,
+    test_client_credentials,
+    test_site_url,
+    test_team_site_url,
+    test_user_credentials,
+)
 
 
 class TestSharePointClient(TestCase):
-
     def test1_connect_with_app_principal(self):
         ctx = ClientContext(test_site_url).with_credentials(test_client_credentials)
         result = Web.get_context_web_information(ctx).execute_query()
@@ -24,8 +31,10 @@ class TestSharePointClient(TestCase):
 
     def test2_connect_with_app_principal_alt(self):
         context_auth = AuthenticationContext(url=test_site_url)
-        context_auth.acquire_token_for_app(client_id=settings.get('client_credentials', 'client_id'),
-                                           client_secret=settings.get('client_credentials', 'client_secret'))
+        context_auth.acquire_token_for_app(
+            client_id=settings.get("client_credentials", "client_id"),
+            client_secret=settings.get("client_credentials", "client_secret"),
+        )
         ctx = ClientContext(test_site_url, context_auth)
         result = Web.get_context_web_information(ctx).execute_query()
         self.assertIsNotNone(result.value.WebFullUrl)
@@ -76,18 +85,26 @@ class TestSharePointClient(TestCase):
         client.execute_batch()
 
         updated_web = client.web.get().execute_query()
-        self.assertEqual(updated_web.properties['Title'], new_web_title)
+        self.assertEqual(updated_web.properties["Title"], new_web_title)
 
     def test_11_execute_get_and_update_batch_request(self):
         page_url = "/sites/team/SitePages/Home.aspx"
-        client = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
-        list_item = client.web.get_file_by_server_relative_url(page_url).listItemAllFields
+        client = ClientContext(test_team_site_url).with_credentials(
+            test_user_credentials
+        )
+        list_item = client.web.get_file_by_server_relative_url(
+            page_url
+        ).listItemAllFields
         new_title = create_unique_name("Page")
         list_item.set_property("Title", new_title).update()
         client.execute_batch()
 
-        updated_list_item = client.web.get_file_by_server_relative_url(page_url).listItemAllFields.get().execute_query()
-        self.assertEqual(updated_list_item.properties['Title'], new_title)
+        updated_list_item = (
+            client.web.get_file_by_server_relative_url(page_url)
+            .listItemAllFields.get()
+            .execute_query()
+        )
+        self.assertEqual(updated_list_item.properties["Title"], new_title)
 
     def test_12_create_and_delete_batch_request(self):
         pass
@@ -98,7 +115,9 @@ class TestSharePointClient(TestCase):
         list_pages = client.web.lists.get_by_title("Documents")
         files = list_pages.root_folder.files.get().execute_query()
         files_count_before = len(files)
-        new_file = list_pages.root_folder.upload_file(file_name, "-some content goes here-").execute_query()
+        new_file = list_pages.root_folder.upload_file(
+            file_name, "-some content goes here-"
+        ).execute_query()
         self.assertTrue(new_file.name, file_name)
 
         new_file.delete_object()
@@ -112,8 +131,10 @@ class TestSharePointClient(TestCase):
         self.assertEqual(guid_coll.entity_type_name, "Collection(Edm.Guid)")
 
         custom_type_name = ODataType.resolve_type(SecondaryAdministratorsFieldsData)
-        self.assertEqual(custom_type_name,
-                         "Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsFieldsData")
+        self.assertEqual(
+            custom_type_name,
+            "Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsFieldsData",
+        )
 
         str_type_name = ODataType.resolve_type(StringCollection)
         self.assertEqual(str_type_name, "Collection(Edm.String)")
@@ -122,8 +143,10 @@ class TestSharePointClient(TestCase):
         self.assertEqual(str_col.entity_type_name, "Collection(Edm.String)")
 
         type_item = SecondaryAdministratorsFieldsData()
-        self.assertEqual(type_item.entity_type_name,
-                         "Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsFieldsData")
+        self.assertEqual(
+            type_item.entity_type_name,
+            "Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsFieldsData",
+        )
 
         type_col = ClientValueCollection(SecondaryAdministratorsFieldsData)
         expected_type = "Collection(Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsFieldsData)"
@@ -142,6 +165,7 @@ class TestSharePointClient(TestCase):
 
         def _owner_loaded():
             self.assertIsNotNone(site.owner.id)
+
         site.ensure_property("Owner", _owner_loaded).get()
         lib = client.web.default_document_library().get()
         client.execute_query()

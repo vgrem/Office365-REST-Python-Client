@@ -4,9 +4,10 @@ from office365.outlook.calendar.permissions.permission import CalendarPermission
 
 
 class CalendarPermissionCollection(EntityCollection):
-
     def __init__(self, context, resource_path=None):
-        super(CalendarPermissionCollection, self).__init__(context, CalendarPermission, resource_path)
+        super(CalendarPermissionCollection, self).__init__(
+            context, CalendarPermission, resource_path
+        )
 
     def add(self, email_address, role):
         """
@@ -17,8 +18,5 @@ class CalendarPermissionCollection(EntityCollection):
         """
         if not isinstance(email_address, EmailAddress):
             email_address = EmailAddress(email_address)
-        props = {
-            "emailAddress": email_address,
-            "role": str(role)
-        }
+        props = {"emailAddress": email_address, "role": str(role)}
         return super(CalendarPermissionCollection, self).add(**props)

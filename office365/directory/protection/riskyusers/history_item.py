@@ -8,8 +8,7 @@ class RiskyUserHistoryItem(RiskyUser):
 
     @property
     def activity(self):
-        """The activity related to user risk level change.
-        """
+        """The activity related to user risk level change."""
         return self.properties.get("activity", RiskUserActivity())
 
     @property

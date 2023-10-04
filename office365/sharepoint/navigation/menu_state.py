@@ -7,7 +7,14 @@ from office365.sharepoint.navigation.menu_node import MenuNode
 class MenuState(ClientValue):
     """A menu tree which can be shown in the Quick Launch of a site."""
 
-    def __init__(self, audience_ids=None, friendly_url_prefix=None, nodes=None, simple_url=None, site_prefix=None):
+    def __init__(
+        self,
+        audience_ids=None,
+        friendly_url_prefix=None,
+        nodes=None,
+        simple_url=None,
+        site_prefix=None,
+    ):
         """
         :param list[uuid] audience_ids:
         :param str friendly_url_prefix: Specifies the site collection relative URL for the root node of the menu tree.

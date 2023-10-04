@@ -15,7 +15,7 @@ class PersonProperties(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('AccountName', None)
+        return self.properties.get("AccountName", None)
 
     @property
     def email(self):
@@ -58,7 +58,7 @@ class PersonProperties(BaseEntity):
         The ExtendedManagers property specifies an array of strings that specify the account names of
         a person's managers.
         """
-        return self.properties.get('ExtendedManagers', StringCollection())
+        return self.properties.get("ExtendedManagers", StringCollection())
 
     @property
     def extended_reports(self):
@@ -66,7 +66,7 @@ class PersonProperties(BaseEntity):
         The ExtendedReports properties specifies an array of strings that specify the account names of
         person's extended reports.
         """
-        return self.properties.get('ExtendedReports', StringCollection())
+        return self.properties.get("ExtendedReports", StringCollection())
 
     @property
     def picture_url(self):
@@ -75,7 +75,7 @@ class PersonProperties(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('PictureUrl', None)
+        return self.properties.get("PictureUrl", None)
 
     @property
     def user_url(self):
@@ -84,7 +84,7 @@ class PersonProperties(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('UserUrl', None)
+        return self.properties.get("UserUrl", None)
 
     @property
     def user_profile_properties(self):
@@ -99,7 +99,7 @@ class PersonProperties(BaseEntity):
         if default_value is None:
             property_mapping = {
                 "ExtendedManagers": self.extended_managers,
-                "ExtendedReports": self.extended_reports
+                "ExtendedReports": self.extended_reports,
             }
             default_value = property_mapping.get(name, None)
         return super(PersonProperties, self).get_property(name, default_value)

@@ -14,7 +14,9 @@ class SharedWithMeItems(BaseEntity):
         """
         binding_type = SharedWithMeItems(context)
         return_type = BaseEntityCollection(context, SharedWithMeDocument)
-        qry = ServiceOperationQuery(binding_type, "SharedWithMe", return_type=return_type, is_static=True)
+        qry = ServiceOperationQuery(
+            binding_type, "SharedWithMe", return_type=return_type, is_static=True
+        )
         context.add_query(qry)
         return return_type
 

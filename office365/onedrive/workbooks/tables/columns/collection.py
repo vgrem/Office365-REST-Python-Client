@@ -5,9 +5,10 @@ from office365.runtime.queries.function import FunctionQuery
 
 
 class WorkbookTableColumnCollection(EntityCollection):
-
     def __init__(self, context, resource_path=None):
-        super(WorkbookTableColumnCollection, self).__init__(context, WorkbookTableColumn, resource_path)
+        super(WorkbookTableColumnCollection, self).__init__(
+            context, WorkbookTableColumn, resource_path
+        )
 
     def add(self, index, name, values=None):
         """
@@ -19,7 +20,9 @@ class WorkbookTableColumnCollection(EntityCollection):
         :param list values: A 2-dimensional array of unformatted values of the table column.
         :param str name: Name
         """
-        return super(WorkbookTableColumnCollection, self).add(index=index, values=values, name=name)
+        return super(WorkbookTableColumnCollection, self).add(
+            index=index, values=values, name=name
+        )
 
     def count(self):
         """"""

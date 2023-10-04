@@ -1,6 +1,6 @@
 from office365.runtime.auth.token_response import TokenResponse
 from office365.sharepoint.client_context import ClientContext
-from tests import test_site_url, settings
+from tests import settings, test_site_url
 
 """
 Important: for Application authenticated against Azure AD blade, calling SharePoint v1 API endpoint when
@@ -20,14 +20,19 @@ https://docs.microsoft.com/en-us/answers/questions/131535/azure-app-cannot-acces
 
 
 def acquire_token():
-    authority_url = 'https://login.microsoftonline.com/{0}'.format(settings.get('default', 'tenant'))
+    authority_url = "https://login.microsoftonline.com/{0}".format(
+        settings.get("default", "tenant")
+    )
     import msal
+
     app = msal.ConfidentialClientApplication(
         authority=authority_url,
-        client_id=settings.get('client_credentials', 'client_id'),
-        client_credential=settings.get('client_credentials', 'client_secret')
+        client_id=settings.get("client_credentials", "client_id"),
+        client_credential=settings.get("client_credentials", "client_secret"),
     )
-    token_json = app.acquire_token_for_client(scopes=["https://mediadev8.sharepoint.com/.default"])
+    token_json = app.acquire_token_for_client(
+        scopes=["https://mediadev8.sharepoint.com/.default"]
+    )
     return TokenResponse.from_json(token_json)
 
 

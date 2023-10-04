@@ -1,9 +1,14 @@
-
-
 class ClientQuery(object):
     """Client query"""
 
-    def __init__(self, context, binding_type=None, parameters_type=None, parameters_name=None, return_type=None):
+    def __init__(
+        self,
+        context,
+        binding_type=None,
+        parameters_type=None,
+        parameters_name=None,
+        return_type=None,
+    ):
         """
         Generic query
 

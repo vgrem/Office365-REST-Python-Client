@@ -1,5 +1,6 @@
 class ODataV3MetadataLevel:
     """The amount of metadata information to serialize in an OData response."""
+
     def __init__(self):
         pass
 

@@ -1,10 +1,16 @@
 from office365.communications.calls.incoming_context import IncomingContext
-from office365.communications.calls.route import CallRoute
 from office365.communications.calls.participant import Participant
-from office365.communications.operations.cancel_media_processing import CancelMediaProcessingOperation
+from office365.communications.calls.route import CallRoute
+from office365.communications.operations.cancel_media_processing import (
+    CancelMediaProcessingOperation,
+)
 from office365.communications.operations.comms import CommsOperation
-from office365.communications.operations.unmute_participant import UnmuteParticipantOperation
-from office365.communications.operations.update_recording_status import UpdateRecordingStatusOperation
+from office365.communications.operations.unmute_participant import (
+    UnmuteParticipantOperation,
+)
+from office365.communications.operations.update_recording_status import (
+    UpdateRecordingStatusOperation,
+)
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -35,7 +41,9 @@ class Call(Entity):
         payload = {
             "clientContext": client_context,
         }
-        qry = ServiceOperationQuery(self, "cancelMediaProcessing", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "cancelMediaProcessing", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -55,10 +63,7 @@ class Call(Entity):
             later notifications. If this property has not been set, the bot's global callback URI will be used instead.
             This must be https.
         """
-        payload = {
-            "reason": reason,
-            "callbackUri": callback_uri
-        }
+        payload = {"reason": reason, "callbackUri": callback_uri}
         qry = ServiceOperationQuery(self, "reject", None, payload)
         self.context.add_query(qry)
         return self
@@ -78,11 +83,10 @@ class Call(Entity):
         :param str client_context: Unique client context string. Max limit is 256 chars.
         """
         return_type = UpdateRecordingStatusOperation(self.context)
-        payload = {
-            "status": status,
-            "clientContext": client_context
-        }
-        qry = ServiceOperationQuery(self, "updateRecordingStatus", None, payload, None, return_type)
+        payload = {"status": status, "clientContext": client_context}
+        qry = ServiceOperationQuery(
+            self, "updateRecordingStatus", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -96,9 +100,7 @@ class Call(Entity):
         :param str client_context: Unique Client Context string. Max limit is 256 chars.
         """
         return_type = UnmuteParticipantOperation(self.context)
-        payload = {
-            "clientContext": client_context
-        }
+        payload = {"clientContext": client_context}
         qry = ServiceOperationQuery(self, "unmute", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
@@ -123,15 +125,25 @@ class Call(Entity):
         """
         Participant collection
         """
-        return self.properties.get('participants',
-                                   EntityCollection(self.context, Participant,
-                                                    ResourcePath("participants", self.resource_path)))
+        return self.properties.get(
+            "participants",
+            EntityCollection(
+                self.context,
+                Participant,
+                ResourcePath("participants", self.resource_path),
+            ),
+        )
 
     @property
     def operations(self):
         """
         CommsOperation collection
         """
-        return self.properties.get('operations',
-                                   EntityCollection(self.context, CommsOperation,
-                                                    ResourcePath("operations", self.resource_path)))
+        return self.properties.get(
+            "operations",
+            EntityCollection(
+                self.context,
+                CommsOperation,
+                ResourcePath("operations", self.resource_path),
+            ),
+        )

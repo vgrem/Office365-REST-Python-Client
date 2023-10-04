@@ -3,7 +3,7 @@ Demonstrates how to delete a list item
 """
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.lists.template_type import ListTemplateType
-from tests import test_client_credentials, test_team_site_url, create_unique_name
+from tests import create_unique_name, test_client_credentials, test_team_site_url
 
 
 def create_tasks_list(client):
@@ -31,8 +31,3 @@ tasks_list.get_item_by_id(item_id).delete_object().execute_query()
 
 print("Cleaning up...")
 tasks_list.delete_object().execute_query()
-
-
-
-
-

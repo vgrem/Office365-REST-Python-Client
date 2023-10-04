@@ -16,4 +16,3 @@ class WorkbookTableRow(Entity):
         or a boolean. Cell that contain an error will return the error string.
         """
         return self.properties.get("values", None)
-

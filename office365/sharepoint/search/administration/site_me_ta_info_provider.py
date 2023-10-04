@@ -8,7 +8,9 @@ class SiteMeTAInfoProvider(BaseEntity):
 
     def get_azure_container_sas_token(self):
         return_type = ClientResult(self.context, str())
-        qry = ServiceOperationQuery(self, "GetAzureContainerSASToken", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetAzureContainerSASToken", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 

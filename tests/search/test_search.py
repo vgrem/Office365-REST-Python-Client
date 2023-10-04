@@ -3,7 +3,6 @@ from tests.graph_case import GraphTestCase
 
 
 class TestSearchOneDrive(GraphTestCase):
-
     @classmethod
     def setUpClass(cls):
         super(TestSearchOneDrive, cls).setUpClass()
@@ -13,14 +12,15 @@ class TestSearchOneDrive(GraphTestCase):
         pass
 
     def test1_search_files(self):
-        result = self.client.search.query("Guide.docx", entity_types=[EntityType.driveItem]).execute_query()
+        result = self.client.search.query(
+            "Guide.docx", entity_types=[EntityType.driveItem]
+        ).execute_query()
         self.assertIsNotNone(result.value)
 
     def test2_search_messages(self):
         result = self.client.search.query_messages("Jon Doe").execute_query()
         self.assertIsNotNone(result.value)
 
-    #def test3_search_events(self):
+    # def test3_search_events(self):
     #    result = self.client.search.query_events("Jon Doe").execute_query()
     #    self.assertIsNotNone(result.value)
-

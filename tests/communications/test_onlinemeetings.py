@@ -18,13 +18,17 @@ class TestOnlineMeetings(GraphTestCase):
         pass
 
     def test1_create_meeting(self):
-        meeting = self.client.me.online_meetings.create(subject="User Token Meeting").execute_query()
+        meeting = self.client.me.online_meetings.create(
+            subject="User Token Meeting"
+        ).execute_query()
         self.assertIsNotNone(meeting.resource_path)
         self.__class__.target_meeting = meeting
 
     def test2_get_meeting(self):
         meeting_id = self.__class__.target_meeting.id
-        existing_meeting = self.client.me.online_meetings[meeting_id].get().execute_query()
+        existing_meeting = (
+            self.client.me.online_meetings[meeting_id].get().execute_query()
+        )
         self.assertIsNotNone(existing_meeting.resource_path)
 
     def test3_update_meeting(self):

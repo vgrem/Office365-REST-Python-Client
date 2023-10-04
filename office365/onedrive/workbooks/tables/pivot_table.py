@@ -33,5 +33,10 @@ class WorkbookPivotTable(Entity):
     def worksheet(self):
         """The worksheet containing the current PivotTable"""
         from office365.onedrive.workbooks.worksheets.worksheet import WorkbookWorksheet
-        return self.properties.get('worksheet',
-                                   WorkbookWorksheet(self.context, ResourcePath("worksheet", self.resource_path)))
+
+        return self.properties.get(
+            "worksheet",
+            WorkbookWorksheet(
+                self.context, ResourcePath("worksheet", self.resource_path)
+            ),
+        )

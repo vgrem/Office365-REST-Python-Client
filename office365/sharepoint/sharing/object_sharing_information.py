@@ -4,8 +4,10 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.sharing.object_sharing_information_user import ObjectSharingInformationUser
 from office365.sharepoint.sharing.links.info import SharingLinkInfo
+from office365.sharepoint.sharing.object_sharing_information_user import (
+    ObjectSharingInformationUser,
+)
 
 
 class ObjectSharingInformation(BaseEntity):
@@ -19,11 +21,11 @@ class ObjectSharingInformation(BaseEntity):
         :param str doc_id: Identifies the document that will be analyzed from a sharing perspective.
         """
         binding_type = ObjectSharingInformation(context)
-        payload = {
-            "docId": doc_id
-        }
+        payload = {"docId": doc_id}
         return_type = ClientResult(context, int())
-        qry = ServiceOperationQuery(binding_type, "CanCurrentUserShare", None, payload, None, return_type, True)
+        qry = ServiceOperationQuery(
+            binding_type, "CanCurrentUserShare", None, payload, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
@@ -35,18 +37,30 @@ class ObjectSharingInformation(BaseEntity):
         :param str doc_id: Identifies the document that will be analyzed from a sharing perspective.
         """
         binding_type = ObjectSharingInformation(context)
-        payload = {
-            "docId": doc_id
-        }
+        payload = {"docId": doc_id}
         return_type = ClientResult(context)
-        qry = ServiceOperationQuery(binding_type, "CanCurrentUserShareRemote", None, payload, None, return_type, True)
+        qry = ServiceOperationQuery(
+            binding_type,
+            "CanCurrentUserShareRemote",
+            None,
+            payload,
+            None,
+            return_type,
+            True,
+        )
         context.add_query(qry)
         return return_type
 
     @staticmethod
-    def get_web_sharing_information(context, exclude_current_user=None, exclude_site_admin=None,
-                                    exclude_security_groups=None, retrieve_anonymous_links=None,
-                                    retrieve_user_info_details=None, check_for_access_requests=None):
+    def get_web_sharing_information(
+        context,
+        exclude_current_user=None,
+        exclude_site_admin=None,
+        exclude_security_groups=None,
+        retrieve_anonymous_links=None,
+        retrieve_user_info_details=None,
+        check_for_access_requests=None,
+    ):
         """
         Retrieves information about the sharing state for the current site. The current site is the site
         in the context of which this method is invoked.
@@ -73,24 +87,42 @@ class ObjectSharingInformation(BaseEntity):
             "excludeSecurityGroups": exclude_security_groups,
             "retrieveAnonymousLinks": retrieve_anonymous_links,
             "retrieveUserInfoDetails": retrieve_user_info_details,
-            "checkForAccessRequests": check_for_access_requests
+            "checkForAccessRequests": check_for_access_requests,
         }
-        qry = ServiceOperationQuery(return_type, "GetWebSharingInformation", None, payload, None, return_type, True)
+        qry = ServiceOperationQuery(
+            return_type,
+            "GetWebSharingInformation",
+            None,
+            payload,
+            None,
+            return_type,
+            True,
+        )
         context.add_query(qry)
         return return_type
 
     def get_shared_with_users(self):
         """Returns an array that contains the users with whom a securable object is shared."""
         return_type = BaseEntityCollection(self.context, ObjectSharingInformationUser)
-        qry = ServiceOperationQuery(self, "GetSharedWithUsers", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetSharedWithUsers", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
     @staticmethod
-    def get_list_item_sharing_information(context, list_id, item_id, exclude_current_user=True, exclude_site_admin=True,
-                                          exclude_security_groups=True, retrieve_anonymous_links=False,
-                                          retrieve_user_info_details=False, check_for_access_requests=False,
-                                          return_type=None):
+    def get_list_item_sharing_information(
+        context,
+        list_id,
+        item_id,
+        exclude_current_user=True,
+        exclude_site_admin=True,
+        exclude_security_groups=True,
+        retrieve_anonymous_links=False,
+        retrieve_user_info_details=False,
+        check_for_access_requests=False,
+        return_type=None,
+    ):
         """
         Retrieves information about the sharing state for a given list.
 
@@ -121,11 +153,18 @@ class ObjectSharingInformation(BaseEntity):
             "excludeSecurityGroups": exclude_security_groups,
             "retrieveAnonymousLinks": retrieve_anonymous_links,
             "retrieveUserInfoDetails": retrieve_user_info_details,
-            "checkForAccessRequests": check_for_access_requests
+            "checkForAccessRequests": check_for_access_requests,
         }
         if not return_type:
             return_type = binding_type
-        qry = ServiceOperationQuery(binding_type, "GetListItemSharingInformation", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            binding_type,
+            "GetListItemSharingInformation",
+            None,
+            payload,
+            None,
+            return_type,
+        )
         qry.static = True
         context.add_query(qry)
         return return_type
@@ -138,7 +177,7 @@ class ObjectSharingInformation(BaseEntity):
 
         :rtype: str
         """
-        return self.properties.get('AnonymousEditLink', None)
+        return self.properties.get("AnonymousEditLink", None)
 
     @property
     def anonymous_view_link(self):
@@ -148,7 +187,7 @@ class ObjectSharingInformation(BaseEntity):
 
         :rtype: str
         """
-        return self.properties.get('AnonymousViewLink', None)
+        return self.properties.get("AnonymousViewLink", None)
 
     @property
     def can_be_shared(self):
@@ -156,7 +195,7 @@ class ObjectSharingInformation(BaseEntity):
         Indicates whether the current securable object can be shared.
         :rtype: bool
         """
-        return self.properties.get('CanBeShared', None)
+        return self.properties.get("CanBeShared", None)
 
     @property
     def can_be_unshared(self):
@@ -164,7 +203,7 @@ class ObjectSharingInformation(BaseEntity):
         Indicates whether the current securable object can be unshared.
         :rtype: bool
         """
-        return self.properties.get('CanBeUnshared', None)
+        return self.properties.get("CanBeUnshared", None)
 
     @property
     def can_manage_permissions(self):
@@ -172,7 +211,7 @@ class ObjectSharingInformation(BaseEntity):
         Specifies whether the current user is allowed to change the permissions of the securable object.
         :rtype: bool
         """
-        return self.properties.get('CanManagePermissions', None)
+        return self.properties.get("CanManagePermissions", None)
 
     @property
     def has_pending_access_requests(self):
@@ -183,7 +222,7 @@ class ObjectSharingInformation(BaseEntity):
         access requests. If the current user does not have such permissions, this property will return false.
         :rtype: bool
         """
-        return self.properties.get('HasPendingAccessRequests', None)
+        return self.properties.get("HasPendingAccessRequests", None)
 
     @property
     def has_permission_levels(self):
@@ -192,20 +231,26 @@ class ObjectSharingInformation(BaseEntity):
         of the users who have access to the securable object.
         :rtype: bool
         """
-        return self.properties.get('HasPermissionLevels', None)
+        return self.properties.get("HasPermissionLevels", None)
 
     @property
     def sharing_links(self):
         """Indicates the collection of all available sharing links for the securable object."""
-        return self.properties.get('SharingLinks', ClientValueCollection(SharingLinkInfo))
+        return self.properties.get(
+            "SharingLinks", ClientValueCollection(SharingLinkInfo)
+        )
 
     @property
     def shared_with_users_collection(self):
         """A collection of shared with users."""
-        return self.properties.get('SharedWithUsersCollection',
-                                   BaseEntityCollection(self.context,
-                                                        ObjectSharingInformationUser,
-                                                        ResourcePath("SharedWithUsersCollection", self.resource_path)))
+        return self.properties.get(
+            "SharedWithUsersCollection",
+            BaseEntityCollection(
+                self.context,
+                ObjectSharingInformationUser,
+                ResourcePath("SharedWithUsersCollection", self.resource_path),
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if name == "SharedWithUsersCollection":

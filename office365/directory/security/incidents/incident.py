@@ -55,13 +55,15 @@ class Incident(Entity):
     @property
     def alerts(self):
         """The list of related alerts. Supports $expand."""
-        return self.properties.get('alerts',
-                                   EntityCollection(self.context, Alert, ResourcePath("alerts", self.resource_path)))
+        return self.properties.get(
+            "alerts",
+            EntityCollection(
+                self.context, Alert, ResourcePath("alerts", self.resource_path)
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
-            property_mapping = {
-                "createdDateTime": self.created_datetime
-            }
+            property_mapping = {"createdDateTime": self.created_datetime}
             default_value = property_mapping.get(name, None)
         return super(Incident, self).get_property(name, default_value)

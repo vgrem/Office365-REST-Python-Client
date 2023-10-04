@@ -1,6 +1,14 @@
 class QueryOptions(object):
-
-    def __init__(self, select=None, expand=None, filter_expr=None, order_by=None, top=None, skip=None, custom=None):
+    def __init__(
+        self,
+        select=None,
+        expand=None,
+        filter_expr=None,
+        order_by=None,
+        top=None,
+        skip=None,
+        custom=None,
+    ):
         """
         A query option is a set of query string parameters applied to a resource that can help control the amount
         of data being returned for the resource in the URL
@@ -47,7 +55,10 @@ class QueryOptions(object):
 
         for name in properties_to_include:
             from office365.runtime.client_object import ClientObject
-            from office365.runtime.client_object_collection import ClientObjectCollection
+            from office365.runtime.client_object_collection import (
+                ClientObjectCollection,
+            )
+
             if isinstance(client_object, ClientObjectCollection):
                 prop = client_object.create_typed_object().get_property(name)
             else:
@@ -82,7 +93,7 @@ class QueryOptions(object):
         """Convert query options to url
         :return: str
         """
-        return '&'.join(['$%s=%s' % (key, value) for (key, value) in self])
+        return "&".join(["$%s=%s" % (key, value) for (key, value) in self])
 
     def __iter__(self):
         for k, v in self.__dict__.items():

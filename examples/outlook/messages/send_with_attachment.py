@@ -11,5 +11,7 @@ client = GraphClient(acquire_token_by_username_password)
 client.me.send_mail(
     subject="Meet for lunch?",
     body="The new cafeteria is open.",
-    to_recipients=["fannyd@contoso.onmicrosoft.com"]
-).add_file_attachment("attachment.txt", "--Some content goes here--", "text/plain").execute_query()
+    to_recipients=["fannyd@contoso.onmicrosoft.com"],
+).add_file_attachment(
+    "attachment.txt", "--Some content goes here--", "text/plain"
+).execute_query()

@@ -22,10 +22,12 @@ class VariationsTranslationTimerJob(BaseEntity):
         payload = {
             "list": list_url,
             "itemIds": ClientValueCollection(int, item_ids),
-            "addressesToEmail": ClientValueCollection(str, addresses_to_email)
+            "addressesToEmail": ClientValueCollection(str, addresses_to_email),
         }
         binding_type = VariationsTranslationTimerJob(context)
-        qry = ServiceOperationQuery(binding_type, "ExportItems", None, payload, is_static=True)
+        qry = ServiceOperationQuery(
+            binding_type, "ExportItems", None, payload, is_static=True
+        )
         context.add_query(qry)
         return binding_type
 

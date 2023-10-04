@@ -15,13 +15,20 @@ class SharedWithMeItemCollection(BaseEntity):
         binding_type = SharedWithMeItemCollection(context)
         return_type = ClientResult(context, str())
         params = {"top": top}
-        qry = ServiceOperationQuery(binding_type, "GetSharedWithMeExternalItems", params,
-                                    return_type=return_type, is_static=True)
+        qry = ServiceOperationQuery(
+            binding_type,
+            "GetSharedWithMeExternalItems",
+            params,
+            return_type=return_type,
+            is_static=True,
+        )
         context.add_query(qry)
         return return_type
 
     @staticmethod
-    def get_shared_with_me_items(context, top, skip_token=None, include_sharing_history=None):
+    def get_shared_with_me_items(
+        context, top, skip_token=None, include_sharing_history=None
+    ):
         """
         :param office365.sharepoint.client_context.ClientContext context: Client context
         :param int top:
@@ -33,9 +40,15 @@ class SharedWithMeItemCollection(BaseEntity):
         params = {
             "top": top,
             "skiptoken": skip_token,
-            "includeSharingHistory": include_sharing_history
+            "includeSharingHistory": include_sharing_history,
         }
-        qry = ServiceOperationQuery(binding_type, "GetSharedWithMeItems", None, params,
-                                    return_type=return_type, is_static=True)
+        qry = ServiceOperationQuery(
+            binding_type,
+            "GetSharedWithMeItems",
+            None,
+            params,
+            return_type=return_type,
+            is_static=True,
+        )
         context.add_query(qry)
         return return_type

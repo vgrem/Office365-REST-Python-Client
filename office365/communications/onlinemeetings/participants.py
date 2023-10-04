@@ -1,4 +1,6 @@
-from office365.communications.onlinemeetings.participant_info import MeetingParticipantInfo
+from office365.communications.onlinemeetings.participant_info import (
+    MeetingParticipantInfo,
+)
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
 

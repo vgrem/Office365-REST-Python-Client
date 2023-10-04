@@ -15,7 +15,9 @@ to_folder = client.me.mail_folders[folder_name].get().execute_query()
 message = client.me.messages.add(
     subject="Meet for lunch?",
     body="The new cafeteria is open.",
-    to_recipients=["fannyd@contoso.onmicrosoft.com"]
+    to_recipients=["fannyd@contoso.onmicrosoft.com"],
 )
 message.move(to_folder.id).execute_query()
-print("Draft message is created && moved into {0} folder".format(to_folder.display_name))
+print(
+    "Draft message is created && moved into {0} folder".format(to_folder.display_name)
+)

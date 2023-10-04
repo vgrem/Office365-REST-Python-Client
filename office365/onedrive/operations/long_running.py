@@ -9,11 +9,11 @@ class LongRunningOperation(Entity):
         """URI of the resource that the operation is performed on.
         :rtype: str or None
         """
-        return self.properties.get('resourceLocation', None)
+        return self.properties.get("resourceLocation", None)
 
     @property
     def status_detail(self):
         """Details about the status of the operation.
         :rtype: str or None
         """
-        return self.properties.get('statusDetail', None)
+        return self.properties.get("statusDetail", None)

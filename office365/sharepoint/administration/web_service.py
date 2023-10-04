@@ -6,23 +6,29 @@ from office365.sharepoint.base_entity_collection import BaseEntityCollection
 
 
 class SPWebService(BaseEntity):
-
     @staticmethod
     def content_service(context):
         """
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
         """
         return_type = SPWebService(context)
-        qry = ServiceOperationQuery(return_type, "ContentService", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            return_type, "ContentService", None, None, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type
 
     @property
     def web_applications(self):
-        return self.properties.get('WebApplications',
-                                   BaseEntityCollection(self.context, WebApplication,
-                                                        ResourcePath("WebApplications", self.resource_path)))
+        return self.properties.get(
+            "WebApplications",
+            BaseEntityCollection(
+                self.context,
+                WebApplication,
+                ResourcePath("WebApplications", self.resource_path),
+            ),
+        )
 
     @property
     def entity_type_name(self):

@@ -8,7 +8,9 @@ class ListTemplateCollection(BaseEntityCollection):
 
     def __init__(self, context, resource_path=None):
         """Specifies a collection of list templates"""
-        super(ListTemplateCollection, self).__init__(context, ListTemplate, resource_path)
+        super(ListTemplateCollection, self).__init__(
+            context, ListTemplate, resource_path
+        )
 
     def get_by_name(self, name):
         """
@@ -16,5 +18,6 @@ class ListTemplateCollection(BaseEntityCollection):
 
         :param str name: The specified name.
         """
-        return ListTemplate(self.context,
-                            ServiceOperationPath("getByName", [name], self.resource_path))
+        return ListTemplate(
+            self.context, ServiceOperationPath("getByName", [name], self.resource_path)
+        )

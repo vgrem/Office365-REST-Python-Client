@@ -7,7 +7,9 @@ from office365.onedrive.workbooks.names.named_item import WorkbookNamedItem
 from office365.onedrive.workbooks.operations.workbook import WorkbookOperation
 from office365.onedrive.workbooks.session_info import WorkbookSessionInfo
 from office365.onedrive.workbooks.tables.collection import WorkbookTableCollection
-from office365.onedrive.workbooks.worksheets.collection import WorkbookWorksheetCollection
+from office365.onedrive.workbooks.worksheets.collection import (
+    WorkbookWorksheetCollection,
+)
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
@@ -40,7 +42,9 @@ class Workbook(Entity):
         """
         payload = {"persistChanges": persist_changes}
         return_type = ClientResult(self.context, WorkbookSessionInfo())
-        qry = ServiceOperationQuery(self, "createSession", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "createSession", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -80,46 +84,77 @@ class Workbook(Entity):
     @property
     def application(self):
         """"""
-        return self.properties.get('application',
-                                   WorkbookApplication(self.context, ResourcePath("application", self.resource_path)))
+        return self.properties.get(
+            "application",
+            WorkbookApplication(
+                self.context, ResourcePath("application", self.resource_path)
+            ),
+        )
 
     @property
     def comments(self):
         """"""
-        return self.properties.get('comments',
-                                   EntityCollection(self.context,
-                                                    WorkbookComment, ResourcePath("comments", self.resource_path)))
+        return self.properties.get(
+            "comments",
+            EntityCollection(
+                self.context,
+                WorkbookComment,
+                ResourcePath("comments", self.resource_path),
+            ),
+        )
 
     @property
     def functions(self):
         """"""
-        return self.properties.get('functions',
-                                   WorkbookFunctions(self.context, ResourcePath("functions", self.resource_path)))
+        return self.properties.get(
+            "functions",
+            WorkbookFunctions(
+                self.context, ResourcePath("functions", self.resource_path)
+            ),
+        )
 
     @property
     def tables(self):
         """Represents a collection of tables associated with the workbook. Read-only."""
-        return self.properties.get('tables',
-                                   WorkbookTableCollection(self.context, ResourcePath("tables", self.resource_path)))
+        return self.properties.get(
+            "tables",
+            WorkbookTableCollection(
+                self.context, ResourcePath("tables", self.resource_path)
+            ),
+        )
 
     @property
     def names(self):
         """Represents a collection of workbook scoped named items (named ranges and constants). Read-only."""
-        return self.properties.get('names',
-                                   EntityCollection(self.context, WorkbookNamedItem,
-                                                    ResourcePath("names", self.resource_path)))
+        return self.properties.get(
+            "names",
+            EntityCollection(
+                self.context,
+                WorkbookNamedItem,
+                ResourcePath("names", self.resource_path),
+            ),
+        )
 
     @property
     def operations(self):
         """The status of workbook operations. Getting an operation collection is not supported, but you can get the
-        status of a long-running operation if the Location header is returned in the response"""
-        return self.properties.get('operations',
-                                   EntityCollection(self.context, WorkbookOperation,
-                                                    ResourcePath("operations", self.resource_path)))
+        status of a long-running operation if the Location header is returned in the response
+        """
+        return self.properties.get(
+            "operations",
+            EntityCollection(
+                self.context,
+                WorkbookOperation,
+                ResourcePath("operations", self.resource_path),
+            ),
+        )
 
     @property
     def worksheets(self):
         """Represents a collection of worksheets associated with the workbook. Read-only."""
-        return self.properties.get('worksheets',
-                                   WorkbookWorksheetCollection(self.context,
-                                                               ResourcePath("worksheets", self.resource_path)))
+        return self.properties.get(
+            "worksheets",
+            WorkbookWorksheetCollection(
+                self.context, ResourcePath("worksheets", self.resource_path)
+            ),
+        )

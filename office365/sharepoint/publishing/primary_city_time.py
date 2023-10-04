@@ -24,4 +24,3 @@ class PrimaryCityTime(BaseEntity):
         :rtype: str or None
         """
         return self.properties.get("UtcOffset", None)
-

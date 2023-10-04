@@ -6,7 +6,6 @@ from office365.sharepoint.sites.site import Site
 
 
 class WebApplication(BaseEntity):
-
     @staticmethod
     def lookup(context, request_uri):
         """
@@ -15,7 +14,9 @@ class WebApplication(BaseEntity):
         """
         return_type = WebApplication(context)
         payload = {"requestUri": request_uri}
-        qry = ServiceOperationQuery(return_type, "Lookup", None, payload, None, return_type, True)
+        qry = ServiceOperationQuery(
+            return_type, "Lookup", None, payload, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
@@ -28,8 +29,12 @@ class WebApplication(BaseEntity):
 
     @property
     def sites(self):
-        return self.properties.get('Sites',
-                                   BaseEntityCollection(self.context, Site, ResourcePath("Sites", self.resource_path)))
+        return self.properties.get(
+            "Sites",
+            BaseEntityCollection(
+                self.context, Site, ResourcePath("Sites", self.resource_path)
+            ),
+        )
 
     @property
     def entity_type_name(self):

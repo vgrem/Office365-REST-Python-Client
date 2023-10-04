@@ -2,7 +2,6 @@ from office365.runtime.client_value import ClientValue
 
 
 class SiteScriptActionResult(ClientValue):
-
     def __init__(self, outcome_text=None, target=None):
         """
         :param str outcome_text:

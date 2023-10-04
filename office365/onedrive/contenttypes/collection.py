@@ -6,7 +6,6 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class ContentTypeCollection(EntityCollection):
-
     def __init__(self, context, resource_path):
         super(ContentTypeCollection, self).__init__(context, ContentType, resource_path)
 
@@ -30,7 +29,7 @@ class ContentTypeCollection(EntityCollection):
                 "name": name,
                 "base": {"id": parent_id},
                 "description": description,
-                "group": group
+                "group": group,
             }
             qry = CreateEntityQuery(self, payload, return_type)
             self.context.add_query(qry)
@@ -39,6 +38,7 @@ class ContentTypeCollection(EntityCollection):
 
             def _parent_loaded():
                 _create(parent.id)
+
             parent.ensure_property("id", _parent_loaded)
         else:
             _create(parent)
@@ -51,9 +51,7 @@ class ContentTypeCollection(EntityCollection):
 
         :param str content_type: Canonical URL to the site content type that will be copied to the list.
         """
-        payload = {
-            "contentType": content_type
-        }
+        payload = {"contentType": content_type}
         return_type = ContentType(self.context)
         self.add_child(return_type)
         qry = ServiceOperationQuery(self, "addCopy", None, payload, None, return_type)
@@ -69,12 +67,12 @@ class ContentTypeCollection(EntityCollection):
         :param str content_type_id: The ID of the content type in the content type hub that will be added to a target
             site or a list.
         """
-        payload = {
-            "contentTypeId": content_type_id
-        }
+        payload = {"contentTypeId": content_type_id}
         return_type = ContentType(self.context)
         self.add_child(return_type)
-        qry = ServiceOperationQuery(self, "addCopyFromContentTypeHub", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "addCopyFromContentTypeHub", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 

@@ -10,7 +10,9 @@ class SocialRestFeedManager(BaseEntity):
     It is not available using [MS-CSOM]."""
 
     def __init__(self, content):
-        super(SocialRestFeedManager, self).__init__(content, ResourcePath("SP.Social.SocialRestFeedManager"))
+        super(SocialRestFeedManager, self).__init__(
+            content, ResourcePath("SP.Social.SocialRestFeedManager")
+        )
 
     def my(self):
         """The My method gets a SocialRestActor object that represents the current user. See section 3.1.5.35 for

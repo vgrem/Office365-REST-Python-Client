@@ -18,7 +18,9 @@ class TestPages(SPTestCase):
 
     def test2_create_wiki_page(self):
         page_name = "WelcomeWikiPage.aspx"
-        file = self.__class__.pages_list.create_wiki_page(page_name, "Wiki content").execute_query()
+        file = self.__class__.pages_list.create_wiki_page(
+            page_name, "Wiki content"
+        ).execute_query()
         self.assertIsNotNone(file.resource_path)
         self.__class__.target_file = file
 

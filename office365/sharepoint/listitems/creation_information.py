@@ -2,7 +2,6 @@ from office365.runtime.client_value import ClientValue
 
 
 class ListItemCreationInformation(ClientValue):
-
     def __init__(self, leaf_name=None, folder_url=None, underlying_object_type=None):
         """
         Specifies the properties of the new list item.

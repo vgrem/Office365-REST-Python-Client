@@ -5,7 +5,9 @@ from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.permissions.roles.definitions.definition import RoleDefinition
 from office365.sharepoint.sharing.user_role_assignment import UserRoleAssignment
 from office365.sharepoint.sharing.user_sharing_result import UserSharingResult
-from office365.sharepoint.userprofiles.sharedwithme.view_item_removal_result import SharedWithMeViewItemRemovalResult
+from office365.sharepoint.userprofiles.sharedwithme.view_item_removal_result import (
+    SharedWithMeViewItemRemovalResult,
+)
 
 
 class DocumentSharingManager(BaseEntity):
@@ -22,7 +24,9 @@ class DocumentSharingManager(BaseEntity):
         return_type = RoleDefinition(context)
         context.web.role_definitions.add_child(return_type)
         binding_type = DocumentSharingManager(context)
-        qry = ServiceOperationQuery(binding_type, "GetRoleDefinition", [role], None, None, return_type, True)
+        qry = ServiceOperationQuery(
+            binding_type, "GetRoleDefinition", [role], None, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
@@ -38,19 +42,35 @@ class DocumentSharingManager(BaseEntity):
         :param list[str] item_urls: A list of absolute URLs of the items to be removed from the view.
             These items might belong to any site or site collection in the tenant.
         """
-        return_type = ClientResult(context, ClientValueCollection(SharedWithMeViewItemRemovalResult))
+        return_type = ClientResult(
+            context, ClientValueCollection(SharedWithMeViewItemRemovalResult)
+        )
         binding_type = DocumentSharingManager(context)
-        qry = ServiceOperationQuery(binding_type, "RemoveItemsFromSharedWithMeView", [item_urls], None, None,
-                                    return_type, True)
+        qry = ServiceOperationQuery(
+            binding_type,
+            "RemoveItemsFromSharedWithMeView",
+            [item_urls],
+            None,
+            None,
+            return_type,
+            True,
+        )
         context.add_query(qry)
         return return_type
 
     @staticmethod
-    def update_document_sharing_info(context, resource_address, user_role_assignments,
-                                     validate_existing_permissions=None, additive_mode=None,
-                                     send_server_managed_notification=None, custom_message=None,
-                                     include_anonymous_links_in_notification=None, propagate_acl=None,
-                                     return_type=None):
+    def update_document_sharing_info(
+        context,
+        resource_address,
+        user_role_assignments,
+        validate_existing_permissions=None,
+        additive_mode=None,
+        send_server_managed_notification=None,
+        custom_message=None,
+        include_anonymous_links_in_notification=None,
+        propagate_acl=None,
+        return_type=None,
+    ):
         """
         This method allows a caller with the 'ManagePermission' permission to update sharing information about a
         document to enable document sharing with a set of users. It returns an array of
@@ -84,7 +104,9 @@ class DocumentSharingManager(BaseEntity):
         :param ClientResult return_type:
         """
         if return_type is None:
-            return_type = ClientResult(context, ClientValueCollection(UserSharingResult))
+            return_type = ClientResult(
+                context, ClientValueCollection(UserSharingResult)
+            )
         payload = {
             "resourceAddress": resource_address,
             "userRoleAssignments": user_role_assignments,
@@ -93,10 +115,18 @@ class DocumentSharingManager(BaseEntity):
             "sendServerManagedNotification": send_server_managed_notification,
             "customMessage": custom_message,
             "includeAnonymousLinksInNotification": include_anonymous_links_in_notification,
-            "propagateAcl": propagate_acl
+            "propagateAcl": propagate_acl,
         }
         binding_type = DocumentSharingManager(context)
-        qry = ServiceOperationQuery(binding_type, "UpdateDocumentSharingInfo", None, payload, None, return_type, True)
+        qry = ServiceOperationQuery(
+            binding_type,
+            "UpdateDocumentSharingInfo",
+            None,
+            payload,
+            None,
+            return_type,
+            True,
+        )
         context.add_query(qry)
         return return_type
 

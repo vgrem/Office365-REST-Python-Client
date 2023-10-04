@@ -2,7 +2,6 @@ from office365.sharepoint.base_entity import BaseEntity
 
 
 class SPMachineLearningEnabled(BaseEntity):
-
     @property
     def is_syntex_payg_enabled(self):
         """

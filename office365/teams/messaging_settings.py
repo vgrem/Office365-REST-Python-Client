@@ -4,11 +4,14 @@ from office365.runtime.client_value import ClientValue
 class TeamMessagingSettings(ClientValue):
     """Settings to configure messaging and mentions in the team."""
 
-    def __init__(self, allow_user_edit_messages=True,
-                 allow_user_delete_messages=True,
-                 allow_owner_delete_messages=True,
-                 allow_team_mentions=True,
-                 allow_channel_mentions=True):
+    def __init__(
+        self,
+        allow_user_edit_messages=True,
+        allow_user_delete_messages=True,
+        allow_owner_delete_messages=True,
+        allow_team_mentions=True,
+        allow_channel_mentions=True,
+    ):
         """
         :param bool allow_user_edit_messages: If set to true, users can edit their messages.
         :param bool allow_user_delete_messages: If set to true, users can delete their messages.

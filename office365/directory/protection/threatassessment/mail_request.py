@@ -1,4 +1,6 @@
-from office365.directory.protection.threatassessment.request import ThreatAssessmentRequest
+from office365.directory.protection.threatassessment.request import (
+    ThreatAssessmentRequest,
+)
 
 
 class MailAssessmentRequest(ThreatAssessmentRequest):

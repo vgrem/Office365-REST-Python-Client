@@ -19,7 +19,9 @@ class AlertCollection(BaseEntityCollection):
         """
         return_type = Alert(self.context)
         self.add_child(return_type)
-        qry = ServiceOperationQuery(self, "Add", None, parameters, "alertCreationInformation", return_type)
+        qry = ServiceOperationQuery(
+            self, "Add", None, parameters, "alertCreationInformation", return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -30,7 +32,9 @@ class AlertCollection(BaseEntityCollection):
         :param str id_alert: The Id of the alert to search.
         """
         return_type = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "Contains", {"idAlert": id_alert}, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "Contains", {"idAlert": id_alert}, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -40,4 +44,7 @@ class AlertCollection(BaseEntityCollection):
 
         :param str id_alert: The Id of the alert to get.
         """
-        return Alert(self.context, ServiceOperationPath("GetById", [id_alert], self.resource_path))
+        return Alert(
+            self.context,
+            ServiceOperationPath("GetById", [id_alert], self.resource_path),
+        )

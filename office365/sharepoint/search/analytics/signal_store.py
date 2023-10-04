@@ -7,7 +7,9 @@ class SignalStore(BaseEntity):
 
     def __init__(self, context, resource_path):
         if resource_path is None:
-            resource_path = ResourcePath("Microsoft.SharePoint.Client.Search.Analytics.SignalStore")
+            resource_path = ResourcePath(
+                "Microsoft.SharePoint.Client.Search.Analytics.SignalStore"
+            )
         super(SignalStore, self).__init__(context, resource_path)
 
     @property

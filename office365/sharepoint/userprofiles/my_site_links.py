@@ -14,7 +14,9 @@ class MySiteLinks(BaseEntity):
         :param office365.sharepoint.client_context.ClientContext context: Client context
         """
         return_type = MySiteLinks(context)
-        qry = ServiceOperationQuery(MySiteLinks(context), "GetMySiteLinks", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            MySiteLinks(context), "GetMySiteLinks", None, None, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type

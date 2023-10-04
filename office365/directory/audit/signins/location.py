@@ -5,7 +5,13 @@ from office365.runtime.client_value import ClientValue
 class SignInLocation(ClientValue):
     """Provides the city, state and country/region from where the sign-in happened."""
 
-    def __init__(self, city=None, country_or_region=None, geo_coordinates=GeoCoordinates(), state=None):
+    def __init__(
+        self,
+        city=None,
+        country_or_region=None,
+        geo_coordinates=GeoCoordinates(),
+        state=None,
+    ):
         """
         :param str city: Provides the city where the sign-in originated. This is calculated using latitude/longitude
             information from the sign-in activity.

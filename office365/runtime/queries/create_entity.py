@@ -11,8 +11,6 @@ class CreateEntityQuery(ClientQuery):
             or dict
         :type parent_entity: office365.runtime.client_object.ClientObject
         """
-        super(CreateEntityQuery, self).__init__(parent_entity.context,
-                                                parent_entity,
-                                                parameters,
-                                                None,
-                                                return_type)
+        super(CreateEntityQuery, self).__init__(
+            parent_entity.context, parent_entity, parameters, None, return_type
+        )

@@ -4,11 +4,11 @@ from office365.sharepoint.base_entity import BaseEntity
 
 
 class SPOWebAppServicePrincipal(BaseEntity):
-
     def __init__(self, context):
-        stat_path = ResourcePath("Microsoft.Online.SharePoint.TenantAdministration.Internal.SPOWebAppServicePrincipal")
+        stat_path = ResourcePath(
+            "Microsoft.Online.SharePoint.TenantAdministration.Internal.SPOWebAppServicePrincipal"
+        )
         super(SPOWebAppServicePrincipal, self).__init__(context, stat_path)
-
 
     def update_spfx_client_secret(self, secret_value):
         """

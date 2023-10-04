@@ -14,5 +14,7 @@ target_path = "archive/2018"
 source_file_item = client.me.drive.root.get_by_path(source_path)  # source file item
 target_folder_item = client.me.drive.root.get_by_path(target_path)  # target folder item
 # result = source_file_item.copy(name=new_name).execute_query()  # copy to the same folder with a different name
-result = source_file_item.copy(parent=target_folder_item).execute_query()  # copy to another folder
+result = source_file_item.copy(
+    parent=target_folder_item
+).execute_query()  # copy to another folder
 print(result.value)

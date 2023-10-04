@@ -3,8 +3,12 @@ from office365.sharepoint.administration.orgassets.org_assets import OrgAssets
 
 
 class FilePickerOptions(ClientValue):
-
-    def __init__(self, search_enabled=None, central_asset_repository=OrgAssets(), org_assets=OrgAssets()):
+    def __init__(
+        self,
+        search_enabled=None,
+        central_asset_repository=OrgAssets(),
+        org_assets=OrgAssets(),
+    ):
         self.BingSearchEnabled = search_enabled
         self.CentralAssetRepository = central_asset_repository
         self.OrgAssets = org_assets

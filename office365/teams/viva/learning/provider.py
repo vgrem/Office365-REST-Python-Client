@@ -10,9 +10,14 @@ class LearningProvider(Entity):
     @property
     def learning_contents(self):
         """Learning catalog items for the provider."""
-        return self.properties.get('learningContents',
-                                   EntityCollection(self.context, LearningContent,
-                                                    ResourcePath("learningContents", self.resource_path)))
+        return self.properties.get(
+            "learningContents",
+            EntityCollection(
+                self.context,
+                LearningContent,
+                ResourcePath("learningContents", self.resource_path),
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:

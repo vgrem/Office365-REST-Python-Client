@@ -5,7 +5,6 @@ from office365.runtime.types.collections import StringCollection
 
 
 class OutlookItem(Entity):
-
     @property
     def change_key(self):
         """
@@ -13,7 +12,7 @@ class OutlookItem(Entity):
         This allows Exchange to apply changes to the correct version of the object.
         :rtype: str
         """
-        return self.properties.get('ChangeKey', None)
+        return self.properties.get("ChangeKey", None)
 
     @property
     def categories(self):
@@ -42,7 +41,7 @@ class OutlookItem(Entity):
         if default_value is None:
             property_mapping = {
                 "createdDateTime": self.created_datetime,
-                "lastModifiedDateTime": self.last_modified_datetime
+                "lastModifiedDateTime": self.last_modified_datetime,
             }
             default_value = property_mapping.get(name, None)
         return super(OutlookItem, self).get_property(name, default_value)

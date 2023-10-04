@@ -1,8 +1,14 @@
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
-from office365.sharepoint.sharing.sharepoint_sharing_settings import SharePointSharingSettings
-from office365.sharepoint.sharing.permission_information import SharingPermissionInformation
+from office365.sharepoint.sharing.object_sharing_information import (
+    ObjectSharingInformation,
+)
+from office365.sharepoint.sharing.permission_information import (
+    SharingPermissionInformation,
+)
+from office365.sharepoint.sharing.sharepoint_sharing_settings import (
+    SharePointSharingSettings,
+)
 
 
 class ObjectSharingSettings(BaseEntity):
@@ -48,7 +54,9 @@ class ObjectSharingSettings(BaseEntity):
         Boolean indicating whether the current user can create or disable an organization Edit link.
         :rtype: bool
         """
-        return self.properties.get("CanCurrentUserManageOrganizationReadWriteLink", None)
+        return self.properties.get(
+            "CanCurrentUserManageOrganizationReadWriteLink", None
+        )
 
     @property
     def can_current_user_manage_readonly_link(self):
@@ -102,35 +110,44 @@ class ObjectSharingSettings(BaseEntity):
         """
         Contains information about the sharing state of a shareable object.
         """
-        return self.properties.get("ObjectSharingInformation",
-                                   ObjectSharingInformation(self.context,
-                                                            ResourcePath("ObjectSharingInformation",
-                                                                         self.resource_path)))
+        return self.properties.get(
+            "ObjectSharingInformation",
+            ObjectSharingInformation(
+                self.context,
+                ResourcePath("ObjectSharingInformation", self.resource_path),
+            ),
+        )
 
     @property
     def sharepoint_settings(self):
         """
         An object that contains the SharePoint UI specific sharing settings.
         """
-        return self.properties.get("SharePointSettings",
-                                   SharePointSharingSettings(self.context,
-                                                             ResourcePath("SharePointSettings", self.resource_path)))
+        return self.properties.get(
+            "SharePointSettings",
+            SharePointSharingSettings(
+                self.context, ResourcePath("SharePointSettings", self.resource_path)
+            ),
+        )
 
     @property
     def sharing_permissions(self):
         """
         A list of SharingPermissionInformation objects that can be used to share.
         """
-        return self.properties.get("SharingPermissions",
-                                   SharingPermissionInformation(self.context,
-                                                                ResourcePath("SharingPermissions", self.resource_path)))
+        return self.properties.get(
+            "SharingPermissions",
+            SharingPermissionInformation(
+                self.context, ResourcePath("SharingPermissions", self.resource_path)
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "ObjectSharingInformation": self.object_sharing_information,
                 "SharePointSettings": self.sharepoint_settings,
-                "SharingPermissions": self.sharing_permissions
+                "SharingPermissions": self.sharing_permissions,
             }
             default_value = property_mapping.get(name, None)
         return super(ObjectSharingSettings, self).get_property(name, default_value)

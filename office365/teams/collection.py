@@ -19,6 +19,7 @@ class TeamCollection(EntityCollection):
         :param int page_size: Page size
         :param (ClientObjectCollection) -> None page_loaded: Page loaded event
         """
+
         def _init_teams(groups):
             """
             :type groups:  office365.directory.groups.collection.GroupCollection
@@ -56,11 +57,11 @@ class TeamCollection(EntityCollection):
             """
             :type resp: requests.Response
             """
-            content_loc = resp.headers.get('Content-Location', None)
+            content_loc = resp.headers.get("Content-Location", None)
             team_path = ODataPathBuilder.parse(content_loc)
             return_type.set_property("id", team_path.segment, False)
 
-            loc = resp.headers.get('Location', None)
+            loc = resp.headers.get("Location", None)
             operation_path = ODataPathBuilder.parse(loc)
             operation = TeamsAsyncOperation(self.context, operation_path)
             return_type.operations.add_child(operation)

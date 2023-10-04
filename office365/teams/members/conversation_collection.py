@@ -3,9 +3,10 @@ from office365.teams.members.conversation import ConversationMember
 
 
 class ConversationMemberCollection(EntityCollection):
-
     def __init__(self, context, resource_path=None):
-        super(ConversationMemberCollection, self).__init__(context, ConversationMember, resource_path)
+        super(ConversationMemberCollection, self).__init__(
+            context, ConversationMember, resource_path
+        )
 
     def add(self, user, roles, visible_history_start_datetime=None):
         """
@@ -22,12 +23,13 @@ class ConversationMemberCollection(EntityCollection):
         """
         return_type = super(ConversationMemberCollection, self).add(roles=roles)
         from office365.directory.users.user import User
+
         if isinstance(user, User):
+
             def _user_loaded():
                 return_type.set_property("userId", user.id)
+
             user.ensure_property("id", _user_loaded)
         else:
             return_type.set_property("userId", user)
         return return_type
-
-

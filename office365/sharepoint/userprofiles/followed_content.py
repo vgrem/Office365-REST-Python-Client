@@ -16,10 +16,10 @@ class FollowedContent(BaseEntity):
         :param office365.sharepoint.userprofiles.followed_item.FollowedItem item: Identifies the item to follow.
         """
         return_type = ClientResult(self.context, FollowResult())
-        payload = {
-            "item": item
-        }
-        qry = ServiceOperationQuery(self, "FollowItem", None, payload, None, return_type)
+        payload = {"item": item}
+        qry = ServiceOperationQuery(
+            self, "FollowItem", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 

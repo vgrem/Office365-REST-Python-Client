@@ -1,6 +1,6 @@
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.taxonomy.terms.term import Term
-from tests import test_team_site_url, test_client_credentials
+from tests import test_client_credentials, test_team_site_url
 
 term_name = "Sweden"
 

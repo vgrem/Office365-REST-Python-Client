@@ -11,9 +11,10 @@ https://learn.microsoft.com/en-us/graph/api/driveitem-createlink?view=graph-rest
 from office365.graph_client import GraphClient
 from tests.graph_case import acquire_token_by_username_password
 
-
 client = GraphClient(acquire_token_by_username_password)
 file_path = "Financial Sample.xlsx"
 drive_item = client.me.drive.root.get_by_path(file_path)
-permission = drive_item.create_link("view", "anonymous", password="ThisIsMyPrivatePassword").execute_query()
+permission = drive_item.create_link(
+    "view", "anonymous", password="ThisIsMyPrivatePassword"
+).execute_query()
 print(permission.link)

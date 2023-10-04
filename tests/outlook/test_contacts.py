@@ -10,10 +10,12 @@ class TestOutlookContacts(GraphTestCase):
         self.assertIsNotNone(who_am_i.id)
 
     def test1_create_contacts(self):
-        new_contact = self.client.me.contacts.add("Pavel", "Bansky",
-                                                  "pavelb@a830edad9050849NDA1.onmicrosoft.com",
-                                                  "+1 732 555 0102"
-                                                  ).execute_query()
+        new_contact = self.client.me.contacts.add(
+            "Pavel",
+            "Bansky",
+            "pavelb@a830edad9050849NDA1.onmicrosoft.com",
+            "+1 732 555 0102",
+        ).execute_query()
         self.assertEqual(new_contact.email_addresses[0].name, "Pavel Bansky")
         self.__class__.target_contact = new_contact
 

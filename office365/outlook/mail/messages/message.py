@@ -2,8 +2,10 @@ import os
 import uuid
 from datetime import datetime
 
-from office365.directory.extensions.extended_property import SingleValueLegacyExtendedProperty, \
-    MultiValueLegacyExtendedProperty
+from office365.directory.extensions.extended_property import (
+    MultiValueLegacyExtendedProperty,
+    SingleValueLegacyExtendedProperty,
+)
 from office365.directory.extensions.extension import Extension
 from office365.entity_collection import EntityCollection
 from office365.outlook.item import OutlookItem
@@ -32,8 +34,8 @@ class Message(OutlookItem):
         prop_type = "String"
         prop_value = [
             {
-                "id":"{0} {{{1}}} Name {2}".format(prop_type, prop_id, name),
-                "value": value
+                "id": "{0} {{{1}}} Name {2}".format(prop_type, prop_id, name),
+                "value": value,
             }
         ]
         self.set_property("singleValueExtendedProperties", prop_value)
@@ -51,9 +53,11 @@ class Message(OutlookItem):
         payload = {
             "ToRecipients": ClientValueCollection(Recipient, to_recipients),
             "Message": message,
-            "Comment": comment
+            "Comment": comment,
         }
-        qry = ServiceOperationQuery(self, "createForward", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "createForward", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return self
 
@@ -62,11 +66,13 @@ class Message(OutlookItem):
 
         :type file_object: typing.IO
         """
+
         def _save_content(return_type):
             """
             :type return_type: ClientResult
             """
             file_object.write(return_type.value)
+
         self.get_content().after_execute(_save_content)
         return self
 
@@ -80,7 +86,8 @@ class Message(OutlookItem):
         return return_type
 
     def add_file_attachment(
-        self, name, content=None, content_type=None, base64_content=None):
+        self, name, content=None, content_type=None, base64_content=None
+    ):
         """
         Attach a file to message
 
@@ -106,13 +113,19 @@ class Message(OutlookItem):
         max_upload_chunk = 1000000 * 3
         file_size = os.stat(file_path).st_size
         if file_size > max_upload_chunk:
+
             def _message_loaded():
-                self.attachments.resumable_upload(file_path, max_upload_chunk, chunk_uploaded)
+                self.attachments.resumable_upload(
+                    file_path, max_upload_chunk, chunk_uploaded
+                )
+
             self.ensure_property("id", _message_loaded)
         else:
-            with open(file_path, 'rb') as file_object:
+            with open(file_path, "rb") as file_object:
                 content = file_object.read()
-            self.attachments.add_file(os.path.basename(file_object.name), content.decode("utf-8"))
+            self.attachments.add_file(
+                os.path.basename(file_object.name), content.decode("utf-8")
+            )
         return self
 
     def send(self):
@@ -131,16 +144,13 @@ class Message(OutlookItem):
         :param str comment: A comment to include. Can be an empty string.
         """
         message = Message(self.context)
-        payload = {
-            "message": message,
-            "comment": comment
-        }
+        payload = {"message": message, "comment": comment}
         qry = ServiceOperationQuery(self, "reply", None, payload)
         self.context.add_query(qry)
         return message
 
     def reply_all(self):
-        """Reply to all recipients of a message. The message is then saved in the Sent Items folder. """
+        """Reply to all recipients of a message. The message is then saved in the Sent Items folder."""
         qry = ServiceOperationQuery(self, "replyAll")
         self.context.add_query(qry)
         return self
@@ -152,10 +162,10 @@ class Message(OutlookItem):
         :param str comment:
         """
         return_type = Message(self.context)
-        payload = {
-            "comment": comment
-        }
-        qry = ServiceOperationQuery(self, "createReply", None, payload, None, return_type)
+        payload = {"comment": comment}
+        qry = ServiceOperationQuery(
+            self, "createReply", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return self
 
@@ -189,9 +199,10 @@ class Message(OutlookItem):
         :param str comment: A comment to include. Can be an empty string.
         """
         payload = {
-            "toRecipients": ClientValueCollection(Recipient,
-                                                  [Recipient.from_email(v) for v in to_recipients]),
-            "comment": comment
+            "toRecipients": ClientValueCollection(
+                Recipient, [Recipient.from_email(v) for v in to_recipients]
+            ),
+            "comment": comment,
         }
         qry = ServiceOperationQuery(self, "forward", None, payload)
         self.context.add_query(qry)
@@ -211,19 +222,24 @@ class Message(OutlookItem):
 
     @property
     def attachments(self):
-        """The fileAttachment and itemAttachment attachments for the message.
-        """
-        self._persist_changes('attachments')
-        return self.properties.setdefault('attachments',
-                                          AttachmentCollection(self.context,
-                                                               ResourcePath("attachments", self.resource_path)))
+        """The fileAttachment and itemAttachment attachments for the message."""
+        self._persist_changes("attachments")
+        return self.properties.setdefault(
+            "attachments",
+            AttachmentCollection(
+                self.context, ResourcePath("attachments", self.resource_path)
+            ),
+        )
 
     @property
     def extensions(self):
         """The collection of open extensions defined for the message. Nullable."""
-        return self.properties.get('extensions',
-                                   EntityCollection(self.context, Extension,
-                                                    ResourcePath("extensions", self.resource_path)))
+        return self.properties.get(
+            "extensions",
+            EntityCollection(
+                self.context, Extension, ResourcePath("extensions", self.resource_path)
+            ),
+        )
 
     @property
     def body(self):
@@ -307,7 +323,9 @@ class Message(OutlookItem):
         path taken by a message from the sender to the recipient. It can also contain custom message headers that
         hold app data for the message.
         """
-        return self.properties.get("internetMessageHeaders", ClientValueCollection(InternetMessageHeader))
+        return self.properties.get(
+            "internetMessageHeaders", ClientValueCollection(InternetMessageHeader)
+        )
 
     @property
     def internet_message_id(self):
@@ -378,20 +396,26 @@ class Message(OutlookItem):
     @property
     def to_recipients(self):
         """The To: recipients for the message."""
-        self._persist_changes('toRecipients')
-        return self.properties.setdefault('toRecipients', ClientValueCollection(Recipient))
+        self._persist_changes("toRecipients")
+        return self.properties.setdefault(
+            "toRecipients", ClientValueCollection(Recipient)
+        )
 
     @property
     def bcc_recipients(self):
         """The BCC: recipients for the message."""
-        self._persist_changes('bccRecipients')
-        return self.properties.setdefault('bccRecipients', ClientValueCollection(Recipient))
+        self._persist_changes("bccRecipients")
+        return self.properties.setdefault(
+            "bccRecipients", ClientValueCollection(Recipient)
+        )
 
     @property
     def cc_recipients(self):
         """The CC: recipients for the message."""
-        self._persist_changes('ccRecipients')
-        return self.properties.setdefault('ccRecipients', ClientValueCollection(Recipient))
+        self._persist_changes("ccRecipients")
+        return self.properties.setdefault(
+            "ccRecipients", ClientValueCollection(Recipient)
+        )
 
     @property
     def sender(self):
@@ -399,14 +423,14 @@ class Message(OutlookItem):
         from property. You can set this property to a different value when sending a message from a shared mailbox,
         for a shared calendar, or as a delegate. In any case, the value must correspond to the actual mailbox used.
         Find out more about setting the from and sender properties of a message."""
-        return self.properties.get('sender', Recipient())
+        return self.properties.get("sender", Recipient())
 
     @property
     def parent_folder_id(self):
         """The unique identifier for the message's parent mailFolder.
         :rtype: str or None
         """
-        return self.properties.get('parentFolderId', None)
+        return self.properties.get("parentFolderId", None)
 
     @property
     def web_link(self):
@@ -428,16 +452,26 @@ class Message(OutlookItem):
     @property
     def multi_value_extended_properties(self):
         """The collection of multi-value extended properties defined for the event."""
-        return self.properties.get('multiValueExtendedProperties',
-                                   EntityCollection(self.context, MultiValueLegacyExtendedProperty,
-                                                    ResourcePath("multiValueExtendedProperties", self.resource_path)))
+        return self.properties.get(
+            "multiValueExtendedProperties",
+            EntityCollection(
+                self.context,
+                MultiValueLegacyExtendedProperty,
+                ResourcePath("multiValueExtendedProperties", self.resource_path),
+            ),
+        )
 
     @property
     def single_value_extended_properties(self):
         """The collection of single-value extended properties defined for the message"""
-        return self.properties.get('singleValueExtendedProperties',
-                                   EntityCollection(self.context, SingleValueLegacyExtendedProperty,
-                                                    ResourcePath("singleValueExtendedProperties", self.resource_path)))
+        return self.properties.get(
+            "singleValueExtendedProperties",
+            EntityCollection(
+                self.context,
+                SingleValueLegacyExtendedProperty,
+                ResourcePath("singleValueExtendedProperties", self.resource_path),
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
@@ -450,7 +484,7 @@ class Message(OutlookItem):
                 "multiValueExtendedProperties": self.multi_value_extended_properties,
                 "receivedDateTime": self.received_datetime,
                 "sentDateTime": self.sent_datetime,
-                "singleValueExtendedProperties": self.single_value_extended_properties
+                "singleValueExtendedProperties": self.single_value_extended_properties,
             }
             default_value = property_type_mapping.get(name, None)
 

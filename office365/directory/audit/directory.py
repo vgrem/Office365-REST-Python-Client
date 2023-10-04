@@ -80,7 +80,7 @@ class DirectoryAudit(Entity):
         if default_value is None:
             property_mapping = {
                 "activityDateTime": self.activity_datetime,
-                "initiatedBy": self.initiated_by
+                "initiatedBy": self.initiated_by,
             }
             default_value = property_mapping.get(name, None)
         return super(DirectoryAudit, self).get_property(name, default_value)

@@ -6,20 +6,30 @@ from office365.runtime.paths.resource_path import ResourcePath
 
 
 class EducationRoot(Entity):
-    """The /education namespace exposes functionality that is specific to the education sector. """
+    """The /education namespace exposes functionality that is specific to the education sector."""
 
     @property
     def classes(self):
-        return self.properties.get("classes",
-                                   EntityCollection(self.context, EducationClass,
-                                                    ResourcePath("classes", self.resource_path)))
+        return self.properties.get(
+            "classes",
+            EntityCollection(
+                self.context,
+                EducationClass,
+                ResourcePath("classes", self.resource_path),
+            ),
+        )
 
     @property
     def me(self):
-        return self.properties.get("me", EducationUser(self.context, ResourcePath("me", self.resource_path)))
+        return self.properties.get(
+            "me", EducationUser(self.context, ResourcePath("me", self.resource_path))
+        )
 
     @property
     def users(self):
-        return self.properties.get("users",
-                                   EntityCollection(self.context, EducationUser,
-                                                    ResourcePath("users", self.resource_path)))
+        return self.properties.get(
+            "users",
+            EntityCollection(
+                self.context, EducationUser, ResourcePath("users", self.resource_path)
+            ),
+        )

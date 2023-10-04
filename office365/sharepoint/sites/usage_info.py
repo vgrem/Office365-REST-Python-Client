@@ -5,6 +5,7 @@ class UsageInfo(ClientValue):
     """
     Provides fields used to access information regarding site collection usage.
     """
+
     def __init__(self, bandwidth=None, discussion_storage=None, visits=None):
         """
         :param long bandwidth: Contains the cumulative bandwidth used by the site collection on the previous day or

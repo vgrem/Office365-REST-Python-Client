@@ -2,7 +2,6 @@ from office365.sharepoint.base_entity import BaseEntity
 
 
 class TenantAdminEndpoints(BaseEntity):
-
     @property
     def o365_admin_center_endpoint(self):
         """

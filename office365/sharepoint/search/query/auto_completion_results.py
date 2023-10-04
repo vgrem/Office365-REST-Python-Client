@@ -4,7 +4,6 @@ from office365.sharepoint.search.query.auto_completion import QueryAutoCompletio
 
 
 class QueryAutoCompletionResults(ClientValue):
-
     def __init__(self, core_execution_time_ms=None, correlation_id=None, queries=None):
         """The complex type QueryAutoCompletionResults represent the result of the operation GetQueryCompletions
         as specified in section 3.1.4.25.2.1.

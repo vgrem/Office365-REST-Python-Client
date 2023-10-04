@@ -1,10 +1,9 @@
 from office365.directory.extensions.open_type import OpenTypeExtension
+from office365.directory.users.profile import UserProfile
+from office365.directory.users.user import User
 from office365.runtime.client_value_collection import ClientValueCollection
 from tests import create_unique_name, test_tenant
 from tests.graph_case import GraphTestCase
-
-from office365.directory.users.user import User
-from office365.directory.users.profile import UserProfile
 
 
 class TestGraphUser(GraphTestCase):
@@ -28,7 +27,9 @@ class TestGraphUser(GraphTestCase):
         self.__class__.test_user = new_user
 
     def test3_get_user_licences(self):
-        user = self.__class__.test_user.select(["assignedLicenses"]).get().execute_query()
+        user = (
+            self.__class__.test_user.select(["assignedLicenses"]).get().execute_query()
+        )
         self.assertIsInstance(user.assigned_licenses, ClientValueCollection)
 
     def test4_list_subscribed_skus(self):
@@ -44,14 +45,18 @@ class TestGraphUser(GraphTestCase):
 
     def test7_update_user(self):
         user_to_update = self.__class__.test_user
-        prop_name = 'city'
+        prop_name = "city"
         prop_val = create_unique_name("city_")
         user_to_update.set_property(prop_name, prop_val).update().execute_query()
 
-        result = self.client.users.filter("{0} eq '{1}'".format(prop_name, prop_val)).get().execute_query()
+        result = (
+            self.client.users.filter("{0} eq '{1}'".format(prop_name, prop_val))
+            .get()
+            .execute_query()
+        )
         self.assertEqual(1, len(result))
 
-    #def test8_check_member_groups(self):
+    # def test8_check_member_groups(self):
     #    result = self.__class__.test_user.check_member_groups(["fee2c45b-915a-4a64b130f4eb9e75525e"]).execute_query()
     #    self.assertIsNotNone(result.value)
 
@@ -79,6 +84,3 @@ class TestGraphUser(GraphTestCase):
     def test_14_delete_extension(self):
         result = self.__class__.test_extension.delete_object().execute_query()
         self.assertIsNotNone(result.resource_path)
-
-
-

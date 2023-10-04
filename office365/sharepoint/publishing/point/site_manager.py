@@ -6,5 +6,6 @@ class PointPublishingSiteManager(BaseEntity):
     """"""
 
     def __init__(self, context):
-        super(PointPublishingSiteManager, self).__init__(context,
-                                                         ResourcePath("SP.Publishing.PointPublishingSiteManager"))
+        super(PointPublishingSiteManager, self).__init__(
+            context, ResourcePath("SP.Publishing.PointPublishingSiteManager")
+        )

@@ -17,5 +17,9 @@ class SynchronizationTemplate(Entity):
     @property
     def schema(self):
         """Default synchronization schema for the jobs based on this template."""
-        return self.properties.get('schema',
-                                   SynchronizationSchema(self.context, ResourcePath("schema", self.resource_path)))
+        return self.properties.get(
+            "schema",
+            SynchronizationSchema(
+                self.context, ResourcePath("schema", self.resource_path)
+            ),
+        )

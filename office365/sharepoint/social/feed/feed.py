@@ -9,8 +9,14 @@ class SocialFeed(ClientValue):
     specifies a root SocialPost object (section 3.1.5.26) and an array of response SocialPost objects.
     """
 
-    def __init__(self, attributes=None, newest_processed=None, oldest_processed=None, threads=None,
-                 unread_mention_count=None):
+    def __init__(
+        self,
+        attributes=None,
+        newest_processed=None,
+        oldest_processed=None,
+        threads=None,
+        unread_mention_count=None,
+    ):
         """
         :param in attributes: The Attributes property specifies attributes of the returned feed.
             The attributes specify if the requested feed has additional threads that were not included in the returned

@@ -4,9 +4,14 @@ from office365.runtime.client_value import ClientValue
 
 
 class TaxonomyFieldCreateXmlParameters(ClientValue):
-
-    def __init__(self, name, term_set_id, term_store_id=None, anchor_id="00000000-0000-0000-0000-000000000000",
-                 allow_multiple_values=False):
+    def __init__(
+        self,
+        name,
+        term_set_id,
+        term_store_id=None,
+        anchor_id="00000000-0000-0000-0000-000000000000",
+        allow_multiple_values=False,
+    ):
         """
         :param str name:
         """
@@ -22,13 +27,21 @@ class TaxonomyFieldCreateXmlParameters(ClientValue):
 
     @property
     def type_name(self):
-        return "TaxonomyFieldTypeMulti" if self.AllowMultipleValues else "TaxonomyFieldType"
+        return (
+            "TaxonomyFieldTypeMulti"
+            if self.AllowMultipleValues
+            else "TaxonomyFieldType"
+        )
 
     @property
     def schema_xml(self):
-        list_attr = 'List="{{{list_id}}}"'.format(list_id=self.ListId) if self.ListId is not None else ""
+        list_attr = (
+            'List="{{{list_id}}}"'.format(list_id=self.ListId)
+            if self.ListId is not None
+            else ""
+        )
 
-        return '''
+        return """
             <Field Type="{type_name}" DisplayName="{name}" {list_attr}
                    WebId="{web_id}" Required="FALSE" EnforceUniqueValues="FALSE"
                    ID="{{{field_id}}}" StaticName="{name}" Name="{name}" Mult="{allow_multiple_values}">
@@ -123,7 +136,15 @@ class TaxonomyFieldCreateXmlParameters(ClientValue):
                     </ArrayOfProperty>
                 </Customization>
             </Field>
-            '''.format(name=self.Name, list_attr=list_attr, web_id=self.WebId, field_id=self.FieldId,
-                       ssp_id=self.SspId, term_set_id=self.TermSetId, anchor_id=self.AnchorId,
-                       text_field_id=self.TextFieldId, allow_multiple_values=str(self.AllowMultipleValues).upper(),
-                       type_name=self.type_name)
+            """.format(
+            name=self.Name,
+            list_attr=list_attr,
+            web_id=self.WebId,
+            field_id=self.FieldId,
+            ssp_id=self.SspId,
+            term_set_id=self.TermSetId,
+            anchor_id=self.AnchorId,
+            text_field_id=self.TextFieldId,
+            allow_multiple_values=str(self.AllowMultipleValues).upper(),
+            type_name=self.type_name,
+        )

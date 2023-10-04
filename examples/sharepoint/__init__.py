@@ -11,7 +11,7 @@ def upload_sample_file(context, path):
     :type path: str
     """
     folder = context.web.default_document_library().root_folder
-    with open(path, 'rb') as f:
+    with open(path, "rb") as f:
         file = folder.files.upload(f).execute_query()
     return file
 
@@ -21,9 +21,9 @@ def create_sample_tasks_list(web):
     :type web: office365.sharepoint.webs.web.Web
     """
     list_title = create_unique_name("Tasks N")
-    list_create_info = ListCreationInformation(list_title,
-                                               None,
-                                               ListTemplateType.TasksWithTimelineAndHierarchy)
+    list_create_info = ListCreationInformation(
+        list_title, None, ListTemplateType.TasksWithTimelineAndHierarchy
+    )
 
     return_type = web.lists.add(list_create_info).execute_query()
     field_info = FieldCreationInformation("Manager", FieldType.User)

@@ -1,6 +1,6 @@
 from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.search.simple_data_table import SimpleDataTable
 
@@ -10,7 +10,9 @@ class DocumentCrawlLog(BaseEntity):
     about items that were crawled."""
 
     def __init__(self, context):
-        static_path = ResourcePath("Microsoft.SharePoint.Client.Search.Administration.DocumentCrawlLog")
+        static_path = ResourcePath(
+            "Microsoft.SharePoint.Client.Search.Administration.DocumentCrawlLog"
+        )
         super(DocumentCrawlLog, self).__init__(context, static_path)
 
     def get_crawled_urls(self, get_count_only=False):
@@ -21,10 +23,10 @@ class DocumentCrawlLog(BaseEntity):
              If false, all the information about the crawled contents MUST be returned.
         """
         return_type = ClientResult(self.context, SimpleDataTable())
-        payload = {
-            "getCountOnly": get_count_only
-        }
-        qry = ServiceOperationQuery(self, "GetCrawledUrls", None, payload, None, return_type)
+        payload = {"getCountOnly": get_count_only}
+        qry = ServiceOperationQuery(
+            self, "GetCrawledUrls", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -35,10 +37,10 @@ class DocumentCrawlLog(BaseEntity):
         :param str display_url:
         """
         return_type = ClientResult(self.context, SimpleDataTable())
-        payload = {
-            "displayUrl": display_url
-        }
-        qry = ServiceOperationQuery(self, "GetUnsuccesfulCrawledUrls", None, payload, None, return_type)
+        payload = {"displayUrl": display_url}
+        qry = ServiceOperationQuery(
+            self, "GetUnsuccesfulCrawledUrls", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 

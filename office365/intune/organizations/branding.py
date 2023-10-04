@@ -1,4 +1,6 @@
-from office365.intune.organizations.branding_properties import OrganizationalBrandingProperties
+from office365.intune.organizations.branding_properties import (
+    OrganizationalBrandingProperties,
+)
 
 
 class OrganizationalBranding(OrganizationalBrandingProperties):

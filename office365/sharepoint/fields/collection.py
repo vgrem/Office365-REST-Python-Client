@@ -1,11 +1,13 @@
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
-from office365.sharepoint.fields.field import Field
 from office365.sharepoint.fields.creation_information import FieldCreationInformation
+from office365.sharepoint.fields.field import Field
 from office365.sharepoint.fields.type import FieldType
-from office365.sharepoint.fields.xmlSchemaFieldCreationInformation import XmlSchemaFieldCreationInformation
+from office365.sharepoint.fields.xmlSchemaFieldCreationInformation import (
+    XmlSchemaFieldCreationInformation,
+)
 from office365.sharepoint.taxonomy.field import TaxonomyField
 from office365.sharepoint.taxonomy.sets.set import TermSet
 
@@ -23,9 +25,13 @@ class FieldCollection(BaseEntityCollection):
         :param str title: Specifies the display name of the field
         :param str or None description: Specifies the description of the field
         """
-        return self.add(FieldCreationInformation(title=title,
-                                                 description=description,
-                                                 field_type_kind=FieldType.Geolocation))
+        return self.add(
+            FieldCreationInformation(
+                title=title,
+                description=description,
+                field_type_kind=FieldType.Geolocation,
+            )
+        )
 
     def add_url_field(self, title, description=None):
         """
@@ -34,11 +40,15 @@ class FieldCollection(BaseEntityCollection):
         :param str title:
         :param str or None description:
         """
-        return self.add(FieldCreationInformation(title=title,
-                                                 description=description,
-                                                 field_type_kind=FieldType.URL))
+        return self.add(
+            FieldCreationInformation(
+                title=title, description=description, field_type_kind=FieldType.URL
+            )
+        )
 
-    def add_lookup_field(self, title, lookup_list, lookup_field_name, allow_multiple_values=False):
+    def add_lookup_field(
+        self, title, lookup_list, lookup_field_name, allow_multiple_values=False
+    ):
         """
         Creates a Lookup field
 
@@ -55,24 +65,34 @@ class FieldCollection(BaseEntityCollection):
             :type lookup_list_id: str
             """
             if allow_multiple_values:
-                field_schema = '''
+                field_schema = """
                             <Field Type="LookupMulti" Mult="TRUE" DisplayName="{title}" Required="FALSE" Hidden="TRUE" \
                             ShowField="{lookup_field_name}" List="{{{lookup_list_id}}}" StaticName="{title}" Name="{title}">
                             </Field>
-                            '''.format(title=title, lookup_field_name=lookup_field_name, lookup_list_id=lookup_list_id)
+                            """.format(
+                    title=title,
+                    lookup_field_name=lookup_field_name,
+                    lookup_list_id=lookup_list_id,
+                )
                 self.create_field_as_xml(field_schema, return_type=return_type)
             else:
-                self.add_field(FieldCreationInformation(title=title,
-                                                        lookup_list_id=lookup_list_id,
-                                                        lookup_field_name=lookup_field_name,
-                                                        field_type_kind=FieldType.Lookup),
-                               return_type=return_type)
+                self.add_field(
+                    FieldCreationInformation(
+                        title=title,
+                        lookup_list_id=lookup_list_id,
+                        lookup_field_name=lookup_field_name,
+                        field_type_kind=FieldType.Lookup,
+                    ),
+                    return_type=return_type,
+                )
 
         from office365.sharepoint.lists.list import List
+
         if isinstance(lookup_list, List):
 
             def _lookup_list_loaded():
                 _add_lookup_field(lookup_list.id)
+
             lookup_list.ensure_property("Id", _lookup_list_loaded)
         else:
             _add_lookup_field(lookup_list)
@@ -108,8 +128,10 @@ class FieldCollection(BaseEntityCollection):
         """
         return self.add_field(FieldCreationInformation(title, FieldType.Text))
 
-    def add_dependent_lookup_field(self, display_name, primary_lookup_field_id, show_field):
-        """Adds a secondary lookup field to a field collection (target). 
+    def add_dependent_lookup_field(
+        self, display_name, primary_lookup_field_id, show_field
+    ):
+        """Adds a secondary lookup field to a field collection (target).
         Args:
             display_name (str): title of the added field in the target FieldCollection.
             primary_lookup_field_id (str): ID of the main lookup-field in the target to associate the dependent lookup field with.
@@ -122,10 +144,11 @@ class FieldCollection(BaseEntityCollection):
         parameters = {
             "displayName": display_name,
             "primaryLookupFieldId": primary_lookup_field_id,
-            "showField": show_field
+            "showField": show_field,
         }
-        qry = ServiceOperationQuery(self, "AddDependentLookupField", None, parameters,
-                                    None, return_type)
+        qry = ServiceOperationQuery(
+            self, "AddDependentLookupField", None, parameters, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -134,7 +157,9 @@ class FieldCollection(BaseEntityCollection):
 
         :type field_create_information: office365.sharepoint.fields.creation_information.FieldCreationInformation
         """
-        return_type = Field.create_field_from_type(self.context, field_create_information)
+        return_type = Field.create_field_from_type(
+            self.context, field_create_information
+        )
         self.add_child(return_type)
         qry = CreateEntityQuery(self, return_type, return_type)
         self.context.add_query(qry)
@@ -150,8 +175,7 @@ class FieldCollection(BaseEntityCollection):
             return_type = Field(self.context)
         self.add_child(return_type)
         payload = {"parameters": parameters}
-        qry = ServiceOperationQuery(self, "AddField", None, payload, None,
-                                    return_type)
+        qry = ServiceOperationQuery(self, "AddField", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 
@@ -166,19 +190,34 @@ class FieldCollection(BaseEntityCollection):
         return_type = TaxonomyField(self.context)
 
         if isinstance(term_set, TermSet):
+
             def _term_set_loaded():
-                TaxonomyField.create(self, name, term_set.id, None, allow_multiple_values,
-                                     return_type=return_type)
+                TaxonomyField.create(
+                    self,
+                    name,
+                    term_set.id,
+                    None,
+                    allow_multiple_values,
+                    return_type=return_type,
+                )
 
             term_set.ensure_property("id", _term_set_loaded)
             return return_type
         else:
 
             def _term_store_loaded(term_store):
-                TaxonomyField.create(self, name, term_set, term_store.id, allow_multiple_values,
-                                     return_type=return_type)
+                TaxonomyField.create(
+                    self,
+                    name,
+                    term_set,
+                    term_store.id,
+                    allow_multiple_values,
+                    return_type=return_type,
+                )
 
-            self.context.load(self.context.taxonomy.term_store, after_loaded=_term_store_loaded)
+            self.context.load(
+                self.context.taxonomy.term_store, after_loaded=_term_store_loaded
+            )
         return return_type
 
     def create_field_as_xml(self, schema_xml, return_type=None):
@@ -192,7 +231,9 @@ class FieldCollection(BaseEntityCollection):
             return_type = Field(self.context)
         self.add_child(return_type)
         payload = {"parameters": XmlSchemaFieldCreationInformation(schema_xml)}
-        qry = ServiceOperationQuery(self, "CreateFieldAsXml", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "CreateFieldAsXml", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -202,7 +243,9 @@ class FieldCollection(BaseEntityCollection):
 
         :param str _id: The field identifier.
         """
-        return Field(self.context, ServiceOperationPath("getById", [_id], self.resource_path))
+        return Field(
+            self.context, ServiceOperationPath("getById", [_id], self.resource_path)
+        )
 
     def get_by_internal_name_or_title(self, value):
         """Returns the first field (2) in the collection based on the internal name or the title specified
@@ -210,8 +253,12 @@ class FieldCollection(BaseEntityCollection):
 
         :param str value:  The title or internal name to look up the field (2) by.
         """
-        return Field(self.context,
-                     ServiceOperationPath("getByInternalNameOrTitle", [value], self.resource_path))
+        return Field(
+            self.context,
+            ServiceOperationPath(
+                "getByInternalNameOrTitle", [value], self.resource_path
+            ),
+        )
 
     def get_by_title(self, title):
         """
@@ -219,4 +266,7 @@ class FieldCollection(BaseEntityCollection):
 
         :param str title: The title to look up the field by
         """
-        return Field(self.context, ServiceOperationPath("getByTitle", [title], self.resource_path))
+        return Field(
+            self.context,
+            ServiceOperationPath("getByTitle", [title], self.resource_path),
+        )

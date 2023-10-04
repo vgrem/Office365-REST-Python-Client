@@ -47,16 +47,16 @@ class Invitation(Entity):
     @property
     def invited_user(self):
         """The user created as part of the invitation creation."""
-        return self.properties.get('invitedUser',
-                                   User(self.context, ResourcePath("invitedUser", self.resource_path)))
+        return self.properties.get(
+            "invitedUser",
+            User(self.context, ResourcePath("invitedUser", self.resource_path)),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "invitedUserMessageInfo": self.invited_user_message_info,
-                "invitedUser": self.invited_user
+                "invitedUser": self.invited_user,
             }
             default_value = property_mapping.get(name, None)
         return super(Invitation, self).get_property(name, default_value)
-
-

@@ -2,9 +2,15 @@ from office365.runtime.client_value import ClientValue
 
 
 class ComplianceTagInfo(ClientValue):
-
-    def __init__(self, is_record=None, is_regulatory=None, should_keep=None, tag_name=None, unified_rule_id=None,
-                 unified_tag_id=None):
+    def __init__(
+        self,
+        is_record=None,
+        is_regulatory=None,
+        should_keep=None,
+        tag_name=None,
+        unified_rule_id=None,
+        unified_tag_id=None,
+    ):
         """
         :param bool is_record:
         :param bool is_regulatory:

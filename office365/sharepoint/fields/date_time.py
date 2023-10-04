@@ -12,7 +12,7 @@ class FieldDateTime(Field):
 
         :rtype: int or None
         """
-        return self.properties.get('DateTimeCalendarType', None)
+        return self.properties.get("DateTimeCalendarType", None)
 
     @datetime_calendar_type.setter
     def datetime_calendar_type(self, value):
@@ -21,4 +21,4 @@ class FieldDateTime(Field):
 
         :type value: int
         """
-        self.set_property('DateTimeCalendarType', value)
+        self.set_property("DateTimeCalendarType", value)

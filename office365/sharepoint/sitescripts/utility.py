@@ -1,15 +1,17 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.sitedesigns.metadata import SiteDesignMetadata
-from office365.sharepoint.sitedesigns.task import SiteDesignTask
-from office365.sharepoint.sitescripts.metadata import SiteScriptMetadata
 from office365.sharepoint.sitedesigns.principal import SiteDesignPrincipal
-from office365.sharepoint.sitescripts.serialization_result import SiteScriptSerializationResult
+from office365.sharepoint.sitedesigns.task import SiteDesignTask
 from office365.sharepoint.sitescripts.action_result import SiteScriptActionResult
+from office365.sharepoint.sitescripts.metadata import SiteScriptMetadata
+from office365.sharepoint.sitescripts.serialization_result import (
+    SiteScriptSerializationResult,
+)
 
 
 class SiteScriptUtility(BaseEntity):
@@ -18,7 +20,9 @@ class SiteScriptUtility(BaseEntity):
     """
 
     def __init__(self, context):
-        path = ResourcePath("Microsoft.SharePoint.Utilities.WebTemplateExtensions.SiteScriptUtility")
+        path = ResourcePath(
+            "Microsoft.SharePoint.Utilities.WebTemplateExtensions.SiteScriptUtility"
+        )
         super(SiteScriptUtility, self).__init__(context, path)
 
     @staticmethod
@@ -32,7 +36,9 @@ class SiteScriptUtility(BaseEntity):
         return_type = ClientResult(context, SiteDesignMetadata())
         utility = SiteScriptUtility(context)
         payload = {"info": info}
-        qry = ServiceOperationQuery(utility, "CreateListDesign", None, payload, None, return_type, True)
+        qry = ServiceOperationQuery(
+            utility, "CreateListDesign", None, payload, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
@@ -45,11 +51,10 @@ class SiteScriptUtility(BaseEntity):
         """
         return_type = ClientResult(context, SiteDesignTask())
         utility = SiteScriptUtility(context)
-        payload = {
-            "webUrl": web_url,
-            "siteDesignId": site_design_id
-        }
-        qry = ServiceOperationQuery(utility, "AddSiteDesignTask", None, payload, None, return_type, True)
+        payload = {"webUrl": web_url, "siteDesignId": site_design_id}
+        qry = ServiceOperationQuery(
+            utility, "AddSiteDesignTask", None, payload, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
@@ -65,12 +70,11 @@ class SiteScriptUtility(BaseEntity):
         """
         if return_type is None:
             return_type = ClientResult(context)
-        payload = {
-            "listUrl": list_url,
-            "options": options
-        }
+        payload = {"listUrl": list_url, "options": options}
         utility = SiteScriptUtility(context)
-        qry = ServiceOperationQuery(utility, "GetSiteScriptFromList", None, payload, None, return_type, True)
+        qry = ServiceOperationQuery(
+            utility, "GetSiteScriptFromList", None, payload, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
@@ -86,12 +90,11 @@ class SiteScriptUtility(BaseEntity):
         """
         if return_type is None:
             return_type = ClientResult(context, SiteScriptSerializationResult())
-        payload = {
-            "webUrl": web_url,
-            "info": info
-        }
+        payload = {"webUrl": web_url, "info": info}
         utility = SiteScriptUtility(context)
-        qry = ServiceOperationQuery(utility, "GetSiteScriptFromWeb", None, payload, None, return_type, True)
+        qry = ServiceOperationQuery(
+            utility, "GetSiteScriptFromWeb", None, payload, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
@@ -111,7 +114,9 @@ class SiteScriptUtility(BaseEntity):
             "Title": title,
             "Description": description,
         }
-        qry = ServiceOperationQuery(utility, "CreateSiteScript", params, content, None, return_type)
+        qry = ServiceOperationQuery(
+            utility, "CreateSiteScript", params, content, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type
@@ -129,7 +134,9 @@ class SiteScriptUtility(BaseEntity):
         payload = {
             "id": _id,
         }
-        qry = ServiceOperationQuery(utility, "DeleteSiteScript", None, payload, None, None)
+        qry = ServiceOperationQuery(
+            utility, "DeleteSiteScript", None, payload, None, None
+        )
         qry.static = True
         context.add_query(qry)
         return utility
@@ -144,10 +151,10 @@ class SiteScriptUtility(BaseEntity):
         """
         return_type = ClientResult(context, ClientValueCollection(SiteScriptMetadata))
         utility = SiteScriptUtility(context)
-        payload = {
-            "store": store
-        }
-        qry = ServiceOperationQuery(utility, "GetSiteScripts", None, payload, None, return_type)
+        payload = {"store": store}
+        qry = ServiceOperationQuery(
+            utility, "GetSiteScripts", None, payload, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type
@@ -160,12 +167,14 @@ class SiteScriptUtility(BaseEntity):
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
         :param str action_definition:
         """
-        return_type = ClientResult(context, ClientValueCollection(SiteScriptActionResult))
+        return_type = ClientResult(
+            context, ClientValueCollection(SiteScriptActionResult)
+        )
         utility = SiteScriptUtility(context)
-        payload = {
-            "actionDefinition": action_definition
-        }
-        qry = ServiceOperationQuery(utility, "ExecuteSiteScriptAction", None, payload, None, return_type)
+        payload = {"actionDefinition": action_definition}
+        qry = ServiceOperationQuery(
+            utility, "ExecuteSiteScriptAction", None, payload, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type
@@ -181,7 +190,9 @@ class SiteScriptUtility(BaseEntity):
         return_type = ClientResult(context, SiteDesignMetadata())
         utility = SiteScriptUtility(context)
         payload = {"info": info}
-        qry = ServiceOperationQuery(utility, "CreateSiteDesign", None, payload, None, return_type, True)
+        qry = ServiceOperationQuery(
+            utility, "CreateSiteDesign", None, payload, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
@@ -196,7 +207,9 @@ class SiteScriptUtility(BaseEntity):
         return_type = ClientResult(context, SiteDesignMetadata())
         utility = SiteScriptUtility(context)
         payload = {"updateInfo": update_info}
-        qry = ServiceOperationQuery(utility, "UpdateSiteDesign", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            utility, "UpdateSiteDesign", None, payload, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type
@@ -212,11 +225,10 @@ class SiteScriptUtility(BaseEntity):
         """
         return_type = ClientResult(context, ClientValueCollection(SiteDesignMetadata))
         utility = SiteScriptUtility(context)
-        payload = {
-            "includeUntargeted": include_untargeted,
-            "store": store
-        }
-        qry = ServiceOperationQuery(utility, "GetSiteDesigns", None, payload, None, return_type)
+        payload = {"includeUntargeted": include_untargeted, "store": store}
+        qry = ServiceOperationQuery(
+            utility, "GetSiteDesigns", None, payload, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type
@@ -231,7 +243,9 @@ class SiteScriptUtility(BaseEntity):
         """
         return_type = ClientResult(context)
         utility = SiteScriptUtility(context)
-        qry = ServiceOperationQuery(utility, "GetSiteDesignStages", [site_design_id], None, None, return_type)
+        qry = ServiceOperationQuery(
+            utility, "GetSiteDesignStages", [site_design_id], None, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type
@@ -247,11 +261,10 @@ class SiteScriptUtility(BaseEntity):
         """
         return_type = ClientResult(context, SiteDesignMetadata())
         utility = SiteScriptUtility(context)
-        payload = {
-            "id": _id,
-            "store": store
-        }
-        qry = ServiceOperationQuery(utility, "GetSiteDesignMetadata", None, payload, None, return_type, True)
+        payload = {"id": _id, "store": store}
+        qry = ServiceOperationQuery(
+            utility, "GetSiteDesignMetadata", None, payload, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
@@ -266,7 +279,9 @@ class SiteScriptUtility(BaseEntity):
         """
         return_type = BaseEntityCollection(context, SiteDesignPrincipal)
         utility = SiteScriptUtility(context)
-        qry = ServiceOperationQuery(utility, "GetSiteDesignRights", [id_], None, None, return_type)
+        qry = ServiceOperationQuery(
+            utility, "GetSiteDesignRights", [id_], None, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type
@@ -284,7 +299,7 @@ class SiteScriptUtility(BaseEntity):
         payload = {
             "id": _id,
             "principalNames": ClientValueCollection(str, principal_names),
-            "grantedRights": granted_rights
+            "grantedRights": granted_rights,
         }
         qry = ServiceOperationQuery(utility, "GrantSiteDesignRights", None, payload)
         qry.static = True

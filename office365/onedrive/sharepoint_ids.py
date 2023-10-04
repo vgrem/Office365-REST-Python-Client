@@ -3,7 +3,7 @@ from office365.runtime.client_value import ClientValue
 
 class SharePointIds(ClientValue):
     """The SharePointIds resource groups the various identifiers for an item stored in a SharePoint site or OneDrive
-    for Business into a single structure. """
+    for Business into a single structure."""
 
     def __init__(self, list_id=None, list_item_id=None, list_item_unique_id=None):
         """

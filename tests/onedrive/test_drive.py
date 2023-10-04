@@ -12,10 +12,10 @@ class TestDrive(GraphTestCase):
 
     def test2_get_drives_alt(self):
         resp = self.client.execute_request_direct("drives?$top=2")
-        drives = resp.json()['value']
+        drives = resp.json()["value"]
         self.assertLessEqual(len(drives), 2)
         for drive in drives:
-            self.assertIsNotNone(drive['webUrl'])
+            self.assertIsNotNone(drive["webUrl"])
 
     def test3_get_first_drive(self):
         drives = self.client.drives.top(1).get().execute_query()
@@ -41,6 +41,6 @@ class TestDrive(GraphTestCase):
         col = self.client.me.drive.shared_with_me().execute_query()
         self.assertIsNotNone(col.resource_path)
 
-    #def test6_list_bundles(self):
+    # def test6_list_bundles(self):
     #    result = self.client.me.drive.bundles.get().execute_query()
     #    self.assertIsNotNone(result.resource_path)

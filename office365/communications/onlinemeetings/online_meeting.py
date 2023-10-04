@@ -64,7 +64,7 @@ class OnlineMeeting(Entity):
         """
         The participants associated with the online meeting. This includes the organizer and the attendees.
         """
-        return self.properties.get('participants', MeetingParticipants())
+        return self.properties.get("participants", MeetingParticipants())
 
     @property
     def subject(self):
@@ -127,7 +127,7 @@ class OnlineMeeting(Entity):
             property_mapping = {
                 "endDateTime": self.end_datetime,
                 "joinInformation": self.join_information,
-                "startDateTime": self.start_datetime
+                "startDateTime": self.start_datetime,
             }
             default_value = property_mapping.get(name, None)
         return super(OnlineMeeting, self).get_property(name, default_value)

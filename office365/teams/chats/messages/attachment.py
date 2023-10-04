@@ -9,8 +9,16 @@ class ChatMessageAttachment(ClientValue):
     chatMessage entity.
     """
 
-    def __init__(self, id_=None, name=None, content=None, content_type=None, content_url=None,
-                 teams_app_id=None, thumbnail_url=None):
+    def __init__(
+        self,
+        id_=None,
+        name=None,
+        content=None,
+        content_type=None,
+        content_url=None,
+        teams_app_id=None,
+        thumbnail_url=None,
+    ):
         """
         :param str content: The content of the attachment. If the attachment is a rich card, set the property to the
              rich card object. This property and contentUrl are mutually exclusive.

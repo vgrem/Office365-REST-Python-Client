@@ -20,6 +20,7 @@ class FieldLinkCollection(BaseEntityCollection):
 
         :param str or office365.sharepoint.fields.field.Field field: Specifies the internal name of the field or type
         """
+
         def _create_and_add_query(field_internal_name):
             """
             :type field_internal_name: str
@@ -31,8 +32,10 @@ class FieldLinkCollection(BaseEntityCollection):
         return_type = FieldLink(self.context)
         self.add_child(return_type)
         if isinstance(field, Field):
+
             def _field_loaded():
                 _create_and_add_query(field.internal_name)
+
             field.ensure_property("InternalName", _field_loaded)
         else:
             _create_and_add_query(field)
@@ -46,7 +49,9 @@ class FieldLinkCollection(BaseEntityCollection):
         :param str _id: The GUID that specifies the Microsoft.SharePoint.Client.FieldLink (section 3.2.5.46)
             that is returned.
         """
-        return FieldLink(self.context, ServiceOperationPath("GetById", [_id], self.resource_path))
+        return FieldLink(
+            self.context, ServiceOperationPath("GetById", [_id], self.resource_path)
+        )
 
     def reorder(self, internal_names):
         """
@@ -55,9 +60,7 @@ class FieldLinkCollection(BaseEntityCollection):
         :param list[str] internal_names: Specifies field internal names that are arranged in the order in which the
             collection of field links is reordered.
         """
-        payload = {
-            "internalNames": StringCollection(internal_names)
-        }
+        payload = {"internalNames": StringCollection(internal_names)}
         qry = ServiceOperationQuery(self, "Reorder", None, payload)
         self.context.add_query(qry)
         return self

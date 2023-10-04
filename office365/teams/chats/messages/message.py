@@ -16,7 +16,9 @@ class ChatMessage(Entity):
     @property
     def attachments(self):
         """The collection of replies."""
-        return self.properties.get("attachments", ClientValueCollection(ChatMessageAttachment))
+        return self.properties.get(
+            "attachments", ClientValueCollection(ChatMessageAttachment)
+        )
 
     @property
     def body(self):
@@ -38,9 +40,12 @@ class ChatMessage(Entity):
         """
         The collection of replies.
         """
-        return self.properties.get("replies",
-                                   EntityCollection(self.context, ChatMessage,
-                                                    ResourcePath("replies", self.resource_path)))
+        return self.properties.get(
+            "replies",
+            EntityCollection(
+                self.context, ChatMessage, ResourcePath("replies", self.resource_path)
+            ),
+        )
 
     @property
     def web_url(self):

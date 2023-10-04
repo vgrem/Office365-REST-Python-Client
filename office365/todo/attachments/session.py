@@ -28,7 +28,7 @@ class AttachmentSession(Entity):
         if default_value is None:
             property_mapping = {
                 "expirationDateTime": self.expiration_datetime,
-                "nextExpectedRanges": self.next_expected_ranges
+                "nextExpectedRanges": self.next_expected_ranges,
             }
             default_value = property_mapping.get(name, None)
         return super(AttachmentSession, self).get_property(name, default_value)

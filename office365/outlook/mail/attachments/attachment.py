@@ -11,6 +11,7 @@ class Attachment(Entity):
 
         :type file_object: typing.IO
         """
+
         def _save_content(return_type):
             file_object.write(return_type.value)
 

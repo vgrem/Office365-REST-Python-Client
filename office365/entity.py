@@ -40,7 +40,7 @@ class Entity(ClientObject):
         """The unique identifier of the entity.
         :rtype: str or None
         """
-        return self.properties.get('id', None)
+        return self.properties.get("id", None)
 
     @property
     def property_ref_name(self):
@@ -51,9 +51,13 @@ class Entity(ClientObject):
         if name == self.property_ref_name:
             if self._resource_path is None:
                 if isinstance(self.parent_collection.resource_path, EntityPath):
-                    self._resource_path = self.parent_collection.resource_path.patch(value)
+                    self._resource_path = self.parent_collection.resource_path.patch(
+                        value
+                    )
                 else:
-                    self._resource_path = ResourcePath(value, self.parent_collection.resource_path)
+                    self._resource_path = ResourcePath(
+                        value, self.parent_collection.resource_path
+                    )
             else:
                 self._resource_path.patch(value, inplace=True)
         return self

@@ -26,33 +26,31 @@ class AppRoleAssignment(DirectoryObject):
     @property
     def created_datetime(self):
         """The time when the app role assignment was created."""
-        return self.properties.get('createdDateTime', datetime.min)
+        return self.properties.get("createdDateTime", datetime.min)
 
     @property
     def principal_display_name(self):
         """The display name of the user, group, or service principal that was granted the app role assignment."""
-        return self.properties.get('principalDisplayName', None)
+        return self.properties.get("principalDisplayName", None)
 
     @property
     def principal_id(self):
         """The unique identifier (id) for the user, security group, or service principal being granted the app role.
         Security groups with dynamic memberships are supported. Required on create."""
-        return self.properties.get('principalId', None)
+        return self.properties.get("principalId", None)
 
     @property
     def principal_type(self):
         """The type of the assigned principal. This can either be User, Group, or ServicePrincipal."""
-        return self.properties.get('principalType', None)
+        return self.properties.get("principalType", None)
 
     @property
     def resource_display_name(self):
         """The display name of the resource app's service principal to which the assignment is made."""
-        return self.properties.get('resourceDisplayName', None)
+        return self.properties.get("resourceDisplayName", None)
 
     @property
     def resource_id(self):
         """The unique identifier (id) for the resource service principal for which the assignment is made.
-        Required on create. """
-        return self.properties.get('resourceId', None)
-
-
+        Required on create."""
+        return self.properties.get("resourceId", None)

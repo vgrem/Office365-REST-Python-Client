@@ -3,7 +3,6 @@ from office365.onedrive.termstore.groups.group import Group
 
 
 class GroupCollection(EntityCollection):
-
     def __init__(self, context, resource_path=None):
         super(GroupCollection, self).__init__(context, Group, resource_path)
 

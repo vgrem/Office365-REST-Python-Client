@@ -8,7 +8,7 @@ class ODataType(object):
         int: "Edm.Int32",
         str: "Edm.String",
         datetime.datetime: "Edm.DateTimeOffset",
-        uuid.UUID: "Edm.Guid"
+        uuid.UUID: "Edm.Guid",
     }
     """Primitive OData data type mapping"""
 
@@ -24,15 +24,15 @@ class ODataType(object):
         """
         :type value: dict
         """
-        key = value.get('Key', None)
-        type_name = value.get('ValueType', None)
+        key = value.get("Key", None)
+        type_name = value.get("ValueType", None)
         raw_value = value.get("Value", None)
         try:
-            if type_name == 'Edm.Int64':
+            if type_name == "Edm.Int64":
                 return key, int(raw_value)
-            elif type_name == 'Edm.Double':
+            elif type_name == "Edm.Double":
                 return key, float(raw_value)
-            elif type_name == 'Edm.Boolean':
+            elif type_name == "Edm.Boolean":
                 return key, raw_value == "true"
             else:
                 return key, raw_value
@@ -60,7 +60,12 @@ class ODataType(object):
         :param str value: Represents date and time with values ranging from 12:00:00 midnight, January 1, 1753 A.D.
             through 11:59:59 P.M, December 9999 A.D.
         """
-        known_formats = ["%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S.%f"]
+        known_formats = [
+            "%Y-%m-%dT%H:%M:%SZ",
+            "%Y-%m-%dT%H:%M:%S.%fZ",
+            "%Y-%m-%dT%H:%M:%S",
+            "%Y-%m-%dT%H:%M:%S.%f",
+        ]
 
         result = None
         for cur_format in known_formats:
@@ -78,6 +83,7 @@ class ODataType(object):
         :param T client_type: Client value type
         """
         from office365.runtime.client_value import ClientValue
+
         if issubclass(client_type, ClientValue):
             client_value = client_type()
             return client_value.entity_type_name

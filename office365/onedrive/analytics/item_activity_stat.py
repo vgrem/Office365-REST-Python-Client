@@ -50,12 +50,17 @@ class ItemActivityStat(Entity):
 
     @property
     def start_datetime(self):
-        """	When the interval starts."""
+        """When the interval starts."""
         return self.properties.get("startDateTime", datetime.min)
 
     @property
     def activities(self):
         """Exposes the itemActivities represented in this itemActivityStat resource."""
-        return self.properties.get('activities',
-                                   EntityCollection(self.context, ItemActivity,
-                                                    ResourcePath("activities", self.resource_path)))
+        return self.properties.get(
+            "activities",
+            EntityCollection(
+                self.context,
+                ItemActivity,
+                ResourcePath("activities", self.resource_path),
+            ),
+        )

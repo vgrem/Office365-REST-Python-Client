@@ -14,8 +14,10 @@ existing_subscriptions = client.subscriptions.get().execute_query()
 
 expires = datetime.datetime.now() + datetime.timedelta(hours=120)
 notification_url = "https://webhook.azurewebsites.net/api/send/myNotifyClient"
-subscription = client.subscriptions.add("created",
-                                        notification_url,
-                                        client.me.mail_folders["Inbox"].messages.resource_path,
-                                        expires).execute_query()
+subscription = client.subscriptions.add(
+    "created",
+    notification_url,
+    client.me.mail_folders["Inbox"].messages.resource_path,
+    expires,
+).execute_query()
 print(subscription)

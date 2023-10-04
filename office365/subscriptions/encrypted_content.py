@@ -4,8 +4,14 @@ from office365.runtime.client_value import ClientValue
 class ChangeNotificationEncryptedContent(ClientValue):
     """Represents the encrypted data attached to a change notification."""
 
-    def __init__(self, data=None, data_key=None, data_signature=None, encryption_certificate_id=None,
-                 encryption_certificate_thumbprint=None):
+    def __init__(
+        self,
+        data=None,
+        data_key=None,
+        data_signature=None,
+        encryption_certificate_id=None,
+        encryption_certificate_thumbprint=None,
+    ):
         """
         :param str data: Base64-encoded encrypted data that produces a full resource represented as JSON.
             The data has been encrypted with the provided dataKey using an AES/CBC/PKCS5PADDING cipher suite.

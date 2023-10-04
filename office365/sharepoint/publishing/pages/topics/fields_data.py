@@ -2,7 +2,6 @@ from office365.sharepoint.publishing.pages.fields_data import SitePageFieldsData
 
 
 class TopicPageFieldsData(SitePageFieldsData):
-
     def __init__(self, entity_id=None, entity_relations=None):
         super(TopicPageFieldsData, self).__init__()
         self.EntityId = entity_id

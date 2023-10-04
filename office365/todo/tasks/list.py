@@ -11,16 +11,22 @@ class TodoTaskList(Entity):
     @property
     def extensions(self):
         """The collection of open extensions defined for the task list."""
-        return self.properties.get('extensions',
-                                   EntityCollection(self.context, Extension,
-                                                    ResourcePath("extensions", self.resource_path)))
+        return self.properties.get(
+            "extensions",
+            EntityCollection(
+                self.context, Extension, ResourcePath("extensions", self.resource_path)
+            ),
+        )
 
     @property
     def tasks(self):
         """The tasks in this task list."""
-        return self.properties.get('tasks',
-                                   EntityCollection(self.context, TodoTask,
-                                                    ResourcePath("tasks", self.resource_path)))
+        return self.properties.get(
+            "tasks",
+            EntityCollection(
+                self.context, TodoTask, ResourcePath("tasks", self.resource_path)
+            ),
+        )
 
     @property
     def entity_type_name(self):

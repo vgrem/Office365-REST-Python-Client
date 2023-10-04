@@ -13,16 +13,18 @@ from office365.directory.groups.collection import GroupCollection
 from office365.directory.groups.lifecycle_policy import GroupLifecyclePolicy
 from office365.directory.groups.setting_template import GroupSettingTemplate
 from office365.directory.identities.container import IdentityContainer
-from office365.directory.identitygovernance.governance import IdentityGovernance
-from office365.directory.protection.information import InformationProtection
-from office365.directory.protection.root import IdentityProtectionRoot
 from office365.directory.identities.provider import IdentityProvider
+from office365.directory.identitygovernance.governance import IdentityGovernance
 from office365.directory.internal.paths.me import MePath
 from office365.directory.invitations.collection import InvitationCollection
 from office365.directory.licenses.subscribed_sku import SubscribedSku
 from office365.directory.object_collection import DirectoryObjectCollection
-from office365.directory.permissions.grants.resource_specific import ResourceSpecificPermissionGrant
+from office365.directory.permissions.grants.resource_specific import (
+    ResourceSpecificPermissionGrant,
+)
 from office365.directory.policies.root import PolicyRoot
+from office365.directory.protection.information import InformationProtection
+from office365.directory.protection.root import IdentityProtectionRoot
 from office365.directory.rolemanagement.management import RoleManagement
 from office365.directory.rolemanagement.role import DirectoryRole
 from office365.directory.security.security import Security
@@ -32,7 +34,6 @@ from office365.directory.users.collection import UserCollection
 from office365.directory.users.user import User
 from office365.education.root import EducationRoot
 from office365.entity_collection import EntityCollection
-from office365.search.external.external import External
 from office365.intune.devices.app_management import DeviceAppManagement
 from office365.intune.devices.management.management import DeviceManagement
 from office365.intune.organizations.contact import OrgContact
@@ -54,6 +55,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.search.entity import SearchEntity
+from office365.search.external.external import External
 from office365.subscriptions.collection import SubscriptionCollection
 from office365.teams.apps.catalog import AppCatalogs
 from office365.teams.chats.collection import ChatCollection
@@ -113,7 +115,7 @@ class GraphClient(ClientRuntimeContext):
         """Authenticate request."""
         token_json = self._acquire_token_callback()
         token = TokenResponse.from_json(token_json)
-        request.ensure_header('Authorization', 'Bearer {0}'.format(token.accessToken))
+        request.ensure_header("Authorization", "Bearer {0}".format(token.accessToken))
 
     @property
     def admin(self):
@@ -197,7 +199,9 @@ class GraphClient(ClientRuntimeContext):
     @property
     def group_setting_templates(self):
         """Group setting templates represent system-defined settings available to the tenant."""
-        return EntityCollection(self, GroupSettingTemplate, ResourcePath("groupSettingTemplates"))
+        return EntityCollection(
+            self, GroupSettingTemplate, ResourcePath("groupSettingTemplates")
+        )
 
     @property
     def contacts(self):
@@ -218,12 +222,17 @@ class GraphClient(ClientRuntimeContext):
     def directory_role_templates(self):
         """Represents a directory role templates in the directory"""
         from office365.directory.rolemanagement.template import DirectoryRoleTemplate
-        return EntityCollection(self, DirectoryRoleTemplate, ResourcePath("directoryRoleTemplates"))
+
+        return EntityCollection(
+            self, DirectoryRoleTemplate, ResourcePath("directoryRoleTemplates")
+        )
 
     @property
     def identity_providers(self):
         """"""
-        return EntityCollection(self, IdentityProvider, ResourcePath("identityProviders"))
+        return EntityCollection(
+            self, IdentityProvider, ResourcePath("identityProviders")
+        )
 
     @property
     def identity(self):
@@ -232,7 +241,9 @@ class GraphClient(ClientRuntimeContext):
     @property
     def application_templates(self):
         """Get the list of application templates in this organization."""
-        return EntityCollection(self, ApplicationTemplate, ResourcePath("applicationTemplates"))
+        return EntityCollection(
+            self, ApplicationTemplate, ResourcePath("applicationTemplates")
+        )
 
     @property
     def applications(self):
@@ -257,12 +268,15 @@ class GraphClient(ClientRuntimeContext):
     @property
     def group_lifecycle_policies(self):
         """A collection of lifecycle policies for a Microsoft 365 groups."""
-        return EntityCollection(self, GroupLifecyclePolicy, ResourcePath("groupLifecyclePolicies"))
+        return EntityCollection(
+            self, GroupLifecyclePolicy, ResourcePath("groupLifecyclePolicies")
+        )
 
     @property
     def group_settings(self):
         """Represents a directory roles in the directory"""
         from office365.directory.groups.setting import GroupSetting
+
         return GroupSetting(self, ResourcePath("groupSettings"))
 
     @property
@@ -298,6 +312,7 @@ class GraphClient(ClientRuntimeContext):
     def connections(self):
         """Get a list of the externalConnection objects and their properties."""
         from office365.search.external.connection import ExternalConnection
+
         return EntityCollection(self, ExternalConnection, ResourcePath("connections"))
 
     @property
@@ -353,7 +368,9 @@ class GraphClient(ClientRuntimeContext):
         """
         List all resource-specific permission grants
         """
-        return EntityCollection(self, ResourceSpecificPermissionGrant, ResourcePath("permissionGrants"))
+        return EntityCollection(
+            self, ResourceSpecificPermissionGrant, ResourcePath("permissionGrants")
+        )
 
     @property
     def print(self):
@@ -361,6 +378,7 @@ class GraphClient(ClientRuntimeContext):
         Used to manage printers and print jobs within Universal Print.
         """
         from office365.intune.printing.print import Print
+
         return Print(self, ResourcePath("print"))
 
     @property
@@ -397,11 +415,11 @@ class GraphClient(ClientRuntimeContext):
     @property
     def security(self):
         """The security resource is the entry point for the Security object model.
-        It returns a singleton security resource. It doesn't contain any usable properties."""
+        It returns a singleton security resource. It doesn't contain any usable properties.
+        """
         return Security(self, ResourcePath("security"))
 
     @property
     def schema_extensions(self):
         """Get a list of schemaExtension objects in your tenant"""
         return EntityCollection(self, SchemaExtension, ResourcePath("schemaExtensions"))
-

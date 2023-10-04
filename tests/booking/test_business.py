@@ -3,7 +3,6 @@ from tests.graph_case import GraphTestCase
 
 
 class TestBusiness(GraphTestCase):
-
     business = None  # type: BookingBusiness
 
     def test1_list_booking_business(self):
@@ -11,11 +10,13 @@ class TestBusiness(GraphTestCase):
         self.assertIsNotNone(result.resource_path)
 
     def test2_create_booking_business(self):
-        result = self.client.solutions.booking_businesses.add("Fourth Coffee").execute_query()
+        result = self.client.solutions.booking_businesses.add(
+            "Fourth Coffee"
+        ).execute_query()
         self.assertIsNotNone(result.resource_path)
         self.__class__.business = result
 
-    #def test3_get_staff_availability(self):
+    # def test3_get_staff_availability(self):
     #    result = self.__class__.business.get_staff_availability().execute_query()
     #    self.assertIsNotNone(result.resource_path)
 

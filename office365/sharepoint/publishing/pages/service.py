@@ -1,14 +1,14 @@
 from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.administration.orgassets.org_assets import OrgAssets
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.files.file import File
-from office365.sharepoint.publishing.sites.communication.site import CommunicationSite
 from office365.sharepoint.publishing.file_picker_options import FilePickerOptions
-from office365.sharepoint.publishing.primary_city_time import PrimaryCityTime
 from office365.sharepoint.publishing.pages.collection import SitePageCollection
+from office365.sharepoint.publishing.primary_city_time import PrimaryCityTime
+from office365.sharepoint.publishing.sites.communication.site import CommunicationSite
 
 
 class SitePageService(BaseEntity):
@@ -23,15 +23,20 @@ class SitePageService(BaseEntity):
     @property
     def pages(self):
         """Gets the SitePageCollection for the current web."""
-        return self.properties.get("pages",
-                                   SitePageCollection(self.context, ResourcePath("pages", self.resource_path)))
+        return self.properties.get(
+            "pages",
+            SitePageCollection(self.context, ResourcePath("pages", self.resource_path)),
+        )
 
     @property
     def communication_site(self):
         """Gets a CommunicationSite for the current web."""
-        return self.properties.get("CommunicationSite",
-                                   CommunicationSite(self.context,
-                                                     ResourcePath("CommunicationSite", self.resource_path)))
+        return self.properties.get(
+            "CommunicationSite",
+            CommunicationSite(
+                self.context, ResourcePath("CommunicationSite", self.resource_path)
+            ),
+        )
 
     @property
     def entity_type_name(self):
@@ -58,6 +63,7 @@ class SitePageService(BaseEntity):
             resp.raise_for_status()
             return_type.save_draft(title=title)
             self.context.after_execute(_draft_saved)
+
         self.context.after_execute(_page_created)
         return return_type
 
@@ -75,6 +81,7 @@ class SitePageService(BaseEntity):
             """
             resp.raise_for_status()
             return_type.publish()
+
         self.context.after_execute(_page_created)
         return return_type
 
@@ -85,7 +92,9 @@ class SitePageService(BaseEntity):
 
         """
         return_type = ClientResult(self.context, bool())
-        qry = ServiceOperationQuery(self, "CanCreatePage", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "CanCreatePage", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -95,7 +104,9 @@ class SitePageService(BaseEntity):
         MUST return true if the user has permission to create a site page, otherwise MUST return false.
         """
         return_type = ClientResult(self.context, bool())
-        qry = ServiceOperationQuery(self, "CanCreatePromotedPage", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "CanCreatePromotedPage", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -107,7 +118,9 @@ class SitePageService(BaseEntity):
         """
         return_type = ClientResult(context, StringCollection())
         svc = SitePageService(context)
-        qry = ServiceOperationQuery(svc, "GetCurrentUserMemberships", None, None, None, return_type, True)
+        qry = ServiceOperationQuery(
+            svc, "GetCurrentUserMemberships", None, None, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
@@ -122,7 +135,9 @@ class SitePageService(BaseEntity):
         return_type = PrimaryCityTime(context)
         binding_type = SitePageService(context)
         params = {"cityName": city_name}
-        qry = ServiceOperationQuery(binding_type, "GetTimeZone", params, None, None, return_type, True)
+        qry = ServiceOperationQuery(
+            binding_type, "GetTimeZone", params, None, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
@@ -136,7 +151,9 @@ class SitePageService(BaseEntity):
         return_type = ClientResult(context)
         binding_type = SitePageService(context)
         params = {"title": title}
-        qry = ServiceOperationQuery(binding_type, "ComputeFileName", params, None, None, return_type, True)
+        qry = ServiceOperationQuery(
+            binding_type, "ComputeFileName", params, None, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
@@ -152,8 +169,15 @@ class SitePageService(BaseEntity):
         """
         return_type = ClientResult(context)
         binding_type = SitePageService(context)
-        qry = ServiceOperationQuery(binding_type, "IsFilePickerExternalImageSearchEnabled", None, None, None,
-                                    return_type, True)
+        qry = ServiceOperationQuery(
+            binding_type,
+            "IsFilePickerExternalImageSearchEnabled",
+            None,
+            None,
+            None,
+            return_type,
+            True,
+        )
         context.add_query(qry)
         return return_type
 
@@ -165,7 +189,9 @@ class SitePageService(BaseEntity):
         """
         return_type = ClientResult(context, OrgAssets())
         svc = SitePageService(context)
-        qry = ServiceOperationQuery(svc, "OrgAssets", None, None, None, return_type, True)
+        qry = ServiceOperationQuery(
+            svc, "OrgAssets", None, None, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
@@ -177,7 +203,9 @@ class SitePageService(BaseEntity):
         """
         return_type = ClientResult(context, FilePickerOptions())
         svc = SitePageService(context)
-        qry = ServiceOperationQuery(svc, "FilePickerTabOptions", None, None, None, return_type, True)
+        qry = ServiceOperationQuery(
+            svc, "FilePickerTabOptions", None, None, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
@@ -192,12 +220,20 @@ class SitePageService(BaseEntity):
         :return: File
         """
         return_type = File(self.context)
-        params = {"pageName": page_name, "imageFileName": image_file_name, "imageStream": image_stream}
-        qry = ServiceOperationQuery(self, "AddImage", params, None, None, return_type, True)
+        params = {
+            "pageName": page_name,
+            "imageFileName": image_file_name,
+            "imageStream": image_stream,
+        }
+        qry = ServiceOperationQuery(
+            self, "AddImage", params, None, None, return_type, True
+        )
         self.context.add_query(qry)
         return return_type
 
-    def add_image_from_external_url(self, page_name, image_file_name, external_url, sub_folder_name, page_id):
+    def add_image_from_external_url(
+        self, page_name, image_file_name, external_url, sub_folder_name, page_id
+    ):
         """
         Adds an image to the site assets library of the current web.
         Returns a File object ([MS-CSOMSPT] section 3.2.5.64) that represents the image.
@@ -209,13 +245,16 @@ class SitePageService(BaseEntity):
         :param str page_id:
         """
         return_type = File(self.context)
-        params = {"pageName": page_name,
-                  "imageFileName": image_file_name,
-                  "externalUrl": external_url,
-                  "subFolderName": sub_folder_name,
-                  "pageId": page_id
-                  }
-        qry = ServiceOperationQuery(self, "AddImageFromExternalUrl", params, None, None, return_type)
+        params = {
+            "pageName": page_name,
+            "imageFileName": image_file_name,
+            "externalUrl": external_url,
+            "subFolderName": sub_folder_name,
+            "pageId": page_id,
+        }
+        qry = ServiceOperationQuery(
+            self, "AddImageFromExternalUrl", params, None, None, return_type
+        )
         qry.static = True
         self.context.add_query(qry)
         return return_type

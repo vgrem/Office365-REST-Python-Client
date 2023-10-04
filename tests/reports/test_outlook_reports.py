@@ -2,7 +2,6 @@ from tests.graph_case import GraphTestCase
 
 
 class TestOutlookReports(GraphTestCase):
-
     @classmethod
     def setUpClass(cls):
         super(TestOutlookReports, cls).setUpClass()
@@ -18,5 +17,3 @@ class TestOutlookReports(GraphTestCase):
     def test2_get_m365_app_user_counts(self):
         result = self.client.reports.get_m365_app_user_counts("D7").execute_query()
         self.assertIsNotNone(result.value)
-
-

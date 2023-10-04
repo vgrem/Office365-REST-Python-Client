@@ -3,7 +3,7 @@ import os
 import tempfile
 
 from office365.sharepoint.client_context import ClientContext
-from tests import test_team_site_url, test_client_credentials
+from tests import test_client_credentials, test_team_site_url
 
 "Demonstrates how to export a List data as csv"
 
@@ -17,7 +17,7 @@ if len(list_items) == 0:
 
 # 2.export to a file
 path = os.path.join(tempfile.mkdtemp(), "Contacts.csv")
-with open(path, 'w') as fh:
+with open(path, "w") as fh:
     fields = list_items[0].properties.keys()
     w = csv.DictWriter(fh, fields)
     w.writeheader()

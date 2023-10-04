@@ -2,7 +2,6 @@ from office365.runtime.client_value import ClientValue
 
 
 class PublicationFacet(ClientValue):
-
     def __init__(self, level=None, version_id=None):
         """
         The publicationFacet resource provides details on the published status of a driveItemVersion

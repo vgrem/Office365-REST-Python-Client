@@ -36,12 +36,15 @@ class ObjectSharingInformationUser(BaseEntity):
         """
         The principal with whom a securable object is shared. It is either a user or a group.
         """
-        return self.properties.get('Principal',
-                                   Principal(self.context, ResourcePath("Principal", self.resource_path)))
+        return self.properties.get(
+            "Principal",
+            Principal(self.context, ResourcePath("Principal", self.resource_path)),
+        )
 
     def user(self):
         """
         Specifies the user with whom a securable object is shared.
         """
-        return self.properties.get('User',
-                                   User(self.context, ResourcePath("User", self.resource_path)))
+        return self.properties.get(
+            "User", User(self.context, ResourcePath("User", self.resource_path))
+        )

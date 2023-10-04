@@ -21,13 +21,17 @@ from office365.onedrive.files.system_info import FileSystemInfo
 from office365.onedrive.folders.folder import Folder
 from office365.onedrive.internal.paths.children import ChildrenPath
 from office365.onedrive.internal.paths.url import UrlPath
-from office365.onedrive.internal.queries.resumable_file_upload import create_resumable_file_upload_query
+from office365.onedrive.internal.queries.resumable_file_upload import (
+    create_resumable_file_upload_query,
+)
 from office365.onedrive.listitems.item_reference import ItemReference
 from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.operations.pending import PendingOperations
 from office365.onedrive.permissions.collection import PermissionCollection
 from office365.onedrive.permissions.permission import Permission
-from office365.onedrive.sensitivitylabels.extract_result import ExtractSensitivityLabelsResult
+from office365.onedrive.sensitivitylabels.extract_result import (
+    ExtractSensitivityLabelsResult,
+)
 from office365.onedrive.shares.shared import Shared
 from office365.onedrive.versions.drive_item import DriveItemVersion
 from office365.onedrive.workbooks.workbook import Workbook
@@ -44,7 +48,7 @@ from office365.subscriptions.collection import SubscriptionCollection
 
 class DriveItem(BaseItem):
     """The driveItem resource represents a file, folder, or other item stored in a drive. All file system objects in
-    OneDrive and SharePoint are returned as driveItem resources """
+    OneDrive and SharePoint are returned as driveItem resources"""
 
     def get_by_path(self, url_path):
         """
@@ -52,7 +56,9 @@ class DriveItem(BaseItem):
 
         :type url_path: str
         """
-        return DriveItem(self.context, UrlPath(url_path, self.resource_path), self.children)
+        return DriveItem(
+            self.context, UrlPath(url_path, self.resource_path), self.children
+        )
 
     def create_powerpoint(self, name):
         """
@@ -62,8 +68,15 @@ class DriveItem(BaseItem):
         """
         return self.upload(name, None)
 
-    def create_link(self, link_type, scope="", expiration_datetime=None, password=None, message=None,
-                    retain_inherited_permissions=None):
+    def create_link(
+        self,
+        link_type,
+        scope="",
+        expiration_datetime=None,
+        password=None,
+        message=None,
+        retain_inherited_permissions=None,
+    ):
         """
         The createLink action will create a new sharing link if the specified link type doesn't already exist
         for the calling application. If a sharing link of the specified type already exists for the app,
@@ -86,11 +99,13 @@ class DriveItem(BaseItem):
             "message": message,
             "expirationDateTime": expiration_datetime,
             "password": password,
-            "retainInheritedPermissions": retain_inherited_permissions
+            "retainInheritedPermissions": retain_inherited_permissions,
         }
         return_type = Permission(self.context)
         self.permissions.add_child(return_type)
-        qry = ServiceOperationQuery(self, "createLink", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "createLink", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -101,7 +116,9 @@ class DriveItem(BaseItem):
         of a file, an extraction error will be thrown with the applicable error code and message.
         """
         return_type = ClientResult(self.context, ExtractSensitivityLabelsResult())
-        qry = ServiceOperationQuery(self, "extractSensitivityLabels", return_type=return_type)
+        qry = ServiceOperationQuery(
+            self, "extractSensitivityLabels", return_type=return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -138,14 +155,9 @@ class DriveItem(BaseItem):
         :param str checkin_as: The status of the document after the check-in operation is complete.
             Can be published or unspecified.
         """
-        qry = ServiceOperationQuery(self,
-                                    "checkin",
-                                    None,
-                                    {
-                                        "comment": comment,
-                                        "checkInAs": checkin_as
-                                    }
-                                    )
+        qry = ServiceOperationQuery(
+            self, "checkin", None, {"comment": comment, "checkInAs": checkin_as}
+        )
         self.context.add_query(qry)
         return self
 
@@ -165,7 +177,9 @@ class DriveItem(BaseItem):
         """
         file_name = os.path.basename(source_path)
         return_type = DriveItem(self.context, UrlPath(file_name, self.resource_path))
-        qry = create_resumable_file_upload_query(return_type, source_path, chunk_size, chunk_uploaded)
+        qry = create_resumable_file_upload_query(
+            return_type, source_path, chunk_size, chunk_uploaded
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -191,7 +205,9 @@ class DriveItem(BaseItem):
         :type content: str or bytes or None
         """
         return_type = DriveItem(self.context, UrlPath(name, self.resource_path))
-        qry = ServiceOperationQuery(return_type, "content", None, content, None, return_type)
+        qry = ServiceOperationQuery(
+            return_type, "content", None, content, None, return_type
+        )
         self.children.add_child(qry.return_type)
 
         def _modify_query(request):
@@ -208,12 +224,12 @@ class DriveItem(BaseItem):
 
         :param str or typing.IO path_or_file:
         """
-        if hasattr(path_or_file, 'read'):
+        if hasattr(path_or_file, "read"):
             content = path_or_file.read()
             name = os.path.basename(path_or_file.name)
             return self.upload(name, content)
         else:
-            with open(path_or_file, 'rb') as f:
+            with open(path_or_file, "rb") as f:
                 content = f.read()
             name = os.path.basename(path_or_file)
             return self.upload(name, content)
@@ -250,7 +266,9 @@ class DriveItem(BaseItem):
         self.get_content().after_execute(_save_content)
         return self
 
-    def download_session(self, file_object, chunk_downloaded=None, chunk_size=1024 * 1024):
+    def download_session(
+        self, file_object, chunk_downloaded=None, chunk_size=1024 * 1024
+    ):
         """
         By default, file gets downloaded immediately.
         For a large files reading the whole content of a file at once into memory should be avoided.
@@ -294,7 +312,7 @@ class DriveItem(BaseItem):
         payload = {
             "name": name,
             "folder": {},
-            "@microsoft.graph.conflictBehavior": conflict_behavior
+            "@microsoft.graph.conflictBehavior": conflict_behavior,
         }
         qry = CreateEntityQuery(self.children, payload, return_type)
         self.context.add_query(qry)
@@ -326,7 +344,9 @@ class DriveItem(BaseItem):
             """
             :type request: office365.runtime.http.request_options.RequestOptions
             """
-            request.url += "?@microsoft.graph.conflictBehavior={0}".format(conflict_behavior)
+            request.url += "?@microsoft.graph.conflictBehavior={0}".format(
+                conflict_behavior
+            )
 
         def _process_response(resp):
             """
@@ -343,18 +363,18 @@ class DriveItem(BaseItem):
             :param office365.onedrive.listitems.item_reference.ItemReference or None parent_reference:  Reference to the
              parent item the copy will be created in.
             """
-            payload = {
-                "name": name,
-                "parentReference": parent_reference
-            }
+            payload = {"name": name, "parentReference": parent_reference}
             self.context.before_execute(_create_request)
             self.context.after_execute(_process_response)
             qry = ServiceOperationQuery(self, "copy", None, payload, None, return_type)
             self.context.add_query(qry)
 
         if isinstance(parent, DriveItem):
+
             def _drive_item_loaded():
-                parent_reference = ItemReference(drive_id=parent.parent_reference.driveId, _id=parent.id)
+                parent_reference = ItemReference(
+                    drive_id=parent.parent_reference.driveId, _id=parent.id
+                )
                 _create_and_add_query(parent_reference)
 
             parent.ensure_property("parentReference", _drive_item_loaded)
@@ -375,10 +395,7 @@ class DriveItem(BaseItem):
         return_type = ClientResult(self.context, str())
 
         def _create_and_add_query(parent_reference):
-            payload = {
-                "name": name,
-                "parentReference": parent_reference
-            }
+            payload = {"name": name, "parentReference": parent_reference}
 
             def _construct_request(request):
                 request.method = HttpMethod.Patch
@@ -388,6 +405,7 @@ class DriveItem(BaseItem):
             self.context.add_query(qry)
 
         if isinstance(parent, DriveItem):
+
             def _drive_item_loaded():
                 _create_and_add_query(ItemReference(_id=parent.id))
 
@@ -408,13 +426,24 @@ class DriveItem(BaseItem):
 
         :type query_text: str
         """
-        return_type = EntityCollection(self.context, DriveItem, ResourcePath("items", self.resource_path))
+        return_type = EntityCollection(
+            self.context, DriveItem, ResourcePath("items", self.resource_path)
+        )
         qry = FunctionQuery(self, "search", {"q": query_text}, return_type)
         self.context.add_query(qry)
         return return_type
 
-    def invite(self, recipients, message, require_sign_in=True, send_invitation=True, roles=None,
-               expiration_datetime=None, password=None, retain_inherited_permissions=None):
+    def invite(
+        self,
+        recipients,
+        message,
+        require_sign_in=True,
+        send_invitation=True,
+        roles=None,
+        expiration_datetime=None,
+        password=None,
+        retain_inherited_permissions=None,
+    ):
         """
         Sends a sharing invitation for a driveItem. A sharing invitation provides permissions to the recipients
         and optionally sends them an email with a sharing link.
@@ -443,11 +472,15 @@ class DriveItem(BaseItem):
             "requireSignIn": require_sign_in,
             "sendInvitation": send_invitation,
             "roles": roles,
-            "recipients": ClientValueCollection(DriveRecipient, [DriveRecipient.from_email(r) for r in recipients]),
+            "recipients": ClientValueCollection(
+                DriveRecipient, [DriveRecipient.from_email(r) for r in recipients]
+            ),
             "message": message,
-            "expirationDateTime": expiration_datetime.isoformat() + "Z" if expiration_datetime else None,
+            "expirationDateTime": expiration_datetime.isoformat() + "Z"
+            if expiration_datetime
+            else None,
             "password": password,
-            "retainInheritedPermissions": retain_inherited_permissions
+            "retainInheritedPermissions": retain_inherited_permissions,
         }
         qry = ServiceOperationQuery(self, "invite", None, payload, None, return_type)
         self.context.add_query(qry)
@@ -462,13 +495,15 @@ class DriveItem(BaseItem):
         :param datetime.datetime end_dt: The end time over which to aggregate activities.
         :param str interval: The aggregation interval.
         """
-        return_type = EntityCollection(self.context, ItemActivityStat, self.resource_path)
+        return_type = EntityCollection(
+            self.context, ItemActivityStat, self.resource_path
+        )
 
         def _create_query():
             params = {
-                "startDateTime": start_dt.strftime('%m-%d-%Y') if start_dt else None,
-                "endDateTime": end_dt.strftime('%m-%d-%Y') if end_dt else None,
-                "interval": interval
+                "startDateTime": start_dt.strftime("%m-%d-%Y") if start_dt else None,
+                "endDateTime": end_dt.strftime("%m-%d-%Y") if end_dt else None,
+                "interval": interval,
             }
             return FunctionQuery(self, "getActivitiesByInterval", params, return_type)
 
@@ -497,10 +532,7 @@ class DriveItem(BaseItem):
         :param ItemReference or None parent_reference: Optional. Reference to the parent item the deleted item will
              be restored to.
         """
-        payload = {
-            "name": name,
-            "parentReference": parent_reference
-        }
+        payload = {"name": name, "parentReference": parent_reference}
         return_type = DriveItem(self.context)
         self.children.add_child(return_type)
         qry = ServiceOperationQuery(self, "restore", None, payload, None, return_type)
@@ -517,10 +549,7 @@ class DriveItem(BaseItem):
         :param int zoom: Optional. Zoom level to start at, if applicable.
 
         """
-        payload = {
-            "page": page,
-            "zoom": zoom
-        }
+        payload = {"page": page, "zoom": zoom}
         return_type = ClientResult(self.context, ItemPreviewInfo())
         qry = ServiceOperationQuery(self, "preview", None, payload, None, return_type)
         self.context.add_query(qry)
@@ -531,10 +560,7 @@ class DriveItem(BaseItem):
         :type challenge_token: str
         :type password: str
         """
-        payload = {
-            "challengeToken": challenge_token,
-            "password": password
-        }
+        payload = {"challengeToken": challenge_token, "password": password}
         qry = ServiceOperationQuery(self, "validatePermission", None, payload)
         self.context.add_query(qry)
         return self
@@ -570,17 +596,17 @@ class DriveItem(BaseItem):
     @property
     def file_system_info(self):
         """File system information on client."""
-        return self.properties.get('fileSystemInfo', FileSystemInfo())
+        return self.properties.get("fileSystemInfo", FileSystemInfo())
 
     @property
     def folder(self):
         """Folder metadata, if the item is a folder."""
-        return self.properties.get('folder', Folder())
+        return self.properties.get("folder", Folder())
 
     @property
     def file(self):
         """File metadata, if the item is a file."""
-        return self.properties.get('file', File())
+        return self.properties.get("file", File())
 
     @property
     def is_folder(self):
@@ -596,7 +622,7 @@ class DriveItem(BaseItem):
     def shared(self):
         """Indicates that the item has been shared with others and provides information about the shared state
         of the item. Read-only."""
-        return self.properties.get('shared', Shared())
+        return self.properties.get("shared", Shared())
 
     @property
     def web_dav_url(self):
@@ -611,89 +637,118 @@ class DriveItem(BaseItem):
         """Collection containing Item objects for the immediate children of Item. Only items representing folders
         have children.
         """
-        return self.properties.get('children',
-                                   EntityCollection(self.context, DriveItem, ChildrenPath(self.resource_path)))
+        return self.properties.get(
+            "children",
+            EntityCollection(self.context, DriveItem, ChildrenPath(self.resource_path)),
+        )
 
     @property
     def listItem(self):
         """For drives in SharePoint, the associated document library list item."""
-        return self.properties.get('listItem', ListItem(self.context, ResourcePath("listItem", self.resource_path)))
+        return self.properties.get(
+            "listItem",
+            ListItem(self.context, ResourcePath("listItem", self.resource_path)),
+        )
 
     @property
     def workbook(self):
-        """For files that are Excel spreadsheets, accesses the workbook API to work with the spreadsheet's contents. """
-        return self.properties.get('workbook', Workbook(self.context, ResourcePath("workbook", self.resource_path)))
+        """For files that are Excel spreadsheets, accesses the workbook API to work with the spreadsheet's contents."""
+        return self.properties.get(
+            "workbook",
+            Workbook(self.context, ResourcePath("workbook", self.resource_path)),
+        )
 
     @property
     def pending_operations(self):
         """If present, indicates that one or more operations that might affect the state of the driveItem are pending
         completion. Read-only."""
-        return self.properties.get('pendingOperations', PendingOperations())
+        return self.properties.get("pendingOperations", PendingOperations())
 
     @property
     def permissions(self):
         """The set of permissions for the item. Read-only. Nullable."""
-        return self.properties.get('permissions',
-                                   PermissionCollection(self.context, ResourcePath("permissions", self.resource_path)))
+        return self.properties.get(
+            "permissions",
+            PermissionCollection(
+                self.context, ResourcePath("permissions", self.resource_path)
+            ),
+        )
 
     @property
     def publication(self):
         """Provides information about the published or checked-out state of an item,
-        in locations that support such actions. This property is not returned by default. Read-only."""
-        return self.properties.get('publication', PublicationFacet())
+        in locations that support such actions. This property is not returned by default. Read-only.
+        """
+        return self.properties.get("publication", PublicationFacet())
 
     @property
     def remote_item(self):
         """Remote item data, if the item is shared from a drive other than the one being accessed. Read-only."""
-        return self.properties.get('remoteItem', RemoteItem())
+        return self.properties.get("remoteItem", RemoteItem())
 
     @property
     def special_folder(self):
         """If the current item is also available as a special folder, this facet is returned. Read-only."""
-        return self.properties.get('specialFolder', SpecialFolder())
+        return self.properties.get("specialFolder", SpecialFolder())
 
     @property
     def versions(self):
         """The list of previous versions of the item. For more info, see getting previous versions.
         Read-only. Nullable."""
-        return self.properties.get('versions',
-                                   EntityCollection(self.context, DriveItemVersion,
-                                                    ResourcePath("versions", self.resource_path)))
+        return self.properties.get(
+            "versions",
+            EntityCollection(
+                self.context,
+                DriveItemVersion,
+                ResourcePath("versions", self.resource_path),
+            ),
+        )
 
     @property
     def thumbnails(self):
         """Collection containing ThumbnailSet objects associated with the item. For more info, see getting thumbnails.
         Read-only. Nullable."""
-        return self.properties.get('thumbnails',
-                                   EntityCollection(self.context, ThumbnailSet,
-                                                    ResourcePath("thumbnails", self.resource_path)))
+        return self.properties.get(
+            "thumbnails",
+            EntityCollection(
+                self.context,
+                ThumbnailSet,
+                ResourcePath("thumbnails", self.resource_path),
+            ),
+        )
 
     @property
     def analytics(self):
         """Analytics about the view activities that took place on this item."""
-        return self.properties.get('analytics',
-                                   ItemAnalytics(self.context, ResourcePath("analytics", self.resource_path)))
+        return self.properties.get(
+            "analytics",
+            ItemAnalytics(self.context, ResourcePath("analytics", self.resource_path)),
+        )
 
     @property
     def delta(self):
         """This method allows your app to track changes to a drive item and its children over time."""
-        return self.properties.get('delta',
-                                   EntityCollection(self.context, DriveItem, DeltaPath(self.resource_path)))
+        return self.properties.get(
+            "delta",
+            EntityCollection(self.context, DriveItem, DeltaPath(self.resource_path)),
+        )
 
     @property
     def subscriptions(self):
-        """The set of subscriptions on the driveItem.
-        """
-        return self.properties.get('subscriptions',
-                                   SubscriptionCollection(self.context,
-                                                          ResourcePath("subscriptions", self.resource_path)))
+        """The set of subscriptions on the driveItem."""
+        return self.properties.get(
+            "subscriptions",
+            SubscriptionCollection(
+                self.context, ResourcePath("subscriptions", self.resource_path)
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "fileSystemInfo": self.file_system_info,
                 "remoteItem": self.remote_item,
-                "specialFolder": self.special_folder
+                "specialFolder": self.special_folder,
             }
             default_value = property_mapping.get(name, None)
         return super(DriveItem, self).get_property(name, default_value)

@@ -9,7 +9,6 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class NotebookCollection(EntityCollection):
-
     def __init__(self, context, resource_path=None):
         super(NotebookCollection, self).__init__(context, Notebook, resource_path)
 
@@ -33,7 +32,9 @@ class NotebookCollection(EntityCollection):
         """
         return_type = ClientResult(self.context, CopyNotebookModel())
         params = {"webUrl": web_url}
-        qry = ServiceOperationQuery(self, "getNotebookFromWebUrl", params, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "getNotebookFromWebUrl", params, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 

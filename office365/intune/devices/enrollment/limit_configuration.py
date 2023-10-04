@@ -1,4 +1,6 @@
-from office365.intune.devices.enrollment.configuration import DeviceEnrollmentConfiguration
+from office365.intune.devices.enrollment.configuration import (
+    DeviceEnrollmentConfiguration,
+)
 
 
 class DeviceEnrollmentLimitConfiguration(DeviceEnrollmentConfiguration):

@@ -4,10 +4,11 @@ from office365.sharepoint.base_entity import BaseEntity
 
 
 class HomeSiteNavigationSettings(BaseEntity):
-
     def __init__(self, context, resource_path=None):
         if resource_path is None:
-            resource_path = ResourcePath("Microsoft.SharePoint.Navigation.REST.HomeSiteNavigationSettings")
+            resource_path = ResourcePath(
+                "Microsoft.SharePoint.Navigation.REST.HomeSiteNavigationSettings"
+            )
         super(HomeSiteNavigationSettings, self).__init__(context, resource_path)
 
     def enable_global_navigation(self, is_enabled):

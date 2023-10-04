@@ -11,6 +11,7 @@ class Trending(Entity):
     @property
     def resource(self):
         """Used for navigating to the trending document."""
-        return self.properties.get('resource',
-                                   Entity(self.context, ResourcePath("resource", self.resource_path)))
-
+        return self.properties.get(
+            "resource",
+            Entity(self.context, ResourcePath("resource", self.resource_path)),
+        )

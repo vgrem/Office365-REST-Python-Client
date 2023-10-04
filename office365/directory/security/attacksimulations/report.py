@@ -1,4 +1,6 @@
-from office365.directory.security.attacksimulations.report_overview import SimulationReportOverview
+from office365.directory.security.attacksimulations.report_overview import (
+    SimulationReportOverview,
+)
 from office365.runtime.client_value import ClientValue
 
 

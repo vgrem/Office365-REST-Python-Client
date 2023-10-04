@@ -3,7 +3,6 @@ from office365.runtime.types.collections import StringCollection
 
 
 class GetRemoteItemInfoRequest(ClientValue):
-
     def __init__(self, RemoteItemUniqueIds=None):
         self.RemoteItemUniqueIds = StringCollection(RemoteItemUniqueIds)
 

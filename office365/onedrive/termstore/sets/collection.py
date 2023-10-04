@@ -6,7 +6,6 @@ from office365.runtime.queries.create_entity import CreateEntityQuery
 
 
 class SetCollection(EntityCollection):
-
     def __init__(self, context, resource_path=None, parent_group=None):
         """
         :param office365.onedrive.termstore.groups.group.Group parent_group: The parent group that contains the set
@@ -38,13 +37,17 @@ class SetCollection(EntityCollection):
 
         if self._parent_group is not None:
             props = {
-                "localizedNames": ClientValueCollection(LocalizedName, [LocalizedName(name)])
+                "localizedNames": ClientValueCollection(
+                    LocalizedName, [LocalizedName(name)]
+                )
             }
             self._parent_group.ensure_property("id", _group_loaded, props)
         elif parent_group is not None:
             props = {
                 "parentGroup": {"id": parent_group.id},
-                "localizedNames": ClientValueCollection(LocalizedName, [LocalizedName(name)])
+                "localizedNames": ClientValueCollection(
+                    LocalizedName, [LocalizedName(name)]
+                ),
             }
             parent_group.ensure_property("id", _group_loaded, props)
         else:

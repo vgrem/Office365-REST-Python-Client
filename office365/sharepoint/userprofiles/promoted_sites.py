@@ -25,10 +25,12 @@ class PromotedSites(BaseEntity):
             "url": url,
             "title": title,
             "description": description,
-            "imageUrl": image_url
+            "imageUrl": image_url,
         }
         binding_type = PromotedSites(context)
-        qry = ServiceOperationQuery(binding_type, "AddSiteLink", None, payload, is_static=True)
+        qry = ServiceOperationQuery(
+            binding_type, "AddSiteLink", None, payload, is_static=True
+        )
         context.add_query(qry)
         return binding_type
 
@@ -40,11 +42,11 @@ class PromotedSites(BaseEntity):
         :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
         :param int item_id: Specifies a number that represents the identifier of the site to remove
         """
-        payload = {
-            "itemID": item_id
-        }
+        payload = {"itemID": item_id}
         binding_type = PromotedSites(context)
-        qry = ServiceOperationQuery(binding_type, "DeleteSiteLink", None, payload, is_static=True)
+        qry = ServiceOperationQuery(
+            binding_type, "DeleteSiteLink", None, payload, is_static=True
+        )
         context.add_query(qry)
         return binding_type
 
@@ -55,7 +57,12 @@ class PromotedSites(BaseEntity):
         """
         return_type = ClientResult(context, ClientValueCollection(TileData))
         binding_type = PromotedSites(context)
-        qry = ServiceOperationQuery(binding_type, "GetPromotedLinksAsTiles", return_type=return_type, is_static=True)
+        qry = ServiceOperationQuery(
+            binding_type,
+            "GetPromotedLinksAsTiles",
+            return_type=return_type,
+            is_static=True,
+        )
         context.add_query(qry)
         return return_type
 

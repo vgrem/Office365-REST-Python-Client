@@ -1,23 +1,25 @@
 from datetime import datetime, timedelta
-from office365.runtime.compat import urlparse, timezone
+
+from office365.runtime.compat import timezone, urlparse
 
 
 class STSProfile(object):
-
     def __init__(self, authority_url):
         """
 
         :type authority_url: str
         """
         self.authorityUrl = authority_url
-        self.serviceUrl = 'https://login.microsoftonline.com'
-        self.securityTokenServicePath = 'extSTS.srf'
-        self.userRealmServicePath = 'GetUserRealm.srf'
-        self.tokenIssuer = 'urn:federation:MicrosoftOnline'
+        self.serviceUrl = "https://login.microsoftonline.com"
+        self.securityTokenServicePath = "extSTS.srf"
+        self.userRealmServicePath = "GetUserRealm.srf"
+        self.tokenIssuer = "urn:federation:MicrosoftOnline"
         now = datetime.now(tz=timezone.utc)
-        self.created = now.astimezone(timezone.utc).isoformat('T')[:-9] + 'Z'
-        self.expires = (now + timedelta(minutes=10)).astimezone(timezone.utc).isoformat('T')[:-9] + 'Z'
-        self.signInPage = '_forms/default.aspx?wa=wsignin1.0'
+        self.created = now.astimezone(timezone.utc).isoformat("T")[:-9] + "Z"
+        self.expires = (now + timedelta(minutes=10)).astimezone(timezone.utc).isoformat(
+            "T"
+        )[:-9] + "Z"
+        self.signInPage = "_forms/default.aspx?wa=wsignin1.0"
 
     @property
     def tenant(self):
@@ -33,4 +35,4 @@ class STSProfile(object):
 
     @property
     def user_realm_service_url(self):
-        return '/'.join([self.serviceUrl, self.userRealmServicePath])
+        return "/".join([self.serviceUrl, self.userRealmServicePath])

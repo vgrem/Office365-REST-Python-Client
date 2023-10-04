@@ -21,28 +21,31 @@ class Relation(Entity):
         """The from term of the relation. The term from which the relationship is defined.
         A null value would indicate the relation is directly with the set."""
         from office365.onedrive.termstore.terms.term import Term
-        return self.properties.get('fromTerm',
-                                   Term(self.context, ResourcePath("fromTerm", self.resource_path)))
+
+        return self.properties.get(
+            "fromTerm", Term(self.context, ResourcePath("fromTerm", self.resource_path))
+        )
 
     @property
     def to_term(self):
         """The to term of the relation. The term to which the relationship is defined."""
         from office365.onedrive.termstore.terms.term import Term
-        return self.properties.get('toTerm',
-                                   Term(self.context, ResourcePath("toTerm", self.resource_path)))
+
+        return self.properties.get(
+            "toTerm", Term(self.context, ResourcePath("toTerm", self.resource_path))
+        )
 
     @property
     def set(self):
         """The set in which the relation is relevant."""
         from office365.onedrive.termstore.sets.set import Set
-        return self.properties.get('set',
-                                   Set(self.context, ResourcePath("set", self.resource_path)))
+
+        return self.properties.get(
+            "set", Set(self.context, ResourcePath("set", self.resource_path))
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
-            property_mapping = {
-                "fromTerm": self.from_term,
-                "toTerm": self.to_term
-            }
+            property_mapping = {"fromTerm": self.from_term, "toTerm": self.to_term}
             default_value = property_mapping.get(name, None)
         return super(Relation, self).get_property(name, default_value)

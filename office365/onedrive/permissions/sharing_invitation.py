@@ -5,7 +5,13 @@ from office365.runtime.client_value import ClientValue
 class SharingInvitation(ClientValue):
     """The SharingInvitation resource groups invitation-related data items into a single structure."""
 
-    def __init__(self, email=None, invited_by=IdentitySet(), redeemed_by=None, signin_required=None):
+    def __init__(
+        self,
+        email=None,
+        invited_by=IdentitySet(),
+        redeemed_by=None,
+        signin_required=None,
+    ):
         """
         :param str email: The email address provided for the recipient of the sharing invitation. Read-only.
         :param IdentitySet invited_by: Provides information about who sent the invitation that created this permission,

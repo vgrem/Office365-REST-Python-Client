@@ -13,11 +13,18 @@ class UserTeamwork(Entity):
         """
         The apps installed in the personal scope of this user.
         """
-        return self.properties.get('installedApps',
-                                   EntityCollection(self.context, UserScopeTeamsAppInstallation,
-                                                    ResourcePath("installedApps", self.resource_path)))
+        return self.properties.get(
+            "installedApps",
+            EntityCollection(
+                self.context,
+                UserScopeTeamsAppInstallation,
+                ResourcePath("installedApps", self.resource_path),
+            ),
+        )
 
-    def send_activity_notification(self, topic, activity_type, chain_id, preview_text, template_parameters=None):
+    def send_activity_notification(
+        self, topic, activity_type, chain_id, preview_text, template_parameters=None
+    ):
         """
         Send an activity feed notification in the scope of a team. For more details about sending notifications
         and the requirements for doing so, see sending Teams activity notifications.
@@ -44,8 +51,6 @@ class UserTeamwork(Entity):
 
     def get_property(self, name, default_value=None):
         if default_value is None:
-            property_mapping = {
-                "installedApps": self.installed_apps
-            }
+            property_mapping = {"installedApps": self.installed_apps}
             default_value = property_mapping.get(name, None)
         return super(UserTeamwork, self).get_property(name, default_value)

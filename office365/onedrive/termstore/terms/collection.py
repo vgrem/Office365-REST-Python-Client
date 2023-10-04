@@ -6,7 +6,6 @@ from office365.runtime.queries.create_entity import CreateEntityQuery
 
 
 class TermCollection(EntityCollection):
-
     def __init__(self, context, resource_path=None, parent_set=None):
         """
         :param office365.onedrive.termstore.sets.set.Set parent_set: The parent set that contains the term

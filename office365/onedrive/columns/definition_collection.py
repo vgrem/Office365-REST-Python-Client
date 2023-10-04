@@ -4,9 +4,10 @@ from office365.runtime.queries.create_entity import CreateEntityQuery
 
 
 class ColumnDefinitionCollection(EntityCollection):
-
     def __init__(self, context, resource_path, parent):
-        super(ColumnDefinitionCollection, self).__init__(context, ColumnDefinition, resource_path, parent)
+        super(ColumnDefinitionCollection, self).__init__(
+            context, ColumnDefinition, resource_path, parent
+        )
 
     def add_number(self, name, minimum=None, maximum=None):
         """
@@ -17,6 +18,7 @@ class ColumnDefinitionCollection(EntityCollection):
         :rtype: ColumnDefinition
         """
         from office365.onedrive.columns.number import NumberColumn
+
         return self.add(name=name, number=NumberColumn(minimum, maximum))
 
     def add_text(self, name, max_length=None, text_type=None):
@@ -29,7 +31,10 @@ class ColumnDefinitionCollection(EntityCollection):
         :rtype: ColumnDefinition
         """
         from office365.onedrive.columns.text import TextColumn
-        return self.add(name=name, text=TextColumn(max_length=max_length, text_type=text_type))
+
+        return self.add(
+            name=name, text=TextColumn(max_length=max_length, text_type=text_type)
+        )
 
     def add_hyperlink_or_picture(self, name, is_picture=None):
         """
@@ -38,8 +43,14 @@ class ColumnDefinitionCollection(EntityCollection):
         :param str name: The API-facing name of the column as it appears in the fields on a listItem
         :param bool is_picture: Specifies whether the display format used for URL columns is an image or a hyperlink.
         """
-        from office365.onedrive.columns.hyperlink_or_picture import HyperlinkOrPictureColumn
-        return self.add(name=name, hyperlinkOrPicture=HyperlinkOrPictureColumn(is_picture=is_picture))
+        from office365.onedrive.columns.hyperlink_or_picture import (
+            HyperlinkOrPictureColumn,
+        )
+
+        return self.add(
+            name=name,
+            hyperlinkOrPicture=HyperlinkOrPictureColumn(is_picture=is_picture),
+        )
 
     def add_lookup(self, name, lookup_list, column_name=None):
         """
@@ -58,9 +69,13 @@ class ColumnDefinitionCollection(EntityCollection):
             self.add_child(return_type)
 
             def _list_loaded():
-                params = {"name": name, "lookup": LookupColumn(lookup_list.id, column_name)}
+                params = {
+                    "name": name,
+                    "lookup": LookupColumn(lookup_list.id, column_name),
+                }
                 qry = CreateEntityQuery(self, params, return_type)
                 self.context.add_query(qry)
+
             lookup_list.ensure_property("id", _list_loaded)
             return return_type
         else:

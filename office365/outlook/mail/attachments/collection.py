@@ -1,7 +1,9 @@
 import base64
 
 from office365.entity_collection import EntityCollection
-from office365.outlook.internal.queries.attachment_upload import create_attachment_upload_query
+from office365.outlook.internal.queries.attachment_upload import (
+    create_attachment_upload_query,
+)
 from office365.outlook.mail.attachments.attachment import Attachment
 from office365.runtime.queries.upload_session import UploadSessionQuery
 
@@ -48,9 +50,12 @@ class AttachmentCollection(EntityCollection):
         :param (int)->None chunk_uploaded: Upload action
         """
         from office365.outlook.mail.attachments.file import FileAttachment
+
         return_type = FileAttachment(self.context)
         self.add_child(return_type)
-        qry = create_attachment_upload_query(self, return_type, source_path, chunk_size, chunk_uploaded)
+        qry = create_attachment_upload_query(
+            self, return_type, source_path, chunk_size, chunk_uploaded
+        )
         self.context.add_query(qry)
         return self
 

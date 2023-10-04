@@ -13,7 +13,7 @@ class SocialIdentityProvider(IdentityProviderBase):
         The client identifier for the application obtained when registering the application with the identity provider.
         :rtype: str or None
         """
-        return self.properties.get('clientId', None)
+        return self.properties.get("clientId", None)
 
     @property
     def client_secret(self):
@@ -22,7 +22,7 @@ class SocialIdentityProvider(IdentityProviderBase):
         with the identity provider. This is write-only. A read operation returns ****.
         :rtype: str or None
         """
-        return self.properties.get('clientSecret', None)
+        return self.properties.get("clientSecret", None)
 
     @property
     def identity_provider_type(self):
@@ -32,4 +32,4 @@ class SocialIdentityProvider(IdentityProviderBase):
         QQ, WeChat.
         :rtype: str or None
         """
-        return self.properties.get('identityProviderType', None)
+        return self.properties.get("identityProviderType", None)

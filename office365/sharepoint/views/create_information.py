@@ -5,8 +5,17 @@ from office365.runtime.types.collections import StringCollection
 class ViewCreationInformation(ClientValue):
     """Specifies the properties used to create a new list view."""
 
-    def __init__(self, title=None, view_type_kind=None, view_fields=None, view_data=None, row_limit=None,
-                 query=None, personal_view=None, paged=None):
+    def __init__(
+        self,
+        title=None,
+        view_type_kind=None,
+        view_fields=None,
+        view_data=None,
+        row_limit=None,
+        query=None,
+        personal_view=None,
+        paged=None,
+    ):
         """
         :param str title: Specifies the display name of the new list view. Its length MUST be equal to or less than 255.
         :param int view_type_kind: Specifies the type of the new list view.

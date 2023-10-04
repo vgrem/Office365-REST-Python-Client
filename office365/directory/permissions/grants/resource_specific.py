@@ -9,7 +9,7 @@ class ResourceSpecificPermissionGrant(DirectoryObject):
 
     @property
     def client_id(self):
-        """ID of the Azure AD app that has been granted access. """
+        """ID of the Azure AD app that has been granted access."""
         return self.properties.get("clientId", None)
 
     @property
@@ -37,4 +37,3 @@ class ResourceSpecificPermissionGrant(DirectoryObject):
         :rtype: str
         """
         return self.properties.get("resourceAppId", None)
-

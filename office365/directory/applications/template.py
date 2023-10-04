@@ -16,10 +16,10 @@ class ApplicationTemplate(Entity):
         :param str display_name: Custom name of the application
         """
         return_type = ClientResult(self.context)
-        payload = {
-            "displayName": display_name
-        }
-        qry = ServiceOperationQuery(self, "instantiate", None, payload, None, return_type)
+        payload = {"displayName": display_name}
+        qry = ServiceOperationQuery(
+            self, "instantiate", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -56,4 +56,3 @@ class ApplicationTemplate(Entity):
         The supported values are oidc, password, saml, and notSupported.
         """
         return self.properties.get("supportedSingleSignOnModes", StringCollection())
-

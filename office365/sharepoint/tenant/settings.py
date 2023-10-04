@@ -8,7 +8,9 @@ class TenantSettings(BaseEntity):
 
     def clear_corporate_catalog(self):
         """"""
-        qry = ServiceOperationQuery(self, "ClearCorporateCatalog", None, None, None, None)
+        qry = ServiceOperationQuery(
+            self, "ClearCorporateCatalog", None, None, None, None
+        )
         self.context.add_query(qry)
         return self
 
@@ -17,7 +19,9 @@ class TenantSettings(BaseEntity):
         :param str url:
         """
         payload = {"url": url}
-        qry = ServiceOperationQuery(self, "SetCorporateCatalog", None, payload, None, None)
+        qry = ServiceOperationQuery(
+            self, "SetCorporateCatalog", None, payload, None, None
+        )
         self.context.add_query(qry)
         return self
 
@@ -26,7 +30,7 @@ class TenantSettings(BaseEntity):
         """Specifies the URL of the corporate catalog site collection.
         :rtype: str or None
         """
-        return self.properties.get('CorporateCatalogUrl', None)
+        return self.properties.get("CorporateCatalogUrl", None)
 
     @staticmethod
     def current(context):

@@ -20,7 +20,7 @@ class AttachmentBase(Entity):
         """
         The Timestamp type represents date and time information using ISO 8601 format and is always in UTC time.
         """
-        return self.properties.get('lastModifiedDateTime', datetime.datetime.min)
+        return self.properties.get("lastModifiedDateTime", datetime.datetime.min)
 
     @property
     def name(self):

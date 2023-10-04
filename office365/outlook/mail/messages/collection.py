@@ -6,7 +6,6 @@ from office365.runtime.client_value_collection import ClientValueCollection
 
 
 class MessageCollection(DeltaCollection):
-
     def __init__(self, context, resource_path=None):
         super(MessageCollection, self).__init__(context, Message, resource_path)
 
@@ -27,9 +26,9 @@ class MessageCollection(DeltaCollection):
         :rtype: Message
         """
         if to_recipients is not None:
-            kwargs["toRecipients"] = ClientValueCollection(Recipient,
-                                                           [Recipient.from_email(email) for email
-                                                            in to_recipients])
+            kwargs["toRecipients"] = ClientValueCollection(
+                Recipient, [Recipient.from_email(email) for email in to_recipients]
+            )
         if body is not None:
             kwargs["body"] = body if isinstance(body, ItemBody) else ItemBody(body)
         if subject is not None:

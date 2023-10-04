@@ -1,7 +1,9 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.navigation.configured_metadata_items import ConfiguredMetadataNavigationItemCollection
+from office365.sharepoint.navigation.configured_metadata_items import (
+    ConfiguredMetadataNavigationItemCollection,
+)
 
 
 class MetadataNavigationSettings(BaseEntity):
@@ -17,12 +19,19 @@ class MetadataNavigationSettings(BaseEntity):
         """
 
         if return_type is None:
-            return_type = ClientResult(context, ConfiguredMetadataNavigationItemCollection())
-        payload = {
-            "DecodedUrl": url
-        }
-        qry = ServiceOperationQuery(MetadataNavigationSettings(context), "GetConfiguredSettings", payload, None,
-                                    None, return_type, True)
+            return_type = ClientResult(
+                context, ConfiguredMetadataNavigationItemCollection()
+            )
+        payload = {"DecodedUrl": url}
+        qry = ServiceOperationQuery(
+            MetadataNavigationSettings(context),
+            "GetConfiguredSettings",
+            payload,
+            None,
+            None,
+            return_type,
+            True,
+        )
         context.add_query(qry)
         return return_type
 

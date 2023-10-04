@@ -14,5 +14,3 @@ class SPClientSideComponentQueryResult(ClientValue):
         self.ComponentType = component_type
         self.Manifest = manifest
         self.ManifestType = manifest_type
-
-

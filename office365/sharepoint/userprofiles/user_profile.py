@@ -1,6 +1,6 @@
 from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.sites.site import Site
 from office365.sharepoint.userprofiles.followed_content import FollowedContent
@@ -55,16 +55,22 @@ class UserProfile(BaseEntity):
         """
         Gets a FollowedContent object for the user.
         """
-        return self.properties.get("FollowedContent",
-                                   FollowedContent(self.context, ResourcePath("FollowedContent", self.resource_path)))
+        return self.properties.get(
+            "FollowedContent",
+            FollowedContent(
+                self.context, ResourcePath("FollowedContent", self.resource_path)
+            ),
+        )
 
     @property
     def personal_site(self):
         """
         The PersonalSite property specifies the user's personal site
         """
-        return self.properties.get("PersonalSite",
-                                   Site(self.context, ResourcePath("PersonalSite", self.resource_path)))
+        return self.properties.get(
+            "PersonalSite",
+            Site(self.context, ResourcePath("PersonalSite", self.resource_path)),
+        )
 
     def create_personal_site(self, lcid):
         """
@@ -107,7 +113,9 @@ class UserProfile(BaseEntity):
         """
         payload = {"shareAll": share_all}
         return_type = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "ShareAllSocialData", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "ShareAllSocialData", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -115,7 +123,7 @@ class UserProfile(BaseEntity):
         if default_value is None:
             property_mapping = {
                 "FollowedContent": self.followed_content,
-                "PersonalSite": self.personal_site
+                "PersonalSite": self.personal_site,
             }
             default_value = property_mapping.get(name, None)
         return super(UserProfile, self).get_property(name, default_value)

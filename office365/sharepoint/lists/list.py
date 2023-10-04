@@ -2,44 +2,56 @@ from datetime import datetime
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.changes.token import ChangeToken
 from office365.sharepoint.contenttypes.collection import ContentTypeCollection
-from office365.sharepoint.customactions.element_collection import CustomActionElementCollection
-from office365.sharepoint.eventreceivers.definition_collection import EventReceiverDefinitionCollection
+from office365.sharepoint.customactions.element_collection import (
+    CustomActionElementCollection,
+)
+from office365.sharepoint.eventreceivers.definition_collection import (
+    EventReceiverDefinitionCollection,
+)
 from office365.sharepoint.fields.collection import FieldCollection
 from office365.sharepoint.fields.related_field_collection import RelatedFieldCollection
-from office365.sharepoint.files.checked_out_file_collection import CheckedOutFileCollection
+from office365.sharepoint.files.checked_out_file_collection import (
+    CheckedOutFileCollection,
+)
 from office365.sharepoint.files.file import File
 from office365.sharepoint.flows.synchronization_result import FlowSynchronizationResult
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.forms.collection import FormCollection
 from office365.sharepoint.listitems.caml.query import CamlQuery
-from office365.sharepoint.listitems.creation_information_using_path import ListItemCreationInformationUsingPath
+from office365.sharepoint.listitems.collection import ListItemCollection
+from office365.sharepoint.listitems.creation_information_using_path import (
+    ListItemCreationInformationUsingPath,
+)
 from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateValue
 from office365.sharepoint.listitems.listitem import ListItem
-from office365.sharepoint.listitems.collection import ListItemCollection
 from office365.sharepoint.lists.bloom_filter import ListBloomFilter
 from office365.sharepoint.lists.creatables_info import CreatablesInfo
 from office365.sharepoint.lists.data_source import ListDataSource
 from office365.sharepoint.lists.rule import SPListRule
-from office365.sharepoint.navigation.configured_metadata_items import ConfiguredMetadataNavigationItemCollection
-from office365.sharepoint.pages.wiki_page_creation_information import WikiPageCreationInformation
+from office365.sharepoint.navigation.configured_metadata_items import (
+    ConfiguredMetadataNavigationItemCollection,
+)
+from office365.sharepoint.pages.wiki_page_creation_information import (
+    WikiPageCreationInformation,
+)
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.sharing.object_sharing_settings import ObjectSharingSettings
 from office365.sharepoint.sitescripts.utility import SiteScriptUtility
 from office365.sharepoint.translation.user_resource import UserResource
-from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
-from office365.sharepoint.views.view import View
-from office365.sharepoint.views.collection import ViewCollection
-from office365.sharepoint.webhooks.subscription_collection import SubscriptionCollection
-from office365.sharepoint.utilities.utility import Utility
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
+from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
+from office365.sharepoint.utilities.utility import Utility
+from office365.sharepoint.views.collection import ViewCollection
+from office365.sharepoint.views.view import View
+from office365.sharepoint.webhooks.subscription_collection import SubscriptionCollection
 
 
 class List(SecurableObject):
@@ -53,8 +65,13 @@ class List(SecurableObject):
     def __init__(self, context, resource_path=None):
         super(List, self).__init__(context, resource_path)
 
-    def create_document_and_get_edit_link(self, file_name=None, folder_path=None,
-                                          document_template_type=1, template_url=None):
+    def create_document_and_get_edit_link(
+        self,
+        file_name=None,
+        folder_path=None,
+        document_template_type=1,
+        template_url=None,
+    ):
         """
         Creates a document at the path and of the type specified within the current list.
         Returns an edit link to the file.
@@ -69,9 +86,11 @@ class List(SecurableObject):
             "fileName": file_name,
             "folderPath": folder_path,
             "documentTemplateType": document_template_type,
-            "templateUrl": template_url
+            "templateUrl": template_url,
         }
-        qry = ServiceOperationQuery(self, "CreateDocumentAndGetEditLink", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "CreateDocumentAndGetEditLink", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -86,7 +105,9 @@ class List(SecurableObject):
 
     def get_async_action_config(self):
         return_type = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "GetAsyncActionConfig", return_type=return_type)
+        qry = ServiceOperationQuery(
+            self, "GetAsyncActionConfig", return_type=return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -98,7 +119,9 @@ class List(SecurableObject):
         """
         return_type = ListBloomFilter(self.context)
         payload = {"startItemId": start_item_id}
-        qry = ServiceOperationQuery(self, "GetBloomFilter", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetBloomFilter", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -106,12 +129,18 @@ class List(SecurableObject):
         """
         Retrieves the configured metadata navigation settings for the list.
         """
-        from office365.sharepoint.navigation.metadata_settings import MetadataNavigationSettings
-        return_type = ClientResult(self.context, ConfiguredMetadataNavigationItemCollection())
+        from office365.sharepoint.navigation.metadata_settings import (
+            MetadataNavigationSettings,
+        )
+
+        return_type = ClientResult(
+            self.context, ConfiguredMetadataNavigationItemCollection()
+        )
 
         def _loaded():
-           MetadataNavigationSettings.get_configured_settings(self.context, self.root_folder.serverRelativeUrl,
-                                                              return_type)
+            MetadataNavigationSettings.get_configured_settings(
+                self.context, self.root_folder.serverRelativeUrl, return_type
+            )
 
         self.root_folder.ensure_property("ServerRelativeUrl", _loaded)
         return return_type
@@ -124,8 +153,13 @@ class List(SecurableObject):
 
         def _list_loaded():
             from office365.sharepoint.webs.web import Web
-            list_abs_path = SPResPath.create_absolute(self.context.base_url, self.root_folder.serverRelativeUrl)
-            Web.get_object_sharing_settings(self.context, str(list_abs_path), return_type=return_type)
+
+            list_abs_path = SPResPath.create_absolute(
+                self.context.base_url, self.root_folder.serverRelativeUrl
+            )
+            Web.get_object_sharing_settings(
+                self.context, str(list_abs_path), return_type=return_type
+            )
 
         self.ensure_property("RootFolder", _list_loaded)
         return return_type
@@ -138,8 +172,13 @@ class List(SecurableObject):
         return_type = ClientResult(self.context)
 
         def _list_loaded():
-            list_abs_path = SPResPath.create_absolute(self.context.base_url, self.root_folder.serverRelativeUrl)
-            SiteScriptUtility.get_site_script_from_list(self.context, str(list_abs_path), options, return_type=return_type)
+            list_abs_path = SPResPath.create_absolute(
+                self.context.base_url, self.root_folder.serverRelativeUrl
+            )
+            SiteScriptUtility.get_site_script_from_list(
+                self.context, str(list_abs_path), options, return_type=return_type
+            )
+
         self.ensure_property("RootFolder", _list_loaded)
         return return_type
 
@@ -153,15 +192,17 @@ class List(SecurableObject):
         return return_type
 
     def get_business_app_operation_status(self):
-        """
-
-        """
+        """ """
         return_type = FlowSynchronizationResult(self.context)
-        qry = ServiceOperationQuery(self, "GetBusinessAppOperationStatus", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetBusinessAppOperationStatus", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
-    def search_lookup_field_choices(self, target_field_name, begins_with_search_string, paging_info):
+    def search_lookup_field_choices(
+        self, target_field_name, begins_with_search_string, paging_info
+    ):
         """
         :param str target_field_name:
         :param str begins_with_search_string:
@@ -171,9 +212,11 @@ class List(SecurableObject):
         payload = {
             "targetFieldName": target_field_name,
             "beginsWithSearchString": begins_with_search_string,
-            "pagingInfo": paging_info
+            "pagingInfo": paging_info,
         }
-        qry = ServiceOperationQuery(self, "SearchLookupFieldChoices", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "SearchLookupFieldChoices", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -182,7 +225,9 @@ class List(SecurableObject):
         :param str flow_id:
         """
         return_type = FlowSynchronizationResult(self.context)
-        qry = ServiceOperationQuery(self, "SyncFlowCallbackUrl", None, {"flowId": flow_id}, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "SyncFlowCallbackUrl", None, {"flowId": flow_id}, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -191,7 +236,9 @@ class List(SecurableObject):
         :param str flow_id:
         """
         return_type = FlowSynchronizationResult(self.context)
-        qry = ServiceOperationQuery(self, "SyncFlowInstance", None, {"flowId": flow_id}, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "SyncFlowInstance", None, {"flowId": flow_id}, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -201,7 +248,9 @@ class List(SecurableObject):
         """
         return_type = FlowSynchronizationResult(self.context)
         payload = {"retrieveGroupFlows": retrieve_group_flows}
-        qry = ServiceOperationQuery(self, "SyncFlowInstances", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "SyncFlowInstances", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -211,7 +260,9 @@ class List(SecurableObject):
         """
         return_type = FlowSynchronizationResult(self.context)
         payload = {"category": category}
-        qry = ServiceOperationQuery(self, "SyncFlowTemplates", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "SyncFlowTemplates", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -224,11 +275,10 @@ class List(SecurableObject):
         :param str extension: The file extension without dot prefix.
         """
         return_type = ClientResult(self.context)
-        payload = {
-            "folderPath": folder_path,
-            "extension": extension
-        }
-        qry = ServiceOperationQuery(self, "CreateDocumentWithDefaultName", None, payload, None, return_type)
+        payload = {"folderPath": folder_path, "extension": extension}
+        qry = ServiceOperationQuery(
+            self, "CreateDocumentWithDefaultName", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -255,10 +305,10 @@ class List(SecurableObject):
             [MS-WSSCAML] section 2.3.2.17.
         """
         return_type = ClientResult(self.context)
-        payload = {
-            "viewXml": view_xml
-        }
-        qry = ServiceOperationQuery(self, "RenderListData", None, payload, None, return_type)
+        payload = {"viewXml": view_xml}
+        qry = ServiceOperationQuery(
+            self, "RenderListData", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -277,12 +327,20 @@ class List(SecurableObject):
             "parameters": parameters,
         }
         target_list = context.web.get_list(list_full_url)
-        qry = ServiceOperationQuery(target_list, "GetListDataAsStream", None, payload, None, result)
+        qry = ServiceOperationQuery(
+            target_list, "GetListDataAsStream", None, payload, None, result
+        )
         context.add_query(qry)
         return result
 
-    def bulk_validate_update_list_items(self, item_ids, form_values, new_document_update=True,
-                                        checkin_comment=None, folder_path=None):
+    def bulk_validate_update_list_items(
+        self,
+        item_ids,
+        form_values,
+        new_document_update=True,
+        checkin_comment=None,
+        folder_path=None,
+    ):
         """
         Validate and update multiple list items.
 
@@ -295,15 +353,19 @@ class List(SecurableObject):
         :param str folder_path: Decoded path of the folder where the items belong to. If not provided,
             the server will try to find items to update under root folder.
         """
-        return_type = ClientResult(self.context, ClientValueCollection(ListItemFormUpdateValue))
+        return_type = ClientResult(
+            self.context, ClientValueCollection(ListItemFormUpdateValue)
+        )
         params = {
             "itemIds": item_ids,
             "formValues": ClientValueCollection(ListItemFormUpdateValue, form_values),
             "bNewDocumentUpdate": new_document_update,
             "checkInComment": checkin_comment,
-            "folderPath": folder_path
+            "folderPath": folder_path,
         }
-        qry = ServiceOperationQuery(self, "BulkValidateUpdateListItems", None, params, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "BulkValidateUpdateListItems", None, params, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -314,11 +376,10 @@ class List(SecurableObject):
         :param str paging_info:
         """
         return_type = ClientResult(self.context, str())
-        params = {
-            "targetFieldName": target_field_name,
-            "pagingInfo": paging_info
-        }
-        qry = ServiceOperationQuery(self, "GetLookupFieldChoices", params, None, None, return_type)
+        params = {"targetFieldName": target_field_name, "pagingInfo": paging_info}
+        qry = ServiceOperationQuery(
+            self, "GetLookupFieldChoices", params, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -331,7 +392,9 @@ class List(SecurableObject):
         """
         return_type = ClientResult(self.context, bytes())
         payload = {"query": query}
-        qry = ServiceOperationQuery(self, "getListItemChangesSinceToken", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "getListItemChangesSinceToken", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -350,10 +413,12 @@ class List(SecurableObject):
             "oldName": old_name,
             "newName": new_name,
             "privateView": private_view,
-            "uri": uri
+            "uri": uri,
         }
         return_type = ClientResult(self.context, str())
-        qry = ServiceOperationQuery(self, "SaveAsNewView", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "SaveAsNewView", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return self
 
@@ -372,7 +437,7 @@ class List(SecurableObject):
             "strFileName": file_name,
             "strName": name,
             "strDescription": description,
-            "bSaveData": save_data
+            "bSaveData": save_data,
         }
         qry = ServiceOperationQuery(self, "saveAsTemplate", None, payload, None, None)
         self.context.add_query(qry)
@@ -384,8 +449,10 @@ class List(SecurableObject):
 
         :param str unique_id: The unique ID that is associated with the list item.
         """
-        return ListItem(self.context,
-                        ServiceOperationPath("getItemByUniqueId", [unique_id], self.resource_path))
+        return ListItem(
+            self.context,
+            ServiceOperationPath("getItemByUniqueId", [unique_id], self.resource_path),
+        )
 
     def get_web_dav_url(self, source_url):
         """
@@ -396,10 +463,10 @@ class List(SecurableObject):
         """
 
         return_type = ClientResult(self.context, str())
-        payload = {
-            "sourceUrl": source_url
-        }
-        qry = ServiceOperationQuery(self, "getWebDavUrl", None, payload, None, return_type)
+        payload = {"sourceUrl": source_url}
+        qry = ServiceOperationQuery(
+            self, "getWebDavUrl", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -418,22 +485,29 @@ class List(SecurableObject):
 
     def add_item(self, creation_information):
         """The recommended way to add a list item is to send a POST request to the ListItemCollection resource endpoint,
-         as shown in ListItemCollection request examples.
+        as shown in ListItemCollection request examples.
 
-         :type creation_information: ListItemCreationInformation or dict"""
+        :type creation_information: ListItemCreationInformation or dict"""
         return_type = ListItem(self.context, None, self)
         self.items.add_child(return_type)
         if isinstance(creation_information, dict):
             for k, v in creation_information.items():
                 return_type.set_property(k, v, True)
             return_type.ensure_type_name(self)
-            qry = ServiceOperationQuery(self, "items", None, return_type, None, return_type)
+            qry = ServiceOperationQuery(
+                self, "items", None, return_type, None, return_type
+            )
             self.context.add_query(qry)
         else:
+
             def _add_item():
-                creation_information.FolderUrl = self.context.base_url + self.root_folder.serverRelativeUrl
+                creation_information.FolderUrl = (
+                    self.context.base_url + self.root_folder.serverRelativeUrl
+                )
                 payload = {"parameters": creation_information}
-                next_qry = ServiceOperationQuery(self, "addItem", None, payload, None, return_type)
+                next_qry = ServiceOperationQuery(
+                    self, "addItem", None, payload, None, return_type
+                )
                 self.context.add_query(next_qry)
 
             self.root_folder.ensure_property("ServerRelativeUrl", _add_item)
@@ -451,7 +525,10 @@ class List(SecurableObject):
         def _root_folder_loaded():
             page_url = self.root_folder.serverRelativeUrl + "/" + page_name
             wiki_props = WikiPageCreationInformation(page_url, page_content)
-            Utility.create_wiki_page_in_context_web(self.context, wiki_props, return_type)
+            Utility.create_wiki_page_in_context_web(
+                self.context, wiki_props, return_type
+            )
+
         self.ensure_property("RootFolder", _root_folder_loaded)
         return return_type
 
@@ -468,10 +545,14 @@ class List(SecurableObject):
             URL or an absolute URL. If the value is not null or the decoded url value not being empty string,
             the decoded url value MUST point to a location within the list.
         """
-        parameters = ListItemCreationInformationUsingPath(leaf_name, object_type, folder_path=folder_url)
+        parameters = ListItemCreationInformationUsingPath(
+            leaf_name, object_type, folder_path=folder_url
+        )
         return_type = ListItem(self.context)
         payload = {"parameters": parameters}
-        qry = ServiceOperationQuery(self, "AddItemUsingPath", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "AddItemUsingPath", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -487,10 +568,16 @@ class List(SecurableObject):
         """
         payload = {
             "listItemCreateInfo": create_info,
-            "formValues": [ListItemFormUpdateValue(k, v) for k, v in form_values.items()]
+            "formValues": [
+                ListItemFormUpdateValue(k, v) for k, v in form_values.items()
+            ],
         }
-        return_type = ClientResult(self.context, ClientValueCollection(ListItemFormUpdateValue))
-        qry = ServiceOperationQuery(self, "AddValidateUpdateItem", None, payload, None, return_type)
+        return_type = ClientResult(
+            self.context, ClientValueCollection(ListItemFormUpdateValue)
+        )
+        qry = ServiceOperationQuery(
+            self, "AddValidateUpdateItem", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -499,14 +586,21 @@ class List(SecurableObject):
 
         :type item_id: int
         """
-        return ListItem(self.context, ServiceOperationPath("getItemById", [item_id], self.resource_path))
+        return ListItem(
+            self.context,
+            ServiceOperationPath("getItemById", [item_id], self.resource_path),
+        )
 
     def get_view(self, view_id):
         """Returns the list view with the specified view identifier.
 
         :type view_id: str
         """
-        return View(self.context, ServiceOperationPath("getView", [view_id], self.resource_path), self)
+        return View(
+            self.context,
+            ServiceOperationPath("getView", [view_id], self.resource_path),
+            self,
+        )
 
     def get_changes(self, query=None):
         """Returns the collection of changes from the change log that have occurred within the list,
@@ -518,14 +612,18 @@ class List(SecurableObject):
             query = ChangeQuery(list_=True)
         return_type = ChangeCollection(self.context)
         payload = {"query": query}
-        qry = ServiceOperationQuery(self, "getChanges", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "getChanges", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
     def get_checked_out_files(self):
         """Returns a collection of checked-out files as specified in section 3.2.5.381."""
         return_type = CheckedOutFileCollection(self.context)
-        qry = ServiceOperationQuery(self, "GetCheckedOutFiles", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetCheckedOutFiles", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -534,7 +632,9 @@ class List(SecurableObject):
         Reserves the returned list item identifier for the idempotent creation of a list item.
         """
         return_type = ClientResult(self.context, int())
-        qry = ServiceOperationQuery(self, "ReserveListItemId", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "ReserveListItemId", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -543,7 +643,10 @@ class List(SecurableObject):
         Returns a collection of lookup fields that use this list as a data source and
         that have FieldLookup.IsRelationship set to true.
         """
-        return RelatedFieldCollection(self.context, ServiceOperationPath("getRelatedFields", [], self.resource_path))
+        return RelatedFieldCollection(
+            self.context,
+            ServiceOperationPath("getRelatedFields", [], self.resource_path),
+        )
 
     def get_special_folder_url(self, folder_type, force_create, existing_folder_guid):
         """
@@ -556,10 +659,12 @@ class List(SecurableObject):
         payload = {
             "type": folder_type,
             "bForceCreate": force_create,
-            "existingFolderGuid": existing_folder_guid
+            "existingFolderGuid": existing_folder_guid,
         }
         return_type = ClientResult(self.context, str())
-        qry = ServiceOperationQuery(self, "GetSpecialFolderUrl", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetSpecialFolderUrl", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -583,8 +688,9 @@ class List(SecurableObject):
     @property
     def author(self):
         """Specifies the user who created the list."""
-        return self.properties.get('Author',
-                                   User(self.context, ResourcePath("Author", self.resource_path)))
+        return self.properties.get(
+            "Author", User(self.context, ResourcePath("Author", self.resource_path))
+        )
 
     @property
     def allow_content_types(self):
@@ -678,8 +784,12 @@ class List(SecurableObject):
          The consumer SHOULD also consider appending &IsDlg=1 to the link, to remove the UI from the linked page,
          if desired.
         """
-        return self.properties.get('CreatablesInfo',
-                                   CreatablesInfo(self.context, ResourcePath("CreatablesInfo", self.resource_path)))
+        return self.properties.get(
+            "CreatablesInfo",
+            CreatablesInfo(
+                self.context, ResourcePath("CreatablesInfo", self.resource_path)
+            ),
+        )
 
     @property
     def current_change_token(self):
@@ -739,6 +849,7 @@ class List(SecurableObject):
         Specifies the effective permissions on the list that are assigned to the current user.
         """
         from office365.sharepoint.permissions.base_permissions import BasePermissions
+
         return self.properties.get("EffectiveBasePermissions", BasePermissions())
 
     @property
@@ -750,6 +861,7 @@ class List(SecurableObject):
         of EffectiveBasePermissionsForUI MUST be a subset of the value of EffectiveBasePermissions.
         """
         from office365.sharepoint.permissions.base_permissions import BasePermissions
+
         return self.properties.get("EffectiveBasePermissionsForUI", BasePermissions())
 
     @property
@@ -856,54 +968,74 @@ class List(SecurableObject):
     @property
     def items(self):
         """Get list items"""
-        return self.properties.get("Items",
-                                   ListItemCollection(self.context, ResourcePath("items", self.resource_path)))
+        return self.properties.get(
+            "Items",
+            ListItemCollection(self.context, ResourcePath("items", self.resource_path)),
+        )
 
     @property
     def root_folder(self):
         """Get a root folder"""
-        return self.properties.get("RootFolder",
-                                   Folder(self.context, ResourcePath("RootFolder", self.resource_path)))
+        return self.properties.get(
+            "RootFolder",
+            Folder(self.context, ResourcePath("RootFolder", self.resource_path)),
+        )
 
     @property
     def fields(self):
         """Gets a value that specifies the collection of all fields in the list."""
-        return self.properties.get('Fields',
-                                   FieldCollection(self.context, ResourcePath("Fields", self.resource_path), self))
+        return self.properties.get(
+            "Fields",
+            FieldCollection(
+                self.context, ResourcePath("Fields", self.resource_path), self
+            ),
+        )
 
     @property
     def subscriptions(self):
         """Gets one or more webhook subscriptions on a SharePoint list."""
-        return self.properties.get('Subscriptions',
-                                   SubscriptionCollection(self.context,
-                                                          ResourcePath("Subscriptions", self.resource_path), self))
+        return self.properties.get(
+            "Subscriptions",
+            SubscriptionCollection(
+                self.context, ResourcePath("Subscriptions", self.resource_path), self
+            ),
+        )
 
     @property
     def views(self):
         """Gets a value that specifies the collection of all public views on the list and personal views
         of the current user on the list."""
-        return self.properties.get('Views',
-                                   ViewCollection(self.context, ResourcePath("views", self.resource_path), self))
+        return self.properties.get(
+            "Views",
+            ViewCollection(
+                self.context, ResourcePath("views", self.resource_path), self
+            ),
+        )
 
     @property
     def default_view(self):
         """Gets or sets a value that specifies whether the list view is the default list view."""
-        return self.properties.get('DefaultView',
-                                   View(self.context, ResourcePath("DefaultView", self.resource_path), self))
+        return self.properties.get(
+            "DefaultView",
+            View(self.context, ResourcePath("DefaultView", self.resource_path), self),
+        )
 
     @property
     def content_types(self):
         """Gets the content types that are associated with the list."""
-        return self.properties.get('ContentTypes',
-                                   ContentTypeCollection(self.context,
-                                                         ResourcePath("ContentTypes", self.resource_path), self))
+        return self.properties.get(
+            "ContentTypes",
+            ContentTypeCollection(
+                self.context, ResourcePath("ContentTypes", self.resource_path), self
+            ),
+        )
 
     @property
     def content_types_enabled(self):
         """Specifies whether content types are enabled for the list.
         :rtype: bool or None
         """
-        return self.properties.get('ContentTypesEnabled', None)
+        return self.properties.get("ContentTypesEnabled", None)
 
     @property
     def is_private(self):
@@ -912,7 +1044,7 @@ class List(SecurableObject):
         True if the list is a private list, otherwise False.
         :rtype: bool or None
         """
-        return self.properties.get('IsPrivate', None)
+        return self.properties.get("IsPrivate", None)
 
     @property
     def is_site_assets_library(self):
@@ -921,7 +1053,7 @@ class List(SecurableObject):
         users upload to their wiki pages.
         :rtype: bool or None
         """
-        return self.properties.get('IsSiteAssetsLibrary', None)
+        return self.properties.get("IsSiteAssetsLibrary", None)
 
     @property
     def is_system_list(self):
@@ -930,39 +1062,51 @@ class List(SecurableObject):
         A value of True means yes.
         :rtype: bool or None
         """
-        return self.properties.get('IsSystemList', None)
+        return self.properties.get("IsSystemList", None)
 
     @property
     def user_custom_actions(self):
         """Gets the User Custom Actions that are associated with the list."""
-        return self.properties.get('UserCustomActions',
-                                   UserCustomActionCollection(self.context,
-                                                              ResourcePath("UserCustomActions", self.resource_path)))
+        return self.properties.get(
+            "UserCustomActions",
+            UserCustomActionCollection(
+                self.context, ResourcePath("UserCustomActions", self.resource_path)
+            ),
+        )
 
     @property
     def custom_action_elements(self):
-        return self.properties.get('CustomActionElements', CustomActionElementCollection())
+        return self.properties.get(
+            "CustomActionElements", CustomActionElementCollection()
+        )
 
     @property
     def forms(self):
         """Gets a value that specifies the collection of all list forms in the list."""
-        return self.properties.get('Forms',
-                                   FormCollection(self.context, ResourcePath("forms", self.resource_path)))
+        return self.properties.get(
+            "Forms",
+            FormCollection(self.context, ResourcePath("forms", self.resource_path)),
+        )
 
     @property
     def parent_web(self):
         """Gets a value that specifies the web where list resides."""
         from office365.sharepoint.webs.web import Web
-        return self.properties.get('ParentWeb',
-                                   Web(self.context, ResourcePath("parentWeb", self.resource_path)))
+
+        return self.properties.get(
+            "ParentWeb",
+            Web(self.context, ResourcePath("parentWeb", self.resource_path)),
+        )
 
     @property
     def event_receivers(self):
         """Get Event receivers"""
-        return self.properties.get('EventReceivers',
-                                   EventReceiverDefinitionCollection(self.context,
-                                                                     ResourcePath("eventReceivers", self.resource_path),
-                                                                     self))
+        return self.properties.get(
+            "EventReceivers",
+            EventReceiverDefinitionCollection(
+                self.context, ResourcePath("eventReceivers", self.resource_path), self
+            ),
+        )
 
     @property
     def item_count(self):
@@ -970,7 +1114,7 @@ class List(SecurableObject):
         Gets a value that specifies the number of list items in the list.
         :rtype: int or None
         """
-        return self.properties.get('ItemCount', None)
+        return self.properties.get("ItemCount", None)
 
     @property
     def last_item_deleted_date(self):
@@ -978,7 +1122,7 @@ class List(SecurableObject):
         Specifies the last time a list item was deleted from the list. It MUST return Created if no list item has
         been deleted from the list yet.
         """
-        return self.properties.get('LastItemDeletedDate', datetime.min)
+        return self.properties.get("LastItemDeletedDate", datetime.min)
 
     @property
     def last_item_modified_date(self):
@@ -986,7 +1130,7 @@ class List(SecurableObject):
         Specifies the last time a list item, field, or property of the list was modified.
         It MUST return Created if the list has not been modified.
         """
-        return self.properties.get('LastItemModifiedDate', datetime.min)
+        return self.properties.get("LastItemModifiedDate", datetime.min)
 
     @property
     def last_item_user_modified_date(self):
@@ -995,7 +1139,7 @@ class List(SecurableObject):
         to a list item that is visible to end users. If no item has been created in the list, the list creation time
         is returned.
         """
-        return self.properties.get('LastItemUserModifiedDate', datetime.min)
+        return self.properties.get("LastItemUserModifiedDate", datetime.min)
 
     @property
     def list_experience_options(self):
@@ -1003,14 +1147,14 @@ class List(SecurableObject):
         Gets or sets the list to new experience, classic experience or default experience set by my administrator.
         :rtype: int or None
         """
-        return self.properties.get('ListExperienceOptions', None)
+        return self.properties.get("ListExperienceOptions", None)
 
     @property
     def list_form_customized(self):
         """
         :rtype: bool or None
         """
-        return self.properties.get('ListFormCustomized', None)
+        return self.properties.get("ListFormCustomized", None)
 
     @property
     def list_item_entity_type_full_name(self):
@@ -1018,7 +1162,7 @@ class List(SecurableObject):
         Specifies the full type name of the list item.
         :rtype: str or None
         """
-        return self.properties.get('ListItemEntityTypeFullName', None)
+        return self.properties.get("ListItemEntityTypeFullName", None)
 
     @property
     def major_version_limit(self):
@@ -1027,14 +1171,14 @@ class List(SecurableObject):
         control with major versions only.
         :rtype: int or None
         """
-        return self.properties.get('MajorVersionLimit', None)
+        return self.properties.get("MajorVersionLimit", None)
 
     @property
     def list_schema_version(self):
         """
         :rtype: str or None
         """
-        return self.properties.get('ListSchemaVersion', None)
+        return self.properties.get("ListSchemaVersion", None)
 
     @property
     def major_with_minor_versions_limit(self):
@@ -1043,7 +1187,7 @@ class List(SecurableObject):
         version control with both major and minor versions.
         :rtype: int or None
         """
-        return self.properties.get('MajorWithMinorVersionsLimit', None)
+        return self.properties.get("MajorWithMinorVersionsLimit", None)
 
     @property
     def no_crawl(self):
@@ -1051,7 +1195,7 @@ class List(SecurableObject):
         Specifies that the crawler MUST NOT crawl the list.
         :rtype: bool or None
         """
-        return self.properties.get('NoCrawl', None)
+        return self.properties.get("NoCrawl", None)
 
     @property
     def on_quick_launch(self):
@@ -1060,7 +1204,7 @@ class List(SecurableObject):
         the protocol server MUST set the Hidden property of the list to "false".
         :rtype: bool or None
         """
-        return self.properties.get('OnQuickLaunch', None)
+        return self.properties.get("OnQuickLaunch", None)
 
     @property
     def page_render_type(self):
@@ -1070,7 +1214,7 @@ class List(SecurableObject):
         for staying in classic, as specified by ListPageRenderType enumeration (section 3.2.5.413).
         :rtype: int or None
         """
-        return self.properties.get('PageRenderType', None)
+        return self.properties.get("PageRenderType", None)
 
     @property
     def parent_web_url(self):
@@ -1079,7 +1223,7 @@ class List(SecurableObject):
         It MUST be a URL of server-relative form.
         :rtype: str or None
         """
-        return self.properties.get('ParentWebUrl', None)
+        return self.properties.get("ParentWebUrl", None)
 
     @property
     def parser_disabled(self):
@@ -1088,7 +1232,7 @@ class List(SecurableObject):
         Specify a value of true if the document parser is enabled on the list; specify false if otherwise.
         :rtype: bool or None
         """
-        return self.properties.get('ParserDisabled', None)
+        return self.properties.get("ParserDisabled", None)
 
     @property
     def read_security(self):
@@ -1096,7 +1240,7 @@ class List(SecurableObject):
         Gets or sets the Read security setting for the list.
         :rtype: int or None
         """
-        return self.properties.get('ReadSecurity', None)
+        return self.properties.get("ReadSecurity", None)
 
     @property
     def server_template_can_create_folders(self):
@@ -1104,14 +1248,14 @@ class List(SecurableObject):
         Specifies whether the list template the list is based on allows the creation of folders.
         :rtype: bool or None
         """
-        return self.properties.get('ServerTemplateCanCreateFolders', None)
+        return self.properties.get("ServerTemplateCanCreateFolders", None)
 
     @property
     def show_hidden_fields_in_modern_form(self):
         """
         :rtype: bool or None
         """
-        return self.properties.get('ShowHiddenFieldsInModernForm', None)
+        return self.properties.get("ShowHiddenFieldsInModernForm", None)
 
     @property
     def title(self):
@@ -1119,13 +1263,12 @@ class List(SecurableObject):
         Gets the displayed title for the list.
         :rtype: str or None
         """
-        return self.properties.get('Title', None)
+        return self.properties.get("Title", None)
 
     @title.setter
     def title(self, val):
         """Sets the displayed title for the list."""
-        self.set_property('Title', val)
-
+        self.set_property("Title", val)
 
     @property
     def default_content_approval_workflow_id(self):
@@ -1141,23 +1284,27 @@ class List(SecurableObject):
         """Gets the description for the list.
         :rtype: str or None
         """
-        return self.properties.get('Description', None)
+        return self.properties.get("Description", None)
 
     @description.setter
     def description(self, val):
         """Sets the description for the list."""
-        self.set_property('Description', val)
+        self.set_property("Description", val)
 
     @property
     def description_resource(self):
         """Represents the description of this list."""
-        return self.properties.get('DescriptionResource',
-                                   UserResource(self.context, ResourcePath("DescriptionResource", self.resource_path)))
+        return self.properties.get(
+            "DescriptionResource",
+            UserResource(
+                self.context, ResourcePath("DescriptionResource", self.resource_path)
+            ),
+        )
 
     @property
     def parent_web_path(self):
         """Returns the path of the parent web for the list."""
-        return self.properties.get('ParentWebPath', SPResPath())
+        return self.properties.get("ParentWebPath", SPResPath())
 
     @property
     def schema_xml(self):
@@ -1179,8 +1326,12 @@ class List(SecurableObject):
     @property
     def title_resource(self):
         """Represents the title of this list."""
-        return self.properties.get('TitleResource',
-                                   UserResource(self.context, ResourcePath("TitleResource", self.resource_path)))
+        return self.properties.get(
+            "TitleResource",
+            UserResource(
+                self.context, ResourcePath("TitleResource", self.resource_path)
+            ),
+        )
 
     @property
     def validation_formula(self):
@@ -1218,7 +1369,7 @@ class List(SecurableObject):
                 "ParentWebPath": self.parent_web_path,
                 "RootFolder": self.root_folder,
                 "TitleResource": self.title_resource,
-                "UserCustomActions": self.user_custom_actions
+                "UserCustomActions": self.user_custom_actions,
             }
             default_value = property_mapping.get(name, None)
         return super(List, self).get_property(name, default_value)
@@ -1228,5 +1379,7 @@ class List(SecurableObject):
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id":
-                self._resource_path = self.parent_collection.get_by_id(value).resource_path
+                self._resource_path = self.parent_collection.get_by_id(
+                    value
+                ).resource_path
         return self

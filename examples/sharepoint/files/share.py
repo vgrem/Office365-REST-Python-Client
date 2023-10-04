@@ -8,5 +8,9 @@ from tests import test_team_site_url, test_user_credentials
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
 file_url = "Shared Documents/SharePoint User Guide.docx"
-result = ctx.web.get_file_by_server_relative_path(file_url).share_link(SharingLinkKind.AnonymousView).execute_query()
+result = (
+    ctx.web.get_file_by_server_relative_path(file_url)
+    .share_link(SharingLinkKind.AnonymousView)
+    .execute_query()
+)
 print(result.value.sharingLinkInfo)

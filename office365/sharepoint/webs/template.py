@@ -12,7 +12,7 @@ class WebTemplate(BaseEntity):
         """Gets a value that specifies the description of the list template.
         :rtype: str or None
         """
-        return self.properties.get('Description', None)
+        return self.properties.get("Description", None)
 
     @property
     def display_category(self):
@@ -21,7 +21,7 @@ class WebTemplate(BaseEntity):
         a part of.
         :rtype: str or None
         """
-        return self.properties.get('DisplayCategory', None)
+        return self.properties.get("DisplayCategory", None)
 
     @property
     def image_url(self):
@@ -29,7 +29,7 @@ class WebTemplate(BaseEntity):
         Specifies the URL for the image that is associated with the site definition configuration or site template.
         :rtype: str or None
         """
-        return self.properties.get('ImageUrl', None)
+        return self.properties.get("ImageUrl", None)
 
     @property
     def is_hidden(self):
@@ -37,7 +37,7 @@ class WebTemplate(BaseEntity):
         Specifies whether the site definition configuration is displayed in the user interface for creating new sites
         :rtype: bool or None
         """
-        return self.properties.get('IsHidden', None)
+        return self.properties.get("IsHidden", None)
 
     @property
     def is_root_web_only(self):
@@ -46,7 +46,7 @@ class WebTemplate(BaseEntity):
         in the site collection.
         :rtype: bool or None
         """
-        return self.properties.get('IsRootWebOnly', None)
+        return self.properties.get("IsRootWebOnly", None)
 
     @property
     def is_sub_web_only(self):
@@ -55,7 +55,7 @@ class WebTemplate(BaseEntity):
         created within the site collection.
         :rtype: bool or None
         """
-        return self.properties.get('IsSubWebOnly', None)
+        return self.properties.get("IsSubWebOnly", None)
 
     @property
     def lcid(self):
@@ -63,18 +63,18 @@ class WebTemplate(BaseEntity):
         Specifies the LCID for the site definition configuration or site template.
         :rtype: int or None
         """
-        return self.properties.get('Lcid', None)
+        return self.properties.get("Lcid", None)
 
     @property
     def name(self):
         """Gets a value that specifies the display name of the list template.
         :rtype: str or None
         """
-        return self.properties.get('Name', None)
+        return self.properties.get("Name", None)
 
     @property
     def title(self):
         """Specifies the display name for the site definition configuration or site template.
         :rtype: str or None
         """
-        return self.properties.get('Title', None)
+        return self.properties.get("Title", None)

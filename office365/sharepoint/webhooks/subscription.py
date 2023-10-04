@@ -53,8 +53,9 @@ class Subscription(BaseEntity):
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "id":
-                self._resource_path = ServiceOperationPath("getById",
-                                                           [value], self._parent_collection.resource_path)
+                self._resource_path = ServiceOperationPath(
+                    "getById", [value], self._parent_collection.resource_path
+                )
         return super(Subscription, self).set_property(name, value, persist_changes)
 
     @property

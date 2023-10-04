@@ -6,9 +6,19 @@ from office365.runtime.client_value import ClientValue
 class UpgradeInfo(ClientValue):
     """A class containing site collection upgrade information."""
 
-    def __init__(self, error_file=None, errors=None, last_updated=datetime.datetime.min,
-                 log_file=None, request_date=datetime.datetime.min, retry_count=None,
-                 start_time=datetime.datetime.min, status=None, upgrade_type=None, warnings=None):
+    def __init__(
+        self,
+        error_file=None,
+        errors=None,
+        last_updated=datetime.datetime.min,
+        log_file=None,
+        request_date=datetime.datetime.min,
+        retry_count=None,
+        start_time=datetime.datetime.min,
+        status=None,
+        upgrade_type=None,
+        warnings=None,
+    ):
         """
         :param str error_file: Specifies the location of the file that contains upgrade errors.
         :param int errors: Specifies the number of errors encountered during the site collection upgrade.

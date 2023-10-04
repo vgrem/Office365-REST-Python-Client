@@ -7,7 +7,9 @@ class SPAnalyticsUsageService(BaseEntity):
     """Represents the entry point for the Event REST service exposed through CSOM"""
 
     def __init__(self, context):
-        static_path = ResourcePath("Microsoft.SharePoint.Administration.SPAnalyticsUsageService")
+        static_path = ResourcePath(
+            "Microsoft.SharePoint.Administration.SPAnalyticsUsageService"
+        )
         super(SPAnalyticsUsageService, self).__init__(context, static_path)
 
     def log_event(self, event_type_id, scope_id, item_id, site=None, user=None):
@@ -25,7 +27,7 @@ class SPAnalyticsUsageService(BaseEntity):
             "ItemId": item_id,
             "ScopeId": scope_id,
             "Site": site,
-            "User": user
+            "User": user,
         }
         qry = ServiceOperationQuery(self, "logevent", None, payload)
         self.context.add_query(qry)

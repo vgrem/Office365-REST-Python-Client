@@ -2,7 +2,6 @@ from office365.runtime.client_value import ClientValue
 
 
 class TrackedItemUpdatesRequest(ClientValue):
-
     def __init__(self, timestamp=None, tracked_items_as_json=None):
         """
         :param datetime timestamp:

@@ -8,11 +8,24 @@ class SharingLinkData(ClientValue):
     is a tokenized sharing link.
     """
 
-    def __init__(self, blocks_download=None, description=None, embeddable=None, expiration=None,
-                 has_external_guest_invitees=None, is_anonymous=None, is_create_only_link=None,
-                 is_forms_link=None, is_manage_list_link=None, is_originated_from_sharing_flow=None,
-                 is_review_link=None, is_sharing_link=None, is_writable=None, link_kind=None,
-                 object_type=None):
+    def __init__(
+        self,
+        blocks_download=None,
+        description=None,
+        embeddable=None,
+        expiration=None,
+        has_external_guest_invitees=None,
+        is_anonymous=None,
+        is_create_only_link=None,
+        is_forms_link=None,
+        is_manage_list_link=None,
+        is_originated_from_sharing_flow=None,
+        is_review_link=None,
+        is_sharing_link=None,
+        is_writable=None,
+        link_kind=None,
+        object_type=None,
+    ):
         """
         :param bool blocks_download:
         :param str description:

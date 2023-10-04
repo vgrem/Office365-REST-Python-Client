@@ -22,4 +22,6 @@ class DeviceEnrollmentConfiguration(Entity):
         return self.properties.get("displayName", None)
 
     def get_property(self, name, default_value=None):
-        return super(DeviceEnrollmentConfiguration, self).get_property(name, default_value)
+        return super(DeviceEnrollmentConfiguration, self).get_property(
+            name, default_value
+        )

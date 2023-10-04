@@ -1,5 +1,5 @@
 class PersonalSiteCreationPriority:
-    """The PersonalSiteCreationPriority enumeration specifies the priority for creating personal sites """
+    """The PersonalSiteCreationPriority enumeration specifies the priority for creating personal sites"""
 
     Low = 0
     """The priority for creating personal sites is low."""

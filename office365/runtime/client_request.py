@@ -9,7 +9,6 @@ from office365.runtime.types.event_handler import EventHandler
 
 
 class ClientRequest(object):
-
     def __init__(self):
         """
         Abstract request client
@@ -69,44 +68,56 @@ class ClientRequest(object):
         self.beforeExecute.notify(request)
         if request.method == HttpMethod.Post:
             if request.is_bytes or request.is_file:
-                response = requests.post(url=request.url,
-                                         headers=request.headers,
-                                         data=request.data,
-                                         auth=request.auth,
-                                         verify=request.verify,
-                                         proxies=request.proxies)
+                response = requests.post(
+                    url=request.url,
+                    headers=request.headers,
+                    data=request.data,
+                    auth=request.auth,
+                    verify=request.verify,
+                    proxies=request.proxies,
+                )
             else:
-                response = requests.post(url=request.url,
-                                         headers=request.headers,
-                                         json=request.data,
-                                         auth=request.auth,
-                                         verify=request.verify,
-                                         proxies=request.proxies)
+                response = requests.post(
+                    url=request.url,
+                    headers=request.headers,
+                    json=request.data,
+                    auth=request.auth,
+                    verify=request.verify,
+                    proxies=request.proxies,
+                )
         elif request.method == HttpMethod.Patch:
-            response = requests.patch(url=request.url,
-                                      headers=request.headers,
-                                      json=request.data,
-                                      auth=request.auth,
-                                      verify=request.verify,
-                                      proxies=request.proxies)
+            response = requests.patch(
+                url=request.url,
+                headers=request.headers,
+                json=request.data,
+                auth=request.auth,
+                verify=request.verify,
+                proxies=request.proxies,
+            )
         elif request.method == HttpMethod.Delete:
-            response = requests.delete(url=request.url,
-                                       headers=request.headers,
-                                       auth=request.auth,
-                                       verify=request.verify,
-                                       proxies=request.proxies)
+            response = requests.delete(
+                url=request.url,
+                headers=request.headers,
+                auth=request.auth,
+                verify=request.verify,
+                proxies=request.proxies,
+            )
         elif request.method == HttpMethod.Put:
-            response = requests.put(url=request.url,
-                                    data=request.data,
-                                    headers=request.headers,
-                                    auth=request.auth,
-                                    verify=request.verify,
-                                    proxies=request.proxies)
+            response = requests.put(
+                url=request.url,
+                data=request.data,
+                headers=request.headers,
+                auth=request.auth,
+                verify=request.verify,
+                proxies=request.proxies,
+            )
         else:
-            response = requests.get(url=request.url,
-                                    headers=request.headers,
-                                    auth=request.auth,
-                                    verify=request.verify,
-                                    stream=request.stream,
-                                    proxies=request.proxies)
+            response = requests.get(
+                url=request.url,
+                headers=request.headers,
+                auth=request.auth,
+                verify=request.verify,
+                stream=request.stream,
+                proxies=request.proxies,
+            )
         return response

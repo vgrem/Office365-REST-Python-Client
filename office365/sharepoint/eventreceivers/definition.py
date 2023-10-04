@@ -11,7 +11,7 @@ class EventReceiverDefinition(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('ReceiverAssembly', None)
+        return self.properties.get("ReceiverAssembly", None)
 
     @property
     def receiver_class(self):
@@ -19,7 +19,7 @@ class EventReceiverDefinition(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('ReceiverClass', None)
+        return self.properties.get("ReceiverClass", None)
 
     @property
     def receiver_url(self):
@@ -27,6 +27,4 @@ class EventReceiverDefinition(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('ReceiverUrl', None)
-
-
+        return self.properties.get("ReceiverUrl", None)

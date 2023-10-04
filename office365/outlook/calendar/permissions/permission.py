@@ -65,7 +65,7 @@ class CalendarPermission(Entity):
         if default_value is None:
             property_mapping = {
                 "allowedRoles": self.allowed_roles,
-                "emailAddress": self.email_address
+                "emailAddress": self.email_address,
             }
             default_value = property_mapping.get(name, None)
         return super(CalendarPermission, self).get_property(name, default_value)

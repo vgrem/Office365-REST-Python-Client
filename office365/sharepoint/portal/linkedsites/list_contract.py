@@ -4,7 +4,6 @@ from office365.sharepoint.portal.linkedsites.contract import LinkedSiteContract
 
 
 class LinkedSitesListContract(ClientValue):
-
     def __init__(self, linked_sites=ClientValueCollection(LinkedSiteContract)):
         super().__init__()
         self.LinkedSites = linked_sites

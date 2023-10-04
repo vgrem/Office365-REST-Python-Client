@@ -3,7 +3,7 @@ from office365.runtime.client_value import ClientValue
 
 class Identity(ClientValue):
     """The Identity resource represents an identity of an actor. For example, an actor can be a user, device,
-    or application. """
+    or application."""
 
     def __init__(self, display_name=None, _id=None):
         """

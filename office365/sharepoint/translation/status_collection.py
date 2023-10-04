@@ -3,11 +3,12 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.translation.status import TranslationStatus
-from office365.sharepoint.translation.status_set_request import TranslationStatusSetRequest
+from office365.sharepoint.translation.status_set_request import (
+    TranslationStatusSetRequest,
+)
 
 
 class TranslationStatusCollection(BaseEntity):
-
     def __init__(self, context, resource_path=None):
         super(TranslationStatusCollection, self).__init__(context, resource_path)
 

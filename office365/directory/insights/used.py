@@ -26,15 +26,16 @@ class UsedInsight(Entity):
     def resource(self):
         """Used for navigating to the item that was used. For file attachments, the type is fileAttachment.
         For linked attachments, the type is driveItem."""
-        return self.properties.get('resource',
-                                   Entity(self.context, ResourcePath("resource", self.resource_path)))
+        return self.properties.get(
+            "resource",
+            Entity(self.context, ResourcePath("resource", self.resource_path)),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "lastUsed": self.last_used,
-                "resourceReference": self.resource_reference
+                "resourceReference": self.resource_reference,
             }
             default_value = property_mapping.get(name, None)
         return super(UsedInsight, self).get_property(name, default_value)
-

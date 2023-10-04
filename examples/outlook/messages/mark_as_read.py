@@ -5,6 +5,7 @@ https://learn.microsoft.com/en-us/graph/api/message-update?view=graph-rest-1.0&t
 """
 
 import sys
+
 from office365.graph_client import GraphClient
 from office365.outlook.mail.messages.message import Message
 from tests.graph_case import acquire_token_by_username_password

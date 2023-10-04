@@ -2,8 +2,15 @@ from office365.runtime.client_value import ClientValue
 
 
 class SiteCreationProperties(ClientValue):
-
-    def __init__(self, title=None, url=None, owner=None, owner_name=None, template=None, site_uni_name=None):
+    def __init__(
+        self,
+        title=None,
+        url=None,
+        owner=None,
+        owner_name=None,
+        template=None,
+        site_uni_name=None,
+    ):
         """Sets the initial properties for a new site when it is created.
 
         :param str owner: Gets or sets the login name of the owner of the new site

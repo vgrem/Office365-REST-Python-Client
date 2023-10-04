@@ -31,17 +31,17 @@ class TimeZone(BaseEntity):
     @property
     def id(self):
         """Gets the identifier of the time zone."""
-        return self.properties.get('Id', None)
+        return self.properties.get("Id", None)
 
     @property
     def description(self):
         """Gets the description of the time zone."""
-        return self.properties.get('Description', None)
+        return self.properties.get("Description", None)
 
     @property
     def information(self):
         """Gets information about the time zone."""
-        return self.properties.get('Information', TimeZoneInformation())
+        return self.properties.get("Information", TimeZoneInformation())
 
 
 class TimeZoneCollection(BaseEntityCollection):

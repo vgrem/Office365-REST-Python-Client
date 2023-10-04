@@ -1,11 +1,12 @@
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.types.collections import StringCollection
-from office365.sharepoint.search.query.personal_result_suggestion import PersonalResultSuggestion
+from office365.sharepoint.search.query.personal_result_suggestion import (
+    PersonalResultSuggestion,
+)
 
 
 class QuerySuggestionQuery(ClientValue):
-
     @property
     def entity_type_name(self):
         return "Microsoft.SharePoint.Client.Search.Query.QuerySuggestionQuery"

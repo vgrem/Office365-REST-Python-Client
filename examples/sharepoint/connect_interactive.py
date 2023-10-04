@@ -10,7 +10,7 @@ https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-authentica
 """
 
 from office365.sharepoint.client_context import ClientContext
-from tests import test_tenant, test_client_id, test_site_url
+from tests import test_client_id, test_site_url, test_tenant
 
 ctx = ClientContext(test_site_url).with_interactive(test_tenant, test_client_id)
 me = ctx.web.current_user.get().execute_query()

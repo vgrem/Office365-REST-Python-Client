@@ -26,14 +26,16 @@ class PermissionCollection(EntityCollection):
             "application": self.context.applications,
             "user": self.context.users,
             "device": self.context.device_app_management,
-            "group": self.context.groups
+            "group": self.context.groups,
         }
 
         if isinstance(identity, Entity):
             identity_type = type(identity).__name__.lower()
         else:
             if identity_type is None:
-                raise ValueError("Identity type is a mandatory when identity identifier is specified")
+                raise ValueError(
+                    "Identity type is a mandatory when identity identifier is specified"
+                )
             known_identity = known_identities.get(identity_type, None)
             if known_identity is None:
                 raise ValueError("Unknown identity type")
@@ -42,14 +44,19 @@ class PermissionCollection(EntityCollection):
         def _create():
             payload = {
                 "roles": roles,
-                "grantedToIdentities": [{
-                    identity_type: Identity(display_name=identity.display_name, _id=identity.id)
-                }]
+                "grantedToIdentities": [
+                    {
+                        identity_type: Identity(
+                            display_name=identity.display_name, _id=identity.id
+                        )
+                    }
+                ],
             }
 
             self.add_child(return_type)
             qry = CreateEntityQuery(self, payload, return_type)
             self.context.add_query(qry)
+
         identity.ensure_properties(["displayName"], _create)
         return return_type
 
@@ -57,8 +64,10 @@ class PermissionCollection(EntityCollection):
         """
         Remove all access to resource
         """
+
         def _after_loaded(return_type):
             for permission in return_type:  # type: Permission
                 permission.delete_object()
+
         self.context.load(self, after_loaded=_after_loaded)
         return self

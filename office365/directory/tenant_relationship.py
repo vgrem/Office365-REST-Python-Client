@@ -16,6 +16,8 @@ class TenantRelationship(Entity):
         """
         return_type = ClientResult(self.context, TenantInformation())
         params = {"domainName": domain_name}
-        qry = FunctionQuery(self, "findTenantInformationByDomainName", params, return_type)
+        qry = FunctionQuery(
+            self, "findTenantInformationByDomainName", params, return_type
+        )
         self.context.add_query(qry)
         return return_type

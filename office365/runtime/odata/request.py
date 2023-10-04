@@ -15,7 +15,6 @@ from office365.runtime.queries.update_entity import UpdateEntityQuery
 
 
 class ODataRequest(ClientRequest):
-
     def __init__(self, json_format):
         """
         Creates OData request
@@ -40,7 +39,9 @@ class ODataRequest(ClientRequest):
         request.method = HttpMethod.Get
         if isinstance(query, DeleteEntityQuery):
             request.method = HttpMethod.Post
-        elif isinstance(query, (CreateEntityQuery, UpdateEntityQuery, ServiceOperationQuery)):
+        elif isinstance(
+            query, (CreateEntityQuery, UpdateEntityQuery, ServiceOperationQuery)
+        ):
             request.method = HttpMethod.Post
             if query.parameters_type is not None:
                 request.data = self._build_payload(query)
@@ -59,12 +60,17 @@ class ODataRequest(ClientRequest):
         if isinstance(return_type, ClientObject):
             return_type.clear()
 
-        if response.headers.get('Content-Type', '').lower().split(';')[0] != 'application/json':
+        if (
+            response.headers.get("Content-Type", "").lower().split(";")[0]
+            != "application/json"
+        ):
             if isinstance(return_type, ClientResult):
                 return_type.set_property("__value", response.content)
         else:
             if isinstance(json_format, JsonLightFormat):
-                if isinstance(query, ServiceOperationQuery) or isinstance(query, FunctionQuery):
+                if isinstance(query, ServiceOperationQuery) or isinstance(
+                    query, FunctionQuery
+                ):
                     json_format.function = query.name
 
             self.map_json(response.json(), return_type, json_format)
@@ -105,13 +111,17 @@ class ODataRequest(ClientRequest):
             elif isinstance(json, dict):
                 for name, value in json.items():
                     if isinstance(json_format, JsonLightFormat):
-                        is_valid = name != "__metadata" and not (isinstance(value, dict) and "__deferred" in value)
+                        is_valid = name != "__metadata" and not (
+                            isinstance(value, dict) and "__deferred" in value
+                        )
                     else:
                         is_valid = "@odata" not in name
 
                     if is_valid:
                         if isinstance(value, dict):
-                            value = {k: v for k, v in self._next_property(value, json_format)}
+                            value = {
+                                k: v for k, v in self._next_property(value, json_format)
+                            }
                         yield name, value
             else:
                 yield "__value", json
@@ -129,13 +139,20 @@ class ODataRequest(ClientRequest):
             if isinstance(payload, ClientObject) or isinstance(payload, ClientValue):
                 return payload.to_json(self._default_json_format)
             elif isinstance(payload, dict):
-                return {k: _normalize_payload(v) for k, v in payload.items() if v is not None}
+                return {
+                    k: _normalize_payload(v)
+                    for k, v in payload.items()
+                    if v is not None
+                }
             elif isinstance(payload, list):
                 return [_normalize_payload(item) for item in payload]
             return payload
 
         json = _normalize_payload(query.parameters_type)
-        if isinstance(query, ServiceOperationQuery) and query.parameters_name is not None:
+        if (
+            isinstance(query, ServiceOperationQuery)
+            and query.parameters_name is not None
+        ):
             json = {query.parameters_name: json}
         return json
 
@@ -144,5 +161,5 @@ class ODataRequest(ClientRequest):
         :type request: RequestOptions
         """
         media_type = self.json_format.media_type
-        request.ensure_header('Content-Type', media_type)
-        request.ensure_header('Accept', media_type)
+        request.ensure_header("Content-Type", media_type)
+        request.ensure_header("Accept", media_type)

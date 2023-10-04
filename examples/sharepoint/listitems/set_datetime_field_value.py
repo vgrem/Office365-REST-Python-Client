@@ -2,7 +2,7 @@ import sys
 from datetime import date
 
 from office365.sharepoint.client_context import ClientContext
-from tests import test_team_site_url, test_client_credentials
+from tests import test_client_credentials, test_team_site_url
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 
@@ -14,6 +14,3 @@ if len(items) == 0:
 field_name = "DateColumn"
 field_value = date.today()
 items[0].set_property(field_name, field_value.isoformat()).update().execute_query()
-
-
-

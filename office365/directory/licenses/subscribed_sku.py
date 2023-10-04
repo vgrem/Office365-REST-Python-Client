@@ -49,13 +49,15 @@ class SubscribedSku(Entity):
     @property
     def service_plans(self):
         """Information about the service plans that are available with the SKU. Not nullable"""
-        return self.properties.get('servicePlans', ClientValueCollection(ServicePlanInfo))
+        return self.properties.get(
+            "servicePlans", ClientValueCollection(ServicePlanInfo)
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "prepaidUnits": self.prepaid_units,
-                "servicePlans": self.service_plans
+                "servicePlans": self.service_plans,
             }
             default_value = property_mapping.get(name, None)
         return super(SubscribedSku, self).get_property(name, default_value)

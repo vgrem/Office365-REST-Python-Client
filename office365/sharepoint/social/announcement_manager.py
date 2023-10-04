@@ -21,7 +21,9 @@ class SocialAnnouncementManager(BaseEntity):
         return_type = ClientResult(context, ClientValueCollection(TileData))
         manager = SocialAnnouncementManager(context)
         params = {"url": url}
-        qry = ServiceOperationQuery(manager, "GetCurrentAnnouncements", params, None, None, return_type)
+        qry = ServiceOperationQuery(
+            manager, "GetCurrentAnnouncements", params, None, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type

@@ -25,7 +25,9 @@ class ReportRoot(Entity):
         Note: The Microsoft Graph API for Intune requires an active Intune license for the tenant.
         """
         return_type = ClientResult(self.context, Report())
-        qry = FunctionQuery(self, "managedDeviceEnrollmentTopFailures", {"period": period}, return_type)
+        qry = FunctionQuery(
+            self, "managedDeviceEnrollmentTopFailures", {"period": period}, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -39,7 +41,9 @@ class ReportRoot(Entity):
             Dn where n represents the number of days over which the report is aggregated. Required.
         """
         return_type = ClientResult(self.context, str())
-        qry = FunctionQuery(self, "getEmailActivityCounts", {"period": period}, return_type)
+        qry = FunctionQuery(
+            self, "getEmailActivityCounts", {"period": period}, return_type
+        )
         self.context.add_query(qry)
         return qry.return_type
 
@@ -74,7 +78,9 @@ class ReportRoot(Entity):
         PowerPoint, OneNote, and Teams) in your organization.
         """
         return_type = ClientResult(self.context, str())
-        qry = FunctionQuery(self, "getM365AppUserCounts", {"period": period}, return_type)
+        qry = FunctionQuery(
+            self, "getM365AppUserCounts", {"period": period}, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -200,13 +206,19 @@ class ReportRoot(Entity):
     @property
     def authentication_methods(self):
         """Container for navigation properties for Azure AD authentication methods resources."""
-        return self.properties.get('authenticationMethods',
-                                   AuthenticationMethodsRoot(self.context,
-                                                             ResourcePath("authenticationMethods",
-                                                                          self.resource_path)))
+        return self.properties.get(
+            "authenticationMethods",
+            AuthenticationMethodsRoot(
+                self.context, ResourcePath("authenticationMethods", self.resource_path)
+            ),
+        )
 
     @property
     def security(self):
         """Container for navigation properties for Azure AD authentication methods resources."""
-        return self.properties.get('security',
-                                   SecurityReportsRoot(self.context, ResourcePath("security", self.resource_path)))
+        return self.properties.get(
+            "security",
+            SecurityReportsRoot(
+                self.context, ResourcePath("security", self.resource_path)
+            ),
+        )

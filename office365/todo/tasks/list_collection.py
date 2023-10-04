@@ -3,9 +3,10 @@ from office365.todo.tasks.list import TodoTaskList
 
 
 class TodoTaskListCollection(DeltaCollection):
-
     def __init__(self, context, resource_path=None):
-        super(TodoTaskListCollection, self).__init__(context, TodoTaskList, resource_path)
+        super(TodoTaskListCollection, self).__init__(
+            context, TodoTaskList, resource_path
+        )
 
     def add(self, display_name):
         """

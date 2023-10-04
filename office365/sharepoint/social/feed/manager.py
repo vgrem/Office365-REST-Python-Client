@@ -31,7 +31,9 @@ class SocialFeedManager(BaseEntity):
         """
         return_type = ClientResult(self.context, SocialThread())
         payload = {"targetId": target_id, "creationData": creation_data}
-        qry = ServiceOperationQuery(self, "CreatePost", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "CreatePost", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -46,7 +48,9 @@ class SocialFeedManager(BaseEntity):
         """
         return_type = ClientResult(self.context, SocialThread())
         payload = {"postId": post_id}
-        qry = ServiceOperationQuery(self, "DeletePost", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "DeletePost", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -60,7 +64,9 @@ class SocialFeedManager(BaseEntity):
         """
         return_type = ClientResult(self.context, SocialAttachment())
         payload = {"name": name, "description": description, "fileData": file_data}
-        qry = ServiceOperationQuery(self, "CreateFileAttachment", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "CreateFileAttachment", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 

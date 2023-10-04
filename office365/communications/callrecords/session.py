@@ -12,6 +12,9 @@ class Session(Entity):
         """
         The list of segments involved in the session.
         """
-        return self.properties.get('segments',
-                                   EntityCollection(self.context, Segment,
-                                                    ResourcePath("segments", self.resource_path)))
+        return self.properties.get(
+            "segments",
+            EntityCollection(
+                self.context, Segment, ResourcePath("segments", self.resource_path)
+            ),
+        )

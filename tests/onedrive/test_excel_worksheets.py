@@ -19,7 +19,9 @@ class TestExcelWorksheets(GraphTestCase):
         cls.excel_file.delete_object().execute_query_retry()
 
     def test1_add_worksheet(self):
-        result = self.__class__.excel_file.workbook.worksheets.add(self.sheet_name).execute_query()
+        result = self.__class__.excel_file.workbook.worksheets.add(
+            self.sheet_name
+        ).execute_query()
         self.assertIsNotNone(result.resource_path)
 
     def test2_list_worksheets(self):
@@ -30,8 +32,3 @@ class TestExcelWorksheets(GraphTestCase):
     def test3_delete_worksheet(self):
         worksheet = self.__class__.excel_file.workbook.worksheets[self.sheet_name]
         worksheet.delete_object().execute_query()
-
-
-
-
-

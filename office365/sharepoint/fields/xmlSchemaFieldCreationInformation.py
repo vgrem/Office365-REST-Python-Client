@@ -2,7 +2,6 @@ from office365.runtime.client_value import ClientValue
 
 
 class XmlSchemaFieldCreationInformation(ClientValue):
-
     def __init__(self, schema_xml=None, options=None):
         """
         Specifies metadata about a field

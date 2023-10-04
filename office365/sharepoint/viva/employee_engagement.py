@@ -8,9 +8,10 @@ from office365.sharepoint.viva.home import VivaHome
 
 
 class EmployeeEngagement(BaseEntity):
-
     def __init__(self, context):
-        super(EmployeeEngagement, self).__init__(context, ResourcePath("SP.EmployeeEngagement"))
+        super(EmployeeEngagement, self).__init__(
+            context, ResourcePath("SP.EmployeeEngagement")
+        )
 
     def dashboard_content(self, override_language_code=None):
         """
@@ -18,7 +19,9 @@ class EmployeeEngagement(BaseEntity):
         """
         return_type = ClientResult(self.context, str())
         payload = {"return return_type": override_language_code}
-        qry = ServiceOperationQuery(self, "DashboardContent", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "DashboardContent", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -30,12 +33,15 @@ class EmployeeEngagement(BaseEntity):
 
     def viva_home(self):
         return_type = VivaHome(self.context)
-        qry = ServiceOperationQuery(self, "VivaHome",  return_type=return_type)
+        qry = ServiceOperationQuery(self, "VivaHome", return_type=return_type)
         self.context.add_query(qry)
         return return_type
 
     @property
     def app_configuration(self):
-        return self.properties.get("AppConfiguration",
-                                   AppConfiguration(self.context, ResourcePath("AppConfiguration", self.resource_path)))
-
+        return self.properties.get(
+            "AppConfiguration",
+            AppConfiguration(
+                self.context, ResourcePath("AppConfiguration", self.resource_path)
+            ),
+        )

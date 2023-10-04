@@ -12,7 +12,7 @@ class FieldRatingScale(FieldMultiChoice):
 
         :rtype: int or None
         """
-        return self.properties.get('GridStartNumber', None)
+        return self.properties.get("GridStartNumber", None)
 
     @grid_start_number.setter
     def grid_start_number(self, value):
@@ -21,7 +21,7 @@ class FieldRatingScale(FieldMultiChoice):
 
         :type value: int
         """
-        self.set_property('GridStartNumber', value)
+        self.set_property("GridStartNumber", value)
 
     @property
     def range_count(self):
@@ -30,4 +30,4 @@ class FieldRatingScale(FieldMultiChoice):
 
         :rtype: int or None
         """
-        return self.properties.get('RangeCount', None)
+        return self.properties.get("RangeCount", None)

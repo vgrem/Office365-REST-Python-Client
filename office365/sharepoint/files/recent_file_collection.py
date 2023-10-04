@@ -5,9 +5,10 @@ from office365.sharepoint.base_entity import BaseEntity
 
 
 class RecentFileCollection(BaseEntity):
-
     def __init__(self, context):
-        super(RecentFileCollection, self).__init__(context, ResourcePath("SP.RecentFileCollection"))
+        super(RecentFileCollection, self).__init__(
+            context, ResourcePath("SP.RecentFileCollection")
+        )
 
     @staticmethod
     def get_recent_files(context, top):
@@ -16,10 +17,10 @@ class RecentFileCollection(BaseEntity):
         :param int top:
         """
         return_type = ClientResult(context, str())
-        payload = {
-            "top": top
-        }
+        payload = {"top": top}
         binding_type = RecentFileCollection(context)
-        qry = ServiceOperationQuery(binding_type, "GetRecentFiles", None, payload, None, return_type, True)
+        qry = ServiceOperationQuery(
+            binding_type, "GetRecentFiles", None, payload, None, return_type, True
+        )
         context.add_query(qry)
         return return_type

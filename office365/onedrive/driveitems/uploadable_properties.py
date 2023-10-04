@@ -5,7 +5,13 @@ from office365.runtime.client_value import ClientValue
 class DriveItemUploadableProperties(ClientValue):
     """The driveItemUploadableProperties resource represents an item being uploaded when creating an upload session."""
 
-    def __init__(self, file_system_info=FileSystemInfo(), name=None, description=None, file_size=None):
+    def __init__(
+        self,
+        file_system_info=FileSystemInfo(),
+        name=None,
+        description=None,
+        file_size=None,
+    ):
         """
         :param FileSystemInfo file_system_info: File system information on client.
         :param str name: The name of the item (filename and extension).

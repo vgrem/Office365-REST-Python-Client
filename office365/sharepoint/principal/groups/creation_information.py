@@ -15,5 +15,3 @@ class GroupCreationInformation(ClientValue):
     @property
     def entity_type_name(self):
         return "SP.Group"
-
-

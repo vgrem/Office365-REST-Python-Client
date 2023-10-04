@@ -1,14 +1,15 @@
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.navigation.node import NavigationNode
 
 
 class NavigationNodeCollection(BaseEntityCollection):
-
     def __init__(self, context, resource_path=None):
-        super(NavigationNodeCollection, self).__init__(context, NavigationNode, resource_path)
+        super(NavigationNodeCollection, self).__init__(
+            context, NavigationNode, resource_path
+        )
 
     def add(self, create_node_info):
         """
@@ -31,10 +32,7 @@ class NavigationNodeCollection(BaseEntityCollection):
         :param int node_id: Identifier of the navigation node that is moved.
         :param int previous_node_id: Identifier of the navigation node after which the node identified by nodeId moves to
         """
-        params = {
-            "nodeId": node_id,
-            "previousNodeId": previous_node_id
-        }
+        params = {"nodeId": node_id, "previousNodeId": previous_node_id}
         qry = ServiceOperationQuery(self, "GetByIndex", params)
         self.context.add_query(qry)
         return self
@@ -47,7 +45,9 @@ class NavigationNodeCollection(BaseEntityCollection):
         """
         return_type = NavigationNode(self.context)
         self.add_child(return_type)
-        qry = ServiceOperationQuery(self, "GetByIndex", [index], None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetByIndex", [index], None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -57,5 +57,6 @@ class NavigationNodeCollection(BaseEntityCollection):
 
         :param int node_id: Specifies the identifier of the navigation node.
         """
-        return NavigationNode(self.context,
-                              ServiceOperationPath("GetById", [node_id], self.resource_path))
+        return NavigationNode(
+            self.context, ServiceOperationPath("GetById", [node_id], self.resource_path)
+        )

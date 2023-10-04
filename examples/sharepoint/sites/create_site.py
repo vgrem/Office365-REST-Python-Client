@@ -2,7 +2,12 @@ import json
 from random import randint
 
 from office365.sharepoint.tenant.administration.tenant import Tenant
-from tests import test_admin_site_url, test_site_url, test_user_credentials, test_user_principal_name_alt
+from tests import (
+    test_admin_site_url,
+    test_site_url,
+    test_user_credentials,
+    test_user_principal_name_alt,
+)
 
 alias = str(randint(0, 10000))
 title = "Custom Site"

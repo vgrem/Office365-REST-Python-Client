@@ -1,5 +1,5 @@
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
@@ -23,9 +23,7 @@ class ContentType(BaseEntity):
         :param list[str] field_names: Rearranges the collection of fields in the order in which field internal
              names are specified.
         """
-        payload = {
-            "fieldNames": StringCollection(field_names)
-        }
+        payload = {"fieldNames": StringCollection(field_names)}
         qry = ServiceOperationQuery(self, "ReorderFields", None, payload)
         self.context.add_query(qry)
         return self
@@ -65,7 +63,6 @@ class ContentType(BaseEntity):
         :rtype: str
         """
         return self.properties.get("DisplayFormClientSideComponentProperties", None)
-
 
     @property
     def display_form_template_name(self):
@@ -113,7 +110,7 @@ class ContentType(BaseEntity):
         """Specifies whether the content type can be changed.
         :rtype: bool or None
         """
-        return self.properties.get('Sealed', None)
+        return self.properties.get("Sealed", None)
 
     @property
     def string_id(self):
@@ -162,8 +159,12 @@ class ContentType(BaseEntity):
     @property
     def description_resource(self):
         """Gets the SP.UserResource object (section 3.2.5.333) for the description of this content type"""
-        return self.properties.get('DescriptionResource',
-                                   UserResource(self.context, ResourcePath("DescriptionResource", self.resource_path)))
+        return self.properties.get(
+            "DescriptionResource",
+            UserResource(
+                self.context, ResourcePath("DescriptionResource", self.resource_path)
+            ),
+        )
 
     @property
     def document_template(self):
@@ -226,8 +227,12 @@ class ContentType(BaseEntity):
     @property
     def name_resource(self):
         """Specifies the SP.UserResource object for the name of this content type"""
-        return self.properties.get('NameResource',
-                                   UserResource(self.context, ResourcePath("NameResource", self.resource_path)))
+        return self.properties.get(
+            "NameResource",
+            UserResource(
+                self.context, ResourcePath("NameResource", self.resource_path)
+            ),
+        )
 
     @property
     def schema_xml(self):
@@ -239,20 +244,28 @@ class ContentType(BaseEntity):
     @property
     def fields(self):
         """Gets a value that specifies the collection of fields for the content type."""
-        return self.properties.get('Fields',
-                                   FieldCollection(self.context, ResourcePath("Fields", self.resource_path)))
+        return self.properties.get(
+            "Fields",
+            FieldCollection(self.context, ResourcePath("Fields", self.resource_path)),
+        )
 
     @property
     def parent(self):
         """Gets the parent content type of the content type."""
-        return self.properties.get('Parent',
-                                   ContentType(self.context, ResourcePath("Parent", self.resource_path)))
+        return self.properties.get(
+            "Parent",
+            ContentType(self.context, ResourcePath("Parent", self.resource_path)),
+        )
 
     @property
     def field_links(self):
         """Specifies the collection of field links for the content type."""
-        return self.properties.get('FieldLinks',
-                                   FieldLinkCollection(self.context, ResourcePath("FieldLinks", self.resource_path)))
+        return self.properties.get(
+            "FieldLinks",
+            FieldLinkCollection(
+                self.context, ResourcePath("FieldLinks", self.resource_path)
+            ),
+        )
 
     @property
     def property_ref_name(self):
@@ -263,7 +276,7 @@ class ContentType(BaseEntity):
             property_mapping = {
                 "DescriptionResource": self.description_resource,
                 "FieldLinks": self.field_links,
-                "NameResource": self.name_resource
+                "NameResource": self.name_resource,
             }
             default_value = property_mapping.get(name, None)
         return super(ContentType, self).get_property(name, default_value)

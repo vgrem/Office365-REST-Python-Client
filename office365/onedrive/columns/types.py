@@ -1,5 +1,4 @@
 class ColumnTypes:
-
     text = "text"
     """Single line text."""
 
@@ -11,7 +10,3 @@ class ColumnTypes:
 
     multichoice = "multichoice"
     """Multichoice column."""
-
-
-
-

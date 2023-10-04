@@ -15,7 +15,9 @@ class PersonalWeb(BaseEntity):
         :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
         """
         binding_type = PersonalWeb(context)
-        qry = ServiceOperationQuery(binding_type, "FixPermissionInheritance", None, None, None, None, True)
+        qry = ServiceOperationQuery(
+            binding_type, "FixPermissionInheritance", None, None, None, None, True
+        )
         context.add_query(qry)
         return binding_type
 

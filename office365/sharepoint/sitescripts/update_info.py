@@ -2,7 +2,8 @@ from office365.sharepoint.sitescripts.creation_info import SiteScriptCreationInf
 
 
 class SiteScriptUpdateInfo(SiteScriptCreationInfo):
-
     @property
     def entity_type_name(self):
-        return "Microsoft.SharePoint.Utilities.WebTemplateExtensions.SiteScriptUpdateInfo"
+        return (
+            "Microsoft.SharePoint.Utilities.WebTemplateExtensions.SiteScriptUpdateInfo"
+        )

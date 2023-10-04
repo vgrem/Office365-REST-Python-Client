@@ -7,7 +7,12 @@ class AutomaticRepliesSetting(ClientValue):
     user. For example, an automatic reply to notify that the signed-in user is unavailable to respond to emails.
     """
 
-    def __init__(self, external_audience=None, external_reply_message=None, internal_reply_message=None):
+    def __init__(
+        self,
+        external_audience=None,
+        external_reply_message=None,
+        internal_reply_message=None,
+    ):
         """
         :param str external_audience: The set of audience external to the signed-in user's organization who will
            receive the ExternalReplyMessage, if Status is AlwaysEnabled or Scheduled.

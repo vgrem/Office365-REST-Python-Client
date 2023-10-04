@@ -7,8 +7,14 @@ class RecurrenceRange(ClientValue):
     of access reviews, calendar events, and access package assignments in Azure AD.
     """
 
-    def __init__(self, start_date=None, end_date=None, number_of_occurrences=None, recurrence_timezone=None,
-                 range_type=None):
+    def __init__(
+        self,
+        start_date=None,
+        end_date=None,
+        number_of_occurrences=None,
+        recurrence_timezone=None,
+        range_type=None,
+    ):
         """
         :param datetime.date start_date: The date to start applying the recurrence pattern. The first occurrence of
             the meeting may be this date or later, depending on the recurrence pattern of the event. Must be the

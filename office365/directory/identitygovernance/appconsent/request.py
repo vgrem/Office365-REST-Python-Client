@@ -1,4 +1,6 @@
-from office365.directory.identitygovernance.userconsent.request_collection import UserConsentRequestCollection
+from office365.directory.identitygovernance.userconsent.request_collection import (
+    UserConsentRequestCollection,
+)
 from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -15,8 +17,10 @@ class AppConsentRequest(Entity):
 
     @property
     def user_consent_requests(self):
-        """A list of pending user consent requests. """
-        return self.properties.get('userConsentRequests',
-                                   UserConsentRequestCollection(self.context,
-                                                                ResourcePath("userConsentRequests",
-                                                                             self.resource_path)))
+        """A list of pending user consent requests."""
+        return self.properties.get(
+            "userConsentRequests",
+            UserConsentRequestCollection(
+                self.context, ResourcePath("userConsentRequests", self.resource_path)
+            ),
+        )

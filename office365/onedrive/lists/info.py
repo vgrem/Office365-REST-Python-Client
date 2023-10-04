@@ -2,7 +2,6 @@ from office365.runtime.client_value import ClientValue
 
 
 class ListInfo(ClientValue):
-
     def __init__(self, template=None, content_types_enabled=False, hidden=False):
         """
         The listInfo complex type provides additional information about a list.

@@ -1,5 +1,6 @@
 class PermissionKind:
     """Specifies permissions that are used to define user roles."""
+
     def __init__(self):
         pass
 

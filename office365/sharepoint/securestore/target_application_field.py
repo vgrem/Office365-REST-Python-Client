@@ -16,12 +16,10 @@ class TargetApplicationField(BaseEntity):
         :param int credential_type:
         """
         return_type = TargetApplicationField(context)
-        payload = {
-            "name": name,
-            "masked": masked,
-            "credentialType": credential_type
-        }
-        qry = ServiceOperationQuery(return_type, "", None, payload, None, return_type, True)
+        payload = {"name": name, "masked": masked, "credentialType": credential_type}
+        qry = ServiceOperationQuery(
+            return_type, "", None, payload, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 

@@ -10,9 +10,12 @@ class OrganizationNewsSiteReference(ClientValue):
 
 
 class OrganizationNews(BaseEntity):
-
     def sites_reference(self):
-        return_type = ClientResult(self.context, ClientValueCollection(OrganizationNewsSiteReference))
-        qry = ServiceOperationQuery(self, "SitesReference", None, None, None, return_type)
+        return_type = ClientResult(
+            self.context, ClientValueCollection(OrganizationNewsSiteReference)
+        )
+        qry = ServiceOperationQuery(
+            self, "SitesReference", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type

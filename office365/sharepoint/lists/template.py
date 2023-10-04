@@ -1,6 +1,6 @@
 from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 
 
@@ -19,7 +19,9 @@ class ListTemplate(BaseEntity):
     def get_global_schema_xml(self):
         """Retrieves the global schema.xml file."""
         return_type = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "GetGlobalSchemaXml", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetGlobalSchemaXml", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -29,12 +31,13 @@ class ListTemplate(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('InternalName', None)
+        return self.properties.get("InternalName", None)
 
     def set_property(self, name, value, persist_changes=True):
         super(ListTemplate, self).set_property(name, value, persist_changes)
         if self._resource_path is None:
             if name == "Name":
                 self._resource_path = ServiceOperationPath(
-                    "GetByName", [value], self._parent_collection.resource_path)
+                    "GetByName", [value], self._parent_collection.resource_path
+                )
         return self

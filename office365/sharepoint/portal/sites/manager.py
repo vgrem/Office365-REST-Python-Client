@@ -1,11 +1,13 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.portal.sites.creation_request import SPSiteCreationRequest
 from office365.sharepoint.portal.sites.creation_response import SPSiteCreationResponse
-from office365.sharepoint.teams.site_owner_response import GetTeamChannelSiteOwnerResponse
+from office365.sharepoint.teams.site_owner_response import (
+    GetTeamChannelSiteOwnerResponse,
+)
 from office365.sharepoint.viva.site_request_info import VivaSiteRequestInfo
 
 
@@ -32,13 +34,18 @@ class SPSiteManager(BaseEntity):
         def _create(owner_string=None):
             request = SPSiteCreationRequest(title, site_url, owner_string)
             payload = {"request": request}
-            qry = ServiceOperationQuery(self, "Create", None, payload, None, return_type)
+            qry = ServiceOperationQuery(
+                self, "Create", None, payload, None, return_type
+            )
             self.context.add_query(qry)
 
         from office365.sharepoint.principal.users.user import User
+
         if isinstance(owner, User):
+
             def _owner_loaded():
                 _create(owner.user_principal_name)
+
             owner.ensure_property("UserPrincipalName", _owner_loaded)
         else:
             _create(owner)
@@ -51,9 +58,7 @@ class SPSiteManager(BaseEntity):
 
         :param str site_id: The GUID to uniquely identify a SharePoint site.
         """
-        payload = {
-            "siteId": site_id
-        }
+        payload = {"siteId": site_id}
         qry = ServiceOperationQuery(self, "Delete", None, payload)
         self.context.add_query(qry)
         return self
@@ -65,7 +70,9 @@ class SPSiteManager(BaseEntity):
         :param str site_url: URL of the site to return status for
         """
         response = ClientResult(self.context, SPSiteCreationResponse())
-        qry = ServiceOperationQuery(self, "Status", None, {'url': site_url}, None, response)
+        qry = ServiceOperationQuery(
+            self, "Status", None, {"url": site_url}, None, response
+        )
         self.context.add_query(qry)
 
         def _construct_status_request(request):
@@ -80,7 +87,9 @@ class SPSiteManager(BaseEntity):
         :param str site_id: The GUID to uniquely identify a SharePoint site.
         """
         return_type = ClientResult(self.context, str())
-        qry = ServiceOperationQuery(self, "SiteUrl", None, {'siteId': site_id}, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "SiteUrl", None, {"siteId": site_id}, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -89,7 +98,14 @@ class SPSiteManager(BaseEntity):
         :param str site_id: The GUID to uniquely identify a SharePoint site.
         """
         return_type = ClientResult(self.context, GetTeamChannelSiteOwnerResponse())
-        qry = ServiceOperationQuery(self, "GetTeamChannelSiteOwner", None, {'siteId': site_id}, None, return_type)
+        qry = ServiceOperationQuery(
+            self,
+            "GetTeamChannelSiteOwner",
+            None,
+            {"siteId": site_id},
+            None,
+            return_type,
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -98,7 +114,9 @@ class SPSiteManager(BaseEntity):
         :param str site_name:
         """
         return_type = ClientResult(self.context, VivaSiteRequestInfo())
-        payload = {'siteName': site_name}
-        qry = ServiceOperationQuery(self, "VivaBackendSiteUrlFromName", None, payload, None, return_type)
+        payload = {"siteName": site_name}
+        qry = ServiceOperationQuery(
+            self, "VivaBackendSiteUrlFromName", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type

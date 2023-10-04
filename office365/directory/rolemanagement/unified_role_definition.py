@@ -1,4 +1,6 @@
-from office365.directory.rolemanagement.unified_role_permission import UnifiedRolePermission
+from office365.directory.rolemanagement.unified_role_permission import (
+    UnifiedRolePermission,
+)
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -29,7 +31,9 @@ class UnifiedRoleDefinition(Entity):
         """
         List of permissions included in the role. Read-only when isBuiltIn is true. Required.
         """
-        return self.properties.get("rolePermissions", ClientValueCollection(UnifiedRolePermission))
+        return self.properties.get(
+            "rolePermissions", ClientValueCollection(UnifiedRolePermission)
+        )
 
     @property
     def inherits_permissions_from(self):
@@ -37,9 +41,14 @@ class UnifiedRoleDefinition(Entity):
         Read-only collection of role definitions that the given role definition inherits from. Only Azure AD built-in
         roles (isBuiltIn is true) support this attribute. Supports $expand.
         """
-        return self.properties.get('inheritsPermissionsFrom',
-                                   EntityCollection(self.context, UnifiedRoleDefinition,
-                                                    ResourcePath("inheritsPermissionsFrom", self.resource_path)))
+        return self.properties.get(
+            "inheritsPermissionsFrom",
+            EntityCollection(
+                self.context,
+                UnifiedRoleDefinition,
+                ResourcePath("inheritsPermissionsFrom", self.resource_path),
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:

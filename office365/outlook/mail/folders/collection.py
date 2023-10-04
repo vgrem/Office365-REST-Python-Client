@@ -3,7 +3,6 @@ from office365.outlook.mail.folders.folder import MailFolder
 
 
 class MailFolderCollection(DeltaCollection):
-
     def __init__(self, context, resource_path=None):
         super(MailFolderCollection, self).__init__(context, MailFolder, resource_path)
 

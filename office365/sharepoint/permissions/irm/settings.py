@@ -52,7 +52,9 @@ class InformationRightsManagementSettings(BaseEntity):
         Specifies the date on which the Information Rights Management (IRM) protection of this document library will
         stop.
         """
-        return self.properties.get("DocumentLibraryProtectionExpireDate", datetime.datetime.min)
+        return self.properties.get(
+            "DocumentLibraryProtectionExpireDate", datetime.datetime.min
+        )
 
     @property
     def enable_document_access_expire(self):
@@ -119,5 +121,3 @@ class InformationRightsManagementSettings(BaseEntity):
         :rtype: str or None
         """
         return self.properties.get("TemplateId", None)
-
-

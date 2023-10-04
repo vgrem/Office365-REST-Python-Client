@@ -26,7 +26,9 @@ class SocialRestFollowingManager(BaseEntity):
     def my(self):
         """The My method gets a SocialRestActor object that represents the current user. See section 3.1.5.35 for
         details on the SocialRestActor type."""
-        return SocialRestFollowingManager(self.context, ResourcePath("My", self.resource_path))
+        return SocialRestFollowingManager(
+            self.context, ResourcePath("My", self.resource_path)
+        )
 
     @property
     def entity_type_name(self):

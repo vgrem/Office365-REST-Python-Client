@@ -12,11 +12,19 @@ from office365.sharepoint.activities.facets.sharing import SharingFacet
 
 
 class ActionFacet(ClientValue):
-
-    def __init__(self, add_to_one_drive=AddToOneDriveFacet(), checkin=CheckinFacet(), checkout=CheckoutFacet(),
-                 comment=GetCommentFacet(), create=CreateFacet(), delete=DeleteFacet(),
-                 discard_checkout=DiscardCheckoutFacet(), edit=EditFacet(),
-                 rename=RenameFacet(), share=SharingFacet()):
+    def __init__(
+        self,
+        add_to_one_drive=AddToOneDriveFacet(),
+        checkin=CheckinFacet(),
+        checkout=CheckoutFacet(),
+        comment=GetCommentFacet(),
+        create=CreateFacet(),
+        delete=DeleteFacet(),
+        discard_checkout=DiscardCheckoutFacet(),
+        edit=EditFacet(),
+        rename=RenameFacet(),
+        share=SharingFacet(),
+    ):
         """
         :param AddToOneDriveFacet add_to_one_drive:
         :param CheckinFacet checkin:

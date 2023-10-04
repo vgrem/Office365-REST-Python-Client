@@ -3,7 +3,6 @@ from office365.teams.schedule.change_tracked_entity import ChangeTrackedEntity
 
 
 class ScheduleChangeRequest(ChangeTrackedEntity):
-
     def approve(self, message):
         """
         Approve an ScheduleChangeRequest object.

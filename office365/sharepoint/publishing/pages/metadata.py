@@ -13,7 +13,7 @@ class SitePageMetadata(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('AbsoluteUrl', None)
+        return self.properties.get("AbsoluteUrl", None)
 
     @property
     def author_byline(self):
@@ -44,7 +44,7 @@ class SitePageMetadata(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('BannerImageUrl', None)
+        return self.properties.get("BannerImageUrl", None)
 
     @banner_image_url.setter
     def banner_image_url(self, value):
@@ -52,7 +52,7 @@ class SitePageMetadata(BaseEntity):
 
         :type value: str
         """
-        self.set_property('BannerImageUrl', value)
+        self.set_property("BannerImageUrl", value)
 
     @property
     def content_type_id(self):
@@ -60,7 +60,7 @@ class SitePageMetadata(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('ContentTypeId', None)
+        return self.properties.get("ContentTypeId", None)
 
     @content_type_id.setter
     def content_type_id(self, value):
@@ -68,7 +68,7 @@ class SitePageMetadata(BaseEntity):
 
         :type value: str
         """
-        self.set_property('ContentTypeId', value)
+        self.set_property("ContentTypeId", value)
 
     @property
     def description(self):
@@ -76,7 +76,7 @@ class SitePageMetadata(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('Description', None)
+        return self.properties.get("Description", None)
 
     @property
     def does_user_have_edit_permission(self):
@@ -84,7 +84,7 @@ class SitePageMetadata(BaseEntity):
 
         :rtype: bool or None
         """
-        return self.properties.get('DoesUserHaveEditPermission', None)
+        return self.properties.get("DoesUserHaveEditPermission", None)
 
     @property
     def file_name(self):
@@ -92,7 +92,7 @@ class SitePageMetadata(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('FileName', None)
+        return self.properties.get("FileName", None)
 
     @property
     def first_published(self):
@@ -101,7 +101,7 @@ class SitePageMetadata(BaseEntity):
 
         :rtype: str or None
         """
-        return self.properties.get('FirstPublished', None)
+        return self.properties.get("FirstPublished", None)
 
     @property
     def is_page_checked_out_to_current_user(self):
@@ -109,12 +109,12 @@ class SitePageMetadata(BaseEntity):
 
         :rtype: bool or None
         """
-        return self.properties.get('IsPageCheckedOutToCurrentUser', None)
+        return self.properties.get("IsPageCheckedOutToCurrentUser", None)
 
     @property
     def version_info(self):
         """Gets the version information for the most recently checked in version of the Site Page."""
-        return self.properties.get('VersionInfo', SitePageVersionInfo())
+        return self.properties.get("VersionInfo", SitePageVersionInfo())
 
     @property
     def parent_collection(self):
@@ -128,7 +128,7 @@ class SitePageMetadata(BaseEntity):
         """
         :rtype: str or None
         """
-        return self.properties.get('TopicHeader', None)
+        return self.properties.get("TopicHeader", None)
 
     @property
     def entity_type_name(self):
@@ -140,7 +140,7 @@ class SitePageMetadata(BaseEntity):
                 "AuthorByline": self.author_byline,
                 "CreatedBy": self.created_by,
                 "LastModifiedBy": self.last_modified_by,
-                "VersionInfo": self.version_info
+                "VersionInfo": self.version_info,
             }
             default_value = property_mapping.get(name, None)
         return super(SitePageMetadata, self).get_property(name, default_value)
@@ -148,5 +148,7 @@ class SitePageMetadata(BaseEntity):
     def set_property(self, name, value, persist_changes=True):
         if self._resource_path is None:
             if name == "Id":
-                self._resource_path = self.parent_collection.get_by_id(value).resource_path
+                self._resource_path = self.parent_collection.get_by_id(
+                    value
+                ).resource_path
         return super(SitePageMetadata, self).set_property(name, value, persist_changes)

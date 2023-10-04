@@ -4,19 +4,17 @@ from office365.sharepoint.base_entity import BaseEntity
 
 
 class TenantCrawlVersionsInfoProvider(BaseEntity):
-    """
-
-    """
+    """ """
 
     def disable_crawl_versions(self, site_id):
         """
         :param str site_id:
         """
         return_type = ClientResult(self.context, bool())
-        payload = {
-            "siteId": site_id
-        }
-        qry = ServiceOperationQuery(self, "DisableCrawlVersions", None, payload, None, return_type)
+        payload = {"siteId": site_id}
+        qry = ServiceOperationQuery(
+            self, "DisableCrawlVersions", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -25,18 +23,19 @@ class TenantCrawlVersionsInfoProvider(BaseEntity):
         :param str site_id:
         """
         return_type = ClientResult(self.context, bool())
-        payload = {
-            "siteId": site_id
-        }
-        qry = ServiceOperationQuery(self, "IsCrawlVersionsEnabled", None, payload, None, return_type)
+        payload = {"siteId": site_id}
+        qry = ServiceOperationQuery(
+            self, "IsCrawlVersionsEnabled", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
     def is_crawl_versions_enabled_for_tenant(self):
-        """
-        """
+        """ """
         return_type = ClientResult(self.context, bool())
-        qry = ServiceOperationQuery(self, "IsCrawlVersionsEnabledForTenant", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "IsCrawlVersionsEnabledForTenant", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 

@@ -17,5 +17,7 @@ from tests.graph_case import acquire_token_by_username_password
 client = GraphClient(acquire_token_by_username_password)
 start_time = datetime.utcnow()
 end_time = start_time + timedelta(days=1)
-result = client.me.calendar.get_schedule([test_user_principal_name], start_time, end_time).execute_query()
+result = client.me.calendar.get_schedule(
+    [test_user_principal_name], start_time, end_time
+).execute_query()
 print(json.dumps(result.value.to_json(), indent=4))

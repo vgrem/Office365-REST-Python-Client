@@ -2,7 +2,6 @@ from office365.runtime.client_value import ClientValue
 
 
 class GroupSiteInfo(ClientValue):
-
     def __init__(self, site_url=None, site_status=None):
         """
         :param str site_url: Site url

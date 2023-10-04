@@ -1,10 +1,12 @@
 from office365.delta_collection import DeltaCollection
-from office365.directory.applications.roles.assignment_collection import AppRoleAssignmentCollection
+from office365.directory.applications.roles.assignment_collection import (
+    AppRoleAssignmentCollection,
+)
 from office365.directory.applications.roles.role import AppRole
 from office365.directory.certificates.self_signed import SelfSignedCertificate
 from office365.directory.key_credential import KeyCredential
-from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.object import DirectoryObject
+from office365.directory.object_collection import DirectoryObjectCollection
 from office365.directory.password_credential import PasswordCredential
 from office365.directory.permissions.grants.oauth2 import OAuth2PermissionGrant
 from office365.directory.permissions.scope import PermissionScope
@@ -49,7 +51,9 @@ class ServicePrincipal(DirectoryObject):
         """
         params = PasswordCredential(display_name=display_name)
         return_type = ClientResult(self.context, params)
-        qry = ServiceOperationQuery(self, "addPassword", None, params, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "addPassword", None, params, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -78,12 +82,11 @@ class ServicePrincipal(DirectoryObject):
             The timestamp type represents date and time information using ISO 8601 format and is always in UTC time.
             For example, midnight UTC on Jan 1, 2014 is 2014-01-01T00:00:00Z.
         """
-        payload = {
-            "displayName": display_name,
-            "endDateTime": end_datetime
-        }
+        payload = {"displayName": display_name, "endDateTime": end_datetime}
         return_type = ClientResult(self.context, SelfSignedCertificate())
-        qry = ServiceOperationQuery(self, "addTokenSigningCertificate", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "addTokenSigningCertificate", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -103,7 +106,7 @@ class ServicePrincipal(DirectoryObject):
         able to sign in to this app, even if they are assigned to it. Supports $filter (eq, ne, not, in).
         :rtype: bool
         """
-        return self.properties.get('accountEnabled', None)
+        return self.properties.get("accountEnabled", None)
 
     @property
     def alternative_names(self):
@@ -111,7 +114,7 @@ class ServicePrincipal(DirectoryObject):
         Used to retrieve service principals by subscription, identify resource group and full resource ids for
         managed identities. Supports $filter (eq, not, ge, le, startsWith).
         """
-        return self.properties.get('alternativeNames', StringCollection())
+        return self.properties.get("alternativeNames", StringCollection())
 
     @property
     def app_description(self):
@@ -119,7 +122,7 @@ class ServicePrincipal(DirectoryObject):
         The description exposed by the associated application.
         :rtype: str
         """
-        return self.properties.get('appDescription', None)
+        return self.properties.get("appDescription", None)
 
     @property
     def app_display_name(self):
@@ -127,16 +130,19 @@ class ServicePrincipal(DirectoryObject):
         The display name exposed by the associated application.
         :rtype: str
         """
-        return self.properties.get('appDisplayName', None)
+        return self.properties.get("appDisplayName", None)
 
     @property
     def app_role_assigned_to(self):
         """
         App role assignments for this app or service, granted to users, groups, and other service principals.
         Supports $expand."""
-        return self.properties.get('appRoleAssignedTo',
-                                   AppRoleAssignmentCollection(self.context,
-                                                               ResourcePath("appRoleAssignedTo", self.resource_path)))
+        return self.properties.get(
+            "appRoleAssignedTo",
+            AppRoleAssignmentCollection(
+                self.context, ResourcePath("appRoleAssignedTo", self.resource_path)
+            ),
+        )
 
     @property
     def app_roles(self):
@@ -151,7 +157,7 @@ class ServicePrincipal(DirectoryObject):
         Home page or landing page of the application.
         :rtype: str
         """
-        return self.properties.get('homepage', None)
+        return self.properties.get("homepage", None)
 
     @property
     def key_credentials(self):
@@ -159,7 +165,9 @@ class ServicePrincipal(DirectoryObject):
         The collection of key credentials associated with the service principal. Not nullable.
         Supports $filter (eq, not, ge, le).
         """
-        return self.properties.setdefault('keyCredentials', ClientValueCollection(KeyCredential))
+        return self.properties.setdefault(
+            "keyCredentials", ClientValueCollection(KeyCredential)
+        )
 
     @property
     def login_url(self):
@@ -170,7 +178,7 @@ class ServicePrincipal(DirectoryObject):
         The user launches the application from Microsoft 365, the Azure AD My Apps, or the Azure AD SSO URL.
         :rtype: str
         """
-        return self.properties.get('loginUrl', None)
+        return self.properties.get("loginUrl", None)
 
     @property
     def logout_url(self):
@@ -179,7 +187,7 @@ class ServicePrincipal(DirectoryObject):
         OpenId Connect front-channel, back-channel or SAML logout protocols.
         :rtype: str
         """
-        return self.properties.get('logoutUrl', None)
+        return self.properties.get("logoutUrl", None)
 
     @property
     def notification_email_addresses(self):
@@ -188,7 +196,7 @@ class ServicePrincipal(DirectoryObject):
         the expiration date. This is only for the certificates used to sign the SAML token issued for Azure
         AD Gallery applications.
         """
-        return self.properties.get('notificationEmailAddresses', StringCollection())
+        return self.properties.get("notificationEmailAddresses", StringCollection())
 
     @property
     def service_principal_type(self):
@@ -213,15 +221,19 @@ class ServicePrincipal(DirectoryObject):
 
         :rtype: str or None
         """
-        return self.properties.get('servicePrincipalType', None)
+        return self.properties.get("servicePrincipalType", None)
 
     @property
     def owners(self):
         """Directory objects that are owners of this servicePrincipal.
         The owners are a set of non-admin users or servicePrincipals who are allowed to modify this object.
         """
-        return self.properties.get('owners',
-                                   DirectoryObjectCollection(self.context, ResourcePath("owners", self.resource_path)))
+        return self.properties.get(
+            "owners",
+            DirectoryObjectCollection(
+                self.context, ResourcePath("owners", self.resource_path)
+            ),
+        )
 
     @property
     def oauth2_permission_scopes(self):
@@ -229,28 +241,41 @@ class ServicePrincipal(DirectoryObject):
         The delegated permissions exposed by the application. For more information see the oauth2PermissionScopes
         property on the application entity's api property.
         """
-        return self.properties.get("oauth2PermissionScopes", ClientValueCollection(PermissionScope))
+        return self.properties.get(
+            "oauth2PermissionScopes", ClientValueCollection(PermissionScope)
+        )
 
     @property
     def oauth2_permission_grants(self):
         """"""
-        return self.properties.get('oauth2PermissionGrants',
-                                   DeltaCollection(self.context, OAuth2PermissionGrant,
-                                                   ResourcePath("oauth2PermissionGrants", self.resource_path)))
+        return self.properties.get(
+            "oauth2PermissionGrants",
+            DeltaCollection(
+                self.context,
+                OAuth2PermissionGrant,
+                ResourcePath("oauth2PermissionGrants", self.resource_path),
+            ),
+        )
 
     @property
     def created_objects(self):
-        """Directory objects created by this service principal. """
-        return self.properties.get('createdObjects',
-                                   DirectoryObjectCollection(self.context,
-                                                             ResourcePath("createdObjects", self.resource_path)))
+        """Directory objects created by this service principal."""
+        return self.properties.get(
+            "createdObjects",
+            DirectoryObjectCollection(
+                self.context, ResourcePath("createdObjects", self.resource_path)
+            ),
+        )
 
     @property
     def owned_objects(self):
-        """Directory objects that are owned by this service principal. """
-        return self.properties.get('ownedObjects',
-                                   DirectoryObjectCollection(self.context,
-                                                             ResourcePath("ownedObjects", self.resource_path)))
+        """Directory objects that are owned by this service principal."""
+        return self.properties.get(
+            "ownedObjects",
+            DirectoryObjectCollection(
+                self.context, ResourcePath("ownedObjects", self.resource_path)
+            ),
+        )
 
     @property
     def synchronization(self):
@@ -258,9 +283,12 @@ class ServicePrincipal(DirectoryObject):
         Represents the capability for Azure Active Directory (Azure AD) identity synchronization through
         the Microsoft Graph API.
         """
-        return self.properties.get('synchronization',
-                                   Synchronization(self.context,
-                                                   ResourcePath("synchronization", self.resource_path)))
+        return self.properties.get(
+            "synchronization",
+            Synchronization(
+                self.context, ResourcePath("synchronization", self.resource_path)
+            ),
+        )
 
     @property
     def token_encryption_key_id(self):
@@ -281,7 +309,7 @@ class ServicePrincipal(DirectoryObject):
                 "keyCredentials": self.key_credentials,
                 "oauth2PermissionScopes": self.oauth2_permission_scopes,
                 "ownedObjects": self.owned_objects,
-                "oauth2PermissionGrants": self.oauth2_permission_grants
+                "oauth2PermissionGrants": self.oauth2_permission_grants,
             }
             default_value = property_mapping.get(name, None)
         return super(ServicePrincipal, self).get_property(name, default_value)

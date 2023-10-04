@@ -2,7 +2,6 @@ from office365.runtime.paths.resource_path import ResourcePath
 
 
 class EntityPath(ResourcePath):
-
     def __init__(self, key=None, parent=None, collection=None):
         """
         :param str or None key: Entity key
@@ -17,7 +16,7 @@ class EntityPath(ResourcePath):
 
     @property
     def segment(self):
-        return str(self.key or '<key>')
+        return str(self.key or "<key>")
 
     def patch(self, key, inplace=False):
         """

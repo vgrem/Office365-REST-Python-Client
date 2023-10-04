@@ -11,7 +11,11 @@ class PrintService(Entity):
 
     def endpoints(self):
         """Endpoints that can be used to access the service."""
-        return self.properties.get('endpoints',
-                                   EntityCollection(self.context, PrintServiceEndpoint,
-                                                    ResourcePath("endpoints", self.resource_path)))
-
+        return self.properties.get(
+            "endpoints",
+            EntityCollection(
+                self.context,
+                PrintServiceEndpoint,
+                ResourcePath("endpoints", self.resource_path),
+            ),
+        )

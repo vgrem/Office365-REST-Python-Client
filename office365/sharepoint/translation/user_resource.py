@@ -17,15 +17,18 @@ class UserResource(BaseEntity):
         """
         return_type = ClientResult(self.context, str())
         payload = {"cultureName": culture_name}
-        qry = ServiceOperationQuery(self, "GetValueForUICulture", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetValueForUICulture", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
     def get_resource_entries(self):
-        """
-        """
+        """ """
         return_type = ClientResult(self.context, ClientValueCollection(SPResourceEntry))
-        qry = ServiceOperationQuery(self, "GetResourceEntries", [], None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetResourceEntries", [], None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -39,6 +42,8 @@ class UserResource(BaseEntity):
         """
         return_type = ClientResult(self.context, str())
         payload = {"cultureName": culture_name, "value": value}
-        qry = ServiceOperationQuery(self, "SetValueForUICulture", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "SetValueForUICulture", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type

@@ -2,7 +2,8 @@ from abc import ABCMeta, abstractmethod
 
 
 class AuthenticationProvider(object):
-    """ Base token provider"""
+    """Base token provider"""
+
     __metaclass__ = ABCMeta
 
     @abstractmethod

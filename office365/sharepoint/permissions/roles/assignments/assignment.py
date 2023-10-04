@@ -1,6 +1,8 @@
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.permissions.roles.definitions.collection import RoleDefinitionCollection
+from office365.sharepoint.permissions.roles.definitions.collection import (
+    RoleDefinitionCollection,
+)
 from office365.sharepoint.principal.principal import Principal
 
 
@@ -15,16 +17,20 @@ class RoleAssignment(BaseEntity):
     @property
     def member(self):
         """Specifies the user or group corresponding to the role assignment."""
-        return self.properties.get("Member",
-                                   Principal(self.context, ResourcePath("Member", self.resource_path)))
+        return self.properties.get(
+            "Member",
+            Principal(self.context, ResourcePath("Member", self.resource_path)),
+        )
 
     @property
     def role_definition_bindings(self):
         """Specifies a collection of role definitions for this role assignment."""
-        return self.properties.get("RoleDefinitionBindings",
-                                   RoleDefinitionCollection(self.context,
-                                                            ResourcePath("RoleDefinitionBindings",
-                                                                         self.resource_path)))
+        return self.properties.get(
+            "RoleDefinitionBindings",
+            RoleDefinitionCollection(
+                self.context, ResourcePath("RoleDefinitionBindings", self.resource_path)
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
@@ -38,5 +44,7 @@ class RoleAssignment(BaseEntity):
         super(RoleAssignment, self).set_property(name, value, persist_changes)
         if self._resource_path is None:
             if name == "PrincipalId":
-                self._resource_path = self.parent_collection.get_by_principal_id(value).resource_path
+                self._resource_path = self.parent_collection.get_by_principal_id(
+                    value
+                ).resource_path
         return self

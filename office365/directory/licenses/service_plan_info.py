@@ -30,4 +30,3 @@ class ServicePlanInfo(ClientValue):
 
     def __repr__(self):
         return self.servicePlanName
-

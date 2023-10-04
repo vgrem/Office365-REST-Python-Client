@@ -4,12 +4,20 @@ from office365.subscriptions.subscription import Subscription
 
 
 class SubscriptionCollection(EntityCollection):
-
     def __init__(self, context, resource_path=None):
-        super(SubscriptionCollection, self).__init__(context, Subscription, resource_path)
+        super(SubscriptionCollection, self).__init__(
+            context, Subscription, resource_path
+        )
 
-    def add(self, change_type, notification_url, resource_path, expiration, client_state=None,
-            latest_supported_tls_version=None):
+    def add(
+        self,
+        change_type,
+        notification_url,
+        resource_path,
+        expiration,
+        client_state=None,
+        latest_supported_tls_version=None,
+    ):
         """
         Subscribes a listener application to receive change notifications when the requested type of changes occur
         to the specified resource in Microsoft Graph.
@@ -35,7 +43,7 @@ class SubscriptionCollection(EntityCollection):
             "resource": str(resource_path),
             "expirationDateTime": expiration.isoformat() + "Z",
             "clientState": client_state,
-            "latestSupportedTlsVersion": latest_supported_tls_version
+            "latestSupportedTlsVersion": latest_supported_tls_version,
         }
         qry = CreateEntityQuery(self, payload, return_type)
         self.context.add_query(qry)

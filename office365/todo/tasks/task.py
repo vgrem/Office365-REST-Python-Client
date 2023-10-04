@@ -12,23 +12,36 @@ class TodoTask(Entity):
     @property
     def extensions(self):
         """The collection of open extensions defined for the task."""
-        return self.properties.get('extensions',
-                                   EntityCollection(self.context, Extension,
-                                                    ResourcePath("extensions", self.resource_path)))
+        return self.properties.get(
+            "extensions",
+            EntityCollection(
+                self.context, Extension, ResourcePath("extensions", self.resource_path)
+            ),
+        )
 
     @property
     def checklist_items(self):
         """A collection of checklistItems linked to a task."""
-        return self.properties.get('checklistItems',
-                                   EntityCollection(self.context, ChecklistItem,
-                                                    ResourcePath("checklistItems", self.resource_path)))
+        return self.properties.get(
+            "checklistItems",
+            EntityCollection(
+                self.context,
+                ChecklistItem,
+                ResourcePath("checklistItems", self.resource_path),
+            ),
+        )
 
     @property
     def linked_resources(self):
         """A collection of resources linked to the task."""
-        return self.properties.get('linkedResources',
-                                   EntityCollection(self.context, LinkedResource,
-                                                    ResourcePath("linkedResources", self.resource_path)))
+        return self.properties.get(
+            "linkedResources",
+            EntityCollection(
+                self.context,
+                LinkedResource,
+                ResourcePath("linkedResources", self.resource_path),
+            ),
+        )
 
     @property
     def entity_type_name(self):

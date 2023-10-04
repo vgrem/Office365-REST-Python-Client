@@ -8,6 +8,11 @@ from office365.onedrive.versions.drive_item import DriveItemVersion
 from tests.graph_case import acquire_token_by_client_credentials
 
 client = GraphClient(acquire_token_by_client_credentials)
-file_item = client.sites.root.drive.root.get_by_path("Financial Sample.xlsx").expand(["versions"]).get().execute_query()
+file_item = (
+    client.sites.root.drive.root.get_by_path("Financial Sample.xlsx")
+    .expand(["versions"])
+    .get()
+    .execute_query()
+)
 for ver in file_item.versions:  # type: DriveItemVersion
     print(ver)

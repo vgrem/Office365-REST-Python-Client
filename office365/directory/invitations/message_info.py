@@ -6,7 +6,9 @@ from office365.runtime.client_value_collection import ClientValueCollection
 class InvitedUserMessageInfo(ClientValue):
     """The invitedUserMessageInfo object allows you to configure the invitation message."""
 
-    def __init__(self, cc_recipients=None, customized_message_body=None, message_language=None):
+    def __init__(
+        self, cc_recipients=None, customized_message_body=None, message_language=None
+    ):
         """
         :param list[Recipient] cc_recipients: Additional recipients the invitation message should be sent to.
              Currently only 1 additional recipient is supported.

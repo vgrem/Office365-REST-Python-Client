@@ -12,10 +12,18 @@ class RiskyUser(Entity):
     @property
     def history(self):
         """The activity related to user risk level change"""
-        from office365.directory.protection.riskyusers.history_item import RiskyUserHistoryItem
-        return self.properties.get('history',
-                                   EntityCollection(self.context, RiskyUserHistoryItem,
-                                                    ResourcePath("history", self.resource_path)))
+        from office365.directory.protection.riskyusers.history_item import (
+            RiskyUserHistoryItem,
+        )
+
+        return self.properties.get(
+            "history",
+            EntityCollection(
+                self.context,
+                RiskyUserHistoryItem,
+                ResourcePath("history", self.resource_path),
+            ),
+        )
 
     @property
     def user_principal_name(self):
@@ -23,4 +31,4 @@ class RiskyUser(Entity):
         Risky user principal name.
         :rtype: str or None
         """
-        return self.properties.get('userPrincipalName', None)
+        return self.properties.get("userPrincipalName", None)

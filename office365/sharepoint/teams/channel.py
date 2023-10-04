@@ -2,7 +2,6 @@ from office365.sharepoint.base_entity import BaseEntity
 
 
 class TeamChannel(BaseEntity):
-
     @property
     def folder_id(self):
         """

@@ -11,9 +11,15 @@ class ClientValue(object):
         prop_type = getattr(self, k, None)
         if isinstance(prop_type, ClientValue) and v is not None:
             if isinstance(v, list):
-                [prop_type.set_property(i, p_v, persist_changes) for i, p_v in enumerate(v)]
+                [
+                    prop_type.set_property(i, p_v, persist_changes)
+                    for i, p_v in enumerate(v)
+                ]
             else:
-                [prop_type.set_property(k, p_v, persist_changes) for k, p_v in v.items()]
+                [
+                    prop_type.set_property(k, p_v, persist_changes)
+                    for k, p_v in v.items()
+                ]
             setattr(self, k, prop_type)
         else:
             setattr(self, k, v)
@@ -35,6 +41,7 @@ class ClientValue(object):
 
         def _is_valid_value(val):
             from office365.runtime.client_value_collection import ClientValueCollection
+
             if val is None:
                 return False
             elif isinstance(val, ClientValueCollection) and len(val) == 0:
@@ -45,9 +52,12 @@ class ClientValue(object):
         for n, v in json.items():
             if isinstance(v, ClientValue):
                 json[n] = v.to_json(json_format)
-        if isinstance(json_format, JsonLightFormat) and json_format.include_control_information \
-           and self.entity_type_name is not None:
-            json[json_format.metadata_type] = {'type': self.entity_type_name}
+        if (
+            isinstance(json_format, JsonLightFormat)
+            and json_format.include_control_information
+            and self.entity_type_name is not None
+        ):
+            json[json_format.metadata_type] = {"type": self.entity_type_name}
         return json
 
     @property

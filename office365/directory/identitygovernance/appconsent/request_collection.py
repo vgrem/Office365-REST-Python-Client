@@ -7,7 +7,9 @@ class AppConsentRequestCollection(EntityCollection):
     """AppConsentRequest's collection"""
 
     def __init__(self, context, resource_path=None):
-        super(AppConsentRequestCollection, self).__init__(context, AppConsentRequest, resource_path)
+        super(AppConsentRequestCollection, self).__init__(
+            context, AppConsentRequest, resource_path
+        )
 
     def filter_by_current_user(self, on):
         """

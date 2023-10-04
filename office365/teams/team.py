@@ -1,27 +1,29 @@
 import datetime
 
+from office365.directory.permissions.grants.resource_specific import (
+    ResourceSpecificPermissionGrant,
+)
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.teams.apps.installation import TeamsAppInstallation
 from office365.teams.channels.channel import Channel
 from office365.teams.channels.collection import ChannelCollection
-from office365.teams.members.settings import TeamMemberSettings
-from office365.teams.schedule.schedule import Schedule
 from office365.teams.fun_settings import TeamFunSettings
 from office365.teams.guest_settings import TeamGuestSettings
+from office365.teams.members.settings import TeamMemberSettings
 from office365.teams.messaging_settings import TeamMessagingSettings
-from office365.teams.apps.installation import TeamsAppInstallation
 from office365.teams.operations.async_operation import TeamsAsyncOperation
+from office365.teams.schedule.schedule import Schedule
 from office365.teams.summary import TeamSummary
 from office365.teams.teamwork.tags.tag import TeamworkTag
 from office365.teams.template import TeamsTemplate
-from office365.directory.permissions.grants.resource_specific import ResourceSpecificPermissionGrant
 
 
 class Team(Entity):
     """A team in Microsoft Teams is a collection of channel objects. A channel represents a topic, and therefore a
-    logical isolation of discussion, within a team. """
+    logical isolation of discussion, within a team."""
 
     def execute_query_and_wait(self):
         """
@@ -32,6 +34,7 @@ class Team(Entity):
 
         def _loaded():
             self.operations[0].poll_for_status(status_type="succeeded")
+
         self.ensure_property("id", _loaded)
 
         self.context.execute_query()
@@ -43,29 +46,30 @@ class Team(Entity):
         def _team_loaded():
             group = self.context.groups[self.id]
             group.delete_object(False)
+
         self.ensure_property("id", _team_loaded)
         return self
 
     @property
     def fun_settings(self):
         """Settings to configure use of Giphy, memes, and stickers in the team."""
-        return self.properties.get('funSettings', TeamFunSettings())
+        return self.properties.get("funSettings", TeamFunSettings())
 
     @property
     def member_settings(self):
         """Settings to configure whether members can perform certain actions, for example,
         create channels and add bots, in the team."""
-        return self.properties.get('memberSettings', TeamMemberSettings())
+        return self.properties.get("memberSettings", TeamMemberSettings())
 
     @property
     def guest_settings(self):
         """Settings to configure whether guests can create, update, or delete channels in the team."""
-        return self.properties.get('guestSettings', TeamGuestSettings())
+        return self.properties.get("guestSettings", TeamGuestSettings())
 
     @property
     def messaging_settings(self):
         """Settings to configure messaging and mentions in the team."""
-        return self.properties.get('guestSettings', TeamMessagingSettings())
+        return self.properties.get("guestSettings", TeamMessagingSettings())
 
     @property
     def display_name(self):
@@ -73,7 +77,7 @@ class Team(Entity):
 
         :rtype: str or None
         """
-        return self.properties.get('displayName', None)
+        return self.properties.get("displayName", None)
 
     @property
     def description(self):
@@ -81,7 +85,7 @@ class Team(Entity):
 
         :rtype: str or None
         """
-        return self.properties.get('description', None)
+        return self.properties.get("description", None)
 
     @property
     def classification(self):
@@ -90,97 +94,128 @@ class Team(Entity):
 
         :rtype: str or None
         """
-        return self.properties.get('classification', None)
+        return self.properties.get("classification", None)
 
     @property
     def is_archived(self):
         """Whether this team is in read-only mode."""
-        return self.properties.get('isArchived', None)
+        return self.properties.get("isArchived", None)
 
     @property
     def visibility(self):
         """The visibility of the group and team. Defaults to Public."""
-        return self.properties.get('visibility', None)
+        return self.properties.get("visibility", None)
 
     @property
     def web_url(self):
         """A hyperlink that will go to the team in the Microsoft Teams client. This is the URL that you get when
         you right-click a team in the Microsoft Teams client and select Get link to team. This URL should be treated
         as an opaque blob, and not parsed."""
-        return self.properties.get('webUrl', None)
+        return self.properties.get("webUrl", None)
 
     @property
     def created_datetime(self):
         """Timestamp at which the team was created."""
-        return self.properties.get('createdDateTime', None)
+        return self.properties.get("createdDateTime", None)
 
     @property
     def all_channels(self):
         """
         List of channels either hosted in or shared with the team (incoming channels).
         """
-        return self.properties.get('allChannels',
-                                   ChannelCollection(self.context, ResourcePath("allChannels", self.resource_path)))
+        return self.properties.get(
+            "allChannels",
+            ChannelCollection(
+                self.context, ResourcePath("allChannels", self.resource_path)
+            ),
+        )
 
     @property
     def incoming_channels(self):
         """
         List of channels shared with the team.
         """
-        return self.properties.get('incomingChannels',
-                                   ChannelCollection(self.context,
-                                                     ResourcePath("incomingChannels", self.resource_path)))
+        return self.properties.get(
+            "incomingChannels",
+            ChannelCollection(
+                self.context, ResourcePath("incomingChannels", self.resource_path)
+            ),
+        )
 
     @property
     def channels(self):
-        """The collection of channels & messages associated with the team.
-        """
-        return self.properties.get('channels',
-                                   ChannelCollection(self.context, ResourcePath("channels", self.resource_path)))
+        """The collection of channels & messages associated with the team."""
+        return self.properties.get(
+            "channels",
+            ChannelCollection(
+                self.context, ResourcePath("channels", self.resource_path)
+            ),
+        )
 
     @property
     def group(self):
         """"""
         from office365.directory.groups.group import Group
-        return self.properties.get("group", Group(self.context, ResourcePath("group", self.resource_path)))
+
+        return self.properties.get(
+            "group", Group(self.context, ResourcePath("group", self.resource_path))
+        )
 
     @property
     def primary_channel(self):
         """
         The general channel for the team.
         """
-        return self.properties.get('primaryChannel',
-                                   Channel(self.context, ResourcePath("primaryChannel", self.resource_path)))
+        return self.properties.get(
+            "primaryChannel",
+            Channel(self.context, ResourcePath("primaryChannel", self.resource_path)),
+        )
 
     @property
     def schedule(self):
         """The schedule of shifts for this team."""
-        return self.properties.get('schedule',
-                                   Schedule(self.context, ResourcePath("schedule", self.resource_path)))
+        return self.properties.get(
+            "schedule",
+            Schedule(self.context, ResourcePath("schedule", self.resource_path)),
+        )
 
     @property
     def installed_apps(self):
         """The apps installed in this team."""
-        return self.properties.get('installedApps',
-                                   EntityCollection(self.context, TeamsAppInstallation,
-                                                    ResourcePath("installedApps", self.resource_path)))
+        return self.properties.get(
+            "installedApps",
+            EntityCollection(
+                self.context,
+                TeamsAppInstallation,
+                ResourcePath("installedApps", self.resource_path),
+            ),
+        )
 
     @property
     def operations(self):
-        """The async operations that ran or are running on this team.
-        """
-        return self.properties.setdefault('operations',
-                                          EntityCollection(self.context, TeamsAsyncOperation,
-                                                           ResourcePath("operations", self.resource_path)))
+        """The async operations that ran or are running on this team."""
+        return self.properties.setdefault(
+            "operations",
+            EntityCollection(
+                self.context,
+                TeamsAsyncOperation,
+                ResourcePath("operations", self.resource_path),
+            ),
+        )
 
     @property
     def permission_grants(self):
         """
         List all resource-specific permission grants
         """
-        return self.properties.setdefault('permissionGrants',
-                                          EntityCollection(self.context, ResourceSpecificPermissionGrant,
-                                                           ResourcePath("permissionGrants")))
+        return self.properties.setdefault(
+            "permissionGrants",
+            EntityCollection(
+                self.context,
+                ResourceSpecificPermissionGrant,
+                ResourcePath("permissionGrants"),
+            ),
+        )
 
     @property
     def summary(self):
@@ -197,40 +232,52 @@ class Team(Entity):
 
     @property
     def tags(self):
-        """	The tags associated with the team."""
-        return self.properties.get('tags',
-                                   EntityCollection(self.context, TeamworkTag,
-                                                    ResourcePath("tags", self.resource_path)))
+        """The tags associated with the team."""
+        return self.properties.get(
+            "tags",
+            EntityCollection(
+                self.context, TeamworkTag, ResourcePath("tags", self.resource_path)
+            ),
+        )
 
     @property
     def template(self):
-        """The template this team was created from
-        """
-        return self.properties.get('template',
-                                   TeamsTemplate(self.context, ResourcePath("template", self.resource_path)))
+        """The template this team was created from"""
+        return self.properties.get(
+            "template",
+            TeamsTemplate(self.context, ResourcePath("template", self.resource_path)),
+        )
 
     def archive(self):
         """Archive the specified team. When a team is archived, users can no longer send or like messages on any
         channel in the team, edit the team's name, description, or other settings, or in general make most changes to
-        the team. Membership changes to the team continue to be allowed. """
+        the team. Membership changes to the team continue to be allowed."""
         qry = ServiceOperationQuery(self, "archive")
         self.context.add_query(qry)
         return self
 
     def unarchive(self):
         """Restore an archived team. This restores users' ability to send messages and edit the team, abiding by
-        tenant and team settings. """
+        tenant and team settings."""
         qry = ServiceOperationQuery(self, "unarchive")
         self.context.add_query(qry)
         return self
 
     def clone(self):
-        """Create a copy of a team. This operation also creates a copy of the corresponding group. """
+        """Create a copy of a team. This operation also creates a copy of the corresponding group."""
         qry = ServiceOperationQuery(self, "clone")
         self.context.add_query(qry)
         return self
 
-    def send_activity_notification(self, topic, activity_type, chain_id, preview_text, template_parameters, recipient):
+    def send_activity_notification(
+        self,
+        topic,
+        activity_type,
+        chain_id,
+        preview_text,
+        template_parameters,
+        recipient,
+    ):
         """
         Send an activity feed notification in the scope of a team.
         For more details about sending notifications and the requirements for doing so,
@@ -253,7 +300,7 @@ class Team(Entity):
             "chainId": chain_id,
             "previewText": preview_text,
             "templateParameters": template_parameters,
-            "recipient": recipient
+            "recipient": recipient,
         }
         qry = ServiceOperationQuery(self, "sendActivityNotification", None, payload)
         self.context.add_query(qry)
@@ -266,7 +313,7 @@ class Team(Entity):
                 "incomingChannels": self.incoming_channels,
                 "installedApps": self.installed_apps,
                 "permissionGrants": self.permission_grants,
-                "primaryChannel": self.primary_channel
+                "primaryChannel": self.primary_channel,
             }
             default_value = property_mapping.get(name, None)
         return super(Team, self).get_property(name, default_value)

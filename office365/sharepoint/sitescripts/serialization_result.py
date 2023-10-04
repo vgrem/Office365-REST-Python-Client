@@ -3,7 +3,6 @@ from office365.runtime.types.collections import StringCollection
 
 
 class SiteScriptSerializationResult(ClientValue):
-
     def __init__(self, json=None, warnings=None):
         """
         :param str json:

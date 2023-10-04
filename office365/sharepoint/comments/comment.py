@@ -6,7 +6,6 @@ from office365.sharepoint.likes.user_entity import UserEntity
 
 
 class Comment(BaseEntity):
-
     def like(self):
         """
         The Like method makes the current user a liker of the comment.
@@ -29,8 +28,12 @@ class Comment(BaseEntity):
         List of like entries corresponding to individual likes. MUST NOT contain more than one entry
         for the same user in the set.
         """
-        return self.properties.get('likedBy', BaseEntityCollection(self.context, UserEntity,
-                                                                   ResourcePath("likedBy", self.resource_path)))
+        return self.properties.get(
+            "likedBy",
+            BaseEntityCollection(
+                self.context, UserEntity, ResourcePath("likedBy", self.resource_path)
+            ),
+        )
 
     @property
     def entity_type_name(self):

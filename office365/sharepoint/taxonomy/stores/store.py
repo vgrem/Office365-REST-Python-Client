@@ -20,7 +20,12 @@ class TermStore(TaxonomyItem):
         :param str or None language_tag:
         """
         return_type = TaxonomyItemCollection(self.context, Term, self.resource_path)
-        params = {"label": label, "setId": set_id, "parentTermId": parent_term_id, "languageTag": language_tag}
+        params = {
+            "label": label,
+            "setId": set_id,
+            "parentTermId": parent_term_id,
+            "languageTag": language_tag,
+        }
         qry = FunctionQuery(self, "searchTerm", params, return_type)
         self.context.add_query(qry)
         return return_type
@@ -44,14 +49,18 @@ class TermStore(TaxonomyItem):
     @property
     def term_groups(self):
         """Gets a collection of the child Group objects"""
-        return self.properties.get("termGroups",
-                                   TermGroupCollection(self.context, ResourcePath("termGroups", self.resource_path)))
+        return self.properties.get(
+            "termGroups",
+            TermGroupCollection(
+                self.context, ResourcePath("termGroups", self.resource_path)
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "termGroups": self.term_groups,
-                "languageTags": self.language_tags
+                "languageTags": self.language_tags,
             }
             default_value = property_mapping.get(name, None)
         return super(TermStore, self).get_property(name, default_value)

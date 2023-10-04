@@ -18,5 +18,3 @@ class ProvisionedPlan(ClientValue):
 
     def __repr__(self):
         return self.service
-
-

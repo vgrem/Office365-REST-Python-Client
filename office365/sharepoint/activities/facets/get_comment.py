@@ -6,8 +6,15 @@ from office365.sharepoint.activities.identity import ActivityIdentity
 class GetCommentFacet(ClientValue):
     """"""
 
-    def __init__(self, assignees=None, comment_id=None, is_reply=None, parent_author=ActivityIdentity(),
-                 parent_comment_id=None, participants=None):
+    def __init__(
+        self,
+        assignees=None,
+        comment_id=None,
+        is_reply=None,
+        parent_author=ActivityIdentity(),
+        parent_comment_id=None,
+        participants=None,
+    ):
         """
         :param list[ActivityIdentity] assignees:
         :param str comment_id:

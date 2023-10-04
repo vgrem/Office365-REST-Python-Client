@@ -27,6 +27,7 @@ class TermGroup(TaxonomyItem):
 
         def _group_resolved():
             self.context.load(self.term_sets, after_loaded=_sets_loaded)
+
         self.ensure_property("id", _group_resolved)
         return return_type
 
@@ -35,14 +36,15 @@ class TermGroup(TaxonomyItem):
         """
         Gets a collection of the child TermSet instances of this TermGroup object.
         """
-        return self.properties.get("termSets",
-                                   TaxonomyItemCollection(self.context, TermSet,
-                                                          ResourcePath("termSets", self.resource_path)))
+        return self.properties.get(
+            "termSets",
+            TaxonomyItemCollection(
+                self.context, TermSet, ResourcePath("termSets", self.resource_path)
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
-            property_mapping = {
-                "termSets": self.term_sets
-            }
+            property_mapping = {"termSets": self.term_sets}
             default_value = property_mapping.get(name, None)
         return super(TermGroup, self).get_property(name, default_value)

@@ -1,7 +1,10 @@
+from office365.directory.identities.userflows.language_configuration import (
+    UserFlowLanguageConfiguration,
+)
+from office365.directory.identities.userflows.user_attribute_assignment import (
+    IdentityUserFlowAttributeAssignmentCollection,
+)
 from office365.directory.identities.userflows.user_flow import IdentityUserFlow
-from office365.directory.identities.userflows.language_configuration import UserFlowLanguageConfiguration
-from office365.directory.identities.userflows.user_attribute_assignment import \
-    IdentityUserFlowAttributeAssignmentCollection
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -20,20 +23,27 @@ class B2XIdentityUserFlow(IdentityUserFlow):
         """The languages supported for customization within the user flow. Language customization is enabled by default
         in self-service sign-up user flow. You cannot create custom languages in self-service sign-up user flows.
         """
-        return self.properties.get('languages',
-                                   EntityCollection(self.context, UserFlowLanguageConfiguration,
-                                                    ResourcePath("languages", self.resource_path)))
+        return self.properties.get(
+            "languages",
+            EntityCollection(
+                self.context,
+                UserFlowLanguageConfiguration,
+                ResourcePath("languages", self.resource_path),
+            ),
+        )
 
     @property
     def user_attribute_assignments(self):
         """
         The user attribute assignments included in the user flow.
         """
-        return self.properties.get('userAttributeAssignments',
-                                   IdentityUserFlowAttributeAssignmentCollection(self.context,
-                                                                                 ResourcePath(
-                                                                                     "userAttributeAssignments",
-                                                                                     self.resource_path)))
+        return self.properties.get(
+            "userAttributeAssignments",
+            IdentityUserFlowAttributeAssignmentCollection(
+                self.context,
+                ResourcePath("userAttributeAssignments", self.resource_path),
+            ),
+        )
 
     @property
     def user_flow_type(self):
@@ -43,7 +53,7 @@ class B2XIdentityUserFlow(IdentityUserFlow):
 
         :rtype: str or None
         """
-        return self.properties.get('userFlowType', None)
+        return self.properties.get("userFlowType", None)
 
     def get_property(self, name, default_value=None):
         if default_value is None:

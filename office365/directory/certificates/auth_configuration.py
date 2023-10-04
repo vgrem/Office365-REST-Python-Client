@@ -23,4 +23,6 @@ class CertificateBasedAuthConfiguration(Entity):
         """
         Collection of certificate authorities which creates a trusted certificate chain.
         """
-        return self.properties.get("certificateAuthorities", ClientValueCollection(CertificateAuthority))
+        return self.properties.get(
+            "certificateAuthorities", ClientValueCollection(CertificateAuthority)
+        )

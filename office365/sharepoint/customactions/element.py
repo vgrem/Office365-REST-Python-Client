@@ -10,5 +10,3 @@ class CustomActionElement(ClientValue):
             with the custom action.
         """
         self.ClientSideComponentId = clientside_component_id
-
-

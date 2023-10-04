@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity import Entity
 from office365.onedrive.listitems.item_reference import ItemReference
@@ -7,17 +8,17 @@ from office365.runtime.paths.resource_path import ResourcePath
 
 class BaseItem(Entity):
     """The baseItem resource is an abstract resource that contains a auth set of properties shared among several
-    other resources types """
+    other resources types"""
 
     @property
     def etag(self):
         """ETag for the item."""
-        return self.properties.get('eTag', None)
+        return self.properties.get("eTag", None)
 
     @property
     def created_by(self):
         """Identity of the user, device, or application which created the item."""
-        return self.properties.get('createdBy', IdentitySet())
+        return self.properties.get("createdBy", IdentitySet())
 
     @property
     def created_by_user(self):
@@ -25,13 +26,16 @@ class BaseItem(Entity):
         Identity of the user who created the item
         """
         from office365.directory.users.user import User
-        return self.properties.get('createdByUser',
-                                   User(self.context, ResourcePath("createdByUser", self.resource_path)))
+
+        return self.properties.get(
+            "createdByUser",
+            User(self.context, ResourcePath("createdByUser", self.resource_path)),
+        )
 
     @property
     def last_modified_by(self):
         """Identity of the user, device, and application which last modified the item."""
-        return self.properties.get('lastModifiedBy', IdentitySet())
+        return self.properties.get("lastModifiedBy", IdentitySet())
 
     @property
     def last_modified_by_user(self):
@@ -39,23 +43,26 @@ class BaseItem(Entity):
         Identity of the user who last modified the item.
         """
         from office365.directory.users.user import User
-        return self.properties.get('lastModifiedByUser',
-                                   User(self.context, ResourcePath("lastModifiedByUser", self.resource_path)))
+
+        return self.properties.get(
+            "lastModifiedByUser",
+            User(self.context, ResourcePath("lastModifiedByUser", self.resource_path)),
+        )
 
     @property
     def created_datetime(self):
         """Gets date and time of item creation."""
-        return self.properties.get('createdDateTime', datetime.min)
+        return self.properties.get("createdDateTime", datetime.min)
 
     @property
     def last_modified_datetime(self):
         """Gets date and time the item was last modified."""
-        return self.properties.get('lastModifiedDateTime', datetime.min)
+        return self.properties.get("lastModifiedDateTime", datetime.min)
 
     @property
     def name(self):
         """Gets the name of the item."""
-        return self.properties.get('name', None)
+        return self.properties.get("name", None)
 
     @name.setter
     def name(self, value):
@@ -64,7 +71,7 @@ class BaseItem(Entity):
 
         :type value: str
         """
-        self.set_property('name', value)
+        self.set_property("name", value)
 
     @property
     def description(self):
@@ -72,11 +79,11 @@ class BaseItem(Entity):
         Provides a user-visible description of the item.
         :rtype: str or None
         """
-        return self.properties.get('description', None)
+        return self.properties.get("description", None)
 
     @description.setter
     def description(self, value):
-        self.set_property('description', value)
+        self.set_property("description", value)
 
     @property
     def web_url(self):
@@ -84,16 +91,16 @@ class BaseItem(Entity):
         URL that displays the resource in the browser.
         :rtype: str or None
         """
-        return self.properties.get('webUrl', None)
+        return self.properties.get("webUrl", None)
 
     @property
     def parent_reference(self):
         """Parent information, if the item has a parent."""
-        return self.properties.get('parentReference', ItemReference())
+        return self.properties.get("parentReference", ItemReference())
 
     @parent_reference.setter
     def parent_reference(self, value):
-        self.set_property('parentReference', value, False)
+        self.set_property("parentReference", value, False)
 
     def get_property(self, name, default_value=None):
         if default_value is None:
@@ -104,7 +111,7 @@ class BaseItem(Entity):
                 "lastModifiedDateTime": self.last_modified_datetime,
                 "lastModifiedBy": self.last_modified_by,
                 "lastModifiedByUser": self.last_modified_by_user,
-                "parentReference": self.parent_reference
+                "parentReference": self.parent_reference,
             }
             default_value = property_mapping.get(name, None)
         return super(BaseItem, self).get_property(name, default_value)

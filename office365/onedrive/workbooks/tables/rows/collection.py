@@ -3,9 +3,10 @@ from office365.onedrive.workbooks.tables.rows.row import WorkbookTableRow
 
 
 class WorkbookTableRowCollection(EntityCollection):
-
     def __init__(self, context, resource_path=None):
-        super(WorkbookTableRowCollection, self).__init__(context, WorkbookTableRow, resource_path)
+        super(WorkbookTableRowCollection, self).__init__(
+            context, WorkbookTableRow, resource_path
+        )
 
     def add(self, values, index=None):
         """

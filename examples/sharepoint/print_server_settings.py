@@ -4,7 +4,7 @@
 
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.server_settings import ServerSettings
-from tests import test_username, test_password, test_site_url
+from tests import test_password, test_site_url, test_username
 
 ctx = ClientContext(test_site_url).with_user_credentials(test_username, test_password)
 is_online = ServerSettings.is_sharepoint_online(ctx)

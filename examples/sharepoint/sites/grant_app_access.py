@@ -24,7 +24,11 @@ def assign_site_access(site, application, roles=None, clear_existing=False):
         target_site.permissions.delete_all().execute_query()
 
     if roles:
-        print("Granting {0} permissions for application {1}".format(roles, application.app_id))
+        print(
+            "Granting {0} permissions for application {1}".format(
+                roles, application.app_id
+            )
+        )
         site.permissions.add(roles, application).execute_query()
 
     result = site.permissions.get().execute_query()

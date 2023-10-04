@@ -13,10 +13,7 @@ class EmbedService(BaseEntity):
         :param int version: Version of the method.
         """
         return_type = EmbedDataV1(self.context)
-        payload = {
-            "url": url,
-            "version": version
-        }
+        payload = {"url": url, "version": version}
         qry = ServiceOperationQuery(self, "EmbedData", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type

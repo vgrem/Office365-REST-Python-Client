@@ -17,7 +17,9 @@ class WorkingHours(ClientValue):
     they can still respect your working hours in the appropriate time zone.
     """
 
-    def __init__(self, days_of_week=None, end_time=None, start_time=None, timezone=TimeZoneBase()):
+    def __init__(
+        self, days_of_week=None, end_time=None, start_time=None, timezone=TimeZoneBase()
+    ):
         """
         :param list[str] days_of_week: The days of the week on which the user works.
         :param TimeZoneBase timezone: The time zone to which the working hours apply.

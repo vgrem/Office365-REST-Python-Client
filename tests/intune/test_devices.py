@@ -2,7 +2,6 @@ from tests.graph_case import GraphTestCase
 
 
 class TestDevices(GraphTestCase):
-
     @classmethod
     def setUpClass(cls):
         super(TestDevices, cls).setUpClass()
@@ -18,4 +17,3 @@ class TestDevices(GraphTestCase):
     def test2_get_my_managed_devices(self):
         result = self.client.me.managed_devices.get().execute_query()
         self.assertIsNotNone(result.resource_path)
-

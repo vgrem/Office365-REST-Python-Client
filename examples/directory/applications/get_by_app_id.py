@@ -11,5 +11,9 @@ from tests import test_client_credentials
 from tests.graph_case import acquire_token_by_client_credentials
 
 client = GraphClient(acquire_token_by_client_credentials)
-app = client.applications.get_by_app_id(test_client_credentials.clientId).get().execute_query()
+app = (
+    client.applications.get_by_app_id(test_client_credentials.clientId)
+    .get()
+    .execute_query()
+)
 print(app.display_name)

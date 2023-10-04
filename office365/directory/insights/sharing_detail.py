@@ -6,8 +6,14 @@ from office365.runtime.client_value import ClientValue
 class SharingDetail(ClientValue):
     """Complex type containing properties of sharedInsight items."""
 
-    def __init__(self, sharedBy=InsightIdentity(), shared_datetime=None, sharing_reference=ResourceReference(),
-                 sharing_subject=None, sharing_type=None):
+    def __init__(
+        self,
+        sharedBy=InsightIdentity(),
+        shared_datetime=None,
+        sharing_reference=ResourceReference(),
+        sharing_subject=None,
+        sharing_type=None,
+    ):
         """
         :param datetime.datetime shared_datetime: The date and time the file was last shared.
         :param ResourceReference sharing_reference:

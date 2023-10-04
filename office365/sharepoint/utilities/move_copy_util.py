@@ -25,9 +25,17 @@ class MoveCopyUtil(BaseEntity):
             "srcPath": SPResPath.create_absolute(context.base_url, src_path),
             "destPath": SPResPath.create_absolute(context.base_url, dest_path),
             "overwrite": overwrite,
-            "options": options
+            "options": options,
         }
-        qry = ServiceOperationQuery(MoveCopyUtil(context), "CopyFileByPath", None, payload, None, return_type, True)
+        qry = ServiceOperationQuery(
+            MoveCopyUtil(context),
+            "CopyFileByPath",
+            None,
+            payload,
+            None,
+            return_type,
+            True,
+        )
         context.add_query(qry)
         return return_type
 
@@ -47,9 +55,11 @@ class MoveCopyUtil(BaseEntity):
         payload = {
             "srcUrl": str(SPResPath.create_absolute(context.base_url, src_url)),
             "destUrl": str(SPResPath.create_absolute(context.base_url, dest_url)),
-            "options": options
+            "options": options,
         }
-        qry = ServiceOperationQuery(binding_type, "CopyFolder", None, payload, None, return_type, True)
+        qry = ServiceOperationQuery(
+            binding_type, "CopyFolder", None, payload, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
@@ -67,9 +77,17 @@ class MoveCopyUtil(BaseEntity):
         payload = {
             "srcPath": SPResPath.create_absolute(context.base_url, src_path),
             "destPath": SPResPath.create_absolute(context.base_url, dest_path),
-            "options": options
+            "options": options,
         }
-        qry = ServiceOperationQuery(MoveCopyUtil(context), "CopyFolderByPath", None, payload, None, return_type, True)
+        qry = ServiceOperationQuery(
+            MoveCopyUtil(context),
+            "CopyFolderByPath",
+            None,
+            payload,
+            None,
+            return_type,
+            True,
+        )
         context.add_query(qry)
         return return_type
 
@@ -88,9 +106,11 @@ class MoveCopyUtil(BaseEntity):
         payload = {
             "srcUrl": str(SPResPath.create_absolute(context.base_url, src_url)),
             "destUrl": str(SPResPath.create_absolute(context.base_url, dest_url)),
-            "options": options
+            "options": options,
         }
-        qry = ServiceOperationQuery(binding_type, "MoveFolder", None, payload, None, None, True)
+        qry = ServiceOperationQuery(
+            binding_type, "MoveFolder", None, payload, None, None, True
+        )
         context.add_query(qry)
         return binding_type
 
@@ -109,14 +129,18 @@ class MoveCopyUtil(BaseEntity):
         payload = {
             "srcPath": SPResPath.create_absolute(context.base_url, src_path),
             "destPath": SPResPath.create_absolute(context.base_url, dest_path),
-            "options": options
+            "options": options,
         }
-        qry = ServiceOperationQuery(binding_type, "MoveFolderByPath", None, payload, None, None, True)
+        qry = ServiceOperationQuery(
+            binding_type, "MoveFolderByPath", None, payload, None, None, True
+        )
         context.add_query(qry)
         return binding_type
 
     @staticmethod
-    def download_folder_as_zip(parent_folder, download_file, after_file_downloaded=None, recursive=True):
+    def download_folder_as_zip(
+        parent_folder, download_file, after_file_downloaded=None, recursive=True
+    ):
         """
         Downloads a folder into a zip file
         :param office365.sharepoint.folders.folder.Folder parent_folder: Parent folder
@@ -127,8 +151,12 @@ class MoveCopyUtil(BaseEntity):
         import zipfile
 
         def _get_file_name(file):
-            return os.path.join(file.parent_folder.serverRelativeUrl.replace(parent_folder.serverRelativeUrl, ""),
-                                file.name)
+            return os.path.join(
+                file.parent_folder.serverRelativeUrl.replace(
+                    parent_folder.serverRelativeUrl, ""
+                ),
+                file.name,
+            )
 
         def _after_downloaded(result, file):
             """
@@ -138,15 +166,19 @@ class MoveCopyUtil(BaseEntity):
             filename = _get_file_name(file)
             if callable(after_file_downloaded):
                 after_file_downloaded(file)
-            with zipfile.ZipFile(download_file.name, 'a', zipfile.ZIP_DEFLATED) as zf:
+            with zipfile.ZipFile(download_file.name, "a", zipfile.ZIP_DEFLATED) as zf:
                 zf.writestr(filename, result.value)
 
         def _download_folder(folder):
             """
             :type folder: office365.sharepoint.folders.folder.Folder
             """
+
             def _download_files(rt):
-                [file.get_content().after_execute(_after_downloaded, file) for file in folder.files]
+                [
+                    file.get_content().after_execute(_after_downloaded, file)
+                    for file in folder.files
+                ]
                 if recursive:
                     [_download_folder(sub_folder) for sub_folder in folder.folders]
 

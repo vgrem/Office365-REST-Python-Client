@@ -1,12 +1,12 @@
 from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.listitems.caml.query import CamlQuery
 from office365.sharepoint.listitems.collection import ListItemCollection
-from office365.sharepoint.views.field_collection import ViewFieldCollection
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
+from office365.sharepoint.views.field_collection import ViewFieldCollection
 from office365.sharepoint.views.visualization import Visualization
 
 
@@ -22,12 +22,17 @@ class View(BaseEntity):
 
     def get_items(self):
         """Get list items per a view"""
-        return_type = ListItemCollection(self.context, self.parent_list.items.resource_path)
+        return_type = ListItemCollection(
+            self.context, self.parent_list.items.resource_path
+        )
 
         def _get_items_inner():
             caml_query = CamlQuery.parse(self.view_query)
-            qry = ServiceOperationQuery(self.parent_list, "GetItems", None, caml_query, "query", return_type)
+            qry = ServiceOperationQuery(
+                self.parent_list, "GetItems", None, caml_query, "query", return_type
+            )
             self.context.add_query(qry)
+
         self.ensure_properties(["ViewQuery", "ViewFields"], _get_items_inner)
         return return_type
 
@@ -55,7 +60,7 @@ class View(BaseEntity):
         Specifies fields (2) and functions that define totals shown in a list view.
         :rtype: str or None
         """
-        return self.properties.get('Aggregations', None)
+        return self.properties.get("Aggregations", None)
 
     @property
     def aggregations_status(self):
@@ -64,7 +69,7 @@ class View(BaseEntity):
         It MUST be NULL If Aggregations is NULL; otherwise it MUST be "On" or "Off".
         :rtype: str or None
         """
-        return self.properties.get('AggregationsStatus', None)
+        return self.properties.get("AggregationsStatus", None)
 
     @property
     def associated_content_type_id(self):
@@ -72,7 +77,7 @@ class View(BaseEntity):
         Represents the content type identifier associated with the view.
         :rtype: str or None
         """
-        return self.properties.get('AssociatedContentTypeId', None)
+        return self.properties.get("AssociatedContentTypeId", None)
 
     @property
     def calendar_view_styles(self):
@@ -80,7 +85,7 @@ class View(BaseEntity):
         Represents an object specifying the style of a SharePoint calendar view.
         :rtype: str or None
         """
-        return self.properties.get('CalendarViewStyles', None)
+        return self.properties.get("CalendarViewStyles", None)
 
     @property
     def column_width(self):
@@ -88,7 +93,7 @@ class View(BaseEntity):
         Specifies the width of columns.
         :rtype: str or None
         """
-        return self.properties.get('ColumnWidth', None)
+        return self.properties.get("ColumnWidth", None)
 
     @property
     def parent_list(self):
@@ -108,7 +113,7 @@ class View(BaseEntity):
         Specifies the JavaScript files used for the view.
         :rtype: str or None
         """
-        return self.properties.get('JSLink', None)
+        return self.properties.get("JSLink", None)
 
     @property
     def content_type_id(self):
@@ -159,8 +164,7 @@ class View(BaseEntity):
 
     @hidden.setter
     def hidden(self, value):
-        """Sets whether the list view is hidden.
-        """
+        """Sets whether the list view is hidden."""
         self.set_property("Hidden", value)
 
     @property
@@ -188,8 +192,12 @@ class View(BaseEntity):
     @property
     def view_fields(self):
         """Gets a value that specifies the collection of fields in the list view."""
-        return self.properties.get('ViewFields',
-                                   ViewFieldCollection(self.context, ResourcePath("ViewFields", self.resource_path)))
+        return self.properties.get(
+            "ViewFields",
+            ViewFieldCollection(
+                self.context, ResourcePath("ViewFields", self.resource_path)
+            ),
+        )
 
     @property
     def view_query(self):
@@ -197,21 +205,20 @@ class View(BaseEntity):
         Gets or sets a value that specifies the query that is used by the list view.
         :rtype: str or None
         """
-        return self.properties.get('ViewQuery', None)
+        return self.properties.get("ViewQuery", None)
 
     @property
     def base_view_id(self):
         """Gets a value that specifies the base view identifier of the list view."""
-        return self.properties.get('BaseViewId', None)
+        return self.properties.get("BaseViewId", None)
 
     def read_only_view(self):
         """Specifies whether the list view is read-only."""
-        return self.properties.get('ReadOnlyView', None)
+        return self.properties.get("ReadOnlyView", None)
 
     @property
     def server_relative_path(self):
-        """Gets the server-relative Path of the View.
-        """
+        """Gets the server-relative Path of the View."""
         return self.properties.get("ServerRelativePath", SPResPath())
 
     @property
@@ -233,7 +240,7 @@ class View(BaseEntity):
             "ViewFields": self.view_fields,
             "DefaultView": self.default_view,
             "ServerRelativePath": self.server_relative_path,
-            "VisualizationInfo": self.visualization_info
+            "VisualizationInfo": self.visualization_info,
         }
         if name in property_mapping:
             default_value = property_mapping.get(name, None)
@@ -244,5 +251,7 @@ class View(BaseEntity):
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id":
-                self._resource_path = self.parent_collection.get_by_id(value).resource_path
+                self._resource_path = self.parent_collection.get_by_id(
+                    value
+                ).resource_path
         return self

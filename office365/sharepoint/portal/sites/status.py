@@ -1,5 +1,6 @@
 class SiteStatus:
     """Status of a modern SharePoint site"""
+
     def __init__(self):
         pass
 

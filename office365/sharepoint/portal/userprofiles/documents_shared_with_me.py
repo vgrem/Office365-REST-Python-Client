@@ -22,11 +22,18 @@ class DocumentsSharedWithMe(BaseEntity):
             "sortFieldName": sort_field_name,
             "isAscendingSort": is_ascending_sort,
             "offset": offset,
-            "rowLimit": row_limit
+            "rowLimit": row_limit,
         }
         return_type = ClientResult(context, str())
-        qry = ServiceOperationQuery(DocumentsSharedWithMe(context), "GetListData", None, payload, None, return_type,
-                                    True)
+        qry = ServiceOperationQuery(
+            DocumentsSharedWithMe(context),
+            "GetListData",
+            None,
+            payload,
+            None,
+            return_type,
+            True,
+        )
         context.add_query(qry)
         return return_type
 

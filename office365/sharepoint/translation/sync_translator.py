@@ -12,12 +12,17 @@ class SyncTranslator(BaseEntity):
     Status: The Machine Translations Service API will no longer be supported as of the end of July 2022.
     https://go.microsoft.com/fwlink/?linkid=2187153
     """
+
     def __init__(self, context, target_language):
         """
         :param str target_language:
         """
-        super(SyncTranslator, self).__init__(context, ServiceOperationPath("SP.Translation.SyncTranslator",
-                                                                           {"targetLanguage": target_language}))
+        super(SyncTranslator, self).__init__(
+            context,
+            ServiceOperationPath(
+                "SP.Translation.SyncTranslator", {"targetLanguage": target_language}
+            ),
+        )
 
     def translate(self, input_file, output_file):
         """
@@ -32,10 +37,7 @@ class SyncTranslator(BaseEntity):
         :param str output_file: This value MUST be the full or relative path to the file to where the translated
             document will be stored
         """
-        payload = {
-            "inputFile": input_file,
-            "outputFile": output_file
-        }
+        payload = {"inputFile": input_file, "outputFile": output_file}
         return_type = ClientResult(self.context, TranslationItemInfo())
         qry = ServiceOperationQuery(self, "Translate", None, payload)
         self.context.add_query(qry)

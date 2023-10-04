@@ -7,8 +7,14 @@ class LookupColumn(ClientValue):
     are looked up from another source in the site.
     """
 
-    def __init__(self, list_id=None, column_name=None, allow_multiple_values=None, allow_unlimited_length=None,
-                 primary_lookup_column_id=None):
+    def __init__(
+        self,
+        list_id=None,
+        column_name=None,
+        allow_multiple_values=None,
+        allow_unlimited_length=None,
+        primary_lookup_column_id=None,
+    ):
         """
         :param str list_id: The unique identifier of the lookup source list.
         :param str column_name: The name of the lookup source column.

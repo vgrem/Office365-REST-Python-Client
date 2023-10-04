@@ -2,17 +2,28 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.principal.type import PrincipalType
-from office365.sharepoint.ui.applicationpages.peoplepicker.entity_information import PickerEntityInformation
-from office365.sharepoint.ui.applicationpages.peoplepicker.entity_information_request import \
-    PickerEntityInformationRequest
-from office365.sharepoint.ui.applicationpages.peoplepicker.query_parameters import ClientPeoplePickerQueryParameters
+from office365.sharepoint.ui.applicationpages.peoplepicker.entity_information import (
+    PickerEntityInformation,
+)
+from office365.sharepoint.ui.applicationpages.peoplepicker.entity_information_request import (
+    PickerEntityInformationRequest,
+)
+from office365.sharepoint.ui.applicationpages.peoplepicker.query_parameters import (
+    ClientPeoplePickerQueryParameters,
+)
 
 
 class ClientPeoplePickerWebServiceInterface(BaseEntity):
     """Specifies an interface that can be used to query principals."""
 
     @staticmethod
-    def get_search_results(context, search_pattern, provider_id=None, hierarchy_node_id=None, entity_types=None):
+    def get_search_results(
+        context,
+        search_pattern,
+        provider_id=None,
+        hierarchy_node_id=None,
+        entity_types=None,
+    ):
         """
         Specifies a JSON formatted CSOM String of principals found in the search.
 
@@ -29,16 +40,23 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
             "searchPattern": search_pattern,
             "providerID": provider_id,
             "hierarchyNodeID": hierarchy_node_id,
-            "entityTypes": entity_types
+            "entityTypes": entity_types,
         }
         svc = ClientPeoplePickerWebServiceInterface(context)
-        qry = ServiceOperationQuery(svc, "GetSearchResults", None, payload, None, return_type, True)
+        qry = ServiceOperationQuery(
+            svc, "GetSearchResults", None, payload, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
     @staticmethod
-    def get_search_results_by_hierarchy(context, provider_id=None, hierarchy_node_id=None, entity_types=None,
-                                        context_url=None):
+    def get_search_results_by_hierarchy(
+        context,
+        provider_id=None,
+        hierarchy_node_id=None,
+        entity_types=None,
+        context_url=None,
+    ):
         """
         Specifies a JSON formatted CSOM String of principals found in the search grouped by hierarchy.
 
@@ -54,10 +72,12 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
             "providerID": provider_id,
             "hierarchyNodeID": hierarchy_node_id,
             "entityTypes": entity_types,
-            "contextUrl": context_url
+            "contextUrl": context_url,
         }
         svc = ClientPeoplePickerWebServiceInterface(context)
-        qry = ServiceOperationQuery(svc, "GetSearchResultsByHierarchy", None, payload, None, return_type, True)
+        qry = ServiceOperationQuery(
+            svc, "GetSearchResultsByHierarchy", None, payload, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
@@ -72,14 +92,25 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
         """
         return_type = ClientResult(context, str())
         binding_type = ClientPeoplePickerWebServiceInterface(context)
-        payload = {"queryParams": ClientPeoplePickerQueryParameters(query_string=query_string)}
-        qry = ServiceOperationQuery(binding_type, "ClientPeoplePickerResolveUser", None, payload, None,
-                                    return_type, True)
+        payload = {
+            "queryParams": ClientPeoplePickerQueryParameters(query_string=query_string)
+        }
+        qry = ServiceOperationQuery(
+            binding_type,
+            "ClientPeoplePickerResolveUser",
+            None,
+            payload,
+            None,
+            return_type,
+            True,
+        )
         context.add_query(qry)
         return return_type
 
     @staticmethod
-    def client_people_picker_search_user(context, query_string, maximum_entity_suggestions=100):
+    def client_people_picker_search_user(
+        context, query_string, maximum_entity_suggestions=100
+    ):
         """
         Returns for a string of JSON representing users in people picker format of the specified principals.
 
@@ -90,11 +121,20 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
         """
         return_type = ClientResult(context, str())
         binding_type = ClientPeoplePickerWebServiceInterface(context)
-        params = ClientPeoplePickerQueryParameters(query_string=query_string,
-                                                   maximum_entity_suggestions=maximum_entity_suggestions)
+        params = ClientPeoplePickerQueryParameters(
+            query_string=query_string,
+            maximum_entity_suggestions=maximum_entity_suggestions,
+        )
         payload = {"queryParams": params}
-        qry = ServiceOperationQuery(binding_type, "ClientPeoplePickerSearchUser", None, payload,
-                                    None, return_type, True)
+        qry = ServiceOperationQuery(
+            binding_type,
+            "ClientPeoplePickerSearchUser",
+            None,
+            payload,
+            None,
+            return_type,
+            True,
+        )
         context.add_query(qry)
         return return_type
 
@@ -106,11 +146,21 @@ class ClientPeoplePickerWebServiceInterface(BaseEntity):
         :param str email_address: Specifies the principal for which information is being requested.
 
         """
-        request = PickerEntityInformationRequest(email_address=email_address, principal_type=PrincipalType.All)
+        request = PickerEntityInformationRequest(
+            email_address=email_address, principal_type=PrincipalType.All
+        )
         return_type = PickerEntityInformation(context)
         binding_type = ClientPeoplePickerWebServiceInterface(context)
         payload = {"entityInformationRequest": request}
-        qry = ServiceOperationQuery(binding_type, "GetPickerEntityInformation", None, payload, None, return_type, True)
+        qry = ServiceOperationQuery(
+            binding_type,
+            "GetPickerEntityInformation",
+            None,
+            payload,
+            None,
+            return_type,
+            True,
+        )
         context.add_query(qry)
         return return_type
 

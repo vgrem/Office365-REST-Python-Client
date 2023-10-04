@@ -1,9 +1,8 @@
 from office365.runtime.client_value import ClientValue
-from office365.runtime.compat import is_absolute_url, get_absolute_url, urlparse
+from office365.runtime.compat import get_absolute_url, is_absolute_url, urlparse
 
 
 class ResourcePath(ClientValue):
-
     def __init__(self, decoded_url=None):
         """
         Represents the full (absolute) or parts (relative) path of a site collection, web, file, folder or

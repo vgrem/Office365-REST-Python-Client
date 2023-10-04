@@ -6,9 +6,17 @@ from office365.runtime.client_value import ClientValue
 class Reminder(ClientValue):
     """A reminder for an event in a user calendar."""
 
-    def __init__(self, change_key=None, event_end_time=DateTimeTimeZone(), event_id=None, event_location=Location(),
-                 event_start_time=DateTimeTimeZone(), event_subject=None, event_web_link=None,
-                 reminder_fire_time=DateTimeTimeZone()):
+    def __init__(
+        self,
+        change_key=None,
+        event_end_time=DateTimeTimeZone(),
+        event_id=None,
+        event_location=Location(),
+        event_start_time=DateTimeTimeZone(),
+        event_subject=None,
+        event_web_link=None,
+        reminder_fire_time=DateTimeTimeZone(),
+    ):
         """
         :param str change_key: Identifies the version of the reminder. Every time the reminder is changed, changeKey
             changes as well. This allows Exchange to apply changes to the correct version of the object.

@@ -18,8 +18,10 @@ The example demonstrates how to use SharePoint App-Only principal (second option
 https://learn.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs
 """
 from office365.sharepoint.client_context import ClientContext
-from tests import test_site_url, test_client_id, test_client_secret
+from tests import test_client_id, test_client_secret, test_site_url
 
-ctx = ClientContext(test_site_url).with_client_credentials(test_client_id, test_client_secret)
+ctx = ClientContext(test_site_url).with_client_credentials(
+    test_client_id, test_client_secret
+)
 target_web = ctx.web.get().execute_query()
 print(target_web.url)

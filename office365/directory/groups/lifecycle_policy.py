@@ -35,7 +35,9 @@ class GroupLifecyclePolicy(Entity):
         """
         return_type = ClientResult(self.context, bool())
         payload = {"groupId": group_id}
-        qry = ServiceOperationQuery(self, "removeGroup", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "removeGroup", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 

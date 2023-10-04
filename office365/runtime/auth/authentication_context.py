@@ -10,7 +10,9 @@ from office365.runtime.compat import get_absolute_url
 
 
 def _get_authorization_header(token):
-    return '{token_type} {access_token}'.format(token_type=token.tokenType, access_token=token.accessToken)
+    return "{token_type} {access_token}".format(
+        token_type=token.tokenType, access_token=token.accessToken
+    )
 
 
 class AuthenticationContext(object):
@@ -24,7 +26,15 @@ class AuthenticationContext(object):
         self._authenticate = None
         self._cached_token = None
 
-    def with_client_certificate(self, tenant, client_id, thumbprint, cert_path=None, private_key=None, scopes=None):
+    def with_client_certificate(
+        self,
+        tenant,
+        client_id,
+        thumbprint,
+        cert_path=None,
+        private_key=None,
+        scopes=None,
+    ):
         """Initializes a client to acquire a token via certificate credentials
 
         :param str tenant: Tenant name, for example: contoso.onmicrosoft.com
@@ -38,15 +48,18 @@ class AuthenticationContext(object):
             resource = get_absolute_url(self.url)
             scopes = ["{url}/.default".format(url=resource)]
         if cert_path is None and private_key is None:
-            raise ValueError("Private key is missing. Use either 'cert_path' or 'private_key' to pass the value")
+            raise ValueError(
+                "Private key is missing. Use either 'cert_path' or 'private_key' to pass the value"
+            )
         elif cert_path is not None:
-            with open(cert_path, 'r') as f:
+            with open(cert_path, "r") as f:
                 private_key = f.read()
 
         def _acquire_token():
-            authority_url = 'https://login.microsoftonline.com/{0}'.format(tenant)
+            authority_url = "https://login.microsoftonline.com/{0}".format(tenant)
             credentials = {"thumbprint": thumbprint, "private_key": private_key}
             import msal
+
             app = msal.ConfidentialClientApplication(
                 client_id,
                 authority=authority_url,
@@ -75,13 +88,15 @@ class AuthenticationContext(object):
 
         def _acquire_token():
             import msal
+
             app = msal.PublicClientApplication(
                 client_id,
-                authority='https://login.microsoftonline.com/{0}'.format(tenant),
-                client_credential=None
+                authority="https://login.microsoftonline.com/{0}".format(tenant),
+                client_credential=None,
             )
             result = app.acquire_token_interactive(scopes=scopes)
             return TokenResponse.from_json(result)
+
         self.with_access_token(_acquire_token)
         return self
 
@@ -99,22 +114,25 @@ class AuthenticationContext(object):
 
         def _acquire_token():
             import msal
+
             app = msal.PublicClientApplication(
                 client_id,
-                authority='https://login.microsoftonline.com/{0}'.format(tenant),
-                client_credential=None
+                authority="https://login.microsoftonline.com/{0}".format(tenant),
+                client_credential=None,
             )
 
             flow = app.initiate_device_flow(scopes=scopes)
             if "user_code" not in flow:
                 raise ValueError(
-                    "Failed to create device flow: %s" % json.dumps(flow, indent=4))
+                    "Failed to create device flow: %s" % json.dumps(flow, indent=4)
+                )
 
             print(flow["message"])
             sys.stdout.flush()
 
             result = app.acquire_token_by_device_flow(flow)
             return TokenResponse.from_json(result)
+
         self.with_access_token(_acquire_token)
         return self
 
@@ -124,10 +142,14 @@ class AuthenticationContext(object):
 
         :param () -> dict token_func: A callback
         """
+
         def _authenticate(request):
             if self._cached_token is None:
                 self._cached_token = token_func()
-            request.set_header('Authorization', _get_authorization_header(self._cached_token))
+            request.set_header(
+                "Authorization", _get_authorization_header(self._cached_token)
+            )
+
         self._authenticate = _authenticate
 
     def with_credentials(self, credentials, **kwargs):
@@ -137,20 +159,26 @@ class AuthenticationContext(object):
         :param UserCredential or ClientCredential credentials:
         """
         if isinstance(credentials, ClientCredential):
-            provider = ACSTokenProvider(self.url, credentials.clientId, credentials.clientSecret)
+            provider = ACSTokenProvider(
+                self.url, credentials.clientId, credentials.clientSecret
+            )
         elif isinstance(credentials, UserCredential):
-            allow_ntlm = kwargs.get('allow_ntlm', False)
+            allow_ntlm = kwargs.get("allow_ntlm", False)
             if allow_ntlm:
                 from office365.runtime.auth.providers.ntlm_provider import NtlmProvider
+
                 provider = NtlmProvider(credentials.userName, credentials.password)
             else:
-                browser_mode = kwargs.get('browser_mode', False)
-                provider = SamlTokenProvider(self.url, credentials.userName, credentials.password, browser_mode)
+                browser_mode = kwargs.get("browser_mode", False)
+                provider = SamlTokenProvider(
+                    self.url, credentials.userName, credentials.password, browser_mode
+                )
         else:
             raise ValueError("Unknown credential type")
 
         def _authenticate(request):
             provider.authenticate_request(request)
+
         self._authenticate = _authenticate
 
     def acquire_token_for_user(self, username, password, browser_mode=False):
@@ -166,6 +194,7 @@ class AuthenticationContext(object):
 
         def _authenticate(request):
             provider.authenticate_request(request)
+
         self._authenticate = _authenticate
         return self
 
@@ -182,6 +211,7 @@ class AuthenticationContext(object):
 
         def _authenticate(request):
             provider.authenticate_request(request)
+
         self._authenticate = _authenticate
         return self
 

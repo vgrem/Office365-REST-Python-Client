@@ -30,7 +30,7 @@ class InvitationCollection(EntityCollection):
         return_type = Invitation(self.context)
         properties = {
             "invitedUserEmailAddress": invited_user_email_address,
-            "inviteRedirectUrl": invite_redirect_url
+            "inviteRedirectUrl": invite_redirect_url,
         }
         qry = CreateEntityQuery(self, properties, return_type)
         self.context.add_query(qry)

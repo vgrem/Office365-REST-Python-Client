@@ -15,7 +15,7 @@ class TestOutlookEvent(GraphTestCase):
             body="Does mid month work for you?",
             start=when,
             end=when + timedelta(hours=1),
-            attendees=[test_user_principal_name]
+            attendees=[test_user_principal_name],
         ).execute_query()
         self.assertIsNotNone(new_event.id)
         self.__class__.target_event = new_event

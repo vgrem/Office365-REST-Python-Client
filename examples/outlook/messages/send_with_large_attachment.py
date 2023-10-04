@@ -16,10 +16,13 @@ def print_progress(range_pos):
     print("{0} bytes uploaded".format(range_pos))
 
 
-message = client.me.messages.add(
-    subject="Meet for lunch?",
-    body="The new cafeteria is open.",
-    to_recipients=["fannyd@contoso.onmicrosoft.com"]
-).upload_attachment(local_path, print_progress).execute_query()
+message = (
+    client.me.messages.add(
+        subject="Meet for lunch?",
+        body="The new cafeteria is open.",
+        to_recipients=["fannyd@contoso.onmicrosoft.com"],
+    )
+    .upload_attachment(local_path, print_progress)
+    .execute_query()
+)
 message.send().execute_query()
-

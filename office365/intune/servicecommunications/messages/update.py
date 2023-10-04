@@ -1,4 +1,6 @@
-from office365.intune.servicecommunications.announcement_base import ServiceAnnouncementBase
+from office365.intune.servicecommunications.announcement_base import (
+    ServiceAnnouncementBase,
+)
 
 
 class ServiceUpdateMessage(ServiceAnnouncementBase):

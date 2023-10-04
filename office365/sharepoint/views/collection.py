@@ -1,5 +1,5 @@
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.views.view import View
 
@@ -30,15 +30,22 @@ class ViewCollection(BaseEntityCollection):
 
         :param str view_title: The title of the view to return.
         """
-        return View(self.context,
-                    ServiceOperationPath("GetByTitle", [view_title], self.resource_path), self._parent)
+        return View(
+            self.context,
+            ServiceOperationPath("GetByTitle", [view_title], self.resource_path),
+            self._parent,
+        )
 
     def get_by_id(self, view_id):
         """Gets the list view with the specified ID.
 
         :param str view_id: The view identifier of the view to return.
         """
-        return View(self.context, ServiceOperationPath("GetById", [view_id], self.resource_path), self._parent)
+        return View(
+            self.context,
+            ServiceOperationPath("GetById", [view_id], self.resource_path),
+            self._parent,
+        )
 
     @property
     def parent_list(self):

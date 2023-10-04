@@ -12,19 +12,24 @@ class WorkbookNamedItem(Entity):
         """The name of the object. Read-only.
         :rtype str or None
         """
-        return self.properties.get('name', None)
+        return self.properties.get("name", None)
 
     @property
     def comment(self):
         """Represents the comment associated with this name.
         :rtype str or None
         """
-        return self.properties.get('comment', None)
+        return self.properties.get("comment", None)
 
     @property
     def worksheet(self):
         """Returns the worksheet on which the named item is scoped to. Available only if the item is scoped
         to the worksheet. Read-only."""
         from office365.onedrive.workbooks.worksheets.worksheet import WorkbookWorksheet
-        return self.properties.get('worksheet',
-                                   WorkbookWorksheet(self.context, ResourcePath("worksheet", self.resource_path)))
+
+        return self.properties.get(
+            "worksheet",
+            WorkbookWorksheet(
+                self.context, ResourcePath("worksheet", self.resource_path)
+            ),
+        )

@@ -2,9 +2,9 @@ from datetime import datetime
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
-from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.query import ChangeQuery
@@ -13,9 +13,9 @@ from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.sharing.document_manager import DocumentSharingManager
 from office365.sharepoint.sharing.user_sharing_result import UserSharingResult
 from office365.sharepoint.storagemetrics.storage_metrics import StorageMetrics
+from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 from office365.sharepoint.utilities.move_copy_options import MoveCopyOptions
 from office365.sharepoint.utilities.move_copy_util import MoveCopyUtil
-from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
 class Folder(BaseEntity):
@@ -29,6 +29,7 @@ class Folder(BaseEntity):
         :type abs_url: str
         """
         from office365.sharepoint.client_context import ClientContext
+
         ctx = ClientContext.from_url(abs_url)
         relative_url = abs_url.replace(ctx.base_url, "")
         return ctx.web.get_folder_by_server_relative_url(relative_url)
@@ -40,6 +41,7 @@ class Folder(BaseEntity):
         :param bool recursive: Determines whether to enumerate folders recursively
         """
         from office365.sharepoint.files.collection import FileCollection
+
         return_type = FileCollection(self.context, self.files.resource_path, self)
 
         def _loaded(parent):
@@ -49,7 +51,9 @@ class Folder(BaseEntity):
             [return_type.add_child(f) for f in parent.files]
             if recursive:
                 for folder in parent.folders:
-                    folder.ensure_properties(["Files", "Folders"], _loaded, parent=folder)
+                    folder.ensure_properties(
+                        ["Files", "Folders"], _loaded, parent=folder
+                    )
 
         self.ensure_properties(["Files", "Folders"], _loaded, parent=self)
         return return_type
@@ -76,9 +80,13 @@ class Folder(BaseEntity):
             """
             :type destination_folder: Folder
             """
-            destination_url = "/".join([destination_folder.serverRelativeUrl, self.name])
+            destination_url = "/".join(
+                [destination_folder.serverRelativeUrl, self.name]
+            )
             qry = ServiceOperationQuery(self, "MoveTo", {"newUrl": destination_url})
-            self.context.add_query(qry).after_query_execute(_update_folder, destination_url)
+            self.context.add_query(qry).after_query_execute(
+                _update_folder, destination_url
+            )
 
         def _source_folder_resolved():
             if isinstance(destination, Folder):
@@ -105,20 +113,32 @@ class Folder(BaseEntity):
             """
             :type destination_folder: Folder
             """
-            destination_url = "/".join([str(destination_folder.server_relative_path), self.name])
-            qry = ServiceOperationQuery(self, "MoveToUsingPath", {"DecodedUrl": destination_url})
-            self.context.add_query(qry).after_query_execute(_update_folder, destination_url)
+            destination_url = "/".join(
+                [str(destination_folder.server_relative_path), self.name]
+            )
+            qry = ServiceOperationQuery(
+                self, "MoveToUsingPath", {"DecodedUrl": destination_url}
+            )
+            self.context.add_query(qry).after_query_execute(
+                _update_folder, destination_url
+            )
 
         def _source_folder_resolved():
             if isinstance(destination, Folder):
-                destination.ensure_property("ServerRelativePath", _move_to_using_path, destination)
+                destination.ensure_property(
+                    "ServerRelativePath", _move_to_using_path, destination
+                )
             else:
-                self.context.web.ensure_folder_path(destination).after_execute(_move_to_using_path)
+                self.context.web.ensure_folder_path(destination).after_execute(
+                    _move_to_using_path
+                )
 
         self.ensure_properties(["ServerRelativePath", "Name"], _source_folder_resolved)
         return self
 
-    def move_to_using_path_with_parameters(self, new_relative_path, retain_editor_and_modified=False):
+    def move_to_using_path_with_parameters(
+        self, new_relative_path, retain_editor_and_modified=False
+    ):
         """Moves the folder with files to the destination Path.
 
         :param str new_relative_path: A full URL path that represents the destination folder.
@@ -128,8 +148,15 @@ class Folder(BaseEntity):
         return_type.set_property("ServerRelativePath", SPResPath(new_relative_path))
 
         def _move_folder():
-            opt = MoveCopyOptions(retain_editor_and_modified_on_move=retain_editor_and_modified)
-            MoveCopyUtil.move_folder_by_path(self.context, self.server_relative_path.DecodedUrl, new_relative_path, opt)
+            opt = MoveCopyOptions(
+                retain_editor_and_modified_on_move=retain_editor_and_modified
+            )
+            MoveCopyUtil.move_folder_by_path(
+                self.context,
+                self.server_relative_path.DecodedUrl,
+                new_relative_path,
+                opt,
+            )
 
         self.ensure_property("ServerRelativePath", _move_folder)
         return return_type
@@ -149,10 +176,9 @@ class Folder(BaseEntity):
         :param str password: Optional password value to apply to the tokenized sharing link,
             if it can support password protection.
         """
-        return self.list_item_all_fields.share_link(link_kind=link_kind,
-                                                    expiration=expiration,
-                                                    role=role,
-                                                    password=password)
+        return self.list_item_all_fields.share_link(
+            link_kind=link_kind, expiration=expiration, role=role, password=password
+        )
 
     def unshare_link(self, link_kind, share_id=None):
         """
@@ -180,7 +206,9 @@ class Folder(BaseEntity):
         """
         return_type = ClientResult(self.context)
         payload = {"parameters": parameters}
-        qry = ServiceOperationQuery(self, "RecycleWithParameters", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "RecycleWithParameters", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -194,7 +222,9 @@ class Folder(BaseEntity):
             query = ChangeQuery(folder=True)
         return_type = ChangeCollection(self.context)
         payload = {"query": query}
-        qry = ServiceOperationQuery(self, "getChanges", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "getChanges", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -207,7 +237,9 @@ class Folder(BaseEntity):
         """
         return_type = ChangeCollection(self.context)
         payload = {"query": query}
-        qry = ServiceOperationQuery(self, "getListItemChanges", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "getListItemChanges", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -224,8 +256,8 @@ class Folder(BaseEntity):
         :type name: str
         """
         item = self.list_item_all_fields
-        item.set_property('Title', name)
-        item.set_property('FileLeafRef', name)
+        item.set_property("Title", name)
+        item.set_property("FileLeafRef", name)
         qry = UpdateEntityQuery(item)
         self.context.add_query(qry)
         return self
@@ -239,10 +271,16 @@ class Folder(BaseEntity):
         """
         return self.files.add(file_name, content, True)
 
-    def update_document_sharing_info(self, user_role_assignments,
-                                     validate_existing_permissions=None, additive_mode=None,
-                                     send_server_managed_notification=None, custom_message=None,
-                                     include_anonymous_links_in_notification=None, propagate_acl=None):
+    def update_document_sharing_info(
+        self,
+        user_role_assignments,
+        validate_existing_permissions=None,
+        additive_mode=None,
+        send_server_managed_notification=None,
+        custom_message=None,
+        include_anonymous_links_in_notification=None,
+        propagate_acl=None,
+    ):
         """
         This method allows a caller with the 'ManagePermission' permission to update sharing information about a
         document to enable document sharing with a set of users. It returns an array of
@@ -272,20 +310,26 @@ class Folder(BaseEntity):
         :param bool propagate_acl: A flag to determine if permissions SHOULD be pushed to items with unique permission.
         """
 
-        return_type = ClientResult(self.context, ClientValueCollection(UserSharingResult))
+        return_type = ClientResult(
+            self.context, ClientValueCollection(UserSharingResult)
+        )
 
         def _loaded():
-            resource_address = SPResPath.create_absolute(self.context.base_url, str(self.server_relative_path))
-            DocumentSharingManager.update_document_sharing_info(self.context,
-                                                                str(resource_address),
-                                                                user_role_assignments,
-                                                                validate_existing_permissions,
-                                                                additive_mode,
-                                                                send_server_managed_notification,
-                                                                custom_message,
-                                                                include_anonymous_links_in_notification,
-                                                                propagate_acl,
-                                                                return_type)
+            resource_address = SPResPath.create_absolute(
+                self.context.base_url, str(self.server_relative_path)
+            )
+            DocumentSharingManager.update_document_sharing_info(
+                self.context,
+                str(resource_address),
+                user_role_assignments,
+                validate_existing_permissions,
+                additive_mode,
+                send_server_managed_notification,
+                custom_message,
+                include_anonymous_links_in_notification,
+                propagate_acl,
+                return_type,
+            )
 
         self.ensure_property("ServerRelativePath", _loaded)
         return return_type
@@ -304,21 +348,34 @@ class Folder(BaseEntity):
             """
             :type destination_folder: Folder
             """
-            destination_url = "/".join([destination_folder.serverRelativeUrl, self.name])
+            destination_url = "/".join(
+                [destination_folder.serverRelativeUrl, self.name]
+            )
             return_type.set_property("ServerRelativeUrl", destination_url)
-            opts = MoveCopyOptions(keep_both=keep_both, reset_author_and_created_on_copy=reset_author_and_created)
-            MoveCopyUtil.copy_folder(self.context, self.serverRelativeUrl, destination_url, opts)
+            opts = MoveCopyOptions(
+                keep_both=keep_both,
+                reset_author_and_created_on_copy=reset_author_and_created,
+            )
+            MoveCopyUtil.copy_folder(
+                self.context, self.serverRelativeUrl, destination_url, opts
+            )
 
         def _source_folder_resolved():
             if isinstance(destination, Folder):
-                destination.ensure_property("ServerRelativeUrl", _copy_folder, destination)
+                destination.ensure_property(
+                    "ServerRelativeUrl", _copy_folder, destination
+                )
             else:
-                self.context.web.ensure_folder_path(destination).after_execute(_copy_folder)
+                self.context.web.ensure_folder_path(destination).after_execute(
+                    _copy_folder
+                )
 
         self.ensure_property("ServerRelativeUrl", _source_folder_resolved)
         return return_type
 
-    def copy_to_using_path(self, destination, keep_both=False, reset_author_and_created=False):
+    def copy_to_using_path(
+        self, destination, keep_both=False, reset_author_and_created=False
+    ):
         """Copies the folder with files to the destination Path.
 
         :param str or Folder destination: Parent folder object or server relative folder url
@@ -333,16 +390,27 @@ class Folder(BaseEntity):
             """
             :type destination_folder: Folder
             """
-            destination_url = "/".join([str(destination_folder.server_relative_path), self.name])
+            destination_url = "/".join(
+                [str(destination_folder.server_relative_path), self.name]
+            )
             return_type.set_property("ServerRelativePath", destination_url)
-            opts = MoveCopyOptions(keep_both=keep_both, reset_author_and_created_on_copy=reset_author_and_created)
-            MoveCopyUtil.copy_folder_by_path(self.context, str(self.server_relative_path), destination_url, opts)
+            opts = MoveCopyOptions(
+                keep_both=keep_both,
+                reset_author_and_created_on_copy=reset_author_and_created,
+            )
+            MoveCopyUtil.copy_folder_by_path(
+                self.context, str(self.server_relative_path), destination_url, opts
+            )
 
         def _source_folder_resolved():
             if isinstance(destination, Folder):
-                destination.ensure_property("ServerRelativePath", _copy_folder_by_path, destination)
+                destination.ensure_property(
+                    "ServerRelativePath", _copy_folder_by_path, destination
+                )
             else:
-                self.context.web.ensure_folder_path(destination).after_execute(_copy_folder_by_path)
+                self.context.web.ensure_folder_path(destination).after_execute(
+                    _copy_folder_by_path
+                )
 
         self.ensure_properties(["ServerRelativePath", "Name"], _source_folder_resolved)
         return return_type
@@ -350,35 +418,52 @@ class Folder(BaseEntity):
     @property
     def storage_metrics(self):
         """Specifies the storage-related metrics for list folders in the site"""
-        return self.properties.get("StorageMetrics",
-                                   StorageMetrics(self.context, ResourcePath("StorageMetrics", self.resource_path)))
+        return self.properties.get(
+            "StorageMetrics",
+            StorageMetrics(
+                self.context, ResourcePath("StorageMetrics", self.resource_path)
+            ),
+        )
 
     @property
     def list_item_all_fields(self):
         """Specifies the list item fields (2) values for the list item corresponding to the folder."""
-        return self.properties.get("ListItemAllFields",
-                                   ListItem(self.context, ResourcePath("ListItemAllFields", self.resource_path)))
+        return self.properties.get(
+            "ListItemAllFields",
+            ListItem(
+                self.context, ResourcePath("ListItemAllFields", self.resource_path)
+            ),
+        )
 
     @property
     def files(self):
         """Specifies the collection of files contained in the list folder."""
         from office365.sharepoint.files.collection import FileCollection
-        return self.properties.get("Files",
-                                   FileCollection(self.context, ResourcePath("Files", self.resource_path), self))
+
+        return self.properties.get(
+            "Files",
+            FileCollection(
+                self.context, ResourcePath("Files", self.resource_path), self
+            ),
+        )
 
     @property
     def folders(self):
-        """Specifies the collection of list folders contained within the list folder.
-        """
+        """Specifies the collection of list folders contained within the list folder."""
         from office365.sharepoint.folders.collection import FolderCollection
-        return self.properties.get("Folders",
-                                   FolderCollection(self.context, ResourcePath("Folders", self.resource_path)))
+
+        return self.properties.get(
+            "Folders",
+            FolderCollection(self.context, ResourcePath("Folders", self.resource_path)),
+        )
 
     @property
     def parent_folder(self):
         """Specifies the list folder."""
-        return self.properties.get("ParentFolder",
-                                   Folder(self.context, ResourcePath("ParentFolder", self.resource_path)))
+        return self.properties.get(
+            "ParentFolder",
+            Folder(self.context, ResourcePath("ParentFolder", self.resource_path)),
+        )
 
     @property
     def name(self):
@@ -490,7 +575,7 @@ class Folder(BaseEntity):
                 "ParentFolder": self.parent_folder,
                 "ServerRelativePath": self.server_relative_path,
                 "StorageMetrics": self.storage_metrics,
-                "TimeCreated": self.time_created
+                "TimeCreated": self.time_created,
             }
             default_value = property_mapping.get(name, None)
         return super(Folder, self).get_property(name, default_value)
@@ -502,7 +587,15 @@ class Folder(BaseEntity):
             self._resource_path = self.context.web.get_folder_by_id(value).resource_path
         if self._resource_path is None:
             if name == "ServerRelativeUrl":
-                self._resource_path = self.context.web.get_folder_by_server_relative_url(value).resource_path
+                self._resource_path = (
+                    self.context.web.get_folder_by_server_relative_url(
+                        value
+                    ).resource_path
+                )
             elif name == "ServerRelativePath":
-                self._resource_path = self.context.web.get_folder_by_server_relative_path(value).resource_path
+                self._resource_path = (
+                    self.context.web.get_folder_by_server_relative_path(
+                        value
+                    ).resource_path
+                )
         return self

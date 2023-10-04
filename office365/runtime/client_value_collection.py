@@ -6,7 +6,6 @@ from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 
 
 class ClientValueCollection(ClientValue):
-
     def __init__(self, item_type, initial_values=None):
         """
         :type item_type: type[ClientValue or int or str or bool or uuid]
@@ -53,9 +52,14 @@ class ClientValueCollection(ClientValue):
                 json[i] = v.to_json(json_format)
             elif isinstance(v, uuid.UUID):
                 json[i] = str(v)
-        if isinstance(json_format, JsonLightFormat) and json_format.include_control_information:
-            json = {json_format.collection: json,
-                    json_format.metadata_type: {'type': self.entity_type_name}}
+        if (
+            isinstance(json_format, JsonLightFormat)
+            and json_format.include_control_information
+        ):
+            json = {
+                json_format.collection: json,
+                json_format.metadata_type: {"type": self.entity_type_name},
+            }
         return json
 
     def create_typed_value(self, initial_value=None):

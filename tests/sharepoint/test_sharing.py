@@ -1,14 +1,20 @@
-from office365.runtime.compat import urljoin
 from unittest import TestCase
 
+from office365.runtime.compat import urljoin
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.sharing.document_manager import DocumentSharingManager
-from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
-from office365.sharepoint.sharing.operation_status_code import SharingOperationStatusCode
-from office365.sharepoint.sharing.role_type import RoleType
+from office365.sharepoint.sharing.object_sharing_information import (
+    ObjectSharingInformation,
+)
+from office365.sharepoint.sharing.operation_status_code import (
+    SharingOperationStatusCode,
+)
 from office365.sharepoint.sharing.result import SharingResult
-from office365.sharepoint.sharing.site_sharing_report_helper import SiteSharingReportHelper
+from office365.sharepoint.sharing.role_type import RoleType
+from office365.sharepoint.sharing.site_sharing_report_helper import (
+    SiteSharingReportHelper,
+)
 from office365.sharepoint.webs.web import Web
 from tests import test_site_url, test_user_credentials
 
@@ -26,11 +32,15 @@ class TestSharePointSharing(TestCase):
         cls.client = client
 
     def test1_get_role_def(self):
-        role_def = DocumentSharingManager.get_role_definition(self.client, RoleType.Contributor).execute_query()
+        role_def = DocumentSharingManager.get_role_definition(
+            self.client, RoleType.Contributor
+        ).execute_query()
         self.assertTrue(role_def.name, "Full Control")
 
     def test2_get_object_sharing_settings(self):
-        result = Web.get_object_sharing_settings(self.client, self.target_file_url, 0, True).execute_query()
+        result = Web.get_object_sharing_settings(
+            self.client, self.target_file_url, 0, True
+        ).execute_query()
         self.assertIsNotNone(result.web_url)
 
     def test3_get_file_sharing_info(self):
@@ -41,7 +51,9 @@ class TestSharePointSharing(TestCase):
 
     def test4_share_file(self):
         target_file_item = self.client.web.get_list_item("/SitePages/Home.aspx")
-        result = target_file_item.share(self.target_user.user_principal_name).execute_query()
+        result = target_file_item.share(
+            self.target_user.user_principal_name
+        ).execute_query()
         self.assertIsNone(result.error_message)
 
     def test5_unshare_file(self):
@@ -51,9 +63,13 @@ class TestSharePointSharing(TestCase):
         self.assertIsNone(result.error_message)
 
     def test6_share_web(self):
-        result = self.client.web.share(self.target_user.user_principal_name).execute_query()
+        result = self.client.web.share(
+            self.target_user.user_principal_name
+        ).execute_query()
         self.assertIsInstance(result, SharingResult)
-        self.assertEqual(result.status_code, SharingOperationStatusCode.CompletedSuccessfully)
+        self.assertEqual(
+            result.status_code, SharingOperationStatusCode.CompletedSuccessfully
+        )
         self.assertIsNone(result.error_message)
 
     def test7_unshare_web(self):
@@ -61,13 +77,21 @@ class TestSharePointSharing(TestCase):
         self.assertIsInstance(result, SharingResult)
 
     def test8_get_web_sharing_information(self):
-        result = ObjectSharingInformation.get_web_sharing_information(self.client).execute_query()
+        result = ObjectSharingInformation.get_web_sharing_information(
+            self.client
+        ).execute_query()
         self.assertIsNotNone(result.properties)
 
     def test9_get_site_sharing_report_capabilities(self):
-        result = SiteSharingReportHelper.get_site_sharing_report_capabilities(self.client).execute_query()
+        result = SiteSharingReportHelper.get_site_sharing_report_capabilities(
+            self.client
+        ).execute_query()
         self.assertIsNotNone(result.value)
 
     def test_10_get_get_list_sharing_settings(self):
-        result = self.client.web.default_document_library().get_sharing_settings().execute_query()
+        result = (
+            self.client.web.default_document_library()
+            .get_sharing_settings()
+            .execute_query()
+        )
         self.assertIsNotNone(result.list_id)

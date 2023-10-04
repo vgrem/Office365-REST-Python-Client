@@ -1,12 +1,14 @@
 import json
 import re
+from email.message import Message
 
 import requests
 from requests.structures import CaseInsensitiveDict
 
-from office365.runtime.compat import message_from_bytes_or_string, message_as_bytes_or_string
-from email.message import Message
-
+from office365.runtime.compat import (
+    message_as_bytes_or_string,
+    message_from_bytes_or_string,
+)
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.request import ODataRequest
@@ -14,7 +16,6 @@ from office365.runtime.queries.batch import create_boundary
 
 
 class ODataBatchV3Request(ODataRequest):
-
     def build_request(self, query):
         """
         Construct a OData v3 Batch request
@@ -24,8 +25,10 @@ class ODataBatchV3Request(ODataRequest):
         request = RequestOptions(query.url)
         request.method = HttpMethod.Post
         media_type = "multipart/mixed"
-        content_type = "; ".join([media_type, "boundary={0}".format(query.current_boundary)])
-        request.ensure_header('Content-Type', content_type)
+        content_type = "; ".join(
+            [media_type, "boundary={0}".format(query.current_boundary)]
+        )
+        request.ensure_header("Content-Type", content_type)
         request.data = self._prepare_payload(query)
         return request
 
@@ -46,13 +49,8 @@ class ODataBatchV3Request(ODataRequest):
         :type response: requests.Response
         :type query: office365.runtime.queries.batch.BatchQuery
         """
-        content_type = response.headers['Content-Type'].encode("ascii")
-        http_body = (
-            b"Content-Type: "
-            + content_type
-            + b"\r\n\r\n"
-            + response.content
-        )
+        content_type = response.headers["Content-Type"].encode("ascii")
+        http_body = b"Content-Type: " + content_type + b"\r\n\r\n" + response.content
 
         message = message_from_bytes_or_string(http_body)  # type: Message
 
@@ -134,13 +132,14 @@ class ODataBatchV3Request(ODataRequest):
         method = request.method
         if "X-HTTP-Method" in request.headers:
             method = request.headers["X-HTTP-Method"]
-        lines = ["{method} {url} HTTP/1.1".format(method=method, url=request.url)] + \
-                [':'.join(h) for h in request.headers.items()]
+        lines = ["{method} {url} HTTP/1.1".format(method=method, url=request.url)] + [
+            ":".join(h) for h in request.headers.items()
+        ]
         if request.data:
             lines.append(eol)
             lines.append(json.dumps(request.data))
         raw_content = eol + eol.join(lines) + eol
-        payload = raw_content.encode('utf-8').lstrip()
+        payload = raw_content.encode("utf-8").lstrip()
 
         message = Message()
         message.add_header("Content-Type", "application/http")

@@ -1,12 +1,15 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.sharing.reports.site_capabilities import SiteSharingReportCapabilities
-from office365.sharepoint.sharing.site_sharing_report_status import SiteSharingReportStatus
+from office365.sharepoint.sharing.reports.site_capabilities import (
+    SiteSharingReportCapabilities,
+)
+from office365.sharepoint.sharing.site_sharing_report_status import (
+    SiteSharingReportStatus,
+)
 
 
 class SiteSharingReportHelper(BaseEntity):
-
     @staticmethod
     def cancel_sharing_report_job(context):
         """
@@ -14,7 +17,9 @@ class SiteSharingReportHelper(BaseEntity):
         """
         return_type = ClientResult(context, SiteSharingReportStatus())
         binding_type = SiteSharingReportHelper(context)
-        qry = ServiceOperationQuery(binding_type, "CancelSharingReportJob", None, None, None, return_type, True)
+        qry = ServiceOperationQuery(
+            binding_type, "CancelSharingReportJob", None, None, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
 
@@ -26,13 +31,17 @@ class SiteSharingReportHelper(BaseEntity):
         :param str folder_url:
         """
         return_type = ClientResult(context, SiteSharingReportStatus())
-        payload = {
-            "webUrl": web_url,
-            "folderUrl": folder_url
-        }
+        payload = {"webUrl": web_url, "folderUrl": folder_url}
         binding_type = SiteSharingReportHelper(context)
-        qry = ServiceOperationQuery(binding_type, "CreateSharingReportJob", None, payload,
-                                    None, return_type, True)
+        qry = ServiceOperationQuery(
+            binding_type,
+            "CreateSharingReportJob",
+            None,
+            payload,
+            None,
+            return_type,
+            True,
+        )
         context.add_query(qry)
         return return_type
 
@@ -43,8 +52,15 @@ class SiteSharingReportHelper(BaseEntity):
         """
         return_type = ClientResult(context, SiteSharingReportCapabilities())
         binding_type = SiteSharingReportHelper(context)
-        qry = ServiceOperationQuery(binding_type, "GetSiteSharingReportCapabilities", None, None,
-                                    None, return_type, True)
+        qry = ServiceOperationQuery(
+            binding_type,
+            "GetSiteSharingReportCapabilities",
+            None,
+            None,
+            None,
+            return_type,
+            True,
+        )
         context.add_query(qry)
         return return_type
 

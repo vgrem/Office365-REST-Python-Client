@@ -5,7 +5,6 @@ from tests.graph_case import acquire_token_by_client_credentials
 
 
 class TestOrganization(TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.client = GraphClient(acquire_token_by_client_credentials)

@@ -6,4 +6,5 @@ class EducationUser(Entity):
     Microsoft Graph will return from the non-education-specific /users endpoint. This object provides a targeted
     subset of properties from the core user object and adds a set of education-specific properties such as primaryRole,
     student, and teacher data."""
+
     pass

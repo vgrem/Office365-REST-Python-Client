@@ -3,8 +3,14 @@ from office365.runtime.types.collections import StringCollection
 
 
 class GroupProfile(ClientValue):
-    def __init__(self, name, description=None, mail_enabled=False, security_enabled=True,
-                 group_types=None):
+    def __init__(
+        self,
+        name,
+        description=None,
+        mail_enabled=False,
+        security_enabled=True,
+        group_types=None,
+    ):
         """
         :param str name: The display name for the group
         :param str description: An optional description for the group.

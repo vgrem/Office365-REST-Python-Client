@@ -21,11 +21,11 @@ class RequestOptions(object):
 
     @property
     def is_file(self):
-        return hasattr(self.data, 'read') and callable(self.data.read)
+        return hasattr(self.data, "read") and callable(self.data.read)
 
     @property
     def is_bytes(self):
-        return hasattr(self.data, 'decode') and callable(self.data.decode)
+        return hasattr(self.data, "decode") and callable(self.data.decode)
 
     def set_header(self, name, value):
         self.headers[name] = value

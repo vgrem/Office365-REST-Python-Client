@@ -1,4 +1,6 @@
-from office365.directory.rolemanagement.unified_role_definition import UnifiedRoleDefinition
+from office365.directory.rolemanagement.unified_role_definition import (
+    UnifiedRoleDefinition,
+)
 from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -32,9 +34,12 @@ class UnifiedRoleAssignment(Entity):
         """
         The roleDefinition the assignment is for. Supports $expand. roleDefinition.Id will be auto expanded.
         """
-        return self.properties.get('roleDefinition',
-                                   UnifiedRoleDefinition(self.context,
-                                                         ResourcePath("roleDefinition", self.resource_path)))
+        return self.properties.get(
+            "roleDefinition",
+            UnifiedRoleDefinition(
+                self.context, ResourcePath("roleDefinition", self.resource_path)
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
