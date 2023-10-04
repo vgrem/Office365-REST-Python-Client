@@ -1,24 +1,21 @@
-from typing import TypeVar, Iterator
+from typing import TypeVar, Optional, Generic, Iterator
+from typing_extensions import Self
 
 from office365.runtime.client_object import ClientObject
 from office365.runtime.types.event_handler import EventHandler
+from office365.runtime.client_runtime_context import ClientRuntimeContext
+from office365.runtime.paths.resource_path import ResourcePath
 
-T = TypeVar('T', bound='ClientObjectCollection')
-P_T = TypeVar("P_T", bound=ClientObject)
+T = TypeVar("T")
 
 
-class ClientObjectCollection(ClientObject):
+class ClientObjectCollection(ClientObject, Generic[T]):
 
     def __init__(self, context, item_type, resource_path=None, parent=None):
-        """A collection container which represents a named collections of objects
-
-        :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
-        :type item_type: type[ClientObject]
-        :type resource_path: office365.runtime.paths.resource_path.ResourcePath
-        :type parent: ClientObject or None
-        """
+        # type: (ClientRuntimeContext, T, Optional[ResourcePath], Optional[ClientObject]) -> None
+        """A collection container which represents a named collections of objects."""
         super(ClientObjectCollection, self).__init__(context, resource_path)
-        self._data = []  # type: list[ClientObject]
+        self._data = []  # type: list[T]
         self._item_type = item_type
         self._page_loaded = EventHandler(False)
         self._paged_mode = False
@@ -35,11 +32,8 @@ class ClientObjectCollection(ClientObject):
         return self
 
     def create_typed_object(self, initial_properties=None, resource_path=None):
-        """
-        :type self: T
-        :type initial_properties: dict or None
-        :type resource_path: office365.runtime.paths.resource_path.ResourcePath or None
-        """
+        # type: (Optional[dict], Optional[ResourcePath]) -> T
+        """Create an object from the item_type."""
         if self._item_type is None:
             raise AttributeError("No class model for entity type '{0}' was found".format(self._item_type))
         client_object = self._item_type(context=self.context, resource_path=resource_path)   # type: ClientObject
@@ -48,11 +42,7 @@ class ClientObjectCollection(ClientObject):
         return client_object
 
     def set_property(self, key, value, persist_changes=False):
-        """
-        :type key: int or str
-        :type value: dict
-        :type persist_changes: bool
-        """
+        # type: (str | int, dict, bool) -> Self
         if key == "__nextLinkUrl":
             self._next_request_url = value
         else:
@@ -62,6 +52,7 @@ class ClientObjectCollection(ClientObject):
         return self
 
     def add_child(self, client_object):
+        # type: (T) -> Self
         """
         Adds client object into collection
 
@@ -72,17 +63,12 @@ class ClientObjectCollection(ClientObject):
         return self
 
     def remove_child(self, client_object):
-        """
-        :type client_object: ClientObject
-        """
+        # type: (T) -> Self
         self._data = [item for item in self._data if item != client_object]
         return self
 
     def __iter__(self):
-        """
-        :type self: T
-        :rtype: Iterator[ClientObject]
-        """
+        # type: () -> Iterator[T]
         for item in self._data:
             yield item
         if self._paged_mode:
@@ -93,26 +79,27 @@ class ClientObjectCollection(ClientObject):
                     yield next_item
 
     def __len__(self):
+        # type: () -> int
         return len(self._data)
 
     def __repr__(self):
+        # type: () -> str
         return repr(self._data)
 
     def __getitem__(self, index):
-        """
-        :type index: int
-        """
+        # type: (int) -> T
         return self._data[index]
 
     def to_json(self, json_format=None):
-        """Serializes the collection into JSON"""
+        # type: (int) -> List[dict]
+        """Serializes the collection into JSON."""
         return [item.to_json(json_format) for item in self._data]
 
     def filter(self, expression):
+        # type: (str) -> Self
         """
         Allows clients to filter a collection of resources that are addressed by a request URL
 
-        :type self: T
         :param str expression: Filter expression, for example: 'Id eq 123'
         """
         self.query_options.filter = expression
@@ -191,6 +178,7 @@ class ClientObjectCollection(ClientObject):
         return self
 
     def _get_next(self, after_loaded=None):
+        # type: (Optional[EventHandler]) -> Self
         """
         Submit a request to retrieve next collection of items
 
@@ -207,6 +195,7 @@ class ClientObjectCollection(ClientObject):
         return self
 
     def first(self, expression):
+        # type: (str) -> T
         """Return the first Entity instance that matches current query
 
         :param str expression: Filter expression
@@ -229,6 +218,7 @@ class ClientObjectCollection(ClientObject):
         return return_type
 
     def single(self, expression):
+        # type: (str) -> T
         """
         Return only one resulting Entity
 
@@ -256,15 +246,18 @@ class ClientObjectCollection(ClientObject):
 
     @property
     def parent(self):
+        # type: () -> ClientObject
         return self._parent
 
     @property
     def has_next(self):
+        # type: () -> bool
         """"""
         return self._next_request_url is not None
 
     @property
     def entity_type_name(self):
+        # type: () -> str
         """Returns server type name for the collection of entities"""
         if self._entity_type_name is None:
             client_object = self.create_typed_object()

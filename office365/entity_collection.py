@@ -1,14 +1,19 @@
+from typing import TypeVar
+
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.compat import is_string_type
 from office365.runtime.paths.item import ItemPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.graph_client import GraphClient
 
+T = TypeVar("T")
 
-class EntityCollection(ClientObjectCollection):
+class EntityCollection(ClientObjectCollection[T]):
     """A collection container which represents a named collections of entities"""
 
     def __getitem__(self, key):
+        # type: (int | str) -> T
         """
         :param key: key is used to address an entity by either an index or by identifier
         :type key: int or str
@@ -21,6 +26,7 @@ class EntityCollection(ClientObjectCollection):
             raise ValueError("Invalid key: expected either an entity index [int] or identifier [str]")
 
     def add(self, **kwargs):
+        # type: (Any) -> T
         """
         Creates an entity and prepares the query
         """
@@ -32,7 +38,5 @@ class EntityCollection(ClientObjectCollection):
 
     @property
     def context(self):
-        """
-        :rtype: office365.graph_client.GraphClient
-        """
+        # type: () -> GraphClient
         return self._context

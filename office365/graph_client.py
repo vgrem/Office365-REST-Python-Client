@@ -1,3 +1,5 @@
+from typing import Callable
+
 from office365.booking.solutions.root import SolutionsRoot
 from office365.communications.cloud_communications import CloudCommunications
 from office365.delta_collection import DeltaCollection
@@ -64,6 +66,7 @@ class GraphClient(ClientRuntimeContext):
     """Graph Service client"""
 
     def __init__(self, acquire_token_callback):
+        # type: (Callable[None, dict]) -> None
         """
         :param () -> dict acquire_token_callback: Acquire token function
         """
@@ -86,6 +89,7 @@ class GraphClient(ClientRuntimeContext):
         return self
 
     def pending_request(self):
+        # type: () -> ODataRequest
         if self._pending_request is None:
             self._pending_request = ODataRequest(V4JsonFormat())
             self._pending_request.beforeExecute += self._authenticate_request
@@ -93,25 +97,20 @@ class GraphClient(ClientRuntimeContext):
         return self._pending_request
 
     def service_root_url(self):
+        # type: () -> str
         return "https://graph.microsoft.com/v1.0"
 
     def _build_specific_query(self, request):
-        """
-        Builds Graph specific HTTP request
-
-        :type request: RequestOptions
-        """
+        # type: (RequestOptions) -> None
+        """Builds Graph specific HTTP request."""
         if isinstance(self.current_query, UpdateEntityQuery):
             request.method = HttpMethod.Patch
         elif isinstance(self.current_query, DeleteEntityQuery):
             request.method = HttpMethod.Delete
 
     def _authenticate_request(self, request):
-        """
-        Authenticate request
-
-        :type request: RequestOptions
-        """
+        # type: (RequestOptions) -> None
+        """Authenticate request."""
         token_json = self._acquire_token_callback()
         token = TokenResponse.from_json(token_json)
         request.ensure_header('Authorization', 'Bearer {0}'.format(token.accessToken))

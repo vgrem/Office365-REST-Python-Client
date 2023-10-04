@@ -46,6 +46,7 @@ class SitesWithRoot(EntityCollection):
         return return_type
 
     def search(self, query_text):
+        # type: (str) -> SitesWithRoot
         """
         Search across a SharePoint tenant for sites that match keywords provided.
 
@@ -61,4 +62,5 @@ class SitesWithRoot(EntityCollection):
 
     @property
     def root(self):
+        # type: () -> Site
         return self.properties.get('root', Site(self.context, RootPath(self.resource_path, self.resource_path)))
