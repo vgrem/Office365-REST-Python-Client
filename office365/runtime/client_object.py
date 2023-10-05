@@ -1,25 +1,31 @@
-import datetime
-from typing import TypeVar
+from __future__ import annotations
 
+import datetime
+from typing import TYPE_CHECKING, Generic, Optional, TypeVar
+
+from typing_extensions import Self
+
+from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.client_value import ClientValue
 from office365.runtime.odata.json_format import ODataJsonFormat
 from office365.runtime.odata.query_options import QueryOptions
 from office365.runtime.odata.type import ODataType
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
+from office365.runtime.paths.resource_path import ResourcePath
 
-T = TypeVar("T", bound="ClientObject")
+if TYPE_CHECKING:
+    from office365.runtime.client_object_collection import ClientObjectCollection
+
+
+T = TypeVar("T")
 P_T = TypeVar("P_T")
+"""Property Type."""
 
 
-class ClientObject(object):
+class ClientObject(Generic[T]):
     def __init__(self, context, resource_path=None, parent_collection=None):
-        """
-        Base client object which define named properties and relationships of an entity
-
-        :type parent_collection: office365.runtime.client_object_collection.ClientObjectCollection or None
-        :type resource_path: office365.runtime.paths.resource_path.ResourcePath or None
-        :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
-        """
+        # type: (ClientRuntimeContext, Optional[ResourcePath], Optional[ClientObjectCollection]) -> None
+        """Base client object which define named properties and relationships of an entity."""
         self._properties = {}
         self._ser_property_names = []
         self._query_options = QueryOptions()
@@ -29,9 +35,8 @@ class ClientObject(object):
         self._resource_path = resource_path
 
     def clear(self):
-        """
-        Resets client object's state
-        """
+        # type: () -> Self
+        """Resets client object's state."""
         self._properties = {
             k: v
             for k, v in self._properties.items()
@@ -42,11 +47,8 @@ class ClientObject(object):
         return self
 
     def execute_query(self):
-        """
-        Submit request(s) to the server
-
-        :type self: T
-        """
+        # type: () -> Self
+        """Submit request(s) to the server."""
         self.context.execute_query()
         return self
 
@@ -79,14 +81,13 @@ class ClientObject(object):
         return self
 
     def get(self):
-        """
-        Retrieves a client object from the server
-        :type self: T
-        """
+        # type: () -> Self
+        """Retrieves a client object from the server."""
         self.context.load(self)
         return self
 
     def is_property_available(self, name):
+        # type: (str) -> bool
         """Returns a Boolean value that indicates whether the specified property has been retrieved or set.
 
         :param str name: A property name
@@ -96,16 +97,13 @@ class ClientObject(object):
         return False
 
     def expand(self, names):
-        """
-        Specifies the related resources to be included in line with retrieved resources
-
-        :type self: T
-        :type names: list[str]
-        """
+        # type: (list[str]) -> Self
+        """Specifies the related resources to be included in line with retrieved resources."""
         self.query_options.expand = names
         return self
 
     def select(self, names):
+        # type: (list[str]) -> Self
         """
         Allows to request a limited set of properties
 
@@ -122,6 +120,7 @@ class ClientObject(object):
         return self
 
     def _persist_changes(self, name):
+        # type: (str) -> Self
         """
         Marks a property as a serializable
         :param str name: A property name
@@ -131,19 +130,15 @@ class ClientObject(object):
         return self
 
     def get_property(self, name, default_value=None):
-        """
-        Gets property value
-
-        :type name: str
-        :type default_value: P_T
-        :rtype: P_T
-        """
+        # type: (str, P_T) -> P_T
+        """Gets property value."""
         if default_value is None:
             normalized_name = name[0].lower() + name[1:]
             default_value = getattr(self, normalized_name, None)
         return self._properties.get(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
+        # type: (str, P_T, bool) -> Self
         """Sets property value
 
         :param str name: Property name

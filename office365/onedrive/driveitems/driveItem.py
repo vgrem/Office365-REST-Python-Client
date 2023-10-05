@@ -51,6 +51,7 @@ class DriveItem(BaseItem):
     OneDrive and SharePoint are returned as driveItem resources"""
 
     def get_by_path(self, url_path):
+        # type: (str) -> DriveItem
         """
         Retrieve DriveItem by server relative path
 
@@ -236,8 +237,8 @@ class DriveItem(BaseItem):
 
     def get_content(self, format_name=None):
         """
-        Download the contents of the primary stream (file) of a DriveItem. O
-        nly driveItems with the file property can be downloaded.
+        Download the contents of the primary stream (file) of a DriveItem.
+        Only driveItems with the file property can be downloaded.
 
         :type format_name: str or None
         """

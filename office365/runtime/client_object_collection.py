@@ -1,4 +1,4 @@
-from typing import Generic, Iterator, Optional, TypeVar
+from typing import Generic, Iterator, List, Optional, TypeVar
 
 from typing_extensions import Self
 
