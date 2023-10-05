@@ -28,4 +28,4 @@ class ExcelService(ClientRuntimeContext):
         pass
 
     def get_workbook(self, list_name, file_name):
-        raise NotImplemented("get_workbook")
+        raise NotImplementedError("get_workbook")

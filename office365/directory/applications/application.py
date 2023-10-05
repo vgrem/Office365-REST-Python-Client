@@ -61,7 +61,7 @@ class Application(DirectoryObject):
         Remove a certificate from an application.
         :param str thumbprint: The unique identifier for the password.
         """
-        raise NotImplemented("")
+        raise NotImplementedError("")
 
     def add_password(self, display_name):
         """Adds a strong password to an application.

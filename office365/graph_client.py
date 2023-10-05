@@ -48,6 +48,7 @@ from office365.reports.root import ReportRoot
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.request import ODataRequest
 from office365.runtime.odata.v4.batch_request import ODataV4BatchRequest
 from office365.runtime.odata.v4.json_format import V4JsonFormat
@@ -68,7 +69,7 @@ class GraphClient(ClientRuntimeContext):
     """Graph Service client"""
 
     def __init__(self, acquire_token_callback):
-        # type: (Callable[None, dict]) -> None
+        # type: (Callable[..., dict]) -> None
         """
         :param () -> dict acquire_token_callback: Acquire token function
         """
