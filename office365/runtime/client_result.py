@@ -1,12 +1,12 @@
 import copy
-from typing import TypeVar
+from typing import Generic, TypeVar
 
 from office365.runtime.client_value import ClientValue
 
 T = TypeVar("T", int, str, bytes, bool, ClientValue)
 
 
-class ClientResult(object):
+class ClientResult(Generic[T]):
     """Client result"""
 
     def __init__(self, context, default_value=None):
@@ -17,7 +17,7 @@ class ClientResult(object):
         :type default_value: T
         """
         self._context = context
-        self._value = copy.deepcopy(default_value)
+        self._value = copy.deepcopy(default_value)  # type: T
 
     def before_execute(self, action, *args, **kwargs):
         """
@@ -71,3 +71,11 @@ class ClientResult(object):
             failure_callback=failure_callback,
         )
         return self
+
+    @staticmethod
+    def as_boolean(context):
+        """
+        :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
+        :rtype: ClientResult[bool]
+        """
+        return ClientResult(context, bool())

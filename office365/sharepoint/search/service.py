@@ -145,7 +145,9 @@ class SearchService(BaseEntity):
             "enableSorting": enable_sorting,
         }
         params.update(**kwargs)
-        return_type = ClientResult(self.context, SearchResult())
+        return_type = ClientResult(
+            self.context, SearchResult()
+        )  # type: ClientResult[SearchResult]
         qry = FunctionQuery(self, "query", params, return_type)
         self.context.add_query(qry)
         return return_type
@@ -168,7 +170,9 @@ class SearchService(BaseEntity):
         :param int row_limit: The number of search results the protocol client wants to receive, starting at the index
             specified in the StartRow element. The RowLimit value MUST be greater than or equal to zero.
         """
-        return_type = ClientResult(self.context, SearchResult())
+        return_type = ClientResult(
+            self.context, SearchResult()
+        )  # type: ClientResult[SearchResult]
         request = SearchRequest(
             query_text=query_text,
             select_properties=select_properties,

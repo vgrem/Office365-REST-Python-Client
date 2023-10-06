@@ -88,7 +88,7 @@ class BaseItem(Entity):
     @property
     def web_url(self):
         """
-        URL that displays the resource in the browser.
+        URL that displays the resource in the browser
         :rtype: str or None
         """
         return self.properties.get("webUrl", None)

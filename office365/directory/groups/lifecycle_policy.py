@@ -21,7 +21,7 @@ class GroupLifecyclePolicy(Entity):
 
         :param str group_id: The identifier of the group to remove from the policy.
         """
-        return_type = ClientResult(self.context, bool())
+        return_type = ClientResult.as_boolean(self.context)
         payload = {"groupId": group_id}
         qry = ServiceOperationQuery(self, "addGroup", None, payload, None, return_type)
         self.context.add_query(qry)
