@@ -7,7 +7,7 @@ from office365.teams.operations.async_operation import TeamsAsyncOperation
 from office365.teams.team import Team
 
 
-class TeamCollection(EntityCollection):
+class TeamCollection(EntityCollection[Team]):
     """Team's collection"""
 
     def __init__(self, context, resource_path=None):

@@ -73,7 +73,7 @@ class ClientResult(Generic[T]):
         return self
 
     @staticmethod
-    def as_boolean(context):
+    def from_boolean(context):
         """
         :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
         :rtype: ClientResult[bool]

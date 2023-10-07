@@ -78,7 +78,7 @@ class SearchSetting(BaseEntity):
 
     def ping_admin_endpoint(self):
         """ """
-        return_type = ClientResult.as_boolean(self.context)
+        return_type = ClientResult.from_boolean(self.context)
         qry = ServiceOperationQuery(
             self, "PingAdminEndpoint", None, None, None, return_type
         )

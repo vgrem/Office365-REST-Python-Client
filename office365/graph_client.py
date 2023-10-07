@@ -79,6 +79,43 @@ class GraphClient(ClientRuntimeContext):
         self._authority_host_url = "https://login.microsoftonline.com"
         self._acquire_token_callback = acquire_token_callback
 
+    @staticmethod
+    def with_username_and_password(tenant, client_id, username, password, scopes=None):
+        """
+        Initializes the client via user credentials
+
+        :param str tenant: Tenant name, for example: contoso.onmicrosoft.com
+        :param str client_id: The OAuth client id of the calling application.
+        :param str username: Typically a UPN in the form of an email address.
+        :param str password: The password.
+        :param list[str] or None scopes: Scopes requested to access an API
+        """
+        if scopes is None:
+            scopes = ["https://graph.microsoft.com/.default"]
+        authority_url = "https://login.microsoftonline.com/{0}".format(tenant)
+        import msal
+
+        app = msal.PublicClientApplication(
+            authority=authority_url,
+            client_id=client_id,
+        )
+
+        def _acquire_token():
+            result = None
+            accounts = app.get_accounts(username=username)
+            if accounts:
+                result = app.acquire_token_silent(scopes, account=accounts[0])
+
+            if not result:
+                result = app.acquire_token_by_username_password(
+                    username=username,
+                    password=password,
+                    scopes=scopes,
+                )
+            return result
+
+        return GraphClient(_acquire_token)
+
     def execute_batch(self, items_per_batch=100):
         """Constructs and submit a batch request
 
