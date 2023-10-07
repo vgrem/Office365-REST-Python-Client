@@ -3,7 +3,7 @@ from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.listitems.listitem import ListItem
 
 
-class ListItemCollection(BaseEntityCollection):
+class ListItemCollection(BaseEntityCollection[ListItem]):
     """List Item collection"""
 
     def __init__(self, context, resource_path=None):

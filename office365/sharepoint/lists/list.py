@@ -81,7 +81,7 @@ class List(SecurableObject):
         :param str document_template_type: A number representing the type of document to create.
         :param str template_url: Specifies the URL of the document template (2) to base the new document on.
         """
-        return_type = ClientResult(self.context, str())
+        return_type = ClientResult(self.context, str())  # type: ClientResult[str]
         payload = {
             "fileName": file_name,
             "folderPath": folder_path,
@@ -631,7 +631,7 @@ class List(SecurableObject):
         """
         Reserves the returned list item identifier for the idempotent creation of a list item.
         """
-        return_type = ClientResult(self.context, int())
+        return_type = ClientResult(self.context, int())  # type: ClientResult[int]
         qry = ServiceOperationQuery(
             self, "ReserveListItemId", None, None, None, return_type
         )

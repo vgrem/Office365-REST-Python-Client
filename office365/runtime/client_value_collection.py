@@ -1,5 +1,5 @@
 import uuid
-from typing import Generic, Iterator, List, Optional, TypeVar
+from typing import Dict, Generic, Iterator, List, Optional, TypeVar
 
 from typing_extensions import Self
 
@@ -12,7 +12,7 @@ T = TypeVar("T")
 
 class ClientValueCollection(ClientValue, Generic[T]):
     def __init__(self, item_type, initial_values=None):
-        # type: (T, Optional[List]) -> None
+        # type: (T, Optional[List | Dict]) -> None
         super(ClientValueCollection, self).__init__()
         if initial_values is None:
             initial_values = []

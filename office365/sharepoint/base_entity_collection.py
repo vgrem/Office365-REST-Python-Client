@@ -1,7 +1,15 @@
+from typing import TypeVar
+
 from office365.runtime.client_object_collection import ClientObjectCollection
 
+T = TypeVar("T")
 
-class BaseEntityCollection(ClientObjectCollection):
+
+class BaseEntityCollection(ClientObjectCollection[T]):
+    """
+    SharePoint entity set
+    """
+
     @property
     def context(self):
         """
