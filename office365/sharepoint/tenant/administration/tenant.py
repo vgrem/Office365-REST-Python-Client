@@ -128,7 +128,10 @@ class Tenant(Entity):
 
     def get_collaboration_insights_data(self):
         """"""
-        return_type = ClientResult(self.context, CollaborationInsightsData())
+        return_type = ClientResult[CollaborationInsightsData](
+            self.context, CollaborationInsightsData()
+        )
+
         qry = ServiceOperationQuery(
             self, "GetCollaborationInsightsData", None, None, None, return_type
         )

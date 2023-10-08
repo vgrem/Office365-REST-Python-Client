@@ -36,7 +36,9 @@ class ClientRuntimeContext(object):
         :type query: office365.runtime.queries.client_query.ClientQuery
         """
         self._current_query = query
-        return self.pending_request().build_custom_request(query)
+        request = self.pending_request().build_request(query)
+        self.pending_request().beforeExecute.notify(request)
+        return request
 
     def execute_query_retry(
         self,

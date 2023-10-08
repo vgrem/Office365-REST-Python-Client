@@ -1,5 +1,5 @@
 """
-
+Prints tenant settings
 """
 
 from pprint import pprint

@@ -7,7 +7,7 @@ from office365.sharepoint.tenant.administration.sites.state_properties import (
 )
 
 
-class SitePropertiesCollection(EntityCollection):
+class SitePropertiesCollection(EntityCollection[SiteProperties]):
     """SiteProperties resource collection"""
 
     def __init__(self, context, resource_path=None):

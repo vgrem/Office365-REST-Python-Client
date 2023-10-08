@@ -71,11 +71,3 @@ class ClientResult(Generic[T]):
             failure_callback=failure_callback,
         )
         return self
-
-    @staticmethod
-    def from_boolean(context):
-        """
-        :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
-        :rtype: ClientResult[bool]
-        """
-        return ClientResult(context, bool())

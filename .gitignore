@@ -78,3 +78,7 @@ target/
 .envrc
 Pipfile
 Pipfile.lock
+
+
+# Self signed certificates
+examples/*.pem

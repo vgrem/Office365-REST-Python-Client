@@ -26,7 +26,7 @@ class WorkbookTableColumnCollection(EntityCollection):
 
     def count(self):
         """"""
-        return_type = ClientResult(self.context, int())
+        return_type = ClientResult[int](self.context)
         qry = FunctionQuery(self, "count", None, return_type)
         self.context.add_query(qry)
         return return_type

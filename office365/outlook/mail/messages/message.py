@@ -80,7 +80,7 @@ class Message(OutlookItem):
         """
         Get MIME content of a message
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult[str](self.context)
         qry = FunctionQuery(self, "$value", None, return_type)
         self.context.add_query(qry)
         return return_type

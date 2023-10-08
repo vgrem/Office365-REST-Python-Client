@@ -651,7 +651,9 @@ class Web(SecurableObject):
 
         :param str link_url: A URL that is either a tokenized sharing link or a canonical URL for a document
         """
-        return_type = ClientResult(self.context, SharingLinkData())
+        return_type = ClientResult(
+            self.context, SharingLinkData()
+        )  # type: ClientResult[SharingLinkData]
         payload = {"linkUrl": link_url}
         qry = ServiceOperationQuery(
             self, "GetSharingLinkData", None, payload, None, return_type

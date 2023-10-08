@@ -26,17 +26,6 @@ class ClientRequest(object):
         """
         pass
 
-    def build_custom_request(self, query):
-        """
-        Builds a request
-
-        :type query: office365.runtime.queries.client_query.ClientQuery
-        :rtype: office365.runtime.http.request_options.RequestOptions
-        """
-        request = self.build_request(query)
-        self.beforeExecute.notify(request)
-        return request
-
     @abstractmethod
     def process_response(self, response, query):
         """

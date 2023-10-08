@@ -293,7 +293,9 @@ class User(DirectoryObject):
             "returnSuggestionReasons": return_suggestion_reasons,
             "minimumAttendeePercentage": minimum_attendee_percentage,
         }
-        return_type = ClientResult(self.context, MeetingTimeSuggestionsResult())
+        return_type = ClientResult[MeetingTimeSuggestionsResult](
+            self.context, MeetingTimeSuggestionsResult()
+        )
         qry = ServiceOperationQuery(
             self, "findMeetingTimes", None, payload, None, return_type
         )

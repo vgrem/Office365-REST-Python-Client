@@ -225,7 +225,7 @@ class Site(Entity):
         """
         return_type = ClientResult(
             self.context, ClientValueCollection(SiteAdministratorsInfo)
-        )
+        )  # type: ClientResult[ClientValueCollection[SiteAdministratorsInfo]]
 
         def _site_loaded():
             self.context.tenant.get_site_administrators(self.id, return_type)
