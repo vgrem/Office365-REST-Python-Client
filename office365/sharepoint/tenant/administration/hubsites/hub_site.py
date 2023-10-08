@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class HubSite(BaseEntity):
+class HubSite(Entity):
     """SharePoint hub sites help you meet the needs of your organization by connecting and organizing sites"""
 
     @property

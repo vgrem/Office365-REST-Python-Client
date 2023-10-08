@@ -1,9 +1,9 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.translation.user_resource import UserResource
 
 
-class NavigationNode(BaseEntity):
+class NavigationNode(Entity):
     """
     Represents the URL to a specific navigation node and provides access to properties and methods for
     manipulating the ordering of the navigation node in a navigation node collection.

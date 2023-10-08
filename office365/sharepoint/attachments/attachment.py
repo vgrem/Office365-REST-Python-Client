@@ -1,10 +1,10 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.internal.queries.upload_file import create_upload_file_query
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
-class Attachment(BaseEntity):
+class Attachment(Entity):
     """Represents an attachment file in a SharePoint List Item."""
 
     def download(self, file_object, use_path=True):

@@ -1,8 +1,8 @@
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.changes.change import Change
+from office365.sharepoint.entity_collection import EntityCollection
 
 
-class ChangeCollection(BaseEntityCollection):
+class ChangeCollection(EntityCollection):
     """Represents a collection of Change objects"""
 
     def __init__(self, context, resource_path=None):

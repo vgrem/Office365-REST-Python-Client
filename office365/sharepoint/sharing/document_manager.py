@@ -1,7 +1,7 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.permissions.roles.definitions.definition import RoleDefinition
 from office365.sharepoint.sharing.user_role_assignment import UserRoleAssignment
 from office365.sharepoint.sharing.user_sharing_result import UserSharingResult
@@ -10,7 +10,7 @@ from office365.sharepoint.userprofiles.sharedwithme.view_item_removal_result imp
 )
 
 
-class DocumentSharingManager(BaseEntity):
+class DocumentSharingManager(Entity):
     """Specifies document sharing related methods."""
 
     @staticmethod

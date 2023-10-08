@@ -1,9 +1,9 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class MySiteRecommendations(BaseEntity):
+class MySiteRecommendations(Entity):
     """Provides a method to get site and document recommendations for the current user, and methods to follow or
     stop following a particular item."""
 

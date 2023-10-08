@@ -1,8 +1,8 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class TargetApplication(BaseEntity):
+class TargetApplication(Entity):
     """A logical entity that represents a software system for which credentials are maintained.
     It consists of metadata including the number and type of credentials that are required by the software system and
     a set of claims (2) that identify the administrators who can update, read, and delete the entity.

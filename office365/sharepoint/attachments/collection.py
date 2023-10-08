@@ -4,10 +4,10 @@ from office365.sharepoint.attachments.attachment import Attachment
 from office365.sharepoint.attachments.creation_information import (
     AttachmentCreationInformation,
 )
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 
 
-class AttachmentCollection(BaseEntityCollection):
+class AttachmentCollection(EntityCollection):
     """Represents a collection of Attachment resources."""
 
     def __init__(self, context, resource_path=None, parent=None):

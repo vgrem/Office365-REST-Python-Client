@@ -1,8 +1,8 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class CorporateCatalogAppMetadata(BaseEntity):
+class CorporateCatalogAppMetadata(Entity):
     """App metadata for apps stored in the corporate catalog."""
 
     def deploy(self, skip_feature_deployment):

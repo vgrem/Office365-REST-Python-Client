@@ -5,10 +5,10 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
-from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.sharing.document_manager import DocumentSharingManager
 from office365.sharepoint.sharing.user_sharing_result import UserSharingResult
@@ -18,7 +18,7 @@ from office365.sharepoint.utilities.move_copy_options import MoveCopyOptions
 from office365.sharepoint.utilities.move_copy_util import MoveCopyUtil
 
 
-class Folder(BaseEntity):
+class Folder(Entity):
     """Represents a folder in a SharePoint Web site."""
 
     @staticmethod

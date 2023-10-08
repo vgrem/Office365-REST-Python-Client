@@ -3,10 +3,10 @@ from office365.runtime.paths.key import KeyPath
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class FileVersion(BaseEntity):
+class FileVersion(Entity):
     """Represents a version of a File object."""
 
     def download(self, file_object):

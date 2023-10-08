@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class WebTemplate(BaseEntity):
+class WebTemplate(Entity):
     """Specifies a site definition or a site template that is used to instantiate a site."""
 
     def __repr__(self):

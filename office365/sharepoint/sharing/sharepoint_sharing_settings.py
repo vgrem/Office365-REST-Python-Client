@@ -1,9 +1,9 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.sharing.picker_settings import PickerSettings
 
 
-class SharePointSharingSettings(BaseEntity):
+class SharePointSharingSettings(Entity):
     """This class contains the SharePoint UI-specific sharing settings."""
 
     @property

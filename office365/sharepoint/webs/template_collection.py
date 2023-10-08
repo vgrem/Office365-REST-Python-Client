@@ -1,9 +1,9 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.webs.template import WebTemplate
 
 
-class WebTemplateCollection(BaseEntityCollection):
+class WebTemplateCollection(EntityCollection):
     """Specifies a collection of site templates."""
 
     def __init__(self, context, resource_path=None, parent=None):

@@ -1,8 +1,8 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.sharing.principal import Principal
 
 
-class SharedDocumentInfo(BaseEntity):
+class SharedDocumentInfo(Entity):
     """"""
 
     @property

@@ -1,8 +1,8 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class AppPrincipalCredential(BaseEntity):
+class AppPrincipalCredential(Entity):
     """Represents a credential belonging to an app principal."""
 
     @staticmethod

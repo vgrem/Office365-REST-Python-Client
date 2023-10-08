@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class PrimaryCityTime(BaseEntity):
+class PrimaryCityTime(Entity):
     """Represents the date and time, in UTC, of the geographic location."""
 
     @property

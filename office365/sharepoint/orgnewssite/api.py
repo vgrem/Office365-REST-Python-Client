@@ -1,11 +1,11 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.orgnewssite.info import OrgNewsSiteInfo
 
 
-class OrgNewsSiteApi(BaseEntity):
+class OrgNewsSiteApi(Entity):
     def __init__(self, context, resource_path=None):
         if resource_path is None:
             resource_path = ResourcePath(

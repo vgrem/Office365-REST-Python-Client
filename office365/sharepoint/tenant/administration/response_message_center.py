@@ -1,8 +1,8 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class ResponseMessageCenter(BaseEntity):
+class ResponseMessageCenter(Entity):
     def __init__(self, context):
         static_path = ResourcePath(
             "Microsoft.Online.SharePoint.TenantAdministration.ResponseMessageCenter"

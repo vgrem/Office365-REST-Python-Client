@@ -1,9 +1,9 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class DocumentsSharedWithMe(BaseEntity):
+class DocumentsSharedWithMe(Entity):
     """Provides methods for working with a list that shares documents with the current user on the user's personal site.
     All methods in this object are static."""
 

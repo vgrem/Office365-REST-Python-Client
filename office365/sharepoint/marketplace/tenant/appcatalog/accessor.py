@@ -2,7 +2,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.files.file import File
 from office365.sharepoint.marketplace.app_metadata import CorporateCatalogAppMetadata
 from office365.sharepoint.marketplace.app_metadata_collection import (
@@ -19,7 +19,7 @@ from office365.sharepoint.marketplace.sitecollection.appcatalog.allowed_items im
 )
 
 
-class TenantCorporateCatalogAccessor(BaseEntity):
+class TenantCorporateCatalogAccessor(Entity):
     """Accessor for the tenant corporate catalog."""
 
     def add(self, content, overwrite, url):

@@ -1,12 +1,12 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.fields.type import FieldType
 from office365.sharepoint.translation.user_resource import UserResource
 
 
-class Field(BaseEntity):
+class Field(Entity):
     """A container for metadata within a SharePoint list and associated list items."""
 
     def __init__(self, context, resource_path=None):

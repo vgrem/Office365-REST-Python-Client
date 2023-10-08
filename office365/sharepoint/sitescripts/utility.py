@@ -2,8 +2,8 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity import Entity
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.sitedesigns.metadata import SiteDesignMetadata
 from office365.sharepoint.sitedesigns.principal import SiteDesignPrincipal
 from office365.sharepoint.sitedesigns.task import SiteDesignTask
@@ -14,7 +14,7 @@ from office365.sharepoint.sitescripts.serialization_result import (
 )
 
 
-class SiteScriptUtility(BaseEntity):
+class SiteScriptUtility(Entity):
     """Use class to automate provisioning new or existing modern
     SharePoint sites that use your own custom configurations.
     """
@@ -277,7 +277,7 @@ class SiteScriptUtility(BaseEntity):
         :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
 
         """
-        return_type = BaseEntityCollection(context, SiteDesignPrincipal)
+        return_type = EntityCollection(context, SiteDesignPrincipal)
         utility = SiteScriptUtility(context)
         qry = ServiceOperationQuery(
             utility, "GetSiteDesignRights", [id_], None, None, return_type

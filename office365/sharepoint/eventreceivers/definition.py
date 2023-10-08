@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class EventReceiverDefinition(BaseEntity):
+class EventReceiverDefinition(Entity):
     """Abstract base class that defines general properties of an event receiver for list items, lists,
     websites, and workflows."""
 

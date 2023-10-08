@@ -1,12 +1,12 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.contenttypes.content_type import ContentType
 from office365.sharepoint.contenttypes.entity_data import ContentTypeEntityData
+from office365.sharepoint.entity_collection import EntityCollection
 
 
-class ContentTypeCollection(BaseEntityCollection):
+class ContentTypeCollection(EntityCollection):
     """Content Type resource collection"""
 
     def __init__(self, context, resource_path=None, parent=None):

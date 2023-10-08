@@ -1,5 +1,5 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.sharing.object_sharing_information import (
     ObjectSharingInformation,
 )
@@ -11,7 +11,7 @@ from office365.sharepoint.sharing.sharepoint_sharing_settings import (
 )
 
 
-class ObjectSharingSettings(BaseEntity):
+class ObjectSharingSettings(Entity):
     """This class contains the information necessary to read and change the sharing status of a SharePoint object.
     It also contains a reference to SharePoint specific settings denoted by "SharePointSettings".
     """

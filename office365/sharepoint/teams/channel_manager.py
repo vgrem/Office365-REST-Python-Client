@@ -1,10 +1,10 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.sites.team_site_data import TeamSiteData
 from office365.sharepoint.teams.channel import TeamChannel
 
 
-class TeamChannelManager(BaseEntity):
+class TeamChannelManager(Entity):
     """This class is a placeholder for all TeamChannel related methods."""
 
     @staticmethod

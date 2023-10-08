@@ -6,10 +6,10 @@ from office365.runtime.paths.key import KeyPath
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.comments.collection import CommentCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.fields.image_value import ImageFieldValue
 from office365.sharepoint.fields.lookup_value import FieldLookupValue
 from office365.sharepoint.fields.multi_lookup_value import FieldMultiLookupValue

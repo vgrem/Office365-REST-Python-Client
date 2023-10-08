@@ -1,8 +1,8 @@
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class ListBloomFilter(BaseEntity):
+class ListBloomFilter(Entity):
     """Specifies a Bloom filter (probabilistic structure for checking the existence of list items)."""
 
     @property

@@ -2,11 +2,11 @@ import os
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
-class MoveCopyUtil(BaseEntity):
+class MoveCopyUtil(Entity):
     """A container class for static move/copy methods."""
 
     @staticmethod

@@ -1,11 +1,11 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.publishing.diagnostics.page_diagnostics import PageDiagnostics
 
 
-class PageDiagnosticsController(BaseEntity):
+class PageDiagnosticsController(Entity):
     def __init__(self, context):
         static_path = ResourcePath("SP.Publishing.PageDiagnosticsController")
         super(PageDiagnosticsController, self).__init__(context, static_path)

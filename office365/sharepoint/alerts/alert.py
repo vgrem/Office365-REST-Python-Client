@@ -1,8 +1,8 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class Alert(BaseEntity):
+class Alert(Entity):
     """
     Represents an alert, which generates periodic e-mail notifications sent to a user about the list, list item,
     document, or document library to which the alert applies. SP.Alert provides information about the alert,

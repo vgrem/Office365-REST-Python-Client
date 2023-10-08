@@ -1,10 +1,10 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.files.versions.version import FileVersion
 
 
-class FileVersionCollection(BaseEntityCollection):
+class FileVersionCollection(EntityCollection):
     """Represents a collection of FileVersion."""
 
     def __init__(self, context, resource_path=None):

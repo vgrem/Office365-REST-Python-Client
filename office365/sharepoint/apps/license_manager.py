@@ -1,10 +1,10 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.apps.license_collection import AppLicenseCollection
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class SPAppLicenseManager(BaseEntity):
+class SPAppLicenseManager(Entity):
     def check_license(self, product_id):
         """
         :param str product_id:

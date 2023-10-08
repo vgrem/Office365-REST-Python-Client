@@ -1,5 +1,5 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.sharing.abilities import SharingAbilities
 from office365.sharepoint.sharing.access_request_settings import AccessRequestSettings
 from office365.sharepoint.sharing.links.default_templates_collection import (
@@ -8,7 +8,7 @@ from office365.sharepoint.sharing.links.default_templates_collection import (
 from office365.sharepoint.sharing.picker_settings import PickerSettings
 
 
-class SharingInformation(BaseEntity):
+class SharingInformation(Entity):
     """Represents a response for Microsoft.SharePoint.Client.Sharing.SecurableObjectExtensions.GetSharingInformation.
     The accessRequestSettings, domainRestrictionSettings and permissionsInformation properties are not included in
     the default scalar property set for this type.

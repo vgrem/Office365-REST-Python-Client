@@ -1,9 +1,9 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class VideoItem(BaseEntity):
+class VideoItem(Entity):
     def get_video_embed_code(
         self, width, height, autoplay=True, show_info=True, make_responsive=True
     ):

@@ -1,8 +1,8 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class Principal(BaseEntity):
+class Principal(Entity):
     """Represents a user or group that can be assigned permissions to control security."""
 
     @property

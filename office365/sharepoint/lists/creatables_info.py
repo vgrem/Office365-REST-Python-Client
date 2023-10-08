@@ -1,8 +1,8 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.lists.creatable_item_info import CreatableItemInfoCollection
 
 
-class CreatablesInfo(BaseEntity):
+class CreatablesInfo(Entity):
     """
     Returns an object that describes what this list can create, and a collection of links to visit in order to create
     those things. If it can't create certain things, it contains an error message describing why.

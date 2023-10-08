@@ -3,11 +3,11 @@ from office365.sharepoint.activities.facets.activity_time import ActivityTimeFac
 from office365.sharepoint.activities.facets.coalesced import CoalescedFacet
 from office365.sharepoint.activities.facets.in_doc import InDocFacet
 from office365.sharepoint.activities.facets.resource import ResourceFacet
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.sharing.principal import Principal
 
 
-class SPActivityEntity(BaseEntity):
+class SPActivityEntity(Entity):
     """"""
 
     @property

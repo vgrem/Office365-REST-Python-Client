@@ -38679,6 +38679,7 @@
             <Property Name="MediaServiceGenerationTime" Type="Edm.String"/>
             <Property Name="MediaServiceEventHashCode" Type="Edm.String"/>
             <Property Name="MediaLengthInSeconds" Type="Edm.Int32"/>
+            <Property Name="OData__EffectiveIpLabelDisplayName" Type="Edm.String"/>
             <Property Name="ID" Type="Edm.Int32"/>
             <Property Name="Created" Type="Edm.DateTime"/>
             <Property Name="AuthorId" Type="Edm.Int32"/>
@@ -38729,7 +38730,6 @@
             <Property Name="Combine" Type="Edm.String"/>
             <Property Name="RepairDocument" Type="Edm.String"/>
             <Property Name="PolicyDisabledUICapabilities" Type="Edm.String"/>
-            <Property Name="OData__EffectiveIpLabelDisplayName" Type="Edm.String"/>
             <NavigationProperty Name="Author" Relationship="SP.Data.SP_Data_DocumentsItem_Author_SP_Data_UserInfoItem_AuthorPartner" ToRole="Author" FromRole="AuthorPartner"/>
             <NavigationProperty Name="Editor" Relationship="SP.Data.SP_Data_DocumentsItem_Editor_SP_Data_UserInfoItem_EditorPartner" ToRole="Editor" FromRole="EditorPartner"/>
             <NavigationProperty Name="CheckoutUser" Relationship="SP.Data.SP_Data_DocumentsItem_CheckoutUser_SP_Data_UserInfoItem_CheckoutUserPartner" ToRole="CheckoutUser" FromRole="CheckoutUserPartner"/>

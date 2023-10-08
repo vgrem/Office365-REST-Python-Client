@@ -1,9 +1,9 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.files.checked_out_file import CheckedOutFile
 
 
-class CheckedOutFileCollection(BaseEntityCollection):
+class CheckedOutFileCollection(EntityCollection):
     def __init__(self, context, resource_path=None):
         super(CheckedOutFileCollection, self).__init__(
             context, CheckedOutFile, resource_path

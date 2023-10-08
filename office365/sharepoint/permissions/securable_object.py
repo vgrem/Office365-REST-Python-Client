@@ -1,19 +1,16 @@
 from office365.runtime.client_result import ClientResult
-from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.permissions.base_permissions import BasePermissions
 from office365.sharepoint.permissions.roles.assignments.assignment import RoleAssignment
 from office365.sharepoint.permissions.roles.assignments.collection import (
     RoleAssignmentCollection,
 )
 from office365.sharepoint.principal.users.user import User
-from office365.sharepoint.sharing.document_manager import DocumentSharingManager
-from office365.sharepoint.sharing.user_sharing_result import UserSharingResult
 
 
-class SecurableObject(BaseEntity):
+class SecurableObject(Entity):
     """An object that can be assigned security permissions."""
 
     def get_role_assignment(self, principal):
@@ -113,7 +110,9 @@ class SecurableObject(BaseEntity):
 
         :param str or User user: Specifies the user login name or User object.
         """
-        return_type = ClientResult(self.context, BasePermissions())
+        return_type = ClientResult(
+            self.context, BasePermissions()
+        )  # type: ClientResult[BasePermissions]
 
         def _create_and_add_query(login_name):
             """

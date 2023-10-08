@@ -2,11 +2,11 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
-from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.compliance.tag import ComplianceTag
+from office365.sharepoint.entity import Entity
 
 
-class SPPolicyStoreProxy(BaseEntity):
+class SPPolicyStoreProxy(Entity):
     @staticmethod
     def get_available_tags_for_site(context, site_url, return_type=None):
         """

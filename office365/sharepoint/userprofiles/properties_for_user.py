@@ -2,10 +2,10 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class UserProfilePropertiesForUser(BaseEntity):
+class UserProfilePropertiesForUser(Entity):
     """The UserProfilePropertiesForUser class represents a set of user profile properties for a user."""
 
     def get_property_names(self):

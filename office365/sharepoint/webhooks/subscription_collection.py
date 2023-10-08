@@ -1,13 +1,13 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.webhooks.subscription import Subscription
 from office365.sharepoint.webhooks.subscription_information import (
     SubscriptionInformation,
 )
 
 
-class SubscriptionCollection(BaseEntityCollection):
+class SubscriptionCollection(EntityCollection):
     """Represents a collection of Subscription (WebHook) resources."""
 
     def __init__(self, context, resource_path=None, parent=None):

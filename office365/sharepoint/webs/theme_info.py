@@ -1,9 +1,9 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class ThemeInfo(BaseEntity):
+class ThemeInfo(Entity):
     """Specifies a theme for a site"""
 
     def get_theme_font_by_name(self, name, lcid):

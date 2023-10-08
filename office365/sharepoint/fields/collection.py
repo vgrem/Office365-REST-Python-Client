@@ -1,7 +1,7 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.fields.creation_information import FieldCreationInformation
 from office365.sharepoint.fields.field import Field
 from office365.sharepoint.fields.type import FieldType
@@ -12,7 +12,7 @@ from office365.sharepoint.taxonomy.field import TaxonomyField
 from office365.sharepoint.taxonomy.sets.set import TermSet
 
 
-class FieldCollection(BaseEntityCollection):
+class FieldCollection(EntityCollection[Field]):
     """Represents a collection of Field resource."""
 
     def __init__(self, context, resource_path=None, parent=None):

@@ -2,7 +2,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.portal.sites.creation_request import SPSiteCreationRequest
 from office365.sharepoint.portal.sites.creation_response import SPSiteCreationResponse
 from office365.sharepoint.teams.site_owner_response import (
@@ -11,7 +11,7 @@ from office365.sharepoint.teams.site_owner_response import (
 from office365.sharepoint.viva.site_request_info import VivaSiteRequestInfo
 
 
-class SPSiteManager(BaseEntity):
+class SPSiteManager(Entity):
     """Provides REST methods for creating and managing SharePoint sites."""
 
     def __init__(self, context, resource_path=None):

@@ -1,11 +1,11 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.marketplace.app_metadata_collection import (
     CorporateCatalogAppMetadataCollection,
 )
 
 
-class SiteCollectionCorporateCatalogAccessor(BaseEntity):
+class SiteCollectionCorporateCatalogAccessor(Entity):
     """Accessor for the site collection corporate catalog."""
 
     @property

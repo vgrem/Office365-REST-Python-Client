@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class WebPart(BaseEntity):
+class WebPart(Entity):
     """
     A reusable component that contains or generates web-based content such as XML, HTML, and scripting code.
     It has a standard property schema and displays that content in a cohesive unit on a webpage. See also Web Parts Page

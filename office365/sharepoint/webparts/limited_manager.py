@@ -1,11 +1,11 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.webparts.definition_collection import (
     WebPartDefinitionCollection,
 )
 
 
-class LimitedWebPartManager(BaseEntity):
+class LimitedWebPartManager(Entity):
     """Provides operations to access and modify the existing Web Parts on a Web Part Page, and add new ones
     to the Web Part Page."""
 

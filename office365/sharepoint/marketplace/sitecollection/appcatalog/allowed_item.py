@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class SiteCollectionAppCatalogAllowedItem(BaseEntity):
+class SiteCollectionAppCatalogAllowedItem(Entity):
     """An entry in the site collection app catalog allow list."""
 
     @property

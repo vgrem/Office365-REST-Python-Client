@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class ComponentContextInfo(BaseEntity):
+class ComponentContextInfo(Entity):
     """This class functions as a wrapper of the ContextInfo object. Reserved for internal use only."""
 
     @property

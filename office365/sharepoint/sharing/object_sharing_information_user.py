@@ -1,10 +1,10 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.principal.principal import Principal
 from office365.sharepoint.principal.users.user import User
 
 
-class ObjectSharingInformationUser(BaseEntity):
+class ObjectSharingInformationUser(Entity):
     """Contains information about a principal with whom a securable object is shared. It can be a user or a group."""
 
     @property

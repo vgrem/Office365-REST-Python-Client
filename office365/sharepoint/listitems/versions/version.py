@@ -2,10 +2,10 @@ import datetime
 
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class ListItemVersion(BaseEntity):
+class ListItemVersion(Entity):
     """Represents a version of a list item."""
 
     @property

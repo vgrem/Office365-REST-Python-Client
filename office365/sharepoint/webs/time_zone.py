@@ -1,11 +1,11 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity import Entity
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.webs.time_zone_information import TimeZoneInformation
 
 
-class TimeZone(BaseEntity):
+class TimeZone(Entity):
     """Represents the time zone setting that is implemented on a SharePoint Web site."""
 
     def local_time_to_utc(self, date):
@@ -44,7 +44,7 @@ class TimeZone(BaseEntity):
         return self.properties.get("Information", TimeZoneInformation())
 
 
-class TimeZoneCollection(BaseEntityCollection):
+class TimeZoneCollection(EntityCollection):
     """TimeZone collection"""
 
     def __init__(self, context, resource_path=None):

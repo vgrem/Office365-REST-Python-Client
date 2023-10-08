@@ -599,12 +599,12 @@ class ClientContext(ClientRuntimeContext):
 
     @property
     def publications(self):
-        from office365.sharepoint.base_entity_collection import BaseEntityCollection
         from office365.sharepoint.contentcenter.machinelearning.publications.publication import (
             SPMachineLearningPublication,
         )
+        from office365.sharepoint.entity_collection import EntityCollection
 
-        return BaseEntityCollection(
+        return EntityCollection(
             self, SPMachineLearningPublication, ResourcePath("publications")
         )
 

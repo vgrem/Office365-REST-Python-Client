@@ -1,9 +1,9 @@
 import datetime
 
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class InformationRightsManagementSettings(BaseEntity):
+class InformationRightsManagementSettings(Entity):
     """Represents the Information Rights Management (IRM) settings of a list in Microsoft SharePoint Foundation."""
 
     @property

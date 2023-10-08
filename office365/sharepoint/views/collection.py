@@ -1,10 +1,10 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.views.view import View
 
 
-class ViewCollection(BaseEntityCollection):
+class ViewCollection(EntityCollection):
     """Represents a collection of View resources."""
 
     def __init__(self, context, resource_path=None, parent_list=None):

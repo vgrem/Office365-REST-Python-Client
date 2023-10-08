@@ -1,12 +1,12 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.lists.currency_information_collection import (
     CurrencyInformationCollection,
 )
 
 
-class CurrencyList(BaseEntity):
+class CurrencyList(Entity):
     """List of supported currencies."""
 
     @staticmethod

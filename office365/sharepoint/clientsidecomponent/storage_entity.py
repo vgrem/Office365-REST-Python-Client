@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class StorageEntity(BaseEntity):
+class StorageEntity(Entity):
     """Storage entities which are available across app catalog scopes."""
 
     @property

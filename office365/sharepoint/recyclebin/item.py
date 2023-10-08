@@ -1,11 +1,11 @@
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.principal.users.user import User
 
 
-class RecycleBinItem(BaseEntity):
+class RecycleBinItem(Entity):
     """Represents a Recycle Bin item in the Recycle Bin of a site or a site collection."""
 
     def restore(self):

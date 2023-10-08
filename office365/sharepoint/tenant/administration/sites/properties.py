@@ -1,14 +1,14 @@
 from office365.runtime.paths.key import KeyPath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.sites.site import Site
 from office365.sharepoint.tenant.administration.deny_add_and_customize_pages_status import (
     DenyAddAndCustomizePagesStatus,
 )
 
 
-class SiteProperties(BaseEntity):
+class SiteProperties(Entity):
     """Contains a property bag of information about a site."""
 
     @staticmethod

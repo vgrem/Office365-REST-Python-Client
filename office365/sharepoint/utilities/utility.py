@@ -3,13 +3,13 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.files.file import File
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 from office365.sharepoint.utilities.principal_info import PrincipalInfo
 
 
-class Utility(BaseEntity):
+class Utility(Entity):
     """
     Provides tools for converting date and time formats, for obtaining information from user names,
     for modifying access to sites, and for various other tasks in managing deployment.

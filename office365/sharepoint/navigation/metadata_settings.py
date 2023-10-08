@@ -1,12 +1,12 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.navigation.configured_metadata_items import (
     ConfiguredMetadataNavigationItemCollection,
 )
 
 
-class MetadataNavigationSettings(BaseEntity):
+class MetadataNavigationSettings(Entity):
     """Described and allows changes to the meta-data navigation and filtering settings on an SPList."""
 
     @staticmethod

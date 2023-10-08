@@ -1,8 +1,8 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.listitems.caml.query import CamlQuery
 from office365.sharepoint.listitems.collection import ListItemCollection
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
@@ -10,7 +10,7 @@ from office365.sharepoint.views.field_collection import ViewFieldCollection
 from office365.sharepoint.views.visualization import Visualization
 
 
-class View(BaseEntity):
+class View(Entity):
     """Specifies a List View."""
 
     def __init__(self, context, resource_path=None, parent_list=None):

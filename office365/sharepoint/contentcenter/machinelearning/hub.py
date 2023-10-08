@@ -2,7 +2,6 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.compliance.tag import ComplianceTag
 from office365.sharepoint.contentcenter.machinelearning.enabled import (
     SPMachineLearningEnabled,
@@ -16,9 +15,10 @@ from office365.sharepoint.contentcenter.machinelearning.samples.collection impor
 from office365.sharepoint.contentcenter.syntex_models_landing_info import (
     SyntexModelsLandingInfo,
 )
+from office365.sharepoint.entity import Entity
 
 
-class SPMachineLearningHub(BaseEntity):
+class SPMachineLearningHub(Entity):
     def get_by_content_type_id(self, content_type_id):
         """
         :param str content_type_id:

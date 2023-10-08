@@ -1,8 +1,8 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class InformationRightsManagementFileSettings(BaseEntity):
+class InformationRightsManagementFileSettings(Entity):
     """Represents the Information Rights Management (IRM) settings of a file."""
 
     def reset(self):

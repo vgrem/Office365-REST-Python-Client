@@ -1,10 +1,10 @@
 from office365.runtime.types.collections import StringCollection
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.publishing.pages.version_info import SitePageVersionInfo
 from office365.sharepoint.publishing.user_info import UserInfo
 
 
-class SitePageMetadata(BaseEntity):
+class SitePageMetadata(Entity):
     """Represents the core properties of a Site Page."""
 
     @property

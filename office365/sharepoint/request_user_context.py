@@ -1,8 +1,8 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class RequestUserContext(BaseEntity):
+class RequestUserContext(Entity):
     """The class that represents the user context for the present request. Typically found under /_api/me"""
 
     @property

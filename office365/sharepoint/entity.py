@@ -3,7 +3,7 @@ from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 
 
-class BaseEntity(ClientObject):
+class Entity(ClientObject):
     """SharePoint specific entity"""
 
     def with_credentials(self, credentials):

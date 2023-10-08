@@ -1,9 +1,9 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.publishing.embed_data_v1 import EmbedDataV1
 
 
-class EmbedService(BaseEntity):
+class EmbedService(Entity):
     """The class was used to get embed meta data for the page."""
 
     def embed_data(self, url, version=1):

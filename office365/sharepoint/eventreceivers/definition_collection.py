@@ -1,9 +1,9 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.eventreceivers.definition import EventReceiverDefinition
 
 
-class EventReceiverDefinitionCollection(BaseEntityCollection):
+class EventReceiverDefinitionCollection(EntityCollection):
     """
     Represents a collection of SP.EventReceiverDefinition objects that are used to enumerate the list of
     registered event receivers for Windows SharePoint Services objects that can have events.

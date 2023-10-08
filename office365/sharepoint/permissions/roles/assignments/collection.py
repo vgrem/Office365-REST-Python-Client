@@ -1,11 +1,11 @@
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.permissions.roles.assignments.assignment import RoleAssignment
 
 
-class RoleAssignmentCollection(BaseEntityCollection):
+class RoleAssignmentCollection(EntityCollection):
     """Represents a collection of RoleAssignment resources."""
 
     def __init__(self, context, resource_path=None):

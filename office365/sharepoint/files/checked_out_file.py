@@ -1,11 +1,11 @@
 from office365.runtime.paths.key import KeyPath
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.principal.users.user import User
 
 
-class CheckedOutFile(BaseEntity):
+class CheckedOutFile(Entity):
     """Represents a checked-out file in a document library or workspace."""
 
     def takeover_checkout(self):

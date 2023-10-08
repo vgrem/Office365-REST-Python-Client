@@ -1,6 +1,6 @@
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.principal.groups.collection import GroupCollection
 from office365.sharepoint.sharing.invitation.creation_result import (
     SPInvitationCreationResult,
@@ -8,7 +8,7 @@ from office365.sharepoint.sharing.invitation.creation_result import (
 from office365.sharepoint.sharing.user_sharing_result import UserSharingResult
 
 
-class SharingResult(BaseEntity):
+class SharingResult(Entity):
     """Contains properties generated as a result of sharing."""
 
     @property

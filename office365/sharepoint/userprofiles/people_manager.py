@@ -2,8 +2,8 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
-from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity import Entity
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.userprofiles.hash_tag import HashTagCollection
 from office365.sharepoint.userprofiles.person_properties import PersonProperties
@@ -27,7 +27,7 @@ def _ensure_user(user_or_name, action):
         action(user_or_name)
 
 
-class PeopleManager(BaseEntity):
+class PeopleManager(Entity):
     """Provides methods for operations related to people."""
 
     def __init__(self, context):
@@ -82,7 +82,7 @@ class PeopleManager(BaseEntity):
         :param str account_name: Account name of the specified user.
         :return:
         """
-        return_type = BaseEntityCollection(self.context, PersonProperties)
+        return_type = EntityCollection(self.context, PersonProperties)
         params = {"accountName": account_name}
         qry = ServiceOperationQuery(
             self, "GetFollowersFor", params, None, None, return_type
@@ -211,9 +211,8 @@ class PeopleManager(BaseEntity):
         user cannot be found.
 
         :param str account_name: Account name of the specified user.
-        :return: BaseEntityCollection
         """
-        return_type = BaseEntityCollection(self.context, PersonProperties)
+        return_type = EntityCollection(self.context, PersonProperties)
         params = {"accountName": account_name}
         qry = ServiceOperationQuery(
             self, "GetPeopleFollowedBy", params, None, None, return_type
@@ -225,7 +224,7 @@ class PeopleManager(BaseEntity):
         """
         This method returns a list of PersonProperties objects for the people who are following the current user.
         """
-        return_type = BaseEntityCollection(self.context, PersonProperties)
+        return_type = EntityCollection(self.context, PersonProperties)
         qry = ServiceOperationQuery(
             self, "GetMyFollowers", None, None, None, return_type
         )

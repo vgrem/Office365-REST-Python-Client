@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class TeamChannel(BaseEntity):
+class TeamChannel(Entity):
     @property
     def folder_id(self):
         """

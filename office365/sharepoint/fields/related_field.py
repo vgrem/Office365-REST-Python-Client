@@ -1,8 +1,8 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class RelatedField(BaseEntity):
+class RelatedField(Entity):
     """Represents a Lookup Field that points to a given list on a Web site."""
 
     @property

@@ -1,10 +1,10 @@
 import datetime
 
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class PushNotificationSubscriber(BaseEntity):
+class PushNotificationSubscriber(Entity):
     """Represents a push notification subscriber over a site."""
 
     @property

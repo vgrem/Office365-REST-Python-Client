@@ -1,11 +1,11 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.contentcenter.machinelearning.models.model import (
     SPMachineLearningModel,
 )
+from office365.sharepoint.entity_collection import EntityCollection
 
 
-class SPMachineLearningModelCollection(BaseEntityCollection):
+class SPMachineLearningModelCollection(EntityCollection):
     def __init__(self, context, resource_path=None):
         super(SPMachineLearningModelCollection, self).__init__(
             context, SPMachineLearningModel, resource_path

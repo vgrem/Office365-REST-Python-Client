@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class SecurableObjectExtensions(BaseEntity):
+class SecurableObjectExtensions(Entity):
     """Contains extension methods of securable object."""
 
     @property

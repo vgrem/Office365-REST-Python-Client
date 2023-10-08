@@ -1,9 +1,9 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.clientsidecomponent.hostedapps.app import HostedApp
+from office365.sharepoint.entity import Entity
 
 
-class HostedAppsManager(BaseEntity):
+class HostedAppsManager(Entity):
     def get_by_id(self, _id):
         """
         Gets an hosted app based on the Id.

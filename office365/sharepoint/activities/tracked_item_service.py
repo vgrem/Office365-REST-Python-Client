@@ -3,10 +3,10 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.activities.tracked_item_updates_request import (
     TrackedItemUpdatesRequest,
 )
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class TrackedItemService(BaseEntity):
+class TrackedItemService(Entity):
     @staticmethod
     def get_tracked_item_updates_for_user(context):
         """

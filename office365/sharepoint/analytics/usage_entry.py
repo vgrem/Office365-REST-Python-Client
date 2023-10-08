@@ -1,8 +1,8 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class AnalyticsUsageEntry(BaseEntity):
+class AnalyticsUsageEntry(Entity):
     """Specifies an analytics usage entry to log user or system events"""
 
     @staticmethod

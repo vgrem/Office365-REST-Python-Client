@@ -1,10 +1,10 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.sites.language_collection import LanguageCollection
 from office365.sharepoint.webs.time_zone import TimeZone, TimeZoneCollection
 
 
-class RegionalSettings(BaseEntity):
+class RegionalSettings(Entity):
     """Represents regional settings that are used on the server that is running SharePoint Server."""
 
     @property

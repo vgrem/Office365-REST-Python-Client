@@ -3,7 +3,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.administration.orgassets.org_assets import OrgAssets
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.files.file import File
 from office365.sharepoint.publishing.file_picker_options import FilePickerOptions
 from office365.sharepoint.publishing.pages.collection import SitePageCollection
@@ -11,7 +11,7 @@ from office365.sharepoint.publishing.primary_city_time import PrimaryCityTime
 from office365.sharepoint.publishing.sites.communication.site import CommunicationSite
 
 
-class SitePageService(BaseEntity):
+class SitePageService(Entity):
     """Represents a set of APIs to use for managing site pages."""
 
     def __init__(self, context, resource_path=None):

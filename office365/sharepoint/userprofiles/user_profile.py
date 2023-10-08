@@ -1,12 +1,12 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.sites.site import Site
 from office365.sharepoint.userprofiles.followed_content import FollowedContent
 
 
-class UserProfile(BaseEntity):
+class UserProfile(Entity):
     """The UserProfile class stores the profile of the individual user, which includes properties such
     as the user's account name, preferred name, and email address."""
 

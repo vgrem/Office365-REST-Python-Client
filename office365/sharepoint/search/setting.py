@@ -1,7 +1,7 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.search.promoted_results_operations_result import (
     PromotedResultsOperationsResult,
 )
@@ -9,7 +9,7 @@ from office365.sharepoint.search.query.configuration import QueryConfiguration
 from office365.sharepoint.search.reports.base import ReportBase
 
 
-class SearchSetting(BaseEntity):
+class SearchSetting(Entity):
     """This object provides the REST operations defined under search settings."""
 
     def __init__(self, context):

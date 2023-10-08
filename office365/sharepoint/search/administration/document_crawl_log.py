@@ -1,11 +1,11 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.search.simple_data_table import SimpleDataTable
 
 
-class DocumentCrawlLog(BaseEntity):
+class DocumentCrawlLog(Entity):
     """This object contains methods that can be used by the protocol client to retrieve information
     about items that were crawled."""
 

@@ -6,12 +6,12 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.audit.audit import Audit
-from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.token import ChangeToken
 from office365.sharepoint.compliance.store_proxy import SPPolicyStoreProxy
 from office365.sharepoint.compliance.tag import ComplianceTag
+from office365.sharepoint.entity import Entity
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.eventreceivers.definition_collection import (
     EventReceiverDefinitionCollection,
 )
@@ -38,7 +38,7 @@ from office365.sharepoint.webs.template_collection import WebTemplateCollection
 from office365.sharepoint.webs.web import Web
 
 
-class Site(BaseEntity):
+class Site(Entity):
     """
     Represents a collection of sites in a Web application, including a top-level website and all its sub sites.
 
@@ -120,7 +120,7 @@ class Site(BaseEntity):
 
     def get_migration_status(self):
         """"""
-        return_type = BaseEntityCollection(self.context, SPMigrationJobStatus)
+        return_type = EntityCollection(self.context, SPMigrationJobStatus)
         qry = ServiceOperationQuery(
             self, "GetMigrationStatus", None, None, None, return_type
         )

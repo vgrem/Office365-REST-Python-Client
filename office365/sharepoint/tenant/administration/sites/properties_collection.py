@@ -1,13 +1,13 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.tenant.administration.sites.properties import SiteProperties
 from office365.sharepoint.tenant.administration.sites.state_properties import (
     SiteStateProperties,
 )
 
 
-class SitePropertiesCollection(BaseEntityCollection):
+class SitePropertiesCollection(EntityCollection):
     """SiteProperties resource collection"""
 
     def __init__(self, context, resource_path=None):

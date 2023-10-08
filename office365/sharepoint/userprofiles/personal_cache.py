@@ -1,9 +1,9 @@
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class PersonalCache(BaseEntity):
+class PersonalCache(Entity):
     """Per user cache of key/value pairs organized by folders. Personal cache MAY be used for optimizing initial
     load performance of the protocol client, if obtaining initial set of data from personal cache is faster that
     requesting the data from the server."""

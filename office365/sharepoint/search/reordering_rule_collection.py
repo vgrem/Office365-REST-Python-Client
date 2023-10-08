@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class ReorderingRuleCollection(BaseEntity):
+class ReorderingRuleCollection(Entity):
     """Contains information about how to reorder the search results."""
 
     @property

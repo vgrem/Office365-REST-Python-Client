@@ -1,12 +1,12 @@
 from office365.runtime.paths.key import KeyPath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
-class FolderCollection(BaseEntityCollection):
+class FolderCollection(EntityCollection):
     """Represents a collection of Folder resources."""
 
     def __init__(self, context, resource_path=None, parent=None):

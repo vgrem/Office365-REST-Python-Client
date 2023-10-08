@@ -1,15 +1,15 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.directory.members_info import MembersInfo
 from office365.sharepoint.directory.membership_result import MembershipResult
 from office365.sharepoint.directory.my_groups_result import MyGroupsResult
 from office365.sharepoint.directory.user import User
+from office365.sharepoint.entity import Entity
+from office365.sharepoint.entity_collection import EntityCollection
 
 
-class SPHelper(BaseEntity):
+class SPHelper(Entity):
     def __init__(self, context):
         super(SPHelper, self).__init__(context, ResourcePath("SP.Directory.SPHelper"))
 
@@ -106,10 +106,10 @@ class SPHelper(BaseEntity):
         """
         :param str group_id: Group identifier
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
-        :param BaseEntityCollection or None return_type: Returns members
+        :param EntityCollection or None return_type: Returns members
         """
         if return_type is None:
-            return_type = BaseEntityCollection(context, User)
+            return_type = EntityCollection(context, User)
         qry = ServiceOperationQuery(
             SPHelper(context), "GetMembers", [group_id], None, None, return_type
         )
@@ -122,10 +122,10 @@ class SPHelper(BaseEntity):
         """
         :param str group_id: Group identifier
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
-        :param BaseEntityCollection or None return_type: Returns members
+        :param EntityCollection or None return_type: Returns members
         """
         if return_type is None:
-            return_type = BaseEntityCollection(context, User)
+            return_type = EntityCollection(context, User)
         qry = ServiceOperationQuery(
             SPHelper(context), "GetOwners", [group_id], None, None, return_type
         )

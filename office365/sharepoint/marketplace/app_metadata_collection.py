@@ -1,9 +1,9 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.marketplace.app_metadata import CorporateCatalogAppMetadata
 
 
-class CorporateCatalogAppMetadataCollection(BaseEntityCollection):
+class CorporateCatalogAppMetadataCollection(EntityCollection):
     """Collection of app metadata."""
 
     def __init__(self, context, resource_path=None):

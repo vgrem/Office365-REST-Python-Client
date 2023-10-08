@@ -1,9 +1,9 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.webs.information import WebInformation
 
 
-class WebInformationCollection(BaseEntityCollection):
+class WebInformationCollection(EntityCollection):
     """Specifies a collection of objects containing metadata about a site"""
 
     def __init__(self, context, resource_path=None):

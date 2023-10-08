@@ -1,9 +1,9 @@
 from office365.runtime.client_result import ClientResult
-from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.directory.my_groups_result import MyGroupsResult
+from office365.sharepoint.entity import Entity
 
 
-class User(BaseEntity):
+class User(Entity):
     def is_member_of(self, group_id):
         return_type = ClientResult(self.context)
 

@@ -1,9 +1,9 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class VideoChannel(BaseEntity):
+class VideoChannel(Entity):
     def get_video_count(self):
         return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(

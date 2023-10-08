@@ -4,8 +4,8 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity import Entity
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.gtp.request_options import ChatGptRequestOptions
 from office365.sharepoint.listitems.collection import ListItemCollection
 from office365.sharepoint.lists.render_data_parameters import RenderListDataParameters
@@ -59,7 +59,7 @@ from office365.sharepoint.tenant.administration.webs.templates.collection import
 from office365.sharepoint.tenant.settings import TenantSettings
 
 
-class Tenant(BaseEntity):
+class Tenant(Entity):
     """Represents a SharePoint tenant."""
 
     def __init__(self, context):
@@ -152,7 +152,7 @@ class Tenant(BaseEntity):
         :param int query_mode:
         """
         payload = {"queryMode": query_mode}
-        return_type = BaseEntityCollection(self.context, TopFilesSharingInsights)
+        return_type = EntityCollection(self.context, TopFilesSharingInsights)
         qry = ServiceOperationQuery(
             self, "GetTopFilesSharingInsights", payload, None, None, return_type
         )

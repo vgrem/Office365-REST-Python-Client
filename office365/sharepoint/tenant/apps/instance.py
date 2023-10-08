@@ -1,5 +1,5 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class TenantAppInstance(BaseEntity):
+class TenantAppInstance(Entity):
     """Represents an instance of a tenant-scoped app for a given host web."""

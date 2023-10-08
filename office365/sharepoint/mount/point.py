@@ -1,9 +1,9 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.mount.folder_info import MountedFolderInfo
 
 
-class MountPoint(BaseEntity):
+class MountPoint(Entity):
     """"""
 
     @staticmethod

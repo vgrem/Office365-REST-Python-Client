@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class EffectiveInformationRightsManagementSettings(BaseEntity):
+class EffectiveInformationRightsManagementSettings(Entity):
     """A collection of effective IRM settings on the file."""
 
     @property

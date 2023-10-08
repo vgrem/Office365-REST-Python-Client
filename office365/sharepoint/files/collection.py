@@ -2,7 +2,7 @@ import os
 
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.files.creation_information import FileCreationInformation
 from office365.sharepoint.files.file import File
 from office365.sharepoint.internal.queries.upload_session import (
@@ -11,7 +11,7 @@ from office365.sharepoint.internal.queries.upload_session import (
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
-class FileCollection(BaseEntityCollection):
+class FileCollection(EntityCollection):
     """Represents a collection of File resources."""
 
     def __init__(self, context, resource_path=None, parent=None):

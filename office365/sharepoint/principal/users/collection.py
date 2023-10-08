@@ -1,11 +1,11 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.principal.users.user import User
 
 
-class UserCollection(BaseEntityCollection):
+class UserCollection(EntityCollection[User]):
     def __init__(self, context, resource_path=None):
         """Represents a collection of User resources."""
         super(UserCollection, self).__init__(context, User, resource_path)

@@ -1,11 +1,11 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.translation.item_info import TranslationItemInfo
 
 
-class SyncTranslator(BaseEntity):
+class SyncTranslator(Entity):
     """
     The SyncTranslator type is used to submit immediate translation jobs to the protocol server.
 

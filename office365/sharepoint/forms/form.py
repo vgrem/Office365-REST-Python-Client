@@ -1,8 +1,8 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
-class Form(BaseEntity):
+class Form(Entity):
     """A form provides a display and editing interface for a single list item."""
 
     @property

@@ -1,9 +1,9 @@
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.sharing.shared_with_user import SharedWithUser
 
 
-class FileVersionEvent(BaseEntity):
+class FileVersionEvent(Entity):
     """Represents an event object happened on a Microsoft.SharePoint.SPFile."""
 
     @property

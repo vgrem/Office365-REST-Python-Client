@@ -1,14 +1,14 @@
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
-from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.contenttypes.fieldlinks.collection import FieldLinkCollection
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.fields.collection import FieldCollection
 from office365.sharepoint.translation.user_resource import UserResource
 
 
-class ContentType(BaseEntity):
+class ContentType(Entity):
     """
     Specifies a content type.
 

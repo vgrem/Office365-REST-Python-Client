@@ -1,6 +1,6 @@
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
 class HashTag(ClientValue):
@@ -19,7 +19,7 @@ class HashTag(ClientValue):
         return "SP.UserProfiles.HashTag"
 
 
-class HashTagCollection(BaseEntity):
+class HashTagCollection(Entity):
     """The HashTagCollection class specifies a collection of HashTags. For information about the HashTag type,
     see section 3.1.5.55"""
 

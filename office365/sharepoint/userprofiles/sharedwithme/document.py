@@ -1,13 +1,13 @@
 from datetime import datetime
 
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.userprofiles.sharedwithme.document_user import (
     SharedWithMeDocumentUser,
 )
 
 
-class SharedWithMeDocument(BaseEntity):
+class SharedWithMeDocument(Entity):
     """Represents a shared document."""
 
     @property

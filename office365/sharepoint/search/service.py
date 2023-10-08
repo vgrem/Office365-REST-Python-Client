@@ -4,7 +4,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.search.query.auto_completion_results import (
     QueryAutoCompletionResults,
@@ -19,7 +19,7 @@ from office365.sharepoint.search.request import SearchRequest
 from office365.sharepoint.search.result import SearchResult
 
 
-class SearchService(BaseEntity):
+class SearchService(Entity):
     """SearchService exposes OData Service Operations."""
 
     def __init__(self, context):

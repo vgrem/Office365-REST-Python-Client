@@ -1,8 +1,8 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class MySiteDismissStatusText(BaseEntity):
+class MySiteDismissStatusText(Entity):
     """Provides methods to dismiss status text for the personal online document library page."""
 
     @staticmethod

@@ -1,10 +1,10 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity import Entity
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.likes.user_entity import UserEntity
 
 
-class LikedByInformation(BaseEntity):
+class LikedByInformation(Entity):
     """Represents the information about the set of users who liked the list item."""
 
     @property
@@ -33,7 +33,7 @@ class LikedByInformation(BaseEntity):
         """
         return self.properties.get(
             "likedBy",
-            BaseEntityCollection(
+            EntityCollection(
                 self.context, UserEntity, ResourcePath("likedBy", self.resource_path)
             ),
         )

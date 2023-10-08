@@ -3,7 +3,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.tenant.administration.siteinfo_for_site_picker import (
     SiteInfoForSitePicker,
@@ -20,7 +20,7 @@ from office365.sharepoint.tenant.management.externalusers.results.session_revoca
 )
 
 
-class Office365Tenant(BaseEntity):
+class Office365Tenant(Entity):
     """Represents a SharePoint Online tenant."""
 
     def __init__(self, context):

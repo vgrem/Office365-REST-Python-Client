@@ -1,12 +1,12 @@
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.publishing.video.channel_collection import (
     VideoChannelCollection,
 )
 
 
-class VideoServiceManager(BaseEntity):
+class VideoServiceManager(Entity):
     def __init__(self, context):
         super(VideoServiceManager, self).__init__(
             context, ResourcePath("SP.Publishing.VideoServiceManager")

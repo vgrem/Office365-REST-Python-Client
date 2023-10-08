@@ -2,12 +2,12 @@ from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.contenttypes.fieldlinks.field_link import FieldLink
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.fields.field import Field
 
 
-class FieldLinkCollection(BaseEntityCollection):
+class FieldLinkCollection(EntityCollection):
     """Specifies a Collection for field links."""
 
     def __init__(self, context, resource_path=None):

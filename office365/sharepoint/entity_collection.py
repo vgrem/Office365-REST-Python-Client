@@ -5,7 +5,7 @@ from office365.runtime.client_object_collection import ClientObjectCollection
 T = TypeVar("T")
 
 
-class BaseEntityCollection(ClientObjectCollection[T]):
+class EntityCollection(ClientObjectCollection[T]):
     """
     SharePoint entity set
     """

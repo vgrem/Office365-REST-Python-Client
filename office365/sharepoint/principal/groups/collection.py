@@ -3,7 +3,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.principal.groups.creation_information import (
     GroupCreationInformation,
 )
@@ -11,7 +11,7 @@ from office365.sharepoint.principal.groups.group import Group
 from office365.sharepoint.utilities.principal_info import PrincipalInfo
 
 
-class GroupCollection(BaseEntityCollection):
+class GroupCollection(EntityCollection[Group]):
     """Represents a collection of Group resources."""
 
     def __init__(self, context, resource_path=None):
@@ -24,7 +24,7 @@ class GroupCollection(BaseEntityCollection):
         :param int max_count: Specifies the maximum number of principals to be returned.
         """
         return_type = ClientResult(self.context, ClientValueCollection(PrincipalInfo))
-        for cur_grp in self:  # type: Group
+        for cur_grp in self:
             return_type = cur_grp.expand_to_principals(max_count)
         return return_type
 

@@ -1,9 +1,9 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.permissions.base_permissions import BasePermissions
 
 
-class RoleDefinition(BaseEntity):
+class RoleDefinition(Entity):
     """Defines a single role definition, including a name, description, and set of rights."""
 
     @property

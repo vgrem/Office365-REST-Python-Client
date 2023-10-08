@@ -1,8 +1,8 @@
-from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.changes.token import ChangeToken
+from office365.sharepoint.entity import Entity
 
 
-class Change(BaseEntity):
+class Change(Entity):
     """Base class for a change. installation."""
 
     @property

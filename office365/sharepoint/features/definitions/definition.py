@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class FeatureDefinition(BaseEntity):
+class FeatureDefinition(Entity):
     """Contains the base definition of a feature, including its name, ID, scope, and version."""
 
     @property

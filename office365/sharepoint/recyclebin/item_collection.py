@@ -1,11 +1,11 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.recyclebin.item import RecycleBinItem
 
 
-class RecycleBinItemCollection(BaseEntityCollection):
+class RecycleBinItemCollection(EntityCollection):
     """Represents a collection of View resources."""
 
     def __init__(self, context, resource_path=None):

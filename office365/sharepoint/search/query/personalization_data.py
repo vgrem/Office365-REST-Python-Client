@@ -1,8 +1,8 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class QueryPersonalizationData(BaseEntity):
+class QueryPersonalizationData(Entity):
     """Contains a unique identifier for the current user who is executing a search query"""
 
     def __init__(self, context, user_id):

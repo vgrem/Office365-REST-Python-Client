@@ -1,8 +1,8 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class PersonalWeb(BaseEntity):
+class PersonalWeb(Entity):
     """Microsoft.SharePoint.Client.Sharing.PersonalWeb namespace represents methods that apply to a Web site for
     individual users. Methods act on the users default document library."""
 

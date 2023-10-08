@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class FieldLink(BaseEntity):
+class FieldLink(Entity):
     """Specifies a reference to a field or field definition for a content type."""
 
     @property

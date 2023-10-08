@@ -1,9 +1,9 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.webs.web import Web
 
 
-class WebCollection(BaseEntityCollection):
+class WebCollection(EntityCollection):
     """Web collection"""
 
     def __init__(self, context, resource_path=None, parent_web=None):

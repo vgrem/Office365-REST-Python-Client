@@ -2,12 +2,12 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.viva.app_configuration import AppConfiguration
 from office365.sharepoint.viva.home import VivaHome
 
 
-class EmployeeEngagement(BaseEntity):
+class EmployeeEngagement(Entity):
     def __init__(self, context):
         super(EmployeeEngagement, self).__init__(
             context, ResourcePath("SP.EmployeeEngagement")

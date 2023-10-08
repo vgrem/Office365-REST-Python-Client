@@ -1,14 +1,14 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.social.actor import SocialActor
 from office365.sharepoint.social.attachment import SocialAttachment
 from office365.sharepoint.social.feed.feed import SocialFeed
 from office365.sharepoint.social.thread import SocialThread
 
 
-class SocialFeedManager(BaseEntity):
+class SocialFeedManager(Entity):
     """The SocialFeedManager class provides access to social feeds. It provides methods to create posts,
     delete posts, read posts, and perform other operations on posts."""
 

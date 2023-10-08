@@ -1,10 +1,10 @@
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.webparts.webpart import WebPart
 
 
-class WebPartDefinition(BaseEntity):
+class WebPartDefinition(Entity):
     """Represents a Web Part on a Web Part Page. Provides operations for moving, deleting, and changing the state of
     the Web Part."""
 

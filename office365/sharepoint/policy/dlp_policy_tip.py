@@ -1,8 +1,8 @@
 from office365.runtime.types.collections import StringCollection
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class DlpPolicyTip(BaseEntity):
+class DlpPolicyTip(Entity):
     """Provides information about the Data Loss Protection policy on an item so it can be shown to the user."""
 
     @property

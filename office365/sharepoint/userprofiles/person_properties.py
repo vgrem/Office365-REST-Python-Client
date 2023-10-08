@@ -1,8 +1,8 @@
 from office365.runtime.types.collections import StringCollection
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class PersonProperties(BaseEntity):
+class PersonProperties(Entity):
     """
     The PersonProperties class contains the data about people and is returned by PeopleManager methods
     (see section 3.1.5.58).

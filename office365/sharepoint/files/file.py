@@ -10,8 +10,8 @@ from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.sharepoint.activities.capabilities import ActivityCapabilities
-from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity import Entity
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.files.versions.collection import FileVersionCollection
 from office365.sharepoint.files.versions.event import FileVersionEvent
 from office365.sharepoint.folders.folder import Folder
@@ -35,7 +35,7 @@ from office365.sharepoint.webparts.limited_manager import LimitedWebPartManager
 from office365.sharepoint.webparts.personalization_scope import PersonalizationScope
 
 
-class AbstractFile(BaseEntity):
+class AbstractFile(Entity):
     def read(self):
         """Immediately read content of file"""
         if not self.is_property_available("ServerRelativeUrl"):
@@ -704,7 +704,7 @@ class File(AbstractFile):
         """Gets the history of events on this version object."""
         return self.properties.get(
             "VersionEvents",
-            BaseEntityCollection(
+            EntityCollection(
                 self.context,
                 FileVersionEvent,
                 ResourcePath("VersionEvents", self.resource_path),

@@ -1,11 +1,11 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.sites.home_site_reference import SPHSiteReference
 
 
-class SPHSite(BaseEntity):
+class SPHSite(Entity):
     def __init__(self, context, resource_path=None):
         """
         A home site represents a SharePoint communication site.

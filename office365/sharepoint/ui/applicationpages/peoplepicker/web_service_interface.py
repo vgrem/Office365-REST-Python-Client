@@ -1,6 +1,6 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.principal.type import PrincipalType
 from office365.sharepoint.ui.applicationpages.peoplepicker.entity_information import (
     PickerEntityInformation,
@@ -13,7 +13,7 @@ from office365.sharepoint.ui.applicationpages.peoplepicker.query_parameters impo
 )
 
 
-class ClientPeoplePickerWebServiceInterface(BaseEntity):
+class ClientPeoplePickerWebServiceInterface(Entity):
     """Specifies an interface that can be used to query principals."""
 
     @staticmethod

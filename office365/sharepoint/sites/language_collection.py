@@ -1,9 +1,9 @@
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.sites.language import Language
 
 
-class LanguageCollection(BaseEntity):
+class LanguageCollection(Entity):
     """Represents a collection of SPLanguage objects"""
 
     def __init__(self, context, resource_path=None):

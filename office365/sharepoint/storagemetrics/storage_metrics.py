@@ -1,9 +1,9 @@
 import datetime
 
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class StorageMetrics(BaseEntity):
+class StorageMetrics(Entity):
     """Specifies the storage-related metrics for list folders in the site"""
 
     @property

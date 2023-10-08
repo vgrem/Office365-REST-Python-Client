@@ -1,8 +1,8 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class ViewFieldCollection(BaseEntity):
+class ViewFieldCollection(Entity):
     """Represents a collection of Field resources."""
 
     def __init__(self, context, resource_path=None):

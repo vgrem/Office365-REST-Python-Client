@@ -2,15 +2,15 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity import Entity
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.sharing.links.info import SharingLinkInfo
 from office365.sharepoint.sharing.object_sharing_information_user import (
     ObjectSharingInformationUser,
 )
 
 
-class ObjectSharingInformation(BaseEntity):
+class ObjectSharingInformation(Entity):
     """Provides information about the sharing state of a securable object."""
 
     @staticmethod
@@ -103,7 +103,7 @@ class ObjectSharingInformation(BaseEntity):
 
     def get_shared_with_users(self):
         """Returns an array that contains the users with whom a securable object is shared."""
-        return_type = BaseEntityCollection(self.context, ObjectSharingInformationUser)
+        return_type = EntityCollection(self.context, ObjectSharingInformationUser)
         qry = ServiceOperationQuery(
             self, "GetSharedWithUsers", None, None, None, return_type
         )
@@ -245,7 +245,7 @@ class ObjectSharingInformation(BaseEntity):
         """A collection of shared with users."""
         return self.properties.get(
             "SharedWithUsersCollection",
-            BaseEntityCollection(
+            EntityCollection(
                 self.context,
                 ObjectSharingInformationUser,
                 ResourcePath("SharedWithUsersCollection", self.resource_path),

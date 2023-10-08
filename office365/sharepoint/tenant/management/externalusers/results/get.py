@@ -1,11 +1,11 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.tenant.management.externalusers.collection import (
     ExternalUserCollection,
 )
 
 
-class GetExternalUsersResults(BaseEntity):
+class GetExternalUsersResults(Entity):
     @property
     def total_user_count(self):
         return self.properties.get("TotalUserCount", None)

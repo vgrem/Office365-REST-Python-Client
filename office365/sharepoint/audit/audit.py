@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class Audit(BaseEntity):
+class Audit(Entity):
     """
     Enables auditing of how site collections, sites, lists, folders, and list items are accessed, changed, and used.
     """

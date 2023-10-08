@@ -1,10 +1,10 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.userprofiles.follow_result import FollowResult
 
 
-class FollowedContent(BaseEntity):
+class FollowedContent(Entity):
     """The FollowedContent class provides access to followed content items."""
 
     def follow_item(self, item):

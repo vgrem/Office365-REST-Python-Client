@@ -1,11 +1,11 @@
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity import Entity
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.sites.site import Site
 
 
-class WebApplication(BaseEntity):
+class WebApplication(Entity):
     @staticmethod
     def lookup(context, request_uri):
         """
@@ -31,7 +31,7 @@ class WebApplication(BaseEntity):
     def sites(self):
         return self.properties.get(
             "Sites",
-            BaseEntityCollection(
+            EntityCollection(
                 self.context, Site, ResourcePath("Sites", self.resource_path)
             ),
         )

@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class EmbedDataV1(BaseEntity):
+class EmbedDataV1(Entity):
     """Represents embedded meta data of the page."""
 
     def url(self):

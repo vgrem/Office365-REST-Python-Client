@@ -1,10 +1,10 @@
 from datetime import datetime
 
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class Subscription(BaseEntity):
+class Subscription(Entity):
     """A subscription for receiving notifications at a specified endpoint."""
 
     @property

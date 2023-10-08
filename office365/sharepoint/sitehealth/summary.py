@@ -1,9 +1,9 @@
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.sitehealth.result import SiteHealthResult
 
 
-class SiteHealthSummary(BaseEntity):
+class SiteHealthSummary(Entity):
     """Specifies a summary of the results of running a set of site collection health rules."""
 
     @property

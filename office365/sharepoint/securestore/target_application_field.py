@@ -1,8 +1,8 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class TargetApplicationField(BaseEntity):
+class TargetApplicationField(Entity):
     """A name of a credential field and its associated credential type."""
 
     @staticmethod

@@ -1,10 +1,10 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.permissions.base_permissions import BasePermissions
 from office365.sharepoint.translation.user_resource import UserResource
 
 
-class UserCustomAction(BaseEntity):
+class UserCustomAction(Entity):
     """Specifies a custom action."""
 
     def get_property(self, name, default_value=None):

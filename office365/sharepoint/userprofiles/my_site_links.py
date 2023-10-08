@@ -1,8 +1,8 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class MySiteLinks(BaseEntity):
+class MySiteLinks(Entity):
     """The MySiteLinks object provides links for a user’s personal site."""
 
     @staticmethod

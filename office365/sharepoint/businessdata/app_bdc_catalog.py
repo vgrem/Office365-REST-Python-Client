@@ -1,10 +1,10 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class AppBdcCatalog(BaseEntity):
+class AppBdcCatalog(Entity):
     """
     Represents the Business Data Connectivity (BDC) MetadataCatalog for an application that contains external content
     types provisioned by the application.

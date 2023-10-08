@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class UserCustomAction(BaseEntity):
+class UserCustomAction(Entity):
     """Represents a custom action associated with a SharePoint list, Web site, or subsite."""
 
     @property

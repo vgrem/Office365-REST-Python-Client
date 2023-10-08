@@ -1,9 +1,9 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class MicroServiceManager(BaseEntity):
+class MicroServiceManager(Entity):
     @staticmethod
     def add_microservice_work_item(context, payload, minutes, properties):
         """

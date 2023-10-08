@@ -5,7 +5,6 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.activities.entity import SPActivityEntity
@@ -14,7 +13,6 @@ from office365.sharepoint.alerts.collection import AlertCollection
 from office365.sharepoint.authentication.acs_service_principal_info import (
     SPACSServicePrincipalInfo,
 )
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.businessdata.app_bdc_catalog import AppBdcCatalog
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.clientsidecomponent.hostedapps.manager import (
@@ -28,6 +26,7 @@ from office365.sharepoint.clientsidecomponent.query_result import (
 )
 from office365.sharepoint.clientsidecomponent.storage_entity import StorageEntity
 from office365.sharepoint.contenttypes.collection import ContentTypeCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.eventreceivers.definition_collection import (
     EventReceiverDefinitionCollection,
 )
@@ -410,7 +409,7 @@ class Web(SecurableObject):
     def get_acs_service_principals(self, app_ids=None):
         """
         List service principals
-        :param list[str] appIds:
+        :param list[str] app_ids:
         """
         payload = {"appIds": app_ids}
         return_type = ClientResult(
@@ -1794,7 +1793,7 @@ class Web(SecurableObject):
     def activities(self):
         return self.properties.get(
             "Activities",
-            BaseEntityCollection(
+            EntityCollection(
                 self.context,
                 SPActivityEntity,
                 ResourcePath("Activities", self.resource_path),
@@ -1975,7 +1974,7 @@ class Web(SecurableObject):
         """"""
         return self.properties.get(
             "OneDriveSharedItems",
-            BaseEntityCollection(
+            EntityCollection(
                 self.context,
                 SharedDocumentInfo,
                 ResourcePath("OneDriveSharedItems", self.resource_path),

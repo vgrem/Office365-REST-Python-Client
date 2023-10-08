@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class PageCopyResponse(BaseEntity):
+class PageCopyResponse(Entity):
     @property
     def entity_type_name(self):
         return "Microsoft.SharePoint.Publishing.PageCopyWithAssets.PageCopyResponse"

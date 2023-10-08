@@ -1,6 +1,6 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.sharing.reports.site_capabilities import (
     SiteSharingReportCapabilities,
 )
@@ -9,7 +9,7 @@ from office365.sharepoint.sharing.site_sharing_report_status import (
 )
 
 
-class SiteSharingReportHelper(BaseEntity):
+class SiteSharingReportHelper(Entity):
     @staticmethod
     def cancel_sharing_report_job(context):
         """

@@ -1,7 +1,7 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.navigation.home_site_navigation_settings import (
     HomeSiteNavigationSettings,
 )
@@ -9,7 +9,7 @@ from office365.sharepoint.navigation.menu_state import MenuState
 from office365.sharepoint.navigation.provider_type import NavigationProviderType
 
 
-class NavigationService(BaseEntity):
+class NavigationService(Entity):
     """The entry point for REST-based navigation service operations."""
 
     def __init__(self, context):

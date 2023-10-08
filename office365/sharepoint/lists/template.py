@@ -1,10 +1,10 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class ListTemplate(BaseEntity):
+class ListTemplate(Entity):
     """
     Represents a list definition or a list template, which defines the fields and views for a list.
     List definitions are contained in files within

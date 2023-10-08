@@ -1,10 +1,10 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class RecentFileCollection(BaseEntity):
+class RecentFileCollection(Entity):
     def __init__(self, context):
         super(RecentFileCollection, self).__init__(
             context, ResourcePath("SP.RecentFileCollection")

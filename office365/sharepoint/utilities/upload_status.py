@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class UploadStatus(BaseEntity):
+class UploadStatus(Entity):
     """The status of a chunk session upload."""
 
     @property

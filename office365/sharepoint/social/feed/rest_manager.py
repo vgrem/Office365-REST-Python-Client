@@ -1,9 +1,9 @@
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.social.rest_actor import SocialRestActor
 
 
-class SocialRestFeedManager(BaseEntity):
+class SocialRestFeedManager(Entity):
     """he SocialRestFeedManager class provides REST methods for creating posts, modifying threads,
     and consuming feeds on behalf of the current user. The SocialRestFeedManager class is available
     when the protocol client sends an OData request to a protocol server using [MS-CSOMREST].

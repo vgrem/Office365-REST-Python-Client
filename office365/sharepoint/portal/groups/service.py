@@ -3,10 +3,10 @@ import random
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class GroupService(BaseEntity):
+class GroupService(Entity):
     def __init__(self, context, resource_path=None):
         super(GroupService, self).__init__(context, resource_path)
 

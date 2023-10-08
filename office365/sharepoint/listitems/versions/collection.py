@@ -1,13 +1,13 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.listitems.versions.get_parameters import (
     GetListItemVersionsParameters,
 )
 from office365.sharepoint.listitems.versions.version import ListItemVersion
 
 
-class ListItemVersionCollection(BaseEntityCollection):
+class ListItemVersionCollection(EntityCollection):
     """Specifies a collection of versions of a list item."""
 
     def __init__(self, context, resource_path=None):

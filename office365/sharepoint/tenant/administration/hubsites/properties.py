@@ -1,11 +1,11 @@
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.tenant.administration.hubsites.permission import (
     HubSitePermission,
 )
 
 
-class HubSiteProperties(BaseEntity):
+class HubSiteProperties(Entity):
     @property
     def permissions(self):
         return self.properties.get(
