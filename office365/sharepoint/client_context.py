@@ -13,6 +13,7 @@ from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
+from office365.runtime.types.event_handler import EventHandler
 from office365.sharepoint.portal.sites.status import SiteStatus
 from office365.sharepoint.publishing.pages.service import SitePageService
 from office365.sharepoint.request_user_context import RequestUserContext
@@ -201,9 +202,10 @@ class ClientContext(ClientRuntimeContext):
         Returns an ContextWebInformation object that specifies metadata about the site
         """
         client = ODataRequest(JsonLightFormat())
+        client.beforeExecute += self._authenticate_request
         for e in self.pending_request().beforeExecute:
-            client.beforeExecute += e
-        client.beforeExecute -= self._build_modification_query
+            if not EventHandler.is_builtin(e):
+                client.beforeExecute += e
         request = RequestOptions("{0}/contextInfo".format(self.service_root_url()))
         request.method = HttpMethod.Post
         response = client.execute_request_direct(request)

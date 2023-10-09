@@ -3,7 +3,6 @@ import os
 from office365.runtime.client_request import ClientRequest
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.types.event_handler import EventHandler
 
 
 class UploadSessionRequest(ClientRequest):
@@ -15,7 +14,6 @@ class UploadSessionRequest(ClientRequest):
         """
         super(UploadSessionRequest, self).__init__()
         self._file_object = file_object
-        self.chunk_uploaded = EventHandler(True)
         self._chunk_size = chunk_size
         self._chunk_uploaded = chunk_uploaded
         self._range_start = 0

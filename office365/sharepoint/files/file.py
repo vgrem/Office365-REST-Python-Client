@@ -1,7 +1,6 @@
 import datetime
 
 from office365.runtime.client_result import ClientResult
-from office365.runtime.compat import is_string_type
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.paths.resource_path import ResourcePath
@@ -22,13 +21,8 @@ from office365.sharepoint.permissions.irm.effective_settings import (
 from office365.sharepoint.permissions.irm.file_settings import (
     InformationRightsManagementFileSettings,
 )
-from office365.sharepoint.permissions.irm.settings import (
-    InformationRightsManagementSettings,
-)
 from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
-from office365.sharepoint.utilities.move_copy_options import MoveCopyOptions
-from office365.sharepoint.utilities.move_copy_util import MoveCopyUtil
 from office365.sharepoint.utilities.upload_status import UploadStatus
 from office365.sharepoint.utilities.wopi_frame_action import SPWOPIFrameAction
 from office365.sharepoint.webparts.limited_manager import LimitedWebPartManager

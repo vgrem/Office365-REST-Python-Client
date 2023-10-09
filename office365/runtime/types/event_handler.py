@@ -1,19 +1,29 @@
+import types
+from typing import Callable
+
+from typing_extensions import Self
+
+
 class EventHandler:
     def __init__(self, once=False):
+        # type: (bool) -> None
         self._listeners = []
         self._once = once
 
-    def __contains__(self, e):
-        return e in self._listeners
+    def __contains__(self, listener):
+        # type: (Callable[..., None]) -> bool
+        return listener in self._listeners
 
     def __iter__(self):
         return iter(self._listeners)
 
     def __iadd__(self, listener):
+        # type: (Callable[..., None]) -> Self
         self._listeners.append(listener)
         return self
 
     def __isub__(self, listener):
+        # type: (Callable[..., None]) -> Self
         self._listeners.remove(listener)
         return self
 
@@ -25,3 +35,18 @@ class EventHandler:
             if self._once:
                 self._listeners.remove(listener)
             listener(*args, **kwargs)
+
+    @staticmethod
+    def is_builtin(listener):
+        # type: (Callable[..., None]) -> bool
+        from office365.runtime.client_request import ClientRequest
+        from office365.runtime.client_runtime_context import ClientRuntimeContext
+
+        if isinstance(listener, types.MethodType):
+            return isinstance(listener.__self__, ClientRequest) or isinstance(
+                listener.__self__, ClientRuntimeContext
+            )
+        if isinstance(listener, types.FunctionType):
+            return listener.__module__ == ClientRuntimeContext.__module__
+        else:
+            raise ValueError("Invalid listener type")
