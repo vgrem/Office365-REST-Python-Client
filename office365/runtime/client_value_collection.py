@@ -1,5 +1,5 @@
 import uuid
-from typing import Dict, Generic, Iterator, List, Optional, TypeVar
+from typing import Any, Dict, Generic, Iterator, List, Optional, TypeVar
 
 from typing_extensions import Self
 
@@ -63,7 +63,7 @@ class ClientValueCollection(ClientValue, Generic[T]):
         return json
 
     def create_typed_value(self, initial_value=None):
-        # type: (Optional[T]) -> T
+        # type: (Optional[Any]) -> T
         if initial_value is None:
             return uuid.uuid4() if self._item_type == uuid.UUID else self._item_type()
         elif self._item_type == uuid.UUID:
@@ -76,7 +76,7 @@ class ClientValueCollection(ClientValue, Generic[T]):
             return initial_value
 
     def set_property(self, index, value, persist_changes=False):
-        # type: (str | int, T, bool) -> Self
+        # type: (str | int, Any, bool) -> Self
         client_value = self.create_typed_value(value)
         self.add(client_value)
         return self

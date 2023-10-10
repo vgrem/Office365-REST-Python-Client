@@ -1,29 +1,33 @@
 import types
-from typing import Callable
+from typing import Callable, Iterator, TypeVar
 
-from typing_extensions import Self
+from typing_extensions import ParamSpec, Self
+
+P = ParamSpec("P")
+F = TypeVar("F", bound=Callable[..., None])
 
 
 class EventHandler:
     def __init__(self, once=False):
         # type: (bool) -> None
-        self._listeners = []
+        self._listeners = []  # type: list[F]
         self._once = once
 
     def __contains__(self, listener):
-        # type: (Callable[..., None]) -> bool
+        # type: (F) -> bool
         return listener in self._listeners
 
     def __iter__(self):
+        # type: () -> Iterator[F]
         return iter(self._listeners)
 
     def __iadd__(self, listener):
-        # type: (Callable[..., None]) -> Self
+        # type: (F) -> Self
         self._listeners.append(listener)
         return self
 
     def __isub__(self, listener):
-        # type: (Callable[..., None]) -> Self
+        # type: (F) -> Self
         self._listeners.remove(listener)
         return self
 
@@ -31,14 +35,15 @@ class EventHandler:
         return len(self._listeners)
 
     def notify(self, *args, **kwargs):
+        # type: (P.args, P.kwargs) -> None
         for listener in self._listeners:
             if self._once:
                 self._listeners.remove(listener)
             listener(*args, **kwargs)
 
     @staticmethod
-    def is_builtin(listener):
-        # type: (Callable[..., None]) -> bool
+    def is_system(listener):
+        # type: (F) -> bool
         from office365.runtime.client_request import ClientRequest
         from office365.runtime.client_runtime_context import ClientRuntimeContext
 

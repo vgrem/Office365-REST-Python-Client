@@ -1,4 +1,10 @@
+from typing import Any, Iterator, Tuple, TypeVar
+
+from typing_extensions import Self
+
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
+
+T = TypeVar("T", int, float, str, bool, "ClientValue")
 
 
 class ClientValue(object):
@@ -8,6 +14,7 @@ class ClientValue(object):
     """
 
     def set_property(self, k, v, persist_changes=True):
+        # type: (str, Any, bool) -> Self
         prop_type = getattr(self, k, None)
         if isinstance(prop_type, ClientValue) and v is not None:
             if isinstance(v, list):
@@ -26,9 +33,11 @@ class ClientValue(object):
         return self
 
     def get_property(self, k):
+        # type: (str) -> T
         return getattr(self, k)
 
     def __iter__(self):
+        # type: () -> Iterator[Tuple[str, T]]
         for n, v in vars(self).items():
             yield n, v
 

@@ -6,7 +6,7 @@ from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
-class FolderCollection(EntityCollection):
+class FolderCollection(EntityCollection[Folder]):
     """Represents a collection of Folder resources."""
 
     def __init__(self, context, resource_path=None, parent=None):

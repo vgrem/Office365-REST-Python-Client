@@ -204,7 +204,7 @@ class ClientContext(ClientRuntimeContext):
         client = ODataRequest(JsonLightFormat())
         client.beforeExecute += self._authenticate_request
         for e in self.pending_request().beforeExecute:
-            if not EventHandler.is_builtin(e):
+            if not EventHandler.is_system(e):
                 client.beforeExecute += e
         request = RequestOptions("{0}/contextInfo".format(self.service_root_url()))
         request.method = HttpMethod.Post

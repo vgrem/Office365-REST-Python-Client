@@ -17,9 +17,7 @@ def enum_folder(parent_folder, action):
 
 
 def print_folder_stat(folder):
-    """
-    :type folder: Folder
-    """
+    # type: (Folder) -> None
     print(folder.serverRelativeUrl)
     print(folder.time_created)
 

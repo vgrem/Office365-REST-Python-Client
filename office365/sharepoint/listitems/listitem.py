@@ -4,12 +4,10 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.key import KeyPath
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.comments.collection import CommentCollection
-from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.fields.image_value import ImageFieldValue
 from office365.sharepoint.fields.lookup_value import FieldLookupValue
 from office365.sharepoint.fields.multi_lookup_value import FieldMultiLookupValue
@@ -65,7 +63,9 @@ class ListItem(SecurableObject):
         :param str password: Optional password value to apply to the tokenized sharing link,
             if it can support password protection.
         """
-        return_type = ClientResult(self.context, ShareLinkResponse())
+        return_type = ClientResult(
+            self.context, ShareLinkResponse()
+        )  # type: ClientResult[ShareLinkResponse]
         request = ShareLinkRequest(
             settings=ShareLinkSettings(
                 link_kind=link_kind, expiration=expiration, role=role, password=password

@@ -269,7 +269,7 @@ class Tenant(Entity):
         """
         Checks whether a tenant has the Intune license.
         """
-        return_type = ClientResult(self.context, bool())
+        return_type = ClientResult(self.context)  # type: ClientResult[bool]
         qry = ServiceOperationQuery(
             self, "CheckTenantIntuneLicense", None, None, None, return_type
         )

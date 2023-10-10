@@ -8,6 +8,9 @@ class ShareLinkResponse(ClientValue):
     """
 
     def __init__(self, sharing_link_info=SharingLinkInfo()):
+        """
+        :param SharingLinkInfo sharing_link_info:
+        """
         self.sharingLinkInfo = sharing_link_info
 
     @property

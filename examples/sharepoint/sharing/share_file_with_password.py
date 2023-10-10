@@ -1,5 +1,5 @@
 """
-
+Share a file with a password
 """
 import json
 
@@ -14,5 +14,6 @@ target_file = ctx.web.get_file_by_server_relative_url(file_url)
 result = target_file.share_link(
     SharingLinkKind.Flexible, role=RoleType.Editor, password="password"
 ).execute_query()
-print(json.dumps(result.value.to_json(), indent=4))
-# print("Shared link url: {0}".format(result.value.sharingLinkInfo))
+
+# print(json.dumps(result.value.to_json(), indent=4))
+print("Shared link url: {0}".format(result.value.sharingLinkInfo))

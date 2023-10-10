@@ -11,7 +11,7 @@ from office365.sharepoint.internal.queries.upload_session import (
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
-class FileCollection(EntityCollection):
+class FileCollection(EntityCollection[File]):
     """Represents a collection of File resources."""
 
     def __init__(self, context, resource_path=None, parent=None):
