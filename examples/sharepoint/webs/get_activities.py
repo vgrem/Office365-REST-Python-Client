@@ -1,7 +1,6 @@
 """
 
 """
-from office365.sharepoint.activities.entity import SPActivityEntity
 from office365.sharepoint.client_context import ClientContext
 from tests import test_client_credentials, test_site_url
 

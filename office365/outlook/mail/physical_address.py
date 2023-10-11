@@ -14,7 +14,8 @@ class PhysicalAddress(ClientValue):
     ):
         """
         :param str city: The city.
-        :param str country_or_region: The country or region. It's a free-format string value, for example, "United States".
+        :param str country_or_region: The country or region. It's a free-format string value, for example,
+            "United States".
         :param str postal_code: The postal code.
         :param str state:
         :param str street:

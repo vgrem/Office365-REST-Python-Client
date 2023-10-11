@@ -1,4 +1,3 @@
-from office365.onenote.pages.page import OnenotePage
 from tests.graph_case import GraphTestCase
 
 

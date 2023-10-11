@@ -1,7 +1,7 @@
 import types
-from typing import Callable, Iterator, TypeVar
+from typing import Callable, TypeVar
 
-from typing_extensions import ParamSpec, Self
+from typing_extensions import ParamSpec
 
 P = ParamSpec("P")
 F = TypeVar("F", bound=Callable[..., None])
@@ -48,9 +48,7 @@ class EventHandler:
         from office365.runtime.client_runtime_context import ClientRuntimeContext
 
         if isinstance(listener, types.MethodType):
-            return isinstance(listener.__self__, ClientRequest) or isinstance(
-                listener.__self__, ClientRuntimeContext
-            )
+            return isinstance(listener.__self__, (ClientRequest, ClientRuntimeContext))
         if isinstance(listener, types.FunctionType):
             return listener.__module__ == ClientRuntimeContext.__module__
         else:

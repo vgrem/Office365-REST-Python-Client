@@ -1,6 +1,5 @@
 from office365.sharepoint.permissions.base_permissions import BasePermissions
 from office365.sharepoint.permissions.kind import PermissionKind
-from office365.sharepoint.permissions.roles.definitions.definition import RoleDefinition
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 

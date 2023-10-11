@@ -22,8 +22,8 @@ class MeetingTimeSuggestion(ClientValue):
         :param list[AttendeeAvailability] attendee_availability: An array that shows the availability status of each
             attendees for this meeting suggestion.
         :param float confidence: A percentage that represents the likelhood of all the attendees attending.
-        :param list[Location] locations: An array that specifies the name and geographic location of each meeting location
-             for this meeting suggestion.
+        :param list[Location] locations: An array that specifies the name and geographic location of each meeting
+            location for this meeting suggestion.
         :param TimeSlot meeting_timeslot: A time period suggested for the meeting.
         """
         self.attendeeAvailability = ClientValueCollection(

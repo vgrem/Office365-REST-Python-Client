@@ -9,9 +9,7 @@ from office365.sharepoint.fields.multi_user_value import FieldMultiUserValue
 from office365.sharepoint.fields.type import FieldType
 from office365.sharepoint.fields.url_value import FieldUrlValue
 from office365.sharepoint.fields.user_value import FieldUserValue
-from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.creation_information import ListCreationInformation
-from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.template_type import ListTemplateType
 from tests import create_unique_name
 from tests.sharepoint.sharepoint_case import SPTestCase

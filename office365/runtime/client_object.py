@@ -1,20 +1,16 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Generic, Optional, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
 
-from typing_extensions import Self
-
-from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.client_value import ClientValue
 from office365.runtime.odata.json_format import ODataJsonFormat
 from office365.runtime.odata.query_options import QueryOptions
 from office365.runtime.odata.type import ODataType
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
-from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.runtime.client_object_collection import ClientObjectCollection
+    pass
 
 
 T = TypeVar("T")
@@ -149,9 +145,7 @@ class ClientObject(Generic[T]):
             self._ser_property_names.append(name)
 
         typed_value = self.get_property(name)
-        if isinstance(typed_value, ClientObject) or isinstance(
-            typed_value, ClientValue
-        ):
+        if isinstance(typed_value, (ClientObject, ClientValue)):
             if isinstance(value, list):
                 [
                     typed_value.set_property(i, v, persist_changes)
@@ -269,7 +263,7 @@ class ClientObject(Generic[T]):
             k: self.get_property(k) for k in self._properties if k in ser_prop_names
         }
         for k, v in json.items():
-            if isinstance(v, ClientObject) or isinstance(v, ClientValue):
+            if isinstance(v, (ClientObject, ClientValue)):
                 json[k] = v.to_json(json_format)
 
         if json and include_control_info:

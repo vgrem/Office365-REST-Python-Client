@@ -1,4 +1,3 @@
-from office365.sharepoint.fields.field import Field
 from office365.sharepoint.taxonomy.field import TaxonomyField
 from office365.sharepoint.taxonomy.groups.group import TermGroup
 from office365.sharepoint.taxonomy.sets.set import TermSet

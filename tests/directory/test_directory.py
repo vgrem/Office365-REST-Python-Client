@@ -1,4 +1,3 @@
-from office365.directory.administrative_unit import AdministrativeUnit
 from office365.runtime.client_value_collection import ClientValueCollection
 from tests.graph_case import GraphTestCase
 

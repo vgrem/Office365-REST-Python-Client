@@ -1,6 +1,5 @@
 import uuid
 
-from office365.sharepoint.fields.field import Field
 from office365.sharepoint.fields.text import FieldText
 from tests.sharepoint.sharepoint_case import SPTestCase
 

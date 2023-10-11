@@ -1,5 +1,4 @@
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.listitems.listitem import ListItem
 from tests import test_client_credentials, test_team_site_url
 
 

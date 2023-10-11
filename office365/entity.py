@@ -1,6 +1,4 @@
-from typing import TYPE_CHECKING, Optional, TypeVar
-
-from typing_extensions import Self
+from typing import TYPE_CHECKING, TypeVar
 
 from office365.runtime.client_object import ClientObject
 from office365.runtime.paths.entity import EntityPath
@@ -9,7 +7,7 @@ from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 
 if TYPE_CHECKING:
-    from office365.graph_client import GraphClient
+    pass
 
 
 T = TypeVar("T")

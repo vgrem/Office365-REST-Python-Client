@@ -1,3 +1,4 @@
+# pylint: skip-file
 import sys
 
 # -------
@@ -14,15 +15,9 @@ is_py2 = _ver[0] == 2
 is_py3 = _ver[0] == 3
 
 if is_py2:
-    from email import message_from_string as message_from_bytes_or_string
-    from urllib import quote
-
-    import pytz as timezone
-    from urlparse import urljoin, urlparse
+    from urlparse import urlparse
 elif is_py3:
-    from datetime import timezone
-    from email import message_from_bytes as message_from_bytes_or_string
-    from urllib.parse import quote, urljoin, urlparse
+    from urllib.parse import urlparse
 
 
 def message_as_bytes_or_string(message):
@@ -33,10 +28,11 @@ def message_as_bytes_or_string(message):
 
 
 def is_string_type(value):
+    # ruff: noqa
     if is_py2:
         return isinstance(value, basestring)
     else:
-        return type(value) is str
+        return isinstance(value, str)
 
 
 def is_absolute_url(url):

@@ -1,7 +1,6 @@
 import uuid
 
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.fields.calculated import FieldCalculated
 from office365.sharepoint.fields.creation_information import FieldCreationInformation
 from office365.sharepoint.fields.type import FieldType
 from tests import test_client_credentials, test_team_site_url

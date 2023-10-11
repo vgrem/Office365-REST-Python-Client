@@ -95,7 +95,7 @@ class PeopleManager(Entity):
         :param str account_name: Account name of the specified user.
         :param str site_id: Site Identifier.
         """
-        return_type = ClientResult(self.context, dict())
+        return_type = ClientResult(self.context, {})
         params = {"accountName": account_name, "siteId": site_id}
         qry = ServiceOperationQuery(
             self, "GetSPUserInformation", params, None, None, return_type

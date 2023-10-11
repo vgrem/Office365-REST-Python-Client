@@ -1,5 +1,3 @@
-import datetime
-
 from office365.directory.permissions.grants.resource_specific import (
     ResourceSpecificPermissionGrant,
 )

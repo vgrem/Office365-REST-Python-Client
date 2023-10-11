@@ -6,7 +6,6 @@ https://learn.microsoft.com/en-us/graph/api/channel-doesuserhaveaccess?view=grap
 import sys
 
 from office365.graph_client import GraphClient
-from office365.teams.team import Team
 from tests import test_user_principal_name
 from tests.graph_case import acquire_token_by_client_credentials
 

@@ -1,7 +1,4 @@
 from office365.runtime.client_value import ClientValue
-from office365.sharepoint.listitems.collection_position import (
-    ListItemCollectionPosition,
-)
 from office365.sharepoint.views.scope import ViewScope
 
 

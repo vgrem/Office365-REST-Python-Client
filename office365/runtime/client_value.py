@@ -1,6 +1,4 @@
-from typing import Any, Iterator, Tuple, TypeVar
-
-from typing_extensions import Self
+from typing import TypeVar
 
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 

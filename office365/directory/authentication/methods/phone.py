@@ -8,7 +8,9 @@ class PhoneAuthenticationMethod(AuthenticationMethod):
     to sign in via SMS.
 
     A phone has one of three types: mobile, alternate mobile, or office. A user can have one number registered
-    for each type, and must have a mobile phone before an alternate mobile phone is added. When using a phone for multi-factor authentication (MFA) or self-service password reset (SSPR), the mobile phone is the default and the alternate mobile phone is the backup.
+    for each type, and must have a mobile phone before an alternate mobile phone is added. When using a phone for
+    multi-factor authentication (MFA) or self-service password reset (SSPR), the mobile phone is the default and the
+    alternate mobile phone is the backup.
 
     Mobile phones can be used for both SMS and voice calls, depending on the tenant settings.
 

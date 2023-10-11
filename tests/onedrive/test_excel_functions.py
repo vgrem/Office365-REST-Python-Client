@@ -1,7 +1,5 @@
 import os
 
-from office365.onedrive.driveitems.driveItem import DriveItem
-from office365.onedrive.workbooks.tables.table import WorkbookTable
 from tests.graph_case import GraphTestCase
 
 

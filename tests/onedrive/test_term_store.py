@@ -1,10 +1,6 @@
 import uuid
 
 from office365.graph_client import GraphClient
-from office365.onedrive.termstore.groups.group import Group
-from office365.onedrive.termstore.sets.set import Set
-from office365.onedrive.termstore.store import Store
-from office365.onedrive.termstore.terms.term import Term
 from tests import test_root_site_url
 from tests.graph_case import GraphTestCase, acquire_token_by_client_credentials
 

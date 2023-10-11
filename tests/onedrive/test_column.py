@@ -1,4 +1,3 @@
-from office365.onedrive.columns.definition import ColumnDefinition
 from tests import create_unique_name
 from tests.graph_case import GraphTestCase
 

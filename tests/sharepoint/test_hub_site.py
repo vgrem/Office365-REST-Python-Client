@@ -1,5 +1,4 @@
 from office365.sharepoint.portal.hub_sites_utility import SPHubSitesUtility
-from office365.sharepoint.sites.site import Site
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 

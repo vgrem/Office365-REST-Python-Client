@@ -10,7 +10,7 @@ from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.read_entity import ReadEntityQuery
 
 if TYPE_CHECKING:
-    from office365.runtime.client_object import T
+    pass
 
 
 class ClientRuntimeContext(object):

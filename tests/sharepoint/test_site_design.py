@@ -1,7 +1,6 @@
 from uuid import UUID
 
 from office365.sharepoint.sitedesigns.creation_info import SiteDesignCreationInfo
-from office365.sharepoint.sitedesigns.metadata import SiteDesignMetadata
 from office365.sharepoint.sitescripts.utility import SiteScriptUtility
 from tests.sharepoint.sharepoint_case import SPTestCase
 

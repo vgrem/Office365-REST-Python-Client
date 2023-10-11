@@ -1,8 +1,5 @@
-import json
 import re
 
-from office365.runtime.client_value import ClientValue
-from office365.runtime.compat import is_string_type
 from office365.runtime.paths.resource_path import ResourcePath
 
 

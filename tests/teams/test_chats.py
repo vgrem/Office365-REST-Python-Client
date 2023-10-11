@@ -1,4 +1,3 @@
-from office365.teams.chats.chat import Chat
 from tests.graph_case import GraphTestCase
 
 

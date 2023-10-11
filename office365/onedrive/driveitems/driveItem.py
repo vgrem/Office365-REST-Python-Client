@@ -1,8 +1,5 @@
 import os
-from datetime import datetime
-from typing import IO, TYPE_CHECKING, Callable, Optional, TypeVar
-
-from typing_extensions import Self
+from typing import TYPE_CHECKING, TypeVar
 
 from office365.base_item import BaseItem
 from office365.delta_path import DeltaPath
@@ -50,9 +47,7 @@ from office365.runtime.queries.upload_session import UploadSessionQuery
 from office365.subscriptions.collection import SubscriptionCollection
 
 if TYPE_CHECKING:
-    from office365.onedrive.driveitems.drive_item_uploadable_properties import (
-        DriveItemUploadableProperties,
-    )
+    pass
 
 P_T = TypeVar("P_T")
 
@@ -98,8 +93,8 @@ class DriveItem(BaseItem):
 
         :param str link_type: The type of sharing link to create. Either view, edit, or embed.
         :param str scope:  The scope of link to create. Either anonymous or organization.
-        :param str or datetime.datetime expiration_datetime: A String with format of yyyy-MM-ddTHH:mm:ssZ of DateTime indicates
-            the expiration time of the permission.
+        :param str or datetime.datetime expiration_datetime: A String with format of yyyy-MM-ddTHH:mm:ssZ of DateTime
+            indicates the expiration time of the permission.
         :param str password: The password of the sharing link that is set by the creator. Optional
             and OneDrive Personal only.
         :param str message:

@@ -10,7 +10,6 @@ from office365.sharepoint.search.query.auto_completion_results import (
     QueryAutoCompletionResults,
 )
 from office365.sharepoint.search.query.popular_tenant_query import PopularTenantQuery
-from office365.sharepoint.search.query.sort.sort import Sort
 from office365.sharepoint.search.query.suggestion_results import QuerySuggestionResults
 from office365.sharepoint.search.query.tenant_custom_query_suggestions import (
     TenantCustomQuerySuggestions,

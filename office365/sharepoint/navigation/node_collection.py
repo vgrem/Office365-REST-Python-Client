@@ -1,8 +1,13 @@
+from typing import TYPE_CHECKING
+
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.navigation.node import NavigationNode
+
+if TYPE_CHECKING:
+    pass
 
 
 class NavigationNodeCollection(EntityCollection):
@@ -12,11 +17,8 @@ class NavigationNodeCollection(EntityCollection):
         )
 
     def add(self, create_node_info):
-        """
-        Creates a navigation node object and adds it to the collection.
-
-        :type create_node_info: office365.sharepoint.navigation.node_creation_information.NavigationNodeCreationInformation
-        """
+        # type: (NavigationNodeCreationInformation) -> NavigationNode
+        """Creates a navigation node object and adds it to the collection."""
         return_type = NavigationNode(self.context)
         return_type.title = create_node_info.Title
         return_type.url = create_node_info.Url

@@ -1,4 +1,3 @@
-from office365.sharepoint.navigation.node import NavigationNode
 from office365.sharepoint.navigation.node_collection import NavigationNodeCollection
 from office365.sharepoint.navigation.node_creation_information import (
     NavigationNodeCreationInformation,

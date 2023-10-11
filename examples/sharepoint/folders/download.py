@@ -5,8 +5,6 @@ import os
 import tempfile
 
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.files.file import File
-from office365.sharepoint.folders.folder import Folder
 from tests import test_client_credentials, test_team_site_url
 
 

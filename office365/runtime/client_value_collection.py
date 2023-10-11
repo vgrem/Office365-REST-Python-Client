@@ -1,7 +1,5 @@
 import uuid
-from typing import Any, Dict, Generic, Iterator, List, Optional, TypeVar
-
-from typing_extensions import Self
+from typing import Generic, TypeVar
 
 from office365.runtime.client_value import ClientValue
 from office365.runtime.odata.type import ODataType

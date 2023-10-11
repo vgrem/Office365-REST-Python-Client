@@ -1,9 +1,6 @@
 from unittest import TestCase
 
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.marketplace.tenant.appcatalog.accessor import (
-    TenantCorporateCatalogAccessor,
-)
 from tests import test_admin_credentials, test_admin_site_url
 
 

@@ -2,7 +2,6 @@ import uuid
 from unittest import TestCase
 
 from office365.graph_client import GraphClient
-from office365.onedrive.contenttypes.content_type import ContentType
 from tests.graph_case import acquire_token_by_username_password
 
 

@@ -5,7 +5,6 @@ https://learn.microsoft.com/en-us/onedrive/developer/rest-api/api/site_list_subs
 """
 
 from office365.graph_client import GraphClient
-from office365.onedrive.sites.site import Site
 from tests.graph_case import acquire_token_by_client_credentials
 
 client = GraphClient(acquire_token_by_client_credentials)

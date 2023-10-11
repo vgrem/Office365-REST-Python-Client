@@ -5,7 +5,6 @@ https://learn.microsoft.com/en-us/graph/teams-list-all-teams?context=graph%2Fapi
 """
 
 from office365.graph_client import GraphClient
-from office365.teams.team import Team
 from tests.graph_case import acquire_token_by_client_credentials
 
 client = GraphClient(acquire_token_by_client_credentials)

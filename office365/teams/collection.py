@@ -1,4 +1,3 @@
-from office365.directory.groups.group import Group
 from office365.entity_collection import EntityCollection
 from office365.runtime.odata.path_builder import ODataPathBuilder
 from office365.runtime.paths.resource_path import ResourcePath

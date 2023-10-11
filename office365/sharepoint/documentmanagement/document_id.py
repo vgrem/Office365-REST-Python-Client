@@ -36,8 +36,8 @@ class DocumentId(Entity):
         Performs the same function as ResetDocIdByServerRelativePath (section 3.1.5.10.2.1.1), but for every
         document in the specified document library.
 
-        :param str decoded_url: Server relative path to the document library, for which all document identifiers MUST be reset to guarantee
-            global uniqueness in the farm.
+        :param str decoded_url: Server relative path to the document library, for which all document identifiers
+            MUST be reset to guarantee global uniqueness in the farm.
         :param str content_type_id: The content type identifier.
         """
         payload = {"DecodedUrl": decoded_url, "contentTypeId": content_type_id}

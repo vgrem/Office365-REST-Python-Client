@@ -1,7 +1,6 @@
 import datetime
 
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.entity import Entity
 
 

@@ -1,4 +1,3 @@
-from office365.onedrive.driveitems.driveItem import DriveItem
 from tests import create_unique_name
 from tests.graph_case import GraphTestCase
 from tests.onedrive.test_excel import upload_excel

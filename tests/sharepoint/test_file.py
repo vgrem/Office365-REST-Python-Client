@@ -3,7 +3,6 @@ from io import BytesIO
 
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.files.file import File
-from office365.sharepoint.folders.folder import Folder
 from tests import create_unique_name, test_client_credentials
 from tests.sharepoint.sharepoint_case import SPTestCase
 

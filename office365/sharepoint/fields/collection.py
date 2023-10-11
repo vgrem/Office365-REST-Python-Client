@@ -66,10 +66,10 @@ class FieldCollection(EntityCollection[Field]):
             """
             if allow_multiple_values:
                 field_schema = """
-                            <Field Type="LookupMulti" Mult="TRUE" DisplayName="{title}" Required="FALSE" Hidden="TRUE" \
-                            ShowField="{lookup_field_name}" List="{{{lookup_list_id}}}" StaticName="{title}" Name="{title}">
-                            </Field>
-                            """.format(
+                <Field Type="LookupMulti" Mult="TRUE" DisplayName="{title}" Required="FALSE" Hidden="TRUE" \
+                ShowField="{lookup_field_name}" List="{{{lookup_list_id}}}" StaticName="{title}" Name="{title}">
+                </Field>
+                """.format(
                     title=title,
                     lookup_field_name=lookup_field_name,
                     lookup_list_id=lookup_list_id,
@@ -134,7 +134,8 @@ class FieldCollection(EntityCollection[Field]):
         """Adds a secondary lookup field to a field collection (target).
         Args:
             display_name (str): title of the added field in the target FieldCollection.
-            primary_lookup_field_id (str): ID of the main lookup-field in the target to associate the dependent lookup field with.
+            primary_lookup_field_id (str): ID of the main lookup-field in the target to associate the dependent lookup
+                field with.
             show_field (str): name of the field from the source list to include data from.
         Returns:
             Field: reference to the SP.Field that was added.

@@ -1,6 +1,5 @@
 from office365.outlook.mail.attachments.attachment_item import AttachmentItem
 from office365.outlook.mail.attachments.attachment_type import AttachmentType
-from office365.outlook.mail.messages.message import Message
 from tests.graph_case import GraphTestCase
 
 

@@ -1,6 +1,5 @@
 import uuid
 
-from office365.sharepoint.principal.groups.group import Group
 from tests import test_user_principal_name
 from tests.sharepoint.sharepoint_case import SPTestCase
 

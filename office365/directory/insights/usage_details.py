@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from office365.runtime.client_value import ClientValue
 
 

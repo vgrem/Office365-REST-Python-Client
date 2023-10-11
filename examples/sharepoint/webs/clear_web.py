@@ -1,6 +1,5 @@
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.lists.list import List
-from tests import test_client_credentials, test_site_url, test_team_site_url
+from tests import test_client_credentials, test_site_url
 
 
 def print_progress(num_deleted):

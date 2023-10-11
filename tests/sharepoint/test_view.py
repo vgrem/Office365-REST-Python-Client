@@ -2,14 +2,11 @@ import uuid
 
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.fields.creation_information import FieldCreationInformation
-from office365.sharepoint.fields.field import Field
 from office365.sharepoint.fields.type import FieldType
 from office365.sharepoint.lists.creation_information import ListCreationInformation
-from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.template_type import ListTemplateType
 from office365.sharepoint.views.create_information import ViewCreationInformation
 from office365.sharepoint.views.field_collection import ViewFieldCollection
-from office365.sharepoint.views.view import View
 from tests import create_unique_name
 from tests.sharepoint.sharepoint_case import SPTestCase
 

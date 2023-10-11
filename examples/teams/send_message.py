@@ -6,7 +6,6 @@ import sys
 
 from office365.graph_client import GraphClient
 from office365.outlook.mail.item_body import ItemBody
-from office365.teams.team import Team
 from tests.graph_case import acquire_token_by_username_password
 
 client = GraphClient(acquire_token_by_username_password)

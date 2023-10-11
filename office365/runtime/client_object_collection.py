@@ -1,10 +1,6 @@
-from typing import Generic, Iterator, List, Optional, TypeVar
-
-from typing_extensions import Self
+from typing import Generic, TypeVar
 
 from office365.runtime.client_object import ClientObject
-from office365.runtime.client_runtime_context import ClientRuntimeContext
-from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.event_handler import EventHandler
 
 T = TypeVar("T")

@@ -26,7 +26,7 @@ class EmployeeEngagement(Entity):
         return return_type
 
     def viva_home_configuration(self):
-        return_type = ClientResult(self.context, dict())
+        return_type = ClientResult(self.context, {})
         qry = FunctionQuery(self, "VivaHomeConfiguration", None, return_type)
         self.context.add_query(qry)
         return return_type

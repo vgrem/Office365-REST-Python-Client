@@ -9,7 +9,6 @@ from office365.sharepoint.tenant.administration.settings_service import (
 from office365.sharepoint.tenant.administration.sharing_capabilities import (
     SharingCapabilities,
 )
-from office365.sharepoint.tenant.administration.sites.properties import SiteProperties
 from office365.sharepoint.tenant.administration.sites.properties_collection import (
     SitePropertiesCollection,
 )
@@ -78,7 +77,9 @@ class TestTenant(TestCase):
     #    target_site = self.client.site.get()
     #    target_user = self.client.web.ensure_user("jdoe@mediadev8.onmicrosoft.com")
     #    self.client.execute_batch()
-    #    #self.tenant.set_site_secondary_administrators(target_site.id, [target_user.login_name], [target_user.login_name])
+    #    #self.tenant.set_site_secondary_administrators(
+    #       target_site.id, [target_user.login_name], [target_user.login_name]
+    #       )
     #    self.tenant.set_site_secondary_administrators(target_site.id, [target_user.user_principal_name])
     #    self.client.execute_query()
 
