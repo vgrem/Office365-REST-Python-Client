@@ -9,10 +9,9 @@ from office365.sharepoint.taxonomy.field_value import (
 )
 from tests import create_unique_name, test_client_credentials, test_team_site_url
 
-print("Creating a custom list...")
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 
-
+print("Creating a custom list...")
 custom_list = ctx.web.add_list(create_unique_name("Custom List")).execute_query()
 
 print("Adding a taxonomy field into list '{0}'...".format(custom_list.title))

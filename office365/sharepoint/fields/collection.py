@@ -2,7 +2,9 @@ from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity_collection import EntityCollection
+from office365.sharepoint.fields.calculated import FieldCalculated
 from office365.sharepoint.fields.creation_information import FieldCreationInformation
+from office365.sharepoint.fields.date_time import FieldDateTime
 from office365.sharepoint.fields.field import Field
 from office365.sharepoint.fields.type import FieldType
 from office365.sharepoint.fields.xmlSchemaFieldCreationInformation import (
@@ -17,6 +19,38 @@ class FieldCollection(EntityCollection[Field]):
 
     def __init__(self, context, resource_path=None, parent=None):
         super(FieldCollection, self).__init__(context, Field, resource_path, parent)
+
+    def add_calculated(self, title, formula, description=None):
+        """
+        Creates a Calculated field
+        :param str title: Specifies the display name of the field
+        :param str formula: Specifies the formula for the field
+        :param str or None description: Specifies the description of the field
+        """
+        return_type = self.add(
+            FieldCreationInformation(
+                title=title,
+                formula=formula,
+                field_type_kind=FieldType.Calculated,
+                description=description,
+            )
+        )  # type: FieldCalculated
+        return return_type
+
+    def add_datetime(self, title, description=None):
+        """
+        Creates DateTime field
+        :param str title: Specifies the display name of the field
+        :param str or None description: Specifies the description of the field
+        """
+        return_type = self.add(
+            FieldCreationInformation(
+                title=title,
+                description=description,
+                field_type_kind=FieldType.DateTime,
+            )
+        )  # type: FieldDateTime
+        return return_type
 
     def add_geolocation_field(self, title, description=None):
         """
@@ -37,7 +71,7 @@ class FieldCollection(EntityCollection[Field]):
         """
         Creates Url field
 
-        :param str title:
+        :param str title: Specifies the display name of the field
         :param str or None description:
         """
         return self.add(
@@ -58,7 +92,9 @@ class FieldCollection(EntityCollection[Field]):
         :param str or office365.sharepoint.lists.list.List lookup_list: Lookup List object or identifier
         :param str title: Specifies the display name of the field.
         """
-        return_type = Field(self.context)
+        from office365.sharepoint.fields.lookup import FieldLookup
+
+        return_type = FieldLookup(self.context)
 
         def _add_lookup_field(lookup_list_id):
             """

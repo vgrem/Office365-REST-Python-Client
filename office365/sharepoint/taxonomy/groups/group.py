@@ -18,12 +18,12 @@ class TermGroup(TaxonomyItem):
         return_type = TermSetCollection(self.context)
 
         def _sets_loaded(col):
-            """
-            :type col: TermSetCollection
-            """
-            for ts in col:  # type: TermSet
-                if str(ts.localized_names[0]) == label:
-                    return_type.add_child(ts)
+            # type: (TermSetCollection) -> None
+            [
+                return_type.add_child(ts)
+                for ts in col
+                if str(ts.localized_names[0]) == label
+            ]
 
         def _group_resolved():
             self.context.load(self.term_sets, after_loaded=_sets_loaded)

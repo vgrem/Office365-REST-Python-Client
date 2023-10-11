@@ -10,7 +10,7 @@ from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.read_entity import ReadEntityQuery
 
 if TYPE_CHECKING:
-    from office365.runtime.client_object import T
+    pass
 
 
 class ClientRuntimeContext(object):
@@ -217,16 +217,17 @@ class ClientRuntimeContext(object):
         return self
 
     def get_metadata(self):
-        return_type = ClientResult(self)
+        """Loads API metadata"""
+        return_type = ClientResult(self)  # type: ClientResult[bytes]
 
-        def _construct_download_request(request):
+        def _construct_request(request):
             """
             :type request: office365.runtime.http.request_options.RequestOptions
             """
             request.url += "/$metadata"
             request.method = HttpMethod.Get
 
-        def _process_download_response(response):
+        def _process_response(response):
             """
             :type response: requests.Response
             """
@@ -234,9 +235,9 @@ class ClientRuntimeContext(object):
             return_type.set_property("__value", response.content)
 
         qry = ClientQuery(self)
-        self.before_execute(_construct_download_request)
-        self.after_execute(_process_download_response)
-        self.add_query(qry)
+        self.add_query(qry).before_execute(_construct_request).after_execute(
+            _process_response
+        )
         return return_type
 
     def _get_next_query(self, count=1):
