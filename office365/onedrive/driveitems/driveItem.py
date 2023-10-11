@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import IO, TYPE_CHECKING, Callable, Optional, TypeVar
+from typing import IO, Callable, Optional, TypeVar
 
 from typing_extensions import Self
 
@@ -19,6 +19,9 @@ from office365.onedrive.driveitems.publication_facet import PublicationFacet
 from office365.onedrive.driveitems.remote_item import RemoteItem
 from office365.onedrive.driveitems.special_folder import SpecialFolder
 from office365.onedrive.driveitems.thumbnail_set import ThumbnailSet
+from office365.onedrive.driveitems.uploadable_properties import (
+    DriveItemUploadableProperties,
+)
 from office365.onedrive.drives.recipient import DriveRecipient
 from office365.onedrive.files.file import File
 from office365.onedrive.files.system_info import FileSystemInfo
@@ -48,11 +51,6 @@ from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.queries.upload_session import UploadSessionQuery
 from office365.subscriptions.collection import SubscriptionCollection
-
-if TYPE_CHECKING:
-    from office365.onedrive.driveitems.drive_item_uploadable_properties import (
-        DriveItemUploadableProperties,
-    )
 
 P_T = TypeVar("P_T")
 
@@ -90,7 +88,7 @@ class DriveItem(BaseItem):
         message=None,
         retain_inherited_permissions=None,
     ):
-        # type: (str, Optional[str], Optional[datetime.datetime], Optional[str], Optional[str], Optional[bool]) -> Permission
+        # type: (str, Optional[str], Optional[datetime], Optional[str], Optional[str], Optional[bool]) -> Permission
         """
         The createLink action will create a new sharing link if the specified link type doesn't already exist
         for the calling application. If a sharing link of the specified type already exists for the app,
@@ -98,8 +96,8 @@ class DriveItem(BaseItem):
 
         :param str link_type: The type of sharing link to create. Either view, edit, or embed.
         :param str scope:  The scope of link to create. Either anonymous or organization.
-        :param str or datetime.datetime expiration_datetime: A String with format of yyyy-MM-ddTHH:mm:ssZ of DateTime indicates
-            the expiration time of the permission.
+        :param str or datetime.datetime expiration_datetime: A String with format of yyyy-MM-ddTHH:mm:ssZ of DateTime
+            indicate the expiration time of the permission.
         :param str password: The password of the sharing link that is set by the creator. Optional
             and OneDrive Personal only.
         :param str message:
@@ -124,7 +122,7 @@ class DriveItem(BaseItem):
         return return_type
 
     def extract_sensitivity_labels(self):
-        # type: () -> ClientValueCollection[SensitivityLabelAssignment]
+        # type: () -> ClientResult[ExtractSensitivityLabelsResult]
         """
         Extract one or more sensitivity labels assigned to a drive item and update the metadata of a drive
         item with the latest details of the assigned label. In case of failure to extract the sensitivity labels
@@ -181,7 +179,7 @@ class DriveItem(BaseItem):
         return self
 
     def resumable_upload(self, source_path, chunk_size=2000000, chunk_uploaded=None):
-        # type: (str, int, str) -> DriveItem
+        # type: (str, int, Optional[Callable[[int], None]]) -> DriveItem
         """
         Create an upload session to allow your app to upload files up to the maximum file size.
         An upload session allows your app to upload ranges of the file in sequential API requests,
@@ -257,7 +255,7 @@ class DriveItem(BaseItem):
             return self.upload(name, content)
 
     def get_content(self, format_name=None):
-        # type: (Optional[str]) -> ClientResult
+        # type: (Optional[str]) -> ClientResult[bytes]
         """
         Download the contents of the primary stream (file) of a DriveItem.
         Only driveItems with the file property can be downloaded.
@@ -473,7 +471,7 @@ class DriveItem(BaseItem):
         password=None,
         retain_inherited_permissions=None,
     ):
-        # type: (list[str], str, Optional[bool], Optional[bool], Optional[list[str]], Optional[datetime.datetime], Optional[str], Optional[bool]) -> PermissionCollection
+        # type: (list[str], str, Optional[bool], Optional[bool], Optional[list[str]], Optional[datetime], Optional[str], Optional[bool]) -> PermissionCollection
         """
         Sends a sharing invitation for a driveItem. A sharing invitation provides permissions to the recipients
         and optionally sends them an email with a sharing link.
@@ -571,7 +569,7 @@ class DriveItem(BaseItem):
         return return_type
 
     def preview(self, page, zoom=None):
-        # type: (str or int, int or None) -> ItemPreviewInfo
+        # type: (str or int, int or None) -> ClientResult[ItemPreviewInfo]
         """
         This action allows you to obtain a short-lived embeddable URL for an item in order
         to render a temporary preview.

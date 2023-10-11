@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity import Entity
@@ -61,6 +62,7 @@ class BaseItem(Entity):
 
     @property
     def name(self):
+        # type: () -> Optional[str]
         """Gets the name of the item."""
         return self.properties.get("name", None)
 

@@ -3,7 +3,7 @@ from office365.onedrive.columns.definition import ColumnDefinition
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
 
-class ColumnDefinitionCollection(EntityCollection):
+class ColumnDefinitionCollection(EntityCollection[ColumnDefinition]):
     def __init__(self, context, resource_path, parent):
         super(ColumnDefinitionCollection, self).__init__(
             context, ColumnDefinition, resource_path, parent

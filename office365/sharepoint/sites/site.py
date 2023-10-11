@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -605,10 +606,9 @@ class Site(Entity):
 
     @property
     def url(self):
+        # type: () -> Optional[str]
         """
-        Specifies the full URL of the site (2), including host name, port number and path.
-
-        :rtype: str
+        Specifies the full URL of the site (2), including host name, port number and path
         """
         return self.properties.get("Url", None)
 

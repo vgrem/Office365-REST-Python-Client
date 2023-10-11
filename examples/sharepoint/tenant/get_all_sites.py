@@ -1,5 +1,5 @@
 """
-
+Retrieves sites in tenant
 """
 
 from office365.sharepoint.client_context import ClientContext

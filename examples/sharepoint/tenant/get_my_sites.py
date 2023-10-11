@@ -1,6 +1,5 @@
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.tenant.administration.sites.properties import SiteProperties
 from office365.sharepoint.tenant.administration.tenant import Tenant
 from tests import test_admin_credentials, test_admin_site_url, test_user_principal_name
 
@@ -24,7 +23,7 @@ def try_get_user_permissions(site_url, user_name):
             raise ValueError(e.response.text)
 
 
-for siteProps in result:  # type: SiteProperties
+for siteProps in result:
     print("Current site url: {0}".format(siteProps.url))
     if try_get_user_permissions(siteProps.url, test_user_principal_name) is True:
         print(

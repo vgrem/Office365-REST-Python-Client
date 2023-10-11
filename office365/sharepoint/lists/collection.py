@@ -5,7 +5,7 @@ from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.lists.list import List
 
 
-class ListCollection(EntityCollection):
+class ListCollection(EntityCollection[List]):
     """Specifies a collection of lists."""
 
     def __init__(self, context, resource_path=None):

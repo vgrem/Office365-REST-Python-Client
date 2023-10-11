@@ -30,7 +30,7 @@ class BookingBusiness(Entity):
         """
         return_type = ClientResult(
             self.context, ClientValueCollection(StaffAvailabilityItem)
-        )
+        )  # type: ClientResult[ClientValueCollection[StaffAvailabilityItem]]
         payload = {
             "staffIds": staff_ids,
             "startDateTime": start_datetime,

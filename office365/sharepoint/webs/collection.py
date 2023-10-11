@@ -3,7 +3,7 @@ from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.webs.web import Web
 
 
-class WebCollection(EntityCollection):
+class WebCollection(EntityCollection[Web]):
     """Web collection"""
 
     def __init__(self, context, resource_path=None, parent_web=None):

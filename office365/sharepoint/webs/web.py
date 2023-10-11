@@ -1,5 +1,6 @@
 # coding=utf-8
 import datetime
+from typing import Optional
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -2180,9 +2181,8 @@ class Web(SecurableObject):
 
     @property
     def url(self):
-        """Gets the absolute URL for the website.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the absolute URL for the website."""
         return self.properties.get("Url", None)
 
     @property
