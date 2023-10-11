@@ -1,4 +1,7 @@
 import os
+from typing import IO, Optional, TypeVar
+
+from typing_extensions import Self
 
 from office365.base_item import BaseItem
 from office365.delta_path import DeltaPath
@@ -45,6 +48,8 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.queries.upload_session import UploadSessionQuery
 from office365.subscriptions.collection import SubscriptionCollection
 
+P_T = TypeVar("P_T")
+
 
 class DriveItem(BaseItem):
     """The driveItem resource represents a file, folder, or other item stored in a drive. All file system objects in
@@ -62,6 +67,7 @@ class DriveItem(BaseItem):
         )
 
     def create_powerpoint(self, name):
+        # type: (str) -> DriveItem
         """
         Creates a PowerPoint file
 
@@ -72,12 +78,13 @@ class DriveItem(BaseItem):
     def create_link(
         self,
         link_type,
-        scope="",
+        scope=None,
         expiration_datetime=None,
         password=None,
         message=None,
         retain_inherited_permissions=None,
     ):
+        # type: (str, Optional[str], Optional[datetime.datetime], Optional[str], Optional[str], Optional[bool]) -> Permission
         """
         The createLink action will create a new sharing link if the specified link type doesn't already exist
         for the calling application. If a sharing link of the specified type already exists for the app,
@@ -96,7 +103,7 @@ class DriveItem(BaseItem):
         """
         payload = {
             "type": link_type,
-            "scope": scope,
+            "scope": scope or "",
             "message": message,
             "expirationDateTime": expiration_datetime,
             "password": password,
@@ -111,6 +118,7 @@ class DriveItem(BaseItem):
         return return_type
 
     def extract_sensitivity_labels(self):
+        # type: () -> ClientValueCollection[SensitivityLabelAssignment]
         """
         Extract one or more sensitivity labels assigned to a drive item and update the metadata of a drive
         item with the latest details of the assigned label. In case of failure to extract the sensitivity labels
@@ -124,6 +132,7 @@ class DriveItem(BaseItem):
         return return_type
 
     def follow(self):
+        # type: () -> Self
         """
         Follow a driveItem.
         """
@@ -132,6 +141,7 @@ class DriveItem(BaseItem):
         return self
 
     def unfollow(self):
+        # type: () -> Self
         """
         Unfollow a driveItem.
         """
@@ -140,6 +150,7 @@ class DriveItem(BaseItem):
         return self
 
     def checkout(self):
+        # type: () -> Self
         """
         Check out a driveItem resource to prevent others from editing the document, and prevent your changes
         from being visible until the documented is checked in.
@@ -148,7 +159,8 @@ class DriveItem(BaseItem):
         self.context.add_query(qry)
         return self
 
-    def checkin(self, comment, checkin_as=""):
+    def checkin(self, comment, checkin_as=None):
+        # type: (str, Optional[str]) -> Self
         """
         Check in a checked out driveItem resource, which makes the version of the document available to others.
 
@@ -157,12 +169,13 @@ class DriveItem(BaseItem):
             Can be published or unspecified.
         """
         qry = ServiceOperationQuery(
-            self, "checkin", None, {"comment": comment, "checkInAs": checkin_as}
+            self, "checkin", None, {"comment": comment, "checkInAs": checkin_as or ""}
         )
         self.context.add_query(qry)
         return self
 
     def resumable_upload(self, source_path, chunk_size=2000000, chunk_uploaded=None):
+        # type: (str, int, str) -> DriveItem
         """
         Create an upload session to allow your app to upload files up to the maximum file size.
         An upload session allows your app to upload ranges of the file in sequential API requests,
@@ -221,6 +234,7 @@ class DriveItem(BaseItem):
         return return_type
 
     def upload_file(self, path_or_file):
+        # type: (str or IO) -> DriveItem
         """Uploads a file
 
         :param str or typing.IO path_or_file:
@@ -236,6 +250,7 @@ class DriveItem(BaseItem):
             return self.upload(name, content)
 
     def get_content(self, format_name=None):
+        # type: (Optional[str]) -> ClientResult
         """
         Download the contents of the primary stream (file) of a DriveItem.
         Only driveItems with the file property can be downloaded.
@@ -251,6 +266,7 @@ class DriveItem(BaseItem):
         return return_type
 
     def download(self, file_object):
+        # type: (IO) -> Self
         """
         Download the contents of the primary stream (file) of a DriveItem. Only driveItems with the file property
         can be downloaded
@@ -270,6 +286,7 @@ class DriveItem(BaseItem):
     def download_session(
         self, file_object, chunk_downloaded=None, chunk_size=1024 * 1024
     ):
+        # type: (IO, Optional[(int)->None], Optional[int]) -> Self
         """
         By default, file gets downloaded immediately.
         For a large files reading the whole content of a file at once into memory should be avoided.
@@ -303,6 +320,7 @@ class DriveItem(BaseItem):
         return self
 
     def create_folder(self, name, conflict_behavior=ConflictBehavior.Rename):
+        # type: (str, Optional[ConflictBehavior]) -> DriveItem
         """Create a new folder or DriveItem in a Drive with a specified parent item or path.
 
         :param str name: Folder name
@@ -320,6 +338,7 @@ class DriveItem(BaseItem):
         return return_type
 
     def convert(self, format_name):
+        # type: (str) -> ClientResult
         """Converts the contents of an item in a specific format
 
         :param format_name: Specify the format the item's content should be downloaded as.
@@ -416,12 +435,14 @@ class DriveItem(BaseItem):
         return return_type
 
     def rename(self, new_name):
+        # type: (str) -> DriveItem
         """Rename a DriveItem
         :param str new_name: The new name for the rename.
         """
         return self.move(name=new_name)
 
     def search(self, query_text):
+        # type: (str) -> EntityCollection[DriveItem]
         """Search the hierarchy of items for items matching a query. You can search within a folder hierarchy,
         a whole drive, or files shared with the current user.
 
@@ -445,6 +466,7 @@ class DriveItem(BaseItem):
         password=None,
         retain_inherited_permissions=None,
     ):
+        # type: (list[str], str, Optional[bool], Optional[bool], Optional[list[str]], Optional[datetime.datetime], Optional[str], Optional[bool]) -> PermissionCollection
         """
         Sends a sharing invitation for a driveItem. A sharing invitation provides permissions to the recipients
         and optionally sends them an email with a sharing link.
@@ -524,6 +546,7 @@ class DriveItem(BaseItem):
         return self
 
     def restore(self, parent_reference=None, name=None):
+        # type: (ItemReference or None, str or None) -> DriveItem
         """
         Restore a driveItem that has been deleted and is currently in the recycle bin.
         NOTE: This functionality is currently only available for OneDrive Personal.
@@ -541,6 +564,7 @@ class DriveItem(BaseItem):
         return return_type
 
     def preview(self, page, zoom=None):
+        # type: (str or int, int or None) -> ItemPreviewInfo
         """
         This action allows you to obtain a short-lived embeddable URL for an item in order
         to render a temporary preview.
@@ -557,6 +581,7 @@ class DriveItem(BaseItem):
         return return_type
 
     def validate_permission(self, challenge_token=None, password=None):
+        # type: (str or None, str or None) -> Self
         """
         :type challenge_token: str
         :type password: str
@@ -568,6 +593,7 @@ class DriveItem(BaseItem):
 
     @property
     def audio(self):
+        # type: () -> Audio
         """
         Audio metadata, if the item is an audio file. Read-only.
         """
@@ -575,6 +601,7 @@ class DriveItem(BaseItem):
 
     @property
     def image(self):
+        # type: () -> Image
         """
         Image metadata, if the item is an image. Read-only.
         """
@@ -582,6 +609,7 @@ class DriveItem(BaseItem):
 
     @property
     def photo(self):
+        # type: () -> Photo
         """
         Photo metadata, if the item is a photo. Read-only.
         """
@@ -589,6 +617,7 @@ class DriveItem(BaseItem):
 
     @property
     def location(self):
+        # type: () -> GeoCoordinates
         """
         Location metadata, if the item has location data. Read-only.
         """
@@ -596,37 +625,44 @@ class DriveItem(BaseItem):
 
     @property
     def file_system_info(self):
+        # type: () -> FileSystemInfo
         """File system information on client."""
         return self.properties.get("fileSystemInfo", FileSystemInfo())
 
     @property
     def folder(self):
+        # type: () -> Folder
         """Folder metadata, if the item is a folder."""
         return self.properties.get("folder", Folder())
 
     @property
     def file(self):
+        # type: () -> File
         """File metadata, if the item is a file."""
         return self.properties.get("file", File())
 
     @property
     def is_folder(self):
+        # type: () -> bool
         """Determines whether the provided drive item is folder facet"""
         return self.is_property_available("folder")
 
     @property
     def is_file(self):
+        # type: () -> bool
         """Determines whether the provided drive item is file facet"""
         return self.is_property_available("file")
 
     @property
     def shared(self):
+        # type: () -> Shared
         """Indicates that the item has been shared with others and provides information about the shared state
         of the item. Read-only."""
         return self.properties.get("shared", Shared())
 
     @property
     def web_dav_url(self):
+        # type: () -> str or None
         """
         WebDAV compatible URL for the item.
         :rtype: str or None
@@ -635,6 +671,7 @@ class DriveItem(BaseItem):
 
     @property
     def children(self):
+        # type: () -> EntityCollection[DriveItem]
         """Collection containing Item objects for the immediate children of Item. Only items representing folders
         have children.
         """
@@ -645,6 +682,7 @@ class DriveItem(BaseItem):
 
     @property
     def listItem(self):
+        # type: () -> ListItem
         """For drives in SharePoint, the associated document library list item."""
         return self.properties.get(
             "listItem",
@@ -653,6 +691,7 @@ class DriveItem(BaseItem):
 
     @property
     def workbook(self):
+        # type: () -> Workbook
         """For files that are Excel spreadsheets, accesses the workbook API to work with the spreadsheet's contents."""
         return self.properties.get(
             "workbook",
@@ -661,12 +700,14 @@ class DriveItem(BaseItem):
 
     @property
     def pending_operations(self):
+        # type: () -> PendingOperations
         """If present, indicates that one or more operations that might affect the state of the driveItem are pending
         completion. Read-only."""
         return self.properties.get("pendingOperations", PendingOperations())
 
     @property
     def permissions(self):
+        # type: () -> PermissionCollection
         """The set of permissions for the item. Read-only. Nullable."""
         return self.properties.get(
             "permissions",
@@ -677,6 +718,7 @@ class DriveItem(BaseItem):
 
     @property
     def publication(self):
+        # type: () -> PublicationFacet
         """Provides information about the published or checked-out state of an item,
         in locations that support such actions. This property is not returned by default. Read-only.
         """
@@ -684,16 +726,19 @@ class DriveItem(BaseItem):
 
     @property
     def remote_item(self):
+        # type: () -> RemoteItem
         """Remote item data, if the item is shared from a drive other than the one being accessed. Read-only."""
         return self.properties.get("remoteItem", RemoteItem())
 
     @property
     def special_folder(self):
+        # type: () -> SpecialFolder
         """If the current item is also available as a special folder, this facet is returned. Read-only."""
         return self.properties.get("specialFolder", SpecialFolder())
 
     @property
     def versions(self):
+        # type: () -> EntityCollection[DriveItemVersion]
         """The list of previous versions of the item. For more info, see getting previous versions.
         Read-only. Nullable."""
         return self.properties.get(
@@ -707,6 +752,7 @@ class DriveItem(BaseItem):
 
     @property
     def thumbnails(self):
+        # type: () -> EntityCollection[ThumbnailSet]
         """Collection containing ThumbnailSet objects associated with the item. For more info, see getting thumbnails.
         Read-only. Nullable."""
         return self.properties.get(
@@ -720,6 +766,7 @@ class DriveItem(BaseItem):
 
     @property
     def analytics(self):
+        # type: () -> ItemAnalytics
         """Analytics about the view activities that took place on this item."""
         return self.properties.get(
             "analytics",
@@ -728,6 +775,7 @@ class DriveItem(BaseItem):
 
     @property
     def delta(self):
+        # type: () -> EntityCollection[DriveItem]
         """This method allows your app to track changes to a drive item and its children over time."""
         return self.properties.get(
             "delta",
@@ -736,6 +784,7 @@ class DriveItem(BaseItem):
 
     @property
     def subscriptions(self):
+        # type: () -> SubscriptionCollection
         """The set of subscriptions on the driveItem."""
         return self.properties.get(
             "subscriptions",
@@ -745,6 +794,7 @@ class DriveItem(BaseItem):
         )
 
     def get_property(self, name, default_value=None):
+        # type: (str, P_T) -> P_T
         if default_value is None:
             property_mapping = {
                 "fileSystemInfo": self.file_system_info,
