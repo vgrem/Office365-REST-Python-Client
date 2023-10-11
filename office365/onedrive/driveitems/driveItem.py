@@ -1,5 +1,6 @@
 import os
-from typing import IO, Optional, TypeVar
+from datetime import datetime
+from typing import IO, TYPE_CHECKING, Callable, Optional, TypeVar
 
 from typing_extensions import Self
 
@@ -47,6 +48,11 @@ from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.queries.upload_session import UploadSessionQuery
 from office365.subscriptions.collection import SubscriptionCollection
+
+if TYPE_CHECKING:
+    from office365.onedrive.driveitems.drive_item_uploadable_properties import (
+        DriveItemUploadableProperties,
+    )
 
 P_T = TypeVar("P_T")
 
@@ -198,6 +204,7 @@ class DriveItem(BaseItem):
         return return_type
 
     def create_upload_session(self, item):
+        # type: (DriveItemUploadableProperties) -> ClientResult
         """Creates a temporary storage location where the bytes of the file will be saved until the complete file is
         uploaded.
 
@@ -286,7 +293,7 @@ class DriveItem(BaseItem):
     def download_session(
         self, file_object, chunk_downloaded=None, chunk_size=1024 * 1024
     ):
-        # type: (IO, Optional[(int)->None], Optional[int]) -> Self
+        # type: (IO, Callable[[int], None] or None, Optional[int]) -> Self
         """
         By default, file gets downloaded immediately.
         For a large files reading the whole content of a file at once into memory should be avoided.
