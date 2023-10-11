@@ -49,6 +49,7 @@ jobs:
     needs:
       - ruff
       - black
+      - pylint
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ env.DEFAULT_PYTHON }}
