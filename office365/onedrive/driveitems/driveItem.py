@@ -47,7 +47,15 @@ from office365.runtime.queries.upload_session import UploadSessionQuery
 from office365.subscriptions.collection import SubscriptionCollection
 
 if TYPE_CHECKING:
-    pass
+    from typing import IO, Callable, Optional  # noqa
+    from datetime import datetime  # noqa
+    from typing_extensions import Self  # noqa
+    from office365.onedrive.driveitems.uploadable_properties import (
+        DriveItemUploadableProperties,  # noqa
+    )
+    from office365.onedrive.sensitivitylabels.assignment import (
+        SensitivityLabelAssignment,  # noqa
+    )
 
 P_T = TypeVar("P_T")
 
