@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar
+=======
+from typing import TYPE_CHECKING, Any, TypeVar
+>>>>>>> 3ecd282d (isort)
 
 from office365.entity import Entity
 from office365.runtime.client_object_collection import ClientObjectCollection
