@@ -12,6 +12,7 @@ class ListCollection(EntityCollection[List]):
         super(ListCollection, self).__init__(context, List, resource_path)
 
     def get_by_title(self, list_title):
+        # type: (str) -> List
         """
         Returns the list with the specified display name.
 

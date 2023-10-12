@@ -1965,6 +1965,7 @@ class Web(SecurableObject):
 
     @property
     def lists(self):
+        # type: () -> ListCollection
         """Specifies the collection of lists that are contained in the site available to the current user based on the
         current user's permissions."""
         return self.properties.get(

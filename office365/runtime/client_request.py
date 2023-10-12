@@ -26,18 +26,12 @@ class ClientRequest(object):
 
     @abstractmethod
     def process_response(self, response, query):
-        """
-        :type response: requests.Response
-        :type query: office365.runtime.queries.client_query.ClientQuery
-        """
+        # type: (requests.Response, ClientQuery) -> None
         pass
 
     def execute_query(self, query):
-        """
-        Submits a pending request to the server
-
-        :type query: office365.runtime.queries.client_query.ClientQuery
-        """
+        # type: (ClientQuery) -> None
+        """Submits a pending request to the server"""
         try:
             request = self.build_request(query)
             response = self.execute_request_direct(request)
@@ -48,10 +42,8 @@ class ClientRequest(object):
             raise ClientRequestException(*e.args, response=e.response)
 
     def execute_request_direct(self, request):
-        """Execute the client request
-
-        :type request: office365.runtime.http.request_options.RequestOptions
-        """
+        # type: (RequestOptions) -> requests.Response
+        """Execute the client request"""
         self.beforeExecute.notify(request)
         if request.method == HttpMethod.Post:
             if request.is_bytes or request.is_file:

@@ -10,7 +10,6 @@ class MeetingTimeSuggestionsResult(ClientValue):
 
     def __init__(self, meeting_time_suggestions=None, empty_suggestions_reason=None):
         """
-
         :param list[MeetingTimeSuggestion] meeting_time_suggestions: An array of meeting suggestions.
         :param str empty_suggestions_reason: A reason for not returning any meeting suggestions.
             The possible values are: attendeesUnavailable, attendeesUnavailableOrUnknown, locationsUnavailable,

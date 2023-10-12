@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Generic, Optional, TypeVar
+from typing import TYPE_CHECKING, Callable, Generic, List, Optional, ParamSpec, TypeVar
 
 from typing_extensions import Self
 
@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 P_T = TypeVar("P_T")
 """Property Type."""
+P = ParamSpec("P")
 
 
 class ClientObject(Generic[T]):
@@ -174,6 +175,7 @@ class ClientObject(Generic[T]):
         return self
 
     def ensure_property(self, name, action, *args, **kwargs):
+        # type: (str, Callable[[], None], P.args, P.kwargs) -> Self
         """
         Ensures if property is loaded
 
@@ -183,11 +185,9 @@ class ClientObject(Generic[T]):
         return self.ensure_properties([name], action, *args, **kwargs)
 
     def ensure_properties(self, names, action, *args, **kwargs):
+        # type: (List[str], Callable[[P], None], P.args, P.kwargs) -> Self
         """
         Ensure if list of properties are retrieved from the server
-
-        :type action: (any) -> None
-        :type names: str or list[str]
         """
         if self.property_ref_name is not None and self.property_ref_name not in names:
             names.append(self.property_ref_name)
@@ -211,19 +211,14 @@ class ClientObject(Generic[T]):
 
     @property
     def property_ref_name(self):
-        """Returns property reference name
-
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Returns property reference name"""
         return None
 
     @property
     def resource_url(self):
-        """
-        Returns resource url
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Returns resource url"""
         if self.resource_path is None:
             return None
         return self.context.service_root_url() + str(self.resource_path)
@@ -250,11 +245,8 @@ class ClientObject(Generic[T]):
         return self._parent_collection
 
     def to_json(self, json_format=None):
-        """
-        Serializes client object
-
-        :type json_format: office365.runtime.odata.json_format.ODataJsonFormat or None
-        """
+        # type: (Optional[ODataJsonFormat]) -> dict
+        """Serializes client object"""
         if json_format is None:
             ser_prop_names = [n for n in self._properties.keys()]
             include_control_info = False

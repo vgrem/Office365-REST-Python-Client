@@ -1,4 +1,5 @@
 import datetime
+from typing import AnyStr
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
@@ -109,15 +110,17 @@ class File(AbstractFile):
         return return_type
 
     def get_content(self):
+        # type: () -> ClientResult[AnyStr]
         """Downloads a file content"""
-        return_type = ClientResult(self.context, bytes())
+        return_type = ClientResult(self.context)
         qry = FunctionQuery(self, "$value", return_type=return_type)
         self.context.add_query(qry)
         return return_type
 
     def get_absolute_url(self):
+        # type: () -> ClientResult[str]
         """Gets absolute url of a File"""
-        return_type = ClientResult(self.context, str())
+        return_type = ClientResult(self.context)
 
         def _loaded():
             return_type.set_property(

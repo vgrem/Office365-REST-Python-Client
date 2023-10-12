@@ -3,7 +3,7 @@ from office365.directory.applications.application import Application
 from office365.runtime.paths.appid import AppIdPath
 
 
-class ApplicationCollection(DeltaCollection):
+class ApplicationCollection(DeltaCollection[Application]):
     """DirectoryObject's collection"""
 
     def __init__(self, context, resource_path=None):
@@ -13,6 +13,5 @@ class ApplicationCollection(DeltaCollection):
         """Retrieves application by Application client identifier
 
         :param str app_id: Application client identifier
-        :rtype: Application
         """
         return Application(self.context, AppIdPath(app_id, self.resource_path))

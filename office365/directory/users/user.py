@@ -53,6 +53,7 @@ from office365.planner.user import PlannerUser
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.paths.entity import EntityPath
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.create_entity import CreateEntityQuery
@@ -293,9 +294,9 @@ class User(DirectoryObject):
             "returnSuggestionReasons": return_suggestion_reasons,
             "minimumAttendeePercentage": minimum_attendee_percentage,
         }
-        return_type = ClientResult[MeetingTimeSuggestionsResult](
+        return_type = ClientResult(
             self.context, MeetingTimeSuggestionsResult()
-        )
+        )  # type: ClientResult[MeetingTimeSuggestionsResult]
         qry = ServiceOperationQuery(
             self, "findMeetingTimes", None, payload, None, return_type
         )
@@ -318,9 +319,7 @@ class User(DirectoryObject):
         qry = ServiceOperationQuery(self, "calendarView", None, None, None, return_type)
 
         def _construct_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
+            # type: (RequestOptions) -> None
             request.method = HttpMethod.Get
             request.url += "?startDateTime={0}&endDateTime={1}".format(
                 start_dt.isoformat(), end_dt.isoformat()
@@ -660,6 +659,7 @@ class User(DirectoryObject):
 
     @property
     def calendar(self):
+        # type: () -> Calendar
         """The user's primary calendar. Read-only."""
         return self.properties.get(
             "calendar",
@@ -668,6 +668,7 @@ class User(DirectoryObject):
 
     @property
     def calendars(self):
+        # type: () -> EntityCollection[Calendar]
         """The user's calendar groups. Read-only. Nullable."""
         return self.properties.get(
             "calendars",

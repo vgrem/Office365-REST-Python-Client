@@ -1,5 +1,6 @@
 import base64
 import datetime
+from typing import Optional
 
 from office365.directory.applications.api import ApiApplication
 from office365.directory.applications.public_client import PublicClientApplication
@@ -228,10 +229,10 @@ class Application(DirectoryObject):
 
     @property
     def display_name(self):
+        # type: () -> Optional[str]
         """
         The display name for the application.
         Supports $filter (eq, ne, NOT, ge, le, in, startsWith), $search, and $orderBy.
-        :rtype: str or None
         """
         return self.properties.get("displayName", None)
 

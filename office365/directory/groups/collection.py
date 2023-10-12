@@ -4,7 +4,7 @@ from office365.directory.groups.profile import GroupProfile
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
 
-class GroupCollection(DeltaCollection):
+class GroupCollection(DeltaCollection[Group]):
     """Group's collection"""
 
     def __init__(self, context, resource_path=None):

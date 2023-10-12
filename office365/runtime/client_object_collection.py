@@ -1,9 +1,10 @@
-from typing import Generic, Iterator, List, Optional, TypeVar
+from typing import Callable, Generic, Iterator, List, Optional, TypeVar
 
 from typing_extensions import Self
 
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_runtime_context import ClientRuntimeContext
+from office365.runtime.odata.json_format import ODataJsonFormat
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.event_handler import EventHandler
 
@@ -40,7 +41,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
             )
         client_object = self._item_type(
             context=self.context, resource_path=resource_path
-        )  # type: ClientObject
+        )  # type: T
         if initial_properties is not None:
             [
                 client_object.set_property(k, v)
@@ -102,7 +103,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         return self._data[index]
 
     def to_json(self, json_format=None):
-        # type: (int) -> List[dict]
+        # type: (Optional[ODataJsonFormat]) -> List[dict]
         """Serializes the collection into JSON."""
         return [item.to_json(json_format) for item in self._data]
 
@@ -117,42 +118,33 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         return self
 
     def order_by(self, value):
+        # type: (str) -> Self
         """
         Allows clients to request resources in either ascending order using asc or descending order using desc
-
-        :type self: T
-        :type value: str
         """
         self.query_options.orderBy = value
         return self
 
     def skip(self, value):
+        # type: (int) -> Self
         """
         Requests the number of items in the queried collection that are to be skipped and not included in the result
-
-        :type self: T
-        :type value: int
         """
         self.query_options.skip = value
         return self
 
     def top(self, value):
+        # type: (int) -> Self
         """
         Specifies the number of items in the queried collection to be included in the result
-
-        :type self: T
-        :type value: int
         """
         self.query_options.top = value
         return self
 
     def paged(self, page_size=None, page_loaded=None):
+        # type: (int, Callable[["ClientObjectCollection"], None]) -> Self
         """
         Retrieves via server-driven paging mode
-
-        :type self: T
-        :param int page_size: Page size
-        :param (ClientObjectCollection) -> None page_loaded: Page loaded event
         """
         self._paged_mode = True
         if callable(page_loaded):
@@ -162,9 +154,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         return self
 
     def get(self):
-        """
-        :type self: T
-        """
+        # type: () -> Self
 
         def _loaded(items):
             self._page_loaded.notify(self)
@@ -220,9 +210,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         key = return_type.property_ref_name
 
         def _after_loaded(col):
-            """
-            :type col: ClientObjectCollection
-            """
+            # type: (ClientObjectCollection) -> None
             if len(col) < 1:
                 message = "Not found for filter: {0}".format(self.query_options.filter)
                 raise ValueError(message)
@@ -244,9 +232,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         key = return_type.property_ref_name
 
         def _after_loaded(col):
-            """
-            :type col: ClientObjectCollection
-            """
+            # type: (ClientObjectCollection) -> None
             if len(col) == 0:
                 message = "Not found for filter: {0}".format(expression)
                 raise ValueError(message)

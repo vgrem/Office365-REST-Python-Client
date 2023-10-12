@@ -3,7 +3,7 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.queries.function import FunctionQuery
 
 
-class UserActivityCollection(EntityCollection):
+class UserActivityCollection(EntityCollection[UserActivity]):
     """User activities collection"""
 
     def __init__(self, context, resource_path=None):

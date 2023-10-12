@@ -129,9 +129,9 @@ class Calendar(Entity):
 
     @property
     def name(self):
+        # type: () -> str
         """
-        The calendar name.
-        :rtype: str
+        The calendar name
         """
         return self.properties.get("name", None)
 

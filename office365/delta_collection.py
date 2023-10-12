@@ -1,8 +1,12 @@
+from typing import TypeVar
+
 from office365.delta_path import DeltaPath
 from office365.entity_collection import EntityCollection
 
+T = TypeVar("T")
 
-class DeltaCollection(EntityCollection):
+
+class DeltaCollection(EntityCollection[T]):
     def change_type(self, type_name):
         """
         Specifies a custom query option to filter the delta response based on the type of change.

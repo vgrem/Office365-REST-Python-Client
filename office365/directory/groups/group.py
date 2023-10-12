@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from typing import Optional
 
 from office365.directory.applications.roles.assignment_collection import (
     AppRoleAssignmentCollection,
@@ -138,13 +139,13 @@ class Group(DirectoryObject):
 
     @property
     def display_name(self):
+        # type: () -> Optional[str]
         """
         The display name for the group. This property is required when a group is created and cannot be cleared during
         updates. Maximum length is 256 characters.
 
         Returned by default. Supports $filter (eq, ne, not, ge, le, in, startsWith, and eq on null values), $search,
         and $orderby.
-        :rtype: str
         """
         return self.properties.get("displayName", None)
 

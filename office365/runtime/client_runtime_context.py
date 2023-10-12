@@ -3,7 +3,9 @@ from time import sleep
 from typing import AnyStr
 
 import requests
+from typing_extensions import Self
 
+from office365.runtime.client_request import ClientRequest
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
@@ -27,10 +29,9 @@ class ClientRuntimeContext(object):
         return len(self._queries) > 0
 
     def build_request(self, query):
+        # type: (ClientQuery) -> RequestOptions
         """
         Builds a request
-
-        :type query: office365.runtime.queries.client_query.ClientQuery
         """
         self._current_query = query
         request = self.pending_request().build_request(query)
@@ -69,16 +70,12 @@ class ClientRuntimeContext(object):
 
     @abc.abstractmethod
     def pending_request(self):
-        """
-        :rtype: office365.runtime.client_request.ClientRequest
-        """
+        # type: () -> ClientRequest
         pass
 
     @abc.abstractmethod
     def service_root_url(self):
-        """
-        :rtype: str
-        """
+        # type: () -> str
         pass
 
     def load(
@@ -188,9 +185,7 @@ class ClientRuntimeContext(object):
         return self
 
     def execute_request_direct(self, path):
-        """
-        :type path: str
-        """
+        # type: (str) -> requests.Response
         full_url = "".join([self.service_root_url(), "/", path])
         request = RequestOptions(full_url)
         return self.pending_request().execute_request_direct(request)
@@ -203,9 +198,7 @@ class ClientRuntimeContext(object):
         return self
 
     def add_query(self, query):
-        """
-        :type query: office365.runtime.queries.client_query.ClientQuery
-        """
+        # type: (ClientQuery) ->Self
         self._queries.append(query)
         return self
 
@@ -237,9 +230,6 @@ class ClientRuntimeContext(object):
 
     def _get_next_query(self, count=1):
         # type: (int) -> ClientQuery
-        """
-        :type count: int
-        """
         if count == 1:
             qry = self._queries.pop(0)
         else:

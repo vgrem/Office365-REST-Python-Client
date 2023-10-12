@@ -4,17 +4,11 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
 
-class UserCollection(DeltaCollection):
+class UserCollection(DeltaCollection[User]):
     """User's collection"""
 
     def __init__(self, context, resource_path=None):
         super(UserCollection, self).__init__(context, User, resource_path)
-
-    def __getitem__(self, id_or_principal_name):
-        """
-        :rtype: User
-        """
-        return super(UserCollection, self).__getitem__(id_or_principal_name)
 
     def get_by_principal_name(self, name):
         """
