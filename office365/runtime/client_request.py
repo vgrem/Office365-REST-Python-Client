@@ -5,6 +5,8 @@ from requests import HTTPError
 
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.http.request_options import RequestOptions
+from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.types.event_handler import EventHandler
 
 
@@ -18,12 +20,8 @@ class ClientRequest(object):
 
     @abstractmethod
     def build_request(self, query):
-        """
-        Builds a request
-
-        :type query: office365.runtime.queries.client_query.ClientQuery
-        :rtype: office365.runtime.http.request_options.RequestOptions
-        """
+        # type: (ClientQuery) -> RequestOptions
+        """Builds a request"""
         pass
 
     @abstractmethod

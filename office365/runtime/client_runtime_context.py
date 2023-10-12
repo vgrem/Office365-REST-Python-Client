@@ -1,6 +1,8 @@
 import abc
 from time import sleep
-from typing import TYPE_CHECKING
+from typing import AnyStr
+
+import requests
 
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.client_result import ClientResult
@@ -8,9 +10,6 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.read_entity import ReadEntityQuery
-
-if TYPE_CHECKING:
-    pass
 
 
 class ClientRuntimeContext(object):
@@ -20,9 +19,7 @@ class ClientRuntimeContext(object):
 
     @property
     def current_query(self):
-        """
-        :rtype: office365.runtime.queries.client_query.ClientQuery
-        """
+        # type: () -> ClientQuery
         return self._current_query
 
     @property
@@ -139,6 +136,7 @@ class ClientRuntimeContext(object):
         """
 
         def _process_request(request):
+            # type: (RequestOptions) -> None
             if once:
                 self.pending_request().beforeExecute -= _process_request
             action(request, *args, **kwargs)
@@ -217,20 +215,17 @@ class ClientRuntimeContext(object):
         return self
 
     def get_metadata(self):
+        # type: () -> ClientResult[AnyStr]
         """Loads API metadata"""
-        return_type = ClientResult(self)  # type: ClientResult[bytes]
+        return_type = ClientResult(self)
 
         def _construct_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
+            # type: (RequestOptions) -> None
             request.url += "/$metadata"
             request.method = HttpMethod.Get
 
         def _process_response(response):
-            """
-            :type response: requests.Response
-            """
+            # type: (requests.Response) -> None
             response.raise_for_status()
             return_type.set_property("__value", response.content)
 
@@ -241,6 +236,7 @@ class ClientRuntimeContext(object):
         return return_type
 
     def _get_next_query(self, count=1):
+        # type: (int) -> ClientQuery
         """
         :type count: int
         """

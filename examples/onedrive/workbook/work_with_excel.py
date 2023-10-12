@@ -5,8 +5,6 @@ https://learn.microsoft.com/en-us/graph/api/resources/excel?view=graph-rest-1.0
 """
 from examples.onedrive import ensure_workbook_sample
 from office365.graph_client import GraphClient
-from office365.onedrive.workbooks.tables.rows.row import WorkbookTableRow
-from office365.runtime.client_request_exception import ClientRequestException
 from tests.graph_case import acquire_token_by_username_password
 
 client = GraphClient(acquire_token_by_username_password)
@@ -19,7 +17,7 @@ print("Reading a table...")
 table = workbook.worksheets["Sheet1"].tables["financials"]
 # read table content
 rows = table.rows.get().execute_query()
-for r in rows:  # type: WorkbookTableRow
+for r in rows:
     print(r.values)
 
 print("Refreshing a session...")

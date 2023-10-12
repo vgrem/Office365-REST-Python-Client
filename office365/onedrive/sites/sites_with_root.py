@@ -8,7 +8,7 @@ from office365.runtime.queries.read_entity import ReadEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
-class SitesWithRoot(EntityCollection):
+class SitesWithRoot(EntityCollection[Site]):
     """Sites container"""
 
     def __init__(self, context, resource_path=None):
@@ -46,7 +46,7 @@ class SitesWithRoot(EntityCollection):
         return return_type
 
     def search(self, query_text):
-        # type: (str) -> SitesWithRoot
+        # type: (str) -> "SitesWithRoot"
         """
         Search across a SharePoint tenant for sites that match keywords provided.
 

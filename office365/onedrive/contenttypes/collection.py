@@ -5,7 +5,7 @@ from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
-class ContentTypeCollection(EntityCollection):
+class ContentTypeCollection(EntityCollection[ContentType]):
     def __init__(self, context, resource_path):
         super(ContentTypeCollection, self).__init__(context, ContentType, resource_path)
 

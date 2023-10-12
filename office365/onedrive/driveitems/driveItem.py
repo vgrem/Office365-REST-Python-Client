@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import os
 from datetime import datetime
-from typing import IO, Callable, Optional, TypeVar
+from typing import IO, AnyStr, Callable, Optional, TypeVar
 
 from typing_extensions import Self
 
@@ -45,6 +47,7 @@ from office365.onedrive.workbooks.workbook import Workbook
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.odata.v4.upload_session import UploadSession
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.function import FunctionQuery
@@ -60,7 +63,7 @@ class DriveItem(BaseItem):
     OneDrive and SharePoint are returned as driveItem resources"""
 
     def get_by_path(self, url_path):
-        # type: (str) -> DriveItem
+        # type: (str) -> "DriveItem"
         """
         Retrieve DriveItem by server relative path
 
@@ -71,7 +74,7 @@ class DriveItem(BaseItem):
         )
 
     def create_powerpoint(self, name):
-        # type: (str) -> DriveItem
+        # type: (str) -> "DriveItem"
         """
         Creates a PowerPoint file
 
@@ -179,7 +182,7 @@ class DriveItem(BaseItem):
         return self
 
     def resumable_upload(self, source_path, chunk_size=2000000, chunk_uploaded=None):
-        # type: (str, int, Optional[Callable[[int], None]]) -> DriveItem
+        # type: (str, int, Optional[Callable[[int], None]]) -> "DriveItem"
         """
         Create an upload session to allow your app to upload files up to the maximum file size.
         An upload session allows your app to upload ranges of the file in sequential API requests,
@@ -202,11 +205,9 @@ class DriveItem(BaseItem):
         return return_type
 
     def create_upload_session(self, item):
-        # type: (DriveItemUploadableProperties) -> ClientResult
+        # type: (DriveItemUploadableProperties) -> ClientResult[UploadSession]
         """Creates a temporary storage location where the bytes of the file will be saved until the complete file is
         uploaded.
-
-        :type item: office365.graph.onedrive.driveItemUploadableProperties.DriveItemUploadableProperties
         """
         qry = UploadSessionQuery(self, {"item": item})
         self.context.add_query(qry)
@@ -239,7 +240,7 @@ class DriveItem(BaseItem):
         return return_type
 
     def upload_file(self, path_or_file):
-        # type: (str or IO) -> DriveItem
+        # type: (str or IO) -> "DriveItem"
         """Uploads a file
 
         :param str or typing.IO path_or_file:
@@ -255,7 +256,7 @@ class DriveItem(BaseItem):
             return self.upload(name, content)
 
     def get_content(self, format_name=None):
-        # type: (Optional[str]) -> ClientResult[bytes]
+        # type: (Optional[str]) -> ClientResult[AnyStr]
         """
         Download the contents of the primary stream (file) of a DriveItem.
         Only driveItems with the file property can be downloaded.
@@ -280,9 +281,7 @@ class DriveItem(BaseItem):
         """
 
         def _save_content(return_type):
-            """
-            :type return_type: ClientResult
-            """
+            # type: (ClientResult[AnyStr]) -> None
             file_object.write(return_type.value)
 
         self.get_content().after_execute(_save_content)
@@ -325,7 +324,7 @@ class DriveItem(BaseItem):
         return self
 
     def create_folder(self, name, conflict_behavior=ConflictBehavior.Rename):
-        # type: (str, Optional[ConflictBehavior]) -> DriveItem
+        # type: (str, Optional[ConflictBehavior]) -> "DriveItem"
         """Create a new folder or DriveItem in a Drive with a specified parent item or path.
 
         :param str name: Folder name
@@ -363,7 +362,7 @@ class DriveItem(BaseItem):
 
         Returns location for details about how to monitor the progress of the copy, upon accepting the request.
         """
-        return_type = ClientResult(self.context, str())
+        return_type = ClientResult(self.context)  # type: ClientResult[str]
 
         def _create_request(request):
             """
@@ -440,20 +439,20 @@ class DriveItem(BaseItem):
         return return_type
 
     def rename(self, new_name):
-        # type: (str) -> DriveItem
+        # type: (str) -> "DriveItem"
         """Rename a DriveItem
         :param str new_name: The new name for the rename.
         """
         return self.move(name=new_name)
 
     def search(self, query_text):
-        # type: (str) -> EntityCollection[DriveItem]
+        # type: (str) -> EntityCollection["DriveItem"]
         """Search the hierarchy of items for items matching a query. You can search within a folder hierarchy,
         a whole drive, or files shared with the current user.
 
         :type query_text: str
         """
-        return_type = EntityCollection(
+        return_type = EntityCollection[DriveItem](
             self.context, DriveItem, ResourcePath("items", self.resource_path)
         )
         qry = FunctionQuery(self, "search", {"q": query_text}, return_type)

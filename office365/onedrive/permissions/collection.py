@@ -5,7 +5,7 @@ from office365.onedrive.permissions.permission import Permission
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
 
-class PermissionCollection(EntityCollection):
+class PermissionCollection(EntityCollection[Permission]):
     """Permission's collection"""
 
     def __init__(self, context, resource_path=None):

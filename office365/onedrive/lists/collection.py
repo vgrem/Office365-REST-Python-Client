@@ -4,7 +4,7 @@ from office365.runtime.paths.item import ItemPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
 
-class ListCollection(EntityCollection):
+class ListCollection(EntityCollection[List]):
     """Drive list's collection"""
 
     def __init__(self, context, resource_path=None):

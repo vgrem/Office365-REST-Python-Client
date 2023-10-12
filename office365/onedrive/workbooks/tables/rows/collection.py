@@ -2,7 +2,7 @@ from office365.entity_collection import EntityCollection
 from office365.onedrive.workbooks.tables.rows.row import WorkbookTableRow
 
 
-class WorkbookTableRowCollection(EntityCollection):
+class WorkbookTableRowCollection(EntityCollection[WorkbookTableRow]):
     def __init__(self, context, resource_path=None):
         super(WorkbookTableRowCollection, self).__init__(
             context, WorkbookTableRow, resource_path

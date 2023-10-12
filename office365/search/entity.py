@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 from office365.entity import Entity
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -15,6 +17,7 @@ class SearchEntity(Entity):
     """
 
     def query(self, query_string, entity_types=None):
+        # type: (str, Optional[List[str]]) -> ClientResult[ClientValueCollection[SearchResponse]]
         """
         Runs the query specified in the request body. Search results are provided in the response.
 

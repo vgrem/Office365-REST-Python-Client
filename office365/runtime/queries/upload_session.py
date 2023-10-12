@@ -15,9 +15,7 @@ class UploadSessionQuery(ServiceOperationQuery):
 
     @property
     def return_type(self):
-        """
-        :rtype: ClientResult
-        """
+        # type: () -> ClientResult[UploadSession]
         if self._return_type is None:
             self._return_type = ClientResult(self.context, UploadSession())
         return self._return_type
