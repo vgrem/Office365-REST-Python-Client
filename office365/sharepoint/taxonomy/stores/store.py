@@ -67,6 +67,7 @@ class TermStore(TaxonomyItem):
 
     @property
     def term_groups(self):
+        # type: () -> TermGroupCollection
         """Gets a collection of the child Group objects"""
         return self.properties.get(
             "termGroups",

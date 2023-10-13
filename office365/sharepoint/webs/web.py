@@ -2063,6 +2063,7 @@ class Web(SecurableObject):
 
     @property
     def fields(self):
+        # type: () -> FieldCollection
         """Specifies the collection of all the fields (2) in the site (2)."""
         return self.properties.get(
             "Fields",
@@ -2071,6 +2072,7 @@ class Web(SecurableObject):
 
     @property
     def content_types(self):
+        # type: () -> ContentTypeCollection
         """Gets the collection of content types for the Web site."""
         return self.properties.get(
             "ContentTypes",
@@ -2195,9 +2197,8 @@ class Web(SecurableObject):
 
     @property
     def mega_menu_enabled(self):
-        """Gets a value that specifies whether the Mega menu is enabled on the site.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Gets a value that specifies whether the Mega menu is enabled on the site."""
         return self.properties.get("MegaMenuEnabled", None)
 
     @quick_launch_enabled.setter
@@ -2210,9 +2211,8 @@ class Web(SecurableObject):
 
     @property
     def site_logo_url(self):
-        """Gets a value that specifies Site logo url.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets a value that specifies Site logo url."""
         return self.properties.get("SiteLogoUrl", None)
 
     @property
@@ -2228,10 +2228,8 @@ class Web(SecurableObject):
 
     @property
     def is_multilingual(self):
-        """Gets whether Multilingual UI is turned on for this web or not.
-
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Gets whether Multilingual UI is turned on for this web or not."""
         return self.properties.get("IsMultilingual", None)
 
     @is_multilingual.setter
@@ -2256,10 +2254,8 @@ class Web(SecurableObject):
 
     @property
     def web_template(self):
-        """Gets the name of the site definition or site template that was used to create the site.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the name of the site definition or site template that was used to create the site."""
         return self.properties.get("WebTemplate", None)
 
     @property

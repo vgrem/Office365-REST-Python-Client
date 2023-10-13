@@ -6,7 +6,7 @@ from office365.sharepoint.contenttypes.entity_data import ContentTypeEntityData
 from office365.sharepoint.entity_collection import EntityCollection
 
 
-class ContentTypeCollection(EntityCollection):
+class ContentTypeCollection(EntityCollection[ContentType]):
     """Content Type resource collection"""
 
     def __init__(self, context, resource_path=None, parent=None):
@@ -19,7 +19,6 @@ class ContentTypeCollection(EntityCollection):
         Returns the content type with the given name from the collection.
 
         :param str name: Content type name
-        :rtype: ContentType
         """
         return self.single("Name eq '{0}'".format(name))
 

@@ -9,7 +9,8 @@ from office365.teams.team import Team
 from tests.graph_case import acquire_token_by_client_credentials
 
 client = GraphClient(acquire_token_by_client_credentials)
-# teams = client.teams.get_all().select(["displayName"]).execute_query()
-teams = client.teams.get().paged().select(["displayName"]).execute_query()
-for i, team in enumerate(teams):  # type: int, Team
-    print("({0} of {1}) Name: {2}".format(i + 1, len(teams), team.display_name))
+# teams = client.teams.get_all().select(["displayName"]).execute_query()  # get all at once
+# teams = client.teams.get().paged().select(["displayName"]).execute_query()   # paged load
+teams = client.teams.get().top(10).select(["displayName"]).execute_query()
+for team in teams:
+    print("Name: {0}".format(team.display_name))

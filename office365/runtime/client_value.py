@@ -1,10 +1,11 @@
-from typing import Any, Iterator, Tuple, TypeVar
+from typing import Any, Dict, Iterator, Optional, Tuple, TypeVar
 
 from typing_extensions import Self
 
+from office365.runtime.odata.json_format import ODataJsonFormat
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 
-T = TypeVar("T", int, float, str, bool, "ClientValue")
+P_T = TypeVar("P_T", int, float, str, bool, "ClientValue")
 
 
 class ClientValue(object):
@@ -33,20 +34,17 @@ class ClientValue(object):
         return self
 
     def get_property(self, k):
-        # type: (str) -> T
+        # type: (str) -> P_T
         return getattr(self, k)
 
     def __iter__(self):
-        # type: () -> Iterator[Tuple[str, T]]
+        # type: () -> Iterator[Tuple[str, P_T]]
         for n, v in vars(self).items():
             yield n, v
 
     def to_json(self, json_format=None):
-        """
-        Serializes a client value
-
-        :type json_format: office365.runtime.odata.json_format.ODataJsonFormat or None
-        """
+        # type: (Optional[ODataJsonFormat]) -> Dict
+        """Serializes a client value"""
 
         def _is_valid_value(val):
             from office365.runtime.client_value_collection import ClientValueCollection
@@ -71,7 +69,6 @@ class ClientValue(object):
 
     @property
     def entity_type_name(self):
-        """
-        Returns server type name of value
-        """
+        # type: () -> str
+        """Returns server type name of value"""
         return type(self).__name__

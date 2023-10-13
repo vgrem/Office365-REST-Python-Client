@@ -43,6 +43,7 @@ class OfficeGraphInsights(Entity):
 
     @property
     def used(self):
+        # type: () -> EntityCollection[UsedInsight]
         """
         Calculated relationship identifying the latest documents viewed or modified by a user,
         including OneDrive for Business and SharePoint documents, ranked by recency of use.

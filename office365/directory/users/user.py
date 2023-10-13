@@ -110,18 +110,14 @@ class User(DirectoryObject):
         """
 
         def _construct_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
+            # type: (RequestOptions) -> None
             request.method = HttpMethod.Put
             request.set_header("Content-Type", "application/json")
             request.set_header("Accept", "application/json")
             request.data = json.dumps(request.data)
 
         def _assign_manager(user_id):
-            """
-            :type user_id: str
-            """
+            # type: (str) -> None
             payload = {
                 "@odata.id": "https://graph.microsoft.com/v1.0/users/{0}".format(
                     user_id
@@ -614,6 +610,7 @@ class User(DirectoryObject):
 
     @property
     def insights(self):
+        # type: () -> OfficeGraphInsights
         """Insights are relationships calculated using advanced analytics and machine learning techniques."""
         return self.properties.get(
             "insights",
@@ -757,6 +754,7 @@ class User(DirectoryObject):
 
     @property
     def joined_teams(self):
+        # type: () -> TeamCollection
         """Get the teams in Microsoft Teams that the user is a direct member of."""
         return self.properties.get(
             "joinedTeams",

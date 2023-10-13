@@ -1,7 +1,6 @@
 import datetime
 
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.listitems.listitem import ListItem
 from tests import test_client_credentials, test_team_site_url
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
@@ -14,5 +13,5 @@ items = (
     site_pages.items.filter(filter_text).select(include_fields).get().execute_query()
 )
 print("Loaded items count: {0}".format(len(items)))
-for index, item in enumerate(items):  # type: int, ListItem
-    print("{0}: {1}".format(index, item.properties["EncodedAbsUrl"]))
+for item in items:
+    print(item.properties["EncodedAbsUrl"])

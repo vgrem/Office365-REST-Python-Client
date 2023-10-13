@@ -33,6 +33,7 @@ class TermGroup(TaxonomyItem):
 
     @property
     def term_sets(self):
+        # type: () -> TaxonomyItemCollection[TermSet]
         """
         Gets a collection of the child TermSet instances of this TermGroup object.
         """

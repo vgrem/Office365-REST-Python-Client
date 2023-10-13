@@ -1,9 +1,12 @@
 import abc
 from time import sleep
-from typing import AnyStr
+from typing import TYPE_CHECKING, AnyStr, Callable, List
 
 import requests
 from typing_extensions import Self
+
+if TYPE_CHECKING:
+    from office365.runtime.client_object import ClientObject
 
 from office365.runtime.client_request import ClientRequest
 from office365.runtime.client_request_exception import ClientRequestException
@@ -85,13 +88,8 @@ class ClientRuntimeContext(object):
         before_loaded=None,
         after_loaded=None,
     ):
-        """Prepare retrieval query
-
-        :type properties_to_retrieve: list[str] or None
-        :type client_object: office365.runtime.client_object.ClientObject
-        :type before_loaded: (office365.runtime.http.request_options.RequestOptions) -> None
-        :type after_loaded: (T) -> None
-        """
+        # type: (ClientObject, List[str], Callable[[RequestOptions], None], Callable[[ClientObject], None]) -> Self
+        """Prepare retrieval query"""
         qry = ReadEntityQuery(client_object, properties_to_retrieve)
         self.add_query(qry)
         if callable(before_loaded):
@@ -152,9 +150,7 @@ class ClientRuntimeContext(object):
         query = self._queries[-1]
 
         def _process_response(resp):
-            """
-            :type resp: requests.Response
-            """
+            # type: (requests.Response) -> None
             resp.raise_for_status()
             if self.current_query.id == query.id:
                 self.pending_request().afterExecute -= _process_response

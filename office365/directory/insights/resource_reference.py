@@ -13,3 +13,6 @@ class ResourceReference(ClientValue):
         self.id = _id
         self.type = _type
         self.webUrl = web_url
+
+    def __str__(self):
+        return self.webUrl

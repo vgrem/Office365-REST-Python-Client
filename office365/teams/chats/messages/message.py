@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.outlook.mail.item_body import ItemBody
@@ -49,16 +51,16 @@ class ChatMessage(Entity):
 
     @property
     def web_url(self):
+        # type: () -> Optional[str]
         """
         Link to the message in Microsoft Teams.
-        :rtype: str
         """
         return self.properties.get("webUrl", None)
 
     @property
     def importance(self):
+        # type: () -> Optional[str]
         """
         The importance of the chat message. The possible values are: normal, high, urgent.
-        :rtype: str
         """
         return self.properties.get("importance", None)

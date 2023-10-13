@@ -4,6 +4,7 @@ from typing_extensions import Self
 
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_runtime_context import ClientRuntimeContext
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.json_format import ODataJsonFormat
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.event_handler import EventHandler
@@ -163,6 +164,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         return self
 
     def get_all(self, page_size=None, page_loaded=None):
+        # type: (int, Callable[[T], None]) -> Self
         """
         Gets all the items in a collection, regardless of the size.
 
@@ -189,9 +191,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         """
 
         def _construct_next_query(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
+            # type: (RequestOptions) -> None
             request.url = self._next_request_url
 
         self.context.load(

@@ -167,7 +167,7 @@ class Site(Entity):
         """
         Determines whether a site is landing site for your intranet.
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context)  # type: ClientResult[bool]
 
         def _site_loaded():
             SPHSite.is_valid_home_site(self.context, self.url, return_type)
@@ -226,7 +226,7 @@ class Site(Entity):
         """
         return_type = ClientResult(
             self.context, ClientValueCollection(SiteAdministratorsInfo)
-        )  # type: ClientResult[ClientValueCollection[SiteAdministratorsInfo]]
+        )
 
         def _site_loaded():
             self.context.tenant.get_site_administrators(self.id, return_type)
@@ -572,6 +572,7 @@ class Site(Entity):
 
     @property
     def root_web(self):
+        # type: () -> Web
         """Get root web"""
         return self.properties.get(
             "RootWeb", Web(self.context, ResourcePath("RootWeb", self.resource_path))

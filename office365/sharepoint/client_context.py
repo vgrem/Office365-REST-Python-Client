@@ -1,4 +1,7 @@
 import copy
+from typing import List, Optional
+
+from typing_extensions import Self
 
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.auth.client_credential import ClientCredential
@@ -29,6 +32,7 @@ class ClientContext(ClientRuntimeContext):
     """SharePoint client context (used for SharePoint v1 API)"""
 
     def __init__(self, base_url, auth_context=None):
+        # type: (str, AuthenticationContext) -> None
         """
         Instantiates a SharePoint client context
 
@@ -46,6 +50,7 @@ class ClientContext(ClientRuntimeContext):
 
     @staticmethod
     def from_url(full_url):
+        # type: (str) -> ClientContext
         """
         Constructs a client from absolute resource url
 
@@ -69,6 +74,7 @@ class ClientContext(ClientRuntimeContext):
         private_key=None,
         scopes=None,
     ):
+        # type: (str, str, str, Optional[str], Optional[str], Optional[List[str]]) -> Self
         """
         Creates authenticated SharePoint context via certificate credentials
 
@@ -122,6 +128,7 @@ class ClientContext(ClientRuntimeContext):
     def with_user_credentials(
         self, username, password, allow_ntlm=False, browser_mode=False
     ):
+        # type: (str, str, bool, bool) -> Self
         """
         Initializes a client to acquire a token via user credentials.
 
@@ -154,6 +161,7 @@ class ClientContext(ClientRuntimeContext):
         return self
 
     def with_credentials(self, credentials):
+        # type: (UserCredential|ClientCredential) -> Self
         """
         Initializes a client to acquire a token via user or client credentials
         :type credentials: UserCredential or ClientCredential

@@ -1,5 +1,8 @@
 import json
 import sys
+from typing import Any, Callable, TypedDict
+
+from typing_extensions import Required
 
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
@@ -7,9 +10,19 @@ from office365.runtime.auth.providers.saml_token_provider import SamlTokenProvid
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.auth.user_credential import UserCredential
 from office365.runtime.compat import get_absolute_url
+from office365.runtime.http.request_options import RequestOptions
+
+JSONToken = TypedDict(
+    "JSONToken",
+    {
+        "tokenType": Required[str],
+        "accessToken": Required[str],
+    },
+)
 
 
 def _get_authorization_header(token):
+    # type: (Any) -> str
     return "{token_type} {access_token}".format(
         token_type=token.tokenType, access_token=token.accessToken
     )
@@ -137,10 +150,11 @@ class AuthenticationContext(object):
         return self
 
     def with_access_token(self, token_func):
+        # type: (Callable[[], JSONToken]) -> None
         """
         Initializes a client to acquire a token from a callback
 
-        :param () -> dict token_func: A callback
+        :param () -> dict token_func: A token callback
         """
 
         def _authenticate(request):
@@ -216,10 +230,8 @@ class AuthenticationContext(object):
         return self
 
     def authenticate_request(self, request):
-        """
-        Authenticate request
-        :type request: office365.runtime.http.request_options.RequestOptions
-        """
+        # type: (RequestOptions) -> None
+        """Authenticate request"""
         if self._authenticate is None:
             raise ValueError("Authentication credentials are missing or invalid")
         self._authenticate(request)

@@ -1,21 +1,22 @@
 import copy
-from typing import Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, Optional, TypeVar
+
+from typing_extensions import Self
+
+if TYPE_CHECKING:
+    from office365.runtime.client_runtime_context import ClientRuntimeContext
 
 from office365.runtime.client_value import ClientValue
 
-T = TypeVar("T", int, str, bytes, bool, ClientValue)
+T = TypeVar("T")
 
 
 class ClientResult(Generic[T]):
     """Client result"""
 
     def __init__(self, context, default_value=None):
-        """
-        Client result
-
-        :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
-        :type default_value: T
-        """
+        # type: (ClientRuntimeContext, Optional[T]) -> None
+        """Client result"""
         self._context = context
         self._value = copy.deepcopy(default_value)  # type: T
 
@@ -36,17 +37,14 @@ class ClientResult(Generic[T]):
         return self
 
     def set_property(self, key, value, persist_changes=False):
-        """
-        :type key: str
-        :type value: T
-        :type persist_changes: bool
-        """
+        # type: (str, T, bool) -> Self
         from office365.runtime.client_value import ClientValue
 
         if isinstance(self._value, ClientValue):
             self._value.set_property(key, value, persist_changes)
         else:
             self._value = value
+        return self
 
     @property
     def value(self):

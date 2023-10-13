@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -205,9 +207,9 @@ class Field(Entity):
 
     @property
     def internal_name(self):
+        # type: () -> Optional[str]
         """
         Gets a value that specifies the field internal name.
-        :rtype: str or None
         """
         return self.properties.get("InternalName", None)
 

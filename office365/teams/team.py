@@ -1,4 +1,4 @@
-import datetime
+from typing import Optional
 
 from office365.directory.permissions.grants.resource_specific import (
     ResourceSpecificPermissionGrant,
@@ -73,10 +73,8 @@ class Team(Entity):
 
     @property
     def display_name(self):
-        """The name of the team.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The name of the team."""
         return self.properties.get("displayName", None)
 
     @property
