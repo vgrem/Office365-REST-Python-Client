@@ -1,6 +1,6 @@
 import abc
 from time import sleep
-from typing import TYPE_CHECKING, AnyStr, Callable, List
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, List
 
 import requests
 from typing_extensions import Self
@@ -140,10 +140,9 @@ class ClientRuntimeContext(object):
         return self
 
     def after_query_execute(self, action, *args, **kwargs):
+        # type: (Callable[[Any, Any], None], Any, Any) -> Self
         """
         Attach an event handler which is triggered after query is submitted to server
-
-        :type action: (Response, *args, **kwargs) -> None
         """
         if len(self._queries) == 0:
             return
@@ -165,14 +164,13 @@ class ClientRuntimeContext(object):
         return self
 
     def after_execute(self, action, once=True, *args, **kwargs):
+        # type: (Callable[[RequestOptions, Any, Any], None], bool, Any, Any) -> Self
         """
         Attach an event handler which is triggered after request is submitted to server
-
-        :param (RequestOptions, *args, **kwargs) -> None action:
-        :param bool once:
         """
 
         def _process_response(response):
+            # type: (requests.Response) -> None
             if once:
                 self.pending_request().afterExecute -= _process_response
             action(response, *args, **kwargs)

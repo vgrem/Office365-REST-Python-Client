@@ -1,4 +1,5 @@
 import time
+from typing import Optional
 
 from office365.entity import Entity
 
@@ -61,9 +62,8 @@ class TeamsAsyncOperation(Entity):
 
     @property
     def target_resource_id(self):
-        """The ID of the object that's created or modified as result of this async operation, typically a team.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The ID of the object that's created or modified as result of this async operation, typically a team."""
         return self.properties.get("targetResourceId", None)
 
     @property

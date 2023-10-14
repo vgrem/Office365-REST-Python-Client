@@ -1,5 +1,6 @@
-from typing import TYPE_CHECKING, TypeVar, Any
+from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar
 
+from office365.entity import Entity
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.compat import is_string_type
 from office365.runtime.paths.item import ItemPath
@@ -14,6 +15,12 @@ T = TypeVar("T")
 
 class EntityCollection(ClientObjectCollection[T]):
     """A collection container which represents a named collections of entities"""
+
+    def __init__(self, context, item_type, resource_path=None, parent=None):
+        # type: (GraphClient, Type[T], Optional[ResourcePath], Optional[Entity]) -> None
+        super(EntityCollection, self).__init__(
+            context, item_type, resource_path, parent
+        )
 
     def __getitem__(self, key):
         # type: (int | str) -> T

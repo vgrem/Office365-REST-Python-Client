@@ -3,7 +3,7 @@ import uuid
 from office365.runtime.client_value_collection import ClientValueCollection
 
 
-class StringCollection(ClientValueCollection):
+class StringCollection(ClientValueCollection[str]):
     def __init__(self, initial_values=None):
         """
         :type initial_values: list[str] or None

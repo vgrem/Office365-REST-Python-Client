@@ -1,7 +1,16 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Callable, Generic, List, Optional, ParamSpec, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Generic,
+    List,
+    Optional,
+    ParamSpec,
+    TypeVar,
+)
 
 from typing_extensions import Self
 
@@ -175,7 +184,7 @@ class ClientObject(Generic[T]):
         return self
 
     def ensure_property(self, name, action, *args, **kwargs):
-        # type: (str, Callable[[], None], P.args, P.kwargs) -> Self
+        # type: (str, Callable[[], None], Any, Any) -> Self
         """
         Ensures if property is loaded
 
@@ -185,7 +194,7 @@ class ClientObject(Generic[T]):
         return self.ensure_properties([name], action, *args, **kwargs)
 
     def ensure_properties(self, names, action, *args, **kwargs):
-        # type: (List[str], Callable[[P], None], P.args, P.kwargs) -> Self
+        # type: (List[str], Callable[[Any, Any], None], Any, Any) -> Self
         """
         Ensure if list of properties are retrieved from the server
         """

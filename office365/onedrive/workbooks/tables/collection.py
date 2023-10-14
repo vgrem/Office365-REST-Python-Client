@@ -3,17 +3,11 @@ from office365.onedrive.workbooks.tables.table import WorkbookTable
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
-class WorkbookTableCollection(EntityCollection):
+class WorkbookTableCollection(EntityCollection[WorkbookTable]):
     def __init__(self, context, resource_path=None):
         super(WorkbookTableCollection, self).__init__(
             context, WorkbookTable, resource_path
         )
-
-    def __getitem__(self, id_or_name):
-        """
-        :rtype: WorkbookTable
-        """
-        return super(WorkbookTableCollection, self).__getitem__(id_or_name)
 
     def add(self, address, has_headers):
         """

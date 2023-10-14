@@ -96,6 +96,7 @@ class Team(Entity):
 
     @property
     def is_archived(self):
+        # type: () -> Optional[bool]
         """Whether this team is in read-only mode."""
         return self.properties.get("isArchived", None)
 
@@ -142,6 +143,7 @@ class Team(Entity):
 
     @property
     def channels(self):
+        # type: () -> ChannelCollection
         """The collection of channels & messages associated with the team."""
         return self.properties.get(
             "channels",
@@ -161,6 +163,7 @@ class Team(Entity):
 
     @property
     def primary_channel(self):
+        # type: () -> Channel
         """
         The general channel for the team.
         """

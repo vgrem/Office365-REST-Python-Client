@@ -8,6 +8,7 @@ class UserSettings(Entity):
 
     @property
     def shift_preferences(self):
+        # type: () -> ShiftPreferences
         return self.properties.get(
             "shiftPreferences",
             ShiftPreferences(

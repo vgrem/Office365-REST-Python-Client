@@ -1,14 +1,13 @@
 import os
 
 from office365.onedrive.driveitems.driveItem import DriveItem
+from office365.onedrive.drives.drive import Drive
 from office365.onedrive.workbooks.tables.table import WorkbookTable
 from tests.graph_case import GraphTestCase
 
 
 def upload_excel(target_drive):
-    """
-    :type target_drive: office365.onedrive.drives.drive.Drive
-    """
+    # type: (Drive) -> DriveItem
     path = "{0}/../data/Financial Sample.xlsx".format(os.path.dirname(__file__))
     with open(path, "rb") as content_file:
         file_content = content_file.read()

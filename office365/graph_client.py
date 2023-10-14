@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, List
 
 from office365.booking.solutions.root import SolutionsRoot
 from office365.communications.cloud_communications import CloudCommunications
@@ -69,7 +69,7 @@ class GraphClient(ClientRuntimeContext):
     """Graph Service client"""
 
     def __init__(self, acquire_token_callback):
-        # type: (Callable[..., dict]) -> None
+        # type: (Callable[[], dict]) -> None
         """
         :param () -> dict acquire_token_callback: Acquire token function
         """
@@ -81,6 +81,7 @@ class GraphClient(ClientRuntimeContext):
 
     @staticmethod
     def with_username_and_password(tenant, client_id, username, password, scopes=None):
+        # type: (str, str, str, str, List[str]) -> GraphClient
         """
         Initializes the client via user credentials
 

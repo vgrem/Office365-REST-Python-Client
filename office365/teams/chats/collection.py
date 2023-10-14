@@ -2,7 +2,7 @@ from office365.entity_collection import EntityCollection
 from office365.teams.chats.chat import Chat
 
 
-class ChatCollection(EntityCollection):
+class ChatCollection(EntityCollection[Chat]):
     """Team's collection"""
 
     def __init__(self, context, resource_path=None):
@@ -16,7 +16,6 @@ class ChatCollection(EntityCollection):
         this operation will return the existing chat and not create a new one.
 
         :param str chat_type: Specifies the type of chat. Possible values are: group and oneOnOne.
-        :rtype: Chat
         """
 
         return super(ChatCollection, self).add(chatType=chat_type)

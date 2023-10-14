@@ -480,6 +480,7 @@ class User(DirectoryObject):
 
     @property
     def chats(self):
+        # type: () -> ChatCollection
         """The user's chats."""
         return self.properties.get(
             "chats",
@@ -584,6 +585,7 @@ class User(DirectoryObject):
 
     @property
     def activities(self):
+        # type: () -> UserActivityCollection
         """The user's activities across devices."""
         return self.properties.get(
             "activities",
@@ -594,6 +596,7 @@ class User(DirectoryObject):
 
     @property
     def assigned_licenses(self):
+        # type: () -> ClientValueCollection[AssignedLicense]
         """The licenses that are assigned to the user, including inherited (group-based) licenses."""
         return self.properties.get(
             "assignedLicenses", ClientValueCollection(AssignedLicense)
@@ -874,6 +877,7 @@ class User(DirectoryObject):
 
     @property
     def outlook(self):
+        # type: () -> OutlookUser
         """Represents the Outlook services available to a user."""
         return self.properties.get(
             "outlook",
@@ -1002,6 +1006,7 @@ class User(DirectoryObject):
 
     @property
     def todo(self):
+        # type: () -> Todo
         """Represents the To Do services available to a user."""
         return self.properties.get(
             "todo", Todo(self.context, ResourcePath("todo", self.resource_path))

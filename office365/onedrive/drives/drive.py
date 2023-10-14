@@ -109,6 +109,7 @@ class Drive(BaseItem):
 
     @property
     def list(self):
+        # type: () -> List
         """For drives in SharePoint, the underlying document library list."""
         return self.properties.get(
             "list", List(self.context, ResourcePath("list", self.resource_path))

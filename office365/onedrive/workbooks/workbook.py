@@ -115,6 +115,7 @@ class Workbook(Entity):
 
     @property
     def tables(self):
+        # type: () -> WorkbookTableCollection
         """Represents a collection of tables associated with the workbook. Read-only."""
         return self.properties.get(
             "tables",

@@ -1,3 +1,5 @@
+from typing import AnyStr, Optional
+
 from office365.onenote.entity_schema_object_model import OnenoteEntitySchemaObjectModel
 from office365.onenote.notebooks.notebook import Notebook
 from office365.onenote.pages.links import PageLinks
@@ -12,6 +14,7 @@ class OnenotePage(OnenoteEntitySchemaObjectModel):
     """A page in a OneNote notebook."""
 
     def get_content(self):
+        # type: () -> ClientResult[AnyStr]
         """Download the page's HTML content."""
         return_type = ClientResult(self.context)
         qry = FunctionQuery(self, "content", None, return_type)
@@ -20,10 +23,8 @@ class OnenotePage(OnenoteEntitySchemaObjectModel):
 
     @property
     def content_url(self):
-        """The URL for the page's HTML content. Read-only.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The URL for the page's HTML content. Read-only."""
         return self.properties.get("contentUrl", None)
 
     @property
@@ -36,6 +37,7 @@ class OnenotePage(OnenoteEntitySchemaObjectModel):
 
     @property
     def title(self):
+        # type: () -> Optional[str]
         """The title of the page."""
         return self.properties.get("title", None)
 

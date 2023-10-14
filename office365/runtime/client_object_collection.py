@@ -1,4 +1,4 @@
-from typing import Callable, Generic, Iterator, List, Optional, TypeVar
+from typing import Callable, Generic, Iterator, List, Optional, Type, TypeVar
 
 from typing_extensions import Self
 
@@ -14,7 +14,7 @@ T = TypeVar("T")
 
 class ClientObjectCollection(ClientObject, Generic[T]):
     def __init__(self, context, item_type, resource_path=None, parent=None):
-        # type: (ClientRuntimeContext, T, Optional[ResourcePath], Optional[ClientObject]) -> None
+        # type: (ClientRuntimeContext, Type[T], Optional[ResourcePath], Optional[ClientObject]) -> None
         """A collection container which represents a named collections of objects."""
         super(ClientObjectCollection, self).__init__(context, resource_path)
         self._data = []  # type: list[T]
@@ -164,7 +164,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         return self
 
     def get_all(self, page_size=None, page_loaded=None):
-        # type: (int, Callable[[T], None]) -> Self
+        # type: (int, Callable[[Self], None]) -> Self
         """
         Gets all the items in a collection, regardless of the size.
 

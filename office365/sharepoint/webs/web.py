@@ -2320,6 +2320,7 @@ class Web(SecurableObject):
 
     @property
     def available_fields(self):
+        # type: () -> FieldCollection
         """
         Specifies the collection of all fields available for the current scope, including those of the
         current site, as well as any parent sites.

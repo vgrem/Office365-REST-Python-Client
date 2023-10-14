@@ -10,6 +10,7 @@ class ApplicationCollection(DeltaCollection[Application]):
         super(ApplicationCollection, self).__init__(context, Application, resource_path)
 
     def get_by_app_id(self, app_id):
+        # type: (str) -> Application
         """Retrieves application by Application client identifier
 
         :param str app_id: Application client identifier

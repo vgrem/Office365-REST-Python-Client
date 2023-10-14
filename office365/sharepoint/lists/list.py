@@ -967,6 +967,7 @@ class List(SecurableObject):
 
     @property
     def items(self):
+        # type: () -> ListItemCollection
         """Get list items"""
         return self.properties.get(
             "Items",

@@ -1,3 +1,7 @@
+from typing import Callable
+
+from typing_extensions import Self
+
 from office365.directory.groups.group import Group
 from office365.entity_collection import EntityCollection
 from office365.runtime.odata.path_builder import ODataPathBuilder
@@ -14,17 +18,12 @@ class TeamCollection(EntityCollection[Team]):
         super(TeamCollection, self).__init__(context, Team, resource_path)
 
     def get_all(self, page_size=None, page_loaded=None):
-        """List all teams in Microsoft Teams for an organization
-
-        :param int page_size: Page size
-        :param (ClientObjectCollection) -> None page_loaded: Page loaded event
-        """
+        # type: (int, Callable[[Self], None]) -> Self
+        """List all teams in Microsoft Teams for an organization"""
 
         def _init_teams(groups):
-            """
-            :type groups:  office365.directory.groups.collection.GroupCollection
-            """
-            for grp in groups:  # type: Group
+            # type: (Self) -> None
+            for grp in groups:
                 if "Team" in grp.properties["resourceProvisioningOptions"]:
                     team = Team(self.context, ResourcePath(grp.id, self.resource_path))
                     for k, v in grp.properties.items():

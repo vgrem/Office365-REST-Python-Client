@@ -1,9 +1,13 @@
 from typing import Optional
 
+from typing_extensions import TYPE_CHECKING
+
 from office365.entity_collection import EntityCollection
 from office365.onedrive.columns.definition import ColumnDefinition
-from office365.onedrive.lists.list import List
 from office365.runtime.queries.create_entity import CreateEntityQuery
+
+if TYPE_CHECKING:
+    from office365.onedrive.lists.list import List
 
 
 class ColumnDefinitionCollection(EntityCollection[ColumnDefinition]):
