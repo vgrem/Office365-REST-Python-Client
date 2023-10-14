@@ -1,7 +1,4 @@
 from office365.sharepoint.sites.site import Site
-from office365.sharepoint.tenant.administration.secondary_administrators_info import (
-    SecondaryAdministratorsInfo,
-)
 from office365.sharepoint.tenant.administration.tenant import Tenant
 from tests import (
     test_admin_site_url,
@@ -18,8 +15,9 @@ target_site = (
     .get()
     .execute_query()
 )
-admins = tenant.get_site_secondary_administrators(site_id=target_site.id)
-tenant.execute_query()
+admins = tenant.get_site_secondary_administrators(
+    site_id=target_site.id
+).execute_query()
 
 existing_admin_names = [admin.loginName for admin in admins]
 
@@ -31,5 +29,5 @@ tenant.set_site_secondary_administrators(
     site_id=target_site.id, names=names
 ).execute_query()
 
-for admin in admins:  # type: SecondaryAdministratorsInfo
+for admin in admins:
     print(admin.loginName)
