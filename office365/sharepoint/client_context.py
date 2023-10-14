@@ -31,7 +31,7 @@ from office365.sharepoint.webs.web import Web
 
 
 class ClientContext(ClientRuntimeContext):
-    """SharePoint client context (used for SharePoint v1 API)"""
+    """SharePoint client context (SharePoint v1 API)"""
 
     def __init__(self, base_url, auth_context=None):
         # type: (str, AuthenticationContext) -> None

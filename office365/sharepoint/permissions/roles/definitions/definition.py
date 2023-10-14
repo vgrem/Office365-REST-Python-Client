@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.permissions.base_permissions import BasePermissions
@@ -5,6 +7,9 @@ from office365.sharepoint.permissions.base_permissions import BasePermissions
 
 class RoleDefinition(Entity):
     """Defines a single role definition, including a name, description, and set of rights."""
+
+    def __repr__(self):
+        return self.name
 
     @property
     def base_permissions(self):
@@ -30,6 +35,7 @@ class RoleDefinition(Entity):
 
     @property
     def name(self):
+        # type: () -> Optional[str]
         """Gets a value that specifies the role definition name."""
         return self.properties.get("Name", None)
 
@@ -40,6 +46,7 @@ class RoleDefinition(Entity):
 
     @property
     def description(self):
+        # type: () -> Optional[str]
         """Gets or sets a value that specifies the description of the role definition."""
         return self.properties.get("Description", None)
 
@@ -60,6 +67,6 @@ class RoleDefinition(Entity):
         if self.resource_path is None:
             if name == "Id":
                 self._resource_path = ServiceOperationPath(
-                    "GetById", [value], self._parent_collection.resource_path
+                    "GetById", [value], self.parent_collection.resource_path
                 )
         return super(RoleDefinition, self).set_property(name, value, persist_changes)

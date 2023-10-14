@@ -101,6 +101,7 @@
             <Property Name="IsVivaHomeOptedOut" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="NavConfig" Type="SP.HomeSiteNavConfiguration"/>
             <Property Name="SiteId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="Theme" Type="Edm.String"/>
             <Property Name="VivaExperienceType" Type="Edm.Int32" Nullable="false"/>
             <Property Name="WebId" Type="Edm.Guid" Nullable="false"/>
          </ComplexType>
@@ -162,6 +163,7 @@
          </ComplexType>
          <ComplexType Name="ApprovalsCreateRequestParameters">
             <Property Name="approvers" Type="Edm.String"/>
+            <Property Name="approversInSteps" Type="Collection(Edm.String)"/>
             <Property Name="awaitAll" Type="Edm.Boolean"/>
             <Property Name="details" Type="Edm.String"/>
             <Property Name="itemId" Type="Edm.String"/>
@@ -186,6 +188,12 @@
          <ComplexType Name="CAAESnippetElement">
             <Property Name="Id" Type="Edm.String"/>
             <Property Name="Version" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="CAFieldValue">
+            <Property Name="DataType" Type="Edm.String"/>
+            <Property Name="Id" Type="Edm.String"/>
+            <Property Name="Name" Type="Edm.String"/>
+            <Property Name="Value" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="ColumnTypeInfo">
             <Property Name="PlaceholderId" Type="Edm.String"/>
@@ -247,6 +255,10 @@
          </ComplexType>
          <ComplexType Name="EncryptionOption">
             <Property Name="AES256CBCKey" Type="Edm.Binary"/>
+         </ComplexType>
+         <ComplexType Name="FieldValuesWithUrl">
+            <Property Name="FieldValues" Type="Collection(SP.CAFieldValue)"/>
+            <Property Name="ServerRedirectedEmbedUrl" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="HTMLFieldSecuritySetting">
             <Property Name="allowedDomains" Type="Collection(Edm.String)"/>
@@ -1893,6 +1905,7 @@
             <Property Name="EffectiveBasePermissionsForUI" Type="SP.BasePermissions"/>
             <Property Name="EnableAssignToEmail" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EnableAttachments" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="EnabledQueryableColumnsDateTime" Type="Edm.DateTime"/>
             <Property Name="EnableFolderCreation" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EnableMinorVersions" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EnableModeration" Type="Edm.Boolean" Nullable="false"/>
@@ -2637,10 +2650,12 @@
             <Property Name="AllowResubmit" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="Approvers" Type="Edm.String"/>
             <Property Name="AwaitAll" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="CurrentStepNumber" Type="Edm.Int32" Nullable="false"/>
             <Property Name="Details" Type="Edm.String"/>
             <Property Name="Id" Type="Edm.String" Nullable="false"/>
             <Property Name="PartnerMetadata" Type="Edm.String"/>
             <Property Name="Priority" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="RequestType" Type="Edm.String"/>
             <Property Name="Responses" Type="Edm.String"/>
             <Property Name="Status" Type="Edm.Int32" Nullable="false"/>
             <Property Name="Title" Type="Edm.String"/>
@@ -11506,6 +11521,9 @@
                <Parameter Name="this" Type="SP.List"/>
                <Parameter Name="ruleId" Type="Edm.String"/>
             </FunctionImport>
+            <FunctionImport Name="EnableQueryableColumns" IsBindable="true">
+               <Parameter Name="this" Type="SP.List"/>
+            </FunctionImport>
             <FunctionImport Name="EnqueueAsyncActionTaskById" ReturnType="Edm.Boolean" IsBindable="true">
                <Parameter Name="this" Type="SP.List"/>
                <Parameter Name="id" Type="Edm.Guid" Nullable="false"/>
@@ -11554,6 +11572,10 @@
             </FunctionImport>
             <FunctionImport Name="GetCheckedOutFiles" ReturnType="Collection(SP.CheckedOutFile)" IsComposable="true" IsBindable="true" EntitySet="CheckedOutFiles">
                <Parameter Name="this" Type="SP.List"/>
+            </FunctionImport>
+            <FunctionImport Name="GetContentAssemblyDocumentFieldValues" ReturnType="SP.FieldValuesWithUrl" IsSideEffecting="false" IsBindable="true">
+               <Parameter Name="this" Type="SP.List"/>
+               <Parameter Name="DocumentUrl" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="GetContentAssemblyTemplateFields" ReturnType="Collection(SP.PlaceholderV2)" IsSideEffecting="false" IsBindable="true">
                <Parameter Name="this" Type="SP.List"/>
@@ -12175,6 +12197,11 @@
                <Parameter Name="this" Type="SP.List"/>
                <Parameter Name="Id" Type="Edm.String"/>
                <Parameter Name="updateTemplateInfo" Type="SP.UpdateTemplateInfoV2"/>
+            </FunctionImport>
+            <FunctionImport Name="UpdateContentAssemblyDocument" ReturnType="SP.ContentAssemblyFileInfo" IsBindable="true">
+               <Parameter Name="this" Type="SP.List"/>
+               <Parameter Name="TemplateUrl" Type="Edm.String"/>
+               <Parameter Name="contentAssemblyFormAnswers" Type="Collection(SP.ContentAssemblyFormAnswer)"/>
             </FunctionImport>
             <FunctionImport Name="UpdateFormProcessingModelRetentionLabel" IsBindable="true">
                <Parameter Name="this" Type="SP.List"/>
@@ -14315,7 +14342,7 @@
                <Parameter Name="this" Type="Collection(SP.ListItemVersion)"/>
                <Parameter Name="versionId" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
-            <FunctionImport Name="RestoreByID" IsSideEffecting="false" IsBindable="true">
+            <FunctionImport Name="RestoreByID" IsBindable="true">
                <Parameter Name="this" Type="Collection(SP.ListItemVersion)"/>
                <Parameter Name="versionId" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
@@ -23183,6 +23210,9 @@
          <Annotations Target="SP.Sharing.SharingInformation/addressBarLinkSettings">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.Sharing.SharingInformation/ageGroup">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.Sharing.SharingInformation/enforceIBSegmentFiltering">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -25368,6 +25398,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/DeleteRule(SP.List, Edm.String)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/EnableQueryableColumns(SP.List)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/EnqueueAsyncActionTaskById(SP.List, Edm.Guid, Collection(SP.KeyValue))">
@@ -33792,10 +33825,14 @@
             <Property Name="driveId" Type="Edm.String"/>
             <Property Name="firstActivity" Type="Edm.DateTime" Nullable="false"/>
             <Property Name="impactedAssetLocation" Type="Edm.String"/>
+            <Property Name="impactedSiteType" Type="Edm.Int32" Nullable="false"/>
             <Property Name="lastActivity" Type="Edm.DateTime" Nullable="false"/>
+            <Property Name="siteLabelId" Type="Edm.String"/>
+            <Property Name="siteLabelName" Type="Edm.String"/>
             <Property Name="siteOwner" Type="Edm.String"/>
             <Property Name="siteSubscriptionId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="siteType" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="siteUrl" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="RecentAdminActionReport">
             <Property Name="actions" Type="Edm.String"/>
@@ -33853,6 +33890,7 @@
          </ComplexType>
          <ComplexType Name="TenantAdminRansomwareActivitiesOverview">
             <Property Name="impactedAssetsCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="lastActivityTime" Type="Edm.DateTime" Nullable="false"/>
             <Property Name="oneDriveActivityCount" Type="Edm.Int32" Nullable="false"/>
             <Property Name="sharePointActivityCount" Type="Edm.Int32" Nullable="false"/>
             <Property Name="totalActivitiesCount" Type="Edm.Int32" Nullable="false"/>
@@ -34323,10 +34361,11 @@
          </EntityType>
          <EntityType Name="SharingInformation">
             <Key>
-               <PropertyRef Name="anonymousLinkExpirationRestrictionDays"/>
+               <PropertyRef Name="ageGroup"/>
             </Key>
             <Property Name="accessRequestSettings" Type="SP.Sharing.AccessRequestSettings"/>
             <Property Name="addressBarLinkSettings" Type="SP.Sharing.AddressBarLinkSettings"/>
+            <Property Name="ageGroup" Type="Edm.Int32" Nullable="false"/>
             <Property Name="anonymousLinkExpirationRestrictionDays" Type="Edm.Int32" Nullable="false"/>
             <Property Name="anyoneLinkTrackUsers" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="blockPeoplePickerAndSharing" Type="Edm.Boolean" Nullable="false"/>
@@ -35431,6 +35470,7 @@
             <Property Name="BlockDownloadMicrosoft365GroupIds" Type="Collection(Edm.Guid)" Nullable="false"/>
             <Property Name="BlockDownloadPolicy" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="BlockGuestsAsSiteAdmin" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="BonusDiskQuota" Type="Edm.Int64" Nullable="false"/>
             <Property Name="ClearRestrictedAccessControl" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CommentsOnSitePagesDisabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CompatibilityLevel" Type="Edm.Int32" Nullable="false"/>

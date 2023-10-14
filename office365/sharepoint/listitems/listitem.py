@@ -5,6 +5,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.key import KeyPath
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.sharepoint.attachments.collection import AttachmentCollection
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.comments.collection import CommentCollection
@@ -399,6 +400,7 @@ class ListItem(SecurableObject):
 
     @property
     def attachment_files(self):
+        # type: () -> AttachmentCollection
         """Specifies the collection of attachments that are associated with the list item.<62>"""
         from office365.sharepoint.attachments.collection import AttachmentCollection
 

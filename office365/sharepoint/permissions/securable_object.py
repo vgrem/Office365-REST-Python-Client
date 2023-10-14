@@ -1,3 +1,5 @@
+from typing_extensions import Self
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -7,6 +9,8 @@ from office365.sharepoint.permissions.roles.assignments.assignment import RoleAs
 from office365.sharepoint.permissions.roles.assignments.collection import (
     RoleAssignmentCollection,
 )
+from office365.sharepoint.permissions.roles.definitions.definition import RoleDefinition
+from office365.sharepoint.principal.principal import Principal
 from office365.sharepoint.principal.users.user import User
 
 
@@ -30,6 +34,7 @@ class SecurableObject(Entity):
         return return_type
 
     def add_role_assignment(self, principal, role_def):
+        # type: (Principal, RoleDefinition) -> Self
         """Adds a role assignment to securable resource.
 
         :param office365.sharepoint.permissions.roles.definitions.definition.RoleDefinition role_def: Specifies the

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.internal.queries.upload_file import create_upload_file_query
@@ -71,10 +73,9 @@ class Attachment(Entity):
 
     @property
     def file_name(self):
+        # type: () -> Optional[str]
         """
         Specifies the file name of the list item attachment.
-
-        :rtype: str or None
         """
         return self.properties.get("FileName", None)
 
@@ -87,9 +88,8 @@ class Attachment(Entity):
 
     @property
     def server_relative_url(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """ """
         return self.properties.get("ServerRelativeUrl", None)
 
     @property

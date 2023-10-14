@@ -1,6 +1,11 @@
+from typing import TYPE_CHECKING
+
 from office365.runtime.client_object import ClientObject
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
+
+if TYPE_CHECKING:
+    from office365.sharepoint.client_context import ClientContext
 
 
 class Entity(ClientObject):
@@ -29,9 +34,7 @@ class Entity(ClientObject):
 
     @property
     def context(self):
-        """
-        :rtype: office365.sharepoint.client_context.ClientContext
-        """
+        # type: () -> ClientContext
         return self._context
 
     @property

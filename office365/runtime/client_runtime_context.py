@@ -164,7 +164,7 @@ class ClientRuntimeContext(object):
         return self
 
     def after_execute(self, action, once=True, *args, **kwargs):
-        # type: (Callable[[RequestOptions, Any, Any], None], bool, Any, Any) -> Self
+        # type: (Callable[[requests.Response, Any, Any], None], bool, Any, Any) -> Self
         """
         Attach an event handler which is triggered after request is submitted to server
         """

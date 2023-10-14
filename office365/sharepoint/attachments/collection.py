@@ -7,7 +7,7 @@ from office365.sharepoint.attachments.creation_information import (
 from office365.sharepoint.entity_collection import EntityCollection
 
 
-class AttachmentCollection(EntityCollection):
+class AttachmentCollection(EntityCollection[Attachment]):
     """Represents a collection of Attachment resources."""
 
     def __init__(self, context, resource_path=None, parent=None):
@@ -16,6 +16,7 @@ class AttachmentCollection(EntityCollection):
         )
 
     def add(self, attachment_file_information):
+        # type: (AttachmentCreationInformation) -> Attachment
         """
         Adds the attachment represented by the file name and stream in the specified parameter to the list item.
 

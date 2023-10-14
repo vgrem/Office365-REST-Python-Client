@@ -1987,6 +1987,7 @@ class Web(SecurableObject):
 
     @property
     def site_users(self):
+        # type: () -> UserCollection
         """
         Specifies the collection of users in the site collection that contains the site
         """
@@ -1997,6 +1998,7 @@ class Web(SecurableObject):
 
     @property
     def site_groups(self):
+        # type: () -> GroupCollection
         """Gets the collection of groups for the site collection."""
         return self.properties.get(
             "SiteGroups",
@@ -2007,6 +2009,7 @@ class Web(SecurableObject):
 
     @property
     def current_user(self):
+        # type: () -> User
         """Gets the current user."""
         return self.properties.get(
             "CurrentUser",
@@ -2102,6 +2105,7 @@ class Web(SecurableObject):
 
     @property
     def role_definitions(self):
+        # type: () -> RoleDefinitionCollection
         """Gets the collection of role definitions for the Web site."""
         return self.properties.get(
             "RoleDefinitions",
@@ -2312,6 +2316,7 @@ class Web(SecurableObject):
 
     @property
     def alerts(self):
+        # type: () -> AlertCollection
         """Gets the collection of alerts for the site or subsite."""
         return self.properties.get(
             "Alerts",

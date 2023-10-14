@@ -8,7 +8,7 @@ from office365.sharepoint.permissions.roles.definitions.creation_information imp
 from office365.sharepoint.permissions.roles.definitions.definition import RoleDefinition
 
 
-class RoleDefinitionCollection(EntityCollection):
+class RoleDefinitionCollection(EntityCollection[RoleDefinition]):
     """Represents the collection of role definitions that are available within the site"""
 
     def __init__(self, context, resource_path=None):

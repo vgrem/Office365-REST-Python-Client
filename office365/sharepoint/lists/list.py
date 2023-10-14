@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -26,6 +27,9 @@ from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.forms.collection import FormCollection
 from office365.sharepoint.listitems.caml.query import CamlQuery
 from office365.sharepoint.listitems.collection import ListItemCollection
+from office365.sharepoint.listitems.creation_information import (
+    ListItemCreationInformation,
+)
 from office365.sharepoint.listitems.creation_information_using_path import (
     ListItemCreationInformationUsingPath,
 )
@@ -484,10 +488,9 @@ class List(SecurableObject):
         return return_type
 
     def add_item(self, creation_information):
+        # type: (ListItemCreationInformation|dict) -> ListItem
         """The recommended way to add a list item is to send a POST request to the ListItemCollection resource endpoint,
-        as shown in ListItemCollection request examples.
-
-        :type creation_information: ListItemCreationInformation or dict"""
+        as shown in ListItemCollection request examples."""
         return_type = ListItem(self.context, None, self)
         self.items.add_child(return_type)
         if isinstance(creation_information, dict):
@@ -976,6 +979,7 @@ class List(SecurableObject):
 
     @property
     def root_folder(self):
+        # type: () -> Folder
         """Get a root folder"""
         return self.properties.get(
             "RootFolder",
@@ -984,6 +988,7 @@ class List(SecurableObject):
 
     @property
     def fields(self):
+        # type: () -> FieldCollection
         """Gets a value that specifies the collection of all fields in the list."""
         return self.properties.get(
             "Fields",
@@ -1004,6 +1009,7 @@ class List(SecurableObject):
 
     @property
     def views(self):
+        # type: () -> ViewCollection
         """Gets a value that specifies the collection of all public views on the list and personal views
         of the current user on the list."""
         return self.properties.get(
@@ -1176,62 +1182,61 @@ class List(SecurableObject):
 
     @property
     def list_schema_version(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """"""
         return self.properties.get("ListSchemaVersion", None)
 
     @property
     def major_with_minor_versions_limit(self):
+        # type: () -> Optional[int]
         """
         Gets the maximum number of major versions that are allowed for an item in a document library that uses
         version control with both major and minor versions.
-        :rtype: int or None
         """
         return self.properties.get("MajorWithMinorVersionsLimit", None)
 
     @property
     def no_crawl(self):
+        # type: () -> Optional[bool]
         """
         Specifies that the crawler MUST NOT crawl the list.
-        :rtype: bool or None
         """
         return self.properties.get("NoCrawl", None)
 
     @property
     def on_quick_launch(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the list appears on the Quick Launch of the site (2). If the value is set to "true",
         the protocol server MUST set the Hidden property of the list to "false".
-        :rtype: bool or None
         """
         return self.properties.get("OnQuickLaunch", None)
 
     @property
     def page_render_type(self):
+        # type: () -> Optional[int]
         """
         Returns the render type of the current file. If the file will render in the modern experience it will return
         ListPageRenderType.Modern. If the file will render in the classic experience, it will return the reason
         for staying in classic, as specified by ListPageRenderType enumeration (section 3.2.5.413).
-        :rtype: int or None
         """
         return self.properties.get("PageRenderType", None)
 
     @property
     def parent_web_url(self):
+        # type: () -> Optional[str]
         """
         Specifies the server-relative URL of the site (2) that contains the list.
         It MUST be a URL of server-relative form.
-        :rtype: str or None
         """
         return self.properties.get("ParentWebUrl", None)
 
     @property
     def parser_disabled(self):
+        # type: () -> Optional[str]
         """
         Specifies whether or not the document parser is enabled on the list.
         Specify a value of true if the document parser is enabled on the list; specify false if otherwise.
-        :rtype: bool or None
         """
         return self.properties.get("ParserDisabled", None)
 
@@ -1260,9 +1265,9 @@ class List(SecurableObject):
 
     @property
     def title(self):
+        # type: () -> Optional[str]
         """
         Gets the displayed title for the list.
-        :rtype: str or None
         """
         return self.properties.get("Title", None)
 

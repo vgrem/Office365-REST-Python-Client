@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -16,6 +17,9 @@ from office365.sharepoint.storagemetrics.storage_metrics import StorageMetrics
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 from office365.sharepoint.utilities.move_copy_options import MoveCopyOptions
 from office365.sharepoint.utilities.move_copy_util import MoveCopyUtil
+
+if TYPE_CHECKING:
+    from office365.sharepoint.files.collection import FileCollection
 
 
 class Folder(Entity):
@@ -450,6 +454,7 @@ class Folder(Entity):
 
     @property
     def files(self):
+        # type: () -> FileCollection
         """Specifies the collection of files contained in the list folder."""
         from office365.sharepoint.files.collection import FileCollection
 

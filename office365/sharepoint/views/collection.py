@@ -1,13 +1,21 @@
+from typing import TYPE_CHECKING, Optional
+
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.views.view import View
+
+if TYPE_CHECKING:
+    from office365.sharepoint.client_context import ClientContext
+    from office365.sharepoint.lists.list import List
 
 
 class ViewCollection(EntityCollection):
     """Represents a collection of View resources."""
 
     def __init__(self, context, resource_path=None, parent_list=None):
+        # type: (ClientContext, Optional[ResourcePath], Optional[List]) -> None
         super(ViewCollection, self).__init__(context, View, resource_path, parent_list)
 
     def add(self, view_creation_information):
@@ -49,9 +57,6 @@ class ViewCollection(EntityCollection):
 
     @property
     def parent_list(self):
-        """
-        Parent List
-
-        :rtype: office365.sharepoint.lists.list.List
-        """
+        # type: () -> List
+        """Parent List"""
         return self._parent

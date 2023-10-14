@@ -6,6 +6,7 @@ from office365.sharepoint.fields.calculated import FieldCalculated
 from office365.sharepoint.fields.creation_information import FieldCreationInformation
 from office365.sharepoint.fields.date_time import FieldDateTime
 from office365.sharepoint.fields.field import Field
+from office365.sharepoint.fields.geolocation import FieldGeolocation
 from office365.sharepoint.fields.type import FieldType
 from office365.sharepoint.fields.xmlSchemaFieldCreationInformation import (
     XmlSchemaFieldCreationInformation,
@@ -59,13 +60,14 @@ class FieldCollection(EntityCollection[Field]):
         :param str title: Specifies the display name of the field
         :param str or None description: Specifies the description of the field
         """
-        return self.add(
+        return_type = self.add(
             FieldCreationInformation(
                 title=title,
                 description=description,
                 field_type_kind=FieldType.Geolocation,
             )
-        )
+        )  # type: FieldGeolocation
+        return return_type
 
     def add_url_field(self, title, description=None):
         """

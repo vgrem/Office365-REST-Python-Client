@@ -7,7 +7,7 @@ from office365.sharepoint.webhooks.subscription_information import (
 )
 
 
-class SubscriptionCollection(EntityCollection):
+class SubscriptionCollection(EntityCollection[Subscription]):
     """Represents a collection of Subscription (WebHook) resources."""
 
     def __init__(self, context, resource_path=None, parent=None):

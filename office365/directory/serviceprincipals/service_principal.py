@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.delta_collection import DeltaCollection
 from office365.directory.applications.roles.assignment_collection import (
     AppRoleAssignmentCollection,
@@ -101,10 +103,10 @@ class ServicePrincipal(DirectoryObject):
 
     @property
     def account_enabled(self):
+        # type: () -> Optional[bool]
         """
         true if the service principal account is enabled; otherwise, false. If set to false, then no users will be
         able to sign in to this app, even if they are assigned to it. Supports $filter (eq, ne, not, in).
-        :rtype: bool
         """
         return self.properties.get("accountEnabled", None)
 
@@ -118,17 +120,17 @@ class ServicePrincipal(DirectoryObject):
 
     @property
     def app_description(self):
+        # type: () -> Optional[str]
         """
         The description exposed by the associated application.
-        :rtype: str
         """
         return self.properties.get("appDescription", None)
 
     @property
     def app_display_name(self):
+        # type: () -> Optional[str]
         """
         The display name exposed by the associated application.
-        :rtype: str
         """
         return self.properties.get("appDisplayName", None)
 
@@ -153,9 +155,9 @@ class ServicePrincipal(DirectoryObject):
 
     @property
     def homepage(self):
+        # type: () -> Optional[str]
         """
         Home page or landing page of the application.
-        :rtype: str
         """
         return self.properties.get("homepage", None)
 
@@ -171,12 +173,12 @@ class ServicePrincipal(DirectoryObject):
 
     @property
     def login_url(self):
+        # type: () -> Optional[str]
         """
         Specifies the URL where the service provider redirects the user to Azure AD to authenticate.
         Azure AD uses the URL to launch the application from Microsoft 365 or the Azure AD My Apps. When blank,
         Azure AD performs IdP-initiated sign-on for applications configured with SAML-based single sign-on.
         The user launches the application from Microsoft 365, the Azure AD My Apps, or the Azure AD SSO URL.
-        :rtype: str
         """
         return self.properties.get("loginUrl", None)
 

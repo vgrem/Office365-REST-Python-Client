@@ -740,6 +740,7 @@ class File(AbstractFile):
 
     @property
     def listItemAllFields(self):
+        # type: () -> ListItem
         """Gets a value that specifies the list item fields values for the list item corresponding to the file."""
         return self.properties.setdefault(
             "ListItemAllFields",

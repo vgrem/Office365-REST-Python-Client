@@ -30,6 +30,7 @@ class SitePageService(Entity):
 
     @property
     def communication_site(self):
+        # type: () -> CommunicationSite
         """Gets a CommunicationSite for the current web."""
         return self.properties.get(
             "CommunicationSite",
