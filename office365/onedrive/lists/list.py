@@ -43,6 +43,7 @@ class List(BaseItem):
 
     @property
     def columns(self):
+        # type: () -> ColumnDefinitionCollection
         """The collection of columns under this site."""
         return self.properties.setdefault(
             "columns",
@@ -53,6 +54,7 @@ class List(BaseItem):
 
     @property
     def content_types(self):
+        # type: () -> ContentTypeCollection
         """The collection of content types under this site."""
         return self.properties.get(
             "contentTypes",
@@ -63,6 +65,7 @@ class List(BaseItem):
 
     @property
     def items(self):
+        # type: () -> EntityCollection[ListItem]
         """All items contained in the list."""
         return self.properties.get(
             "items",
@@ -73,6 +76,7 @@ class List(BaseItem):
 
     @property
     def operations(self):
+        # type: () -> EntityCollection[RichLongRunningOperation]
         """The collection of long-running operations on the list."""
         return self.properties.get(
             "operations",
@@ -85,6 +89,7 @@ class List(BaseItem):
 
     @property
     def subscriptions(self):
+        # type: () -> EntityCollection[Subscription]
         """The set of subscriptions on the list."""
         return self.properties.get(
             "subscriptions",

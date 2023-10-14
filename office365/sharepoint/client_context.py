@@ -1,10 +1,12 @@
 import copy
-from typing import List, Optional
+from typing import Callable, List, Optional
 
+from requests import RequestException
 from typing_extensions import Self
 
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.auth.client_credential import ClientCredential
+from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.auth.user_credential import UserCredential
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.compat import get_absolute_url, urlparse
@@ -92,6 +94,7 @@ class ClientContext(ClientRuntimeContext):
         return self
 
     def with_interactive(self, tenant, client_id, scopes=None):
+        # type: (str, str, Optional[List[str]]) -> Self
         """
         Initializes a client to acquire a token interactively i.e. via a local browser.
 
@@ -106,6 +109,7 @@ class ClientContext(ClientRuntimeContext):
         return self
 
     def with_device_flow(self, tenant, client_id, scopes=None):
+        # type: (str, str, Optional[List[str]]) -> Self
         """
         Initializes a client to acquire a token via device flow auth.
 
@@ -117,10 +121,10 @@ class ClientContext(ClientRuntimeContext):
         return self
 
     def with_access_token(self, token_func):
+        # type: (Callable[[], TokenResponse]) -> Self
         """
         Initializes a client to acquire a token from a callback
-
-        :param () -> TokenResponse token_func: A callback
+        :param () -> TokenResponse token_func: A token callback
         """
         self.authentication_context.with_access_token(token_func)
         return self
@@ -131,8 +135,6 @@ class ClientContext(ClientRuntimeContext):
         # type: (str, str, bool, bool) -> Self
         """
         Initializes a client to acquire a token via user credentials.
-
-
         :param str username: Typically, a UPN in the form of an email address
         :param str password: The password
         :param bool allow_ntlm: Flag indicates whether NTLM scheme is enabled. Disabled by default
@@ -146,6 +148,7 @@ class ClientContext(ClientRuntimeContext):
         return self
 
     def with_client_credentials(self, client_id, client_secret):
+        # type: (str, str) -> Self
         """
         Initializes a client to acquire a token via client credentials (SharePoint App-Only)
 
@@ -170,6 +173,7 @@ class ClientContext(ClientRuntimeContext):
         return self
 
     def execute_batch(self, items_per_batch=100, success_callback=None):
+        # type: (int, Callable[[int], None]) -> Self
         """
         Construct and submit to a server a batch request
         :param int items_per_batch: Maximum to be selected for bulk operation
@@ -188,8 +192,6 @@ class ClientContext(ClientRuntimeContext):
     def pending_request(self):
         """
         Provides access to underlying request instance
-
-        :return: ODataRequest
         """
         if self._pending_request is None:
             self._pending_request = ODataRequest(JsonLightFormat())
@@ -198,9 +200,7 @@ class ClientContext(ClientRuntimeContext):
         return self._pending_request
 
     def _ensure_form_digest(self, request):
-        """
-        :type request: RequestOptions
-        """
+        # type: (RequestOptions) -> None
         if not self.context_info.is_valid:
             self._ctx_web_info = self._get_context_web_information()
         request.set_header("X-RequestDigest", self._ctx_web_info.FormDigestValue)
@@ -228,13 +228,11 @@ class ClientContext(ClientRuntimeContext):
         settings = {"timeout": 0}
 
         def _try_process_if_failed(retry, ex):
+            # type: (int, RequestException) -> None
             """
-            :type retry: int
-            :type ex: requests.exceptions.RequestException
+            check if request was throttled - http status code 429
+            or check is request failed due to server unavailable - http status code 503
             """
-
-            # check if request was throttled - http status code 429
-            # or check is request failed due to server unavailable - http status code 503
             if ex.response.status_code == 429 or ex.response.status_code == 503:
                 retry_after = ex.response.headers.get("Retry-After", None)
                 if retry_after is not None:
@@ -249,10 +247,8 @@ class ClientContext(ClientRuntimeContext):
     def clone(self, url, clear_queries=True):
         """
         Creates a clone of ClientContext
-
         :param bool clear_queries:
         :param str url: Site Url
-        :return ClientContext
         """
         ctx = copy.deepcopy(self)
         ctx._auth_context.url = url
@@ -262,17 +258,14 @@ class ClientContext(ClientRuntimeContext):
         return ctx
 
     def _authenticate_request(self, request):
-        """
-        Authenticate request
-        :type request: office365.runtime.http.request_options.RequestOptions
-        """
+        # type: (RequestOptions) -> None
+        """Authenticate request"""
         self.authentication_context.authenticate_request(request)
 
     def _build_modification_query(self, request):
+        # type: (RequestOptions) -> None
         """
         Constructs SharePoint specific modification OData request
-
-        :type request: RequestOptions
         """
         if request.method == HttpMethod.Post:
             self._ensure_form_digest(request)

@@ -370,6 +370,7 @@ class User(DirectoryObject):
         return self
 
     def revoke_signin_sessions(self):
+        # type: () -> ClientResult[bool]
         """
         Invalidates all the refresh tokens issued to applications for a user
         (as well as session cookies in a user's browser), by resetting the signInSessionsValidFromDateTime user

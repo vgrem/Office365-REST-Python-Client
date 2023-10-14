@@ -1,5 +1,8 @@
+from typing import Optional
+
 from office365.entity_collection import EntityCollection
 from office365.onedrive.columns.definition import ColumnDefinition
+from office365.onedrive.lists.list import List
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
 
@@ -15,7 +18,6 @@ class ColumnDefinitionCollection(EntityCollection[ColumnDefinition]):
         :param str name: The API-facing name of the column as it appears in the fields on a listItem
         :param float minimum: The minimum permitted value.
         :param float maximum: The maximum permitted value.
-        :rtype: ColumnDefinition
         """
         from office365.onedrive.columns.number import NumberColumn
 
@@ -28,7 +30,6 @@ class ColumnDefinitionCollection(EntityCollection[ColumnDefinition]):
         :param str name: The API-facing name of the column as it appears in the fields on a listItem
         :param int or None max_length: The maximum number of characters for the value.
         :param str or None text_type: The type of text being stored
-        :rtype: ColumnDefinition
         """
         from office365.onedrive.columns.text import TextColumn
 
@@ -53,13 +54,13 @@ class ColumnDefinitionCollection(EntityCollection[ColumnDefinition]):
         )
 
     def add_lookup(self, name, lookup_list, column_name=None):
+        # type: (str, List|str, Optional[str]) -> ColumnDefinition
         """
         Creates a lookup column
 
         :param str name: The API-facing name of the column as it appears in the fields on a listItem
         :param office365.onedrive.lists.list.List or str lookup_list: Lookup source list or identifier
         :param str column_name: The name of the lookup source column.
-        :rtype: ColumnDefinition
         """
         from office365.onedrive.columns.lookup import LookupColumn
         from office365.onedrive.lists.list import List

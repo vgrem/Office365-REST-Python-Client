@@ -1,18 +1,19 @@
-from typing import TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 from office365.runtime.client_object_collection import ClientObjectCollection
+
+if TYPE_CHECKING:
+    from office365.sharepoint.client_context import ClientContext
 
 T = TypeVar("T")
 
 
 class EntityCollection(ClientObjectCollection[T]):
     """
-    SharePoint entity set
+    SharePoint's entity set
     """
 
     @property
     def context(self):
-        """
-        :rtype: office365.sharepoint.client_context.ClientContext
-        """
+        # type: () -> ClientContext
         return self._context

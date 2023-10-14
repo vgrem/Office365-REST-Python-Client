@@ -4,7 +4,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.function import FunctionQuery
 
 
-class WorkbookTableColumnCollection(EntityCollection):
+class WorkbookTableColumnCollection(EntityCollection[WorkbookTableColumn]):
     def __init__(self, context, resource_path=None):
         super(WorkbookTableColumnCollection, self).__init__(
             context, WorkbookTableColumn, resource_path

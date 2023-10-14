@@ -1,9 +1,10 @@
 import uuid
-from typing import Any, Dict, Generic, Iterator, List, Optional, TypeVar
+from typing import Any, Dict, Generic, Iterator, List, Optional, Type, TypeVar
 
 from typing_extensions import Self
 
 from office365.runtime.client_value import ClientValue
+from office365.runtime.odata.json_format import ODataJsonFormat
 from office365.runtime.odata.type import ODataType
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 
@@ -12,7 +13,7 @@ T = TypeVar("T")
 
 class ClientValueCollection(ClientValue, Generic[T]):
     def __init__(self, item_type, initial_values=None):
-        # type: (T, Optional[List | Dict]) -> None
+        # type: (Type[T], Optional[List | Dict]) -> None
         super(ClientValueCollection, self).__init__()
         if initial_values is None:
             initial_values = []
@@ -42,9 +43,9 @@ class ClientValueCollection(ClientValue, Generic[T]):
         return ",".join(self._data)
 
     def to_json(self, json_format=None):
+        # type: (ODataJsonFormat) -> dict
         """
         Serializes a client value's collection
-        :type json_format: office365.runtime.odata.json_format.ODataJsonFormat or None
         """
         json = [v for v in self]
         for i, v in enumerate(json):
@@ -63,7 +64,7 @@ class ClientValueCollection(ClientValue, Generic[T]):
         return json
 
     def create_typed_value(self, initial_value=None):
-        # type: (Optional[Any]) -> T
+        # type: (Optional[T]) -> T
         if initial_value is None:
             return uuid.uuid4() if self._item_type == uuid.UUID else self._item_type()
         elif self._item_type == uuid.UUID:

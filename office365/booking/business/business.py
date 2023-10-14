@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import List, Optional
+
 from office365.booking.appointment import BookingAppointment
 from office365.booking.custom_question import BookingCustomQuestion
 from office365.booking.customers.base import BookingCustomerBase
@@ -22,6 +25,7 @@ class BookingBusiness(Entity):
     def get_staff_availability(
         self, staff_ids=None, start_datetime=None, end_datetime=None
     ):
+        # type: (List[str], datetime, datetime) -> ClientResult[ClientValueCollection[StaffAvailabilityItem]]
         """
         Get the availability information of staff members of a Microsoft Bookings calendar.
         :param list[str] staff_ids: The list of staff IDs
@@ -30,7 +34,7 @@ class BookingBusiness(Entity):
         """
         return_type = ClientResult(
             self.context, ClientValueCollection(StaffAvailabilityItem)
-        )  # type: ClientResult[ClientValueCollection[StaffAvailabilityItem]]
+        )
         payload = {
             "staffIds": staff_ids,
             "startDateTime": start_datetime,
@@ -61,10 +65,10 @@ class BookingBusiness(Entity):
         )
 
     def display_name(self):
+        # type: () -> Optional[str]
         """
         The name of the business, which interfaces with customers. This name appears at the top of the business
-            scheduling page.
-        :rtype: str or None
+        scheduling page.
         """
         return self.properties.get("displayName", None)
 

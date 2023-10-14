@@ -13,11 +13,13 @@ class BaseItem(Entity):
 
     @property
     def etag(self):
+        # type: () -> Optional[str]
         """ETag for the item."""
         return self.properties.get("eTag", None)
 
     @property
     def created_by(self):
+        # type: () -> IdentitySet
         """Identity of the user, device, or application which created the item."""
         return self.properties.get("createdBy", IdentitySet())
 
@@ -70,16 +72,14 @@ class BaseItem(Entity):
     def name(self, value):
         """
         Sets the name of the item.
-
-        :type value: str
         """
         self.set_property("name", value)
 
     @property
     def description(self):
+        # type: () -> Optional[str]
         """
         Provides a user-visible description of the item.
-        :rtype: str or None
         """
         return self.properties.get("description", None)
 
@@ -89,9 +89,9 @@ class BaseItem(Entity):
 
     @property
     def web_url(self):
+        # type: () -> Optional[str]
         """
         URL that displays the resource in the browser
-        :rtype: str or None
         """
         return self.properties.get("webUrl", None)
 

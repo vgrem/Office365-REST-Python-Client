@@ -170,6 +170,7 @@ class Calendar(Entity):
 
     @property
     def events(self):
+        # type: () -> EventCollection
         """The events in the calendar. Navigation property. Read-only."""
         return self.properties.get(
             "events",

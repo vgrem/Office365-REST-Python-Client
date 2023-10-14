@@ -5,8 +5,7 @@ from typing_extensions import Self
 
 if TYPE_CHECKING:
     from office365.runtime.client_runtime_context import ClientRuntimeContext
-
-from office365.runtime.client_value import ClientValue
+    from office365.runtime.client_value import ClientValue
 
 T = TypeVar("T")
 

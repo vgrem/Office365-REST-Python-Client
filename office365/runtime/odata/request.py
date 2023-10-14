@@ -1,12 +1,16 @@
 import copy
 
+import requests
+
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_request import ClientRequest
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value import ClientValue
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
+from office365.runtime.odata.json_format import ODataJsonFormat
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
+from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.function import FunctionQuery
@@ -16,11 +20,8 @@ from office365.runtime.queries.update_entity import UpdateEntityQuery
 
 class ODataRequest(ClientRequest):
     def __init__(self, json_format):
-        """
-        Creates OData request
-
-        :type json_format: office365.runtime.odata.json_format.ODataJsonFormat
-        """
+        # type: (ODataJsonFormat) -> None
+        """Creates OData request"""
         super(ODataRequest, self).__init__()
         self._default_json_format = json_format
         self.beforeExecute += self._ensure_json_format
@@ -30,11 +31,8 @@ class ODataRequest(ClientRequest):
         return self._default_json_format
 
     def build_request(self, query):
-        """
-        Builds a request
-
-        :type query: office365.runtime.queries.client_query.ClientQuery
-        """
+        # type: (ClientQuery) -> RequestOptions
+        """Builds a request"""
         request = RequestOptions(query.url)
         request.method = HttpMethod.Get
         if isinstance(query, DeleteEntityQuery):
@@ -48,10 +46,7 @@ class ODataRequest(ClientRequest):
         return request
 
     def process_response(self, response, query):
-        """
-        :type response: requests.Response
-        :type query: office365.runtime.queries.client_query.ClientQuery
-        """
+        # type: (requests.Response, ClientQuery) -> None
         json_format = copy.deepcopy(self.json_format)
         return_type = query.return_type
         if return_type is None:
@@ -129,13 +124,11 @@ class ODataRequest(ClientRequest):
             yield "__value", json
 
     def _build_payload(self, query):
-        """
-        Normalizes OData request payload
-
-        :type query: office365.runtime.queries.client_query.ClientQuery
-        """
+        # type: (ClientQuery) -> dict|list
+        """Normalizes OData request payload"""
 
         def _normalize_payload(payload):
+            # type: (ClientObject|ClientValue|dict|list) -> dict|list
             if isinstance(payload, ClientObject) or isinstance(payload, ClientValue):
                 return payload.to_json(self._default_json_format)
             elif isinstance(payload, dict):
@@ -157,9 +150,7 @@ class ODataRequest(ClientRequest):
         return json
 
     def _ensure_json_format(self, request):
-        """
-        :type request: RequestOptions
-        """
+        # type: (RequestOptions) -> None
         media_type = self.json_format.media_type
         request.ensure_header("Content-Type", media_type)
         request.ensure_header("Accept", media_type)

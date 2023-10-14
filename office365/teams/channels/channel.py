@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.onedrive.driveitems.driveItem import DriveItem
@@ -18,6 +20,7 @@ class Channel(Entity):
     def does_user_have_access(
         self, user_id=None, tenant_id=None, user_principal_name=None
     ):
+        # type: (str, str, str) -> ClientResult[bool]
         """Determine whether a user has access to a shared channel.
 
         :param str user_id: Unique identifier for the user. Either specify the userId or the userPrincipalName property
@@ -27,7 +30,7 @@ class Channel(Entity):
         :param str user_principal_name: The user principal name (UPN) of the user. Either specify the userId or the
              userPrincipalName property in the request.
         """
-        return_type = ClientResult(self.context, bool())
+        return_type = ClientResult(self.context)
         params = {
             "userId": user_id,
             "tenantId": tenant_id,
@@ -58,7 +61,6 @@ class Channel(Entity):
     def remove_email(self):
         """
         Remove the email address of a channel.
-
         You can remove an email address only if it was provisioned using the provisionEmail method or through
         the Microsoft Teams client.
         """
@@ -76,6 +78,7 @@ class Channel(Entity):
 
     @property
     def tabs(self):
+        # type: () -> EntityCollection[TeamsTab]
         """A collection of all the tabs in the channel. A navigation property."""
         return self.properties.get(
             "tabs",
@@ -86,6 +89,7 @@ class Channel(Entity):
 
     @property
     def messages(self):
+        # type: () -> EntityCollection[ChatMessage]
         """
         A collection of all the messages in the channel. A navigation property. Nullable.
         """
@@ -98,10 +102,8 @@ class Channel(Entity):
 
     @property
     def members(self):
-        """A collection of membership records associated with the channel.
-
-        :rtype: EntityCollection
-        """
+        # type: () -> EntityCollection[ConversationMember]
+        """A collection of membership records associated with the channel."""
         return self.properties.get(
             "members",
             EntityCollection(
@@ -113,6 +115,7 @@ class Channel(Entity):
 
     @property
     def membership_type(self):
+        # type: () -> Optional[str]
         """
         The type of the channel. Can be set during creation and can't be changed.
         The possible values are: standard, private, unknownFutureValue, shared. The default value is standard.
@@ -123,11 +126,10 @@ class Channel(Entity):
 
     @property
     def web_url(self):
+        # type: () -> Optional[str]
         """A hyperlink that will navigate to the channel in Microsoft Teams. This is the URL that you get when you
         right-click a channel in Microsoft Teams and select Get link to channel. This URL should be treated as an
-        opaque blob, and not parsed. Read-only.
-
-        :rtype: str or None"""
+        opaque blob, and not parsed. Read-only."""
         return self.properties.get("webUrl", None)
 
     def get_property(self, name, default_value=None):

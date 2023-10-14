@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.paths.key import KeyPath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -73,26 +75,25 @@ class SiteProperties(Entity):
 
     @property
     def url(self):
+        # type: () -> Optional[str]
         """
         Gets the URL of the site.
-        :rtype: str
         """
         return self.properties.get("Url", None)
 
     @property
     def compatibility_level(self):
+        # type: () -> Optional[str]
         """
         Gets the compatibility level of the site.
-        :rtype: str
         """
         return self.properties.get("CompatibilityLevel", None)
 
     @property
     def lock_state(self):
+        # type: () -> Optional[str]
         """
         Gets or sets the lock state of the site.
-
-        :rtype: str
         """
         return self.properties.get("LockState", None)
 
@@ -122,9 +123,9 @@ class SiteProperties(Entity):
 
     @property
     def time_zone_id(self):
+        # type: () -> Optional[str]
         """
         Gets the time zone ID of the site.
-        :rtype: str
         """
         return self.properties.get("TimeZoneId", None)
 

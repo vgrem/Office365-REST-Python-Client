@@ -1,4 +1,5 @@
 import time
+from typing import AnyStr, Optional
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -163,11 +164,12 @@ class Tenant(Entity):
         return return_type
 
     def get_site_thumbnail_logo(self, site_url):
+        # type: (str) -> ClientResult[AnyStr]
         """
         :param str site_url:
         """
         payload = {"siteUrl": site_url}
-        return_type = ClientResult(self.context, bytes())
+        return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(
             self, "GetSiteThumbnailLogo", None, payload, None, return_type
         )
@@ -175,8 +177,9 @@ class Tenant(Entity):
         return return_type
 
     def get_home_site_url(self):
+        # type: () -> ClientResult[str]
         """ """
-        return_type = ClientResult(self.context, str())
+        return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(
             self, "GetSPHSiteUrl", None, None, None, return_type
         )
@@ -184,9 +187,10 @@ class Tenant(Entity):
         return return_type
 
     def get_home_sites(self):
+        # type: () -> ClientResult[ClientValueCollection[HomeSitesDetails]]
         return_type = ClientResult(
-            self.context, ClientValueCollection(HomeSitesDetails)
-        )  # type: ClientResult[ClientValueCollection[HomeSitesDetails]]
+            self.context, ClientValueCollection[HomeSitesDetails]()
+        )
         qry = ServiceOperationQuery(self, "GetHomeSites", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
@@ -345,10 +349,10 @@ class Tenant(Entity):
         return return_type
 
     def get_site_secondary_administrators(self, site_id):
+        # type: (str) -> ClientResult[ClientValueCollection[SecondaryAdministratorsInfo]]
         """
         Gets site collection administrators
-
-        :param str site_id: Site identifier
+        :param str site_id: Site object or identifier
         """
         return_type = ClientResult(
             self.context, ClientValueCollection(SecondaryAdministratorsInfo)
@@ -518,8 +522,8 @@ class Tenant(Entity):
         return return_type
 
     def get_site_properties_by_url(self, url, include_detail=False):
+        # type: (str, bool) -> SiteProperties
         """
-
         :param str url: A string that represents the site URL.
         :param bool include_detail: A Boolean value that indicates whether to include all of the SPSite properties.
         """
@@ -535,12 +539,8 @@ class Tenant(Entity):
     def get_site_properties_from_sharepoint_by_filters(
         self, _filter=None, start_index=None, include_detail=False
     ):
-        """
-
-        :param bool include_detail:
-        :param str start_index:
-        :param str _filter:
-        """
+        # type: (str, str, bool) -> SitePropertiesCollection
+        """ """
         return_type = SitePropertiesCollection(self.context)
         payload = {
             "speFilter": SitePropertiesEnumerableFilter(
@@ -639,9 +639,9 @@ class Tenant(Entity):
 
     @property
     def root_site_url(self):
+        # type: () -> Optional[str]
         """
         The tenant's root site url
-        :rtype: str or None
         """
         return self.properties.get("RootSiteUrl", None)
 

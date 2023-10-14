@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.delta_collection import DeltaCollection
 from office365.directory.extensions.extended_property import (
     MultiValueLegacyExtendedProperty,
@@ -211,9 +213,9 @@ class Event(OutlookItem):
 
     @property
     def subject(self):
+        # type: () -> Optional[str]
         """
         The text of the event's subject line.
-        :rtype: str or None
         """
         return self.properties.get("subject", None)
 

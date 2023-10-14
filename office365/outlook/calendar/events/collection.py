@@ -1,3 +1,8 @@
+import datetime
+from typing import List
+
+from typing_extensions import Self
+
 from office365.delta_collection import DeltaCollection
 from office365.outlook.calendar.attendees.attendee import Attendee
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
@@ -7,13 +12,14 @@ from office365.outlook.mail.item_body import ItemBody
 from office365.runtime.client_value_collection import ClientValueCollection
 
 
-class EventCollection(DeltaCollection):
+class EventCollection(DeltaCollection[Event]):
     def __init__(self, context, resource_path=None):
         super(EventCollection, self).__init__(context, Event, resource_path)
 
     def add(
         self, subject=None, body=None, start=None, end=None, attendees=None, **kwargs
     ):
+        # type: (str, str|ItemBody, datetime.datetime, datetime.datetime, List[str], ...) -> Event
         """
         Create an event in the user's default calendar or specified calendar.
 
@@ -28,7 +34,6 @@ class EventCollection(DeltaCollection):
         :param datetime.datetime end: The date, time, and time zone that the event ends.
             By default, the end time is in UTC.
         :param list[str] attendees: The collection of attendees for the event.
-        :rtype: Event
         """
 
         if body is not None:
