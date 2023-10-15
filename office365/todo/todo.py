@@ -8,6 +8,7 @@ class Todo(Entity):
 
     @property
     def lists(self):
+        # type: () -> TodoTaskListCollection
         """The task lists in the users mailbox."""
         return self.properties.get(
             "lists",

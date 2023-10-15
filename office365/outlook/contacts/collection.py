@@ -5,7 +5,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.types.collections import StringCollection
 
 
-class ContactCollection(DeltaCollection):
+class ContactCollection(DeltaCollection[Contact]):
     def __init__(self, context, resource_path=None):
         super(ContactCollection, self).__init__(context, Contact, resource_path)
 

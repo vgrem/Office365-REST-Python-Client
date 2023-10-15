@@ -20,6 +20,7 @@ class TodoTaskList(Entity):
 
     @property
     def tasks(self):
+        # type: () -> EntityCollection[TodoTask]
         """The tasks in this task list."""
         return self.properties.get(
             "tasks",

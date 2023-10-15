@@ -3,7 +3,7 @@ from office365.onenote.internal.multipart_page_query import OneNotePageCreateQue
 from office365.onenote.pages.page import OnenotePage
 
 
-class OnenotePageCollection(EntityCollection):
+class OnenotePageCollection(EntityCollection[OnenotePage]):
     """A collection of pages in a OneNote notebook"""
 
     def __init__(self, context, resource_path=None):

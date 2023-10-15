@@ -8,7 +8,7 @@ from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
-class NotebookCollection(EntityCollection):
+class NotebookCollection(EntityCollection[Notebook]):
     def __init__(self, context, resource_path=None):
         super(NotebookCollection, self).__init__(context, Notebook, resource_path)
 

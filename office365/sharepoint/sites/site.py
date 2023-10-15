@@ -155,7 +155,7 @@ class Site(Entity):
         """
         Determines whether a site is communication site
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context)  # type: ClientResult[bool]
 
         def _site_loaded():
             SPHSite.is_comm_site(self.context, self.url, return_type)
@@ -347,7 +347,7 @@ class Site(Entity):
         :type context: office365.sharepoint.client_context.ClientContext
         :param str url: The absolute url of a site.
         """
-        return_type = ClientResult(context, bool())
+        return_type = ClientResult(context)  # type: ClientResult[bool]
         payload = {"url": url}
         qry = ServiceOperationQuery(
             context.site, "Exists", None, payload, None, return_type, True

@@ -1,6 +1,7 @@
 import os
 import uuid
 from datetime import datetime
+from typing import Optional
 
 from office365.directory.extensions.extended_property import (
     MultiValueLegacyExtendedProperty,
@@ -222,6 +223,7 @@ class Message(OutlookItem):
 
     @property
     def attachments(self):
+        # type: () -> AttachmentCollection
         """The fileAttachment and itemAttachment attachments for the message."""
         self._persist_changes("attachments")
         return self.properties.setdefault(
@@ -379,9 +381,9 @@ class Message(OutlookItem):
 
     @property
     def subject(self):
+        # type: () -> Optional[str]
         """
         The subject of the message.
-        :rtype: str
         """
         return self.properties.get("subject", None)
 

@@ -2,7 +2,7 @@ from office365.booking.business.business import BookingBusiness
 from office365.entity_collection import EntityCollection
 
 
-class BookingBusinessCollection(EntityCollection):
+class BookingBusinessCollection(EntityCollection[BookingBusiness]):
     """"""
 
     def __init__(self, context, resource_path=None):

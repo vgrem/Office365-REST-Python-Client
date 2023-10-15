@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 from typing import IO, AnyStr, Callable, Optional, TypeVar
 
+import requests
 from typing_extensions import Self
 
 from office365.base_item import BaseItem
@@ -47,6 +48,7 @@ from office365.onedrive.workbooks.workbook import Workbook
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.v4.upload_session import UploadSession
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.create_entity import CreateEntityQuery
@@ -309,9 +311,7 @@ class DriveItem(BaseItem):
             request.stream = True
 
         def _process_response(response):
-            """
-            :type response: requests.Response
-            """
+            # type: (requests.Response) -> None
             bytes_read = 0
             for chunk in response.iter_content(chunk_size=chunk_size):
                 bytes_read += len(chunk)
@@ -342,7 +342,7 @@ class DriveItem(BaseItem):
         return return_type
 
     def convert(self, format_name):
-        # type: (str) -> ClientResult
+        # type: (str) -> ClientResult[AnyStr]
         """Converts the contents of an item in a specific format
 
         :param format_name: Specify the format the item's content should be downloaded as.
@@ -373,9 +373,7 @@ class DriveItem(BaseItem):
             )
 
         def _process_response(resp):
-            """
-            :type resp: requests.Response
-            """
+            # type: (requests.Response) -> None
             resp.raise_for_status()
             location = resp.headers.get("Location", None)
             if location is None:
@@ -422,6 +420,7 @@ class DriveItem(BaseItem):
             payload = {"name": name, "parentReference": parent_reference}
 
             def _construct_request(request):
+                # type: (RequestOptions) -> None
                 request.method = HttpMethod.Patch
 
             self.context.before_execute(_construct_request)

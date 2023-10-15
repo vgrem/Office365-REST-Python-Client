@@ -3,7 +3,7 @@ from office365.onedrive.workbooks.worksheets.worksheet import WorkbookWorksheet
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
-class WorkbookWorksheetCollection(EntityCollection):
+class WorkbookWorksheetCollection(EntityCollection[WorkbookWorksheet]):
     def __init__(self, context, resource_path=None):
         super(WorkbookWorksheetCollection, self).__init__(
             context, WorkbookWorksheet, resource_path

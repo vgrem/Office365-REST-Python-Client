@@ -14,6 +14,7 @@ class OfficeGraphInsights(Entity):
 
     @property
     def shared(self):
+        # type: () -> EntityCollection[SharedInsight]
         """
         Calculated relationship identifying documents shared with or by the user. This includes URLs, file attachments,
         and reference attachments to OneDrive for Business and SharePoint files found in Outlook messages and meetings.
@@ -28,6 +29,7 @@ class OfficeGraphInsights(Entity):
 
     @property
     def trending(self):
+        # type: () -> EntityCollection[Trending]
         """
         Calculated relationship identifying documents trending around a user.
         Trending documents are calculated based on activity of the user's closest network of people and include

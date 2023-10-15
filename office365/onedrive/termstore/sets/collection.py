@@ -5,7 +5,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
 
-class SetCollection(EntityCollection):
+class SetCollection(EntityCollection[Set]):
     def __init__(self, context, resource_path=None, parent_group=None):
         """
         :param office365.onedrive.termstore.groups.group.Group parent_group: The parent group that contains the set

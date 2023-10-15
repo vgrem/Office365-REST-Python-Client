@@ -2018,6 +2018,7 @@ class Web(SecurableObject):
 
     @property
     def parent_web(self):
+        # type: () -> Web
         """Gets the parent website of the specified website."""
         return self.properties.get(
             "ParentWeb",
@@ -2116,6 +2117,7 @@ class Web(SecurableObject):
 
     @property
     def event_receivers(self):
+        # type: () -> EventReceiverDefinitionCollection
         """Specifies the collection of event receiver definitions that are currently available on the Web site"""
         return self.properties.get(
             "EventReceivers",

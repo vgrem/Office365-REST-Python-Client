@@ -10,6 +10,7 @@ class SolutionsRoot(Entity):
 
     @property
     def booking_businesses(self):
+        # type: () -> BookingBusinessCollection
         """Get a collection of bookingBusiness objects that has been created for the tenant."""
         return self.properties.get(
             "bookingBusinesses",

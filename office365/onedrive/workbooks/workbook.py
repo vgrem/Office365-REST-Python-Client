@@ -126,6 +126,7 @@ class Workbook(Entity):
 
     @property
     def names(self):
+        # type: () -> EntityCollection[WorkbookNamedItem]
         """Represents a collection of workbook scoped named items (named ranges and constants). Read-only."""
         return self.properties.get(
             "names",
@@ -138,6 +139,7 @@ class Workbook(Entity):
 
     @property
     def operations(self):
+        # type: () -> EntityCollection[WorkbookOperation]
         """The status of workbook operations. Getting an operation collection is not supported, but you can get the
         status of a long-running operation if the Location header is returned in the response
         """
@@ -152,6 +154,7 @@ class Workbook(Entity):
 
     @property
     def worksheets(self):
+        # type: () -> WorkbookWorksheetCollection
         """Represents a collection of worksheets associated with the workbook. Read-only."""
         return self.properties.get(
             "worksheets",

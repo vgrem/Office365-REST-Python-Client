@@ -15,5 +15,5 @@ messages = (
     .get()
     .execute_query()
 )
-for m in messages:  # type: Message
+for m in messages:
     print(m.subject)

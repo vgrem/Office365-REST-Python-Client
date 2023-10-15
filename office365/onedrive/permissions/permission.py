@@ -69,6 +69,7 @@ class Permission(Entity):
 
     @property
     def link(self):
+        # type: () -> SharingLink
         """Provides the link details of the current permission, if it is a link type permissions. Read-only."""
         return self.properties.get("link", SharingLink())
 

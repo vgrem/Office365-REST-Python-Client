@@ -6,7 +6,7 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
-class DirectoryObjectCollection(DeltaCollection):
+class DirectoryObjectCollection(DeltaCollection[DirectoryObject]):
     """DirectoryObject's collection"""
 
     def __init__(self, context, resource_path=None):

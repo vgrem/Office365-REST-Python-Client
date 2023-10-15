@@ -101,6 +101,7 @@ class MailFolder(Entity):
 
     @property
     def messages(self):
+        # type: () -> MessageCollection
         """The collection of messages in the mailFolder."""
         return self.properties.get(
             "messages",

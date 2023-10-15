@@ -21,11 +21,13 @@ class SharedInsight(Entity):
 
     @property
     def resource_reference(self):
+        # type: () -> ResourceReference
         """Reference properties of the used document, such as the url and type of the document. Read-only"""
         return self.properties.get("resourceReference", ResourceReference())
 
     @property
     def resource(self):
+        # type: () -> Entity
         """Used for navigating to the item that was shared. For file attachments, the type is fileAttachment.
         For linked attachments, the type is driveItem."""
         return self.properties.get(
@@ -35,6 +37,7 @@ class SharedInsight(Entity):
 
     @property
     def sharing_history(self):
+        # type: () -> ClientValueCollection[SharingDetail]
         """Details about the sharing history. Read-only"""
         return self.properties.get(
             "sharingHistory", ClientValueCollection(SharingDetail)

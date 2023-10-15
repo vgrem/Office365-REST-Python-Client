@@ -704,6 +704,7 @@ class User(DirectoryObject):
 
     @property
     def drive(self):
+        # type: () -> Drive
         """Retrieve the properties and relationships of a Drive resource."""
         return self.properties.get(
             "drive",
@@ -715,6 +716,7 @@ class User(DirectoryObject):
 
     @property
     def contacts(self):
+        # type: () -> ContactCollection
         """Get a contact collection from the default Contacts folder of the signed-in user (.../me/contacts),
         or from the specified contact folder."""
         return self.properties.get(
@@ -726,6 +728,7 @@ class User(DirectoryObject):
 
     @property
     def contact_folders(self):
+        # type: () -> DeltaCollection[ContactFolder]
         """Get the contact folder collection in the default Contacts folder of the signed-in user."""
         return self.properties.get(
             "contactFolders",
@@ -738,6 +741,7 @@ class User(DirectoryObject):
 
     @property
     def events(self):
+        # type: () -> DeltaCollection[Event]
         """Get an event collection or an event."""
         return self.properties.get(
             "events",
@@ -748,6 +752,7 @@ class User(DirectoryObject):
 
     @property
     def messages(self):
+        # type: () -> MessageCollection
         """Get an event collection or an event."""
         return self.properties.get(
             "messages",
@@ -769,6 +774,7 @@ class User(DirectoryObject):
 
     @property
     def managed_devices(self):
+        # type: () -> EntityCollection[ManagedDevice]
         """"""
         return self.properties.get(
             "managedDevices",
@@ -781,6 +787,7 @@ class User(DirectoryObject):
 
     @property
     def member_of(self):
+        # type: () -> DirectoryObjectCollection
         """Get groups and directory roles that the user is a direct member of."""
         return self.properties.get(
             "memberOf",
@@ -867,6 +874,7 @@ class User(DirectoryObject):
 
     @property
     def mail_folders(self):
+        # type: () -> MailFolderCollection
         """Get the mail folder collection under the root folder of the signed-in user."""
         return self.properties.get(
             "mailFolders",
@@ -886,6 +894,7 @@ class User(DirectoryObject):
 
     @property
     def onenote(self):
+        # type: () -> Onenote
         """Represents the Onenote services available to a user."""
         return self.properties.get(
             "onenote",

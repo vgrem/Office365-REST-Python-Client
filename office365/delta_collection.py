@@ -18,6 +18,7 @@ class DeltaCollection(EntityCollection[T]):
 
     @property
     def delta(self):
+        # type: () -> DeltaCollection[T]
         """
         Get newly created, updated, or deleted entities (changes)
         """

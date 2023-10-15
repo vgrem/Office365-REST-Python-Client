@@ -14,6 +14,7 @@ class Onenote(Entity):
 
     @property
     def notebooks(self):
+        # type: () -> NotebookCollection
         """Retrieve a list of notebook objects."""
         return self.properties.get(
             "notebooks",
@@ -36,6 +37,7 @@ class Onenote(Entity):
 
     @property
     def pages(self):
+        # type: () -> OnenotePageCollection
         """Retrieve a list of page objects."""
         return self.properties.get(
             "pages",
@@ -58,6 +60,7 @@ class Onenote(Entity):
 
     @property
     def sections(self):
+        # type: () -> EntityCollection[OnenoteSection]
         """Retrieve a list of onenoteSection objects from the specified notebook."""
         return self.properties.get(
             "sections",

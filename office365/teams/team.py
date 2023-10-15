@@ -182,6 +182,7 @@ class Team(Entity):
 
     @property
     def installed_apps(self):
+        # type: () -> EntityCollection[TeamsAppInstallation]
         """The apps installed in this team."""
         return self.properties.get(
             "installedApps",

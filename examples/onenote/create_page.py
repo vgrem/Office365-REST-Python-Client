@@ -1,5 +1,7 @@
 """
+Create OneNote pages
 
+https://learn.microsoft.com/en-us/graph/onenote-create-page
 """
 
 from office365.graph_client import GraphClient

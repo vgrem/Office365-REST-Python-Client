@@ -8,7 +8,7 @@ from office365.outlook.mail.attachments.attachment import Attachment
 from office365.runtime.queries.upload_session import UploadSessionQuery
 
 
-class AttachmentCollection(EntityCollection):
+class AttachmentCollection(EntityCollection[Attachment]):
     """Attachment collection"""
 
     def __init__(self, context, resource_path=None):

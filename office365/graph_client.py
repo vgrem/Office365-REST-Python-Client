@@ -80,8 +80,40 @@ class GraphClient(ClientRuntimeContext):
         self._acquire_token_callback = acquire_token_callback
 
     @staticmethod
+    def with_client_secret(
+        tenant, client_id, client_secret, scopes=None, token_cache=None
+    ):
+        """
+        Initializes the confidential client with client secret
+
+        :param str tenant: Tenant name, for example: contoso.onmicrosoft.com
+        :param str client_id: The OAuth client id of the calling application.
+        :param str client_secret: Client secret
+        :param list[str] or None scopes: Scopes requested to access an API
+        :param Any token_cache: Default cache is in memory only,
+        Refer https://msal-python.readthedocs.io/en/latest/#msal.SerializableTokenCache
+        """
+        if scopes is None:
+            scopes = ["https://graph.microsoft.com/.default"]
+        authority_url = "https://login.microsoftonline.com/{0}".format(tenant)
+        import msal
+
+        app = msal.ConfidentialClientApplication(
+            client_id,
+            authority=authority_url,
+            client_credential=client_secret,
+            token_cache=token_cache,
+        )
+
+        def _acquire_token():
+            result = app.acquire_token_for_client(scopes=scopes)
+            return result
+
+        return GraphClient(_acquire_token)
+
+    @staticmethod
     def with_username_and_password(tenant, client_id, username, password, scopes=None):
-        # type: (str, str, str, str, List[str]) -> GraphClient
+        # type: (str, str, str, str, List[str]) -> "GraphClient"
         """
         Initializes the client via user credentials
 
