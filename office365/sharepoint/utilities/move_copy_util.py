@@ -1,9 +1,14 @@
 import os
+from typing import IO, TYPE_CHECKING, Callable
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
+
+if TYPE_CHECKING:
+    from office365.sharepoint.files.file import File
+    from office365.sharepoint.folders.folder import Folder
 
 
 class MoveCopyUtil(Entity):
@@ -141,6 +146,7 @@ class MoveCopyUtil(Entity):
     def download_folder(
         remove_folder, download_file, after_file_downloaded=None, recursive=True
     ):
+        # type: (Folder, IO, Callable[[File], None], bool) -> Folder
         """
         Downloads a folder into a zip file
         :param office365.sharepoint.folders.folder.Folder remove_folder: Parent folder

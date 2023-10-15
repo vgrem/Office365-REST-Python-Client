@@ -1,5 +1,7 @@
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
+
+from typing_extensions import Self
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -20,6 +22,7 @@ from office365.sharepoint.utilities.move_copy_util import MoveCopyUtil
 
 if TYPE_CHECKING:
     from office365.sharepoint.files.collection import FileCollection
+    from office365.sharepoint.folders.collection import FolderCollection
 
 
 class Folder(Entity):
@@ -54,7 +57,6 @@ class Folder(Entity):
     def get_files(self, recursive=False):
         """
         Retrieves files
-
         :param bool recursive: Determines whether to enumerate folders recursively
         """
         from office365.sharepoint.files.collection import FileCollection
@@ -62,9 +64,7 @@ class Folder(Entity):
         return_type = FileCollection(self.context, self.files.resource_path, self)
 
         def _loaded(parent):
-            """
-            :type parent: Folder
-            """
+            # type: ("Folder") -> None
             [return_type.add_child(f) for f in parent.files]
             if recursive:
                 for folder in parent.folders:
@@ -94,9 +94,7 @@ class Folder(Entity):
             self.set_property("ServerRelativeUrl", url)
 
         def _move_to(destination_folder):
-            """
-            :type destination_folder: Folder
-            """
+            # type: ("Folder") -> None
             destination_url = "/".join(
                 [destination_folder.serverRelativeUrl, self.name]
             )
@@ -261,10 +259,8 @@ class Folder(Entity):
         return return_type
 
     def add(self, name):
-        """Adds the folder that is located under a current folder
-
-        :type name: str
-        """
+        # type: (str) -> Self
+        """Adds the folder that is located under a current folder"""
         return self.folders.add(name)
 
     def rename(self, name):
@@ -352,6 +348,7 @@ class Folder(Entity):
         return return_type
 
     def copy_to(self, destination, keep_both=False, reset_author_and_created=False):
+        # type: (str|"Folder", bool, bool) -> "Folder"
         """Copies the folder with files to the destination URL.
 
         :param str or Folder destination: Parent folder object or server relative folder url
@@ -362,9 +359,7 @@ class Folder(Entity):
         self.parent_collection.add_child(return_type)
 
         def _copy_folder(destination_folder):
-            """
-            :type destination_folder: Folder
-            """
+            # type: ("Folder") -> None
             destination_url = "/".join(
                 [destination_folder.serverRelativeUrl, self.name]
             )
@@ -393,6 +388,7 @@ class Folder(Entity):
     def copy_to_using_path(
         self, destination, keep_both=False, reset_author_and_created=False
     ):
+        # type: (str|"Folder", bool, bool) -> "Folder"
         """Copies the folder with files to the destination Path.
 
         :param str or Folder destination: Parent folder object or server relative folder url
@@ -404,9 +400,7 @@ class Folder(Entity):
         self.parent_collection.add_child(return_type)
 
         def _copy_folder_by_path(destination_folder):
-            """
-            :type destination_folder: Folder
-            """
+            # type: ("Folder") -> None
             destination_url = "/".join(
                 [str(destination_folder.server_relative_path), self.name]
             )
@@ -425,9 +419,9 @@ class Folder(Entity):
                     "ServerRelativePath", _copy_folder_by_path, destination
                 )
             else:
-                self.context.web.ensure_folder_path(destination).after_execute(
-                    _copy_folder_by_path
-                )
+                self.context.web.ensure_folder_path(destination).get().select(
+                    ["ServerRelativePath"]
+                ).after_execute(_copy_folder_by_path)
 
         self.ensure_properties(["ServerRelativePath", "Name"], _source_folder_resolved)
         return return_type
@@ -444,7 +438,8 @@ class Folder(Entity):
 
     @property
     def list_item_all_fields(self):
-        """Specifies the list item fields (2) values for the list item corresponding to the folder."""
+        # type: () -> ListItem
+        """Specifies the list item fields values for the list item corresponding to the folder."""
         return self.properties.get(
             "ListItemAllFields",
             ListItem(
@@ -467,6 +462,7 @@ class Folder(Entity):
 
     @property
     def folders(self):
+        # type: () -> FolderCollection
         """Specifies the collection of list folders contained within the list folder."""
         from office365.sharepoint.folders.collection import FolderCollection
 
@@ -477,6 +473,7 @@ class Folder(Entity):
 
     @property
     def parent_folder(self):
+        # type: () -> "Folder"
         """Specifies the list folder."""
         return self.properties.get(
             "ParentFolder",
@@ -485,103 +482,85 @@ class Folder(Entity):
 
     @property
     def name(self):
-        """Specifies the list folder name.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the list folder name."""
         return self.properties.get("Name", None)
 
     @property
     def is_wopi_enabled(self):
+        # type: () -> Optional[bool]
         """
         Indicates whether the folder is enabled for WOPI default action.
-
-        :rtype: bool or None
         """
         return self.properties.get("IsWOPIEnabled", None)
 
     @property
     def prog_id(self):
-        """Gets the identifier (ID) of the application in which the folder was created.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the identifier (ID) of the application in which the folder was created."""
         return self.properties.get("ProgID", None)
 
     @property
     def unique_id(self):
-        """Gets the unique ID of the folder.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the unique ID of the folder."""
         return self.properties.get("UniqueId", None)
 
     @property
     def exists(self):
-        """Gets a Boolean value that indicates whether the folder exists.
-
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Gets a Boolean value that indicates whether the folder exists."""
         return self.properties.get("Exists", None)
 
     @property
     def welcome_page(self):
-        """Specifies the server-relative URL for the list folder Welcome page.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the server-relative URL for the list folder Welcome page."""
         return self.properties.get("WelcomePage", None)
 
     @property
     def unique_content_type_order(self):
-        """Specifies the content type order for the list folder.
-
-        :rtype: office365.sharepoint.contenttypes.content_type_id.ContentTypeId or None
-        """
+        """Specifies the content type order for the list folder."""
         return self.properties.get("UniqueContentTypeOrder", ContentTypeId())
 
     @property
     def content_type_order(self):
-        """Specifies the content type order for the list folder.
-
-        :rtype: office365.sharepoint.contenttypes.content_type_id.ContentTypeId or None
-        """
+        """Specifies the content type order for the list folder."""
         return self.properties.get("ContentTypeOrder", ContentTypeId())
 
     @property
     def time_last_modified(self):
-        """Gets the last time this folder or a direct child was modified in UTC.
-
-        :rtype: str or None
-        """
-        return self.properties.get("TimeLastModified", None)
+        # type: () -> Optional[datetime]
+        """Gets the last time this folder or a direct child was modified in UTC."""
+        return self.properties.get("TimeLastModified", datetime.min)
 
     @property
     def time_created(self):
+        # type: () -> Optional[datetime]
         """
         Gets when the folder was created in UTC.
-        :rtype: datetime or None
         """
         return self.properties.get("TimeCreated", datetime.min)
 
     @property
     def serverRelativeUrl(self):
+        # type: () -> Optional[str]
         """
         Gets the server-relative URL of the list folder.
-        :rtype: str or None
         """
         return self.properties.get("ServerRelativeUrl", None)
 
     @property
     def server_relative_path(self):
+        # type: () -> Optional[SPResPath]
         """
         Gets the server-relative Path of the list folder.
-        :rtype: SPResPath or None
         """
         return self.properties.get("ServerRelativePath", SPResPath())
 
     @property
     def property_ref_name(self):
+        # type: () -> str
         return "ServerRelativeUrl"
 
     def get_property(self, name, default_value=None):
@@ -594,6 +573,7 @@ class Folder(Entity):
                 "ServerRelativePath": self.server_relative_path,
                 "StorageMetrics": self.storage_metrics,
                 "TimeCreated": self.time_created,
+                "TimeLastModified": self.time_last_modified,
             }
             default_value = property_mapping.get(name, None)
         return super(Folder, self).get_property(name, default_value)

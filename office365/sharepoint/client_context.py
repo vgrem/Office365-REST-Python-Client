@@ -690,6 +690,11 @@ class ClientContext(ClientRuntimeContext):
         return result.scheme + "://" + ".".join(names)
 
     @property
+    def site_path(self):
+        root_url = get_absolute_url(self.base_url)
+        return self.base_url.replace(root_url, "")
+
+    @property
     def is_tenant(self):
         """
         Determines whether the current site is a tenant administration site

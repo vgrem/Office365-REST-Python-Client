@@ -33,6 +33,7 @@ class FolderCollection(EntityCollection[Folder]):
 
         :param str path: server or site relative url to a folder
         """
+        path = path.replace(self.context.site_path, "")
         names = [name for name in path.split("/") if name]
         if not names:
             raise ValueError("Invalid server or site relative url")

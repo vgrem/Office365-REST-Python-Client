@@ -1,5 +1,5 @@
 """
-Demonstrates how to copy a folder within a site
+Demonstrates how to copy a folder using path
 """
 
 from office365.sharepoint.client_context import ClientContext
@@ -12,13 +12,13 @@ folder_from = ctx.web.default_document_library().root_folder.add(
     create_unique_name("from")
 )
 # folder_to = ctx.web.default_document_library().root_folder.add(create_unique_name("to"))
-folder_to_url = "/sites/team/Shared Documents/Archive/2001/01"
+folder_to_url = "Shared Documents/Archive/2001/01"
 
 # copies the folder with a new name
-folder = folder_from.copy_to(folder_to_url).execute_query()
+folder = folder_from.copy_to_using_path(folder_to_url).execute_query()
 print(
     "Folder has been copied from '{0}' into '{1}'".format(
-        folder_from.serverRelativeUrl, folder.serverRelativeUrl
+        folder_from.server_relative_path, folder.server_relative_path
     )
 )
 
