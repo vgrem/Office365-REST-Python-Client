@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import sys
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -8,9 +9,12 @@ from typing import (
     Generic,
     List,
     Optional,
-    ParamSpec,
     TypeVar,
 )
+if sys.version_info < (3, 10):
+    from typing_extensions import ParamSpec
+else:
+    from typing import ParamSpec
 
 from typing_extensions import Self
 

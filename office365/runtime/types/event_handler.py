@@ -1,7 +1,12 @@
 import types
 from typing import Callable, Iterator, TypeVar
+import sys
+from typing_extensions import Self
+if sys.version_info < (3, 10):
+    from typing_extensions import ParamSpec
+else:
+    from typing import ParamSpec
 
-from typing_extensions import ParamSpec, Self
 
 P = ParamSpec("P")
 F = TypeVar("F", bound=Callable[..., None])
