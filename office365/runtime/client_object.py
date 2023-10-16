@@ -1,20 +1,7 @@
 from __future__ import annotations
 
 import datetime
-import sys
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Generic,
-    List,
-    Optional,
-    TypeVar,
-)
-if sys.version_info < (3, 10):
-    from typing_extensions import ParamSpec
-else:
-    from typing import ParamSpec
+from typing import TYPE_CHECKING, Any, Callable, Generic, List, Optional, TypeVar
 
 from typing_extensions import Self
 
@@ -33,7 +20,6 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 P_T = TypeVar("P_T")
 """Property Type."""
-P = ParamSpec("P")
 
 
 class ClientObject(Generic[T]):

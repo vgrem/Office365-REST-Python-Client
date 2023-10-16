@@ -10,7 +10,7 @@ with io.open("README.md", mode="r", encoding="utf-8") as fh:
 
 setup(
     name="Office365-REST-Python-Client",
-    version="2.5.0",
+    version="2.5.1",
     author="Vadim Gremyachev",
     author_email="vvgrem@gmail.com",
     maintainer="Konrad Gądek, Domenico Di Nicola",
@@ -19,7 +19,12 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/vgrem/Office365-REST-Python-Client",
-    install_requires=["requests", "msal", "pytz", "typing_extensions;python_version<'3.11'"],
+    install_requires=[
+        "requests",
+        "msal",
+        "pytz",
+        "typing_extensions;python_version<'3.11'",
+    ],
     extras_require={"NtlmProvider": ["requests_ntlm"]},
     tests_require=["pytest", "adal"],
     test_suite="tests",

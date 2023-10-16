@@ -1,14 +1,8 @@
 import types
-from typing import Callable, Iterator, TypeVar
-import sys
+from typing import Any, Callable, Iterator, TypeVar
+
 from typing_extensions import Self
-if sys.version_info < (3, 10):
-    from typing_extensions import ParamSpec
-else:
-    from typing import ParamSpec
 
-
-P = ParamSpec("P")
 F = TypeVar("F", bound=Callable[..., None])
 
 
@@ -40,7 +34,7 @@ class EventHandler:
         return len(self._listeners)
 
     def notify(self, *args, **kwargs):
-        # type: (P.args, P.kwargs) -> None
+        # type: (Any, Any) -> None
         for listener in self._listeners:
             if self._once:
                 self._listeners.remove(listener)
