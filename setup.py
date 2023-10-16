@@ -19,7 +19,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/vgrem/Office365-REST-Python-Client",
-    install_requires=["requests", "msal", "pytz", "typing_extensions;python_version<'3.10'"],
+    install_requires=["requests", "msal", "pytz", "typing_extensions;python_version<'3.11'"],
     extras_require={"NtlmProvider": ["requests_ntlm"]},
     tests_require=["pytest", "adal"],
     test_suite="tests",
