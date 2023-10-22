@@ -5,6 +5,7 @@ The example is adapted from https://learn.microsoft.com/en-us/graph/api/message-
 """
 
 from office365.graph_client import GraphClient
+from office365.outlook.mail.messages.message import Message
 from tests.graph_case import acquire_token_by_username_password
 
 client = GraphClient(acquire_token_by_username_password)
@@ -14,5 +15,5 @@ messages = (
     .get()
     .execute_query()
 )
-for m in messages:  # type: Message
+for m in messages:
     print(m.subject)

@@ -1,6 +1,7 @@
 """
 Share a file with a password
 """
+import json
 
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.sharing.links.kind import SharingLinkKind

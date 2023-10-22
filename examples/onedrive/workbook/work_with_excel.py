@@ -17,7 +17,7 @@ print("Reading a table...")
 table = workbook.worksheets["Sheet1"].tables["financials"]
 # read table content
 rows = table.rows.get().execute_query()
-for r in rows:  # type: WorkbookTableRow
+for r in rows:
     print(r.values)
 
 print("Refreshing a session...")

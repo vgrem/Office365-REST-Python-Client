@@ -20,6 +20,7 @@ from tests import (
     test_client_id,
     test_site_url,
     test_tenant,
+    test_tenant_name,
 )
 
 cert_credentials = {

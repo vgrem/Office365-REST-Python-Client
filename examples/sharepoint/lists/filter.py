@@ -8,5 +8,5 @@ result = (
     .filter("IsSystemList eq true")
     .execute_query()
 )
-for lst in result:  # type: List
+for lst in result:
     print(lst.title)

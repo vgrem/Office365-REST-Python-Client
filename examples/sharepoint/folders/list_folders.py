@@ -1,14 +1,14 @@
+from typing import Callable
+
 from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.folders.folder import Folder
 from tests import test_client_credentials, test_team_site_url
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 
 
 def enum_folder(parent_folder, action):
-    """
-    :type parent_folder: Folder
-    :type action: (Folder)-> None
-    """
+    # type: (Folder, Callable[[Folder], None]) -> None
     parent_folder.expand(["Folders"]).get().execute_query()
     action(parent_folder)
     for folder in parent_folder.folders:

@@ -13,5 +13,5 @@ file_item = (
     .get()
     .execute_query()
 )
-for ver in file_item.versions:  # type: DriveItemVersion
-    print(ver)
+for ver in file_item.versions:
+    print(ver.id)

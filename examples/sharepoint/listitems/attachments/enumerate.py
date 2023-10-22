@@ -7,6 +7,6 @@ source_list = ctx.web.lists.get_by_title(list_title)
 items = (
     source_list.items.select(["Id"]).expand(["AttachmentFiles"]).get().execute_query()
 )
-for item in items:  # type: ListItem
-    for attachment_file in item.attachment_files:  # type: Attachment
-        print(f"{attachment_file.server_relative_url}")
+for item in items:
+    for attachment_file in item.attachment_files:
+        print(attachment_file.server_relative_url)

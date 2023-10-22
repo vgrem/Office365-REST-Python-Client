@@ -8,7 +8,7 @@ def create_paged_query(page_size):
     qry.ViewXml = f"""
        <View Scope='RecursiveAll'>
           <Query><Where><Neq>
-              <FieldRef Name=\"FullName\" /><Value Type=\"Text\">Travis Clayton</Value>
+          <FieldRef Name=\"FullName\" /><Value Type=\"Text\">Travis Clayton</Value>
           </Neq></Where></Query>
           <QueryOptions><QueryThrottleMode>Override</QueryThrottleMode></QueryOptions>
           <RowLimit Paged='TRUE'>{page_size}</RowLimit>

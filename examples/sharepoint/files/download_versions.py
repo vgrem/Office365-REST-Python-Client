@@ -2,6 +2,7 @@ import os
 import tempfile
 
 from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.files.versions.version import FileVersion
 from tests import test_client_credentials, test_team_site_url
 
 

@@ -7,5 +7,5 @@ from tests.graph_case import acquire_token_by_username_password
 
 client = GraphClient(acquire_token_by_username_password)
 activities = client.me.activities.get().top(5).execute_query()
-for activity in activities:  # type: UserActivity
+for activity in activities:
     print(activity)

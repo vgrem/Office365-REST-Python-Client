@@ -1,5 +1,5 @@
 """
-Demonstrates how to download a file content
+Demonstrates how to download a file content (intended for a small files with a size less than 4 Mb)
 """
 
 from office365.sharepoint.client_context import ClientContext

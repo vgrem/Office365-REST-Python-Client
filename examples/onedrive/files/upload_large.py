@@ -25,4 +25,4 @@ remote_file = (
     .get()
     .execute_query()
 )
-print(f"File {remote_file.web_url} has been uploaded")
+print("File {0} has been uploaded".format(remote_file.web_url))

@@ -9,5 +9,5 @@ from tests.graph_case import acquire_token_by_client_credentials
 
 client = GraphClient(acquire_token_by_client_credentials)
 lists = client.sites.root.lists.get().execute_query()
-for lst in lists:  # type: List
+for lst in lists:
     print(lst.display_name)

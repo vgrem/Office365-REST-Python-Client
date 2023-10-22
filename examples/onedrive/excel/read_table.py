@@ -16,5 +16,5 @@ print(table.name)
 
 # read table content
 rows = table.rows.get().execute_query()
-for r in rows:  # type: WorkbookTableRow
+for r in rows:
     print(r.values)

@@ -11,5 +11,5 @@ from tests.graph_case import acquire_token_by_client_credentials
 
 client = GraphClient(acquire_token_by_client_credentials)
 sites = client.sites.search("team").execute_query()
-for site in sites:  # type: Site
+for site in sites:
     print("Site url: {0}".format(site.web_url))

@@ -2,6 +2,7 @@ import os
 import tempfile
 
 from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.listitems.listitem import ListItem
 from tests import test_site_url, test_user_credentials
 
 ctx = ClientContext(test_site_url).with_credentials(test_user_credentials)

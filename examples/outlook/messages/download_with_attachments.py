@@ -8,6 +8,8 @@ import os
 import tempfile
 
 from office365.graph_client import GraphClient
+from office365.outlook.mail.attachments.attachment import Attachment
+from office365.outlook.mail.messages.message import Message
 from tests import test_user_principal_name
 from tests.graph_case import acquire_token_by_client_credentials
 
