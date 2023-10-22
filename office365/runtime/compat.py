@@ -1,4 +1,5 @@
 # ruff: noqa
+# pylint: skip-file
 import sys
 
 # -------

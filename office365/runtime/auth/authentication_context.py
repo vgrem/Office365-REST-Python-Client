@@ -65,7 +65,7 @@ class AuthenticationContext(object):
                 "Private key is missing. Use either 'cert_path' or 'private_key' to pass the value"
             )
         elif cert_path is not None:
-            with open(cert_path, "r") as f:
+            with open(cert_path, "r", encoding="utf8") as f:
                 private_key = f.read()
 
         def _acquire_token():

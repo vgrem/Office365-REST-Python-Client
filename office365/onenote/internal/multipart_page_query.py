@@ -48,7 +48,7 @@ class OneNotePageCreateQuery(ClientQuery):
         )
         main_message.set_boundary(boundary)
 
-        c_type, enc = get_mime_type(self._presentation.name)
+        c_type, _enc = get_mime_type(self._presentation.name)
         presentation_message = Message()
         presentation_message.add_header("Content-Type", c_type)
         presentation_message.add_header(
@@ -59,7 +59,7 @@ class OneNotePageCreateQuery(ClientQuery):
 
         for name, file in self._files.items():
             file_message = Message()
-            c_type, enc = get_mime_type(file.name)
+            c_type, _enc = get_mime_type(file.name)
             file_message.add_header("Content-Type", c_type)
             file_message.add_header(
                 "Content-Disposition", 'form-data; name="{0}"'.format(name)

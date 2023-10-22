@@ -47,9 +47,7 @@ class EventHandler:
         from office365.runtime.client_runtime_context import ClientRuntimeContext
 
         if isinstance(listener, types.MethodType):
-            return isinstance(listener.__self__, ClientRequest) or isinstance(
-                listener.__self__, ClientRuntimeContext
-            )
+            return isinstance(listener.__self__, (ClientRequest, ClientRuntimeContext))
         if isinstance(listener, types.FunctionType):
             return listener.__module__ == ClientRuntimeContext.__module__
         else:

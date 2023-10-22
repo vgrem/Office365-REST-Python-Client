@@ -189,7 +189,8 @@ class Tenant(Entity):
     def get_home_sites(self):
         # type: () -> ClientResult[ClientValueCollection[HomeSitesDetails]]
         return_type = ClientResult(
-            self.context, ClientValueCollection[HomeSitesDetails]()
+            self.context,
+            ClientValueCollection[HomeSitesDetails](),  # pylint: disable=E1120
         )
         qry = ServiceOperationQuery(self, "GetHomeSites", None, None, None, return_type)
         self.context.add_query(qry)

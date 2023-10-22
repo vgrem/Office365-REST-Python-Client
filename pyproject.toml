@@ -46,6 +46,7 @@ disable = [
     "W0237", # arguments-renamed
     "W0246", # useless-parent-delegation
     "W0404", # reimported
+    "W0611", # unused-imports # typing
     "W0613", # unused-argument
     "W0621", # redefine-outer-name
     "W0707", # raise-missing-from

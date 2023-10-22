@@ -63,9 +63,7 @@ class ODataRequest(ClientRequest):
                 return_type.set_property("__value", response.content)
         else:
             if isinstance(json_format, JsonLightFormat):
-                if isinstance(query, ServiceOperationQuery) or isinstance(
-                    query, FunctionQuery
-                ):
+                if isinstance(query, (ServiceOperationQuery, FunctionQuery)):
                     json_format.function = query.name
 
             self.map_json(response.json(), return_type, json_format)
@@ -129,7 +127,7 @@ class ODataRequest(ClientRequest):
 
         def _normalize_payload(payload):
             # type: (ClientObject|ClientValue|dict|list) -> dict|list
-            if isinstance(payload, ClientObject) or isinstance(payload, ClientValue):
+            if isinstance(payload, (ClientObject, ClientValue)):
                 return payload.to_json(self._default_json_format)
             elif isinstance(payload, dict):
                 return {
