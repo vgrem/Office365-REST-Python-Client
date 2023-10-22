@@ -67,7 +67,7 @@ class ColumnDefinitionCollection(EntityCollection[ColumnDefinition]):
         :param str column_name: The name of the lookup source column.
         """
         from office365.onedrive.columns.lookup import LookupColumn
-        from office365.onedrive.lists.list import List
+        from office365.onedrive.lists.list import List  # noqa
 
         if isinstance(lookup_list, List):
             return_type = ColumnDefinition(self.context)

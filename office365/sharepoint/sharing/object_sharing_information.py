@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
@@ -8,6 +10,11 @@ from office365.sharepoint.sharing.links.info import SharingLinkInfo
 from office365.sharepoint.sharing.object_sharing_information_user import (
     ObjectSharingInformationUser,
 )
+
+if TYPE_CHECKING:
+    from typing import Optional  # noqa
+
+    from office365.sharepoint.client_context import ClientContext  # noqa
 
 
 class ObjectSharingInformation(Entity):
@@ -123,26 +130,27 @@ class ObjectSharingInformation(Entity):
         check_for_access_requests=False,
         return_type=None,
     ):
+        # type: (ClientContext, str, int, Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[ObjectSharingInformation]) -> ObjectSharingInformation
         """
         Retrieves information about the sharing state for a given list.
 
-        :param bool check_for_access_requests: Specifies whether the returned sharing state information will contain a URL
+        :param check_for_access_requests: Specifies whether the returned sharing state information will contain a URL
         to a location which describes any access requests present in the site (2), if such a URL is available.
-        :param bool retrieve_user_info_details: Specifies whether the returned sharing state information will contain
+        :param retrieve_user_info_details: Specifies whether the returned sharing state information will contain
         basic or detailed information about the users with permissions to the list item.
-        :param bool retrieve_anonymous_links: Specifies whether the returned sharing state information will contain
+        :param retrieve_anonymous_links: Specifies whether the returned sharing state information will contain
         information about a URL that allows an anonymous user to access the list item.
-        :param bool exclude_security_groups: Specifies whether the returned sharing state information will exclude
+        :param exclude_security_groups: Specifies whether the returned sharing state information will exclude
         information about security groups which have permissions to the list item.
-        :param bool exclude_site_admin:  Specifies whether the returned sharing state information will exclude
+        :param exclude_site_admin:  Specifies whether the returned sharing state information will exclude
         information about users who are site collection administrators of the site collection which contains the list.
-        :param bool exclude_current_user: Specifies whether the returned sharing state information will exclude
+        :param exclude_current_user: Specifies whether the returned sharing state information will exclude
         information about the user making the request.
-        :param int item_id: The list item identifier for the list item for which the sharing state is requested.
-        :param str list_id: The list identifier for the list which contains the list item for which
+        :param item_id: The list item identifier for the list item for which the sharing state is requested.
+        :param list_id: The list identifier for the list which contains the list item for which
         the sharing state is requested.
-        :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
-        :param ObjectSharingInformation return_type: Return type
+        :param context: SharePoint client context
+        :param return_type: Return type
         """
         binding_type = ObjectSharingInformation(context)
         payload = {

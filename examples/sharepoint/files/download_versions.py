@@ -14,7 +14,7 @@ def download_file_versions(source_file, target_path):
     file_versions = source_file.versions.get().execute_query()
     for version in file_versions:  # type: FileVersion
         with open(target_path, "wb") as f:
-            file = version.download(f).execute_query()
+            version.download(f).execute_query()
         print(
             "[Ok] file version {0} has been downloaded into: {1}".format(
                 version.url, target_path
@@ -30,7 +30,7 @@ def download_specific_file_version(source_file, version, target_path):
     """
     version = source_file.versions.get_by_id(version)
     with open(target_path, "wb") as f:
-        file = version.download(f).execute_query()
+        version.download(f).execute_query()
     print(
         "[Ok] file version {0} has been downloaded into: {1}".format(
             version.url, target_path

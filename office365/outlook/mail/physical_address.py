@@ -1,4 +1,9 @@
+from typing import TYPE_CHECKING
+
 from office365.runtime.client_value import ClientValue
+
+if TYPE_CHECKING:
+    from typing import Optional  # noqa
 
 
 class PhysicalAddress(ClientValue):
@@ -12,12 +17,13 @@ class PhysicalAddress(ClientValue):
         state=None,
         street=None,
     ):
+        # type: (Optional[str], Optional[str], Optional[str], Optional[str], Optional[str]) -> None
         """
-        :param str city: The city.
-        :param str country_or_region: The country or region. It's a free-format string value, for example, "United States".
-        :param str postal_code: The postal code.
-        :param str state:
-        :param str street:
+        :param city: The city.
+        :param country_or_region: The country or region. It's a free-format string value, for example, "United States".
+        :param postal_code: The postal code.
+        :param state:
+        :param street:
         """
         super(PhysicalAddress, self).__init__()
         self.city = city

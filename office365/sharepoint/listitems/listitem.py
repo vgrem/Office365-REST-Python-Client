@@ -1,4 +1,5 @@
 import json
+from typing import TYPE_CHECKING
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -33,6 +34,10 @@ from office365.sharepoint.ui.applicationpages.peoplepicker.web_service_interface
     ClientPeoplePickerWebServiceInterface,
 )
 
+if TYPE_CHECKING:
+    import datetime
+    from typing import Optional
+
 
 class ListItem(SecurableObject):
     """An individual entry within a SharePoint list. Each list item has a schema that maps to fields in the list
@@ -50,18 +55,19 @@ class ListItem(SecurableObject):
             self.set_property("ParentList", parent_list, False)
 
     def share_link(self, link_kind, expiration=None, role=None, password=None):
+        # type: (int, Optional[datetime.datetime], Optional[int], Optional[str]) -> ClientResult
         """Creates a tokenized sharing link for a list item based on the specified parameters and optionally
         sends an email to the people that are listed in the specified parameters.
 
-        :param int link_kind: The kind of the tokenized sharing link to be created/updated or retrieved.
-        :param datetime.datetime or None expiration: A date/time string for which the format conforms to the ISO 8601:2004(E)
+        :param link_kind: The kind of the tokenized sharing link to be created/updated or retrieved.
+        :param expiration: A date/time string for which the format conforms to the ISO 8601:2004(E)
             complete representation for calendar date and time of day and which represents the time and date of expiry
             for the tokenized sharing link. Both the minutes and hour value MUST be specified for the difference
             between the local and UTC time. Midnight is represented as 00:00:00. A null value indicates no expiry.
             This value is only applicable to tokenized sharing links that are anonymous access links.
-        :param int role: The role to be used for the tokenized sharing link. This is required for Flexible links
+        :param role: The role to be used for the tokenized sharing link. This is required for Flexible links
             and ignored for all other kinds.
-        :param str password: Optional password value to apply to the tokenized sharing link,
+        :param password: Optional password value to apply to the tokenized sharing link,
             if it can support password protection.
         """
         return_type = ClientResult(
@@ -402,7 +408,9 @@ class ListItem(SecurableObject):
     def attachment_files(self):
         # type: () -> AttachmentCollection
         """Specifies the collection of attachments that are associated with the list item.<62>"""
-        from office365.sharepoint.attachments.collection import AttachmentCollection
+        from office365.sharepoint.attachments.collection import (
+            AttachmentCollection,  # noqa
+        )
 
         return self.properties.get(
             "AttachmentFiles",

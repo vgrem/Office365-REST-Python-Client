@@ -59,7 +59,7 @@ class Folder(Entity):
         Retrieves files
         :param bool recursive: Determines whether to enumerate folders recursively
         """
-        from office365.sharepoint.files.collection import FileCollection
+        from office365.sharepoint.files.collection import FileCollection  # noqa
 
         return_type = FileCollection(self.context, self.files.resource_path, self)
 
@@ -177,18 +177,19 @@ class Folder(Entity):
         return return_type
 
     def share_link(self, link_kind, expiration=None, role=None, password=None):
+        # type: (int, Optional[datetime], Optional[int], Optional[str]) -> str
         """Creates a tokenized sharing link for a folder based on the specified parameters and optionally
         sends an email to the people that are listed in the specified parameters.
 
-        :param int link_kind: The kind of the tokenized sharing link to be created/updated or retrieved.
-        :param datetime.datetime or None expiration: A date/time string for which the format conforms to the ISO 8601:2004(E)
+        :param link_kind: The kind of the tokenized sharing link to be created/updated or retrieved.
+        :param expiration: A date/time string for which the format conforms to the ISO 8601:2004(E)
             complete representation for calendar date and time of day and which represents the time and date of expiry
             for the tokenized sharing link. Both the minutes and hour value MUST be specified for the difference
             between the local and UTC time. Midnight is represented as 00:00:00. A null value indicates no expiry.
             This value is only applicable to tokenized sharing links that are anonymous access links.
-        :param int role: The role to be used for the tokenized sharing link. This is required for Flexible links
+        :param role: The role to be used for the tokenized sharing link. This is required for Flexible links
             and ignored for all other kinds.
-        :param str password: Optional password value to apply to the tokenized sharing link,
+        :param password: Optional password value to apply to the tokenized sharing link,
             if it can support password protection.
         """
         return self.list_item_all_fields.share_link(
@@ -451,7 +452,7 @@ class Folder(Entity):
     def files(self):
         # type: () -> FileCollection
         """Specifies the collection of files contained in the list folder."""
-        from office365.sharepoint.files.collection import FileCollection
+        from office365.sharepoint.files.collection import FileCollection  # noqa
 
         return self.properties.get(
             "Files",
@@ -464,7 +465,7 @@ class Folder(Entity):
     def folders(self):
         # type: () -> FolderCollection
         """Specifies the collection of list folders contained within the list folder."""
-        from office365.sharepoint.folders.collection import FolderCollection
+        from office365.sharepoint.folders.collection import FolderCollection  # noqa
 
         return self.properties.get(
             "Folders",

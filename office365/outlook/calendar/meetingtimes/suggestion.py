@@ -18,13 +18,14 @@ class MeetingTimeSuggestion(ClientValue):
         locations=None,
         meeting_timeslot=TimeSlot(),
     ):
+        # type: (list[AttendeeAvailability], float, list[Location], TimeSlot) -> None
         """
-        :param list[AttendeeAvailability] attendee_availability: An array that shows the availability status of each
+        :param attendee_availability: An array that shows the availability status of each
             attendees for this meeting suggestion.
-        :param float confidence: A percentage that represents the likelhood of all the attendees attending.
-        :param list[Location] locations: An array that specifies the name and geographic location of each meeting location
+        :param confidence: A percentage that represents the likelhood of all the attendees attending.
+        :param locations: An array that specifies the name and geographic location of each meeting location
              for this meeting suggestion.
-        :param TimeSlot meeting_timeslot: A time period suggested for the meeting.
+        :param meeting_timeslot: A time period suggested for the meeting.
         """
         self.attendeeAvailability = ClientValueCollection(
             AttendeeAvailability, attendee_availability

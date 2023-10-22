@@ -9,7 +9,7 @@ from tests import test_cert_path, test_cert_thumbprint, test_client_id, test_ten
 
 
 def acquire_token():
-    with open(test_cert_path, "r") as f:
+    with open(test_cert_path, "r"):
         private_key = open(test_cert_path).read()
 
     authority_url = "https://login.microsoftonline.com/{0}".format(test_tenant_name)

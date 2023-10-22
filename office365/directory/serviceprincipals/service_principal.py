@@ -32,8 +32,9 @@ class ServicePrincipal(DirectoryObject):
             The type, usage and key are required properties for this usage. Supported key types are:
                 AsymmetricX509Cert: The usage must be Verify.
                 X509CertAndPassword: The usage must be Sign
-        :param PasswordCredential password_credential: Only secretText is required to be set which should contain the password
-             for the key. This property is required only for keys of type X509CertAndPassword. Set it to null otherwise.
+        :param PasswordCredential password_credential: Only secretText is required to be set which should contain
+            the password for the key. This property is required only for keys of type X509CertAndPassword.
+            Set it to null otherwise.
         :param str proof: A self-signed JWT token used as a proof of possession of the existing keys
         """
         payload = {
