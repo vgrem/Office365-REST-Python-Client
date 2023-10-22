@@ -22,6 +22,7 @@ class BaseItem(Entity):
 
     @property
     def created_by_user(self):
+        # type: () -> User
         """
         Identity of the user who created the item
         """
@@ -39,6 +40,7 @@ class BaseItem(Entity):
 
     @property
     def last_modified_by_user(self):
+        # type: () -> User
         """
         Identity of the user who last modified the item.
         """
@@ -51,11 +53,13 @@ class BaseItem(Entity):
 
     @property
     def created_datetime(self):
+        # type: () -> datetime
         """Gets date and time of item creation."""
         return self.properties.get("createdDateTime", datetime.min)
 
     @property
     def last_modified_datetime(self):
+        # type: () -> datetime
         """Gets date and time the item was last modified."""
         return self.properties.get("lastModifiedDateTime", datetime.min)
 

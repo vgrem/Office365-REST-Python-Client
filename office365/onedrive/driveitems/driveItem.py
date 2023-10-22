@@ -93,7 +93,7 @@ class DriveItem(BaseItem):
         message=None,
         retain_inherited_permissions=None,
     ):
-        # type: (str, Optional[str], Optional[datetime.datetime], Optional[str], Optional[str], Optional[bool]) -> Permission
+        # type: (str, Optional[str], Optional[datetime], Optional[str], Optional[str], Optional[bool]) -> Permission
         """
         The createLink action will create a new sharing link if the specified link type doesn't already exist
         for the calling application. If a sharing link of the specified type already exists for the app,
@@ -476,7 +476,7 @@ class DriveItem(BaseItem):
         password=None,
         retain_inherited_permissions=None,
     ):
-        # type: (list[str], str, Optional[bool], Optional[bool], Optional[list[str]], Optional[datetime.datetime], Optional[str], Optional[bool]) -> PermissionCollection
+        # type: (list[str], str, Optional[bool], Optional[bool], Optional[list[str]], Optional[datetime], Optional[str], Optional[bool]) -> PermissionCollection
         """
         Sends a sharing invitation for a driveItem. A sharing invitation provides permissions to the recipients
         and optionally sends them an email with a sharing link.
@@ -520,6 +520,7 @@ class DriveItem(BaseItem):
         return return_type
 
     def get_activities_by_interval(self, start_dt=None, end_dt=None, interval=None):
+        # type: (Optional[datetime], Optional[datetime], Optional[str]) -> EntityCollection[ItemActivityStat]
         """
         Get a collection of itemActivityStats resources for the activities that took place on this resource
         within the specified time interval.

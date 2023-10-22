@@ -1,7 +1,14 @@
-from typing import Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 from office365.runtime.client_object import ClientObject
 from office365.runtime.types.event_handler import EventHandler
+
+if TYPE_CHECKING:
+    from typing import Iterator, List, Optional  # noqa
+    from typing_extensions import Self  # noqa
+
+    from office365.runtime.client_runtime_context import ClientRuntimeContext  # noqa
+    from office365.runtime.paths.resource_path import ResourcePath  # noqa
 
 T = TypeVar("T")
 

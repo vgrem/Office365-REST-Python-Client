@@ -10,7 +10,12 @@ from office365.runtime.odata.type import ODataType
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 
 if TYPE_CHECKING:
-    pass
+    from typing import Optional  # noqa
+    from typing_extensions import Self  # noqa
+    from office365.runtime.client_object_collection import (
+        ClientObjectCollection,  # noqa
+    )
+    from office365.runtime.client_runtime_context import ClientRuntimeContext  # noqa
 
 
 T = TypeVar("T")

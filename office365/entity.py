@@ -7,7 +7,7 @@ from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 
 if TYPE_CHECKING:
-    pass
+    from office365.graph_client import GraphClient  # noqa
 
 
 T = TypeVar("T")
