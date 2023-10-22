@@ -8,3 +8,4 @@ Faker~=4.1.2
 adal~=1.2.4
 configparser~=5.0.2
 black
+pylint
