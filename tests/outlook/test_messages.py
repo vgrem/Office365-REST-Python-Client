@@ -1,6 +1,7 @@
 import base64
 import io
 
+from office365.outlook.mail.messages.message import Message
 from office365.outlook.mail.recipient import Recipient
 from tests import test_user_principal_name, test_user_principal_name_alt
 from tests.graph_case import GraphTestCase

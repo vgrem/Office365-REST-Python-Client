@@ -1,3 +1,4 @@
+from office365.booking.business.business import BookingBusiness
 from tests.graph_case import GraphTestCase
 
 

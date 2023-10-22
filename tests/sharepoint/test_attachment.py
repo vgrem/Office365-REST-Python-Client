@@ -2,9 +2,11 @@ import os.path
 from io import BytesIO
 from random import randint
 
+from office365.sharepoint.attachments.attachment import Attachment
 from office365.sharepoint.attachments.creation_information import (
     AttachmentCreationInformation,
 )
+from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.creation_information import ListCreationInformation
 from office365.sharepoint.lists.template_type import ListTemplateType
 from tests.sharepoint.sharepoint_case import SPTestCase

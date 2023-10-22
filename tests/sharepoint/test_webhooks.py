@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 
+from office365.sharepoint.lists.list import List
+from office365.sharepoint.webhooks.subscription import Subscription
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 

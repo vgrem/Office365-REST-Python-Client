@@ -1,4 +1,6 @@
+from office365.directory.extensions.open_type import OpenTypeExtension
 from office365.directory.users.profile import UserProfile
+from office365.directory.users.user import User
 from office365.runtime.client_value_collection import ClientValueCollection
 from tests import create_unique_name, test_tenant
 from tests.graph_case import GraphTestCase

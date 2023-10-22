@@ -2,7 +2,9 @@ from random import randint
 from time import sleep
 
 from office365.sharepoint.listitems.caml.query import CamlQuery
+from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.creation_information import ListCreationInformation
+from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.template_type import ListTemplateType
 from office365.sharepoint.types.wopi_action import SPWOPIAction
 from tests import create_unique_name

@@ -1,4 +1,5 @@
 from office365.sharepoint.changes.collection import ChangeCollection
+from office365.sharepoint.folders.folder import Folder
 from tests import create_unique_name
 from tests.sharepoint.sharepoint_case import SPTestCase
 

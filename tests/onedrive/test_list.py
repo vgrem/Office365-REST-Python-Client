@@ -1,3 +1,5 @@
+from office365.onedrive.columns.definition import ColumnDefinition
+from office365.onedrive.lists.list import List
 from tests import create_unique_name
 from tests.graph_case import GraphTestCase
 

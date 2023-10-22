@@ -18,8 +18,8 @@ class TestDrive(GraphTestCase):
             self.assertIsNotNone(drive["webUrl"])
 
     def test3_get_first_drive(self):
-        drives = self.client.drives.top(1).get().execute_query()
-        self.assertLessEqual(len(drives), 1)
+        drives = self.client.drives.get().top(10).execute_query()
+        self.assertGreaterEqual(len(drives), 1)
         target_drive_id = drives[0].id
 
         target_drive = self.client.drives[target_drive_id].get().execute_query()

@@ -1,3 +1,4 @@
+from office365.todo.tasks.list import TodoTaskList
 from tests import create_unique_name
 from tests.graph_case import GraphTestCase
 

@@ -2,6 +2,8 @@ import os
 import uuid
 from datetime import datetime, timedelta
 
+from office365.onedrive.driveitems.driveItem import DriveItem
+from office365.onedrive.drives.drive import Drive
 from tests import create_unique_name
 from tests.graph_case import GraphTestCase
 

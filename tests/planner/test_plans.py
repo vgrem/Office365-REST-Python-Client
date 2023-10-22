@@ -1,3 +1,6 @@
+from office365.directory.groups.group import Group
+from office365.planner.plans.plan import PlannerPlan
+from tests import create_unique_name
 from tests.graph_case import GraphTestCase
 
 

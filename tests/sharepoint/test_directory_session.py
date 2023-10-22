@@ -3,7 +3,7 @@ from unittest import TestCase
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.directory.helper import SPHelper
 from office365.sharepoint.directory.session import DirectorySession
-from tests import test_site_url, test_user_credentials
+from tests import test_site_url, test_user_credentials, test_user_principal_name
 
 
 class TestDirectorySession(TestCase):

@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 import pytz
 
+from office365.communications.onlinemeetings.online_meeting import OnlineMeeting
 from tests.graph_case import GraphTestCase
 
 

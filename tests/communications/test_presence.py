@@ -1,3 +1,4 @@
+from office365.communications.presences.presence import Presence
 from tests.graph_case import GraphTestCase
 
 

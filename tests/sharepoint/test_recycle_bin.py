@@ -1,5 +1,6 @@
 from random import randint
 
+from office365.sharepoint.files.file import File
 from office365.sharepoint.recyclebin.item_collection import RecycleBinItemCollection
 from tests.sharepoint.sharepoint_case import SPTestCase
 

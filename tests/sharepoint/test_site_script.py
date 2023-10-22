@@ -1,3 +1,4 @@
+from office365.sharepoint.sitescripts.metadata import SiteScriptMetadata
 from office365.sharepoint.sitescripts.utility import SiteScriptUtility
 from tests.sharepoint.sharepoint_case import SPTestCase
 

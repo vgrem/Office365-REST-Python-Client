@@ -1,5 +1,6 @@
 from office365.sharepoint.documentmanagement.document_set import DocumentSet
 from office365.sharepoint.lists.creation_information import ListCreationInformation
+from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.template_type import ListTemplateType
 from tests import create_unique_name
 from tests.sharepoint.sharepoint_case import SPTestCase

@@ -1,6 +1,9 @@
 from unittest import TestCase
 
 from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.lists.creation_information import ListCreationInformation
+from office365.sharepoint.lists.list import List
+from office365.sharepoint.webs.web import Web
 from tests import test_client_credentials, test_team_site_url
 
 
@@ -17,11 +20,7 @@ class SPTestCase(TestCase):
 
     @staticmethod
     def ensure_list(web, list_properties):
-        """
-
-        :type web: office365.sharepoint.webs.web.Web
-        :type list_properties: office365.sharepoint.lists.creation_information.ListCreationInformation
-        """
+        # type: (Web, ListCreationInformation) -> List
         lists = (
             web.lists.filter("Title eq '{0}'".format(list_properties.Title))
             .get()

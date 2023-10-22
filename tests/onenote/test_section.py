@@ -1,3 +1,4 @@
+from office365.onenote.sections.section import OnenoteSection
 from tests.graph_case import GraphTestCase
 
 
