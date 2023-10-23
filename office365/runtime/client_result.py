@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Generic, Optional, TypeVar
 from typing_extensions import Self
 
 if TYPE_CHECKING:
-    from office365.runtime.client_runtime_context import ClientRuntimeContext
-    from office365.runtime.client_value import ClientValue
+    from office365.runtime.client_runtime_context import ClientRuntimeContext  # noqa
+    from office365.runtime.client_value import ClientValue  # noqa
 
 T = TypeVar("T")
 
@@ -37,7 +37,7 @@ class ClientResult(Generic[T]):
 
     def set_property(self, key, value, persist_changes=False):
         # type: (str, T, bool) -> Self
-        from office365.runtime.client_value import ClientValue
+        from office365.runtime.client_value import ClientValue  # noqa
 
         if isinstance(self._value, ClientValue):
             self._value.set_property(key, value, persist_changes)

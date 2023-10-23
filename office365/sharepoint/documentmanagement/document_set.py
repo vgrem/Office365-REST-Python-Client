@@ -10,7 +10,8 @@ class DocumentSet(Folder):
         Creates a DocumentSet (section 3.1.5.3) object on the server.
 
         :type context: office365.sharepoint.client_context.ClientContext
-        :param office365.sharepoint.folders.folder.Folder parent_folder: The folder inside which to create the new DocumentSet.
+        :param office365.sharepoint.folders.folder.Folder parent_folder: The folder inside which to create the new
+            DocumentSet.
         :param str name: The name to give to the new DocumentSet
         :param office365.sharepoint.contenttypes.content_type_id.ContentTypeId ct_id: The identifier of the content
             type to give to the new document set.

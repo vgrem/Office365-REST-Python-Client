@@ -1,6 +1,6 @@
 import os
 import uuid
-import xml.dom.minidom as minidom
+from xml.dom import minidom
 from xml.etree import ElementTree
 
 import requests
@@ -314,7 +314,10 @@ class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         """Construct the request body to acquire security token from STS endpoint"""
         logger = SamlTokenProvider.logger()
         logger.debug_secrets("params: %s", params)
-        f = open(os.path.join(os.path.dirname(__file__), "templates", template_name))
+        f = open(
+            os.path.join(os.path.dirname(__file__), "templates", template_name),
+            encoding="utf8",
+        )
         try:
             data = f.read()
             for key in params:

@@ -24,7 +24,7 @@ class ClientPeoplePickerQueryParameters(ClientValue):
         Specifies the properties of a principal query
 
         :type int urlZone: Specifies a location in the topology of the farm for the principal query.
-        :param int sharepoint_group_id: specifies a group containing allowed principals to be used in the principal query.
+        :param int sharepoint_group_id: specifies a group containing allowed principals to be used in the principal query
         :param str query_string: Specifies the value to be used in the principal query.
         :param int principal_type: Specifies the type to be used in the principal query.
         :param int principal_source: Specifies the source to be used in the principal query.

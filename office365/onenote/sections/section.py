@@ -59,7 +59,7 @@ class OnenoteSection(OnenoteEntityHierarchyModel):
         """
         The collection of pages in the section. Read-only. Nullable.
         """
-        from office365.onenote.pages.page import OnenotePage
+        from office365.onenote.pages.page import OnenotePage  # noqa
 
         return self.properties.get(
             "pages",

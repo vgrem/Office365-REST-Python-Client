@@ -19,7 +19,7 @@ class ODataReader(object):
     def format_file(self):
         import xml.dom.minidom
 
-        with open(self._metadata_path, "r") as in_file:
+        with open(self._metadata_path, "r", encoding="utf8") as in_file:
             metadata_content = in_file.read()
 
         formatted_metadata_content = xml.dom.minidom.parseString(

@@ -1,5 +1,5 @@
 import datetime
-from typing import AnyStr
+from typing import TYPE_CHECKING, AnyStr
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
@@ -28,6 +28,9 @@ from office365.sharepoint.utilities.upload_status import UploadStatus
 from office365.sharepoint.utilities.wopi_frame_action import SPWOPIFrameAction
 from office365.sharepoint.webparts.limited_manager import LimitedWebPartManager
 from office365.sharepoint.webparts.personalization_scope import PersonalizationScope
+
+if TYPE_CHECKING:
+    from typing import Optional
 
 
 class AbstractFile(Entity):
@@ -84,11 +87,12 @@ class File(AbstractFile):
         return return_type
 
     def create_anonymous_link_with_expiration(self, expiration, is_edit_link=False):
+        # type: (datetime.datetime, bool) -> ClientResult[str]
         """Creates and returns an anonymous link that can be used to access a document without needing to authenticate.
 
-        :param bool is_edit_link: If true, the link will allow the guest user edit privileges on the item.
+        :param is_edit_link: If true, the link will allow the guest user edit privileges on the item.
         string parameters
-        :param datetime.datetime expiration: A date/time string for which the format conforms to the ISO 8601:2004(E) complete
+        :param expiration: A date/time string for which the format conforms to the ISO 8601:2004(E) complete
         representation for calendar date and time of day, and which represents the time and date of expiry for the
         anonymous link. Both the minutes and hour value MUST be specified for the difference between the local and
         UTC time. Midnight is represented as 00:00:00.
@@ -151,18 +155,19 @@ class File(AbstractFile):
         return return_type
 
     def share_link(self, link_kind, expiration=None, role=None, password=None):
+        # type: (int, Optional[datetime.datetime], Optional[int], Optional[str]) -> ClientResult[str]
         """Creates a tokenized sharing link for a file based on the specified parameters and optionally
         sends an email to the people that are listed in the specified parameters.
 
-        :param int link_kind: The kind of the tokenized sharing link to be created/updated or retrieved.
-        :param datetime.datetime or None expiration: A date/time string for which the format conforms to the ISO 8601:2004(E)
+        :param link_kind: The kind of the tokenized sharing link to be created/updated or retrieved.
+        :param expiration: A date/time string for which the format conforms to the ISO 8601:2004(E)
             complete representation for calendar date and time of day and which represents the time and date of expiry
             for the tokenized sharing link. Both the minutes and hour value MUST be specified for the difference
             between the local and UTC time. Midnight is represented as 00:00:00. A null value indicates no expiry.
             This value is only applicable to tokenized sharing links that are anonymous access links.
-        :param int role: The role to be used for the tokenized sharing link. This is required for Flexible links
+        :param role: The role to be used for the tokenized sharing link. This is required for Flexible links
             and ignored for all other kinds.
-        :param str password: Optional password value to apply to the tokenized sharing link,
+        :param password: Optional password value to apply to the tokenized sharing link,
             if it can support password protection.
         """
         return self.listItemAllFields.share_link(link_kind, expiration, role, password)
@@ -607,7 +612,7 @@ class File(AbstractFile):
                 after_downloaded(self)
 
         def _download_inner():
-            return_type = self.get_content().after_execute(_save_content)
+            self.get_content().after_execute(_save_content)
 
         self.ensure_property("ServerRelativePath", _download_inner)
         return self

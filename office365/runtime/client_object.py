@@ -149,9 +149,7 @@ class ClientObject(Generic[T]):
             self._ser_property_names.append(name)
 
         typed_value = self.get_property(name)
-        if isinstance(typed_value, ClientObject) or isinstance(
-            typed_value, ClientValue
-        ):
+        if isinstance(typed_value, (ClientObject, ClientValue)):
             if isinstance(value, list):
                 [
                     typed_value.set_property(i, v, persist_changes)
@@ -260,7 +258,7 @@ class ClientObject(Generic[T]):
             k: self.get_property(k) for k in self._properties if k in ser_prop_names
         }
         for k, v in json.items():
-            if isinstance(v, ClientObject) or isinstance(v, ClientValue):
+            if isinstance(v, (ClientObject, ClientValue)):
                 json[k] = v.to_json(json_format)
 
         if json and include_control_info:

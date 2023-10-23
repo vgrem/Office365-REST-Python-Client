@@ -28,7 +28,7 @@ class EntityCollection(ClientObjectCollection[T]):
         :param key: key is used to address an entity by either an index or by identifier
         :type key: int or str
         """
-        if type(key) == int:
+        if isinstance(key, int):
             return super(EntityCollection, self).__getitem__(key)
         elif is_string_type(key):
             return self.create_typed_object(

@@ -17,7 +17,7 @@ class RoleAssignmentCollection(EntityCollection):
         """
         :param int or str index_or_principal_id: key is used to address a RoleAssignment resource by either an index
         in collection or by resource id"""
-        if type(index_or_principal_id) == int:
+        if isinstance(index_or_principal_id, int):
             return super(RoleAssignmentCollection, self).__getitem__(
                 index_or_principal_id
             )
