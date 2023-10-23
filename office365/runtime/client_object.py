@@ -74,6 +74,7 @@ class ClientObject(Generic[T]):
         return self
 
     def after_execute(self, action, *args, **kwargs):
+        # type: (Callable[[Self, Any, Any], None], Any, Any) -> Self
         """
         Attach an event handler to client object which gets triggered after query is submitted to server
         """

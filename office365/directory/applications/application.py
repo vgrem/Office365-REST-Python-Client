@@ -166,16 +166,14 @@ class Application(DirectoryObject):
 
     @property
     def app_id(self):
-        """The unique identifier for the application that is assigned to an application by Azure AD. Not nullable.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """The unique identifier for the application that is assigned to an application by Azure AD. Not nullable."""
         return self.properties.get("appId", None)
 
     @property
     def application_template_id(self):
-        """Unique identifier of the applicationTemplate
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Unique identifier of the applicationTemplate"""
         return self.properties.get("applicationTemplateId", None)
 
     @property
@@ -207,9 +205,8 @@ class Application(DirectoryObject):
 
     @property
     def default_redirect_uri(self):
-        """
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """ """
         return self.properties.get("defaultRedirectUri", None)
 
     @property
@@ -254,12 +251,11 @@ class Application(DirectoryObject):
 
     @property
     def signin_audience(self):
+        # type: () -> Optional[str]
         """
         Specifies the Microsoft accounts that are supported for the current application.
         Supported values are: AzureADMyOrg, AzureADMultipleOrgs, AzureADandPersonalMicrosoftAccount,
         PersonalMicrosoftAccount
-
-        :rtype: str or None
         """
         return self.properties.get("signInAudience", None)
 

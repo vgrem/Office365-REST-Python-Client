@@ -9,10 +9,23 @@ Note:
 
 https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-authentication-flows#interactive-and-non-interactive-authentication
 """
+import msal
 
 from office365.graph_client import GraphClient
 from tests import test_client_id, test_tenant
 
-client = GraphClient.with_token_interactive(test_tenant, test_client_id)
+
+def acquire_token():
+    app = msal.PublicClientApplication(
+        test_client_id,
+        authority="https://login.microsoftonline.com/{0}".format(test_tenant),
+        client_credential=None,
+    )
+    scopes = ["https://graph.microsoft.com/.default"]
+    result = app.acquire_token_interactive(scopes=scopes)
+    return result
+
+
+client = GraphClient(acquire_token)
 me = client.me.get().execute_query()
 print(me.user_principal_name)

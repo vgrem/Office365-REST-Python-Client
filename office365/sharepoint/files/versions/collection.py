@@ -4,7 +4,7 @@ from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.files.versions.version import FileVersion
 
 
-class FileVersionCollection(EntityCollection):
+class FileVersionCollection(EntityCollection[FileVersion]):
     """Represents a collection of FileVersion."""
 
     def __init__(self, context, resource_path=None):

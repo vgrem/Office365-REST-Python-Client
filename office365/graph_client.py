@@ -1,4 +1,4 @@
-from typing import Callable, List
+from typing import Callable, List, Optional
 
 from office365.booking.solutions.root import SolutionsRoot
 from office365.communications.cloud_communications import CloudCommunications
@@ -80,6 +80,43 @@ class GraphClient(ClientRuntimeContext):
         self._acquire_token_callback = acquire_token_callback
 
     @staticmethod
+    def with_certificate(
+        tenant, client_id, thumbprint, private_key, scopes=None, token_cache=None
+    ):
+        """
+        Initializes the confidential client with client certificate
+
+        :param str tenant: Tenant name, for example: contoso.onmicrosoft.com
+        :param str client_id: The OAuth client id of the calling application.
+        :param str thumbprint: Thumbprint
+        :param str private_key: Private key
+        :param list[str] or None scopes: Scopes requested to access an API
+        :param Any token_cache: Default cache is in memory only,
+        Refer https://msal-python.readthedocs.io/en/latest/#msal.SerializableTokenCache
+        """
+        if scopes is None:
+            scopes = ["https://graph.microsoft.com/.default"]
+        authority_url = "https://login.microsoftonline.com/{0}".format(tenant)
+        import msal
+
+        app = msal.ConfidentialClientApplication(
+            client_id,
+            authority=authority_url,
+            client_credential={
+                "thumbprint": thumbprint,
+                "private_key": private_key,
+            },
+            token_cache=token_cache  # Default cache is in memory only.
+            # You can learn how to use SerializableTokenCache from
+            # https://msal-python.readthedocs.io/en/latest/#msal.SerializableTokenCache
+        )
+
+        def _acquire_token():
+            return app.acquire_token_for_client(scopes=scopes)
+
+        return GraphClient(_acquire_token)
+
+    @staticmethod
     def with_client_secret(
         tenant, client_id, client_secret, scopes=None, token_cache=None
     ):
@@ -106,7 +143,45 @@ class GraphClient(ClientRuntimeContext):
         )
 
         def _acquire_token():
-            result = app.acquire_token_for_client(scopes=scopes)
+            return app.acquire_token_for_client(scopes=scopes)
+
+        return GraphClient(_acquire_token)
+
+    @staticmethod
+    def with_token_interactive(tenant, client_id, username=None, scopes=None):
+        # type: (str, str, Optional[str], List[str]) -> "GraphClient"
+        """
+        Initializes the client via user credentials
+        Note: only works if your app is registered with redirect_uri as http://localhost
+
+        :param str tenant: Tenant name, for example: contoso.onmicrosoft.com
+        :param str client_id: The OAuth client id of the calling application.
+        :param str username: Typically a UPN in the form of an email address.
+        :param list[str] or None scopes: Scopes requested to access an API
+        """
+        if scopes is None:
+            scopes = ["https://graph.microsoft.com/.default"]
+        authority_url = "https://login.microsoftonline.com/{0}".format(tenant)
+        import msal
+
+        app = msal.PublicClientApplication(client_id, authority=authority_url)
+
+        def _acquire_token():
+            # The pattern to acquire a token looks like this.
+            result = None
+
+            # Firstly, check the cache to see if this end user has signed in before
+            accounts = app.get_accounts(username=username)
+            if accounts:
+                chosen = accounts[0]  # Assuming the end user chose this one to proceed
+                # Now let's try to find a token in cache for this account
+                result = app.acquire_token_silent(scopes, account=chosen)
+
+            if not result:
+                result = app.acquire_token_interactive(
+                    scopes,
+                    login_hint=username,
+                )
             return result
 
         return GraphClient(_acquire_token)

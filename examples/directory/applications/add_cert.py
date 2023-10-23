@@ -15,27 +15,14 @@ from tests.graph_case import acquire_token_by_username_password
 def verify_connect():
     """Test the app-only authentication"""
 
-    cert_thumbprint = "12FC1BB6796D114AF4FEBBE95FCA8084CF47D81F"
+    thumbprint = "12FC1BB6796D114AF4FEBBE95FCA8084CF47D81F"
     cert_key_path = "../../selfsignkey.pem"
+    with open(cert_key_path, "r") as fh:
+        private_key = fh.read()
 
-    def _acquire_token():
-        with open(cert_key_path, "r") as fh:
-            private_key = fh.read()
-
-        authority_url = "https://login.microsoftonline.com/{0}".format(test_tenant)
-        credentials = {"thumbprint": cert_thumbprint, "private_key": private_key}
-        import msal
-
-        app = msal.ConfidentialClientApplication(
-            test_client_id,
-            authority=authority_url,
-            client_credential=credentials,
-        )
-        return app.acquire_token_for_client(
-            scopes=["https://graph.microsoft.com/.default"]
-        )
-
-    ctx = GraphClient(_acquire_token)
+    ctx = GraphClient.with_certificate(
+        test_tenant, test_client_id, thumbprint, private_key
+    )
     site = ctx.sites.root.get().execute_query()
     print(site.web_url)
 

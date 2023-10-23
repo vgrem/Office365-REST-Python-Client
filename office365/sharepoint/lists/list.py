@@ -173,7 +173,7 @@ class List(SecurableObject):
 
         :param dict or None options:
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context)  # type: ClientResult[str]
 
         def _list_loaded():
             list_abs_path = SPResPath.create_absolute(
@@ -278,7 +278,7 @@ class List(SecurableObject):
         :param str folder_path: The path within the current list at which to create the document.
         :param str extension: The file extension without dot prefix.
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context)  # type: ClientResult[str]
         payload = {"folderPath": folder_path, "extension": extension}
         qry = ServiceOperationQuery(
             self, "CreateDocumentWithDefaultName", None, payload, None, return_type

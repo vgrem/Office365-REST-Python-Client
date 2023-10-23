@@ -79,18 +79,15 @@ class Team(Entity):
 
     @property
     def description(self):
-        """An optional description for the team.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """An optional description for the team."""
         return self.properties.get("description", None)
 
     @property
     def classification(self):
+        # type: () -> Optional[str]
         """An optional label. Typically describes the data or business sensitivity of the team.
         Must match one of a pre-configured set in the tenant's directory.
-
-        :rtype: str or None
         """
         return self.properties.get("classification", None)
 
@@ -107,6 +104,7 @@ class Team(Entity):
 
     @property
     def web_url(self):
+        # type: () -> Optional[str]
         """A hyperlink that will go to the team in the Microsoft Teams client. This is the URL that you get when
         you right-click a team in the Microsoft Teams client and select Get link to team. This URL should be treated
         as an opaque blob, and not parsed."""
@@ -119,6 +117,7 @@ class Team(Entity):
 
     @property
     def all_channels(self):
+        # type: () -> ChannelCollection
         """
         List of channels either hosted in or shared with the team (incoming channels).
         """
@@ -131,6 +130,7 @@ class Team(Entity):
 
     @property
     def incoming_channels(self):
+        # type: () -> ChannelCollection
         """
         List of channels shared with the team.
         """
@@ -195,6 +195,7 @@ class Team(Entity):
 
     @property
     def operations(self):
+        # type: () -> EntityCollection[TeamsAsyncOperation]
         """The async operations that ran or are running on this team."""
         return self.properties.setdefault(
             "operations",
@@ -207,6 +208,7 @@ class Team(Entity):
 
     @property
     def permission_grants(self):
+        # type: () -> EntityCollection[ResourceSpecificPermissionGrant]
         """
         List all resource-specific permission grants
         """
@@ -226,9 +228,9 @@ class Team(Entity):
 
     @property
     def tenant_id(self):
+        # type: () -> Optional[str]
         """
         The ID of the Azure Active Directory tenant.
-        :rtype: str
         """
         return self.properties.get("tenantId", None)
 
@@ -293,8 +295,9 @@ class Team(Entity):
         :param str preview_text: Preview text for the notification. Microsoft Teams will only show first 150 characters
         :param dict template_parameters: Values for template variables defined in the activity feed entry corresponding
             to activityType in Teams app manifest.
-        :param teamworkNotificationRecipient template_parameters: Recipient of the notification.
+        :param dict template_parameters: Recipient of the notification.
              Only Azure AD users are supported.
+        :param teamworkNotificationRecipient recipient: Recipient of the notification
         """
         payload = {
             "topic": topic,

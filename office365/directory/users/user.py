@@ -1,4 +1,5 @@
 import json
+from typing import Optional
 
 from office365.communications.onlinemeetings.collection import OnlineMeetingCollection
 from office365.communications.presences.presence import Presence
@@ -489,15 +490,15 @@ class User(DirectoryObject):
 
     @property
     def given_name(self):
+        # type: () -> Optional[str]
         """
         The given name (first name) of the user. Maximum length is 64 characters.
-
-        :rtype: str or None
         """
         return self.properties.get("givenName", None)
 
     @property
     def user_principal_name(self):
+        # type: () -> Optional[str]
         """
         The user principal name (UPN) of the user. The UPN is an Internet-style login name for the user based on the
         Internet standard RFC 822. By convention, this should map to the user's email name.
@@ -507,8 +508,6 @@ class User(DirectoryObject):
         NOTE: This property cannot contain accent characters.
         Only the following characters are allowed A - Z, a - z, 0 - 9, ' . - _ ! # ^ ~.
         For the complete list of allowed characters, see username policies.
-
-        :rtype: str or None
         """
         return self.properties.get("userPrincipalName", None)
 
@@ -538,6 +537,7 @@ class User(DirectoryObject):
 
     @property
     def creation_type(self):
+        # type: () -> Optional[str]
         """Indicates whether the user account was created as a regular school or work account (null),
         an external account (Invitation), a local account for an Azure Active Directory B2C tenant (LocalAccount)
         or self-service sign-up using email verification (EmailVerified). Read-only.
@@ -556,6 +556,7 @@ class User(DirectoryObject):
 
     @property
     def mail(self):
+        # type: () -> Optional[str]
         """The SMTP address for the user, for example, "jeff@contoso.onmicrosoft.com".
         Returned by default. Supports $filter and endsWith.
         """
@@ -798,6 +799,7 @@ class User(DirectoryObject):
 
     @property
     def oauth2_permission_grants(self):
+        # type: () -> DeltaCollection[OAuth2PermissionGrant]
         """"""
         return self.properties.get(
             "oauth2PermissionGrants",
@@ -810,20 +812,20 @@ class User(DirectoryObject):
 
     @property
     def on_premises_distinguished_name(self):
+        # type: () -> Optional[str]
         """
         Contains the on-premises Active Directory distinguished name or DN. The property is only populated for
         customers who are synchronizing their on-premises directory to Azure Active Directory via Azure AD Connect
-        :rtype: str
         """
         return self.properties.get("onPremisesDistinguishedName", None)
 
     @property
     def on_premises_domain_name(self):
+        # type: () -> Optional[str]
         """
         Contains the on-premises domainFQDN, also called dnsDomainName synchronized from the on-premises directory.
         The property is only populated for customers who are synchronizing their on-premises directory to
         Azure Active Directory via Azure AD Connect.
-        :rtype: str
         """
         return self.properties.get("onPremisesDomainName", None)
 
@@ -953,12 +955,12 @@ class User(DirectoryObject):
 
     @property
     def password_policies(self):
+        # type: () -> Optional[str]
         """
         Specifies password policies for the user. This value is an enumeration with one possible value being
         DisableStrongPassword, which allows weaker passwords than the default policy to be specified.
         DisablePasswordExpiration can also be specified. The two may be specified together; for example:
         DisablePasswordExpiration, DisableStrongPassword.
-        :rtype: str
         """
         return self.properties.get("passwordPolicies", None)
 
@@ -991,17 +993,17 @@ class User(DirectoryObject):
 
     @property
     def street_address(self):
+        # type: () -> Optional[str]
         """
         The street address of the user's place of business. Maximum length is 1024 characters.
-        :rtype: str
         """
         return self.properties.get("streetAddress", None)
 
     @property
     def security_identifier(self):
+        # type: () -> Optional[str]
         """
         Security identifier (SID) of the user, used in Windows scenarios.
-        :rtype: str
         """
         return self.properties.get("securityIdentifier", None)
 
@@ -1033,10 +1035,10 @@ class User(DirectoryObject):
 
     @property
     def usage_location(self):
+        # type: () -> Optional[str]
         """
         A two letter country code (ISO standard 3166). Required for users that will be assigned licenses due to
         legal requirement to check for availability of services in countries. Examples include: US, JP, and GB.
-        :rtype: str
         """
         return self.properties.get("usageLocation", None)
 

@@ -4,7 +4,7 @@ from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
-class OnlineMeetingCollection(EntityCollection):
+class OnlineMeetingCollection(EntityCollection[OnlineMeeting]):
     def __init__(self, context, resource_path=None):
         super(OnlineMeetingCollection, self).__init__(
             context, OnlineMeeting, resource_path
