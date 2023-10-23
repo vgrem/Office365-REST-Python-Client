@@ -3,7 +3,7 @@ from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.webparts.definition import WebPartDefinition
 
 
-class WebPartDefinitionCollection(EntityCollection):
+class WebPartDefinitionCollection(EntityCollection[WebPartDefinition]):
     """Implements a collection of Web Part definition objects"""
 
     def __init__(self, context, resource_path=None):

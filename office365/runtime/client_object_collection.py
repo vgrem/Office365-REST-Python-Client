@@ -68,8 +68,6 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         # type: (T) -> Self
         """
         Adds client object into collection
-
-        :type client_object: ClientObject
         """
         client_object._parent_collection = self
         self._data.append(client_object)
@@ -143,7 +141,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         return self
 
     def paged(self, page_size=None, page_loaded=None):
-        # type: (int, Callable[["ClientObjectCollection"], None]) -> Self
+        # type: (int, Callable[[Self], None]) -> Self
         """
         Retrieves via server-driven paging mode
         """

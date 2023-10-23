@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.client_object import ClientObject
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -9,22 +11,19 @@ class TaxonomyItem(ClientObject):
 
     @property
     def id(self):
-        """Gets the Id of the current TaxonomyItem
-
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Gets the Id of the current TaxonomyItem"""
         return self.properties.get("id", None)
 
     @property
     def name(self):
-        """Gets the name of the current TaxonomyItem object
-
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Gets the name of the current TaxonomyItem object"""
         return self.properties.get("name", None)
 
     @property
     def property_ref_name(self):
+        # type: () -> str
         return "id"
 
     def set_property(self, name, value, persist_changes=True):

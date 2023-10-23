@@ -21721,6 +21721,7 @@
             <NavigationProperty Name="oauth2PermissionGrants" Type="Collection(graph.oAuth2PermissionGrant)"/>
             <NavigationProperty Name="ownedObjects" Type="Collection(graph.directoryObject)"/>
             <NavigationProperty Name="owners" Type="Collection(graph.directoryObject)"/>
+            <NavigationProperty Name="remoteDesktopSecurityConfiguration" Type="graph.remoteDesktopSecurityConfiguration" ContainsTarget="true"/>
             <NavigationProperty Name="tokenIssuancePolicies" Type="Collection(graph.tokenIssuancePolicy)"/>
             <NavigationProperty Name="tokenLifetimePolicies" Type="Collection(graph.tokenLifetimePolicy)"/>
             <NavigationProperty Name="transitiveMemberOf" Type="Collection(graph.directoryObject)"/>
@@ -21783,6 +21784,10 @@
             <Property Name="providerName" Type="Edm.String"/>
             <Property Name="providerResourceId" Type="Edm.String"/>
             <Property Name="uri" Type="Edm.String" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="remoteDesktopSecurityConfiguration" BaseType="graph.entity">
+            <Property Name="isRemoteDesktopProtocolEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <NavigationProperty Name="targetDeviceGroups" Type="Collection(graph.targetDeviceGroup)" ContainsTarget="true"/>
          </EntityType>
          <ComplexType Name="authenticationMethodFeatureConfiguration">
             <Property Name="excludeTarget" Type="graph.featureTarget"/>
@@ -23557,6 +23562,9 @@
             <Property Name="memberType" Type="Edm.String"/>
             <Property Name="scheduleInfo" Type="graph.requestSchedule"/>
          </EntityType>
+         <EntityType Name="targetDeviceGroup" BaseType="graph.entity">
+            <Property Name="displayName" Type="Edm.String"/>
+         </EntityType>
          <EntityType Name="roleManagement">
             <NavigationProperty Name="directory" Type="graph.rbacApplication" ContainsTarget="true"/>
             <NavigationProperty Name="entitlementManagement" Type="graph.rbacApplication" ContainsTarget="true"/>
@@ -23588,6 +23596,7 @@
          <EntityType Name="delegatedAdminRelationship" BaseType="graph.entity">
             <Property Name="accessDetails" Type="graph.delegatedAdminAccessDetails" Nullable="false"/>
             <Property Name="activatedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="autoExtendDuration" Type="Edm.Duration"/>
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="customer" Type="graph.delegatedAdminRelationshipCustomerParticipant"/>
             <Property Name="displayName" Type="Edm.String" Nullable="false"/>
@@ -30686,6 +30695,9 @@
             <Property Name="joinDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="leaveDateTime" Type="Edm.DateTimeOffset"/>
          </ComplexType>
+         <ComplexType Name="azureCommunicationServicesUserIdentity" BaseType="graph.identity" OpenType="true">
+            <Property Name="azureCommunicationServicesResourceId" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="broadcastMeetingCaptionSettings">
             <Property Name="isCaptionEnabled" Type="Edm.Boolean"/>
             <Property Name="spokenLanguage" Type="Edm.String"/>
@@ -30713,6 +30725,30 @@
          </ComplexType>
          <ComplexType Name="commsNotifications">
             <Property Name="value" Type="Collection(graph.commsNotification)"/>
+         </ComplexType>
+         <ComplexType Name="communicationsApplicationIdentity" BaseType="graph.identity" OpenType="true">
+            <Property Name="applicationType" Type="Edm.String"/>
+            <Property Name="hidden" Type="Edm.Boolean"/>
+         </ComplexType>
+         <ComplexType Name="communicationsApplicationInstanceIdentity" BaseType="graph.identity" OpenType="true">
+            <Property Name="hidden" Type="Edm.Boolean"/>
+            <Property Name="tenantId" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="communicationsEncryptedIdentity" BaseType="graph.identity" OpenType="true"/>
+         <ComplexType Name="communicationsGuestIdentity" BaseType="graph.identity" OpenType="true"/>
+         <ComplexType Name="communicationsIdentitySet" BaseType="graph.identitySet" OpenType="true">
+            <Property Name="applicationInstance" Type="graph.identity"/>
+            <Property Name="assertedIdentity" Type="graph.identity"/>
+            <Property Name="azureCommunicationServicesUser" Type="graph.identity"/>
+            <Property Name="encrypted" Type="graph.identity"/>
+            <Property Name="endpointType" Type="graph.endpointType"/>
+            <Property Name="guest" Type="graph.identity"/>
+            <Property Name="onPremises" Type="graph.identity"/>
+            <Property Name="phone" Type="graph.identity"/>
+         </ComplexType>
+         <ComplexType Name="communicationsPhoneIdentity" BaseType="graph.identity" OpenType="true"/>
+         <ComplexType Name="communicationsUserIdentity" BaseType="graph.identity" OpenType="true">
+            <Property Name="tenantId" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="incomingCallOptions" BaseType="graph.callOptions"/>
          <ComplexType Name="incomingContext">
@@ -32076,6 +32112,15 @@
          <Function Name="delta" IsBound="true">
             <Parameter Name="bindingparameter" Type="Collection(graph.message)" Nullable="false"/>
             <ReturnType Type="Collection(graph.message)" Nullable="false"/>
+         </Function>
+         <Function Name="delta" IsBound="true">
+            <Parameter Name="bindingParameter" Type="Collection(graph.site)"/>
+            <ReturnType Type="Collection(graph.site)"/>
+         </Function>
+         <Function Name="delta" IsBound="true">
+            <Parameter Name="bindingParameter" Type="Collection(graph.site)"/>
+            <Parameter Name="token" Type="Edm.String" Unicode="false"/>
+            <ReturnType Type="Collection(graph.site)"/>
          </Function>
          <Function Name="delta" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.driveItem"/>
@@ -37220,6 +37265,11 @@
             <Member Name="appGovernanceDetection" Value="2097152"/>
             <Member Name="unknownFutureValue" Value="4194303"/>
             <Member Name="microsoftDefenderForCloud" Value="4194304"/>
+            <Member Name="nrtAlerts" Value="1073741844"/>
+            <Member Name="scheduledAlerts" Value="1073741845"/>
+            <Member Name="microsoftDefenderThreatIntelligenceAnalytics" Value="1073741846"/>
+            <Member Name="builtInMl" Value="1073741847"/>
+            <Member Name="microsoftSentinel" Value="268435456"/>
          </EnumType>
          <EnumType Name="detectionStatus">
             <Member Name="detected" Value="0"/>
@@ -37335,6 +37385,7 @@
             <Member Name="dataLossPrevention" Value="128"/>
             <Member Name="unknownFutureValue" Value="255"/>
             <Member Name="microsoftDefenderForCloud" Value="256"/>
+            <Member Name="microsoftSentinel" Value="512"/>
          </EnumType>
          <EnumType Name="vmCloudProvider">
             <Member Name="unknown" Value="0"/>
@@ -37438,6 +37489,7 @@
             <Property Name="lastActivityDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="lastUpdateDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="mitreTechniques" Type="Collection(Edm.String)"/>
+            <Property Name="productName" Type="Edm.String"/>
             <Property Name="providerAlertId" Type="Edm.String"/>
             <Property Name="recommendedActions" Type="Edm.String"/>
             <Property Name="resolvedDateTime" Type="Edm.DateTimeOffset"/>

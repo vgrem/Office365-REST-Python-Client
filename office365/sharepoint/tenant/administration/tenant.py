@@ -19,6 +19,9 @@ from office365.sharepoint.sites.site import Site
 from office365.sharepoint.tenant.administration.collaboration.insights_data import (
     CollaborationInsightsData,
 )
+from office365.sharepoint.tenant.administration.collaboration.insights_overview import (
+    CollaborationInsightsOverview,
+)
 from office365.sharepoint.tenant.administration.hubsites.properties import (
     HubSiteProperties,
 )
@@ -139,6 +142,18 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def get_collaboration_insights_overview(self):
+        """"""
+        return_type = ClientResult[CollaborationInsightsData](
+            self.context, CollaborationInsightsOverview()
+        )
+
+        qry = ServiceOperationQuery(
+            self, "GetCollaborationInsightsOverview", None, None, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def render_recent_admin_actions(self):
         return_type = ClientResult(self.context)
         payload = {
@@ -190,7 +205,7 @@ class Tenant(Entity):
         # type: () -> ClientResult[ClientValueCollection[HomeSitesDetails]]
         return_type = ClientResult(
             self.context,
-            ClientValueCollection[HomeSitesDetails](),  # pylint: disable=E1120
+            ClientValueCollection(HomeSitesDetails),  # pylint: disable=E1120
         )
         qry = ServiceOperationQuery(self, "GetHomeSites", None, None, None, return_type)
         self.context.add_query(qry)

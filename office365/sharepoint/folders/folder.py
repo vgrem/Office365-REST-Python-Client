@@ -429,6 +429,7 @@ class Folder(Entity):
 
     @property
     def storage_metrics(self):
+        # type: () -> StorageMetrics
         """Specifies the storage-related metrics for list folders in the site"""
         return self.properties.get(
             "StorageMetrics",

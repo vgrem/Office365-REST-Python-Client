@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.types.collections import StringCollection
@@ -39,7 +41,9 @@ class TermStore(TaxonomyItem):
         :param str or None parent_term_id:
         :param str or None language_tag:
         """
-        return_type = TaxonomyItemCollection(self.context, Term, self.resource_path)
+        return_type = TaxonomyItemCollection[Term](
+            self.context, Term, self.resource_path
+        )
         params = {
             "label": label,
             "setId": set_id,
@@ -52,9 +56,9 @@ class TermStore(TaxonomyItem):
 
     @property
     def default_language_tag(self):
+        # type: () -> Optional[str]
         """
         Gets or sets the LCID of the default working language.
-        :rtype: str
         """
         return self.properties.get("defaultLanguageTag", None)
 

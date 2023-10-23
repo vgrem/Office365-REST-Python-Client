@@ -1,5 +1,5 @@
 import copy
-from typing import TYPE_CHECKING, Generic, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar
 
 from typing_extensions import Self
 
@@ -28,6 +28,7 @@ class ClientResult(Generic[T]):
         return self
 
     def after_execute(self, action, *args, **kwargs):
+        # type: ("ClientResult", Any, Any) -> Self
         """
         Attach an event handler which is triggered after query is submitted to server
         :param (ClientResult) -> None action: Event handler

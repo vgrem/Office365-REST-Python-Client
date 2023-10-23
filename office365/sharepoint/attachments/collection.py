@@ -1,3 +1,5 @@
+from typing import AnyStr
+
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.attachments.attachment import Attachment
@@ -45,6 +47,7 @@ class AttachmentCollection(EntityCollection[Attachment]):
         return return_type
 
     def add_using_path(self, decoded_url, content_stream):
+        # type: (str, AnyStr) -> Attachment
         """
         Adds the attachment represented by the file name and stream in the specified parameter to the list item.
 
