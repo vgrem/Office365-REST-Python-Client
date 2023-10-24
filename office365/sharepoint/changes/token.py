@@ -23,3 +23,8 @@ class ChangeToken(ClientValue):
 
     def __repr__(self):
         return self.StringValue or ""
+
+    @property
+    def entity_type_name(self):
+        return "SP.ChangeToken"
+
