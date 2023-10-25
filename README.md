@@ -360,7 +360,7 @@ Additional examples:
 -  [export files](examples/onedrive/files/export.py)
 -  [upload folder](examples/onedrive/folder/upload.py)   
 -  [list drives](examples/onedrive/drives/list.py)
--  [list files](examples/onedrive/list_files.py)
+-  [list files](examples/onedrive/folders/list_with_files.py)
 
 Refer to [OneDrive examples section](examples/onedrive) for more examples.
 
