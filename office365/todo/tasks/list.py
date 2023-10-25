@@ -10,6 +10,7 @@ class TodoTaskList(Entity):
 
     @property
     def extensions(self):
+        # type: () -> EntityCollection[Extension]
         """The collection of open extensions defined for the task list."""
         return self.properties.get(
             "extensions",

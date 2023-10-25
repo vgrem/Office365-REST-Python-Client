@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.object import DirectoryObject
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -10,16 +12,14 @@ class DirectoryRole(DirectoryObject):
 
     @property
     def description(self):
-        """The description for the directory role.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The description for the directory role."""
         return self.properties.get("Description", None)
 
     @property
     def display_name(self):
-        """The display name for the directory role.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The display name for the directory role."""
         return self.properties.get("displayName", None)
 
     @property

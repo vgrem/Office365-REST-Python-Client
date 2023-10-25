@@ -117,6 +117,7 @@ class Drive(BaseItem):
 
     @property
     def bundles(self):
+        # type: () -> EntityCollection[DriveItem]
         """Bundle metadata, if the item is a bundle."""
         return self.properties.get(
             "bundles",
@@ -127,6 +128,7 @@ class Drive(BaseItem):
 
     @property
     def items(self):
+        # type: () -> EntityCollection[DriveItem]
         """All items contained in the drive."""
         return self.properties.get(
             "items",
@@ -137,6 +139,7 @@ class Drive(BaseItem):
 
     @property
     def following(self):
+        # type: () -> EntityCollection[DriveItem]
         """The list of items the user is following. Only in OneDrive for Business."""
         return self.properties.get(
             "following",
@@ -152,6 +155,7 @@ class Drive(BaseItem):
 
     @property
     def special(self):
+        # type: () -> EntityCollection[DriveItem]
         """Collection of auth folders available in OneDrive. Read-only. Nullable."""
         return self.properties.get(
             "special",

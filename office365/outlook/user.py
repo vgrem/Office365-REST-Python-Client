@@ -41,6 +41,7 @@ class OutlookUser(Entity):
 
     @property
     def master_categories(self):
+        # type: () -> EntityCollection[OutlookCategory]
         """A list of categories defined for the user."""
         return self.properties.get(
             "masterCategories",

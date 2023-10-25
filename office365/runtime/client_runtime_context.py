@@ -14,7 +14,7 @@ from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.read_entity import ReadEntityQuery
 
 if TYPE_CHECKING:
-    from office365.runtime.client_object import ClientObject
+    from office365.runtime.client_object import T
 
 
 class ClientRuntimeContext(object):
@@ -88,7 +88,7 @@ class ClientRuntimeContext(object):
         before_loaded=None,
         after_loaded=None,
     ):
-        # type: (ClientObject, List[str], Callable[[RequestOptions], None], Callable[[ClientObject], None]) -> Self
+        # type: (T, List[str], Callable[[RequestOptions], None], Callable[[T], None]) -> Self
         """Prepare retrieval query"""
         qry = ReadEntityQuery(client_object, properties_to_retrieve)
         self.add_query(qry)

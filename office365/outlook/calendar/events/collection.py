@@ -1,8 +1,6 @@
 import datetime
 from typing import List
 
-from typing_extensions import Self
-
 from office365.delta_collection import DeltaCollection
 from office365.outlook.calendar.attendees.attendee import Attendee
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone

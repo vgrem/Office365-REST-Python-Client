@@ -14985,6 +14985,35 @@
          <Annotations Target="microsoft.graph.schedulingGroup/isActive">
             <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
          </Annotations>
+         <Annotations Target="microsoft.graph.security.hostComponent">
+            <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
+               <Record>
+                  <PropertyValue Property="Countable" Bool="true"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
+               <Record>
+                  <PropertyValue Property="Expandable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.FilterRestrictions">
+               <Record>
+                  <PropertyValue Property="Filterable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
+               <Record>
+                  <PropertyValue Property="Searchable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SelectRestrictions">
+               <Record>
+                  <PropertyValue Property="Selectable" Bool="true"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="true"/>
+            <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="true"/>
+         </Annotations>
          <Annotations Target="microsoft.graph.security.host">
             <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
                <Record>
@@ -15054,35 +15083,6 @@
             <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="true"/>
          </Annotations>
          <Annotations Target="microsoft.graph.security.articleIndicator">
-            <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
-               <Record>
-                  <PropertyValue Property="Countable" Bool="true"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
-               <Record>
-                  <PropertyValue Property="Expandable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.FilterRestrictions">
-               <Record>
-                  <PropertyValue Property="Filterable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
-               <Record>
-                  <PropertyValue Property="Searchable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.SelectRestrictions">
-               <Record>
-                  <PropertyValue Property="Selectable" Bool="true"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="true"/>
-            <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="true"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.security.hostComponent">
             <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
                <Record>
                   <PropertyValue Property="Countable" Bool="true"/>
@@ -37265,6 +37265,17 @@
             <Member Name="appGovernanceDetection" Value="2097152"/>
             <Member Name="unknownFutureValue" Value="4194303"/>
             <Member Name="microsoftDefenderForCloud" Value="4194304"/>
+            <Member Name="microsoftDefenderForIoT" Value="1073741833"/>
+            <Member Name="microsoftDefenderForServers" Value="1073741834"/>
+            <Member Name="microsoftDefenderForStorage" Value="1073741835"/>
+            <Member Name="microsoftDefenderForDNS" Value="1073741836"/>
+            <Member Name="microsoftDefenderForDatabases" Value="1073741837"/>
+            <Member Name="microsoftDefenderForContainers" Value="1073741838"/>
+            <Member Name="microsoftDefenderForNetwork" Value="1073741839"/>
+            <Member Name="microsoftDefenderForAppService" Value="1073741840"/>
+            <Member Name="microsoftDefenderForKeyVault" Value="1073741841"/>
+            <Member Name="microsoftDefenderForResourceManager" Value="1073741842"/>
+            <Member Name="microsoftDefenderForApiManagement" Value="1073741843"/>
             <Member Name="nrtAlerts" Value="1073741844"/>
             <Member Name="scheduledAlerts" Value="1073741845"/>
             <Member Name="microsoftDefenderThreatIntelligenceAnalytics" Value="1073741846"/>
@@ -37424,6 +37435,17 @@
             <Member Name="markdown" Value="2"/>
             <Member Name="unknownFutureValue" Value="3"/>
          </EnumType>
+         <EnumType Name="hostPortProtocol">
+            <Member Name="tcp" Value="0"/>
+            <Member Name="udp" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
+         <EnumType Name="hostPortStatus">
+            <Member Name="open" Value="0"/>
+            <Member Name="filtered" Value="1"/>
+            <Member Name="closed" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
          <EnumType Name="hostReputationClassification">
             <Member Name="unknown" Value="0"/>
             <Member Name="neutral" Value="1"/>
@@ -37532,6 +37554,7 @@
             <NavigationProperty Name="hostComponents" Type="Collection(microsoft.graph.security.hostComponent)" ContainsTarget="true"/>
             <NavigationProperty Name="hostCookies" Type="Collection(microsoft.graph.security.hostCookie)" ContainsTarget="true"/>
             <NavigationProperty Name="hostPairs" Type="Collection(microsoft.graph.security.hostPair)" ContainsTarget="true"/>
+            <NavigationProperty Name="hostPorts" Type="Collection(microsoft.graph.security.hostPort)" ContainsTarget="true"/>
             <NavigationProperty Name="hosts" Type="Collection(microsoft.graph.security.host)" ContainsTarget="true"/>
             <NavigationProperty Name="hostSslCertificates" Type="Collection(microsoft.graph.security.hostSslCertificate)" ContainsTarget="true"/>
             <NavigationProperty Name="hostTrackers" Type="Collection(microsoft.graph.security.hostTracker)" ContainsTarget="true"/>
@@ -38026,6 +38049,28 @@
             <Property Name="content" Type="Edm.String"/>
             <Property Name="format" Type="microsoft.graph.security.contentFormat"/>
          </ComplexType>
+         <ComplexType Name="hostPortBanner">
+            <Property Name="banner" Type="Edm.String" Nullable="false"/>
+            <Property Name="firstSeenDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="lastSeenDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="scanProtocol" Type="Edm.String"/>
+            <Property Name="timesObserved" Type="Edm.Int32"/>
+         </ComplexType>
+         <ComplexType Name="hostPortComponent">
+            <Property Name="firstSeenDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="isRecent" Type="Edm.Boolean"/>
+            <Property Name="lastSeenDateTime" Type="Edm.DateTimeOffset"/>
+            <NavigationProperty Name="component" Type="microsoft.graph.security.hostComponent"/>
+         </ComplexType>
+         <EntityType Name="artifact" BaseType="graph.entity" Abstract="true"/>
+         <EntityType Name="hostComponent" BaseType="microsoft.graph.security.artifact">
+            <Property Name="category" Type="Edm.String"/>
+            <Property Name="firstSeenDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="lastSeenDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="name" Type="Edm.String" Nullable="false"/>
+            <Property Name="version" Type="Edm.String"/>
+            <NavigationProperty Name="host" Type="microsoft.graph.security.host" Nullable="false"/>
+         </EntityType>
          <ComplexType Name="hostReputationRule">
             <Property Name="description" Type="Edm.String" Nullable="false"/>
             <Property Name="name" Type="Edm.String" Nullable="false"/>
@@ -38069,7 +38114,6 @@
             <Property Name="lastSeenDateTime" Type="Edm.DateTimeOffset"/>
             <NavigationProperty Name="host" Type="microsoft.graph.security.host" Nullable="false"/>
          </ComplexType>
-         <EntityType Name="artifact" BaseType="graph.entity" Abstract="true"/>
          <EntityType Name="host" BaseType="microsoft.graph.security.artifact" Abstract="true">
             <Property Name="firstSeenDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="lastSeenDateTime" Type="Edm.DateTimeOffset"/>
@@ -38080,6 +38124,7 @@
             <NavigationProperty Name="parentHostPairs" Type="Collection(microsoft.graph.security.hostPair)"/>
             <NavigationProperty Name="passiveDns" Type="Collection(microsoft.graph.security.passiveDnsRecord)"/>
             <NavigationProperty Name="passiveDnsReverse" Type="Collection(microsoft.graph.security.passiveDnsRecord)"/>
+            <NavigationProperty Name="ports" Type="Collection(microsoft.graph.security.hostPort)"/>
             <NavigationProperty Name="reputation" Type="microsoft.graph.security.hostReputation" ContainsTarget="true"/>
             <NavigationProperty Name="sslCertificates" Type="Collection(microsoft.graph.security.hostSslCertificate)"/>
             <NavigationProperty Name="subdomains" Type="Collection(microsoft.graph.security.subdomain)"/>
@@ -38109,14 +38154,6 @@
             <NavigationProperty Name="childHost" Type="microsoft.graph.security.host" Nullable="false"/>
             <NavigationProperty Name="parentHost" Type="microsoft.graph.security.host" Nullable="false"/>
          </EntityType>
-         <EntityType Name="hostComponent" BaseType="microsoft.graph.security.artifact">
-            <Property Name="category" Type="Edm.String"/>
-            <Property Name="firstSeenDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="lastSeenDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="name" Type="Edm.String" Nullable="false"/>
-            <Property Name="version" Type="Edm.String"/>
-            <NavigationProperty Name="host" Type="microsoft.graph.security.host" Nullable="false"/>
-         </EntityType>
          <EntityType Name="hostCookie" BaseType="microsoft.graph.security.artifact">
             <Property Name="domain" Type="Edm.String" Nullable="false"/>
             <Property Name="firstSeenDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
@@ -38131,6 +38168,19 @@
             <Property Name="recordType" Type="Edm.String" Nullable="false"/>
             <NavigationProperty Name="artifact" Type="microsoft.graph.security.artifact" Nullable="false"/>
             <NavigationProperty Name="parentHost" Type="microsoft.graph.security.host" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="hostPort" BaseType="graph.entity">
+            <Property Name="banners" Type="Collection(microsoft.graph.security.hostPortBanner)"/>
+            <Property Name="firstSeenDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="lastScanDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="lastSeenDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="port" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="protocol" Type="microsoft.graph.security.hostPortProtocol"/>
+            <Property Name="services" Type="Collection(microsoft.graph.security.hostPortComponent)"/>
+            <Property Name="status" Type="microsoft.graph.security.hostPortStatus"/>
+            <Property Name="timesObserved" Type="Edm.Int32"/>
+            <NavigationProperty Name="host" Type="microsoft.graph.security.host" Nullable="false"/>
+            <NavigationProperty Name="mostRecentSslCertificate" Type="microsoft.graph.security.sslCertificate"/>
          </EntityType>
          <EntityType Name="hostReputation" BaseType="graph.entity">
             <Property Name="classification" Type="microsoft.graph.security.hostReputationClassification" Nullable="false"/>
@@ -38926,6 +38976,7 @@
          <EntityType Name="externalConnection" BaseType="graph.entity">
             <Property Name="activitySettings" Type="microsoft.graph.externalConnectors.activitySettings"/>
             <Property Name="configuration" Type="microsoft.graph.externalConnectors.configuration"/>
+            <Property Name="connectorId" Type="Edm.String"/>
             <Property Name="description" Type="Edm.String"/>
             <Property Name="name" Type="Edm.String"/>
             <Property Name="searchSettings" Type="microsoft.graph.externalConnectors.searchSettings"/>

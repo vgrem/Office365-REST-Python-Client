@@ -6,9 +6,9 @@ file being collaborated on. The invitation grants Ryan read-write access to the 
 
 https://learn.microsoft.com/en-us/graph/api/driveitem-invite?view=graph-rest-1.0
 """
-import json
 from datetime import datetime, timedelta
 
+from examples import upload_sample_files
 from office365.graph_client import GraphClient
 from tests.graph_case import acquire_token_by_username_password
 
@@ -24,4 +24,5 @@ permissions = file_item.invite(
     expiration_datetime=None,
     password="password123",
 ).execute_query()
-print(json.dumps(permissions.to_json(), indent=4))
+for perm in permissions:
+    print(perm.granted_to_identities)

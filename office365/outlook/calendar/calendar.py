@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.extensions.extended_property import (
     MultiValueLegacyExtendedProperty,
     SingleValueLegacyExtendedProperty,
@@ -24,6 +26,9 @@ class Calendar(Entity):
     A calendar which is a container for events. It can be a calendar for a user, or the default calendar
         of a Microsoft 365 group.
     """
+
+    def __repr__(self):
+        return self.name
 
     def allowed_calendar_sharing_roles(self, user):
         """
@@ -74,62 +79,62 @@ class Calendar(Entity):
 
     @property
     def can_edit(self):
+        # type: () -> Optional[bool]
         """
         true if the user can write to the calendar, false otherwise.
         This property is true for the user who created the calendar.
         This property is also true for a user who has been shared a calendar and granted write access.
-        :rtype: bool or None
         """
         return self.properties.get("canEdit", None)
 
     @property
     def can_share(self):
+        # type: () -> Optional[bool]
         """
         true if the user has the permission to share the calendar, false otherwise.
         Only the user who created the calendar can share it.
-        :rtype: bool or None
         """
         return self.properties.get("canShare", None)
 
     @property
     def can_view_private_items(self):
+        # type: () -> Optional[bool]
         """
         true if the user can read calendar items that have been marked private, false otherwise.
-        :rtype: bool or None
         """
         return self.properties.get("canViewPrivateItems", None)
 
     @property
     def change_key(self):
+        # type: () -> Optional[str]
         """
         Identifies the version of the calendar object. Every time the calendar is changed, changeKey changes as well.
         This allows Exchange to apply changes to the correct version of the object.
-        :rtype: str
         """
         return self.properties.get("changeKey", None)
 
     @property
     def color(self):
+        # type: () -> Optional[str]
         """
         Specifies the color theme to distinguish the calendar from other calendars in a UI.
         The property values are: auto, lightBlue, lightGreen, lightOrange, lightGray, lightYellow, lightTeal,
         lightPink, lightBrown, lightRed, maxColor.
-        :rtype: str
         """
         return self.properties.get("color", None)
 
     @property
     def default_online_meeting_provider(self):
+        # type: () -> Optional[str]
         """
         The default online meeting provider for meetings sent from this calendar.
         Possible values are: unknown, skypeForBusiness, skypeForConsumer, teamsForBusiness.
-        :rtype: str
         """
         return self.properties.get("defaultOnlineMeetingProvider", None)
 
     @property
     def name(self):
-        # type: () -> str
+        # type: () -> Optional[str]
         """
         The calendar name
         """
@@ -137,26 +142,26 @@ class Calendar(Entity):
 
     @property
     def is_default_calendar(self):
+        # type: () -> Optional[bool]
         """
         true if this is the default calendar where new events are created by default, false otherwise.
-        :rtype: bool or None
         """
         return self.properties.get("isDefaultCalendar", None)
 
     @property
     def is_removable(self):
+        # type: () -> Optional[bool]
         """
         Indicates whether this user calendar can be deleted from the user mailbox.
-        :rtype: bool or None
         """
         return self.properties.get("isRemovable", None)
 
     @property
     def is_tallying_responses(self):
+        # type: () -> Optional[bool]
         """
         Indicates whether this user calendar supports tracking of meeting responses.
         Only meeting invites sent from users' primary calendars support tracking of meeting responses.
-        :rtype: bool or None
         """
         return self.properties.get("isTallyingResponses", None)
 
@@ -179,6 +184,7 @@ class Calendar(Entity):
 
     @property
     def calendar_view(self):
+        # type: () -> EventCollection
         """The calendar view for the calendar. Navigation property. Read-only."""
         return self.properties.get(
             "calendarView",
@@ -199,6 +205,7 @@ class Calendar(Entity):
 
     @property
     def multi_value_extended_properties(self):
+        # type: () -> EntityCollection[MultiValueLegacyExtendedProperty]
         """The collection of multi-value extended properties defined for the Calendar."""
         return self.properties.get(
             "multiValueExtendedProperties",
@@ -211,6 +218,7 @@ class Calendar(Entity):
 
     @property
     def single_value_extended_properties(self):
+        # type: () -> EntityCollection[SingleValueLegacyExtendedProperty]
         """The collection of single-value extended properties defined for the calendar. Read-only. Nullable."""
         return self.properties.get(
             "singleValueExtendedProperties",

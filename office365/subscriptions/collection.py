@@ -3,7 +3,7 @@ from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.subscriptions.subscription import Subscription
 
 
-class SubscriptionCollection(EntityCollection):
+class SubscriptionCollection(EntityCollection[Subscription]):
     def __init__(self, context, resource_path=None):
         super(SubscriptionCollection, self).__init__(
             context, Subscription, resource_path

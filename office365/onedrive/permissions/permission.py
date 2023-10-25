@@ -1,6 +1,7 @@
+from typing import Optional
+
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity import Entity
-from office365.entity_collection import EntityCollection
 from office365.onedrive.drives.recipient import DriveRecipient
 from office365.onedrive.listitems.item_reference import ItemReference
 from office365.onedrive.permissions.sharepoint_identity_set import SharePointIdentitySet
@@ -89,18 +90,15 @@ class Permission(Entity):
 
     @property
     def share_id(self):
-        """A unique token that can be used to access this shared item via the shares API. Read-only.
-
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """A unique token that can be used to access this shared item via the shares API. Read-only."""
         return self.properties.get("shareId", None)
 
     @property
     def has_password(self):
+        # type: () -> Optional[bool]
         """This indicates whether password is set for this permission, it's only showing in response.
         Optional and Read-only and for OneDrive Personal only.
-
-        :rtype: bool
         """
         return self.properties.get("hasPassword", None)
 

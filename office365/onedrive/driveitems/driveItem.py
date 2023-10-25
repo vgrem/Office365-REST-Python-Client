@@ -242,7 +242,7 @@ class DriveItem(BaseItem):
         return return_type
 
     def upload_file(self, path_or_file):
-        # type: (str or IO) -> "DriveItem"
+        # type: (str|IO) -> "DriveItem"
         """Uploads a file
 
         :param str or typing.IO path_or_file:
@@ -584,7 +584,7 @@ class DriveItem(BaseItem):
         return return_type
 
     def validate_permission(self, challenge_token=None, password=None):
-        # type: (str or None, str or None) -> Self
+        # type: (Optional[str], Optional[str]) -> Self
         """
         :type challenge_token: str
         :type password: str

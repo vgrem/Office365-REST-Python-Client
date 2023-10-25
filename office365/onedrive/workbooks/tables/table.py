@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.onedrive.workbooks.ranges.range import WorkbookRange
 from office365.onedrive.workbooks.tables.columns.collection import (
@@ -49,11 +51,13 @@ class WorkbookTable(Entity):
 
     @property
     def name(self):
+        # type: () -> Optional[str]
         """Name of the table."""
-        return self.properties.get("name", str())
+        return self.properties.get("name", None)
 
     @property
     def columns(self):
+        # type: () -> WorkbookTableColumnCollection
         """
         Represents a collection of all the columns in the table.
         """
@@ -66,6 +70,7 @@ class WorkbookTable(Entity):
 
     @property
     def rows(self):
+        # type: () -> WorkbookTableRowCollection
         """
         Represents a collection of all the rows in the table.
         """

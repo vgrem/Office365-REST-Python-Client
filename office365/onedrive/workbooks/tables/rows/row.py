@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 
 
@@ -6,6 +8,7 @@ class WorkbookTableRow(Entity):
 
     @property
     def index(self):
+        # type: () -> Optional[int]
         """Returns the index number of the row within the rows collection of the table. Zero-indexed."""
         return self.properties.get("index", None)
 

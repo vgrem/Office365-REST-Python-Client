@@ -11,6 +11,7 @@ class TodoTask(Entity):
 
     @property
     def extensions(self):
+        # type: () -> EntityCollection[Extension]
         """The collection of open extensions defined for the task."""
         return self.properties.get(
             "extensions",
@@ -21,6 +22,7 @@ class TodoTask(Entity):
 
     @property
     def checklist_items(self):
+        # type: () -> EntityCollection[ChecklistItem]
         """A collection of checklistItems linked to a task."""
         return self.properties.get(
             "checklistItems",
@@ -33,6 +35,7 @@ class TodoTask(Entity):
 
     @property
     def linked_resources(self):
+        # type: () -> EntityCollection[LinkedResource]
         """A collection of resources linked to the task."""
         return self.properties.get(
             "linkedResources",

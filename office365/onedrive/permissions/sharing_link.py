@@ -34,4 +34,4 @@ class SharingLink(ClientValue):
         self.application = application
 
     def __repr__(self):
-        return self.webUrl
+        return self.webUrl or ""

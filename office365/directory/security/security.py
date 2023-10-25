@@ -17,6 +17,7 @@ class Security(Entity):
 
     @property
     def alerts(self):
+        # type: () -> EntityCollection[Alert]
         return self.properties.get(
             "alerts",
             EntityCollection(
@@ -26,6 +27,7 @@ class Security(Entity):
 
     @property
     def alerts_v2(self):
+        # type: () -> EntityCollection[Alert]
         """
         A collection of alerts in Microsoft 365 Defender.
         """
@@ -55,6 +57,7 @@ class Security(Entity):
 
     @property
     def incidents(self):
+        # type: () -> EntityCollection[Incident]
         """A collection of correlated alert instances and associated metadata that reflects the story of
         an attack in a tenant"""
         return self.properties.get(

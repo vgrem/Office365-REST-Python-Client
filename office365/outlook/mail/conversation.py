@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
@@ -15,33 +16,34 @@ class Conversation(Entity):
 
     @property
     def has_attachments(self):
+        # type: () -> Optional[bool]
         """
         Indicates whether any of the posts within this Conversation has at least one attachment.
         Supports $filter (eq, ne) and $search.
-        :rtype: bool or None
         """
         return self.properties.get("hasAttachments", None)
 
     @property
     def last_delivered_datetime(self):
+        # type: () -> Optional[datetime.datetime]
         """The Timestamp type represents date and time information using ISO 8601 format and is always in UTC time."""
         return self.properties.get("lastDeliveredDateTime", datetime.datetime.min)
 
     @property
     def preview(self):
+        # type: () -> Optional[str]
         """
         A short summary from the body of the latest post in this conversation.
         Supports $filter (eq, ne, le, ge).
-        :rtype: str or None
         """
         return self.properties.get("preview", None)
 
     @property
     def topic(self):
+        # type: () -> Optional[str]
         """
         The topic of the conversation. This property can be set when the conversation is created, but it cannot be
         updated.
-        :rtype: str or None
         """
         return self.properties.get("topic", None)
 
@@ -49,12 +51,12 @@ class Conversation(Entity):
     def unique_senders(self):
         """
         All the users that sent a message to this Conversation.
-        :rtype: str or None
         """
         return self.properties.get("uniqueSenders", StringCollection())
 
     @property
     def threads(self):
+        # type: () -> EntityCollection[ConversationThread]
         """A collection of all the conversation threads in the conversation."""
         return self.properties.get(
             "threads",

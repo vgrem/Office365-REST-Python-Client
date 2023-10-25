@@ -16,3 +16,6 @@ class Identity(ClientValue):
         super(Identity, self).__init__()
         self.displayName = display_name
         self.id = _id
+
+    def __repr__(self):
+        return repr(self.to_json())

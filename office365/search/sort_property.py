@@ -12,3 +12,6 @@ class SortProperty(ClientValue):
         """
         self.isDescending = is_descending
         self.name = name
+
+    def __repr__(self):
+        return "{0} {1}".format(self.name, "DESC" if self.isDescending else "ASC")

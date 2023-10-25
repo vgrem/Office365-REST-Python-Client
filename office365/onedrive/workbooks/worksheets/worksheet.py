@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.onedrive.workbooks.charts.chart import WorkbookChart
@@ -30,14 +32,15 @@ class WorkbookWorksheet(Entity):
 
     @property
     def name(self):
+        # type: () -> Optional[str]
         """
         The display name of the worksheet.
-        :rtype: str or None
         """
         return self.properties.get("name", None)
 
     @property
     def names(self):
+        # type: () -> EntityCollection[WorkbookNamedItem]
         """Returns collection of names that are associated with the worksheet"""
         return self.properties.get(
             "names",
@@ -50,6 +53,7 @@ class WorkbookWorksheet(Entity):
 
     @property
     def tables(self):
+        # type: () -> WorkbookTableCollection
         """Collection of tables that are part of the worksheet."""
         return self.properties.get(
             "tables",
@@ -60,6 +64,7 @@ class WorkbookWorksheet(Entity):
 
     @property
     def pivot_tables(self):
+        # type: () -> EntityCollection[WorkbookPivotTable]
         """Collection of PivotTables that are part of the worksheet."""
         return self.properties.get(
             "pivotTables",
@@ -72,6 +77,7 @@ class WorkbookWorksheet(Entity):
 
     @property
     def protection(self):
+        # type: () -> WorkbookWorksheetProtection
         """Returns sheet protection object for a worksheet."""
         return self.properties.get(
             "protection",

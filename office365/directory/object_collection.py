@@ -3,6 +3,7 @@ from office365.directory.object import DirectoryObject
 from office365.entity_collection import EntityCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
@@ -68,9 +69,7 @@ class DirectoryObjectCollection(DeltaCollection[DirectoryObject]):
         qry = ServiceOperationQuery(self, "{0}/$ref".format(user_id))
 
         def _construct_request(request):
-            """
-            :type request: RequestOptions
-            """
+            # type: (RequestOptions) -> None
             request.method = HttpMethod.Delete
 
         self.context.add_query(qry).before_query_execute(_construct_request)

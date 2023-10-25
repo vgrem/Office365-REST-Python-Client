@@ -66,7 +66,8 @@ class PermissionCollection(EntityCollection[Permission]):
         """
 
         def _after_loaded(return_type):
-            for permission in return_type:  # type: Permission
+            # type: (PermissionCollection) -> None
+            for permission in return_type:
                 permission.delete_object()
 
         self.context.load(self, after_loaded=_after_loaded)

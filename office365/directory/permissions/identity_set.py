@@ -17,3 +17,6 @@ class IdentitySet(ClientValue):
         self.application = application
         self.device = device
         self.user = user
+
+    def __repr__(self):
+        return repr({n: v.to_json() for n, v in self if v.to_json()})

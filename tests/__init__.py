@@ -8,6 +8,7 @@ from office365.runtime.auth.user_credential import UserCredential
 
 
 def create_unique_name(prefix):
+    # type: (str) -> str
     return prefix + "".join(
         random.choice(string.ascii_uppercase + string.digits) for _ in range(8)
     )

@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.onedrive.documentsets.version_item import DocumentSetVersionItem
@@ -11,16 +12,19 @@ class DocumentSetVersion(ListItemVersion):
 
     @property
     def comment(self):
+        # type: () -> Optional[str]
         """Comment about the captured version."""
         return self.properties.get("comment", None)
 
     @property
     def created_by(self):
+        # type: () -> IdentitySet
         """User who captured the version."""
         return self.properties.get("createdBy", IdentitySet())
 
     @property
     def created_datetime(self):
+        # type: () -> datetime.datetime
         """
         Date and time when this version was created.
         """
@@ -28,6 +32,7 @@ class DocumentSetVersion(ListItemVersion):
 
     @property
     def items(self):
+        # type: () -> ClientValueCollection[DocumentSetVersionItem]
         """Items within the document set that are captured as part of this version."""
         return self.properties.get(
             "items", ClientValueCollection(DocumentSetVersionItem)
@@ -35,6 +40,7 @@ class DocumentSetVersion(ListItemVersion):
 
     @property
     def should_capture_minor_version(self):
+        # type: () -> Optional[bool]
         """
         If true, minor versions of items are also captured; otherwise, only major versions will be captured.
         Default value is false.

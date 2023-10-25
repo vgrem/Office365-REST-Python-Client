@@ -9,4 +9,4 @@ from tests.graph_case import acquire_token_by_username_password
 client = GraphClient(acquire_token_by_username_password)
 calendars = client.me.calendars.top(10).get().execute_query()
 for cal in calendars:
-    print(cal.name)
+    print(cal)

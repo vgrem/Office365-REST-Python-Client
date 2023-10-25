@@ -21,8 +21,10 @@ def ensure_workbook_sample(graph_client):
     except ClientRequestException as e:
         if e.response.status_code == 404:
             local_path = "../../data/Financial Sample.xlsx"
-            target_file = graph_client.me.drive.root.upload(local_path).execute_query()
-            print(f"File {target_file.web_url} has been uploaded")
+            target_file = graph_client.me.drive.root.upload_file(
+                local_path
+            ).execute_query()
+            print("File {0} has been uploaded".format(target_file.web_url))
             return target_file.workbook
         else:
             raise ValueError(e.response.text)

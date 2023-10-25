@@ -3,7 +3,7 @@ from office365.outlook.calendar.email_address import EmailAddress
 from office365.outlook.calendar.permissions.permission import CalendarPermission
 
 
-class CalendarPermissionCollection(EntityCollection):
+class CalendarPermissionCollection(EntityCollection[CalendarPermission]):
     def __init__(self, context, resource_path=None):
         super(CalendarPermissionCollection, self).__init__(
             context, CalendarPermission, resource_path
