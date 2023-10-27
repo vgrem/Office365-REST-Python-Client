@@ -7,7 +7,7 @@ from office365.sharepoint.listitems.versions.get_parameters import (
 from office365.sharepoint.listitems.versions.version import ListItemVersion
 
 
-class ListItemVersionCollection(EntityCollection):
+class ListItemVersionCollection(EntityCollection[ListItemVersion]):
     """Specifies a collection of versions of a list item."""
 
     def __init__(self, context, resource_path=None):

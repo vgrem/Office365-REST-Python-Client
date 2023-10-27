@@ -334,6 +334,26 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def _poll_site_status(self, site_url, polling_interval_secs):
+        states = [0, 1, 2]
+        time.sleep(polling_interval_secs)
+
+        def _after(items):
+            completed = (
+                len(
+                    [
+                        item
+                        for item in items
+                        if item.properties.get("SiteUrl") == site_url
+                    ]
+                )
+                > 0
+            )
+            if not completed:
+                self._poll_site_status(site_url, polling_interval_secs)
+
+        self.get_sites_by_state(states).after_execute(_after, execute_first=True)
+
     def get_site_health_status(self, source_url):
         """
         :type source_url: str
@@ -408,7 +428,6 @@ class Tenant(Entity):
         Registers an existing site as a hub site.
 
         :param str site_url:
-        :return:
         """
         return_type = HubSiteProperties(self.context)
         params = {"siteUrl": site_url}
@@ -453,39 +472,19 @@ class Tenant(Entity):
     def create_site_sync(self, url, owner, title=None):
         """Creates a site collection
 
-         :param str title: Sets the new site’s title.
+        :param str title: Sets the new site’s title.
         :param str url: Sets the new site’s URL.
         :param str owner: Sets the login name of the owner of the new site.
         """
         return_type = Site(self.context)
-        op = self.create_site(url, owner, title)
+        return_type.set_property("__siteUrl", url)
 
-        def _verify_site_status(resp, items=None):
-            """
-            :type resp: requests.Response
-            """
-            resp.raise_for_status()
-            if items is None:
-                is_complete = op.is_complete
-            else:
-                is_complete = (
-                    len(
-                        [
-                            item
-                            for item in items
-                            if item.properties.get("SiteUrl") == url
-                        ]
-                    )
-                    > 0
-                )
-            if not is_complete:
-                time.sleep(op.polling_interval_secs)
-                items = self.get_sites_by_state([0, 1, 2])
-                self.context.after_execute(_verify_site_status, items=items)
+        def _ensure_status(op):
+            # type: (SpoOperation) -> None
+            if not op.is_complete:
+                self._poll_site_status(url, op.polling_interval_secs)
 
-            return_type.set_property("__siteUrl", url)
-
-        self.context.after_execute(_verify_site_status)
+        self.create_site(url, owner, title).after_execute(_ensure_status)
         return return_type
 
     def remove_site(self, site_url):

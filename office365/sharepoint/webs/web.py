@@ -16,6 +16,7 @@ from office365.sharepoint.authentication.acs_service_principal_info import (
 )
 from office365.sharepoint.businessdata.app_bdc_catalog import AppBdcCatalog
 from office365.sharepoint.changes.collection import ChangeCollection
+from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.clientsidecomponent.hostedapps.manager import (
     HostedAppsManager,
 )
@@ -1019,12 +1020,14 @@ class Web(SecurableObject):
             ServiceOperationPath("getList", [str(safe_path)], self.resource_path),
         )
 
-    def get_changes(self, query):
-        """Returns the collection of all changes from the change log that have occurred within the scope of the site,
+    def get_changes(self, query=None):
+        """Returns the collection of all changes from the change log that have occurred within the scope of the web,
         based on the specified query.
 
         :param office365.sharepoint.changes.query.ChangeQuery query: Specifies which changes to return
         """
+        if query is None:
+            query = ChangeQuery(web=True, fetch_limit=100)
         return_type = ChangeCollection(self.context)
         payload = {"query": query}
         qry = ServiceOperationQuery(

@@ -8,6 +8,7 @@ from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.audit.audit import Audit
 from office365.sharepoint.changes.collection import ChangeCollection
+from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.changes.token import ChangeToken
 from office365.sharepoint.compliance.store_proxy import SPPolicyStoreProxy
 from office365.sharepoint.compliance.tag import ComplianceTag
@@ -189,12 +190,14 @@ class Site(Entity):
         self.ensure_property("Url", _site_loaded)
         return return_type
 
-    def get_changes(self, query):
+    def get_changes(self, query=None):
         """Returns the collection of all changes from the change log that have occurred within the scope of the site,
         based on the specified query.
 
         :param office365.sharepoint.changes.query.ChangeQuery query: Specifies which changes to return
         """
+        if query is None:
+            query = ChangeQuery(site=True, fetch_limit=100)
         return_type = ChangeCollection(self.context)
         payload = {"query": query}
         qry = ServiceOperationQuery(
@@ -237,7 +240,7 @@ class Site(Entity):
     def get_web_templates(self, lcid=1033, override_compat_level=0):
         """
         Returns the collection of site definitions that are available for creating
-            Web sites within the site collection.<99>
+            Web sites within the site collection.
 
         :param int lcid: A 32-bit unsigned integer that specifies the language of the site definitions that are
             returned from the site collection.

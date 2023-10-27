@@ -8,6 +8,7 @@ from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.auth.user_credential import UserCredential
+from office365.runtime.client_result import ClientResult
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.compat import get_absolute_url, urlparse
 from office365.runtime.http.http_method import HttpMethod
@@ -19,8 +20,14 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.runtime.types.event_handler import EventHandler
+from office365.sharepoint.portal.groups.site_info import GroupSiteInfo
+from office365.sharepoint.portal.sites.creation_response import SPSiteCreationResponse
 from office365.sharepoint.portal.sites.status import SiteStatus
+from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.publishing.pages.service import SitePageService
+from office365.sharepoint.publishing.sites.communication.creation_response import (
+    CommunicationSiteCreationResponse,
+)
 from office365.sharepoint.request_user_context import RequestUserContext
 from office365.sharepoint.sites.site import Site
 from office365.sharepoint.tenant.administration.hubsites.collection import (
@@ -279,8 +286,10 @@ class ClientContext(ClientRuntimeContext):
                 request.ensure_header("IF-MATCH", "*")
 
     def create_modern_site(self, title, alias, owner=None):
+        # type: (str, str, Optional[str | User]) -> Site
         """
-        Creates a modern site
+        Creates a modern (Communication) site
+        https://learn.microsoft.com/en-us/sharepoint/dev/apis/site-creation-rest#create-a-modern-site
 
         :param str alias: Site alias which defines site url, e.g. https://contoso.sharepoint.com/sites/{alias}
         :param str title: Site title
@@ -290,19 +299,17 @@ class ClientContext(ClientRuntimeContext):
         site_url = "{base_url}/sites/{alias}".format(
             base_url=get_absolute_url(self.base_url), alias=alias
         )
-        result = self.site_manager.create(title, site_url, owner)
 
-        def _after_site_create(resp):
-            """
-            :type resp: requests.Response
-            """
-            resp.raise_for_status()
+        def _after_site_create(result):
+            # type: (ClientResult[SPSiteCreationResponse]) -> None
             if result.value.SiteStatus == SiteStatus.Error:
                 raise ValueError(result.value.ErrorMessage)
             elif result.value.SiteStatus == SiteStatus.Ready:
                 return_type.set_property("__siteUrl", result.value.SiteUrl)
 
-        self.after_execute(_after_site_create)
+        self.site_manager.create(title, site_url, owner).after_execute(
+            _after_site_create
+        )
         return return_type
 
     def create_team_site(self, alias, title, is_public=True):
@@ -312,20 +319,18 @@ class ClientContext(ClientRuntimeContext):
         :param str title: Site title
         :param bool is_public:
         """
-        result = self.group_site_manager.create_group_ex(title, alias, is_public)
         return_type = Site(self)
 
-        def _after_site_created(resp):
-            """
-            :type resp: requests.Response
-            """
-            resp.raise_for_status()
+        def _after_site_created(result):
+            # type: (ClientResult[GroupSiteInfo]) -> None
             if result.value.SiteStatus == SiteStatus.Error:
                 raise ValueError(result.value.ErrorMessage)
             elif result.value.SiteStatus == SiteStatus.Ready:
                 return_type.set_property("__siteUrl", result.value.SiteUrl)
 
-        self.after_execute(_after_site_created)
+        self.group_site_manager.create_group_ex(title, alias, is_public).after_execute(
+            _after_site_created
+        )
         return return_type
 
     def create_communication_site(self, alias, title):
@@ -341,9 +346,7 @@ class ClientContext(ClientRuntimeContext):
         )
 
         def _after_site_created(result):
-            """
-            :type result: ClientResult
-            """
+            # type: (ClientResult[CommunicationSiteCreationResponse]) -> None
             if result.value.SiteStatus == SiteStatus.Error:
                 raise ValueError("Site creation error")
             elif result.value.SiteStatus == SiteStatus.Ready:

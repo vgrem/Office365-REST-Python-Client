@@ -1,5 +1,5 @@
 """
-Creates Team site
+Creates a Team site
 """
 
 from office365.sharepoint.client_context import ClientContext

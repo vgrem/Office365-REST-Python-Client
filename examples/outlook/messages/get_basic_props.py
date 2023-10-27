@@ -12,4 +12,4 @@ client = GraphClient(acquire_token_by_client_credentials)
 user = client.users[test_user_principal_name]
 messages = user.messages.select(["id", "subject"]).top(10).get().execute_query()
 for message in messages:  # type: Message
-    print(message.id)
+    print(message.subject)

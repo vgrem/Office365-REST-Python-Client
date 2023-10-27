@@ -138,9 +138,7 @@ class Field(Entity):
 
     @property
     def default_formula(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
         return self.properties.get("DefaultFormula", None)
 
     @property
@@ -155,9 +153,9 @@ class Field(Entity):
 
     @property
     def schema_xml(self):
-        """Gets a value that specifies the XML schema that defines the field.
-
-        :rtype: str or None
+        # type: () -> Optional[str]
+        """
+        Gets a value that specifies the XML schema that defines the field.
         """
         return self.properties.get("SchemaXml", None)
 
@@ -168,41 +166,32 @@ class Field(Entity):
 
     @property
     def type_as_string(self):
-        """Gets a value that specifies the type of the field..
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets a value that specifies the type of the field"""
         return self.properties.get("TypeAsString", None)
 
     @property
     def title(self):
-        """Gets a value that specifies the display name of the field.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets a value that specifies the display name of the field."""
         return self.properties.get("Title", None)
 
     @title.setter
     def title(self, val):
         """
         Sets a value that specifies the display name of the field.
-        :rtype: str or None
         """
         self.set_property("Title", val)
 
     @property
     def group(self):
-        """
-        Gets a value that specifies the field group.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets a value that specifies the field group"""
         return self.properties.get("Group", None)
 
     @group.setter
     def group(self, val):
-        """Sets a value that specifies the field group.
-        :rtype: str or None
-        """
+        """Sets a value that specifies the field group."""
         self.set_property("Group", val)
 
     @property
@@ -215,71 +204,65 @@ class Field(Entity):
 
     @property
     def can_be_deleted(self):
+        # type: () -> Optional[bool]
         """
         Gets a value that specifies whether the field can be deleted
-        :rtype: bool or None
         """
         return self.properties.get("CanBeDeleted", None)
 
     @property
     def client_side_component_id(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
         return self.properties.get("ClientSideComponentId", None)
 
     @property
     def client_side_component_properties(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
         return self.properties.get("ClientSideComponentProperties", None)
 
     @property
     def client_validation_formula(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
         return self.properties.get("ClientValidationFormula", None)
 
     @property
     def enforce_unique_values(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the field enforces unique values.
-        :rtype: bool or None
         """
         return self.properties.get("enforceUniqueValues", None)
 
     @property
     def filterable(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether list items in the list can be filtered by the field value.
-        :rtype: bool or None
         """
         return self.properties.get("Filterable", None)
 
     @property
     def from_base_type(self):
+        # type: () -> Optional[bool]
         """
         Gets a Boolean value that indicates whether the field derives from a base field type.
-        :rtype: bool or None
         """
         return self.properties.get("FromBaseType", None)
 
     @property
     def js_link(self):
+        # type: () -> Optional[str]
         """
         When implemented in a derived class, gets or sets the name of an external JavaScript file that contains
         any client rendering logic for fields of the derived type.
-        :rtype: str or None
         """
         return self.properties.get("JSLink", None)
 
     @property
     def hidden(self):
+        # type: () -> Optional[bool]
         """
         Gets a value that specifies whether the field is hidden in list views and list forms.
-        :rtype: bool or None
         """
         return self.properties.get("Hidden", None)
 
@@ -292,25 +275,25 @@ class Field(Entity):
 
     @property
     def no_crawl(self):
+        # type: () -> Optional[bool]
         """
         Gets value that specifies whether the field can be crawled by a search engine.
-        :rtype: bool or None
         """
         return self.properties.get("NoCrawl", None)
 
     @property
     def read_only_field(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the value of the field is read-only.
-        :rtype: bool or None
         """
         return self.properties.get("ReadOnlyField", None)
 
     @property
     def default_value(self):
+        # type: () -> Optional[str]
         """
         Gets  a value that specifies the default value for the field.
-        :rtype: str or None
         """
         return self.properties.get("DefaultValue", None)
 
@@ -323,16 +306,13 @@ class Field(Entity):
 
     @property
     def indexed(self):
-        """
-        :rtype: str or None
-        """
         return self.properties.get("Indexed", None)
 
     @property
     def type_display_name(self):
+        # type: () -> Optional[str]
         """
         Gets a value that specifies the display name for the type of the field.
-        :rtype: str or None
         """
         return self.properties.get("TypeDisplayName", None)
 
@@ -348,10 +328,9 @@ class Field(Entity):
 
     @property
     def type_short_description(self):
+        # type: () -> Optional[str]
         """
         Gets a value that specifies the description for the type of the field.
-
-        :rtype: str or None
         """
         return self.properties.get("TypeShortDescription", None)
 

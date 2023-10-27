@@ -20,12 +20,12 @@ class FolderCollection(EntityCollection[Folder]):
         :param bool overwrite:  bool
         """
         parameters = {"DecodedUrl": decoded_url, "Overwrite": overwrite}
-        target_folder = Folder(self.context)
+        return_type = Folder(self.context)
         qry = ServiceOperationQuery(
-            self, "AddUsingPath", parameters, None, None, target_folder
+            self, "AddUsingPath", parameters, None, None, return_type
         )
         self.context.add_query(qry)
-        return target_folder
+        return return_type
 
     def ensure_path(self, path):
         """

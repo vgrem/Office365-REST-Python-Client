@@ -9,6 +9,9 @@ class ChangeList(Change):
     The RelativeTime and RootFolderUrl properties are not included in the default scalar property set for this type.
     """
 
+    def __repr__(self):
+        return "List: {0}".format(self.list_id)
+
     @property
     def base_template(self):
         """An SP.ListTemplateType object that returns the list template type of the list."""

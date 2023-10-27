@@ -265,10 +265,8 @@ class Folder(Entity):
         return self.folders.add(name)
 
     def rename(self, name):
-        """Rename a Folder resource
-
-        :type name: str
-        """
+        # type: (str) -> Self
+        """Rename a Folder resource"""
         item = self.list_item_all_fields
         item.set_property("Title", name)
         item.set_property("FileLeafRef", name)

@@ -1,30 +1,39 @@
 import datetime
+from typing import TYPE_CHECKING, Optional
 
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.entity import Entity
+
+if TYPE_CHECKING:
+    from office365.sharepoint.listitems.versions.collection import (
+        ListItemVersionCollection,
+    )
 
 
 class ListItemVersion(Entity):
     """Represents a version of a list item."""
 
+    def __repr__(self):
+        return "Label: {0}, Url: {1}".format(
+            self.version_label, self.properties.get("FileRef", None)
+        )
+
     @property
     def version_id(self):
+        # type: () -> Optional[int]
         """Gets the ID of the version."""
-        return int(self.properties.get("VersionId", -1))
+        return int(self.properties.get("VersionId", None))
 
     @property
     def version_label(self):
-        """Gets the version number of the item version.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the version number of the item version."""
         return self.properties.get("VersionLabel", None)
 
     @property
     def is_current_version(self):
-        """Gets a value that specifies whether the file version is the current version.
-        :rtype: bool
-        """
+        # type: () -> Optional[bool]
+        """Gets a value that specifies whether the file version is the current version."""
         return self.properties.get("IsCurrentVersion", None)
 
     @property
@@ -68,9 +77,7 @@ class ListItemVersion(Entity):
 
     @property
     def parent_collection(self):
-        """
-        :rtype: office365.sharepoint.listitems.versions.collection.ListItemVersionCollection
-        """
+        # type: () -> ListItemVersionCollection
         return self._parent_collection
 
     def get_property(self, name, default_value=None):

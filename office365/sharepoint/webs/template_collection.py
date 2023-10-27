@@ -3,7 +3,7 @@ from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.webs.template import WebTemplate
 
 
-class WebTemplateCollection(EntityCollection):
+class WebTemplateCollection(EntityCollection[WebTemplate]):
     """Specifies a collection of site templates."""
 
     def __init__(self, context, resource_path=None, parent=None):

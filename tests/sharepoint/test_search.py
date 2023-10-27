@@ -53,13 +53,15 @@ class TestSearch(TestCase):
         self.assertIsInstance(result.value.PrimaryQueryResult, QueryResult)
 
     def test7_search_get_query_with_sort_list(self):
-        result = self.client.search.query(
-            "guide.docx", enable_sorting=True, sort_list=[Sort("LastModifiedTime", 1)]
+        result = self.client.search.post_query(
+            query_text="guide.docx",
+            enable_sorting=True,
+            sort_list=[Sort("LastModifiedTime", 1)],
         ).execute_query()
         self.assertIsInstance(result.value.PrimaryQueryResult, QueryResult)
 
     def test8_search_suggest(self):
-        result = self.client.search.suggest("guide.docx").execute_query()
+        result = self.client.search.suggest("guide").execute_query()
         self.assertIsInstance(result.value, QuerySuggestionResults)
 
     # def test9_auto_completions(self):

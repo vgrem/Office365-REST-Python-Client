@@ -6,15 +6,11 @@ from tests.sharepoint.sharepoint_case import SPTestCase
 
 class TestChange(SPTestCase):
     def test_1_get_web_changes(self):
-        changes = self.client.site.root_web.get_changes(
-            query=ChangeQuery(web=True)
-        ).execute_query()
+        changes = self.client.site.root_web.get_changes().execute_query()
         self.assertIsInstance(changes, ChangeCollection)
 
     def test_2_get_site_changes(self):
-        changes = self.client.site.get_changes(
-            query=ChangeQuery(site=True, fetch_limit=100)
-        ).execute_query()
+        changes = self.client.site.get_changes().execute_query()
         self.assertIsInstance(changes, ChangeCollection)
 
     def test_3_get_list_item_changes_since_token(self):

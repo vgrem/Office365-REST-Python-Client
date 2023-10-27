@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
@@ -7,19 +9,17 @@ class Form(Entity):
 
     @property
     def form_type(self):
+        # type: () -> Optional[str]
         """
         Gets the type of the form.
-
-        :rtype: str or None
         """
         return self.properties.get("FormType", None)
 
     @property
     def server_relative_url(self):
+        # type: () -> Optional[str]
         """
         Gets the server-relative URL of the form.
-
-        :rtype: str or None
         """
         return self.properties.get("ServerRelativeUrl", None)
 

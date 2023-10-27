@@ -1,9 +1,27 @@
+import datetime
+import inspect
+from typing import Optional
+
 from office365.sharepoint.changes.token import ChangeToken
+from office365.sharepoint.changes.type import ChangeType
 from office365.sharepoint.entity import Entity
 
 
 class Change(Entity):
     """Base class for a change. installation."""
+
+    @property
+    def change_type_name(self):
+        return next(
+            iter(
+                [
+                    item[0]
+                    for item in inspect.getmembers(ChangeType)
+                    if item[1] == self.change_type
+                ]
+            ),
+            None,
+        )
 
     @property
     def change_token(self):
@@ -22,6 +40,7 @@ class Change(Entity):
 
     @property
     def site_id(self):
+        # type: () -> Optional[str]
         """
         Returns the Id of the site of the changed item
         """
@@ -29,10 +48,11 @@ class Change(Entity):
 
     @property
     def time(self):
+        # type: () -> datetime.datetime
         """
         Gets a value that specifies the time that the object was modified.
         """
-        return self.properties.get("Time", None)
+        return self.properties.get("Time", datetime.datetime.min)
 
     def get_property(self, name, default_value=None):
         if default_value is None:
