@@ -16,7 +16,6 @@ class MessageCollection(DeltaCollection[Message]):
         :param str subject: The subject of the message.
         :param str or ItemBody body: The body of the message. It can be in HTML or text format
         :param list[str] to_recipients:
-        :rtype: Message
         """
         if to_recipients is not None:
             kwargs["toRecipients"] = ClientValueCollection(

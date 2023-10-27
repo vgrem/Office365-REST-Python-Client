@@ -31,7 +31,17 @@ class SearchEntity(Entity):
         payload = {"requests": ClientValueCollection(SearchRequest, [search_request])}
         return_type = ClientResult(self.context, ClientValueCollection(SearchResponse))
         qry = ServiceOperationQuery(self, "query", None, payload, None, return_type)
-        self.context.add_query(qry)
+
+        def _process_response():
+            # patch 'resource' nav property
+            for item in return_type.value:
+                for hitCs in item.hitsContainers:
+                    for hit in hitCs.hits:
+                        json = hit.resource
+                        hit.resource = Entity(self.context)
+                        self.context.pending_request().map_json(json, hit.resource)
+
+        self.context.add_query(qry).after_query_execute(_process_response)
         return return_type
 
     def query_messages(self, query_string):

@@ -31,9 +31,6 @@ from office365.onedrive.files.system_info import FileSystemInfo
 from office365.onedrive.folders.folder import Folder
 from office365.onedrive.internal.paths.children import ChildrenPath
 from office365.onedrive.internal.paths.url import UrlPath
-from office365.onedrive.internal.queries.resumable_file_upload import (
-    create_resumable_file_upload_query,
-)
 from office365.onedrive.listitems.item_reference import ItemReference
 from office365.onedrive.listitems.list_item import ListItem
 from office365.onedrive.operations.pending import PendingOperations
@@ -50,6 +47,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.v4.upload_session import UploadSession
+from office365.runtime.odata.v4.upload_session_request import UploadSessionRequest
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.function import FunctionQuery
@@ -198,12 +196,21 @@ class DriveItem(BaseItem):
         :param str source_path: File path
         :param int chunk_size: chunk size
         """
+
+        def _start_upload():
+            with open(source_path, "rb") as local_file:
+                session_request = UploadSessionRequest(
+                    local_file, chunk_size, chunk_uploaded
+                )
+                session_request.execute_query(qry)
+
         file_name = os.path.basename(source_path)
         return_type = DriveItem(self.context, UrlPath(file_name, self.resource_path))
-        qry = create_resumable_file_upload_query(
-            return_type, source_path, chunk_size, chunk_uploaded
+
+        qry = UploadSessionQuery(
+            return_type, {"item": DriveItemUploadableProperties(name=file_name)}
         )
-        self.context.add_query(qry)
+        self.context.add_query(qry).after_query_execute(_start_upload)
         return return_type
 
     def create_upload_session(self, item):

@@ -8,13 +8,11 @@ https://learn.microsoft.com/en-us/graph/api/driveitem-invite?view=graph-rest-1.0
 """
 from datetime import datetime, timedelta
 
-from examples import upload_sample_files
 from office365.graph_client import GraphClient
 from tests.graph_case import acquire_token_by_username_password
 
 file_name = "Financial Sample.xlsx"
 client = GraphClient(acquire_token_by_username_password)
-# upload_sample_files(client.me.drive)
 file_item = client.me.drive.root.get_by_path(file_name)
 expired = datetime.utcnow() + timedelta(days=1)
 permissions = file_item.invite(

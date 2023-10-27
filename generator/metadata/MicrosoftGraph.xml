@@ -3871,6 +3871,11 @@
                   <PropertyValue Property="Supported" Bool="false"/>
                </Record>
             </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
+               <Record>
+                  <PropertyValue Property="Countable" Bool="false"/>
+               </Record>
+            </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
                <Record>
                   <PropertyValue Property="Deletable" Bool="false"/>
@@ -5242,6 +5247,11 @@
                   <PropertyValue Property="Supported" Bool="false"/>
                </Record>
             </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
+               <Record>
+                  <PropertyValue Property="Countable" Bool="false"/>
+               </Record>
+            </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
                <Record>
                   <PropertyValue Property="Deletable" Bool="false"/>
@@ -5298,11 +5308,18 @@
                </Collection>
             </Annotation>
          </Annotations>
-         <Annotations Target="microsoft.graph.certification/certificationDetailsUrl">
-            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.certification/isCertifiedByMicrosoft">
-            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         <Annotations Target="microsoft.graph.directory/deviceLocalCredentials">
+            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
+               <Record>
+                  <PropertyValue Property="Expandable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.NavigationRestrictions">
+               <Record>
+                  <PropertyValue Property="Referenceable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="false"/>
          </Annotations>
          <Annotations Target="microsoft.graph.administrativeUnit">
             <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
@@ -5310,6 +5327,19 @@
                   <PropertyValue Property="Supported" Bool="true"/>
                </Record>
             </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.directory/administrativeUnits">
+            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
+               <Record>
+                  <PropertyValue Property="Supported" Bool="true"/>
+               </Record>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.certification/certificationDetailsUrl">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.certification/isCertifiedByMicrosoft">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
          </Annotations>
          <Annotations Target="microsoft.graph.crossTenantAccessPolicyConfigurationDefault">
             <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
@@ -5401,13 +5431,6 @@
             </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.device">
-            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
-               <Record>
-                  <PropertyValue Property="Supported" Bool="true"/>
-               </Record>
-            </Annotation>
-         </Annotations>
-         <Annotations Target="microsoft.graph.directory/administrativeUnits">
             <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
                <Record>
                   <PropertyValue Property="Supported" Bool="true"/>
@@ -20612,6 +20635,7 @@
          <EntityType Name="extensionProperty" BaseType="graph.directoryObject" OpenType="true">
             <Property Name="appDisplayName" Type="Edm.String"/>
             <Property Name="dataType" Type="Edm.String" Nullable="false"/>
+            <Property Name="isMultiValued" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="isSyncedFromOnPremises" Type="Edm.Boolean"/>
             <Property Name="name" Type="Edm.String" Nullable="false"/>
             <Property Name="targetObjects" Type="Collection(Edm.String)" Nullable="false"/>
@@ -22504,6 +22528,7 @@
             <Property Name="email" Type="Edm.String"/>
             <Property Name="isFavoriteByDefault" Type="Edm.Boolean"/>
             <Property Name="membershipType" Type="graph.channelMembershipType"/>
+            <Property Name="summary" Type="graph.channelSummary"/>
             <Property Name="tenantId" Type="Edm.String"/>
             <Property Name="webUrl" Type="Edm.String"/>
             <NavigationProperty Name="filesFolder" Type="graph.driveItem" ContainsTarget="true"/>
@@ -22905,6 +22930,54 @@
             <Property Name="isEnabledForContentSharing" Type="Edm.Boolean"/>
             <Property Name="isEnabledForVideo" Type="Edm.Boolean"/>
          </ComplexType>
+         <ComplexType Name="deviceLocalCredential">
+            <Property Name="accountName" Type="Edm.String" Nullable="false"/>
+            <Property Name="accountSid" Type="Edm.String" Nullable="false"/>
+            <Property Name="backupDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="passwordBase64" Type="Edm.String" Nullable="false"/>
+         </ComplexType>
+         <EntityType Name="deviceLocalCredentialInfo" BaseType="graph.entity">
+            <Property Name="credentials" Type="Collection(graph.deviceLocalCredential)" Nullable="false"/>
+            <Property Name="deviceName" Type="Edm.String" Nullable="false"/>
+            <Property Name="lastBackupDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="refreshDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="directory" BaseType="graph.entity">
+            <NavigationProperty Name="deviceLocalCredentials" Type="Collection(graph.deviceLocalCredentialInfo)" ContainsTarget="true"/>
+            <NavigationProperty Name="administrativeUnits" Type="Collection(graph.administrativeUnit)" ContainsTarget="true"/>
+            <NavigationProperty Name="attributeSets" Type="Collection(graph.attributeSet)" ContainsTarget="true"/>
+            <NavigationProperty Name="customSecurityAttributeDefinitions" Type="Collection(graph.customSecurityAttributeDefinition)" ContainsTarget="true"/>
+            <NavigationProperty Name="deletedItems" Type="Collection(graph.directoryObject)" ContainsTarget="true"/>
+            <NavigationProperty Name="federationConfigurations" Type="Collection(graph.identityProviderBase)" ContainsTarget="true"/>
+            <NavigationProperty Name="onPremisesSynchronization" Type="Collection(graph.onPremisesDirectorySynchronization)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="administrativeUnit" BaseType="graph.directoryObject" OpenType="true">
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="visibility" Type="Edm.String"/>
+            <NavigationProperty Name="members" Type="Collection(graph.directoryObject)"/>
+            <NavigationProperty Name="scopedRoleMembers" Type="Collection(graph.scopedRoleMembership)" ContainsTarget="true"/>
+            <NavigationProperty Name="extensions" Type="Collection(graph.extension)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="attributeSet" BaseType="graph.entity">
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="maxAttributesPerSet" Type="Edm.Int32"/>
+         </EntityType>
+         <EntityType Name="customSecurityAttributeDefinition" BaseType="graph.entity">
+            <Property Name="attributeSet" Type="Edm.String" Nullable="false"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="isCollection" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="isSearchable" Type="Edm.Boolean"/>
+            <Property Name="name" Type="Edm.String" Nullable="false"/>
+            <Property Name="status" Type="Edm.String" Nullable="false"/>
+            <Property Name="type" Type="Edm.String" Nullable="false"/>
+            <Property Name="usePreDefinedValuesOnly" Type="Edm.Boolean"/>
+            <NavigationProperty Name="allowedValues" Type="Collection(graph.allowedValue)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="onPremisesDirectorySynchronization" BaseType="graph.entity">
+            <Property Name="configuration" Type="graph.onPremisesDirectorySynchronizationConfiguration"/>
+            <Property Name="features" Type="graph.onPremisesDirectorySynchronizationFeature" Nullable="false"/>
+         </EntityType>
          <ComplexType Name="alternativeSecurityId">
             <Property Name="identityProvider" Type="Edm.String"/>
             <Property Name="key" Type="Edm.Binary"/>
@@ -23111,24 +23184,12 @@
             <Property Name="name" Type="Edm.String"/>
             <Property Name="type" Type="Edm.String"/>
          </ComplexType>
-         <EntityType Name="administrativeUnit" BaseType="graph.directoryObject" OpenType="true">
-            <Property Name="description" Type="Edm.String"/>
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="visibility" Type="Edm.String"/>
-            <NavigationProperty Name="members" Type="Collection(graph.directoryObject)"/>
-            <NavigationProperty Name="scopedRoleMembers" Type="Collection(graph.scopedRoleMembership)" ContainsTarget="true"/>
-            <NavigationProperty Name="extensions" Type="Collection(graph.extension)" ContainsTarget="true"/>
-         </EntityType>
          <EntityType Name="allowedValue" BaseType="graph.entity">
             <Property Name="isActive" Type="Edm.Boolean"/>
          </EntityType>
          <EntityType Name="appScope" BaseType="graph.entity">
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="type" Type="Edm.String"/>
-         </EntityType>
-         <EntityType Name="attributeSet" BaseType="graph.entity">
-            <Property Name="description" Type="Edm.String"/>
-            <Property Name="maxAttributesPerSet" Type="Edm.Int32"/>
          </EntityType>
          <EntityType Name="certificateBasedAuthConfiguration" BaseType="graph.entity">
             <Property Name="certificateAuthorities" Type="Collection(graph.certificateAuthority)" Nullable="false"/>
@@ -23169,17 +23230,6 @@
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="tenantId" Type="Edm.String" Nullable="false"/>
             <Property Name="userSyncInbound" Type="graph.crossTenantUserSyncInbound"/>
-         </EntityType>
-         <EntityType Name="customSecurityAttributeDefinition" BaseType="graph.entity">
-            <Property Name="attributeSet" Type="Edm.String" Nullable="false"/>
-            <Property Name="description" Type="Edm.String"/>
-            <Property Name="isCollection" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="isSearchable" Type="Edm.Boolean"/>
-            <Property Name="name" Type="Edm.String" Nullable="false"/>
-            <Property Name="status" Type="Edm.String" Nullable="false"/>
-            <Property Name="type" Type="Edm.String" Nullable="false"/>
-            <Property Name="usePreDefinedValuesOnly" Type="Edm.Boolean"/>
-            <NavigationProperty Name="allowedValues" Type="Collection(graph.allowedValue)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="device" BaseType="graph.directoryObject" OpenType="true">
             <Property Name="accountEnabled" Type="Edm.Boolean"/>
@@ -23224,18 +23274,6 @@
                   </Record>
                </Collection>
             </Annotation>
-         </EntityType>
-         <EntityType Name="directory" BaseType="graph.entity">
-            <NavigationProperty Name="administrativeUnits" Type="Collection(graph.administrativeUnit)" ContainsTarget="true"/>
-            <NavigationProperty Name="attributeSets" Type="Collection(graph.attributeSet)" ContainsTarget="true"/>
-            <NavigationProperty Name="customSecurityAttributeDefinitions" Type="Collection(graph.customSecurityAttributeDefinition)" ContainsTarget="true"/>
-            <NavigationProperty Name="deletedItems" Type="Collection(graph.directoryObject)" ContainsTarget="true"/>
-            <NavigationProperty Name="federationConfigurations" Type="Collection(graph.identityProviderBase)" ContainsTarget="true"/>
-            <NavigationProperty Name="onPremisesSynchronization" Type="Collection(graph.onPremisesDirectorySynchronization)" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="onPremisesDirectorySynchronization" BaseType="graph.entity">
-            <Property Name="configuration" Type="graph.onPremisesDirectorySynchronizationConfiguration"/>
-            <Property Name="features" Type="graph.onPremisesDirectorySynchronizationFeature" Nullable="false"/>
          </EntityType>
          <EntityType Name="directoryObjectPartnerReference" BaseType="graph.directoryObject">
             <Property Name="description" Type="Edm.String"/>
@@ -31067,6 +31105,12 @@
          <ComplexType Name="channelSetAsFavoriteByDefaultEventMessageDetail" BaseType="graph.eventMessageDetail">
             <Property Name="channelId" Type="Edm.String"/>
             <Property Name="initiator" Type="graph.identitySet"/>
+         </ComplexType>
+         <ComplexType Name="channelSummary">
+            <Property Name="guestsCount" Type="Edm.Int32"/>
+            <Property Name="hasMembersFromOtherTenants" Type="Edm.Boolean"/>
+            <Property Name="membersCount" Type="Edm.Int32"/>
+            <Property Name="ownersCount" Type="Edm.Int32"/>
          </ComplexType>
          <ComplexType Name="channelUnsetAsFavoriteByDefaultEventMessageDetail" BaseType="graph.eventMessageDetail">
             <Property Name="channelId" Type="Edm.String"/>
