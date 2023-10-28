@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -12,41 +14,41 @@ class UserProfile(Entity):
 
     @property
     def account_name(self):
+        # type: () -> Optional[str]
         """
         The account name of the user.
-        :rtype: str or None
         """
         return self.properties.get("AccountName", None)
 
     @property
     def display_name(self):
+        # type: () -> Optional[str]
         """
         The title of the user.
-        :rtype: str or None
         """
         return self.properties.get("DisplayName", None)
 
     @property
     def my_site_host_url(self):
+        # type: () -> Optional[str]
         """
         Specifies the URL for the personal site of the current user.
-        :rtype: str or None
         """
         return self.properties.get("MySiteHostUrl", None)
 
     @property
     def public_url(self):
+        # type: () -> Optional[str]
         """
         Specifies the public URL for the personal site of the current user.
-        :rtype: str or None
         """
         return self.properties.get("PublicUrl", None)
 
     @property
     def url_to_create_personal_site(self):
+        # type: () -> Optional[str]
         """
         The UrlToCreatePersonalSite property specifies the URL to allow the current user to create a personal site.
-        :rtype: str or None
         """
         return self.properties.get("UrlToCreatePersonalSite", None)
 

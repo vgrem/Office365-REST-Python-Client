@@ -133,17 +133,19 @@ class SearchService(Entity):
             "rankingModelId": ranking_model_id,
             "startRow": start_row,
             "rowsPerPage": rows_per_page,
-            "selectProperties": str(StringCollection(select_properties)),
-            "refinementFilters": str(StringCollection(refinement_filters)),
-            "refiners": str(StringCollection(refiners)),
-            "sortList": str(StringCollection([str(s) for s in sort_list]))
-            if sort_list
-            else None,
             "trimDuplicates": trim_duplicates,
             "rowLimit": row_limit,
             "enableQueryRules": enable_query_rules,
             "enableSorting": enable_sorting,
         }
+        if refinement_filters:
+            params["refinementFilters"] = str(StringCollection(refinement_filters))
+        if sort_list:
+            params["sortList"] = str(StringCollection([str(s) for s in sort_list]))
+        if select_properties:
+            params["selectProperties"] = str(StringCollection(select_properties))
+        if refiners:
+            params["refiners"] = str(StringCollection(refiners))
         params.update(**kwargs)
         return_type = ClientResult(
             self.context, SearchResult()

@@ -1,4 +1,4 @@
-from typing import Callable, List, Optional
+from typing import Any, Callable, List, Optional
 
 from office365.booking.solutions.root import SolutionsRoot
 from office365.communications.cloud_communications import CloudCommunications
@@ -120,6 +120,7 @@ class GraphClient(ClientRuntimeContext):
     def with_client_secret(
         tenant, client_id, client_secret, scopes=None, token_cache=None
     ):
+        # type: (str, str, str, List[str], Any) -> "GraphClient"
         """
         Initializes the confidential client with client secret
 

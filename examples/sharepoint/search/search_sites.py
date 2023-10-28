@@ -1,3 +1,8 @@
+"""
+Search SharePoint sites the current user is member of
+
+"""
+
 from office365.sharepoint.client_context import ClientContext
 from tests import test_site_url, test_user_credentials
 

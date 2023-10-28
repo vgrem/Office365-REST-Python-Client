@@ -33,10 +33,3 @@ class ContactCollection(DeltaCollection[Contact]):
         if business_phone:
             kwargs["businessPhones"] = StringCollection([business_phone])
         return super(ContactCollection, self).add(**kwargs)
-
-    def __getitem__(self, key):
-        """
-        :param int or str key: Contact identifier or index
-        :rtype: Contact
-        """
-        return super(ContactCollection, self).__getitem__(key)

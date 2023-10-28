@@ -15,4 +15,4 @@ from tests import test_client_id, test_tenant
 
 client = GraphClient.with_token_interactive(test_tenant, test_client_id)
 me = client.me.get().execute_query()
-print(me.user_principal_name)
+print("Welcome,  {0}!".format(me.given_name))

@@ -3,7 +3,7 @@ from office365.runtime.queries.client_query import ClientQuery
 
 
 class FunctionQuery(ClientQuery):
-    """ "Service operation query"""
+    """Function query"""
 
     def __init__(
         self, binding_type, method_name=None, method_params=None, return_type=None

@@ -1,7 +1,9 @@
 import os
 import uuid
 from datetime import datetime
-from typing import Optional
+from typing import IO, AnyStr, Optional
+
+from typing_extensions import Self
 
 from office365.directory.extensions.extended_property import (
     MultiValueLegacyExtendedProperty,
@@ -26,11 +28,8 @@ class Message(OutlookItem):
     """A message in a mailbox folder."""
 
     def add_extended_property(self, name, value):
-        """
-        Create a single-value extended property for a message
-        :param str name: A property name
-        :param str value:
-        """
+        # type: (str, str) -> Self
+        """Create a single-value extended property for a message"""
         prop_id = str(uuid.uuid4())
         prop_type = "String"
         prop_value = [
@@ -63,25 +62,20 @@ class Message(OutlookItem):
         return self
 
     def download(self, file_object):
-        """Download MIME content of a message into a file
-
-        :type file_object: typing.IO
-        """
+        # type: (IO) -> Self
+        """Download MIME content of a message into a file"""
 
         def _save_content(return_type):
-            """
-            :type return_type: ClientResult
-            """
+            # type: (ClientResult[AnyStr]) -> None
             file_object.write(return_type.value)
 
         self.get_content().after_execute(_save_content)
         return self
 
     def get_content(self):
-        """
-        Get MIME content of a message
-        """
-        return_type = ClientResult[str](self.context)
+        # type: () -> ClientResult[AnyStr]
+        """Get MIME content of a message"""
+        return_type = ClientResult(self.context)
         qry = FunctionQuery(self, "$value", None, return_type)
         self.context.add_query(qry)
         return return_type
@@ -245,43 +239,37 @@ class Message(OutlookItem):
 
     @property
     def body(self):
-        """The body of the message. It can be in HTML or text format.
-
-        :rtype: ItemBody
-        """
+        """The body of the message. It can be in HTML or text format."""
         return self.properties.setdefault("body", ItemBody())
 
     @body.setter
     def body(self, value):
-        """The body of the message. It can be in HTML or text format.
-
-        :type value: str or ItemBody
-        """
+        # type: (str|ItemBody) -> None
+        """Sets the body of the message. It can be in HTML or text format."""
         if not isinstance(value, ItemBody):
             value = ItemBody(value)
         self.set_property("body", value)
 
     @property
     def body_preview(self):
+        # type: () -> Optional[str]
         """
-        The first 255 characters of the message body. It is in text format.
-        :rtype: str or None
-        """
+        The first 255 characters of the message body. It is in text format."""
         return self.properties.get("bodyPreview", None)
 
     @property
     def conversation_id(self):
+        # type: () -> Optional[str]
         """
         The ID of the conversation the email belongs to.
-        :rtype: str or None
         """
         return self.properties.get("conversationId", None)
 
     @property
     def conversation_index(self):
+        # type: () -> Optional[str]
         """
         Indicates the position of the message within the conversation.
-        :rtype: str or None
         """
         return self.properties.get("conversationIndex", None)
 
@@ -303,18 +291,18 @@ class Message(OutlookItem):
 
     @property
     def importance(self):
+        # type: () -> Optional[str]
         """
         The importance of the message.
-        :rtype: str
         """
         return self.properties.get("importance", None)
 
     @property
     def inference_classification(self):
+        # type: () -> Optional[str]
         """
         The classification of the message for the user, based on inferred relevance or importance,
         or on an explicit override. The possible values are: focused or other.
-        :rtype: str
         """
         return self.properties.get("inferenceClassification", None)
 
@@ -331,41 +319,37 @@ class Message(OutlookItem):
 
     @property
     def internet_message_id(self):
-        """
-        The message ID in the format specified by RFC2822
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """The message ID in the format specified by RFC2822"""
         return self.properties.get("internetMessageId", None)
 
     @property
     def is_delivery_receipt_requested(self):
+        # type: () -> Optional[bool]
         """
         Indicates whether a read receipt is requested for the message.
-        :rtype: bool
         """
         return self.properties.get("isDeliveryReceiptRequested", None)
 
     @property
     def is_draft(self):
+        # type: () -> Optional[bool]
         """
         Indicates whether the message is a draft. A message is a draft if it hasn't been sent yet.
-        :rtype: bool
         """
         return self.properties.get("isDraft", None)
 
     @property
     def is_read(self):
-        """
-        Indicates whether the message has been read.
-        :rtype: bool
-        """
+        # type: () -> Optional[bool]
+        """Indicates whether the message has been read."""
         return self.properties.get("isRead", None)
 
     @property
     def is_read_receipt_requested(self):
+        # type: () -> Optional[bool]
         """
         Indicates whether a read receipt is requested for the message.
-        :rtype: bool
         """
         return self.properties.get("isReadReceiptRequested", None)
 
@@ -389,10 +373,8 @@ class Message(OutlookItem):
 
     @subject.setter
     def subject(self, value):
-        """
-        The subject of the message.
-        :type value: str
-        """
+        # type: (str) -> None
+        """Sets the subject of the message."""
         self.set_property("subject", value)
 
     @property
@@ -429,13 +411,13 @@ class Message(OutlookItem):
 
     @property
     def parent_folder_id(self):
-        """The unique identifier for the message's parent mailFolder.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The unique identifier for the message's parent mailFolder."""
         return self.properties.get("parentFolderId", None)
 
     @property
     def web_link(self):
+        # type: () -> Optional[str]
         """
         The URL to open the message in Outlook on the web.
 
@@ -447,12 +429,12 @@ class Message(OutlookItem):
         You will be prompted to login if you are not already logged in with the browser.
 
         This URL cannot be accessed from within an iFrame.
-        :rtype: str or None
         """
         return self.properties.get("webLink", None)
 
     @property
     def multi_value_extended_properties(self):
+        # type: () -> EntityCollection[MultiValueLegacyExtendedProperty]
         """The collection of multi-value extended properties defined for the event."""
         return self.properties.get(
             "multiValueExtendedProperties",
@@ -465,6 +447,7 @@ class Message(OutlookItem):
 
     @property
     def single_value_extended_properties(self):
+        # type: () -> EntityCollection[SingleValueLegacyExtendedProperty]
         """The collection of single-value extended properties defined for the message"""
         return self.properties.get(
             "singleValueExtendedProperties",

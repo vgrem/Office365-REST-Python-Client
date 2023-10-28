@@ -22,6 +22,7 @@ class SitePageService(Entity):
 
     @property
     def pages(self):
+        # type: () -> SitePageCollection
         """Gets the SitePageCollection for the current web."""
         return self.properties.get(
             "pages",

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.base_item import BaseItem
 from office365.entity_collection import EntityCollection
 from office365.onedrive.columns.column_link import ColumnLink
@@ -88,9 +90,9 @@ class ContentType(BaseItem):
 
     @property
     def name(self):
+        # type: () -> Optional[str]
         """
         The name of the content type.
-        :rtype: str or None
         """
         return self.properties.get("name", None)
 
@@ -118,9 +120,9 @@ class ContentType(BaseItem):
 
     @property
     def read_only(self):
+        # type: () -> Optional[bool]
         """
         If true, the content type cannot be modified unless this value is first set to false.
-        :rtype: bool or None
         """
         return self.properties.get("readOnly", None)
 
@@ -163,6 +165,7 @@ class ContentType(BaseItem):
 
     @property
     def columns(self):
+        # type: () -> EntityCollection[ColumnDefinition]
         """The collection of column definitions for this contentType."""
         return self.properties.get(
             "columns",

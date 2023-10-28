@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.onenote.entity_schema_object_model import OnenoteEntitySchemaObjectModel
 
@@ -5,11 +7,13 @@ from office365.onenote.entity_schema_object_model import OnenoteEntitySchemaObje
 class OnenoteEntityHierarchyModel(OnenoteEntitySchemaObjectModel):
     @property
     def display_name(self):
+        # type: () -> Optional[str]
         """The name of the section."""
         return self.properties.get("displayName", None)
 
     @property
     def created_by(self):
+        # type: () -> IdentitySet
         """Identity of the user, device, and application which created the item. Read-only."""
         return self.properties.get("createdBy", IdentitySet())
 

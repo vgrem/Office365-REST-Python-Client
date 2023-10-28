@@ -93,7 +93,7 @@ class ClientRuntimeContext(object):
         qry = ReadEntityQuery(client_object, properties_to_retrieve)
         self.add_query(qry)
         if callable(before_loaded):
-            self.before_execute(before_loaded)
+            self.before_query_execute(before_loaded)
         if callable(after_loaded):
             self.after_query_execute(after_loaded, client_object)
         return self
@@ -110,10 +110,7 @@ class ClientRuntimeContext(object):
         query = self._queries[-1]
 
         def _prepare_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
-
+            # type: (RequestOptions) -> None
             if self.current_query.id == query.id:
                 if once:
                     self.pending_request().beforeExecute -= _prepare_request

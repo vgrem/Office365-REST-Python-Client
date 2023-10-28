@@ -9,13 +9,12 @@ import os
 import tempfile
 
 from office365.graph_client import GraphClient
-from office365.outlook.mail.messages.message import Message
 from tests.graph_case import acquire_token_by_username_password
 
 client = GraphClient(acquire_token_by_username_password)
 messages = client.me.messages.select(["id", "subject"]).top(2).get().execute_query()
 with tempfile.TemporaryDirectory() as local_path:
-    for message in messages:  # type: Message
+    for message in messages:
         with open(os.path.join(local_path, message.id + ".eml"), "wb") as local_file:
             message.download(
                 local_file

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value import ClientValue
 from office365.runtime.paths.resource_path import ResourcePath
@@ -202,15 +204,15 @@ class SitePage(SitePageMetadata):
 
     @property
     def canvas_content(self):
+        # type: () -> Optional[str]
         """
         Gets the CanvasContent1 for the current Site Page.
-
-        :rtype: str or None
         """
         return self.properties.get("CanvasContent1", None)
 
     @canvas_content.setter
     def canvas_content(self, value):
+        # type: (str) -> None
         """
         Sets the CanvasContent1 for the current Site Page.
 
@@ -220,10 +222,9 @@ class SitePage(SitePageMetadata):
 
     @property
     def layout_web_parts_content(self):
+        # type: () -> Optional[str]
         """
         Gets the LayoutWebPartsContent field for the current Site Page.
-
-        :rtype: str or None
         """
         return self.properties.get("LayoutWebpartsContent", None)
 
@@ -231,13 +232,12 @@ class SitePage(SitePageMetadata):
     def layout_web_parts_content(self, value):
         """
         Sets the LayoutWebPartsContent field for the current Site Page.
-
-        :rtype: str or None
         """
         self.set_property("LayoutWebpartsContent", value)
 
     @property
     def translations(self):
+        # type: () -> TranslationStatusCollection
         return self.properties.get(
             "Translations",
             TranslationStatusCollection(
@@ -247,4 +247,5 @@ class SitePage(SitePageMetadata):
 
     @property
     def entity_type_name(self):
+        # type: () -> str
         return "SP.Publishing.SitePage"

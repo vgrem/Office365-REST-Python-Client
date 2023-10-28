@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.extensions.extended_property import (
     MultiValueLegacyExtendedProperty,
     SingleValueLegacyExtendedProperty,
@@ -23,44 +25,44 @@ class Contact(OutlookItem):
 
     @property
     def display_name(self):
+        # type: () -> Optional[str]
         """
         The contact's display name. You can specify the display name in a create or update operation.
         Note that later updates to other properties may cause an automatically generated value to overwrite the
         displayName value you have specified. To preserve a pre-existing value, always include it as displayName
         in an update operation.
-        :rtype: str or None
         """
         return self.properties.get("displayName", None)
 
     @property
     def manager(self):
+        # type: () -> Optional[str]
         """
         The name of the contact's manager.
-        :rtype: str or None
         """
         return self.properties.get("manager", None)
 
     @manager.setter
     def manager(self, value):
+        # type: (str) -> None
         """
         Sets name of the contact's manager.
-        :type value: str
         """
         self.set_property("manager", value)
 
     @property
     def mobile_phone(self):
+        # type: () -> Optional[str]
         """
         The contact's mobile phone number.
-        :rtype: str or None
         """
         return self.properties.get("mobilePhone", None)
 
     @mobile_phone.setter
     def mobile_phone(self, value):
+        # type: (str) -> None
         """
         Sets contact's mobile phone number.
-        :type value: str
         """
         self.set_property("mobilePhone", value)
 
@@ -78,6 +80,7 @@ class Contact(OutlookItem):
 
     @property
     def extensions(self):
+        # type: () -> EntityCollection[Extension]
         """The collection of open extensions defined for the contact. Nullable."""
         return self.properties.get(
             "extensions",

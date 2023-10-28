@@ -1,3 +1,8 @@
+import datetime
+from typing import IO, AnyStr, Optional
+
+from typing_extensions import Self
+
 from office365.entity import Entity
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.function import FunctionQuery
@@ -6,22 +11,23 @@ from office365.runtime.queries.function import FunctionQuery
 class Attachment(Entity):
     """A file or item (contact, event or message) attached to an event or message."""
 
-    def download(self, file_object):
-        """Downloads raw contents of a file or item attachment
+    def __repr__(self):
+        return self.name or self.entity_type_name
 
-        :type file_object: typing.IO
-        """
+    def download(self, file_object):
+        # type: (IO) -> Self
+        """Downloads raw contents of a file or item attachment"""
 
         def _save_content(return_type):
+            # type: (ClientResult[AnyStr]) -> None
             file_object.write(return_type.value)
 
         self.get_content().after_execute(_save_content)
         return self
 
     def get_content(self):
-        """
-        Gets the raw contents of a file or item attachment
-        """
+        # type: () -> ClientResult[AnyStr]
+        """Gets the raw contents of a file or item attachment"""
         return_type = ClientResult(self.context)
         qry = FunctionQuery(self, "$value", None, return_type)
         self.context.add_query(qry)
@@ -29,47 +35,41 @@ class Attachment(Entity):
 
     @property
     def name(self):
-        """
-        The attachment's file name.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The attachment's file name."""
         return self.properties.get("name", None)
 
     @name.setter
     def name(self, value):
-        """
-        Sets the attachment's file name.
-        :type: value: str
-        """
+        # type: (str) -> None
+        """Sets the attachment's file name."""
         self.set_property("name", value)
 
     @property
     def content_type(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
         return self.properties.get("contentType", None)
 
     @content_type.setter
     def content_type(self, value):
-        """
-        :type: value: str
-        """
+        # type: (str) -> None
         self.set_property("contentType", value)
 
     @property
     def size(self):
-        """
-
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
         return self.properties.get("size", None)
 
     @property
-    def last_modified_date_time(self):
-        """
-        The Timestamp type represents date and time information using ISO 8601 format and is always in UTC time.
+    def last_modified_datetime(self):
+        # type: () -> Optional[datetime.datetime]
+        """The Timestamp type represents date and time information using ISO 8601 format and is always in UTC time."""
+        return self.properties.get("lastModifiedDateTime", datetime.datetime.min)
 
-        :rtype: int or None
-        """
-        return self.properties.get("lastModifiedDateTime", None)
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "lastModifiedDateTime": self.last_modified_datetime,
+            }
+            default_value = property_mapping.get(name, None)
+        return super(Attachment, self).get_property(name, default_value)

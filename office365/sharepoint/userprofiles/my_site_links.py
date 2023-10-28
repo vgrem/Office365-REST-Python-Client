@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 
@@ -23,22 +25,20 @@ class MySiteLinks(Entity):
 
     @property
     def all_documents_link(self):
+        # type: () -> Optional[str]
         """
         This property value is the URL of the user’s document library on their personal site. This property value is
         null if the user does not have a personal site or the user does not have a document library in their personal
         site.
-
-        :rtype: str
         """
         return self.properties.get("AllDocumentsLink", None)
 
     @property
     def all_sites_link(self):
+        # type: () -> Optional[str]
         """
         This property value is the URL of the user’s followed sites view on their personal site.  This property value
         is null if the user does not have a personal site or social features are not enabled on their personal site.
-
-        :rtype: str
         """
         return self.properties.get("AllSitesLink", None)
 

@@ -1,5 +1,7 @@
 """
 Retrieves site users
+
+
 """
 
 from office365.sharepoint.client_context import ClientContext

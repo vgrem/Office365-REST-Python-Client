@@ -33,3 +33,6 @@ class MeetingTimeSuggestion(ClientValue):
         self.confidence = confidence
         self.locations = ClientValueCollection(Location, locations)
         self.meetingTimeSlot = meeting_timeslot
+
+    def __repr__(self):
+        return repr(self.meetingTimeSlot)

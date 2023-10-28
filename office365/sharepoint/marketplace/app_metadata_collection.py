@@ -3,7 +3,9 @@ from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.marketplace.app_metadata import CorporateCatalogAppMetadata
 
 
-class CorporateCatalogAppMetadataCollection(EntityCollection):
+class CorporateCatalogAppMetadataCollection(
+    EntityCollection[CorporateCatalogAppMetadata]
+):
     """Collection of app metadata."""
 
     def __init__(self, context, resource_path=None):

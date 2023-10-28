@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
@@ -43,58 +45,56 @@ class ContentType(Entity):
 
     @property
     def client_form_custom_formatter(self):
-        """
-        :rtype: str
-        """
+        # type: () -> Optional[str]
         return self.properties.get("ClientFormCustomFormatter", None)
 
     @property
     def display_form_client_side_component_id(self):
+        # type: () -> Optional[str]
         """
         The component ID of an SPFx Form Customizer to connect to this content type for usage with display forms.
-        :rtype: str
         """
         return self.properties.get("DisplayFormClientSideComponentId", None)
 
     @property
     def display_form_client_side_component_properties(self):
+        # type: () -> Optional[str]
         """
         The component properties of an SPFx Form Customizer to connect to this content type for usage with display forms
-        :rtype: str
         """
         return self.properties.get("DisplayFormClientSideComponentProperties", None)
 
     @property
     def display_form_template_name(self):
+        # type: () -> Optional[str]
         """
         Specifies the name of a custom display form template to use for list items that have been assigned
         the content type.
-        :rtype: str or None
         """
         return self.properties.get("DisplayFormTemplateName", None)
 
     @property
     def display_form_url(self):
+        # type: () -> Optional[str]
         """
         Specifies the URL of a custom display form to use for list items that have been assigned the content type.
-        :rtype: str or None
         """
         return self.properties.get("DisplayFormUrl", None)
 
     @property
     def edit_form_client_side_component_id(self):
+        # type: () -> Optional[str]
         """
         The component properties of an SPFx Form Customizer to connect to this content type for usage with edit item
             forms
-        :rtype: str or None
         """
         return self.properties.get("EditFormClientSideComponentId", None)
 
     @property
     def edit_form_client_side_component_properties(self):
+        # type: () -> Optional[str]
         """
         The component ID of an SPFx Form Customizer to connect to this content type for usage with edit item forms
-        :rtype: str
         """
         return self.properties.get("EditFormClientSideComponentProperties", None)
 
@@ -107,53 +107,45 @@ class ContentType(Entity):
 
     @property
     def sealed(self):
-        """Specifies whether the content type can be changed.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether the content type can be changed."""
         return self.properties.get("Sealed", None)
 
     @property
     def string_id(self):
-        """A string representation of the value of the Id
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """A string representation of the value of the Id"""
         return self.properties.get("StringId", None)
 
     @property
     def name(self):
-        """Gets the name of the content type.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the name of the content type."""
         return self.properties.get("Name", None)
 
     @name.setter
     def name(self, value):
-        """Sets the name of the content type.
-        :rtype: str or None
-        """
+        # type: (str) -> None
+        """Sets the name of the content type."""
         self.set_property("Name", value)
 
     @property
     def new_form_client_side_component_properties(self):
-        """
-        The component properties of an SPFx Form Customizer to connect to this content type for usage with new item forms
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The component properties of an SPFx Form Customizer to connect to this content type for usage with new
+        item forms"""
         return self.properties.get("NewFormClientSideComponentProperties", None)
 
     @property
     def description(self):
-        """Gets the description of the content type.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the description of the content type."""
         return self.properties.get("Description", None)
 
     @description.setter
     def description(self, value):
-        """Sets the description of the content type.
-
-        :type value: str
-        """
+        # type: (str) -> None
+        """Sets the description of the content type."""
         self.set_property("Description", value)
 
     @property
@@ -168,60 +160,54 @@ class ContentType(Entity):
 
     @property
     def document_template(self):
-        """
-        Specifies the file path to the document template (1) used for a new list item that has been assigned
-            the content type.
-        :rtype: str or None
+        # type: () -> Optional[str]
+        """Specifies the file path to the document template (1) used for a new list item that has been assigned
+        the content type.
         """
         return self.properties.get("DocumentTemplate", None)
 
     @property
     def document_template_url(self):
-        """
-        Specifies the URL of the document template assigned to the content type.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the URL of the document template assigned to the content type."""
         return self.properties.get("DocumentTemplateUrl", None)
 
     @property
     def edit_form_url(self):
+        # type: () -> Optional[str]
         """
         Specifies the URL of a custom edit form to use for list items that have been assigned the content type.
-        :rtype: str or None
         """
         return self.properties.get("EditFormUrl", None)
 
     @property
     def group(self):
-        """Gets the group of the content type.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the group of the content type."""
         return self.properties.get("Group", None)
 
     @group.setter
     def group(self, value):
-        """Sets the group of the content type.
-        :type value: str or None
-        """
+        # type: (str) -> None
+        """Sets the group of the content type."""
         self.set_property("Group", value)
 
     @property
     def hidden(self):
+        # type: () -> Optional[bool]
         """Specifies whether the content type is unavailable for creation or usage directly from a user interface."""
         return self.properties.get("Hidden", None)
 
     @property
     def js_link(self):
-        """Gets or sets the JSLink for the content type custom form template
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets or sets the JSLink for the content type custom form template"""
         return self.properties.get("JSLink", None)
 
     @property
     def read_only(self):
-        """Specifies whether changes to the content type properties are denied.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether changes to the content type properties are denied."""
         return self.properties.get("ReadOnly", None)
 
     @property
@@ -236,9 +222,8 @@ class ContentType(Entity):
 
     @property
     def schema_xml(self):
-        """Specifies the XML schema that represents the content type.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the XML schema that represents the content type."""
         return self.properties.get("SchemaXml", None)
 
     @property

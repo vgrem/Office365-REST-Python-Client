@@ -7,7 +7,6 @@ https://learn.microsoft.com/en-us/graph/outlook-get-free-busy-schedule
 The following example gets the availability information for user for the specified date, time, and time zone.
 """
 
-import json
 from datetime import datetime, timedelta
 
 from office365.graph_client import GraphClient
@@ -20,4 +19,5 @@ end_time = start_time + timedelta(days=1)
 result = client.me.calendar.get_schedule(
     [test_user_principal_name], start_time, end_time
 ).execute_query()
-print(json.dumps(result.value.to_json(), indent=4))
+for item in result.value:
+    print(item.availabilityView)

@@ -1,6 +1,6 @@
 # coding=utf-8
 import datetime
-from typing import Optional
+from typing import AnyStr, Optional
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -1288,7 +1288,6 @@ class Web(SecurableObject):
         :param bool send_email: A flag to determine if an email notification SHOULD be sent (if email is configured).
         :param str email_subject: The email subject.
         :param str email_body: The email subject.
-        :rtype: SharingResult
         """
         return_type = SharingResult(self.context)
 
@@ -1332,11 +1331,7 @@ class Web(SecurableObject):
         return return_type
 
     def unshare(self):
-        """
-        Removes Sharing permissions on a Web
-
-        :rtype: SharingResult
-        """
+        """Removes Sharing permissions on a Web"""
         return_type = SharingResult(self.context)
 
         def _web_initialized():
@@ -1605,12 +1600,12 @@ class Web(SecurableObject):
         )
 
     def get_list_item(self, str_url):
+        # type: (str) -> ListItem
         """
         Returns the list item that is associated with the specified server-relative URL.
 
         :param str str_url: A string that contains the server-relative URL,
         for example, "/sites/MySite/Shared Documents/MyDocument.docx".
-        :return: ListItem
         """
         return ListItem(
             self.context,
@@ -1618,12 +1613,12 @@ class Web(SecurableObject):
         )
 
     def get_list_item_using_path(self, decoded_url):
+        # type: (str) -> ListItem
         """
         Returns the list item that is associated with the specified server-relative path.
 
         :param str decoded_url: A string that contains the server-relative path,
         for example, "/sites/MySite/Shared Documents/MyDocument.docx" or "Shared Documents/MyDocument.docx".
-        :return: ListItem
         """
         params = SPResPath.create_relative(self.context.base_url, decoded_url)
         return ListItem(
@@ -1642,6 +1637,7 @@ class Web(SecurableObject):
         )
 
     def page_context_info(self, include_odb_settings, emit_navigation_info):
+        # type: (bool, bool) -> ClientResult[AnyStr]
         """
         Return Page context info for the current list being rendered.
 
@@ -1797,6 +1793,7 @@ class Web(SecurableObject):
 
     @property
     def activities(self):
+        # type: () -> EntityCollection[SPActivityEntity]
         return self.properties.get(
             "Activities",
             EntityCollection(
@@ -1818,22 +1815,21 @@ class Web(SecurableObject):
 
     @property
     def allow_rss_feeds(self):
+        # type: () -> Optional[bool]
         """
         Gets a Boolean value that specifies whether the site collection allows RSS feeds.
-        :rtype: str
         """
         return self.properties.get("AllowRssFeeds", None)
 
     @property
     def alternate_css_url(self):
-        """Gets the URL for an alternate cascading style sheet (CSS) to use in the website.
-
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Gets the URL for an alternate cascading style sheet (CSS) to use in the website."""
         return self.properties.get("AlternateCssUrl", None)
 
     @property
     def app_instance_id(self):
+        # type: () -> Optional[str]
         """
         Specifies the identifier of the app instance that this site (2) represents. If this site (2) does not
         represent an app instance, then this MUST specify an empty GUID.
@@ -1851,31 +1847,25 @@ class Web(SecurableObject):
 
     @property
     def created(self):
-        """
-        Specifies when the site was created.
-        """
+        # type: () -> datetime.datetime
+        """Specifies when the site was created"""
         return self.properties.get("Created", datetime.datetime.min)
 
     @property
     def custom_master_url(self):
-        """Gets the URL for a custom master page to apply to the Web site
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the URL for a custom master page to apply to the Web site"""
         return self.properties.get("CustomMasterUrl", None)
 
     @property
     def custom_site_actions_disabled(self):
-        """
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
         return self.properties.get("CustomSiteActionsDisabled", None)
 
     @property
     def id(self):
-        """
-        Specifies the site identifier for the site
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Specifies the site identifier for the site"""
         return self.properties.get("Id", None)
 
     @property
@@ -1888,32 +1878,30 @@ class Web(SecurableObject):
 
     @property
     def access_request_list_url(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
         return self.properties.get("AccessRequestListUrl", None)
 
     @property
     def allow_designer_for_current_user(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the current user is allowed to use a designer application to customize this site
-        :rtype: bool or None
         """
         return self.properties.get("AllowDesignerForCurrentUser", None)
 
     @property
     def allow_master_page_editing_for_current_user(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the current user is allowed to edit the master page.
-        :rtype: bool or None
         """
         return self.properties.get("AllowMasterPageEditingForCurrentUser", None)
 
     @property
     def allow_revert_from_template_for_current_user(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the current user is allowed to revert the site (2) to a default site template.
-        :rtype: bool or None
         """
         return self.properties.get("AllowRevertFromTemplateForCurrentUser", None)
 
@@ -1926,6 +1914,7 @@ class Web(SecurableObject):
 
     @property
     def enable_minimal_download(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the site will use the minimal download strategy by default.
 
@@ -1978,6 +1967,7 @@ class Web(SecurableObject):
 
     @property
     def onedrive_shared_items(self):
+        # type: () -> EntityCollection[SharedDocumentInfo]
         """"""
         return self.properties.get(
             "OneDriveSharedItems",
@@ -2030,6 +2020,7 @@ class Web(SecurableObject):
 
     @property
     def associated_visitor_group(self):
+        # type: () -> Group
         """Gets or sets the associated visitor group of the Web site."""
         return self.properties.get(
             "AssociatedVisitorGroup",
@@ -2040,6 +2031,7 @@ class Web(SecurableObject):
 
     @property
     def associated_owner_group(self):
+        # type: () -> Group
         """Gets or sets the associated owner group of the Web site."""
         return self.properties.get(
             "AssociatedOwnerGroup",
@@ -2050,6 +2042,7 @@ class Web(SecurableObject):
 
     @property
     def associated_member_group(self):
+        # type: () -> Group
         """Gets or sets the group of users who have been given contribute permissions to the Web site."""
         return self.properties.get(
             "AssociatedMemberGroup",
@@ -2212,10 +2205,8 @@ class Web(SecurableObject):
 
     @quick_launch_enabled.setter
     def quick_launch_enabled(self, value):
-        """Sets a value that specifies whether the Quick Launch area is enabled on the site.
-
-        :type value: bool
-        """
+        # type: (bool) -> None
+        """Sets a value that specifies whether the Quick Launch area is enabled on the site."""
         self.set_property("QuickLaunchEnabled", value)
 
     @property
@@ -2243,10 +2234,9 @@ class Web(SecurableObject):
 
     @is_multilingual.setter
     def is_multilingual(self, val):
+        # type: (bool) -> None
         """
         Sets whether Multilingual UI is turned on for this web or not.
-
-        :type val: bool
         """
         self.set_property("IsMultilingual", val)
 
@@ -2344,6 +2334,7 @@ class Web(SecurableObject):
 
     @property
     def available_content_types(self):
+        # type: () -> ContentTypeCollection
         """
         Specifies the collection of all site content types that apply to the current scope,
         including those of the current site (2), as well as any parent sites.
@@ -2367,19 +2358,14 @@ class Web(SecurableObject):
 
     @property
     def title(self):
-        """Gets the title of the web.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the title of the web."""
         return self.properties.get("Title", None)
 
     @property
     def welcome_page(self):
-        """
-        Specifies the URL of the Welcome page for the site
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the URL of the Welcome page for the site"""
         return self.properties.get("WelcomePage", None)
 
     @property
@@ -2389,11 +2375,8 @@ class Web(SecurableObject):
 
     @property
     def ui_version(self):
-        """
-        Gets or sets the user interface (UI) version of the Web site.
-
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
+        """Gets or sets the user interface (UI) version of the Web site."""
         return self.properties.get("UIVersion", None)
 
     @property
@@ -2415,6 +2398,7 @@ class Web(SecurableObject):
 
     @property
     def syndication_enabled(self):
+        # type: () -> Optional[bool]
         """Specifies whether the [RSS2.0] feeds are enabled on the site"""
         return self.properties.get("SyndicationEnabled", None)
 
@@ -2430,6 +2414,7 @@ class Web(SecurableObject):
 
     @property
     def treeview_enabled(self):
+        # type: () -> Optional[bool]
         """Specifies whether the tree view is enabled on the site"""
         return self.properties.get("TreeViewEnabled", None)
 

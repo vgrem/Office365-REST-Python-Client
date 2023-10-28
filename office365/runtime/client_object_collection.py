@@ -156,6 +156,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         # type: () -> Self
 
         def _loaded(items):
+            # type: (Self) -> None
             self._page_loaded.notify(self)
 
         self.context.load(self, after_loaded=_loaded)
@@ -163,17 +164,13 @@ class ClientObjectCollection(ClientObject, Generic[T]):
 
     def get_all(self, page_size=None, page_loaded=None):
         # type: (int, Callable[[Self], None]) -> Self
-        """
-        Gets all the items in a collection, regardless of the size.
+        """Gets all the items in a collection, regardless of the size."""
 
-        :type self: T
-        :param int page_size: Page size
-        :param (T) -> None page_loaded: Page loaded event
-        """
         self.paged(page_size, page_loaded)
 
         def _page_loaded(items):
-            self._page_loaded.notify(self)
+            # type: (Self) -> None
+            self._page_loaded.notify(items)
             if self.has_next:
                 self._get_next(after_loaded=_page_loaded)
 
@@ -184,16 +181,15 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         # type: (Optional[EventHandler]) -> Self
         """
         Submit a request to retrieve next collection of items
-
         :param (ClientObjectCollection) -> None after_loaded: Page loaded event
         """
 
-        def _construct_next_query(request):
+        def _construct_request(request):
             # type: (RequestOptions) -> None
             request.url = self._next_request_url
 
         self.context.load(
-            self, before_loaded=_construct_next_query, after_loaded=after_loaded
+            self, before_loaded=_construct_request, after_loaded=after_loaded
         )
         return self
 
@@ -253,6 +249,11 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         # type: () -> bool
         """"""
         return self._next_request_url is not None
+
+    @property
+    def current_page(self):
+        # type: () -> List[T]
+        return self._data[self._current_pos :]
 
     @property
     def entity_type_name(self):

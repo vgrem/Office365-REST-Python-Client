@@ -22,8 +22,7 @@ class TestGraphMail(GraphTestCase):
         message.to_recipients.add(Recipient.from_email(test_user_principal_name))
         message.to_recipients.add(Recipient.from_email(test_user_principal_name_alt))
         message.body = "The new cafeteria is open."
-        message.update()
-        message.send().execute_query()
+        message.update().send().execute_query()
 
     # def test4_create_reply(self):
     #    message = self.__class__.target_message.create_reply().execute_query()
@@ -51,12 +50,13 @@ class TestGraphMail(GraphTestCase):
         content = base64.b64encode(
             io.BytesIO(b"This is some file content").read()
         ).decode()
+
         draft = (
             self.client.me.messages.add(
                 subject="Check out this attachment", body="The new cafeteria is open."
             )
-            .add_file_attachment("test.txt", "Hello World!")
-            .add_file_attachment("test2.txt", base64_content=content)
+            .add_file_attachment("TextAttachment.txt", "Hello World!")
+            .add_file_attachment("BinaryAttachment.txt", base64_content=content)
             .execute_query()
         )
         assert (

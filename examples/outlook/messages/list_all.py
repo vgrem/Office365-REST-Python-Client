@@ -8,6 +8,6 @@ from office365.graph_client import GraphClient
 from tests.graph_case import acquire_token_by_username_password
 
 client = GraphClient(acquire_token_by_username_password)
-messages = client.me.messages.get().execute_query()
+messages = client.me.messages.get().top(10).execute_query()
 for m in messages:
     print(m.subject)

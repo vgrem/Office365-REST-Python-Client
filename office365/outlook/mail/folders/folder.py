@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.extensions.extended_property import (
     MultiValueLegacyExtendedProperty,
     SingleValueLegacyExtendedProperty,
@@ -26,57 +28,84 @@ class MailFolder(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def empty(self, delete_sub_folders=False):
+        """
+        Empties the folder
+        :param bool delete_sub_folders: true to indicate that subfolders should also be deleted; otherwise, false.
+        """
+
+        def _empty(col):
+            # type: (MessageCollection) -> None
+            if not col.has_next:
+                [m.delete_object() for m in col]
+
+        self.messages.get_all(page_loaded=_empty)
+        return self
+
+    def mark_all_items_as_read(self):
+        """Marks all items in folder as read."""
+
+        def _mark_all_items_as_read(col):
+            # type: (MessageCollection) -> None
+            [m.set_property("isRead", True).update() for m in col.current_page]
+
+        self.messages.get_all(1, page_loaded=_mark_all_items_as_read)
+        return self
+
+    def mark_all_items_as_unread(self):
+        """Marks all items in folder as unread."""
+
+        def _mark_all_items_as_unread(col):
+            # type: (MessageCollection) -> None
+            [m.set_property("isRead", False).update() for m in col.current_page]
+
+        self.messages.get_all(page_loaded=_mark_all_items_as_unread)
+        return self
+
     @property
     def child_folder_count(self):
-        """
-        The number of immediate child mailFolders in the current mailFolder.
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
+        """The number of immediate child mailFolders in the current mailFolder."""
         return self.properties.get("childFolderCount", None)
 
     @property
     def display_name(self):
-        """
-        The name of the Mail folder
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The name of the Mail folder"""
         return self.properties.get("displayName", None)
 
     @property
     def is_hidden(self):
+        # type: () -> Optional[bool]
         """
         Indicates whether the mailFolder is hidden. This property can be set only when creating the folder.
         Find more information in Hidden mail folders.
-        :rtype: bool or None
         """
         return self.properties.get("isHidden", None)
 
     @property
     def parent_folder_id(self):
+        # type: () -> Optional[str]
         """
         The unique identifier for the mailFolder's parent mailFolder.
-        :rtype: str or None
         """
         return self.properties.get("parentFolderId", None)
 
     @property
     def total_item_count(self):
-        """
-        The number of items in the mailFolder.
-        :rtype: int
-        """
+        # type: () -> Optional[int]
+        """The number of items in the mailFolder."""
         return self.properties.get("totalItemCount", None)
 
     @property
     def unread_item_count(self):
-        """
-        The number of items in the mailFolder marked as unread.
-        :rtype: int
-        """
+        # type: () -> Optional[int]
+        """The number of items in the mailFolder marked as unread."""
         return self.properties.get("unreadItemCount", None)
 
     @property
     def child_folders(self):
+        # type: () -> EntityCollection[MailFolder]
         """The collection of child folders in the mailFolder."""
         return self.properties.get(
             "childFolders",
@@ -89,6 +118,7 @@ class MailFolder(Entity):
 
     @property
     def message_rules(self):
+        # type: () -> EntityCollection[MessageRule]
         """"""
         return self.properties.get(
             "messageRules",
@@ -112,6 +142,7 @@ class MailFolder(Entity):
 
     @property
     def multi_value_extended_properties(self):
+        # type: () -> EntityCollection[MultiValueLegacyExtendedProperty]
         """The collection of multi-value extended properties defined for the MailFolder."""
         return self.properties.get(
             "multiValueExtendedProperties",
@@ -124,6 +155,7 @@ class MailFolder(Entity):
 
     @property
     def single_value_extended_properties(self):
+        # type: () -> EntityCollection[SingleValueLegacyExtendedProperty]
         """The collection of single-value extended properties defined for the MailFolder."""
         return self.properties.get(
             "singleValueExtendedProperties",

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.base_item import BaseItem
 from office365.onedrive.columns.boolean import BooleanColumn
 from office365.onedrive.columns.calculated import CalculatedColumn
@@ -32,23 +34,21 @@ class ColumnDefinition(BaseItem):
 
     @property
     def display_name(self):
-        """The user-facing name of the column.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The user-facing name of the column."""
         return self.properties.get("displayName", None)
 
     @property
     def enforce_unique_values(self):
+        # type: () -> Optional[bool]
         """
         If true, no two list items may have the same value for this column.
-
-        :rtype: bool or None
         """
         return self.properties.get("enforceUniqueValues", None)
 
     @property
     def indexed(self):
+        # type: () -> Optional[bool]
         """Specifies whether the column values can used for sorting and searching."""
         return self.properties.get("indexed", None)
 
@@ -61,6 +61,7 @@ class ColumnDefinition(BaseItem):
 
     @property
     def column_group(self):
+        # type: () -> Optional[str]
         """For site columns, the name of the group this column belongs to. Helps organize related columns."""
         return self.properties.get("columnGroup", None)
 
@@ -131,16 +132,14 @@ class ColumnDefinition(BaseItem):
 
     @property
     def hidden(self):
-        """Specifies whether the column is displayed in the user interface.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether the column is displayed in the user interface."""
         return self.properties.get("hidden", None)
 
     @property
     def is_deletable(self):
-        """Indicates whether this column can be deleted.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Indicates whether this column can be deleted."""
         return self.properties.get("isDeletable", None)
 
     @property

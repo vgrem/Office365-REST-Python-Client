@@ -3,7 +3,9 @@ from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.pushnotifications.subscriber import PushNotificationSubscriber
 
 
-class PushNotificationSubscriberCollection(EntityCollection):
+class PushNotificationSubscriberCollection(
+    EntityCollection[PushNotificationSubscriber]
+):
     """Specifies the collection of push notification subscribers for the site"""
 
     def __init__(self, context, resource_path=None):

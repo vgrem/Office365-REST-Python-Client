@@ -5,7 +5,7 @@ from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.recyclebin.item import RecycleBinItem
 
 
-class RecycleBinItemCollection(EntityCollection):
+class RecycleBinItemCollection(EntityCollection[RecycleBinItem]):
     """Represents a collection of View resources."""
 
     def __init__(self, context, resource_path=None):
