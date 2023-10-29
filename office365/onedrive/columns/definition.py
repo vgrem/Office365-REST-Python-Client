@@ -144,31 +144,28 @@ class ColumnDefinition(BaseItem):
 
     @property
     def is_reorderable(self):
+        # type: () -> Optional[bool]
         """
         Indicates whether values in the column can be reordered. Read-only.
-        :rtype: bool or None
         """
         return self.properties.get("isReorderable", None)
 
     @property
     def is_sealed(self):
-        """Specifies whether the column can be changed.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether the column can be changed."""
         return self.properties.get("isSealed", None)
 
     @property
     def propagate_changes(self):
-        """If 'true', changes to this column will be propagated to lists that implement the column.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """If 'true', changes to this column will be propagated to lists that implement the column."""
         return self.properties.get("propagateChanges", None)
 
     @property
     def read_only(self):
-        """Specifies whether the column values can be modified.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether the column values can be modified."""
         return self.properties.get("readOnly", None)
 
     @property
@@ -178,6 +175,7 @@ class ColumnDefinition(BaseItem):
 
     @property
     def source_column(self):
+        # type: () -> "ColumnDefinition"
         """The source column for the content type column."""
         return self.properties.get(
             "sourceColumn",
@@ -196,9 +194,9 @@ class ColumnDefinition(BaseItem):
 
     @property
     def type(self):
+        # type: () -> Optional[str]
         """
         For site columns, the type of column.
-        :rtype: str
         """
         return self.properties.get("type", None)
 

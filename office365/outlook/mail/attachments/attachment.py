@@ -12,7 +12,7 @@ class Attachment(Entity):
     """A file or item (contact, event or message) attached to an event or message."""
 
     def __repr__(self):
-        return self.name or self.entity_type_name
+        return self.name or self.id
 
     def download(self, file_object):
         # type: (IO) -> Self

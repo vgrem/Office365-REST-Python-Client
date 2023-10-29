@@ -56,6 +56,7 @@ class GroupCollection(DeltaCollection[Group]):
         """
 
         def _after_group_created(return_type):
+            # type: (Group) -> None
             return_type.add_team()
 
         return self.create_m365_group(group_name).after_execute(_after_group_created)

@@ -3,7 +3,7 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
 
-class InvitationCollection(EntityCollection):
+class InvitationCollection(EntityCollection[Invitation]):
     """Invitation's collection"""
 
     def __init__(self, context, resource_path=None):

@@ -10,6 +10,7 @@ class AppRole(ClientValue):
 
     def __init__(
         self,
+        id_=None,
         allowed_member_types=None,
         description=None,
         display_name=None,
@@ -25,6 +26,7 @@ class AppRole(ClientValue):
             on application entities.
         :param str value:
         """
+        self.id = id_
         self.allowedMemberTypes = StringCollection(allowed_member_types)
         self.description = description
         self.displayName = display_name

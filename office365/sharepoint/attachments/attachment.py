@@ -1,5 +1,6 @@
-from typing import Optional
+from typing import AnyStr, Optional
 
+from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.internal.queries.upload_file import create_upload_file_query
@@ -17,6 +18,7 @@ class Attachment(Entity):
         """
 
         def _save_content(return_type):
+            # type: (ClientResult[AnyStr]) -> None
             file_object.write(return_type.value)
 
         def _download_file_by_path():

@@ -375,7 +375,6 @@ class List(SecurableObject):
 
     def get_lookup_field_choices(self, target_field_name, paging_info=None):
         """
-
         :param str target_field_name:
         :param str paging_info:
         """
@@ -450,7 +449,6 @@ class List(SecurableObject):
     def get_item_by_unique_id(self, unique_id):
         """
         Returns the list item with the specified ID.
-
         :param str unique_id: The unique ID that is associated with the list item.
         """
         return ListItem(
@@ -519,7 +517,6 @@ class List(SecurableObject):
     def create_wiki_page(self, page_name, page_content):
         """
         Creates a wiki page.
-
         :param str page_name:
         :param str page_content:
         """
@@ -586,7 +583,6 @@ class List(SecurableObject):
 
     def get_item_by_id(self, item_id):
         """Returns the list item with the specified list item identifier.
-
         :type item_id: int
         """
         return ListItem(
@@ -596,7 +592,6 @@ class List(SecurableObject):
 
     def get_view(self, view_id):
         """Returns the list view with the specified view identifier.
-
         :type view_id: str
         """
         return View(
@@ -673,19 +668,14 @@ class List(SecurableObject):
 
     @property
     def id(self):
+        # type: () -> Optional[str]
         """
-        Gets a value that specifies the list identifier.
-
-        :rtype: str
-        """
+        Gets a value that specifies the list identifier."""
         return self.properties.get("Id", None)
 
     @property
     def additional_ux_properties(self):
-        """
-
-        :rtype: str
-        """
+        # type: () -> Optional[str]
         return self.properties.get("AdditionalUXProperties", None)
 
     @property
@@ -697,45 +687,45 @@ class List(SecurableObject):
 
     @property
     def allow_content_types(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the list supports content types.
-        :rtype: bool or None
         """
         return self.properties.get("AllowContentTypes", None)
 
     @property
     def allow_deletion(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the list could be deleted.
-        :rtype: bool or None
         """
         return self.properties.get("AllowDeletion", None)
 
     @property
     def base_template(self):
+        # type: () -> Optional[int]
         """
         Specifies the list server template of the list.
-        :rtype: int or None
         """
         return self.properties.get("BaseTemplate", None)
 
     @property
     def base_type(self):
+        # type: () -> Optional[int]
         """
         Specifies the base type of the list.
         It MUST be one of the following values: GenericList, DocumentLibrary, DiscussionBoard, Survey, or Issue.
-        :rtype: int or None
         """
         return self.properties.get("BaseType", None)
 
     @property
     def browser_file_handling(self):
+        # type: () -> Optional[int]
         """
         Specifies the override at the list level for the BrowserFileHandling property of the Web application.
         If the BrowserFileHandling property of the Web application is BrowserFileHandling.Strict,
         then this setting MUST be ignored. If the BrowserFileHandling property of the Web application is
         BrowserFileHandling.Permissive, then this setting MUST be respected.
-        :rtype: int or None
         """
         return self.properties.get("BrowserFileHandling", None)
 
@@ -746,9 +736,9 @@ class List(SecurableObject):
 
     @property
     def default_display_form_url(self):
+        # type: () -> Optional[str]
         """
         Specifies the location of the default display form for the list.
-        :rtype: str or None
         """
         return self.properties.get("DefaultDisplayFormUrl", None)
 
@@ -761,18 +751,18 @@ class List(SecurableObject):
 
     @property
     def default_view_url(self):
+        # type: () -> Optional[str]
         """
         Specifies the server-relative URL of the default view for the list.
-        :rtype: str or None
         """
         return self.properties.get("DefaultViewUrl", None)
 
     @property
     def crawl_non_default_views(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether or not the crawler indexes the non-default views of the list.
         Specify a value of true if the crawler indexes the list's non-default views; specify false if otherwise.
-        :rtype: bool or None
         """
         return self.properties.get("CrawlNonDefaultViews", None)
 
@@ -809,41 +799,35 @@ class List(SecurableObject):
 
     @property
     def default_edit_form_url(self):
+        # type: () -> Optional[str]
         """
         Gets a value that specifies the URL of the edit form to use for list items in the list.
-        :rtype: str or None
         """
         return self.properties.get("DefaultEditFormUrl", None)
 
     @property
     def default_item_open_in_browser(self):
-        """
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
         return self.properties.get("DefaultItemOpenInBrowser", None)
 
     @property
     def default_item_open_use_list_setting(self):
+        # type: () -> Optional[bool]
         """
         This property returns whether to use the List setting or the server wide setting for
         DefaultItemOpen (BrowserEnabledDocuments setting) in the Web application. This property can only be set to
         false, thereby using the server-wide setting. To set it to use List setting, set the value for DefaultItemOpen.
-        :rtype: bool or None
         """
         return self.properties.get("DefaultItemOpenUseListSetting", None)
 
     @property
     def disable_commenting(self):
-        """
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
         return self.properties.get("DisableCommenting", None)
 
     @property
     def disable_grid_editing(self):
-        """
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
         return self.properties.get("DisableGridEditing", None)
 
     @property
@@ -869,103 +853,97 @@ class List(SecurableObject):
 
     @property
     def enable_assign_to_email(self):
+        # type: () -> Optional[bool]
         """
         Gets or sets a Boolean value specifying whether e-mail notification is enabled for the list.
-        :rtype: bool or None
         """
         return self.properties.get("EnableAssignToEmail", None)
 
     @property
     def enable_attachments(self):
-        """
-        Specifies whether list item attachments are enabled for the list.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether list item attachments are enabled for the list"""
         return self.properties.get("EnableAttachments", None)
 
     @property
     def enable_folder_creation(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether new list folders can be added to the list.
-        :rtype: bool or None
         """
         return self.properties.get("EnableFolderCreation", None)
 
     @enable_folder_creation.setter
     def enable_folder_creation(self, value):
+        # type: (bool) -> None
         self.set_property("EnableFolderCreation", value, True)
 
     @property
     def enable_minor_versions(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether minor versions are enabled for the list.
-        :rtype: bool or None
         """
         return self.properties.get("EnableMinorVersions", None)
 
     @property
     def enable_moderation(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether content approval is enabled for the list.
-        :rtype: bool or None
         """
         return self.properties.get("EnableModeration", None)
 
     @property
     def enable_request_sign_off(self):
-        """
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
         return self.properties.get("EnableRequestSignOff", None)
 
     @property
     def enable_versioning(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether content approval is enabled for the list.
-        :rtype: bool or None
         """
         return self.properties.get("EnableVersioning", None)
 
     @property
     def exclude_from_offline_client(self):
+        # type: () -> Optional[bool]
         """
         This doesn't block sync but acts as a recommendation to the client to not take this list offline.
         This gets returned as part of list properties in GetListSchema soap call.
-        :rtype: bool or None
         """
         return self.properties.get("ExcludeFromOfflineClient", None)
 
     @property
     def exempt_from_block_download_of_non_viewable_files(self):
+        # type: () -> Optional[bool]
         """
         Property indicating whether the list is exempt from the policy to block download of non-server handled files.
         This SHOULD be set using the SetExemptFromBlockDownloadOfNonViewableFiles (section 3.2.5.79.2.1.25) method.
-        :rtype: bool or None
         """
         return self.properties.get("ExemptFromBlockDownloadOfNonViewableFiles", None)
 
     @property
     def file_save_post_processing_enabled(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether or not the files in the list can be processed in asynchronous manner
         Specify a value of true if the list files can be processed asynchronously; specify false if otherwise.
-        :rtype: bool or None
         """
         return self.properties.get("FileSavePostProcessingEnabled", None)
 
     @property
     def force_checkout(self):
-        """
-        Specifies whether check out is required when adding or editing documents in the list.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether check out is required when adding or editing documents in the list"""
         return self.properties.get("ForceCheckout", None)
 
     @property
     def has_content_assembly_templates(self):
-        """
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """ """
         return self.properties.get("HasContentAssemblyTemplates", None)
 
     @property
@@ -1039,35 +1017,34 @@ class List(SecurableObject):
 
     @property
     def content_types_enabled(self):
-        """Specifies whether content types are enabled for the list.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether content types are enabled for the list."""
         return self.properties.get("ContentTypesEnabled", None)
 
     @property
     def is_private(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the list is a private list with restricted permissions.
         True if the list is a private list, otherwise False.
-        :rtype: bool or None
         """
         return self.properties.get("IsPrivate", None)
 
     @property
     def is_site_assets_library(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the list is designated as a default asset location for images or other files which the
         users upload to their wiki pages.
-        :rtype: bool or None
         """
         return self.properties.get("IsSiteAssetsLibrary", None)
 
     @property
     def is_system_list(self):
+        # type: () -> Optional[bool]
         """
         Indicates whether the list is system list that does not contain end user data and created by system account.
         A value of True means yes.
-        :rtype: bool or None
         """
         return self.properties.get("IsSystemList", None)
 

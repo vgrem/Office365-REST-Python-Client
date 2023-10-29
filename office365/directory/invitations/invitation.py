@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.invitations.message_info import InvitedUserMessageInfo
 from office365.directory.users.user import User
 from office365.entity import Entity
@@ -27,16 +29,14 @@ class Invitation(Entity):
 
     @property
     def invited_user_display_name(self):
-        """The display name of the user being invited.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """The display name of the user being invited."""
         return self.properties.get("invitedUserDisplayName", None)
 
     @property
     def invited_user_email_address(self):
-        """The email address of the user being invited.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """The email address of the user being invited."""
         return self.properties.get("invitedUserEmailAddress", None)
 
     @property

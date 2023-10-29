@@ -165,7 +165,6 @@ class SitePage(SitePageMetadata):
     def publish(self):
         """
         Publishes a major version of the current Site Page.  Returns TRUE on success, FALSE otherwise.
-
         """
         return_type = ClientResult(self.context, bool())
         qry = ServiceOperationQuery(self, "Publish", None, None, None, return_type)
@@ -205,19 +204,13 @@ class SitePage(SitePageMetadata):
     @property
     def canvas_content(self):
         # type: () -> Optional[str]
-        """
-        Gets the CanvasContent1 for the current Site Page.
-        """
+        """Gets the CanvasContent1 for the current Site Page"""
         return self.properties.get("CanvasContent1", None)
 
     @canvas_content.setter
     def canvas_content(self, value):
         # type: (str) -> None
-        """
-        Sets the CanvasContent1 for the current Site Page.
-
-        :rtype: str or None
-        """
+        """Sets the CanvasContent1 for the current Site Page"""
         self.set_property("CanvasContent1", value)
 
     @property

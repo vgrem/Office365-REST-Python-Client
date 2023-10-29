@@ -681,6 +681,7 @@ class User(DirectoryObject):
 
     @property
     def calendar_groups(self):
+        # type: () -> EntityCollection[CalendarGroup]
         """The user's calendar groups. Read-only. Nullable."""
         return self.properties.get(
             "calendarGroups",
@@ -693,6 +694,7 @@ class User(DirectoryObject):
 
     @property
     def license_details(self):
+        # type: () -> EntityCollection[LicenseDetails]
         """Retrieve the properties and relationships of a Drive resource."""
         return self.properties.get(
             "licenseDetails",
@@ -921,6 +923,7 @@ class User(DirectoryObject):
 
     @property
     def extensions(self):
+        # type: () -> EntityCollection[Extension]
         """The collection of open extensions defined for the user. Nullable."""
         return self.properties.get(
             "extensions",
@@ -931,9 +934,7 @@ class User(DirectoryObject):
 
     @property
     def direct_reports(self):
-        """
-        Get a user's direct reports.
-        """
+        """Get a user's direct reports"""
         return self.properties.get(
             "directReports",
             DirectoryObjectCollection(

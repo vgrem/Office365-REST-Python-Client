@@ -12,7 +12,7 @@ from office365.sharepoint.translation.status_collection import (
 )
 
 
-class SitePageCollection(SitePageMetadataCollection):
+class SitePageCollection(SitePageMetadataCollection[SitePage]):
     def __init__(self, context, resource_path=None):
         """Specifies a collection of site pages."""
         if resource_path is None:
@@ -85,10 +85,7 @@ class SitePageCollection(SitePageMetadataCollection):
 
     def get_by_name(self, name):
         """Gets the site page with the specified file name.
-
         :param str name: Specifies the name of the site page.
-
-        :rtype: SitePage
         """
         return self.single("FileName eq '{0}'".format(name))
 

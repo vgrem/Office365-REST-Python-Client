@@ -78,6 +78,7 @@ class Authentication(Entity):
 
     @property
     def methods(self):
+        # type: () -> EntityCollection[AuthenticationMethod]
         """Represents all authentication methods registered to a user."""
         return self.properties.get(
             "methods",

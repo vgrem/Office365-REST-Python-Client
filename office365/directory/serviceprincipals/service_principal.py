@@ -1,5 +1,7 @@
 from typing import Optional
 
+from typing_extensions import Self
+
 from office365.delta_collection import DeltaCollection
 from office365.directory.applications.roles.assignment_collection import (
     AppRoleAssignmentCollection,
@@ -93,6 +95,30 @@ class ServicePrincipal(DirectoryObject):
         self.context.add_query(qry)
         return return_type
 
+    def grant(self, resource, app_role):
+        # type: ("ServicePrincipal"|str, AppRole|str) -> Self
+        """
+        Grants the current app (the service principal) an app role.
+        """
+
+        def _grant(resource_id, app_role_id):
+            # type: (str, str) -> None
+            self.app_role_assigned_to.add(
+                principalId=self.id, resourceId=resource_id, appRoleId=app_role_id
+            )
+
+        def _validate_params():
+            app_role_id = app_role.id if isinstance(app_role, AppRole) else app_role
+            if isinstance(resource, ServicePrincipal):
+                resource.ensure_property(
+                    "id", _grant, resource_id=resource.id, app_role_id=app_role_id
+                )
+            else:
+                _grant(resource, app_role_id)
+
+        self.ensure_property("id", _validate_params)
+        return self
+
     def remove_password(self, key_id):
         """
         Remove a password from a servicePrincipal object.
@@ -185,10 +211,10 @@ class ServicePrincipal(DirectoryObject):
 
     @property
     def logout_url(self):
+        # type: () -> Optional[str]
         """
         Specifies the URL that will be used by Microsoft's authorization service to logout an user using
         OpenId Connect front-channel, back-channel or SAML logout protocols.
-        :rtype: str
         """
         return self.properties.get("logoutUrl", None)
 
@@ -203,6 +229,7 @@ class ServicePrincipal(DirectoryObject):
 
     @property
     def service_principal_type(self):
+        # type: () -> Optional[str]
         """
         Identifies whether the service principal represents an application, a managed identity, or a legacy application.
         This is set by Azure AD internally. The servicePrincipalType property can be set to three different values:
@@ -221,8 +248,6 @@ class ServicePrincipal(DirectoryObject):
             but does not have an associated app registration. The appId value does not associate
             the service principal with an app registration.
             The service principal can only be used in the tenant where it was created.
-
-        :rtype: str or None
         """
         return self.properties.get("servicePrincipalType", None)
 
@@ -250,6 +275,7 @@ class ServicePrincipal(DirectoryObject):
 
     @property
     def oauth2_permission_grants(self):
+        # type: () -> DeltaCollection[OAuth2PermissionGrant]
         """"""
         return self.properties.get(
             "oauth2PermissionGrants",
@@ -295,6 +321,7 @@ class ServicePrincipal(DirectoryObject):
 
     @property
     def token_encryption_key_id(self):
+        # type: () -> Optional[str]
         """
         Specifies the keyId of a public key from the keyCredentials collection. When configured, Azure AD issues tokens
         for this application encrypted using the key specified by this property. The application code that receives

@@ -34,6 +34,7 @@ class PolicyRoot(Entity):
         )
 
     def authentication_strength_policies(self):
+        # type: () -> EntityCollection[AuthenticationStrengthPolicy]
         """
         The authentication method combinations that are to be used in scenarios defined by Azure AD Conditional Access.
         """
@@ -69,6 +70,7 @@ class PolicyRoot(Entity):
 
     @property
     def app_management_policies(self):
+        # type: () -> EntityCollection[AppManagementPolicy]
         """The policies that enforce app management restrictions for specific applications and service principals,
         overriding the defaultAppManagementPolicy."""
         return self.properties.get(
@@ -108,7 +110,8 @@ class PolicyRoot(Entity):
 
     @property
     def permission_grant_policies(self):
-        """ "
+        # type: () -> EntityCollection[PermissionGrantPolicy]
+        """
         The policy that specifies the conditions under which consent can be granted.
         """
         return self.properties.get(
@@ -122,9 +125,8 @@ class PolicyRoot(Entity):
 
     @property
     def conditional_access_policies(self):
-        """ "
-        The custom rules that define an access scenario.
-        """
+        # type: () -> EntityCollection[ConditionalAccessPolicy]
+        """The custom rules that define an access scenario"""
         return self.properties.get(
             "conditionalAccessPolicies",
             EntityCollection(

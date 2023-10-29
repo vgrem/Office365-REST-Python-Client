@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, Optional
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -7,8 +9,12 @@ from office365.sharepoint.entity import Entity
 from office365.sharepoint.files.file import File
 from office365.sharepoint.publishing.file_picker_options import FilePickerOptions
 from office365.sharepoint.publishing.pages.collection import SitePageCollection
+from office365.sharepoint.publishing.pages.page import SitePage
 from office365.sharepoint.publishing.primary_city_time import PrimaryCityTime
 from office365.sharepoint.publishing.sites.communication.site import CommunicationSite
+
+if TYPE_CHECKING:
+    from office365.sharepoint.client_context import ClientContext
 
 
 class SitePageService(Entity):
@@ -45,53 +51,45 @@ class SitePageService(Entity):
         return "SP.Publishing.SitePageService"
 
     def create_page(self, title):
+        # type: (str) -> SitePage
         """Create a new sitePage in the site pages list in a site.
-
         :param str title: The title of Site Page
         """
-        return_type = self.pages.add()
 
-        def _draft_saved(resp):
-            """
-            :type resp: requests.Response
-            """
-            resp.raise_for_status()
-            return_type.get()
+        def _page_created(return_type):
+            # type: (SitePage) -> None
 
-        def _page_created(resp):
-            """
-            :type resp: requests.Response
-            """
-            resp.raise_for_status()
-            return_type.save_draft(title=title)
-            self.context.after_execute(_draft_saved)
+            def _draft_saved(result):
+                # type: (ClientResult[bool]) -> None
+                pass
 
-        self.context.after_execute(_page_created)
-        return return_type
+            return_type.save_draft(title=title).after_execute(
+                _draft_saved, execute_first=True
+            )
+
+        return self.pages.add().after_execute(_page_created).get()
 
     def create_and_publish_page(self, title):
         """
         Create and publish a new sitePage in the site pages list in a site.
-
         :param str title: The title of Site Page
         """
-        return_type = self.create_page(title)
 
-        def _page_created(resp):
-            """
-            :type resp: requests.Response
-            """
-            resp.raise_for_status()
-            return_type.publish()
+        def _page_created(return_type):
+            # type: (SitePage) -> None
 
-        self.context.after_execute(_page_created)
-        return return_type
+            def _page_published(result):
+                # type: (ClientResult[bool]) -> None
+                pass
+
+            return_type.publish().after_execute(_page_published)
+
+        return self.create_page(title).after_execute(_page_created)
 
     def can_create_page(self):
         """
         Checks if the current user has permission to create a site page on the site pages document library.
         MUST return true if the user has permission to create a site page, otherwise MUST return false.
-
         """
         return_type = ClientResult(self.context, bool())
         qry = ServiceOperationQuery(
@@ -114,10 +112,7 @@ class SitePageService(Entity):
 
     @staticmethod
     def get_current_user_memberships(context, scenario=None):
-        """
-        :param office365.sharepoint.client_context.ClientContext context: Client context
-        :param str scenario:
-        """
+        # type: (ClientContext, Optional[str]) -> ClientResult[StringCollection]
         return_type = ClientResult(context, StringCollection())
         svc = SitePageService(context)
         qry = ServiceOperationQuery(
@@ -128,9 +123,9 @@ class SitePageService(Entity):
 
     @staticmethod
     def get_time_zone(context, city_name):
+        # type: (ClientContext, str) -> PrimaryCityTime
         """
         Gets time zone data for specified city.
-
         :param office365.sharepoint.client_context.ClientContext context:
         :param str city_name: The name of the city.
         """
@@ -145,8 +140,8 @@ class SitePageService(Entity):
 
     @staticmethod
     def compute_file_name(context, title):
+        # type: (ClientContext, str) -> ClientResult[str]
         """
-
         :param office365.sharepoint.client_context.ClientContext context: Client context
         :param str title: The title of the page.
         """
@@ -165,10 +160,7 @@ class SitePageService(Entity):
 
     @staticmethod
     def is_file_picker_external_image_search_enabled(context):
-        """
-
-        :param office365.sharepoint.client_context.ClientContext context: Client context
-        """
+        # type: (ClientContext) -> ClientResult[bool]
         return_type = ClientResult(context)
         binding_type = SitePageService(context)
         qry = ServiceOperationQuery(
@@ -185,10 +177,7 @@ class SitePageService(Entity):
 
     @staticmethod
     def org_assets(context):
-        """
-
-        :param office365.sharepoint.client_context.ClientContext context: Client context
-        """
+        # type: (ClientContext) -> ClientResult[OrgAssets]
         return_type = ClientResult(context, OrgAssets())
         svc = SitePageService(context)
         qry = ServiceOperationQuery(
@@ -199,10 +188,7 @@ class SitePageService(Entity):
 
     @staticmethod
     def file_picker_tab_options(context):
-        """
-
-        :param office365.sharepoint.client_context.ClientContext context: Client context
-        """
+        # type: (ClientContext) -> ClientResult[FilePickerOptions]
         return_type = ClientResult(context, FilePickerOptions())
         svc = SitePageService(context)
         qry = ServiceOperationQuery(

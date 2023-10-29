@@ -18932,6 +18932,14 @@
                <End Role="CheckoutUserPartner" EntitySet="IWConvertedFormsItems"/>
                <End Role="CheckoutUser" EntitySet="UserInfoItems"/>
             </AssociationSet>
+            <AssociationSet Name="SP_Data_DocumentsItem_LookupColumn3PORD6JO_SP_Data_DocumentsItem_LookupColumn3PORD6JOPartnerSet" Association="SP.Data.SP_Data_DocumentsItem_LookupColumn3PORD6JO_SP_Data_DocumentsItem_LookupColumn3PORD6JOPartner">
+               <End Role="LookupColumn3PORD6JOPartner" EntitySet="DocumentsItems"/>
+               <End Role="LookupColumn3PORD6JO" EntitySet="DocumentsItems"/>
+            </AssociationSet>
+            <AssociationSet Name="SP_Data_DocumentsItem_LookupColumnWUX0ULE6_SP_Data_DocumentsItem_LookupColumnWUX0ULE6PartnerSet" Association="SP.Data.SP_Data_DocumentsItem_LookupColumnWUX0ULE6_SP_Data_DocumentsItem_LookupColumnWUX0ULE6Partner">
+               <End Role="LookupColumnWUX0ULE6Partner" EntitySet="DocumentsItems"/>
+               <End Role="LookupColumnWUX0ULE6" EntitySet="DocumentsItems"/>
+            </AssociationSet>
             <AssociationSet Name="SP_Data_DocumentsItem_Author_SP_Data_UserInfoItem_AuthorPartnerSet" Association="SP.Data.SP_Data_DocumentsItem_Author_SP_Data_UserInfoItem_AuthorPartner">
                <End Role="AuthorPartner" EntitySet="DocumentsItems"/>
                <End Role="Author" EntitySet="UserInfoItems"/>
@@ -38878,6 +38886,8 @@
             <Property Name="MediaServiceEventHashCode" Type="Edm.String"/>
             <Property Name="MediaLengthInSeconds" Type="Edm.Int32"/>
             <Property Name="OData__EffectiveIpLabelDisplayName" Type="Edm.String"/>
+            <Property Name="LookupColumn3PORD6JOId" Type="Edm.Int32"/>
+            <Property Name="LookupColumnWUX0ULE6Id" Type="Edm.Int32"/>
             <Property Name="ID" Type="Edm.Int32"/>
             <Property Name="Created" Type="Edm.DateTime"/>
             <Property Name="AuthorId" Type="Edm.Int32"/>
@@ -38928,6 +38938,8 @@
             <Property Name="Combine" Type="Edm.String"/>
             <Property Name="RepairDocument" Type="Edm.String"/>
             <Property Name="PolicyDisabledUICapabilities" Type="Edm.String"/>
+            <NavigationProperty Name="LookupColumn3PORD6JO" Relationship="SP.Data.SP_Data_DocumentsItem_LookupColumn3PORD6JO_SP_Data_DocumentsItem_LookupColumn3PORD6JOPartner" ToRole="LookupColumn3PORD6JO" FromRole="LookupColumn3PORD6JOPartner"/>
+            <NavigationProperty Name="LookupColumnWUX0ULE6" Relationship="SP.Data.SP_Data_DocumentsItem_LookupColumnWUX0ULE6_SP_Data_DocumentsItem_LookupColumnWUX0ULE6Partner" ToRole="LookupColumnWUX0ULE6" FromRole="LookupColumnWUX0ULE6Partner"/>
             <NavigationProperty Name="Author" Relationship="SP.Data.SP_Data_DocumentsItem_Author_SP_Data_UserInfoItem_AuthorPartner" ToRole="Author" FromRole="AuthorPartner"/>
             <NavigationProperty Name="Editor" Relationship="SP.Data.SP_Data_DocumentsItem_Editor_SP_Data_UserInfoItem_EditorPartner" ToRole="Editor" FromRole="EditorPartner"/>
             <NavigationProperty Name="CheckoutUser" Relationship="SP.Data.SP_Data_DocumentsItem_CheckoutUser_SP_Data_UserInfoItem_CheckoutUserPartner" ToRole="CheckoutUser" FromRole="CheckoutUserPartner"/>
@@ -40562,6 +40574,14 @@
          <Association Name="SP_Data_IWConvertedFormsItem_CheckoutUser_SP_Data_UserInfoItem_CheckoutUserPartner">
             <End Type="SP.Data.UserInfoItem" Role="CheckoutUser" Multiplicity="0..1"/>
             <End Type="SP.Data.IWConvertedFormsItem" Role="CheckoutUserPartner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_Data_DocumentsItem_LookupColumn3PORD6JO_SP_Data_DocumentsItem_LookupColumn3PORD6JOPartner">
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumn3PORD6JO" Multiplicity="0..1"/>
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumn3PORD6JOPartner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_Data_DocumentsItem_LookupColumnWUX0ULE6_SP_Data_DocumentsItem_LookupColumnWUX0ULE6Partner">
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumnWUX0ULE6" Multiplicity="0..1"/>
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumnWUX0ULE6Partner" Multiplicity="0..1"/>
          </Association>
          <Association Name="SP_Data_DocumentsItem_Author_SP_Data_UserInfoItem_AuthorPartner">
             <End Type="SP.Data.UserInfoItem" Role="Author" Multiplicity="0..1"/>

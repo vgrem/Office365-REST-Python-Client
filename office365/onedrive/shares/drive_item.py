@@ -15,6 +15,7 @@ class SharedDriveItem(BaseItem):
 
     @property
     def items(self):
+        # type: () -> EntityCollection[DriveItem]
         """All driveItems contained in the sharing root. This collection cannot be enumerated."""
         return self.properties.get(
             "items",

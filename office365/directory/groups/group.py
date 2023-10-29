@@ -24,6 +24,7 @@ from office365.outlook.mail.conversation_thread import ConversationThread
 from office365.planner.group import PlannerGroup
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
@@ -98,9 +99,7 @@ class Group(DirectoryObject):
         qry = ServiceOperationQuery(self, "team", None, self.team, None, self.team)
 
         def _construct_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
+            # type: (RequestOptions) -> None
             request.method = HttpMethod.Put
             request.set_header("Content-Type", "application/json")
             request.data = json.dumps(request.data)
@@ -131,9 +130,9 @@ class Group(DirectoryObject):
 
     @property
     def classification(self):
+        # type: () -> Optional[str]
         """Describes a classification for the group (such as low, medium or high business impact). Valid values for
         this property are defined by creating a ClassificationList setting value, based on the template definition.
-        :rtype: str or None
         """
         return self.properties.get("classification", None)
 
@@ -165,18 +164,19 @@ class Group(DirectoryObject):
 
     @property
     def has_members_with_license_errors(self):
+        # type: () -> Optional[bool]
         """
         Indicates whether there are members in this group that have license errors from its group-based license
         assignment.
 
         This property is never returned on a GET operation. You can use it as a $filter argument to get groups that
         have members with license errors (that is, filter for this property being true)
-        :rtype: bool or None
         """
         return self.properties.get("hasMembersWithLicenseErrors", None)
 
     @property
     def is_assignable_to_role(self):
+        # type: () -> Optional[bool]
         """
         Indicates whether this group can be assigned to an Azure Active Directory role or not. Optional.
 
@@ -187,7 +187,6 @@ class Group(DirectoryObject):
         Only callers in Global Administrator and Privileged Role Administrator roles can set this property.
         The caller must also be assigned the RoleManagement.ReadWrite.Directory permission to set this property or
         update the membership of such groups. For more, see Using a group to manage Azure AD role assignments
-        :rtype: bool or None
         """
         return self.properties.get("isAssignableToRole", None)
 
@@ -200,38 +199,37 @@ class Group(DirectoryObject):
 
     @property
     def mail(self):
+        # type: () -> Optional[str]
         """
         The SMTP address for the group, for example, "serviceadmins@contoso.onmicrosoft.com".
-        :rtype: str or None
         """
         return self.properties.get("mail", None)
 
     @property
     def mail_enabled(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the group is mail-enabled. Required.
-        :rtype: bool or None
         """
         return self.properties.get("mailEnabled", None)
 
     @property
     def mail_nickname(self):
+        # type: () -> Optional[str]
         """
         The mail alias for the group, unique for Microsoft 365 groups in the organization. Maximum length is 64
         characters.
-        :rtype: str or None
         """
         return self.properties.get("mailNickname", None)
 
     @property
     def on_premises_domain_name(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
         return self.properties.get("onPremisesDomainName", None)
 
     @property
     def conversations(self):
+        # type: () -> EntityCollection[Conversation]
         """The group's conversations."""
         return self.properties.get(
             "conversations",
@@ -249,6 +247,7 @@ class Group(DirectoryObject):
 
     @property
     def extensions(self):
+        # type: () -> EntityCollection[Extension]
         """
         The collection of open extensions defined for the group
         """
@@ -261,9 +260,7 @@ class Group(DirectoryObject):
 
     @property
     def members(self):
-        """
-        Users and groups that are members of this group.
-        """
+        """Users and groups that are members of this group."""
         return self.properties.get(
             "members",
             DirectoryObjectCollection(
@@ -300,6 +297,7 @@ class Group(DirectoryObject):
 
     @property
     def threads(self):
+        # type: () -> EntityCollection[ConversationThread]
         """The group's conversation threads"""
         return self.properties.get(
             "threads",
@@ -322,6 +320,7 @@ class Group(DirectoryObject):
 
     @property
     def drives(self):
+        # type: () -> EntityCollection[Drive]
         """
         The group's drives. Read-only.
         """
@@ -346,6 +345,7 @@ class Group(DirectoryObject):
 
     @property
     def events(self):
+        # type: () -> EventCollection
         """Get an event collection or an event."""
         return self.properties.get(
             "events",
@@ -380,6 +380,7 @@ class Group(DirectoryObject):
 
     @property
     def permission_grants(self):
+        # type: () -> EntityCollection[ResourceSpecificPermissionGrant]
         """
         List permissions that have been granted to apps to access the group.
         """

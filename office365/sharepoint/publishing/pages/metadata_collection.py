@@ -1,9 +1,13 @@
+from typing import TypeVar
+
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.publishing.pages.metadata import SitePageMetadata
 
+T = TypeVar("T")
 
-class SitePageMetadataCollection(EntityCollection):
+
+class SitePageMetadataCollection(EntityCollection[T]):
     """Specifies a collection of site pages."""
 
     def get_by_id(self, site_page_id):

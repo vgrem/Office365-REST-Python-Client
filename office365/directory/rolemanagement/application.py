@@ -17,6 +17,7 @@ class RbacApplication(Entity):
 
     @property
     def role_assignments(self):
+        # type: () -> EntityCollection[UnifiedRoleAssignment]
         """Resource to grant access to users or groups."""
         return self.properties.get(
             "roleAssignments",
@@ -28,6 +29,7 @@ class RbacApplication(Entity):
         )
 
     def role_definitions(self):
+        # type: () -> EntityCollection[UnifiedRoleDefinition]
         """Resource representing the roles allowed by RBAC providers and the permissions assigned to the roles."""
         return self.properties.get(
             "roleDefinitions",
