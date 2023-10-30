@@ -27,4 +27,3 @@ class ChangeToken(ClientValue):
     @property
     def entity_type_name(self):
         return "SP.ChangeToken"
-
