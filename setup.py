@@ -23,7 +23,7 @@ setup(
         "requests",
         "msal",
         "pytz",
-        "typing_extensions>=4.0.0;python_version<'3.11'",
+        "typing_extensions>=4.0.0",
     ],
     extras_require={"NtlmProvider": ["requests_ntlm"]},
     tests_require=["pytest", "adal"],
