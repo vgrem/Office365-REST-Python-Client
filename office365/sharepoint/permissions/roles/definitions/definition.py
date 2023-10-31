@@ -9,7 +9,7 @@ class RoleDefinition(Entity):
     """Defines a single role definition, including a name, description, and set of rights."""
 
     def __repr__(self):
-        return self.name
+        return self.name or self.entity_type_name
 
     @property
     def base_permissions(self):
@@ -22,12 +22,14 @@ class RoleDefinition(Entity):
 
     @property
     def id(self):
+        # type: () -> Optional[int]
         """Specifies the identifier of the role definition.
         Its value MUST be equal to or greater than 1073741824."""
         return self.properties.get("Id", None)
 
     @property
     def role_type_kind(self):
+        # type: () -> Optional[int]
         """Specifies the type of the role definition.
         Its value MUST be equal to or greater than 0. Its value MUST be equal to or less than 5.
         """

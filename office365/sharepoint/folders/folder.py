@@ -54,6 +54,25 @@ class Folder(Entity):
             self, download_file, after_file_downloaded, recursive
         )
 
+    def get_folders(self, recursive=False):
+        """
+        Retrieves folders
+        :param bool recursive: Determines whether to enumerate folders recursively
+        """
+        from office365.sharepoint.folders.collection import FolderCollection  # noqa
+
+        return_type = FolderCollection(self.context, self.folders.resource_path, self)
+
+        def _loaded(parent):
+            # type: ("Folder") -> None
+            [return_type.add_child(f) for f in parent.folders]
+            if recursive:
+                for folder in parent.folders:
+                    folder.ensure_properties(["Folders"], _loaded, parent=folder)
+
+        self.ensure_properties(["Folders"], _loaded, parent=self)
+        return return_type
+
     def get_files(self, recursive=False):
         """
         Retrieves files

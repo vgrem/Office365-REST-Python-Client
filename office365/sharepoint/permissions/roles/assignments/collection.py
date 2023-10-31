@@ -5,7 +5,7 @@ from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.permissions.roles.assignments.assignment import RoleAssignment
 
 
-class RoleAssignmentCollection(EntityCollection):
+class RoleAssignmentCollection(EntityCollection[RoleAssignment]):
     """Represents a collection of RoleAssignment resources."""
 
     def __init__(self, context, resource_path=None):
@@ -13,18 +13,14 @@ class RoleAssignmentCollection(EntityCollection):
             context, RoleAssignment, resource_path
         )
 
-    def __getitem__(self, index_or_principal_id):
+    def __getitem__(self, key):
         """
-        :param int or str index_or_principal_id: key is used to address a RoleAssignment resource by either an index
+        :param int or str key: key is used to address a RoleAssignment resource by either an index
         in collection or by resource id"""
-        if isinstance(index_or_principal_id, int):
-            return super(RoleAssignmentCollection, self).__getitem__(
-                index_or_principal_id
-            )
+        if isinstance(key, int):
+            return super(RoleAssignmentCollection, self).__getitem__(key)
         else:
-            return self._item_type(
-                self.context, ResourcePath(index_or_principal_id, self.resource_path)
-            )
+            return self._item_type(self.context, ResourcePath(key, self.resource_path))
 
     def get_by_principal_id(self, principal_id):
         """Retrieves the role assignment object (1) based on the specified user or group.
@@ -39,10 +35,10 @@ class RoleAssignmentCollection(EntityCollection):
         )
 
     def add_role_assignment(self, principal_id, role_def_id):
-        """Adds a role assignment to the role assignment collection.<81>
+        """Adds a role assignment to the role assignment collection.
 
-        :param int role_def_id: Specifies the role definition of the role assignment.
         :param int principal_id: Specifies the user or group of the role assignment.
+        :param int role_def_id: Specifies the role definition of the role assignment.
         """
         payload = {"principalId": principal_id, "roleDefId": role_def_id}
         qry = ServiceOperationQuery(

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from typing_extensions import Self
 
 from office365.runtime.client_result import ClientResult
@@ -33,23 +35,27 @@ class SecurableObject(Entity):
         principal.ensure_property("Id", _principal_loaded)
         return return_type
 
-    def add_role_assignment(self, principal, role_def):
-        # type: (Principal, RoleDefinition) -> Self
+    def add_role_assignment(self, principal, role):
+        # type: (Principal|str, RoleDefinition|int) -> Self
         """Adds a role assignment to securable resource.
 
-        :param office365.sharepoint.permissions.roles.definitions.definition.RoleDefinition role_def: Specifies the
-            role definition of the role assignment.
-        :param office365.sharepoint.principal.principal.Principal principal: Specifies the user or group of the
-            role assignment.
+        :param RoleDefinition or int principal: Specifies the role definition or role type.
+        :param Principal or str role: Specifies the user or group of the role assignment.
         """
 
-        def _principal_loaded():
-            role_def.ensure_property("Id", _role_def_loaded)
+        if not isinstance(principal, Principal):
+            principal = self.context.web.site_users.get_by_principal_name(principal)
 
-        def _role_def_loaded():
-            self.role_assignments.add_role_assignment(principal.id, role_def.id)
+        if not isinstance(role, RoleDefinition):
+            role = self.context.web.role_definitions.get_by_type(role)
 
-        principal.ensure_property("Id", _principal_loaded)
+        def _ensure_role_def():
+            role.ensure_property("Id", _add_role_assignment)
+
+        def _add_role_assignment():
+            self.role_assignments.add_role_assignment(principal.id, role.id)
+
+        principal.ensure_property("Id", _ensure_role_def)
         return self
 
     def remove_role_assignment(self, principal, role_def):
@@ -110,19 +116,16 @@ class SecurableObject(Entity):
         return self
 
     def get_user_effective_permissions(self, user):
+        # type: (str|User) -> ClientResult[BasePermissions]
         """
-        Returns the user permissions for this list.
+        Returns the user permissions for secured object.
 
         :param str or User user: Specifies the user login name or User object.
         """
-        return_type = ClientResult(
-            self.context, BasePermissions()
-        )  # type: ClientResult[BasePermissions]
+        return_type = ClientResult(self.context, BasePermissions())
 
         def _create_and_add_query(login_name):
-            """
-            :param str login_name:
-            """
+            # type: (str) -> None
             qry = ServiceOperationQuery(
                 self,
                 "GetUserEffectivePermissions",
@@ -145,17 +148,16 @@ class SecurableObject(Entity):
 
     @property
     def has_unique_role_assignments(self):
+        # type: () -> Optional[bool]
         """Specifies whether the role assignments are uniquely defined for this securable object or inherited from a
         parent securable object. If the value is "false", role assignments are inherited from a parent securable
         object.
-
-        :rtype: bool or None
         """
         return self.properties.get("HasUniqueRoleAssignments", None)
 
     @property
     def first_unique_ancestor_securable_object(self):
-        """Specifies the object where role assignments for this object are defined.<85>."""
+        """Specifies the object where role assignments for this object are defined"""
         return self.properties.get(
             "FirstUniqueAncestorSecurableObject",
             SecurableObject(

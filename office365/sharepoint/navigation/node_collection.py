@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     )
 
 
-class NavigationNodeCollection(EntityCollection):
+class NavigationNodeCollection(EntityCollection[NavigationNode]):
     def __init__(self, context, resource_path=None):
         super(NavigationNodeCollection, self).__init__(
             context, NavigationNode, resource_path

@@ -1,6 +1,5 @@
 """
 Adds and removes site group
-
 """
 from office365.sharepoint.client_context import ClientContext
 from tests import create_unique_name, test_password, test_site_url, test_username

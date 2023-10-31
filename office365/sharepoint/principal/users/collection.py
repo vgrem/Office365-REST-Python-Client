@@ -36,6 +36,11 @@ class UserCollection(EntityCollection[User]):
             _create_and_add_query(user)
         return return_type
 
+    def get_by_principal_name(self, value):
+        # type: (str) -> User
+        """Returns the user with the specified principal name."""
+        return self.single("UserPrincipalName eq '{0}'".format(value))
+
     def get_by_email(self, email):
         """
         Returns the user with the specified e-mail address.

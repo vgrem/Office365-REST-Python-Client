@@ -1,9 +1,14 @@
+from typing import TYPE_CHECKING, Optional
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.principal.principal import Principal
 from office365.sharepoint.utilities.principal_info import PrincipalInfo
+
+if TYPE_CHECKING:
+    from office365.sharepoint.principal.groups.collection import GroupCollection
 
 
 class Group(Principal):
@@ -67,72 +72,61 @@ class Group(Principal):
 
     @property
     def parent_collection(self):
-        """
-        :rtype: office365.sharepoint.principal.groups.collection.GroupCollection
-        """
+        # type: () -> GroupCollection
         return self._parent_collection
 
     @property
     def allow_members_edit_membership(self):
-        """Specifies whether a member of the group can add and remove members from the group.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether a member of the group can add and remove members from the group"""
         return self.properties.get("AllowMembersEditMembership", None)
 
     @property
     def allow_request_to_join_leave(self):
-        """Specifies whether to allow users to request to join or leave in the group.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether to allow users to request to join or leave in the group."""
         return self.properties.get("AllowRequestToJoinLeave", None)
 
     @property
     def auto_accept_request_to_join_leave(self):
-        """Specifies whether requests to join or leave the group are automatically accepted.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether requests to join or leave the group are automatically accepted"""
         return self.properties.get("AutoAcceptRequestToJoinLeave", None)
 
     @property
     def can_current_user_edit_membership(self):
-        """Specifies whether the current user can add and remove members from the group.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether the current user can add and remove members from the group."""
         return self.properties.get("CanCurrentUserEditMembership", None)
 
     @property
     def can_current_user_manage_group(self):
-        """Gets a Boolean value that indicates whether the current user can manage the group.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Gets a Boolean value that indicates whether the current user can manage the group."""
         return self.properties.get("CanCurrentUserManageGroup", None)
 
     @property
     def can_current_user_view_membership(self):
-        """Specifies whether the current user can view the membership of the group.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether the current user can view the membership of the group."""
         return self.properties.get("CanCurrentUserViewMembership", None)
 
     @property
     def only_allow_members_view_membership(self):
-        """Specifies whether viewing the membership of the group is restricted to members of the group.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether viewing the membership of the group is restricted to members of the group."""
         return self.properties.get("OnlyAllowMembersViewMembership", None)
 
     @property
     def owner_title(self):
-        """Specifies the name of the owner of the group.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the name of the owner of the group."""
         return self.properties.get("OwnerTitle", None)
 
     @property
     def request_to_join_leave_email_setting(self):
-        """Specifies the e-mail address to which requests to join or leave the group are sent.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the e-mail address to which requests to join or leave the group are sent."""
         return self.properties.get("RequestToJoinLeaveEmailSetting", None)
 
     @property

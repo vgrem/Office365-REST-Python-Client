@@ -1094,10 +1094,8 @@ class List(SecurableObject):
 
     @property
     def item_count(self):
-        """
-        Gets a value that specifies the number of list items in the list.
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
+        """Gets a value that specifies the number of list items in the list"""
         return self.properties.get("ItemCount", None)
 
     @property
@@ -1127,33 +1125,32 @@ class List(SecurableObject):
 
     @property
     def list_experience_options(self):
+        # type: () -> Optional[int]
         """
         Gets or sets the list to new experience, classic experience or default experience set by my administrator.
-        :rtype: int or None
         """
         return self.properties.get("ListExperienceOptions", None)
 
     @property
     def list_form_customized(self):
-        """
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """ """
         return self.properties.get("ListFormCustomized", None)
 
     @property
     def list_item_entity_type_full_name(self):
+        # type: () -> Optional[str]
         """
         Specifies the full type name of the list item.
-        :rtype: str or None
         """
         return self.properties.get("ListItemEntityTypeFullName", None)
 
     @property
     def major_version_limit(self):
+        # type: () -> Optional[int]
         """
         Gets the maximum number of major versions allowed for an item in a document library that uses version
         control with major versions only.
-        :rtype: int or None
         """
         return self.properties.get("MajorVersionLimit", None)
 
@@ -1219,33 +1216,27 @@ class List(SecurableObject):
 
     @property
     def read_security(self):
-        """
-        Gets or sets the Read security setting for the list.
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
+        """Gets or sets the Read security setting for the list."""
         return self.properties.get("ReadSecurity", None)
 
     @property
     def server_template_can_create_folders(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the list template the list is based on allows the creation of folders.
-        :rtype: bool or None
         """
         return self.properties.get("ServerTemplateCanCreateFolders", None)
 
     @property
     def show_hidden_fields_in_modern_form(self):
-        """
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
         return self.properties.get("ShowHiddenFieldsInModernForm", None)
 
     @property
     def title(self):
         # type: () -> Optional[str]
-        """
-        Gets the displayed title for the list.
-        """
+        """Gets the displayed title for the list."""
         return self.properties.get("Title", None)
 
     @title.setter
@@ -1255,22 +1246,22 @@ class List(SecurableObject):
 
     @property
     def default_content_approval_workflow_id(self):
+        # type: () -> Optional[str]
         """
         Specifies the default workflow identifier for content approval on the list. It MUST be an empty GUID
-        if there is no default content approval workflow.
-        :rtype: str
+        if there is no default content approval workflow
         """
         return self.properties.get("DefaultContentApprovalWorkflowId", None)
 
     @property
     def description(self):
-        """Gets the description for the list.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the description for the list."""
         return self.properties.get("Description", None)
 
     @description.setter
     def description(self, val):
+        # type: (str) -> None
         """Sets the description for the list."""
         self.set_property("Description", val)
 
@@ -1291,18 +1282,16 @@ class List(SecurableObject):
 
     @property
     def schema_xml(self):
-        """
-        Specifies the list schema of the list.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the list schema of the list."""
         return self.properties.get("SchemaXml", None)
 
     @property
     def template_feature_id(self):
+        # type: () -> Optional[str]
         """
         Specifies the feature identifier of the feature that contains the list schema for the list.
         It MUST be an empty GUID if the list schema for the list is not contained within a feature.
-        :rtype: str or None
         """
         return self.properties.get("TemplateFeatureId", None)
 

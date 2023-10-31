@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.entity import Entity
 
@@ -7,52 +9,46 @@ class Principal(Entity):
 
     @property
     def id(self):
-        """Gets a value that specifies the member identifier for the user or group.
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
+        """Gets a value that specifies the member identifier for the user or group."""
         return self.properties.get("Id", None)
 
     @property
     def title(self):
-        """Gets a value that specifies the name of the principal.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets a value that specifies the name of the principal."""
         return self.properties.get("Title", None)
 
     @title.setter
     def title(self, value):
+        # type: (str) -> None
         """
         Sets a value that specifies the name of the principal.
-        :type value: str
         """
         self.set_property("Title", value)
 
     @property
     def login_name(self):
-        """Gets the login name of the principal.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the login name of the principal."""
         return self.properties.get("LoginName", None)
 
     @property
     def user_principal_name(self):
-        """Gets the UPN of the principal.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the UPN of the principal."""
         return self.properties.get("UserPrincipalName", None)
 
     @property
     def is_hidden_in_ui(self):
-        """Gets the login name of the principal.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Gets the login name of the principal."""
         return self.properties.get("IsHiddenInUI", None)
 
     @property
     def principal_type(self):
-        """Gets the type of the principal.
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
+        """Gets the type of the principal."""
         return self.properties.get("PrincipalType", None)
 
     def set_property(self, name, value, persist_changes=True):

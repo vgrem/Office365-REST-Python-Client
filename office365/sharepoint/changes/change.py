@@ -1,7 +1,7 @@
 import datetime
-import inspect
 from typing import Optional
 
+from office365.runtime.odata.type import ODataType
 from office365.sharepoint.changes.token import ChangeToken
 from office365.sharepoint.changes.type import ChangeType
 from office365.sharepoint.entity import Entity
@@ -12,16 +12,7 @@ class Change(Entity):
 
     @property
     def change_type_name(self):
-        return next(
-            iter(
-                [
-                    item[0]
-                    for item in inspect.getmembers(ChangeType)
-                    if item[1] == self.change_type
-                ]
-            ),
-            None,
-        )
+        return ODataType.resolve_enum_key(ChangeType, self.change_type)
 
     @property
     def change_token(self):

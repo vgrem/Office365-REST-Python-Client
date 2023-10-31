@@ -931,18 +931,6 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
-    def get_user_effective_permissions(self, user_name):
-        """Gets the effective permissions that the specified user has within the current application scope.
-
-        :param str user_name: Specifies the user login name.
-        """
-        return_type = ClientResult(self.context, BasePermissions())
-        qry = ServiceOperationQuery(
-            self, "GetUserEffectivePermissions", [user_name], None, None, return_type
-        )
-        self.context.add_query(qry)
-        return return_type
-
     def get_list_by_title(self, title):
         """
         Returns the list with the specified display name.
@@ -1908,8 +1896,6 @@ class Web(SecurableObject):
     @property
     def effective_base_permissions(self):
         """Specifies the effective permissions that are assigned to the current user"""
-        from office365.sharepoint.permissions.base_permissions import BasePermissions
-
         return self.properties.get("EffectiveBasePermissions", BasePermissions())
 
     @property

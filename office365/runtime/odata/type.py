@@ -1,5 +1,7 @@
 import datetime
+import inspect
 import uuid
+from typing import Type
 
 
 class ODataType(object):
@@ -92,6 +94,16 @@ class ODataType(object):
             return client_value.entity_type_name
         else:
             return ODataType.primitive_types.get(client_type, None)
+
+    @staticmethod
+    def resolve_enum_key(enum_type, value):
+        # type: (Type, int) -> str
+        return next(
+            iter(
+                [item[0] for item in inspect.getmembers(enum_type) if item[1] == value]
+            ),
+            None,
+        )
 
     def add_property(self, prop_schema):
         """

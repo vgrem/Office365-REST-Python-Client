@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.translation.user_resource import UserResource
@@ -8,6 +10,12 @@ class NavigationNode(Entity):
     Represents the URL to a specific navigation node and provides access to properties and methods for
     manipulating the ordering of the navigation node in a navigation node collection.
     """
+
+    def __str__(self):
+        return self.title
+
+    def __repr__(self):
+        return self.url
 
     @property
     def children(self):
@@ -25,10 +33,8 @@ class NavigationNode(Entity):
 
     @property
     def title(self):
-        """Gets a value that specifies the anchor text for the navigation node link.
-
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Gets a value that specifies the anchor text for the navigation node link."""
         return self.properties.get("Title", None)
 
     @title.setter
@@ -38,10 +44,8 @@ class NavigationNode(Entity):
 
     @property
     def url(self):
-        """Gets a value that specifies the URL stored with the navigation node.
-
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Gets a value that specifies the URL stored with the navigation node."""
         return self.properties.get("Url", None)
 
     @url.setter
@@ -51,17 +55,14 @@ class NavigationNode(Entity):
 
     @property
     def is_visible(self):
-        """Gets a value that specifies the anchor text for the navigation node link.
-
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Gets a value that specifies the anchor text for the navigation node link."""
         return self.properties.get("isVisible", None)
 
     @property
     def is_external(self):
-        """
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """ """
         return self.properties.get("isExternal", None)
 
     @property

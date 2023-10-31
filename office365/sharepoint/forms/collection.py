@@ -3,7 +3,7 @@ from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.forms.form import Form
 
 
-class FormCollection(EntityCollection):
+class FormCollection(EntityCollection[Form]):
     def __init__(self, context, resource_path=None):
         """Specifies a collection of list forms for a list."""
         super(FormCollection, self).__init__(context, Form, resource_path)

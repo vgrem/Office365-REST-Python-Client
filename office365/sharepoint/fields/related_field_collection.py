@@ -3,7 +3,7 @@ from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.fields.related_field import RelatedField
 
 
-class RelatedFieldCollection(EntityCollection):
+class RelatedFieldCollection(EntityCollection[RelatedField]):
     """Represents a collection of RelatedField resources."""
 
     def __init__(self, context, resource_path=None):
