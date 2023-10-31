@@ -142,9 +142,7 @@ class User(DirectoryObject):
         qry = ServiceOperationQuery(self.manager, "$ref")
 
         def _construct_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
+            # type: (RequestOptions) -> None
             request.method = HttpMethod.Delete
 
         self.context.add_query(qry).before_query_execute(_construct_request)
@@ -446,9 +444,7 @@ class User(DirectoryObject):
 
     @property
     def device_enrollment_limit(self):
-        """
-        :rtype: str
-        """
+        # type: () -> Optional[str]
         return self.properties.get("deviceEnrollmentLimit", None)
 
     @property
@@ -458,15 +454,14 @@ class User(DirectoryObject):
 
     @property
     def account_enabled(self):
+        # type: () -> Optional[bool]
         """True if the account is enabled; otherwise, false. This property is required when a user is created."""
         return self.properties.get("accountEnabled", None)
 
     @property
     def age_group(self):
-        """
-        Gets the age group of the user.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the age group of the user"""
         return self.properties.get("ageGroup", None)
 
     @property

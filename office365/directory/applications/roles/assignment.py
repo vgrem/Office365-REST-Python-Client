@@ -12,6 +12,11 @@ class AppRoleAssignment(DirectoryObject):
     a resource application (the app's service principal) and an app role defined on the resource application.
     """
 
+    def __str__(self):
+        return "Principal: {0}, AppRole: {1}".format(
+            self.principal_display_name, self.app_role_id
+        )
+
     @property
     def app_role_id(self):
         # type: () -> Optional[str]

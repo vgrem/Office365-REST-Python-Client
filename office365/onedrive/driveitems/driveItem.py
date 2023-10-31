@@ -240,9 +240,7 @@ class DriveItem(BaseItem):
         self.children.add_child(qry.return_type)
 
         def _modify_query(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
+            # type: (RequestOptions) -> None
             request.method = HttpMethod.Put
 
         self.context.add_query(qry).before_query_execute(_modify_query)
@@ -250,10 +248,7 @@ class DriveItem(BaseItem):
 
     def upload_file(self, path_or_file):
         # type: (str|IO) -> "DriveItem"
-        """Uploads a file
-
-        :param str or typing.IO path_or_file:
-        """
+        """Uploads a file"""
         if hasattr(path_or_file, "read"):
             content = path_or_file.read()
             name = os.path.basename(path_or_file.name)
@@ -285,8 +280,6 @@ class DriveItem(BaseItem):
         """
         Download the contents of the primary stream (file) of a DriveItem. Only driveItems with the file property
         can be downloaded
-
-        :type file_object: typing.IO
         """
 
         def _save_content(return_type):
@@ -312,9 +305,7 @@ class DriveItem(BaseItem):
         """
 
         def _construct_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
+            # type: (RequestOptions) -> None
             request.stream = True
 
         def _process_response(response):

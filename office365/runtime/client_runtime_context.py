@@ -99,6 +99,7 @@ class ClientRuntimeContext(object):
         return self
 
     def before_query_execute(self, action, once=True, *args, **kwargs):
+        # type: (Callable[[RequestOptions, Any, Any], None], bool, Any, Any) -> Self
         """
         Attach an event handler which is triggered before query is submitted to server
 
@@ -120,9 +121,9 @@ class ClientRuntimeContext(object):
         return self
 
     def before_execute(self, action, once=True, *args, **kwargs):
+        # type: (Callable[[RequestOptions, Any, Any], None], bool, Any, Any) -> Self
         """
         Attach an event handler which is triggered before request is submitted to server
-
         :param (office365.runtime.http.request_options.RequestOptions, any) -> None action:
         :param bool once: Flag which determines whether action is executed once or multiple times
         """
@@ -138,9 +139,7 @@ class ClientRuntimeContext(object):
 
     def after_query_execute(self, action, *args, **kwargs):
         # type: (Callable[[Any, Any], None], Any, Any) -> Self
-        """
-        Attach an event handler which is triggered after query is submitted to server
-        """
+        """Attach an event handler which is triggered after query is submitted to server"""
         if len(self._queries) == 0:
             return
         query = self._queries[-1]
@@ -162,9 +161,7 @@ class ClientRuntimeContext(object):
 
     def after_execute(self, action, once=True, *args, **kwargs):
         # type: (Callable[[requests.Response, Any, Any], None], bool, Any, Any) -> Self
-        """
-        Attach an event handler which is triggered after request is submitted to server
-        """
+        """Attach an event handler which is triggered after request is submitted to server"""
 
         def _process_response(response):
             # type: (requests.Response) -> None

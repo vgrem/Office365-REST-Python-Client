@@ -34,5 +34,8 @@ class AppRole(ClientValue):
         self.origin = origin
         self.value = value
 
+    def __str__(self):
+        return "{0}  {1}".format(self.allowedMemberTypes, self.value)
+
     def __repr__(self):
-        return self.value
+        return "{0}".format(self.id)

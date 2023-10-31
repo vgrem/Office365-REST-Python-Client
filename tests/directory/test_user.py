@@ -73,7 +73,7 @@ class TestGraphUser(GraphTestCase):
         self.assertIsNotNone(result.value)
 
     def test_12_create_extension(self):
-        result = self.client.me.add_extension("Com.Contoso.SSN").execute_query()
+        result = self.client.me.add_extension("Com.Contoso.SSN2").execute_query()
         self.assertIsNotNone(result.resource_path)
         self.__class__.test_extension = result
 

@@ -3,9 +3,11 @@ from typing import Optional
 from typing_extensions import Self
 
 from office365.delta_collection import DeltaCollection
+from office365.directory.applications.application import Application
 from office365.directory.applications.roles.assignment_collection import (
     AppRoleAssignmentCollection,
 )
+from office365.directory.applications.roles.collection import AppRoleCollection
 from office365.directory.applications.roles.role import AppRole
 from office365.directory.certificates.self_signed import SelfSignedCertificate
 from office365.directory.key_credential import KeyCredential
@@ -17,6 +19,7 @@ from office365.directory.permissions.scope import PermissionScope
 from office365.directory.synchronization.synchronization import Synchronization
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.paths.appid import AppIdPath
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
@@ -95,28 +98,54 @@ class ServicePrincipal(DirectoryObject):
         self.context.add_query(qry)
         return return_type
 
-    def grant(self, resource, app_role):
-        # type: ("ServicePrincipal"|str, AppRole|str) -> Self
+    def grant(self, app, app_role):
+        # type: (Application|str, AppRole|str) -> Self
         """
-        Grants the current app (the service principal) an app role.
+        Revokes an app role assignment to a client service principal
+        :param Application or str app: Application object or app identifier
+        :param AppRole or str app_role: AppRole object or name
         """
 
-        def _grant(resource_id, app_role_id):
-            # type: (str, str) -> None
+        def _grant(principal):
+            # type: ("ServicePrincipal") -> None
+            app_role_id = repr(app_role)
+            principal_id = principal.id
             self.app_role_assigned_to.add(
-                principalId=self.id, resourceId=resource_id, appRoleId=app_role_id
+                principalId=principal_id, resourceId=self.id, appRoleId=app_role_id
             )
 
-        def _validate_params():
-            app_role_id = app_role.id if isinstance(app_role, AppRole) else app_role
-            if isinstance(resource, ServicePrincipal):
-                resource.ensure_property(
-                    "id", _grant, resource_id=resource.id, app_role_id=app_role_id
-                )
-            else:
-                _grant(resource, app_role_id)
+        def _ensure_principal():
+            self.context.service_principals.get_by_app(app).get().after_execute(_grant)
 
-        self.ensure_property("id", _validate_params)
+        self.ensure_property("id", _ensure_principal)
+        return self
+
+    def revoke(self, app, app_role):
+        # type: (Application|str, AppRole|str) -> Self
+        """Revokes an app role assignment from a client service principal"""
+
+        def _revoke(principal):
+            # type ("ServicePrincipal") -> None
+            principal_id = principal.id
+            app_role_id = repr(app_role)
+            app_role_assigned_to_ids = [
+                item.id
+                for item in self.app_role_assigned_to
+                if item.principal_id == principal_id and item.app_role_id == app_role_id
+            ]
+            if len(app_role_assigned_to_ids) > 0:
+                self.app_role_assigned_to[app_role_assigned_to_ids[0]].delete_object()
+
+        def _ensure_resource(principal):
+            self.ensure_properties(["id", "appRoleAssignedTo"], _revoke, principal)
+            # self.app_role_assigned_to.get_all(page_loaded=_revoke)
+
+        def _ensure_principal():
+            self.context.service_principals.get_by_app(app).get().after_execute(
+                _ensure_resource
+            )
+
+        self.ensure_property("id", _ensure_principal)
         return self
 
     def remove_password(self, key_id):
@@ -178,7 +207,7 @@ class ServicePrincipal(DirectoryObject):
         """
         The roles exposed by the application which this service principal represents.
         """
-        return self.properties.get("appRoles", ClientValueCollection(AppRole))
+        return self.properties.get("appRoles", AppRoleCollection())
 
     @property
     def homepage(self):
@@ -343,3 +372,8 @@ class ServicePrincipal(DirectoryObject):
             }
             default_value = property_mapping.get(name, None)
         return super(ServicePrincipal, self).get_property(name, default_value)
+
+    def set_property(self, name, value, persist_changes=True):
+        if self._resource_path is None and name == "appId":
+            self._resource_path = AppIdPath(value, self.parent_collection.resource_path)
+        return super(ServicePrincipal, self).set_property(name, value, persist_changes)

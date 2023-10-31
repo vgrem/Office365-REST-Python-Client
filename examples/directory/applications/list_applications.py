@@ -9,4 +9,4 @@ from tests.graph_case import acquire_token_by_username_password
 client = GraphClient(acquire_token_by_username_password)
 apps = client.applications.get().top(10).execute_query()
 for app in apps:
-    print(app.display_name)
+    print(app)

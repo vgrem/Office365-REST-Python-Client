@@ -24,15 +24,5 @@ resource = (
 )
 
 
-# select specific appRole
-app_role = resource.app_roles["Place.Read.All"]
-
-# Step 2: Grant an app role to a client app
-app = client.applications.get_by_app_id(test_client_id)
-resource.grant(app, app_role).execute_query()
-
-
-# Step 3. Print app role assignments
-result = resource.app_role_assigned_to.get_all().execute_query()
-for app_role_assignment in result:
-    print(app_role_assignment)
+# Step 2: Revoke an app role assignment from a client service principal
+resource.revoke(test_client_id, "Place.Read.All").execute_query()

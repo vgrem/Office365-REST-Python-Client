@@ -281,6 +281,7 @@ class Application(DirectoryObject):
 
     @property
     def extension_properties(self):
+        # type: () -> EntityCollection[ExtensionProperty]
         """List extension properties on an application object."""
         return self.properties.get(
             "extensionProperties",
@@ -293,6 +294,7 @@ class Application(DirectoryObject):
 
     @property
     def token_issuance_policies(self):
+        # type: () -> EntityCollection[TokenIssuancePolicy]
         """Get all tokenIssuancePolicies assigned to this object."""
         return self.properties.get(
             "tokenIssuancePolicies",
@@ -316,3 +318,9 @@ class Application(DirectoryObject):
             }
             default_value = property_mapping.get(name, None)
         return super(Application, self).get_property(name, default_value)
+
+    def __repr__(self):
+        return self.id
+
+    def __str__(self):
+        return self.display_name

@@ -3,6 +3,7 @@ from office365.directory.protection.threatassessment.request import (
 )
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
@@ -29,9 +30,7 @@ class InformationProtection(Entity):
         self.threat_assessment_requests.add_child(return_type)
 
         def _construct_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
+            # type: (RequestOptions) -> None
             request.set_header("Content-Type", "application/json")
 
         def _create_and_add_query():
@@ -51,6 +50,7 @@ class InformationProtection(Entity):
 
     @property
     def threat_assessment_requests(self):
+        # type: () -> EntityCollection[ThreatAssessmentRequest]
         """"""
         return self.properties.get(
             "threatAssessmentRequests",
