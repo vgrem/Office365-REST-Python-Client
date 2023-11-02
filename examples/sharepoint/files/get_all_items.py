@@ -4,7 +4,7 @@ from office365.sharepoint.listitems.listitem import ListItem
 from tests import test_client_credentials, test_team_site_url
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
-doc_lib = ctx.web.lists.get_by_title("Documents_Archive")
+doc_lib = ctx.web.default_document_library()
 items = (
     doc_lib.items.select(["FileSystemObjectType"])
     .expand(["File", "Folder"])

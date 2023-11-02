@@ -41,6 +41,7 @@ class BasePermissions(ClientValue):
                 self.High |= low << high - 32
 
     def has(self, perm):
+        # type: (int) -> bool
         """Determines whether the current instance has the specified permission."""
         if perm == PermissionKind.EmptyMask:
             return True

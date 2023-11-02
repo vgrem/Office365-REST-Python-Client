@@ -14,6 +14,9 @@ class Field(Entity):
     def __init__(self, context, resource_path=None):
         super(Field, self).__init__(context, resource_path)
 
+    def __repr__(self):
+        return self.internal_name or self.id
+
     @staticmethod
     def resolve_field_type(type_id_or_name):
         from office365.sharepoint.fields.calculated import FieldCalculated

@@ -15,17 +15,13 @@ class UserProfile(Entity):
     @property
     def account_name(self):
         # type: () -> Optional[str]
-        """
-        The account name of the user.
-        """
+        """The account name of the user."""
         return self.properties.get("AccountName", None)
 
     @property
     def display_name(self):
         # type: () -> Optional[str]
-        """
-        The title of the user.
-        """
+        """The title of the user."""
         return self.properties.get("DisplayName", None)
 
     @property

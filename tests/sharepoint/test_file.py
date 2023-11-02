@@ -145,4 +145,4 @@ class TestSharePointFile(SPTestCase):
         file = self.folder_from.files.create_upload_session(
             path, size_1mb
         ).execute_query()
-        self.assertEqual(file_size, int(file.length))
+        self.assertEqual(file_size, file.length)

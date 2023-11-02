@@ -25,7 +25,6 @@ class FileVersionCollection(EntityCollection[FileVersion]):
 
     def delete_by_id(self, vid):
         """Removes the file version object with the specified integer ID from the collection.
-
         :param int vid: The file version to remove.
         """
         qry = ServiceOperationQuery(self, "DeleteByID", {"vid": vid})
@@ -35,7 +34,6 @@ class FileVersionCollection(EntityCollection[FileVersion]):
     def delete_by_label(self, label):
         """
         Deletes the file version object with the specified version label.
-
         :param str label: The file version to remove.
         """
         qry = ServiceOperationQuery(self, "DeleteByLabel", {"versionlabel": label})

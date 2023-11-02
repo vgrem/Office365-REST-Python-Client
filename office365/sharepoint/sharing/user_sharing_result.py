@@ -1,5 +1,7 @@
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.odata.type import ODataType
+from office365.sharepoint.sharing.role import Role
 
 
 class UserSharingResult(ClientValue):
@@ -43,5 +45,15 @@ class UserSharingResult(ClientValue):
         self.User = user
 
     @property
+    def current_role_name(self):
+        return ODataType.resolve_enum_key(Role, self.CurrentRole)
+
+    @property
     def entity_type_name(self):
         return "SP.Sharing"
+
+    def __str__(self):
+        return "{0}: {1}".format(self.User, self.current_role_name)
+
+    def __repr__(self):
+        return "{0}: {1}".format(self.User, self.current_role_name)

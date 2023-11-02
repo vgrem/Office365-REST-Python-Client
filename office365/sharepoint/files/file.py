@@ -1,6 +1,8 @@
 import datetime
 from typing import TYPE_CHECKING, AnyStr
 
+import requests
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
@@ -254,9 +256,7 @@ class File(AbstractFile):
         self.parent_collection.add_child(return_type)
 
         def _copyto(destination_folder):
-            """
-            :type destination_folder: Folder
-            """
+            # type: (Folder) -> None
             file_path = "/".join([str(destination_folder.serverRelativeUrl), self.name])
             return_type.set_property("ServerRelativeUrl", file_path)
 
@@ -604,9 +604,7 @@ class File(AbstractFile):
         """
 
         def _save_content(return_type):
-            """
-            :type return_type: ClientResult
-            """
+            # type: (ClientResult[AnyStr]) -> None
             file_object.write(return_type.value)
             if callable(after_downloaded):
                 after_downloaded(self)
@@ -632,19 +630,15 @@ class File(AbstractFile):
         def _download_as_stream():
             qry = ServiceOperationQuery(self, "$value")
 
-            def _construct_download_request(request):
-                """
-                :type request: office365.runtime.http.request_options.RequestOptions
-                """
+            def _construct_request(request):
+                # type: (RequestOptions) -> None
                 request.stream = True
                 request.method = HttpMethod.Get
 
-            self.context.before_execute(_construct_download_request)
+            self.context.before_execute(_construct_request)
 
-            def _process_download_response(response):
-                """
-                :type response: requests.Response
-                """
+            def _process_response(response):
+                # type: (requests.Response) -> None
                 response.raise_for_status()
                 bytes_read = 0
                 for chunk in response.iter_content(chunk_size=chunk_size):
@@ -653,7 +647,7 @@ class File(AbstractFile):
                         chunk_downloaded(bytes_read)
                     file_object.write(chunk)
 
-            self.context.after_execute(_process_download_response)
+            self.context.after_execute(_process_response)
             self.context.add_query(qry)
 
         if use_path:
@@ -665,7 +659,6 @@ class File(AbstractFile):
     def rename(self, new_file_name):
         """
         Rename a file
-
         :param str new_file_name: A new file name
         """
         item = self.listItemAllFields
@@ -695,14 +688,19 @@ class File(AbstractFile):
         )
 
     @property
+    def check_out_type(self):
+        # type: () -> Optional[int]
+        return self.properties.get("CheckOutType", None)
+
+    @property
     def expiration_date(self):
-        """
-        Required. Specifies the date and time when the file expires.
-        """
+        # type: () -> Optional[datetime.datetime]
+        """Specifies the date and time when the file expires."""
         return self.properties.get("ExpirationDate", datetime.datetime.min)
 
     @property
     def version_events(self):
+        # type: () -> EntityCollection[FileVersionEvent]
         """Gets the history of events on this version object."""
         return self.properties.get(
             "VersionEvents",
@@ -777,9 +775,7 @@ class File(AbstractFile):
 
     @property
     def modified_by(self):
-        """
-        Gets a value that returns the user who last modified the file.
-        """
+        """Gets a value that returns the user who last modified the file."""
         return self.properties.get(
             "ModifiedBy",
             User(self.context, ResourcePath("ModifiedBy", self.resource_path)),
@@ -797,127 +793,107 @@ class File(AbstractFile):
 
     @property
     def serverRelativeUrl(self):
-        """Gets the relative URL of the file based on the URL for the server.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the relative URL of the file based on the URL for the server."""
         return self.properties.get("ServerRelativeUrl", None)
 
     @property
     def server_relative_path(self):
-        """Gets the server-relative Path of the list folder.
-
-        :rtype: SPResPath or None
-        """
+        """Gets the server-relative Path of the list folder."""
         return self.properties.get("ServerRelativePath", SPResPath())
 
     @property
     def length(self):
-        """Gets the file size.
-
-        :rtype: int or None
-        """
-        return int(self.properties.get("Length", -1))
+        # type: () -> Optional[int]
+        """Gets the file size."""
+        return int(self.properties.get("Length", 0))
 
     @property
     def exists(self):
-        """Specifies whether the file exists.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether the file exists."""
         return self.properties.get("Exists", None)
 
     @property
     def irm_enabled(self):
+        # type: () -> Optional[bool]
         """Specifies whether or not Information Rights Management (IRM) is enabled at the file level.
         A value of true indicates IRM is enabled; a value of false indicates IRM is disabled.
-        :rtype: bool or None
         """
         return self.properties.get("IrmEnabled", None)
 
     @property
     def level(self):
-        """Specifies the publishing level of the file.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the publishing level of the file."""
         return self.properties.get("Level", None)
 
     @property
     def linking_uri(self):
-        """Specifies the URL that is suitable for durable linking to the file.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the URL that is suitable for durable linking to the file."""
         return self.properties.get("LinkingUri", None)
 
     @property
     def name(self):
+        # type: () -> Optional[str]
         """Specifies the file name including the extension.
-            It MUST NOT be NULL. Its length MUST be equal to or less than 260.
-        :rtype: str or None
+        It MUST NOT be NULL. Its length MUST be equal to or less than 260.
         """
         return self.properties.get("Name", None)
 
     @property
     def list_id(self):
-        """Gets the GUID that identifies the List containing the file.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the GUID that identifies the List containing the file."""
         return self.properties.get("ListId", None)
 
     @property
     def site_id(self):
-        """Gets the GUID that identifies the site collection containing the file.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the GUID that identifies the site collection containing the file."""
         return self.properties.get("SiteId", None)
 
     @property
     def web_id(self):
-        """Gets the GUID for the site containing the file.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the GUID for the site containing the file."""
         return self.properties.get("WebId", None)
 
     @property
     def time_created(self):
-        """Gets a value that specifies when the file was created.
-        :rtype: str or None
-        """
+        # type: () -> Optional[datetime.datetime]
+        """Gets a value that specifies when the file was created."""
         return self.properties.get("TimeCreated", datetime.datetime.min)
 
     @property
     def time_last_modified(self):
+        # type: () -> Optional[datetime.datetime]
         """Specifies when the file was last modified."""
         return self.properties.get("TimeLastModified", datetime.datetime.min)
 
     @property
     def minor_version(self):
-        """
-        Gets a value that specifies the minor version of the file.
-        """
-        return int(self.properties.get("MinorVersion", -1))
+        # type: () -> Optional[int]
+        """Gets a value that specifies the minor version of the file."""
+        return self.properties.get("MinorVersion", None)
 
     @property
     def major_version(self):
-        """
-        Gets a value that specifies the major version of the file.
-        :rtype: int or None
-        """
-        return int(self.properties.get("MajorVersion", -1))
+        # type: () -> Optional[int]
+        """Gets a value that specifies the major version of the file."""
+        return self.properties.get("MajorVersion", None)
 
     @property
     def unique_id(self):
-        """
-        Gets a value that specifies the a file unique identifier
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets a value that specifies the a file unique identifier"""
         return self.properties.get("UniqueId", None)
 
     @property
     def customized_page_status(self):
-        """Specifies the customization status of the file.
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
+        """Specifies the customization status of the file."""
         return self.properties.get("CustomizedPageStatus", None)
 
     @property

@@ -1,6 +1,5 @@
 """
 Search SharePoint sites the current user is member of
-
 """
 
 from office365.sharepoint.client_context import ClientContext

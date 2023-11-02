@@ -657,40 +657,37 @@ class Site(Entity):
 
     @property
     def id(self):
+        # type: () -> Optional[str]
         """
         Specifies the GUID that identifies the site collection.
-        :rtype: str
         """
         return self.properties.get("Id", None)
 
     @property
     def hub_site_id(self):
-        """
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """ """
         return self.properties.get("HubSiteId", None)
 
     @property
     def is_hub_site(self):
+        # type: () -> Optional[bool]
         """
         Returns whether the specified site is a hub site
-        :rtype: bool
         """
         return self.properties.get("IsHubSite", None)
 
     @property
     def server_relative_path(self):
-        """Gets the server-relative Path of the Site.
-        :rtype: SPResPath or None
-        """
+        # type: () -> Optional[SPResPath]
+        """Gets the server-relative Path of the Site."""
         return self.properties.get("ServerRelativePath", SPResPath())
 
     @property
     def status_bar_link(self):
+        # type: () -> Optional[str]
         """
         Gets the status bar message link target for this site.
-
-        :rtype: str or None
         """
         return self.properties.get("StatusBarLink", None)
 
@@ -724,18 +721,18 @@ class Site(Entity):
 
     @property
     def max_items_per_throttled_operation(self):
+        # type: () -> Optional[int]
         """
         Specifies the maximum number of list items allowed to be returned for each retrieve request before throttling
         occurs. If throttling occurs, list items MUST NOT be returned.
-        :rtype: int or None
         """
         return self.properties.get("MaxItemsPerThrottledOperation", None)
 
     @property
     def needs_b2b_upgrade(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the site needs a Build-to-Build upgrade.
-        :rtype: bool or None
         """
         return self.properties.get("NeedsB2BUpgrade", None)
 
@@ -753,19 +750,19 @@ class Site(Entity):
 
     @property
     def show_url_structure(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the URL structure of this site collection is viewable.
         See Web.ShowURLStructureForCurrentUser, which is the scalar property used to determine the behavior for the
         current user. The default, if not disabled on the Web application, is "false".
-        :rtype: bool or None
         """
         return self.properties.get("ShowUrlStructure", None)
 
     @property
     def ui_version_configuration_enabled(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the visual upgrade UI for this site collection is displayed.
-        :rtype: bool or None
         """
         return self.properties.get("UIVersionConfigurationEnabled", None)
 
@@ -788,15 +785,16 @@ class Site(Entity):
 
     @property
     def upgrade_scheduled(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the upgrade has been scheduled. It can only be set to false by a farm administrator.
         To set it to true, set the UpgradeScheduledDate to a future time.
-        :rtype: bool or None
         """
         return self.properties.get("UpgradeScheduled", None)
 
     @property
     def upgrade_scheduled_date(self):
+        # type: () -> Optional[datetime.datetime]
         """
         Specifies the upgrade scheduled date in UTC (Coordinated Universal Time). Only the Date part is used.
         If UpgradeScheduled is false, returns SqlDateTime.MinValue.
@@ -805,9 +803,9 @@ class Site(Entity):
 
     @property
     def upgrading(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the user will be able to share links to the documents that can be accessed without signing in.
-        :rtype: bool or None
         """
         return self.properties.get("Upgrading", None)
 

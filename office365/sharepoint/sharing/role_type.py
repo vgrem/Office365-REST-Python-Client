@@ -55,6 +55,7 @@ class RoleType:
         the following: ViewPages, ViewListItems and ViewItemsRequiresOpen."""
 
     RestrictedReader = 8
+    """"""
 
     System = 255
     """For SharePoint internal use only. System roles can not be deleted, nor modified."""

@@ -15,6 +15,9 @@ class LanguageCollection(Entity):
     def items(self):
         return self.properties.get("Items", ClientValueCollection(Language))
 
+    def __len__(self):
+        return len(self.items)
+
     def __repr__(self):
         return repr(self.items)
 

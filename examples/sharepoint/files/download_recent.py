@@ -2,7 +2,6 @@ import os
 import tempfile
 
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.listitems.listitem import ListItem
 from tests import test_site_url, test_user_credentials
 
 ctx = ClientContext(test_site_url).with_credentials(test_user_credentials)
@@ -16,7 +15,7 @@ recent_items = (
     .get()
     .execute_query()
 )
-for item in recent_items:  # type: ListItem
+for item in recent_items:
     file_url = item.properties.get("FileRef")
     download_path = os.path.join(tempfile.mkdtemp(), os.path.basename(file_url))
     with open(download_path, "wb") as local_file:

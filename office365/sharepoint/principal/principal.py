@@ -7,6 +7,12 @@ from office365.sharepoint.entity import Entity
 class Principal(Entity):
     """Represents a user or group that can be assigned permissions to control security."""
 
+    def __str__(self):
+        return self.title
+
+    def __repr__(self):
+        return self.user_principal_name or self.id or self.entity_type_name
+
     @property
     def id(self):
         # type: () -> Optional[int]

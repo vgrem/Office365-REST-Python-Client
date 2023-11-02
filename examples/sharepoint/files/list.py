@@ -19,10 +19,8 @@ def enum_folder(parent_folder, fn):
 
 
 def print_file(f):
-    """
-    :type f: File
-    """
-    print(f.properties["ServerRelativeUrl"])
+    # type: (File) -> None
+    print(f.serverRelativeUrl)
 
 
 target_folder_url = "Shared Documents"

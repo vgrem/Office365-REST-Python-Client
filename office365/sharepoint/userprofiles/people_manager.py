@@ -157,9 +157,7 @@ class PeopleManager(Entity):
     def get_properties_for(self, user_or_name):
         """
         Gets user properties for the specified user.
-
         :param str or User user_or_name: Specifies the User object or its login name.
-        :return: PersonProperties
         """
         return_type = PersonProperties(self.context)
 

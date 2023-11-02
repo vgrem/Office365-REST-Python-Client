@@ -59,21 +59,26 @@ class SecurableObject(Entity):
         return self
 
     def remove_role_assignment(self, principal, role_def):
-        """Removes a role assignment from a securable resource.<81>
-
-        :param office365.sharepoint.permissions.role_definition.RoleDefinition role_def: Specifies the role definition
-        of the role assignment.
-        :param office365.sharepoint.principal.principal.Principal principal: Specifies the user or group of the
+        # type: (Principal|str, RoleDefinition|int) -> Self
+        """Removes a role assignment from a securable resource.
+        :param Principal principal: Specifies the user or group of the
         role assignment.
+        :param RoleDefinition role_def: Specifies the role definition
+        of the role assignment.
         """
+        if not isinstance(principal, Principal):
+            principal = self.context.web.site_users.get_by_principal_name(principal)
 
-        def _principal_loaded():
-            def _role_def_loaded():
-                self.role_assignments.remove_role_assignment(principal.id, role_def.id)
+        if not isinstance(role_def, RoleDefinition):
+            role_def = self.context.web.role_definitions.get_by_type(role_def)
 
-            role_def.ensure_property("Id", _role_def_loaded)
+        def _remove_role_assignment():
+            self.role_assignments.remove_role_assignment(principal.id, role_def.id)
 
-        principal.ensure_property("Id", _principal_loaded)
+        def _ensure_role_def():
+            role_def.ensure_property("Id", _remove_role_assignment)
+
+        principal.ensure_property("Id", _ensure_role_def)
         return self
 
     def break_role_inheritance(self, copy_role_assignments=True, clear_sub_scopes=True):

@@ -20,4 +20,4 @@ class ContentTypeId(ClientValue):
         self.StringValue = string_value
 
     def __repr__(self):
-        return self.StringValue
+        return self.StringValue or self.entity_type_name

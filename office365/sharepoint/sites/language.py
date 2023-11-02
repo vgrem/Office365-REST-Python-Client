@@ -13,3 +13,9 @@ class Language(ClientValue):
         self.DisplayName = display_name
         self.LanguageTag = language_tag
         self.Lcid = lcid
+
+    def __str__(self):
+        return self.DisplayName
+
+    def __repr__(self):
+        return "{0}: {1}".format(self.DisplayName, self.LanguageTag)

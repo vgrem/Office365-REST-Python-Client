@@ -572,9 +572,7 @@ class Folder(Entity):
     @property
     def server_relative_path(self):
         # type: () -> Optional[SPResPath]
-        """
-        Gets the server-relative Path of the list folder.
-        """
+        """Gets the server-relative Path of the list folder."""
         return self.properties.get("ServerRelativePath", SPResPath())
 
     @property

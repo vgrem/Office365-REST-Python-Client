@@ -1,5 +1,5 @@
 """
-Retrieves versions of the file
+Retrieves file system metadata
 """
 
 from office365.sharepoint.client_context import ClientContext
@@ -7,11 +7,14 @@ from tests import test_client_credentials, test_team_site_url
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 file_url = "SitePages/Home.aspx"
-file_with_versions = (
-    ctx.web.get_file_by_server_relative_path(file_url)
-    .expand(["Versions"])
+file = (
+    ctx.web.get_file_by_server_relative_url(file_url)
+    .expand(["ModifiedBy", "Author", "TimeCreated", "TimeLastModified"])
     .get()
     .execute_query()
 )
-for version in file_with_versions.versions:
-    print(version.version_label)
+
+print(file.author)
+print(file.modified_by)
+print(file.time_created)
+print(file.time_last_modified)

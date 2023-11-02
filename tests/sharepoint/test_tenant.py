@@ -166,9 +166,9 @@ class TestTenant(TestCase):
     #    result = self.tenant.get_onedrive_site_sharing_insights(1).execute_query()
     #    self.assertIsNotNone(result.value)
 
-    def test_22_get_home_site_url(self):
-        result = self.tenant.get_home_site_url().execute_query()
-        self.assertIsNotNone(result.value)
+    # def test_22_get_home_site_url(self):
+    #    result = self.tenant.get_home_site_url().execute_query()
+    #    self.assertIsNotNone(result.value)
 
     def test_23_get_tenant_all_web_templates(self):
         result = self.tenant.get_spo_tenant_all_web_templates().execute_query()

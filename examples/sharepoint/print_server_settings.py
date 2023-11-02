@@ -1,5 +1,5 @@
 """
-
+Prints server settings
 """
 
 from office365.sharepoint.client_context import ClientContext
@@ -12,4 +12,4 @@ blocked_file_extensions = ServerSettings.get_blocked_file_extensions(ctx)
 installed_languages = ServerSettings.get_global_installed_languages(ctx, 15)
 ctx.execute_batch()
 print("Is SharePoint Online? : {0}".format(is_online.value))
-print("Installed languages amount : {0}".format(len(installed_languages.items)))
+print("Installed languages : {0}".format(installed_languages))

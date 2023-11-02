@@ -9,6 +9,7 @@ from tests import test_team_site_url, test_user_credentials
 
 
 def print_upload_progress(offset):
+    # type: (int) -> None
     file_size = os.path.getsize(local_path)
     print(
         "Uploaded '{0}' bytes from '{1}'...[{2}%]".format(

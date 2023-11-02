@@ -5,7 +5,7 @@ from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.tenant.administration.hubsites.hub_site import HubSite
 
 
-class HubSiteCollection(EntityCollection):
+class HubSiteCollection(EntityCollection[HubSite]):
     """Represents a collection of HubSite resources."""
 
     def __init__(self, context, resource_path=None):
@@ -13,7 +13,6 @@ class HubSiteCollection(EntityCollection):
 
     def get_by_id(self, _id):
         """Retrieve Hub site by id
-
         :type _id: str
         """
         return HubSite(

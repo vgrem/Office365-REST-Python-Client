@@ -1,8 +1,11 @@
+from typing import Optional
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.alerts.collection import AlertCollection
 from office365.sharepoint.principal.principal import Principal
 from office365.sharepoint.principal.users.id_info import UserIdInfo
+from office365.sharepoint.userprofiles.person_properties import PersonProperties
 
 
 class User(Principal):
@@ -14,18 +17,16 @@ class User(Principal):
 
         return_type = Site(self.context)
 
-        def _user_loaded():
-            from office365.sharepoint.userprofiles.people_manager import PeopleManager
+        def _person_props_loaded(person_props):
+            # type: (PersonProperties) -> None
+            return_type.set_property("__siteUrl", person_props.personal_url)
 
-            people_manager = PeopleManager(self.context)
-            person_props = people_manager.get_properties_for(self.login_name)
+        def _get_properties_for():
+            self.context.people_manager.get_properties_for(
+                self.login_name
+            ).after_execute(_person_props_loaded)
 
-            def _person_props_loaded(resp):
-                return_type.set_property("__siteUrl", person_props.personal_url)
-
-            self.context.after_execute(_person_props_loaded)
-
-        self.ensure_property("LoginName", _user_loaded)
+        self.ensure_property("LoginName", _get_properties_for)
         return return_type
 
     def get_recent_files(self, top=100):
@@ -86,9 +87,8 @@ class User(Principal):
 
     @property
     def is_site_admin(self):
-        """Gets a Boolean value that specifies whether the user is a site collection administrator.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Gets a Boolean value that specifies whether the user is a site collection administrator."""
         return self.properties.get("IsSiteAdmin", None)
 
     @property
@@ -99,51 +99,45 @@ class User(Principal):
 
     @property
     def email(self):
+        # type: () -> Optional[str]
         """
         Specifies the e-mail address of the user.
         It MUST NOT be NULL. Its length MUST be equal to or less than 255.
-        :rtype: str or None
         """
         return self.properties.get("Email", None)
 
     @property
     def email_with_fallback(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
         return self.properties.get("EmailWithFallback", None)
 
     @property
     def expiration(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
         return self.properties.get("Expiration", None)
 
     @property
     def is_email_authentication_guest_user(self):
+        # type: () -> Optional[bool]
         """
         Indicates whether the User is a share by email guest user using time of access authentication.
         If this instance is an email authentication guest user, this value MUST be true, otherwise it MUST be false.
-        :rtype: bool or None
         """
         return self.properties.get("IsEmailAuthenticationGuestUser", None)
 
     @property
     def is_share_by_email_guest_user(self):
+        # type: () -> Optional[bool]
         """
         Gets a value indicating whether this User is a share by email guest user.
         If this instance is a share by email guest user, it's true; otherwise, false.
-        :rtype: bool or None
         """
         return self.properties.get("IsShareByEmailGuestUser", None)
 
     @property
     def user_principal_name(self):
-        """
-        User principal name of the user that initiated the sign-in.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """User principal name of the user that initiated the sign-in."""
         return self.properties.get("UserPrincipalName", None)
 
     def get_property(self, name, default_value=None):
