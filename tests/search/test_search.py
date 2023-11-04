@@ -1,4 +1,3 @@
-from office365.search.entity_type import EntityType
 from tests.graph_case import GraphTestCase
 
 
@@ -12,9 +11,7 @@ class TestSearchOneDrive(GraphTestCase):
         pass
 
     def test1_search_files(self):
-        result = self.client.search.query(
-            "Guide.docx", entity_types=[EntityType.driveItem]
-        ).execute_query()
+        result = self.client.search.query_drive_items("Guide.docx").execute_query()
         self.assertIsNotNone(result.value)
 
     def test2_search_messages(self):

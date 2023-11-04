@@ -699,7 +699,7 @@ class Web(SecurableObject):
         :param str url: The URL of the site, with the path of the object in SharePoint represented as query
         string parameters
         :param office365.sharepoint.client_context.ClientContext context: client context
-        :param ClientResult return_type: Return type
+        :param ClientResult[str] return_type: Return type
         """
         if return_type is None:
             return_type = ClientResult(context, str())
@@ -892,7 +892,6 @@ class Web(SecurableObject):
     def ensure_folder_path(self, path):
         """
         Ensures a nested folder hierarchy exist
-
         :param str path: relative server URL (path) to a folder
         """
         return self.root_folder.folders.ensure_path(path)

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import AnyStr, Optional
 
 from office365.communications.onlinemeetings.participants import MeetingParticipants
 from office365.entity import Entity
@@ -14,49 +15,37 @@ class OnlineMeeting(Entity):
 
     @property
     def allow_attendee_to_enable_camera(self):
-        """
-        Indicates whether attendees can turn on their camera.
-        :rtype: str
-        """
+        # type: () -> Optional[bool]
+        """Indicates whether attendees can turn on their camera."""
         return self.properties.get("allowAttendeeToEnableCamera", None)
 
     @property
     def allow_attendee_to_enable_mic(self):
-        """
-        Indicates whether attendees can turn on their microphone.
-        :rtype: str
-        """
+        # type: () -> Optional[bool]
+        """Indicates whether attendees can turn on their microphone."""
         return self.properties.get("allowAttendeeToEnableMic", None)
 
     @property
     def allowed_presenters(self):
-        """
-        Specifies who can be a presenter in a meeting. Possible values are listed in the following table.
-        """
+        """Specifies who can be a presenter in a meeting. Possible values are listed in the following table."""
         return self.properties.get("allowedPresenters", StringCollection())
 
     @property
     def allow_meeting_chat(self):
-        """
-        Specifies the mode of meeting chat.
-        :rtype: str or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies the mode of meeting chat."""
         return self.properties.get("allowMeetingChat", None)
 
     @property
     def allow_participants_to_change_name(self):
-        """
-        Specifies if participants are allowed to rename themselves in an instance of the meeting.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies if participants are allowed to rename themselves in an instance of the meeting."""
         return self.properties.get("allowParticipantsToChangeName", None)
 
     @property
     def attendee_report(self):
-        """
-        The content stream of the attendee report of a Microsoft Teams live event.
-        :rtype: bytes or None
-        """
+        # type: () -> Optional[AnyStr]
+        """The content stream of the attendee report of a Microsoft Teams live event."""
         return self.properties.get("attendeeReport", None)
 
     @property
@@ -68,17 +57,13 @@ class OnlineMeeting(Entity):
 
     @property
     def subject(self):
-        """
-        The subject of the online meeting.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The subject of the online meeting."""
         return self.properties.get("subject", None)
 
     @subject.setter
     def subject(self, value):
-        """
-        :type value: str
-        """
+        # type: (str) -> None
         self.set_property("subject", value)
 
     @property
@@ -88,9 +73,9 @@ class OnlineMeeting(Entity):
 
     @start_datetime.setter
     def start_datetime(self, value):
+        # type: (datetime) -> None
         """
         Sets the meeting start time in UTC.
-        :type value: datetime.datetime
         """
         self.set_property("startDateTime", value.isoformat())
 
@@ -101,10 +86,8 @@ class OnlineMeeting(Entity):
 
     @end_datetime.setter
     def end_datetime(self, value):
-        """
-        Sets the meeting end time in UTC.
-        :type value: datetime.datetime
-        """
+        # type: (datetime) -> None
+        """Sets the meeting end time in UTC."""
         self.set_property("endDateTime", value.isoformat())
 
     @property
@@ -114,11 +97,13 @@ class OnlineMeeting(Entity):
 
     @property
     def join_web_url(self):
+        # type: () -> Optional[str]
         """The join URL of the online meeting. Read-only."""
         return self.properties.get("joinWebUrl", None)
 
     @property
     def video_teleconference_id(self):
+        # type: () -> Optional[str]
         """The video teleconferencing ID."""
         return self.properties.get("videoTeleconferenceId", None)
 

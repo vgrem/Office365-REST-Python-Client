@@ -28,6 +28,12 @@ if TYPE_CHECKING:
 class Folder(Entity):
     """Represents a folder in a SharePoint Web site."""
 
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.serverRelativeUrl or self.unique_id or self.entity_type_name
+
     @staticmethod
     def from_url(abs_url):
         """

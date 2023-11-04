@@ -59,13 +59,15 @@ class File(AbstractFile):
     or a file in a folder."""
 
     def __repr__(self):
-        return self.serverRelativeUrl or self.unique_id or self.entity_type_name
+        if self.server_relative_path:
+            return repr(self.server_relative_path)
+        else:
+            return self.serverRelativeUrl or self.unique_id or self.entity_type_name
 
     @staticmethod
     def from_url(abs_url):
         """
         Retrieves a File from absolute url
-
         :type abs_url: str
         """
         from office365.sharepoint.client_context import ClientContext
@@ -273,9 +275,7 @@ class File(AbstractFile):
             if isinstance(destination, Folder):
                 destination.ensure_property("ServerRelativeUrl", _copyto, destination)
             else:
-                self.context.web.ensure_folder_path(destination).get().after_execute(
-                    _copyto
-                )
+                self.context.web.ensure_folder_path(destination).after_execute(_copyto)
 
         self.ensure_properties(["ServerRelativeUrl", "Name"], _source_file_resolved)
         return return_type
@@ -310,9 +310,9 @@ class File(AbstractFile):
                     "ServerRelativePath", _copyto_using_path, destination
                 )
             else:
-                self.context.web.ensure_folder_path(destination).after_execute(
-                    _copyto_using_path
-                )
+                self.context.web.ensure_folder_path(destination).get().select(
+                    ["ServerRelativePath"]
+                ).after_execute(_copyto_using_path)
 
         self.ensure_properties(["ServerRelativePath", "Name"], _source_file_resolved)
         return return_type
@@ -360,16 +360,19 @@ class File(AbstractFile):
         """
 
         def _update_file(return_type, new_file_url):
+            # type: (File, str) -> None
             return_type.set_property("ServerRelativePath", new_file_url)
 
         def _move_to_using_path(destination_folder):
+            # type: (Folder) -> None
             file_path = "/".join(
                 [str(destination_folder.server_relative_path), self.name]
             )
             params = {"DecodedUrl": file_path, "moveOperations": flag}
             qry = ServiceOperationQuery(self, "MoveToUsingPath", params)
-            self.context.add_query(qry)
-            self.context.after_query_execute(_update_file, self, file_path)
+            self.context.add_query(qry).after_query_execute(
+                _update_file, self, file_path
+            )
 
         def _source_file_resolved():
             if isinstance(destination, Folder):
@@ -386,7 +389,6 @@ class File(AbstractFile):
 
     def publish(self, comment):
         """Submits the file for content approval with the specified comment.
-
         :param str comment: Specifies the comment.
         """
         qry = ServiceOperationQuery(self, "Publish", {"comment": comment})
@@ -395,7 +397,6 @@ class File(AbstractFile):
 
     def unpublish(self, comment):
         """Removes the file from content approval or unpublishes a major version.
-
         :param str comment: Specifies the comment for UnPublish. Its length MUST be equal to or less than 1023.
         """
         qry = ServiceOperationQuery(self, "unpublish", {"comment": comment})
@@ -768,6 +769,7 @@ class File(AbstractFile):
 
     @property
     def versions(self):
+        # type: () -> FileVersionCollection
         """Gets a value that returns a collection of file version objects that represent the versions of the file."""
         return self.properties.get(
             "Versions",
@@ -786,9 +788,7 @@ class File(AbstractFile):
 
     @property
     def locked_by_user(self):
-        """
-        Gets a value that returns the user that owns the current lock on the file.
-        """
+        """Gets a value that returns the user that owns the current lock on the file."""
         return self.properties.get(
             "LockedByUser",
             User(self.context, ResourcePath("LockedByUser", self.resource_path)),

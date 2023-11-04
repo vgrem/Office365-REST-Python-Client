@@ -1,3 +1,7 @@
+"""
+Share a Web with user
+"""
+
 import sys
 
 from office365.sharepoint.client_context import ClientContext

@@ -24,6 +24,12 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 class Site(BaseItem):
     """The site resource provides metadata and relationships for a SharePoint site."""
 
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name or self.web_url or self.id or self.entity_type_name
+
     def get_by_path(self, path):
         # type: (str) -> Site
         """

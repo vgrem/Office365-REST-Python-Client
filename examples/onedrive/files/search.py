@@ -10,4 +10,6 @@ from tests.graph_case import acquire_token_by_username_password
 client = GraphClient(acquire_token_by_username_password)
 result = client.search.query_drive_items("Guide.docx").execute_query()
 for item in result.value:
-    print("Search terms: {0}".format(item.searchTerms))
+    for hit_container in item.hitsContainers:
+        for hit in hit_container.hits:
+            print(hit.resource)

@@ -3,9 +3,6 @@ from office365.sharepoint.documentmanagement.document_set import DocumentSet
 from tests import test_client_credentials, test_team_site_url
 
 client = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
-target_folder = client.web.default_document_library().root_folder.folders.get_by_url(
-    "2017"
-)
-
-doc_set = DocumentSet.create(client, target_folder, "07").execute_query()
+lib = client.web.default_document_library()
+doc_set = DocumentSet.create(client, lib.root_folder, "07").execute_query()
 print("DocSet created: {0}".format(doc_set.name))

@@ -76,6 +76,10 @@ class ListItem(SecurableObject):
                 link_kind=link_kind, expiration=expiration, role=role, password=password
             )
         )
+        if password:
+            request.settings.allowAnonymousAccess = True
+            request.settings.updatePassword = True
+
         payload = {"request": request}
         qry = ServiceOperationQuery(self, "ShareLink", None, payload, None, return_type)
         self.context.add_query(qry)

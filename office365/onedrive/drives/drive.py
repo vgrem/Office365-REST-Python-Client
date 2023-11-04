@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.base_item import BaseItem
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity_collection import EntityCollection
@@ -73,11 +75,10 @@ class Drive(BaseItem):
 
     @property
     def drive_type(self):
+        # type: () -> Optional[str]
         """
         Describes the type of drive represented by this resource. OneDrive personal drives will return personal.
         OneDrive for Business will return business. SharePoint document libraries will return documentLibrary.
-
-        :rtype: str or None
         """
         return self.properties.get("driveType", None)
 

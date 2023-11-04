@@ -25,11 +25,12 @@ class Team(Entity):
     """A team in Microsoft Teams is a collection of channel objects. A channel represents a topic, and therefore a
     logical isolation of discussion, within a team."""
 
+    def __str__(self):
+        return self.display_name
+
     def execute_query_and_wait(self):
         """
         Submit request(s) to the server and waits until operation is completed
-
-        :type self: T
         """
 
         def _loaded():
@@ -131,9 +132,7 @@ class Team(Entity):
     @property
     def incoming_channels(self):
         # type: () -> ChannelCollection
-        """
-        List of channels shared with the team.
-        """
+        """List of channels shared with the team."""
         return self.properties.get(
             "incomingChannels",
             ChannelCollection(
@@ -164,9 +163,7 @@ class Team(Entity):
     @property
     def primary_channel(self):
         # type: () -> Channel
-        """
-        The general channel for the team.
-        """
+        """The general channel for the team."""
         return self.properties.get(
             "primaryChannel",
             Channel(self.context, ResourcePath("primaryChannel", self.resource_path)),
@@ -229,9 +226,7 @@ class Team(Entity):
     @property
     def tenant_id(self):
         # type: () -> Optional[str]
-        """
-        The ID of the Azure Active Directory tenant.
-        """
+        """The ID of the Azure Active Directory tenant."""
         return self.properties.get("tenantId", None)
 
     @property

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 
 
@@ -6,8 +8,6 @@ class ColumnLink(Entity):
 
     @property
     def name(self):
-        """
-        The name of the column in this content type.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The name of the column in this content type."""
         return self.properties.get("name", None)

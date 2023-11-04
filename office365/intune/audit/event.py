@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.intune.audit.actor import AuditActor
 from office365.intune.audit.resource import AuditResource
@@ -9,9 +11,8 @@ class AuditEvent(Entity):
 
     @property
     def activity(self):
-        """Friendly name of the activity.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Friendly name of the activity."""
         return self.properties.get("activity", None)
 
     @property

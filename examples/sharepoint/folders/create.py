@@ -14,4 +14,3 @@ folder = (
     .execute_query()
 )
 print("Folder : {0} has been created".format(folder.serverRelativeUrl))
-folder.delete_object().execute_query()

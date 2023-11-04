@@ -90,9 +90,7 @@ class Channel(Entity):
     @property
     def messages(self):
         # type: () -> EntityCollection[ChatMessage]
-        """
-        A collection of all the messages in the channel. A navigation property. Nullable.
-        """
+        """A collection of all the messages in the channel."""
         return self.properties.get(
             "messages",
             EntityCollection(

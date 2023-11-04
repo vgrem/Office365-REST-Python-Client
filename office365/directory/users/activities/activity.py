@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
@@ -15,14 +16,15 @@ class UserActivity(Entity):
 
     @property
     def activation_url(self):
+        # type: () -> Optional[str]
         """URL used to launch the activity in the best native experience represented by the appId.
         Might launch a web-based app if no native app exists
-        :rtype: str or None
         """
         return self.properties.get("activationUrl", None)
 
     @property
     def activity_source_host(self):
+        # type: () -> Optional[str]
         """Required. URL for the domain representing the cross-platform identity mapping for the app.
         Mapping is stored either as a JSON file hosted on the domain or configurable via Windows Dev Center.
         The JSON file is named cross-platform-app-identifiers and is hosted at root of your HTTPS domain,
@@ -30,24 +32,23 @@ class UserActivity(Entity):
         For example: https://contoso.com or https://myapp.contoso.com but NOT https://myapp.contoso.com/somepath.
         You must have a unique file and domain (or sub domain) per cross-platform app identity.
         For example, a separate file and domain is needed for Word vs. PowerPoint.
-        :rtype: str or None
         """
         return self.properties.get("activitySourceHost", None)
 
     @property
     def app_activity_id(self):
+        # type: () -> Optional[str]
         """
         The unique activity ID in the context of the app - supplied by caller and immutable thereafter.
-        :rtype: str
         """
         return self.properties.get("appActivityId", None)
 
     @property
     def app_display_name(self):
+        # type: () -> Optional[str]
         """
         Short text description of the app used to generate the activity for use in cases when the app is
         not installed on the user’s local device.
-        :rtype: str
         """
         return self.properties.get("appDisplayName", None)
 

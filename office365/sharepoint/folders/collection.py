@@ -15,7 +15,6 @@ class FolderCollection(EntityCollection[Folder]):
     def add_using_path(self, decoded_url, overwrite):
         """
         Adds the folder located at the specified path to the collection.
-
         :param str decoded_url: Specifies the path for the folder.
         :param bool overwrite:  bool
         """
@@ -30,7 +29,6 @@ class FolderCollection(EntityCollection[Folder]):
     def ensure_path(self, path):
         """
         Ensures a folder exist
-
         :param str path: server or site relative url to a folder
         """
         path = path.replace(self.context.site_path, "")
@@ -46,7 +44,6 @@ class FolderCollection(EntityCollection[Folder]):
 
     def add(self, name):
         """Adds the folder that is located at the specified URL to the collection.
-
         :param str name: Specifies the Name of the folder.
         """
         return_type = Folder(self.context, KeyPath(name, self.resource_path))
@@ -57,7 +54,6 @@ class FolderCollection(EntityCollection[Folder]):
 
     def get_by_url(self, url):
         """Retrieve Folder resource by url
-
         :param str url: Specifies the URL of the list folder. The URL MUST be an absolute URL, a server-relative URL,
             a site-relative URL relative to the site (2) containing the collection of list folders, or relative to the
             list folder that directly contains this collection of list folders.
@@ -69,7 +65,6 @@ class FolderCollection(EntityCollection[Folder]):
     def get_by_path(self, decoded_url):
         """
         Get folder at the specified path.
-
         :param str decoded_url: Specifies the path for the folder.
         """
         return Folder(

@@ -15,6 +15,7 @@ class ShareLinkSettings(ClientValue):
         role=None,
         track_link_users=None,
         share_id=None,
+        update_password=None,
     ):
         """
         :param bool allow_anonymous_access: Indicates if the tokenized sharing link supports anonymous access.
@@ -33,6 +34,7 @@ class ShareLinkSettings(ClientValue):
         :param bool track_link_users:
         :param str share_id: The optional unique identifier of an existing section tokenized sharing link to be
              retrieved and updated if necessary.
+        :param bool update_password:
         """
         self.allowAnonymousAccess = allow_anonymous_access
         self.applicationLink = application_link
@@ -43,6 +45,7 @@ class ShareLinkSettings(ClientValue):
         self.role = role
         self.shareId = share_id
         self.trackLinkUsers = track_link_users
+        self.updatePassword = update_password
 
     @property
     def entity_type_name(self):
