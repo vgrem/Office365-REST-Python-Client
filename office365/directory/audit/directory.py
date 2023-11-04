@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 
 from office365.directory.audit.activity_initiator import AuditActivityInitiator
 from office365.entity import Entity
@@ -8,7 +9,7 @@ class DirectoryAudit(Entity):
     """Represents the directory audit items and its collection."""
 
     def __repr__(self):
-        return self.activity_display_name
+        return self.activity_display_name or self.entity_type_name
 
     @property
     def activity_datetime(self):
@@ -17,28 +18,28 @@ class DirectoryAudit(Entity):
 
     @property
     def activity_display_name(self):
+        # type: () -> Optional[str]
         """
         Indicates the activity name or the operation name (examples: "Create User" and "Add member to group").
         For a list of activities logged, refer to Azure AD audit log categories and activities.
-        :rtype: str
         """
         return self.properties.get("activityDisplayName", None)
 
     @property
     def category(self):
+        # type: () -> Optional[str]
         """
         Indicates which resource category that's targeted by the activity.
         For example: UserManagement, GroupManagement, ApplicationManagement, RoleManagement.
-        :rtype: str
         """
         return self.properties.get("category", None)
 
     @property
     def correlation_id(self):
+        # type: () -> Optional[str]
         """
         Indicates a unique ID that helps correlate activities that span across various services.
         Can be used to trace logs across services.
-        :rtype: str
         """
         return self.properties.get("correlationId", None)
 
@@ -51,28 +52,28 @@ class DirectoryAudit(Entity):
 
     @property
     def operation_type(self):
+        # type: () -> Optional[str]
         """
         Indicates the type of operation that was performed. The possible values include but are not limited
         to the following: Add, Assign, Update, Unassign, and Delete.
-        :rtype: str
         """
         return self.properties.get("operationType", None)
 
     @property
     def logged_by_service(self):
+        # type: () -> Optional[str]
         """
         Indicates information on which service initiated the activity. For example:
         Self-service Password Management, Core Directory, B2C, Invited Users, Microsoft Identity Manager,
         Privileged Identity Management.
-        :rtype: str
         """
         return self.properties.get("loggedByService", None)
 
     @property
     def result_reason(self):
+        # type: () -> Optional[str]
         """
         Indicates the reason for failure if the result is failure or timeout.
-        :rtype: str
         """
         return self.properties.get("resultReason", None)
 

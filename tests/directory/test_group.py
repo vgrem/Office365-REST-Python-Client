@@ -17,7 +17,7 @@ class TestGraphGroup(GraphTestCase):
     def test1_create_group(self):
         try:
             name = create_unique_name("Group")
-            new_group = self.client.groups.create_m365_group(name).execute_query()
+            new_group = self.client.groups.create_m365(name).execute_query()
             self.assertIsNotNone(new_group.id)
             self.__class__.target_group = new_group
         except ClientRequestException as e:

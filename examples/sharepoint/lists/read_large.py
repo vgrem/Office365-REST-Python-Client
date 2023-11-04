@@ -27,17 +27,7 @@ def get_total_count(target_list):
     print("Total items count: {0}".format(len(all_items)))
 
 
-def query_items_no_paged(target_list):
-    # type: (List) -> None
-    """
-    Demonstrates the default behaviour where only
-    """
-    items = target_list.items.get().select(["Title"]).top(50).execute_query()
-    print("Total items count: {0}".format(len(items)))
-
-
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 large_list = ctx.web.lists.get_by_title("Contacts_Large")
-# query_large_list(large_list)
-get_total_count(large_list)
-# query_items_no_paged(large_list)
+query_large_list(large_list)
+# get_total_count(large_list)

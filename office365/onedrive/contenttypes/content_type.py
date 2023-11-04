@@ -91,31 +91,25 @@ class ContentType(BaseItem):
     @property
     def name(self):
         # type: () -> Optional[str]
-        """
-        The name of the content type.
-        """
+        """The name of the content type."""
         return self.properties.get("name", None)
 
     @property
     def description(self):
-        """
-        The descriptive text for the item.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The descriptive text for the item."""
         return self.properties.get("description", None)
 
     @property
     def parent_id(self):
-        """The unique identifier of the content type.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The unique identifier of the content type."""
         return self.properties.get("parentId", None)
 
     @property
     def propagate_changes(self):
-        """If 'true', changes to this column will be propagated to lists that implement the column.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """If 'true', changes to this column will be propagated to lists that implement the column."""
         return self.properties.get("propagateChanges", None)
 
     @property
@@ -136,6 +130,7 @@ class ContentType(BaseItem):
 
     @property
     def column_links(self):
+        # type: () -> EntityCollection[ColumnLink]
         """The collection of columns that are required by this content type"""
         return self.properties.get(
             "columnLinks",
@@ -155,6 +150,7 @@ class ContentType(BaseItem):
 
     @property
     def base_types(self):
+        # type: () -> EntityCollection["ContentType"]
         """The collection of content types that are ancestors of this content type."""
         return self.properties.get(
             "baseTypes",
@@ -178,6 +174,7 @@ class ContentType(BaseItem):
 
     @property
     def column_positions(self):
+        # type: () -> EntityCollection[ColumnDefinition]
         """Column order information in a content type."""
         return self.properties.get(
             "columnPositions",
@@ -190,9 +187,7 @@ class ContentType(BaseItem):
 
     @property
     def order(self):
-        """
-        Specifies the order in which the content type appears in the selection UI.
-        """
+        """Specifies the order in which the content type appears in the selection UI."""
         return self.properties.get("order", ContentTypeOrder())
 
     def get_property(self, name, default_value=None):

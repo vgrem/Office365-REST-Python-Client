@@ -1,4 +1,5 @@
 from email.message import Message
+from typing import AnyStr
 
 from office365.runtime.compat import get_mime_type, message_as_bytes_or_string
 from office365.runtime.http.http_method import HttpMethod
@@ -7,9 +8,7 @@ from office365.runtime.queries.client_query import ClientQuery
 
 
 def _message_to_payload(message):
-    """
-    :type message: Message
-    """
+    # type: (Message) -> AnyStr
     lf = b"\n"
     crlf = b"\r\n"
     payload = message_as_bytes_or_string(message)

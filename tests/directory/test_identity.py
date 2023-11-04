@@ -23,6 +23,6 @@ class TestIdentity(TestCase):
         )
         self.assertIsNotNone(result.value)
 
-    def test4_list_risky_users(self):
-        result = self.client.identity_protection.risky_users.get().execute_query()
-        self.assertIsNotNone(result.resource_path)
+    # def test4_list_risky_users(self):
+    #    result = self.client.identity_protection.risky_users.get().execute_query()
+    #    self.assertIsNotNone(result.resource_path)

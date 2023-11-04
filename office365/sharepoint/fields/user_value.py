@@ -1,4 +1,5 @@
 from office365.sharepoint.fields.lookup_value import FieldLookupValue
+from office365.sharepoint.principal.users.user import User
 
 
 class FieldUserValue(FieldLookupValue):
@@ -8,11 +9,10 @@ class FieldUserValue(FieldLookupValue):
 
     @staticmethod
     def from_user(user):
+        # type: (User) -> FieldUserValue
         """
         Initialize field value from User
-
-        :param office365.sharepoint.principal.user.User user: User entity
-        :return: FieldUserValue
+        :param User user: User object
         """
         return_type = FieldUserValue(-1)
 

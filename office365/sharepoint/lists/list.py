@@ -69,6 +69,9 @@ class List(SecurableObject):
     def __init__(self, context, resource_path=None):
         super(List, self).__init__(context, resource_path)
 
+    def __repr__(self):
+        return self.id or self.title or self.entity_type_name
+
     def create_document_and_get_edit_link(
         self,
         file_name=None,
@@ -389,7 +392,7 @@ class List(SecurableObject):
     def get_list_item_changes_since_token(self, query):
         """
         Returns the changes made to the list since the date and time specified in the change token defined
-        by the query input parameter.<57>
+        by the query input parameter.
 
         :type query: office365.sharepoint.changes.log_item_query.ChangeLogItemQuery
         """

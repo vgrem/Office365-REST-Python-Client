@@ -1,8 +1,5 @@
 """
 Creating a list in SharePoint site
-
-To create a list object, use the ListCreationInformation class to define its properties,
-and then pass this object to the add(ListCreationInformation) method
 """
 
 from random import randint
@@ -13,7 +10,6 @@ from office365.sharepoint.lists.template_type import ListTemplateType
 from tests import test_client_credentials, test_team_site_url
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
-
 list_name = "Tasks" + str(randint(0, 10000))
 create_info = ListCreationInformation(list_name, None, ListTemplateType.Tasks)
 list_object = ctx.web.lists.add(create_info).execute_query()

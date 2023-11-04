@@ -12,7 +12,7 @@ from tests.graph_case import acquire_token_by_username_password
 
 grp_name = create_unique_name("Group")
 client = GraphClient(acquire_token_by_username_password)
-group = client.groups.create_m365_group(grp_name).execute_query()
+group = client.groups.create_m365(grp_name).execute_query()
 
 # clean up resources
 group.delete_object(True).execute_query()

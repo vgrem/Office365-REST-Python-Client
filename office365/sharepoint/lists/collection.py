@@ -16,7 +16,6 @@ class ListCollection(EntityCollection[List]):
         # type: (str) -> List
         """
         Returns the list with the specified display name.
-
         :param str list_title: Specifies the display name
         """
         return List(
@@ -25,9 +24,9 @@ class ListCollection(EntityCollection[List]):
         )
 
     def get_by_id(self, list_id):
+        # type: (str) -> List
         """
         Returns the list with the specified list identifier.
-
         :param str list_id: Specifies the list identifier
         """
         return List(

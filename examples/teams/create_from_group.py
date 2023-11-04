@@ -15,7 +15,7 @@ def print_failure(retry_number, ex):
 
 client = GraphClient(acquire_token_by_username_password)
 group_name = create_unique_name("Flight")
-group = client.groups.create_m365_group(group_name)
+group = client.groups.create_m365(group_name)
 team = group.add_team().execute_query_retry(
     max_retry=10, failure_callback=print_failure
 )

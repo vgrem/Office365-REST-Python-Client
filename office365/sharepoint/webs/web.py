@@ -815,6 +815,7 @@ class Web(SecurableObject):
             ServiceOperationPath(
                 "getFileByServerRelativeUrl", [str(path)], self.resource_path
             ),
+            self.root_folder.files,
         )
 
     def get_file_by_server_relative_path(self, path):
@@ -831,6 +832,7 @@ class Web(SecurableObject):
             ServiceOperationPath(
                 "getFileByServerRelativePath", path.to_json(), self.resource_path
             ),
+            self.root_folder.files,
         )
 
     def get_folder_by_server_relative_url(self, url):
@@ -843,6 +845,7 @@ class Web(SecurableObject):
             ServiceOperationPath(
                 "getFolderByServerRelativeUrl", [url], self.resource_path
             ),
+            self.folders,
         )
 
     def get_folder_by_server_relative_path(self, decoded_url):
@@ -859,6 +862,7 @@ class Web(SecurableObject):
             ServiceOperationPath(
                 "getFolderByServerRelativePath", path.to_json(), self.resource_path
             ),
+            self.folders,
         )
 
     def get_site_page_copy_to_status(self, work_item_id):

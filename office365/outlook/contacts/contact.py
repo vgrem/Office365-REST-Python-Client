@@ -73,6 +73,7 @@ class Contact(OutlookItem):
 
     @property
     def email_addresses(self):
+        # type: () -> ClientValueCollection[EmailAddress]
         """The contact's email addresses."""
         return self.properties.setdefault(
             "emailAddresses", ClientValueCollection(EmailAddress)
@@ -99,6 +100,7 @@ class Contact(OutlookItem):
 
     @property
     def multi_value_extended_properties(self):
+        # type: () -> EntityCollection[MultiValueLegacyExtendedProperty]
         """The collection of multi-value extended properties defined for the Contact."""
         return self.properties.get(
             "multiValueExtendedProperties",
@@ -111,6 +113,7 @@ class Contact(OutlookItem):
 
     @property
     def single_value_extended_properties(self):
+        # type: () -> EntityCollection[SingleValueLegacyExtendedProperty]
         """The collection of single-value extended properties defined for the Contact."""
         return self.properties.get(
             "singleValueExtendedProperties",

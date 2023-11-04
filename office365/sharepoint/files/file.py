@@ -25,6 +25,7 @@ from office365.sharepoint.permissions.irm.file_settings import (
     InformationRightsManagementFileSettings,
 )
 from office365.sharepoint.principal.users.user import User
+from office365.sharepoint.sharing.links.share_response import ShareLinkResponse
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 from office365.sharepoint.utilities.upload_status import UploadStatus
 from office365.sharepoint.utilities.wopi_frame_action import SPWOPIFrameAction
@@ -56,6 +57,9 @@ class AbstractFile(Entity):
 class File(AbstractFile):
     """Represents a file in a SharePoint Web site that can be a Web Part Page, an item in a document library,
     or a file in a folder."""
+
+    def __repr__(self):
+        return self.serverRelativeUrl or self.unique_id or self.entity_type_name
 
     @staticmethod
     def from_url(abs_url):
@@ -157,7 +161,7 @@ class File(AbstractFile):
         return return_type
 
     def share_link(self, link_kind, expiration=None, role=None, password=None):
-        # type: (int, Optional[datetime.datetime], Optional[int], Optional[str]) -> ClientResult[str]
+        # type: (int, Optional[datetime.datetime], Optional[int], Optional[str]) -> ClientResult[ShareLinkResponse]
         """Creates a tokenized sharing link for a file based on the specified parameters and optionally
         sends an email to the people that are listed in the specified parameters.
 
@@ -246,6 +250,7 @@ class File(AbstractFile):
         return self
 
     def copyto(self, destination, overwrite=False):
+        # type: (Folder|str, bool) -> File
         """Copies the file to the destination URL.
 
         :param office365.sharepoint.folders.folder.Folder or str destination: Specifies the destination folder or
@@ -272,7 +277,7 @@ class File(AbstractFile):
                     _copyto
                 )
 
-        self.ensure_property("ServerRelativeUrl", _source_file_resolved)
+        self.ensure_properties(["ServerRelativeUrl", "Name"], _source_file_resolved)
         return return_type
 
     def copyto_using_path(self, destination, overwrite=False):
@@ -289,9 +294,7 @@ class File(AbstractFile):
         self.parent_collection.add_child(return_type)
 
         def _copyto_using_path(destination_folder):
-            """
-            :type destination_folder: Folder
-            """
+            # type: (Folder) -> None
             file_path = "/".join(
                 [str(destination_folder.server_relative_path), self.name]
             )
@@ -307,9 +310,9 @@ class File(AbstractFile):
                     "ServerRelativePath", _copyto_using_path, destination
                 )
             else:
-                self.context.web.ensure_folder_path(destination).get().select(
-                    ["ServerRelativePath"]
-                ).after_execute(_copyto_using_path)
+                self.context.web.ensure_folder_path(destination).after_execute(
+                    _copyto_using_path
+                )
 
         self.ensure_properties(["ServerRelativePath", "Name"], _source_file_resolved)
         return return_type

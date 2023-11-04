@@ -1,4 +1,6 @@
-import json
+"""
+Gets the sharing information for a folder
+"""
 
 from office365.sharepoint.client_context import ClientContext
 from tests import test_team_site_url, test_user_credentials
@@ -11,4 +13,6 @@ result = (
     .get_sharing_information()
     .execute_query()
 )
-print(json.dumps(result.to_json(), indent=4))
+
+for sharing_link in result.sharing_links:
+    print(sharing_link)

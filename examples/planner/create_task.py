@@ -1,22 +1,16 @@
+"""
+Create a new plannerTask.
+https://learn.microsoft.com/en-us/graph/api/planner-post-tasks?view=graph-rest-1.0
+"""
+import sys
+
 from office365.graph_client import GraphClient
-from office365.planner.plans.plan import PlannerPlan
 from tests.graph_case import acquire_token_by_username_password
 
-
-def ensure_plan(planner, name):
-    """
-    :type planner: office365.planner.user.PlannerUser
-    :type name: str
-    :rtype: PlannerPlan
-    """
-    plans = planner.plans.get().filter("title eq '{0}'".format(name)).execute_query()
-    if len(plans) > 0:
-        return plans[0]
-    else:
-        return planner.plans.add(title=name).execute_query()
-
-
 client = GraphClient(acquire_token_by_username_password)
-plan = ensure_plan(client.me.planner, "My plan")
-task = client.planner.tasks.add(title="New task", planId=plan.id).execute_query()
+group = client.groups.get_by_name("My Sample Team").get().execute_query()
+plans = group.planner.plans.get().execute_query()
+if len(plans) == 0:
+    sys.exit("No plans were found")
+task = plans[0].tasks.add(title="New task").execute_query()
 print("Task {0} has been created".format(task.title))

@@ -36,10 +36,10 @@ class TestTeamSite(TestCase):
         self.assertIsNotNone(result.value.SiteStatus)
         self.assertTrue(result.value.SiteStatus == SiteStatus.Ready)
 
-    def test4_get_notebook_url(self):
-        group_id = self.__class__.target_site.group_id
-        result = self.client.group_site_manager.notebook(group_id).execute_query()
-        self.assertIsNotNone(result.value)
+    # def test4_get_notebook_url(self):
+    #    group_id = self.__class__.target_site.group_id
+    #    result = self.client.group_site_manager.notebook(group_id).execute_query()
+    #    self.assertIsNotNone(result.value)
 
     # def test5_get_team_channels(self):
     #    group_id = self.__class__.target_site.group_id

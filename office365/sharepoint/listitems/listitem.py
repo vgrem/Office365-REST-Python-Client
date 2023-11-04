@@ -55,7 +55,7 @@ class ListItem(SecurableObject):
             self.set_property("ParentList", parent_list, False)
 
     def share_link(self, link_kind, expiration=None, role=None, password=None):
-        # type: (int, Optional[datetime.datetime], Optional[int], Optional[str]) -> ClientResult
+        # type: (int, Optional[datetime.datetime], Optional[int], Optional[str]) -> ClientResult[ShareLinkResponse]
         """Creates a tokenized sharing link for a list item based on the specified parameters and optionally
         sends an email to the people that are listed in the specified parameters.
 
@@ -70,9 +70,7 @@ class ListItem(SecurableObject):
         :param password: Optional password value to apply to the tokenized sharing link,
             if it can support password protection.
         """
-        return_type = ClientResult(
-            self.context, ShareLinkResponse()
-        )  # type: ClientResult[ShareLinkResponse]
+        return_type = ClientResult(self.context, ShareLinkResponse())
         request = ShareLinkRequest(
             settings=ShareLinkSettings(
                 link_kind=link_kind, expiration=expiration, role=role, password=password

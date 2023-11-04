@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 
 from office365.directory.audit.signins.location import SignInLocation
 from office365.directory.audit.signins.status import SignInStatus
@@ -29,18 +30,18 @@ class SignIn(Entity):
 
     @property
     def client_app_used(self):
+        # type: () -> Optional[str]
         """
         Identifies the client used for the sign-in activity. Modern authentication clients include Browser, modern
         clients. Legacy authentication clients include Exchange ActiveSync, IMAP, MAPI, SMTP, POP, and other clients.
-        :rtype: str
         """
         return self.properties.get("clientAppUsed", None)
 
     @property
     def correlation_id(self):
+        # type: () -> Optional[str]
         """
         The request ID sent from the client when the sign-in is initiated; used to troubleshoot sign-in activity.
-        :rtype: str
         """
         return self.properties.get("correlationId", None)
 
@@ -58,18 +59,14 @@ class SignIn(Entity):
 
     @property
     def ip_address(self):
-        """
-        IP address of the client used to sign in.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """IP address of the client used to sign in."""
         return self.properties.get("ipAddress", None)
 
     @property
     def is_interactive(self):
-        """
-        Indicates if a sign-in is interactive or not.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Indicates if a sign-in is interactive or not."""
         return self.properties.get("isInteractive", None)
 
     @property
@@ -82,18 +79,15 @@ class SignIn(Entity):
 
     @property
     def resource_display_name(self):
-        """
-        Name of the resource the user signed into.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Name of the resource the user signed into."""
         return self.properties.get("resourceDisplayName", None)
 
     @property
     def resource_id(self):
+        # type: () -> Optional[str]
         """
-        ID of the resource that the user signed into.
-        :rtype: str or None
-        """
+        ID of the resource that the user signed into."""
         return self.properties.get("resourceId", None)
 
     @property

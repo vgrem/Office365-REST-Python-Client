@@ -1,8 +1,11 @@
+from typing import Optional
+
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.planner.buckets.bucket import PlannerBucket
-from office365.planner.plans.plan_details import PlannerPlanDetails
+from office365.planner.plans.container import PlannerPlanContainer
+from office365.planner.plans.details import PlannerPlanDetails
 from office365.planner.tasks.task import PlannerTask
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -14,8 +17,20 @@ class PlannerPlan(Entity):
     For more information about the relationships between groups, plans, and tasks, see Planner.
     """
 
+    def __str__(self):
+        return self.title
+
+    def __repr__(self):
+        return self.id or self.entity_type_name
+
+    @property
+    def container(self):
+        """Identity of the user, device, or application which created the plan."""
+        return self.properties.get("container", PlannerPlanContainer())
+
     @property
     def title(self):
+        # type: () -> Optional[str]
         """Required. Title of the plan."""
         return self.properties.get("title", None)
 
@@ -26,9 +41,8 @@ class PlannerPlan(Entity):
 
     @property
     def buckets(self):
-        """
-        Read-only. Nullable. Collection of buckets in the plan.
-        """
+        # type: () -> EntityCollection[PlannerBucket]
+        """Collection of buckets in the plan."""
         return self.properties.get(
             "buckets",
             EntityCollection(
@@ -38,9 +52,7 @@ class PlannerPlan(Entity):
 
     @property
     def details(self):
-        """
-        Read-only. Nullable. Additional details about the plan.
-        """
+        """Additional details about the plan."""
         return self.properties.get(
             "details",
             PlannerPlanDetails(
@@ -50,9 +62,8 @@ class PlannerPlan(Entity):
 
     @property
     def tasks(self):
-        """
-        Read-only. Nullable. Collection of tasks in the plan.
-        """
+        # type: () -> EntityCollection[PlannerTask]
+        """Collection of tasks in the plan."""
         return self.properties.get(
             "tasks",
             EntityCollection(

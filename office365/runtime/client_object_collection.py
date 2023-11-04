@@ -155,7 +155,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
     def get(self):
         # type: () -> Self
 
-        def _loaded(items):
+        def _loaded(col):
             # type: (Self) -> None
             self._page_loaded.notify(self)
 
@@ -168,9 +168,9 @@ class ClientObjectCollection(ClientObject, Generic[T]):
 
         self.paged(page_size, page_loaded)
 
-        def _page_loaded(items):
+        def _page_loaded(col):
             # type: (Self) -> None
-            self._page_loaded.notify(items)
+            self._page_loaded.notify(col)
             if self.has_next:
                 self._get_next(after_loaded=_page_loaded)
 

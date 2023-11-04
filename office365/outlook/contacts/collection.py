@@ -18,7 +18,6 @@ class ContactCollection(DeltaCollection[Contact]):
         :param str surname: The contact's surname.
         :param str email_address: Default email address
         :param str business_phone: Default contact's business phone number.
-        :rtype: Contact
         """
 
         def _create_email_address(address):

@@ -44,7 +44,7 @@ class ResourcePath(ClientValue):
         return "SP.ResourcePath"
 
     def __str__(self):
-        return str(self.DecodedUrl)
+        return self.DecodedUrl
 
     def __repr__(self):
-        return str(self.DecodedUrl)
+        return self.DecodedUrl or self.entity_type_name

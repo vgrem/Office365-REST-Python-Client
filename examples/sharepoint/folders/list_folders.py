@@ -1,5 +1,6 @@
 """
-Demonstrates how to enumerate a folder
+Demonstrates how to retrieve folders
+If 'recursive' flag set to True, it traverses all sub folders
 """
 
 from office365.sharepoint.client_context import ClientContext

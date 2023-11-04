@@ -35,7 +35,7 @@ class Group(DirectoryObject):
     """Represents an Azure Active Directory (Azure AD) group, which can be an Office 365 group, or a security group."""
 
     def __repr__(self):
-        return self.display_name
+        return self.display_name or self.id or self.entity_type_name
 
     def renew(self):
         """
@@ -121,9 +121,8 @@ class Group(DirectoryObject):
 
     @property
     def assigned_labels(self):
-        """
-        The list of sensitivity label pairs (label ID, label name) associated with a Microsoft 365 group.
-        """
+        # type: () -> ClientValueCollection[AssignedLabel]
+        """The list of sensitivity label pairs (label ID, label name) associated with a Microsoft 365 group."""
         return self.properties.get(
             "assignedLabels", ClientValueCollection(AssignedLabel)
         )
