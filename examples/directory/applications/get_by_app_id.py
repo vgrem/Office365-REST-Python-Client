@@ -16,4 +16,4 @@ app = (
     .get()
     .execute_query()
 )
-print(app.display_name)
+print(app)

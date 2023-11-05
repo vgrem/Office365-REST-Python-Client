@@ -1,6 +1,8 @@
 import time
 from typing import AnyStr, Optional
 
+from typing_extensions import Self
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
@@ -9,6 +11,7 @@ from office365.sharepoint.entity import Entity
 from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.gtp.request_options import ChatGptRequestOptions
 from office365.sharepoint.listitems.collection import ListItemCollection
+from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.render_data_parameters import RenderListDataParameters
 from office365.sharepoint.lists.render_override_parameters import (
     RenderListDataOverrideParameters,
@@ -310,14 +313,11 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return return_type
 
-    def get_site_status(self, url):
-        """
-        :param str url:
-        """
-        result = self.aggregated_site_collections_list.items.filter(
-            "SiteUrl eq '{0}'".format(url)
+    def get_site(self, site_url):
+        # type: (str) -> ListItem
+        return self._aggregated_site_collections_list.items.single(
+            "SiteUrl eq '{0}'".format(site_url.rstrip("/"))
         ).get()
-        return result
 
     def get_sites_by_state(self, states=None):
         """
@@ -325,7 +325,7 @@ class Tenant(Entity):
         """
         return_type = ListItemCollection(
             self.context,
-            ResourcePath("items", self.aggregated_site_collections_list.resource_path),
+            ResourcePath("items", self._aggregated_site_collections_list.resource_path),
         )
         payload = {"states": states}
         qry = ServiceOperationQuery(
@@ -424,11 +424,8 @@ class Tenant(Entity):
         return self
 
     def register_hub_site(self, site_url):
-        """
-        Registers an existing site as a hub site.
-
-        :param str site_url:
-        """
+        # type: (str) -> HubSiteProperties
+        """Registers an existing site as a hub site."""
         return_type = HubSiteProperties(self.context)
         params = {"siteUrl": site_url}
         qry = ServiceOperationQuery(
@@ -438,11 +435,8 @@ class Tenant(Entity):
         return return_type
 
     def unregister_hub_site(self, site_url):
-        """
-        Unregisters a hub site so that it is no longer a hub site.
-
-        :param str site_url: Site Url
-        """
+        # type: (str) -> Self
+        """Unregisters a hub site so that it is no longer a hub site."""
         payload = {"siteUrl": site_url}
         qry = ServiceOperationQuery(
             self, "UnregisterHubSite", None, payload, None, None
@@ -526,7 +520,6 @@ class Tenant(Entity):
 
     def restore_deleted_site(self, site_url):
         """Restores deleted site with the specified URL
-
         :param str site_url: A string representing the URL of the site.
         """
         return_type = SpoOperation(self.context)
@@ -543,6 +536,7 @@ class Tenant(Entity):
         :param bool include_detail: A Boolean value that indicates whether to include all of the SPSite properties.
         """
         return_type = SiteProperties(self.context)
+        return_type.set_property("Url", url, False)
         self.sites.add_child(return_type)
         payload = {"url": url, "includeDetail": include_detail}
         qry = ServiceOperationQuery(
@@ -574,12 +568,8 @@ class Tenant(Entity):
         return return_type
 
     def connect_site_to_hub_site_by_id(self, site_url, hub_site_id):
-        """
-
-        :param str site_url:
-        :param str hub_site_id:
-        :return:
-        """
+        # type: (str, str) -> Self
+        """Connects Site to Hub Site"""
         params = {"siteUrl": site_url, "hubSiteId": hub_site_id}
         qry = ServiceOperationQuery(
             self, "ConnectSiteToHubSiteById", None, params, None, None
@@ -588,9 +578,8 @@ class Tenant(Entity):
         return self
 
     def send_email(self, site_url):
-        """
-        :type site_url: str
-        """
+        # type: (str) -> ClientResult[bool]
+        """ """
         return_type = ClientResult(self.context, bool())
         payload = {"siteUrl": site_url}
         qry = ServiceOperationQuery(self, "SendEmail", None, payload, None, return_type)
@@ -599,10 +588,8 @@ class Tenant(Entity):
 
     @property
     def ai_builder_enabled(self):
-        """
-        Gets the value if the AIBuilder settings should be shown in the tenant
-        :rtype: bool or None
-        """
+        # type: () -> Optional[str]
+        """Gets the value if the AIBuilder settings should be shown in the tenant"""
         return self.properties.get("AIBuilderEnabled", None)
 
     @property
@@ -613,26 +600,26 @@ class Tenant(Entity):
         )
 
     @property
-    def aggregated_site_collections_list(self):
+    def _aggregated_site_collections_list(self):
         return self.context.web.lists.get_by_title(
             "DO_NOT_DELETE_SPLIST_TENANTADMIN_AGGREGATED_SITECOLLECTIONS"
         )
 
     @property
     def allow_comments_text_on_email_enabled(self):
+        # type: () -> Optional[bool]
         """
         When enabled, the email notification that a user receives when is mentioned,
-            includes the surrounding document context
-        :rtype: bool or None
+        includes the surrounding document context
         """
         return self.properties.get("AllowCommentsTextOnEmailEnabled", None)
 
     @property
     def allow_everyone_except_external_users_claim_in_private_site(self):
+        # type: () -> Optional[bool]
         """
         Gets the value if EveryoneExceptExternalUsers claim is allowed or not in people picker in a private group site.
         False value means it is blocked
-        :rtype: bool or None
         """
         return self.properties.get(
             "AllowEveryoneExceptExternalUsersClaimInPrivateSite", None
@@ -640,10 +627,10 @@ class Tenant(Entity):
 
     @property
     def allow_editing(self):
+        # type: () -> Optional[bool]
         """
         Prevents users from editing Office files in the browser and copying and pasting Office file contents
         out of the browser window.
-        :rtype: bool or None
         """
         return self.properties.get("AllowEditing", None)
 
@@ -655,9 +642,7 @@ class Tenant(Entity):
     @property
     def root_site_url(self):
         # type: () -> Optional[str]
-        """
-        The tenant's root site url
-        """
+        """The tenant's root site url"""
         return self.properties.get("RootSiteUrl", None)
 
     @property

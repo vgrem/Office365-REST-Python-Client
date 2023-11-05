@@ -1,24 +1,27 @@
 from typing import Optional
 
+from office365.onedrive.listitems.list_item import ListItem
 from office365.runtime.paths.key import KeyPath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.entity import Entity
-from office365.sharepoint.sites.site import Site
+from office365.sharepoint.internal.paths.static_operation import StaticOperationPath
 from office365.sharepoint.tenant.administration.deny_add_and_customize_pages_status import (
     DenyAddAndCustomizePagesStatus,
 )
+from office365.sharepoint.tenant.administration.spo_operation import SpoOperation
 
 
 class SiteProperties(Entity):
     """Contains a property bag of information about a site."""
 
+    def __repr__(self):
+        return self.url or self.entity_type_name
+
     @staticmethod
     def clear_sharing_lock_down(context, site_url):
-        """
-        :param office365.sharepoint.client_context.ClientContext context: SharePoint client service
-        :param str site_url:
-        """
+        # type: (ClientContext, str) -> SiteProperties
         payload = {"siteUrl": site_url}
         binding_type = SiteProperties(context)
         qry = ServiceOperationQuery(
@@ -30,75 +33,71 @@ class SiteProperties(Entity):
     def update(self):
         """Updates the site collection properties with the new properties specified in the SiteProperties object."""
 
-        site = Site(self.context)
-        site.set_property("__siteUrl", self.url)
-
-        def _site_loaded(return_type):
-            self._resource_path = KeyPath(site.id, self.parent_collection.resource_path)
+        def _update():
             super(SiteProperties, self).update()
 
-        self.context.load(site, after_loaded=_site_loaded)
+        self._ensure_site_path(_update)
         return self
+
+    def update_ex(self):
+        """Updates the site collection properties with the new properties specified in the SiteProperties object."""
+        return_type = SpoOperation(self.context)
+
+        def _update_ex():
+            qry = ServiceOperationQuery(
+                self, "Update", parameters_type=self, return_type=return_type
+            )
+            self.context.add_query(qry)
+
+        self._ensure_site_path(_update_ex)
+        return return_type
 
     @property
     def deny_add_and_customize_pages(self):
-        """
-        Represents the status of the [DenyAddAndCustomizePages] feature on a site collection.
-        """
+        # type: () -> Optional[int]
+        """Represents the status of the [DenyAddAndCustomizePages] feature on a site collection."""
         return self.properties.get(
             "DenyAddAndCustomizePages", DenyAddAndCustomizePagesStatus.Unknown
         )
 
     @deny_add_and_customize_pages.setter
     def deny_add_and_customize_pages(self, value):
-        """
-        Sets the status of the [DenyAddAndCustomizePages] feature on a site collection.
-
-        :param int value:
-        """
+        # type: (int) -> None
+        """Sets the status of the [DenyAddAndCustomizePages] feature on a site collection."""
         self.set_property("DenyAddAndCustomizePages", value)
 
     @property
     def owner_login_name(self):
-        """
-        :rtype: str
-        """
+        # type: () -> Optional[str]
         return self.properties.get("OwnerLoginName", None)
 
     @property
     def webs_count(self):
-        """
-        Gets the number of Web objects in the site.
-        :rtype: int
-        """
+        # type: () -> Optional[str]
+        """Gets the number of Web objects in the site."""
         return self.properties.get("WebsCount", None)
 
     @property
     def url(self):
         # type: () -> Optional[str]
-        """
-        Gets the URL of the site.
-        """
+        """Gets the URL of the site."""
         return self.properties.get("Url", None)
 
     @property
     def compatibility_level(self):
         # type: () -> Optional[str]
-        """
-        Gets the compatibility level of the site.
-        """
+        """Gets the compatibility level of the site."""
         return self.properties.get("CompatibilityLevel", None)
 
     @property
     def lock_state(self):
         # type: () -> Optional[str]
-        """
-        Gets or sets the lock state of the site.
-        """
+        """Gets or sets the lock state of the site."""
         return self.properties.get("LockState", None)
 
     @property
     def sharing_capability(self):
+        # type: () -> Optional[int]
         """
         Determines what level of sharing is available for the site.
 
@@ -115,29 +114,41 @@ class SiteProperties(Entity):
 
     @sharing_capability.setter
     def sharing_capability(self, value):
-        """
-        Sets the level of sharing for the site.
-        :type value: int
-        """
+        # type: (int) -> None
+        """Sets the level of sharing for the site."""
         self.set_property("SharingCapability", value)
 
     @property
     def time_zone_id(self):
         # type: () -> Optional[str]
-        """
-        Gets the time zone ID of the site.
-        """
+        """Gets the time zone ID of the site."""
         return self.properties.get("TimeZoneId", None)
 
     @property
     def entity_type_name(self):
+        # type: () -> str
         return "Microsoft.Online.SharePoint.TenantAdministration.SiteProperties"
 
     def set_property(self, name, value, persist_changes=True):
         super(SiteProperties, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if name == "Url" and self._resource_path is None:
-            self._resource_path = ServiceOperationPath(
+            self._resource_path = StaticOperationPath(
                 self.entity_type_name, {"Url": value}
             )
         return self
+
+    def _ensure_site_path(self, action):
+        if isinstance(self.resource_path, ServiceOperationPath):
+
+            def _loaded(return_type):
+                # type: (ListItem) -> None
+                site_id = return_type.get_property("SiteId")
+                self._resource_path = KeyPath(
+                    site_id, self.parent_collection.resource_path
+                )
+                action()
+
+            self.context.tenant.get_site(self.url).after_execute(_loaded)
+        else:
+            action()

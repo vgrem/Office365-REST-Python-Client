@@ -1,5 +1,8 @@
 """
+Demonstrates how to authenticate using App-Only flow
 
+Refer this article for a detailed instruction:
+https://learn.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread
 """
 import os
 
@@ -9,7 +12,6 @@ from tests import (
     test_client_id,
     test_site_url,
     test_tenant,
-    test_tenant_name,
 )
 
 cert_credentials = {
@@ -22,4 +24,4 @@ cert_credentials = {
 
 ctx = ClientContext(test_site_url).with_client_certificate(**cert_credentials)
 current_web = ctx.web.get().execute_query()
-print("{0}".format(current_web.url))
+print(current_web)

@@ -28,6 +28,9 @@ from office365.runtime.types.collections import StringCollection
 class ServicePrincipal(DirectoryObject):
     """Represents an instance of an application in a directory."""
 
+    def __str__(self):
+        return self.display_name
+
     def add_key(self, key_credential, password_credential, proof):
         """
         Adds a key credential to a servicePrincipal. This method along with removeKey can be used by a servicePrincipal
@@ -185,9 +188,7 @@ class ServicePrincipal(DirectoryObject):
     @property
     def app_display_name(self):
         # type: () -> Optional[str]
-        """
-        The display name exposed by the associated application.
-        """
+        """The display name exposed by the associated application."""
         return self.properties.get("appDisplayName", None)
 
     @property
@@ -210,11 +211,15 @@ class ServicePrincipal(DirectoryObject):
         return self.properties.get("appRoles", AppRoleCollection())
 
     @property
+    def display_name(self):
+        # type: () -> Optional[str]
+        """The display name."""
+        return self.properties.get("displayName", None)
+
+    @property
     def homepage(self):
         # type: () -> Optional[str]
-        """
-        Home page or landing page of the application.
-        """
+        """Home page or landing page of the application"""
         return self.properties.get("homepage", None)
 
     @property
