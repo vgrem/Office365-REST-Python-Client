@@ -14,18 +14,14 @@ class SignIn(Entity):
 
     @property
     def app_display_name(self):
-        """
-        App name displayed in the Azure Portal.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """App name displayed in the Azure Portal."""
         return self.properties.get("appDisplayName", None)
 
     @property
     def app_id(self):
-        """
-        Unique GUID representing the app ID in the Azure Active Directory.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Unique GUID representing the app ID in the Azure Active Directory."""
         return self.properties.get("appId", None)
 
     @property
@@ -92,34 +88,34 @@ class SignIn(Entity):
 
     @property
     def risk_detail(self):
+        # type: () -> Optional[str]
         """
         Provides the 'reason' behind a specific state of a risky user, sign-in or a risk event.
-        :rtype: str or None
         """
         return self.properties.get("riskDetail", None)
 
     @property
     def user_id(self):
+        # type: () -> Optional[str]
         """
         ID of the user that initiated the sign-in. Supports $filter (eq operator only).
-        :rtype: str or None
         """
         return self.properties.get("userId", None)
 
     @property
     def user_principal_name(self):
+        # type: () -> Optional[str]
         """
         User principal name of the user that initiated the sign-in. Supports $filter (eq and startsWith operators only).
-        :rtype: str or None
         """
         return self.properties.get("userPrincipalName", None)
 
     @property
     def status(self):
+        # type: () -> Optional[SignInStatus]
         """
         Sign-in status. Includes the error code and description of the error (in case of a sign-in failure).
         Supports $filter (eq operator only) on errorCode property.
-        :rtype: str or None
         """
         return self.properties.get("status", SignInStatus())
 

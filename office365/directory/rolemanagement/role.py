@@ -24,9 +24,7 @@ class DirectoryRole(DirectoryObject):
 
     @property
     def members(self):
-        """
-        Users that are members of this directory role.
-        """
+        """Users that are members of this directory role."""
         from office365.directory.object_collection import DirectoryObjectCollection
 
         return self.properties.get(

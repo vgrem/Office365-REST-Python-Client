@@ -45,25 +45,19 @@ class Contact(OutlookItem):
     @manager.setter
     def manager(self, value):
         # type: (str) -> None
-        """
-        Sets name of the contact's manager.
-        """
+        """Sets name of the contact's manager."""
         self.set_property("manager", value)
 
     @property
     def mobile_phone(self):
         # type: () -> Optional[str]
-        """
-        The contact's mobile phone number.
-        """
+        """The contact's mobile phone number."""
         return self.properties.get("mobilePhone", None)
 
     @mobile_phone.setter
     def mobile_phone(self, value):
         # type: (str) -> None
-        """
-        Sets contact's mobile phone number.
-        """
+        """Sets contact's mobile phone number."""
         self.set_property("mobilePhone", value)
 
     @property

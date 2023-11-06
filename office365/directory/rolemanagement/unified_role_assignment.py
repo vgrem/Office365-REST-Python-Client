@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.rolemanagement.unified_role_definition import (
     UnifiedRoleDefinition,
 )
@@ -13,20 +15,19 @@ class UnifiedRoleAssignment(Entity):
 
     @property
     def app_scope_id(self):
+        # type: () -> Optional[str]
         """
         Identifier of the app-specific scope when the assignment scope is app-specific. Either this property or
         directoryScopeId is required. App scopes are scopes that are defined and understood by this application only.
         Use / for tenant-wide app scopes. Use directoryScopeId to limit the scope to particular directory objects,
         for example, administrative units. Supports $filter (eq, in).
-        :rtype: str
         """
         return self.properties.get("appScopeId", None)
 
     @property
     def condition(self):
-        """
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """ """
         return self.properties.get("condition", None)
 
     @property

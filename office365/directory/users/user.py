@@ -71,6 +71,9 @@ from office365.todo.todo import Todo
 class User(DirectoryObject):
     """Represents an Azure AD user account. Inherits from directoryObject."""
 
+    def __repr__(self):
+        return self.user_principal_name or self.id or self.entity_type_name
+
     def add_extension(self, name):
         """
         Creates an open extension (openTypeExtension object) and add custom properties in a new or existing instance

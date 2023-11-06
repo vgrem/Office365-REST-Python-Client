@@ -19,6 +19,12 @@ class ContentType(Entity):
     to items of those types
     """
 
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.string_id or str(self.id) or self.entity_type_name
+
     def reorder_fields(self, field_names):
         """
         The ReorderFields method is called to change the order in which fields appear in a content type.

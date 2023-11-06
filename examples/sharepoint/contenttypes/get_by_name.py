@@ -7,4 +7,4 @@ from tests import test_client_credentials, test_team_site_url
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 ct = ctx.web.content_types.get_by_name("Document").get().execute_query()
-print(ct.id)
+print(ct)

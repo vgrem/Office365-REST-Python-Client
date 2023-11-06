@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.rolemanagement.unified_role_permission import (
     UnifiedRolePermission,
 )
@@ -13,16 +15,15 @@ class UnifiedRoleDefinition(Entity):
 
     @property
     def display_name(self):
-        """The display name for the unifiedRoleDefinition.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """The display name for the unifiedRoleDefinition."""
         return self.properties.get("displayName", None)
 
     @property
     def is_built_in(self):
+        # type: () -> Optional[bool]
         """Flag indicating whether the role definition is part of the default set included in
         Azure Active Directory (Azure AD) or a custom definition.
-        :rtype: bool
         """
         return self.properties.get("isBuiltIn", None)
 
@@ -37,6 +38,7 @@ class UnifiedRoleDefinition(Entity):
 
     @property
     def inherits_permissions_from(self):
+        # type: () -> EntityCollection[UnifiedRoleDefinition]
         """
         Read-only collection of role definitions that the given role definition inherits from. Only Azure AD built-in
         roles (isBuiltIn is true) support this attribute. Supports $expand.

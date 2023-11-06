@@ -14,6 +14,7 @@ from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.sharing.document_manager import DocumentSharingManager
+from office365.sharepoint.sharing.links.share_response import ShareLinkResponse
 from office365.sharepoint.sharing.user_sharing_result import UserSharingResult
 from office365.sharepoint.storagemetrics.storage_metrics import StorageMetrics
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
@@ -202,7 +203,7 @@ class Folder(Entity):
         return return_type
 
     def share_link(self, link_kind, expiration=None, role=None, password=None):
-        # type: (int, Optional[datetime], Optional[int], Optional[str]) -> str
+        # type: (int, Optional[datetime], Optional[int], Optional[str]) -> ClientResult[ShareLinkResponse]
         """Creates a tokenized sharing link for a folder based on the specified parameters and optionally
         sends an email to the people that are listed in the specified parameters.
 

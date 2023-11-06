@@ -24,6 +24,7 @@ class ContactFolder(Entity):
 
     @property
     def child_folders(self):
+        # type: () -> EntityCollection["ContactFolder"]
         """The collection of child folders in the folder. Navigation property. Read-only. Nullable."""
         return self.properties.get(
             "childFolders",
@@ -36,6 +37,7 @@ class ContactFolder(Entity):
 
     @property
     def multi_value_extended_properties(self):
+        # type: () -> EntityCollection[MultiValueLegacyExtendedProperty]
         """The collection of multi-value extended properties defined for the Contact folder."""
         return self.properties.get(
             "multiValueExtendedProperties",
@@ -48,6 +50,7 @@ class ContactFolder(Entity):
 
     @property
     def single_value_extended_properties(self):
+        # type: () -> EntityCollection[SingleValueLegacyExtendedProperty]
         """The collection of single-value extended properties defined for the Contact folder."""
         return self.properties.get(
             "singleValueExtendedProperties",

@@ -13,6 +13,9 @@ class ShareLinkResponse(ClientValue):
         """
         self.sharingLinkInfo = sharing_link_info
 
+    def __str__(self):
+        return self.sharingLinkInfo.Url
+
     @property
     def entity_type_name(self):
         return "SP.Sharing.ShareLinkResponse"

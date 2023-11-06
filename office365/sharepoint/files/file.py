@@ -64,6 +64,9 @@ class File(AbstractFile):
         else:
             return self.serverRelativeUrl or self.unique_id or self.entity_type_name
 
+    def __str__(self):
+        return self.name
+
     @staticmethod
     def from_url(abs_url):
         """

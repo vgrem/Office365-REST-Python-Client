@@ -28,7 +28,7 @@ class Calendar(Entity):
     """
 
     def __repr__(self):
-        return self.name
+        return self.name or self.id or self.entity_type_name
 
     def allowed_calendar_sharing_roles(self, user):
         """

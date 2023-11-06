@@ -1098,7 +1098,6 @@ class Web(SecurableObject):
     def get_file_by_guest_url(self, guest_url):
         """
         Returns the file object from the guest access URL.
-
         :param str guest_url: The guest access URL to get the file with.
         """
         return_type = File(self.context)
@@ -1282,9 +1281,10 @@ class Web(SecurableObject):
         """
         return_type = SharingResult(self.context)
 
-        def _picker_value_resolved(resp, picker_result, group):
+        def _share(picker_result, group):
+            # type: (ClientResult[str], Group) -> None
             picker_input = "[{0}]".format(picker_result.value)
-            role_value = "group:{groupId}".format(groupId=group.properties["Id"])
+            role_value = "group:{groupId}".format(groupId=group.id)
             Web.share_object(
                 self.context,
                 self.url,
@@ -1299,26 +1299,26 @@ class Web(SecurableObject):
                 return_type=return_type,
             )
 
-        def _grp_resolved(group):
-            picker_result = (
-                ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(
-                    self.context, user_principal_name
-                )
-            )
-            self.context.after_execute(
-                _picker_value_resolved, True, picker_result, group
-            )
-
         def _web_resolved():
             groups = {
                 ExternalSharingSiteOption.View: self.associated_visitor_group,
                 ExternalSharingSiteOption.Edit: self.associated_member_group,
                 ExternalSharingSiteOption.Owner: self.associated_owner_group,
-            }
-            selected_group = groups[share_option]
-            self.context.load(selected_group, after_loaded=_grp_resolved)
+            }  # type: dict[ExternalSharingSiteOption, Group]
 
-        self.ensure_property("Url", _web_resolved)
+            ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(
+                self.context, user_principal_name
+            ).after_execute(_share, groups[share_option])
+
+        self.ensure_properties(
+            [
+                "Url",
+                "AssociatedVisitorGroup",
+                "AssociatedMemberGroup",
+                "AssociatedOwnerGroup",
+            ],
+            _web_resolved,
+        )
         return return_type
 
     def unshare(self):

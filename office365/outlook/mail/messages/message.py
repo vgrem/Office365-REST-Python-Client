@@ -205,13 +205,12 @@ class Message(OutlookItem):
 
     @property
     def has_attachments(self):
+        # type: () -> Optional[bool]
         """
         Indicates whether the message has attachments. This property doesn't include inline attachments,
         so if a message contains only inline attachments, this property is false. To verify the existence
         of inline attachments, parse the body property to look for a src attribute,
         such as <IMG src="cid:image001.jpg@01D26CD8.6C05F070">.
-
-        :rtype: bool or None
         """
         return self.properties.get("hasAttachments", None)
 
@@ -229,6 +228,7 @@ class Message(OutlookItem):
 
     @property
     def extensions(self):
+        # type: () -> EntityCollection[Extension]
         """The collection of open extensions defined for the message. Nullable."""
         return self.properties.get(
             "extensions",
@@ -253,24 +253,19 @@ class Message(OutlookItem):
     @property
     def body_preview(self):
         # type: () -> Optional[str]
-        """
-        The first 255 characters of the message body. It is in text format."""
+        """The first 255 characters of the message body. It is in text format."""
         return self.properties.get("bodyPreview", None)
 
     @property
     def conversation_id(self):
         # type: () -> Optional[str]
-        """
-        The ID of the conversation the email belongs to.
-        """
+        """The ID of the conversation the email belongs to."""
         return self.properties.get("conversationId", None)
 
     @property
     def conversation_index(self):
         # type: () -> Optional[str]
-        """
-        Indicates the position of the message within the conversation.
-        """
+        """Indicates the position of the message within the conversation."""
         return self.properties.get("conversationIndex", None)
 
     @property
@@ -292,9 +287,7 @@ class Message(OutlookItem):
     @property
     def importance(self):
         # type: () -> Optional[str]
-        """
-        The importance of the message.
-        """
+        """The importance of the message."""
         return self.properties.get("importance", None)
 
     @property
@@ -308,6 +301,7 @@ class Message(OutlookItem):
 
     @property
     def internet_message_headers(self):
+        # type: () -> ClientValueCollection[InternetMessageHeader]
         """
         A collection of message headers defined by RFC5322. The set includes message headers indicating the network
         path taken by a message from the sender to the recipient. It can also contain custom message headers that
