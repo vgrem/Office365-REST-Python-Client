@@ -8,7 +8,10 @@ class DirectoryRole(DirectoryObject):
     """Represents an Azure AD directory role. Azure AD directory roles are also known as administrator roles"""
 
     def __repr__(self):
-        return self.display_name
+        return self.id or self.entity_type_name
+
+    def __str__(self):
+        return "Name: {0}".format(self.display_name)
 
     @property
     def description(self):

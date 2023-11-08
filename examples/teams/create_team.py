@@ -14,8 +14,8 @@ from tests.graph_case import acquire_token_by_username_password
 client = GraphClient(acquire_token_by_username_password)
 team_name = create_unique_name("Team")
 print("Creating a team '{0}' ...".format(team_name))
-new_team = client.teams.create(team_name).execute_query_and_wait()
+team = client.teams.create(team_name).execute_query_and_wait()
 print("Team has been created")
 
 print("Cleaning up temporary resources... ")
-new_team.delete_object().execute_query()
+team.delete_object().execute_query()

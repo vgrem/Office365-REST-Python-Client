@@ -30,6 +30,17 @@ class Application(DirectoryObject):
     an Application in Azure AD
     """
 
+    def __repr__(self):
+        return self.id or self.app_id or self.entity_type_name
+
+    def __str__(self):
+        if self.display_name:
+            return "Name: {0}".format(self.display_name)
+        elif self.app_id:
+            return "App Id: {0}".format(self.app_id)
+        else:
+            return self.entity_type_name
+
     def add_certificate(
         self, cert_data, display_name, start_datetime=None, end_datetime=None
     ):
@@ -62,7 +73,7 @@ class Application(DirectoryObject):
         Remove a certificate from an application.
         :param str thumbprint: The unique identifier for the password.
         """
-        raise NotImplementedError("")
+        raise NotImplementedError("remove_certificate")
 
     def add_password(self, display_name):
         """Adds a strong password to an application.
@@ -178,6 +189,7 @@ class Application(DirectoryObject):
 
     @property
     def app_roles(self):
+        # type: () -> ClientValueCollection[AppRole]
         """
         The collection of roles defined for the application. With app role assignments, these roles can be assigned to
         users, groups, or service principals associated with other applications
@@ -191,16 +203,12 @@ class Application(DirectoryObject):
 
     @property
     def certification(self):
-        """
-        Specifies the certification status of the application.
-        """
+        """Specifies the certification status of the application."""
         return self.properties.get("certification", Certification())
 
     @property
     def created_datetime(self):
-        """
-        The date and time the application was registered.
-        """
+        """The date and time the application was registered."""
         return self.properties.get("createdDateTime", datetime.datetime.min)
 
     @property
@@ -318,9 +326,3 @@ class Application(DirectoryObject):
             }
             default_value = property_mapping.get(name, None)
         return super(Application, self).get_property(name, default_value)
-
-    def __repr__(self):
-        return self.id
-
-    def __str__(self):
-        return self.display_name

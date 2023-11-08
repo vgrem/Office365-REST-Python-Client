@@ -1,8 +1,16 @@
+from typing import TYPE_CHECKING
+
 from office365.directory.permissions.identity import Identity
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.onedrive.permissions.permission import Permission
 from office365.runtime.queries.create_entity import CreateEntityQuery
+
+if TYPE_CHECKING:
+    from office365.directory.applications.application import Application
+    from office365.directory.groups.group import Group
+    from office365.directory.users.user import User
+    from office365.intune.devices.device import Device
 
 
 class PermissionCollection(EntityCollection[Permission]):
@@ -12,6 +20,7 @@ class PermissionCollection(EntityCollection[Permission]):
         super(PermissionCollection, self).__init__(context, Permission, resource_path)
 
     def add(self, roles, identity=None, identity_type=None):
+        # type: (list[str], Application|User|Group|Device|str, str) -> Permission
         """
         Create a new permission object.
 
@@ -21,6 +30,7 @@ class PermissionCollection(EntityCollection[Permission]):
         """
 
         return_type = Permission(self.context)
+        self.add_child(return_type)
 
         known_identities = {
             "application": self.context.applications,
@@ -41,7 +51,7 @@ class PermissionCollection(EntityCollection[Permission]):
                 raise ValueError("Unknown identity type")
             identity = known_identity[identity]
 
-        def _create():
+        def _add():
             payload = {
                 "roles": roles,
                 "grantedToIdentities": [
@@ -53,12 +63,26 @@ class PermissionCollection(EntityCollection[Permission]):
                 ],
             }
 
-            self.add_child(return_type)
             qry = CreateEntityQuery(self, payload, return_type)
             self.context.add_query(qry)
 
-        identity.ensure_properties(["displayName"], _create)
+        identity.ensure_properties(["displayName"], _add)
         return return_type
+
+    def delete(self, roles, identity):
+        # type: (list[str], Application|User|Group|Device) -> Permission
+        """
+        Deletes the permission.
+        """
+
+        def _delete(col):
+            pass
+
+        def _identity_loaded():
+            self.get_all(page_loaded=_delete)
+
+        identity.ensure_property("id", _identity_loaded)
+        return self
 
     def delete_all(self):
         """

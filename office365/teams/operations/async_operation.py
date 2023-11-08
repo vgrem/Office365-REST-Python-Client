@@ -68,16 +68,14 @@ class TeamsAsyncOperation(Entity):
 
     @property
     def target_resource_location(self):
+        # type: () -> Optional[str]
         """The location of the object that's created or modified as result of this async operation.
         This URL should be treated as an opaque value and not parsed into its component paths.
-        :rtype: str or None
         """
         return self.properties.get("targetResourceLocation", None)
 
     @property
     def status(self):
-        """
-        Operation status.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Operation status."""
         return self.properties.get("status", None)

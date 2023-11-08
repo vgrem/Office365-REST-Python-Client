@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.types.collections import StringCollection
 from office365.teams.schedule.change_tracked_entity import ChangeTrackedEntity
 
@@ -7,6 +9,7 @@ class SchedulingGroup(ChangeTrackedEntity):
 
     @property
     def is_active(self):
+        # type: () -> Optional[bool]
         """Indicates whether the schedulingGroup can be used when creating new entities or updating existing ones"""
         return self.properties.get("isActive", None)
 

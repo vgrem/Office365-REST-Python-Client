@@ -20,8 +20,12 @@ class WorkbookWorksheet(Entity):
     def __repr__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
     @property
     def charts(self):
+        # type: () -> EntityCollection[WorkbookChart]
         """Returns collection of charts that are part of the worksheet"""
         return self.properties.get(
             "charts",
@@ -33,9 +37,7 @@ class WorkbookWorksheet(Entity):
     @property
     def name(self):
         # type: () -> Optional[str]
-        """
-        The display name of the worksheet.
-        """
+        """The display name of the worksheet."""
         return self.properties.get("name", None)
 
     @property

@@ -62,13 +62,30 @@ class DriveItem(BaseItem):
     """The driveItem resource represents a file, folder, or other item stored in a drive. All file system objects in
     OneDrive and SharePoint are returned as driveItem resources"""
 
+    def get_files(self, recursive=False):
+        """Retrieves files
+        :param bool recursive: Determines whether to enumerate folders recursively
+        """
+        return_type = EntityCollection(self.context, DriveItem)
+
+        def _get_files(parent_drive_item):
+            # type: (DriveItem) -> None
+            def _after_loaded():
+                for drive_item in parent_drive_item.children:
+                    if drive_item.is_folder:
+                        if recursive:
+                            _get_files(drive_item)
+                    else:
+                        return_type.add_child(drive_item)
+
+            parent_drive_item.ensure_properties(["children"], _after_loaded)
+
+        _get_files(self)
+        return return_type
+
     def get_by_path(self, url_path):
         # type: (str) -> "DriveItem"
-        """
-        Retrieve DriveItem by server relative path
-
-        :type url_path: str
-        """
+        """Retrieve DriveItem by server relative path"""
         return DriveItem(
             self.context, UrlPath(url_path, self.resource_path), self.children
         )
@@ -77,7 +94,6 @@ class DriveItem(BaseItem):
         # type: (str) -> "DriveItem"
         """
         Creates a PowerPoint file
-
         :param str name: File name
         """
         return self.upload(name, None)
@@ -140,18 +156,14 @@ class DriveItem(BaseItem):
 
     def follow(self):
         # type: () -> Self
-        """
-        Follow a driveItem.
-        """
+        """Follow a driveItem."""
         qry = ServiceOperationQuery(self, "follow")
         self.context.add_query(qry)
         return self
 
     def unfollow(self):
         # type: () -> Self
-        """
-        Unfollow a driveItem.
-        """
+        """Unfollow a driveItem."""
         qry = ServiceOperationQuery(self, "unfollow")
         self.context.add_query(qry)
         return self
@@ -363,9 +375,7 @@ class DriveItem(BaseItem):
         return_type = ClientResult(self.context)  # type: ClientResult[str]
 
         def _create_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
+            # type: (RequestOptions) -> None
             request.url += "?@microsoft.graph.conflictBehavior={0}".format(
                 conflict_behavior
             )
@@ -533,7 +543,6 @@ class DriveItem(BaseItem):
 
         qry = _create_query()
         self.context.add_query(qry)
-
         return return_type
 
     def permanent_delete(self):
@@ -583,10 +592,7 @@ class DriveItem(BaseItem):
 
     def validate_permission(self, challenge_token=None, password=None):
         # type: (Optional[str], Optional[str]) -> Self
-        """
-        :type challenge_token: str
-        :type password: str
-        """
+        """ """
         payload = {"challengeToken": challenge_token, "password": password}
         qry = ServiceOperationQuery(self, "validatePermission", None, payload)
         self.context.add_query(qry)
@@ -619,9 +625,7 @@ class DriveItem(BaseItem):
     @property
     def location(self):
         # type: () -> GeoCoordinates
-        """
-        Location metadata, if the item has location data. Read-only.
-        """
+        """Location metadata, if the item has location data"""
         return self.properties.get("location", GeoCoordinates())
 
     @property
@@ -664,15 +668,12 @@ class DriveItem(BaseItem):
     @property
     def web_dav_url(self):
         # type: () -> str or None
-        """
-        WebDAV compatible URL for the item.
-        :rtype: str or None
-        """
+        """WebDAV compatible URL for the item."""
         return self.properties.get("webDavUrl", None)
 
     @property
     def children(self):
-        # type: () -> EntityCollection[DriveItem]
+        # type: () -> EntityCollection["DriveItem"]
         """Collection containing Item objects for the immediate children of Item. Only items representing folders
         have children.
         """

@@ -21358,6 +21358,7 @@
             <Property Name="videoTeleconferenceId" Type="Edm.String"/>
             <Property Name="watermarkProtection" Type="graph.watermarkProtectionValues"/>
             <NavigationProperty Name="attendanceReports" Type="Collection(graph.meetingAttendanceReport)" ContainsTarget="true"/>
+            <NavigationProperty Name="recordings" Type="Collection(graph.callRecording)" ContainsTarget="true"/>
             <NavigationProperty Name="transcripts" Type="Collection(graph.callTranscript)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="presence" BaseType="graph.entity">
@@ -25292,6 +25293,13 @@
             <Property Name="meetingStartDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="totalParticipantCount" Type="Edm.Int32"/>
             <NavigationProperty Name="attendanceRecords" Type="Collection(graph.attendanceRecord)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="callRecording" BaseType="graph.entity">
+            <Property Name="content" Type="Edm.Stream"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="meetingId" Type="Edm.String"/>
+            <Property Name="meetingOrganizer" Type="graph.identitySet"/>
+            <Property Name="recordingContentUrl" Type="Edm.String"/>
          </EntityType>
          <EntityType Name="callTranscript" BaseType="graph.entity">
             <Property Name="content" Type="Edm.Stream"/>

@@ -10,7 +10,6 @@ class SharesCollection(EntityCollection[SharedDriveItem]):
     def by_url(self, url):
         """
         Address shared item by absolute url
-
         :type url: str
         """
         return SharedDriveItem(self.context, SharedPath(url, self.resource_path))

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.base_item import BaseItem
 from office365.entity_collection import EntityCollection
 from office365.onedrive.columns.definition_collection import ColumnDefinitionCollection
@@ -16,10 +18,8 @@ class List(BaseItem):
 
     @property
     def display_name(self):
-        """
-        The displayable title of the list
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The displayable title of the list"""
         return self.properties.get("displayName", None)
 
     @property

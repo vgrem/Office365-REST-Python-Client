@@ -1,8 +1,8 @@
 from typing import Callable
 
+import requests
 from typing_extensions import Self
 
-from office365.directory.groups.group import Group
 from office365.entity_collection import EntityCollection
 from office365.runtime.odata.path_builder import ODataPathBuilder
 from office365.runtime.paths.resource_path import ResourcePath
@@ -44,18 +44,8 @@ class TeamCollection(EntityCollection[Team]):
         return_type = Team(self.context)
         self.add_child(return_type)
 
-        payload = {
-            "displayName": display_name,
-            "description": description,
-            "template@odata.bind": "https://graph.microsoft.com/v1.0/teamsTemplates('standard')",
-        }
-        qry = CreateEntityQuery(self, payload, return_type)
-        self.context.add_query(qry)
-
         def _process_response(resp):
-            """
-            :type resp: requests.Response
-            """
+            # type: (requests.Response) -> None
             content_loc = resp.headers.get("Content-Location", None)
             team_path = ODataPathBuilder.parse(content_loc)
             return_type.set_property("id", team_path.segment, False)
@@ -65,5 +55,11 @@ class TeamCollection(EntityCollection[Team]):
             operation = TeamsAsyncOperation(self.context, operation_path)
             return_type.operations.add_child(operation)
 
-        self.context.after_execute(_process_response)
+        payload = {
+            "displayName": display_name,
+            "description": description,
+            "template@odata.bind": "https://graph.microsoft.com/v1.0/teamsTemplates('standard')",
+        }
+        qry = CreateEntityQuery(self, payload, return_type)
+        self.context.add_query(qry).after_execute(_process_response)
         return return_type

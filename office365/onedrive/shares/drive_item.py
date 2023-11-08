@@ -26,6 +26,7 @@ class SharedDriveItem(BaseItem):
 
     @property
     def list_item(self):
+        # type: () -> ListItem
         """Used to access the underlying listItem"""
         return self.properties.get(
             "listItem",
@@ -34,6 +35,7 @@ class SharedDriveItem(BaseItem):
 
     @property
     def list(self):
+        # type: () -> List
         """Used to access the underlying list"""
         return self.properties.get(
             "list", List(self.context, ResourcePath("list", self.resource_path))
@@ -41,6 +43,7 @@ class SharedDriveItem(BaseItem):
 
     @property
     def drive_item(self):
+        # type: () -> DriveItem
         """Used to access the underlying driveItem"""
         return self.properties.get(
             "driveItem",

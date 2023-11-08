@@ -14,6 +14,7 @@ from tests.graph_case import acquire_token_by_username_password
 
 
 def print_progress(offset):
+    # type: (int) -> None
     print("Downloaded '{0}' bytes...".format(offset))
 
 

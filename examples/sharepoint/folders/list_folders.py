@@ -8,7 +8,7 @@ from tests import test_client_credentials, test_team_site_url
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 folders = (
-    ctx.web.default_document_library().root_folder.get_folders(False).execute_query()
+    ctx.web.default_document_library().root_folder.get_files(False).execute_query()
 )
 for folder in folders:
     print(

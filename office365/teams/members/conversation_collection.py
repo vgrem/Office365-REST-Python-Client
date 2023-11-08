@@ -2,7 +2,7 @@ from office365.entity_collection import EntityCollection
 from office365.teams.members.conversation import ConversationMember
 
 
-class ConversationMemberCollection(EntityCollection):
+class ConversationMemberCollection(EntityCollection[ConversationMember]):
     def __init__(self, context, resource_path=None):
         super(ConversationMemberCollection, self).__init__(
             context, ConversationMember, resource_path
@@ -18,8 +18,6 @@ class ConversationMemberCollection(EntityCollection):
             Each member must be assigned a role of owner or guest. Guest tenant members must be assigned the guest role
         :param list[str] roles: The roles for that user.
         :param datetime.datetime visible_history_start_datetime:
-
-        :rtype: ConversationMember
         """
         return_type = super(ConversationMemberCollection, self).add(roles=roles)
         from office365.directory.users.user import User

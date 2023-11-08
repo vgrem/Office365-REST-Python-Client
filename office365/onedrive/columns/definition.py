@@ -32,6 +32,12 @@ class ColumnDefinition(BaseItem):
     To list hidden field values on listItems, include the desired columns by name in your $select statement.
     """
 
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name or self.id or self.entity_type_name
+
     @property
     def display_name(self):
         # type: () -> Optional[str]
@@ -41,9 +47,7 @@ class ColumnDefinition(BaseItem):
     @property
     def enforce_unique_values(self):
         # type: () -> Optional[bool]
-        """
-        If true, no two list items may have the same value for this column.
-        """
+        """If true, no two list items may have the same value for this column."""
         return self.properties.get("enforceUniqueValues", None)
 
     @property
@@ -195,9 +199,7 @@ class ColumnDefinition(BaseItem):
     @property
     def type(self):
         # type: () -> Optional[str]
-        """
-        For site columns, the type of column.
-        """
+        """For site columns, the type of column."""
         return self.properties.get("type", None)
 
     def get_property(self, name, default_value=None):

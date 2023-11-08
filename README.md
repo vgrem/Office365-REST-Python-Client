@@ -1,5 +1,5 @@
 # About
-Office 365 & Microsoft Graph library for Python
+Microsoft 365 & Microsoft Graph library for Python
 
 # Usage
 
@@ -356,11 +356,11 @@ def download_files(remote_folder, local_path):
 Additional examples:
 
 -  [create list column](examples/onedrive/columns/create_text.py) 
--  [download file](examples/onedrive/files/download_default.py)
+-  [download file](examples/onedrive/files/download.py)
 -  [export files](examples/onedrive/files/export.py)
 -  [upload folder](examples/onedrive/folders/upload.py)   
 -  [list drives](examples/onedrive/drives/list.py)
--  [list files](examples/onedrive/folders/list_with_files.py)
+-  [list files](examples/onedrive/folders/list_files.py)
 
 Refer to [OneDrive examples section](examples/onedrive) for more examples.
 
