@@ -12,7 +12,6 @@ class SitePageMetadataCollection(EntityCollection[T]):
 
     def get_by_id(self, site_page_id):
         """Gets the site page with the specified ID.
-
         :param int site_page_id: Specifies the identifier of the site page.
         """
         return SitePageMetadata(

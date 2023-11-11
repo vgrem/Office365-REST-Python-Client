@@ -15,6 +15,9 @@ if TYPE_CHECKING:
 class SitePageMetadata(Entity):
     """Represents the core properties of a Site Page."""
 
+    def __repr__(self):
+        return self.file_name or self.absolute_url or self.entity_type_name
+
     @property
     def absolute_url(self):
         # type: () -> Optional[str]

@@ -223,7 +223,6 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         """
         return_type = self.create_typed_object()
         self.add_child(return_type)
-        key = return_type.property_ref_name
 
         def _after_loaded(col):
             # type: (ClientObjectCollection) -> None
@@ -233,7 +232,10 @@ class ClientObjectCollection(ClientObject, Generic[T]):
             elif len(col) > 1:
                 message = "Ambiguous match found for filter: {0}".format(expression)
                 raise ValueError(message)
-            return_type.set_property(key, col[0].get_property(key), False)
+            [
+                return_type.set_property(k, v, False)
+                for k, v in col[0].properties.items()
+            ]
 
         self.filter(expression).top(2)
         self.context.load(self, after_loaded=_after_loaded)

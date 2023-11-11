@@ -105,7 +105,7 @@ class FileVersion(Entity):
     def set_property(self, key, value, persist_changes=True):
         super(FileVersion, self).set_property(key, value, persist_changes)
         if self._resource_path is None:
-            if key == "ID":
+            if key == self.property_ref_name:
                 self._resource_path = KeyPath(
                     value, self.parent_collection.resource_path
                 )

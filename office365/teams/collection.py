@@ -4,7 +4,7 @@ import requests
 from typing_extensions import Self
 
 from office365.entity_collection import EntityCollection
-from office365.runtime.odata.path_builder import ODataPathBuilder
+from office365.runtime.paths.builder import ODataPathBuilder
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.teams.operations.async_operation import TeamsAsyncOperation
@@ -47,11 +47,11 @@ class TeamCollection(EntityCollection[Team]):
         def _process_response(resp):
             # type: (requests.Response) -> None
             content_loc = resp.headers.get("Content-Location", None)
-            team_path = ODataPathBuilder.parse(content_loc)
+            team_path = ODataPathBuilder.parse_url(content_loc)
             return_type.set_property("id", team_path.segment, False)
 
             loc = resp.headers.get("Location", None)
-            operation_path = ODataPathBuilder.parse(loc)
+            operation_path = ODataPathBuilder.parse_url(loc)
             operation = TeamsAsyncOperation(self.context, operation_path)
             return_type.operations.add_child(operation)
 

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.communications.presences.status_message import PresenceStatusMessage
 from office365.entity import Entity
 from office365.outlook.mail.item_body import ItemBody
@@ -88,22 +90,20 @@ class Presence(Entity):
 
     @property
     def activity(self):
+        # type: () -> Optional[str]
         """
         The supplemental information to a user's availability.
         Possible values are Available, Away, BeRightBack, Busy, DoNotDisturb, InACall, InAConferenceCall, Inactive,
         InAMeeting, Offline, OffWork, OutOfOffice, PresenceUnknown, Presenting, UrgentInterruptionsOnly.
-
-        :rtype: str or None
         """
         return self.properties.get("activity", None)
 
     @property
     def availability(self):
+        # type: () -> Optional[str]
         """
         The base presence information for a user.
         Possible values are Available, AvailableIdle, Away, BeRightBack, Busy, BusyIdle, DoNotDisturb, Offline,
            PresenceUnknown
-
-        :rtype: str or None
         """
         return self.properties.get("availability", None)

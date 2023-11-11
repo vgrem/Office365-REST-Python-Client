@@ -57,16 +57,12 @@ class TermStore(TaxonomyItem):
     @property
     def default_language_tag(self):
         # type: () -> Optional[str]
-        """
-        Gets or sets the LCID of the default working language.
-        """
+        """Gets or sets the LCID of the default working language."""
         return self.properties.get("defaultLanguageTag", None)
 
     @property
     def language_tags(self):
-        """
-        Gets an integer collection of LCIDs.
-        """
+        """Gets an integer collection of LCIDs."""
         return self.properties.get("languageTags", StringCollection())
 
     @property

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.intune.devices.category import DeviceCategory
@@ -17,12 +19,12 @@ class ManagedDevice(Entity):
 
     @property
     def activation_lock_bypass_code(self):
+        # type: () -> Optional[str]
         """
         The code that allows the Activation Lock on managed device to be bypassed. Default,
         is Null (Non-Default property) for this property when returned as part of managedDevice entity in LIST call.
         To retrieve actual values GET call needs to be made, with device id and included in select parameter.
         Supports: $select. $Search is not supported. Read-only. This property is read-only.
-        :rtype: str
         """
         return self.properties.get("activationLockBypassCode", None)
 
@@ -38,25 +40,20 @@ class ManagedDevice(Entity):
 
     @property
     def manufacturer(self):
-        """
-        Manufacturer of the device.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Manufacturer of the device."""
         return self.properties.get("manufacturer", None)
 
     @property
     def operating_system(self):
-        """
-        Manufacturer of the device.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Manufacturer of the device."""
         return self.properties.get("operatingSystem", None)
 
     @property
     def device_compliance_policy_states(self):
-        """
-        Device compliance policy states for this device
-        """
+        # type: () -> EntityCollection[DeviceCompliancePolicyState]
+        """Device compliance policy states for this device"""
         return self.properties.get(
             "deviceCompliancePolicyStates",
             EntityCollection(

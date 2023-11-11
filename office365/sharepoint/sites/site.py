@@ -109,7 +109,7 @@ class Site(Entity):
         return ClientContext(url).site
 
     def get_available_tags(self):
-        """"""
+        """ """
         return_type = ClientResult(self.context, ClientValueCollection(ComplianceTag))
 
         def _site_loaded():
@@ -130,9 +130,7 @@ class Site(Entity):
         return return_type
 
     def get_site_logo(self):
-        """
-        Downloads a site logo
-        """
+        """Downloads a site logo"""
         return_type = ClientResult(self.context)
 
         def _site_loaded():
@@ -141,6 +139,18 @@ class Site(Entity):
             )
 
         self.ensure_property("Url", _site_loaded)
+        return return_type
+
+    def get_site_logo_ex(self):
+        """Gets site logo image"""
+        return_type = ClientResult(self.context)
+
+        def _site_loaded():
+            self.context.group_service.get_group_image(
+                group_id=self.group_id, return_type=return_type
+            )
+
+        self.ensure_property("GroupId", _site_loaded)
         return return_type
 
     def set_site_logo(self, relative_logo_url):
@@ -153,9 +163,7 @@ class Site(Entity):
         return self
 
     def is_comm_site(self):
-        """
-        Determines whether a site is communication site
-        """
+        """Determines whether a site is communication site"""
         return_type = ClientResult(self.context)  # type: ClientResult[bool]
 
         def _site_loaded():
@@ -165,9 +173,7 @@ class Site(Entity):
         return return_type
 
     def is_valid_home_site(self):
-        """
-        Determines whether a site is landing site for your intranet.
-        """
+        """Determines whether a site is landing site for your intranet."""
         return_type = ClientResult(self.context)  # type: ClientResult[bool]
 
         def _site_loaded():
@@ -177,9 +183,7 @@ class Site(Entity):
         return return_type
 
     def set_as_home_site(self):
-        """
-        Sets a site as a landing site for your intranet.
-        """
+        """Sets a site as a landing site for your intranet."""
         return_type = ClientResult(self.context)
 
         def _site_loaded():
@@ -438,9 +442,7 @@ class Site(Entity):
         return return_type
 
     def unregister_hub_site(self):
-        """
-        Disables the hub site feature on a site.
-        """
+        """Disables the hub site feature on a site."""
         qry = ServiceOperationQuery(self, "UnRegisterHubSite")
         self.context.add_query(qry)
         return self
@@ -464,93 +466,80 @@ class Site(Entity):
 
     @property
     def allow_create_declarative_workflow(self):
-        """
-        Specifies whether a designer can be used to create declarative workflows on this site collection
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether a designer can be used to create declarative workflows on this site collection"""
         return self.properties.get("AllowCreateDeclarativeWorkflow", None)
 
     @property
     def allow_designer(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether a designer can be used on this site collection.
         See Microsoft.SharePoint.Client.Web.AllowDesignerForCurrentUser, which is the scalar property used
         to determine the behavior for the current user. The default, if not disabled on the Web application, is "true".
-        :rtype: bool or None
         """
         return self.properties.get("AllowDesigner", None)
 
     @property
     def allowed_external_domains(self):
-        """
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
         return self.properties.get("AllowedExternalDomains", None)
 
     @property
     def allow_master_page_editing(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether master page editing is allowed on this site collection.
         See Web.AllowMasterPageEditingForCurrentUser, which is the scalar property used to
         determine the behavior for the current user. The default, if not disabled on the Web application, is "false".
-        :rtype: bool or None
         """
         return self.properties.get("AllowMasterPageEditing", None)
 
     @property
     def allow_revert_from_template(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether this site collection can be reverted to its base template.
         See Web.AllowRevertFromTemplateForCurrentUser, which is the scalar property used to determine the behavior
         for the current user. The default, if not disabled on the Web application, is "false".
-        :rtype: bool or None
         """
         return self.properties.get("AllowRevertFromTemplate", None)
 
     @property
     def audit(self):
-        """
-        Enables auditing of how site collection is accessed, changed, and used.
-        """
+        """Enables auditing of how site collection is accessed, changed, and used."""
         return self.properties.get(
             "Audit", Audit(self.context, ResourcePath("Audit", self.resource_path))
         )
 
     @property
     def can_upgrade(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether this site collection is in an implementation-specific valid state for site collection upgrade,
          "true" if it is; otherwise, "false".
-
-        :rtype: bool
         """
         return self.properties.get("CanUpgrade", None)
 
     @property
     def classification(self):
-        """
-        Gets the classification of this site.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the classification of this site."""
         return self.properties.get("Classification", None)
 
     @property
     def compatibility_level(self):
+        # type: () -> Optional[str]
         """
         Specifies the compatibility level of the site collection for the purpose of major version level compatibility
         checks
-
-        :rtype: str
         """
         return self.properties.get("CompatibilityLevel", None)
 
     @property
     def comments_on_site_pages_disabled(self):
-        """
-        Indicates whether comments on site pages are disabled or not.
-        :rtype: bool
-        """
+        # type: () -> Optional[bool]
+        """Indicates whether comments on site pages are disabled or not."""
         return self.properties.get("CommentsOnSitePagesDisabled", None)
 
     @property
@@ -560,17 +549,14 @@ class Site(Entity):
 
     @property
     def group_id(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Group identifier"""
         return self.properties.get("GroupId", None)
 
     @property
     def lock_issue(self):
-        """
-        Specifies the comment that is used when a site collection is locked
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the comment that is used when a site collection is locked"""
         return self.properties.get("LockIssue", None)
 
     @property
@@ -583,6 +569,7 @@ class Site(Entity):
 
     @property
     def owner(self):
+        # type: () -> User
         """Gets or sets the owner of the site collection. (Read-only in sandboxed solutions.)"""
         return self.properties.get(
             "Owner", User(self.context, ResourcePath("Owner", self.resource_path))
@@ -590,54 +577,46 @@ class Site(Entity):
 
     @property
     def read_only(self):
+        # type: () -> Optional[bool]
         """
         Gets a Boolean value that specifies whether the site collection is read-only,
         locked, and unavailable for write access.
-
-        :rtype: bool
         """
         return self.properties.get("ReadOnly", None)
 
     @property
     def required_designer_version(self):
+        # type: () -> Optional[str]
         """
         Specifies the required minimum version of the designer that can be used on this site collection.
         The default, if not disabled on the Web application, is "15.0.0.0".
-
-        :rtype: str
         """
         return self.properties.get("RequiredDesignerVersion", None)
 
     @property
     def url(self):
         # type: () -> Optional[str]
-        """
-        Specifies the full URL of the site (2), including host name, port number and path
-        """
+        """Specifies the full URL of the site (2), including host name, port number and path"""
         return self.properties.get("Url", None)
 
     @property
     def server_relative_url(self):
-        """
-        Specifies the server-relative URL of the top-level site in the site collection.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Specifies the server-relative URL of the top-level site in the site collection."""
         return self.properties.get("ServerRelativeUrl", None)
 
     @property
     def share_by_email_enabled(self):
+        # type: () -> Optional[bool]
         """
         When true, users will be able to grant permissions to guests for resources within the site collection.
-        :rtype: bool or none
         """
         return self.properties.get("ShareByEmailEnabled", None)
 
     @property
     def status_bar_text(self):
-        """
-        Gets or sets the status bar message text for this site.
-        :rtype: str or none
-        """
+        # type: () -> Optional[str]
+        """Gets or sets the status bar message text for this site."""
         return self.properties.get("StatusBarText", None)
 
     @property

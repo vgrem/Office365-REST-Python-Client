@@ -14,12 +14,7 @@ class SetCollection(EntityCollection[Set]):
         self._parent_group = parent_group
 
     def get_by_name(self, name):
-        """
-        Returns the TermSet specified by its name.
-
-        :param str name: Term set name
-        :rtype: Set
-        """
+        """Returns the TermSet specified by its name."""
         return self.single("displayName eq '{0}'".format(name))
 
     def add(self, name, parent_group=None):

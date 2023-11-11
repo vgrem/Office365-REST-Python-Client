@@ -624,9 +624,7 @@ class User(DirectoryObject):
 
     @property
     def photo(self):
-        """
-        The user's profile photo. Read-only.
-        """
+        """The user's profile photo. Read-only."""
         return self.properties.get(
             "photo",
             ProfilePhoto(self.context, ResourcePath("photo", self.resource_path)),
@@ -634,9 +632,7 @@ class User(DirectoryObject):
 
     @property
     def manager(self):
-        """
-        The user or contact that is this user's manager
-        """
+        """The user or contact that is this user's manager"""
         return self.properties.get(
             "manager",
             DirectoryObject(self.context, ResourcePath("manager", self.resource_path)),
@@ -644,17 +640,15 @@ class User(DirectoryObject):
 
     @property
     def preferred_language(self):
+        # type: () -> Optional[str]
         """
         The preferred language for the user. Should follow ISO 639-1 Code; for example en-US.
-        :rtype: str or None
         """
         return self.properties.get("preferredLanguage", None)
 
     @property
     def mailbox_settings(self):
-        """
-        Get the user's mailboxSettings.
-        """
+        """Get the user's mailboxSettings."""
         return self.properties.get("mailboxSettings", MailboxSettings())
 
     @property

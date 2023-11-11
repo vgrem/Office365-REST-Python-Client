@@ -17,6 +17,10 @@ class FileVersionCollection(EntityCollection[FileVersion]):
             ServiceOperationPath("getById", [version_id], self.resource_path),
         )
 
+    def get_by_label(self, label):
+        """Gets the file version with the specified Label."""
+        return self.single("VersionLabel eq '{0}'".format(label))
+
     def delete_all(self):
         """Deletes all the file version objects in the collection."""
         qry = ServiceOperationQuery(self, "DeleteAll")

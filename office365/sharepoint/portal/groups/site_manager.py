@@ -120,7 +120,6 @@ class GroupSiteManager(ClientObject):
     ):
         """
         Get the teams in Microsoft Teams that the current user is a direct member of.
-
         :type get_logo_data: bool
         :type force_cache_update: bool
         """

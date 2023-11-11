@@ -149,9 +149,7 @@ class ColumnDefinition(BaseItem):
     @property
     def is_reorderable(self):
         # type: () -> Optional[bool]
-        """
-        Indicates whether values in the column can be reordered. Read-only.
-        """
+        """Indicates whether values in the column can be reordered."""
         return self.properties.get("isReorderable", None)
 
     @property

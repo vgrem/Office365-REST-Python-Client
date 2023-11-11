@@ -20015,6 +20015,11 @@
             <Member Name="inactive" Value="1"/>
             <Member Name="unknownFutureValue" Value="2"/>
          </EnumType>
+         <EnumType Name="meetingAudience">
+            <Member Name="everyone" Value="0"/>
+            <Member Name="organization" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
          <EnumType Name="meetingChatHistoryDefaultMode">
             <Member Name="none" Value="0"/>
             <Member Name="all" Value="1"/>
@@ -20088,6 +20093,20 @@
             <Member Name="c" Value="14"/>
             <Member Name="d" Value="15"/>
             <Member Name="flash" Value="16"/>
+         </EnumType>
+         <EnumType Name="virtualEventAttendeeRegistrationStatus">
+            <Member Name="registered" Value="0"/>
+            <Member Name="canceled" Value="1"/>
+            <Member Name="waitlisted" Value="2"/>
+            <Member Name="pendingApproval" Value="3"/>
+            <Member Name="rejectedByOrganizer" Value="4"/>
+            <Member Name="unknownFutureValue" Value="11"/>
+         </EnumType>
+         <EnumType Name="virtualEventStatus">
+            <Member Name="draft" Value="0"/>
+            <Member Name="published" Value="1"/>
+            <Member Name="canceled" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
          </EnumType>
          <EnumType Name="attestationLevel">
             <Member Name="attested" Value="0"/>
@@ -21330,34 +21349,36 @@
             <Property Name="visualElements" Type="graph.visualInfo" Nullable="false"/>
             <NavigationProperty Name="historyItems" Type="Collection(graph.activityHistoryItem)" ContainsTarget="true"/>
          </EntityType>
-         <EntityType Name="onlineMeeting" BaseType="graph.entity" OpenType="true">
+         <EntityType Name="onlineMeetingBase" BaseType="graph.entity" Abstract="true" OpenType="true">
             <Property Name="allowAttendeeToEnableCamera" Type="Edm.Boolean"/>
             <Property Name="allowAttendeeToEnableMic" Type="Edm.Boolean"/>
             <Property Name="allowedPresenters" Type="graph.onlineMeetingPresenters"/>
             <Property Name="allowMeetingChat" Type="graph.meetingChatMode"/>
             <Property Name="allowParticipantsToChangeName" Type="Edm.Boolean"/>
             <Property Name="allowTeamworkReactions" Type="Edm.Boolean"/>
-            <Property Name="attendeeReport" Type="Edm.Stream"/>
             <Property Name="audioConferencing" Type="graph.audioConferencing"/>
-            <Property Name="broadcastSettings" Type="graph.broadcastMeetingSettings"/>
             <Property Name="chatInfo" Type="graph.chatInfo"/>
-            <Property Name="creationDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="endDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="externalId" Type="Edm.String"/>
-            <Property Name="isBroadcast" Type="Edm.Boolean"/>
             <Property Name="isEntryExitAnnounced" Type="Edm.Boolean"/>
             <Property Name="joinInformation" Type="graph.itemBody"/>
             <Property Name="joinMeetingIdSettings" Type="graph.joinMeetingIdSettings"/>
             <Property Name="joinWebUrl" Type="Edm.String"/>
             <Property Name="lobbyBypassSettings" Type="graph.lobbyBypassSettings"/>
-            <Property Name="participants" Type="graph.meetingParticipants"/>
             <Property Name="recordAutomatically" Type="Edm.Boolean"/>
             <Property Name="shareMeetingChatHistoryDefault" Type="graph.meetingChatHistoryDefaultMode"/>
-            <Property Name="startDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="subject" Type="Edm.String"/>
             <Property Name="videoTeleconferenceId" Type="Edm.String"/>
             <Property Name="watermarkProtection" Type="graph.watermarkProtectionValues"/>
             <NavigationProperty Name="attendanceReports" Type="Collection(graph.meetingAttendanceReport)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="onlineMeeting" BaseType="graph.onlineMeetingBase" OpenType="true">
+            <Property Name="attendeeReport" Type="Edm.Stream"/>
+            <Property Name="broadcastSettings" Type="graph.broadcastMeetingSettings"/>
+            <Property Name="creationDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="endDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="externalId" Type="Edm.String"/>
+            <Property Name="isBroadcast" Type="Edm.Boolean"/>
+            <Property Name="participants" Type="graph.meetingParticipants"/>
+            <Property Name="startDateTime" Type="Edm.DateTimeOffset"/>
             <NavigationProperty Name="recordings" Type="Collection(graph.callRecording)" ContainsTarget="true"/>
             <NavigationProperty Name="transcripts" Type="Collection(graph.callTranscript)" ContainsTarget="true"/>
          </EntityType>
@@ -22292,6 +22313,11 @@
          <EntityType Name="solutionsRoot">
             <NavigationProperty Name="bookingBusinesses" Type="Collection(graph.bookingBusiness)" ContainsTarget="true"/>
             <NavigationProperty Name="bookingCurrencies" Type="Collection(graph.bookingCurrency)" ContainsTarget="true"/>
+            <NavigationProperty Name="virtualEvents" Type="graph.virtualEventsRoot" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="virtualEventsRoot" BaseType="graph.entity">
+            <NavigationProperty Name="events" Type="Collection(graph.virtualEvent)" ContainsTarget="true"/>
+            <NavigationProperty Name="webinars" Type="Collection(graph.virtualEventWebinar)" ContainsTarget="true"/>
          </EntityType>
          <ComplexType Name="dataSubject" OpenType="true">
             <Property Name="email" Type="Edm.String"/>
@@ -24138,6 +24164,7 @@
             <NavigationProperty Name="children" Type="Collection(graph.driveItem)" ContainsTarget="true"/>
             <NavigationProperty Name="listItem" Type="graph.listItem" ContainsTarget="true"/>
             <NavigationProperty Name="permissions" Type="Collection(graph.permission)" ContainsTarget="true"/>
+            <NavigationProperty Name="retentionLabel" Type="graph.itemRetentionLabel" ContainsTarget="true"/>
             <NavigationProperty Name="subscriptions" Type="Collection(graph.subscription)" ContainsTarget="true"/>
             <NavigationProperty Name="thumbnails" Type="Collection(graph.thumbnailSet)" ContainsTarget="true"/>
             <NavigationProperty Name="versions" Type="Collection(graph.driveItemVersion)" ContainsTarget="true"/>
@@ -24272,6 +24299,13 @@
             <NavigationProperty Name="driveItem" Type="graph.driveItem" ContainsTarget="true"/>
             <NavigationProperty Name="fields" Type="graph.fieldValueSet" ContainsTarget="true"/>
             <NavigationProperty Name="versions" Type="Collection(graph.listItemVersion)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="itemRetentionLabel" BaseType="graph.entity">
+            <Property Name="isLabelAppliedExplicitly" Type="Edm.Boolean"/>
+            <Property Name="labelAppliedBy" Type="graph.identitySet"/>
+            <Property Name="labelAppliedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="retentionSettings" Type="graph.retentionLabelSettings"/>
          </EntityType>
          <EntityType Name="subscription" BaseType="graph.entity">
             <Property Name="applicationId" Type="Edm.String"/>
@@ -25167,6 +25201,14 @@
             <Property Name="oldName" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="restoreAction"/>
+         <ComplexType Name="retentionLabelSettings">
+            <Property Name="behaviorDuringRetentionPeriod" Type="microsoft.graph.security.behaviorDuringRetentionPeriod"/>
+            <Property Name="isContentUpdateAllowed" Type="Edm.Boolean"/>
+            <Property Name="isDeleteAllowed" Type="Edm.Boolean"/>
+            <Property Name="isLabelUpdateAllowed" Type="Edm.Boolean"/>
+            <Property Name="isMetadataUpdateAllowed" Type="Edm.Boolean"/>
+            <Property Name="isRecordLocked" Type="Edm.Boolean"/>
+         </ComplexType>
          <ComplexType Name="shareAction">
             <Property Name="recipients" Type="Collection(graph.identitySet)"/>
          </ComplexType>
@@ -25258,14 +25300,6 @@
             <NavigationProperty Name="root" Type="graph.driveItem" ContainsTarget="true"/>
             <NavigationProperty Name="site" Type="graph.site" ContainsTarget="true"/>
          </EntityType>
-         <ComplexType Name="audioConferencing">
-            <Property Name="conferenceId" Type="Edm.String"/>
-            <Property Name="dialinUrl" Type="Edm.String"/>
-            <Property Name="tollFreeNumber" Type="Edm.String"/>
-            <Property Name="tollFreeNumbers" Type="Collection(Edm.String)"/>
-            <Property Name="tollNumber" Type="Edm.String"/>
-            <Property Name="tollNumbers" Type="Collection(Edm.String)"/>
-         </ComplexType>
          <ComplexType Name="broadcastMeetingSettings">
             <Property Name="allowedAudience" Type="graph.broadcastMeetingAudience"/>
             <Property Name="captions" Type="graph.broadcastMeetingCaptionSettings"/>
@@ -25274,26 +25308,10 @@
             <Property Name="isRecordingEnabled" Type="Edm.Boolean"/>
             <Property Name="isVideoOnDemandEnabled" Type="Edm.Boolean"/>
          </ComplexType>
-         <ComplexType Name="chatInfo">
-            <Property Name="messageId" Type="Edm.String"/>
-            <Property Name="replyChainMessageId" Type="Edm.String"/>
-            <Property Name="threadId" Type="Edm.String"/>
-         </ComplexType>
-         <ComplexType Name="joinMeetingIdSettings">
-            <Property Name="isPasscodeRequired" Type="Edm.Boolean"/>
-            <Property Name="joinMeetingId" Type="Edm.String"/>
-            <Property Name="passcode" Type="Edm.String"/>
-         </ComplexType>
          <ComplexType Name="meetingParticipants">
             <Property Name="attendees" Type="Collection(graph.meetingParticipantInfo)"/>
             <Property Name="organizer" Type="graph.meetingParticipantInfo"/>
          </ComplexType>
-         <EntityType Name="meetingAttendanceReport" BaseType="graph.entity">
-            <Property Name="meetingEndDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="meetingStartDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="totalParticipantCount" Type="Edm.Int32"/>
-            <NavigationProperty Name="attendanceRecords" Type="Collection(graph.attendanceRecord)" ContainsTarget="true"/>
-         </EntityType>
          <EntityType Name="callRecording" BaseType="graph.entity">
             <Property Name="content" Type="Edm.Stream"/>
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
@@ -30741,6 +30759,14 @@
             <Property Name="joinDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="leaveDateTime" Type="Edm.DateTimeOffset"/>
          </ComplexType>
+         <ComplexType Name="audioConferencing">
+            <Property Name="conferenceId" Type="Edm.String"/>
+            <Property Name="dialinUrl" Type="Edm.String"/>
+            <Property Name="tollFreeNumber" Type="Edm.String"/>
+            <Property Name="tollFreeNumbers" Type="Collection(Edm.String)"/>
+            <Property Name="tollNumber" Type="Edm.String"/>
+            <Property Name="tollNumbers" Type="Collection(Edm.String)"/>
+         </ComplexType>
          <ComplexType Name="azureCommunicationServicesUserIdentity" BaseType="graph.identity" OpenType="true">
             <Property Name="azureCommunicationServicesResourceId" Type="Edm.String"/>
          </ComplexType>
@@ -30764,6 +30790,11 @@
          <ComplexType Name="callTranscriptionInfo">
             <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="state" Type="graph.callTranscriptionState" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="chatInfo">
+            <Property Name="messageId" Type="Edm.String"/>
+            <Property Name="replyChainMessageId" Type="Edm.String"/>
+            <Property Name="threadId" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="commsNotification" OpenType="true">
             <Property Name="changeType" Type="graph.changeType" Nullable="false"/>
@@ -30816,6 +30847,11 @@
          <ComplexType Name="meetingInfo" Abstract="true"/>
          <ComplexType Name="joinMeetingIdMeetingInfo" BaseType="graph.meetingInfo" OpenType="true">
             <Property Name="joinMeetingId" Type="Edm.String" Nullable="false"/>
+            <Property Name="passcode" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="joinMeetingIdSettings">
+            <Property Name="isPasscodeRequired" Type="Edm.Boolean"/>
+            <Property Name="joinMeetingId" Type="Edm.String"/>
             <Property Name="passcode" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="mediaInfo">
@@ -30919,6 +30955,13 @@
             <Property Name="sequenceId" Type="Edm.Int64" Nullable="false"/>
             <Property Name="tone" Type="graph.tone" Nullable="false"/>
          </ComplexType>
+         <ComplexType Name="virtualEventRegistrationQuestionAnswer">
+            <Property Name="booleanValue" Type="Edm.Boolean"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="multiChoiceValues" Type="Collection(Edm.String)"/>
+            <Property Name="questionId" Type="Edm.String"/>
+            <Property Name="value" Type="Edm.String"/>
+         </ComplexType>
          <EntityType Name="commsOperation" BaseType="graph.entity" OpenType="true">
             <Property Name="clientContext" Type="Edm.String"/>
             <Property Name="resultInfo" Type="graph.resultInfo"/>
@@ -30951,6 +30994,12 @@
          <EntityType Name="inviteParticipantsOperation" BaseType="graph.commsOperation" OpenType="true">
             <Property Name="participants" Type="Collection(graph.invitationParticipantInfo)" Nullable="false"/>
          </EntityType>
+         <EntityType Name="meetingAttendanceReport" BaseType="graph.entity">
+            <Property Name="meetingEndDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="meetingStartDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="totalParticipantCount" Type="Edm.Int32"/>
+            <NavigationProperty Name="attendanceRecords" Type="Collection(graph.attendanceRecord)" ContainsTarget="true"/>
+         </EntityType>
          <EntityType Name="muteParticipantOperation" BaseType="graph.commsOperation" OpenType="true"/>
          <EntityType Name="participantJoiningNotification" BaseType="graph.entity">
             <NavigationProperty Name="call" Type="graph.call" ContainsTarget="true"/>
@@ -30969,6 +31018,34 @@
          <EntityType Name="subscribeToToneOperation" BaseType="graph.commsOperation" OpenType="true"/>
          <EntityType Name="unmuteParticipantOperation" BaseType="graph.commsOperation" OpenType="true"/>
          <EntityType Name="updateRecordingStatusOperation" BaseType="graph.commsOperation" OpenType="true"/>
+         <EntityType Name="virtualEvent" BaseType="graph.entity">
+            <Property Name="createdBy" Type="graph.communicationsIdentitySet"/>
+            <Property Name="description" Type="graph.itemBody"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="endDateTime" Type="graph.dateTimeTimeZone"/>
+            <Property Name="startDateTime" Type="graph.dateTimeTimeZone"/>
+            <Property Name="status" Type="graph.virtualEventStatus"/>
+            <NavigationProperty Name="sessions" Type="Collection(graph.virtualEventSession)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="virtualEventSession" BaseType="graph.onlineMeetingBase">
+            <Property Name="endDateTime" Type="graph.dateTimeTimeZone"/>
+            <Property Name="startDateTime" Type="graph.dateTimeTimeZone"/>
+         </EntityType>
+         <EntityType Name="virtualEventRegistration" BaseType="graph.entity">
+            <Property Name="cancelationDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="email" Type="Edm.String"/>
+            <Property Name="firstName" Type="Edm.String"/>
+            <Property Name="lastName" Type="Edm.String"/>
+            <Property Name="registrationDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="registrationQuestionAnswers" Type="Collection(graph.virtualEventRegistrationQuestionAnswer)"/>
+            <Property Name="status" Type="graph.virtualEventAttendeeRegistrationStatus"/>
+            <Property Name="userId" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="virtualEventWebinar" BaseType="graph.virtualEvent">
+            <Property Name="audience" Type="graph.meetingAudience"/>
+            <Property Name="coOrganizers" Type="Collection(graph.communicationsUserIdentity)"/>
+            <NavigationProperty Name="registrations" Type="Collection(graph.virtualEventRegistration)" ContainsTarget="true"/>
+         </EntityType>
          <ComplexType Name="passwordResetResponse">
             <Property Name="newPassword" Type="Edm.String"/>
          </ComplexType>
@@ -36841,6 +36918,17 @@
             <Parameter Name="clientContext" Type="Edm.String" Unicode="false"/>
             <ReturnType Type="graph.stopHoldMusicOperation"/>
          </Action>
+         <Function Name="getByUserIdAndRole" IsBound="true">
+            <Parameter Name="bindingParameter" Type="Collection(graph.virtualEventWebinar)"/>
+            <Parameter Name="userId" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <Parameter Name="role" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Collection(graph.virtualEventWebinar)"/>
+         </Function>
+         <Function Name="getByUserRole" IsBound="true">
+            <Parameter Name="bindingParameter" Type="Collection(graph.virtualEventWebinar)"/>
+            <Parameter Name="role" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Collection(graph.virtualEventWebinar)"/>
+         </Function>
          <Action Name="disableSmsSignIn" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.phoneAuthenticationMethod"/>
          </Action>
@@ -37240,6 +37328,13 @@
          <EnumType Name="sourceType" IsFlags="true">
             <Member Name="mailbox" Value="1"/>
             <Member Name="site" Value="2"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
+         <EnumType Name="behaviorDuringRetentionPeriod">
+            <Member Name="doNotRetain" Value="0"/>
+            <Member Name="retain" Value="1"/>
+            <Member Name="retainAsRecord" Value="2"/>
+            <Member Name="retainAsRegulatoryRecord" Value="3"/>
             <Member Name="unknownFutureValue" Value="4"/>
          </EnumType>
          <EnumType Name="alertClassification" UnderlyingType="Edm.Byte">

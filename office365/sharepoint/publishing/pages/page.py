@@ -216,16 +216,13 @@ class SitePage(SitePageMetadata):
     @property
     def layout_web_parts_content(self):
         # type: () -> Optional[str]
-        """
-        Gets the LayoutWebPartsContent field for the current Site Page.
-        """
+        """Gets the LayoutWebPartsContent field for the current Site Page."""
         return self.properties.get("LayoutWebpartsContent", None)
 
     @layout_web_parts_content.setter
     def layout_web_parts_content(self, value):
-        """
-        Sets the LayoutWebPartsContent field for the current Site Page.
-        """
+        # type: (str) -> None
+        """Sets the LayoutWebPartsContent field for the current Site Page."""
         self.set_property("LayoutWebpartsContent", value)
 
     @property

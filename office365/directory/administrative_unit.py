@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.extensions.extension import Extension
 from office365.directory.object import DirectoryObject
 from office365.entity_collection import EntityCollection
@@ -14,10 +16,8 @@ class AdministrativeUnit(DirectoryObject):
 
     @property
     def display_name(self):
-        """
-        Display name for the administrative unit
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Display name for the administrative unit"""
         return self.properties.get("displayName", None)
 
     @property
@@ -36,9 +36,8 @@ class AdministrativeUnit(DirectoryObject):
 
     @property
     def extensions(self):
-        """
-        The collection of open extensions defined for this administrative unit.
-        """
+        # type: () -> EntityCollection[Extension]
+        """The collection of open extensions defined for this administrative unit."""
         return self.properties.get(
             "extensions",
             EntityCollection(

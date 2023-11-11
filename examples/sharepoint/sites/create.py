@@ -1,3 +1,7 @@
+"""
+Creates a site
+"""
+
 import json
 from random import randint
 
