@@ -12,4 +12,4 @@ client = GraphClient(acquire_token_by_client_credentials)
 # teams = client.teams.get().paged().select(["displayName"]).execute_query()   # paged load
 teams = client.teams.get().top(10).select(["displayName"]).execute_query()
 for team in teams:
-    print("Name: {0}".format(team.display_name))
+    print("Name: {0}".format(team))

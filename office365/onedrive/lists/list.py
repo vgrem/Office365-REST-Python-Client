@@ -16,6 +16,9 @@ class List(BaseItem):
     """The list resource represents a list in a site. This resource contains the top level properties of the list,
     including template and field definitions."""
 
+    def __str__(self):
+        return self.display_name
+
     @property
     def display_name(self):
         # type: () -> Optional[str]

@@ -476,7 +476,6 @@ class File(AbstractFile):
 
     def get_upload_status(self, upload_id):
         """Gets the status of a chunk upload session.
-
         :param str upload_id:  The upload session ID.
         """
         payload = {
@@ -496,9 +495,9 @@ class File(AbstractFile):
         :param bytes stream:
         """
         return_type = File(self.context)
-        payload = {"uploadId": upload_id, "checksum": checksum, "stream": stream}
+        params = {"uploadId": upload_id, "checksum": checksum}
         qry = ServiceOperationQuery(
-            self, "UploadWithChecksum", None, payload, None, return_type
+            self, "UploadWithChecksum", params, stream, None, return_type
         )
         self.context.add_query(qry)
         return return_type
@@ -564,6 +563,26 @@ class File(AbstractFile):
         """
         params = {"uploadID": upload_id, "fileOffset": file_offset}
         qry = ServiceOperationQuery(self, "finishUpload", params, content, None, self)
+        self.context.add_query(qry)
+        return self
+
+    def finish_upload_with_checksum(self, upload_id, file_offset, checksum, stream):
+        """Uploads the last file fragment and commits the file. The current file content is changed when this method
+        completes.
+
+        :param str upload_id: Upload session id
+        :param int file_offset: File offset
+        :param str checksum: File checksum
+        :param bytes stream: File content
+        """
+        payload = {
+            "uploadID": upload_id,
+            "fileOffset": file_offset,
+            "checksum": checksum,
+        }
+        qry = ServiceOperationQuery(
+            self, "FinishUploadWithChecksum", payload, stream, None, self
+        )
         self.context.add_query(qry)
         return self
 
@@ -737,9 +756,7 @@ class File(AbstractFile):
 
     @property
     def information_rights_management_settings(self):
-        """
-        Returns the Information Rights Management (IRM) settings for the file.
-        """
+        """Returns the Information Rights Management (IRM) settings for the file."""
         return self.properties.get(
             "InformationRightsManagementSettings",
             InformationRightsManagementFileSettings(

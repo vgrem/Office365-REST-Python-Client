@@ -1,3 +1,4 @@
+import hashlib
 import os
 import uuid
 from typing import IO, Callable
@@ -33,6 +34,23 @@ class FileCollection(EntityCollection[File]):
                 content = f.read()
             name = os.path.basename(path_or_file)
             return self.add(name, content, True)
+
+    def upload_with_checksum(self, file_object, chunk_size=1024):
+        # type: (IO, int) -> File
+        """ """
+        h = hashlib.sha1()  # hashlib.md5()
+        file_name = os.path.basename(file_object.name)
+        upload_id = str(uuid.uuid4())
+
+        def _upload_session(return_type):
+            # type: (File) -> None
+            content = file_object.read(chunk_size)
+            h.update(content)
+            return_type.upload_with_checksum(
+                upload_id, h.hexdigest(), content
+            ).after_execute(_upload_session)
+
+        return self.add(file_name, None, True).after_execute(_upload_session)
 
     def create_upload_session(
         self, file, chunk_size, chunk_uploaded=None, file_name=None, **kwargs

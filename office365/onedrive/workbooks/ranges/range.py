@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.onedrive.workbooks.ranges.format import WorkbookRangeFormat
 from office365.onedrive.workbooks.ranges.sort import WorkbookRangeSort
@@ -18,35 +20,31 @@ class WorkbookRange(Entity):
 
     @property
     def address(self):
+        # type: () -> Optional[str]
         """
         Represents the range reference in A1-style. Address value will contain the Sheet reference
         (e.g. Sheet1!A1:B4)
-        :rtype: str or None
         """
         return self.properties.get("address", None)
 
     @property
     def address_local(self):
+        # type: () -> Optional[str]
         """
-        Represents range reference for the specified range in the language of the user. Read-only.
-        :rtype: str or None
+        Represents range reference for the specified range in the language of the user.
         """
         return self.properties.get("addressLocal", None)
 
     @property
     def cell_count(self):
-        """
-        Number of cells in the range. Read-only.
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
+        """Number of cells in the range. Read-only."""
         return self.properties.get("cellCount", None)
 
     @property
     def column_count(self):
-        """
-        Represents the total number of columns in the range. Read-only.
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
+        """Represents the total number of columns in the range. Read-only."""
         return self.properties.get("columnCount", None)
 
     @property

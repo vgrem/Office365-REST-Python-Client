@@ -1,17 +1,32 @@
 import json
+import re
+from typing import TYPE_CHECKING
 
 from office365.runtime.client_value import ClientValue
 from office365.runtime.compat import is_string_type
+from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.runtime.paths.service_operation import ServiceOperationPath
 
 
-class ODataUrlBuilder(object):
+class ODataPathBuilder(object):
+    @staticmethod
+    def parse_url(path_str):
+        # type: (str) -> ResourcePath
+        """Parses path from a string"""
+        segments = [n for n in re.split(r"[('')]|/", path_str) if n]
+        if not segments:
+            raise TypeError("Invalid path")
+        path = None
+        for segment in segments:
+            path = ResourcePath(segment, path)
+        return path
+
     @staticmethod
     def build_segment(path):
-        """
-        Constructs url for path segment
-
-        :type path: office365.runtime.paths.service_operation.ServiceOperationPath
-        """
+        # type: (ServiceOperationPath) -> str
+        """Constructs url for path segment"""
         url = path.key or ""
         if isinstance(path.parameters, ClientValue):
             url += "(@v)?@v={0}".format(json.dumps(path.parameters.to_json()))
@@ -20,7 +35,7 @@ class ODataUrlBuilder(object):
             if isinstance(path.parameters, dict):
                 url += ",".join(
                     [
-                        "%s=%s" % (key, ODataUrlBuilder._encode_method_value(value))
+                        "%s=%s" % (key, ODataPathBuilder._encode_method_value(value))
                         for (key, value) in path.parameters.items()
                         if value is not None
                     ]
@@ -28,7 +43,7 @@ class ODataUrlBuilder(object):
             else:
                 url += ",".join(
                     [
-                        "%s" % (ODataUrlBuilder._encode_method_value(value))
+                        "%s" % (ODataPathBuilder._encode_method_value(value))
                         for (i, value) in enumerate(path.parameters)
                         if value is not None
                     ]

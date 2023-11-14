@@ -8248,6 +8248,7 @@
                <Parameter Name="this" Type="SP.Publishing.CampaignPublication"/>
                <Parameter Name="sitePageFlags" Type="Edm.String"/>
                <Parameter Name="isNews" Type="Edm.Boolean" Nullable="false"/>
+               <Parameter Name="creationMode" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="CreateNewsCopy" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.CampaignPublication"/>
@@ -8303,6 +8304,10 @@
             </FunctionImport>
             <FunctionImport Name="SavePageAsTemplate" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.CampaignPublication"/>
+            </FunctionImport>
+            <FunctionImport Name="SavePageAsTemplate2" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
+               <Parameter Name="this" Type="SP.Publishing.CampaignPublication"/>
+               <Parameter Name="creationMode" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="SavePageAsTemplateOnMySite" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.CampaignPublication"/>
@@ -8438,6 +8443,7 @@
                <Parameter Name="this" Type="SP.Publishing.FeedVideoPage"/>
                <Parameter Name="sitePageFlags" Type="Edm.String"/>
                <Parameter Name="isNews" Type="Edm.Boolean" Nullable="false"/>
+               <Parameter Name="creationMode" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="CreateNewsCopy" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.FeedVideoPage"/>
@@ -8490,6 +8496,10 @@
             </FunctionImport>
             <FunctionImport Name="SavePageAsTemplate" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.FeedVideoPage"/>
+            </FunctionImport>
+            <FunctionImport Name="SavePageAsTemplate2" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
+               <Parameter Name="this" Type="SP.Publishing.FeedVideoPage"/>
+               <Parameter Name="creationMode" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="SavePageAsTemplateOnMySite" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.FeedVideoPage"/>
@@ -8661,6 +8671,7 @@
                <Parameter Name="this" Type="SP.Publishing.RepostPage"/>
                <Parameter Name="sitePageFlags" Type="Edm.String"/>
                <Parameter Name="isNews" Type="Edm.Boolean" Nullable="false"/>
+               <Parameter Name="creationMode" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="CreateNewsCopy" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.RepostPage"/>
@@ -8713,6 +8724,10 @@
             </FunctionImport>
             <FunctionImport Name="SavePageAsTemplate" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.RepostPage"/>
+            </FunctionImport>
+            <FunctionImport Name="SavePageAsTemplate2" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
+               <Parameter Name="this" Type="SP.Publishing.RepostPage"/>
+               <Parameter Name="creationMode" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="SavePageAsTemplateOnMySite" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.RepostPage"/>
@@ -8853,6 +8868,7 @@
                <Parameter Name="this" Type="SP.Publishing.SitePage3D"/>
                <Parameter Name="sitePageFlags" Type="Edm.String"/>
                <Parameter Name="isNews" Type="Edm.Boolean" Nullable="false"/>
+               <Parameter Name="creationMode" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="CreateNewsCopy" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.SitePage3D"/>
@@ -8905,6 +8921,10 @@
             </FunctionImport>
             <FunctionImport Name="SavePageAsTemplate" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.SitePage3D"/>
+            </FunctionImport>
+            <FunctionImport Name="SavePageAsTemplate2" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
+               <Parameter Name="this" Type="SP.Publishing.SitePage3D"/>
+               <Parameter Name="creationMode" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="SavePageAsTemplateOnMySite" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.SitePage3D"/>
@@ -9031,6 +9051,7 @@
                <Parameter Name="this" Type="SP.Publishing.SitePage"/>
                <Parameter Name="sitePageFlags" Type="Edm.String"/>
                <Parameter Name="isNews" Type="Edm.Boolean" Nullable="false"/>
+               <Parameter Name="creationMode" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="CreateNewsCopy" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.SitePage"/>
@@ -9083,6 +9104,10 @@
             </FunctionImport>
             <FunctionImport Name="SavePageAsTemplate" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.SitePage"/>
+            </FunctionImport>
+            <FunctionImport Name="SavePageAsTemplate2" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
+               <Parameter Name="this" Type="SP.Publishing.SitePage"/>
+               <Parameter Name="creationMode" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="SavePageAsTemplateOnMySite" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.SitePage"/>
@@ -9236,6 +9261,7 @@
                <Parameter Name="this" Type="SP.Publishing.TopicSitePage"/>
                <Parameter Name="sitePageFlags" Type="Edm.String"/>
                <Parameter Name="isNews" Type="Edm.Boolean" Nullable="false"/>
+               <Parameter Name="creationMode" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="CreateNewsCopy" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.TopicSitePage"/>
@@ -9288,6 +9314,10 @@
             </FunctionImport>
             <FunctionImport Name="SavePageAsTemplate" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.TopicSitePage"/>
+            </FunctionImport>
+            <FunctionImport Name="SavePageAsTemplate2" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
+               <Parameter Name="this" Type="SP.Publishing.TopicSitePage"/>
+               <Parameter Name="creationMode" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="SavePageAsTemplateOnMySite" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.TopicSitePage"/>
@@ -14755,6 +14785,9 @@
                <Parameter Name="this" Type="SP.Site"/>
                <Parameter Name="reportFileUrl" Type="Edm.String"/>
             </FunctionImport>
+            <FunctionImport Name="GetProgressForSetVersionPolicyForDocLibs" ReturnType="Edm.String" IsBindable="true">
+               <Parameter Name="this" Type="SP.Site"/>
+            </FunctionImport>
             <FunctionImport Name="GetRecycleBinItems" ReturnType="Collection(SP.RecycleBinItem)" IsComposable="true" IsBindable="true" EntitySet="RecycleBinItems">
                <Parameter Name="this" Type="SP.Site"/>
                <Parameter Name="pagingInfo" Type="Edm.String"/>
@@ -16216,6 +16249,10 @@
                <Parameter Name="siteUrl" Type="Edm.String"/>
                <Parameter Name="creationInformation" Type="SP.HubSiteCreationInformation"/>
             </FunctionImport>
+            <FunctionImport Name="RemoveContainer" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+               <Parameter Name="containerId" Type="Edm.String"/>
+            </FunctionImport>
             <FunctionImport Name="RemoveDeletedSite" ReturnType="Microsoft.Online.SharePoint.TenantAdministration.SpoOperation" IsBindable="true" EntitySet="SpoOperations">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="siteUrl" Type="Edm.String"/>
@@ -16272,6 +16309,10 @@
                <Parameter Name="parameters" Type="SP.RenderListDataParameters"/>
                <Parameter Name="overrideParameters" Type="SP.RenderListDataOverrideParameters"/>
                <Parameter Name="listName" Type="Edm.String"/>
+            </FunctionImport>
+            <FunctionImport Name="RenderDeletedContainers" ReturnType="Edm.Stream" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+               <Parameter Name="viewXml" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="RenderFilteredAdminListData" ReturnType="Edm.Stream" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -18958,6 +18999,42 @@
                <End Role="LookupColumnWUX0ULE6Partner" EntitySet="DocumentsItems"/>
                <End Role="LookupColumnWUX0ULE6" EntitySet="DocumentsItems"/>
             </AssociationSet>
+            <AssociationSet Name="SP_Data_DocumentsItem_LookupColumnDZOJX4BK_SP_Data_DocumentsItem_LookupColumnDZOJX4BKPartnerSet" Association="SP.Data.SP_Data_DocumentsItem_LookupColumnDZOJX4BK_SP_Data_DocumentsItem_LookupColumnDZOJX4BKPartner">
+               <End Role="LookupColumnDZOJX4BKPartner" EntitySet="DocumentsItems"/>
+               <End Role="LookupColumnDZOJX4BK" EntitySet="DocumentsItems"/>
+            </AssociationSet>
+            <AssociationSet Name="SP_Data_DocumentsItem_LookupColumnCDCTM75Y_SP_Data_DocumentsItem_LookupColumnCDCTM75YPartnerSet" Association="SP.Data.SP_Data_DocumentsItem_LookupColumnCDCTM75Y_SP_Data_DocumentsItem_LookupColumnCDCTM75YPartner">
+               <End Role="LookupColumnCDCTM75YPartner" EntitySet="DocumentsItems"/>
+               <End Role="LookupColumnCDCTM75Y" EntitySet="DocumentsItems"/>
+            </AssociationSet>
+            <AssociationSet Name="SP_Data_DocumentsItem_LookupColumnOVU64GO6_SP_Data_DocumentsItem_LookupColumnOVU64GO6PartnerSet" Association="SP.Data.SP_Data_DocumentsItem_LookupColumnOVU64GO6_SP_Data_DocumentsItem_LookupColumnOVU64GO6Partner">
+               <End Role="LookupColumnOVU64GO6Partner" EntitySet="DocumentsItems"/>
+               <End Role="LookupColumnOVU64GO6" EntitySet="DocumentsItems"/>
+            </AssociationSet>
+            <AssociationSet Name="SP_Data_DocumentsItem_LookupColumnBNSA9H9P_SP_Data_DocumentsItem_LookupColumnBNSA9H9PPartnerSet" Association="SP.Data.SP_Data_DocumentsItem_LookupColumnBNSA9H9P_SP_Data_DocumentsItem_LookupColumnBNSA9H9PPartner">
+               <End Role="LookupColumnBNSA9H9PPartner" EntitySet="DocumentsItems"/>
+               <End Role="LookupColumnBNSA9H9P" EntitySet="DocumentsItems"/>
+            </AssociationSet>
+            <AssociationSet Name="SP_Data_DocumentsItem_LookupColumnAWQY8O2F_SP_Data_DocumentsItem_LookupColumnAWQY8O2FPartnerSet" Association="SP.Data.SP_Data_DocumentsItem_LookupColumnAWQY8O2F_SP_Data_DocumentsItem_LookupColumnAWQY8O2FPartner">
+               <End Role="LookupColumnAWQY8O2FPartner" EntitySet="DocumentsItems"/>
+               <End Role="LookupColumnAWQY8O2F" EntitySet="DocumentsItems"/>
+            </AssociationSet>
+            <AssociationSet Name="SP_Data_DocumentsItem_LookupColumnWSR4NS9L_SP_Data_DocumentsItem_LookupColumnWSR4NS9LPartnerSet" Association="SP.Data.SP_Data_DocumentsItem_LookupColumnWSR4NS9L_SP_Data_DocumentsItem_LookupColumnWSR4NS9LPartner">
+               <End Role="LookupColumnWSR4NS9LPartner" EntitySet="DocumentsItems"/>
+               <End Role="LookupColumnWSR4NS9L" EntitySet="DocumentsItems"/>
+            </AssociationSet>
+            <AssociationSet Name="SP_Data_DocumentsItem_LookupColumnA44OOVKX_SP_Data_DocumentsItem_LookupColumnA44OOVKXPartnerSet" Association="SP.Data.SP_Data_DocumentsItem_LookupColumnA44OOVKX_SP_Data_DocumentsItem_LookupColumnA44OOVKXPartner">
+               <End Role="LookupColumnA44OOVKXPartner" EntitySet="DocumentsItems"/>
+               <End Role="LookupColumnA44OOVKX" EntitySet="DocumentsItems"/>
+            </AssociationSet>
+            <AssociationSet Name="SP_Data_DocumentsItem_LookupColumn0R5TCYOS_SP_Data_DocumentsItem_LookupColumn0R5TCYOSPartnerSet" Association="SP.Data.SP_Data_DocumentsItem_LookupColumn0R5TCYOS_SP_Data_DocumentsItem_LookupColumn0R5TCYOSPartner">
+               <End Role="LookupColumn0R5TCYOSPartner" EntitySet="DocumentsItems"/>
+               <End Role="LookupColumn0R5TCYOS" EntitySet="DocumentsItems"/>
+            </AssociationSet>
+            <AssociationSet Name="SP_Data_DocumentsItem_LookupColumnIKTS1PFY_SP_Data_DocumentsItem_LookupColumnIKTS1PFYPartnerSet" Association="SP.Data.SP_Data_DocumentsItem_LookupColumnIKTS1PFY_SP_Data_DocumentsItem_LookupColumnIKTS1PFYPartner">
+               <End Role="LookupColumnIKTS1PFYPartner" EntitySet="DocumentsItems"/>
+               <End Role="LookupColumnIKTS1PFY" EntitySet="DocumentsItems"/>
+            </AssociationSet>
             <AssociationSet Name="SP_Data_DocumentsItem_Author_SP_Data_UserInfoItem_AuthorPartnerSet" Association="SP.Data.SP_Data_DocumentsItem_Author_SP_Data_UserInfoItem_AuthorPartner">
                <End Role="AuthorPartner" EntitySet="DocumentsItems"/>
                <End Role="Author" EntitySet="UserInfoItems"/>
@@ -19467,6 +19544,9 @@
          <Annotations Target="SP.Publishing.CampaignPublicationFieldsData/EndpointTeams">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.Publishing.CampaignPublicationFieldsData/EndpointVivaEngage">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.Publishing.CampaignPublicationFieldsData/EndpointYammer">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -19564,6 +19644,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Publishing.TeamsPublishingStatus">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Publishing.VivaEngagePublishingStatus">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Publishing.PublishPublicationResponse">
@@ -22681,6 +22764,9 @@
          <Annotations Target="SP.Publishing.CampaignPublication/TeamsEndpoint">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.Publishing.CampaignPublication/VivaEngageEndpoint">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.Publishing.CampaignPublication/YammerEndpoint">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -24016,7 +24102,7 @@
          <Annotations Target="SP.ApiData/CopyTo(SP.Publishing.CampaignPublication, SP.Publishing.CopyToParams)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/CopyWithConfiguration(SP.Publishing.CampaignPublication, Edm.String, Edm.Boolean)">
+         <Annotations Target="SP.ApiData/CopyWithConfiguration(SP.Publishing.CampaignPublication, Edm.String, Edm.Boolean, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/CreateNewsCopy(SP.Publishing.CampaignPublication)">
@@ -24065,6 +24151,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SavePageAsTemplate(SP.Publishing.CampaignPublication)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/SavePageAsTemplate2(SP.Publishing.CampaignPublication, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SavePageAsTemplateOnMySite(SP.Publishing.CampaignPublication)">
@@ -24184,7 +24273,7 @@
          <Annotations Target="SP.ApiData/CopyTo(SP.Publishing.FeedVideoPage, SP.Publishing.CopyToParams)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/CopyWithConfiguration(SP.Publishing.FeedVideoPage, Edm.String, Edm.Boolean)">
+         <Annotations Target="SP.ApiData/CopyWithConfiguration(SP.Publishing.FeedVideoPage, Edm.String, Edm.Boolean, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/CreateNewsCopy(SP.Publishing.FeedVideoPage)">
@@ -24230,6 +24319,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SavePageAsTemplate(SP.Publishing.FeedVideoPage)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/SavePageAsTemplate2(SP.Publishing.FeedVideoPage, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SavePageAsTemplateOnMySite(SP.Publishing.FeedVideoPage)">
@@ -24307,7 +24399,7 @@
          <Annotations Target="SP.ApiData/CopyTo(SP.Publishing.RepostPage, SP.Publishing.CopyToParams)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/CopyWithConfiguration(SP.Publishing.RepostPage, Edm.String, Edm.Boolean)">
+         <Annotations Target="SP.ApiData/CopyWithConfiguration(SP.Publishing.RepostPage, Edm.String, Edm.Boolean, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/CreateNewsCopy(SP.Publishing.RepostPage)">
@@ -24353,6 +24445,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SavePageAsTemplate(SP.Publishing.RepostPage)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/SavePageAsTemplate2(SP.Publishing.RepostPage, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SavePageAsTemplateOnMySite(SP.Publishing.RepostPage)">
@@ -24409,7 +24504,7 @@
          <Annotations Target="SP.ApiData/CopyTo(SP.Publishing.SitePage3D, SP.Publishing.CopyToParams)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/CopyWithConfiguration(SP.Publishing.SitePage3D, Edm.String, Edm.Boolean)">
+         <Annotations Target="SP.ApiData/CopyWithConfiguration(SP.Publishing.SitePage3D, Edm.String, Edm.Boolean, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/CreateNewsCopy(SP.Publishing.SitePage3D)">
@@ -24455,6 +24550,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SavePageAsTemplate(SP.Publishing.SitePage3D)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/SavePageAsTemplate2(SP.Publishing.SitePage3D, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SavePageAsTemplateOnMySite(SP.Publishing.SitePage3D)">
@@ -24550,7 +24648,7 @@
          <Annotations Target="SP.ApiData/CopyTo(SP.Publishing.SitePage, SP.Publishing.CopyToParams)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/CopyWithConfiguration(SP.Publishing.SitePage, Edm.String, Edm.Boolean)">
+         <Annotations Target="SP.ApiData/CopyWithConfiguration(SP.Publishing.SitePage, Edm.String, Edm.Boolean, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/CreateNewsCopy(SP.Publishing.SitePage)">
@@ -24596,6 +24694,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SavePageAsTemplate(SP.Publishing.SitePage)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/SavePageAsTemplate2(SP.Publishing.SitePage, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SavePageAsTemplateOnMySite(SP.Publishing.SitePage)">
@@ -24700,7 +24801,7 @@
          <Annotations Target="SP.ApiData/CopyTo(SP.Publishing.TopicSitePage, SP.Publishing.CopyToParams)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/CopyWithConfiguration(SP.Publishing.TopicSitePage, Edm.String, Edm.Boolean)">
+         <Annotations Target="SP.ApiData/CopyWithConfiguration(SP.Publishing.TopicSitePage, Edm.String, Edm.Boolean, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/CreateNewsCopy(SP.Publishing.TopicSitePage)">
@@ -24746,6 +24847,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SavePageAsTemplate(SP.Publishing.TopicSitePage)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/SavePageAsTemplate2(SP.Publishing.TopicSitePage, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SavePageAsTemplateOnMySite(SP.Publishing.TopicSitePage)">
@@ -26189,6 +26293,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/GetProgressForFileVersionExpirationReport(SP.Site, Edm.String)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/GetProgressForSetVersionPolicyForDocLibs(SP.Site)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/GetWebPath(SP.Site, Edm.Guid, Edm.Guid)">
@@ -30729,6 +30836,7 @@
             <Property Name="EndpointEmail" Type="Edm.String"/>
             <Property Name="EndpointSharePoint" Type="Edm.String"/>
             <Property Name="EndpointTeams" Type="Edm.String"/>
+            <Property Name="EndpointVivaEngage" Type="Edm.String"/>
             <Property Name="EndpointYammer" Type="Edm.String"/>
             <Property Name="PublicationMetadata" Type="Edm.String"/>
             <Property Name="PublicationStatus" Type="Edm.Int32" Nullable="false"/>
@@ -30964,6 +31072,7 @@
             <Property Name="PublishingStatus" Type="Edm.Int32" Nullable="false"/>
             <Property Name="SharePointPublishingStatus" Type="Collection(SP.Publishing.SharePointPublishingStatusResponse)"/>
             <Property Name="TeamsPublishingStatus" Type="Collection(SP.Publishing.TeamsPublishingStatusResponse)"/>
+            <Property Name="VivaEngagePublishingStatus" Type="SP.Publishing.VivaEngagePublishingStatus"/>
             <Property Name="YammerPublishingStatus" Type="Collection(SP.KeyValue)"/>
          </ComplexType>
          <ComplexType Name="SharePointPublishingStatusResponse">
@@ -30984,6 +31093,12 @@
             <Property Name="ErrorCode" Type="Edm.Int32" Nullable="false"/>
             <Property Name="ErrorMessage" Type="Edm.String"/>
             <Property Name="HttpStatusCode" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="Status" Type="Edm.Int32" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="VivaEngagePublishingStatus">
+            <Property Name="DestinationId" Type="Edm.String"/>
+            <Property Name="ErrorCode" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="ErrorMessage" Type="Edm.String"/>
             <Property Name="Status" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="PublishPublicationResponse">
@@ -31223,6 +31338,7 @@
             <Property Name="PublicationStatus" Type="Edm.Int32"/>
             <Property Name="SharePointEndpoint" Type="Edm.String"/>
             <Property Name="TeamsEndpoint" Type="Edm.String"/>
+            <Property Name="VivaEngageEndpoint" Type="Edm.String"/>
             <Property Name="YammerEndpoint" Type="Edm.String"/>
          </EntityType>
          <EntityType Name="CanCreatePageResponse">
@@ -34052,10 +34168,8 @@
             <Property Name="lastActivity" Type="Edm.DateTime" Nullable="false"/>
             <Property Name="siteLabelId" Type="Edm.String"/>
             <Property Name="siteLabelName" Type="Edm.String"/>
-            <Property Name="siteOwner" Type="Edm.String"/>
             <Property Name="siteOwnerName" Type="Edm.String"/>
             <Property Name="siteSubscriptionId" Type="Edm.Guid" Nullable="false"/>
-            <Property Name="siteType" Type="Edm.Int32" Nullable="false"/>
             <Property Name="siteUrl" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="RecentAdminActionReport">
@@ -38969,6 +39083,15 @@
             <Property Name="OData__EffectiveIpLabelDisplayName" Type="Edm.String"/>
             <Property Name="LookupColumn3PORD6JOId" Type="Edm.Int32"/>
             <Property Name="LookupColumnWUX0ULE6Id" Type="Edm.Int32"/>
+            <Property Name="LookupColumnDZOJX4BKId" Type="Edm.Int32"/>
+            <Property Name="LookupColumnCDCTM75YId" Type="Edm.Int32"/>
+            <Property Name="LookupColumnOVU64GO6Id" Type="Edm.Int32"/>
+            <Property Name="LookupColumnBNSA9H9PId" Type="Edm.Int32"/>
+            <Property Name="LookupColumnAWQY8O2FId" Type="Edm.Int32"/>
+            <Property Name="LookupColumnWSR4NS9LId" Type="Edm.Int32"/>
+            <Property Name="LookupColumnA44OOVKXId" Type="Edm.Int32"/>
+            <Property Name="LookupColumn0R5TCYOSId" Type="Edm.Int32"/>
+            <Property Name="LookupColumnIKTS1PFYId" Type="Edm.Int32"/>
             <Property Name="ID" Type="Edm.Int32"/>
             <Property Name="Created" Type="Edm.DateTime"/>
             <Property Name="AuthorId" Type="Edm.Int32"/>
@@ -39021,6 +39144,15 @@
             <Property Name="PolicyDisabledUICapabilities" Type="Edm.String"/>
             <NavigationProperty Name="LookupColumn3PORD6JO" Relationship="SP.Data.SP_Data_DocumentsItem_LookupColumn3PORD6JO_SP_Data_DocumentsItem_LookupColumn3PORD6JOPartner" ToRole="LookupColumn3PORD6JO" FromRole="LookupColumn3PORD6JOPartner"/>
             <NavigationProperty Name="LookupColumnWUX0ULE6" Relationship="SP.Data.SP_Data_DocumentsItem_LookupColumnWUX0ULE6_SP_Data_DocumentsItem_LookupColumnWUX0ULE6Partner" ToRole="LookupColumnWUX0ULE6" FromRole="LookupColumnWUX0ULE6Partner"/>
+            <NavigationProperty Name="LookupColumnDZOJX4BK" Relationship="SP.Data.SP_Data_DocumentsItem_LookupColumnDZOJX4BK_SP_Data_DocumentsItem_LookupColumnDZOJX4BKPartner" ToRole="LookupColumnDZOJX4BK" FromRole="LookupColumnDZOJX4BKPartner"/>
+            <NavigationProperty Name="LookupColumnCDCTM75Y" Relationship="SP.Data.SP_Data_DocumentsItem_LookupColumnCDCTM75Y_SP_Data_DocumentsItem_LookupColumnCDCTM75YPartner" ToRole="LookupColumnCDCTM75Y" FromRole="LookupColumnCDCTM75YPartner"/>
+            <NavigationProperty Name="LookupColumnOVU64GO6" Relationship="SP.Data.SP_Data_DocumentsItem_LookupColumnOVU64GO6_SP_Data_DocumentsItem_LookupColumnOVU64GO6Partner" ToRole="LookupColumnOVU64GO6" FromRole="LookupColumnOVU64GO6Partner"/>
+            <NavigationProperty Name="LookupColumnBNSA9H9P" Relationship="SP.Data.SP_Data_DocumentsItem_LookupColumnBNSA9H9P_SP_Data_DocumentsItem_LookupColumnBNSA9H9PPartner" ToRole="LookupColumnBNSA9H9P" FromRole="LookupColumnBNSA9H9PPartner"/>
+            <NavigationProperty Name="LookupColumnAWQY8O2F" Relationship="SP.Data.SP_Data_DocumentsItem_LookupColumnAWQY8O2F_SP_Data_DocumentsItem_LookupColumnAWQY8O2FPartner" ToRole="LookupColumnAWQY8O2F" FromRole="LookupColumnAWQY8O2FPartner"/>
+            <NavigationProperty Name="LookupColumnWSR4NS9L" Relationship="SP.Data.SP_Data_DocumentsItem_LookupColumnWSR4NS9L_SP_Data_DocumentsItem_LookupColumnWSR4NS9LPartner" ToRole="LookupColumnWSR4NS9L" FromRole="LookupColumnWSR4NS9LPartner"/>
+            <NavigationProperty Name="LookupColumnA44OOVKX" Relationship="SP.Data.SP_Data_DocumentsItem_LookupColumnA44OOVKX_SP_Data_DocumentsItem_LookupColumnA44OOVKXPartner" ToRole="LookupColumnA44OOVKX" FromRole="LookupColumnA44OOVKXPartner"/>
+            <NavigationProperty Name="LookupColumn0R5TCYOS" Relationship="SP.Data.SP_Data_DocumentsItem_LookupColumn0R5TCYOS_SP_Data_DocumentsItem_LookupColumn0R5TCYOSPartner" ToRole="LookupColumn0R5TCYOS" FromRole="LookupColumn0R5TCYOSPartner"/>
+            <NavigationProperty Name="LookupColumnIKTS1PFY" Relationship="SP.Data.SP_Data_DocumentsItem_LookupColumnIKTS1PFY_SP_Data_DocumentsItem_LookupColumnIKTS1PFYPartner" ToRole="LookupColumnIKTS1PFY" FromRole="LookupColumnIKTS1PFYPartner"/>
             <NavigationProperty Name="Author" Relationship="SP.Data.SP_Data_DocumentsItem_Author_SP_Data_UserInfoItem_AuthorPartner" ToRole="Author" FromRole="AuthorPartner"/>
             <NavigationProperty Name="Editor" Relationship="SP.Data.SP_Data_DocumentsItem_Editor_SP_Data_UserInfoItem_EditorPartner" ToRole="Editor" FromRole="EditorPartner"/>
             <NavigationProperty Name="CheckoutUser" Relationship="SP.Data.SP_Data_DocumentsItem_CheckoutUser_SP_Data_UserInfoItem_CheckoutUserPartner" ToRole="CheckoutUser" FromRole="CheckoutUserPartner"/>
@@ -40743,6 +40875,42 @@
          <Association Name="SP_Data_DocumentsItem_LookupColumnWUX0ULE6_SP_Data_DocumentsItem_LookupColumnWUX0ULE6Partner">
             <End Type="SP.Data.DocumentsItem" Role="LookupColumnWUX0ULE6" Multiplicity="0..1"/>
             <End Type="SP.Data.DocumentsItem" Role="LookupColumnWUX0ULE6Partner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_Data_DocumentsItem_LookupColumnDZOJX4BK_SP_Data_DocumentsItem_LookupColumnDZOJX4BKPartner">
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumnDZOJX4BK" Multiplicity="0..1"/>
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumnDZOJX4BKPartner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_Data_DocumentsItem_LookupColumnCDCTM75Y_SP_Data_DocumentsItem_LookupColumnCDCTM75YPartner">
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumnCDCTM75Y" Multiplicity="0..1"/>
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumnCDCTM75YPartner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_Data_DocumentsItem_LookupColumnOVU64GO6_SP_Data_DocumentsItem_LookupColumnOVU64GO6Partner">
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumnOVU64GO6" Multiplicity="0..1"/>
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumnOVU64GO6Partner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_Data_DocumentsItem_LookupColumnBNSA9H9P_SP_Data_DocumentsItem_LookupColumnBNSA9H9PPartner">
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumnBNSA9H9P" Multiplicity="0..1"/>
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumnBNSA9H9PPartner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_Data_DocumentsItem_LookupColumnAWQY8O2F_SP_Data_DocumentsItem_LookupColumnAWQY8O2FPartner">
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumnAWQY8O2F" Multiplicity="0..1"/>
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumnAWQY8O2FPartner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_Data_DocumentsItem_LookupColumnWSR4NS9L_SP_Data_DocumentsItem_LookupColumnWSR4NS9LPartner">
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumnWSR4NS9L" Multiplicity="0..1"/>
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumnWSR4NS9LPartner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_Data_DocumentsItem_LookupColumnA44OOVKX_SP_Data_DocumentsItem_LookupColumnA44OOVKXPartner">
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumnA44OOVKX" Multiplicity="0..1"/>
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumnA44OOVKXPartner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_Data_DocumentsItem_LookupColumn0R5TCYOS_SP_Data_DocumentsItem_LookupColumn0R5TCYOSPartner">
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumn0R5TCYOS" Multiplicity="0..1"/>
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumn0R5TCYOSPartner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_Data_DocumentsItem_LookupColumnIKTS1PFY_SP_Data_DocumentsItem_LookupColumnIKTS1PFYPartner">
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumnIKTS1PFY" Multiplicity="0..1"/>
+            <End Type="SP.Data.DocumentsItem" Role="LookupColumnIKTS1PFYPartner" Multiplicity="0..1"/>
          </Association>
          <Association Name="SP_Data_DocumentsItem_Author_SP_Data_UserInfoItem_AuthorPartner">
             <End Type="SP.Data.UserInfoItem" Role="Author" Multiplicity="0..1"/>

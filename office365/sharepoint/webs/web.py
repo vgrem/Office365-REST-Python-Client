@@ -127,6 +127,9 @@ class Web(SecurableObject):
         super(Web, self).__init__(context, resource_path)
         self._web_url = None
 
+    def __str__(self):
+        return self.title
+
     def add_list(self, title, template_type=ListTemplateType.GenericList):
         """
         Creates a new list and adds it to the web.

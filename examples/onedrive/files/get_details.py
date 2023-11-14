@@ -8,6 +8,6 @@ from office365.graph_client import GraphClient
 from tests.graph_case import acquire_token_by_username_password
 
 client = GraphClient(acquire_token_by_username_password)
-file_path = "archive/Sample.rtf"
+file_path = "Financial Sample.xlsx"
 file_item = client.me.drive.root.get_by_path(file_path).get().execute_query()
 print(file_item.web_url)

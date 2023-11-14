@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 
 
@@ -11,20 +13,17 @@ class IdentityProvider(Entity):
 
     @property
     def client_id(self):
+        # type: () -> Optional[str]
         """
         The client ID for the application. This is the client ID obtained when registering the application
-        with the identity provider.
-
-        :rtype: str or None
-        """
+        with the identity provider."""
         return self.properties.get("clientId", None)
 
     @property
     def client_secret(self):
+        # type: () -> Optional[str]
         """
         The client secret for the application. This is the client secret obtained when registering the application
         with the identity provider. This is write-only. A read operation will return ****
-
-        :rtype: str or None
         """
         return self.properties.get("clientSecret", None)

@@ -2,7 +2,7 @@
 This example moves an item specified by {server relative path} into a folder specified by
 server relative path.
 
-https://learn.microsoft.com/en-us/graph/api/driveitem-move?view=graph-rest-1.0&tabs=http
+https://learn.microsoft.com/en-us/graph/api/driveitem-move?view=graph-rest-1.0
 """
 from office365.graph_client import GraphClient
 from tests.graph_case import acquire_token_by_username_password
