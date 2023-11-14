@@ -549,7 +549,7 @@ class DriveItem(BaseItem):
         """
         Permanently delete a driveItem.
         Note that if you delete items using this method, they will be permanently removed and won't be sent to the
-        recycle bin. Therefore, they cannot be restored afterward.
+        recycle bin. Therefore, they cannot be restored afterward. For non-permanent delete, use delete_object()
         """
         qry = ServiceOperationQuery(self, "permanentDelete")
         self.context.add_query(qry)
