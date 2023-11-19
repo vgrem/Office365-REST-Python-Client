@@ -241,9 +241,7 @@ class ListItem(SecurableObject):
         return return_type
 
     def unshare(self):
-        """
-        Unshare a ListItem (file or folder facet)
-        """
+        """Unshare a ListItem (file or folder facet)"""
         return_type = SharingResult(self.context)
 
         def _property_resolved():
@@ -372,10 +370,8 @@ class ListItem(SecurableObject):
 
     @property
     def display_name(self):
-        """Specifies the display name of the list item.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the display name of the list item."""
         return self.properties.get("DisplayName", None)
 
     @property
@@ -441,34 +437,26 @@ class ListItem(SecurableObject):
 
     @property
     def field_values(self):
+        # type: () -> Optional[dict]
         """Gets a collection of key/value pairs containing the names and values for the fields of the list item."""
         return self.properties.get("FieldValues", None)
 
     @property
     def comments_disabled(self):
-        """
-        Indicates whether comments for this item are disabled or not.
-
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Indicates whether comments for this item are disabled or not."""
         return self.properties.get("CommentsDisabled", None)
 
     @property
     def file_system_object_type(self):
-        """
-        Gets a value that specifies whether the list item is a file or a list folder.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets a value that specifies whether the list item is a file or a list folder"""
         return self.properties.get("FileSystemObjectType", None)
 
     @property
     def id(self):
-        """
-        Gets a value that specifies the list item identifier.
-
-        :rtype: int
-        """
+        # type: () -> Optional[int]
+        """Gets a value that specifies the list item identifier."""
         return self.properties.get("Id", None)
 
     @property
@@ -477,6 +465,7 @@ class ListItem(SecurableObject):
 
     @property
     def comments_disabled_scope(self):
+        # type: () -> Optional[str]
         """Indicates at what scope comments are disabled."""
         return self.properties.get("CommentsDisabledScope", None)
 
@@ -502,9 +491,7 @@ class ListItem(SecurableObject):
 
     @property
     def liked_by_information(self):
-        """
-        Gets a value that specifies the list item identifier.
-        """
+        """Gets a value that specifies the list item identifier."""
         return self.properties.get(
             "LikedByInformation",
             LikedByInformation(
@@ -570,17 +557,17 @@ class ListItem(SecurableObject):
             super(ListItem, self).set_property(name, value, persist_changes)
 
         # fallback: create a new resource path
-        if self._resource_path is None and self.parent_collection is not None:
-            if name == "Id":
+        if name == "Id":
+            if self._resource_path is None and self.parent_collection is not None:
                 self._resource_path = KeyPath(
                     value, self.parent_collection.resource_path
                 )
         return self
 
     def _set_taxonomy_field_value(self, name, value):
+        # type: (str, TaxonomyFieldValueCollection) -> None
         """
         Sets taxonomy field value
-
         :param str name: Taxonomy field name
         :param TaxonomyFieldValueCollection value: Taxonomy field value
         """

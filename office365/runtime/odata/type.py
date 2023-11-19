@@ -64,6 +64,8 @@ class ODataType(object):
         """
         if value is None:
             return None
+        elif isinstance(value, datetime.datetime):
+            return value
 
         known_formats = [
             "%Y-%m-%dT%H:%M:%SZ",

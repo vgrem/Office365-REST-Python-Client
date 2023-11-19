@@ -59,9 +59,7 @@ class ClientResult(Generic[T]):
     def execute_query_retry(
         self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None
     ):
-        """
-        Executes the current set of data retrieval queries and method invocations and retries it if needed.
-        """
+        """Executes the current set of data retrieval queries and method invocations and retries it if needed."""
         self._context.execute_query_retry(
             max_retry=max_retry,
             timeout_secs=timeout_secs,

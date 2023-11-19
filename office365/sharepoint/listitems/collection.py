@@ -31,3 +31,7 @@ class ListItemCollection(EntityCollection[ListItem]):
             self.context,
             ServiceOperationPath("GetByStringId", {"sId": s_id}, self.resource_path),
         )
+
+    def get_by_url(self, url):
+        """Returns the list item with the specified site or server relative url."""
+        return self.single("FileRef eq '{0}'".format(url))

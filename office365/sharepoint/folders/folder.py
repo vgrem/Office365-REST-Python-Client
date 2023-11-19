@@ -39,7 +39,6 @@ class Folder(Entity):
     def from_url(abs_url):
         """
         Addresses a Folder by absolute url
-
         :type abs_url: str
         """
         from office365.sharepoint.client_context import ClientContext
@@ -151,9 +150,7 @@ class Folder(Entity):
             self.set_property("ServerRelativePath", url)
 
         def _move_to_using_path(destination_folder):
-            """
-            :type destination_folder: Folder
-            """
+            # type: ("Folder") -> None
             destination_url = "/".join(
                 [str(destination_folder.server_relative_path), self.name]
             )
@@ -515,9 +512,7 @@ class Folder(Entity):
     @property
     def is_wopi_enabled(self):
         # type: () -> Optional[bool]
-        """
-        Indicates whether the folder is enabled for WOPI default action.
-        """
+        """Indicates whether the folder is enabled for WOPI default action."""
         return self.properties.get("IsWOPIEnabled", None)
 
     @property
@@ -571,9 +566,7 @@ class Folder(Entity):
     @property
     def serverRelativeUrl(self):
         # type: () -> Optional[str]
-        """
-        Gets the server-relative URL of the list folder.
-        """
+        """Gets the server-relative URL of the list folder."""
         return self.properties.get("ServerRelativeUrl", None)
 
     @property

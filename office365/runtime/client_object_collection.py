@@ -1,4 +1,4 @@
-from typing import Callable, Generic, Iterator, List, Optional, Type, TypeVar
+from typing import Any, Callable, Generic, Iterator, List, Optional, Type, TypeVar
 
 from typing_extensions import Self
 
@@ -110,7 +110,6 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         # type: (str) -> Self
         """
         Allows clients to filter a collection of resources that are addressed by a request URL
-
         :param str expression: Filter expression, for example: 'Id eq 123'
         """
         self.query_options.filter = expression
@@ -134,22 +133,24 @@ class ClientObjectCollection(ClientObject, Generic[T]):
 
     def top(self, value):
         # type: (int) -> Self
-        """
-        Specifies the number of items in the queried collection to be included in the result
-        """
+        """Specifies the number of items in the queried collection to be included in the result"""
         self.query_options.top = value
         return self
 
     def paged(self, page_size=None, page_loaded=None):
         # type: (int, Callable[[Self], None]) -> Self
-        """
-        Retrieves via server-driven paging mode
-        """
+        """Retrieves via server-driven paging mode"""
         self._paged_mode = True
         if callable(page_loaded):
             self._page_loaded += page_loaded
         if page_size:
             self.top(page_size)
+        return self
+
+    def after_execute(self, action, *args, **kwargs):
+        # type: (Callable[[Self, Any, Any], None], Any, Any) -> Self
+        super(ClientObjectCollection, self).after_execute(action, *args, **kwargs)
+        self._page_loaded += action
         return self
 
     def get(self):
@@ -196,22 +197,22 @@ class ClientObjectCollection(ClientObject, Generic[T]):
     def first(self, expression):
         # type: (str) -> T
         """Return the first Entity instance that matches current query
-
         :param str expression: Filter expression
         """
         return_type = self.create_typed_object()
         self.add_child(return_type)
-        key = return_type.property_ref_name
 
         def _after_loaded(col):
             # type: (ClientObjectCollection) -> None
             if len(col) < 1:
                 message = "Not found for filter: {0}".format(self.query_options.filter)
                 raise ValueError(message)
-            return_type.set_property(key, col[0].get_property(key))
+            [
+                return_type.set_property(k, v, False)
+                for k, v in col[0].properties.items()
+            ]
 
-        self.filter(expression).top(1)
-        self.context.load(self, [key], after_loaded=_after_loaded)
+        self.get().filter(expression).top(1).after_execute(_after_loaded)
         return return_type
 
     def single(self, expression):
@@ -237,8 +238,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
                 for k, v in col[0].properties.items()
             ]
 
-        self.filter(expression).top(2)
-        self.context.load(self, after_loaded=_after_loaded)
+        self.get().filter(expression).top(2).after_execute(_after_loaded)
         return return_type
 
     @property

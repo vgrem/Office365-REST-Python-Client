@@ -8226,6 +8226,9 @@
             <FunctionImport Name="Active" ReturnType="Collection(SP.Publishing.AnnouncementsData)" IsSideEffecting="false" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.AnnouncementsController"/>
             </FunctionImport>
+            <FunctionImport Name="Channel" ReturnType="Collection(SP.Publishing.ChannelAnnouncement)" IsSideEffecting="false" IsBindable="true">
+               <Parameter Name="this" Type="SP.Publishing.AnnouncementsController"/>
+            </FunctionImport>
             <FunctionImport Name="SP_Publishing_CampaignPublicationCollection" ReturnType="Collection(SP.Publishing.CampaignPublication)" IsComposable="true" EntitySet="SitePageMetadatas"/>
             <FunctionImport Name="BoostNews" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.CampaignPublication"/>
@@ -10618,6 +10621,9 @@
             <FunctionImport Name="Microsoft_SharePoint_Utilities_WebTemplateExtensions_SiteScriptUtility_GetSiteScriptMetadata" ReturnType="Microsoft.SharePoint.Utilities.WebTemplateExtensions.SiteScriptMetadata">
                <Parameter Name="id" Type="Edm.Guid" Nullable="false"/>
                <Parameter Name="store" Type="Edm.Int32" Nullable="false"/>
+            </FunctionImport>
+            <FunctionImport Name="Microsoft_SharePoint_Utilities_WebTemplateExtensions_SiteScriptUtility_GetSiteScriptPackageFile" ReturnType="Edm.Stream">
+               <Parameter Name="id" Type="Edm.Guid" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="Microsoft_SharePoint_Utilities_WebTemplateExtensions_SiteScriptUtility_GetSiteScripts" ReturnType="Collection(Microsoft.SharePoint.Utilities.WebTemplateExtensions.SiteScriptMetadata)">
                <Parameter Name="store" Type="Edm.Int32" Nullable="false"/>
@@ -14006,7 +14012,6 @@
                <Parameter Name="uploadId" Type="Edm.Guid" Nullable="false"/>
                <Parameter Name="fileOffset" Type="Edm.Int64" Nullable="false"/>
                <Parameter Name="stream" Type="Edm.Stream"/>
-               <Parameter Name="sandboxId" Type="Edm.Guid" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="FinishUploadWithChecksum" ReturnType="SP.File" IsBindable="true" EntitySet="Files12">
                <Parameter Name="this" Type="SP.File"/>
@@ -15989,6 +15994,10 @@
             <FunctionImport Name="DeleteRecentAdminActionReport" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="reportId" Type="Edm.Int32" Nullable="false"/>
+            </FunctionImport>
+            <FunctionImport Name="DeleteSPOContainerTypeById" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+               <Parameter Name="containerTypeId" Type="Edm.Guid" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="DisableCollaborationInsightsDataCollection" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -19424,6 +19433,18 @@
          <Annotations Target="SP.Publishing.AcronymInformation">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.Publishing.AnnouncementAuthor">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Publishing.AnnouncementAuthor/Email">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Publishing.AnnouncementAuthor/ID">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Publishing.AnnouncementAuthor/Name">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.Publishing.CallToAction/Text">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -19560,6 +19581,33 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Publishing.CampaignPublicationMailDraftData/GroupUpn">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Publishing.ChannelAnnouncement">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Publishing.ChannelAnnouncement/Author">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Publishing.ChannelAnnouncement/CallToAction">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Publishing.ChannelAnnouncement/ChannelName">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Publishing.ChannelAnnouncement/Icon">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Publishing.ChannelAnnouncement/ID">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Publishing.ChannelAnnouncement/Message">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Publishing.ChannelAnnouncement/PublishStartDate">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Publishing.ChannelAnnouncement/Title">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Publishing.CopyToParams">
@@ -25251,6 +25299,9 @@
          <Annotations Target="SP.ApiData/Microsoft_SharePoint_Utilities_WebTemplateExtensions_SiteScriptUtility_GetSiteScriptMetadata(Edm.Guid, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.ApiData/Microsoft_SharePoint_Utilities_WebTemplateExtensions_SiteScriptUtility_GetSiteScriptPackageFile(Edm.Guid)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.ApiData/Microsoft_SharePoint_Utilities_WebTemplateExtensions_SiteScriptUtility_GetSiteScripts(Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -30776,6 +30827,11 @@
             <Property Name="Lcid" Type="Edm.Int32" Nullable="false"/>
             <Property Name="Text" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="AnnouncementAuthor">
+            <Property Name="Email" Type="Edm.String"/>
+            <Property Name="ID" Type="Edm.String"/>
+            <Property Name="Name" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="AnnouncementsData">
             <Property Name="CallToAction" Type="SP.Publishing.CallToAction"/>
             <Property Name="Dismissable" Type="Edm.Boolean" Nullable="false"/>
@@ -30844,6 +30900,17 @@
          <ComplexType Name="CampaignPublicationMailDraftData">
             <Property Name="DraftId" Type="Edm.String"/>
             <Property Name="GroupUpn" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="ChannelAnnouncement">
+            <Property Name="Author" Type="SP.Publishing.AnnouncementAuthor"/>
+            <Property Name="CallToAction" Type="SP.Publishing.CallToAction"/>
+            <Property Name="ChannelName" Type="Edm.String"/>
+            <Property Name="Icon" Type="SP.Publishing.Icon"/>
+            <Property Name="ID" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="IsRead" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="Message" Type="Edm.String"/>
+            <Property Name="PublishStartDate" Type="Edm.String"/>
+            <Property Name="Title" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="CopyToParams">
             <Property Name="AsNews" Type="Edm.Boolean" Nullable="false"/>
@@ -35608,6 +35675,7 @@
          </ComplexType>
          <ComplexType Name="SPContainerProperties">
             <Property Name="AllowEditing" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="AuthenticationContextName" Type="Edm.String"/>
             <Property Name="BlockDownloadPolicy" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ConditionalAccessPolicy" Type="Edm.Int32" Nullable="false"/>
             <Property Name="ContainerApiUrl" Type="Edm.String"/>
@@ -38100,12 +38168,6 @@
                <PropertyRef Name="AddressbarLinkPermission"/>
             </Key>
             <Property Name="AddressbarLinkPermission" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="AIBuilderDefaultPowerAppsEnvironment" Type="Edm.String"/>
-            <Property Name="AIBuilderEnabled" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="AIBuilderEnabledInContentCenter" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="AIBuilderSiteInfoList" Type="Collection(Microsoft.Online.SharePoint.TenantAdministration.SiteInfoForSitePicker)"/>
-            <Property Name="AIBuilderSiteList" Type="Collection(Edm.Guid)" Nullable="false"/>
-            <Property Name="AIBuilderSiteListFileName" Type="Edm.String"/>
             <Property Name="AllowAnonymousMeetingParticipantsToAccessWhiteboards" Type="Edm.Int32" Nullable="false"/>
             <Property Name="AllowCommentsTextOnEmailEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="AllowDownloadingNonWebViewableFiles" Type="Edm.Boolean" Nullable="false"/>
@@ -38175,10 +38237,6 @@
             <Property Name="DisableSpacesActivation" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="DisableVivaConnectionsAnalytics" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="DisplayStartASiteOption" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="DocumentUnderstandingEnabled" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="DocumentUnderstandingSiteInfoList" Type="Collection(Microsoft.Online.SharePoint.TenantAdministration.SiteInfoForSitePicker)"/>
-            <Property Name="DocumentUnderstandingSiteList" Type="Collection(Edm.Guid)" Nullable="false"/>
-            <Property Name="DocumentUnderstandingSiteListFileName" Type="Edm.String"/>
             <Property Name="EmailAttestationEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EmailAttestationReAuthDays" Type="Edm.Int32" Nullable="false"/>
             <Property Name="EmailAttestationRequired" Type="Edm.Boolean" Nullable="false"/>
@@ -38235,15 +38293,6 @@
             <Property Name="NotificationsInSharePointEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="NotifyOwnersWhenInvitationsAccepted" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="NotifyOwnersWhenItemsReshared" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="OCRAdminSiteInfoList" Type="Collection(Microsoft.Online.SharePoint.TenantAdministration.SiteInfoForSitePicker)"/>
-            <Property Name="OCRAdminSiteList" Type="Collection(Edm.Guid)" Nullable="false"/>
-            <Property Name="OCRAdminSiteListFileName" Type="Edm.String"/>
-            <Property Name="OCRComplianceSiteInfoList" Type="Collection(Microsoft.Online.SharePoint.TenantAdministration.SiteInfoForSitePicker)"/>
-            <Property Name="OCRComplianceSiteList" Type="Collection(Edm.Guid)" Nullable="false"/>
-            <Property Name="OCRComplianceSiteListFileName" Type="Edm.String"/>
-            <Property Name="OCRModeForAdminSites" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="OCRModeForComplianceODBs" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="OCRModeForComplianceSites" Type="Edm.Int32" Nullable="false"/>
             <Property Name="ODBAccessRequests" Type="Edm.Int32" Nullable="false"/>
             <Property Name="ODBMembersCanShare" Type="Edm.Int32" Nullable="false"/>
             <Property Name="ODBSensitivityRefreshWindowInHours" Type="Edm.Int32" Nullable="false"/>
@@ -38260,10 +38309,6 @@
             <Property Name="OneDriveRequestFilesLinkEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="OneDriveRequestFilesLinkExpirationInDays" Type="Edm.Int32" Nullable="false"/>
             <Property Name="OwnerAnonymousNotification" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="PrebuiltEnabled" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="PrebuiltSiteInfoList" Type="Collection(Microsoft.Online.SharePoint.TenantAdministration.SiteInfoForSitePicker)"/>
-            <Property Name="PrebuiltSiteList" Type="Collection(Edm.Guid)" Nullable="false"/>
-            <Property Name="PrebuiltSiteListFileName" Type="Edm.String"/>
             <Property Name="PreventExternalUsersFromResharing" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ProvisionSharedWithEveryoneFolder" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="PublicCdnAllowedFileTypes" Type="Edm.String"/>

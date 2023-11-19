@@ -1,24 +1,31 @@
 import hashlib
 import os
 import uuid
-from typing import IO, Callable
+from typing import IO, TYPE_CHECKING, Callable
 
 from office365.runtime.client_result import ClientResult
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.files.creation_information import FileCreationInformation
 from office365.sharepoint.files.file import File
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
+
+if TYPE_CHECKING:
+    from office365.sharepoint.folders.folder import Folder
 
 
 class FileCollection(EntityCollection[File]):
     """Represents a collection of File resources."""
 
     def __init__(self, context, resource_path=None, parent=None):
+        # type: (ClientContext, ResourcePath, Folder) -> None
         super(FileCollection, self).__init__(context, File, resource_path, parent)
 
     def upload(self, path_or_file):
+        # type: (str|IO) -> File
         """Uploads a file into folder.
 
         Note: This method only supports files up to 4MB in size!
@@ -136,7 +143,7 @@ class FileCollection(EntityCollection[File]):
         return_type = File(self.context)
         self.add_child(return_type)
 
-        def _parent_folder_loaded():
+        def _add_template_file():
             params = {
                 "urlOfFile": str(
                     SPResPath.create_relative(
@@ -150,17 +157,24 @@ class FileCollection(EntityCollection[File]):
             )
             self.context.add_query(qry)
 
-        self.parent.ensure_property("ServerRelativeUrl", _parent_folder_loaded)
+        self.parent.ensure_property("ServerRelativeUrl", _add_template_file)
         return return_type
 
     def get_by_url(self, url):
+        # type: (str) -> File
         """Retrieve File object by url"""
         return File(
             self.context, ServiceOperationPath("GetByUrl", [url], self.resource_path)
         )
 
     def get_by_id(self, _id):
+        # type: (int) -> File
         """Gets the File with the specified ID."""
         return File(
             self.context, ServiceOperationPath("getById", [_id], self.resource_path)
         )
+
+    @property
+    def parent(self):
+        # type: () -> Folder
+        return self._parent

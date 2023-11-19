@@ -3,7 +3,7 @@ from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.files.checked_out_file import CheckedOutFile
 
 
-class CheckedOutFileCollection(EntityCollection):
+class CheckedOutFileCollection(EntityCollection[CheckedOutFile]):
     def __init__(self, context, resource_path=None):
         super(CheckedOutFileCollection, self).__init__(
             context, CheckedOutFile, resource_path

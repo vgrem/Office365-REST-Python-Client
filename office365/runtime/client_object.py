@@ -90,7 +90,6 @@ class ClientObject(Generic[T]):
     def is_property_available(self, name):
         # type: (str) -> bool
         """Returns a Boolean value that indicates whether the specified property has been retrieved or set.
-
         :param str name: A property name
         """
         if name in self.properties:
@@ -116,7 +115,7 @@ class ClientObject(Generic[T]):
 
     def remove_from_parent_collection(self):
         if self._parent_collection is None:
-            return
+            return self
         self._parent_collection.remove_child(self)
         return self
 

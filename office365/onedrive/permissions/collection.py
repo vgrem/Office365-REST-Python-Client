@@ -71,9 +71,7 @@ class PermissionCollection(EntityCollection[Permission]):
 
     def delete(self, roles, identity):
         # type: (list[str], Application|User|Group|Device) -> Permission
-        """
-        Deletes the permission.
-        """
+        """Deletes the permission."""
 
         def _delete(col):
             pass
@@ -85,9 +83,7 @@ class PermissionCollection(EntityCollection[Permission]):
         return self
 
     def delete_all(self):
-        """
-        Remove all access to resource
-        """
+        """Remove all access to resource"""
 
         def _after_loaded(return_type):
             # type: (PermissionCollection) -> None

@@ -1,5 +1,6 @@
+import os
 from datetime import datetime
-from typing import Optional
+from typing import AnyStr, Optional
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -7,6 +8,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.changes.collection import ChangeCollection
+from office365.sharepoint.changes.log_item_query import ChangeLogItemQuery
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.changes.token import ChangeToken
 from office365.sharepoint.contenttypes.collection import ContentTypeCollection
@@ -133,9 +135,7 @@ class List(SecurableObject):
         return return_type
 
     def get_metadata_navigation_settings(self):
-        """
-        Retrieves the configured metadata navigation settings for the list.
-        """
+        """Retrieves the configured metadata navigation settings for the list."""
         from office365.sharepoint.navigation.metadata_settings import (
             MetadataNavigationSettings,
         )
@@ -153,12 +153,10 @@ class List(SecurableObject):
         return return_type
 
     def get_sharing_settings(self):
-        """
-        Retrieves a sharing settings for a List
-        """
+        """Retrieves a sharing settings for a List"""
         return_type = ObjectSharingSettings(self.context)
 
-        def _list_loaded():
+        def _get_sharing_settings():
             from office365.sharepoint.webs.web import Web
 
             list_abs_path = SPResPath.create_absolute(
@@ -168,7 +166,7 @@ class List(SecurableObject):
                 self.context, str(list_abs_path), return_type=return_type
             )
 
-        self.ensure_property("RootFolder", _list_loaded)
+        self.ensure_property("RootFolder", _get_sharing_settings)
         return return_type
 
     def get_site_script(self, options=None):
@@ -190,9 +188,7 @@ class List(SecurableObject):
         return return_type
 
     def get_all_rules(self):
-        """
-        Retrieves rules of a List
-        """
+        """Retrieves rules of a List"""
         return_type = ClientResult(self.context, ClientValueCollection(SPListRule))
         qry = ServiceOperationQuery(self, "GetAllRules", None, None, None, return_type)
         self.context.add_query(qry)
@@ -390,11 +386,10 @@ class List(SecurableObject):
         return return_type
 
     def get_list_item_changes_since_token(self, query):
+        # type: (ChangeLogItemQuery) -> ClientResult[AnyStr]
         """
         Returns the changes made to the list since the date and time specified in the change token defined
         by the query input parameter.
-
-        :type query: office365.sharepoint.changes.log_item_query.ChangeLogItemQuery
         """
         return_type = ClientResult(self.context, bytes())
         payload = {"query": query}
@@ -437,7 +432,6 @@ class List(SecurableObject):
         :param str description: A string that contains the description for the list template.
         :param str name: A string that contains the title for the list template.
         :param str file_name: A string that contains the file name for the list template with an .stp extension.
-        :return:
         """
         payload = {
             "strFileName": file_name,
@@ -460,11 +454,10 @@ class List(SecurableObject):
         )
 
     def get_web_dav_url(self, source_url):
+        # type: (str) -> ClientResult[str]
         """
         Gets the trusted URL for opening the folder in Explorer view.
-
         :param str source_url: The URL of the current folder the user is in.
-        :return: ClientResult
         """
 
         return_type = ClientResult(self.context, str())
@@ -476,10 +469,8 @@ class List(SecurableObject):
         return return_type
 
     def get_items(self, caml_query=None):
-        """Returns a collection of items from the list based on the specified query.
-
-        :type caml_query: CamlQuery
-        """
+        # type: (CamlQuery) -> ListItemCollection
+        """Returns a collection of items from the list based on the specified query."""
         if not caml_query:
             caml_query = CamlQuery.create_all_items_query()
         return_type = ListItemCollection(self.context, self.items.resource_path)
@@ -585,13 +576,28 @@ class List(SecurableObject):
         return return_type
 
     def get_item_by_id(self, item_id):
-        """Returns the list item with the specified list item identifier.
-        :type item_id: int
-        """
+        # type: (int) -> ListItem
+        """Returns the list item with the specified list item identifier."""
         return ListItem(
             self.context,
             ServiceOperationPath("getItemById", [item_id], self.resource_path),
         )
+
+    def get_item_by_url(self, url):
+        # type: (str) -> ListItem
+        """Returns the list item with the specified site or server relative url."""
+        return_type = ListItem(self.context)
+        self.items.add_child(return_type)
+
+        def _after_loaded(item):
+            [return_type.set_property(k, v, False) for k, v in item.properties.items()]
+
+        def _get_item_by_url():
+            path = os.path.join(self.root_folder.serverRelativeUrl, url)
+            self.items.get_by_url(path).after_execute(_after_loaded, execute_first=True)
+
+        self.ensure_property("RootFolder", _get_item_by_url)
+        return return_type
 
     def get_view(self, view_id):
         """Returns the list view with the specified view identifier.
@@ -629,10 +635,9 @@ class List(SecurableObject):
         return return_type
 
     def reserve_list_item_id(self):
-        """
-        Reserves the returned list item identifier for the idempotent creation of a list item.
-        """
-        return_type = ClientResult(self.context, int())  # type: ClientResult[int]
+        # type: () -> ClientResult[int]
+        """Reserves the returned list item identifier for the idempotent creation of a list item."""
+        return_type = ClientResult(self.context, int())
         qry = ServiceOperationQuery(
             self, "ReserveListItemId", None, None, None, return_type
         )
@@ -672,8 +677,7 @@ class List(SecurableObject):
     @property
     def id(self):
         # type: () -> Optional[str]
-        """
-        Gets a value that specifies the list identifier."""
+        """Gets a value that specifies the list identifier."""
         return self.properties.get("Id", None)
 
     @property
@@ -691,25 +695,19 @@ class List(SecurableObject):
     @property
     def allow_content_types(self):
         # type: () -> Optional[bool]
-        """
-        Specifies whether the list supports content types.
-        """
+        """Specifies whether the list supports content types."""
         return self.properties.get("AllowContentTypes", None)
 
     @property
     def allow_deletion(self):
         # type: () -> Optional[bool]
-        """
-        Specifies whether the list could be deleted.
-        """
+        """Specifies whether the list could be deleted."""
         return self.properties.get("AllowDeletion", None)
 
     @property
     def base_template(self):
         # type: () -> Optional[int]
-        """
-        Specifies the list server template of the list.
-        """
+        """Specifies the list server template of the list."""
         return self.properties.get("BaseTemplate", None)
 
     @property
@@ -740,16 +738,12 @@ class List(SecurableObject):
     @property
     def default_display_form_url(self):
         # type: () -> Optional[str]
-        """
-        Specifies the location of the default display form for the list.
-        """
+        """Specifies the location of the default display form for the list."""
         return self.properties.get("DefaultDisplayFormUrl", None)
 
     @property
     def default_view_path(self):
-        """
-        Specifies the server-relative URL of the default view for the list.
-        """
+        """Specifies the server-relative URL of the default view for the list."""
         return self.properties.get("DefaultViewPath", SPResPath())
 
     @property
@@ -803,9 +797,7 @@ class List(SecurableObject):
     @property
     def default_edit_form_url(self):
         # type: () -> Optional[str]
-        """
-        Gets a value that specifies the URL of the edit form to use for list items in the list.
-        """
+        """Gets a value that specifies the URL of the edit form to use for list items in the list."""
         return self.properties.get("DefaultEditFormUrl", None)
 
     @property
@@ -871,9 +863,7 @@ class List(SecurableObject):
     @property
     def enable_folder_creation(self):
         # type: () -> Optional[bool]
-        """
-        Specifies whether new list folders can be added to the list.
-        """
+        """Specifies whether new list folders can be added to the list."""
         return self.properties.get("EnableFolderCreation", None)
 
     @enable_folder_creation.setter
@@ -884,17 +874,13 @@ class List(SecurableObject):
     @property
     def enable_minor_versions(self):
         # type: () -> Optional[bool]
-        """
-        Specifies whether minor versions are enabled for the list.
-        """
+        """Specifies whether minor versions are enabled for the list."""
         return self.properties.get("EnableMinorVersions", None)
 
     @property
     def enable_moderation(self):
         # type: () -> Optional[bool]
-        """
-        Specifies whether content approval is enabled for the list.
-        """
+        """Specifies whether content approval is enabled for the list."""
         return self.properties.get("EnableModeration", None)
 
     @property
@@ -905,9 +891,7 @@ class List(SecurableObject):
     @property
     def enable_versioning(self):
         # type: () -> Optional[bool]
-        """
-        Specifies whether content approval is enabled for the list.
-        """
+        """Specifies whether content approval is enabled for the list."""
         return self.properties.get("EnableVersioning", None)
 
     @property

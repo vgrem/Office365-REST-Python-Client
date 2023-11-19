@@ -83,8 +83,9 @@ class TestSharePointFile(SPTestCase):
     def test_11_delete_file_version(self):
         versions = self.__class__.file.versions.top(1).get().execute_query()
         self.assertEqual(len(versions), 1)
-        self.assertIsNotNone(versions[0].resource_path)
-        versions[0].delete_object().execute_query()
+        first_version = versions[0]
+        self.assertIsNotNone(first_version.resource_path)
+        first_version.delete_object().execute_query()
 
     def test_13_download_file_content(self):
         result = self.__class__.file.get_content().execute_query()
