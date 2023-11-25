@@ -1,3 +1,6 @@
+from typing import Optional
+
+from office365.runtime.paths.key import KeyPath
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -30,17 +33,13 @@ class RecycleBinItem(Entity):
 
     @property
     def size(self):
-        """Gets a value that specifies the size of the Recycle Bin item in bytes.
-
-        :rtype: long or None
-        """
+        # type: () -> Optional[int]
+        """Gets a value that specifies the size of the Recycle Bin item in bytes."""
         return self.properties.get("Size", None)
 
     @property
     def author(self):
-        """
-        Gets a value that specifies the user who created the Recycle Bin item.
-        """
+        """Gets a value that specifies the user who created the Recycle Bin item."""
         return self.properties.get(
             "Author", User(self.context, ResourcePath("Author", self.resource_path))
         )
@@ -61,8 +60,11 @@ class RecycleBinItem(Entity):
     def set_property(self, name, value, persist_changes=True):
         super(RecycleBinItem, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
-        if self._resource_path is None:
-            if name == "Id" and self._parent_collection is not None:
+
+        if name == "Id":
+            if self._resource_path is None:
                 self._resource_path = ServiceOperationPath(
                     "GetById", [value], self._parent_collection.resource_path
                 )
+            else:
+                self._resource_path.patch(value, path_type=KeyPath)

@@ -71,9 +71,7 @@ class WorkbookTable(Entity):
     @property
     def rows(self):
         # type: () -> WorkbookTableRowCollection
-        """
-        Represents a collection of all the rows in the table.
-        """
+        """Represents a collection of all the rows in the table."""
         return self.properties.get(
             "rows",
             WorkbookTableRowCollection(

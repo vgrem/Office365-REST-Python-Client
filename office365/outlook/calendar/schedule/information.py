@@ -17,7 +17,6 @@ class ScheduleInformation(ClientValue):
         working_hours=WorkingHours(),
     ):
         """
-
         :param WorkingHours working_hours: The days of the week and hours in a specific time zone that the user works.
              These are set as part of the user's mailboxSettings.
         :param str error: Error information from attempting to get the availability of the user, distribution list,

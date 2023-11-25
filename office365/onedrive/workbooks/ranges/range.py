@@ -30,9 +30,7 @@ class WorkbookRange(Entity):
     @property
     def address_local(self):
         # type: () -> Optional[str]
-        """
-        Represents range reference for the specified range in the language of the user.
-        """
+        """Represents range reference for the specified range in the language of the user."""
         return self.properties.get("addressLocal", None)
 
     @property

@@ -562,6 +562,8 @@ class ListItem(SecurableObject):
                 self._resource_path = KeyPath(
                     value, self.parent_collection.resource_path
                 )
+            else:
+                self._resource_path.patch(value, path_type=KeyPath)
         return self
 
     def _set_taxonomy_field_value(self, name, value):

@@ -1,9 +1,12 @@
+from typing import Optional
+
 import requests
 
 import office365.logger
 from office365.runtime.auth.authentication_provider import AuthenticationProvider
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.compat import urlparse
+from office365.runtime.http.request_options import RequestOptions
 
 
 class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
@@ -24,9 +27,7 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         self._cached_token = None
 
     def authenticate_request(self, request):
-        """
-        :type request: office365.runtime.http.request_options.RequestOptions
-        """
+        # type: (RequestOptions) -> None
         self.ensure_app_only_access_token()
         request.set_header("Authorization", self._get_authorization_header())
 
@@ -36,9 +37,7 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         return self._cached_token and self._cached_token.is_valid
 
     def get_app_only_access_token(self):
-        """
-        Retrieves an app-only access token from ACS
-        """
+        """Retrieves an app-only access token from ACS"""
         try:
             realm = self._get_realm_from_target_url()
             url_info = urlparse(self.url)
@@ -86,9 +85,7 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
 
     @staticmethod
     def process_realm_response(response):
-        """
-        :type response: requests.Response
-        """
+        # type: (requests.Response) -> Optional[str]
         header_key = "WWW-Authenticate"
         if header_key in response.headers:
             auth_values = response.headers[header_key].split(",")
@@ -98,6 +95,7 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
 
     @staticmethod
     def get_formatted_principal(principal_name, host_name, realm):
+        # type: (str, Optional[str], str) -> str
         if host_name:
             return "{0}/{1}@{2}".format(principal_name, host_name, realm)
         return "{0}@{1}".format(principal_name, realm)

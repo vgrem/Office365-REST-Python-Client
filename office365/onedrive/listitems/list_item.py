@@ -60,6 +60,7 @@ class ListItem(BaseItem):
 
     @property
     def content_type(self):
+        # type: () -> ContentTypeInfo
         """The content type of this list item"""
         return self.properties.get("contentType", ContentTypeInfo())
 
@@ -73,6 +74,7 @@ class ListItem(BaseItem):
 
     @property
     def document_set_versions(self):
+        # type: () -> EntityCollection[DocumentSetVersion]
         """Version information for a document set version created by a user."""
         return self.properties.get(
             "documentSetVersions",

@@ -41,6 +41,7 @@ from office365.sharepoint.files.file import File
 from office365.sharepoint.flows.synchronization_result import FlowSynchronizationResult
 from office365.sharepoint.folders.collection import FolderCollection
 from office365.sharepoint.folders.folder import Folder
+from office365.sharepoint.internal.paths.web import WebPath
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.collection import ListCollection
 from office365.sharepoint.lists.creation_information import ListCreationInformation
@@ -579,7 +580,7 @@ class Web(SecurableObject):
         :type webs: office365.sharepoint.webs.collection.WebCollection
         :type all_webs: office365.sharepoint.webs.collection.WebCollection
         """
-        for cur_web in webs:  # type: Web
+        for cur_web in webs:
             all_webs.add_child(cur_web)
 
             def _webs_loaded(web):
@@ -2383,9 +2384,7 @@ class Web(SecurableObject):
 
     @property
     def server_relative_path(self):
-        """
-        Gets the server-relative Path of the Web.
-        """
+        """Gets the server-relative Path of the Web."""
         return self.properties.get("ServerRelativePath", SPResPath())
 
     @property
@@ -2453,6 +2452,7 @@ class Web(SecurableObject):
         super(Web, self).set_property(name, value, persist_changes)
         if name == "Url":
             self._web_url = value
+            self._resource_path.patch(value, path_type=WebPath)
         return self
 
     @property

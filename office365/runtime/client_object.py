@@ -173,19 +173,12 @@ class ClientObject(Generic[T]):
 
     def ensure_property(self, name, action, *args, **kwargs):
         # type: (str, Callable[[], None], Any, Any) -> Self
-        """
-        Ensures if property is loaded
-
-        :type action: () -> None
-        :type name: str
-        """
+        """Ensures if property is loaded"""
         return self.ensure_properties([name], action, *args, **kwargs)
 
     def ensure_properties(self, names, action, *args, **kwargs):
         # type: (List[str], Callable[[Any, Any], None], Any, Any) -> Self
-        """
-        Ensure if list of properties are retrieved from the server
-        """
+        """Ensure if list of properties are retrieved from the server"""
         if self.property_ref_name is not None and self.property_ref_name not in names:
             names.append(self.property_ref_name)
 

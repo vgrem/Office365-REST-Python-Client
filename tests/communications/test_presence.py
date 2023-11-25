@@ -32,7 +32,7 @@ class TestPresence(GraphTestCase):
 
     def test4_set_status_message(self):
         my_presence = self.client.me.presence.set_status_message(
-            "On vacation"
+            "Hey I'm currently in a meeting"
         ).execute_query()
         self.assertIsNotNone(my_presence.resource_path)
 

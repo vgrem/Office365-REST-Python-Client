@@ -25,9 +25,7 @@ class DocumentSetVersion(ListItemVersion):
     @property
     def created_datetime(self):
         # type: () -> datetime.datetime
-        """
-        Date and time when this version was created.
-        """
+        """Date and time when this version was created."""
         return self.properties("createdDateTime", datetime.datetime.min)
 
     @property

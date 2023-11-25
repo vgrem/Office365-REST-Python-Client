@@ -8,6 +8,7 @@ class Sharepoint(Entity):
 
     @property
     def settings(self):
+        # type: () -> SharepointSettings
         """Represents the tenant-level settings for SharePoint and OneDrive."""
         return self.properties.get(
             "settings",

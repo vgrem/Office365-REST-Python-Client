@@ -690,6 +690,7 @@ class Site(Entity):
 
     @property
     def features(self):
+        # type: () -> FeatureCollection
         """Get features"""
         return self.properties.get(
             "Features",
@@ -710,9 +711,7 @@ class Site(Entity):
     @property
     def needs_b2b_upgrade(self):
         # type: () -> Optional[bool]
-        """
-        Specifies whether the site needs a Build-to-Build upgrade.
-        """
+        """Specifies whether the site needs a Build-to-Build upgrade."""
         return self.properties.get("NeedsB2BUpgrade", None)
 
     @property

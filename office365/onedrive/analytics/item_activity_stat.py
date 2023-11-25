@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
@@ -38,9 +39,8 @@ class ItemActivityStat(Entity):
 
     @property
     def is_trending(self):
-        """Indicates whether the item is trending.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Indicates whether the item is trending."""
         return self.properties.get("isTrending", None)
 
     @property
@@ -55,6 +55,7 @@ class ItemActivityStat(Entity):
 
     @property
     def activities(self):
+        # type: () -> EntityCollection[ItemActivity]
         """Exposes the itemActivities represented in this itemActivityStat resource."""
         return self.properties.get(
             "activities",

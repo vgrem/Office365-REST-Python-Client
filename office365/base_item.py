@@ -25,9 +25,7 @@ class BaseItem(Entity):
 
     @property
     def created_by_user(self):
-        """
-        Identity of the user who created the item
-        """
+        """Identity of the user who created the item"""
         from office365.directory.users.user import User
 
         return self.properties.get(
@@ -37,14 +35,13 @@ class BaseItem(Entity):
 
     @property
     def last_modified_by(self):
+        # type: () -> IdentitySet
         """Identity of the user, device, and application which last modified the item."""
         return self.properties.get("lastModifiedBy", IdentitySet())
 
     @property
     def last_modified_by_user(self):
-        """
-        Identity of the user who last modified the item.
-        """
+        """Identity of the user who last modified the item."""
         from office365.directory.users.user import User
 
         return self.properties.get(
@@ -54,11 +51,13 @@ class BaseItem(Entity):
 
     @property
     def created_datetime(self):
+        # type: () -> Optional[datetime]
         """Gets date and time of item creation."""
         return self.properties.get("createdDateTime", datetime.min)
 
     @property
     def last_modified_datetime(self):
+        # type: () -> Optional[datetime]
         """Gets date and time the item was last modified."""
         return self.properties.get("lastModifiedDateTime", datetime.min)
 
@@ -70,39 +69,32 @@ class BaseItem(Entity):
 
     @name.setter
     def name(self, value):
-        """
-        Sets the name of the item.
-        """
+        # type: (str) -> None
+        """Sets the name of the item."""
         self.set_property("name", value)
 
     @property
     def description(self):
         # type: () -> Optional[str]
-        """
-        Provides a user-visible description of the item.
-        """
+        """Provides a user-visible description of the item."""
         return self.properties.get("description", None)
 
     @description.setter
     def description(self, value):
+        # type: (str) -> None
         self.set_property("description", value)
 
     @property
     def web_url(self):
         # type: () -> Optional[str]
-        """
-        URL that displays the resource in the browser
-        """
+        """URL that displays the resource in the browser"""
         return self.properties.get("webUrl", None)
 
     @property
     def parent_reference(self):
+        # type: () -> ItemReference
         """Parent information, if the item has a parent."""
-        return self.properties.get("parentReference", ItemReference())
-
-    @parent_reference.setter
-    def parent_reference(self, value):
-        self.set_property("parentReference", value, False)
+        return self.properties.setdefault("parentReference", ItemReference())
 
     def get_property(self, name, default_value=None):
         if default_value is None:

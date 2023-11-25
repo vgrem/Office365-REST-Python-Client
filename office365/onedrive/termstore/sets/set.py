@@ -14,8 +14,12 @@ class Set(Entity):
     terms. A group can contain multiple sets.
     """
 
+    def __repr__(self):
+        return repr(self.localized_names)
+
     @property
     def children(self):
+        # type: () -> TermCollection
         """Children terms of set in term store."""
         return self.properties.get(
             "children",
@@ -28,6 +32,7 @@ class Set(Entity):
 
     @property
     def localized_names(self):
+        # type: () -> ClientValueCollection[LocalizedName]
         """"""
         return self.properties.get(
             "localizedNames", ClientValueCollection(LocalizedName)
@@ -45,6 +50,7 @@ class Set(Entity):
 
     @property
     def relations(self):
+        # type: () -> EntityCollection[Relation]
         """Indicates which terms have been pinned or reused directly under the set."""
         return self.properties.get(
             "relations",
@@ -55,6 +61,7 @@ class Set(Entity):
 
     @property
     def terms(self):
+        # type: () -> TermCollection
         """All the terms under the set."""
         return self.properties.get(
             "terms",

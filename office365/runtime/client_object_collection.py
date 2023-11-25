@@ -40,6 +40,8 @@ class ClientObjectCollection(ClientObject, Generic[T]):
             raise AttributeError(
                 "No class model for entity type '{0}' was found".format(self._item_type)
             )
+        if resource_path is None:
+            resource_path = ResourcePath(None, self.resource_path)
         client_object = self._item_type(
             context=self.context, resource_path=resource_path
         )  # type: T
@@ -66,9 +68,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
 
     def add_child(self, client_object):
         # type: (T) -> Self
-        """
-        Adds client object into collection
-        """
+        """Adds client object into collection"""
         client_object._parent_collection = self
         self._data.append(client_object)
         return self

@@ -1,6 +1,8 @@
 from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.queries.client_query import ClientQuery
 from office365.sharepoint.folders.folder import Folder
+from office365.sharepoint.lists.list import List
 
 
 class DocumentSet(Folder):
@@ -26,18 +28,14 @@ class DocumentSet(Folder):
             target_list.ensure_property("Title", _create, target_list=target_list)
 
         def _create(target_list):
-            """
-            :type target_list: office365.sharepoint.lists.list.List
-            """
+            # type: (List) -> None
             qry = ClientQuery(context, return_type=return_type)
             context.add_query(qry)
             folder_url = parent_folder.serverRelativeUrl + "/" + name
             return_type.set_property("ServerRelativeUrl", folder_url)
 
             def _construct_request(request):
-                """
-                :type request: office365.runtime.http.request_options.RequestOptions
-                """
+                # type: (RequestOptions) -> None
                 list_name = target_list.title.replace(" ", "")
                 request.url = r"{0}/_vti_bin/listdata.svc/{1}".format(
                     context.base_url, list_name

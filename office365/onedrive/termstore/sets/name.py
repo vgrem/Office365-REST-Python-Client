@@ -1,3 +1,5 @@
+import json
+
 from office365.runtime.client_value import ClientValue
 
 
@@ -15,3 +17,6 @@ class LocalizedName(ClientValue):
         super(LocalizedName, self).__init__()
         self.name = name
         self.languageTag = language_tag
+
+    def __repr__(self):
+        return json.dumps(self.to_json())

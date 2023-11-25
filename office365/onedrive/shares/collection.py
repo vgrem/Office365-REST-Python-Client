@@ -8,8 +8,6 @@ class SharesCollection(EntityCollection[SharedDriveItem]):
         super(SharesCollection, self).__init__(context, SharedDriveItem, resource_path)
 
     def by_url(self, url):
-        """
-        Address shared item by absolute url
-        :type url: str
-        """
+        # type: (str) -> SharedDriveItem
+        """Address shared item by absolute url"""
         return SharedDriveItem(self.context, SharedPath(url, self.resource_path))

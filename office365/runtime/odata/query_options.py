@@ -90,9 +90,7 @@ class QueryOptions(object):
         self.custom = {}
 
     def to_url(self):
-        """Convert query options to url
-        :return: str
-        """
+        """Convert query options to url"""
         return "&".join(["$%s=%s" % (key, value) for (key, value) in self])
 
     def __iter__(self):

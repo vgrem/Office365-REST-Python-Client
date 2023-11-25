@@ -41,9 +41,7 @@ class ClientValueCollection(ClientValue, Generic[T]):
 
     def to_json(self, json_format=None):
         # type: (ODataJsonFormat) -> list
-        """
-        Serializes a client value's collection
-        """
+        """Serializes a client value's collection"""
         json = [v for v in self]
         for i, v in enumerate(json):
             if isinstance(v, ClientValue):
@@ -81,7 +79,5 @@ class ClientValueCollection(ClientValue, Generic[T]):
 
     @property
     def entity_type_name(self):
-        """
-        Returns server type name of value's collection
-        """
+        """Returns server type name of value's collection"""
         return "Collection({0})".format(ODataType.resolve_type(self._item_type))

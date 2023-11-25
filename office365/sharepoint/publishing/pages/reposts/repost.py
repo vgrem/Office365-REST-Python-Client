@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.sharepoint.publishing.pages.page import SitePage
 
 
@@ -7,23 +9,17 @@ class RepostPage(SitePage):
 
     @property
     def is_banner_image_url_external(self):
-        """
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
         return self.properties.get("IsBannerImageUrlExternal", None)
 
     @property
     def original_source_item_id(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
         return self.properties.get("OriginalSourceItemId", None)
 
     @property
     def original_source_url(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
         return self.properties.get("OriginalSourceUrl", None)
 
     @property

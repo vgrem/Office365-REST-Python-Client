@@ -1,18 +1,23 @@
+from typing import Iterator
+
+
 class ResourcePath(object):
     """OData resource path"""
 
-    def __init__(self, key, parent=None):
-        """
-        :type key: int or str
-        :type parent: ResourcePath or None
-        """
+    def __init__(self, key=None, parent=None):
+        # type: (int|str, "ResourcePath") -> None
         self._key = key
         self._parent = parent
 
-    def patch(self, key, inplace=False):
+    def patch(self, key, inplace=False, path_type=None):
+        if self._key is None:
+            self._key = key
+            if path_type:
+                self.__class__ = path_type
         return self
 
     def __iter__(self):
+        # type: () -> Iterator["ResourcePath"]
         current = self
         while current:
             yield current
@@ -25,11 +30,8 @@ class ResourcePath(object):
         return self.to_url()
 
     def to_url(self):
-        """
-        Builds url
-
-        :rtype: str
-        """
+        # type: () -> str
+        """Builds url"""
         segments = []
         for path in self:
             segments.insert(0, path.segment)

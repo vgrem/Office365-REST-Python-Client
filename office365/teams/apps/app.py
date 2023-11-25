@@ -9,6 +9,7 @@ class TeamsApp(Entity):
 
     @property
     def app_definitions(self):
+        # type: () -> EntityCollection[TeamsAppDefinition]
         """The details for each version of the app."""
         return self.properties.get(
             "appDefinitions",

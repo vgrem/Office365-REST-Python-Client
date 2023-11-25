@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.onedrive.termstore.groups.collection import GroupCollection
@@ -15,17 +17,13 @@ class Store(Entity):
         """Returns a collection containing a flat list of all TermSet objects."""
         return_type = EntityCollection(self.context, Set)
 
-        def _sets_loaded(group_sets):
-            """
-            :type group_sets: EntityCollection
-            """
-            [return_type.add_child(s) for s in group_sets]
+        def _sets_loaded(sets):
+            # type: (SetCollection) -> None
+            [return_type.add_child(s) for s in sets]
 
         def _groups_loaded(groups):
-            """
-            :type groups: EntityCollection
-            """
-            for g in groups:  # type: Group
+            # type: (GroupCollection) -> None
+            for g in groups:
                 self.context.load(g.sets, after_loaded=_sets_loaded)
 
         self.context.load(self.groups, after_loaded=_groups_loaded)
@@ -34,10 +32,8 @@ class Store(Entity):
 
     @property
     def default_language_tag(self):
-        """Default language of the term store.
-
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Default language of the term store."""
         return self.properties.get("defaultLanguageTag", None)
 
     @property
@@ -47,6 +43,7 @@ class Store(Entity):
 
     @property
     def groups(self):
+        # type: () -> GroupCollection
         """Collection of all groups available in the term store."""
         return self.properties.get(
             "groups",
