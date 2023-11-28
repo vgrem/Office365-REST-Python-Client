@@ -1,6 +1,6 @@
 from office365.runtime.compat import is_absolute_url, urlparse
-from office365.runtime.paths.entity import EntityPath
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.v4.entity import EntityPath
 
 
 class SitePath(EntityPath):
@@ -8,8 +8,8 @@ class SitePath(EntityPath):
 
     @property
     def segment(self):
-        if is_absolute_url(self.key):
-            url_result = urlparse(self.key)
+        if is_absolute_url(self._key):
+            url_result = urlparse(self._key)
             return ":".join([url_result.hostname, url_result.path])
         else:
             return super(SitePath, self).segment

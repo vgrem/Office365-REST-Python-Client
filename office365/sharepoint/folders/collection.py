@@ -1,5 +1,5 @@
-from office365.runtime.paths.key import KeyPath
 from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.runtime.paths.v3.entity import EntityPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.folders.folder import Folder
@@ -46,7 +46,7 @@ class FolderCollection(EntityCollection[Folder]):
         """Adds the folder that is located at the specified URL to the collection.
         :param str name: Specifies the Name of the folder.
         """
-        return_type = Folder(self.context, KeyPath(name, self.resource_path))
+        return_type = Folder(self.context, EntityPath(name, self.resource_path))
         self.add_child(return_type)
         qry = ServiceOperationQuery(self, "Add", [name], None, None, return_type)
         self.context.add_query(qry)

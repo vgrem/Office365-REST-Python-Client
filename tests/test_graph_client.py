@@ -110,4 +110,4 @@ class TestGraphClient(GraphTestCase):
     def test_17_build_path_from_url(self):
         path_str = "/teams('7f919b9f-c220-4290-a4d8-5ff9300d1296')/operations('dc97f61a-0040-436f-ac09-427cd2456fd8')"
         path = ODataPathBuilder.parse_url(path_str)
-        self.assertIsNotNone(path.key)
+        self.assertIsNotNone(path.segment)

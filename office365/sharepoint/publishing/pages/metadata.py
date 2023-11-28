@@ -1,7 +1,7 @@
 import datetime
 from typing import TYPE_CHECKING, Optional
 
-from office365.runtime.paths.key import KeyPath
+from office365.runtime.paths.v3.entity import EntityPath
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.publishing.pages.version_info import SitePageVersionInfo
@@ -138,5 +138,5 @@ class SitePageMetadata(Entity):
                     value
                 ).resource_path
             else:
-                self._resource_path.patch(value, path_type=KeyPath)
+                self._resource_path.patch(value, path_type=EntityPath)
         return super(SitePageMetadata, self).set_property(name, value, persist_changes)

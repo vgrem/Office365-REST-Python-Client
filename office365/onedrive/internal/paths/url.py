@@ -1,5 +1,5 @@
 from office365.onedrive.internal.paths.root import RootPath
-from office365.runtime.paths.entity import EntityPath
+from office365.runtime.paths.v4.entity import EntityPath
 
 
 class UrlPath(EntityPath):
@@ -11,7 +11,7 @@ class UrlPath(EntityPath):
         :type parent: office365.runtime.paths.resource_path.ResourcePath
         """
         if isinstance(parent, UrlPath):
-            url = "/".join([parent.key, url])
+            url = "/".join([parent._key, url])
             collection = parent.collection
             parent = parent.parent
         elif isinstance(parent, RootPath):

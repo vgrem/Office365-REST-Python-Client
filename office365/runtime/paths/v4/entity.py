@@ -16,7 +16,7 @@ class EntityPath(ResourcePath):
 
     @property
     def segment(self):
-        return str(self.key or "<key>")
+        return str(self._key or "<key>")
 
     def patch(self, key, inplace=False):
         """

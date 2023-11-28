@@ -17,7 +17,7 @@ class TestPages(SPTestCase):
         self.__class__.pages_list = pages_list
 
     def test2_create_wiki_page(self):
-        page_name = "WelcomeWikiPage.aspx"
+        page_name = "WelcomeWikiPage123.aspx"
         file = self.__class__.pages_list.create_wiki_page(
             page_name, "Wiki content"
         ).execute_query()

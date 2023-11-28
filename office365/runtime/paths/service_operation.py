@@ -16,5 +16,9 @@ class ServiceOperationPath(ResourcePath):
         return ODataPathBuilder.build_segment(self)
 
     @property
+    def name(self):
+        return self._key
+
+    @property
     def parameters(self):
         return self._parameters

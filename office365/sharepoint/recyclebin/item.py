@@ -1,8 +1,8 @@
 from typing import Optional
 
-from office365.runtime.paths.key import KeyPath
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.runtime.paths.v3.entity import EntityPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.principal.users.user import User
@@ -67,4 +67,4 @@ class RecycleBinItem(Entity):
                     "GetById", [value], self._parent_collection.resource_path
                 )
             else:
-                self._resource_path.patch(value, path_type=KeyPath)
+                self._resource_path.patch(value, path_type=EntityPath)

@@ -3,8 +3,8 @@ from typing import IO, AnyStr, Optional
 from typing_extensions import Self
 
 from office365.runtime.client_result import ClientResult
-from office365.runtime.paths.key import KeyPath
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.v3.entity import EntityPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 
@@ -106,9 +106,9 @@ class FileVersion(Entity):
         super(FileVersion, self).set_property(key, value, persist_changes)
         if key.lower() == self.property_ref_name.lower():
             if self._resource_path is None:
-                self._resource_path = KeyPath(
+                self._resource_path = EntityPath(
                     value, self.parent_collection.resource_path
                 )
             else:
-                self._resource_path.patch(value, path_type=KeyPath)
+                self._resource_path.patch(value, path_type=EntityPath)
         return self

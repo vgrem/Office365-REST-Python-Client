@@ -1,8 +1,8 @@
 from typing import Optional
 
 from office365.onedrive.listitems.list_item import ListItem
-from office365.runtime.paths.key import KeyPath
 from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.runtime.paths.v3.entity import EntityPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.entity import Entity
@@ -144,7 +144,7 @@ class SiteProperties(Entity):
             def _loaded(return_type):
                 # type: (ListItem) -> None
                 site_id = return_type.get_property("SiteId")
-                self._resource_path = KeyPath(
+                self._resource_path = EntityPath(
                     site_id, self.parent_collection.resource_path
                 )
                 action()

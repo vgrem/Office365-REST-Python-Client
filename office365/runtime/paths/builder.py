@@ -27,7 +27,7 @@ class ODataPathBuilder(object):
     def build_segment(path):
         # type: (ServiceOperationPath) -> str
         """Constructs url for path segment"""
-        url = path.key or ""
+        url = path.name or ""
         if isinstance(path.parameters, ClientValue):
             url += "(@v)?@v={0}".format(json.dumps(path.parameters.to_json()))
         elif path.parameters is not None:

@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.paths.key import KeyPath
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.v3.entity import EntityPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.attachments.collection import AttachmentCollection
 from office365.sharepoint.changes.collection import ChangeCollection
@@ -559,11 +559,11 @@ class ListItem(SecurableObject):
         # fallback: create a new resource path
         if name == "Id":
             if self._resource_path is None and self.parent_collection is not None:
-                self._resource_path = KeyPath(
+                self._resource_path = EntityPath(
                     value, self.parent_collection.resource_path
                 )
             else:
-                self._resource_path.patch(value, path_type=KeyPath)
+                self._resource_path.patch(value, path_type=EntityPath)
         return self
 
     def _set_taxonomy_field_value(self, name, value):

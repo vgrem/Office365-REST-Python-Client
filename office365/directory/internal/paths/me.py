@@ -1,5 +1,5 @@
-from office365.runtime.paths.entity import EntityPath
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.v4.entity import EntityPath
 
 
 class MePath(EntityPath):

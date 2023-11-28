@@ -1,4 +1,4 @@
-from office365.runtime.paths.entity import EntityPath
+from office365.runtime.paths.v4.entity import EntityPath
 
 
 class ChildrenPath(EntityPath):

@@ -19,4 +19,4 @@ class SharedPath(ResourcePath):
 
     @property
     def segment(self):
-        return _url_to_shared_token(self.key)
+        return _url_to_shared_token(self._key)

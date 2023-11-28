@@ -45,11 +45,7 @@ class ResourcePath(object):
 
     @property
     def segment(self):
-        return str(self.key)
-
-    @property
-    def key(self):
-        return self._key
+        return str(self._key)
 
     @property
     def delimiter(self):

@@ -1,8 +1,8 @@
 import json
 import sys
-from typing import Any, Callable, TypedDict
+from typing import Any, Callable
 
-from typing_extensions import Required
+from typing_extensions import Required, TypedDict
 
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
