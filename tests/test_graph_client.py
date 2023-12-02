@@ -43,13 +43,13 @@ class TestGraphClient(GraphTestCase):
         parent_path = self.client.me.drive.root.resource_path
         path = UrlPath("Sample.docx", UrlPath("2018", UrlPath("archive", parent_path)))
         item_id = uuid.uuid4().hex
-        path.patch(item_id, inplace=True)
+        path.patch(item_id)
         self.assertEqual(f"/me/drive/items/{item_id}", str(path))
 
     def test6_resolve_drive_children_path(self):
         path = self.client.me.drive.root.children.resource_path
         item_id = uuid.uuid4().hex
-        path.patch(item_id, inplace=True)
+        path.patch(item_id)
         self.assertEqual(f"/me/drive/items/{item_id}", str(path))
 
     def test7_build_drive_children_path(self):
@@ -66,7 +66,7 @@ class TestGraphClient(GraphTestCase):
     def test9_resolve_drive_root_path(self):
         path = self.client.me.drive.root.resource_path
         item_id = uuid.uuid4().hex
-        path.patch(item_id, inplace=True)
+        path.patch(item_id)
         self.assertEqual(f"/me/drive/items/{item_id}", str(path))
 
     def test_10_build_site_root_path(self):

@@ -5,6 +5,7 @@ from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.compat import is_string_type
 from office365.runtime.paths.item import ItemPath
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.v4.entity import EntityPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
 if TYPE_CHECKING:
@@ -32,7 +33,7 @@ class EntityCollection(ClientObjectCollection[T]):
             return super(EntityCollection, self).__getitem__(key)
         elif is_string_type(key):
             return self.create_typed_object(
-                resource_path=ResourcePath(key, self.resource_path)
+                resource_path=EntityPath(key, self.resource_path)
             )
         else:
             raise ValueError(
@@ -47,6 +48,14 @@ class EntityCollection(ClientObjectCollection[T]):
         qry = CreateEntityQuery(self, return_type, return_type)
         self.context.add_query(qry)
         return return_type
+
+    def create_typed_object(self, initial_properties=None, resource_path=None):
+        # type: (Optional[dict], Optional[ResourcePath]) -> T
+        if resource_path is None:
+            resource_path = EntityPath(None, self.resource_path)
+        return super(EntityCollection, self).create_typed_object(
+            initial_properties, resource_path
+        )
 
     @property
     def context(self):

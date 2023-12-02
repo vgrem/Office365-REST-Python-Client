@@ -67,4 +67,4 @@ class RecycleBinItem(Entity):
                     "GetById", [value], self._parent_collection.resource_path
                 )
             else:
-                self._resource_path.patch(value, path_type=EntityPath)
+                self._resource_path.patch(value)

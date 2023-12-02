@@ -7,6 +7,7 @@ from tests.graph_case import acquire_token_by_username_password
 
 client = GraphClient(acquire_token_by_username_password)
 drive = client.me.drive
-file_items = client.me.drive.root.get_files(True).execute_query()
-for file_item in file_items:
+# items = client.me.drive.root.get_files(True).execute_query()
+items = client.sites.root.lists["Documents"].drive.root.get_files(True).execute_query()
+for file_item in items:
     print(file_item.web_url)

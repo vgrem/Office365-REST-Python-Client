@@ -12,23 +12,25 @@ class EntityPath(ResourcePath):
 
     @property
     def collection(self):
+        from office365.onedrive.internal.paths.children import ChildrenPath
+
+        if self._collection is None:
+            if isinstance(self.parent, ChildrenPath):
+                self._collection = self.parent.collection
+            else:
+                self._collection = self.parent
         return self._collection
 
     @property
     def segment(self):
         return str(self._key or "<key>")
 
-    def patch(self, key, inplace=False):
+    def patch(self, key):
         """
         Patches path
-
         :type key: str or None
-        :type inplace: bool
         """
-        if inplace:
-            self._key = key
-            self._parent = self.collection
-            self.__class__ = ResourcePath
-            return self
-        else:
-            return ResourcePath(key, self.collection)
+        self._key = key
+        self._parent = self.collection
+        self.__class__ = EntityPath
+        return self

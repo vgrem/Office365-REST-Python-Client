@@ -66,7 +66,7 @@ class DriveItem(BaseItem):
         """Retrieves files
         :param bool recursive: Determines whether to enumerate folders recursively
         """
-        return_type = EntityCollection(self.context, DriveItem)
+        return_type = EntityCollection(self.context, DriveItem, self.resource_path)
 
         def _get_files(parent_drive_item):
             # type: (DriveItem) -> None

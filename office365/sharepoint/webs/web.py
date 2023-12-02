@@ -124,7 +124,7 @@ class Web(SecurableObject):
         :type context: office365.sharepoint.client_context.ClientContext
         """
         if resource_path is None:
-            resource_path = ResourcePath("Web")
+            resource_path = WebPath("Web")
         super(Web, self).__init__(context, resource_path)
         self._web_url = None
 
@@ -2452,7 +2452,7 @@ class Web(SecurableObject):
         super(Web, self).set_property(name, value, persist_changes)
         if name == "Url":
             self._web_url = value
-            self._resource_path.patch(value, path_type=WebPath)
+            self._resource_path.patch(value)
         return self
 
     @property

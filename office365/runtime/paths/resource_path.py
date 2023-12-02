@@ -9,11 +9,9 @@ class ResourcePath(object):
         self._key = key
         self._parent = parent
 
-    def patch(self, key, inplace=False, path_type=None):
+    def patch(self, key):
         if self._key is None:
             self._key = key
-            if path_type:
-                self.__class__ = path_type
         return self
 
     def __iter__(self):

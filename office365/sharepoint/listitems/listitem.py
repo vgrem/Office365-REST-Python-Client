@@ -563,7 +563,7 @@ class ListItem(SecurableObject):
                     value, self.parent_collection.resource_path
                 )
             else:
-                self._resource_path.patch(value, path_type=EntityPath)
+                self._resource_path.patch(value)
         return self
 
     def _set_taxonomy_field_value(self, name, value):

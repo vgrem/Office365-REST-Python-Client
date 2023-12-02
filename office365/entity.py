@@ -72,5 +72,5 @@ class Entity(ClientObject[T]):
                         value, self.parent_collection.resource_path
                     )
             else:
-                self._resource_path.patch(value, inplace=True)
+                self._resource_path.patch(value)
         return self

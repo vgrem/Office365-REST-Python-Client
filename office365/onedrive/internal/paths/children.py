@@ -13,5 +13,5 @@ class ChildrenPath(EntityPath):
             if isinstance(self.parent, EntityPath):
                 self._collection = self.parent.collection
             else:
-                self._collection = self.parent.parent
+                self._collection = self.parent
         return self._collection
