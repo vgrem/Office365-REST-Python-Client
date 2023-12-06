@@ -4,13 +4,16 @@ from office365.runtime.compat import timezone, urlparse
 
 
 class STSProfile(object):
-    def __init__(self, authority_url):
+    def __init__(self, authority_url, environment):
         """
 
         :type authority_url: str
         """
         self.authorityUrl = authority_url
-        self.serviceUrl = "https://login.microsoftonline.com"
+        if environment == "GCCH":
+            self.serviceUrl = "https://login.microsoftonline.us"
+        else:
+            self.serviceUrl = "https://login.microsoftonline.com"
         self.securityTokenServicePath = "extSTS.srf"
         self.userRealmServicePath = "GetUserRealm.srf"
         self.tokenIssuer = "urn:federation:MicrosoftOnline"

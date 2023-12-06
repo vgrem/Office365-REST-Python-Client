@@ -40,7 +40,7 @@ def is_valid_auth_cookies(values):
 
 
 class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
-    def __init__(self, url, username, password, browser_mode):
+    def __init__(self, url, username, password, browser_mode, environment='commercial'):
         """
         SAML Security Token Service provider (claims-based authentication)
 
@@ -48,11 +48,14 @@ class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         :param str username: Typically a UPN in the form of an email address
         :param str password: The password
         :param bool browser_mode:
+        :param str environment: The Office 365 Cloud Environment endpoint used for authentication.
+        By default, this will be set to commercial ('commercial', 'GCCH')
         """
         # Security Token Service info
-        self._sts_profile = STSProfile(resolve_base_url(url))
+        self._sts_profile = STSProfile(resolve_base_url(url), environment)
         # Obtain authentication cookies, using the browser mode
         self._browser_mode = browser_mode
+        self._environment = environment
         # Last occurred error
         self.error = ""
         self._username = username
