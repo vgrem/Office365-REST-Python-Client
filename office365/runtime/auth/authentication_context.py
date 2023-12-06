@@ -184,8 +184,9 @@ class AuthenticationContext(object):
                 provider = NtlmProvider(credentials.userName, credentials.password)
             else:
                 browser_mode = kwargs.get("browser_mode", False)
+                environment = kwargs.get("environment")
                 provider = SamlTokenProvider(
-                    self.url, credentials.userName, credentials.password, browser_mode
+                    self.url, credentials.userName, credentials.password, browser_mode, environment
                 )
         else:
             raise ValueError("Unknown credential type")

@@ -137,20 +137,23 @@ class ClientContext(ClientRuntimeContext):
         return self
 
     def with_user_credentials(
-        self, username, password, allow_ntlm=False, browser_mode=False
+        self, username, password, allow_ntlm=False, browser_mode=False, environment='commercial'
     ):
-        # type: (str, str, bool, bool) -> Self
+        # type: (str, str, bool, bool, str) -> Self
         """
         Initializes a client to acquire a token via user credentials.
         :param str username: Typically, a UPN in the form of an email address
         :param str password: The password
         :param bool allow_ntlm: Flag indicates whether NTLM scheme is enabled. Disabled by default
         :param bool browser_mode:
+        :param str environment: The Office 365 Cloud Environment endpoint used for authentication.
+        By default, this will be set to commercial ('commercial', 'GCCH')
         """
         self.authentication_context.with_credentials(
             UserCredential(username, password),
             allow_ntlm=allow_ntlm,
             browser_mode=browser_mode,
+            environment=environment
         )
         return self
 
