@@ -6,7 +6,7 @@ from tests.sharepoint.sharepoint_case import SPTestCase
 
 class TestRoles(SPTestCase):
     target_object = None  # type: RoleDefinition
-    role_name = "Create and Manage Alerts 12"
+    role_name = "Create and Manage Alerts 123"
 
     def test1_create_role(self):
         permissions = BasePermissions()

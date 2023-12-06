@@ -1204,7 +1204,7 @@ class Web(SecurableObject):
 
         :param str guest_url: The tokenized sharing link URL for the folder.
         """
-        return_type = Folder(self.context)
+        return_type = Folder(self.context, parent_collection=self.folders)
         payload = {"guestUrl": guest_url}
         qry = ServiceOperationQuery(
             self, "GetFolderByGuestUrl", None, payload, None, return_type
@@ -1228,7 +1228,7 @@ class Web(SecurableObject):
         :param bool ensure_access: Indicates if the request to the tokenized sharing link grants perpetual access to
             the calling user.
         """
-        return_type = Folder(self.context)
+        return_type = Folder(self.context, parent_collection=self.folders)
         payload = {
             "guestUrl": guest_url,
             "requestSettings": SharingLinkAccessRequest(ensure_access, password),

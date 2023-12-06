@@ -65,7 +65,7 @@ class File(AbstractFile):
             return self.serverRelativeUrl or self.unique_id or self.entity_type_name
 
     def __str__(self):
-        return self.name
+        return self.name or self.entity_type_name
 
     @staticmethod
     def from_url(abs_url):
@@ -254,20 +254,23 @@ class File(AbstractFile):
         self.context.add_query(qry)
         return self
 
-    def copyto(self, destination, overwrite=False):
-        # type: (Folder|str, bool) -> File
+    def copyto(self, destination, overwrite=False, file_name=None):
+        # type: (Folder|str, bool, str) -> "File"
         """Copies the file to the destination URL.
 
         :param office365.sharepoint.folders.folder.Folder or str destination: Specifies the destination folder or
             folder server relative url where to copy a file.
         :param bool overwrite: Specifies whether a file with the same name is overwritten.
+        :param str file_name: A new file name
         """
         return_type = File(self.context)
         self.parent_collection.add_child(return_type)
 
         def _copyto(destination_folder):
             # type: (Folder) -> None
-            file_path = "/".join([str(destination_folder.serverRelativeUrl), self.name])
+            file_path = "/".join(
+                [str(destination_folder.serverRelativeUrl), file_name or self.name]
+            )
             return_type.set_property("ServerRelativeUrl", file_path)
 
             params = {"strNewUrl": file_path, "boverwrite": overwrite}
@@ -283,7 +286,7 @@ class File(AbstractFile):
         self.ensure_properties(["ServerRelativeUrl", "Name"], _source_file_resolved)
         return return_type
 
-    def copyto_using_path(self, destination, overwrite=False):
+    def copyto_using_path(self, destination, overwrite=False, file_name=None):
         """
         Copies the file to the destination path. Server MUST overwrite an existing file of the same name
         if overwrite is true.
@@ -291,6 +294,7 @@ class File(AbstractFile):
         :param bool overwrite: Specifies whether a file with the same name is overwritten.
         :param office365.sharepoint.folders.folder.Folder or str destination: Specifies the destination folder or
             folder server relative url where to copy a file.
+        :param str file_name: New file name
         """
 
         return_type = File(self.context)
@@ -299,7 +303,7 @@ class File(AbstractFile):
         def _copyto_using_path(destination_folder):
             # type: (Folder) -> None
             file_path = "/".join(
-                [str(destination_folder.server_relative_path), self.name]
+                [str(destination_folder.server_relative_path), file_name or self.name]
             )
             return_type.set_property("ServerRelativePath", file_path)
 

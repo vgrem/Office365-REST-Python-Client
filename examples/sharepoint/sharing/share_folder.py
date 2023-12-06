@@ -12,4 +12,4 @@ result = folder.share_link(SharingLinkKind.AnonymousView).execute_query()
 shared_folder = ctx.web.get_folder_by_guest_url(
     result.value.sharingLinkInfo.Url
 ).execute_query()
-print(shared_folder.unique_id)
+print(shared_folder)
