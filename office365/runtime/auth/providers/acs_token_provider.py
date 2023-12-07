@@ -10,13 +10,15 @@ from office365.runtime.http.request_options import RequestOptions
 
 
 class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
-    def __init__(self, url, client_id, client_secret):
+    def __init__(self, url, client_id, client_secret, environment):
         """
         Provider to acquire the access token from a Microsoft Azure Access Control Service (ACS)
 
         :param str client_id: The OAuth client id of the calling application.
         :param str client_secret: Secret string that the application uses to prove its identity when requesting a token
         :param str url: SharePoint web or site url
+        :param str environment: The Office 365 Cloud Environment endpoint used for authentication
+            defaults to 'commercial'.
         """
         self.url = url
         self.redirect_url = None
@@ -25,6 +27,7 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         self._client_id = client_id
         self._client_secret = client_secret
         self._cached_token = None
+        self._environment = environment
 
     def authenticate_request(self, request):
         # type: (RequestOptions) -> None
@@ -62,7 +65,7 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
             self.SharePointPrincipal, target_host, target_realm
         )
         principal_id = self.get_formatted_principal(self._client_id, None, target_realm)
-        sts_url = self.get_security_token_service_url(target_realm)
+        sts_url = self.get_security_token_service_url(target_realm, environment=self._environment)
         oauth2_request = {
             "grant_type": "client_credentials",
             "client_id": principal_id,
@@ -101,10 +104,15 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         return "{0}@{1}".format(principal_name, realm)
 
     @staticmethod
-    def get_security_token_service_url(realm):
-        return "https://accounts.accesscontrol.windows.net/{0}/tokens/OAuth/2".format(
-            realm
-        )
+    def get_security_token_service_url(realm, environment):
+        if environment == "GCCH":
+            return "https://login.microsoftonline.us/{0}/tokens/OAuth/2".format(
+                realm
+            )
+        else:
+            return "https://accounts.accesscontrol.windows.net/{0}/tokens/OAuth/2".format(
+                realm
+            )
 
     def _get_authorization_header(self):
         return "Bearer {0}".format(self._cached_token.accessToken)

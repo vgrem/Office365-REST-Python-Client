@@ -81,7 +81,7 @@ class ClientContext(ClientRuntimeContext):
         thumbprint,
         cert_path=None,
         private_key=None,
-        scopes=None,
+        scopes=None
     ):
         # type: (str, str, str, Optional[str], Optional[str], Optional[List[str]]) -> Self
         """
@@ -93,7 +93,6 @@ class ClientContext(ClientRuntimeContext):
         :param str thumbprint: Hex encoded thumbprint of the certificate.
         :param str client_id: The OAuth client id of the calling application.
         :param list[str] or None scopes:  Scopes requested to access a protected API (a resource)
-
         """
         self.authentication_context.with_client_certificate(
             tenant, client_id, thumbprint, cert_path, private_key, scopes
@@ -139,15 +138,15 @@ class ClientContext(ClientRuntimeContext):
     def with_user_credentials(
         self, username, password, allow_ntlm=False, browser_mode=False, environment='commercial'
     ):
-        # type: (str, str, bool, bool, str) -> Self
+        # type: (str, str, bool, bool, Optional[str]) -> Self
         """
         Initializes a client to acquire a token via user credentials.
         :param str username: Typically, a UPN in the form of an email address
         :param str password: The password
         :param bool allow_ntlm: Flag indicates whether NTLM scheme is enabled. Disabled by default
         :param bool browser_mode:
-        :param str environment: The Office 365 Cloud Environment endpoint used for authentication.
-        By default, this will be set to commercial ('commercial', 'GCCH')
+        :param str environment: The Office 365 Cloud Environment endpoint used for authentication
+            defaults to 'commercial'.
         """
         self.authentication_context.with_credentials(
             UserCredential(username, password),
@@ -157,8 +156,8 @@ class ClientContext(ClientRuntimeContext):
         )
         return self
 
-    def with_client_credentials(self, client_id, client_secret):
-        # type: (str, str) -> Self
+    def with_client_credentials(self, client_id, client_secret, environment='commercial'):
+        # type: (str, str, Optional[str]) -> Self
         """
         Initializes a client to acquire a token via client credentials (SharePoint App-Only)
 
@@ -167,19 +166,24 @@ class ClientContext(ClientRuntimeContext):
 
         :param str client_id: The OAuth client id of the calling application
         :param str client_secret: Secret string that the application uses to prove its identity when requesting a token
+        :param str environment: The Office 365 Cloud Environment endpoint used for authentication
+            defaults to 'commercial'.
         """
         self.authentication_context.with_credentials(
-            ClientCredential(client_id, client_secret)
+            ClientCredential(client_id, client_secret),
+            environment=environment
         )
         return self
 
-    def with_credentials(self, credentials):
-        # type: (UserCredential|ClientCredential) -> Self
+    def with_credentials(self, credentials, environment='commercial'):
+        # type: (UserCredential|ClientCredential, Optional[str]) -> Self
         """
         Initializes a client to acquire a token via user or client credentials
         :type credentials: UserCredential or ClientCredential
+        :param str environment: The Office 365 Cloud Environment endpoint used for authentication
+            defaults to 'commercial'.
         """
-        self.authentication_context.with_credentials(credentials)
+        self.authentication_context.with_credentials(credentials, environment=environment)
         return self
 
     def execute_batch(self, items_per_batch=100, success_callback=None):
