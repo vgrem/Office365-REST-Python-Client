@@ -10,7 +10,7 @@ from office365.runtime.http.request_options import RequestOptions
 
 
 class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
-    def __init__(self, url, client_id, client_secret, environment):
+    def __init__(self, url, client_id, client_secret, environment='commercial'):
         """
         Provider to acquire the access token from a Microsoft Azure Access Control Service (ACS)
 
