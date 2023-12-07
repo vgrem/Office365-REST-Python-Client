@@ -173,8 +173,9 @@ class AuthenticationContext(object):
         :param UserCredential or ClientCredential credentials:
         """
         if isinstance(credentials, ClientCredential):
+            environment = kwargs.get("environment")
             provider = ACSTokenProvider(
-                self.url, credentials.clientId, credentials.clientSecret
+                self.url, credentials.clientId, credentials.clientSecret, environment
             )
         elif isinstance(credentials, UserCredential):
             allow_ntlm = kwargs.get("allow_ntlm", False)

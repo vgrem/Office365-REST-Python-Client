@@ -27,7 +27,6 @@ pip install Office365-REST-Python-Client
 
 ### Note 
 >
-
 >Alternatively the _latest_ version could be directly installed via GitHub:
 >```
 >pip install git+https://github.com/vgrem/Office365-REST-Python-Client.git
@@ -174,6 +173,20 @@ The list of examples:
   -  [delete a list item](examples/sharepoint/listitems/delete.py) 
   
 Refer [examples section](examples/sharepoint) for another scenarios
+
+### Support for non-standard SharePoint Online Environments
+
+  Support for non-standard SharePoint Environments is currently being implemented. Currently supported:
+  - GCC High
+
+  To enable authentication to GCC High endpoints, add the `environment='GCCH'` parameter when calling the 
+  `ClientContext class` with `.with_user_credentials`, `.with_client_credentials`, or `.with_credentials`
+
+   Example:
+   ```python
+   client_credentials = ClientCredential('{client_id}','{client_secret}')
+   ctx = ClientContext('{url}').with_credentials(client_credentials, environment='GCCH')
+   ```
 
 # Working with Outlook API
 
