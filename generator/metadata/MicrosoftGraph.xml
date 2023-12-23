@@ -3915,6 +3915,30 @@
             </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="false"/>
          </Annotations>
+         <Annotations Target="microsoft.graph.resourceSpecificPermissionGrant">
+            <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
+               <Record>
+                  <PropertyValue Property="Countable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
+               <Record>
+                  <PropertyValue Property="Expandable" Bool="true"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.FilterRestrictions">
+               <Record>
+                  <PropertyValue Property="Filterable" Bool="true"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SelectRestrictions">
+               <Record>
+                  <PropertyValue Property="Selectable" Bool="true"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="false"/>
+            <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="false"/>
+         </Annotations>
          <Annotations Target="microsoft.graph.identityGovernance.task">
             <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
                <Record>
@@ -4762,7 +4786,7 @@
             <Annotation Term="Org.OData.Core.V1.LongDescription" String="The value of this property is only available when reading an individual booking appointment by id."/>
          </Annotations>
          <Annotations Target="microsoft.graph.bookingBusiness">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Represents a Microsot Bookings Business."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Represents a Microsoft Bookings Business."/>
             <Annotation Term="Org.OData.Core.V1.LongDescription" String="The bookingBusiness is the top level object which contains business information and related business objects such as appointments, customers, services and staff members."/>
          </Annotations>
          <Annotations Target="microsoft.graph.bookingBusiness/displayName">
@@ -4854,6 +4878,363 @@
          <Annotations Target="microsoft.graph.solutionsRoot">
             <Annotation Term="Org.OData.Capabilities.V1.BatchContinueOnErrorSupported" Bool="true"/>
             <Annotation Term="Org.OData.Capabilities.V1.BatchSupported" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Singleton entity that acts as a container for all device management functionality."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.auditEvent">
+            <Annotation Term="Org.OData.Core.V1.Description" String="A class containing the properties for Audit Event."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/auditEvents">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The Audit Events"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.termsAndConditions">
+            <Annotation Term="Org.OData.Core.V1.Description" String="A termsAndConditions entity represents the metadata and contents of a given Terms and Conditions (T&amp;C) policy. T&amp;C policies’ contents are presented to users upon their first attempt to enroll into Intune and subsequently upon edits where an administrator has required re-acceptance. They enable administrators to communicate the provisions to which a user must agree in order to have devices enrolled into Intune."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/termsAndConditions">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The terms and conditions associated with device management of the company."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/intuneAccountId">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Intune Account Id for given tenant"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/settings">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Account level settings."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceCompliancePolicy">
+            <Annotation Term="Org.OData.Core.V1.Description" String="This is the base class for Compliance policy. Compliance policies are platform specific and individual per-platform compliance policies inherit from here. "/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/deviceCompliancePolicies">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The device compliance policies."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/deviceCompliancePolicyDeviceStateSummary">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The device compliance state summary for this account."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceCompliancePolicySettingStateSummary">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Device Compilance Policy Setting State summary across the account."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/deviceCompliancePolicySettingStateSummaries">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The summary states of compliance policy settings for this account."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/deviceConfigurationDeviceStateSummaries">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The device configuration device state summary for this account."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceConfiguration">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Device Configuration."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/deviceConfigurations">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The device configurations."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/iosUpdateStatuses">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The IOS software update installation statuses for this account."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/softwareUpdateStatusSummary">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The software update status summary."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.intuneBrand">
+            <Annotation Term="Org.OData.Core.V1.Description" String="intuneBrand contains data which is used in customizing the appearance of the Company Portal applications as well as the end user web portal."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/intuneBrand">
+            <Annotation Term="Org.OData.Core.V1.Description" String="intuneBrand contains data which is used in customizing the appearance of the Company Portal applications as well as the end user web portal."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.complianceManagementPartner">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Compliance management partner for all platforms"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/complianceManagementPartners">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The list of Compliance Management Partners configured by the tenant."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.onPremisesConditionalAccessSettings">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Singleton entity which represents the Exchange OnPremises Conditional Access Settings for a tenant."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/conditionalAccessSettings">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The Exchange on premises conditional access settings. On premises conditional access will require devices to be both enrolled and compliant for mail access"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceCategory">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Device categories provides a way to organize your devices. Using device categories, company administrators can define their own categories that make sense to their company. These categories can then be applied to a device in the Intune Azure console or selected by a user during device enrollment. You can filter reports and create dynamic Azure Active Directory device groups based on device categories."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/deviceCategories">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The list of device categories with the tenant."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceEnrollmentConfiguration">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The Base Class of Device Enrollment Configuration"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/deviceEnrollmentConfigurations">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The list of device enrollment configurations"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagementPartner">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Entity which represents a connection to device management partner."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/deviceManagementPartners">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The list of Device Management Partners configured by the tenant."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagementExchangeConnector">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Entity which represents a connection to an Exchange environment."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/exchangeConnectors">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The list of Exchange Connectors configured by the tenant."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.mobileThreatDefenseConnector">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Entity which represents a connection to Mobile Threat Defense partner."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/mobileThreatDefenseConnectors">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The list of Mobile threat Defense connectors configured by the tenant."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceProtectionOverview">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Hardware information of a given device."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/deviceProtectionOverview">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Device protection overview."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/subscriptionState">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Tenant mobile device management subscription state."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsSettings">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics insight is the recomendation to improve the user experience analytics score."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsSettings">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics device settings"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.windowsMalwareOverview">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Windows device malware overview."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/windowsMalwareOverview">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Malware overview for windows devices."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.applePushNotificationCertificate">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Apple push notification certificate."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/applePushNotificationCertificate">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Apple push notification certificate."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.detectedApp">
+            <Annotation Term="Org.OData.Core.V1.Description" String="A managed or unmanaged app that is installed on a managed device. Unmanaged apps will only appear for devices marked as corporate owned."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/detectedApps">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The list of detected apps associated with a device."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.managedDeviceOverview">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Summary data for managed devices"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/managedDeviceOverview">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Device overview"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/managedDevices">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The list of managed devices."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/mobileAppTroubleshootingEvents">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The collection property of MobileAppTroubleshootingEvent."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsAppHealthApplicationPerformance">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics application performance entity contains application performance details."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsAppHealthApplicationPerformance">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics appHealth Application Performance"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsAppHealthAppPerformanceByAppVersionDetails">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics application performance entity contains application performance by application version details."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsAppHealthApplicationPerformanceByAppVersionDetails">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics appHealth Application Performance by App Version details"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsAppHealthAppPerformanceByAppVersionDeviceId">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics application performance entity contains application performance by application version device id."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsAppHealthApplicationPerformanceByAppVersionDeviceId">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics appHealth Application Performance by App Version Device Id"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsAppHealthAppPerformanceByOSVersion">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics application performance entity contains app performance details by OS version."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsAppHealthApplicationPerformanceByOSVersion">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics appHealth Application Performance by OS Version"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsAppHealthDeviceModelPerformance">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device model performance entity contains device model performance details."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsAppHealthDeviceModelPerformance">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics appHealth Model Performance"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsAppHealthDevicePerformance">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device performance entity contains device performance details."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsAppHealthDevicePerformance">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics appHealth Device Performance"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsAppHealthDevicePerformanceDetails">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device performance entity contains device performance details."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsAppHealthDevicePerformanceDetails">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics device performance details"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsAppHealthOSVersionPerformance">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device OS version performance entity contains OS version performance details."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsAppHealthOSVersionPerformance">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics appHealth OS version Performance"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsCategory">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics category entity contains the scores and insights for the various metrics of a category."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsAppHealthOverview">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics appHealth overview"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsBaseline">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics baseline entity contains baseline values against which to compare the user experience analytics scores."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsBaselines">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics baselines"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsCategories">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics categories"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsDevicePerformance">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device performance entity contains device boot performance details."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsDevicePerformance">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics device performance"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsDeviceScores">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device scores entity consolidates the various Endpoint Analytics scores."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsDeviceScores">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics device scores"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsDeviceStartupHistory">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device startup history entity contains device boot performance history details."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsDeviceStartupHistory">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics device Startup History"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsDeviceStartupProcess">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device startup process details."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsDeviceStartupProcesses">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics device Startup Processes"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsDeviceStartupProcessPerformance">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device startup process performance."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsDeviceStartupProcessPerformance">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics device Startup Process Performance"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsMetricHistory">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics metric history."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsMetricHistory">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics metric history"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsModelScores">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics model scores entity consolidates the various Endpoint Analytics scores."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsModelScores">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics model scores"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsOverview">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics overview entity contains the overall score and the scores and insights of every metric of all categories."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsOverview">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics overview"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsScoreHistory">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device startup score history."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsScoreHistory">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics device Startup Score History"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsWorkFromAnywhereHardwareReadinessMetric">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics hardware readiness entity contains account level information about hardware blockers for windows upgrade."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsWorkFromAnywhereHardwareReadinessMetric">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics work from anywhere hardware readiness metrics."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsWorkFromAnywhereMetric">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics metric for work from anywhere report."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsWorkFromAnywhereMetrics">
+            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics work from anywhere metrics."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userExperienceAnalyticsWorkFromAnywhereModelPerformance">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics work from anywhere model performance."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsWorkFromAnywhereModelPerformance">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics work from anywhere model performance"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.windowsMalwareInformation">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Malware information entity."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/windowsMalwareInformation">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The list of affected malware in the tenant."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.importedWindowsAutopilotDeviceIdentity">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Imported windows autopilot devices."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/importedWindowsAutopilotDeviceIdentities">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Collection of imported Windows autopilot devices."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.windowsAutopilotDeviceIdentity">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The windowsAutopilotDeviceIdentity resource represents a Windows Autopilot Device."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/windowsAutopilotDeviceIdentities">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The Windows autopilot device identities contained collection."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.notificationMessageTemplate">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Notification messages are messages that are sent to end users who are determined to be not-compliant with the compliance policies defined by the administrator. Administrators choose notifications and configure them in the Intune Admin Console using the compliance policy creation page under the “Actions for non-compliance” section. Use the notificationMessageTemplate object to create your own custom notifications for administrators to choose while configuring actions for non-compliance."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/notificationMessageTemplates">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The Notification Message Templates."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.resourceOperation">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Describes the resourceOperation resource (entity) of the Microsoft Graph API (REST), which supports Intune workflows related to role-based access control (RBAC)."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/resourceOperations">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The Resource Operations."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.roleAssignment">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The Role Assignment resource. Role assignments tie together a role definition with members and scopes. There can be one or more role assignments per role. This applies to custom and built-in roles."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceAndAppManagementRoleAssignment">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The Role Assignment resource. Role assignments tie together a role definition with members and scopes. There can be one or more role assignments per role. This applies to custom and built-in roles."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/roleAssignments">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The Role Assignments."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.roleDefinition">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The Role Definition resource. The role definition is the foundation of role based access in Intune. The role combines an Intune resource such as a Mobile App and associated role permissions such as Create or Read for the resource. There are two types of roles, built-in and custom. Built-in roles cannot be modified. Both built-in roles and custom roles must have assignments to be enforced. Create custom roles if you want to define a role that allows any of the available resources and role permissions to be combined into a single role."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/roleDefinitions">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The Role Definitions."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.remoteAssistancePartner">
+            <Annotation Term="Org.OData.Core.V1.Description" String="RemoteAssistPartner resources represent the metadata and status of a given Remote Assistance partner service."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/remoteAssistancePartners">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The remote assist partners."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagementReports">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Singleton entity that acts as a container for all reports functionality."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/reports">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Reports singleton"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.telecomExpenseManagementPartner">
+            <Annotation Term="Org.OData.Core.V1.Description" String="telecomExpenseManagementPartner resources represent the metadata and status of a given TEM service. Once your organization has onboarded with a partner, the partner can be enabled or disabled to switch TEM functionality on or off."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/telecomExpenseManagementPartners">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The telecom expense management partners."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/troubleshootingEvents">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The list of troubleshooting events for the tenant."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.windowsInformationProtectionAppLearningSummary">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Windows Information Protection AppLearning Summary entity."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/windowsInformationProtectionAppLearningSummaries">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The windows information protection app learning summaries."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.windowsInformationProtectionNetworkLearningSummary">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Windows Information Protection Network learning Summary entity."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagement/windowsInformationProtectionNetworkLearningSummaries">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The windows information protection network learning summaries."/>
          </Annotations>
          <Annotations Target="microsoft.graph.privacy/subjectRightsRequests">
             <Annotation Term="Org.OData.Core.V1.Revisions">
@@ -5030,30 +5411,6 @@
                   <PropertyValue Property="Supported" Bool="true"/>
                </Record>
             </Annotation>
-         </Annotations>
-         <Annotations Target="microsoft.graph.resourceSpecificPermissionGrant">
-            <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
-               <Record>
-                  <PropertyValue Property="Countable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
-               <Record>
-                  <PropertyValue Property="Expandable" Bool="true"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.FilterRestrictions">
-               <Record>
-                  <PropertyValue Property="Filterable" Bool="true"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.SelectRestrictions">
-               <Record>
-                  <PropertyValue Property="Selectable" Bool="true"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="false"/>
-            <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="false"/>
          </Annotations>
          <Annotations Target="microsoft.graph.group/acceptedSenders">
             <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
@@ -5547,6 +5904,11 @@
             <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
                <Record>
                   <PropertyValue Property="Insertable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+               <Record>
+                  <PropertyValue Property="Updatable" Bool="false"/>
                </Record>
             </Annotation>
          </Annotations>
@@ -7931,9 +8293,6 @@
          <Annotations Target="microsoft.graph.auditResource/resourceId">
             <Annotation Term="Org.OData.Core.V1.Description" String="Audit resource's Id."/>
          </Annotations>
-         <Annotations Target="microsoft.graph.auditEvent">
-            <Annotation Term="Org.OData.Core.V1.Description" String="A class containing the properties for Audit Event."/>
-         </Annotations>
          <Annotations Target="microsoft.graph.auditEvent/activity">
             <Annotation Term="Org.OData.Core.V1.Description" String="Friendly name of the activity."/>
          </Annotations>
@@ -7966,360 +8325,6 @@
          </Annotations>
          <Annotations Target="microsoft.graph.auditEvent/resources">
             <Annotation Term="Org.OData.Core.V1.Description" String="Resources being modified."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Singleton entity that acts as a container for all device management functionality."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.termsAndConditions">
-            <Annotation Term="Org.OData.Core.V1.Description" String="A termsAndConditions entity represents the metadata and contents of a given Terms and Conditions (T&amp;C) policy. T&amp;C policies’ contents are presented to users upon their first attempt to enroll into Intune and subsequently upon edits where an administrator has required re-acceptance. They enable administrators to communicate the provisions to which a user must agree in order to have devices enrolled into Intune."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/termsAndConditions">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The terms and conditions associated with device management of the company."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/auditEvents">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The Audit Events"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/intuneAccountId">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Intune Account Id for given tenant"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/settings">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Account level settings."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceCompliancePolicy">
-            <Annotation Term="Org.OData.Core.V1.Description" String="This is the base class for Compliance policy. Compliance policies are platform specific and individual per-platform compliance policies inherit from here. "/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/deviceCompliancePolicies">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The device compliance policies."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/deviceCompliancePolicyDeviceStateSummary">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The device compliance state summary for this account."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceCompliancePolicySettingStateSummary">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Device Compilance Policy Setting State summary across the account."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/deviceCompliancePolicySettingStateSummaries">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The summary states of compliance policy settings for this account."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/deviceConfigurationDeviceStateSummaries">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The device configuration device state summary for this account."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceConfiguration">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Device Configuration."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/deviceConfigurations">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The device configurations."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/iosUpdateStatuses">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The IOS software update installation statuses for this account."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/softwareUpdateStatusSummary">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The software update status summary."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.intuneBrand">
-            <Annotation Term="Org.OData.Core.V1.Description" String="intuneBrand contains data which is used in customizing the appearance of the Company Portal applications as well as the end user web portal."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/intuneBrand">
-            <Annotation Term="Org.OData.Core.V1.Description" String="intuneBrand contains data which is used in customizing the appearance of the Company Portal applications as well as the end user web portal."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.complianceManagementPartner">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Compliance management partner for all platforms"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/complianceManagementPartners">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The list of Compliance Management Partners configured by the tenant."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.onPremisesConditionalAccessSettings">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Singleton entity which represents the Exchange OnPremises Conditional Access Settings for a tenant."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/conditionalAccessSettings">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The Exchange on premises conditional access settings. On premises conditional access will require devices to be both enrolled and compliant for mail access"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceCategory">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Device categories provides a way to organize your devices. Using device categories, company administrators can define their own categories that make sense to their company. These categories can then be applied to a device in the Intune Azure console or selected by a user during device enrollment. You can filter reports and create dynamic Azure Active Directory device groups based on device categories."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/deviceCategories">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The list of device categories with the tenant."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceEnrollmentConfiguration">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The Base Class of Device Enrollment Configuration"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/deviceEnrollmentConfigurations">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The list of device enrollment configurations"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagementPartner">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Entity which represents a connection to device management partner."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/deviceManagementPartners">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The list of Device Management Partners configured by the tenant."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagementExchangeConnector">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Entity which represents a connection to an Exchange environment."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/exchangeConnectors">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The list of Exchange Connectors configured by the tenant."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.mobileThreatDefenseConnector">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Entity which represents a connection to Mobile Threat Defense partner."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/mobileThreatDefenseConnectors">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The list of Mobile threat Defense connectors configured by the tenant."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceProtectionOverview">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Hardware information of a given device."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/deviceProtectionOverview">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Device protection overview."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/subscriptionState">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Tenant mobile device management subscription state."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsSettings">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics insight is the recomendation to improve the user experience analytics score."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsSettings">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics device settings"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.windowsMalwareOverview">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Windows device malware overview."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/windowsMalwareOverview">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Malware overview for windows devices."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.applePushNotificationCertificate">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Apple push notification certificate."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/applePushNotificationCertificate">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Apple push notification certificate."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.detectedApp">
-            <Annotation Term="Org.OData.Core.V1.Description" String="A managed or unmanaged app that is installed on a managed device. Unmanaged apps will only appear for devices marked as corporate owned."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/detectedApps">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The list of detected apps associated with a device."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.managedDeviceOverview">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Summary data for managed devices"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/managedDeviceOverview">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Device overview"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/managedDevices">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The list of managed devices."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/mobileAppTroubleshootingEvents">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The collection property of MobileAppTroubleshootingEvent."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsAppHealthApplicationPerformance">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics application performance entity contains application performance details."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsAppHealthApplicationPerformance">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics appHealth Application Performance"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsAppHealthAppPerformanceByAppVersionDetails">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics application performance entity contains application performance by application version details."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsAppHealthApplicationPerformanceByAppVersionDetails">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics appHealth Application Performance by App Version details"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsAppHealthAppPerformanceByAppVersionDeviceId">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics application performance entity contains application performance by application version device id."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsAppHealthApplicationPerformanceByAppVersionDeviceId">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics appHealth Application Performance by App Version Device Id"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsAppHealthAppPerformanceByOSVersion">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics application performance entity contains app performance details by OS version."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsAppHealthApplicationPerformanceByOSVersion">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics appHealth Application Performance by OS Version"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsAppHealthDeviceModelPerformance">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device model performance entity contains device model performance details."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsAppHealthDeviceModelPerformance">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics appHealth Model Performance"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsAppHealthDevicePerformance">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device performance entity contains device performance details."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsAppHealthDevicePerformance">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics appHealth Device Performance"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsAppHealthDevicePerformanceDetails">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device performance entity contains device performance details."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsAppHealthDevicePerformanceDetails">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics device performance details"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsAppHealthOSVersionPerformance">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device OS version performance entity contains OS version performance details."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsAppHealthOSVersionPerformance">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics appHealth OS version Performance"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsCategory">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics category entity contains the scores and insights for the various metrics of a category."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsAppHealthOverview">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics appHealth overview"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsBaseline">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics baseline entity contains baseline values against which to compare the user experience analytics scores."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsBaselines">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics baselines"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsCategories">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics categories"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsDevicePerformance">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device performance entity contains device boot performance details."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsDevicePerformance">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics device performance"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsDeviceScores">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device scores entity consolidates the various Endpoint Analytics scores."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsDeviceScores">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics device scores"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsDeviceStartupHistory">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device startup history entity contains device boot performance history details."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsDeviceStartupHistory">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics device Startup History"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsDeviceStartupProcess">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device startup process details."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsDeviceStartupProcesses">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics device Startup Processes"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsDeviceStartupProcessPerformance">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device startup process performance."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsDeviceStartupProcessPerformance">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics device Startup Process Performance"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsMetricHistory">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics metric history."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsMetricHistory">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics metric history"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsModelScores">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics model scores entity consolidates the various Endpoint Analytics scores."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsModelScores">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics model scores"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsOverview">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics overview entity contains the overall score and the scores and insights of every metric of all categories."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsOverview">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics overview"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsScoreHistory">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics device startup score history."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsScoreHistory">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics device Startup Score History"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsWorkFromAnywhereHardwareReadinessMetric">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics hardware readiness entity contains account level information about hardware blockers for windows upgrade."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsWorkFromAnywhereHardwareReadinessMetric">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics work from anywhere hardware readiness metrics."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsWorkFromAnywhereMetric">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics metric for work from anywhere report."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsWorkFromAnywhereMetrics">
-            <Annotation Term="Org.OData.Core.V1.Description" String="User experience analytics work from anywhere metrics."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.userExperienceAnalyticsWorkFromAnywhereModelPerformance">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics work from anywhere model performance."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/userExperienceAnalyticsWorkFromAnywhereModelPerformance">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The user experience analytics work from anywhere model performance"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.windowsMalwareInformation">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Malware information entity."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/windowsMalwareInformation">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The list of affected malware in the tenant."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.importedWindowsAutopilotDeviceIdentity">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Imported windows autopilot devices."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/importedWindowsAutopilotDeviceIdentities">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Collection of imported Windows autopilot devices."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.windowsAutopilotDeviceIdentity">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The windowsAutopilotDeviceIdentity resource represents a Windows Autopilot Device."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/windowsAutopilotDeviceIdentities">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The Windows autopilot device identities contained collection."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.notificationMessageTemplate">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Notification messages are messages that are sent to end users who are determined to be not-compliant with the compliance policies defined by the administrator. Administrators choose notifications and configure them in the Intune Admin Console using the compliance policy creation page under the “Actions for non-compliance” section. Use the notificationMessageTemplate object to create your own custom notifications for administrators to choose while configuring actions for non-compliance."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/notificationMessageTemplates">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The Notification Message Templates."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.resourceOperation">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Describes the resourceOperation resource (entity) of the Microsoft Graph API (REST), which supports Intune workflows related to role-based access control (RBAC)."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/resourceOperations">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The Resource Operations."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.roleAssignment">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The Role Assignment resource. Role assignments tie together a role definition with members and scopes. There can be one or more role assignments per role. This applies to custom and built-in roles."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceAndAppManagementRoleAssignment">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The Role Assignment resource. Role assignments tie together a role definition with members and scopes. There can be one or more role assignments per role. This applies to custom and built-in roles."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/roleAssignments">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The Role Assignments."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.roleDefinition">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The Role Definition resource. The role definition is the foundation of role based access in Intune. The role combines an Intune resource such as a Mobile App and associated role permissions such as Create or Read for the resource. There are two types of roles, built-in and custom. Built-in roles cannot be modified. Both built-in roles and custom roles must have assignments to be enforced. Create custom roles if you want to define a role that allows any of the available resources and role permissions to be combined into a single role."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/roleDefinitions">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The Role Definitions."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.remoteAssistancePartner">
-            <Annotation Term="Org.OData.Core.V1.Description" String="RemoteAssistPartner resources represent the metadata and status of a given Remote Assistance partner service."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/remoteAssistancePartners">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The remote assist partners."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagementReports">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Singleton entity that acts as a container for all reports functionality."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/reports">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Reports singleton"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.telecomExpenseManagementPartner">
-            <Annotation Term="Org.OData.Core.V1.Description" String="telecomExpenseManagementPartner resources represent the metadata and status of a given TEM service. Once your organization has onboarded with a partner, the partner can be enabled or disabled to switch TEM functionality on or off."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/telecomExpenseManagementPartners">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The telecom expense management partners."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/troubleshootingEvents">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The list of troubleshooting events for the tenant."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.windowsInformationProtectionAppLearningSummary">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Windows Information Protection AppLearning Summary entity."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/windowsInformationProtectionAppLearningSummaries">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The windows information protection app learning summaries."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.windowsInformationProtectionNetworkLearningSummary">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Windows Information Protection Network learning Summary entity."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement/windowsInformationProtectionNetworkLearningSummaries">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The windows information protection network learning summaries."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceInstallState">
             <Annotation Term="Org.OData.Core.V1.Description" String="Contains properties for the installation state for a device."/>
@@ -14850,6 +14855,18 @@
          <Annotations Target="microsoft.graph.usedInsight/resourceVisualization">
             <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
          </Annotations>
+         <Annotations Target="microsoft.graph.peopleAdminSettings/pronouns">
+            <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
+               <Record>
+                  <PropertyValue Property="Deletable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
+               <Record>
+                  <PropertyValue Property="Insertable" Bool="false"/>
+               </Record>
+            </Annotation>
+         </Annotations>
          <Annotations Target="microsoft.graph.activityHistoryItem">
             <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
                <Record>
@@ -15687,6 +15704,10 @@
             <Member Name="notEnabled" Value="3"/>
             <Member Name="unknown" Value="4"/>
             <Member Name="unknownFutureValue" Value="5"/>
+            <Member Name="reportOnlySuccess" Value="6"/>
+            <Member Name="reportOnlyFailure" Value="7"/>
+            <Member Name="reportOnlyNotApplied" Value="8"/>
+            <Member Name="reportOnlyInterrupted" Value="9"/>
          </EnumType>
          <EnumType Name="authenticationMethodFeature">
             <Member Name="ssprRegistered" Value="0"/>
@@ -20075,6 +20096,12 @@
             <Member Name="viewer" Value="0"/>
             <Member Name="sharer" Value="1"/>
          </EnumType>
+         <EnumType Name="sendDtmfCompletionReason">
+            <Member Name="unknown" Value="0"/>
+            <Member Name="completedSuccessfully" Value="1"/>
+            <Member Name="mediaOperationCanceled" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
          <EnumType Name="tone">
             <Member Name="tone0" Value="0"/>
             <Member Name="tone1" Value="1"/>
@@ -20847,6 +20874,7 @@
             <NavigationProperty Name="authentication" Type="graph.authentication" ContainsTarget="true"/>
             <NavigationProperty Name="chats" Type="Collection(graph.chat)" ContainsTarget="true"/>
             <NavigationProperty Name="joinedTeams" Type="Collection(graph.team)" ContainsTarget="true"/>
+            <NavigationProperty Name="permissionGrants" Type="Collection(graph.resourceSpecificPermissionGrant)" ContainsTarget="true"/>
             <NavigationProperty Name="teamwork" Type="graph.userTeamwork" ContainsTarget="true"/>
             <NavigationProperty Name="todo" Type="graph.todo" ContainsTarget="true"/>
             <NavigationProperty Name="employeeExperience" Type="graph.employeeExperienceUser" ContainsTarget="true"/>
@@ -21445,6 +21473,13 @@
             <NavigationProperty Name="tags" Type="Collection(graph.teamworkTag)" ContainsTarget="true"/>
             <NavigationProperty Name="template" Type="graph.teamsTemplate"/>
             <NavigationProperty Name="schedule" Type="graph.schedule" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="resourceSpecificPermissionGrant" BaseType="graph.directoryObject">
+            <Property Name="clientAppId" Type="Edm.String"/>
+            <Property Name="clientId" Type="Edm.String"/>
+            <Property Name="permission" Type="Edm.String"/>
+            <Property Name="permissionType" Type="Edm.String"/>
+            <Property Name="resourceAppId" Type="Edm.String"/>
          </EntityType>
          <EntityType Name="userTeamwork" BaseType="graph.entity">
             <NavigationProperty Name="associatedTeams" Type="Collection(graph.associatedTeamInfo)" ContainsTarget="true"/>
@@ -22319,6 +22354,634 @@
             <NavigationProperty Name="events" Type="Collection(graph.virtualEvent)" ContainsTarget="true"/>
             <NavigationProperty Name="webinars" Type="Collection(graph.virtualEventWebinar)" ContainsTarget="true"/>
          </EntityType>
+         <EntityType Name="deviceManagement" BaseType="graph.entity">
+            <Property Name="intuneAccountId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="settings" Type="graph.deviceManagementSettings"/>
+            <Property Name="intuneBrand" Type="graph.intuneBrand"/>
+            <Property Name="deviceProtectionOverview" Type="graph.deviceProtectionOverview"/>
+            <Property Name="subscriptionState" Type="graph.deviceManagementSubscriptionState" Nullable="false"/>
+            <Property Name="userExperienceAnalyticsSettings" Type="graph.userExperienceAnalyticsSettings"/>
+            <Property Name="windowsMalwareOverview" Type="graph.windowsMalwareOverview"/>
+            <NavigationProperty Name="auditEvents" Type="Collection(graph.auditEvent)" ContainsTarget="true"/>
+            <NavigationProperty Name="virtualEndpoint" Type="graph.virtualEndpoint" ContainsTarget="true"/>
+            <NavigationProperty Name="termsAndConditions" Type="Collection(graph.termsAndConditions)" ContainsTarget="true"/>
+            <NavigationProperty Name="deviceCompliancePolicies" Type="Collection(graph.deviceCompliancePolicy)" ContainsTarget="true"/>
+            <NavigationProperty Name="deviceCompliancePolicyDeviceStateSummary" Type="graph.deviceCompliancePolicyDeviceStateSummary" ContainsTarget="true"/>
+            <NavigationProperty Name="deviceCompliancePolicySettingStateSummaries" Type="Collection(graph.deviceCompliancePolicySettingStateSummary)" ContainsTarget="true"/>
+            <NavigationProperty Name="deviceConfigurationDeviceStateSummaries" Type="graph.deviceConfigurationDeviceStateSummary" ContainsTarget="true"/>
+            <NavigationProperty Name="deviceConfigurations" Type="Collection(graph.deviceConfiguration)" ContainsTarget="true"/>
+            <NavigationProperty Name="iosUpdateStatuses" Type="Collection(graph.iosUpdateDeviceStatus)" ContainsTarget="true"/>
+            <NavigationProperty Name="softwareUpdateStatusSummary" Type="graph.softwareUpdateStatusSummary"/>
+            <NavigationProperty Name="complianceManagementPartners" Type="Collection(graph.complianceManagementPartner)" ContainsTarget="true"/>
+            <NavigationProperty Name="conditionalAccessSettings" Type="graph.onPremisesConditionalAccessSettings" ContainsTarget="true"/>
+            <NavigationProperty Name="deviceCategories" Type="Collection(graph.deviceCategory)" ContainsTarget="true"/>
+            <NavigationProperty Name="deviceEnrollmentConfigurations" Type="Collection(graph.deviceEnrollmentConfiguration)" ContainsTarget="true"/>
+            <NavigationProperty Name="deviceManagementPartners" Type="Collection(graph.deviceManagementPartner)" ContainsTarget="true"/>
+            <NavigationProperty Name="exchangeConnectors" Type="Collection(graph.deviceManagementExchangeConnector)" ContainsTarget="true"/>
+            <NavigationProperty Name="mobileThreatDefenseConnectors" Type="Collection(graph.mobileThreatDefenseConnector)" ContainsTarget="true"/>
+            <NavigationProperty Name="applePushNotificationCertificate" Type="graph.applePushNotificationCertificate" ContainsTarget="true"/>
+            <NavigationProperty Name="detectedApps" Type="Collection(graph.detectedApp)" ContainsTarget="true"/>
+            <NavigationProperty Name="managedDeviceOverview" Type="graph.managedDeviceOverview"/>
+            <NavigationProperty Name="managedDevices" Type="Collection(graph.managedDevice)" ContainsTarget="true"/>
+            <NavigationProperty Name="mobileAppTroubleshootingEvents" Type="Collection(graph.mobileAppTroubleshootingEvent)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsAppHealthApplicationPerformance" Type="Collection(graph.userExperienceAnalyticsAppHealthApplicationPerformance)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsAppHealthApplicationPerformanceByAppVersionDetails" Type="Collection(graph.userExperienceAnalyticsAppHealthAppPerformanceByAppVersionDetails)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsAppHealthApplicationPerformanceByAppVersionDeviceId" Type="Collection(graph.userExperienceAnalyticsAppHealthAppPerformanceByAppVersionDeviceId)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsAppHealthApplicationPerformanceByOSVersion" Type="Collection(graph.userExperienceAnalyticsAppHealthAppPerformanceByOSVersion)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsAppHealthDeviceModelPerformance" Type="Collection(graph.userExperienceAnalyticsAppHealthDeviceModelPerformance)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsAppHealthDevicePerformance" Type="Collection(graph.userExperienceAnalyticsAppHealthDevicePerformance)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsAppHealthDevicePerformanceDetails" Type="Collection(graph.userExperienceAnalyticsAppHealthDevicePerformanceDetails)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsAppHealthOSVersionPerformance" Type="Collection(graph.userExperienceAnalyticsAppHealthOSVersionPerformance)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsAppHealthOverview" Type="graph.userExperienceAnalyticsCategory" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsBaselines" Type="Collection(graph.userExperienceAnalyticsBaseline)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsCategories" Type="Collection(graph.userExperienceAnalyticsCategory)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsDevicePerformance" Type="Collection(graph.userExperienceAnalyticsDevicePerformance)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsDeviceScores" Type="Collection(graph.userExperienceAnalyticsDeviceScores)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsDeviceStartupHistory" Type="Collection(graph.userExperienceAnalyticsDeviceStartupHistory)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsDeviceStartupProcesses" Type="Collection(graph.userExperienceAnalyticsDeviceStartupProcess)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsDeviceStartupProcessPerformance" Type="Collection(graph.userExperienceAnalyticsDeviceStartupProcessPerformance)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsMetricHistory" Type="Collection(graph.userExperienceAnalyticsMetricHistory)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsModelScores" Type="Collection(graph.userExperienceAnalyticsModelScores)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsOverview" Type="graph.userExperienceAnalyticsOverview" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsScoreHistory" Type="Collection(graph.userExperienceAnalyticsScoreHistory)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsWorkFromAnywhereHardwareReadinessMetric" Type="graph.userExperienceAnalyticsWorkFromAnywhereHardwareReadinessMetric" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsWorkFromAnywhereMetrics" Type="Collection(graph.userExperienceAnalyticsWorkFromAnywhereMetric)" ContainsTarget="true"/>
+            <NavigationProperty Name="userExperienceAnalyticsWorkFromAnywhereModelPerformance" Type="Collection(graph.userExperienceAnalyticsWorkFromAnywhereModelPerformance)" ContainsTarget="true"/>
+            <NavigationProperty Name="windowsMalwareInformation" Type="Collection(graph.windowsMalwareInformation)" ContainsTarget="true"/>
+            <NavigationProperty Name="importedWindowsAutopilotDeviceIdentities" Type="Collection(graph.importedWindowsAutopilotDeviceIdentity)" ContainsTarget="true"/>
+            <NavigationProperty Name="windowsAutopilotDeviceIdentities" Type="Collection(graph.windowsAutopilotDeviceIdentity)" ContainsTarget="true"/>
+            <NavigationProperty Name="notificationMessageTemplates" Type="Collection(graph.notificationMessageTemplate)" ContainsTarget="true"/>
+            <NavigationProperty Name="resourceOperations" Type="Collection(graph.resourceOperation)" ContainsTarget="true"/>
+            <NavigationProperty Name="roleAssignments" Type="Collection(graph.deviceAndAppManagementRoleAssignment)" ContainsTarget="true"/>
+            <NavigationProperty Name="roleDefinitions" Type="Collection(graph.roleDefinition)" ContainsTarget="true"/>
+            <NavigationProperty Name="remoteAssistancePartners" Type="Collection(graph.remoteAssistancePartner)" ContainsTarget="true"/>
+            <NavigationProperty Name="reports" Type="graph.deviceManagementReports" ContainsTarget="true"/>
+            <NavigationProperty Name="telecomExpenseManagementPartners" Type="Collection(graph.telecomExpenseManagementPartner)" ContainsTarget="true"/>
+            <NavigationProperty Name="troubleshootingEvents" Type="Collection(graph.deviceManagementTroubleshootingEvent)" ContainsTarget="true"/>
+            <NavigationProperty Name="windowsInformationProtectionAppLearningSummaries" Type="Collection(graph.windowsInformationProtectionAppLearningSummary)" ContainsTarget="true"/>
+            <NavigationProperty Name="windowsInformationProtectionNetworkLearningSummaries" Type="Collection(graph.windowsInformationProtectionNetworkLearningSummary)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="auditEvent" BaseType="graph.entity">
+            <Property Name="activity" Type="Edm.String"/>
+            <Property Name="activityDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="activityOperationType" Type="Edm.String"/>
+            <Property Name="activityResult" Type="Edm.String"/>
+            <Property Name="activityType" Type="Edm.String"/>
+            <Property Name="actor" Type="graph.auditActor"/>
+            <Property Name="category" Type="Edm.String"/>
+            <Property Name="componentName" Type="Edm.String"/>
+            <Property Name="correlationId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="resources" Type="Collection(graph.auditResource)"/>
+         </EntityType>
+         <EntityType Name="virtualEndpoint" BaseType="graph.entity"/>
+         <EntityType Name="termsAndConditions" BaseType="graph.entity">
+            <Property Name="acceptanceStatement" Type="Edm.String"/>
+            <Property Name="bodyText" Type="Edm.String"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="title" Type="Edm.String"/>
+            <Property Name="version" Type="Edm.Int32" Nullable="false"/>
+            <NavigationProperty Name="acceptanceStatuses" Type="Collection(graph.termsAndConditionsAcceptanceStatus)" ContainsTarget="true"/>
+            <NavigationProperty Name="assignments" Type="Collection(graph.termsAndConditionsAssignment)" ContainsTarget="true"/>
+         </EntityType>
+         <ComplexType Name="deviceManagementSettings">
+            <Property Name="deviceComplianceCheckinThresholdDays" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="isScheduledActionEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="secureByDefault" Type="Edm.Boolean" Nullable="false"/>
+         </ComplexType>
+         <EntityType Name="deviceCompliancePolicy" BaseType="graph.entity" Abstract="true">
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="version" Type="Edm.Int32" Nullable="false"/>
+            <NavigationProperty Name="assignments" Type="Collection(graph.deviceCompliancePolicyAssignment)" ContainsTarget="true"/>
+            <NavigationProperty Name="deviceSettingStateSummaries" Type="Collection(graph.settingStateDeviceSummary)" ContainsTarget="true"/>
+            <NavigationProperty Name="deviceStatuses" Type="Collection(graph.deviceComplianceDeviceStatus)" ContainsTarget="true"/>
+            <NavigationProperty Name="deviceStatusOverview" Type="graph.deviceComplianceDeviceOverview" ContainsTarget="true"/>
+            <NavigationProperty Name="scheduledActionsForRule" Type="Collection(graph.deviceComplianceScheduledActionForRule)" ContainsTarget="true"/>
+            <NavigationProperty Name="userStatuses" Type="Collection(graph.deviceComplianceUserStatus)" ContainsTarget="true"/>
+            <NavigationProperty Name="userStatusOverview" Type="graph.deviceComplianceUserOverview" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="deviceCompliancePolicyDeviceStateSummary" BaseType="graph.entity">
+            <Property Name="compliantDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="configManagerCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="conflictDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="errorDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="inGracePeriodCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="nonCompliantDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="notApplicableDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="remediatedDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="unknownDeviceCount" Type="Edm.Int32" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="deviceCompliancePolicySettingStateSummary" BaseType="graph.entity">
+            <Property Name="compliantDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="conflictDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="errorDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="nonCompliantDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="notApplicableDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="platformType" Type="graph.policyPlatformType" Nullable="false"/>
+            <Property Name="remediatedDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="setting" Type="Edm.String"/>
+            <Property Name="settingName" Type="Edm.String"/>
+            <Property Name="unknownDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <NavigationProperty Name="deviceComplianceSettingStates" Type="Collection(graph.deviceComplianceSettingState)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="deviceConfigurationDeviceStateSummary" BaseType="graph.entity">
+            <Property Name="compliantDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="conflictDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="errorDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="nonCompliantDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="notApplicableDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="remediatedDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="unknownDeviceCount" Type="Edm.Int32" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="deviceConfiguration" BaseType="graph.entity" Abstract="true">
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="version" Type="Edm.Int32" Nullable="false"/>
+            <NavigationProperty Name="assignments" Type="Collection(graph.deviceConfigurationAssignment)" ContainsTarget="true"/>
+            <NavigationProperty Name="deviceSettingStateSummaries" Type="Collection(graph.settingStateDeviceSummary)" ContainsTarget="true"/>
+            <NavigationProperty Name="deviceStatuses" Type="Collection(graph.deviceConfigurationDeviceStatus)" ContainsTarget="true"/>
+            <NavigationProperty Name="deviceStatusOverview" Type="graph.deviceConfigurationDeviceOverview" ContainsTarget="true"/>
+            <NavigationProperty Name="userStatuses" Type="Collection(graph.deviceConfigurationUserStatus)" ContainsTarget="true"/>
+            <NavigationProperty Name="userStatusOverview" Type="graph.deviceConfigurationUserOverview" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="iosUpdateDeviceStatus" BaseType="graph.entity">
+            <Property Name="complianceGracePeriodExpirationDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="deviceDisplayName" Type="Edm.String"/>
+            <Property Name="deviceId" Type="Edm.String"/>
+            <Property Name="deviceModel" Type="Edm.String"/>
+            <Property Name="installStatus" Type="graph.iosUpdatesInstallStatus" Nullable="false"/>
+            <Property Name="lastReportedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="osVersion" Type="Edm.String"/>
+            <Property Name="status" Type="graph.complianceStatus" Nullable="false"/>
+            <Property Name="userId" Type="Edm.String"/>
+            <Property Name="userName" Type="Edm.String"/>
+            <Property Name="userPrincipalName" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="softwareUpdateStatusSummary" BaseType="graph.entity">
+            <Property Name="compliantDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="compliantUserCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="conflictDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="conflictUserCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="errorDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="errorUserCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="nonCompliantDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="nonCompliantUserCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="notApplicableDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="notApplicableUserCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="remediatedDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="remediatedUserCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="unknownDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="unknownUserCount" Type="Edm.Int32" Nullable="false"/>
+         </EntityType>
+         <ComplexType Name="intuneBrand">
+            <Property Name="contactITEmailAddress" Type="Edm.String"/>
+            <Property Name="contactITName" Type="Edm.String"/>
+            <Property Name="contactITNotes" Type="Edm.String"/>
+            <Property Name="contactITPhoneNumber" Type="Edm.String"/>
+            <Property Name="darkBackgroundLogo" Type="graph.mimeContent"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="lightBackgroundLogo" Type="graph.mimeContent"/>
+            <Property Name="onlineSupportSiteName" Type="Edm.String"/>
+            <Property Name="onlineSupportSiteUrl" Type="Edm.String"/>
+            <Property Name="privacyUrl" Type="Edm.String"/>
+            <Property Name="showDisplayNameNextToLogo" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="showLogo" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="showNameNextToLogo" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="themeColor" Type="graph.rgbColor"/>
+         </ComplexType>
+         <EntityType Name="complianceManagementPartner" BaseType="graph.entity">
+            <Property Name="androidEnrollmentAssignments" Type="Collection(graph.complianceManagementPartnerAssignment)"/>
+            <Property Name="androidOnboarded" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="iosEnrollmentAssignments" Type="Collection(graph.complianceManagementPartnerAssignment)"/>
+            <Property Name="iosOnboarded" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="lastHeartbeatDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="macOsEnrollmentAssignments" Type="Collection(graph.complianceManagementPartnerAssignment)"/>
+            <Property Name="macOsOnboarded" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="partnerState" Type="graph.deviceManagementPartnerTenantState" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="onPremisesConditionalAccessSettings" BaseType="graph.entity">
+            <Property Name="enabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="excludedGroups" Type="Collection(Edm.Guid)" Nullable="false"/>
+            <Property Name="includedGroups" Type="Collection(Edm.Guid)" Nullable="false"/>
+            <Property Name="overrideDefaultRule" Type="Edm.Boolean" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="deviceCategory" BaseType="graph.entity">
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="deviceEnrollmentConfiguration" BaseType="graph.entity" Abstract="true">
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="priority" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="version" Type="Edm.Int32" Nullable="false"/>
+            <NavigationProperty Name="assignments" Type="Collection(graph.enrollmentConfigurationAssignment)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="deviceManagementPartner" BaseType="graph.entity">
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="groupsRequiringPartnerEnrollment" Type="Collection(graph.deviceManagementPartnerAssignment)"/>
+            <Property Name="isConfigured" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="lastHeartbeatDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="partnerAppType" Type="graph.deviceManagementPartnerAppType" Nullable="false"/>
+            <Property Name="partnerState" Type="graph.deviceManagementPartnerTenantState" Nullable="false"/>
+            <Property Name="singleTenantAppId" Type="Edm.String"/>
+            <Property Name="whenPartnerDevicesWillBeMarkedAsNonCompliantDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="whenPartnerDevicesWillBeRemovedDateTime" Type="Edm.DateTimeOffset"/>
+         </EntityType>
+         <EntityType Name="deviceManagementExchangeConnector" BaseType="graph.entity">
+            <Property Name="connectorServerName" Type="Edm.String"/>
+            <Property Name="exchangeAlias" Type="Edm.String"/>
+            <Property Name="exchangeConnectorType" Type="graph.deviceManagementExchangeConnectorType" Nullable="false"/>
+            <Property Name="exchangeOrganization" Type="Edm.String"/>
+            <Property Name="lastSyncDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="primarySmtpAddress" Type="Edm.String"/>
+            <Property Name="serverName" Type="Edm.String"/>
+            <Property Name="status" Type="graph.deviceManagementExchangeConnectorStatus" Nullable="false"/>
+            <Property Name="version" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="mobileThreatDefenseConnector" BaseType="graph.entity">
+            <Property Name="allowPartnerToCollectIOSApplicationMetadata" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="allowPartnerToCollectIOSPersonalApplicationMetadata" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="androidDeviceBlockedOnMissingPartnerData" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="androidEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="androidMobileApplicationManagementEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="iosDeviceBlockedOnMissingPartnerData" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="iosEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="iosMobileApplicationManagementEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="lastHeartbeatDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="microsoftDefenderForEndpointAttachEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="partnerState" Type="graph.mobileThreatPartnerTenantState" Nullable="false"/>
+            <Property Name="partnerUnresponsivenessThresholdInDays" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="partnerUnsupportedOsVersionBlocked" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="windowsDeviceBlockedOnMissingPartnerData" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="windowsEnabled" Type="Edm.Boolean" Nullable="false"/>
+         </EntityType>
+         <ComplexType Name="deviceProtectionOverview">
+            <Property Name="cleanDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="criticalFailuresDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="inactiveThreatAgentDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="pendingFullScanDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="pendingManualStepsDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="pendingOfflineScanDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="pendingQuickScanDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="pendingRestartDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="pendingSignatureUpdateDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="totalReportedDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="unknownStateThreatAgentDeviceCount" Type="Edm.Int32" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="userExperienceAnalyticsSettings">
+            <Property Name="configurationManagerDataConnectorConfigured" Type="Edm.Boolean" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="windowsMalwareOverview">
+            <Property Name="malwareCategorySummary" Type="Collection(graph.windowsMalwareCategoryCount)"/>
+            <Property Name="malwareDetectedDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="malwareExecutionStateSummary" Type="Collection(graph.windowsMalwareExecutionStateCount)"/>
+            <Property Name="malwareNameSummary" Type="Collection(graph.windowsMalwareNameCount)"/>
+            <Property Name="malwareSeveritySummary" Type="Collection(graph.windowsMalwareSeverityCount)"/>
+            <Property Name="malwareStateSummary" Type="Collection(graph.windowsMalwareStateCount)"/>
+            <Property Name="osVersionsSummary" Type="Collection(graph.osVersionCount)"/>
+            <Property Name="totalDistinctMalwareCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="totalMalwareCount" Type="Edm.Int32" Nullable="false"/>
+         </ComplexType>
+         <EntityType Name="applePushNotificationCertificate" BaseType="graph.entity">
+            <Property Name="appleIdentifier" Type="Edm.String"/>
+            <Property Name="certificate" Type="Edm.String"/>
+            <Property Name="certificateSerialNumber" Type="Edm.String"/>
+            <Property Name="certificateUploadFailureReason" Type="Edm.String"/>
+            <Property Name="certificateUploadStatus" Type="Edm.String"/>
+            <Property Name="expirationDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="topicIdentifier" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="detectedApp" BaseType="graph.entity">
+            <Property Name="deviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="platform" Type="graph.detectedAppPlatformType" Nullable="false"/>
+            <Property Name="publisher" Type="Edm.String"/>
+            <Property Name="sizeInByte" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="version" Type="Edm.String"/>
+            <NavigationProperty Name="managedDevices" Type="Collection(graph.managedDevice)"/>
+         </EntityType>
+         <EntityType Name="managedDeviceOverview" BaseType="graph.entity">
+            <Property Name="deviceExchangeAccessStateSummary" Type="graph.deviceExchangeAccessStateSummary"/>
+            <Property Name="deviceOperatingSystemSummary" Type="graph.deviceOperatingSystemSummary"/>
+            <Property Name="dualEnrolledDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="enrolledDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="mdmEnrolledCount" Type="Edm.Int32" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="mobileAppTroubleshootingEvent" BaseType="graph.entity">
+            <NavigationProperty Name="appLogCollectionRequests" Type="Collection(graph.appLogCollectionRequest)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsAppHealthApplicationPerformance" BaseType="graph.entity">
+            <Property Name="activeDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="appCrashCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="appDisplayName" Type="Edm.String"/>
+            <Property Name="appHangCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="appHealthScore" Type="Edm.Double" Nullable="false"/>
+            <Property Name="appName" Type="Edm.String"/>
+            <Property Name="appPublisher" Type="Edm.String"/>
+            <Property Name="appUsageDuration" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="meanTimeToFailureInMinutes" Type="Edm.Int32" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsAppHealthAppPerformanceByAppVersionDetails" BaseType="graph.entity">
+            <Property Name="appCrashCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="appDisplayName" Type="Edm.String"/>
+            <Property Name="appName" Type="Edm.String"/>
+            <Property Name="appPublisher" Type="Edm.String"/>
+            <Property Name="appVersion" Type="Edm.String"/>
+            <Property Name="deviceCountWithCrashes" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="isLatestUsedVersion" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="isMostUsedVersion" Type="Edm.Boolean" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsAppHealthAppPerformanceByAppVersionDeviceId" BaseType="graph.entity">
+            <Property Name="appCrashCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="appDisplayName" Type="Edm.String"/>
+            <Property Name="appName" Type="Edm.String"/>
+            <Property Name="appPublisher" Type="Edm.String"/>
+            <Property Name="appVersion" Type="Edm.String"/>
+            <Property Name="deviceDisplayName" Type="Edm.String"/>
+            <Property Name="deviceId" Type="Edm.String"/>
+            <Property Name="processedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsAppHealthAppPerformanceByOSVersion" BaseType="graph.entity">
+            <Property Name="activeDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="appCrashCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="appDisplayName" Type="Edm.String"/>
+            <Property Name="appName" Type="Edm.String"/>
+            <Property Name="appPublisher" Type="Edm.String"/>
+            <Property Name="appUsageDuration" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="meanTimeToFailureInMinutes" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="osBuildNumber" Type="Edm.String"/>
+            <Property Name="osVersion" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsAppHealthDeviceModelPerformance" BaseType="graph.entity">
+            <Property Name="activeDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="deviceManufacturer" Type="Edm.String"/>
+            <Property Name="deviceModel" Type="Edm.String"/>
+            <Property Name="healthStatus" Type="graph.userExperienceAnalyticsHealthState" Nullable="false"/>
+            <Property Name="meanTimeToFailureInMinutes" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="modelAppHealthScore" Type="Edm.Double" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsAppHealthDevicePerformance" BaseType="graph.entity">
+            <Property Name="appCrashCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="appHangCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="crashedAppCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="deviceAppHealthScore" Type="Edm.Double" Nullable="false"/>
+            <Property Name="deviceDisplayName" Type="Edm.String"/>
+            <Property Name="deviceId" Type="Edm.String"/>
+            <Property Name="deviceManufacturer" Type="Edm.String"/>
+            <Property Name="deviceModel" Type="Edm.String"/>
+            <Property Name="healthStatus" Type="graph.userExperienceAnalyticsHealthState" Nullable="false"/>
+            <Property Name="meanTimeToFailureInMinutes" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="processedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsAppHealthDevicePerformanceDetails" BaseType="graph.entity">
+            <Property Name="appDisplayName" Type="Edm.String"/>
+            <Property Name="appPublisher" Type="Edm.String"/>
+            <Property Name="appVersion" Type="Edm.String"/>
+            <Property Name="deviceDisplayName" Type="Edm.String"/>
+            <Property Name="deviceId" Type="Edm.String"/>
+            <Property Name="eventDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="eventType" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsAppHealthOSVersionPerformance" BaseType="graph.entity">
+            <Property Name="activeDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="meanTimeToFailureInMinutes" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="osBuildNumber" Type="Edm.String"/>
+            <Property Name="osVersion" Type="Edm.String"/>
+            <Property Name="osVersionAppHealthScore" Type="Edm.Double" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsCategory" BaseType="graph.entity">
+            <Property Name="insights" Type="Collection(graph.userExperienceAnalyticsInsight)"/>
+            <NavigationProperty Name="metricValues" Type="Collection(graph.userExperienceAnalyticsMetric)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsBaseline" BaseType="graph.entity">
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="isBuiltIn" Type="Edm.Boolean" Nullable="false"/>
+            <NavigationProperty Name="appHealthMetrics" Type="graph.userExperienceAnalyticsCategory"/>
+            <NavigationProperty Name="batteryHealthMetrics" Type="graph.userExperienceAnalyticsCategory"/>
+            <NavigationProperty Name="bestPracticesMetrics" Type="graph.userExperienceAnalyticsCategory"/>
+            <NavigationProperty Name="deviceBootPerformanceMetrics" Type="graph.userExperienceAnalyticsCategory"/>
+            <NavigationProperty Name="rebootAnalyticsMetrics" Type="graph.userExperienceAnalyticsCategory"/>
+            <NavigationProperty Name="resourcePerformanceMetrics" Type="graph.userExperienceAnalyticsCategory"/>
+            <NavigationProperty Name="workFromAnywhereMetrics" Type="graph.userExperienceAnalyticsCategory"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsDevicePerformance" BaseType="graph.entity">
+            <Property Name="averageBlueScreens" Type="Edm.Double" Nullable="false"/>
+            <Property Name="averageRestarts" Type="Edm.Double" Nullable="false"/>
+            <Property Name="blueScreenCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="bootScore" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="coreBootTimeInMs" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="coreLoginTimeInMs" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="deviceCount" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="deviceName" Type="Edm.String"/>
+            <Property Name="diskType" Type="graph.diskType" Nullable="false"/>
+            <Property Name="groupPolicyBootTimeInMs" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="groupPolicyLoginTimeInMs" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="healthStatus" Type="graph.userExperienceAnalyticsHealthState" Nullable="false"/>
+            <Property Name="loginScore" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="manufacturer" Type="Edm.String"/>
+            <Property Name="model" Type="Edm.String"/>
+            <Property Name="modelStartupPerformanceScore" Type="Edm.Double" Nullable="false"/>
+            <Property Name="operatingSystemVersion" Type="Edm.String"/>
+            <Property Name="responsiveDesktopTimeInMs" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="restartCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="startupPerformanceScore" Type="Edm.Double" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsDeviceScores" BaseType="graph.entity">
+            <Property Name="appReliabilityScore" Type="Edm.Double" Nullable="false"/>
+            <Property Name="batteryHealthScore" Type="Edm.Double" Nullable="false"/>
+            <Property Name="deviceName" Type="Edm.String"/>
+            <Property Name="endpointAnalyticsScore" Type="Edm.Double" Nullable="false"/>
+            <Property Name="healthStatus" Type="graph.userExperienceAnalyticsHealthState" Nullable="false"/>
+            <Property Name="manufacturer" Type="Edm.String"/>
+            <Property Name="model" Type="Edm.String"/>
+            <Property Name="startupPerformanceScore" Type="Edm.Double" Nullable="false"/>
+            <Property Name="workFromAnywhereScore" Type="Edm.Double" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsDeviceStartupHistory" BaseType="graph.entity">
+            <Property Name="coreBootTimeInMs" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="coreLoginTimeInMs" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="deviceId" Type="Edm.String"/>
+            <Property Name="featureUpdateBootTimeInMs" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="groupPolicyBootTimeInMs" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="groupPolicyLoginTimeInMs" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="isFeatureUpdate" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="isFirstLogin" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="operatingSystemVersion" Type="Edm.String"/>
+            <Property Name="responsiveDesktopTimeInMs" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="restartCategory" Type="graph.userExperienceAnalyticsOperatingSystemRestartCategory" Nullable="false"/>
+            <Property Name="restartFaultBucket" Type="Edm.String"/>
+            <Property Name="restartStopCode" Type="Edm.String"/>
+            <Property Name="startTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="totalBootTimeInMs" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="totalLoginTimeInMs" Type="Edm.Int32" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsDeviceStartupProcess" BaseType="graph.entity">
+            <Property Name="managedDeviceId" Type="Edm.String"/>
+            <Property Name="processName" Type="Edm.String"/>
+            <Property Name="productName" Type="Edm.String"/>
+            <Property Name="publisher" Type="Edm.String"/>
+            <Property Name="startupImpactInMs" Type="Edm.Int32" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsDeviceStartupProcessPerformance" BaseType="graph.entity">
+            <Property Name="deviceCount" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="medianImpactInMs" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="processName" Type="Edm.String"/>
+            <Property Name="productName" Type="Edm.String"/>
+            <Property Name="publisher" Type="Edm.String"/>
+            <Property Name="totalImpactInMs" Type="Edm.Int64" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsMetricHistory" BaseType="graph.entity">
+            <Property Name="deviceId" Type="Edm.String"/>
+            <Property Name="metricDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="metricType" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsModelScores" BaseType="graph.entity">
+            <Property Name="appReliabilityScore" Type="Edm.Double" Nullable="false"/>
+            <Property Name="batteryHealthScore" Type="Edm.Double" Nullable="false"/>
+            <Property Name="endpointAnalyticsScore" Type="Edm.Double" Nullable="false"/>
+            <Property Name="healthStatus" Type="graph.userExperienceAnalyticsHealthState" Nullable="false"/>
+            <Property Name="manufacturer" Type="Edm.String"/>
+            <Property Name="model" Type="Edm.String"/>
+            <Property Name="modelDeviceCount" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="startupPerformanceScore" Type="Edm.Double" Nullable="false"/>
+            <Property Name="workFromAnywhereScore" Type="Edm.Double" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsOverview" BaseType="graph.entity">
+            <Property Name="insights" Type="Collection(graph.userExperienceAnalyticsInsight)"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsScoreHistory" BaseType="graph.entity">
+            <Property Name="startupDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsWorkFromAnywhereHardwareReadinessMetric" BaseType="graph.entity">
+            <Property Name="osCheckFailedPercentage" Type="Edm.Double" Nullable="false"/>
+            <Property Name="processor64BitCheckFailedPercentage" Type="Edm.Double" Nullable="false"/>
+            <Property Name="processorCoreCountCheckFailedPercentage" Type="Edm.Double" Nullable="false"/>
+            <Property Name="processorFamilyCheckFailedPercentage" Type="Edm.Double" Nullable="false"/>
+            <Property Name="processorSpeedCheckFailedPercentage" Type="Edm.Double" Nullable="false"/>
+            <Property Name="ramCheckFailedPercentage" Type="Edm.Double" Nullable="false"/>
+            <Property Name="secureBootCheckFailedPercentage" Type="Edm.Double" Nullable="false"/>
+            <Property Name="storageCheckFailedPercentage" Type="Edm.Double" Nullable="false"/>
+            <Property Name="totalDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="tpmCheckFailedPercentage" Type="Edm.Double" Nullable="false"/>
+            <Property Name="upgradeEligibleDeviceCount" Type="Edm.Int32" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsWorkFromAnywhereMetric" BaseType="graph.entity">
+            <NavigationProperty Name="metricDevices" Type="Collection(graph.userExperienceAnalyticsWorkFromAnywhereDevice)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="userExperienceAnalyticsWorkFromAnywhereModelPerformance" BaseType="graph.entity">
+            <Property Name="cloudIdentityScore" Type="Edm.Double" Nullable="false"/>
+            <Property Name="cloudManagementScore" Type="Edm.Double" Nullable="false"/>
+            <Property Name="cloudProvisioningScore" Type="Edm.Double" Nullable="false"/>
+            <Property Name="healthStatus" Type="graph.userExperienceAnalyticsHealthState" Nullable="false"/>
+            <Property Name="manufacturer" Type="Edm.String"/>
+            <Property Name="model" Type="Edm.String"/>
+            <Property Name="modelDeviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="windowsScore" Type="Edm.Double" Nullable="false"/>
+            <Property Name="workFromAnywhereScore" Type="Edm.Double" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="windowsMalwareInformation" BaseType="graph.entity">
+            <Property Name="additionalInformationUrl" Type="Edm.String"/>
+            <Property Name="category" Type="graph.windowsMalwareCategory"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="lastDetectionDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="severity" Type="graph.windowsMalwareSeverity"/>
+            <NavigationProperty Name="deviceMalwareStates" Type="Collection(graph.malwareStateForWindowsDevice)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="importedWindowsAutopilotDeviceIdentity" BaseType="graph.entity">
+            <Property Name="assignedUserPrincipalName" Type="Edm.String"/>
+            <Property Name="groupTag" Type="Edm.String"/>
+            <Property Name="hardwareIdentifier" Type="Edm.Binary"/>
+            <Property Name="importId" Type="Edm.String"/>
+            <Property Name="productKey" Type="Edm.String"/>
+            <Property Name="serialNumber" Type="Edm.String"/>
+            <Property Name="state" Type="graph.importedWindowsAutopilotDeviceIdentityState"/>
+         </EntityType>
+         <EntityType Name="windowsAutopilotDeviceIdentity" BaseType="graph.entity">
+            <Property Name="addressableUserName" Type="Edm.String"/>
+            <Property Name="azureActiveDirectoryDeviceId" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="enrollmentState" Type="graph.enrollmentState" Nullable="false"/>
+            <Property Name="groupTag" Type="Edm.String"/>
+            <Property Name="lastContactedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="managedDeviceId" Type="Edm.String"/>
+            <Property Name="manufacturer" Type="Edm.String"/>
+            <Property Name="model" Type="Edm.String"/>
+            <Property Name="productKey" Type="Edm.String"/>
+            <Property Name="purchaseOrderIdentifier" Type="Edm.String"/>
+            <Property Name="resourceName" Type="Edm.String"/>
+            <Property Name="serialNumber" Type="Edm.String"/>
+            <Property Name="skuNumber" Type="Edm.String"/>
+            <Property Name="systemFamily" Type="Edm.String"/>
+            <Property Name="userPrincipalName" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="notificationMessageTemplate" BaseType="graph.entity">
+            <Property Name="brandingOptions" Type="graph.notificationTemplateBrandingOptions" Nullable="false"/>
+            <Property Name="defaultLocale" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="roleScopeTagIds" Type="Collection(Edm.String)"/>
+            <NavigationProperty Name="localizedNotificationMessages" Type="Collection(graph.localizedNotificationMessage)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="resourceOperation" BaseType="graph.entity">
+            <Property Name="actionName" Type="Edm.String"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="resourceName" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="roleAssignment" BaseType="graph.entity">
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="resourceScopes" Type="Collection(Edm.String)"/>
+            <NavigationProperty Name="roleDefinition" Type="graph.roleDefinition"/>
+         </EntityType>
+         <EntityType Name="deviceAndAppManagementRoleAssignment" BaseType="graph.roleAssignment">
+            <Property Name="members" Type="Collection(Edm.String)"/>
+         </EntityType>
+         <EntityType Name="roleDefinition" BaseType="graph.entity">
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="isBuiltIn" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="rolePermissions" Type="Collection(graph.rolePermission)"/>
+            <NavigationProperty Name="roleAssignments" Type="Collection(graph.roleAssignment)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="remoteAssistancePartner" BaseType="graph.entity">
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="lastConnectionDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="onboardingStatus" Type="graph.remoteAssistanceOnboardingStatus" Nullable="false"/>
+            <Property Name="onboardingUrl" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="deviceManagementReports" BaseType="graph.entity">
+            <NavigationProperty Name="exportJobs" Type="Collection(graph.deviceManagementExportJob)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="telecomExpenseManagementPartner" BaseType="graph.entity">
+            <Property Name="appAuthorized" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="enabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="lastConnectionDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="url" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="windowsInformationProtectionAppLearningSummary" BaseType="graph.entity">
+            <Property Name="applicationName" Type="Edm.String"/>
+            <Property Name="applicationType" Type="graph.applicationType" Nullable="false"/>
+            <Property Name="deviceCount" Type="Edm.Int32" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="windowsInformationProtectionNetworkLearningSummary" BaseType="graph.entity">
+            <Property Name="deviceCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="url" Type="Edm.String"/>
+         </EntityType>
          <ComplexType Name="dataSubject" OpenType="true">
             <Property Name="email" Type="Edm.String"/>
             <Property Name="firstName" Type="Edm.String"/>
@@ -22651,13 +23314,6 @@
             <Property Name="status" Type="graph.teamsAsyncOperationStatus" Nullable="false"/>
             <Property Name="targetResourceId" Type="Edm.String"/>
             <Property Name="targetResourceLocation" Type="Edm.String"/>
-         </EntityType>
-         <EntityType Name="resourceSpecificPermissionGrant" BaseType="graph.directoryObject">
-            <Property Name="clientAppId" Type="Edm.String"/>
-            <Property Name="clientId" Type="Edm.String"/>
-            <Property Name="permission" Type="Edm.String"/>
-            <Property Name="permissionType" Type="Edm.String"/>
-            <Property Name="resourceAppId" Type="Edm.String"/>
          </EntityType>
          <EntityType Name="teamworkTag" BaseType="graph.entity">
             <Property Name="description" Type="Edm.String"/>
@@ -23719,6 +24375,7 @@
          </EntityType>
          <EntityType Name="peopleAdminSettings" BaseType="graph.entity">
             <NavigationProperty Name="profileCardProperties" Type="Collection(graph.profileCardProperty)" ContainsTarget="true"/>
+            <NavigationProperty Name="pronouns" Type="graph.pronounsSettings" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="browserSharedCookie" BaseType="graph.entity">
             <Property Name="comment" Type="Edm.String" Nullable="false"/>
@@ -23875,12 +24532,17 @@
             <Property Name="status" Type="graph.educationAssignmentStatus"/>
             <Property Name="webUrl" Type="Edm.String"/>
             <NavigationProperty Name="categories" Type="Collection(graph.educationCategory)" ContainsTarget="true"/>
+            <NavigationProperty Name="gradingCategory" Type="graph.educationGradingCategory"/>
             <NavigationProperty Name="resources" Type="Collection(graph.educationAssignmentResource)" ContainsTarget="true"/>
             <NavigationProperty Name="rubric" Type="graph.educationRubric" ContainsTarget="true"/>
             <NavigationProperty Name="submissions" Type="Collection(graph.educationSubmission)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="educationCategory" BaseType="graph.entity">
             <Property Name="displayName" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="educationGradingCategory" BaseType="graph.entity">
+            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="percentageWeight" Type="Edm.Int32" Nullable="false"/>
          </EntityType>
          <EntityType Name="educationAssignmentResource" BaseType="graph.entity">
             <Property Name="distributeForStudentWork" Type="Edm.Boolean"/>
@@ -23921,6 +24583,7 @@
          </EntityType>
          <EntityType Name="educationAssignmentSettings" BaseType="graph.entity">
             <Property Name="submissionAnimationDisabled" Type="Edm.Boolean"/>
+            <NavigationProperty Name="gradingCategories" Type="Collection(graph.educationGradingCategory)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="educationClass" BaseType="graph.entity">
             <Property Name="classCode" Type="Edm.String"/>
@@ -27101,632 +27764,6 @@
             <Property Name="modifiedProperties" Type="Collection(graph.auditProperty)"/>
             <Property Name="resourceId" Type="Edm.String"/>
          </ComplexType>
-         <EntityType Name="auditEvent" BaseType="graph.entity">
-            <Property Name="activity" Type="Edm.String"/>
-            <Property Name="activityDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="activityOperationType" Type="Edm.String"/>
-            <Property Name="activityResult" Type="Edm.String"/>
-            <Property Name="activityType" Type="Edm.String"/>
-            <Property Name="actor" Type="graph.auditActor"/>
-            <Property Name="category" Type="Edm.String"/>
-            <Property Name="componentName" Type="Edm.String"/>
-            <Property Name="correlationId" Type="Edm.Guid" Nullable="false"/>
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="resources" Type="Collection(graph.auditResource)"/>
-         </EntityType>
-         <EntityType Name="deviceManagement" BaseType="graph.entity">
-            <Property Name="intuneAccountId" Type="Edm.Guid" Nullable="false"/>
-            <Property Name="settings" Type="graph.deviceManagementSettings"/>
-            <Property Name="intuneBrand" Type="graph.intuneBrand"/>
-            <Property Name="deviceProtectionOverview" Type="graph.deviceProtectionOverview"/>
-            <Property Name="subscriptionState" Type="graph.deviceManagementSubscriptionState" Nullable="false"/>
-            <Property Name="userExperienceAnalyticsSettings" Type="graph.userExperienceAnalyticsSettings"/>
-            <Property Name="windowsMalwareOverview" Type="graph.windowsMalwareOverview"/>
-            <NavigationProperty Name="termsAndConditions" Type="Collection(graph.termsAndConditions)" ContainsTarget="true"/>
-            <NavigationProperty Name="auditEvents" Type="Collection(graph.auditEvent)" ContainsTarget="true"/>
-            <NavigationProperty Name="deviceCompliancePolicies" Type="Collection(graph.deviceCompliancePolicy)" ContainsTarget="true"/>
-            <NavigationProperty Name="deviceCompliancePolicyDeviceStateSummary" Type="graph.deviceCompliancePolicyDeviceStateSummary" ContainsTarget="true"/>
-            <NavigationProperty Name="deviceCompliancePolicySettingStateSummaries" Type="Collection(graph.deviceCompliancePolicySettingStateSummary)" ContainsTarget="true"/>
-            <NavigationProperty Name="deviceConfigurationDeviceStateSummaries" Type="graph.deviceConfigurationDeviceStateSummary" ContainsTarget="true"/>
-            <NavigationProperty Name="deviceConfigurations" Type="Collection(graph.deviceConfiguration)" ContainsTarget="true"/>
-            <NavigationProperty Name="iosUpdateStatuses" Type="Collection(graph.iosUpdateDeviceStatus)" ContainsTarget="true"/>
-            <NavigationProperty Name="softwareUpdateStatusSummary" Type="graph.softwareUpdateStatusSummary"/>
-            <NavigationProperty Name="complianceManagementPartners" Type="Collection(graph.complianceManagementPartner)" ContainsTarget="true"/>
-            <NavigationProperty Name="conditionalAccessSettings" Type="graph.onPremisesConditionalAccessSettings" ContainsTarget="true"/>
-            <NavigationProperty Name="deviceCategories" Type="Collection(graph.deviceCategory)" ContainsTarget="true"/>
-            <NavigationProperty Name="deviceEnrollmentConfigurations" Type="Collection(graph.deviceEnrollmentConfiguration)" ContainsTarget="true"/>
-            <NavigationProperty Name="deviceManagementPartners" Type="Collection(graph.deviceManagementPartner)" ContainsTarget="true"/>
-            <NavigationProperty Name="exchangeConnectors" Type="Collection(graph.deviceManagementExchangeConnector)" ContainsTarget="true"/>
-            <NavigationProperty Name="mobileThreatDefenseConnectors" Type="Collection(graph.mobileThreatDefenseConnector)" ContainsTarget="true"/>
-            <NavigationProperty Name="applePushNotificationCertificate" Type="graph.applePushNotificationCertificate" ContainsTarget="true"/>
-            <NavigationProperty Name="detectedApps" Type="Collection(graph.detectedApp)" ContainsTarget="true"/>
-            <NavigationProperty Name="managedDeviceOverview" Type="graph.managedDeviceOverview"/>
-            <NavigationProperty Name="managedDevices" Type="Collection(graph.managedDevice)" ContainsTarget="true"/>
-            <NavigationProperty Name="mobileAppTroubleshootingEvents" Type="Collection(graph.mobileAppTroubleshootingEvent)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsAppHealthApplicationPerformance" Type="Collection(graph.userExperienceAnalyticsAppHealthApplicationPerformance)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsAppHealthApplicationPerformanceByAppVersionDetails" Type="Collection(graph.userExperienceAnalyticsAppHealthAppPerformanceByAppVersionDetails)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsAppHealthApplicationPerformanceByAppVersionDeviceId" Type="Collection(graph.userExperienceAnalyticsAppHealthAppPerformanceByAppVersionDeviceId)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsAppHealthApplicationPerformanceByOSVersion" Type="Collection(graph.userExperienceAnalyticsAppHealthAppPerformanceByOSVersion)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsAppHealthDeviceModelPerformance" Type="Collection(graph.userExperienceAnalyticsAppHealthDeviceModelPerformance)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsAppHealthDevicePerformance" Type="Collection(graph.userExperienceAnalyticsAppHealthDevicePerformance)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsAppHealthDevicePerformanceDetails" Type="Collection(graph.userExperienceAnalyticsAppHealthDevicePerformanceDetails)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsAppHealthOSVersionPerformance" Type="Collection(graph.userExperienceAnalyticsAppHealthOSVersionPerformance)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsAppHealthOverview" Type="graph.userExperienceAnalyticsCategory" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsBaselines" Type="Collection(graph.userExperienceAnalyticsBaseline)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsCategories" Type="Collection(graph.userExperienceAnalyticsCategory)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsDevicePerformance" Type="Collection(graph.userExperienceAnalyticsDevicePerformance)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsDeviceScores" Type="Collection(graph.userExperienceAnalyticsDeviceScores)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsDeviceStartupHistory" Type="Collection(graph.userExperienceAnalyticsDeviceStartupHistory)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsDeviceStartupProcesses" Type="Collection(graph.userExperienceAnalyticsDeviceStartupProcess)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsDeviceStartupProcessPerformance" Type="Collection(graph.userExperienceAnalyticsDeviceStartupProcessPerformance)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsMetricHistory" Type="Collection(graph.userExperienceAnalyticsMetricHistory)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsModelScores" Type="Collection(graph.userExperienceAnalyticsModelScores)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsOverview" Type="graph.userExperienceAnalyticsOverview" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsScoreHistory" Type="Collection(graph.userExperienceAnalyticsScoreHistory)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsWorkFromAnywhereHardwareReadinessMetric" Type="graph.userExperienceAnalyticsWorkFromAnywhereHardwareReadinessMetric" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsWorkFromAnywhereMetrics" Type="Collection(graph.userExperienceAnalyticsWorkFromAnywhereMetric)" ContainsTarget="true"/>
-            <NavigationProperty Name="userExperienceAnalyticsWorkFromAnywhereModelPerformance" Type="Collection(graph.userExperienceAnalyticsWorkFromAnywhereModelPerformance)" ContainsTarget="true"/>
-            <NavigationProperty Name="windowsMalwareInformation" Type="Collection(graph.windowsMalwareInformation)" ContainsTarget="true"/>
-            <NavigationProperty Name="importedWindowsAutopilotDeviceIdentities" Type="Collection(graph.importedWindowsAutopilotDeviceIdentity)" ContainsTarget="true"/>
-            <NavigationProperty Name="windowsAutopilotDeviceIdentities" Type="Collection(graph.windowsAutopilotDeviceIdentity)" ContainsTarget="true"/>
-            <NavigationProperty Name="notificationMessageTemplates" Type="Collection(graph.notificationMessageTemplate)" ContainsTarget="true"/>
-            <NavigationProperty Name="resourceOperations" Type="Collection(graph.resourceOperation)" ContainsTarget="true"/>
-            <NavigationProperty Name="roleAssignments" Type="Collection(graph.deviceAndAppManagementRoleAssignment)" ContainsTarget="true"/>
-            <NavigationProperty Name="roleDefinitions" Type="Collection(graph.roleDefinition)" ContainsTarget="true"/>
-            <NavigationProperty Name="remoteAssistancePartners" Type="Collection(graph.remoteAssistancePartner)" ContainsTarget="true"/>
-            <NavigationProperty Name="reports" Type="graph.deviceManagementReports" ContainsTarget="true"/>
-            <NavigationProperty Name="telecomExpenseManagementPartners" Type="Collection(graph.telecomExpenseManagementPartner)" ContainsTarget="true"/>
-            <NavigationProperty Name="troubleshootingEvents" Type="Collection(graph.deviceManagementTroubleshootingEvent)" ContainsTarget="true"/>
-            <NavigationProperty Name="windowsInformationProtectionAppLearningSummaries" Type="Collection(graph.windowsInformationProtectionAppLearningSummary)" ContainsTarget="true"/>
-            <NavigationProperty Name="windowsInformationProtectionNetworkLearningSummaries" Type="Collection(graph.windowsInformationProtectionNetworkLearningSummary)" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="termsAndConditions" BaseType="graph.entity">
-            <Property Name="acceptanceStatement" Type="Edm.String"/>
-            <Property Name="bodyText" Type="Edm.String"/>
-            <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="description" Type="Edm.String"/>
-            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
-            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="title" Type="Edm.String"/>
-            <Property Name="version" Type="Edm.Int32" Nullable="false"/>
-            <NavigationProperty Name="acceptanceStatuses" Type="Collection(graph.termsAndConditionsAcceptanceStatus)" ContainsTarget="true"/>
-            <NavigationProperty Name="assignments" Type="Collection(graph.termsAndConditionsAssignment)" ContainsTarget="true"/>
-         </EntityType>
-         <ComplexType Name="deviceManagementSettings">
-            <Property Name="deviceComplianceCheckinThresholdDays" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="isScheduledActionEnabled" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="secureByDefault" Type="Edm.Boolean" Nullable="false"/>
-         </ComplexType>
-         <EntityType Name="deviceCompliancePolicy" BaseType="graph.entity" Abstract="true">
-            <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="description" Type="Edm.String"/>
-            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
-            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="version" Type="Edm.Int32" Nullable="false"/>
-            <NavigationProperty Name="assignments" Type="Collection(graph.deviceCompliancePolicyAssignment)" ContainsTarget="true"/>
-            <NavigationProperty Name="deviceSettingStateSummaries" Type="Collection(graph.settingStateDeviceSummary)" ContainsTarget="true"/>
-            <NavigationProperty Name="deviceStatuses" Type="Collection(graph.deviceComplianceDeviceStatus)" ContainsTarget="true"/>
-            <NavigationProperty Name="deviceStatusOverview" Type="graph.deviceComplianceDeviceOverview" ContainsTarget="true"/>
-            <NavigationProperty Name="scheduledActionsForRule" Type="Collection(graph.deviceComplianceScheduledActionForRule)" ContainsTarget="true"/>
-            <NavigationProperty Name="userStatuses" Type="Collection(graph.deviceComplianceUserStatus)" ContainsTarget="true"/>
-            <NavigationProperty Name="userStatusOverview" Type="graph.deviceComplianceUserOverview" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="deviceCompliancePolicyDeviceStateSummary" BaseType="graph.entity">
-            <Property Name="compliantDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="configManagerCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="conflictDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="errorDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="inGracePeriodCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="nonCompliantDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="notApplicableDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="remediatedDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="unknownDeviceCount" Type="Edm.Int32" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="deviceCompliancePolicySettingStateSummary" BaseType="graph.entity">
-            <Property Name="compliantDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="conflictDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="errorDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="nonCompliantDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="notApplicableDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="platformType" Type="graph.policyPlatformType" Nullable="false"/>
-            <Property Name="remediatedDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="setting" Type="Edm.String"/>
-            <Property Name="settingName" Type="Edm.String"/>
-            <Property Name="unknownDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <NavigationProperty Name="deviceComplianceSettingStates" Type="Collection(graph.deviceComplianceSettingState)" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="deviceConfigurationDeviceStateSummary" BaseType="graph.entity">
-            <Property Name="compliantDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="conflictDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="errorDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="nonCompliantDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="notApplicableDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="remediatedDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="unknownDeviceCount" Type="Edm.Int32" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="deviceConfiguration" BaseType="graph.entity" Abstract="true">
-            <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="description" Type="Edm.String"/>
-            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
-            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="version" Type="Edm.Int32" Nullable="false"/>
-            <NavigationProperty Name="assignments" Type="Collection(graph.deviceConfigurationAssignment)" ContainsTarget="true"/>
-            <NavigationProperty Name="deviceSettingStateSummaries" Type="Collection(graph.settingStateDeviceSummary)" ContainsTarget="true"/>
-            <NavigationProperty Name="deviceStatuses" Type="Collection(graph.deviceConfigurationDeviceStatus)" ContainsTarget="true"/>
-            <NavigationProperty Name="deviceStatusOverview" Type="graph.deviceConfigurationDeviceOverview" ContainsTarget="true"/>
-            <NavigationProperty Name="userStatuses" Type="Collection(graph.deviceConfigurationUserStatus)" ContainsTarget="true"/>
-            <NavigationProperty Name="userStatusOverview" Type="graph.deviceConfigurationUserOverview" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="iosUpdateDeviceStatus" BaseType="graph.entity">
-            <Property Name="complianceGracePeriodExpirationDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="deviceDisplayName" Type="Edm.String"/>
-            <Property Name="deviceId" Type="Edm.String"/>
-            <Property Name="deviceModel" Type="Edm.String"/>
-            <Property Name="installStatus" Type="graph.iosUpdatesInstallStatus" Nullable="false"/>
-            <Property Name="lastReportedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="osVersion" Type="Edm.String"/>
-            <Property Name="status" Type="graph.complianceStatus" Nullable="false"/>
-            <Property Name="userId" Type="Edm.String"/>
-            <Property Name="userName" Type="Edm.String"/>
-            <Property Name="userPrincipalName" Type="Edm.String"/>
-         </EntityType>
-         <EntityType Name="softwareUpdateStatusSummary" BaseType="graph.entity">
-            <Property Name="compliantDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="compliantUserCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="conflictDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="conflictUserCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="errorDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="errorUserCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="nonCompliantDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="nonCompliantUserCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="notApplicableDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="notApplicableUserCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="remediatedDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="remediatedUserCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="unknownDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="unknownUserCount" Type="Edm.Int32" Nullable="false"/>
-         </EntityType>
-         <ComplexType Name="intuneBrand">
-            <Property Name="contactITEmailAddress" Type="Edm.String"/>
-            <Property Name="contactITName" Type="Edm.String"/>
-            <Property Name="contactITNotes" Type="Edm.String"/>
-            <Property Name="contactITPhoneNumber" Type="Edm.String"/>
-            <Property Name="darkBackgroundLogo" Type="graph.mimeContent"/>
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="lightBackgroundLogo" Type="graph.mimeContent"/>
-            <Property Name="onlineSupportSiteName" Type="Edm.String"/>
-            <Property Name="onlineSupportSiteUrl" Type="Edm.String"/>
-            <Property Name="privacyUrl" Type="Edm.String"/>
-            <Property Name="showDisplayNameNextToLogo" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="showLogo" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="showNameNextToLogo" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="themeColor" Type="graph.rgbColor"/>
-         </ComplexType>
-         <EntityType Name="complianceManagementPartner" BaseType="graph.entity">
-            <Property Name="androidEnrollmentAssignments" Type="Collection(graph.complianceManagementPartnerAssignment)"/>
-            <Property Name="androidOnboarded" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="iosEnrollmentAssignments" Type="Collection(graph.complianceManagementPartnerAssignment)"/>
-            <Property Name="iosOnboarded" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="lastHeartbeatDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="macOsEnrollmentAssignments" Type="Collection(graph.complianceManagementPartnerAssignment)"/>
-            <Property Name="macOsOnboarded" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="partnerState" Type="graph.deviceManagementPartnerTenantState" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="onPremisesConditionalAccessSettings" BaseType="graph.entity">
-            <Property Name="enabled" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="excludedGroups" Type="Collection(Edm.Guid)" Nullable="false"/>
-            <Property Name="includedGroups" Type="Collection(Edm.Guid)" Nullable="false"/>
-            <Property Name="overrideDefaultRule" Type="Edm.Boolean" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="deviceCategory" BaseType="graph.entity">
-            <Property Name="description" Type="Edm.String"/>
-            <Property Name="displayName" Type="Edm.String"/>
-         </EntityType>
-         <EntityType Name="deviceEnrollmentConfiguration" BaseType="graph.entity" Abstract="true">
-            <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="description" Type="Edm.String"/>
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="priority" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="version" Type="Edm.Int32" Nullable="false"/>
-            <NavigationProperty Name="assignments" Type="Collection(graph.enrollmentConfigurationAssignment)" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="deviceManagementPartner" BaseType="graph.entity">
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="groupsRequiringPartnerEnrollment" Type="Collection(graph.deviceManagementPartnerAssignment)"/>
-            <Property Name="isConfigured" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="lastHeartbeatDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="partnerAppType" Type="graph.deviceManagementPartnerAppType" Nullable="false"/>
-            <Property Name="partnerState" Type="graph.deviceManagementPartnerTenantState" Nullable="false"/>
-            <Property Name="singleTenantAppId" Type="Edm.String"/>
-            <Property Name="whenPartnerDevicesWillBeMarkedAsNonCompliantDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="whenPartnerDevicesWillBeRemovedDateTime" Type="Edm.DateTimeOffset"/>
-         </EntityType>
-         <EntityType Name="deviceManagementExchangeConnector" BaseType="graph.entity">
-            <Property Name="connectorServerName" Type="Edm.String"/>
-            <Property Name="exchangeAlias" Type="Edm.String"/>
-            <Property Name="exchangeConnectorType" Type="graph.deviceManagementExchangeConnectorType" Nullable="false"/>
-            <Property Name="exchangeOrganization" Type="Edm.String"/>
-            <Property Name="lastSyncDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="primarySmtpAddress" Type="Edm.String"/>
-            <Property Name="serverName" Type="Edm.String"/>
-            <Property Name="status" Type="graph.deviceManagementExchangeConnectorStatus" Nullable="false"/>
-            <Property Name="version" Type="Edm.String"/>
-         </EntityType>
-         <EntityType Name="mobileThreatDefenseConnector" BaseType="graph.entity">
-            <Property Name="allowPartnerToCollectIOSApplicationMetadata" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="allowPartnerToCollectIOSPersonalApplicationMetadata" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="androidDeviceBlockedOnMissingPartnerData" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="androidEnabled" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="androidMobileApplicationManagementEnabled" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="iosDeviceBlockedOnMissingPartnerData" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="iosEnabled" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="iosMobileApplicationManagementEnabled" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="lastHeartbeatDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="microsoftDefenderForEndpointAttachEnabled" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="partnerState" Type="graph.mobileThreatPartnerTenantState" Nullable="false"/>
-            <Property Name="partnerUnresponsivenessThresholdInDays" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="partnerUnsupportedOsVersionBlocked" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="windowsDeviceBlockedOnMissingPartnerData" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="windowsEnabled" Type="Edm.Boolean" Nullable="false"/>
-         </EntityType>
-         <ComplexType Name="deviceProtectionOverview">
-            <Property Name="cleanDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="criticalFailuresDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="inactiveThreatAgentDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="pendingFullScanDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="pendingManualStepsDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="pendingOfflineScanDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="pendingQuickScanDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="pendingRestartDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="pendingSignatureUpdateDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="totalReportedDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="unknownStateThreatAgentDeviceCount" Type="Edm.Int32" Nullable="false"/>
-         </ComplexType>
-         <ComplexType Name="userExperienceAnalyticsSettings">
-            <Property Name="configurationManagerDataConnectorConfigured" Type="Edm.Boolean" Nullable="false"/>
-         </ComplexType>
-         <ComplexType Name="windowsMalwareOverview">
-            <Property Name="malwareCategorySummary" Type="Collection(graph.windowsMalwareCategoryCount)"/>
-            <Property Name="malwareDetectedDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="malwareExecutionStateSummary" Type="Collection(graph.windowsMalwareExecutionStateCount)"/>
-            <Property Name="malwareNameSummary" Type="Collection(graph.windowsMalwareNameCount)"/>
-            <Property Name="malwareSeveritySummary" Type="Collection(graph.windowsMalwareSeverityCount)"/>
-            <Property Name="malwareStateSummary" Type="Collection(graph.windowsMalwareStateCount)"/>
-            <Property Name="osVersionsSummary" Type="Collection(graph.osVersionCount)"/>
-            <Property Name="totalDistinctMalwareCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="totalMalwareCount" Type="Edm.Int32" Nullable="false"/>
-         </ComplexType>
-         <EntityType Name="applePushNotificationCertificate" BaseType="graph.entity">
-            <Property Name="appleIdentifier" Type="Edm.String"/>
-            <Property Name="certificate" Type="Edm.String"/>
-            <Property Name="certificateSerialNumber" Type="Edm.String"/>
-            <Property Name="certificateUploadFailureReason" Type="Edm.String"/>
-            <Property Name="certificateUploadStatus" Type="Edm.String"/>
-            <Property Name="expirationDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="topicIdentifier" Type="Edm.String"/>
-         </EntityType>
-         <EntityType Name="detectedApp" BaseType="graph.entity">
-            <Property Name="deviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="platform" Type="graph.detectedAppPlatformType" Nullable="false"/>
-            <Property Name="publisher" Type="Edm.String"/>
-            <Property Name="sizeInByte" Type="Edm.Int64" Nullable="false"/>
-            <Property Name="version" Type="Edm.String"/>
-            <NavigationProperty Name="managedDevices" Type="Collection(graph.managedDevice)"/>
-         </EntityType>
-         <EntityType Name="managedDeviceOverview" BaseType="graph.entity">
-            <Property Name="deviceExchangeAccessStateSummary" Type="graph.deviceExchangeAccessStateSummary"/>
-            <Property Name="deviceOperatingSystemSummary" Type="graph.deviceOperatingSystemSummary"/>
-            <Property Name="dualEnrolledDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="enrolledDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="mdmEnrolledCount" Type="Edm.Int32" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="mobileAppTroubleshootingEvent" BaseType="graph.entity">
-            <NavigationProperty Name="appLogCollectionRequests" Type="Collection(graph.appLogCollectionRequest)" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsAppHealthApplicationPerformance" BaseType="graph.entity">
-            <Property Name="activeDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="appCrashCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="appDisplayName" Type="Edm.String"/>
-            <Property Name="appHangCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="appHealthScore" Type="Edm.Double" Nullable="false"/>
-            <Property Name="appName" Type="Edm.String"/>
-            <Property Name="appPublisher" Type="Edm.String"/>
-            <Property Name="appUsageDuration" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="meanTimeToFailureInMinutes" Type="Edm.Int32" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsAppHealthAppPerformanceByAppVersionDetails" BaseType="graph.entity">
-            <Property Name="appCrashCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="appDisplayName" Type="Edm.String"/>
-            <Property Name="appName" Type="Edm.String"/>
-            <Property Name="appPublisher" Type="Edm.String"/>
-            <Property Name="appVersion" Type="Edm.String"/>
-            <Property Name="deviceCountWithCrashes" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="isLatestUsedVersion" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="isMostUsedVersion" Type="Edm.Boolean" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsAppHealthAppPerformanceByAppVersionDeviceId" BaseType="graph.entity">
-            <Property Name="appCrashCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="appDisplayName" Type="Edm.String"/>
-            <Property Name="appName" Type="Edm.String"/>
-            <Property Name="appPublisher" Type="Edm.String"/>
-            <Property Name="appVersion" Type="Edm.String"/>
-            <Property Name="deviceDisplayName" Type="Edm.String"/>
-            <Property Name="deviceId" Type="Edm.String"/>
-            <Property Name="processedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsAppHealthAppPerformanceByOSVersion" BaseType="graph.entity">
-            <Property Name="activeDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="appCrashCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="appDisplayName" Type="Edm.String"/>
-            <Property Name="appName" Type="Edm.String"/>
-            <Property Name="appPublisher" Type="Edm.String"/>
-            <Property Name="appUsageDuration" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="meanTimeToFailureInMinutes" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="osBuildNumber" Type="Edm.String"/>
-            <Property Name="osVersion" Type="Edm.String"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsAppHealthDeviceModelPerformance" BaseType="graph.entity">
-            <Property Name="activeDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="deviceManufacturer" Type="Edm.String"/>
-            <Property Name="deviceModel" Type="Edm.String"/>
-            <Property Name="healthStatus" Type="graph.userExperienceAnalyticsHealthState" Nullable="false"/>
-            <Property Name="meanTimeToFailureInMinutes" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="modelAppHealthScore" Type="Edm.Double" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsAppHealthDevicePerformance" BaseType="graph.entity">
-            <Property Name="appCrashCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="appHangCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="crashedAppCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="deviceAppHealthScore" Type="Edm.Double" Nullable="false"/>
-            <Property Name="deviceDisplayName" Type="Edm.String"/>
-            <Property Name="deviceId" Type="Edm.String"/>
-            <Property Name="deviceManufacturer" Type="Edm.String"/>
-            <Property Name="deviceModel" Type="Edm.String"/>
-            <Property Name="healthStatus" Type="graph.userExperienceAnalyticsHealthState" Nullable="false"/>
-            <Property Name="meanTimeToFailureInMinutes" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="processedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsAppHealthDevicePerformanceDetails" BaseType="graph.entity">
-            <Property Name="appDisplayName" Type="Edm.String"/>
-            <Property Name="appPublisher" Type="Edm.String"/>
-            <Property Name="appVersion" Type="Edm.String"/>
-            <Property Name="deviceDisplayName" Type="Edm.String"/>
-            <Property Name="deviceId" Type="Edm.String"/>
-            <Property Name="eventDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="eventType" Type="Edm.String"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsAppHealthOSVersionPerformance" BaseType="graph.entity">
-            <Property Name="activeDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="meanTimeToFailureInMinutes" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="osBuildNumber" Type="Edm.String"/>
-            <Property Name="osVersion" Type="Edm.String"/>
-            <Property Name="osVersionAppHealthScore" Type="Edm.Double" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsCategory" BaseType="graph.entity">
-            <Property Name="insights" Type="Collection(graph.userExperienceAnalyticsInsight)"/>
-            <NavigationProperty Name="metricValues" Type="Collection(graph.userExperienceAnalyticsMetric)" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsBaseline" BaseType="graph.entity">
-            <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="isBuiltIn" Type="Edm.Boolean" Nullable="false"/>
-            <NavigationProperty Name="appHealthMetrics" Type="graph.userExperienceAnalyticsCategory"/>
-            <NavigationProperty Name="batteryHealthMetrics" Type="graph.userExperienceAnalyticsCategory"/>
-            <NavigationProperty Name="bestPracticesMetrics" Type="graph.userExperienceAnalyticsCategory"/>
-            <NavigationProperty Name="deviceBootPerformanceMetrics" Type="graph.userExperienceAnalyticsCategory"/>
-            <NavigationProperty Name="rebootAnalyticsMetrics" Type="graph.userExperienceAnalyticsCategory"/>
-            <NavigationProperty Name="resourcePerformanceMetrics" Type="graph.userExperienceAnalyticsCategory"/>
-            <NavigationProperty Name="workFromAnywhereMetrics" Type="graph.userExperienceAnalyticsCategory"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsDevicePerformance" BaseType="graph.entity">
-            <Property Name="averageBlueScreens" Type="Edm.Double" Nullable="false"/>
-            <Property Name="averageRestarts" Type="Edm.Double" Nullable="false"/>
-            <Property Name="blueScreenCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="bootScore" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="coreBootTimeInMs" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="coreLoginTimeInMs" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="deviceCount" Type="Edm.Int64" Nullable="false"/>
-            <Property Name="deviceName" Type="Edm.String"/>
-            <Property Name="diskType" Type="graph.diskType" Nullable="false"/>
-            <Property Name="groupPolicyBootTimeInMs" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="groupPolicyLoginTimeInMs" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="healthStatus" Type="graph.userExperienceAnalyticsHealthState" Nullable="false"/>
-            <Property Name="loginScore" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="manufacturer" Type="Edm.String"/>
-            <Property Name="model" Type="Edm.String"/>
-            <Property Name="modelStartupPerformanceScore" Type="Edm.Double" Nullable="false"/>
-            <Property Name="operatingSystemVersion" Type="Edm.String"/>
-            <Property Name="responsiveDesktopTimeInMs" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="restartCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="startupPerformanceScore" Type="Edm.Double" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsDeviceScores" BaseType="graph.entity">
-            <Property Name="appReliabilityScore" Type="Edm.Double" Nullable="false"/>
-            <Property Name="batteryHealthScore" Type="Edm.Double" Nullable="false"/>
-            <Property Name="deviceName" Type="Edm.String"/>
-            <Property Name="endpointAnalyticsScore" Type="Edm.Double" Nullable="false"/>
-            <Property Name="healthStatus" Type="graph.userExperienceAnalyticsHealthState" Nullable="false"/>
-            <Property Name="manufacturer" Type="Edm.String"/>
-            <Property Name="model" Type="Edm.String"/>
-            <Property Name="startupPerformanceScore" Type="Edm.Double" Nullable="false"/>
-            <Property Name="workFromAnywhereScore" Type="Edm.Double" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsDeviceStartupHistory" BaseType="graph.entity">
-            <Property Name="coreBootTimeInMs" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="coreLoginTimeInMs" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="deviceId" Type="Edm.String"/>
-            <Property Name="featureUpdateBootTimeInMs" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="groupPolicyBootTimeInMs" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="groupPolicyLoginTimeInMs" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="isFeatureUpdate" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="isFirstLogin" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="operatingSystemVersion" Type="Edm.String"/>
-            <Property Name="responsiveDesktopTimeInMs" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="restartCategory" Type="graph.userExperienceAnalyticsOperatingSystemRestartCategory" Nullable="false"/>
-            <Property Name="restartFaultBucket" Type="Edm.String"/>
-            <Property Name="restartStopCode" Type="Edm.String"/>
-            <Property Name="startTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="totalBootTimeInMs" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="totalLoginTimeInMs" Type="Edm.Int32" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsDeviceStartupProcess" BaseType="graph.entity">
-            <Property Name="managedDeviceId" Type="Edm.String"/>
-            <Property Name="processName" Type="Edm.String"/>
-            <Property Name="productName" Type="Edm.String"/>
-            <Property Name="publisher" Type="Edm.String"/>
-            <Property Name="startupImpactInMs" Type="Edm.Int32" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsDeviceStartupProcessPerformance" BaseType="graph.entity">
-            <Property Name="deviceCount" Type="Edm.Int64" Nullable="false"/>
-            <Property Name="medianImpactInMs" Type="Edm.Int64" Nullable="false"/>
-            <Property Name="processName" Type="Edm.String"/>
-            <Property Name="productName" Type="Edm.String"/>
-            <Property Name="publisher" Type="Edm.String"/>
-            <Property Name="totalImpactInMs" Type="Edm.Int64" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsMetricHistory" BaseType="graph.entity">
-            <Property Name="deviceId" Type="Edm.String"/>
-            <Property Name="metricDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="metricType" Type="Edm.String"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsModelScores" BaseType="graph.entity">
-            <Property Name="appReliabilityScore" Type="Edm.Double" Nullable="false"/>
-            <Property Name="batteryHealthScore" Type="Edm.Double" Nullable="false"/>
-            <Property Name="endpointAnalyticsScore" Type="Edm.Double" Nullable="false"/>
-            <Property Name="healthStatus" Type="graph.userExperienceAnalyticsHealthState" Nullable="false"/>
-            <Property Name="manufacturer" Type="Edm.String"/>
-            <Property Name="model" Type="Edm.String"/>
-            <Property Name="modelDeviceCount" Type="Edm.Int64" Nullable="false"/>
-            <Property Name="startupPerformanceScore" Type="Edm.Double" Nullable="false"/>
-            <Property Name="workFromAnywhereScore" Type="Edm.Double" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsOverview" BaseType="graph.entity">
-            <Property Name="insights" Type="Collection(graph.userExperienceAnalyticsInsight)"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsScoreHistory" BaseType="graph.entity">
-            <Property Name="startupDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsWorkFromAnywhereHardwareReadinessMetric" BaseType="graph.entity">
-            <Property Name="osCheckFailedPercentage" Type="Edm.Double" Nullable="false"/>
-            <Property Name="processor64BitCheckFailedPercentage" Type="Edm.Double" Nullable="false"/>
-            <Property Name="processorCoreCountCheckFailedPercentage" Type="Edm.Double" Nullable="false"/>
-            <Property Name="processorFamilyCheckFailedPercentage" Type="Edm.Double" Nullable="false"/>
-            <Property Name="processorSpeedCheckFailedPercentage" Type="Edm.Double" Nullable="false"/>
-            <Property Name="ramCheckFailedPercentage" Type="Edm.Double" Nullable="false"/>
-            <Property Name="secureBootCheckFailedPercentage" Type="Edm.Double" Nullable="false"/>
-            <Property Name="storageCheckFailedPercentage" Type="Edm.Double" Nullable="false"/>
-            <Property Name="totalDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="tpmCheckFailedPercentage" Type="Edm.Double" Nullable="false"/>
-            <Property Name="upgradeEligibleDeviceCount" Type="Edm.Int32" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsWorkFromAnywhereMetric" BaseType="graph.entity">
-            <NavigationProperty Name="metricDevices" Type="Collection(graph.userExperienceAnalyticsWorkFromAnywhereDevice)" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="userExperienceAnalyticsWorkFromAnywhereModelPerformance" BaseType="graph.entity">
-            <Property Name="cloudIdentityScore" Type="Edm.Double" Nullable="false"/>
-            <Property Name="cloudManagementScore" Type="Edm.Double" Nullable="false"/>
-            <Property Name="cloudProvisioningScore" Type="Edm.Double" Nullable="false"/>
-            <Property Name="healthStatus" Type="graph.userExperienceAnalyticsHealthState" Nullable="false"/>
-            <Property Name="manufacturer" Type="Edm.String"/>
-            <Property Name="model" Type="Edm.String"/>
-            <Property Name="modelDeviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="windowsScore" Type="Edm.Double" Nullable="false"/>
-            <Property Name="workFromAnywhereScore" Type="Edm.Double" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="windowsMalwareInformation" BaseType="graph.entity">
-            <Property Name="additionalInformationUrl" Type="Edm.String"/>
-            <Property Name="category" Type="graph.windowsMalwareCategory"/>
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="lastDetectionDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="severity" Type="graph.windowsMalwareSeverity"/>
-            <NavigationProperty Name="deviceMalwareStates" Type="Collection(graph.malwareStateForWindowsDevice)" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="importedWindowsAutopilotDeviceIdentity" BaseType="graph.entity">
-            <Property Name="assignedUserPrincipalName" Type="Edm.String"/>
-            <Property Name="groupTag" Type="Edm.String"/>
-            <Property Name="hardwareIdentifier" Type="Edm.Binary"/>
-            <Property Name="importId" Type="Edm.String"/>
-            <Property Name="productKey" Type="Edm.String"/>
-            <Property Name="serialNumber" Type="Edm.String"/>
-            <Property Name="state" Type="graph.importedWindowsAutopilotDeviceIdentityState"/>
-         </EntityType>
-         <EntityType Name="windowsAutopilotDeviceIdentity" BaseType="graph.entity">
-            <Property Name="addressableUserName" Type="Edm.String"/>
-            <Property Name="azureActiveDirectoryDeviceId" Type="Edm.String"/>
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="enrollmentState" Type="graph.enrollmentState" Nullable="false"/>
-            <Property Name="groupTag" Type="Edm.String"/>
-            <Property Name="lastContactedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="managedDeviceId" Type="Edm.String"/>
-            <Property Name="manufacturer" Type="Edm.String"/>
-            <Property Name="model" Type="Edm.String"/>
-            <Property Name="productKey" Type="Edm.String"/>
-            <Property Name="purchaseOrderIdentifier" Type="Edm.String"/>
-            <Property Name="resourceName" Type="Edm.String"/>
-            <Property Name="serialNumber" Type="Edm.String"/>
-            <Property Name="skuNumber" Type="Edm.String"/>
-            <Property Name="systemFamily" Type="Edm.String"/>
-            <Property Name="userPrincipalName" Type="Edm.String"/>
-         </EntityType>
-         <EntityType Name="notificationMessageTemplate" BaseType="graph.entity">
-            <Property Name="brandingOptions" Type="graph.notificationTemplateBrandingOptions" Nullable="false"/>
-            <Property Name="defaultLocale" Type="Edm.String"/>
-            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
-            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="roleScopeTagIds" Type="Collection(Edm.String)"/>
-            <NavigationProperty Name="localizedNotificationMessages" Type="Collection(graph.localizedNotificationMessage)" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="resourceOperation" BaseType="graph.entity">
-            <Property Name="actionName" Type="Edm.String"/>
-            <Property Name="description" Type="Edm.String"/>
-            <Property Name="resourceName" Type="Edm.String"/>
-         </EntityType>
-         <EntityType Name="roleAssignment" BaseType="graph.entity">
-            <Property Name="description" Type="Edm.String"/>
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="resourceScopes" Type="Collection(Edm.String)"/>
-            <NavigationProperty Name="roleDefinition" Type="graph.roleDefinition"/>
-         </EntityType>
-         <EntityType Name="deviceAndAppManagementRoleAssignment" BaseType="graph.roleAssignment">
-            <Property Name="members" Type="Collection(Edm.String)"/>
-         </EntityType>
-         <EntityType Name="roleDefinition" BaseType="graph.entity">
-            <Property Name="description" Type="Edm.String"/>
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="isBuiltIn" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="rolePermissions" Type="Collection(graph.rolePermission)"/>
-            <NavigationProperty Name="roleAssignments" Type="Collection(graph.roleAssignment)" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="remoteAssistancePartner" BaseType="graph.entity">
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="lastConnectionDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="onboardingStatus" Type="graph.remoteAssistanceOnboardingStatus" Nullable="false"/>
-            <Property Name="onboardingUrl" Type="Edm.String"/>
-         </EntityType>
-         <EntityType Name="deviceManagementReports" BaseType="graph.entity">
-            <NavigationProperty Name="exportJobs" Type="Collection(graph.deviceManagementExportJob)" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="telecomExpenseManagementPartner" BaseType="graph.entity">
-            <Property Name="appAuthorized" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="enabled" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="lastConnectionDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="url" Type="Edm.String"/>
-         </EntityType>
-         <EntityType Name="windowsInformationProtectionAppLearningSummary" BaseType="graph.entity">
-            <Property Name="applicationName" Type="Edm.String"/>
-            <Property Name="applicationType" Type="graph.applicationType" Nullable="false"/>
-            <Property Name="deviceCount" Type="Edm.Int32" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="windowsInformationProtectionNetworkLearningSummary" BaseType="graph.entity">
-            <Property Name="deviceCount" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="url" Type="Edm.String"/>
-         </EntityType>
          <EntityType Name="deviceInstallState" BaseType="graph.entity">
             <Property Name="deviceId" Type="Edm.String"/>
             <Property Name="deviceName" Type="Edm.String"/>
@@ -29919,6 +29956,9 @@
             <Property Name="annotations" Type="Collection(graph.profileCardAnnotation)"/>
             <Property Name="directoryPropertyName" Type="Edm.String"/>
          </EntityType>
+         <EntityType Name="pronounsSettings" BaseType="graph.entity">
+            <Property Name="isEnabledInOrganization" Type="Edm.Boolean" Nullable="false"/>
+         </EntityType>
          <ComplexType Name="approvalSettings">
             <Property Name="approvalMode" Type="Edm.String"/>
             <Property Name="approvalStages" Type="Collection(graph.unifiedApprovalStage)"/>
@@ -30902,6 +30942,9 @@
          <ComplexType Name="rejectJoinResponse" BaseType="graph.participantJoiningResponse">
             <Property Name="reason" Type="graph.rejectReason" Nullable="false"/>
          </ComplexType>
+         <ComplexType Name="removedState">
+            <Property Name="reason" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="serviceHostedMediaConfig" BaseType="graph.mediaConfig">
             <Property Name="preFetchMedia" Type="Collection(graph.mediaInfo)"/>
          </ComplexType>
@@ -30988,9 +31031,15 @@
             <Property Name="mediaStreams" Type="Collection(graph.mediaStream)"/>
             <Property Name="metadata" Type="Edm.String"/>
             <Property Name="recordingInfo" Type="graph.recordingInfo"/>
+            <Property Name="removedState" Type="graph.removedState"/>
             <Property Name="restrictedExperience" Type="graph.onlineMeetingRestricted"/>
+            <Property Name="rosterSequenceNumber" Type="Edm.Int64"/>
          </EntityType>
          <EntityType Name="cancelMediaProcessingOperation" BaseType="graph.commsOperation" OpenType="true"/>
+         <EntityType Name="deltaParticipants" BaseType="graph.entity">
+            <Property Name="sequenceNumber" Type="Edm.Int64"/>
+            <NavigationProperty Name="participants" Type="Collection(graph.participant)" ContainsTarget="true"/>
+         </EntityType>
          <EntityType Name="inviteParticipantsOperation" BaseType="graph.commsOperation" OpenType="true">
             <Property Name="participants" Type="Collection(graph.invitationParticipantInfo)" Nullable="false"/>
          </EntityType>
@@ -31012,6 +31061,9 @@
          <EntityType Name="recordOperation" BaseType="graph.commsOperation" OpenType="true">
             <Property Name="recordingAccessToken" Type="Edm.String"/>
             <Property Name="recordingLocation" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="sendDtmfTonesOperation" BaseType="graph.commsOperation" OpenType="true">
+            <Property Name="completionReason" Type="graph.sendDtmfCompletionReason"/>
          </EntityType>
          <EntityType Name="startHoldMusicOperation" BaseType="graph.commsOperation" OpenType="true"/>
          <EntityType Name="stopHoldMusicOperation" BaseType="graph.commsOperation" OpenType="true"/>
@@ -31496,6 +31548,7 @@
          <EntityType Name="teamworkBot" BaseType="graph.entity"/>
          <EntityType Name="teamsAppSettings" BaseType="graph.entity">
             <Property Name="allowUserRequestsForAppAccess" Type="Edm.Boolean"/>
+            <Property Name="isUserPersonalScopeResourceSpecificConsentEnabled" Type="Edm.Boolean"/>
          </EntityType>
          <EntityType Name="teamwork" BaseType="graph.entity">
             <NavigationProperty Name="workforceIntegrations" Type="Collection(graph.workforceIntegration)" ContainsTarget="true"/>
@@ -32272,9 +32325,6 @@
             <Parameter Name="bindingParameter" Type="Collection(graph.todoTaskList)"/>
             <ReturnType Type="Collection(graph.todoTaskList)"/>
          </Function>
-         <Action Name="resetToSystemDefault" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.crossTenantAccessPolicyConfigurationDefault" Nullable="false"/>
-         </Action>
          <Function Name="findTenantInformationByDomainName" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.tenantRelationship" Nullable="false"/>
             <Parameter Name="domainName" Type="Edm.String" Unicode="false"/>
@@ -32285,6 +32335,9 @@
             <Parameter Name="tenantId" Type="Edm.String" Unicode="false"/>
             <ReturnType Type="graph.tenantInformation"/>
          </Function>
+         <Action Name="resetToSystemDefault" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.crossTenantAccessPolicyConfigurationDefault" Nullable="false"/>
+         </Action>
          <Action Name="setUpFeedbackResourcesFolder" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.educationAssignment"/>
             <ReturnType Type="graph.educationAssignment"/>
@@ -35277,12 +35330,30 @@
          </Action>
          <Action Name="createLink" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.driveItem"/>
-            <Parameter Name="type" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <Parameter Name="type" Type="Edm.String" Unicode="false"/>
             <Parameter Name="scope" Type="Edm.String" Unicode="false"/>
             <Parameter Name="expirationDateTime" Type="Edm.DateTimeOffset"/>
             <Parameter Name="password" Type="Edm.String" Unicode="false"/>
             <Parameter Name="message" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="recipients" Type="Collection(graph.driveRecipient)"/>
             <Parameter Name="retainInheritedPermissions" Type="Edm.Boolean"/>
+            <Parameter Name="sendNotification" Type="Edm.Boolean">
+               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
+            </Parameter>
+            <ReturnType Type="graph.permission"/>
+         </Action>
+         <Action Name="createLink" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.listItem"/>
+            <Parameter Name="type" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="scope" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="expirationDateTime" Type="Edm.DateTimeOffset"/>
+            <Parameter Name="password" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="message" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="recipients" Type="Collection(graph.driveRecipient)"/>
+            <Parameter Name="retainInheritedPermissions" Type="Edm.Boolean"/>
+            <Parameter Name="sendNotification" Type="Edm.Boolean">
+               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
+            </Parameter>
             <ReturnType Type="graph.permission"/>
          </Action>
          <Action Name="extractSensitivityLabels" IsBound="true">
@@ -36841,6 +36912,13 @@
             <Parameter Name="reason" Type="graph.rejectReason"/>
             <Parameter Name="callbackUri" Type="Edm.String" Unicode="false"/>
          </Action>
+         <Action Name="sendDtmfTones" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.call"/>
+            <Parameter Name="tones" Type="Collection(graph.tone)" Nullable="false"/>
+            <Parameter Name="delayBetweenTonesMs" Type="Edm.Int32"/>
+            <Parameter Name="clientContext" Type="Edm.String" Unicode="false"/>
+            <ReturnType Type="graph.sendDtmfTonesOperation"/>
+         </Action>
          <Action Name="subscribeToTone" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.call"/>
             <Parameter Name="clientContext" Type="Edm.String" Unicode="false"/>
@@ -37170,6 +37248,7 @@
             <Singleton Name="reports" Type="microsoft.graph.reportRoot"/>
             <Singleton Name="authenticationMethodsPolicy" Type="microsoft.graph.authenticationMethodsPolicy"/>
             <Singleton Name="solutions" Type="microsoft.graph.solutionsRoot"/>
+            <Singleton Name="deviceManagement" Type="microsoft.graph.deviceManagement"/>
             <Singleton Name="privacy" Type="microsoft.graph.privacy"/>
             <Singleton Name="security" Type="microsoft.graph.security">
                <NavigationPropertyBinding Path="threatIntelligence/hosts/childHostPairs" Target="security/microsoft.graph.security.threatIntelligence/threatIntelligence/hostPairs"/>
@@ -37226,7 +37305,6 @@
             <Singleton Name="communications" Type="microsoft.graph.cloudCommunications"/>
             <Singleton Name="identityProtection" Type="microsoft.graph.identityProtectionRoot"/>
             <Singleton Name="deviceAppManagement" Type="microsoft.graph.deviceAppManagement"/>
-            <Singleton Name="deviceManagement" Type="microsoft.graph.deviceManagement"/>
             <Singleton Name="search" Type="microsoft.graph.searchEntity"/>
             <Singleton Name="planner" Type="microsoft.graph.planner">
                <NavigationPropertyBinding Path="buckets/tasks" Target="planner/tasks"/>

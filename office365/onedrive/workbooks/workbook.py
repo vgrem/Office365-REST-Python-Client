@@ -3,7 +3,7 @@ from office365.entity_collection import EntityCollection
 from office365.onedrive.workbooks.applications.application import WorkbookApplication
 from office365.onedrive.workbooks.comments.comment import WorkbookComment
 from office365.onedrive.workbooks.functions.functions import WorkbookFunctions
-from office365.onedrive.workbooks.names.named_item import WorkbookNamedItem
+from office365.onedrive.workbooks.names.collection import WorkbookNamedItemCollection
 from office365.onedrive.workbooks.operations.workbook import WorkbookOperation
 from office365.onedrive.workbooks.session_info import WorkbookSessionInfo
 from office365.onedrive.workbooks.tables.collection import WorkbookTableCollection
@@ -11,6 +11,7 @@ from office365.onedrive.workbooks.worksheets.collection import (
     WorkbookWorksheetCollection,
 )
 from office365.runtime.client_result import ClientResult
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -56,9 +57,7 @@ class Workbook(Entity):
         self.context.add_query(qry)
 
         def _construct_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
+            # type: (RequestOptions) -> None
             request.set_header("workbook-session-id", session_id)
 
         self.context.before_execute(_construct_request)
@@ -66,15 +65,12 @@ class Workbook(Entity):
 
     def close_session(self, session_id):
         """Use this API to close an existing workbook session.
-
         :param str session_id: Identifier of the workbook session
         """
         qry = ServiceOperationQuery(self, "closeSession")
 
         def _construct_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
+            # type: (RequestOptions) -> None
             request.set_header("workbook-session-id", session_id)
 
         self.context.before_execute(_construct_request)
@@ -126,13 +122,12 @@ class Workbook(Entity):
 
     @property
     def names(self):
-        # type: () -> EntityCollection[WorkbookNamedItem]
+        # type: () -> WorkbookNamedItemCollection
         """Represents a collection of workbook scoped named items (named ranges and constants). Read-only."""
         return self.properties.get(
             "names",
-            EntityCollection(
+            WorkbookNamedItemCollection(
                 self.context,
-                WorkbookNamedItem,
                 ResourcePath("names", self.resource_path),
             ),
         )

@@ -33,3 +33,8 @@ class WorkbookNamedItem(Entity):
                 self.context, ResourcePath("worksheet", self.resource_path)
             ),
         )
+
+    @property
+    def property_ref_name(self):
+        # type: () -> str
+        return "name"

@@ -5,9 +5,7 @@ class ODataJsonFormat(object):
     """OData JSON format"""
 
     def __init__(self, metadata_level=None):
-        """
-        :type metadata_level: str
-        """
+        # type: (str) -> None
         self.metadata_level = metadata_level
 
     __metaclass__ = ABCMeta
@@ -28,7 +26,6 @@ class ODataJsonFormat(object):
     def media_type(self):
         """
         Gets media type
-
         :rtype: str
         """
         raise NotImplementedError
@@ -36,7 +33,6 @@ class ODataJsonFormat(object):
     @property
     def include_control_information(self):
         """Determines whether control information that is represented as annotations should be included in payload
-
         :rtype: bool
         """
         raise NotImplementedError

@@ -1,4 +1,5 @@
 import copy
+from typing import Any, Optional
 
 import requests
 
@@ -69,11 +70,7 @@ class ODataRequest(ClientRequest):
             self.map_json(response.json(), return_type, json_format)
 
     def map_json(self, json, return_type, json_format=None):
-        """
-        :type json: any
-        :type return_type: ClientValue or ClientResult or ClientObject
-        :type json_format: office365.runtime.odata.json_format.ODataJsonFormat
-        """
+        # type: (Any, ClientValue | ClientResult | ClientObject, Optional[ODataJsonFormat]) -> None
         if json_format is None:
             json_format = self.json_format
 
@@ -82,19 +79,17 @@ class ODataRequest(ClientRequest):
                 return_type.set_property(k, v, False)
 
     def _next_property(self, json, json_format):
-        """
-        :type json: Any
-        :type json_format: office365.runtime.odata.json_format.ODataJsonFormat
-        """
+        # type: (Any, ODataJsonFormat) -> None
         if isinstance(json_format, JsonLightFormat):
             json = json.get(json_format.security, json)
             json = json.get(json_format.function, json)
 
         if isinstance(json, dict):
-            next_link_url = json.get(json_format.collection_next, None)
-            json = json.get(json_format.collection, json)
-            if next_link_url:
-                yield "__nextLinkUrl", next_link_url
+            if isinstance(json.get(json_format.collection, None), list):
+                next_link_url = json.get(json_format.collection_next, None)
+                json = json.get(json_format.collection, json)
+                if next_link_url:
+                    yield "__nextLinkUrl", next_link_url
 
             if isinstance(json, list):
                 for index, item in enumerate(json):

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.authentication.methods.method import AuthenticationMethod
 
 
@@ -9,8 +11,6 @@ class EmailAuthenticationMethod(AuthenticationMethod):
 
     @property
     def email_address(self):
-        """
-        The email address registered to this user.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """The email address registered to this user."""
         return self.properties.get("emailAddress", None)
