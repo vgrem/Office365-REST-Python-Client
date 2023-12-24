@@ -89,6 +89,7 @@ class Workbook(Entity):
 
     @property
     def comments(self):
+        # type: () -> EntityCollection[WorkbookComment]
         """"""
         return self.properties.get(
             "comments",

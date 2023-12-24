@@ -16,6 +16,9 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 class WorkbookTable(Entity):
     """Represents an Excel table."""
 
+    def __repr__(self):
+        return self.name or self.id or self.entity_type_name
+
     def data_body_range(self):
         """Gets the range object associated with the data body of the table."""
         return_type = WorkbookRange(
@@ -62,9 +65,7 @@ class WorkbookTable(Entity):
     @property
     def columns(self):
         # type: () -> WorkbookTableColumnCollection
-        """
-        Represents a collection of all the columns in the table.
-        """
+        """Represents a collection of all the columns in the table."""
         return self.properties.get(
             "columns",
             WorkbookTableColumnCollection(
