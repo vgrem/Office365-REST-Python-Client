@@ -1,5 +1,9 @@
+from typing import Optional
+
 from office365.entity import Entity
+from office365.onedrive.workbooks.ranges.range import WorkbookRange
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.function import FunctionQuery
 
 
 class WorkbookNamedItem(Entity):
@@ -7,18 +11,26 @@ class WorkbookNamedItem(Entity):
     (as seen in the type below), range object, reference to a range. This object can be used to obtain range
     object associated with names."""
 
+    def range(self):
+        """Returns the range object that is associated with the name. Throws an exception if the named item's type
+        isn't a range."""
+        return_type = WorkbookRange(
+            self.context, ResourcePath("range", self.resource_path)
+        )
+        qry = FunctionQuery(self, "range", return_type=return_type)
+        self.context.add_query(qry)
+        return return_type
+
     @property
     def name(self):
-        """The name of the object. Read-only.
-        :rtype str or None
-        """
+        # type: () -> Optional[str]
+        """The name of the object."""
         return self.properties.get("name", None)
 
     @property
     def comment(self):
-        """Represents the comment associated with this name.
-        :rtype str or None
-        """
+        # type: () -> Optional[str]
+        """Represents the comment associated with this name."""
         return self.properties.get("comment", None)
 
     @property

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -25,11 +27,8 @@ class ApplicationTemplate(Entity):
 
     @property
     def display_name(self):
-        """
-        The name of the application.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The name of the application."""
         return self.properties.get("displayName", None)
 
     @property
@@ -44,9 +43,7 @@ class ApplicationTemplate(Entity):
 
     @property
     def supported_provisioning_types(self):
-        """
-        The list of provisioning modes supported by this application
-        """
+        """The list of provisioning modes supported by this application"""
         return self.properties.get("supportedProvisioningTypes", StringCollection())
 
     @property

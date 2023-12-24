@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.protection.riskyusers.activity import RiskUserActivity
 from office365.directory.protection.riskyusers.risky_user import RiskyUser
 
@@ -13,7 +15,6 @@ class RiskyUserHistoryItem(RiskyUser):
 
     @property
     def initiated_by(self):
-        """The ID of actor that does the operation.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """The ID of actor that does the operation."""
         return self.properties.get("initiatedBy", None)

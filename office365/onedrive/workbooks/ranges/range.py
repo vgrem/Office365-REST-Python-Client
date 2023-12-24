@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from office365.entity import Entity
 from office365.onedrive.workbooks.ranges.format import WorkbookRangeFormat
@@ -6,13 +6,50 @@ from office365.onedrive.workbooks.ranges.sort import WorkbookRangeSort
 from office365.onedrive.workbooks.ranges.view import WorkbookRangeView
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class WorkbookRange(Entity):
     """Range represents a set of one or more contiguous cells such as a cell, a row, a column, block of cells, etc."""
 
+    def cell(self, row, column):
+        """
+        Gets the range object containing the single cell based on row and column numbers. The cell can be outside
+        the bounds of its parent range, so long as it's stays within the worksheet grid.
+        :param int row: Row number of the cell to be retrieved. Zero-indexed.
+        :param int column: Column number of the cell to be retrieved. Zero-indexed.
+        """
+        return_type = WorkbookRange(self.context)
+        params = {"row": row, "column": column}
+        qry = FunctionQuery(self, "cell", params, return_type=return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def clear(self, apply_to=None):
+        """Clear range values such as format, fill, and border.
+        :param str apply_to:
+        """
+        payload = {"applyTo": apply_to}
+        qry = ServiceOperationQuery(self, "clear", parameters_type=payload)
+        self.context.add_query(qry)
+        return self
+
+    def insert(self, shift):
+        """
+        Inserts a cell or a range of cells into the worksheet in place of this range, and shifts the other cells to
+        make space. Returns a new Range object at the now blank space.
+        :param str shift: Specifies which way to shift the cells. The possible values are: Down, Right.
+        """
+        return_type = WorkbookRange(self.context)
+        payload = {"shift": shift}
+        qry = ServiceOperationQuery(
+            self, "insert", parameters_type=payload, return_type=return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def visible_view(self):
-        """"""
+        """Get the range visible from a filtered range."""
         return_type = WorkbookRangeView(self.context)
         qry = FunctionQuery(self, "visibleView", return_type=return_type)
         self.context.add_query(qry)
@@ -62,6 +99,20 @@ class WorkbookRange(Entity):
             "sort",
             WorkbookRangeSort(self.context, ResourcePath("sort", self.resource_path)),
         )
+
+    @property
+    def values(self):
+        # type: () -> List
+        """Represents the raw values of the specified range. The data returned could be of type string, number,
+        or a boolean. Cell that contains an error returns the error string."""
+        return self.properties.get("values", None)
+
+    @property
+    def value_types(self):
+        # type: () -> List
+        """Represents the type of data of each cell. The possible values are:
+        Unknown, Empty, String, Integer, Double, Boolean, Error."""
+        return self.properties.get("valueTypes", None)
 
     @property
     def worksheet(self):

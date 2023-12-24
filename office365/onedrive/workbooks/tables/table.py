@@ -18,14 +18,18 @@ class WorkbookTable(Entity):
 
     def data_body_range(self):
         """Gets the range object associated with the data body of the table."""
-        return_type = WorkbookRange(self.context)
+        return_type = WorkbookRange(
+            self.context, ResourcePath("dataBodyRange", self.resource_path)
+        )
         qry = FunctionQuery(self, "dataBodyRange", return_type=return_type)
         self.context.add_query(qry)
         return return_type
 
     def range(self):
         """Get the range object associated with the entire table."""
-        return_type = WorkbookRange(self.context)
+        return_type = WorkbookRange(
+            self.context, ResourcePath("range", self.resource_path)
+        )
         qry = FunctionQuery(self, "range", return_type=return_type)
         self.context.add_query(qry)
         return return_type

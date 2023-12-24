@@ -1,5 +1,6 @@
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.workbooks.names.named_item import WorkbookNamedItem
+from office365.onedrive.workbooks.ranges.range import WorkbookRange
 from tests import create_unique_name
 from tests.graph_case import GraphTestCase
 from tests.onedrive.test_excel import upload_excel
@@ -8,6 +9,7 @@ from tests.onedrive.test_excel import upload_excel
 class TestExcelRanges(GraphTestCase):
     excel_file = None  # type: DriveItem
     named_item = None  # type: WorkbookNamedItem
+    range = None  # type: WorkbookRange
     sheet_name = create_unique_name("Sheet")
 
     @classmethod
@@ -30,3 +32,16 @@ class TestExcelRanges(GraphTestCase):
     def test2_names_get(self):
         result = self.__class__.named_item.get().execute_query()
         self.assertIsNotNone(result.resource_path)
+
+    def test3_list_range(self):
+        result = self.__class__.named_item.range().execute_query()
+        self.assertIsNotNone(result.address)
+        self.__class__.range = result
+
+    # def test4_insert_range(self):
+    #    result = self.__class__.range.insert("Right").execute_query()
+    #    self.assertIsNotNone(result.address)
+
+    def test5_clear_range(self):
+        result = self.__class__.range.clear().execute_query()
+        self.assertIsNotNone(result.address)

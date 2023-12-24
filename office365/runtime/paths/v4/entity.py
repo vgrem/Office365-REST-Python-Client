@@ -1,12 +1,13 @@
+from typing import Optional
+
+from typing_extensions import Self
+
 from office365.runtime.paths.resource_path import ResourcePath
 
 
 class EntityPath(ResourcePath):
     def __init__(self, key=None, parent=None, collection=None):
-        """
-        :param str or None key: Entity key
-        :param ResourcePath or None collection:
-        """
+        # type: (Optional[str], Optional[ResourcePath], Optional[ResourcePath]) -> None
         super(EntityPath, self).__init__(key, parent)
         self._collection = collection
 
@@ -26,10 +27,8 @@ class EntityPath(ResourcePath):
         return str(self._key or "<key>")
 
     def patch(self, key):
-        """
-        Patches path
-        :type key: str or None
-        """
+        # type: (str) -> Self
+        """Patches the path"""
         self._key = key
         self._parent = self.collection
         self.__class__ = EntityPath
