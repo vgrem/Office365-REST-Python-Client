@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
@@ -23,14 +25,12 @@ class ThemeInfo(Entity):
 
     @property
     def accessible_description(self):
-        """Specifies the accessible description for this theme.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the accessible description for this theme."""
         return self.properties.get("AccessibleDescription", None)
 
     @property
     def theme_background_image_uri(self):
-        """Specifies the URI of the background image for this theme.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the URI of the background image for this theme."""
         return self.properties.get("ThemeBackgroundImageUri", None)

@@ -1,5 +1,5 @@
 import copy
-from typing import Any, Optional
+from typing import Any, Iterator, Optional, Tuple
 
 import requests
 
@@ -79,7 +79,7 @@ class ODataRequest(ClientRequest):
                 return_type.set_property(k, v, False)
 
     def _next_property(self, json, json_format):
-        # type: (Any, ODataJsonFormat) -> None
+        # type: (Any, ODataJsonFormat) -> Iterator[Tuple[str, Any]]
         if isinstance(json_format, JsonLightFormat):
             json = json.get(json_format.security, json)
             json = json.get(json_format.function, json)

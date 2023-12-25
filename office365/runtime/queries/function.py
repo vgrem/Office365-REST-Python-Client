@@ -1,3 +1,6 @@
+from office365.runtime.client_object import ClientObject
+from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value import ClientValue
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.client_query import ClientQuery
 
@@ -8,12 +11,8 @@ class FunctionQuery(ClientQuery):
     def __init__(
         self, binding_type, method_name=None, method_params=None, return_type=None
     ):
-        """
-        Function query
-
-        :type method_params: list or dict or office365.runtime.client_value.ClientValue or None
-        :type method_name: str or None
-        """
+        # type: (ClientObject, str, list|dict|ClientValue, ClientObject|ClientResult) -> None
+        """Function query"""
         super(FunctionQuery, self).__init__(
             binding_type.context, binding_type, None, None, return_type
         )

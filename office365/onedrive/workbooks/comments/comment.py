@@ -1,3 +1,5 @@
+from typing import AnyStr, Optional
+
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.onedrive.workbooks.comments.reply import WorkbookCommentReply
@@ -9,20 +11,19 @@ class WorkbookComment(Entity):
 
     @property
     def content(self):
-        """The content of comment.
-        :rtype: str or None
-        """
+        # type: () -> Optional[AnyStr]
+        """The content of comment."""
         return self.properties.get("content", None)
 
     @property
     def content_type(self):
-        """Indicates the type for the comment.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Indicates the type for the comment."""
         return self.properties.get("contentType", None)
 
     @property
     def replies(self):
+        # type: () -> EntityCollection[WorkbookCommentReply]
         """"""
         return self.properties.get(
             "replies",
