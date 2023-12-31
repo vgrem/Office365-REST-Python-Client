@@ -665,8 +665,6 @@ class File(AbstractFile):
                 request.stream = True
                 request.method = HttpMethod.Get
 
-            self.context.before_execute(_construct_request)
-
             def _process_response(response):
                 # type: (requests.Response) -> None
                 response.raise_for_status()
@@ -677,8 +675,9 @@ class File(AbstractFile):
                         chunk_downloaded(bytes_read)
                     file_object.write(chunk)
 
-            self.context.after_execute(_process_response)
-            self.context.add_query(qry)
+            self.context.add_query(qry).before_execute(
+                _construct_request
+            ).after_execute(_process_response)
 
         if use_path:
             self.ensure_property("ServerRelativePath", _download_as_stream)

@@ -10,9 +10,7 @@ class PlannerUser(Entity):
 
     @property
     def plans(self):
-        """
-        Returns the plannerTasks assigned to the user.
-        """
+        """Returns the plannerTasks assigned to the user."""
         from office365.planner.plans.collection import PlannerPlanCollection
 
         return self.properties.get(
@@ -24,10 +22,8 @@ class PlannerUser(Entity):
 
     @property
     def tasks(self):
-        """Read-only. Nullable. Returns the plannerTasks assigned to the user.
-
-        :rtype: EntityCollection
-        """
+        # type: () -> EntityCollection[PlannerTask]
+        """Returns the plannerTasks assigned to the user."""
         return self.properties.get(
             "tasks",
             EntityCollection(

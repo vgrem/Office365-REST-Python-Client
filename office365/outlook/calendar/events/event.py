@@ -1,6 +1,5 @@
 from typing import Optional
 
-from office365.delta_collection import DeltaCollection
 from office365.directory.extensions.extended_property import (
     MultiValueLegacyExtendedProperty,
     SingleValueLegacyExtendedProperty,
@@ -9,7 +8,6 @@ from office365.directory.extensions.extension import Extension
 from office365.entity_collection import EntityCollection
 from office365.outlook.calendar.attendees.attendee import Attendee
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
-from office365.outlook.calendar.email_address import EmailAddress
 from office365.outlook.item import OutlookItem
 from office365.outlook.mail.attachments.collection import AttachmentCollection
 from office365.outlook.mail.item_body import ItemBody
@@ -74,45 +72,41 @@ class Event(OutlookItem):
         return self
 
     def dismiss_reminder(self):
-        """
-        Dismiss a reminder that has been triggered for an event in a user calendar.
-        """
+        """Dismiss a reminder that has been triggered for an event in a user calendar."""
         qry = ServiceOperationQuery(self, "dismissReminder")
         self.context.add_query(qry)
         return self
 
     @property
     def allow_new_time_proposals(self):
+        # type: () -> Optional[bool]
         """
         true if the meeting organizer allows invitees to propose a new time when responding; otherwise, false.
         Optional. Default is true.
-        :rtype: bool or None
         """
         return self.properties.get("allowNewTimeProposals", None)
 
     @property
     def has_attachments(self):
-        """
-        Set to true if the event has attachments.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Set to true if the event has attachments."""
         return self.properties.get("hasAttachments", None)
 
     @property
     def hide_attendees(self):
+        # type: () -> Optional[bool]
         """
         When set to true, each attendee only sees themselves in the meeting request and meeting Tracking list.
         Default is false.
-        :rtype: bool or None
         """
         return self.properties.get("hideAttendees", None)
 
     @property
     def ical_uid(self):
+        # type: () -> Optional[str]
         """
         A unique identifier for an event across calendars. This ID is different for each occurrence in a recurring
-        series. Read-only.
-        :rtype: str or None
+        series.
         """
         return self.properties.get("iCalUId", None)
 
@@ -167,6 +161,7 @@ class Event(OutlookItem):
 
     @property
     def single_value_extended_properties(self):
+        # type: () -> EntityCollection[SingleValueLegacyExtendedProperty]
         """The collection of single-value extended properties defined for the event."""
         return self.properties.get(
             "singleValueExtendedProperties",
@@ -179,6 +174,7 @@ class Event(OutlookItem):
 
     @property
     def multi_value_extended_properties(self):
+        # type: () -> EntityCollection[MultiValueLegacyExtendedProperty]
         """The collection of multi-value extended properties defined for the event."""
         return self.properties.get(
             "multiValueExtendedProperties",
@@ -229,13 +225,12 @@ class Event(OutlookItem):
 
     @property
     def location(self):
-        """
-        The location of the event.
-        """
+        """The location of the event."""
         return self.properties.get("location", Location())
 
     @property
     def web_link(self):
+        # type: () -> Optional[str]
         """
         The URL to open the event in Outlook on the web.
 
@@ -243,8 +238,6 @@ class Event(OutlookItem):
         on the web prompts you to sign in.
 
         This URL cannot be accessed from within an iFrame.
-
-        :rtype: str or None
         """
         return self.properties.get("webLink", None)
 
@@ -275,6 +268,7 @@ class Event(OutlookItem):
 
     @property
     def extensions(self):
+        # type: () -> EntityCollection[Extension]
         """The collection of open extensions defined for the event. Nullable."""
         return self.properties.get(
             "extensions",

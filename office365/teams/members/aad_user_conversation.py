@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.teams.members.conversation import ConversationMember
 
@@ -7,10 +9,8 @@ class AadUserConversationMember(ConversationMember):
 
     @property
     def user_id(self):
-        """
-        The guid of the user.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The guid of the user."""
         return self.properties.get("userId", None)
 
     @property

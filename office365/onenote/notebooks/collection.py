@@ -18,7 +18,6 @@ class NotebookCollection(EntityCollection[Notebook]):
 
         :param str display_name: Name for the notebook. Notebook names must be unique. The name cannot contain more
             than 128 characters or contain the following characters: ?*/:<>|'"
-        :rtype: Notebook
         """
         return super(NotebookCollection, self).add(displayName=display_name)
 

@@ -57,9 +57,8 @@ class BookingBusiness(Entity):
 
     @property
     def business_hours(self):
-        """
-        The hours of operation for the business.
-        """
+        # type: () -> ClientValueCollection[BookingWorkHours]
+        """The hours of operation for the business."""
         return self.properties.get(
             "businessHours", ClientValueCollection(BookingWorkHours)
         )
@@ -74,6 +73,7 @@ class BookingBusiness(Entity):
 
     @property
     def appointments(self):
+        # type: () -> EntityCollection[BookingAppointment]
         """All the appointments of this business. Read-only. Nullable."""
         return self.properties.get(
             "appointments",
@@ -86,6 +86,7 @@ class BookingBusiness(Entity):
 
     @property
     def calendar_view(self):
+        # type: () -> EntityCollection[BookingAppointment]
         """The set of appointments of this business in a specified date range. Read-only. Nullable."""
         return self.properties.get(
             "calendarView",
@@ -98,6 +99,7 @@ class BookingBusiness(Entity):
 
     @property
     def customers(self):
+        # type: () -> EntityCollection[BookingCustomerBase]
         """All the customers of this business. Read-only. Nullable."""
         return self.properties.get(
             "customers",

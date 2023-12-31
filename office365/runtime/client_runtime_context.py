@@ -1,6 +1,6 @@
 import abc
 from time import sleep
-from typing import TYPE_CHECKING, Any, AnyStr, Callable, List
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, List, Optional
 
 import requests
 from typing_extensions import Self
@@ -121,7 +121,7 @@ class ClientRuntimeContext(object):
         return self
 
     def before_execute(self, action, once=True, *args, **kwargs):
-        # type: (Callable[[RequestOptions, Any, Any], None], bool, Any, Any) -> Self
+        # type: (Callable[[RequestOptions, ...], None], bool, Optional[Any], Optional[Any]) -> Self
         """
         Attach an event handler which is triggered before request is submitted to server
         :param (office365.runtime.http.request_options.RequestOptions, any) -> None action:
