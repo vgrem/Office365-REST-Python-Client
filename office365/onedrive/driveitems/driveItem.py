@@ -246,10 +246,10 @@ class DriveItem(BaseItem):
         :type content: str or bytes or None
         """
         return_type = DriveItem(self.context, UrlPath(name, self.resource_path))
+        self.children.add_child(return_type)
         qry = ServiceOperationQuery(
             return_type, "content", None, content, None, return_type
         )
-        self.children.add_child(qry.return_type)
 
         def _modify_query(request):
             # type: (RequestOptions) -> None
@@ -533,15 +533,13 @@ class DriveItem(BaseItem):
             self.context, ItemActivityStat, self.resource_path
         )
 
-        def _create_query():
-            params = {
-                "startDateTime": start_dt.strftime("%m-%d-%Y") if start_dt else None,
-                "endDateTime": end_dt.strftime("%m-%d-%Y") if end_dt else None,
-                "interval": interval,
-            }
-            return FunctionQuery(self, "getActivitiesByInterval", params, return_type)
+        params = {
+            "startDateTime": start_dt.strftime("%m-%d-%Y") if start_dt else None,
+            "endDateTime": end_dt.strftime("%m-%d-%Y") if end_dt else None,
+            "interval": interval,
+        }
 
-        qry = _create_query()
+        qry = FunctionQuery(self, "getActivitiesByInterval", params, return_type)
         self.context.add_query(qry)
         return return_type
 

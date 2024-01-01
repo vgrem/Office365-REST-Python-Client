@@ -33,9 +33,7 @@ class ClientRuntimeContext(object):
 
     def build_request(self, query):
         # type: (ClientQuery) -> RequestOptions
-        """
-        Builds a request
-        """
+        """Builds a request"""
         self._current_query = query
         request = self.pending_request().build_request(query)
         self.pending_request().beforeExecute.notify(request)
@@ -98,8 +96,8 @@ class ClientRuntimeContext(object):
             self.after_query_execute(after_loaded, client_object)
         return self
 
-    def before_query_execute(self, action, once=True, *args, **kwargs):
-        # type: (Callable[[RequestOptions, Any, Any], None], bool, Any, Any) -> Self
+    def before_query_execute(self, action, once=True):
+        # type: (Callable[[RequestOptions], None], bool) -> Self
         """
         Attach an event handler which is triggered before query is submitted to server
 
@@ -115,13 +113,13 @@ class ClientRuntimeContext(object):
             if self.current_query.id == query.id:
                 if once:
                     self.pending_request().beforeExecute -= _prepare_request
-                action(request, *args, **kwargs)
+                action(request)
 
         self.pending_request().beforeExecute += _prepare_request
         return self
 
-    def before_execute(self, action, once=True, *args, **kwargs):
-        # type: (Callable[[RequestOptions, ...], None], bool, Optional[Any], Optional[Any]) -> Self
+    def before_execute(self, action, once=True):
+        # type: (Callable[[RequestOptions], None], bool) -> Self
         """
         Attach an event handler which is triggered before request is submitted to server
         :param (office365.runtime.http.request_options.RequestOptions, any) -> None action:
@@ -132,13 +130,13 @@ class ClientRuntimeContext(object):
             # type: (RequestOptions) -> None
             if once:
                 self.pending_request().beforeExecute -= _process_request
-            action(request, *args, **kwargs)
+            action(request)
 
         self.pending_request().beforeExecute += _process_request
         return self
 
     def after_query_execute(self, action, *args, **kwargs):
-        # type: (Callable[[Any, Any], None], Any, Any) -> Self
+        # type: (Callable[..., None], Any, Any) -> Self
         """Attach an event handler which is triggered after query is submitted to server"""
         if len(self._queries) == 0:
             return
@@ -159,15 +157,15 @@ class ClientRuntimeContext(object):
 
         return self
 
-    def after_execute(self, action, once=True, *args, **kwargs):
-        # type: (Callable[[requests.Response, Any, Any], None], bool, Any, Any) -> Self
+    def after_execute(self, action, once=True):
+        # type: (Callable[[requests.Response], None], bool) -> Self
         """Attach an event handler which is triggered after request is submitted to server"""
 
         def _process_response(response):
             # type: (requests.Response) -> None
             if once:
                 self.pending_request().afterExecute -= _process_response
-            action(response, *args, **kwargs)
+            action(response)
 
         self.pending_request().afterExecute += _process_response
         return self

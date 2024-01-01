@@ -380,7 +380,7 @@ class Folder(Entity):
         return_type = Folder(self.context)
         self.parent_collection.add_child(return_type)
 
-        def _copy_folder(destination_folder):
+        def _copy_to(destination_folder):
             # type: ("Folder") -> None
             destination_url = "/".join(
                 [destination_folder.serverRelativeUrl, self.name]
@@ -396,15 +396,11 @@ class Folder(Entity):
 
         def _source_folder_resolved():
             if isinstance(destination, Folder):
-                destination.ensure_property(
-                    "ServerRelativeUrl", _copy_folder, destination
-                )
+                destination.ensure_property("ServerRelativeUrl", _copy_to, destination)
             else:
-                self.context.web.ensure_folder_path(destination).after_execute(
-                    _copy_folder
-                )
+                self.context.web.ensure_folder_path(destination).after_execute(_copy_to)
 
-        self.ensure_property("ServerRelativeUrl", _source_folder_resolved)
+        self.ensure_properties(["ServerRelativeUrl", "Name"], _source_folder_resolved)
         return return_type
 
     def copy_to_using_path(

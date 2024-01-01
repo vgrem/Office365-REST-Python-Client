@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.sharepoint.entity import Entity
 
 
@@ -9,42 +11,41 @@ class WebTemplate(Entity):
 
     @property
     def description(self):
-        """Gets a value that specifies the description of the list template.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets a value that specifies the description of the list template."""
         return self.properties.get("Description", None)
 
     @property
     def display_category(self):
+        # type: () -> Optional[str]
         """
         Specifies the display name for the category that this site definition configuration or site template is
         a part of.
-        :rtype: str or None
         """
         return self.properties.get("DisplayCategory", None)
 
     @property
     def image_url(self):
+        # type: () -> Optional[str]
         """
         Specifies the URL for the image that is associated with the site definition configuration or site template.
-        :rtype: str or None
         """
         return self.properties.get("ImageUrl", None)
 
     @property
     def is_hidden(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the site definition configuration is displayed in the user interface for creating new sites
-        :rtype: bool or None
         """
         return self.properties.get("IsHidden", None)
 
     @property
     def is_root_web_only(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the site definition configuration or site template can only be applied to the top-level site
         in the site collection.
-        :rtype: bool or None
         """
         return self.properties.get("IsRootWebOnly", None)
 
@@ -74,7 +75,6 @@ class WebTemplate(Entity):
 
     @property
     def title(self):
-        """Specifies the display name for the site definition configuration or site template.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the display name for the site definition configuration or site template."""
         return self.properties.get("Title", None)

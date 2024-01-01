@@ -210,7 +210,8 @@ class ListItem(SecurableObject):
             ExternalSharingSiteOption.Edit: "role:1073741827",
         }
 
-        def _picker_value_resolved(resp, picker_result):
+        def _picker_value_resolved(picker_result):
+            # type: (ClientResult) -> None
             file_abs_url = self.get_property("EncodedAbsUrl")
             picker_value = "[{0}]".format(picker_result.value)
             from office365.sharepoint.webs.web import Web
@@ -229,15 +230,12 @@ class ListItem(SecurableObject):
                 return_type=return_type,
             )
 
-        def _property_resolved():
-            picker_result = (
-                ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(
-                    self.context, user_principal_name
-                )
-            )
-            self.context.after_execute(_picker_value_resolved, True, picker_result)
+        def _url_resolved():
+            ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(
+                self.context, user_principal_name
+            ).after_execute(_picker_value_resolved)
 
-        self.ensure_property("EncodedAbsUrl", _property_resolved)
+        self.ensure_property("EncodedAbsUrl", _url_resolved)
         return return_type
 
     def unshare(self):

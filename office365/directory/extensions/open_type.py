@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.extensions.extension import Extension
 
 
@@ -10,8 +12,6 @@ class OpenTypeExtension(Extension):
 
     @property
     def extension_name(self):
-        """
-        A unique text identifier for an open type data extension. Optional.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """A unique text identifier for an open type data extension."""
         return self.properties.get("extensionName", None)
