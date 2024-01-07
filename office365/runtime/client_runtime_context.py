@@ -1,6 +1,6 @@
 import abc
 from time import sleep
-from typing import TYPE_CHECKING, Any, AnyStr, Callable, List, Optional
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, List
 
 import requests
 from typing_extensions import Self

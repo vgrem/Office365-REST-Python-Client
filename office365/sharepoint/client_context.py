@@ -81,7 +81,7 @@ class ClientContext(ClientRuntimeContext):
         thumbprint,
         cert_path=None,
         private_key=None,
-        scopes=None
+        scopes=None,
     ):
         # type: (str, str, str, Optional[str], Optional[str], Optional[List[str]]) -> Self
         """
@@ -136,7 +136,12 @@ class ClientContext(ClientRuntimeContext):
         return self
 
     def with_user_credentials(
-        self, username, password, allow_ntlm=False, browser_mode=False, environment='commercial'
+        self,
+        username,
+        password,
+        allow_ntlm=False,
+        browser_mode=False,
+        environment="commercial",
     ):
         # type: (str, str, bool, bool, Optional[str]) -> Self
         """
@@ -152,11 +157,13 @@ class ClientContext(ClientRuntimeContext):
             UserCredential(username, password),
             allow_ntlm=allow_ntlm,
             browser_mode=browser_mode,
-            environment=environment
+            environment=environment,
         )
         return self
 
-    def with_client_credentials(self, client_id, client_secret, environment='commercial'):
+    def with_client_credentials(
+        self, client_id, client_secret, environment="commercial"
+    ):
         # type: (str, str, Optional[str]) -> Self
         """
         Initializes a client to acquire a token via client credentials (SharePoint App-Only)
@@ -170,12 +177,11 @@ class ClientContext(ClientRuntimeContext):
             defaults to 'commercial'.
         """
         self.authentication_context.with_credentials(
-            ClientCredential(client_id, client_secret),
-            environment=environment
+            ClientCredential(client_id, client_secret), environment=environment
         )
         return self
 
-    def with_credentials(self, credentials, environment='commercial'):
+    def with_credentials(self, credentials, environment="commercial"):
         # type: (UserCredential|ClientCredential, Optional[str]) -> Self
         """
         Initializes a client to acquire a token via user or client credentials
@@ -183,7 +189,9 @@ class ClientContext(ClientRuntimeContext):
         :param str environment: The Office 365 Cloud Environment endpoint used for authentication
             defaults to 'commercial'.
         """
-        self.authentication_context.with_credentials(credentials, environment=environment)
+        self.authentication_context.with_credentials(
+            credentials, environment=environment
+        )
         return self
 
     def execute_batch(self, items_per_batch=100, success_callback=None):
@@ -204,9 +212,7 @@ class ClientContext(ClientRuntimeContext):
         return self
 
     def pending_request(self):
-        """
-        Provides access to underlying request instance
-        """
+        """Provides access to underlying request instance"""
         if self._pending_request is None:
             self._pending_request = ODataRequest(JsonLightFormat())
             self._pending_request.beforeExecute += self._authenticate_request
@@ -220,9 +226,7 @@ class ClientContext(ClientRuntimeContext):
         request.set_header("X-RequestDigest", self._ctx_web_info.FormDigestValue)
 
     def _get_context_web_information(self):
-        """
-        Returns an ContextWebInformation object that specifies metadata about the site
-        """
+        """Returns an ContextWebInformation object that specifies metadata about the site"""
         client = ODataRequest(JsonLightFormat())
         client.beforeExecute += self._authenticate_request
         for e in self.pending_request().beforeExecute:
@@ -278,9 +282,7 @@ class ClientContext(ClientRuntimeContext):
 
     def _build_modification_query(self, request):
         # type: (RequestOptions) -> None
-        """
-        Constructs SharePoint specific modification OData request
-        """
+        """Constructs SharePoint specific modification OData request"""
         if request.method == HttpMethod.Post:
             self._ensure_form_digest(request)
         # set custom SharePoint control headers
@@ -366,9 +368,7 @@ class ClientContext(ClientRuntimeContext):
 
     @property
     def context_info(self):
-        """
-        Returns an ContextWebInformation object that specifies metadata about the site
-        """
+        """Returns an ContextWebInformation object that specifies metadata about the site"""
         if self._ctx_web_info is None:
             self._ctx_web_info = ContextWebInformation()
         return self._ctx_web_info

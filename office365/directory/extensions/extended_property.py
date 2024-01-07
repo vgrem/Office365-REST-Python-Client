@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.runtime.types.collections import StringCollection
 
@@ -7,10 +9,8 @@ class SingleValueLegacyExtendedProperty(Entity):
 
     @property
     def value(self):
-        """
-        A property value.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """A property value."""
         return self.properties.get("value", None)
 
 

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.v3.entity import EntityPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -16,9 +18,8 @@ class CheckedOutFile(Entity):
 
     @property
     def checked_out_by_id(self):
-        """Returns the user ID of the account used to check out the file.
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
+        """Returns the user ID of the account used to check out the file."""
         return self.properties.get("CheckedOutById", None)
 
     @property

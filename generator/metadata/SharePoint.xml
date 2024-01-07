@@ -10046,9 +10046,13 @@
             </FunctionImport>
             <FunctionImport Name="EnsureTeamForGroup" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Portal.GroupSiteManager"/>
+               <Parameter Name="altGroupId" Type="Edm.String"/>
+               <Parameter Name="teamTemplate" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="EnsureTeamForGroupEx" ReturnType="Microsoft.SharePoint.Portal.EnsureTeamForGroupExResponse" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Portal.GroupSiteManager"/>
+               <Parameter Name="altGroupId" Type="Edm.String"/>
+               <Parameter Name="teamTemplate" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="GetAllOrgLabels" ReturnType="Microsoft.SharePoint.Portal.OrgLabelsContextList" IsSideEffecting="false" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Portal.GroupSiteManager"/>
@@ -15001,7 +15005,7 @@
                <Parameter Name="this" Type="SP.Site"/>
                <Parameter Name="requireUseRemoteAPIs" Type="Edm.Boolean" Nullable="false"/>
             </FunctionImport>
-            <FunctionImport Name="UpdateInactiveSiteProperties" ReturnType="Edm.String" IsBindable="true">
+            <FunctionImport Name="UpdateInactiveSiteProperties" ReturnType="Microsoft.SharePoint.ActionableMessage.UpdateCard" IsBindable="true">
                <Parameter Name="this" Type="SP.Site"/>
                <Parameter Name="operation" Type="Edm.String"/>
                <Parameter Name="executionId" Type="Edm.Int32" Nullable="false"/>
@@ -16619,6 +16623,7 @@
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="siteUrl" Type="Edm.String"/>
                <Parameter Name="status" Type="Edm.Int32" Nullable="false"/>
+               <Parameter Name="customizedEmail" Type="Edm.Boolean" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="SetDefaultView" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -19484,25 +19489,22 @@
          <Annotations Target="Microsoft.Office.Server.ContentCenter.SiteCreationProperties/Url">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPAzureCognitiveModelEntityData">
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPDependentModel">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPAzureCognitiveModelEntityData/AzureCognitivePrebuiltModelName">
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPDependentModel/LastRefereshedTimeUtc">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPAzureCognitiveModelEntityData/ColumnId">
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPDependentModel/ModelId">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPAzureCognitiveModelEntityData/ColumnName">
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPDependentModel/ModelType">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPAzureCognitiveModelEntityData/ColumnType">
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPModelDependencies">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPAzureCognitiveModelEntityData/ContentTypeGroup">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
-         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPAzureCognitiveModelEntityData/ContentTypeName">
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPModelDependencies/DependentModels">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.CompliancePolicy.ComplianceTag">
@@ -20519,6 +20521,15 @@
          <Annotations Target="Microsoft.SharePoint.AddToOneDrive.PlacesUserEntity">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="Microsoft.SharePoint.ActionableMessage.ElementUpdate">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.ActionableMessage.UpdateCardElement">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.ActionableMessage.UpdateCard">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.AccessRequestResponse">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -21461,6 +21472,9 @@
          <Annotations Target="Microsoft.Office.Server.ContentCenter.SPMachineLearningModel/CreatedBy">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPMachineLearningModel/ModelDependencies">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="Microsoft.Office.Server.ContentCenter.SPMachineLearningModel/DriveId">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -21794,7 +21808,13 @@
          <Annotations Target="Microsoft.Office.Server.ContentCenter.SPMachineLearningModelEntityData/LastTrained">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPMachineLearningModelEntityData/ModelName">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="Microsoft.Office.Server.ContentCenter.SPMachineLearningModelEntityData/ModelSettings">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPMachineLearningModelEntityData/ModelType">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.Office.Server.ContentCenter.SPMachineLearningModelEntityData/SampleFileUniqueIds">
@@ -25137,10 +25157,10 @@
          <Annotations Target="SP.ApiData/Delete(Microsoft.SharePoint.Portal.GroupSiteManager, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/EnsureTeamForGroup(Microsoft.SharePoint.Portal.GroupSiteManager)">
+         <Annotations Target="SP.ApiData/EnsureTeamForGroup(Microsoft.SharePoint.Portal.GroupSiteManager, Edm.String, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/EnsureTeamForGroupEx(Microsoft.SharePoint.Portal.GroupSiteManager)">
+         <Annotations Target="SP.ApiData/EnsureTeamForGroupEx(Microsoft.SharePoint.Portal.GroupSiteManager, Edm.String, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/GetAllOrgLabels(Microsoft.SharePoint.Portal.GroupSiteManager, Edm.Int32)">
@@ -27136,13 +27156,13 @@
             <Property Name="Title" Type="Edm.String"/>
             <Property Name="Url" Type="Edm.String"/>
          </ComplexType>
-         <ComplexType Name="SPAzureCognitiveModelEntityData">
-            <Property Name="AzureCognitivePrebuiltModelName" Type="Edm.String"/>
-            <Property Name="ColumnId" Type="Edm.String"/>
-            <Property Name="ColumnName" Type="Edm.String"/>
-            <Property Name="ColumnType" Type="Edm.String"/>
-            <Property Name="ContentTypeGroup" Type="Edm.String"/>
-            <Property Name="ContentTypeName" Type="Edm.String"/>
+         <ComplexType Name="SPDependentModel">
+            <Property Name="LastRefereshedTimeUtc" Type="Edm.DateTime" Nullable="false"/>
+            <Property Name="ModelId" Type="Edm.String"/>
+            <Property Name="ModelType" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="SPModelDependencies">
+            <Property Name="DependentModels" Type="Collection(Microsoft.Office.Server.ContentCenter.SPDependentModel)"/>
          </ComplexType>
          <ComplexType Name="SPMachineLearningPublicationEntityData">
             <Property Name="ModelUniqueId" Type="Edm.Guid" Nullable="false"/>
@@ -27213,6 +27233,7 @@
             <Property Name="ContentTypeName" Type="Edm.String"/>
             <Property Name="Created" Type="Edm.DateTime" Nullable="false"/>
             <Property Name="CreatedBy" Type="Edm.String"/>
+            <Property Name="ModelDependencies" Type="Microsoft.Office.Server.ContentCenter.SPModelDependencies"/>
             <Property Name="DriveId" Type="Edm.String"/>
             <Property Name="Explanations" Type="Edm.String"/>
             <Property Name="ExtractorFieldMapping" Type="Edm.String"/>
@@ -27336,7 +27357,9 @@
             <Property Name="ContentTypeName" Type="Edm.String"/>
             <Property Name="Explanations" Type="Edm.String"/>
             <Property Name="LastTrained" Type="Edm.DateTime"/>
+            <Property Name="ModelName" Type="Edm.String"/>
             <Property Name="ModelSettings" Type="Edm.String"/>
+            <Property Name="ModelType" Type="Edm.String"/>
             <Property Name="SampleFileUniqueIds" Type="Collection(Edm.Guid)" Nullable="false"/>
             <Property Name="Schemas" Type="Edm.String"/>
          </EntityType>
@@ -31114,6 +31137,7 @@
          </ComplexType>
          <ComplexType Name="PageMoveParams">
             <Property Name="DestinationWebUrl" Type="Edm.String"/>
+            <Property Name="ShouldPublish" Type="Edm.Boolean" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="PersonCore">
             <Property Name="AadObjectId" Type="Edm.String"/>
@@ -33625,11 +33649,11 @@
          </EntityType>
          <EntityType Name="CorporateCatalogAppMetadata">
             <Key>
-               <PropertyRef Name="AppCatalogVersion"/>
+               <PropertyRef Name="AadAppId"/>
             </Key>
-            <Property Name="AadAppId" Type="Edm.String"/>
+            <Property Name="AadAppId" Type="Edm.String" Nullable="false"/>
             <Property Name="AadPermissions" Type="Edm.String"/>
-            <Property Name="AppCatalogVersion" Type="Edm.String" Nullable="false"/>
+            <Property Name="AppCatalogVersion" Type="Edm.String"/>
             <Property Name="CanUpgrade" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CDNLocation" Type="Edm.String"/>
             <Property Name="ContainsTenantWideExtension" Type="Edm.Boolean" Nullable="false"/>
@@ -34655,6 +34679,22 @@
             <End Type="Microsoft.SharePoint.AddToOneDrive.placesInformation" Role="placesPartner" Multiplicity="0..1"/>
          </Association>
       </Schema>
+      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.ActionableMessage">
+         <ComplexType Name="ElementUpdate">
+            <Property Name="action" Type="Edm.String"/>
+            <Property Name="element" Type="Microsoft.SharePoint.ActionableMessage.UpdateCardElement"/>
+            <Property Name="elementId" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="UpdateCardElement">
+            <Property Name="isVisible" Type="Edm.Boolean"/>
+            <Property Name="type" Type="Edm.String"/>
+            <Property Name="value" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="UpdateCard">
+            <Property Name="cardUpdates" Type="Collection(Microsoft.SharePoint.ActionableMessage.ElementUpdate)"/>
+            <Property Name="type" Type="Edm.String"/>
+         </ComplexType>
+      </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="SP.Sharing">
          <ComplexType Name="Principal">
             <Property Name="directoryObjectId" Type="Edm.String"/>
@@ -34763,6 +34803,7 @@
             <Property Name="isInherited" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="linkDetails" Type="SP.SharingLinkInfo"/>
             <Property Name="linkMembers" Type="Collection(SP.Sharing.Principal)"/>
+            <Property Name="totalLinkMembersCount" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="LinkParameters">
             <Property Name="nav" Type="Edm.String"/>
@@ -34937,11 +34978,14 @@
             <Property Name="Activity" Type="Edm.String" Nullable="false"/>
             <Property Name="Author" Type="SP.Sharing.Principal"/>
             <Property Name="CallerStack" Type="Edm.String"/>
+            <Property Name="ColorHex" Type="Edm.String"/>
+            <Property Name="ColorTag" Type="Edm.String"/>
             <Property Name="ContentTypeId" Type="SP.ContentTypeId"/>
             <Property Name="DriveAccessToken" Type="Edm.String"/>
             <Property Name="DriveAccessTokenV21" Type="Edm.String"/>
             <Property Name="DriveUrl" Type="Edm.String"/>
             <Property Name="Editor" Type="SP.Sharing.Principal"/>
+            <Property Name="Emoji" Type="Edm.String"/>
             <Property Name="Extension" Type="Edm.String"/>
             <Property Name="FileLeafRef" Type="Edm.String"/>
             <Property Name="FileRef" Type="Edm.String"/>
@@ -36255,10 +36299,10 @@
          </EntityType>
          <EntityType Name="TenantAdminEndpoints">
             <Key>
-               <PropertyRef Name="CdnDefaultEndpoint"/>
+               <PropertyRef Name="AADAdminCenterEndpoint"/>
             </Key>
-            <Property Name="AADAdminCenterEndpoint" Type="Edm.String"/>
-            <Property Name="CdnDefaultEndpoint" Type="Edm.String" Nullable="false"/>
+            <Property Name="AADAdminCenterEndpoint" Type="Edm.String" Nullable="false"/>
+            <Property Name="CdnDefaultEndpoint" Type="Edm.String"/>
             <Property Name="CFRMSGraphEndpoint" Type="Edm.String"/>
             <Property Name="MigrationAgentUrl" Type="Edm.String"/>
             <Property Name="MiniMavenEndpoint" Type="Edm.String"/>
@@ -36374,6 +36418,7 @@
             <Property Name="DefaultLinkPermission" Type="Edm.Int32" Nullable="false"/>
             <Property Name="DefaultODBMode" Type="Edm.String"/>
             <Property Name="DefaultSharingLinkType" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="DelayDenyAddAndCustomizePagesEnforcement" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="DenySelectSecurityGroupsInSPSitesList" Type="Collection(Edm.String)"/>
             <Property Name="DenySelectSGsInODBListInTenant" Type="Collection(Edm.String)"/>
             <Property Name="DisableAddToOneDrive" Type="Edm.Boolean" Nullable="false"/>
