@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.entity import Entity
 
@@ -14,26 +16,20 @@ class Alert(Entity):
 
     @property
     def alert_frequency(self):
-        """
-        Gets the time interval for sending the alert.
-        :rtype: int
-        """
+        # type: () -> Optional[int]
+        """Gets the time interval for sending the alert."""
         return self.properties.get("AlertFrequency", None)
 
     @property
     def alert_template_name(self):
-        """
-        Gets the string representing the alert template name.
-        :rtype: int
-        """
+        # type: () -> Optional[int]
+        """Gets the string representing the alert template name."""
         return self.properties.get("AlertTemplateName", None)
 
     @property
     def always_notify(self):
-        """
-        Gets a Boolean value that causes daily and weekly alerts to trigger, even if there is no matching event.
-        :rtype: bool
-        """
+        # type: () -> Optional[bool]
+        """Gets a Boolean value that causes daily and weekly alerts to trigger, even if there is no matching event."""
         return self.properties.get("AlwaysNotify", None)
 
     @property

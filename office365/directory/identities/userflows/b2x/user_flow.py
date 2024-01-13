@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.identities.userflows.language_configuration import (
     UserFlowLanguageConfiguration,
 )
@@ -20,6 +22,7 @@ class B2XIdentityUserFlow(IdentityUserFlow):
 
     @property
     def languages(self):
+        # type: () -> EntityCollection[UserFlowLanguageConfiguration]
         """The languages supported for customization within the user flow. Language customization is enabled by default
         in self-service sign-up user flow. You cannot create custom languages in self-service sign-up user flows.
         """
@@ -34,9 +37,8 @@ class B2XIdentityUserFlow(IdentityUserFlow):
 
     @property
     def user_attribute_assignments(self):
-        """
-        The user attribute assignments included in the user flow.
-        """
+        # type: () -> IdentityUserFlowAttributeAssignmentCollection
+        """The user attribute assignments included in the user flow."""
         return self.properties.get(
             "userAttributeAssignments",
             IdentityUserFlowAttributeAssignmentCollection(
@@ -47,11 +49,10 @@ class B2XIdentityUserFlow(IdentityUserFlow):
 
     @property
     def user_flow_type(self):
+        # type: () -> Optional[str]
         """
         The type of user flow. For self-service sign-up user flows,
         the value can only be signUpOrSignIn and cannot be modified after creation.
-
-        :rtype: str or None
         """
         return self.properties.get("userFlowType", None)
 

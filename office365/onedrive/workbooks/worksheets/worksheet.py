@@ -4,12 +4,14 @@ from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.onedrive.workbooks.charts.chart import WorkbookChart
 from office365.onedrive.workbooks.names.named_item import WorkbookNamedItem
+from office365.onedrive.workbooks.ranges.range import WorkbookRange
 from office365.onedrive.workbooks.tables.collection import WorkbookTableCollection
 from office365.onedrive.workbooks.tables.pivot_table import WorkbookPivotTable
 from office365.onedrive.workbooks.worksheets.protection import (
     WorkbookWorksheetProtection,
 )
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.function import FunctionQuery
 
 
 class WorkbookWorksheet(Entity):
@@ -18,10 +20,22 @@ class WorkbookWorksheet(Entity):
     """
 
     def __repr__(self):
-        return self.name
+        return self.name or self.entity_type_name
 
     def __str__(self):
-        return self.name
+        return self.name or self.entity_type_name
+
+    def range(self, address=None):
+        """Gets the range object specified by the address or name."""
+        return_type = WorkbookRange(
+            self.context, ResourcePath("range", self.resource_path)
+        )
+        params = {"address": address}
+        qry = FunctionQuery(
+            self, "range", method_params=params, return_type=return_type
+        )
+        self.context.add_query(qry)
+        return return_type
 
     @property
     def charts(self):

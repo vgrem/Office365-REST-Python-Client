@@ -6,6 +6,9 @@ from office365.sharepoint.entity import Entity
 class WebTemplate(Entity):
     """Specifies a site definition or a site template that is used to instantiate a site."""
 
+    def __str__(self):
+        return self.title or self.entity_type_name
+
     def __repr__(self):
         return self.name
 
@@ -68,9 +71,8 @@ class WebTemplate(Entity):
 
     @property
     def name(self):
-        """Gets a value that specifies the display name of the list template.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets a value that specifies the display name of the list template."""
         return self.properties.get("Name", None)
 
     @property

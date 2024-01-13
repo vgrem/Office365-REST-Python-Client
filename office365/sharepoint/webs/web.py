@@ -2185,9 +2185,8 @@ class Web(SecurableObject):
 
     @property
     def quick_launch_enabled(self):
-        """Gets a value that specifies whether the Quick Launch area is enabled on the site.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Gets a value that specifies whether the Quick Launch area is enabled on the site."""
         return self.properties.get("QuickLaunchEnabled", None)
 
     @property

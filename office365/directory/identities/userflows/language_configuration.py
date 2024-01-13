@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.identities.userflows.language_page import UserFlowLanguagePage
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
@@ -11,19 +13,19 @@ class UserFlowLanguageConfiguration(Entity):
     User flows for Azure Active Directory support defining the language and strings shown to users
     as they go through the journeys you configure with your user flows."""
 
+    def __str__(self):
+        return self.display_name or self.entity_type_name
+
     @property
     def display_name(self):
-        """
-        The language name to display.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The language name to display."""
         return self.properties.get("displayName", None)
 
     @property
     def default_pages(self):
-        """
-        Collection of pages with the default content to display in a user flow for a specified language.
-        """
+        # type: () -> EntityCollection[UserFlowLanguagePage]
+        """Collection of pages with the default content to display in a user flow for a specified language."""
         return self.properties.get(
             "defaultPages",
             EntityCollection(
@@ -35,6 +37,7 @@ class UserFlowLanguageConfiguration(Entity):
 
     @property
     def overrides_pages(self):
+        # type: () -> EntityCollection[UserFlowLanguagePage]
         """Collection of pages with the default content to display in a user flow for a specified language."""
         return self.properties.get(
             "overridesPages",

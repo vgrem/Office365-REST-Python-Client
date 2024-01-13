@@ -112,26 +112,22 @@ class Event(OutlookItem):
 
     @property
     def importance(self):
-        """
-        The importance of the event. The possible values are: low, normal, high.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """The importance of the event. The possible values are: low, normal, high."""
         return self.properties.get("importance", None)
 
     @property
     def is_all_day(self):
+        # type: () -> Optional[bool]
         """
         Set to true if the event lasts all day. If true, regardless of whether it's a single-day or multi-day event,
         start and end time must be set to midnight and be in the same time zone.
-        :rtype: bool or None
         """
         return self.properties.get("isAllDay", None)
 
     @property
     def start(self):
-        """
-        The date, time, and time zone that the event starts. By default, the start time is in UTC.
-        """
+        """The date, time, and time zone that the event starts. By default, the start time is in UTC."""
         return self.properties.get("start", DateTimeTimeZone())
 
     @start.setter
@@ -145,9 +141,7 @@ class Event(OutlookItem):
 
     @property
     def end(self):
-        """
-        The date, time, and time zone that the event starts. By default, the start time is in UTC.
-        """
+        """The date, time, and time zone that the event starts. By default, the start time is in UTC."""
         return self.properties.get("end", DateTimeTimeZone())
 
     @end.setter
@@ -187,40 +181,30 @@ class Event(OutlookItem):
 
     @property
     def body(self):
-        """
-        The body of the message associated with the event. It can be in HTML or text format.
-        """
+        """The body of the message associated with the event. It can be in HTML or text format."""
         return self.properties.get("body", ItemBody())
 
     @body.setter
     def body(self, value):
-        """
-        Sets The body of the message associated with the event. It can be in HTML or text format.
-        """
+        """Sets The body of the message associated with the event. It can be in HTML or text format."""
         self.set_property("body", ItemBody(value, "HTML"))
 
     @property
     def body_preview(self):
-        """
-        The preview of the message associated with the event. It is in text format.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The preview of the message associated with the event. It is in text format."""
         return self.properties.get("bodyPreview", None)
 
     @property
     def subject(self):
         # type: () -> Optional[str]
-        """
-        The text of the event's subject line.
-        """
+        """The text of the event's subject line."""
         return self.properties.get("subject", None)
 
     @subject.setter
     def subject(self, value):
-        """
-        Sets The text of the event's subject line.
-        :type: str or None
-        """
+        # type: (str) -> None
+        """Sets The text of the event's subject line."""
         self.set_property("subject", value)
 
     @property

@@ -4,7 +4,7 @@ from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.features.feature import Feature
 
 
-class FeatureCollection(EntityCollection):
+class FeatureCollection(EntityCollection[Feature]):
     """Represents a collection of Feature resources."""
 
     def __init__(self, context, resource_path=None, parent=None):
@@ -31,9 +31,7 @@ class FeatureCollection(EntityCollection):
             return ServiceOperationQuery(self, "Add", None, payload, None, return_type)
 
         def _create_if_not_activated(f):
-            """
-            :type f: Feature
-            """
+            # type: (Feature) -> None
             if not f.properties:
                 self.context.add_query(_create_query())
 
