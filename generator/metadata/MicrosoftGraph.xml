@@ -6134,6 +6134,9 @@
          <Annotations Target="microsoft.graph.educationSubmission/unsubmittedDateTime">
             <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
          </Annotations>
+         <Annotations Target="microsoft.graph.educationSubmission/webUrl">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
          <Annotations Target="microsoft.graph.subscription">
             <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
                <Record>
@@ -24575,6 +24578,7 @@
             <Property Name="submittedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="unsubmittedBy" Type="graph.identitySet"/>
             <Property Name="unsubmittedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="webUrl" Type="Edm.String"/>
             <NavigationProperty Name="outcomes" Type="Collection(graph.educationOutcome)" ContainsTarget="true"/>
             <NavigationProperty Name="resources" Type="Collection(graph.educationSubmissionResource)" ContainsTarget="true"/>
             <NavigationProperty Name="submittedResources" Type="Collection(graph.educationSubmissionResource)" ContainsTarget="true"/>

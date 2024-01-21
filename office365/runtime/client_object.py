@@ -34,7 +34,7 @@ class ClientObject(Generic[T]):
         self._entity_type_name = None
         self._resource_path = resource_path
 
-    def clear(self):
+    def clear_state(self):
         # type: () -> Self
         """Resets client object's state."""
         self._properties = {

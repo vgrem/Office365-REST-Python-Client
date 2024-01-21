@@ -54,7 +54,7 @@ class ODataRequest(ClientRequest):
             return
 
         if isinstance(return_type, ClientObject):
-            return_type.clear()
+            return_type.clear_state()
 
         if (
             response.headers.get("Content-Type", "").lower().split(";")[0]
