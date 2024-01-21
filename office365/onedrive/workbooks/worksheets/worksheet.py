@@ -25,6 +25,20 @@ class WorkbookWorksheet(Entity):
     def __str__(self):
         return self.name or self.entity_type_name
 
+    def cell(self, row, column):
+        """Gets the range object containing the single cell based on row and column numbers.
+        The cell can be outside the bounds of its parent range, so long as it's stays within the worksheet grid.
+        :param int row: Row number of the cell to be retrieved. Zero-indexed.
+        :param int column: Column number of the cell to be retrieved. Zero-indexed.
+        """
+        return_type = WorkbookRange(
+            self.context, ResourcePath("range", self.resource_path)
+        )
+        params = {"row": row, "column": column}
+        qry = FunctionQuery(self, "cell", method_params=params, return_type=return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def range(self, address=None):
         """Gets the range object specified by the address or name."""
         return_type = WorkbookRange(

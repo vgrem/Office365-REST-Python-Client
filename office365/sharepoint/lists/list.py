@@ -301,7 +301,7 @@ class List(SecurableObject):
 
     def render_list_data(self, view_xml):
         """
-        Returns the data for the specified query view.<56> The result is implementation-specific, used for
+        Returns the data for the specified query view. The result is implementation-specific, used for
         providing data to a user interface.
 
         :param str view_xml:  Specifies the query as XML that conforms to the ViewDefinition type as specified in
