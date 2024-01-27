@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.sharepoint.fields.field import Field
 
 
@@ -11,26 +13,18 @@ class FieldCalculated(Field):
 
     @property
     def currency_locale_id(self):
-        """
-        Gets the locale ID that is used for currency on the Web site.
-
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
+        """Gets the locale ID that is used for currency on the Web site."""
         return self.properties.get("CurrencyLocaleId", None)
 
     @property
     def formula(self):
-        """
-        Specifies the formula for the field
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the formula for the field"""
         return self.properties.get("Formula", None)
 
     @formula.setter
     def formula(self, val):
-        """Sets a value that specifies the Formula.
-
-        :type val: str
-        """
+        # type: (str) -> None
+        """Sets a value that specifies the Formula."""
         self.set_property("Formula", val)

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.policies.base import PolicyBase
 
 
@@ -8,8 +10,6 @@ class AuthorizationPolicy(PolicyBase):
 
     @property
     def allowed_to_sign_up_email_based_subscriptions(self):
-        """
-        Indicates whether a user can join the tenant by email validation.
-        :rtype: bool
-        """
+        # type: () -> Optional[bool]
+        """Indicates whether a user can join the tenant by email validation."""
         return self.properties.get("allowedToSignUpEmailBasedSubscriptions", None)

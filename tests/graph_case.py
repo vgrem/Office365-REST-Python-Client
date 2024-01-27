@@ -3,7 +3,13 @@ from unittest import TestCase
 import msal
 
 from office365.graph_client import GraphClient
-from tests import load_settings
+from tests import (
+    load_settings,
+    test_client_id,
+    test_password,
+    test_tenant,
+    test_username,
+)
 
 
 def acquire_token_by_username_password():
@@ -44,4 +50,6 @@ class GraphTestCase(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.client = GraphClient(acquire_token_by_username_password)
+        cls.client = GraphClient.with_username_and_password(
+            test_tenant, test_client_id, test_username, test_password
+        )

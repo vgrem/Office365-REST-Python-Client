@@ -35,6 +35,7 @@ from office365.directory.users.user import User
 from office365.education.root import EducationRoot
 from office365.entity_collection import EntityCollection
 from office365.intune.devices.app_management import DeviceAppManagement
+from office365.intune.devices.collection import DeviceCollection
 from office365.intune.devices.management.management import DeviceManagement
 from office365.intune.organizations.contact import OrgContact
 from office365.intune.organizations.organization import Organization
@@ -333,6 +334,11 @@ class GraphClient(ClientRuntimeContext):
     def directory_objects(self):
         """Directory Objects container"""
         return DirectoryObjectCollection(self, ResourcePath("directoryObjects"))
+
+    @property
+    def devices(self):
+        """Devices container"""
+        return DeviceCollection(self, ResourcePath("devices"))
 
     @property
     def teams(self):

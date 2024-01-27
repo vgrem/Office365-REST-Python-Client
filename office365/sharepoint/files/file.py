@@ -924,9 +924,7 @@ class File(AbstractFile):
 
     @property
     def parent_folder(self):
-        """
-        :rtype: office365.sharepoint.folders.folder.Folder
-        """
+        # type: () -> Optional[Folder]
         if self.parent_collection is None:
             return None
         return self.parent_collection.parent

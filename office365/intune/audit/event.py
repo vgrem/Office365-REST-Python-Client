@@ -17,9 +17,7 @@ class AuditEvent(Entity):
 
     @property
     def actor(self):
-        """
-        AAD user and application that are associated with the audit event.
-        """
+        """AAD user and application that are associated with the audit event."""
         return self.properties.get("actor", AuditActor())
 
     @property

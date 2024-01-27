@@ -35,7 +35,8 @@ resource = (
 
 
 # select specific appRole
-app_role = resource.app_roles["ThreatHunting.Read.All"]
+names = ["Directory.AccessAsUser.All", "ThreatHunting.Read.All"]
+app_role = resource.app_roles["Directory.AccessAsUser.All"]
 
 # Step 2: Grant an app role to a client app
 app = client.applications.get_by_app_id(test_client_id)

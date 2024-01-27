@@ -24,15 +24,12 @@ class ODataJsonFormat(object):
 
     @property
     def media_type(self):
-        """
-        Gets media type
-        :rtype: str
-        """
+        # type: () -> str
+        """Gets media type"""
         raise NotImplementedError
 
     @property
     def include_control_information(self):
-        """Determines whether control information that is represented as annotations should be included in payload
-        :rtype: bool
-        """
+        # type: () -> bool
+        """Determines whether control information that is represented as annotations should be included in payload"""
         raise NotImplementedError

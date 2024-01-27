@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.licenses.service_plan_info import ServicePlanInfo
 from office365.directory.licenses.units_detail import LicenseUnitsDetail
 from office365.entity import Entity
@@ -9,35 +11,31 @@ class SubscribedSku(Entity):
 
     @property
     def account_id(self):
-        """
-        The unique ID of the account this SKU belongs to.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """The unique ID of the account this SKU belongs to."""
         return self.properties.get("accountId", None)
 
     @property
     def applies_to(self):
+        # type: () -> Optional[str]
         """
         The target class for this SKU. Only SKUs with target class User are assignable.
         Possible values are: "User", "Company".
-        :rtype: str
         """
         return self.properties.get("appliesTo", None)
 
     @property
     def sku_id(self):
-        """
-        The unique identifier (GUID) for the service SKU.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """The unique identifier (GUID) for the service SKU."""
         return self.properties.get("skuId", None)
 
     @property
     def sku_part_number(self):
+        # type: () -> Optional[str]
         """
         The SKU part number; for example: "AAD_PREMIUM" or "RMSBASIC".
         To get a list of commercial subscriptions that an organization has acquired, see List subscribedSkus.
-        :rtype: str
         """
         return self.properties.get("skuPartNumber", None)
 
