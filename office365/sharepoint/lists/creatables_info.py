@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.lists.creatable_item_info import CreatableItemInfoCollection
 
@@ -14,30 +16,27 @@ class CreatablesInfo(Entity):
 
     @property
     def can_create_folders(self):
+        # type: () -> Optional[bool]
         """
         Indicates if the user is able to create folders in the current list. The user MUST have the appropriate
         permissions and the list MUST allow folder creation.
-
-        :rtype: bool or None
         """
         return self.properties.get("CanCreateFolders", None)
 
     @property
     def can_create_items(self):
+        # type: () -> Optional[bool]
         """
         Indicates whether this list can create items (such as documents (Word/Excel/PowerPoint))
         using Microsoft Office Online.
-
-        :rtype: bool or None
         """
         return self.properties.get("CanCreateItems", None)
 
     @property
     def can_upload_files(self):
+        # type: () -> Optional[bool]
         """
         Indicates whether the user is able to upload files to this list.
-
-        :rtype: bool or None
         """
         return self.properties.get("CanUploadFiles", None)
 

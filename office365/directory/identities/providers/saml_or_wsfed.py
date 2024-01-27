@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.identities.providers.base import IdentityProviderBase
 
 
@@ -7,9 +9,6 @@ class SamlOrWsFedProvider(IdentityProviderBase):
 
     @property
     def issuer_uri(self):
-        """
-        Issuer URI of the federation server.
-
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Issuer URI of the federation server."""
         return self.properties.get("issuerUri", None)

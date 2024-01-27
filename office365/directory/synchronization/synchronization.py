@@ -16,6 +16,7 @@ class Synchronization(Entity):
 
     @property
     def jobs(self):
+        # type: () -> EntityCollection[SynchronizationJob]
         """
         Performs synchronization by periodically running in the background, polling for changes in one directory,
         and pushing them to another directory.
@@ -31,6 +32,7 @@ class Synchronization(Entity):
 
     @property
     def templates(self):
+        # type: () -> EntityCollection[SynchronizationTemplate]
         """
         Performs synchronization by periodically running in the background, polling for changes in one directory,
         and pushing them to another directory.

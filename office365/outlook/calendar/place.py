@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.outlook.mail.physical_address import PhysicalAddress
 
@@ -8,9 +10,8 @@ class Place(Entity):
 
     @property
     def display_name(self):
-        """The name associated with the place.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The name associated with the place."""
         return self.properties.get("displayName", None)
 
     @property
@@ -20,5 +21,6 @@ class Place(Entity):
 
     @property
     def phone(self):
+        # type: () -> Optional[str]
         """The phone number of the place."""
         return self.properties.get("phone", None)

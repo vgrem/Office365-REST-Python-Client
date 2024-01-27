@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.outlook.calendar.email_address import EmailAddress
 from office365.runtime.types.collections import StringCollection
@@ -37,28 +39,26 @@ class CalendarPermission(Entity):
 
     @property
     def is_inside_organization(self):
+        # type: () -> Optional[bool]
         """
-        True if the user in context (sharee or delegate) is inside the same organization as the calendar owner.
-        :rtype: bool or None
+        True if the user in context (sharee or delegate) is inside the same organization as the calendar owner
         """
         return self.properties.get("isInsideOrganization", None)
 
     @property
     def is_removable(self):
+        # type: () -> Optional[bool]
         """
         True if the user can be removed from the list of sharees or delegates for the specified calendar,
         false otherwise. The "My organization" user determines the permissions other people within your organization
         have to the given calendar. You cannot remove "My organization" as a sharee to a calendar.
-        :rtype: bool or None
         """
         return self.properties.get("isRemovable", None)
 
     @property
     def role(self):
-        """
-        Current permission level of the calendar sharee or delegate.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Current permission level of the calendar sharee or delegate."""
         return self.properties.get("role", None)
 
     def get_property(self, name, default_value=None):

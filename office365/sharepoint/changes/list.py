@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.changes.change import Change
 
@@ -19,10 +21,8 @@ class ChangeList(Change):
 
     @property
     def list_id(self):
-        """
-        Identifies the changed list
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Identifies the changed list"""
         return self.properties.get("ListId", None)
 
     @property

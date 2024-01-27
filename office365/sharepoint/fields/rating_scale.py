@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.sharepoint.fields.multi_choice import FieldMultiChoice
 
 
@@ -7,11 +9,8 @@ class FieldRatingScale(FieldMultiChoice):
 
     @property
     def grid_start_number(self):
-        """
-        Gets the start number for the rating scale.
-
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
+        """Gets the start number for the rating scale."""
         return self.properties.get("GridStartNumber", None)
 
     @grid_start_number.setter
@@ -25,9 +24,6 @@ class FieldRatingScale(FieldMultiChoice):
 
     @property
     def range_count(self):
-        """
-        Specifies the number of options in the rating scale.
-
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
+        """Specifies the number of options in the rating scale."""
         return self.properties.get("RangeCount", None)

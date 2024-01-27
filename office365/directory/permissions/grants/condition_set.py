@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.runtime.types.collections import StringCollection
 
@@ -29,10 +31,10 @@ class PermissionGrantConditionSet(Entity):
 
     @property
     def client_applications_from_verified_publisher_only(self):
+        # type: () -> Optional[bool]
         """
         Set to true to only match on client applications with a verified publisher. Set to false to match on any client
         app, even if it does not have a verified publisher. Default is false.
-        :rtype: bool
         """
         return self.properties.get("clientApplicationsFromVerifiedPublisherOnly", None)
 
@@ -50,9 +52,9 @@ class PermissionGrantConditionSet(Entity):
 
     @property
     def resource_application(self):
+        # type: () -> Optional[str]
         """
         The appId of the resource application (e.g. the API) for which a permission is being granted, or any to match
         with any resource application or API. Default is any.
-        :rtype: str
         """
         return self.properties.get("resourceApplication", None)

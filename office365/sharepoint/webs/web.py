@@ -1068,9 +1068,7 @@ class Web(SecurableObject):
         return return_type
 
     def increment_site_client_tag(self):
-        """
-        Increments the client cache control number for this site collection.
-        """
+        """Increments the client cache control number for this site collection."""
         qry = ServiceOperationQuery(self, "IncrementSiteClientTag")
         self.context.add_query(qry)
         return self
@@ -1080,7 +1078,6 @@ class Web(SecurableObject):
         Applies the specified site definition or site template to the website that has no template applied to it.
 
         :param str web_template: The name of the site definition or the file name of the site template to be applied.
-        :return:
         """
         qry = ServiceOperationQuery(
             self, "ApplyWebTemplate", {"webTemplate": web_template}
@@ -1089,9 +1086,7 @@ class Web(SecurableObject):
         return self
 
     def get_custom_list_templates(self):
-        """
-        Specifies the collection of custom list templates for a given site.
-        """
+        """Specifies the collection of custom list templates for a given site."""
         return_type = ListTemplateCollection(self.context)
         qry = ServiceOperationQuery(
             self, "GetCustomListTemplates", None, None, None, return_type
@@ -1974,9 +1969,7 @@ class Web(SecurableObject):
     @property
     def site_users(self):
         # type: () -> UserCollection
-        """
-        Specifies the collection of users in the site collection that contains the site
-        """
+        """Specifies the collection of users in the site collection that contains the site"""
         return self.properties.get(
             "SiteUsers",
             UserCollection(self.context, ResourcePath("siteUsers", self.resource_path)),

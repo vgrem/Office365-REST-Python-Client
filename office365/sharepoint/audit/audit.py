@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.sharepoint.entity import Entity
 
 
@@ -8,11 +10,10 @@ class Audit(Entity):
 
     @property
     def allow_designer(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether a designer can be used on this site collection.
         See Microsoft.SharePoint.Client.Web.AllowDesignerForCurrentUser, which is the scalar property used
         to determine the behavior for the current user. The default, if not disabled on the Web application, is "true".
-
-        :rtype: bool or None
         """
         return self.properties.get("AllowDesigner", None)

@@ -5,7 +5,7 @@ from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.types.collections import StringCollection
 
 
-class AuditEventCollection(EntityCollection):
+class AuditEventCollection(EntityCollection[AuditEvent]):
     def __init__(self, context, resource_path=None):
         super(AuditEventCollection, self).__init__(context, AuditEvent, resource_path)
 

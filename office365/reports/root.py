@@ -72,6 +72,18 @@ class ReportRoot(Entity):
         self.context.add_query(qry)
         return qry.return_type
 
+    def get_email_app_usage_apps_user_counts(self, period):
+        """
+        Get the count of unique users per email app.
+
+        :param str period: Specifies the length of time over which the report is aggregated.
+            The supported values for {period_value} are: D7, D30, D90, and D180. These values follow the format
+            Dn where n represents the number of days over which the report is aggregated. Required.
+        """
+        qry = create_report_query(self, "getEmailAppUsageAppsUserCounts", period)
+        self.context.add_query(qry)
+        return qry.return_type
+
     def get_m365_app_user_counts(self, period=None):
         """
         Get a report that provides the trend in the number of active users for each app (Outlook, Word, Excel,
@@ -163,6 +175,19 @@ class ReportRoot(Entity):
             Dn where n represents the number of days over which the report is aggregated. Required.
         """
         qry = create_report_query(self, "getMailboxUsageDetail", period)
+        self.context.add_query(qry)
+        return qry.return_type
+
+    def get_mailbox_usage_mailbox_counts(self, period):
+        """
+        Get the total number of user mailboxes in your organization and how many are active each day of the reporting
+        period. A mailbox is considered active if the user sent or read any email.
+
+        :param str period: Specifies the length of time over which the report is aggregated.
+            The supported values for {period_value} are: D7, D30, D90, and D180. These values follow the format
+            Dn where n represents the number of days over which the report is aggregated. Required.
+        """
+        qry = create_report_query(self, "getMailboxUsageMailboxCounts", period)
         self.context.add_query(qry)
         return qry.return_type
 

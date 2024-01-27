@@ -299,6 +299,7 @@ class ServicePrincipal(DirectoryObject):
 
     @property
     def oauth2_permission_scopes(self):
+        # type: () -> ClientValueCollection[PermissionScope]
         """
         The delegated permissions exposed by the application. For more information see the oauth2PermissionScopes
         property on the application entity's api property.

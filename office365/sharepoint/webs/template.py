@@ -54,19 +54,17 @@ class WebTemplate(Entity):
 
     @property
     def is_sub_web_only(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the site definition configuration or site template can only be applied to subsites
         created within the site collection.
-        :rtype: bool or None
         """
         return self.properties.get("IsSubWebOnly", None)
 
     @property
     def lcid(self):
-        """
-        Specifies the LCID for the site definition configuration or site template.
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
+        """Specifies the LCID for the site definition configuration or site template."""
         return self.properties.get("Lcid", None)
 
     @property

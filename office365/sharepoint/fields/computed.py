@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.sharepoint.fields.field import Field
 
 
@@ -10,9 +12,6 @@ class FieldComputed(Field):
 
     @property
     def enable_lookup(self):
-        """
-        Specifies whether a lookup field can reference the field (2).
-
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether a lookup field can reference the field."""
         return self.properties.get("EnableLookup", None)

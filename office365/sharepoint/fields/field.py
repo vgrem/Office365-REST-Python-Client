@@ -69,7 +69,6 @@ class Field(Entity):
 
         :type context: office365.sharepoint.client_context.ClientContext
         :type field_parameters: office365.sharepoint.fields.creation_information.FieldCreationInformation
-        :return: Field
         """
         field_type = Field.resolve_field_type(field_parameters.FieldTypeKind)
         field = field_type(context)
@@ -124,19 +123,14 @@ class Field(Entity):
 
     @property
     def id(self):
-        """
-        Gets a value that specifies the field identifier.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets a value that specifies the field identifier."""
         return self.properties.get("Id", None)
 
     @property
     def auto_indexed(self):
-        """
-        Gets a Boolean value that specifies whether the field is auto-indexed.
-        :rtype: str or None
-        """
+        # type: () -> Optional[bool]
+        """Gets a Boolean value that specifies whether the field is auto-indexed."""
         return self.properties.get("AutoIndexed", None)
 
     @property

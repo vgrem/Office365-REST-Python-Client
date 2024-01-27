@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.entity import Entity
 
@@ -7,35 +9,26 @@ class RelatedField(Entity):
 
     @property
     def field_id(self):
-        """
-        Gets the field id of the corresponding Lookup Field.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the field id of the corresponding Lookup Field."""
         return self.properties.get("FieldId", None)
 
     @property
     def list_id(self):
-        """
-        Gets the ID of the List containing the corresponding Lookup Field.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the ID of the List containing the corresponding Lookup Field."""
         return self.properties.get("ListId", None)
 
     @property
     def web_id(self):
-        """
-        Gets the ID of the Web containing the corresponding Lookup Field.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the ID of the Web containing the corresponding Lookup Field."""
         return self.properties.get("WebId", None)
 
     @property
     def relationship_delete_behavior(self):
-        """
-        Gets delete behavior of the corresponding Lookup Field.
-
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
+        """Gets delete behavior of the corresponding Lookup Field."""
         return self.properties.get("RelationshipDeleteBehavior", None)
 
     @property
