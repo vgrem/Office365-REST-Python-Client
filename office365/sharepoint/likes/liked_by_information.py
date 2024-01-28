@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.entity_collection import EntityCollection
@@ -9,24 +11,19 @@ class LikedByInformation(Entity):
 
     @property
     def like_count(self):
-        """
-        Number of users that have liked the item.
-
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
+        """Number of users that have liked the item."""
         return self.properties.get("LikeCount", None)
 
     @property
     def is_liked_by_user(self):
-        """
-        MUST be TRUE if the current user has liked the list item.
-
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """MUST be TRUE if the current user has liked the list item."""
         return self.properties.get("isLikedByUser", None)
 
     @property
     def liked_by(self):
+        # type: () -> EntityCollection[UserEntity]
         """
         List of like entries corresponding to individual likes. MUST NOT contain more than one entry
         for the same user in the set.

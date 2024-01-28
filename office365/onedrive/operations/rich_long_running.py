@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.onedrive.operations.long_running import LongRunningOperation
 
 
@@ -6,7 +8,6 @@ class RichLongRunningOperation(LongRunningOperation):
 
     @property
     def resource_id(self):
-        """The unique identifier for the result.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The unique identifier for the result."""
         return self.properties.get("resourceId", None)

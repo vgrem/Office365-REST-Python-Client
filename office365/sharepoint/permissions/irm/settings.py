@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 
 from office365.sharepoint.entity import Entity
 
@@ -74,50 +75,40 @@ class InformationRightsManagementSettings(Entity):
 
     @property
     def enable_license_cache_expire(self):
-        """
-        Specifies whether a user MUST verify his or her credentials after certain intervals.
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
+        """Specifies whether a user MUST verify his or her credentials after certain intervals."""
         return self.properties.get("EnableLicenseCacheExpire", None)
 
     @property
     def policy_title(self):
-        """
-        Specifies the permission policy title.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the permission policy title."""
         return self.properties.get("PolicyTitle", None)
 
     @property
     def policy_description(self):
-        """
-        Specifies the permission policy description.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the permission policy description."""
         return self.properties.get("PolicyDescription", None)
 
     @property
     def group_name(self):
-        """
-        Specifies the group name (email address) that the permission is also applicable to.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the group name (email address) that the permission is also applicable to."""
         return self.properties.get("GroupName", None)
 
     @property
     def license_cache_expire_days(self):
+        # type: () -> Optional[int]
         """
         Specifies the number of days that the Information Rights Management (IRM) license can be cached by the
         application to open the downloaded document. When these elapse, the application will connect to the IRM
         server to validate the license.
-        :rtype: int or None
         """
         return self.properties.get("LicenseCacheExpireDays", None)
 
     @property
     def template_id(self):
-        """
-        Gets or sets the ID of the RMS template that will be applied to the file or library.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets or sets the ID of the RMS template that will be applied to the file or library."""
         return self.properties.get("TemplateId", None)

@@ -7,7 +7,7 @@ from office365.runtime.client_request_exception import ClientRequestException
 def upload_excel_sample(graph_client):
     # type: (GraphClient) -> DriveItem
     local_path = "../../data/Financial Sample.xlsx"
-    return graph_client.me.drive.root.resumable_upload(local_path).execute_query()
+    return graph_client.me.drive.root.upload_file(local_path).execute_query()
 
 
 def ensure_workbook_sample(graph_client):

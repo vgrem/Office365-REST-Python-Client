@@ -1294,10 +1294,8 @@ class List(SecurableObject):
 
     @property
     def validation_formula(self):
-        """
-        Specifies the data validation criteria for a list item.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the data validation criteria for a list item."""
         return self.properties.get("ValidationFormula", None)
 
     @property

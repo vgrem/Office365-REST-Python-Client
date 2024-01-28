@@ -51,9 +51,9 @@ class TestGraphGroup(GraphTestCase):
         )
         self.assertEqual(len(users), 1)
 
-        owner_id = users[0].id
+        owner = users[0]
         grp = self.__class__.target_group
-        grp.owners.add(owner_id).execute_query()
+        grp.owners.add(owner).execute_query()
         self.__class__.target_user = users[0]
 
     def test5_list_group_owners(self):
@@ -68,9 +68,9 @@ class TestGraphGroup(GraphTestCase):
 
     @unittest.skipIf(directory_quota_exceeded, "Skipping, group was not created")
     def test7_add_group_member(self):
-        member_id = self.__class__.target_user.id
+        member = self.__class__.target_user
         grp = self.__class__.target_group
-        grp.members.add(member_id).execute_query()
+        grp.members.add(member).execute_query()
 
     @unittest.skipIf(directory_quota_exceeded, "Skipping, group was not created")
     def test8_remove_group_member(self):

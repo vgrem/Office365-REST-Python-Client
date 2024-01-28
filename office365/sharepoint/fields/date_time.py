@@ -9,18 +9,14 @@ class FieldDateTime(Field):
 
     @property
     def datetime_calendar_type(self):
-        """
-        Gets the calendar type of the field
-        :rtype: int or None
-        """
+        # type: () -> Optional[int]
+        """Gets the calendar type of the field"""
         return self.properties.get("DateTimeCalendarType", None)
 
     @datetime_calendar_type.setter
     def datetime_calendar_type(self, value):
-        """
-        Sets Gets the calendar type of the field
-        :type value: int
-        """
+        # type: (int) -> None
+        """Sets Gets the calendar type of the field"""
         self.set_property("DateTimeCalendarType", value)
 
     @property

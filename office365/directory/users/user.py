@@ -936,9 +936,7 @@ class User(DirectoryObject):
 
     @property
     def online_meetings(self):
-        """
-        Get a user's online meetings.
-        """
+        """Get a user's online meetings."""
         return self.properties.get(
             "onlineMeetings",
             OnlineMeetingCollection(
@@ -987,21 +985,18 @@ class User(DirectoryObject):
     @property
     def street_address(self):
         # type: () -> Optional[str]
-        """
-        The street address of the user's place of business. Maximum length is 1024 characters.
-        """
+        """The street address of the user's place of business. Maximum length is 1024 characters."""
         return self.properties.get("streetAddress", None)
 
     @property
     def security_identifier(self):
         # type: () -> Optional[str]
-        """
-        Security identifier (SID) of the user, used in Windows scenarios.
-        """
+        """Security identifier (SID) of the user, used in Windows scenarios."""
         return self.properties.get("securityIdentifier", None)
 
     @property
     def teamwork(self):
+        # type: () -> UserTeamwork
         """A container for the range of Microsoft Teams functionalities that are available per user in the tenant."""
         return self.properties.get(
             "teamwork",

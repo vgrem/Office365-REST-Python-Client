@@ -3,7 +3,7 @@ from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.lists.template import ListTemplate
 
 
-class ListTemplateCollection(EntityCollection):
+class ListTemplateCollection(EntityCollection[ListTemplate]):
     """Specifies a collection of list templates"""
 
     def __init__(self, context, resource_path=None):
@@ -13,9 +13,7 @@ class ListTemplateCollection(EntityCollection):
         )
 
     def get_by_name(self, name):
-        """
-        Returns the list template with the specified name.
-
+        """Returns the list template with the specified name.
         :param str name: The specified name.
         """
         return ListTemplate(

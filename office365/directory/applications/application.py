@@ -252,9 +252,7 @@ class Application(DirectoryObject):
 
     @property
     def public_client(self):
-        """
-        Specifies settings for installed clients such as desktop or mobile devices.
-        """
+        """Specifies settings for installed clients such as desktop or mobile devices."""
         return self.properties.get("publicClient", PublicClientApplication())
 
     @property
@@ -269,6 +267,7 @@ class Application(DirectoryObject):
 
     @property
     def created_on_behalf_of(self):
+        # type: () -> DirectoryObject
         """"""
         return self.properties.get(
             "createdOnBehalfOf",
@@ -279,6 +278,7 @@ class Application(DirectoryObject):
 
     @property
     def owners(self):
+        # type: () -> DirectoryObjectCollection
         """Directory objects that are owners of the application."""
         return self.properties.get(
             "owners",

@@ -5,7 +5,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
 
-class TermCollection(EntityCollection):
+class TermCollection(EntityCollection[Term]):
     def __init__(self, context, resource_path=None, parent_set=None):
         """
         :param office365.onedrive.termstore.sets.set.Set parent_set: The parent set that contains the term
@@ -17,7 +17,6 @@ class TermCollection(EntityCollection):
         """Create a new term object.
 
         :param str label: The name of the label.
-        :rtype: Term
         """
         return_type = Term(self.context)
         self.add_child(return_type)

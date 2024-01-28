@@ -1,7 +1,8 @@
+from typing_extensions import Self
+
 from office365.delta_collection import DeltaCollection
 from office365.directory.object import DirectoryObject
 from office365.entity_collection import EntityCollection
-from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -15,29 +16,32 @@ class DirectoryObjectCollection(DeltaCollection[DirectoryObject]):
             context, DirectoryObject, resource_path
         )
 
-    def get_by_ids(self, ids):
+    def get_by_ids(self, ids, types=None):
         """
         Returns the directory objects specified in a list of IDs.
-
-        :type ids: list[str]
+        :param list[str] ids: A collection of IDs for which to return objects. The IDs are GUIDs, represented as
+            strings. You can specify up to 1000 IDs.
+        :param list[str] types: A collection of resource types that specifies the set of resource collections to search.
+            If not specified, the default is directoryObject, which contains all of the resource types defined in
+            the directory. Any object that derives from directoryObject may be specified in the collection;
+            for example: user, group, and device objects.
         """
-        return_type = ClientResult(self.context)
-        params = {"ids": ids}
+        return_type = DirectoryObjectCollection(self.context)
+        params = {"ids": ids, "types": types}
         qry = ServiceOperationQuery(self, "getByIds", params, None, None, return_type)
         self.context.add_query(qry)
         return return_type
 
-    def add(self, user_id):
-        """
-        Add a user to the group.
+    def add(self, directory_object):
+        # type: (DirectoryObject) -> Self
+        """Adds directory objects to the collection."""
 
-        :type user_id: str
-        """
-        payload = {
-            "@odata.id": "https://graph.microsoft.com/v1.0/users/{0}".format(user_id)
-        }
-        qry = ServiceOperationQuery(self, "$ref", None, payload)
-        self.context.add_query(qry)
+        def _add():
+            payload = {"@odata.id": directory_object.resource_url}
+            qry = ServiceOperationQuery(self, "$ref", None, payload)
+            self.context.add_query(qry)
+
+        directory_object.ensure_property("id", _add)
         return self
 
     def get_available_extension_properties(self, is_synced_from_on_premises=None):
@@ -60,19 +64,30 @@ class DirectoryObjectCollection(DeltaCollection[DirectoryObject]):
         self.context.add_query(qry)
         return return_type
 
-    def remove(self, user_id):
-        """Remove a user from the group.
-
-        :param str user_id: User identifier
+    def remove(self, directory_object):
+        # type: (DirectoryObject|str) -> Self
+        """Removes directory object from the collection.
+        :param str directory_object: Directory object or identifier
         """
 
-        qry = ServiceOperationQuery(self, "{0}/$ref".format(user_id))
+        def _remove(id_):
+            qry = ServiceOperationQuery(self, "{0}/$ref".format(id_))
 
-        def _construct_request(request):
-            # type: (RequestOptions) -> None
-            request.method = HttpMethod.Delete
+            def _construct_request(request):
+                # type: (RequestOptions) -> None
+                request.method = HttpMethod.Delete
 
-        self.context.add_query(qry).before_query_execute(_construct_request)
+            self.context.add_query(qry).before_query_execute(_construct_request)
+
+        if isinstance(directory_object, DirectoryObject):
+
+            def _loaded():
+                _remove(directory_object.id)
+
+            directory_object.ensure_property("id", _loaded)
+        else:
+            _remove(directory_object)
+
         return self
 
     def validate_properties(

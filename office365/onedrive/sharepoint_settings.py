@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.runtime.types.collections import StringCollection
 
@@ -26,26 +28,24 @@ class SharepointSettings(Entity):
 
     @property
     def site_creation_default_managed_path(self):
+        # type: () -> Optional[str]
         """
         The value of the team site managed path. This is the path under which new team sites will be created.
-        :rtype: str
         """
         return self.properties.get("siteCreationDefaultManagedPath", None)
 
     @property
     def site_creation_default_storage_limit_in_mb(self):
-        """
-        The default storage quota for a new site upon creation. Measured in megabytes (MB).
-        :rtype: int
-        """
+        # type: () -> Optional[int]
+        """The default storage quota for a new site upon creation. Measured in megabytes (MB)."""
         return self.properties.get("siteCreationDefaultStorageLimitInMB", None)
 
     @property
     def tenant_default_timezone(self):
+        # type: () -> Optional[str]
         """
         The default timezone of a tenant for newly created sites. For a list of possible values,
         see SPRegionalSettings.TimeZones property.
-        :rtype: str
         """
         return self.properties.get("tenantDefaultTimezone", None)
 

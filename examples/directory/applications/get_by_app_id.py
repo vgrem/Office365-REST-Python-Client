@@ -4,7 +4,7 @@ Manage an Azure AD application using Microsoft Graph
 https://learn.microsoft.com/en-us/graph/tutorial-applications-basics?tabs=http
 
 You can address an application or a service principal by its ID or by its appId, where ID is referred to
-as Object ID and appId is refered to as Application (client) ID on the Azure portal.
+as Object ID and appId is referred to as Application (client) ID on the Azure portal.
 """
 from office365.graph_client import GraphClient
 from tests import test_client_credentials

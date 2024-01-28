@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 
 from office365.directory.users.activities.activity import UserActivity
 from office365.entity import Entity
@@ -16,10 +17,10 @@ class ActivityHistoryItem(Entity):
 
     @property
     def active_duration_seconds(self):
+        # type: () -> Optional[int]
         """
-        Optional. The duration of active user engagement. if not supplied, this is calculated from the startedDateTime
+        The duration of active user engagement. if not supplied, this is calculated from the startedDateTime
         and lastActiveDateTime.
-        :rtype: int or None
         """
         return self.properties.get("activeDurationSeconds", None)
 

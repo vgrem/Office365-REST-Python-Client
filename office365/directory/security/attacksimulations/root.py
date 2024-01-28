@@ -13,6 +13,7 @@ class AttackSimulationRoot(Entity):
 
     @property
     def simulations(self):
+        # type: () -> EntityCollection[Simulation]
         """Represents an attack simulation training campaign in a tenant."""
         return self.properties.get(
             "simulations",
@@ -25,6 +26,7 @@ class AttackSimulationRoot(Entity):
 
     @property
     def simulation_automations(self):
+        # type: () -> EntityCollection[SimulationAutomation]
         """Represents simulation automation created to run on a tenant."""
         return self.properties.get(
             "simulationAutomations",

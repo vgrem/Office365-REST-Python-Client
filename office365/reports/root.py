@@ -97,10 +97,7 @@ class ReportRoot(Entity):
         return return_type
 
     def get_office365_activations_user_counts(self):
-        """
-        Get the count of Microsoft 365 activations on desktops and devices.
-
-        """
+        """Get the count of Microsoft 365 activations on desktops and devices."""
         qry = create_report_query(self, "getOffice365ActivationsUserCounts")
         self.context.add_query(qry)
         return qry.return_type

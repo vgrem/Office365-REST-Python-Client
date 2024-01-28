@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 
@@ -12,10 +14,8 @@ class ViewFieldCollection(Entity):
         return len(self.items)
 
     def __getitem__(self, index):
-        """
-        Gets view field by index
-        :param int index: Index
-        """
+        # type: (int) -> str
+        """Gets view field by index"""
         return self.items[index]
 
     def __repr__(self):
@@ -23,17 +23,14 @@ class ViewFieldCollection(Entity):
 
     @property
     def schema_xml(self):
-        """
-        Gets Schema Xml.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets Schema Xml."""
         return self.properties.get("SchemaXml", None)
 
     @property
     def items(self):
-        """Gets items.
-        :rtype: list[str] or None
-        """
+        # type: () -> Optional[List[str]]
+        """Gets items."""
         return self.properties.get("Items", None)
 
     def set_property(self, name, value, persist_changes=False):
@@ -63,9 +60,7 @@ class ViewFieldCollection(Entity):
         return self
 
     def remove_all_view_fields(self):
-        """
-        Removes all the fields from the collection.
-        """
+        """Removes all the fields from the collection."""
         qry = ServiceOperationQuery(self, "RemoveAllViewFields")
         self.context.add_query(qry)
         return self

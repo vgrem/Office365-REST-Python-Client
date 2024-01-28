@@ -12,9 +12,7 @@ T = TypeVar("T")
 
 
 class EntityCollection(ClientObjectCollection[T]):
-    """
-    SharePoint's entity set
-    """
+    """SharePoint's entity set"""
 
     def __init__(self, context, item_type, resource_path=None, parent=None):
         # type: (ClientContext, Type[T], Optional[ResourcePath], Optional[Entity]) -> None

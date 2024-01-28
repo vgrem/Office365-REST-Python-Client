@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, Optional
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -8,6 +10,9 @@ from office365.sharepoint.listitems.collection import ListItemCollection
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 from office365.sharepoint.views.field_collection import ViewFieldCollection
 from office365.sharepoint.views.visualization import Visualization
+
+if TYPE_CHECKING:
+    from office365.sharepoint.views.collection import ViewCollection
 
 
 class View(Entity):
@@ -37,9 +42,7 @@ class View(Entity):
         return return_type
 
     def render_as_html(self):
-        """
-        Returns the list view as HTML.
-        """
+        """Returns the list view as HTML."""
         return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "RenderAsHtml", None, None, None, return_type)
         self.context.add_query(qry)
@@ -56,43 +59,35 @@ class View(Entity):
 
     @property
     def aggregations(self):
-        """
-        Specifies fields (2) and functions that define totals shown in a list view.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies fields and functions that define totals shown in a list view."""
         return self.properties.get("Aggregations", None)
 
     @property
     def aggregations_status(self):
+        # type: () -> Optional[str]
         """
         Specifies whether totals are shown in the list view.
         It MUST be NULL If Aggregations is NULL; otherwise it MUST be "On" or "Off".
-        :rtype: str or None
         """
         return self.properties.get("AggregationsStatus", None)
 
     @property
     def associated_content_type_id(self):
-        """
-        Represents the content type identifier associated with the view.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Represents the content type identifier associated with the view."""
         return self.properties.get("AssociatedContentTypeId", None)
 
     @property
     def calendar_view_styles(self):
-        """
-        Represents an object specifying the style of a SharePoint calendar view.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Represents an object specifying the style of a SharePoint calendar view."""
         return self.properties.get("CalendarViewStyles", None)
 
     @property
     def column_width(self):
-        """
-        Specifies the width of columns.
-        :rtype: str or None
-        """
+        # type: () -> Optional[int]
+        """Specifies the width of columns."""
         return self.properties.get("ColumnWidth", None)
 
     @property
@@ -102,24 +97,19 @@ class View(Entity):
 
     @property
     def parent_collection(self):
-        """
-        :rtype: office365.sharepoint.views.collection.ViewCollection
-        """
+        # type: () -> ViewCollection
         return self._parent_collection
 
     @property
     def js_link(self):
-        """
-        Specifies the JavaScript files used for the view.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the JavaScript files used for the view."""
         return self.properties.get("JSLink", None)
 
     @property
     def content_type_id(self):
-        """Gets the identifier of the content type with which the view is associated.
-        :rtype: ContentTypeId
-        """
+        # type: () -> Optional[ContentTypeId]
+        """Gets the identifier of the content type with which the view is associated."""
         return self.properties.get("ContentTypeId", ContentTypeId())
 
     @content_type_id.setter
@@ -129,64 +119,55 @@ class View(Entity):
 
     @property
     def custom_formatter(self):
-        """
-        Specifies the Custom Formatter used for the view.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the Custom Formatter used for the view."""
         return self.properties.get("CustomFormatter", None)
 
     @property
     def custom_order(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """"""
         return self.properties.get("CustomOrder", None)
 
     @property
     def editor_modified(self):
-        """Specifies whether the list view was modified in an editor.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether the list view was modified in an editor."""
         return self.properties.get("EditorModified", None)
 
     def formats(self):
-        """Specifies the column and row formatting for the list view.
-        :stype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the column and row formatting for the list view."""
         return self.properties.get("Formats", None)
 
     @property
     def hidden(self):
-        """Gets whether the list view is hidden.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Gets whether the list view is hidden."""
         return self.properties.get("Hidden", None)
 
     @hidden.setter
     def hidden(self, value):
+        # type: (bool) -> None
         """Sets whether the list view is hidden."""
         self.set_property("Hidden", value)
 
     @property
     def default_view(self):
-        """Gets whether the list view is the default list view.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Gets whether the list view is the default list view."""
         return self.properties.get("DefaultView", None)
 
     @default_view.setter
     def default_view(self, value):
-        """
-        Sets whether the list view is the default list view.
-        """
+        # type: (bool) -> None
+        """Sets whether the list view is the default list view."""
         self.set_property("DefaultView", value)
 
     @property
     def default_view_for_content_type(self):
-        """
-        Specifies whether the list view is the default list view for the content type specified by ContentTypeId.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether the list view is the default list view for the content type specified by ContentTypeId."""
         return self.properties.get("DefaultViewForContentType", None)
 
     @property
@@ -201,18 +182,18 @@ class View(Entity):
 
     @property
     def view_query(self):
-        """
-        Gets or sets a value that specifies the query that is used by the list view.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets or sets a value that specifies the query that is used by the list view."""
         return self.properties.get("ViewQuery", None)
 
     @property
     def base_view_id(self):
+        # type: () -> Optional[str]
         """Gets a value that specifies the base view identifier of the list view."""
         return self.properties.get("BaseViewId", None)
 
     def read_only_view(self):
+        # type: () -> Optional[bool]
         """Specifies whether the list view is read-only."""
         return self.properties.get("ReadOnlyView", None)
 
@@ -223,10 +204,8 @@ class View(Entity):
 
     @property
     def view_joins(self):
-        """
-        Specifies the joins that are used in the list view
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the joins that are used in the list view"""
         return self.properties.get("ViewJoins", None)
 
     @property

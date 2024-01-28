@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.sharepoint.changes.change import Change
 
 
@@ -6,9 +8,6 @@ class ChangeField(Change):
 
     @property
     def field_id(self):
-        """ "
-        Identifies the changed field
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Identifies the changed field"""
         return self.properties.get("FieldId", None)

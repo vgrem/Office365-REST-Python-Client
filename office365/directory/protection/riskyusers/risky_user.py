@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
@@ -27,8 +29,6 @@ class RiskyUser(Entity):
 
     @property
     def user_principal_name(self):
-        """
-        Risky user principal name.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Risky user principal name."""
         return self.properties.get("userPrincipalName", None)

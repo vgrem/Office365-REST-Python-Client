@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.security.alerts.evidence import AlertEvidence
 from office365.directory.security.alerts.history_state import AlertHistoryState
 from office365.entity import Entity
@@ -11,17 +13,13 @@ class Alert(Entity):
 
     @property
     def actor_display_name(self):
-        """
-        The adversary or activity group that is associated with this alert.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """The adversary or activity group that is associated with this alert."""
         return self.properties.get("actorDisplayName", None)
 
     @property
     def alert_policy_id(self):
-        """
-        :rtype: str
-        """
+        # type: () -> Optional[str]
         return self.properties.get("alertPolicyId", None)
 
     @property

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.sharepoint.changes.change import Change
 
 
@@ -6,8 +8,6 @@ class ChangeContentType(Change):
 
     @property
     def content_type_id(self):
-        """Identifies the content type that has changed.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Identifies the content type that has changed."""
         return self.properties.get("ContentTypeId", None)

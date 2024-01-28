@@ -21,6 +21,6 @@ role_template_ids = [
     if o.properties.get("roleTemplateId", None)
 ]
 result = client.directory_roles.get().execute_query()
-for o in result:
-    if o.properties.get("roleTemplateId", None) in role_template_ids:
-        print(o)
+for role in result:
+    if role.properties.get("roleTemplateId", None) in role_template_ids:
+        print(role)

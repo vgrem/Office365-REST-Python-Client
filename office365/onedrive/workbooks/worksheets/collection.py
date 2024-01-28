@@ -9,12 +9,6 @@ class WorkbookWorksheetCollection(EntityCollection[WorkbookWorksheet]):
             context, WorkbookWorksheet, resource_path
         )
 
-    def __getitem__(self, id_or_name):
-        """
-        :rtype: WorkbookWorksheet
-        """
-        return super(WorkbookWorksheetCollection, self).__getitem__(id_or_name)
-
     def add(self, name=None):
         """
         Adds a new worksheet to the workbook. The worksheet will be added at the end of existing worksheets.

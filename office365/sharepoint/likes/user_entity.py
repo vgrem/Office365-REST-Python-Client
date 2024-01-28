@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.sharepoint.entity import Entity
 
 
@@ -6,16 +8,12 @@ class UserEntity(Entity):
 
     @property
     def creation_date(self):
-        """
-        The Datetime of the like.
-        """
+        # type: () -> Optional[str]
+        """The Datetime of the like."""
         return self.properties.get("creationDate", None)
 
     @property
     def email(self):
-        """
-        The email of the user who liked the item.
-
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """The email of the user who liked the item."""
         return self.properties.get("email", None)
