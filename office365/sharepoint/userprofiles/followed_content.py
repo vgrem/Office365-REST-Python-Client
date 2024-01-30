@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
@@ -25,20 +27,14 @@ class FollowedContent(Entity):
 
     @property
     def followed_documents_url(self):
-        """
-        The FollowedDocumentsUrl property gets the location of the followed documents view.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The FollowedDocumentsUrl property gets the location of the followed documents view."""
         return self.properties.get("FollowedDocumentsUrl", None)
 
     @property
     def followed_sites_url(self):
-        """
-        The FollowedSitesUrl property gets the location of the followed sites view.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The FollowedSitesUrl property gets the location of the followed sites view."""
         return self.properties.get("FollowedSitesUrl", None)
 
     @property

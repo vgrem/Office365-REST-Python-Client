@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.sharepoint.fields.field import Field
 
 
@@ -8,30 +10,24 @@ class FieldMultiLineText(Field):
 
     @property
     def allow_hyperlink(self):
-        """
-        Gets a value that specifies whether a hyperlink is allowed as a value of the field.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Gets a value that specifies whether a hyperlink is allowed as a value of the field."""
         return self.properties.get("AllowHyperlink", None)
 
     @allow_hyperlink.setter
     def allow_hyperlink(self, val):
-        """
-        Sets a value that specifies whether a hyperlink is allowed as a value of the field.
-        """
+        # type: (bool) -> None
+        """Sets a value that specifies whether a hyperlink is allowed as a value of the field."""
         self.set_property("AllowHyperlink", val)
 
     @property
     def number_of_lines(self):
-        """
-        Gets the number of lines to display in the field.
-        :return:
-        """
+        # type: () -> Optional[int]
+        """Gets the number of lines to display in the field."""
         return self.properties.get("NumberOfLines", None)
 
     @number_of_lines.setter
     def number_of_lines(self, val):
-        """
-        Set the number of lines to display in the field.
-        """
+        # type: (int) -> None
+        """Set the number of lines to display in the field."""
         self.set_property("NumberOfLines", val)

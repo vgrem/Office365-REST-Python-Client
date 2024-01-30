@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
@@ -27,9 +29,8 @@ class TenantSettings(Entity):
 
     @property
     def corporate_catalog_url(self):
-        """Specifies the URL of the corporate catalog site collection.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the URL of the corporate catalog site collection."""
         return self.properties.get("CorporateCatalogUrl", None)
 
     @staticmethod

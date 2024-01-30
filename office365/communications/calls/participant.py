@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.communications.calls.invitation_participant_info import (
     InvitationParticipantInfo,
 )
@@ -68,9 +70,6 @@ class Participant(Entity):
 
     @property
     def metadata(self):
-        """
-        A blob of data provided by the participant in the roster.
-
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """A blob of data provided by the participant in the roster."""
         return self.properties.get("metadata", None)

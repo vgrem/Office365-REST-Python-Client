@@ -1,7 +1,7 @@
 import json
 import re
 from email.message import Message
-from typing import Iterator, Tuple
+from typing import AnyStr, Iterator, List, Tuple
 
 import requests
 from requests import Response
@@ -40,12 +40,8 @@ class ODataBatchV3Request(ODataRequest):
             super(ODataBatchV3Request, self).process_response(sub_resp, sub_qry)
 
     def _extract_response(self, response, query):
-        # type: (requests.Response, BatchQuery) -> Iterator[Tuple[ClientQuery, Response]]
-        """Parses a multipart/mixed response body from the position defined by the context.
-
-        :type response: requests.Response
-        :type query: office365.runtime.queries.batch.BatchQuery
-        """
+        # type: (Response, BatchQuery) -> Iterator[Tuple[ClientQuery, Response]]
+        """Parses a multipart/mixed response body from the position defined by the context."""
         content_type = response.headers["Content-Type"].encode("ascii")
         http_body = b"Content-Type: " + content_type + b"\r\n\r\n" + response.content
 
@@ -59,11 +55,8 @@ class ODataBatchV3Request(ODataRequest):
                 yield qry, self._deserialize_response(raw_response)
 
     def _prepare_payload(self, query):
-        """
-        Serializes a batch request body.
-
-        :type query: office365.runtime.queries.batch.BatchQuery
-        """
+        # type: (BatchQuery) -> AnyStr
+        """Serializes a batch request body."""
         main_message = Message()
         main_message.add_header("Content-Type", "multipart/mixed")
         main_message.set_boundary(query.current_boundary)
@@ -89,9 +82,8 @@ class ODataBatchV3Request(ODataRequest):
 
     @staticmethod
     def _normalize_headers(headers_raw):
-        """
-        :type headers_raw: list[str]
-        """
+        # type: (List[str]) -> CaseInsensitiveDict
+        """ """
         headers = {}
         for header_line in headers_raw:
             k, v = header_line.split(":", 1)

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.sharepoint.entity import Entity
 
 
@@ -6,46 +8,36 @@ class FieldLink(Entity):
 
     @property
     def id(self):
-        """
-        Gets a value that specifies the GUID of the FieldLink.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets a value that specifies the GUID of the FieldLink."""
         return self.properties.get("Id", None)
 
     @property
     def field_internal_name(self):
-        """Gets a value that specifies field internal name
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets a value that specifies field internal name"""
         return self.properties.get("FieldInternalName", None)
 
     @property
     def read_only(self):
-        """
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """ """
         return self.properties.get("ReadOnly", None)
 
     @property
     def hidden(self):
-        """
-        Gets a value that specifies whether the field is displayed in forms that can be edited.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Gets a value that specifies whether the field is displayed in forms that can be edited."""
         return self.properties.get("Hidden", None)
 
     @property
     def required(self):
-        """
-        Gets a value that specifies whether the field (2) requires a value.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Gets a value that specifies whether the field (2) requires a value."""
         return self.properties.get("Required", None)
 
     @property
     def show_in_display_form(self):
-        """
-        A Boolean value that indicates whether this field is shown in the display form.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """A Boolean value that indicates whether this field is shown in the display form."""
         return self.properties.get("ShowInDisplayForm", None)

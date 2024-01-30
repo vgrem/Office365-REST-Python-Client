@@ -6,6 +6,9 @@ from office365.delta_collection import DeltaCollection
 from office365.directory.applications.collection import ApplicationCollection
 from office365.directory.applications.template import ApplicationTemplate
 from office365.directory.audit.log_root import AuditLogRoot
+from office365.directory.authentication.method_configuration import (
+    AuthenticationMethodConfiguration,
+)
 from office365.directory.directory import Directory
 from office365.directory.domains.domain import Domain
 from office365.directory.extensions.schema import SchemaExtension
@@ -400,6 +403,15 @@ class GraphClient(ClientRuntimeContext):
         )
 
     @property
+    def authentication_method_configurations(self):
+        """Get the list of application templates in this organization."""
+        return EntityCollection(
+            self,
+            AuthenticationMethodConfiguration,
+            ResourcePath("authenticationMethodConfigurations"),
+        )
+
+    @property
     def applications(self):
         """Get the list of applications in this organization."""
         return ApplicationCollection(self, ResourcePath("applications"))
@@ -435,16 +447,12 @@ class GraphClient(ClientRuntimeContext):
 
     @property
     def communications(self):
-        """
-        Cloud communications API endpoint
-        """
+        """Cloud communications API endpoint"""
         return CloudCommunications(self, ResourcePath("communications"))
 
     @property
     def identity_governance(self):
-        """
-        The identity governance singleton
-        """
+        """The identity governance singleton"""
         return IdentityGovernance(self, ResourcePath("identityGovernance"))
 
     @property
@@ -509,9 +517,7 @@ class GraphClient(ClientRuntimeContext):
 
     @property
     def teams_templates(self):
-        """
-        Get the list of teams templates.
-        """
+        """Get the list of teams templates."""
         return EntityCollection(self, TeamsTemplate, ResourcePath("teamsTemplates"))
 
     @property
@@ -524,34 +530,26 @@ class GraphClient(ClientRuntimeContext):
 
     @property
     def permission_grants(self):
-        """
-        List all resource-specific permission grants
-        """
+        """List all resource-specific permission grants"""
         return EntityCollection(
             self, ResourceSpecificPermissionGrant, ResourcePath("permissionGrants")
         )
 
     @property
     def print(self):
-        """
-        Used to manage printers and print jobs within Universal Print.
-        """
+        """Used to manage printers and print jobs within Universal Print."""
         from office365.intune.printing.print import Print
 
         return Print(self, ResourcePath("print"))
 
     @property
     def search(self):
-        """
-        The search endpoint is the entry point for Microsoft Search API to query data.
-        """
+        """The search endpoint is the entry point for Microsoft Search API to query data."""
         return SearchEntity(self, ResourcePath("search"))
 
     @property
     def employee_experience(self):
-        """
-        An alias to EmployeeExperience
-        """
+        """An alias to EmployeeExperience"""
         return EmployeeExperience(self, ResourcePath("employeeExperience"))
 
     @property

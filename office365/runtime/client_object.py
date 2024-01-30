@@ -73,12 +73,10 @@ class ClientObject(Generic[T]):
         )
         return self
 
-    def after_execute(self, action, *args, **kwargs):
-        # type: (Callable[[Self, Any, Any], None], Any, Any) -> Self
-        """
-        Attach an event handler to client object which gets triggered after query is submitted to server
-        """
-        self._context.after_query_execute(action, self, *args, **kwargs)
+    def after_execute(self, action):
+        # type: (Callable[[Self], None]) -> Self
+        """Attach an event handler to client object which gets triggered after query is submitted to server"""
+        self._context.after_query_execute(action, self)
         return self
 
     def get(self):
@@ -138,13 +136,8 @@ class ClientObject(Generic[T]):
         return self._properties.get(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
-        # type: (str, P_T, bool) -> Self
-        """Sets property value
-
-        :param str name: Property name
-        :param P_T value: Property value
-        :param bool persist_changes: Persist changes
-        """
+        # type: (str|int, P_T, bool) -> Self
+        """Sets property value"""
         if persist_changes:
             self._ser_property_names.append(name)
 

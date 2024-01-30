@@ -18,9 +18,7 @@ class IdentityContainer(Entity):
 
     @property
     def api_connectors(self):
-        """
-        Represents entry point for API connectors.
-        """
+        """Represents entry point for API connectors."""
         return self.properties.get(
             "apiConnectors",
             EntityCollection(
@@ -52,9 +50,7 @@ class IdentityContainer(Entity):
 
     @property
     def b2x_user_flows(self):
-        """
-        Represents entry point for B2X/self-service sign-up identity userflows.
-        """
+        """Represents entry point for B2X/self-service sign-up identity userflows."""
         return self.properties.get(
             "b2xUserFlows",
             EntityCollection(
@@ -66,9 +62,7 @@ class IdentityContainer(Entity):
 
     @property
     def user_flow_attributes(self):
-        """
-        Represents entry point for identity userflow attributes.
-        """
+        """Represents entry point for identity userflow attributes."""
         return self.properties.get(
             "userFlowAttributes",
             EntityCollection(

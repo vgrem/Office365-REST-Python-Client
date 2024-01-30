@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.changes.change import Change
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
@@ -9,17 +11,13 @@ class ChangeItem(Change):
 
     @property
     def activity_type(self):
-        """
-        Returns activity type defined in ChangeActivityType
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Returns activity type defined in ChangeActivityType"""
         return self.properties.get("ActivityType", None)
 
     @property
     def content_type_id(self):
-        """
-        Specifies an identifier for the content type
-        """
+        """Specifies an identifier for the content type"""
         return self.properties.get("ContentTypeId", ContentTypeId())
 
     @property

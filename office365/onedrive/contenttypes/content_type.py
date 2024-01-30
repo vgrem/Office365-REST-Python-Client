@@ -20,9 +20,7 @@ class ContentType(BaseItem):
     columns that must be present on every listItem in a list."""
 
     def is_published(self):
-        """
-        Check the publishing status of a contentType in a content type hub site.
-        """
+        """Check the publishing status of a contentType in a content type hub site."""
         return_type = ClientResult(self.context, bool())
         qry = FunctionQuery(self, "isPublished", None, return_type)
         self.context.add_query(qry)
@@ -57,9 +55,7 @@ class ContentType(BaseItem):
         return self
 
     def unpublish(self):
-        """
-        Unpublish a contentType from a content type hub site.
-        """
+        """Unpublish a contentType from a content type hub site."""
         qry = ServiceOperationQuery(self, "unpublish")
         self.context.add_query(qry)
         return self
@@ -75,9 +71,7 @@ class ContentType(BaseItem):
 
     @property
     def document_set(self):
-        """
-        Document Set metadata.
-        """
+        """Document Set metadata."""
         return self.properties.get("documentSet", DocumentSet())
 
     @property
@@ -115,9 +109,7 @@ class ContentType(BaseItem):
     @property
     def read_only(self):
         # type: () -> Optional[bool]
-        """
-        If true, the content type cannot be modified unless this value is first set to false.
-        """
+        """If true, the content type cannot be modified unless this value is first set to false."""
         return self.properties.get("readOnly", None)
 
     @property

@@ -1,6 +1,7 @@
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.portal.groups.creation_context import GroupCreationContext
@@ -98,21 +99,19 @@ class GroupSiteManager(ClientObject):
         return return_type
 
     def get_status(self, group_id):
-        """Get the status of a SharePoint site
-
-        :type group_id: str
-        """
+        # type: (str) -> ClientResult[GroupSiteInfo]
+        """Get the status of a SharePoint site"""
         return_type = ClientResult(self.context, GroupSiteInfo())
         qry = ServiceOperationQuery(
             self, "GetSiteStatus", None, {"groupId": group_id}, None, return_type
         )
-        self.context.add_query(qry)
 
-        def _construct_status_request(request):
+        def _construct_request(request):
+            # type: (RequestOptions) -> None
             request.method = HttpMethod.Get
             request.url += "?groupId='{0}'".format(group_id)
 
-        self.context.before_execute(_construct_status_request)
+        self.context.add_query(qry).before_execute(_construct_request)
         return return_type
 
     def get_current_user_joined_teams(

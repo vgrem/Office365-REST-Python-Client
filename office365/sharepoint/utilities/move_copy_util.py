@@ -1,5 +1,5 @@
 import os
-from typing import IO, TYPE_CHECKING, Callable
+from typing import IO, TYPE_CHECKING, AnyStr, Callable
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -157,6 +157,7 @@ class MoveCopyUtil(Entity):
         import zipfile
 
         def _get_file_name(file):
+            # type: (File) -> str
             return os.path.join(
                 file.parent_folder.serverRelativeUrl.replace(
                     remove_folder.serverRelativeUrl, ""
@@ -164,27 +165,26 @@ class MoveCopyUtil(Entity):
                 file.name,
             )
 
-        def _after_downloaded(result, file):
-            """
-            :type result: ClientResult
-            :type file: office365.sharepoint.files.file.File
-            """
-            filename = _get_file_name(file)
-            if callable(after_file_downloaded):
-                after_file_downloaded(file)
-            with zipfile.ZipFile(download_file.name, "a", zipfile.ZIP_DEFLATED) as zf:
-                zf.writestr(filename, result.value)
+        def _download_file(file):
+            # type: (File) -> None
+
+            def _after_downloaded(result):
+                # type: (ClientResult[AnyStr]) -> None
+                filename = _get_file_name(file)
+                if callable(after_file_downloaded):
+                    after_file_downloaded(file)
+                with zipfile.ZipFile(
+                    download_file.name, "a", zipfile.ZIP_DEFLATED
+                ) as zf:
+                    zf.writestr(filename, result.value)
+
+            file.get_content().after_execute(_after_downloaded)
 
         def _download_folder(folder):
-            """
-            :type folder: office365.sharepoint.folders.folder.Folder
-            """
+            # type: (Folder) -> None
 
             def _download_files(rt):
-                [
-                    file.get_content().after_execute(_after_downloaded, file)
-                    for file in folder.files
-                ]
+                [_download_file(file) for file in folder.files]
                 if recursive:
                     [_download_folder(sub_folder) for sub_folder in folder.folders]
 

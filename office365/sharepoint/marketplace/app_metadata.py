@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 
@@ -30,49 +32,38 @@ class CorporateCatalogAppMetadata(Entity):
 
     @property
     def aad_permissions(self):
-        """
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """ """
         return self.properties.get("AadPermissions", None)
 
     @property
     def app_catalog_version(self):
-        """The version of the app stored in the corporate catalog.
-
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """The version of the app stored in the corporate catalog."""
         return self.properties.get("AppCatalogVersion", None)
 
     @property
     def can_upgrade(self):
-        """Whether an existing instance of an app can be upgraded.
-
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Whether an existing instance of an app can be upgraded."""
         return self.properties.get("CanUpgrade", None)
 
     @property
     def is_client_side_solution(self):
-        """Whether the app is a client-side solution.
-
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Whether the app is a client-side solution."""
         return self.properties.get("IsClientSideSolution", None)
 
     @property
     def title(self):
-        """The title of the app.
-
-        :rtype: bool or None
-        """
+        # type: () -> Optional[str]
+        """The title of the app."""
         return self.properties.get("Title", None)
 
     @property
     def id(self):
-        """The identifier of the app.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The identifier of the app."""
         return self.properties.get("ID", None)
 
     @property

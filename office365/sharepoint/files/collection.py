@@ -75,6 +75,8 @@ class FileCollection(EntityCollection[File]):
         if not hasattr(file, "read"):
             file = open(file, "rb")
             auto_close = True
+        else:
+            pass
 
         file_size = os.fstat(file.fileno()).st_size
         file_name = file_name if file_name else os.path.basename(file.name)

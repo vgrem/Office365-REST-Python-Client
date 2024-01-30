@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING, Any, Callable, Generic, Optional, TypeVar
 
 from typing_extensions import Self
 
+from office365.runtime.http.request_options import RequestOptions
+
 if TYPE_CHECKING:
     from office365.runtime.client_runtime_context import ClientRuntimeContext  # noqa
     from office365.runtime.client_value import ClientValue  # noqa
@@ -19,21 +21,16 @@ class ClientResult(Generic[T]):
         self._context = context
         self._value = copy.deepcopy(default_value)  # type: T
 
-    def before_execute(self, action, *args, **kwargs):
-        """
-        Attach an event handler which is triggered before query is submitted to server
-        :param (office365.runtime.http.request_options.RequestOptions) -> None action: Event handler
-        """
-        self._context.before_query_execute(action, *args, **kwargs)
+    def before_execute(self, action):
+        # type: (Callable[[RequestOptions], None]) -> Self
+        """Attach an event handler which is triggered before query is submitted to server"""
+        self._context.before_query_execute(action)
         return self
 
-    def after_execute(self, action, *args, **kwargs):
-        # type: (Callable[[Self], None], Any, Any) -> Self
-        """
-        Attach an event handler which is triggered after query is submitted to server
-        :param (ClientResult) -> None action: Event handler
-        """
-        self._context.after_query_execute(action, self, *args, **kwargs)
+    def after_execute(self, action):
+        # type: (Callable[[Self], None]) -> Self
+        """Attach an event handler which is triggered after query is submitted to server"""
+        self._context.after_query_execute(action, self)
         return self
 
     def set_property(self, key, value, persist_changes=False):

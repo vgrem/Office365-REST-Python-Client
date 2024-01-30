@@ -621,25 +621,20 @@ class Site(Entity):
 
     @property
     def trim_audit_log(self):
-        """
-        When this flag is set for the site, the audit events are trimmed periodically.
-        :rtype: bool or none
-        """
+        # type: () -> Optional[bool]
+        """When this flag is set for the site, the audit events are trimmed periodically."""
         return self.properties.get("TrimAuditLog", None)
 
     @property
     def write_locked(self):
-        """
-        :rtype: bool or none
-        """
+        # type: () -> Optional[bool]
+        """ """
         return self.properties.get("WriteLocked", None)
 
     @property
     def id(self):
         # type: () -> Optional[str]
-        """
-        Specifies the GUID that identifies the site collection.
-        """
+        """Specifies the GUID that identifies the site collection."""
         return self.properties.get("Id", None)
 
     @property
@@ -651,9 +646,7 @@ class Site(Entity):
     @property
     def is_hub_site(self):
         # type: () -> Optional[bool]
-        """
-        Returns whether the specified site is a hub site
-        """
+        """Returns whether the specified site is a hub site"""
         return self.properties.get("IsHubSite", None)
 
     @property
@@ -665,9 +658,7 @@ class Site(Entity):
     @property
     def status_bar_link(self):
         # type: () -> Optional[str]
-        """
-        Gets the status bar message link target for this site.
-        """
+        """Gets the status bar message link target for this site."""
         return self.properties.get("StatusBarLink", None)
 
     @property

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.taxonomy.item import TaxonomyItem
 from office365.sharepoint.taxonomy.item_collection import TaxonomyItemCollection
@@ -7,6 +9,9 @@ from office365.sharepoint.taxonomy.sets.set import TermSet
 
 class TermGroup(TaxonomyItem):
     """Represents the top-level container in a TermStore object."""
+
+    def __str__(self):
+        return self.display_name or self.entity_type_name
 
     def get_term_sets_by_name(self, label, lcid=None):
         """
@@ -43,6 +48,12 @@ class TermGroup(TaxonomyItem):
                 self.context, TermSet, ResourcePath("termSets", self.resource_path)
             ),
         )
+
+    @property
+    def display_name(self):
+        # type: () -> Optional[str]
+        """Gets the name of the Term Group"""
+        return self.properties.get("displayName", None)
 
     def get_property(self, name, default_value=None):
         if default_value is None:

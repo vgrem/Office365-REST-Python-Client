@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.sharepoint.entity import Entity
 
 
@@ -6,9 +8,8 @@ class ComponentContextInfo(Entity):
 
     @property
     def serialized_data(self):
-        """
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """"""
         return self.properties.get("SerializedData", None)
 
     @property

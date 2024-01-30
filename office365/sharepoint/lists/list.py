@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import AnyStr, Optional
+from typing import TYPE_CHECKING, AnyStr, Optional
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -58,6 +58,9 @@ from office365.sharepoint.utilities.utility import Utility
 from office365.sharepoint.views.collection import ViewCollection
 from office365.sharepoint.views.view import View
 from office365.sharepoint.webhooks.subscription_collection import SubscriptionCollection
+
+if TYPE_CHECKING:
+    from office365.sharepoint.lists.collection import ListCollection
 
 
 class List(SecurableObject):
@@ -1300,9 +1303,7 @@ class List(SecurableObject):
 
     @property
     def parent_collection(self):
-        """
-        :rtype: office365.sharepoint.lists.collection.ListCollection
-        """
+        # type: () -> ListCollection
         return self._parent_collection
 
     def get_property(self, name, default_value=None):

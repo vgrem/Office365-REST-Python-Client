@@ -10,7 +10,7 @@ from office365.runtime.http.request_options import RequestOptions
 
 
 class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
-    def __init__(self, url, client_id, client_secret, environment='commercial'):
+    def __init__(self, url, client_id, client_secret, environment="commercial"):
         """
         Provider to acquire the access token from a Microsoft Azure Access Control Service (ACS)
 
@@ -65,7 +65,9 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
             self.SharePointPrincipal, target_host, target_realm
         )
         principal_id = self.get_formatted_principal(self._client_id, None, target_realm)
-        sts_url = self.get_security_token_service_url(target_realm, environment=self._environment)
+        sts_url = self.get_security_token_service_url(
+            target_realm, environment=self._environment
+        )
         oauth2_request = {
             "grant_type": "client_credentials",
             "client_id": principal_id,
@@ -105,13 +107,14 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
 
     @staticmethod
     def get_security_token_service_url(realm, environment):
+        # type: (str, str) -> str
         if environment == "GCCH":
-            return "https://login.microsoftonline.us/{0}/tokens/OAuth/2".format(
-                realm
-            )
+            return "https://login.microsoftonline.us/{0}/tokens/OAuth/2".format(realm)
         else:
-            return "https://accounts.accesscontrol.windows.net/{0}/tokens/OAuth/2".format(
-                realm
+            return (
+                "https://accounts.accesscontrol.windows.net/{0}/tokens/OAuth/2".format(
+                    realm
+                )
             )
 
     def _get_authorization_header(self):
