@@ -1,3 +1,4 @@
+from office365.directory.rolemanagement.role_permission import RolePermission
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.intune.audit.event_collection import AuditEventCollection
@@ -8,7 +9,10 @@ from office365.intune.devices.enrollment.configuration import (
 )
 from office365.intune.devices.managed import ManagedDevice
 from office365.intune.devices.management.reports.reports import DeviceManagementReports
+from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.function import FunctionQuery
 
 
 class DeviceManagement(Entity):
@@ -17,6 +21,14 @@ class DeviceManagement(Entity):
     Intune, and the enrollment profiles that may be assigned to device identities that support pre-enrollment
     configuration.
     """
+
+    def get_effective_permissions(self, scope=None):
+        """Retrieves the effective permissions of the currently authenticated user"""
+        return_type = ClientResult(self.context, ClientValueCollection(RolePermission))
+        # params = {"scope": scope}
+        qry = FunctionQuery(self, "getEffectivePermissions", None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     @property
     def audit_events(self):

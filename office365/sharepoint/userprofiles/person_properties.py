@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.entity import Entity
 
@@ -10,29 +12,20 @@ class PersonProperties(Entity):
 
     @property
     def account_name(self):
-        """
-        The AccountName property specifies the person's account name.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The AccountName property specifies the person's account name."""
         return self.properties.get("AccountName", None)
 
     @property
     def email(self):
-        """
-        The Email property specifies the person's email address.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The Email property specifies the person's email address."""
         return self.properties.get("Email", None)
 
     @property
     def latest_post(self):
-        """
-        The  LatestPost property specifies the person's latest microblog post.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The  LatestPost property specifies the person's latest microblog post."""
         return self.properties.get("LatestPost", None)
 
     @property
@@ -45,11 +38,8 @@ class PersonProperties(Entity):
 
     @property
     def personal_url(self):
-        """
-        The PersonalUrl property specifies the absolute URL of the person's personal page.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The PersonalUrl property specifies the absolute URL of the person's personal page."""
         return self.properties.get("PersonalUrl", None)
 
     @property
@@ -70,20 +60,14 @@ class PersonProperties(Entity):
 
     @property
     def picture_url(self):
-        """
-        The PictureUrl property specifies the  URL for the person's profile picture.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The PictureUrl property specifies the  URL for the person's profile picture."""
         return self.properties.get("PictureUrl", None)
 
     @property
     def user_url(self):
-        """
-        The UserUrl property specifies the URL for the person's profile.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The UserUrl property specifies the URL for the person's profile."""
         return self.properties.get("UserUrl", None)
 
     @property

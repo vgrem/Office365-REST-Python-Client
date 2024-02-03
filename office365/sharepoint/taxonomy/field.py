@@ -1,4 +1,5 @@
 import uuid
+from typing import Optional
 
 from office365.sharepoint.fields.lookup import FieldLookup
 from office365.sharepoint.taxonomy.create_xml_parameters import (
@@ -77,68 +78,65 @@ class TaxonomyField(FieldLookup):
 
     @property
     def anchor_id(self):
-        """Gets or sets the GUID of the anchor Term object for a TaxonomyField object.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets or sets the GUID of the anchor Term object for a TaxonomyField object."""
         return self.properties.get("AnchorId", None)
 
     @property
     def create_values_in_edit_form(self):
+        # type: () -> Optional[bool]
         """
         Specifies a Boolean value that specifies whether the new Term  objects can be added to the
         TermSet while typing in the TaxonomyField editor control.
-        :rtype: bool or None
         """
         return self.properties.get("CreateValuesInEditForm", None)
 
     @property
     def is_anchor_valid(self):
-        """Gets a Boolean value that specifies whether the Term object identified by the AnchorId property is valid.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Gets a Boolean value that specifies whether the Term object identified by the AnchorId property is valid."""
         return self.properties.get("IsAnchorValid", None)
 
     @property
     def is_doc_tags_enabled(self):
-        """
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """ """
         return self.properties.get("IsDocTagsEnabled", None)
 
     @property
     def is_keyword(self):
+        # type: () -> Optional[bool]
         """
         Specifies a Boolean value that indicates whether the TaxonomyField value points to the
         keywords term set  object.
-        :rtype: bool or None
         """
         return self.properties.get("IsKeyword", None)
 
     @property
     def is_path_rendered(self):
+        # type: () -> Optional[bool]
         """
         Specifies a Boolean value that specifies whether the default Label objects of all the parent
         Term objects of a Term in the TaxonomyField object will be rendered in
         addition to the default label of that Term.
-        :rtype: bool or None
         """
         return self.properties.get("IsPathRendered", None)
 
     @property
     def is_term_set_valid(self):
+        # type: () -> Optional[bool]
         """
         Gets a Boolean value that specifies whether the TermSet object identified by the TermSetId
         property exists and is available for tagging.
-        :rtype: bool or None
         """
         return self.properties.get("IsTermSetValid", None)
 
     @property
     def open(self):
+        # type: () -> Optional[bool]
         """
         Specifies a Boolean value that specifies whether the TaxonomyField object is linked to an
         open TermSet (section 3.1.5.20) object or a closed TermSet.
-        :rtype: bool or None
         """
         return self.properties.get("Open", None)
 
@@ -153,27 +151,26 @@ class TaxonomyField(FieldLookup):
 
     @property
     def target_template(self):
+        # type: () -> Optional[str]
         """
         Specifies the Web-relative Uniform Resource Locator (URL) of the target page that is used to construct the
         hyperlink on each Term object when the TaxonomyField (section 3.1.5.27) object is rendered.
-        :rtype: str or None
         """
         return self.properties.get("TargetTemplate", None)
 
     @property
     def term_set_id(self):
+        # type: () -> Optional[str]
         """
         Specifies the GUID of the TermSet object that contains the Term
         objects used by the current TaxonomyField () object.
-        :rtype: str or None
         """
         return self.properties.get("TermSetId", None)
 
     @property
     def text_field_id(self):
-        """Gets the GUID that identifies the hidden text field in an item.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the GUID that identifies the hidden text field in an item."""
         return self.properties.get("TextField", None)
 
     @property

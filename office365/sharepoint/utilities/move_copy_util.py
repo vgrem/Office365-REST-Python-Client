@@ -156,7 +156,7 @@ class MoveCopyUtil(Entity):
         """
         import zipfile
 
-        def _get_file_name(file):
+        def _get_relative_file_path(file):
             # type: (File) -> str
             return os.path.join(
                 file.parent_folder.serverRelativeUrl.replace(
@@ -170,7 +170,7 @@ class MoveCopyUtil(Entity):
 
             def _after_downloaded(result):
                 # type: (ClientResult[AnyStr]) -> None
-                filename = _get_file_name(file)
+                filename = _get_relative_file_path(file)
                 if callable(after_file_downloaded):
                     after_file_downloaded(file)
                 with zipfile.ZipFile(

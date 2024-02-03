@@ -108,7 +108,6 @@ class SiteProperties(Entity):
             - ExternalUserSharingOnly - External user sharing (share by email) is enabled, but guest link sharing
                  is disabled.
             - ExistingExternalUserSharingOnly - Only guests already in your organization's directory.
-        :rtype: int
         """
         return self.properties.get("SharingCapability", None)
 

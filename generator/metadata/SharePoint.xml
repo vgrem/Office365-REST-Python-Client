@@ -3248,6 +3248,7 @@
             <Property Name="IsHidden" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="IsValid" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="PackageJson" Type="Edm.String"/>
+            <Property Name="Store" Type="Edm.Int32" Nullable="false"/>
             <Property Name="Title" Type="Edm.String"/>
          </EntityType>
          <EntityType Name="HubSite">
@@ -4926,6 +4927,7 @@
             <FunctionImport Name="models" ReturnType="Collection(Microsoft.Office.Server.ContentCenter.SPMachineLearningModel)" IsComposable="true" EntitySet="Models"/>
             <FunctionImport Name="OrgNews" ReturnType="SP.OrganizationNews" IsComposable="true" EntitySet="OrgNews"/>
             <FunctionImport Name="OrgNewsSite" ReturnType="Microsoft.SharePoint.OrgNewsSite.OrgNewsSiteApi" IsComposable="true" EntitySet="OrgNewsSites"/>
+            <FunctionImport Name="outofboxfontpackages" ReturnType="Collection(SP.FontPackage)" IsComposable="true" EntitySet="Fontpackages"/>
             <FunctionImport Name="PageDiagnostics" ReturnType="SP.Publishing.PageDiagnosticsController" IsComposable="true" EntitySet="PageDiagnostics"/>
             <FunctionImport Name="PortalLaunchWaves" ReturnType="SP.Publishing.PortalLaunch.PortalLaunchWavesManager" IsComposable="true" EntitySet="PortalLaunchWaves"/>
             <FunctionImport Name="PortalNavigationCache" ReturnType="SP.Publishing.Navigation.PortalNavigationCacheWrapper" IsComposable="true" EntitySet="PortalNavigationCaches"/>
@@ -12035,6 +12037,9 @@
                <Parameter Name="this" Type="SP.List"/>
                <Parameter Name="viewGuid" Type="Edm.Guid" Nullable="false"/>
             </FunctionImport>
+            <FunctionImport Name="IsSyntexAIFeaturesFlightEnabled" ReturnType="Edm.Boolean" IsSideEffecting="false" IsBindable="true">
+               <Parameter Name="this" Type="SP.List"/>
+            </FunctionImport>
             <FunctionImport Name="LockSmartTemplate" ReturnType="SP.LockFileData" IsBindable="true">
                <Parameter Name="this" Type="SP.List"/>
                <Parameter Name="Id" Type="Edm.String"/>
@@ -13149,6 +13154,9 @@
             <FunctionImport Name="SP_eSignInternal_CompleteAgreement_V2" ReturnType="Edm.String">
                <Parameter Name="completeAgreement" Type="Microsoft.SharePoint.ESign.Models.Requests.CompleteAgreementModel"/>
             </FunctionImport>
+            <FunctionImport Name="SP_eSignInternal_CompleteAgreementV3" ReturnType="Edm.String">
+               <Parameter Name="completeAgreement" Type="Microsoft.SharePoint.ESign.Models.Requests.CompleteAgreementModel"/>
+            </FunctionImport>
             <FunctionImport Name="SP_eSignInternal_DeclineAgreement">
                <Parameter Name="declineAgreement" Type="Microsoft.SharePoint.ESign.Models.Requests.DeclineAgreementModel"/>
             </FunctionImport>
@@ -13295,6 +13303,7 @@
                <Parameter Name="compatibilityLevel" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="SP_ServerSettings_IsSharePointOnline" ReturnType="Edm.Boolean"/>
+            <FunctionImport Name="SP_SharedWithMeItemCollection_GetCalendarEvents" ReturnType="Edm.String" IsSideEffecting="false"/>
             <FunctionImport Name="SP_SharedWithMeItemCollection_GetSharedWithMeExternalItems" ReturnType="Edm.String" IsSideEffecting="false">
                <Parameter Name="top" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
@@ -14360,7 +14369,6 @@
             <FunctionImport Name="Update" IsBindable="true">
                <Parameter Name="this" Type="SP.Folder"/>
             </FunctionImport>
-            <FunctionImport Name="SP_FontPackages" ReturnType="Collection(SP.FontPackage)" IsComposable="true" EntitySet="Fontpackages"/>
             <FunctionImport Name="GetById" ReturnType="SP.FontPackage" IsComposable="true" IsBindable="true" EntitySet="Fontpackages">
                <Parameter Name="this" Type="Collection(SP.FontPackage)"/>
                <Parameter Name="id" Type="Edm.Guid" Nullable="false"/>
@@ -14607,6 +14615,15 @@
                <Parameter Name="retrieveUserInfoDetails" Type="Edm.Boolean" Nullable="false"/>
                <Parameter Name="checkForAccessRequests" Type="Edm.Boolean" Nullable="false"/>
             </FunctionImport>
+            <FunctionImport Name="GetById" ReturnType="SP.FontPackage" IsComposable="true" IsBindable="true" EntitySet="Fontpackages">
+               <Parameter Name="this" Type="Collection(SP.FontPackage)"/>
+               <Parameter Name="id" Type="Edm.Guid" Nullable="false"/>
+            </FunctionImport>
+            <FunctionImport Name="GetByTitle" ReturnType="SP.FontPackage" IsComposable="true" IsBindable="true" EntitySet="Fontpackages">
+               <Parameter Name="this" Type="Collection(SP.FontPackage)"/>
+               <Parameter Name="title" Type="Edm.String"/>
+            </FunctionImport>
+            <FunctionImport Name="SP_OutOfBoxFontPackages_Load" ReturnType="Collection(SP.FontPackage)" IsComposable="true" EntitySet="Fontpackages"/>
             <FunctionImport Name="SP_SPPlaylist_GetSubscriberInfo" ReturnType="SP.SPPlaylist_Subscriber" EntitySet="SPPlaylist_Subscribers">
                <Parameter Name="listId" Type="Edm.String"/>
             </FunctionImport>
@@ -15113,6 +15130,15 @@
                <Parameter Name="folderPath" Type="SP.ResourcePath"/>
             </FunctionImport>
             <FunctionImport Name="SP_TeamChannelManager_UnstampLWGIdOnPrivateChannelSite" ReturnType="Edm.Boolean"/>
+            <FunctionImport Name="GetById" ReturnType="SP.FontPackage" IsComposable="true" IsBindable="true" EntitySet="Fontpackages">
+               <Parameter Name="this" Type="Collection(SP.FontPackage)"/>
+               <Parameter Name="id" Type="Edm.Guid" Nullable="false"/>
+            </FunctionImport>
+            <FunctionImport Name="GetByTitle" ReturnType="SP.FontPackage" IsComposable="true" IsBindable="true" EntitySet="Fontpackages">
+               <Parameter Name="this" Type="Collection(SP.FontPackage)"/>
+               <Parameter Name="title" Type="Edm.String"/>
+            </FunctionImport>
+            <FunctionImport Name="SP_TenantFontPackages_Load" ReturnType="Collection(SP.FontPackage)" IsComposable="true" EntitySet="Fontpackages"/>
             <FunctionImport Name="GetThemeFontByName" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="SP.ThemeInfo"/>
                <Parameter Name="name" Type="Edm.String"/>
@@ -16131,6 +16157,10 @@
                <Parameter Name="viewXml" Type="Edm.String"/>
                <Parameter Name="listName" Type="Edm.String"/>
             </FunctionImport>
+            <FunctionImport Name="ExportCSVFile" ReturnType="Edm.String" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+               <Parameter Name="timeZoneId" Type="Edm.Int32" Nullable="false"/>
+            </FunctionImport>
             <FunctionImport Name="ExportToCSV" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="viewXml" Type="Edm.String"/>
@@ -16185,11 +16215,12 @@
             <FunctionImport Name="GetIdleSessionSignOutForUnmanagedDevices" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
             </FunctionImport>
-            <FunctionImport Name="GetInsightsSummary" ReturnType="Edm.String" IsBindable="true">
+            <FunctionImport Name="GetInsightsSummary" ReturnType="Microsoft.SharePoint.Administration.TenantAdmin.InsightsSummaryResponse" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="insightsScenario" Type="Edm.Int32" Nullable="false"/>
                <Parameter Name="dataFileName" Type="Edm.String"/>
                <Parameter Name="content" Type="Edm.String"/>
+               <Parameter Name="pageIndex" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="GetOneDriveSiteSharingInsights" ReturnType="Collection(Microsoft.Online.SharePoint.TenantAdministration.OneDriveSiteSharingInsights)" IsComposable="true" IsBindable="true" EntitySet="OneDriveSiteSharingInsightss">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -16596,6 +16627,11 @@
             <FunctionImport Name="RenderIBSegmentListFilterData" ReturnType="Edm.Stream" IsSideEffecting="false" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="parameters" Type="SP.RenderListFilterDataParameters"/>
+            </FunctionImport>
+            <FunctionImport Name="RenderOwnershipPolicyStorageSPList" ReturnType="Edm.Stream" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+               <Parameter Name="parameters" Type="SP.RenderListDataParameters"/>
+               <Parameter Name="overrideParameters" Type="SP.RenderListDataOverrideParameters"/>
             </FunctionImport>
             <FunctionImport Name="RenderPolicyDefinitionList" ReturnType="Edm.Stream" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -20556,6 +20592,9 @@
          <Annotations Target="Microsoft.SharePoint.Administration.OrgAssets">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="Microsoft.SharePoint.Administration.TenantAdmin.InsightsSummaryResponse">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="Microsoft.SharePoint.AddToOneDrive.PlacesUserEntity">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -23512,6 +23551,9 @@
          <Annotations Target="SP.FontPackage/PackageJson">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.FontPackage/Store">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.FontPackage/Title">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -26218,6 +26260,9 @@
          <Annotations Target="SP.ApiData/SP_eSignInternal_CompleteAgreement_V2(Microsoft.SharePoint.ESign.Models.Requests.CompleteAgreementModel)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.ApiData/SP_eSignInternal_CompleteAgreementV3(Microsoft.SharePoint.ESign.Models.Requests.CompleteAgreementModel)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.ApiData/SP_eSignInternal_DeclineAgreement(Microsoft.SharePoint.ESign.Models.Requests.DeclineAgreementModel)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -26306,6 +26351,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SP_RecentListProxy_GetRecentListsProxy(Edm.Int32, Edm.String)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/SP_SharedWithMeItemCollection_GetCalendarEvents()">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SP_SharedWithMeItemCollection_GetSharedWithMeExternalItems(Edm.Int32)">
@@ -26446,13 +26494,14 @@
          <Annotations Target="SP.ApiData/RecycleWithParameters(SP.Folder, SP.FolderDeleteParameters)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SP_FontPackages()">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
          <Annotations Target="SP.ApiData/GetById(Collection(SP.FontPackage), Edm.Guid)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/GetByTitle(Collection(SP.FontPackage), Edm.String)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SP_FontPackages_Load()">
@@ -26516,6 +26565,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/RestoreByID(Collection(SP.ListItemVersion), Edm.Int32)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/SP_OutOfBoxFontPackages_Load()">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SP_SPPlaylist_GetSubscriberInfo(Edm.String)">
@@ -26663,6 +26715,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SP_TeamChannelManager_UnstampLWGIdOnPrivateChannelSite()">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/SP_TenantFontPackages_Load()">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SetId(SP.TimeZone, Edm.Int32)">
@@ -34457,6 +34512,23 @@
             <Property Name="resourceStatus" Type="Edm.Int32" Nullable="false"/>
             <Property Name="resourceType" Type="Edm.Int32" Nullable="false"/>
             <Property Name="updatedOn" Type="Edm.DateTime"/>
+         </ComplexType>
+         <ComplexType Name="InsightsSummaryResponse">
+            <Property Name="insightsSummary" Type="Edm.String"/>
+            <Property Name="totalPagedCount" Type="Edm.Int32" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="OwnershipPolicyResourceStorage">
+            <Property Name="createdOn" Type="Edm.DateTime"/>
+            <Property Name="lastScopedOn" Type="Edm.DateTime"/>
+            <Property Name="lookupSiteId" Type="SP.FieldLookupValue"/>
+            <Property Name="notificationData" Type="Edm.String"/>
+            <Property Name="notificationStatus" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="resourceId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="resourceStateTransitionData" Type="Edm.String"/>
+            <Property Name="resourceStatus" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="resourceType" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="updatedOn" Type="Edm.DateTime"/>
+            <Property Name="userResponses" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="PageResponse">
             <Property Name="ContinuationToken" Type="Edm.String"/>

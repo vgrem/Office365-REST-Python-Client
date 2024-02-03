@@ -80,7 +80,6 @@ class PeopleManager(Entity):
         Gets the people who are following the specified user.
 
         :param str account_name: Account name of the specified user.
-        :return:
         """
         return_type = EntityCollection(self.context, PersonProperties)
         params = {"accountName": account_name}

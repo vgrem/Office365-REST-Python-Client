@@ -6071,6 +6071,24 @@
                </Record>
             </Annotation>
          </Annotations>
+         <Annotations Target="microsoft.graph.educationModule/createdBy">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.educationModule/createdDateTime">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.educationModule/lastModifiedBy">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.educationModule/lastModifiedDateTime">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.educationModule/resourcesFolderUrl">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.educationModule/status">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
          <Annotations Target="microsoft.graph.educationRoot/classes">
             <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
                <Record>
@@ -16308,6 +16326,11 @@
             <Member Name="failedPublish" Value="3"/>
             <Member Name="unknownFutureValue" Value="4"/>
          </EnumType>
+         <EnumType Name="educationModuleStatus">
+            <Member Name="draft" Value="0"/>
+            <Member Name="published" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
          <EnumType Name="educationSubmissionStatus">
             <Member Name="working" Value="0"/>
             <Member Name="submitted" Value="1"/>
@@ -16649,6 +16672,16 @@
             <Member Name="privileged" Value="1"/>
             <Member Name="auto" Value="2"/>
             <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="remindBeforeTimeInMinutesType">
+            <Member Name="mins15" Value="0"/>
+            <Member Name="unknownFutureValue" Value="100"/>
+         </EnumType>
+         <EnumType Name="virtualAppointmentMessageType">
+            <Member Name="confirmation" Value="0"/>
+            <Member Name="reschedule" Value="1"/>
+            <Member Name="cancellation" Value="2"/>
+            <Member Name="unknownFutureValue" Value="10"/>
          </EnumType>
          <EnumType Name="stagedFeatureName">
             <Member Name="passthroughAuthentication" Value="0"/>
@@ -21706,11 +21739,15 @@
          </EntityType>
          <EntityType Name="reportRoot">
             <NavigationProperty Name="authenticationMethods" Type="graph.authenticationMethodsRoot" ContainsTarget="true"/>
+            <NavigationProperty Name="partners" Type="graph.partners" ContainsTarget="true"/>
             <NavigationProperty Name="dailyPrintUsageByPrinter" Type="Collection(graph.printUsageByPrinter)" ContainsTarget="true"/>
             <NavigationProperty Name="dailyPrintUsageByUser" Type="Collection(graph.printUsageByUser)" ContainsTarget="true"/>
             <NavigationProperty Name="monthlyPrintUsageByPrinter" Type="Collection(graph.printUsageByPrinter)" ContainsTarget="true"/>
             <NavigationProperty Name="monthlyPrintUsageByUser" Type="Collection(graph.printUsageByUser)" ContainsTarget="true"/>
             <NavigationProperty Name="security" Type="graph.securityReportsRoot" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="partners" BaseType="graph.entity">
+            <NavigationProperty Name="billing" Type="microsoft.graph.partners.billing.billing" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="printUsage" BaseType="graph.entity" Abstract="true">
             <Property Name="blackAndWhitePageCount" Type="Edm.Int64"/>
@@ -23937,6 +23974,7 @@
             <Property Name="isManaged" Type="Edm.Boolean"/>
             <Property Name="mdmAppId" Type="Edm.String"/>
             <Property Name="onPremisesLastSyncDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="onPremisesSecurityIdentifier" Type="Edm.String"/>
             <Property Name="onPremisesSyncEnabled" Type="Edm.Boolean"/>
             <Property Name="operatingSystem" Type="Edm.String"/>
             <Property Name="operatingSystemVersion" Type="Edm.String"/>
@@ -24451,6 +24489,9 @@
             <Property Name="lastModifiedBy" Type="graph.identitySet"/>
             <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
          </ComplexType>
+         <ComplexType Name="educationChannelResource" BaseType="graph.educationResource">
+            <Property Name="url" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="educationExcelResource" BaseType="graph.educationResource">
             <Property Name="fileUrl" Type="Edm.String"/>
          </ComplexType>
@@ -24468,6 +24509,9 @@
          </ComplexType>
          <ComplexType Name="educationFileResource" BaseType="graph.educationResource">
             <Property Name="fileUrl" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="educationLinkedAssignmentResource" BaseType="graph.educationResource">
+            <Property Name="url" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="educationLinkResource" BaseType="graph.educationResource">
             <Property Name="link" Type="Edm.String"/>
@@ -24534,6 +24578,7 @@
             <Property Name="instructions" Type="graph.educationItemBody"/>
             <Property Name="lastModifiedBy" Type="graph.identitySet"/>
             <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="moduleUrl" Type="Edm.String"/>
             <Property Name="notificationChannelUrl" Type="Edm.String"/>
             <Property Name="resourcesFolderUrl" Type="Edm.String"/>
             <Property Name="status" Type="graph.educationAssignmentStatus"/>
@@ -24610,10 +24655,23 @@
             <NavigationProperty Name="assignmentDefaults" Type="graph.educationAssignmentDefaults" ContainsTarget="true"/>
             <NavigationProperty Name="assignments" Type="Collection(graph.educationAssignment)" ContainsTarget="true"/>
             <NavigationProperty Name="assignmentSettings" Type="graph.educationAssignmentSettings" ContainsTarget="true"/>
+            <NavigationProperty Name="modules" Type="Collection(graph.educationModule)" ContainsTarget="true"/>
             <NavigationProperty Name="group" Type="graph.group"/>
             <NavigationProperty Name="members" Type="Collection(graph.educationUser)"/>
             <NavigationProperty Name="schools" Type="Collection(graph.educationSchool)"/>
             <NavigationProperty Name="teachers" Type="Collection(graph.educationUser)"/>
+         </EntityType>
+         <EntityType Name="educationModule" BaseType="graph.entity">
+            <Property Name="createdBy" Type="graph.identitySet"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="isPinned" Type="Edm.Boolean"/>
+            <Property Name="lastModifiedBy" Type="graph.identitySet"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="resourcesFolderUrl" Type="Edm.String"/>
+            <Property Name="status" Type="graph.educationModuleStatus"/>
+            <NavigationProperty Name="resources" Type="Collection(graph.educationModuleResource)" ContainsTarget="true"/>
          </EntityType>
          <ComplexType Name="educationCourse">
             <Property Name="courseNumber" Type="Edm.String"/>
@@ -24701,6 +24759,9 @@
          <EntityType Name="educationFeedbackResourceOutcome" BaseType="graph.educationOutcome">
             <Property Name="feedbackResource" Type="graph.educationResource"/>
             <Property Name="resourceStatus" Type="graph.educationFeedbackResourceOutcomeStatus"/>
+         </EntityType>
+         <EntityType Name="educationModuleResource" BaseType="graph.entity">
+            <Property Name="resource" Type="graph.educationResource"/>
          </EntityType>
          <EntityType Name="educationPointsOutcome" BaseType="graph.educationOutcome">
             <Property Name="points" Type="graph.educationAssignmentPointsGrade"/>
@@ -25971,6 +26032,10 @@
             <NavigationProperty Name="root" Type="graph.driveItem" ContainsTarget="true"/>
             <NavigationProperty Name="site" Type="graph.site" ContainsTarget="true"/>
          </EntityType>
+         <ComplexType Name="attendeeNotificationInfo">
+            <Property Name="phoneNumber" Type="Edm.String"/>
+            <Property Name="timeZone" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="broadcastMeetingSettings">
             <Property Name="allowedAudience" Type="graph.broadcastMeetingAudience"/>
             <Property Name="captions" Type="graph.broadcastMeetingCaptionSettings"/>
@@ -31987,6 +32052,10 @@
             <ReturnType Type="graph.browserSiteList"/>
          </Action>
          <Action Name="publish" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.educationModule"/>
+            <ReturnType Type="graph.educationModule"/>
+         </Action>
+         <Action Name="publish" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.educationAssignment"/>
             <ReturnType Type="graph.educationAssignment"/>
          </Action>
@@ -32362,9 +32431,13 @@
          <Action Name="resetToSystemDefault" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.crossTenantAccessPolicyConfigurationDefault" Nullable="false"/>
          </Action>
-         <Action Name="setUpFeedbackResourcesFolder" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.educationAssignment"/>
-            <ReturnType Type="graph.educationAssignment"/>
+         <Action Name="pin" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.educationModule"/>
+            <ReturnType Type="graph.educationModule"/>
+         </Action>
+         <Action Name="setUpResourcesFolder" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.educationModule"/>
+            <ReturnType Type="graph.educationModule"/>
          </Action>
          <Action Name="setUpResourcesFolder" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.educationAssignment"/>
@@ -32373,6 +32446,14 @@
          <Action Name="setUpResourcesFolder" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.educationSubmission"/>
             <ReturnType Type="graph.educationSubmission"/>
+         </Action>
+         <Action Name="unpin" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.educationModule"/>
+            <ReturnType Type="graph.educationModule"/>
+         </Action>
+         <Action Name="setUpFeedbackResourcesFolder" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.educationAssignment"/>
+            <ReturnType Type="graph.educationAssignment"/>
          </Action>
          <Action Name="reassign" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.educationSubmission"/>
@@ -35518,6 +35599,16 @@
             <Parameter Name="bindingParameter" Type="graph.drive"/>
             <ReturnType Type="Collection(graph.driveItem)"/>
          </Function>
+         <Action Name="sendVirtualAppointmentReminderSms" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.onlineMeeting"/>
+            <Parameter Name="remindBeforeTimeInMinutesType" Type="graph.remindBeforeTimeInMinutesType"/>
+            <Parameter Name="attendees" Type="Collection(graph.attendeeNotificationInfo)"/>
+         </Action>
+         <Action Name="sendVirtualAppointmentSms" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.onlineMeeting"/>
+            <Parameter Name="messageType" Type="graph.virtualAppointmentMessageType"/>
+            <Parameter Name="attendees" Type="Collection(graph.attendeeNotificationInfo)"/>
+         </Action>
          <Function Name="getVirtualAppointmentJoinWebUrl" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.onlineMeeting"/>
             <ReturnType Type="Edm.String" Unicode="false"/>
@@ -37162,7 +37253,7 @@
             <Parameter Name="bindingParameter" Type="Collection(graph.channel)"/>
             <ReturnType Type="Collection(graph.chatMessage)"/>
          </Function>
-         <Function Name="getAllMessages" IsBound="true" EntitySetPath="bindingParameter/messages">
+         <Function Name="getAllMessages" IsBound="true" EntitySetPath="bindingParameter/messages" IsComposable="true">
             <Parameter Name="bindingParameter" Type="Collection(graph.chat)"/>
             <ReturnType Type="Collection(graph.chatMessage)"/>
          </Function>
@@ -38126,6 +38217,16 @@
             <Property Name="vmId" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="dictionary" OpenType="true"/>
+         <ComplexType Name="dnsEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="dnsServerIp" Type="microsoft.graph.security.ipEvidence"/>
+            <Property Name="domainName" Type="Edm.String"/>
+            <Property Name="hostIpAddress" Type="microsoft.graph.security.ipEvidence"/>
+            <Property Name="ipAddresses" Type="Collection(microsoft.graph.security.ipEvidence)"/>
+         </ComplexType>
+         <ComplexType Name="ipEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="countryLetterCode" Type="Edm.String"/>
+            <Property Name="ipAddress" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="dynamicColumnValue" OpenType="true"/>
          <ComplexType Name="fileDetails">
             <Property Name="fileName" Type="Edm.String"/>
@@ -38141,6 +38242,10 @@
             <Property Name="detectionStatus" Type="microsoft.graph.security.detectionStatus"/>
             <Property Name="fileDetails" Type="microsoft.graph.security.fileDetails"/>
             <Property Name="mdeDeviceId" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="fileHashEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="algorithm" Type="microsoft.graph.security.fileHashAlgorithm" Nullable="false"/>
+            <Property Name="value" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="gitHubOrganizationEvidence" BaseType="microsoft.graph.security.alertEvidence">
             <Property Name="company" Type="Edm.String"/>
@@ -38218,10 +38323,6 @@
             <Property Name="source" Type="Edm.String"/>
             <Property Name="sourceRef" Type="microsoft.graph.security.urlEvidence"/>
             <Property Name="zone" Type="Edm.String"/>
-         </ComplexType>
-         <ComplexType Name="ipEvidence" BaseType="microsoft.graph.security.alertEvidence">
-            <Property Name="countryLetterCode" Type="Edm.String"/>
-            <Property Name="ipAddress" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="nicEvidence" BaseType="microsoft.graph.security.alertEvidence">
             <Property Name="ipAddress" Type="microsoft.graph.security.ipEvidence"/>
@@ -39208,6 +39309,70 @@
             <Parameter Name="toDateTime" Type="Edm.DateTimeOffset"/>
             <ReturnType Type="Collection(microsoft.graph.callRecords.pstnCallLogRow)"/>
          </Function>
+      </Schema>
+      <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="microsoft.graph.partners.billing">
+         <EnumType Name="attributeSet">
+            <Member Name="full" Value="1"/>
+            <Member Name="basic" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="billingPeriod">
+            <Member Name="current" Value="1"/>
+            <Member Name="last" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EntityType Name="billing" BaseType="graph.entity">
+            <NavigationProperty Name="manifests" Type="Collection(microsoft.graph.partners.billing.manifest)" ContainsTarget="true"/>
+            <NavigationProperty Name="operations" Type="Collection(microsoft.graph.partners.billing.operation)" ContainsTarget="true"/>
+            <NavigationProperty Name="usage" Type="microsoft.graph.partners.billing.azureUsage" Nullable="false" ContainsTarget="true"/>
+         </EntityType>
+         <ComplexType Name="blob">
+            <Property Name="name" Type="Edm.String" Nullable="false"/>
+            <Property Name="partitionValue" Type="Edm.String" Nullable="false"/>
+         </ComplexType>
+         <EntityType Name="azureUsage" BaseType="graph.entity">
+            <NavigationProperty Name="billed" Type="microsoft.graph.partners.billing.billedUsage" Nullable="false" ContainsTarget="true"/>
+            <NavigationProperty Name="unbilled" Type="microsoft.graph.partners.billing.unbilledUsage" Nullable="false" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="billedUsage" BaseType="graph.entity"/>
+         <EntityType Name="unbilledUsage" BaseType="graph.entity"/>
+         <EntityType Name="manifest" BaseType="graph.entity">
+            <Property Name="blobCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="blobs" Type="Collection(microsoft.graph.partners.billing.blob)" Nullable="false"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="dataFormat" Type="Edm.String" Nullable="false"/>
+            <Property Name="eTag" Type="Edm.String" Nullable="false"/>
+            <Property Name="partitionType" Type="Edm.String" Nullable="false"/>
+            <Property Name="partnerTenantId" Type="Edm.String" Nullable="false"/>
+            <Property Name="rootDirectory" Type="Edm.String" Nullable="false"/>
+            <Property Name="sasToken" Type="Edm.String" Nullable="false"/>
+            <Property Name="schemaVersion" Type="Edm.String" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="operation" BaseType="graph.entity">
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="lastActionDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="status" Type="graph.longRunningOperationStatus"/>
+         </EntityType>
+         <EntityType Name="exportSuccessOperation" BaseType="microsoft.graph.partners.billing.operation">
+            <NavigationProperty Name="resourceLocation" Type="microsoft.graph.partners.billing.manifest" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="failedOperation" BaseType="microsoft.graph.partners.billing.operation">
+            <Property Name="error" Type="graph.publicError" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="runningOperation" BaseType="microsoft.graph.partners.billing.operation"/>
+         <Action Name="export" IsBound="true">
+            <Parameter Name="this" Type="microsoft.graph.partners.billing.billedUsage"/>
+            <Parameter Name="invoiceId" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="attributeSet" Type="microsoft.graph.partners.billing.attributeSet"/>
+            <ReturnType Type="microsoft.graph.partners.billing.operation"/>
+         </Action>
+         <Action Name="export" IsBound="true">
+            <Parameter Name="this" Type="microsoft.graph.partners.billing.unbilledUsage"/>
+            <Parameter Name="currencyCode" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="billingPeriod" Type="microsoft.graph.partners.billing.billingPeriod"/>
+            <Parameter Name="attributeSet" Type="microsoft.graph.partners.billing.attributeSet"/>
+            <ReturnType Type="microsoft.graph.partners.billing.operation"/>
+         </Action>
       </Schema>
       <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="microsoft.graph.externalConnectors">
          <EnumType Name="accessType">
