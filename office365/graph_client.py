@@ -9,6 +9,9 @@ from office365.directory.audit.log_root import AuditLogRoot
 from office365.directory.authentication.method_configuration import (
     AuthenticationMethodConfiguration,
 )
+from office365.directory.certificates.auth_configuration import (
+    CertificateBasedAuthConfiguration,
+)
 from office365.directory.directory import Directory
 from office365.directory.domains.domain import Domain
 from office365.directory.extensions.schema import SchemaExtension
@@ -73,14 +76,12 @@ from office365.teams.viva.employee_experience import EmployeeExperience
 class GraphClient(ClientRuntimeContext):
     """Graph Service client"""
 
-    def __init__(self, acquire_token_callback):
-        # type: (Callable[[], dict]) -> None
-        """
-        :param () -> dict acquire_token_callback: Acquire token function
-        """
+    def __init__(self, acquire_token_callback, version="v1.0"):
+        # type: (Callable[[], dict], str) -> None
         super(GraphClient, self).__init__()
         self._pending_request = None
         self._resource = "https://graph.microsoft.com"
+        self._version = version
         self._authority_host_url = "https://login.microsoftonline.com"
         self._acquire_token_callback = acquire_token_callback
 
@@ -252,7 +253,7 @@ class GraphClient(ClientRuntimeContext):
 
     def service_root_url(self):
         # type: () -> str
-        return "https://graph.microsoft.com/v1.0"
+        return "https://graph.microsoft.com/{0}".format(self._version)
 
     def _build_specific_query(self, request):
         # type: (RequestOptions) -> None
@@ -415,6 +416,15 @@ class GraphClient(ClientRuntimeContext):
     def applications(self):
         """Get the list of applications in this organization."""
         return ApplicationCollection(self, ResourcePath("applications"))
+
+    @property
+    def certificate_based_auth_configuration(self):
+        """Get the list of applications in this organization."""
+        return EntityCollection(
+            self,
+            CertificateBasedAuthConfiguration,
+            ResourcePath("certificateBasedAuthConfiguration"),
+        )
 
     @property
     def service_principals(self):

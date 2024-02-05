@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.entity import Entity
 
@@ -10,7 +12,6 @@ class VideoServiceDiscoverer(Entity):
 
     @property
     def video_portal_url(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """ """
         return self.properties.get("VideoPortalUrl", None)

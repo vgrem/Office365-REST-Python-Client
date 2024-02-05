@@ -2,6 +2,9 @@ from office365.directory.identitygovernance.accessreview.set import AccessReview
 from office365.directory.identitygovernance.appconsent.approval_route import (
     AppConsentApprovalRoute,
 )
+from office365.directory.identitygovernance.privilegedaccess.root import (
+    PrivilegedAccessRoot,
+)
 from office365.directory.identitygovernance.termsofuse.container import (
     TermsOfUseContainer,
 )
@@ -35,13 +38,21 @@ class IdentityGovernance(Entity):
 
     @property
     def access_reviews(self):
-        """
-        Container for the base resources that expose the access reviews API and features.
-        """
+        """Container for the base resources that expose the access reviews API and features."""
         return self.properties.get(
             "accessReviews",
             AccessReviewSet(
                 self.context, ResourcePath("accessReviews", self.resource_path)
+            ),
+        )
+
+    @property
+    def privileged_access(self):
+        """Container for the base resources that expose the access reviews API and features."""
+        return self.properties.get(
+            "privilegedAccess",
+            PrivilegedAccessRoot(
+                self.context, ResourcePath("privilegedAccess", self.resource_path)
             ),
         )
 

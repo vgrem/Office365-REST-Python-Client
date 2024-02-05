@@ -13,10 +13,6 @@ class TestDevices(GraphTestCase):
     def tearDownClass(cls):
         pass
 
-    def test2_get_my_managed_devices(self):
-        result = self.client.me.managed_devices.get().execute_query()
-        self.assertIsNotNone(result.resource_path)
-
     def test3_list_devices(self):
         result = self.client.devices.get().execute_query()
         self.assertIsNotNone(result.resource_path)

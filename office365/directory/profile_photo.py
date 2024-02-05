@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 
 
@@ -12,14 +14,12 @@ class ProfilePhoto(Entity):
 
     @property
     def height(self):
-        """
-        The height of the photo. Read-only.
-        """
+        # type: () -> Optional[int]
+        """The height of the photo."""
         return self.properties.get("height", None)
 
     @property
     def width(self):
-        """
-        The width of the photo. Read-only.
-        """
+        # type: () -> Optional[int]
+        """The width of the photo."""
         return self.properties.get("width", None)

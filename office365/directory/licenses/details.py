@@ -8,11 +8,12 @@ from office365.runtime.client_value_collection import ClientValueCollection
 class LicenseDetails(Entity):
     """Contains information about a license assigned to a user."""
 
+    def __repr__(self):
+        return self.sku_part_number or self.entity_type_name
+
     @property
     def service_plans(self):
-        """
-        Information about the service plans assigned with the license. Read-only, Not nullable
-        """
+        """Information about the service plans assigned with the license. Read-only, Not nullable"""
         return self.properties.get(
             "servicePlans", ClientValueCollection(ServicePlanInfo)
         )

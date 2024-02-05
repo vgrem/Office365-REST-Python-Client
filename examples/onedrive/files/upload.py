@@ -1,7 +1,7 @@
 """
 Demonstrates how to upload a small file
 
-https://learn.microsoft.com/en-us/graph/api/driveitem-put-content?view=graph-rest-1.0&tabs=http
+https://learn.microsoft.com/en-us/graph/api/driveitem-put-content?view=graph-rest-1.0
 """
 
 from office365.graph_client import GraphClient

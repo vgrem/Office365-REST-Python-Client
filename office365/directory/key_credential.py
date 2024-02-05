@@ -44,3 +44,6 @@ class KeyCredential(ClientValue):
         self.startDateTime = start_datetime
         self.type = key_type
         self.usage = usage
+
+    def __str__(self):
+        return self.displayName or self.entity_type_name

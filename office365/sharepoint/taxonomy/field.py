@@ -142,10 +142,10 @@ class TaxonomyField(FieldLookup):
 
     @property
     def ssp_id(self):
+        # type: () -> Optional[str]
         """
         Specifies the GUID that identifies the TermStore object, which contains the Enterprise
         keywords for the site that the current TaxonomyField belongs to.
-        :rtype: str or None
         """
         return self.properties.get("SspId", None)
 
@@ -182,10 +182,10 @@ class TaxonomyField(FieldLookup):
 
     @property
     def user_created(self):
+        # type: () -> Optional[bool]
         """
         Specifies a Boolean value that specifies whether the TaxonomyField object is linked to a
         customized TermSet object.
-        :rtype: bool or None
         """
         return self.properties.get("UserCreated", None)
 

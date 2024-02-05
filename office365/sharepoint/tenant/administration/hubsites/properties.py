@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.tenant.administration.hubsites.permission import (
@@ -14,11 +16,8 @@ class HubSiteProperties(Entity):
 
     @property
     def site_id(self):
-        """
-        Returns the Site identifier
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Returns the Site identifier"""
         return self.properties.get("SiteId", None)
 
     @property

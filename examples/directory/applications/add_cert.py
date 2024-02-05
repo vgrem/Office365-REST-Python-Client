@@ -8,12 +8,13 @@ https://learn.microsoft.com/en-us/graph/applications-how-to-add-certificate
 """
 
 from office365.graph_client import GraphClient
-from tests import test_client_id, test_tenant
-from tests.graph_case import acquire_token_by_username_password
+from tests import test_client_id, test_password, test_tenant, test_username
 
 cert_path = "../../selfsigncert.pem"
 
-client = GraphClient(acquire_token_by_username_password)
+client = GraphClient.with_username_and_password(
+    test_tenant, test_client_id, test_username, test_password
+)
 target_app = client.applications.get_by_app_id(test_client_id)
 with open(cert_path, "rb") as f:
     cert_data = f.read()

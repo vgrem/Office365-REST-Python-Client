@@ -380,9 +380,7 @@ class Group(DirectoryObject):
     @property
     def permission_grants(self):
         # type: () -> EntityCollection[ResourceSpecificPermissionGrant]
-        """
-        List permissions that have been granted to apps to access the group.
-        """
+        """List permissions that have been granted to apps to access the group."""
         return self.properties.setdefault(
             "permissionGrants",
             EntityCollection(
@@ -394,9 +392,7 @@ class Group(DirectoryObject):
 
     @property
     def photo(self):
-        """
-        The group's profile photo
-        """
+        """The group's profile photo"""
         return self.properties.get(
             "photo",
             ProfilePhoto(self.context, ResourcePath("photo", self.resource_path)),

@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from typing import Optional
 
 from office365.communications.onlinemeetings.collection import OnlineMeetingCollection
@@ -446,8 +447,28 @@ class User(DirectoryObject):
         return return_type
 
     @property
+    def created_datetime(self):
+        # type: () -> Optional[datetime]
+        """
+        The Timestamp type represents date and time information using ISO 8601 format and is always in UTC time.
+        For example, midnight UTC on Jan 1, 2014 is 2014-01-01T00:00:00Z
+        """
+        return self.properties.get("createdDateTime", datetime.min)
+
+    @property
+    def created_objects(self):
+        """Directory objects created by this user."""
+        return self.properties.get(
+            "createdObjects",
+            DirectoryObjectCollection(
+                self.context, ResourcePath("createdObjects", self.resource_path)
+            ),
+        )
+
+    @property
     def device_enrollment_limit(self):
         # type: () -> Optional[str]
+        """ """
         return self.properties.get("deviceEnrollmentLimit", None)
 
     @property
@@ -631,6 +652,16 @@ class User(DirectoryObject):
         )
 
     @property
+    def photos(self):
+        """The collection of the user's profile photos in different sizes"""
+        return self.properties.get(
+            "photos",
+            EntityCollection(
+                self.context, ProfilePhoto, ResourcePath("photos", self.resource_path)
+            ),
+        )
+
+    @property
     def manager(self):
         """The user or contact that is this user's manager"""
         return self.properties.get(
@@ -770,7 +801,7 @@ class User(DirectoryObject):
     @property
     def managed_devices(self):
         # type: () -> EntityCollection[ManagedDevice]
-        """"""
+        """Devices that are managed or pre-enrolled through Intune"""
         return self.properties.get(
             "managedDevices",
             EntityCollection(
@@ -1037,6 +1068,7 @@ class User(DirectoryObject):
                 "businessPhones": self.business_phones,
                 "calendarGroups": self.calendar_groups,
                 "contactFolders": self.contact_folders,
+                "createdObjects": self.created_objects,
                 "employeeExperience": self.employee_experience,
                 "followedSites": self.followed_sites,
                 "licenseDetails": self.license_details,

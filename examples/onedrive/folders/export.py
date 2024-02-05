@@ -9,10 +9,14 @@ import tempfile
 
 from office365.graph_client import GraphClient
 from office365.onedrive.driveitems.driveItem import DriveItem
-from tests import test_user_principal_name
-from tests.graph_case import acquire_token_by_client_credentials
+from tests import (
+    test_client_id,
+    test_client_secret,
+    test_tenant,
+    test_user_principal_name,
+)
 
-client = GraphClient(acquire_token_by_client_credentials)
+client = GraphClient.with_client_secret(test_tenant, test_client_id, test_client_secret)
 drive = client.users[test_user_principal_name].drive
 with tempfile.TemporaryDirectory() as local_path:
     drive_items = drive.root.children.get().execute_query()

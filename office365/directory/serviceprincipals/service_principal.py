@@ -205,9 +205,7 @@ class ServicePrincipal(DirectoryObject):
 
     @property
     def app_roles(self):
-        """
-        The roles exposed by the application which this service principal represents.
-        """
+        """The roles exposed by the application which this service principal represents."""
         return self.properties.get("appRoles", AppRoleCollection())
 
     @property
