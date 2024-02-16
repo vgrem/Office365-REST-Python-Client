@@ -1,5 +1,5 @@
 import copy
-from typing import TYPE_CHECKING, Any, Callable, Generic, Optional, TypeVar
+from typing import TYPE_CHECKING, Callable, Generic, Optional, TypeVar
 
 from typing_extensions import Self
 
@@ -27,10 +27,10 @@ class ClientResult(Generic[T]):
         self._context.before_query_execute(action)
         return self
 
-    def after_execute(self, action):
-        # type: (Callable[[Self], None]) -> Self
+    def after_execute(self, action, execute_first=False):
+        # type: (Callable[[Self], None], bool) -> Self
         """Attach an event handler which is triggered after query is submitted to server"""
-        self._context.after_query_execute(action, self)
+        self._context.after_query_execute(action, execute_first)
         return self
 
     def set_property(self, key, value, persist_changes=False):

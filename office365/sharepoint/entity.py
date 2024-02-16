@@ -1,4 +1,6 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
+
+from typing_extensions import Self
 
 from office365.runtime.client_object import ClientObject
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
@@ -10,6 +12,11 @@ if TYPE_CHECKING:
 
 class Entity(ClientObject):
     """SharePoint specific entity"""
+
+    def execute_batch(self, items_per_batch=100, success_callback=None):
+        # type: (int, Callable[[int], None]) -> Self
+        """Construct and submit to a server a batch request"""
+        return self.context.execute_batch(items_per_batch, success_callback)
 
     def with_credentials(self, credentials):
         """

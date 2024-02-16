@@ -225,6 +225,30 @@ class ReportRoot(Entity):
         self.context.add_query(qry)
         return qry.return_type
 
+    def get_sharepoint_site_usage_detail(self, period):
+        """
+        Get details about SharePoint site usage.
+
+        :param str period: Specifies the length of time over which the report is aggregated.
+            The supported values for {period_value} are: D7, D30, D90, and D180. These values follow the format
+            Dn where n represents the number of days over which the report is aggregated. Required.
+        """
+        qry = create_report_query(self, "getSharePointSiteUsageDetail", period)
+        self.context.add_query(qry)
+        return qry.return_type
+
+    def get_sharepoint_site_usage_site_counts(self, period):
+        """
+        Get the trend of total and active site count during the reporting period.
+
+        :param str period: Specifies the length of time over which the report is aggregated.
+            The supported values for {period_value} are: D7, D30, D90, and D180. These values follow the format
+            Dn where n represents the number of days over which the report is aggregated. Required.
+        """
+        qry = create_report_query(self, "getSharePointSiteUsageSiteCounts", period)
+        self.context.add_query(qry)
+        return qry.return_type
+
     @property
     def authentication_methods(self):
         """Container for navigation properties for Azure AD authentication methods resources."""

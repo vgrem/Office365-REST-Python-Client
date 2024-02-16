@@ -1278,12 +1278,19 @@ class Web(SecurableObject):
         :param str email_subject: The email subject.
         :param str email_body: The email subject.
         """
+
         return_type = SharingResult(self.context)
 
-        def _share(picker_result, group):
-            # type: (ClientResult[str], Group) -> None
+        def _share(picker_result):
+            # type: (ClientResult[str]) -> None
+            groups = {
+                ExternalSharingSiteOption.View: self.associated_visitor_group,
+                ExternalSharingSiteOption.Edit: self.associated_member_group,
+                ExternalSharingSiteOption.Owner: self.associated_owner_group,
+            }  # type: dict[ExternalSharingSiteOption, Group]
+
             picker_input = "[{0}]".format(picker_result.value)
-            role_value = "group:{groupId}".format(groupId=group.id)
+            role_value = "group:{groupId}".format(groupId=groups[share_option].id)
             Web.share_object(
                 self.context,
                 self.url,
@@ -1299,15 +1306,9 @@ class Web(SecurableObject):
             )
 
         def _web_resolved():
-            groups = {
-                ExternalSharingSiteOption.View: self.associated_visitor_group,
-                ExternalSharingSiteOption.Edit: self.associated_member_group,
-                ExternalSharingSiteOption.Owner: self.associated_owner_group,
-            }  # type: dict[ExternalSharingSiteOption, Group]
-
             ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(
                 self.context, user_principal_name
-            ).after_execute(_share, groups[share_option])
+            ).after_execute(_share)
 
         self.ensure_properties(
             [

@@ -75,44 +75,43 @@ class FileCollection(EntityCollection[File]):
         if not hasattr(file, "read"):
             file = open(file, "rb")
             auto_close = True
-        else:
-            pass
 
         file_size = os.fstat(file.fileno()).st_size
         file_name = file_name if file_name else os.path.basename(file.name)
         upload_id = str(uuid.uuid4())
 
-        def _upload_session(return_type, return_file):
-            # type: (File|ClientResult, File) -> None
-            if return_file is None:
-                return_file = return_type
+        def _upload(return_type):
+            # type: (File) -> None
+
+            def _after_uploaded(result):
+                # type: (ClientResult) -> None
+                _upload(return_type)
 
             uploaded_bytes = file.tell()
             if callable(chunk_uploaded):
                 chunk_uploaded(uploaded_bytes, **kwargs)
 
+            content = file.read(chunk_size)
             if uploaded_bytes == file_size:
                 if auto_close and not file.closed:
                     file.close()
                 return
 
-            content = file.read(chunk_size)
-
             if uploaded_bytes == 0:
-                return_file.start_upload(upload_id, content).after_execute(
-                    _upload_session, return_file
+                return_type.start_upload(upload_id, content).after_execute(
+                    _after_uploaded
                 )
             elif uploaded_bytes + len(content) < file_size:
-                return_file.continue_upload(
+                return_type.continue_upload(
                     upload_id, uploaded_bytes, content
-                ).after_execute(_upload_session, return_file)
+                ).after_execute(_after_uploaded)
             else:
-                return_file.finish_upload(
+                return_type.finish_upload(
                     upload_id, uploaded_bytes, content
-                ).after_execute(_upload_session, return_file)
+                ).after_execute(_upload)
 
         if file_size > chunk_size:
-            return self.add(file_name, None, True).after_execute(_upload_session, None)
+            return self.add(file_name, None, True).after_execute(_upload)
         else:
             return self.add(file_name, file.read(), True)
 

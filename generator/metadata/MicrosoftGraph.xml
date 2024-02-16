@@ -20587,6 +20587,7 @@
             <Property Name="spa" Type="graph.spaApplication"/>
             <Property Name="tags" Type="Collection(Edm.String)" Nullable="false"/>
             <Property Name="tokenEncryptionKeyId" Type="Edm.Guid"/>
+            <Property Name="uniqueName" Type="Edm.String"/>
             <Property Name="verifiedPublisher" Type="graph.verifiedPublisher"/>
             <Property Name="web" Type="graph.webApplication"/>
             <NavigationProperty Name="appManagementPolicies" Type="Collection(graph.appManagementPolicy)"/>
@@ -20606,6 +20607,16 @@
                            <Record Type="Org.OData.Core.V1.PropertyRef">
                               <PropertyValue Property="Alias" String="appId"/>
                               <PropertyValue Property="Name" PropertyPath="appId"/>
+                           </Record>
+                        </Collection>
+                     </PropertyValue>
+                  </Record>
+                  <Record Type="Org.OData.Core.V1.AlternateKey">
+                     <PropertyValue Property="Key">
+                        <Collection>
+                           <Record Type="Org.OData.Core.V1.PropertyRef">
+                              <PropertyValue Property="Alias" String="uniqueName"/>
+                              <PropertyValue Property="Name" PropertyPath="uniqueName"/>
                            </Record>
                         </Collection>
                      </PropertyValue>
@@ -23303,6 +23314,7 @@
             <Property Name="securityIdentifier" Type="Edm.String"/>
             <Property Name="serviceProvisioningErrors" Type="Collection(graph.serviceProvisioningError)"/>
             <Property Name="theme" Type="Edm.String"/>
+            <Property Name="uniqueName" Type="Edm.String"/>
             <Property Name="visibility" Type="Edm.String"/>
             <Property Name="allowExternalSenders" Type="Edm.Boolean"/>
             <Property Name="autoSubscribeNewMembers" Type="Edm.Boolean"/>
@@ -23338,6 +23350,20 @@
             <NavigationProperty Name="photo" Type="graph.profilePhoto" ContainsTarget="true"/>
             <NavigationProperty Name="photos" Type="Collection(graph.profilePhoto)" ContainsTarget="true"/>
             <NavigationProperty Name="team" Type="graph.team" ContainsTarget="true"/>
+            <Annotation Term="Org.OData.Core.V1.AlternateKeys">
+               <Collection>
+                  <Record Type="Org.OData.Core.V1.AlternateKey">
+                     <PropertyValue Property="Key">
+                        <Collection>
+                           <Record Type="Org.OData.Core.V1.PropertyRef">
+                              <PropertyValue Property="Alias" String="uniqueName"/>
+                              <PropertyValue Property="Name" PropertyPath="uniqueName"/>
+                           </Record>
+                        </Collection>
+                     </PropertyValue>
+                  </Record>
+               </Collection>
+            </Annotation>
          </EntityType>
          <EntityType Name="teamsAppInstallation" BaseType="graph.entity">
             <Property Name="consentedPermissionSet" Type="graph.teamsAppPermissionSet"/>
@@ -26287,6 +26313,7 @@
          <EntityType Name="attributeMappingFunctionSchema" BaseType="graph.entity">
             <Property Name="parameters" Type="Collection(graph.attributeMappingParameterSchema)"/>
          </EntityType>
+         <EntityType Name="bulkUpload" BaseType="graph.entity" HasStream="true"/>
          <EntityType Name="directoryDefinition" BaseType="graph.entity">
             <Property Name="discoverabilities" Type="graph.directoryDefinitionDiscoverabilities" Nullable="false"/>
             <Property Name="discoveryDateTime" Type="Edm.DateTimeOffset"/>
@@ -26305,6 +26332,7 @@
             <Property Name="status" Type="graph.synchronizationStatus"/>
             <Property Name="synchronizationJobSettings" Type="Collection(graph.keyValuePair)"/>
             <Property Name="templateId" Type="Edm.String"/>
+            <NavigationProperty Name="bulkUpload" Type="graph.bulkUpload" ContainsTarget="true"/>
             <NavigationProperty Name="schema" Type="graph.synchronizationSchema" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="synchronizationTemplate" BaseType="graph.entity">
@@ -26618,6 +26646,7 @@
             <NavigationProperty Name="internalSponsors" Type="Collection(graph.directoryObject)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="accessPackageResourceEnvironment" BaseType="graph.entity">
+            <Property Name="connectionInfo" Type="graph.connectionInfo"/>
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="description" Type="Edm.String"/>
             <Property Name="displayName" Type="Edm.String"/>

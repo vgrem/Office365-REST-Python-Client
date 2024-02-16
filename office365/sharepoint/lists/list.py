@@ -77,6 +77,15 @@ class List(SecurableObject):
     def __repr__(self):
         return self.id or self.title or self.entity_type_name
 
+    def clear(self):
+        """Clears the list."""
+
+        def _clear(items):
+            [item.delete_object() for item in items]
+
+        self.items.get().after_execute(_clear)
+        return self
+
     def create_document_and_get_edit_link(
         self,
         file_name=None,

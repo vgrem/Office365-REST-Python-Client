@@ -37,9 +37,10 @@ class TestGraphMail(GraphTestCase):
         self.assertIsNotNone(messages[0].resource_path)
 
     def test_6_update_message(self):
-        messages = self.client.me.messages.top(1).get().execute_query()
-        message_to_update = messages[0]
-        message_to_update.update().execute_query()
+        # messages = self.client.me.messages.top(1).get().execute_query()
+        # message_to_update = messages[0]
+        message = self.__class__.target_message
+        message.update().execute_query()
 
     def test_7_delete_message(self):
         messages = self.client.me.messages.top(1).get().execute_query()

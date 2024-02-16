@@ -104,7 +104,7 @@ class ServicePrincipal(DirectoryObject):
     def grant(self, app, app_role):
         # type: (Application|str, AppRole|str) -> Self
         """
-        Revokes an app role assignment to a client service principal
+        Grants an app role assignment to a client service principal
         :param Application or str app: Application object or app identifier
         :param AppRole or str app_role: AppRole object or name
         """

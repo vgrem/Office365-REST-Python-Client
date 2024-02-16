@@ -30,7 +30,7 @@ class Folder(Entity):
     """Represents a folder in a SharePoint Web site."""
 
     def __str__(self):
-        return self.name
+        return self.name or self.entity_type_name
 
     def __repr__(self):
         return self.serverRelativeUrl or self.unique_id or self.entity_type_name
@@ -69,14 +69,14 @@ class Folder(Entity):
 
         return_type = FolderCollection(self.context, self.folders.resource_path, self)
 
-        def _loaded(parent):
+        def _get_folders(parent):
             # type: ("Folder") -> None
             [return_type.add_child(f) for f in parent.folders]
             if recursive:
                 for folder in parent.folders:
-                    folder.ensure_properties(["Folders"], _loaded, parent=folder)
+                    folder.ensure_properties(["Folders"], _get_folders, parent=folder)
 
-        self.ensure_properties(["Folders"], _loaded, parent=self)
+        self.ensure_properties(["Folders"], _get_folders, parent=self)
         return return_type
 
     def get_files(self, recursive=False):
@@ -88,16 +88,16 @@ class Folder(Entity):
 
         return_type = FileCollection(self.context, self.files.resource_path, self)
 
-        def _loaded(parent):
+        def _get_files(parent):
             # type: ("Folder") -> None
             [return_type.add_child(f) for f in parent.files]
             if recursive:
                 for folder in parent.folders:
                     folder.ensure_properties(
-                        ["Files", "Folders"], _loaded, parent=folder
+                        ["Files", "Folders"], _get_files, parent=folder
                     )
 
-        self.ensure_properties(["Files", "Folders"], _loaded, parent=self)
+        self.ensure_properties(["Files", "Folders"], _get_files, parent=self)
         return return_type
 
     def get_sharing_information(self):
@@ -115,18 +115,17 @@ class Folder(Entity):
             where to move a folder.
         """
 
-        def _update_folder(url):
-            self.set_property("ServerRelativeUrl", url)
-
         def _move_to(destination_folder):
             # type: ("Folder") -> None
             destination_url = "/".join(
                 [destination_folder.serverRelativeUrl, self.name]
             )
             qry = ServiceOperationQuery(self, "MoveTo", {"newUrl": destination_url})
-            self.context.add_query(qry).after_query_execute(
-                _update_folder, destination_url
-            )
+
+            def _update_folder(return_type):
+                self.set_property("ServerRelativeUrl", destination_url)
+
+            self.context.add_query(qry).after_query_execute(_update_folder)
 
         def _source_folder_resolved():
             if isinstance(destination, Folder):
@@ -146,20 +145,19 @@ class Folder(Entity):
             where to move a folder.
         """
 
-        def _update_folder(url):
-            self.set_property("ServerRelativePath", url)
-
         def _move_to_using_path(destination_folder):
             # type: ("Folder") -> None
-            destination_url = "/".join(
+            destination_path = "/".join(
                 [str(destination_folder.server_relative_path), self.name]
             )
             qry = ServiceOperationQuery(
-                self, "MoveToUsingPath", {"DecodedUrl": destination_url}
+                self, "MoveToUsingPath", {"DecodedUrl": destination_path}
             )
-            self.context.add_query(qry).after_query_execute(
-                _update_folder, destination_url
-            )
+
+            def _update_folder(url):
+                self.set_property("ServerRelativePath", destination_path)
+
+            self.context.add_query(qry).after_query_execute(_update_folder)
 
         def _source_folder_resolved():
             if isinstance(destination, Folder):

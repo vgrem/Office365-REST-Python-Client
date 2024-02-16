@@ -103,7 +103,7 @@ class Message(OutlookItem):
         if a file that's smaller than 3 MB, then add_file_attachment method is utilized
 
         :param str file_path:
-        :param ()->None chunk_uploaded: Upload action
+        :param (int)->None chunk_uploaded: Upload action
         """
         max_upload_chunk = 1000000 * 3
         file_size = os.stat(file_path).st_size

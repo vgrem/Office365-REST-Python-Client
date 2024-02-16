@@ -1,8 +1,9 @@
 import abc
 from time import sleep
-from typing import TYPE_CHECKING, Any, AnyStr, Callable, List
+from typing import TYPE_CHECKING, AnyStr, Callable, List
 
 import requests
+from requests import Response
 from typing_extensions import Self
 
 from office365.runtime.client_request import ClientRequest
@@ -135,34 +136,33 @@ class ClientRuntimeContext(object):
         self.pending_request().beforeExecute += _process_request
         return self
 
-    def after_query_execute(self, action, *args, **kwargs):
-        # type: (Callable[..., None], Any, Any) -> Self
+    def after_query_execute(self, action, execute_first=False):
+        # type: (Callable[[T], None], bool) -> Self
         """Attach an event handler which is triggered after query is submitted to server"""
         if len(self._queries) == 0:
             return
         query = self._queries[-1]
 
         def _process_response(resp):
-            # type: (requests.Response) -> None
+            # type: (Response) -> None
             resp.raise_for_status()
             if self.current_query.id == query.id:
                 self.pending_request().afterExecute -= _process_response
-                action(*args, **kwargs)
+                action(query.return_type)
 
         self.pending_request().afterExecute += _process_response
 
-        execute_first = kwargs.pop("execute_first", False)
         if execute_first and len(self._queries) > 1:
             self._queries.insert(0, self._queries.pop())
 
         return self
 
     def after_execute(self, action, once=True):
-        # type: (Callable[[requests.Response], None], bool) -> Self
+        # type: (Callable[[Response], None], bool) -> Self
         """Attach an event handler which is triggered after request is submitted to server"""
 
         def _process_response(response):
-            # type: (requests.Response) -> None
+            # type: (Response) -> None
             if once:
                 self.pending_request().afterExecute -= _process_response
             action(response)
@@ -171,7 +171,7 @@ class ClientRuntimeContext(object):
         return self
 
     def execute_request_direct(self, path):
-        # type: (str) -> requests.Response
+        # type: (str) -> Response
         full_url = "".join([self.service_root_url(), "/", path])
         request = RequestOptions(full_url)
         return self.pending_request().execute_request_direct(request)

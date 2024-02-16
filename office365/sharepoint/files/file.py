@@ -59,10 +59,7 @@ class File(AbstractFile):
     or a file in a folder."""
 
     def __repr__(self):
-        if self.server_relative_path:
-            return repr(self.server_relative_path)
-        else:
-            return self.serverRelativeUrl or self.unique_id or self.entity_type_name
+        return self.serverRelativeUrl or self.unique_id or self.entity_type_name
 
     def __str__(self):
         return self.name or self.entity_type_name
@@ -332,19 +329,18 @@ class File(AbstractFile):
         :param int flag: Specifies the kind of move operation.
         """
 
-        def _update_file(return_type, new_file_url):
-            return_type.set_property("ServerRelativeUrl", new_file_url)
-
         def _moveto(destination_folder):
-            """
-            :type destination_folder: Folder
-            """
-            file_path = "/".join([str(destination_folder.serverRelativeUrl), self.name])
+            # type: (Folder) -> None
+            file_url = "/".join([str(destination_folder.serverRelativeUrl), self.name])
 
-            params = {"newurl": file_path, "flags": flag}
+            params = {"newurl": file_url, "flags": flag}
             qry = ServiceOperationQuery(self, "moveto", params)
             self.context.add_query(qry)
-            self.context.after_query_execute(_update_file, self, file_path)
+
+            def _update_file(return_type):
+                self.set_property("ServerRelativeUrl", file_url)
+
+            self.context.after_query_execute(_update_file)
 
         def _source_file_resolved():
             if isinstance(destination, Folder):
@@ -366,10 +362,6 @@ class File(AbstractFile):
         :param int flag: Specifies the kind of move operation.
         """
 
-        def _update_file(return_type, new_file_url):
-            # type: (File, str) -> None
-            return_type.set_property("ServerRelativePath", new_file_url)
-
         def _move_to_using_path(destination_folder):
             # type: (Folder) -> None
             file_path = "/".join(
@@ -377,9 +369,12 @@ class File(AbstractFile):
             )
             params = {"DecodedUrl": file_path, "moveOperations": flag}
             qry = ServiceOperationQuery(self, "MoveToUsingPath", params)
-            self.context.add_query(qry).after_query_execute(
-                _update_file, self, file_path
-            )
+
+            def _update_file(return_type):
+                # type: (File) -> None
+                self.set_property("ServerRelativePath", file_path)
+
+            self.context.add_query(qry).after_query_execute(_update_file)
 
         def _source_file_resolved():
             if isinstance(destination, Folder):

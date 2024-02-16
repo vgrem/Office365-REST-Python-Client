@@ -8,6 +8,6 @@ class AppRoleCollection(ClientValueCollection[AppRole]):
     def __init__(self, initial_values=None):
         super(AppRoleCollection, self).__init__(AppRole, initial_values)
 
-    def __getitem__(self, name):
+    def __getitem__(self, key):
         # type: (str) -> AppRole
-        return next(iter([item for item in self._data if item.value == name]), None)
+        return next(iter([item for item in self._data if item.value == key]), None)

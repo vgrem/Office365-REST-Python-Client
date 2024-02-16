@@ -35,12 +35,16 @@ resource = (
 
 
 # select specific appRole
-names = ["Directory.AccessAsUser.All", "ThreatHunting.Read.All"]
-app_role = resource.app_roles["Directory.AccessAsUser.All"]
+names = [
+    "Directory.AccessAsUser.All",
+    "ThreatHunting.Read.All",
+    "UserAuthenticationMethod.Read.All",
+]
+app_role = resource.app_roles["Policy.Read.All"]
 
 # Step 2: Grant an app role to a client app
 app = client.applications.get_by_app_id(test_client_id)
-resource.grant(app, app_role).execute_query()
+# resource.grant(app, app_role).execute_query()
 
 
 # Step 3. Print app role assignments

@@ -209,7 +209,8 @@ class DriveItem(BaseItem):
         :param int chunk_size: chunk size
         """
 
-        def _start_upload():
+        def _start_upload(result):
+            # type: (ClientResult[UploadSession]) -> None
             with open(source_path, "rb") as local_file:
                 session_request = UploadSessionRequest(
                     local_file, chunk_size, chunk_uploaded

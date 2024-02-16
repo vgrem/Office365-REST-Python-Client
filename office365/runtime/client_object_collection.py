@@ -1,4 +1,4 @@
-from typing import Any, Callable, Generic, Iterator, List, Optional, Type, TypeVar
+from typing import Callable, Generic, Iterator, List, Optional, Type, TypeVar
 
 from typing_extensions import Self
 
@@ -147,12 +147,6 @@ class ClientObjectCollection(ClientObject, Generic[T]):
             self.top(page_size)
         return self
 
-    def after_execute(self, action, *args, **kwargs):
-        # type: (Callable[[Self, Any, Any], None], Any, Any) -> Self
-        super(ClientObjectCollection, self).after_execute(action, *args, **kwargs)
-        self._page_loaded += action
-        return self
-
     def get(self):
         # type: () -> Self
 
@@ -160,39 +154,30 @@ class ClientObjectCollection(ClientObject, Generic[T]):
             # type: (Self) -> None
             self._page_loaded.notify(self)
 
-        self.context.load(self, after_loaded=_loaded)
+        self.context.load(self).after_query_execute(_loaded)
         return self
 
     def get_all(self, page_size=None, page_loaded=None):
         # type: (int, Callable[[Self], None]) -> Self
         """Gets all the items in a collection, regardless of the size."""
 
-        self.paged(page_size, page_loaded)
-
         def _page_loaded(col):
             # type: (Self) -> None
-            self._page_loaded.notify(col)
             if self.has_next:
-                self._get_next(after_loaded=_page_loaded)
+                self._get_next().after_execute(_page_loaded)
 
-        self.context.load(self, after_loaded=_page_loaded)
+        self.paged(page_size, page_loaded).get().after_execute(_page_loaded)
         return self
 
-    def _get_next(self, after_loaded=None):
-        # type: (Optional[EventHandler]) -> Self
-        """
-        Submit a request to retrieve next collection of items
-        :param (ClientObjectCollection) -> None after_loaded: Page loaded event
-        """
+    def _get_next(self):
+        # type: () -> Self
+        """Submit a request to retrieve next collection of items"""
 
         def _construct_request(request):
             # type: (RequestOptions) -> None
             request.url = self._next_request_url
 
-        self.context.load(
-            self, before_loaded=_construct_request, after_loaded=after_loaded
-        )
-        return self
+        return self.get().before_execute(_construct_request)
 
     def first(self, expression):
         # type: (str) -> T

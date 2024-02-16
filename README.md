@@ -168,7 +168,7 @@ The list of examples:
 
 - Working with lists and list items
   -  [create a list item](examples/sharepoint/lists/data_generator.py)
-  -  [read a list item](examples/sharepoint/lists/read_large.py)   
+  -  [read a list item](examples/sharepoint/lists/read_paged.py)   
   -  [update a list item](examples/sharepoint/listitems/update_batch.py)
   -  [delete a list item](examples/sharepoint/listitems/delete.py) 
   

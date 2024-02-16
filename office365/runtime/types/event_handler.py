@@ -35,7 +35,7 @@ class EventHandler:
 
     def notify(self, *args, **kwargs):
         # type: (Any, Any) -> None
-        for listener in self._listeners:
+        for listener in self._listeners[:]:
             if self._once:
                 self._listeners.remove(listener)
             listener(*args, **kwargs)

@@ -6,7 +6,7 @@ from office365.sharepoint.client_context import ClientContext
 from tests import test_team_site_url, test_user_credentials
 
 
-def generate_documents(context, amount):
+def run(context, amount):
     """
     :type context: ClientContext
     :type amount: int
@@ -36,38 +36,6 @@ def generate_documents(context, amount):
             print("File '{0}' has been uploaded".format(target_file.serverRelativeUrl))
 
 
-def generate_contacts(context, amount):
-    """
-    :type context: ClientContext
-    :type amount: int
-    """
-    contacts_list = context.web.lists.get_by_title("Contacts_Large")
-
-    fake = Faker()
-    for idx in range(0, amount):
-        contact_properties = {
-            "Title": fake.name(),
-            "FullName": fake.name(),
-            "Email": fake.email(),
-            "Company": fake.company(),
-            "WorkPhone": fake.phone_number(),
-            "WorkAddress": fake.street_address(),
-            "WorkCity": fake.city(),
-            "WorkZip": fake.postcode(),
-            "WorkCountry": fake.country(),
-            "WebPage": {"Url": fake.url()},
-        }
-        # contact_item = contacts_list.add_item(contact_properties).execute_query()
-        contact_item = contacts_list.add_item(contact_properties)
-        print(
-            "({0} of {1}) Contact '{2}' has been created".format(
-                idx, amount, contact_item.properties["Title"]
-            )
-        )
-    ctx.execute_batch()
-
-
 if __name__ == "__main__":
     ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
-    # generate_contacts(ctx, 5000)
-    generate_documents(ctx, 100)
+    run(ctx, 100)

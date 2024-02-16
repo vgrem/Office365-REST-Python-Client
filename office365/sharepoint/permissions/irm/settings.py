@@ -9,30 +9,29 @@ class InformationRightsManagementSettings(Entity):
 
     @property
     def allow_print(self):
-        """
-        Specifies whether a user can print the downloaded document.
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether a user can print the downloaded document."""
         return self.properties.get("AllowPrint", None)
 
     @property
     def allow_script(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether a user can run scripts on the downloaded document.
-        :rtype: bool or None
         """
         return self.properties.get("AllowScript", None)
 
     @property
     def allow_write_copy(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether a user can write in a copy of the downloaded document.
-        :rtype: bool or None
         """
         return self.properties.get("AllowWriteCopy", None)
 
     @property
     def disable_document_browser_view(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether a user can write in a copy of the downloaded document.
         :rtype: bool or None
@@ -41,14 +40,15 @@ class InformationRightsManagementSettings(Entity):
 
     @property
     def document_access_expire_days(self):
+        # type: () -> Optional[int]
         """
         Specifies the number of days after which the downloaded document will expire.
-        :rtype: int or None
         """
         return self.properties.get("DocumentAccessExpireDays", None)
 
     @property
     def document_library_protection_expire_date(self):
+        # type: () -> Optional[datetime.datetime]
         """
         Specifies the date on which the Information Rights Management (IRM) protection of this document library will
         stop.
@@ -59,17 +59,15 @@ class InformationRightsManagementSettings(Entity):
 
     @property
     def enable_document_access_expire(self):
-        """
-        Specifies whether the downloaded document will expire.
-        :rtype: int or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether the downloaded document will expire."""
         return self.properties.get("EnableDocumentAccessExpire", None)
 
     @property
     def enable_group_protection(self):
+        # type: () -> Optional[bool]
         """
         Specifies whether the permission of the downloaded document is applicable to a group.
-        :rtype: int or None
         """
         return self.properties.get("EnableGroupProtection", None)
 

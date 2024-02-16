@@ -48,11 +48,14 @@ class WorkbookFunctions(Entity):
     def days(self, start_date, end_date):
         """Returns the number of days between two dates.
 
-        :param datetime start_date: Two dates between which you want to know the number of days.
-        :param datetime end_date: Two dates between which you want to know the number of days.
+        :param datetime.datetime start_date: Two dates between which you want to know the number of days.
+        :param datetime.datetime end_date: Two dates between which you want to know the number of days.
         """
         return_type = WorkbookFunctionResult(self.context)
-        payload = {"startDate": start_date, "endDate": end_date}
+        payload = {
+            "startDate": start_date.isoformat() + "Z",
+            "endDate": end_date.isoformat() + "Z",
+        }
         qry = ServiceOperationQuery(self, "days", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type

@@ -335,6 +335,7 @@ class Tenant(Entity):
         return return_type
 
     def _poll_site_status(self, site_url, polling_interval_secs):
+        # type: (str, int) -> None
         states = [0, 1, 2]
         time.sleep(polling_interval_secs)
 

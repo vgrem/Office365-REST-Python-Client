@@ -38,8 +38,9 @@ class SearchEntity(Entity):
             # self.context.pending_request().map_json(search_hit.resource, resource)
             # search_hit.set_property("resource", resource)
 
-        def _process_response():
-            for item in return_type.value:
+        def _process_response(result):
+            # type: (ClientResult[ClientValueCollection[SearchResponse]]) -> None
+            for item in result.value:
                 for hcs in item.hitsContainers:
                     [_patch_hit(hit) for hit in hcs.hits]
 

@@ -7,6 +7,7 @@ from typing_extensions import Self
 
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.client_value import ClientValue
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.json_format import ODataJsonFormat
 from office365.runtime.odata.query_options import QueryOptions
 from office365.runtime.odata.type import ODataType
@@ -73,10 +74,16 @@ class ClientObject(Generic[T]):
         )
         return self
 
-    def after_execute(self, action):
-        # type: (Callable[[Self], None]) -> Self
+    def before_execute(self, action):
+        # type: (Callable[[RequestOptions], None]) -> Self
         """Attach an event handler to client object which gets triggered after query is submitted to server"""
-        self._context.after_query_execute(action, self)
+        self.context.before_execute(action)
+        return self
+
+    def after_execute(self, action, execute_first=False):
+        # type: (Callable[[Self], None], bool) -> Self
+        """Attach an event handler to client object which gets triggered after query is submitted to server"""
+        self.context.after_query_execute(action, execute_first)
         return self
 
     def get(self):
@@ -180,7 +187,11 @@ class ClientObject(Generic[T]):
             from office365.runtime.queries.read_entity import ReadEntityQuery
 
             qry = ReadEntityQuery(self, names_to_include)
-            self.context.add_query(qry).after_query_execute(action, *args, **kwargs)
+
+            def _after_loaded(return_type):
+                action(*args, **kwargs)
+
+            self.context.add_query(qry).after_query_execute(_after_loaded)
         else:
             action(*args, **kwargs)
         return self
