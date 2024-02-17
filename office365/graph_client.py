@@ -72,17 +72,31 @@ from office365.teams.collection import TeamCollection
 from office365.teams.template import TeamsTemplate
 from office365.teams.viva.employee_experience import EmployeeExperience
 
+environments_endpoints = {
+    "GCCH": {
+        "graph_url": "https://graph.microsoft.com",
+        "entra_url": "https://login.microsoftonline.com",
+    },
+    "GCC High": {
+        "graph_url": "https://graph.microsoft.us",
+        "entra_url": "https://login.microsoftonline.us",
+    },
+    "DoD": {
+        "graph_url": "https://dod-graph.microsoft.us",
+        "entra_url": "https://login.chinacloudapi.cn",
+    },
+}
+
 
 class GraphClient(ClientRuntimeContext):
     """Graph Service client"""
 
-    def __init__(self, acquire_token_callback, version="v1.0"):
-        # type: (Callable[[], dict], str) -> None
+    def __init__(self, acquire_token_callback, version="v1.0", environment="GCCH"):
+        # type: (Callable[[], dict], str, str) -> None
         super(GraphClient, self).__init__()
         self._pending_request = None
-        self._resource = "https://graph.microsoft.com"
         self._version = version
-        self._authority_host_url = "https://login.microsoftonline.com"
+        self._environment_endpoints = environments_endpoints.get(environment, None)
         self._acquire_token_callback = acquire_token_callback
 
     @staticmethod

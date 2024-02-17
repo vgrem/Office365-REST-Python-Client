@@ -9,15 +9,12 @@ class ChangeCollection(EntityCollection[Change]):
         super(ChangeCollection, self).__init__(context, Change, resource_path)
 
     def set_property(self, key, value, persist_changes=False):
-        self.resolve_change_type(value)
+        self._resolve_change_type(value)
         super(ChangeCollection, self).set_property(key, value)
 
-    def resolve_change_type(self, properties):
-        """
-        Resolves a change type
-
-        :type properties: dict
-        """
+    def _resolve_change_type(self, properties):
+        # type: (dict) -> None
+        """Resolves a change type"""
         from office365.sharepoint.changes.alert import ChangeAlert
         from office365.sharepoint.changes.content_type import ChangeContentType
         from office365.sharepoint.changes.field import ChangeField
@@ -27,10 +24,10 @@ class ChangeCollection(EntityCollection[Change]):
         from office365.sharepoint.changes.user import ChangeUser
         from office365.sharepoint.changes.web import ChangeWeb
 
-        if "ListId" in properties and "WebId" in properties:
-            self._item_type = ChangeList
-        elif "ItemId" in properties and "ListId" in properties:
+        if "ItemId" in properties and "ListId" in properties:
             self._item_type = ChangeItem
+        elif "ListId" in properties and "WebId" in properties:
+            self._item_type = ChangeList
         elif "WebId" in properties:
             self._item_type = ChangeWeb
         elif "UserId" in properties:

@@ -83,7 +83,7 @@ class List(SecurableObject):
         def _clear(items):
             [item.delete_object() for item in items]
 
-        self.items.get().after_execute(_clear)
+        self.items.get().after_execute(_clear, execute_first=True)
         return self
 
     def create_document_and_get_edit_link(
@@ -622,10 +622,11 @@ class List(SecurableObject):
         )
 
     def get_changes(self, query=None):
+        # type: (ChangeQuery) -> ChangeCollection
         """Returns the collection of changes from the change log that have occurred within the list,
            based on the specified query.
 
-        :param office365.sharepoint.changeQuery.ChangeQuery query: Specifies which changes to return
+        :param ChangeQuery query: Specifies which changes to return
         """
         if query is None:
             query = ChangeQuery(list_=True)
