@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
@@ -21,9 +23,8 @@ class PersonalCache(Entity):
 
     @property
     def cache_name(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """"""
         return self.properties.get("CacheName", None)
 
     @property

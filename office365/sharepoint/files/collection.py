@@ -45,7 +45,7 @@ class FileCollection(EntityCollection[File]):
     def upload_with_checksum(self, file_object, chunk_size=1024):
         # type: (IO, int) -> File
         """ """
-        h = hashlib.sha1()  # hashlib.md5()
+        h = hashlib.md5()
         file_name = os.path.basename(file_object.name)
         upload_id = str(uuid.uuid4())
 
@@ -53,9 +53,10 @@ class FileCollection(EntityCollection[File]):
             # type: (File) -> None
             content = file_object.read(chunk_size)
             h.update(content)
+
             return_type.upload_with_checksum(
                 upload_id, h.hexdigest(), content
-            ).after_execute(_upload_session)
+            )  # .after_execute(_upload_session)
 
         return self.add(file_name, None, True).after_execute(_upload_session)
 

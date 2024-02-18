@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -21,11 +23,8 @@ class UserProfilePropertiesForUser(Entity):
 
     @property
     def account_name(self):
-        """
-        The AccountName property specifies the account name of the user.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The AccountName property specifies the account name of the user."""
         return self.properties.get("AccountName", None)
 
     @property

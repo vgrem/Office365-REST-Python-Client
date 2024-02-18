@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -45,13 +47,12 @@ class SyncTranslator(Entity):
 
     @property
     def output_save_behavior(self):
+        # type: () -> Optional[int]
         """
         The protocol client sets this property to determine the behavior of the protocol server in the case that
         the output file already exists when a translation occurs.
 
         If the protocol client does not set this property, the AppendIfPossible (section 3.1.5.2.1.1) behavior is used.
-
-        :rtype: int or None
         """
         return self.properties.get("OutputSaveBehavior", None)
 

@@ -1,8 +1,11 @@
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.translation.user_resource import UserResource
+
+if TYPE_CHECKING:
+    from office365.sharepoint.navigation.node_collection import NavigationNodeCollection
 
 
 class NavigationNode(Entity):
@@ -20,10 +23,6 @@ class NavigationNode(Entity):
     @property
     def children(self):
         """Gets the collection of child nodes of the navigation node."""
-        from office365.sharepoint.navigation.node_collection import (
-            NavigationNodeCollection,
-        )
-
         return self.properties.get(
             "Children",
             NavigationNodeCollection(
@@ -67,9 +66,7 @@ class NavigationNode(Entity):
 
     @property
     def parent_collection(self):
-        """
-        :rtype: office365.sharepoint.navigation.node_collection.NavigationNodeCollection
-        """
+        # type: () -> NavigationNodeCollection
         return self._parent_collection
 
     @property

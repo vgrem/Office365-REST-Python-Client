@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.entity import Entity
@@ -12,41 +13,33 @@ class SharedWithMeDocument(Entity):
 
     @property
     def authors(self):
-        """
-        Specifies a list of users that authored the document.
-        """
+        # type: () -> ClientValueCollection[SharedWithMeDocumentUser]
+        """Specifies a list of users that authored the document."""
         return self.properties.get(
             "Authors", ClientValueCollection(SharedWithMeDocumentUser)
         )
 
     @property
     def caller_stack(self):
-        """
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """ """
         return self.properties.get("CallerStack", None)
 
     @property
     def content_type_id(self):
-        """
-        Specifies the identifier of the content type of the document.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Specifies the identifier of the content type of the document."""
         return self.properties.get("ContentTypeId", None)
 
     @property
     def doc_id(self):
-        """
-        Specifies the document identifier.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Specifies the document identifier."""
         return self.properties.get("DocId", None)
 
     @property
     def editors(self):
-        """
-        Specifies a list of users that can edit the document.
-        """
+        """Specifies a list of users that can edit the document."""
         return self.properties.get(
             "Editors", ClientValueCollection(SharedWithMeDocumentUser)
         )
@@ -58,10 +51,8 @@ class SharedWithMeDocument(Entity):
 
     @property
     def file_leaf_ref(self):
-        """
-        Specifies the name of the document.
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Specifies the name of the document."""
         return self.properties.get("FileLeafRef", None)
 
     @property

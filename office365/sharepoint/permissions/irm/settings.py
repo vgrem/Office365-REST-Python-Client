@@ -32,18 +32,13 @@ class InformationRightsManagementSettings(Entity):
     @property
     def disable_document_browser_view(self):
         # type: () -> Optional[bool]
-        """
-        Specifies whether a user can write in a copy of the downloaded document.
-        :rtype: bool or None
-        """
+        """Specifies whether a user can write in a copy of the downloaded document."""
         return self.properties.get("DisableDocumentBrowserView", None)
 
     @property
     def document_access_expire_days(self):
         # type: () -> Optional[int]
-        """
-        Specifies the number of days after which the downloaded document will expire.
-        """
+        """Specifies the number of days after which the downloaded document will expire."""
         return self.properties.get("DocumentAccessExpireDays", None)
 
     @property
@@ -66,9 +61,7 @@ class InformationRightsManagementSettings(Entity):
     @property
     def enable_group_protection(self):
         # type: () -> Optional[bool]
-        """
-        Specifies whether the permission of the downloaded document is applicable to a group.
-        """
+        """Specifies whether the permission of the downloaded document is applicable to a group."""
         return self.properties.get("EnableGroupProtection", None)
 
     @property

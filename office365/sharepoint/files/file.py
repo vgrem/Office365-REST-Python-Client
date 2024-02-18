@@ -129,6 +129,19 @@ class File(AbstractFile):
         self.context.add_query(qry)
         return return_type
 
+    def get_pre_authorized_access_url(self, expiration_hours):
+        # type: (int) -> ClientResult[str]
+        """Returns a link for downloading the file without authentication.
+        :param int expiration_hours: The number of hours until the link expires. If the maximum expiration time
+        defined in the web application is less than the specified expiration time, the maximum expiration time
+        takes precedence.
+        """
+        return_type = ClientResult(self.context, str())
+        params = {"expirationHours": expiration_hours}
+        qry = FunctionQuery(self, "GetPreAuthorizedAccessUrl", params, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def get_absolute_url(self):
         # type: () -> ClientResult[str]
         """Gets absolute url of a File"""
@@ -488,6 +501,7 @@ class File(AbstractFile):
         return return_type
 
     def upload_with_checksum(self, upload_id, checksum, stream):
+        # type: (str, str, bytes) -> File
         """
         :param str upload_id: The upload session ID.
         :param str checksum:

@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar
 from office365.entity import Entity
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.compat import is_string_type
-from office365.runtime.paths.item import ItemPath
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.v4.entity import EntityPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
@@ -43,7 +42,9 @@ class EntityCollection(ClientObjectCollection[T]):
     def add(self, **kwargs):
         # type: (Any) -> T
         """Creates an entity and prepares the query"""
-        return_type = self.create_typed_object(kwargs, ItemPath(self.resource_path))
+        return_type = self.create_typed_object(
+            kwargs, EntityPath(None, self.resource_path)
+        )
         self.add_child(return_type)
         qry = CreateEntityQuery(self, return_type, return_type)
         self.context.add_query(qry)

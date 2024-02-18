@@ -9,6 +9,12 @@ from office365.sharepoint.taxonomy.terms.term import Term
 class TermSet(TaxonomyItem):
     """Represents a hierarchical or flat set of Term objects known as a 'TermSet'."""
 
+    def __repr__(self):
+        if self.is_property_available("localizedNames"):
+            return repr(self.localized_names[0])
+        else:
+            return self.entity_type_name
+
     @property
     def localized_names(self):
         return self.properties.get(

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.sharepoint.entity import Entity
 
 
@@ -9,11 +11,11 @@ class WebPart(Entity):
 
     @property
     def zone_index(self):
+        # type: () -> Optional[int]
         """
         An integer that specifies the relative position of a Web Part in a Web Part zone.
         Web Parts are positioned from the smallest to the largest zone index. If two or more Web Parts have the
         same zone index they are positioned adjacent to each other in an undefined order
-        :rtype: int or None
         """
         return self.properties.get("ZoneIndex", None)
 

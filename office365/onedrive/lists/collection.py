@@ -1,6 +1,6 @@
 from office365.entity_collection import EntityCollection
 from office365.onedrive.lists.list import List
-from office365.runtime.paths.item import ItemPath
+from office365.runtime.paths.v4.entity import EntityPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
 
@@ -17,7 +17,7 @@ class ListCollection(EntityCollection[List]):
         :param str display_name: The displayable title of the list.
         :param str list_template: The base list template used in creating the list
         """
-        return_type = List(self.context, ItemPath(self.resource_path))
+        return_type = List(self.context, EntityPath(None, self.resource_path))
         self.add_child(return_type)
         payload = {
             "displayName": display_name,

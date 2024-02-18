@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.publishing.highlights_info import HighlightsInfo
 from office365.sharepoint.publishing.pages.page import SitePage
@@ -15,9 +17,8 @@ class CampaignPublication(SitePage):
 
     @property
     def email_endpoint(self):
-        """
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """"""
         return self.properties.get("EmailEndpoint", None)
 
     @property
