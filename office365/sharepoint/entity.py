@@ -2,6 +2,8 @@ from typing import TYPE_CHECKING, Callable
 
 from typing_extensions import Self
 
+from office365.runtime.auth.client_credential import ClientCredential
+from office365.runtime.auth.user_credential import UserCredential
 from office365.runtime.client_object import ClientObject
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
@@ -19,10 +21,8 @@ class Entity(ClientObject):
         return self.context.execute_batch(items_per_batch, success_callback)
 
     def with_credentials(self, credentials):
-        """
-        :type self: T
-        :type credentials:  UserCredential or ClientCredential
-        """
+        # type: (UserCredential|ClientCredential) -> Self
+        """ """
         self.context.with_credentials(credentials)
         return self
 

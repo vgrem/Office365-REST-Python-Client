@@ -6,7 +6,6 @@ from office365.runtime.compat import timezone, urlparse
 class STSProfile(object):
     def __init__(self, authority_url, environment):
         """
-
         :type authority_url: str
         """
         self.authorityUrl = authority_url

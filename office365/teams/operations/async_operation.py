@@ -38,9 +38,7 @@ class TeamsAsyncOperation(Entity):
         """
 
         def _poll_for_status(polling_number):
-            """
-            :type polling_number: int
-            """
+            # type: (int) -> None
             if polling_number > max_polling_count:
                 if callable(failure_callback):
                     failure_callback(self)
@@ -48,16 +46,16 @@ class TeamsAsyncOperation(Entity):
                     raise TypeError("The maximum polling count has been reached")
 
             def _verify_status(return_type):
-                if self.status != status_type:
+                if return_type.status != status_type:
                     time.sleep(polling_interval_secs)
                     _poll_for_status(polling_number + 1)
                 else:
                     if callable(success_callback):
-                        success_callback(self)
+                        success_callback(return_type)
 
-            self.context.load(self, after_loaded=_verify_status)
+            self.get().after_execute(_verify_status, execute_first=True)
 
-        self.ensure_property("id", _poll_for_status, 1)
+        _poll_for_status(1)
         return self
 
     @property

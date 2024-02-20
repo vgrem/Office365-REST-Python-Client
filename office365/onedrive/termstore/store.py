@@ -3,7 +3,6 @@ from typing import Optional
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.onedrive.termstore.groups.collection import GroupCollection
-from office365.onedrive.termstore.groups.group import Group
 from office365.onedrive.termstore.sets.collection import SetCollection
 from office365.onedrive.termstore.sets.set import Set
 from office365.runtime.paths.resource_path import ResourcePath
@@ -23,10 +22,9 @@ class Store(Entity):
 
         def _groups_loaded(groups):
             # type: (GroupCollection) -> None
-            for g in groups:
-                self.context.load(g.sets, after_loaded=_sets_loaded)
+            [grp.sets.get().after_execute(_sets_loaded) for grp in groups]
 
-        self.context.load(self.groups, after_loaded=_groups_loaded)
+        self.groups.get().after_execute(_groups_loaded)
 
         return return_type
 

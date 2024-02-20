@@ -31,3 +31,6 @@ class PasswordCredential(ClientValue):
         self.keyId = key_id
         self.startDateTime = start_datetime
         self.endDateTime = end_datetime
+
+    def __str__(self):
+        return self.displayName or self.entity_type_name

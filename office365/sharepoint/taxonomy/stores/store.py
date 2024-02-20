@@ -26,10 +26,12 @@ class TermStore(TaxonomyItem):
 
         def _groups_loaded(col):
             # type: (TermGroupCollection) -> None
-            for grp in col:
+            [
                 grp.get_term_sets_by_name(label, lcid).after_execute(_sets_loaded)
+                for grp in col
+            ]
 
-        self.context.load(self.term_groups, after_loaded=_groups_loaded)
+        self.term_groups.get().after_execute(_groups_loaded)
         return return_type
 
     def search_term(self, label, set_id=None, parent_term_id=None, language_tag=None):

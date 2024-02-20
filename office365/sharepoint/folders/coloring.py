@@ -1,5 +1,8 @@
+from typing_extensions import Self
+
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
+from office365.sharepoint.folders.coloring_information import FolderColoringInformation
 from office365.sharepoint.folders.folder import Folder
 
 
@@ -34,6 +37,7 @@ class FolderColoring(Entity):
         return return_type
 
     def stamp_color(self, decoded_url, coloring_information):
+        # type: (str, FolderColoringInformation) -> Self
         """
         :param str decoded_url:
         :param FolderColoringInformation coloring_information:
