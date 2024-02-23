@@ -212,13 +212,13 @@ class ListItem(SecurableObject):
 
         def _picker_value_resolved(picker_result):
             # type: (ClientResult) -> None
-            file_abs_url = self.get_property("EncodedAbsUrl")
+            abs_url = self.get_property("EncodedAbsUrl")
             picker_value = "[{0}]".format(picker_result.value)
             from office365.sharepoint.webs.web import Web
 
             Web.share_object(
                 self.context,
-                file_abs_url,
+                abs_url,
                 picker_value,
                 role_values[share_option],
                 0,

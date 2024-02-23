@@ -80,21 +80,11 @@ class ClientRuntimeContext(object):
         # type: () -> str
         pass
 
-    def load(
-        self,
-        client_object,
-        properties_to_retrieve=None,
-        before_loaded=None,
-        after_loaded=None,
-    ):
-        # type: (T, List[str], Callable[[RequestOptions], None], Callable[[T], None]) -> Self
+    def load(self, client_object, properties_to_retrieve=None):
+        # type: (T, List[str]) -> Self
         """Prepare retrieval query"""
         qry = ReadEntityQuery(client_object, properties_to_retrieve)
         self.add_query(qry)
-        if callable(before_loaded):
-            self.before_query_execute(before_loaded)
-        if callable(after_loaded):
-            self.after_query_execute(after_loaded, client_object)
         return self
 
     def before_query_execute(self, action, once=True):

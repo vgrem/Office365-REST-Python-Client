@@ -15,9 +15,7 @@ class SitesWithRoot(EntityCollection[Site]):
         super(SitesWithRoot, self).__init__(context, Site, resource_path)
 
     def get_all_sites(self):
-        """
-        List root sites across geographies in an organization.
-        """
+        """List root sites across geographies in an organization."""
         return_type = SitesWithRoot(self.context)
         qry = FunctionQuery(self, "getAllSites", return_type=return_type)
         self.context.add_query(qry)

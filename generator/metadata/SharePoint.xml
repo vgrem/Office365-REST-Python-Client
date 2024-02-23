@@ -168,24 +168,41 @@
             <Property Name="RoleValue" Type="Edm.Int32" Nullable="false"/>
             <Property Name="StatusCode" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
+         <ComplexType Name="AgreementDocument">
+            <Property Name="DocumentType" Type="Edm.String"/>
+            <Property Name="DocumentUrl" Type="Edm.String"/>
+            <Property Name="IsActive" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="LinkedPDFs" Type="Collection(Edm.String)"/>
+            <Property Name="State" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="AgreementESignStatusUpdatedPayload">
+            <Property Name="AgreementId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="ExternalReference" Type="Edm.Guid"/>
+            <Property Name="SignedDocId" Type="Edm.Guid"/>
+            <Property Name="Status" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="AgreementMetaData">
             <Property Name="AgreementNumber" Type="Edm.String"/>
             <Property Name="Category" Type="Edm.String"/>
             <Property Name="Country" Type="Edm.String"/>
             <Property Name="CreatedBy" Type="Edm.String"/>
             <Property Name="CreatedTime" Type="Edm.String"/>
+            <Property Name="Documents" Type="Collection(SP.AgreementDocument)"/>
             <Property Name="EndDate" Type="Edm.String"/>
             <Property Name="FirstParty" Type="Edm.String"/>
             <Property Name="Language" Type="Edm.String"/>
             <Property Name="Name" Type="Edm.String"/>
             <Property Name="Owner" Type="Edm.String"/>
             <Property Name="SecondParty" Type="Edm.String"/>
+            <Property Name="SiteId" Type="Edm.String"/>
             <Property Name="StartDate" Type="Edm.String"/>
             <Property Name="State" Type="Edm.String"/>
             <Property Name="TotalValue" Type="Edm.String"/>
             <Property Name="Url" Type="Edm.String"/>
+            <Property Name="WebId" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="AgreementSearchParameters">
+            <Property Name="AgreementNumber" Type="Edm.String"/>
             <Property Name="Category" Type="Edm.String"/>
             <Property Name="Owner" Type="Edm.String"/>
             <Property Name="RowLimit" Type="Edm.Int32" Nullable="false"/>
@@ -1335,6 +1352,11 @@
             <Property Name="Path" Type="SP.ResourcePath"/>
             <Property Name="Title" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="UpdateAgreementStatePayload">
+            <Property Name="AgreementUrl" Type="Edm.String"/>
+            <Property Name="CurrentState" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="NextState" Type="Edm.Int32" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="UpdateTemplateInfoV2">
             <Property Name="DeletedPlaceholderColumnIds" Type="Collection(Edm.String)"/>
             <Property Name="NewName" Type="Edm.String"/>
@@ -1383,14 +1405,23 @@
             <Property Name="Url" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="RulesDefinition">
+            <Property Name="ActionForInvalidRules" Type="Edm.String"/>
+            <Property Name="CategoryID" Type="Edm.String"/>
+            <Property Name="CreatedByUser" Type="SP.ReviewerInfo"/>
+            <Property Name="CreatedDateTime" Type="Edm.String"/>
+            <Property Name="IsActive" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="IsManual" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="ModifiedByUser" Type="SP.ReviewerInfo"/>
+            <Property Name="ModifiedDateTime" Type="Edm.String"/>
+            <Property Name="Risk" Type="Edm.Int32" Nullable="false"/>
             <Property Name="RuleGroup" Type="Edm.String"/>
             <Property Name="RuleId" Type="Edm.Int32" Nullable="false"/>
             <Property Name="RuleStatement" Type="Edm.String"/>
          </ComplexType>
-         <ComplexType Name="RulesAssignmentModelResponse">
-            <Property Name="CategoryTermGuid" Type="Edm.Guid" Nullable="false"/>
-            <Property Name="IsActive" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="Rules" Type="Collection(SP.RulesDefinition)"/>
+         <ComplexType Name="ReviewerInfo">
+            <Property Name="Email" Type="Edm.String"/>
+            <Property Name="Name" Type="Edm.String"/>
+            <Property Name="ReviewerId" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="RulesDefinitionGroup">
             <Property Name="RuleDefinitionsList" Type="Collection(SP.RulesDefinition)"/>
@@ -1402,11 +1433,6 @@
             <Property Name="LastUpdatedDateTime" Type="Edm.DateTime" Nullable="false"/>
             <Property Name="Reviewer" Type="SP.ReviewerInfo"/>
             <Property Name="Rule" Type="SP.RulesDefinition"/>
-         </ComplexType>
-         <ComplexType Name="ReviewerInfo">
-            <Property Name="Email" Type="Edm.String"/>
-            <Property Name="Name" Type="Edm.String"/>
-            <Property Name="ReviewerId" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
          <EntityType Name="ApiMetadata">
             <Key>
@@ -2656,6 +2682,7 @@
             </Key>
             <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
             <NavigationProperty Name="AppConfiguration" Relationship="SP.SP_EmployeeEngagement_AppConfiguration_SP_AppConfiguration_AppConfigurationPartner" ToRole="AppConfiguration" FromRole="AppConfigurationPartner"/>
+            <NavigationProperty Name="VivaConnectionsConfiguration" Relationship="Microsoft.SharePoint.EmployeeEngagement.SP_EmployeeEngagement_VivaConnectionsConfiguration_Microsoft_SharePoint_EmployeeEngagement_VivaConnectionsConfiguration_VivaConnectionsConfigurationPartner" ToRole="VivaConnectionsConfiguration" FromRole="VivaConnectionsConfigurationPartner"/>
             <NavigationProperty Name="VivaResources" Relationship="Microsoft.SharePoint.EmployeeEngagement.SP_EmployeeEngagement_VivaResources_Microsoft_SharePoint_EmployeeEngagement_VivaResources_VivaResourcesPartner" ToRole="VivaResources" FromRole="VivaResourcesPartner"/>
          </EntityType>
          <EntityType Name="EmployeeExperienceController">
@@ -3529,6 +3556,15 @@
             </Key>
             <Property Name="CorporateCatalogUrl" Type="Edm.String" Nullable="false"/>
             <NavigationProperty Name="Current" Relationship="SP.SP_TenantSettings_Current_SP_TenantSettings_CurrentPartner" ToRole="Current" FromRole="CurrentPartner"/>
+         </EntityType>
+         <EntityType Name="AppPrincipal">
+            <Key>
+               <PropertyRef Name="DisplayName"/>
+            </Key>
+            <Property Name="DisplayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="EndpointAuthorities" Type="Collection(Edm.String)"/>
+            <Property Name="NameIdentifier" Type="Edm.String"/>
+            <Property Name="RedirectAddresses" Type="Collection(Edm.String)"/>
          </EntityType>
          <EntityType Name="AppPrincipalIdentityProvider">
             <Key>
@@ -4520,6 +4556,7 @@
             <EntitySet Name="CommentsAPIs" EntityType="Microsoft.SharePoint.Comments.CommentsAPI"/>
             <EntitySet Name="MigrationCompleteStateApis" EntityType="Microsoft.SharePoint.Convergence.MigrationCompleteStateApi"/>
             <EntitySet Name="OdcMetadataCleanedUpApis" EntityType="Microsoft.SharePoint.Convergence.OdcMetadataCleanedUpApi"/>
+            <EntitySet Name="VivaConnectionsConfigurations" EntityType="Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsConfiguration"/>
             <EntitySet Name="VivaHomes" EntityType="Microsoft.SharePoint.EmployeeEngagement.VivaHome"/>
             <EntitySet Name="VivaResourceGetEndpoints" EntityType="Microsoft.SharePoint.EmployeeEngagement.VivaResourceGetEndpoint"/>
             <EntitySet Name="VivaResourcess" EntityType="Microsoft.SharePoint.EmployeeEngagement.VivaResources"/>
@@ -4746,6 +4783,7 @@
             <EntitySet Name="Groups1" EntityType="SP.Group"/>
             <EntitySet Name="InformationRightsManagementFileSettingss" EntityType="SP.InformationRightsManagementFileSettings"/>
             <EntitySet Name="InformationRightsManagementSettingss" EntityType="SP.InformationRightsManagementSettings"/>
+            <EntitySet Name="AgreementsESignManagers" EntityType="SP.Internal.AgreementsESignManager"/>
             <EntitySet Name="ApprovalsManagers" EntityType="SP.Internal.ApprovalsManager"/>
             <EntitySet Name="FlowPermissionss" EntityType="SP.Internal.FlowPermissions"/>
             <EntitySet Name="FormsCustomizations" EntityType="SP.Internal.FormsCustomization"/>
@@ -5771,9 +5809,6 @@
             <FunctionImport Name="GetExtractorNames" ReturnType="Collection(Edm.String)" IsSideEffecting="false" IsBindable="true">
                <Parameter Name="this" Type="Collection(Microsoft.Office.Server.ContentCenter.SPMachineLearningModel)"/>
                <Parameter Name="packageName" Type="Edm.String"/>
-            </FunctionImport>
-            <FunctionImport Name="GetSupportedPrebuiltModels" ReturnType="Collection(Microsoft.Office.Server.ContentCenter.PrebuiltModelInfo)" IsSideEffecting="false" IsBindable="true">
-               <Parameter Name="this" Type="Collection(Microsoft.Office.Server.ContentCenter.SPMachineLearningModel)"/>
             </FunctionImport>
             <FunctionImport Name="Import" ReturnType="Microsoft.Office.Server.ContentCenter.SPMachineLearningModel" IsBindable="true" EntitySet="Models">
                <Parameter Name="this" Type="Collection(Microsoft.Office.Server.ContentCenter.SPMachineLearningModel)"/>
@@ -9856,6 +9891,7 @@
                <Parameter Name="eventName" Type="Edm.String"/>
                <Parameter Name="payload" Type="Collection(SP.KeyValue)"/>
             </FunctionImport>
+            <EntitySet Name="AppPrincipals" EntityType="SP.AppPrincipal"/>
             <EntitySet Name="AppPrincipalIdentityProviders" EntityType="SP.AppPrincipalIdentityProvider"/>
             <EntitySet Name="AppPrincipalManagers" EntityType="SP.AppPrincipalManager"/>
             <FunctionImport Name="CheckLicense" ReturnType="SP.AppLicenseCollection" IsBindable="true">
@@ -11345,6 +11381,13 @@
             <FunctionImport Name="UpdateLink" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.EmployeeEngagement.VivaResources"/>
                <Parameter Name="updatedLink" Type="Microsoft.SharePoint.EmployeeEngagement.VivaResourceLink"/>
+            </FunctionImport>
+            <FunctionImport Name="GetConfiguration" ReturnType="Microsoft.SharePoint.EmployeeEngagement.ConnectionsConfiguration" IsSideEffecting="false" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsConfiguration"/>
+            </FunctionImport>
+            <FunctionImport Name="SetConfiguration" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsConfiguration"/>
+               <Parameter Name="configuration" Type="Microsoft.SharePoint.EmployeeEngagement.ConnectionsConfiguration"/>
             </FunctionImport>
             <FunctionImport Name="AddImage" ReturnType="SP.File" IsBindable="true" EntitySet="Files12">
                <Parameter Name="this" Type="Microsoft.SharePoint.EmployeeEngagement.VivaHome"/>
@@ -13195,6 +13238,9 @@
                <Parameter Name="itemId" Type="Edm.Int32" Nullable="false"/>
                <Parameter Name="fieldId" Type="Edm.String"/>
                <Parameter Name="overwrite" Type="Edm.Boolean" Nullable="false"/>
+            </FunctionImport>
+            <FunctionImport Name="SP_Internal_AgreementsESignManager_AgreementESignStatusUpdated">
+               <Parameter Name="payload" Type="SP.AgreementESignStatusUpdatedPayload"/>
             </FunctionImport>
             <FunctionImport Name="SP_Internal_ApprovalsManager_OnRequestUpdated"/>
             <FunctionImport Name="SP_Broker_AcquireOBOToken" ReturnType="Edm.String" IsSideEffecting="false">
@@ -16124,7 +16170,7 @@
             </FunctionImport>
             <FunctionImport Name="AddSPORestrictedSearchAllowedList" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
-               <Parameter Name="siteIds" Type="Collection(Edm.Guid)" Nullable="false"/>
+               <Parameter Name="siteUrls" Type="Collection(Edm.String)"/>
             </FunctionImport>
             <FunctionImport Name="AddTenantAdminListItem" ReturnType="SP.ListItem" IsBindable="true" EntitySet="ListItems">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -16532,7 +16578,7 @@
             </FunctionImport>
             <FunctionImport Name="RemoveSPORestrictedSearchAllowedList" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
-               <Parameter Name="siteIds" Type="Collection(Edm.Guid)" Nullable="false"/>
+               <Parameter Name="siteUrls" Type="Collection(Edm.String)"/>
             </FunctionImport>
             <FunctionImport Name="RemoveTargetedSite" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -17358,6 +17404,10 @@
             <AssociationSet Name="SP_EmployeeEngagement_AppConfiguration_SP_AppConfiguration_AppConfigurationPartnerSet" Association="SP.SP_EmployeeEngagement_AppConfiguration_SP_AppConfiguration_AppConfigurationPartner">
                <End Role="AppConfigurationPartner" EntitySet="EEs"/>
                <End Role="AppConfiguration" EntitySet="AppConfigurations"/>
+            </AssociationSet>
+            <AssociationSet Name="SP_EmployeeEngagement_VivaConnectionsConfiguration_Microsoft_SharePoint_EmployeeEngagement_VivaConnectionsConfiguration_VivaConnectionsConfigurationPartnerSet" Association="Microsoft.SharePoint.EmployeeEngagement.SP_EmployeeEngagement_VivaConnectionsConfiguration_Microsoft_SharePoint_EmployeeEngagement_VivaConnectionsConfiguration_VivaConnectionsConfigurationPartner">
+               <End Role="VivaConnectionsConfigurationPartner" EntitySet="EEs"/>
+               <End Role="VivaConnectionsConfiguration" EntitySet="VivaConnectionsConfigurations"/>
             </AssociationSet>
             <AssociationSet Name="SP_EmployeeEngagement_VivaResources_Microsoft_SharePoint_EmployeeEngagement_VivaResources_VivaResourcesPartnerSet" Association="Microsoft.SharePoint.EmployeeEngagement.SP_EmployeeEngagement_VivaResources_Microsoft_SharePoint_EmployeeEngagement_VivaResources_VivaResourcesPartner">
                <End Role="VivaResourcesPartner" EntitySet="EEs"/>
@@ -19626,15 +19676,6 @@
          <Annotations Target="Microsoft.Office.Server.ContentCenter.ColumnDef/Type">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="Microsoft.Office.Server.ContentCenter.PrebuiltModelInfo">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
-         <Annotations Target="Microsoft.Office.Server.ContentCenter.PrebuiltModelInfo/FormRecognizerApiVersion">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
-         <Annotations Target="Microsoft.Office.Server.ContentCenter.PrebuiltModelInfo/FormRecognizerPrebuiltModelName">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
          <Annotations Target="Microsoft.Office.Server.ContentCenter.SiteCreationProperties">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -20661,6 +20702,15 @@
          <Annotations Target="SP.ResourcePath/DecodedUrl">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="Microsoft.SharePoint.EmployeeEngagement.ConnectionsConfiguration">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.EmployeeEngagement.SpotlightConfiguration">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.EmployeeEngagement.SpotlightPinnedNews">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="Microsoft.SharePoint.EmployeeEngagement.DashboardConfiguration">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -20737,9 +20787,6 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.SharePoint.Administration.OrgAssets">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
-         <Annotations Target="Microsoft.SharePoint.Administration.TenantAdmin.CopilotRestrictedSearchSetting">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.SharePoint.Administration.TenantAdmin.InsightsSummaryResponse">
@@ -21358,6 +21405,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Sharing.SharingInformationRequest">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Sharing.SharingInformationRequest/maxLinkMembersToReturn">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Sharing.SharingLinkAccessRequest">
@@ -22039,6 +22089,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.Office.Server.ContentCenter.SPMachineLearningModelEntityData/LastTrained">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPMachineLearningModelEntityData/Locale">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.Office.Server.ContentCenter.SPMachineLearningModelEntityData/ModelName">
@@ -23494,6 +23547,9 @@
          <Annotations Target="SP.EmployeeEngagement">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsConfiguration">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="Microsoft.SharePoint.EmployeeEngagement.VivaResources">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -23552,6 +23608,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.SharePoint.AddToOneDrive.placesInformation">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Internal.AgreementsESignManager">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApprovalRequest">
@@ -24383,9 +24442,6 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/GetExtractorNames(Collection(Microsoft.Office.Server.ContentCenter.SPMachineLearningModel), Edm.String)">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
-         <Annotations Target="SP.ApiData/GetSupportedPrebuiltModels(Collection(Microsoft.Office.Server.ContentCenter.SPMachineLearningModel))">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/Import(Collection(Microsoft.Office.Server.ContentCenter.SPMachineLearningModel), Edm.String)">
@@ -25999,6 +26055,12 @@
          <Annotations Target="SP.ApiData/UpdateLink(Microsoft.SharePoint.EmployeeEngagement.VivaResources, Microsoft.SharePoint.EmployeeEngagement.VivaResourceLink)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.ApiData/GetConfiguration(Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsConfiguration)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/SetConfiguration(Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsConfiguration, Microsoft.SharePoint.EmployeeEngagement.ConnectionsConfiguration)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.ApiData/AddImage(Microsoft.SharePoint.EmployeeEngagement.VivaHome, Edm.String, Edm.Stream)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -26396,6 +26458,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/UploadImage(SP.Web, Edm.String, Edm.String, Edm.Stream, Edm.String, Edm.Int32, Edm.String, Edm.Boolean)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/SP_Internal_AgreementsESignManager_AgreementESignStatusUpdated(SP.AgreementESignStatusUpdatedPayload)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SP_Internal_ApprovalsManager_OnRequestUpdated()">
@@ -27406,10 +27471,6 @@
             <Property Name="Name" Type="Edm.String"/>
             <Property Name="Type" Type="Edm.String"/>
          </ComplexType>
-         <ComplexType Name="PrebuiltModelInfo">
-            <Property Name="FormRecognizerApiVersion" Type="Edm.String"/>
-            <Property Name="FormRecognizerPrebuiltModelName" Type="Edm.String"/>
-         </ComplexType>
          <ComplexType Name="SiteCreationProperties">
             <Property Name="CompatibilityLevel" Type="Edm.Int32" Nullable="false"/>
             <Property Name="Lcid" Type="Edm.String"/>
@@ -27640,6 +27701,7 @@
             <Property Name="ContentTypeName" Type="Edm.String"/>
             <Property Name="Explanations" Type="Edm.String"/>
             <Property Name="LastTrained" Type="Edm.DateTime"/>
+            <Property Name="Locale" Type="Edm.String"/>
             <Property Name="ModelName" Type="Edm.String"/>
             <Property Name="ModelSettings" Type="Edm.String"/>
             <Property Name="ModelType" Type="Edm.String"/>
@@ -27905,6 +27967,7 @@
             <Property Name="ErrorMessage" Type="Edm.String"/>
             <Property Name="FinishedDateInUtc" Type="Edm.DateTime" Nullable="false"/>
             <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="IsReadOnlyAlertRaised" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="JobPhase" Type="Edm.Int32" Nullable="false"/>
             <Property Name="Notify" Type="Edm.String"/>
             <Property Name="Option" Type="Edm.Int32" Nullable="false"/>
@@ -34060,6 +34123,12 @@
             </Key>
             <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
          </EntityType>
+         <EntityType Name="AgreementsESignManager" Abstract="true">
+            <Key>
+               <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
+            </Key>
+            <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
+         </EntityType>
          <EntityType Name="ApprovalsManager" Abstract="true">
             <Key>
                <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
@@ -34196,6 +34265,19 @@
          </ComplexType>
       </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.EmployeeEngagement">
+         <ComplexType Name="ConnectionsConfiguration">
+            <Property Name="SpotlightConfiguration" Type="Microsoft.SharePoint.EmployeeEngagement.SpotlightConfiguration"/>
+         </ComplexType>
+         <ComplexType Name="SpotlightConfiguration">
+            <Property Name="NewsSource" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="PinnedNews" Type="Collection(Microsoft.SharePoint.EmployeeEngagement.SpotlightPinnedNews)"/>
+            <Property Name="SelectedOrganizations" Type="Collection(Edm.String)"/>
+         </ComplexType>
+         <ComplexType Name="SpotlightPinnedNews">
+            <Property Name="ImageURL" Type="Edm.String"/>
+            <Property Name="Title" Type="Edm.String"/>
+            <Property Name="URL" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="DashboardConfiguration">
             <Property Name="canvasContent" Type="Edm.String"/>
             <Property Name="dashboardUrl" Type="Edm.String"/>
@@ -34209,6 +34291,12 @@
             <Property Name="Title" Type="Edm.String"/>
             <Property Name="Url" Type="Edm.String"/>
          </ComplexType>
+         <EntityType Name="VivaConnectionsConfiguration">
+            <Key>
+               <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
+            </Key>
+            <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
+         </EntityType>
          <EntityType Name="VivaResources">
             <Key>
                <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
@@ -34228,6 +34316,10 @@
             <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
             <Property Name="CompanyLinks" Type="Collection(Microsoft.SharePoint.EmployeeEngagement.VivaResourceLink)"/>
          </EntityType>
+         <Association Name="SP_EmployeeEngagement_VivaConnectionsConfiguration_Microsoft_SharePoint_EmployeeEngagement_VivaConnectionsConfiguration_VivaConnectionsConfigurationPartner">
+            <End Type="Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsConfiguration" Role="VivaConnectionsConfiguration" Multiplicity="0..1"/>
+            <End Type="SP.EmployeeEngagement" Role="VivaConnectionsConfigurationPartner" Multiplicity="0..1"/>
+         </Association>
          <Association Name="SP_EmployeeEngagement_VivaResources_Microsoft_SharePoint_EmployeeEngagement_VivaResources_VivaResourcesPartner">
             <End Type="Microsoft.SharePoint.EmployeeEngagement.VivaResources" Role="VivaResources" Multiplicity="0..1"/>
             <End Type="SP.EmployeeEngagement" Role="VivaResourcesPartner" Multiplicity="0..1"/>
@@ -34695,10 +34787,6 @@
             <Property Name="totalOneDrives" Type="Edm.Int32" Nullable="false"/>
             <Property Name="totalSites" Type="Edm.Int32" Nullable="false"/>
             <Property Name="totalUsers" Type="Edm.Int32" Nullable="false"/>
-         </ComplexType>
-         <ComplexType Name="CopilotRestrictedSearchSetting">
-            <Property Name="AllowedSiteIds" Type="Collection(Edm.Guid)" Nullable="false"/>
-            <Property Name="Stage" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="GroupSitesActivityDetail">
             <Property Name="GroupId" Type="Edm.Guid" Nullable="false"/>
@@ -35234,6 +35322,7 @@
          </ComplexType>
          <ComplexType Name="SharingInformationRequest">
             <Property Name="clientSupportedFeatures" Type="Edm.String"/>
+            <Property Name="maxLinkMembersToReturn" Type="Edm.Int32" Nullable="false"/>
             <Property Name="maxPrincipalsToReturn" Type="Edm.Int32" Nullable="false"/>
             <Property Name="populateInheritedLinks" Type="Edm.Boolean" Nullable="false"/>
          </ComplexType>
@@ -36270,10 +36359,10 @@
             <Property Name="Classification" Type="Edm.Int32" Nullable="false"/>
             <Property Name="ContainerTypeId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="ContainerTypeName" Type="Edm.String"/>
-            <Property Name="IsDiscoverablilityDisabled" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="IsMoveDisabled" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="IsRenameDisabled" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="IsSharingRestricted" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="IsDiscoverablilityDisabled" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="IsMoveDisabled" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="IsRenameDisabled" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="IsSharingRestricted" Type="Edm.Int32" Nullable="false"/>
             <Property Name="OwningAppId" Type="Edm.Guid" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="SPContainerTypeProperties">

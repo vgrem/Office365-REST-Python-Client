@@ -18,6 +18,7 @@ from office365.sharepoint.fields.xmlSchemaFieldCreationInformation import (
 )
 from office365.sharepoint.taxonomy.field import TaxonomyField
 from office365.sharepoint.taxonomy.sets.set import TermSet
+from office365.sharepoint.taxonomy.stores.store import TermStore
 
 
 class FieldCollection(EntityCollection[Field]):
@@ -267,6 +268,7 @@ class FieldCollection(EntityCollection[Field]):
         else:
 
             def _term_store_loaded(term_store):
+                # type: (TermStore) -> None
                 TaxonomyField.create(
                     self,
                     name,
@@ -276,9 +278,10 @@ class FieldCollection(EntityCollection[Field]):
                     return_type=return_type,
                 )
 
-            self.context.load(
-                self.context.taxonomy.term_store, after_loaded=_term_store_loaded
+            self.context.load(self.context.taxonomy.term_store).after_query_execute(
+                _term_store_loaded
             )
+
         return return_type
 
     def create_field_as_xml(self, schema_xml, return_type=None):

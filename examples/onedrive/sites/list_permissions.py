@@ -4,12 +4,11 @@ https://learn.microsoft.com/en-us/graph/api/site-list-permissions?view=graph-res
 """
 
 from office365.graph_client import GraphClient
-from tests import test_team_site_url
-from tests.graph_case import acquire_token_by_client_credentials
+from tests import test_client_id, test_client_secret, test_team_site_url, test_tenant
 
-client = GraphClient(acquire_token_by_client_credentials)
+client = GraphClient.with_client_secret(test_tenant, test_client_id, test_client_secret)
 permissions = (
     client.sites.get_by_url(test_team_site_url).permissions.get().execute_query()
 )
 for perm in permissions:
-    print(perm.granted_to)
+    print("Roles: {0}, Granted to: {1}".format(perm.roles, perm.granted_to))

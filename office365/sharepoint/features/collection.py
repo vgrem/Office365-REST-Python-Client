@@ -36,8 +36,7 @@ class FeatureCollection(EntityCollection[Feature]):
                 self.context.add_query(_create_query())
 
         if verify_if_activated:
-            feature = self.get_by_id(feature_id)
-            self.context.load(feature, after_loaded=_create_if_not_activated)
+            self.get_by_id(feature_id).get().after_execute(_create_if_not_activated)
         else:
             self.context.add_query(_create_query())
 

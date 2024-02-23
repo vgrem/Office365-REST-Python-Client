@@ -31,7 +31,7 @@ class TermGroup(TaxonomyItem):
             ]
 
         def _group_resolved():
-            self.context.load(self.term_sets, after_loaded=_sets_loaded)
+            self.term_sets.get().after_execute(_sets_loaded)
 
         self.ensure_property("id", _group_resolved)
         return return_type

@@ -149,7 +149,7 @@ class GraphClient(ClientRuntimeContext):
         :param str client_secret: Client secret
         :param list[str] or None scopes: Scopes requested to access an API
         :param Any token_cache: Default cache is in memory only,
-        Refer https://msal-python.readthedocs.io/en/latest/#msal.SerializableTokenCache
+             Refer https://msal-python.readthedocs.io/en/latest/#msal.SerializableTokenCache
         """
         if scopes is None:
             scopes = ["https://graph.microsoft.com/.default"]

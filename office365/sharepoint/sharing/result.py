@@ -91,6 +91,7 @@ class SharingResult(Entity):
             property_mapping = {
                 "GroupsSharedWith": self.groups_shared_with,
                 "UsersAddedToGroup": self.users_added_to_group,
+                "UniquelyPermissionedUsers": self.uniquely_permissioned_users,
             }
             default_value = property_mapping.get(name, None)
         return super(SharingResult, self).get_property(name, default_value)

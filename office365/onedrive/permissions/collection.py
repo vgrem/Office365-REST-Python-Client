@@ -69,19 +69,6 @@ class PermissionCollection(EntityCollection[Permission]):
         identity.ensure_properties(["displayName"], _add)
         return return_type
 
-    def delete(self, roles, identity):
-        # type: (list[str], Application|User|Group|Device) -> Permission
-        """Deletes the permission."""
-
-        def _delete(col):
-            pass
-
-        def _identity_loaded():
-            self.get_all(page_loaded=_delete)
-
-        identity.ensure_property("id", _identity_loaded)
-        return self
-
     def delete_all(self):
         """Remove all access to resource"""
 
@@ -90,5 +77,5 @@ class PermissionCollection(EntityCollection[Permission]):
             for permission in return_type:
                 permission.delete_object()
 
-        self.context.load(self, after_loaded=_after_loaded)
+        self.get().after_execute(_after_loaded)
         return self
