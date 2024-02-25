@@ -40,11 +40,16 @@ class TestSite(GraphTestCase):
         pass
 
     def test7_get_applicable_content_types_for_list(self):
-        my_site = self.client.sites.root
-        doc_lib = my_site.lists["Documents"].get().execute_query()
-        cts = my_site.get_applicable_content_types_for_list(doc_lib.id).execute_query()
+        site = self.client.sites.root
+        doc_lib = site.lists["Documents"].get().execute_query()
+        cts = site.get_applicable_content_types_for_list(doc_lib.id).execute_query()
         self.assertIsNotNone(cts.resource_path)
 
     def test8_get_operations(self):
         ops = self.client.sites.root.operations.get().execute_query()
         self.assertIsNotNone(ops.resource_path)
+
+    def test9_get_analytics(self):
+        site = self.client.sites.root
+        result = site.analytics.last_seven_days.get().execute_query()
+        self.assertIsNotNone(result.resource_path)

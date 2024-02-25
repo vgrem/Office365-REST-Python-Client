@@ -65,3 +65,12 @@ class ItemActivityStat(Entity):
                 ResourcePath("activities", self.resource_path),
             ),
         )
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "endDateTime": self.end_datetime,
+                "startDateTime": self.start_datetime,
+            }
+            default_value = property_mapping.get(name, None)
+        return super(ItemActivityStat, self).get_property(name, default_value)

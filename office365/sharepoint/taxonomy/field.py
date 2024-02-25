@@ -10,6 +10,20 @@ from office365.sharepoint.taxonomy.create_xml_parameters import (
 class TaxonomyField(FieldLookup):
     """Represents a taxonomy field."""
 
+    def set_field_value_by_value(self, item, tax_value):
+        """
+        Sets the value of the corresponding field in the list item to the value of the specified TaxonomyFieldValue
+        :param ListItem item: The ListItem object whose field is to be updated.
+        :param TaxonomyFieldValue tax_value:  The TaxonomyFieldValue object whose value is to be used to
+            update this field.
+        """
+
+        def _set_field_value_by_value():
+            item.set_property(self.internal_name, tax_value)
+
+        self.ensure_property("InternalName", _set_field_value_by_value)
+        return self
+
     @staticmethod
     def create(
         fields,

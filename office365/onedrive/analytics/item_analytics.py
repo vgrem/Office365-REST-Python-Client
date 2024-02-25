@@ -19,6 +19,7 @@ class ItemAnalytics(Entity):
 
     @property
     def item_activity_stats(self):
+        # type: () -> EntityCollection[ItemActivityStat]
         return self.properties.get(
             "itemActivityStats",
             EntityCollection(

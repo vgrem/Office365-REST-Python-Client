@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
@@ -19,6 +19,10 @@ from office365.sharepoint.fields.xmlSchemaFieldCreationInformation import (
 from office365.sharepoint.taxonomy.field import TaxonomyField
 from office365.sharepoint.taxonomy.sets.set import TermSet
 from office365.sharepoint.taxonomy.stores.store import TermStore
+
+if TYPE_CHECKING:
+    from office365.sharepoint.lists.list import List
+    from office365.sharepoint.webs.web import Web
 
 
 class FieldCollection(EntityCollection[Field]):
@@ -147,8 +151,6 @@ class FieldCollection(EntityCollection[Field]):
                     ),
                     return_type=return_type,
                 )
-
-        from office365.sharepoint.lists.list import List
 
         if isinstance(lookup_list, List):
 
@@ -312,7 +314,7 @@ class FieldCollection(EntityCollection[Field]):
         )
 
     def get_by_internal_name_or_title(self, value):
-        """Returns the first field (2) in the collection based on the internal name or the title specified
+        """Returns the first field in the collection based on the internal name or the title specified
         by the parameter.
 
         :param str value:  The title or internal name to look up the field (2) by.
@@ -334,3 +336,8 @@ class FieldCollection(EntityCollection[Field]):
             self.context,
             ServiceOperationPath("getByTitle", [title], self.resource_path),
         )
+
+    @property
+    def parent(self):
+        # type: () -> Web|List
+        return self._parent

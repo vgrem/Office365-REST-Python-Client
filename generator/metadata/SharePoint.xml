@@ -39966,6 +39966,7 @@
             <Property Name="TextColumnCNU6FEFD" Type="Edm.String"/>
             <Property Name="TextColumnG5FNNYDX" Type="Edm.String"/>
             <Property Name="TextColumn4164USLJ" Type="Edm.String"/>
+            <Property Name="MediaServiceSearchProperties" Type="Edm.String"/>
             <Property Name="ID" Type="Edm.Int32"/>
             <Property Name="Created" Type="Edm.DateTime"/>
             <Property Name="AuthorId" Type="Edm.Int32"/>

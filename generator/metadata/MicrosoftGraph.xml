@@ -4500,6 +4500,15 @@
             <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="false"/>
             <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="true"/>
          </Annotations>
+         <Annotations Target="microsoft.graph.relyingPartyDetailedSummary">
+            <Annotation Term="Org.OData.Capabilities.V1.FilterRestrictions">
+               <Record>
+                  <PropertyValue Property="Filterable" Bool="true"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="false"/>
+            <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="true"/>
+         </Annotations>
          <Annotations Target="microsoft.graph.servicePrincipal">
             <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
                <Record>
@@ -4601,6 +4610,50 @@
                </Record>
             </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="false"/>
+            <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="false"/>
+            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+               <Record>
+                  <PropertyValue Property="Updatable" Bool="false"/>
+               </Record>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.policyRoot/deviceRegistrationPolicy">
+            <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
+               <Record>
+                  <PropertyValue Property="Countable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
+               <Record>
+                  <PropertyValue Property="Deletable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
+               <Record>
+                  <PropertyValue Property="Expandable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.FilterRestrictions">
+               <Record>
+                  <PropertyValue Property="Filterable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
+               <Record>
+                  <PropertyValue Property="Insertable" Bool="true"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.NavigationRestrictions">
+               <Record>
+                  <PropertyValue Property="Referenceable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="false"/>
+            <Annotation Term="Org.OData.Capabilities.V1.SortRestrictions">
+               <Record>
+                  <PropertyValue Property="Sortable" Bool="false"/>
+               </Record>
+            </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="false"/>
             <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
                <Record>
@@ -14876,6 +14929,9 @@
          <Annotations Target="microsoft.graph.usedInsight/resourceVisualization">
             <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
          </Annotations>
+         <Annotations Target="microsoft.graph.windowsSetting/instances">
+            <Annotation Term="Org.OData.Core.V1.AutoExpand" Bool="true"/>
+         </Annotations>
          <Annotations Target="microsoft.graph.peopleAdminSettings/pronouns">
             <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
                <Record>
@@ -15590,6 +15646,12 @@
                </Record>
             </Annotation>
          </Annotations>
+         <Annotations Target="microsoft.graph.deviceConfigurationDeviceActivity(microsoft.graph.reportRoot)">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Metadata for the device configuration device activity report"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.deviceConfigurationUserActivity(microsoft.graph.reportRoot)">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Metadata for the device configuration user activity report"/>
+         </Annotations>
          <Annotations Target="microsoft.graph.cancel(microsoft.graph.bookingAppointment, Edm.String)">
             <Annotation Term="Org.OData.Core.V1.Description" String="Cancels the giving booking appointment, sending a message to the involved parties."/>
          </Annotations>
@@ -15637,12 +15699,6 @@
          </Annotations>
          <Annotations Target="microsoft.graph.renewUpload(microsoft.graph.mobileAppContentFile)">
             <Annotation Term="Org.OData.Core.V1.Description" String="Renews the SAS URI for an application file upload."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceConfigurationDeviceActivity(microsoft.graph.reportRoot)">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Metadata for the device configuration device activity report"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceConfigurationUserActivity(microsoft.graph.reportRoot)">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Metadata for the device configuration user activity report"/>
          </Annotations>
          <Annotations Target="microsoft.graph.syncLicenses(microsoft.graph.vppToken)">
             <Annotation Term="Org.OData.Core.V1.Description" String="Syncs licenses associated with a specific appleVolumePurchaseProgramToken"/>
@@ -15771,6 +15827,12 @@
             <Member Name="user" Value="0"/>
             <Member Name="application" Value="1"/>
             <Member Name="system" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="migrationStatus">
+            <Member Name="ready" Value="0"/>
+            <Member Name="needsReview" Value="1"/>
+            <Member Name="additionalStepsRequired" Value="2"/>
             <Member Name="unknownFutureValue" Value="3"/>
          </EnumType>
          <EnumType Name="operationResult">
@@ -16167,6 +16229,11 @@
             <Member Name="roleIsPresenter" Value="2"/>
             <Member Name="organizer" Value="3"/>
             <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
+         <EnumType Name="multiFactorAuthConfiguration">
+            <Member Name="notRequired" Value="0"/>
+            <Member Name="required" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
          </EnumType>
          <EnumType Name="allowInvitesFrom">
             <Member Name="none" Value="0"/>
@@ -16660,12 +16727,37 @@
             <Member Name="approvalStatus" Value="17"/>
             <Member Name="unknownFutureValue" Value="18"/>
          </EnumType>
+         <EnumType Name="driveItemSourceApplication">
+            <Member Name="teams" Value="0"/>
+            <Member Name="yammer" Value="1"/>
+            <Member Name="sharePoint" Value="2"/>
+            <Member Name="oneDrive" Value="3"/>
+            <Member Name="stream" Value="4"/>
+            <Member Name="powerPoint" Value="5"/>
+            <Member Name="office" Value="6"/>
+            <Member Name="loki" Value="7"/>
+            <Member Name="loop" Value="8"/>
+            <Member Name="other" Value="9"/>
+            <Member Name="unknownFutureValue" Value="10"/>
+         </EnumType>
          <EnumType Name="longRunningOperationStatus">
             <Member Name="notStarted" Value="0"/>
             <Member Name="running" Value="1"/>
             <Member Name="succeeded" Value="2"/>
             <Member Name="failed" Value="3"/>
             <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
+         <EnumType Name="mediaSourceContentCategory">
+            <Member Name="meeting" Value="0"/>
+            <Member Name="liveStream" Value="1"/>
+            <Member Name="presentation" Value="2"/>
+            <Member Name="screenRecording" Value="3"/>
+            <Member Name="story" Value="4"/>
+            <Member Name="profile" Value="5"/>
+            <Member Name="chat" Value="6"/>
+            <Member Name="note" Value="7"/>
+            <Member Name="comment" Value="8"/>
+            <Member Name="unknownFutureValue" Value="9"/>
          </EnumType>
          <EnumType Name="sensitivityLabelAssignmentMethod">
             <Member Name="standard" Value="0"/>
@@ -18548,6 +18640,11 @@
             <Member Name="terminating" Value="8"/>
             <Member Name="terminationRequested" Value="9"/>
             <Member Name="unknownFutureValue" Value="10"/>
+         </EnumType>
+         <EnumType Name="windowsSettingType">
+            <Member Name="roaming" Value="0"/>
+            <Member Name="backup" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
          </EnumType>
          <EnumType Name="assignmentScheduleFilterByCurrentUserOptions">
             <Member Name="principal" Value="1"/>
@@ -20917,6 +21014,7 @@
             <NavigationProperty Name="insights" Type="graph.officeGraphInsights" ContainsTarget="true"/>
             <NavigationProperty Name="settings" Type="graph.userSettings" ContainsTarget="true"/>
             <NavigationProperty Name="onenote" Type="graph.onenote" ContainsTarget="true"/>
+            <NavigationProperty Name="cloudClipboard" Type="graph.cloudClipboardRoot" ContainsTarget="true"/>
             <NavigationProperty Name="photo" Type="graph.profilePhoto" ContainsTarget="true"/>
             <NavigationProperty Name="photos" Type="Collection(graph.profilePhoto)" ContainsTarget="true"/>
             <NavigationProperty Name="activities" Type="Collection(graph.userActivity)" ContainsTarget="true"/>
@@ -21395,6 +21493,7 @@
          <EntityType Name="userSettings" BaseType="graph.entity">
             <Property Name="contributionToContentDiscoveryAsOrganizationDisabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="contributionToContentDiscoveryDisabled" Type="Edm.Boolean" Nullable="false"/>
+            <NavigationProperty Name="windows" Type="Collection(graph.windowsSetting)" ContainsTarget="true"/>
             <NavigationProperty Name="shiftPreferences" Type="graph.shiftPreferences" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="onenote" BaseType="graph.entity">
@@ -21404,6 +21503,9 @@
             <NavigationProperty Name="resources" Type="Collection(graph.onenoteResource)" ContainsTarget="true"/>
             <NavigationProperty Name="sectionGroups" Type="Collection(graph.sectionGroup)" ContainsTarget="true"/>
             <NavigationProperty Name="sections" Type="Collection(graph.onenoteSection)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="cloudClipboardRoot" BaseType="graph.entity">
+            <NavigationProperty Name="items" Type="Collection(graph.cloudClipboardItem)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="profilePhoto" BaseType="graph.entity" HasStream="true">
             <Property Name="height" Type="Edm.Int32"/>
@@ -21748,6 +21850,19 @@
             <NavigationProperty Name="lastModifiedBy" Type="graph.user"/>
             <NavigationProperty Name="member" Type="graph.directoryObject"/>
          </EntityType>
+         <EntityType Name="relyingPartyDetailedSummary" BaseType="graph.entity">
+            <Property Name="failedSignInCount" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="migrationStatus" Type="graph.migrationStatus" Nullable="false"/>
+            <Property Name="migrationValidationDetails" Type="Collection(graph.keyValuePair)" Nullable="false"/>
+            <Property Name="relyingPartyId" Type="Edm.String" Nullable="false"/>
+            <Property Name="relyingPartyName" Type="Edm.String" Nullable="false"/>
+            <Property Name="replyUrls" Type="Collection(Edm.String)" Nullable="false"/>
+            <Property Name="serviceId" Type="Edm.String" Nullable="false"/>
+            <Property Name="signInSuccessRate" Type="Edm.Double" Nullable="false"/>
+            <Property Name="successfulSignInCount" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="totalSignInCount" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="uniqueUserCount" Type="Edm.Int64" Nullable="false"/>
+         </EntityType>
          <EntityType Name="reportRoot">
             <NavigationProperty Name="authenticationMethods" Type="graph.authenticationMethodsRoot" ContainsTarget="true"/>
             <NavigationProperty Name="partners" Type="graph.partners" ContainsTarget="true"/>
@@ -22080,6 +22195,7 @@
             <NavigationProperty Name="authenticationMethodsPolicy" Type="graph.authenticationMethodsPolicy" ContainsTarget="true"/>
             <NavigationProperty Name="authenticationStrengthPolicies" Type="Collection(graph.authenticationStrengthPolicy)" ContainsTarget="true"/>
             <NavigationProperty Name="authenticationFlowsPolicy" Type="graph.authenticationFlowsPolicy" ContainsTarget="true"/>
+            <NavigationProperty Name="deviceRegistrationPolicy" Type="graph.deviceRegistrationPolicy" ContainsTarget="true"/>
             <NavigationProperty Name="activityBasedTimeoutPolicies" Type="Collection(graph.activityBasedTimeoutPolicy)" ContainsTarget="true"/>
             <NavigationProperty Name="appManagementPolicies" Type="Collection(graph.appManagementPolicy)" ContainsTarget="true"/>
             <NavigationProperty Name="authorizationPolicy" Type="graph.authorizationPolicy" ContainsTarget="true"/>
@@ -22101,6 +22217,15 @@
             <Property Name="description" Type="Edm.String"/>
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="selfServiceSignUp" Type="graph.selfServiceSignUpAuthenticationFlowConfiguration"/>
+         </EntityType>
+         <EntityType Name="deviceRegistrationPolicy" BaseType="graph.entity">
+            <Property Name="azureADJoin" Type="graph.azureADJoinPolicy"/>
+            <Property Name="azureADRegistration" Type="graph.azureADRegistrationPolicy"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="localAdminPassword" Type="graph.localAdminPasswordSettings"/>
+            <Property Name="multiFactorAuthConfiguration" Type="graph.multiFactorAuthConfiguration" Nullable="false"/>
+            <Property Name="userDeviceQuota" Type="Edm.Int32" Nullable="false"/>
          </EntityType>
          <EntityType Name="activityBasedTimeoutPolicy" BaseType="graph.stsPolicy"/>
          <EntityType Name="authorizationPolicy" BaseType="graph.policyBase">
@@ -23731,6 +23856,24 @@
             <Property Name="configuration" Type="graph.onPremisesDirectorySynchronizationConfiguration"/>
             <Property Name="features" Type="graph.onPremisesDirectorySynchronizationFeature" Nullable="false"/>
          </EntityType>
+         <ComplexType Name="deviceRegistrationMembership"/>
+         <ComplexType Name="allDeviceRegistrationMembership" BaseType="graph.deviceRegistrationMembership"/>
+         <ComplexType Name="azureADJoinPolicy">
+            <Property Name="allowedToJoin" Type="graph.deviceRegistrationMembership"/>
+            <Property Name="isAdminConfigurable" Type="Edm.Boolean"/>
+         </ComplexType>
+         <ComplexType Name="azureADRegistrationPolicy">
+            <Property Name="allowedToRegister" Type="graph.deviceRegistrationMembership"/>
+            <Property Name="isAdminConfigurable" Type="Edm.Boolean"/>
+         </ComplexType>
+         <ComplexType Name="enumeratedDeviceRegistrationMembership" BaseType="graph.deviceRegistrationMembership">
+            <Property Name="groups" Type="Collection(Edm.String)"/>
+            <Property Name="users" Type="Collection(Edm.String)"/>
+         </ComplexType>
+         <ComplexType Name="localAdminPasswordSettings">
+            <Property Name="isEnabled" Type="Edm.Boolean"/>
+         </ComplexType>
+         <ComplexType Name="noDeviceRegistrationMembership" BaseType="graph.deviceRegistrationMembership"/>
          <ComplexType Name="alternativeSecurityId">
             <Property Name="identityProvider" Type="Edm.String"/>
             <Property Name="key" Type="Edm.Binary"/>
@@ -23998,7 +24141,9 @@
             <Property Name="enrollmentProfileName" Type="Edm.String"/>
             <Property Name="isCompliant" Type="Edm.Boolean"/>
             <Property Name="isManaged" Type="Edm.Boolean"/>
+            <Property Name="manufacturer" Type="Edm.String"/>
             <Property Name="mdmAppId" Type="Edm.String"/>
+            <Property Name="model" Type="Edm.String"/>
             <Property Name="onPremisesLastSyncDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="onPremisesSecurityIdentifier" Type="Edm.String"/>
             <Property Name="onPremisesSyncEnabled" Type="Edm.Boolean"/>
@@ -25865,11 +26010,20 @@
             <Property Name="title" Type="Edm.String"/>
             <Property Name="versionId" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="driveItemSource">
+            <Property Name="application" Type="graph.driveItemSourceApplication"/>
+            <Property Name="externalId" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="driveItemUploadableProperties">
             <Property Name="description" Type="Edm.String"/>
+            <Property Name="driveItemSource" Type="graph.driveItemSource"/>
             <Property Name="fileSize" Type="Edm.Int64"/>
             <Property Name="fileSystemInfo" Type="graph.fileSystemInfo"/>
+            <Property Name="mediaSource" Type="graph.mediaSource"/>
             <Property Name="name" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="mediaSource">
+            <Property Name="contentCategory" Type="graph.mediaSourceContentCategory"/>
          </ComplexType>
          <ComplexType Name="driveRecipient">
             <Property Name="alias" Type="Edm.String"/>
@@ -29887,6 +30041,12 @@
             <Property Name="resourceVisualization" Type="graph.resourceVisualization"/>
             <NavigationProperty Name="resource" Type="graph.entity"/>
          </EntityType>
+         <EntityType Name="windowsSetting" BaseType="graph.entity">
+            <Property Name="payloadType" Type="Edm.String"/>
+            <Property Name="settingType" Type="graph.windowsSettingType" Nullable="false"/>
+            <Property Name="windowsDeviceId" Type="Edm.String"/>
+            <NavigationProperty Name="instances" Type="Collection(graph.windowsSettingInstance)" ContainsTarget="true"/>
+         </EntityType>
          <EntityType Name="changeTrackedEntity" BaseType="graph.entity" Abstract="true">
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="lastModifiedBy" Type="graph.identitySet"/>
@@ -30065,6 +30225,22 @@
          <EntityType Name="resellerDelegatedAdminRelationship" BaseType="graph.delegatedAdminRelationship">
             <Property Name="indirectProviderTenantId" Type="Edm.String" Nullable="false"/>
             <Property Name="isPartnerConsentPending" Type="Edm.Boolean" Nullable="false"/>
+         </EntityType>
+         <ComplexType Name="cloudClipboardItemPayload">
+            <Property Name="content" Type="Edm.String" Nullable="false"/>
+            <Property Name="formatName" Type="Edm.String" Nullable="false"/>
+         </ComplexType>
+         <EntityType Name="cloudClipboardItem" BaseType="graph.entity">
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="expirationDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="payloads" Type="Collection(graph.cloudClipboardItemPayload)" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="windowsSettingInstance" BaseType="graph.entity">
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="expirationDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="payload" Type="Edm.String" Nullable="false"/>
          </EntityType>
          <ComplexType Name="profileCardAnnotation">
             <Property Name="displayName" Type="Edm.String"/>
@@ -31638,6 +31814,7 @@
             <Property Name="contentType" Type="Edm.String"/>
          </EntityType>
          <EntityType Name="chatMessageHostedContent" BaseType="graph.teamworkHostedContent"/>
+         <EntityType Name="deletedChat" BaseType="graph.entity"/>
          <EntityType Name="deletedTeam" BaseType="graph.entity">
             <NavigationProperty Name="channels" Type="Collection(graph.channel)" ContainsTarget="true"/>
          </EntityType>
@@ -31670,6 +31847,7 @@
          </EntityType>
          <EntityType Name="teamwork" BaseType="graph.entity">
             <NavigationProperty Name="workforceIntegrations" Type="Collection(graph.workforceIntegration)" ContainsTarget="true"/>
+            <NavigationProperty Name="deletedChats" Type="Collection(graph.deletedChat)" ContainsTarget="true"/>
             <NavigationProperty Name="deletedTeams" Type="Collection(graph.deletedTeam)" ContainsTarget="true"/>
             <NavigationProperty Name="teamsAppSettings" Type="graph.teamsAppSettings" ContainsTarget="true"/>
          </EntityType>
@@ -31954,6 +32132,518 @@
          <Term Name="channelCreationMode" Type="Edm.String" AppliesTo="microsoft.graph.channel"/>
          <Term Name="teamCreationMode" Type="Edm.String" AppliesTo="microsoft.graph.team"/>
          <Term Name="temporaryId" Type="Edm.String" AppliesTo="microsoft.graph.chatMessageHostedContent"/>
+         <Function Name="getRelyingPartyDetailedSummary" IsBound="true" IsComposable="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Collection(graph.relyingPartyDetailedSummary)" Nullable="false"/>
+         </Function>
+         <Function Name="deviceConfigurationDeviceActivity" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <ReturnType Type="graph.report"/>
+         </Function>
+         <Function Name="deviceConfigurationUserActivity" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <ReturnType Type="graph.report"/>
+         </Function>
+         <Function Name="managedDeviceEnrollmentFailureDetails" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <ReturnType Type="graph.report"/>
+         </Function>
+         <Function Name="managedDeviceEnrollmentFailureDetails" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="skip" Type="Edm.Int32"/>
+            <Parameter Name="top" Type="Edm.Int32"/>
+            <Parameter Name="filter" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="skipToken" Type="Edm.String" Unicode="false"/>
+            <ReturnType Type="graph.report"/>
+         </Function>
+         <Function Name="managedDeviceEnrollmentTopFailures" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <ReturnType Type="graph.report"/>
+         </Function>
+         <Function Name="managedDeviceEnrollmentTopFailures" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Unicode="false"/>
+            <ReturnType Type="graph.report"/>
+         </Function>
+         <Function Name="getEmailActivityCounts" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getEmailActivityUserCounts" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getEmailActivityUserDetail" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getEmailActivityUserDetail" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getEmailAppUsageAppsUserCounts" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getEmailAppUsageUserCounts" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getEmailAppUsageUserDetail" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getEmailAppUsageUserDetail" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getEmailAppUsageVersionsUserCounts" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getM365AppPlatformUserCounts" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getM365AppUserCounts" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getM365AppUserDetail" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getM365AppUserDetail" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getMailboxUsageDetail" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getMailboxUsageMailboxCounts" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getMailboxUsageQuotaStatusMailboxCounts" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getMailboxUsageStorage" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getOffice365ActivationCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOffice365ActivationsUserCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOffice365ActivationsUserDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOffice365ActiveUserCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOffice365ActiveUserDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOffice365ActiveUserDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOffice365GroupsActivityCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOffice365GroupsActivityDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOffice365GroupsActivityDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOffice365GroupsActivityFileCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOffice365GroupsActivityGroupCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOffice365GroupsActivityStorage" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOffice365ServicesUserCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOneDriveActivityFileCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOneDriveActivityUserCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOneDriveActivityUserDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOneDriveActivityUserDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOneDriveUsageAccountCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOneDriveUsageAccountDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOneDriveUsageAccountDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOneDriveUsageFileCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getOneDriveUsageStorage" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSharePointActivityFileCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSharePointActivityPages" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSharePointActivityUserCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSharePointActivityUserDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSharePointActivityUserDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSharePointSiteUsageDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSharePointSiteUsageDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSharePointSiteUsageFileCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSharePointSiteUsagePages" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSharePointSiteUsageSiteCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSharePointSiteUsageStorage" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSkypeForBusinessActivityCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSkypeForBusinessActivityUserCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSkypeForBusinessActivityUserDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSkypeForBusinessActivityUserDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSkypeForBusinessDeviceUsageDistributionUserCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSkypeForBusinessDeviceUsageUserCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSkypeForBusinessDeviceUsageUserDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSkypeForBusinessDeviceUsageUserDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSkypeForBusinessOrganizerActivityCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSkypeForBusinessOrganizerActivityMinuteCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSkypeForBusinessOrganizerActivityUserCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSkypeForBusinessParticipantActivityCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSkypeForBusinessParticipantActivityMinuteCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSkypeForBusinessParticipantActivityUserCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSkypeForBusinessPeerToPeerActivityCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSkypeForBusinessPeerToPeerActivityMinuteCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getSkypeForBusinessPeerToPeerActivityUserCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getTeamsDeviceUsageDistributionUserCounts" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getTeamsDeviceUsageUserCounts" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getTeamsDeviceUsageUserDetail" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getTeamsDeviceUsageUserDetail" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getTeamsTeamActivityCounts" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getTeamsTeamActivityDetail" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getTeamsTeamActivityDetail" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getTeamsTeamActivityDistributionCounts" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getTeamsTeamCounts" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getTeamsUserActivityCounts" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getTeamsUserActivityUserCounts" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getTeamsUserActivityUserDetail" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getTeamsUserActivityUserDetail" IsBound="true">
+            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Edm.Stream" Nullable="false"/>
+         </Function>
+         <Function Name="getYammerActivityCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getYammerActivityUserCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getYammerActivityUserDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getYammerActivityUserDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getYammerDeviceUsageDistributionUserCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getYammerDeviceUsageUserCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getYammerDeviceUsageUserDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getYammerDeviceUsageUserDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getYammerGroupsActivityCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getYammerGroupsActivityDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getYammerGroupsActivityDetail" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getYammerGroupsActivityGroupCounts" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.report" Nullable="false"/>
+         </Function>
+         <Function Name="getGroupArchivedPrintJobs" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="groupId" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <Parameter Name="startDateTime" Type="Edm.DateTimeOffset"/>
+            <Parameter Name="endDateTime" Type="Edm.DateTimeOffset"/>
+            <ReturnType Type="Collection(graph.archivedPrintJob)"/>
+         </Function>
+         <Function Name="getPrinterArchivedPrintJobs" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="printerId" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <Parameter Name="startDateTime" Type="Edm.DateTimeOffset"/>
+            <Parameter Name="endDateTime" Type="Edm.DateTimeOffset"/>
+            <ReturnType Type="Collection(graph.archivedPrintJob)"/>
+         </Function>
+         <Function Name="getUserArchivedPrintJobs" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
+            <Parameter Name="userId" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <Parameter Name="startDateTime" Type="Edm.DateTimeOffset"/>
+            <Parameter Name="endDateTime" Type="Edm.DateTimeOffset"/>
+            <ReturnType Type="Collection(graph.archivedPrintJob)"/>
+         </Function>
          <Function Name="usersRegisteredByFeature" IsBound="true" IsComposable="true">
             <Parameter Name="bindingParameter" Type="graph.authenticationMethodsRoot"/>
             <ReturnType Type="graph.userRegistrationFeatureSummary" Nullable="false"/>
@@ -35960,513 +36650,6 @@
             <Parameter Name="secretReferenceValueId" Type="Edm.String" Unicode="false"/>
             <ReturnType Type="Edm.String" Unicode="false"/>
          </Function>
-         <Function Name="deviceConfigurationDeviceActivity" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <ReturnType Type="graph.report"/>
-         </Function>
-         <Function Name="deviceConfigurationUserActivity" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <ReturnType Type="graph.report"/>
-         </Function>
-         <Function Name="managedDeviceEnrollmentFailureDetails" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <ReturnType Type="graph.report"/>
-         </Function>
-         <Function Name="managedDeviceEnrollmentFailureDetails" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="skip" Type="Edm.Int32"/>
-            <Parameter Name="top" Type="Edm.Int32"/>
-            <Parameter Name="filter" Type="Edm.String" Unicode="false"/>
-            <Parameter Name="skipToken" Type="Edm.String" Unicode="false"/>
-            <ReturnType Type="graph.report"/>
-         </Function>
-         <Function Name="managedDeviceEnrollmentTopFailures" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <ReturnType Type="graph.report"/>
-         </Function>
-         <Function Name="managedDeviceEnrollmentTopFailures" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Unicode="false"/>
-            <ReturnType Type="graph.report"/>
-         </Function>
-         <Function Name="getEmailActivityCounts" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getEmailActivityUserCounts" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getEmailActivityUserDetail" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getEmailActivityUserDetail" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getEmailAppUsageAppsUserCounts" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getEmailAppUsageUserCounts" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getEmailAppUsageUserDetail" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getEmailAppUsageUserDetail" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getEmailAppUsageVersionsUserCounts" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getM365AppPlatformUserCounts" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getM365AppUserCounts" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getM365AppUserDetail" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getM365AppUserDetail" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getMailboxUsageDetail" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getMailboxUsageMailboxCounts" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getMailboxUsageQuotaStatusMailboxCounts" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getMailboxUsageStorage" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getOffice365ActivationCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOffice365ActivationsUserCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOffice365ActivationsUserDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOffice365ActiveUserCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOffice365ActiveUserDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOffice365ActiveUserDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOffice365GroupsActivityCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOffice365GroupsActivityDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOffice365GroupsActivityDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOffice365GroupsActivityFileCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOffice365GroupsActivityGroupCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOffice365GroupsActivityStorage" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOffice365ServicesUserCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOneDriveActivityFileCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOneDriveActivityUserCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOneDriveActivityUserDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOneDriveActivityUserDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOneDriveUsageAccountCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOneDriveUsageAccountDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOneDriveUsageAccountDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOneDriveUsageFileCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getOneDriveUsageStorage" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSharePointActivityFileCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSharePointActivityPages" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSharePointActivityUserCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSharePointActivityUserDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSharePointActivityUserDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSharePointSiteUsageDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSharePointSiteUsageDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSharePointSiteUsageFileCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSharePointSiteUsagePages" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSharePointSiteUsageSiteCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSharePointSiteUsageStorage" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSkypeForBusinessActivityCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSkypeForBusinessActivityUserCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSkypeForBusinessActivityUserDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSkypeForBusinessActivityUserDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSkypeForBusinessDeviceUsageDistributionUserCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSkypeForBusinessDeviceUsageUserCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSkypeForBusinessDeviceUsageUserDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSkypeForBusinessDeviceUsageUserDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSkypeForBusinessOrganizerActivityCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSkypeForBusinessOrganizerActivityMinuteCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSkypeForBusinessOrganizerActivityUserCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSkypeForBusinessParticipantActivityCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSkypeForBusinessParticipantActivityMinuteCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSkypeForBusinessParticipantActivityUserCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSkypeForBusinessPeerToPeerActivityCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSkypeForBusinessPeerToPeerActivityMinuteCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getSkypeForBusinessPeerToPeerActivityUserCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getTeamsDeviceUsageDistributionUserCounts" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getTeamsDeviceUsageUserCounts" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getTeamsDeviceUsageUserDetail" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getTeamsDeviceUsageUserDetail" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getTeamsTeamActivityCounts" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getTeamsTeamActivityDetail" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getTeamsTeamActivityDetail" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getTeamsTeamActivityDistributionCounts" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getTeamsTeamCounts" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getTeamsUserActivityCounts" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getTeamsUserActivityUserCounts" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getTeamsUserActivityUserDetail" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getTeamsUserActivityUserDetail" IsBound="true">
-            <Parameter Name="reportRoot" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="Edm.Stream" Nullable="false"/>
-         </Function>
-         <Function Name="getYammerActivityCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getYammerActivityUserCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getYammerActivityUserDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getYammerActivityUserDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getYammerDeviceUsageDistributionUserCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getYammerDeviceUsageUserCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getYammerDeviceUsageUserDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getYammerDeviceUsageUserDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getYammerGroupsActivityCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getYammerGroupsActivityDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="date" Type="Edm.Date" Nullable="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getYammerGroupsActivityDetail" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getYammerGroupsActivityGroupCounts" IsBound="true" IsComposable="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="period" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <ReturnType Type="graph.report" Nullable="false"/>
-         </Function>
-         <Function Name="getGroupArchivedPrintJobs" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="groupId" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <Parameter Name="startDateTime" Type="Edm.DateTimeOffset"/>
-            <Parameter Name="endDateTime" Type="Edm.DateTimeOffset"/>
-            <ReturnType Type="Collection(graph.archivedPrintJob)"/>
-         </Function>
-         <Function Name="getPrinterArchivedPrintJobs" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="printerId" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <Parameter Name="startDateTime" Type="Edm.DateTimeOffset"/>
-            <Parameter Name="endDateTime" Type="Edm.DateTimeOffset"/>
-            <ReturnType Type="Collection(graph.archivedPrintJob)"/>
-         </Function>
-         <Function Name="getUserArchivedPrintJobs" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.reportRoot"/>
-            <Parameter Name="userId" Type="Edm.String" Nullable="false" Unicode="false"/>
-            <Parameter Name="startDateTime" Type="Edm.DateTimeOffset"/>
-            <Parameter Name="endDateTime" Type="Edm.DateTimeOffset"/>
-            <ReturnType Type="Collection(graph.archivedPrintJob)"/>
-         </Function>
          <Action Name="setPriority" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.deviceEnrollmentConfiguration"/>
             <Parameter Name="priority" Type="Edm.Int32" Nullable="false"/>
@@ -37270,6 +37453,9 @@
             <Parameter Name="bindingParameter" Type="graph.chatMessage"/>
             <Parameter Name="reactionType" Type="Edm.String" Unicode="false"/>
          </Action>
+         <Action Name="undoDelete" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.deletedChat"/>
+         </Action>
          <Action Name="upgrade" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.teamsAppInstallation"/>
             <Parameter Name="consentedPermissionSet" Type="graph.teamsAppPermissionSet"/>
@@ -37909,6 +38095,7 @@
             <Property Name="serviceSource" Type="microsoft.graph.security.serviceSource" Nullable="false"/>
             <Property Name="severity" Type="microsoft.graph.security.alertSeverity" Nullable="false"/>
             <Property Name="status" Type="microsoft.graph.security.alertStatus" Nullable="false"/>
+            <Property Name="systemTags" Type="Collection(Edm.String)"/>
             <Property Name="tenantId" Type="Edm.String"/>
             <Property Name="threatDisplayName" Type="Edm.String"/>
             <Property Name="threatFamilyName" Type="Edm.String"/>

@@ -194,17 +194,13 @@ class Field(Entity):
     @property
     def internal_name(self):
         # type: () -> Optional[str]
-        """
-        Gets a value that specifies the field internal name.
-        """
+        """Gets a value that specifies the field internal name."""
         return self.properties.get("InternalName", None)
 
     @property
     def can_be_deleted(self):
         # type: () -> Optional[bool]
-        """
-        Gets a value that specifies whether the field can be deleted
-        """
+        """Gets a value that specifies whether the field can be deleted"""
         return self.properties.get("CanBeDeleted", None)
 
     @property

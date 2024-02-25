@@ -1,29 +1,40 @@
+"""
+Demonstrates how to update system metadata properties of List Item
+"""
+
 import sys
 from datetime import datetime, timedelta
 
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.fields.user_value import FieldUserValue
-from office365.sharepoint.listitems.listitem import ListItem
-from tests import test_client_credentials, test_team_site_url, test_user_principal_name
+from tests import (
+    test_client_credentials,
+    test_site_url,
+    test_user_principal_name,
+)
 
-ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
+ctx = ClientContext(test_site_url).with_credentials(test_client_credentials)
 
-list_tasks = ctx.web.lists.get_by_title("Company Tasks")
-items = list_tasks.items.get().top(1).execute_query()
+target_list = ctx.web.lists.get_by_title("Documents")
+items = target_list.items.get().top(1).execute_query()
 if len(items) == 0:
     sys.exit("No items were found")
 
-item_to_update = items[0]  # type: ListItem
+item_to_update = items[0]
 author = ctx.web.site_users.get_by_email(test_user_principal_name)
 
-modified_date = datetime.utcnow() - timedelta(days=3)
+created_date = datetime.utcnow() - timedelta(days=14)
+modified_date = datetime.utcnow() - timedelta(days=7)
 result = item_to_update.validate_update_list_item(
     {
         "Title": "Task (updated)",
-        "Author": FieldUserValue.from_user(author),
+        "Editor": FieldUserValue.from_user(author),
         "Modified": modified_date,
+        "Created": created_date,
+        "Author": FieldUserValue.from_user(author),
     },
     dates_in_utc=True,
+    new_document_update=True,
 ).execute_query()
 
 has_any_error = any([item.HasException for item in result.value])
