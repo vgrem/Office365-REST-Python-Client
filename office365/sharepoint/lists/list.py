@@ -839,6 +839,12 @@ class List(SecurableObject):
         return self.properties.get("DisableGridEditing", None)
 
     @property
+    def document_template_url(self):
+        # type: () -> Optional[str]
+        """Specifies the URL of the document template assigned to the list."""
+        return self.properties.get("DocumentTemplateUrl", None)
+
+    @property
     def effective_base_permissions(self):
         """
         Specifies the effective permissions on the list that are assigned to the current user.

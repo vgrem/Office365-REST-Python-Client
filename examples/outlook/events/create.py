@@ -1,16 +1,18 @@
 """
 Create an event in the current user's default calendar
 
-https://learn.microsoft.com/en-us/graph/api/user-post-events?view=graph-rest-1.0&tabs=http
+https://learn.microsoft.com/en-us/graph/api/user-post-events?view=graph-rest-1.0
 """
 
 from datetime import datetime, timedelta
 
 from office365.graph_client import GraphClient
-from tests.graph_case import acquire_token_by_username_password
+from tests import test_client_id, test_password, test_tenant, test_username
 
 when = datetime.utcnow() + timedelta(days=1)
-client = GraphClient(acquire_token_by_username_password)
+client = GraphClient.with_username_and_password(
+    test_tenant, test_client_id, test_username, test_password
+)
 new_event = client.me.calendar.events.add(
     subject="Let's go for lunch",
     body="Does mid month work for you?",

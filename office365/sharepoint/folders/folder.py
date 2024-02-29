@@ -485,7 +485,9 @@ class Folder(Entity):
 
         return self.properties.get(
             "Folders",
-            FolderCollection(self.context, ResourcePath("Folders", self.resource_path)),
+            FolderCollection(
+                self.context, ResourcePath("Folders", self.resource_path), self
+            ),
         )
 
     @property

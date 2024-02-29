@@ -1,7 +1,10 @@
+import os
+
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.paths.v3.entity import EntityPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity_collection import EntityCollection
+from office365.sharepoint.folders.coloring_information import FolderColoringInformation
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
@@ -42,14 +45,28 @@ class FolderCollection(EntityCollection[Folder]):
             folder = folder.add(name)
         return folder
 
-    def add(self, name):
+    def add(self, name, color_hex=None):
         """Adds the folder that is located at the specified URL to the collection.
-        :param str name: Specifies the Name of the folder.
+        :param str name: Specifies the Name or Path of the folder.
+        :param str color_hex: Specifies the color of the folder.
         """
         return_type = Folder(self.context, EntityPath(name, self.resource_path))
-        self.add_child(return_type)
-        qry = ServiceOperationQuery(self, "Add", [name], None, None, return_type)
-        self.context.add_query(qry)
+        if color_hex:
+
+            def _add_coloring():
+                path = os.path.join(
+                    self.parent.properties.get("ServerRelativeUrl"), name
+                )
+                coloring_info = FolderColoringInformation(color_hex=color_hex)
+                self.context.folder_coloring.create_folder(
+                    path, coloring_info, return_type=return_type
+                )
+
+            self.parent.ensure_property("ServerRelativeUrl", _add_coloring)
+        else:
+            self.add_child(return_type)
+            qry = ServiceOperationQuery(self, "Add", [name], None, None, return_type)
+            self.context.add_query(qry)
         return return_type
 
     def get_by_url(self, url):

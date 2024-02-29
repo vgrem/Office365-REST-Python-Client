@@ -4,6 +4,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.folders.coloring_information import FolderColoringInformation
 from office365.sharepoint.folders.folder import Folder
+from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 
 class FolderColoring(Entity):
@@ -12,22 +13,19 @@ class FolderColoring(Entity):
     def create_folder(
         self,
         decoded_url,
-        ensure_unique_file_name=True,
-        overwrite=True,
-        coloring_information=None,
+        coloring_information=FolderColoringInformation(color_hex="1"),
+        return_type=None,
     ):
         """
         :param str decoded_url:
-        :param bool ensure_unique_file_name:
-        :param bool overwrite:
         :param FolderColoringInformation coloring_information:
+        :param Folder return_type: Return type
         """
-        return_type = Folder(self.context)
+        if return_type is None:
+            return_type = Folder(self.context)
 
         payload = {
-            "DecodedUrl": decoded_url,
-            "EnsureUniqueFileName": ensure_unique_file_name,
-            "Overwrite": overwrite,
+            "path": SPResPath(decoded_url),
             "coloringInformation": coloring_information,
         }
         qry = ServiceOperationQuery(

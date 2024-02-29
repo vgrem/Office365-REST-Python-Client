@@ -9,4 +9,4 @@ class DeleteFacet(ClientValue):
 
     @property
     def entity_type_name(self):
-        return "Microsoft.SharePoint.Activities.CreateFacet"
+        return "Microsoft.SharePoint.Activities.DeleteFacet"
