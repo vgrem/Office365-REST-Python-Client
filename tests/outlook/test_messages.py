@@ -37,14 +37,12 @@ class TestGraphMail(GraphTestCase):
         self.assertIsNotNone(messages[0].resource_path)
 
     def test_6_update_message(self):
-        # messages = self.client.me.messages.top(1).get().execute_query()
-        # message_to_update = messages[0]
-        message = self.__class__.target_message
-        message.update().execute_query()
+        message_to_update = self.__class__.target_message
+        message_to_update.body = "The new cafeteria is close."
+        message_to_update.update().execute_query()
 
     def test_7_delete_message(self):
-        messages = self.client.me.messages.top(1).get().execute_query()
-        message_to_delete = messages[0]
+        message_to_delete = self.__class__.target_message
         message_to_delete.delete_object().execute_query()
 
     def test_8_create_draft_message_with_attachments(self):
