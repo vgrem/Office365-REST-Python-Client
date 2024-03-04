@@ -25,7 +25,7 @@ class TaxonomyFieldValue(ClientValue):
         return "SP.Taxonomy.TaxonomyFieldValue"
 
 
-class TaxonomyFieldValueCollection(ClientValueCollection):
+class TaxonomyFieldValueCollection(ClientValueCollection[TaxonomyFieldValue]):
     """Represents the multi-value object for the taxonomy column."""
 
     def __init__(self, initial_values):

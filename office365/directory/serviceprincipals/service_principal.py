@@ -111,10 +111,8 @@ class ServicePrincipal(DirectoryObject):
 
         def _grant(principal):
             # type: ("ServicePrincipal") -> None
-            app_role_id = repr(app_role)
-            principal_id = principal.id
             self.app_role_assigned_to.add(
-                principalId=principal_id, resourceId=self.id, appRoleId=app_role_id
+                principalId=principal.id, resourceId=self.id, appRoleId=app_role.id
             )
 
         def _ensure_principal():
@@ -128,20 +126,17 @@ class ServicePrincipal(DirectoryObject):
         """Revokes an app role assignment from a client service principal"""
 
         def _revoke(principal):
-            # type ("ServicePrincipal") -> None
-            principal_id = principal.id
-            app_role_id = repr(app_role)
+            # type: ("ServicePrincipal") -> None
             app_role_assigned_to_ids = [
                 item.id
                 for item in self.app_role_assigned_to
-                if item.principal_id == principal_id and item.app_role_id == app_role_id
+                if item.principal_id == principal.id and item.app_role_id == app_role.id
             ]
             if len(app_role_assigned_to_ids) > 0:
                 self.app_role_assigned_to[app_role_assigned_to_ids[0]].delete_object()
 
         def _ensure_resource(principal):
             self.ensure_properties(["id", "appRoleAssignedTo"], _revoke, principal)
-            # self.app_role_assigned_to.get_all(page_loaded=_revoke)
 
         def _ensure_principal():
             self.context.service_principals.get_by_app(app).get().after_execute(

@@ -13,5 +13,6 @@ file_with_versions = (
     .get()
     .execute_query()
 )
+
 for version in file_with_versions.versions:
     print(version.version_label)

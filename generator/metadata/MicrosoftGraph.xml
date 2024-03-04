@@ -3389,6 +3389,48 @@
          <Annotations Target="microsoft.graph.applicationType/desktop">
             <Annotation Term="Org.OData.Core.V1.Description" String="The windows desktop application"/>
          </Annotations>
+         <Annotations Target="microsoft.graph.devicePlatformType">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Supported platform types."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.devicePlatformType/android">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Android."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.devicePlatformType/androidForWork">
+            <Annotation Term="Org.OData.Core.V1.Description" String="AndroidForWork."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.devicePlatformType/iOS">
+            <Annotation Term="Org.OData.Core.V1.Description" String="iOS."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.devicePlatformType/macOS">
+            <Annotation Term="Org.OData.Core.V1.Description" String="MacOS."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.devicePlatformType/windowsPhone81">
+            <Annotation Term="Org.OData.Core.V1.Description" String="WindowsPhone 8.1."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.devicePlatformType/windows81AndLater">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Windows 8.1 and later"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.devicePlatformType/windows10AndLater">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Windows 10 and later."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.devicePlatformType/androidWorkProfile">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Android Work Profile."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.devicePlatformType/unknown">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Unknown."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.devicePlatformType/androidAOSP">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Android AOSP."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.devicePlatformType/androidMobileApplicationManagement">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates Mobile Application Management (MAM) for android devices."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.devicePlatformType/iOSMobileApplicationManagement">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates Mobile Application Management (MAM) for iOS devices"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.devicePlatformType/unknownFutureValue">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Evolvable enumeration sentinel value. Do not use"/>
+         </Annotations>
          <Annotations Target="microsoft.graph.directoryObject">
             <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
                <Record>
@@ -5716,6 +5758,28 @@
                      <PropertyValue Property="Version" String="2021-05/identityProvider"/>
                   </Record>
                </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.identityContainer/conditionalAccess">
+            <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
+               <Record>
+                  <PropertyValue Property="Deletable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
+               <Record>
+                  <PropertyValue Property="Insertable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.ReadRestrictions">
+               <Record>
+                  <PropertyValue Property="Readable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+               <Record>
+                  <PropertyValue Property="Updatable" Bool="false"/>
+               </Record>
             </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.directory/deviceLocalCredentials">
@@ -16133,6 +16197,77 @@
             <Member Name="business" Value="2"/>
             <Member Name="other" Value="3"/>
          </EnumType>
+         <EnumType Name="cloudPcAuditActivityOperationType">
+            <Member Name="create" Value="0"/>
+            <Member Name="delete" Value="1"/>
+            <Member Name="patch" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="cloudPcAuditActivityResult">
+            <Member Name="success" Value="0"/>
+            <Member Name="clientError" Value="1"/>
+            <Member Name="failure" Value="2"/>
+            <Member Name="timeout" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
+         <EnumType Name="cloudPcAuditCategory">
+            <Member Name="cloudPC" Value="0"/>
+            <Member Name="unknownFutureValue" Value="1"/>
+         </EnumType>
+         <EnumType Name="cloudPcDomainJoinType">
+            <Member Name="azureADJoin" Value="0"/>
+            <Member Name="hybridAzureADJoin" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
+         <EnumType Name="cloudPcProvisioningPolicyImageType">
+            <Member Name="gallery" Value="0"/>
+            <Member Name="custom" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
+         <EnumType Name="cloudPcProvisioningType">
+            <Member Name="dedicated" Value="0"/>
+            <Member Name="shared" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
+         <EnumType Name="cloudPcRegionGroup">
+            <Member Name="default" Value="0"/>
+            <Member Name="australia" Value="1"/>
+            <Member Name="canada" Value="2"/>
+            <Member Name="usCentral" Value="3"/>
+            <Member Name="usEast" Value="4"/>
+            <Member Name="usWest" Value="5"/>
+            <Member Name="france" Value="6"/>
+            <Member Name="germany" Value="7"/>
+            <Member Name="europeUnion" Value="8"/>
+            <Member Name="unitedKingdom" Value="9"/>
+            <Member Name="japan" Value="10"/>
+            <Member Name="asia" Value="11"/>
+            <Member Name="india" Value="12"/>
+            <Member Name="southAmerica" Value="13"/>
+            <Member Name="euap" Value="14"/>
+            <Member Name="usGovernment" Value="15"/>
+            <Member Name="usGovernmentDOD" Value="16"/>
+            <Member Name="unknownFutureValue" Value="20"/>
+            <Member Name="norway" Value="17"/>
+            <Member Name="switzerland" Value="18"/>
+            <Member Name="southKorea" Value="19"/>
+         </EnumType>
+         <EnumType Name="cloudPcRestorePointFrequencyType">
+            <Member Name="default" Value="0"/>
+            <Member Name="fourHours" Value="1"/>
+            <Member Name="sixHours" Value="2"/>
+            <Member Name="twelveHours" Value="3"/>
+            <Member Name="sixteenHours" Value="4"/>
+            <Member Name="twentyFourHours" Value="5"/>
+            <Member Name="unknownFutureValue" Value="6"/>
+         </EnumType>
+         <EnumType Name="microsoftManagedDesktopType">
+            <Member Name="notManaged" Value="0"/>
+            <Member Name="premiumManaged" Value="1"/>
+            <Member Name="standardManaged" Value="2"/>
+            <Member Name="starterManaged" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
          <EnumType Name="bodyType">
             <Member Name="text" Value="0"/>
             <Member Name="html" Value="1"/>
@@ -16740,6 +16875,16 @@
             <Member Name="other" Value="9"/>
             <Member Name="unknownFutureValue" Value="10"/>
          </EnumType>
+         <EnumType Name="horizontalSectionLayoutType">
+            <Member Name="none" Value="0"/>
+            <Member Name="oneColumn" Value="1"/>
+            <Member Name="twoColumns" Value="2"/>
+            <Member Name="threeColumns" Value="3"/>
+            <Member Name="oneThirdLeftColumn" Value="4"/>
+            <Member Name="oneThirdRightColumn" Value="5"/>
+            <Member Name="fullWidth" Value="6"/>
+            <Member Name="unknownFutureValue" Value="7"/>
+         </EnumType>
          <EnumType Name="longRunningOperationStatus">
             <Member Name="notStarted" Value="0"/>
             <Member Name="running" Value="1"/>
@@ -16759,11 +16904,42 @@
             <Member Name="comment" Value="8"/>
             <Member Name="unknownFutureValue" Value="9"/>
          </EnumType>
+         <EnumType Name="pageLayoutType">
+            <Member Name="microsoftReserved" Value="0"/>
+            <Member Name="article" Value="1"/>
+            <Member Name="home" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="pagePromotionType">
+            <Member Name="microsoftReserved" Value="0"/>
+            <Member Name="page" Value="1"/>
+            <Member Name="newsPost" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="sectionEmphasisType">
+            <Member Name="none" Value="0"/>
+            <Member Name="neutral" Value="1"/>
+            <Member Name="soft" Value="2"/>
+            <Member Name="strong" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
          <EnumType Name="sensitivityLabelAssignmentMethod">
             <Member Name="standard" Value="0"/>
             <Member Name="privileged" Value="1"/>
             <Member Name="auto" Value="2"/>
             <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="titleAreaLayoutType">
+            <Member Name="imageAndTitle" Value="0"/>
+            <Member Name="plain" Value="1"/>
+            <Member Name="colorBlock" Value="2"/>
+            <Member Name="overlap" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
+         <EnumType Name="titleAreaTextAlignmentType">
+            <Member Name="left" Value="0"/>
+            <Member Name="center" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
          </EnumType>
          <EnumType Name="remindBeforeTimeInMinutesType">
             <Member Name="mins15" Value="0"/>
@@ -19712,6 +19888,21 @@
             <Member Name="failed" Value="3"/>
             <Member Name="unknownFutureValue" Value="4"/>
          </EnumType>
+         <EnumType Name="devicePlatformType">
+            <Member Name="android" Value="0"/>
+            <Member Name="androidForWork" Value="1"/>
+            <Member Name="iOS" Value="2"/>
+            <Member Name="macOS" Value="3"/>
+            <Member Name="windowsPhone81" Value="4"/>
+            <Member Name="windows81AndLater" Value="5"/>
+            <Member Name="windows10AndLater" Value="6"/>
+            <Member Name="androidWorkProfile" Value="7"/>
+            <Member Name="unknown" Value="8"/>
+            <Member Name="androidAOSP" Value="9"/>
+            <Member Name="androidMobileApplicationManagement" Value="10"/>
+            <Member Name="iOSMobileApplicationManagement" Value="11"/>
+            <Member Name="unknownFutureValue" Value="12"/>
+         </EnumType>
          <EnumType Name="accountTargetContentType">
             <Member Name="unknown" Value="0"/>
             <Member Name="includeAll" Value="1"/>
@@ -21377,6 +21568,7 @@
             <NavigationProperty Name="items" Type="Collection(graph.baseItem)" ContainsTarget="true"/>
             <NavigationProperty Name="lists" Type="Collection(graph.list)" ContainsTarget="true"/>
             <NavigationProperty Name="operations" Type="Collection(graph.richLongRunningOperation)" ContainsTarget="true"/>
+            <NavigationProperty Name="pages" Type="Collection(graph.baseSitePage)" ContainsTarget="true"/>
             <NavigationProperty Name="permissions" Type="Collection(graph.permission)" ContainsTarget="true"/>
             <NavigationProperty Name="sites" Type="Collection(graph.site)" ContainsTarget="true"/>
             <NavigationProperty Name="termStore" Type="microsoft.graph.termStore.store" ContainsTarget="true"/>
@@ -22534,6 +22726,102 @@
             <NavigationProperty Name="events" Type="Collection(graph.virtualEvent)" ContainsTarget="true"/>
             <NavigationProperty Name="webinars" Type="Collection(graph.virtualEventWebinar)" ContainsTarget="true"/>
          </EntityType>
+         <ComplexType Name="cloudPcAuditActor">
+            <Property Name="applicationDisplayName" Type="Edm.String"/>
+            <Property Name="applicationId" Type="Edm.String"/>
+            <Property Name="ipAddress" Type="Edm.String"/>
+            <Property Name="remoteTenantId" Type="Edm.String"/>
+            <Property Name="remoteUserId" Type="Edm.String"/>
+            <Property Name="servicePrincipalName" Type="Edm.String"/>
+            <Property Name="userId" Type="Edm.String"/>
+            <Property Name="userPermissions" Type="Collection(Edm.String)" Nullable="false"/>
+            <Property Name="userPrincipalName" Type="Edm.String"/>
+            <Property Name="userRoleScopeTags" Type="Collection(graph.cloudPcUserRoleScopeTagInfo)"/>
+         </ComplexType>
+         <ComplexType Name="cloudPcUserRoleScopeTagInfo">
+            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="roleScopeTagId" Type="Edm.String" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="cloudPcAuditProperty">
+            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="newValue" Type="Edm.String" Nullable="false"/>
+            <Property Name="oldValue" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="cloudPcAuditResource">
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="modifiedProperties" Type="Collection(graph.cloudPcAuditProperty)" Nullable="false"/>
+            <Property Name="resourceId" Type="Edm.String" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="cloudPcDomainJoinConfiguration">
+            <Property Name="domainJoinType" Type="graph.cloudPcDomainJoinType"/>
+            <Property Name="onPremisesConnectionId" Type="Edm.String"/>
+            <Property Name="regionGroup" Type="graph.cloudPcRegionGroup"/>
+            <Property Name="regionName" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="cloudPcManagementAssignmentTarget" Abstract="true"/>
+         <ComplexType Name="cloudPcManagementGroupAssignmentTarget" BaseType="graph.cloudPcManagementAssignmentTarget">
+            <Property Name="groupId" Type="Edm.String"/>
+            <Property Name="servicePlanId" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="cloudPcRestorePointSetting">
+            <Property Name="frequencyType" Type="graph.cloudPcRestorePointFrequencyType"/>
+            <Property Name="userRestoreEnabled" Type="Edm.Boolean"/>
+         </ComplexType>
+         <ComplexType Name="cloudPcWindowsSetting">
+            <Property Name="locale" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="microsoftManagedDesktop">
+            <Property Name="managedType" Type="graph.microsoftManagedDesktopType"/>
+            <Property Name="profile" Type="Edm.String"/>
+         </ComplexType>
+         <EntityType Name="cloudPcAuditEvent" BaseType="graph.entity">
+            <Property Name="activity" Type="Edm.String"/>
+            <Property Name="activityDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="activityOperationType" Type="graph.cloudPcAuditActivityOperationType" Nullable="false"/>
+            <Property Name="activityResult" Type="graph.cloudPcAuditActivityResult" Nullable="false"/>
+            <Property Name="activityType" Type="Edm.String" Nullable="false"/>
+            <Property Name="actor" Type="graph.cloudPcAuditActor" Nullable="false"/>
+            <Property Name="category" Type="graph.cloudPcAuditCategory" Nullable="false"/>
+            <Property Name="componentName" Type="Edm.String" Nullable="false"/>
+            <Property Name="correlationId" Type="Edm.String" Nullable="false"/>
+            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="resources" Type="Collection(graph.cloudPcAuditResource)" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="cloudPcProvisioningPolicy" BaseType="graph.entity">
+            <Property Name="alternateResourceUrl" Type="Edm.String"/>
+            <Property Name="cloudPcGroupDisplayName" Type="Edm.String"/>
+            <Property Name="cloudPcNamingTemplate" Type="Edm.String"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="domainJoinConfigurations" Type="Collection(graph.cloudPcDomainJoinConfiguration)"/>
+            <Property Name="enableSingleSignOn" Type="Edm.Boolean"/>
+            <Property Name="gracePeriodInHours" Type="Edm.Int32"/>
+            <Property Name="imageDisplayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="imageId" Type="Edm.String" Nullable="false"/>
+            <Property Name="imageType" Type="graph.cloudPcProvisioningPolicyImageType" Nullable="false"/>
+            <Property Name="localAdminEnabled" Type="Edm.Boolean"/>
+            <Property Name="microsoftManagedDesktop" Type="graph.microsoftManagedDesktop"/>
+            <Property Name="provisioningType" Type="graph.cloudPcProvisioningType"/>
+            <Property Name="windowsSetting" Type="graph.cloudPcWindowsSetting"/>
+            <NavigationProperty Name="assignments" Type="Collection(graph.cloudPcProvisioningPolicyAssignment)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="cloudPcProvisioningPolicyAssignment" BaseType="graph.entity">
+            <Property Name="target" Type="graph.cloudPcManagementAssignmentTarget"/>
+            <NavigationProperty Name="assignedUsers" Type="Collection(graph.user)"/>
+         </EntityType>
+         <EntityType Name="cloudPcUserSetting" BaseType="graph.entity">
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="localAdminEnabled" Type="Edm.Boolean"/>
+            <Property Name="resetEnabled" Type="Edm.Boolean"/>
+            <Property Name="restorePointSetting" Type="graph.cloudPcRestorePointSetting"/>
+            <NavigationProperty Name="assignments" Type="Collection(graph.cloudPcUserSettingAssignment)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="cloudPcUserSettingAssignment" BaseType="graph.entity">
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="target" Type="graph.cloudPcManagementAssignmentTarget"/>
+         </EntityType>
          <EntityType Name="deviceManagement" BaseType="graph.entity">
             <Property Name="intuneAccountId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="settings" Type="graph.deviceManagementSettings"/>
@@ -22614,7 +22902,11 @@
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="resources" Type="Collection(graph.auditResource)"/>
          </EntityType>
-         <EntityType Name="virtualEndpoint" BaseType="graph.entity"/>
+         <EntityType Name="virtualEndpoint" BaseType="graph.entity">
+            <NavigationProperty Name="auditEvents" Type="Collection(graph.cloudPcAuditEvent)" ContainsTarget="true"/>
+            <NavigationProperty Name="provisioningPolicies" Type="Collection(graph.cloudPcProvisioningPolicy)" ContainsTarget="true"/>
+            <NavigationProperty Name="userSettings" Type="Collection(graph.cloudPcUserSetting)" ContainsTarget="true"/>
+         </EntityType>
          <EntityType Name="termsAndConditions" BaseType="graph.entity">
             <Property Name="acceptanceStatement" Type="Edm.String"/>
             <Property Name="bodyText" Type="Edm.String"/>
@@ -23685,6 +23977,11 @@
             <Property Name="resourceId" Type="Edm.String"/>
             <Property Name="type" Type="Edm.String"/>
          </EntityType>
+         <EntityType Name="baseSitePage" BaseType="graph.baseItem">
+            <Property Name="pageLayout" Type="graph.pageLayoutType"/>
+            <Property Name="publishingState" Type="graph.publicationFacet"/>
+            <Property Name="title" Type="Edm.String"/>
+         </EntityType>
          <EntityType Name="permission" BaseType="graph.entity">
             <Property Name="expirationDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="grantedTo" Type="graph.identitySet"/>
@@ -24139,8 +24436,11 @@
             <Property Name="deviceVersion" Type="Edm.Int32"/>
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="enrollmentProfileName" Type="Edm.String"/>
+            <Property Name="enrollmentType" Type="Edm.String"/>
             <Property Name="isCompliant" Type="Edm.Boolean"/>
             <Property Name="isManaged" Type="Edm.Boolean"/>
+            <Property Name="isRooted" Type="Edm.Boolean"/>
+            <Property Name="managementType" Type="Edm.String"/>
             <Property Name="manufacturer" Type="Edm.String"/>
             <Property Name="mdmAppId" Type="Edm.String"/>
             <Property Name="model" Type="Edm.String"/>
@@ -26087,6 +26387,14 @@
          <ComplexType Name="mentionAction">
             <Property Name="mentionees" Type="Collection(graph.identitySet)"/>
          </ComplexType>
+         <ComplexType Name="metaDataKeyStringPair">
+            <Property Name="key" Type="Edm.String"/>
+            <Property Name="value" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="metaDataKeyValuePair">
+            <Property Name="key" Type="Edm.String"/>
+            <Property Name="value" Type="graph.Json"/>
+         </ComplexType>
          <ComplexType Name="moveAction">
             <Property Name="from" Type="Edm.String"/>
             <Property Name="to" Type="Edm.String"/>
@@ -26108,6 +26416,11 @@
          <ComplexType Name="storagePlanInformation">
             <Property Name="upgradeAvailable" Type="Edm.Boolean"/>
          </ComplexType>
+         <ComplexType Name="reactionsFacet">
+            <Property Name="commentCount" Type="Edm.Int32"/>
+            <Property Name="likeCount" Type="Edm.Int32"/>
+            <Property Name="shareCount" Type="Edm.Int32"/>
+         </ComplexType>
          <ComplexType Name="renameAction">
             <Property Name="newName" Type="Edm.String"/>
             <Property Name="oldName" Type="Edm.String"/>
@@ -26120,6 +26433,12 @@
             <Property Name="isLabelUpdateAllowed" Type="Edm.Boolean"/>
             <Property Name="isMetadataUpdateAllowed" Type="Edm.Boolean"/>
             <Property Name="isRecordLocked" Type="Edm.Boolean"/>
+         </ComplexType>
+         <ComplexType Name="serverProcessedContent">
+            <Property Name="htmlStrings" Type="Collection(graph.metaDataKeyStringPair)"/>
+            <Property Name="imageSources" Type="Collection(graph.metaDataKeyStringPair)"/>
+            <Property Name="links" Type="Collection(graph.metaDataKeyStringPair)"/>
+            <Property Name="searchablePlainTexts" Type="Collection(graph.metaDataKeyStringPair)"/>
          </ComplexType>
          <ComplexType Name="shareAction">
             <Property Name="recipients" Type="Collection(graph.identitySet)"/>
@@ -26167,9 +26486,47 @@
             <Property Name="width" Type="Edm.Int32"/>
          </ComplexType>
          <ComplexType Name="thumbnailColumn"/>
+         <ComplexType Name="titleArea" OpenType="true">
+            <Property Name="alternativeText" Type="Edm.String"/>
+            <Property Name="enableGradientEffect" Type="Edm.Boolean"/>
+            <Property Name="imageWebUrl" Type="Edm.String"/>
+            <Property Name="layout" Type="graph.titleAreaLayoutType"/>
+            <Property Name="serverProcessedContent" Type="graph.serverProcessedContent"/>
+            <Property Name="showAuthor" Type="Edm.Boolean"/>
+            <Property Name="showPublishedDate" Type="Edm.Boolean"/>
+            <Property Name="showTextBlockAboveTitle" Type="Edm.Boolean"/>
+            <Property Name="textAboveTitle" Type="Edm.String"/>
+            <Property Name="textAlignment" Type="graph.titleAreaTextAlignmentType"/>
+         </ComplexType>
          <ComplexType Name="versionAction">
             <Property Name="newVersion" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="webPartData">
+            <Property Name="dataVersion" Type="Edm.String"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="properties" Type="graph.Json"/>
+            <Property Name="serverProcessedContent" Type="graph.serverProcessedContent"/>
+            <Property Name="title" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="webPartPosition">
+            <Property Name="columnId" Type="Edm.Double"/>
+            <Property Name="horizontalSectionId" Type="Edm.Double"/>
+            <Property Name="isInVerticalSection" Type="Edm.Boolean"/>
+            <Property Name="webPartIndex" Type="Edm.Double"/>
+         </ComplexType>
+         <EntityType Name="canvasLayout" BaseType="graph.entity">
+            <NavigationProperty Name="horizontalSections" Type="Collection(graph.horizontalSection)" ContainsTarget="true"/>
+            <NavigationProperty Name="verticalSection" Type="graph.verticalSection" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="horizontalSection" BaseType="graph.entity">
+            <Property Name="emphasis" Type="graph.sectionEmphasisType"/>
+            <Property Name="layout" Type="graph.horizontalSectionLayoutType"/>
+            <NavigationProperty Name="columns" Type="Collection(graph.horizontalSectionColumn)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="verticalSection" BaseType="graph.entity">
+            <Property Name="emphasis" Type="graph.sectionEmphasisType"/>
+            <NavigationProperty Name="webparts" Type="Collection(graph.webPart)" ContainsTarget="true"/>
+         </EntityType>
          <EntityType Name="columnLink" BaseType="graph.entity">
             <Property Name="name" Type="Edm.String"/>
          </EntityType>
@@ -26184,6 +26541,11 @@
             <Property Name="shouldCaptureMinorVersion" Type="Edm.Boolean"/>
          </EntityType>
          <EntityType Name="fieldValueSet" BaseType="graph.entity" OpenType="true"/>
+         <EntityType Name="horizontalSectionColumn" BaseType="graph.entity">
+            <Property Name="width" Type="Edm.Int32"/>
+            <NavigationProperty Name="webparts" Type="Collection(graph.webPart)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="webPart" BaseType="graph.entity" Abstract="true"/>
          <EntityType Name="itemActivity" BaseType="graph.entity" OpenType="true">
             <Property Name="access" Type="graph.accessAction"/>
             <Property Name="activityDateTime" Type="Edm.DateTimeOffset"/>
@@ -26211,6 +26573,24 @@
             <NavigationProperty Name="permission" Type="graph.permission" ContainsTarget="true"/>
             <NavigationProperty Name="root" Type="graph.driveItem" ContainsTarget="true"/>
             <NavigationProperty Name="site" Type="graph.site" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="sitePage" BaseType="graph.baseSitePage" OpenType="true">
+            <Property Name="promotionKind" Type="graph.pagePromotionType"/>
+            <Property Name="reactions" Type="graph.reactionsFacet"/>
+            <Property Name="showComments" Type="Edm.Boolean"/>
+            <Property Name="showRecommendedPages" Type="Edm.Boolean"/>
+            <Property Name="thumbnailWebUrl" Type="Edm.String"/>
+            <Property Name="titleArea" Type="graph.titleArea"/>
+            <NavigationProperty Name="canvasLayout" Type="graph.canvasLayout" ContainsTarget="true"/>
+            <NavigationProperty Name="webParts" Type="Collection(graph.webPart)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="standardWebPart" BaseType="graph.webPart">
+            <Property Name="containerTextWebPartId" Type="Edm.String"/>
+            <Property Name="data" Type="graph.webPartData"/>
+            <Property Name="webPartType" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="textWebPart" BaseType="graph.webPart">
+            <Property Name="innerHtml" Type="Edm.String"/>
          </EntityType>
          <ComplexType Name="attendeeNotificationInfo">
             <Property Name="phoneNumber" Type="Edm.String"/>
@@ -29863,7 +30243,11 @@
             <Property Name="resultTemplates" Type="graph.resultTemplateDictionary"/>
             <Property Name="searchTerms" Type="Collection(Edm.String)"/>
          </ComplexType>
-         <EntityType Name="searchEntity" BaseType="graph.entity"/>
+         <EntityType Name="searchEntity" BaseType="graph.entity">
+            <NavigationProperty Name="acronyms" Type="Collection(microsoft.graph.search.acronym)" ContainsTarget="true"/>
+            <NavigationProperty Name="bookmarks" Type="Collection(microsoft.graph.search.bookmark)" ContainsTarget="true"/>
+            <NavigationProperty Name="qnas" Type="Collection(microsoft.graph.search.qna)" ContainsTarget="true"/>
+         </EntityType>
          <ComplexType Name="plannerAppliedCategories" OpenType="true"/>
          <ComplexType Name="plannerAssignment">
             <Property Name="assignedBy" Type="graph.identitySet"/>
@@ -32787,6 +33171,61 @@
          <Action Name="unpublish" IsBound="true" EntitySetPath="bindingParameter">
             <Parameter Name="bindingParameter" Type="graph.contentType"/>
          </Action>
+         <Action Name="assign" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.cloudPcProvisioningPolicy"/>
+            <Parameter Name="assignments" Type="Collection(graph.cloudPcProvisioningPolicyAssignment)"/>
+         </Action>
+         <Action Name="assign" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.cloudPcUserSetting"/>
+            <Parameter Name="assignments" Type="Collection(graph.cloudPcUserSettingAssignment)"/>
+         </Action>
+         <Action Name="assign" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.managedDeviceMobileAppConfiguration"/>
+            <Parameter Name="assignments" Type="Collection(graph.managedDeviceMobileAppConfigurationAssignment)"/>
+         </Action>
+         <Action Name="assign" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.mobileApp"/>
+            <Parameter Name="mobileAppAssignments" Type="Collection(graph.mobileAppAssignment)"/>
+         </Action>
+         <Action Name="assign" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.managedEBook"/>
+            <Parameter Name="managedEBookAssignments" Type="Collection(graph.managedEBookAssignment)"/>
+         </Action>
+         <Action Name="assign" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.deviceCompliancePolicy"/>
+            <Parameter Name="assignments" Type="Collection(graph.deviceCompliancePolicyAssignment)"/>
+            <ReturnType Type="Collection(graph.deviceCompliancePolicyAssignment)"/>
+         </Action>
+         <Action Name="assign" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.deviceConfiguration"/>
+            <Parameter Name="assignments" Type="Collection(graph.deviceConfigurationAssignment)"/>
+            <ReturnType Type="Collection(graph.deviceConfigurationAssignment)"/>
+         </Action>
+         <Action Name="assign" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.deviceEnrollmentConfiguration"/>
+            <Parameter Name="enrollmentConfigurationAssignments" Type="Collection(graph.enrollmentConfigurationAssignment)"/>
+         </Action>
+         <Action Name="assign" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.targetedManagedAppConfiguration"/>
+            <Parameter Name="assignments" Type="Collection(graph.targetedManagedAppPolicyAssignment)"/>
+         </Action>
+         <Action Name="assign" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.targetedManagedAppProtection"/>
+            <Parameter Name="assignments" Type="Collection(graph.targetedManagedAppPolicyAssignment)"/>
+         </Action>
+         <Action Name="assign" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.windowsInformationProtection"/>
+            <Parameter Name="assignments" Type="Collection(graph.targetedManagedAppPolicyAssignment)"/>
+         </Action>
+         <Function Name="getAuditActivityTypes" IsBound="true">
+            <Parameter Name="bindingParameter" Type="Collection(graph.cloudPcAuditEvent)"/>
+            <ReturnType Type="Collection(Edm.String)" Unicode="false"/>
+         </Function>
+         <Function Name="getAuditActivityTypes" IsBound="true">
+            <Parameter Name="bindingParameter" Type="Collection(graph.auditEvent)"/>
+            <Parameter Name="category" Type="Edm.String" Unicode="false"/>
+            <ReturnType Type="Collection(Edm.String)" Unicode="false"/>
+         </Function>
          <Function Name="getFinalAttachment" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.subjectRightsRequest"/>
             <ReturnType Type="Edm.Stream"/>
@@ -36587,44 +37026,6 @@
             <Parameter Name="incompatibleAccessPackageId" Type="Edm.String" Unicode="false"/>
             <ReturnType Type="Collection(graph.accessPackageAssignment)"/>
          </Function>
-         <Action Name="assign" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.managedDeviceMobileAppConfiguration"/>
-            <Parameter Name="assignments" Type="Collection(graph.managedDeviceMobileAppConfigurationAssignment)"/>
-         </Action>
-         <Action Name="assign" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.mobileApp"/>
-            <Parameter Name="mobileAppAssignments" Type="Collection(graph.mobileAppAssignment)"/>
-         </Action>
-         <Action Name="assign" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.managedEBook"/>
-            <Parameter Name="managedEBookAssignments" Type="Collection(graph.managedEBookAssignment)"/>
-         </Action>
-         <Action Name="assign" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.deviceCompliancePolicy"/>
-            <Parameter Name="assignments" Type="Collection(graph.deviceCompliancePolicyAssignment)"/>
-            <ReturnType Type="Collection(graph.deviceCompliancePolicyAssignment)"/>
-         </Action>
-         <Action Name="assign" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.deviceConfiguration"/>
-            <Parameter Name="assignments" Type="Collection(graph.deviceConfigurationAssignment)"/>
-            <ReturnType Type="Collection(graph.deviceConfigurationAssignment)"/>
-         </Action>
-         <Action Name="assign" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.deviceEnrollmentConfiguration"/>
-            <Parameter Name="enrollmentConfigurationAssignments" Type="Collection(graph.enrollmentConfigurationAssignment)"/>
-         </Action>
-         <Action Name="assign" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.targetedManagedAppConfiguration"/>
-            <Parameter Name="assignments" Type="Collection(graph.targetedManagedAppPolicyAssignment)"/>
-         </Action>
-         <Action Name="assign" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.targetedManagedAppProtection"/>
-            <Parameter Name="assignments" Type="Collection(graph.targetedManagedAppPolicyAssignment)"/>
-         </Action>
-         <Action Name="assign" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.windowsInformationProtection"/>
-            <Parameter Name="assignments" Type="Collection(graph.targetedManagedAppPolicyAssignment)"/>
-         </Action>
          <Action Name="commit" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.mobileAppContentFile"/>
             <Parameter Name="fileEncryptionInfo" Type="graph.fileEncryptionInfo"/>
@@ -36632,11 +37033,6 @@
          <Action Name="renewUpload" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.mobileAppContentFile"/>
          </Action>
-         <Function Name="getAuditActivityTypes" IsBound="true">
-            <Parameter Name="bindingParameter" Type="Collection(graph.auditEvent)"/>
-            <Parameter Name="category" Type="Edm.String" Unicode="false"/>
-            <ReturnType Type="Collection(Edm.String)" Unicode="false"/>
-         </Function>
          <Function Name="getAuditCategories" IsBound="true">
             <Parameter Name="bindingParameter" Type="Collection(graph.auditEvent)"/>
             <ReturnType Type="Collection(Edm.String)" Unicode="false"/>
@@ -39589,6 +39985,70 @@
             <Parameter Name="attributeSet" Type="microsoft.graph.partners.billing.attributeSet"/>
             <ReturnType Type="microsoft.graph.partners.billing.operation"/>
          </Action>
+      </Schema>
+      <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="microsoft.graph.search">
+         <EnumType Name="answerState">
+            <Member Name="published" Value="0"/>
+            <Member Name="draft" Value="1"/>
+            <Member Name="excluded" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EntityType Name="searchAnswer" BaseType="graph.entity">
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="lastModifiedBy" Type="microsoft.graph.search.identitySet"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="webUrl" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="acronym" BaseType="microsoft.graph.search.searchAnswer">
+            <Property Name="standsFor" Type="Edm.String"/>
+            <Property Name="state" Type="microsoft.graph.search.answerState" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="bookmark" BaseType="microsoft.graph.search.searchAnswer">
+            <Property Name="availabilityEndDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="availabilityStartDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="categories" Type="Collection(Edm.String)"/>
+            <Property Name="groupIds" Type="Collection(Edm.String)"/>
+            <Property Name="isSuggested" Type="Edm.Boolean"/>
+            <Property Name="keywords" Type="microsoft.graph.search.answerKeyword"/>
+            <Property Name="languageTags" Type="Collection(Edm.String)"/>
+            <Property Name="platforms" Type="Collection(graph.devicePlatformType)" Nullable="false"/>
+            <Property Name="powerAppIds" Type="Collection(Edm.String)"/>
+            <Property Name="state" Type="microsoft.graph.search.answerState" Nullable="false"/>
+            <Property Name="targetedVariations" Type="Collection(microsoft.graph.search.answerVariant)"/>
+         </EntityType>
+         <EntityType Name="qna" BaseType="microsoft.graph.search.searchAnswer">
+            <Property Name="availabilityEndDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="availabilityStartDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="groupIds" Type="Collection(Edm.String)"/>
+            <Property Name="isSuggested" Type="Edm.Boolean"/>
+            <Property Name="keywords" Type="microsoft.graph.search.answerKeyword"/>
+            <Property Name="languageTags" Type="Collection(Edm.String)"/>
+            <Property Name="platforms" Type="Collection(graph.devicePlatformType)" Nullable="false"/>
+            <Property Name="state" Type="microsoft.graph.search.answerState" Nullable="false"/>
+            <Property Name="targetedVariations" Type="Collection(microsoft.graph.search.answerVariant)"/>
+         </EntityType>
+         <ComplexType Name="answerKeyword">
+            <Property Name="keywords" Type="Collection(Edm.String)"/>
+            <Property Name="matchSimilarKeywords" Type="Edm.Boolean"/>
+            <Property Name="reservedKeywords" Type="Collection(Edm.String)"/>
+         </ComplexType>
+         <ComplexType Name="answerVariant">
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="languageTag" Type="Edm.String"/>
+            <Property Name="platform" Type="graph.devicePlatformType"/>
+            <Property Name="webUrl" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="identity" OpenType="true">
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="id" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="identitySet" OpenType="true">
+            <Property Name="application" Type="microsoft.graph.search.identity"/>
+            <Property Name="device" Type="microsoft.graph.search.identity"/>
+            <Property Name="user" Type="microsoft.graph.search.identity"/>
+         </ComplexType>
       </Schema>
       <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="microsoft.graph.externalConnectors">
          <EnumType Name="accessType">

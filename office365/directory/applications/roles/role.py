@@ -38,4 +38,4 @@ class AppRole(ClientValue):
         return "{0}  {1}".format(self.allowedMemberTypes, self.value)
 
     def __repr__(self):
-        return "{0}".format(self.id)
+        return self.value or self.id or self.entity_type_name

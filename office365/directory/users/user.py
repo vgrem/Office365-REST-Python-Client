@@ -50,6 +50,7 @@ from office365.outlook.mail.mailbox_settings import MailboxSettings
 from office365.outlook.mail.messages.collection import MessageCollection
 from office365.outlook.mail.messages.message import Message
 from office365.outlook.mail.recipient import Recipient
+from office365.outlook.mail.tips import MailTips
 from office365.outlook.user import OutlookUser
 from office365.planner.user import PlannerUser
 from office365.runtime.client_result import ClientResult
@@ -168,6 +169,28 @@ class User(DirectoryObject):
         )
         self.context.add_query(qry)
         return self
+
+    def get_mail_tips(self, email_addresses, mail_tips_options=None):
+        """Get the MailTips of one or more recipients as available to the signed-in user.
+        :param list[str] email_addresses: A collection of SMTP addresses of recipients to get MailTips for.
+        :param str mail_tips_options: A enumeration of flags that represents the requested mailtips.
+            Possible values are: automaticReplies, customMailTip, deliveryRestriction, externalMemberCount,
+            mailboxFullStatus, maxMessageSize, moderationStatus, recipientScope, recipientSuggestions,
+            and totalMemberCount.
+        """
+        return_type = ClientResult(self.context, ClientValueCollection(MailTips))
+        payload = {
+            "EmailAddresses": StringCollection(email_addresses),
+            "MailTipsOptions": mail_tips_options,
+        }
+        qry = ServiceOperationQuery(
+            self,
+            "getMailTips",
+            None,
+            payload,
+        )
+        self.context.add_query(qry)
+        return return_type
 
     def send_mail(
         self,
