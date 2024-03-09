@@ -10,7 +10,7 @@ from tests import (
 )
 
 client = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
-file_url = "Shared Documents/report #123.csv"
+file_url = "Shared Documents/Financial Sample.xlsx"
 
 
 role_def = client.web.role_definitions.get_by_type(RoleType.Contributor)

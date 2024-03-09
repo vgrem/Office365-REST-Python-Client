@@ -18,7 +18,7 @@ tasks_list = ctx.web.lists.get_by_title(list_title)
 task_item = tasks_list.add_item({"Title": "New Task"}).execute_query()
 
 # 2. read & upload attachment for a list item
-path = "../../../data/report #123.csv"
+path = "../../../data/Financial Sample.xlsx"
 with open(path, "rb") as fh:
     file_content = fh.read()
 attachment_file_info = AttachmentCreationInformation(

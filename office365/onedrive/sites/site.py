@@ -13,6 +13,7 @@ from office365.onedrive.lists.collection import ListCollection
 from office365.onedrive.operations.rich_long_running import RichLongRunningOperation
 from office365.onedrive.permissions.collection import PermissionCollection
 from office365.onedrive.sharepoint_ids import SharePointIds
+from office365.onedrive.sitepages.base import BaseSitePage
 from office365.onedrive.sites.site_collection import SiteCollection
 from office365.onedrive.termstore.store import Store
 from office365.onenote.onenote import Onenote
@@ -222,6 +223,17 @@ class Site(BaseItem):
         return self.properties.get(
             "onenote",
             Onenote(self.context, ResourcePath("onenote", self.resource_path)),
+        )
+
+    @property
+    def pages(self):
+        # type: () -> EntityCollection[Store]
+        """The collection of site pages under this site."""
+        return self.properties.get(
+            "pages",
+            EntityCollection(
+                self.context, BaseSitePage, ResourcePath("pages", self.resource_path)
+            ),
         )
 
     @property

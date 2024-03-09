@@ -7,7 +7,7 @@ from tests import test_team_site_url, test_user_credentials
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
 
-path = "../../data/report #123.csv"
+path = "../../data/report.csv"
 
 print("Uploading a new file...")
 with open(path, "rb") as f:

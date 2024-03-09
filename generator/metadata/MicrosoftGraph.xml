@@ -15960,6 +15960,9 @@
             <Member Name="adminConfirmedServicePrincipalCompromised" Value="13"/>
             <Member Name="adminDismissedAllRiskForServicePrincipal" Value="14"/>
             <Member Name="m365DAdminDismissedDetection" Value="12"/>
+            <Member Name="userChangedPasswordOnPremises" Value="15"/>
+            <Member Name="adminDismissedRiskForSignIn" Value="16"/>
+            <Member Name="adminConfirmedAccountSafe" Value="17"/>
          </EnumType>
          <EnumType Name="riskEventType">
             <Member Name="unlikelyTravel" Value="0"/>
@@ -16214,9 +16217,123 @@
             <Member Name="cloudPC" Value="0"/>
             <Member Name="unknownFutureValue" Value="1"/>
          </EnumType>
+         <EnumType Name="cloudPcDeviceImageErrorCode">
+            <Member Name="internalServerError" Value="0"/>
+            <Member Name="sourceImageNotFound" Value="1"/>
+            <Member Name="osVersionNotSupported" Value="2"/>
+            <Member Name="sourceImageInvalid" Value="3"/>
+            <Member Name="sourceImageNotGeneralized" Value="4"/>
+            <Member Name="unknownFutureValue" Value="5"/>
+            <Member Name="vmAlreadyAzureAdjoined" Value="6"/>
+            <Member Name="paidSourceImageNotSupport" Value="7"/>
+            <Member Name="sourceImageNotSupportCustomizeVMName" Value="8"/>
+            <Member Name="sourceImageSizeExceedsLimitation" Value="9"/>
+         </EnumType>
+         <EnumType Name="cloudPcDeviceImageOsStatus">
+            <Member Name="supported" Value="0"/>
+            <Member Name="supportedWithWarning" Value="1"/>
+            <Member Name="unknown" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="cloudPcDeviceImageStatus">
+            <Member Name="pending" Value="0"/>
+            <Member Name="ready" Value="1"/>
+            <Member Name="failed" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
          <EnumType Name="cloudPcDomainJoinType">
             <Member Name="azureADJoin" Value="0"/>
             <Member Name="hybridAzureADJoin" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
+         <EnumType Name="cloudPcGalleryImageStatus">
+            <Member Name="supported" Value="0"/>
+            <Member Name="supportedWithWarning" Value="1"/>
+            <Member Name="notSupported" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="cloudPcOnPremisesConnectionHealthCheckErrorType">
+            <Member Name="dnsCheckFqdnNotFound" Value="100"/>
+            <Member Name="dnsCheckNameWithInvalidCharacter" Value="101"/>
+            <Member Name="dnsCheckUnknownError" Value="199"/>
+            <Member Name="adJoinCheckFqdnNotFound" Value="200"/>
+            <Member Name="adJoinCheckIncorrectCredentials" Value="201"/>
+            <Member Name="adJoinCheckOrganizationalUnitNotFound" Value="202"/>
+            <Member Name="adJoinCheckOrganizationalUnitIncorrectFormat" Value="203"/>
+            <Member Name="adJoinCheckComputerObjectAlreadyExists" Value="204"/>
+            <Member Name="adJoinCheckAccessDenied" Value="205"/>
+            <Member Name="adJoinCheckCredentialsExpired" Value="206"/>
+            <Member Name="adJoinCheckAccountLockedOrDisabled" Value="207"/>
+            <Member Name="adJoinCheckAccountQuotaExceeded" Value="208"/>
+            <Member Name="adJoinCheckServerNotOperational" Value="209"/>
+            <Member Name="adJoinCheckUnknownError" Value="299"/>
+            <Member Name="endpointConnectivityCheckCloudPcUrlNotAllowListed" Value="300"/>
+            <Member Name="endpointConnectivityCheckWVDUrlNotAllowListed" Value="301"/>
+            <Member Name="endpointConnectivityCheckIntuneUrlNotAllowListed" Value="302"/>
+            <Member Name="endpointConnectivityCheckAzureADUrlNotAllowListed" Value="303"/>
+            <Member Name="endpointConnectivityCheckLocaleUrlNotAllowListed" Value="304"/>
+            <Member Name="endpointConnectivityCheckUnknownError" Value="399"/>
+            <Member Name="azureAdDeviceSyncCheckDeviceNotFound" Value="400"/>
+            <Member Name="azureAdDeviceSyncCheckLongSyncCircle" Value="401"/>
+            <Member Name="azureAdDeviceSyncCheckConnectDisabled" Value="402"/>
+            <Member Name="azureAdDeviceSyncCheckDurationExceeded" Value="403"/>
+            <Member Name="azureAdDeviceSyncCheckScpNotConfigured" Value="404"/>
+            <Member Name="azureAdDeviceSyncCheckTransientServiceError" Value="498"/>
+            <Member Name="azureAdDeviceSyncCheckUnknownError" Value="499"/>
+            <Member Name="resourceAvailabilityCheckNoSubnetIP" Value="500"/>
+            <Member Name="resourceAvailabilityCheckSubscriptionDisabled" Value="501"/>
+            <Member Name="resourceAvailabilityCheckAzurePolicyViolation" Value="502"/>
+            <Member Name="resourceAvailabilityCheckSubscriptionNotFound" Value="503"/>
+            <Member Name="resourceAvailabilityCheckSubscriptionTransferred" Value="504"/>
+            <Member Name="resourceAvailabilityCheckGeneralSubscriptionError" Value="505"/>
+            <Member Name="resourceAvailabilityCheckUnsupportedVNetRegion" Value="506"/>
+            <Member Name="resourceAvailabilityCheckResourceGroupInvalid" Value="507"/>
+            <Member Name="resourceAvailabilityCheckVNetInvalid" Value="508"/>
+            <Member Name="resourceAvailabilityCheckSubnetInvalid" Value="509"/>
+            <Member Name="resourceAvailabilityCheckResourceGroupBeingDeleted" Value="510"/>
+            <Member Name="resourceAvailabilityCheckVNetBeingMoved" Value="511"/>
+            <Member Name="resourceAvailabilityCheckSubnetDelegationFailed" Value="512"/>
+            <Member Name="resourceAvailabilityCheckSubnetWithExternalResources" Value="513"/>
+            <Member Name="resourceAvailabilityCheckResourceGroupLockedForReadonly" Value="514"/>
+            <Member Name="resourceAvailabilityCheckResourceGroupLockedForDelete" Value="515"/>
+            <Member Name="resourceAvailabilityCheckNoIntuneReaderRoleError" Value="516"/>
+            <Member Name="resourceAvailabilityCheckIntuneDefaultWindowsRestrictionViolation" Value="517"/>
+            <Member Name="resourceAvailabilityCheckIntuneCustomWindowsRestrictionViolation" Value="518"/>
+            <Member Name="resourceAvailabilityCheckDeploymentQuotaLimitReached" Value="519"/>
+            <Member Name="resourceAvailabilityCheckTransientServiceError" Value="598"/>
+            <Member Name="resourceAvailabilityCheckUnknownError" Value="599"/>
+            <Member Name="permissionCheckNoSubscriptionReaderRole" Value="600"/>
+            <Member Name="permissionCheckNoResourceGroupOwnerRole" Value="601"/>
+            <Member Name="permissionCheckNoVNetContributorRole" Value="602"/>
+            <Member Name="permissionCheckNoResourceGroupNetworkContributorRole" Value="603"/>
+            <Member Name="permissionCheckNoWindows365NetworkUserRole" Value="604"/>
+            <Member Name="permissionCheckNoWindows365NetworkInterfaceContributorRole" Value="605"/>
+            <Member Name="permissionCheckTransientServiceError" Value="698"/>
+            <Member Name="permissionCheckUnknownError" Value="699"/>
+            <Member Name="udpConnectivityCheckStunUrlNotAllowListed" Value="800"/>
+            <Member Name="udpConnectivityCheckTurnUrlNotAllowListed" Value="801"/>
+            <Member Name="udpConnectivityCheckUrlsNotAllowListed" Value="802"/>
+            <Member Name="udpConnectivityCheckUnknownError" Value="899"/>
+            <Member Name="internalServerErrorDeploymentCanceled" Value="900"/>
+            <Member Name="internalServerErrorAllocateResourceFailed" Value="901"/>
+            <Member Name="internalServerErrorVMDeploymentTimeout" Value="902"/>
+            <Member Name="internalServerErrorUnableToRunDscScript" Value="903"/>
+            <Member Name="ssoCheckKerberosConfigurationError" Value="904"/>
+            <Member Name="internalServerUnknownError" Value="999"/>
+            <Member Name="unknownFutureValue" Value="1000"/>
+         </EnumType>
+         <EnumType Name="cloudPcOnPremisesConnectionStatus">
+            <Member Name="pending" Value="0"/>
+            <Member Name="running" Value="1"/>
+            <Member Name="passed" Value="2"/>
+            <Member Name="failed" Value="3"/>
+            <Member Name="warning" Value="4"/>
+            <Member Name="informational" Value="5"/>
+            <Member Name="unknownFutureValue" Value="6"/>
+         </EnumType>
+         <EnumType Name="cloudPcOnPremisesConnectionType">
+            <Member Name="hybridAzureADJoin" Value="0"/>
+            <Member Name="azureADJoin" Value="1"/>
             <Member Name="unknownFutureValue" Value="2"/>
          </EnumType>
          <EnumType Name="cloudPcProvisioningPolicyImageType">
@@ -18652,6 +18769,12 @@
          <EnumType Name="applicationType">
             <Member Name="universal" Value="1"/>
             <Member Name="desktop" Value="2"/>
+         </EnumType>
+         <EnumType Name="appsUpdateChannelType">
+            <Member Name="current" Value="0"/>
+            <Member Name="monthlyEnterprise" Value="1"/>
+            <Member Name="semiAnnual" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
          </EnumType>
          <EnumType Name="postType">
             <Member Name="regular" Value="0"/>
@@ -22763,9 +22886,30 @@
             <Property Name="groupId" Type="Edm.String"/>
             <Property Name="servicePlanId" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="cloudPcOnPremisesConnectionHealthCheck">
+            <Property Name="additionalDetail" Type="Edm.String"/>
+            <Property Name="correlationId" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="endDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="errorType" Type="graph.cloudPcOnPremisesConnectionHealthCheckErrorType"/>
+            <Property Name="recommendedAction" Type="Edm.String"/>
+            <Property Name="startDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="status" Type="graph.cloudPcOnPremisesConnectionStatus" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="cloudPcOnPremisesConnectionStatusDetail">
+            <Property Name="endDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="healthChecks" Type="Collection(graph.cloudPcOnPremisesConnectionHealthCheck)"/>
+            <Property Name="startDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="cloudPcRestorePointSetting">
             <Property Name="frequencyType" Type="graph.cloudPcRestorePointFrequencyType"/>
             <Property Name="userRestoreEnabled" Type="Edm.Boolean"/>
+         </ComplexType>
+         <ComplexType Name="cloudPcSourceDeviceImage">
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="resourceId" Type="Edm.String" Nullable="false"/>
+            <Property Name="subscriptionDisplayName" Type="Edm.String"/>
+            <Property Name="subscriptionId" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="cloudPcWindowsSetting">
             <Property Name="locale" Type="Edm.String"/>
@@ -22774,6 +22918,22 @@
             <Property Name="managedType" Type="graph.microsoftManagedDesktopType"/>
             <Property Name="profile" Type="Edm.String"/>
          </ComplexType>
+         <EntityType Name="cloudPC" BaseType="graph.entity">
+            <Property Name="aadDeviceId" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="gracePeriodEndDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="imageDisplayName" Type="Edm.String"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="managedDeviceId" Type="Edm.String"/>
+            <Property Name="managedDeviceName" Type="Edm.String"/>
+            <Property Name="onPremisesConnectionName" Type="Edm.String"/>
+            <Property Name="provisioningPolicyId" Type="Edm.String"/>
+            <Property Name="provisioningPolicyName" Type="Edm.String"/>
+            <Property Name="provisioningType" Type="graph.cloudPcProvisioningType"/>
+            <Property Name="servicePlanId" Type="Edm.String"/>
+            <Property Name="servicePlanName" Type="Edm.String"/>
+            <Property Name="userPrincipalName" Type="Edm.String"/>
+         </EntityType>
          <EntityType Name="cloudPcAuditEvent" BaseType="graph.entity">
             <Property Name="activity" Type="Edm.String"/>
             <Property Name="activityDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
@@ -22786,6 +22946,47 @@
             <Property Name="correlationId" Type="Edm.String" Nullable="false"/>
             <Property Name="displayName" Type="Edm.String" Nullable="false"/>
             <Property Name="resources" Type="Collection(graph.cloudPcAuditResource)" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="cloudPcDeviceImage" BaseType="graph.entity">
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="errorCode" Type="graph.cloudPcDeviceImageErrorCode"/>
+            <Property Name="expirationDate" Type="Edm.Date"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="operatingSystem" Type="Edm.String"/>
+            <Property Name="osBuildNumber" Type="Edm.String"/>
+            <Property Name="osStatus" Type="graph.cloudPcDeviceImageOsStatus"/>
+            <Property Name="sourceImageResourceId" Type="Edm.String"/>
+            <Property Name="status" Type="graph.cloudPcDeviceImageStatus"/>
+            <Property Name="version" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="cloudPcGalleryImage" BaseType="graph.entity">
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="endDate" Type="Edm.Date"/>
+            <Property Name="expirationDate" Type="Edm.Date"/>
+            <Property Name="offerName" Type="Edm.String"/>
+            <Property Name="publisherName" Type="Edm.String"/>
+            <Property Name="sizeInGB" Type="Edm.Int32"/>
+            <Property Name="skuName" Type="Edm.String"/>
+            <Property Name="startDate" Type="Edm.Date"/>
+            <Property Name="status" Type="graph.cloudPcGalleryImageStatus"/>
+         </EntityType>
+         <EntityType Name="cloudPcOnPremisesConnection" BaseType="graph.entity">
+            <Property Name="adDomainName" Type="Edm.String"/>
+            <Property Name="adDomainPassword" Type="Edm.String"/>
+            <Property Name="adDomainUsername" Type="Edm.String"/>
+            <Property Name="alternateResourceUrl" Type="Edm.String"/>
+            <Property Name="connectionType" Type="graph.cloudPcOnPremisesConnectionType"/>
+            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="healthCheckStatus" Type="graph.cloudPcOnPremisesConnectionStatus" Nullable="false"/>
+            <Property Name="healthCheckStatusDetail" Type="graph.cloudPcOnPremisesConnectionStatusDetail"/>
+            <Property Name="inUse" Type="Edm.Boolean"/>
+            <Property Name="organizationalUnit" Type="Edm.String"/>
+            <Property Name="resourceGroupId" Type="Edm.String" Nullable="false"/>
+            <Property Name="subnetId" Type="Edm.String" Nullable="false"/>
+            <Property Name="subscriptionId" Type="Edm.String" Nullable="false"/>
+            <Property Name="subscriptionName" Type="Edm.String"/>
+            <Property Name="virtualNetworkId" Type="Edm.String" Nullable="false"/>
+            <Property Name="virtualNetworkLocation" Type="Edm.String"/>
          </EntityType>
          <EntityType Name="cloudPcProvisioningPolicy" BaseType="graph.entity">
             <Property Name="alternateResourceUrl" Type="Edm.String"/>
@@ -22904,6 +23105,10 @@
          </EntityType>
          <EntityType Name="virtualEndpoint" BaseType="graph.entity">
             <NavigationProperty Name="auditEvents" Type="Collection(graph.cloudPcAuditEvent)" ContainsTarget="true"/>
+            <NavigationProperty Name="cloudPCs" Type="Collection(graph.cloudPC)" ContainsTarget="true"/>
+            <NavigationProperty Name="deviceImages" Type="Collection(graph.cloudPcDeviceImage)" ContainsTarget="true"/>
+            <NavigationProperty Name="galleryImages" Type="Collection(graph.cloudPcGalleryImage)" ContainsTarget="true"/>
+            <NavigationProperty Name="onPremisesConnections" Type="Collection(graph.cloudPcOnPremisesConnection)" ContainsTarget="true"/>
             <NavigationProperty Name="provisioningPolicies" Type="Collection(graph.cloudPcProvisioningPolicy)" ContainsTarget="true"/>
             <NavigationProperty Name="userSettings" Type="Collection(graph.cloudPcUserSetting)" ContainsTarget="true"/>
          </EntityType>
@@ -24875,6 +25080,7 @@
          <EntityType Name="admin">
             <NavigationProperty Name="edge" Type="graph.edge" ContainsTarget="true"/>
             <NavigationProperty Name="sharepoint" Type="graph.sharepoint" ContainsTarget="true"/>
+            <NavigationProperty Name="microsoft365Apps" Type="graph.adminMicrosoft365Apps" ContainsTarget="true"/>
             <NavigationProperty Name="serviceAnnouncement" Type="graph.serviceAnnouncement" ContainsTarget="true"/>
             <NavigationProperty Name="people" Type="graph.peopleAdminSettings" ContainsTarget="true"/>
          </EntityType>
@@ -24883,6 +25089,9 @@
          </EntityType>
          <EntityType Name="sharepoint" BaseType="graph.entity">
             <NavigationProperty Name="settings" Type="graph.sharepointSettings" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="adminMicrosoft365Apps" BaseType="graph.entity">
+            <NavigationProperty Name="installationOptions" Type="graph.m365AppsInstallationOptions" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="serviceAnnouncement" BaseType="graph.entity">
             <NavigationProperty Name="healthOverviews" Type="Collection(graph.serviceHealth)" ContainsTarget="true"/>
@@ -30084,6 +30293,21 @@
             <Property Name="osVersion" Type="Edm.String"/>
             <Property Name="userId" Type="Edm.String"/>
          </EntityType>
+         <ComplexType Name="appsInstallationOptionsForMac">
+            <Property Name="isMicrosoft365AppsEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="isSkypeForBusinessEnabled" Type="Edm.Boolean" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="appsInstallationOptionsForWindows">
+            <Property Name="isMicrosoft365AppsEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="isProjectEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="isSkypeForBusinessEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="isVisioEnabled" Type="Edm.Boolean" Nullable="false"/>
+         </ComplexType>
+         <EntityType Name="m365AppsInstallationOptions" BaseType="graph.entity">
+            <Property Name="appsForMac" Type="graph.appsInstallationOptionsForMac" Nullable="false"/>
+            <Property Name="appsForWindows" Type="graph.appsInstallationOptionsForWindows" Nullable="false"/>
+            <Property Name="updateChannel" Type="graph.appsUpdateChannelType" Nullable="false"/>
+         </EntityType>
          <ComplexType Name="serviceHealthIssuePost">
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
             <Property Name="description" Type="graph.itemBody"/>
@@ -33217,6 +33441,39 @@
             <Parameter Name="bindingParameter" Type="graph.windowsInformationProtection"/>
             <Parameter Name="assignments" Type="Collection(graph.targetedManagedAppPolicyAssignment)"/>
          </Action>
+         <Action Name="endGracePeriod" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.cloudPC"/>
+         </Action>
+         <Action Name="reboot" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.cloudPC"/>
+         </Action>
+         <Action Name="rename" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.cloudPC"/>
+            <Parameter Name="displayName" Type="Edm.String" Unicode="false"/>
+         </Action>
+         <Action Name="restore" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.cloudPC"/>
+            <Parameter Name="cloudPcSnapshotId" Type="Edm.String" Unicode="false"/>
+         </Action>
+         <Action Name="restore" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.directoryObject" Nullable="false"/>
+            <ReturnType Type="graph.directoryObject"/>
+         </Action>
+         <Action Name="restore" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.driveItem"/>
+            <Parameter Name="parentReference" Type="graph.itemReference"/>
+            <Parameter Name="name" Type="Edm.String" Unicode="false"/>
+            <ReturnType Type="graph.driveItem"/>
+         </Action>
+         <Action Name="restore" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.documentSetVersion"/>
+         </Action>
+         <Action Name="troubleshoot" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.cloudPC"/>
+         </Action>
+         <Action Name="runHealthChecks" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.cloudPcOnPremisesConnection"/>
+         </Action>
          <Function Name="getAuditActivityTypes" IsBound="true">
             <Parameter Name="bindingParameter" Type="Collection(graph.cloudPcAuditEvent)"/>
             <ReturnType Type="Collection(Edm.String)" Unicode="false"/>
@@ -33225,6 +33482,10 @@
             <Parameter Name="bindingParameter" Type="Collection(graph.auditEvent)"/>
             <Parameter Name="category" Type="Edm.String" Unicode="false"/>
             <ReturnType Type="Collection(Edm.String)" Unicode="false"/>
+         </Function>
+         <Function Name="getSourceImages" IsBound="true">
+            <Parameter Name="bindingParameter" Type="Collection(graph.cloudPcDeviceImage)"/>
+            <ReturnType Type="Collection(graph.cloudPcSourceDeviceImage)"/>
          </Function>
          <Function Name="getFinalAttachment" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.subjectRightsRequest"/>
@@ -33423,19 +33684,6 @@
             <Parameter Name="bindingParameter" Type="graph.directoryObject" Nullable="false"/>
             <Parameter Name="securityEnabledOnly" Type="Edm.Boolean"/>
             <ReturnType Type="Collection(Edm.String)" Nullable="false" Unicode="false"/>
-         </Action>
-         <Action Name="restore" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.directoryObject" Nullable="false"/>
-            <ReturnType Type="graph.directoryObject"/>
-         </Action>
-         <Action Name="restore" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.driveItem"/>
-            <Parameter Name="parentReference" Type="graph.itemReference"/>
-            <Parameter Name="name" Type="Edm.String" Unicode="false"/>
-            <ReturnType Type="graph.driveItem"/>
-         </Action>
-         <Action Name="restore" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.documentSetVersion"/>
          </Action>
          <Action Name="forceDelete" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.domain" Nullable="false"/>
@@ -39936,6 +40184,7 @@
          <EntityType Name="billing" BaseType="graph.entity">
             <NavigationProperty Name="manifests" Type="Collection(microsoft.graph.partners.billing.manifest)" ContainsTarget="true"/>
             <NavigationProperty Name="operations" Type="Collection(microsoft.graph.partners.billing.operation)" ContainsTarget="true"/>
+            <NavigationProperty Name="reconciliation" Type="microsoft.graph.partners.billing.billingReconciliation" Nullable="false" ContainsTarget="true"/>
             <NavigationProperty Name="usage" Type="microsoft.graph.partners.billing.azureUsage" Nullable="false" ContainsTarget="true"/>
          </EntityType>
          <ComplexType Name="blob">
@@ -39948,6 +40197,7 @@
          </EntityType>
          <EntityType Name="billedUsage" BaseType="graph.entity"/>
          <EntityType Name="unbilledUsage" BaseType="graph.entity"/>
+         <EntityType Name="billedReconciliation" BaseType="graph.entity"/>
          <EntityType Name="manifest" BaseType="graph.entity">
             <Property Name="blobCount" Type="Edm.Int32" Nullable="false"/>
             <Property Name="blobs" Type="Collection(microsoft.graph.partners.billing.blob)" Nullable="false"/>
@@ -39965,6 +40215,9 @@
             <Property Name="lastActionDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
             <Property Name="status" Type="graph.longRunningOperationStatus"/>
          </EntityType>
+         <EntityType Name="billingReconciliation" BaseType="graph.entity">
+            <NavigationProperty Name="billed" Type="microsoft.graph.partners.billing.billedReconciliation" Nullable="false" ContainsTarget="true"/>
+         </EntityType>
          <EntityType Name="exportSuccessOperation" BaseType="microsoft.graph.partners.billing.operation">
             <NavigationProperty Name="resourceLocation" Type="microsoft.graph.partners.billing.manifest" Nullable="false"/>
          </EntityType>
@@ -39972,6 +40225,14 @@
             <Property Name="error" Type="graph.publicError" Nullable="false"/>
          </EntityType>
          <EntityType Name="runningOperation" BaseType="microsoft.graph.partners.billing.operation"/>
+         <Action Name="export" IsBound="true">
+            <Parameter Name="this" Type="microsoft.graph.partners.billing.billedReconciliation"/>
+            <Parameter Name="invoiceId" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="attributeSet" Type="microsoft.graph.partners.billing.attributeSet">
+               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
+            </Parameter>
+            <ReturnType Type="microsoft.graph.partners.billing.operation"/>
+         </Action>
          <Action Name="export" IsBound="true">
             <Parameter Name="this" Type="microsoft.graph.partners.billing.billedUsage"/>
             <Parameter Name="invoiceId" Type="Edm.String" Unicode="false"/>

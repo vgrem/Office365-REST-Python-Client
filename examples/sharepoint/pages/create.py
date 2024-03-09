@@ -5,11 +5,7 @@ https://support.microsoft.com/en-gb/office/create-and-use-modern-pages-on-a-shar
 """
 
 from office365.sharepoint.client_context import ClientContext
-from tests import (
-    create_unique_name,
-    test_team_site_url,
-    test_user_credentials,
-)
+from tests import create_unique_name, test_team_site_url, test_user_credentials
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
 page_title = create_unique_name("Site Page ")

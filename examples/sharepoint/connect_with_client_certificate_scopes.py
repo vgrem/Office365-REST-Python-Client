@@ -7,12 +7,7 @@ https://learn.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-appo
 import os
 
 from office365.sharepoint.client_context import ClientContext
-from tests import (
-    test_cert_thumbprint,
-    test_client_id,
-    test_site_url,
-    test_tenant,
-)
+from tests import test_cert_thumbprint, test_client_id, test_site_url, test_tenant
 
 cert_credentials = {
     "tenant": test_tenant,

@@ -4,6 +4,11 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class UploadSessionQuery(ServiceOperationQuery):
+    """
+    The UploadSession query provides information about how to upload large files to OneDrive, OneDrive for
+    Business, or SharePoint document libraries
+    """
+
     def __init__(self, binding_type, parameters_type):
         super(UploadSessionQuery, self).__init__(
             binding_type, "createUploadSession", None, parameters_type

@@ -10,7 +10,7 @@ from tests import (
 )
 
 client = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
-file_url = "Shared Documents/report #123.csv"
+file_url = "Shared Documents/Financial Sample.xlsx"
 
 target_user = client.web.site_users.get_by_email(test_user_principal_name_alt)
 target_file = client.web.get_file_by_server_relative_path(file_url)

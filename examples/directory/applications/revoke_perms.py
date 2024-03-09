@@ -5,11 +5,7 @@ https://learn.microsoft.com/en-us/graph/permissions-grant-via-msgraph?tabs=http&
 """
 
 from office365.graph_client import GraphClient
-from tests import (
-    test_admin_principal_name,
-    test_client_id,
-    test_tenant,
-)
+from tests import test_admin_principal_name, test_client_id, test_tenant
 
 client = GraphClient.with_token_interactive(
     test_tenant, test_client_id, test_admin_principal_name

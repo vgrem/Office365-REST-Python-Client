@@ -3,11 +3,7 @@ Shares a folder
 """
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.sharing.external_site_option import ExternalSharingSiteOption
-from tests import (
-    test_team_site_url,
-    test_user_credentials,
-    test_user_principal_name,
-)
+from tests import test_team_site_url, test_user_credentials, test_user_principal_name
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
 folder_url = "Shared Documents/Archive"

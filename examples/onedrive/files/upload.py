@@ -17,5 +17,7 @@ folder = client.users.get_by_principal_name(test_user_principal_name_alt).drive.
 
 # local_path = "../../data/Financial Sample.xlsx"
 local_path = "../../data/countries.json"
-file = folder.upload_file(local_path).execute_query()
+# file = folder.upload_file(local_path).execute_query()
+with open(local_path, "rb") as f:
+    file = folder.upload_file(f).execute_query()
 print("File {0} has been uploaded".format(file.web_url))

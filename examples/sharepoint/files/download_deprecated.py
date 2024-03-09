@@ -12,7 +12,6 @@ from tests import test_client_credentials, test_team_site_url
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 file_url = "Shared Documents/Sample.pdf"
-# file_url = "Shared Documents/report '123.csv"
 download_path = os.path.join(tempfile.mkdtemp(), os.path.basename(file_url))
 with open(download_path, "wb") as local_file:
     file = ctx.web.get_file_by_server_relative_url(file_url).get().execute_query()

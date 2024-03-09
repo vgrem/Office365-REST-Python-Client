@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
+from functools import partial
+from os.path import isfile, join
 from typing import IO, AnyStr, Callable, Optional, TypeVar
 
 import requests
@@ -271,6 +273,30 @@ class DriveItem(BaseItem):
                 content = f.read()
             name = os.path.basename(path_or_file)
             return self.upload(name, content)
+
+    def upload_folder(self, path, file_uploaded=None):
+        # type: (str, Callable[["DriveItem"], None]) -> "DriveItem"
+
+        def _after_file_upload(return_type):
+            # type: ("DriveItem") -> None
+            if callable(file_uploaded):
+                file_uploaded(return_type)
+
+        def _upload_folder(source_path, target_folder):
+            # type: (str, "DriveItem") -> None
+            for name in os.listdir(source_path):
+                cur_path = join(source_path, name)
+                if isfile(cur_path):
+                    with open(cur_path, "rb") as f:
+                        target_folder.upload_file(f).after_execute(_after_file_upload)
+                else:
+                    target_folder.create_folder(name).after_execute(
+                        partial(_upload_folder, cur_path)
+                    )
+
+        """Uploads a folder"""
+        _upload_folder(path, self)
+        return self
 
     def get_content(self, format_name=None):
         # type: (Optional[str]) -> ClientResult[AnyStr]

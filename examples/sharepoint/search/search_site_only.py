@@ -6,11 +6,7 @@ https://learn.microsoft.com/en-us/sharepoint/dev/general-development/sharepoint-
 """
 
 from office365.sharepoint.client_context import ClientContext
-from tests import (
-    test_site_url,
-    test_team_site_url,
-    test_user_credentials,
-)
+from tests import test_site_url, test_team_site_url, test_user_credentials
 
 ctx = ClientContext(test_site_url).with_credentials(test_user_credentials)
 
