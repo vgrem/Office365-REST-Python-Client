@@ -16,5 +16,5 @@ client = GraphClient.with_username_and_password(
     test_tenant, test_client_id, test_username, test_password
 )
 local_path = "../../data"
-target_folder = client.me.drive.root.get_by_path("Import")
-target_folder.upload_folder(local_path, print_progress).execute_query()
+drive_item = client.me.drive.root.get_by_path("Import")
+drive_item.upload_folder(local_path, print_progress).execute_query()

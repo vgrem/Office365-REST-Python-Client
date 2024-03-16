@@ -495,25 +495,25 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="Foreground delivery optimization priority."/>
          </Annotations>
          <Annotations Target="microsoft.graph.win32LobAppFileSystemOperationType">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Contains all supported file system detection type."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="A list of possible operations for rules used to make determinations about an application based on files or folders. Unless noted, can be used with either detection or requirement rules."/>
          </Annotations>
          <Annotations Target="microsoft.graph.win32LobAppFileSystemOperationType/notConfigured">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Not configured."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Default. Indicates that the rule does not have the operation type configured."/>
          </Annotations>
          <Annotations Target="microsoft.graph.win32LobAppFileSystemOperationType/exists">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Whether the specified file or folder exists."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates that the rule evaluates whether the specified file or folder exists."/>
          </Annotations>
          <Annotations Target="microsoft.graph.win32LobAppFileSystemOperationType/modifiedDate">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Last modified date."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates that the rule compares the modified date of the specified file against a provided comparison value by DateTime comparison."/>
          </Annotations>
          <Annotations Target="microsoft.graph.win32LobAppFileSystemOperationType/createdDate">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Created date."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates that the rule compares the created date of the specified file against a provided comparison value by DateTime comparison."/>
          </Annotations>
          <Annotations Target="microsoft.graph.win32LobAppFileSystemOperationType/version">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Version value type."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates that the rule compares the detected version of the specified file against a provided comparison value via version semantics (both operand values will be parsed as versions and directly compared). If the value read at the given registry value is not discovered to be in version-compatible format, a string comparison will be used instead."/>
          </Annotations>
          <Annotations Target="microsoft.graph.win32LobAppFileSystemOperationType/sizeInMB">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Size detection type."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates that the rule compares the size of the file in MiB (rounded down) against a provided comparison value by integer comparison."/>
          </Annotations>
          <Annotations Target="microsoft.graph.win32LobAppMsiPackageType">
             <Annotation Term="Org.OData.Core.V1.Description" String="Indicates the package type of an MSI Win32LobApp."/>
@@ -564,25 +564,25 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="Output data type is boolean."/>
          </Annotations>
          <Annotations Target="microsoft.graph.win32LobAppRegistryRuleOperationType">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Contains all supported registry data detection type."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="A list of possible operations for rules used to make determinations about an application based on registry keys or values. Unless noted, the values can be used with either detection or requirement rules."/>
          </Annotations>
          <Annotations Target="microsoft.graph.win32LobAppRegistryRuleOperationType/notConfigured">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Not configured."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Default. Indicates that the rule does not have the operation type configured."/>
          </Annotations>
          <Annotations Target="microsoft.graph.win32LobAppRegistryRuleOperationType/exists">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The specified registry key or value exists."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates that the rule evaluates whether the specified registry key or value exists."/>
          </Annotations>
          <Annotations Target="microsoft.graph.win32LobAppRegistryRuleOperationType/doesNotExist">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The specified registry key or value does not exist."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates that the rule evaluates whether the specified registry key or value does not exist. It is the functional inverse of an equivalent rule that uses operation type `exists`."/>
          </Annotations>
          <Annotations Target="microsoft.graph.win32LobAppRegistryRuleOperationType/string">
-            <Annotation Term="Org.OData.Core.V1.Description" String="String value type."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates that the rule compares the value read at the given registry value against a provided comparison value by string comparison."/>
          </Annotations>
          <Annotations Target="microsoft.graph.win32LobAppRegistryRuleOperationType/integer">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Integer value type."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates that the rule compares the value read at the given registry value against a provided comparison value by integer comparison."/>
          </Annotations>
          <Annotations Target="microsoft.graph.win32LobAppRegistryRuleOperationType/version">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Version value type."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates that the rule compares the value read at the given registry value against a provided comparison value via version semantics (both operand values will be parsed as versions and directly compared). If the value read at the given registry value is not discovered to be in version-compatible format, a string comparison will be used instead."/>
          </Annotations>
          <Annotations Target="microsoft.graph.win32LobAppRestartBehavior">
             <Annotation Term="Org.OData.Core.V1.Description" String="Indicates the type of restart action."/>
@@ -2180,6 +2180,9 @@
          <Annotations Target="microsoft.graph.mobileThreatPartnerTenantState/unresponsive">
             <Annotation Term="Org.OData.Core.V1.Description" String="Partner is unresponsive."/>
          </Annotations>
+         <Annotations Target="microsoft.graph.mobileThreatPartnerTenantState/unknownFutureValue">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Evolvable enumeration sentinel value. Do not use."/>
+         </Annotations>
          <Annotations Target="microsoft.graph.vppTokenState">
             <Annotation Term="Org.OData.Core.V1.Description" String="Possible states associated with an Apple Volume Purchase Program token."/>
          </Annotations>
@@ -3300,46 +3303,46 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="The status reported when the system has successfully exchanged account information with TeamViewer and can now initiate remote assistance sessions with clients"/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementExportJobLocalizationType">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Configures how the requested export job is localized"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Configures how the requested export job is localized."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementExportJobLocalizationType/localizedValuesAsAdditionalColumn">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Configures the export job to expose localized values as an additional column"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Configures the export job to expose localized values as an additional column."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementExportJobLocalizationType/replaceLocalizableValues">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Configures the export job to replace enumerable values with their localized values"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Configures the export job to replace enumerable values with their localized values."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementReportFileFormat">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Possible values for the file format of a report"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Possible values for the file format of a report."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementReportFileFormat/csv">
-            <Annotation Term="Org.OData.Core.V1.Description" String="CSV Format"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="CSV Format."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementReportFileFormat/pdf">
-            <Annotation Term="Org.OData.Core.V1.Description" String="PDF Format"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="PDF Format (Deprecate later)."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementReportFileFormat/json">
-            <Annotation Term="Org.OData.Core.V1.Description" String="JSON Format"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="JSON Format."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementReportFileFormat/unknownFutureValue">
             <Annotation Term="Org.OData.Core.V1.Description" String="Evolvable enumeration sentinel value. Do not use."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementReportStatus">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Possible statuses associated with a generated report"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Possible statuses associated with a generated report."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementReportStatus/unknown">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Report generation status is unknown"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Report generation status is unknown."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementReportStatus/notStarted">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Report generation has not started"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Report generation has not started."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementReportStatus/inProgress">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Report generation is in progress"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Report generation is in progress."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementReportStatus/completed">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Report generation is completed"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Report generation is completed."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementReportStatus/failed">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Report generation has failed"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Report generation has failed."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceEnrollmentFailureReason">
             <Annotation Term="Org.OData.Core.V1.Description" String="Top level failure categories for enrollment."/>
@@ -7601,7 +7604,11 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="The value for the minimum applicable operating system."/>
          </Annotations>
          <Annotations Target="microsoft.graph.androidStoreApp/packageId">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The package identifier."/>
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="The package identifier. This property is read-only."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceAppManagement">
             <Annotation Term="Org.OData.Core.V1.Description" String="Singleton entity that acts as a container for all device app management functionality."/>
@@ -7832,7 +7839,7 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="When TRUE, indicates that the app's version will NOT be used to detect if the app is installed on a device. When FALSE, indicates that the app's version will be used to detect if the app is installed on a device. Set this to true for apps that use a self update feature. The default value is FALSE."/>
          </Annotations>
          <Annotations Target="microsoft.graph.macOSDmgApp/includedApps">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The list of .apps expected to be installed by the DMG (Apple Disk Image)"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="The list of .apps expected to be installed by the DMG (Apple Disk Image). This collection can contain a maximum of 500 elements."/>
          </Annotations>
          <Annotations Target="microsoft.graph.macOSDmgApp/minimumSupportedOperatingSystem">
             <Annotation Term="Org.OData.Core.V1.Description" String="ComplexType macOSMinimumOperatingSystem that indicates the minimum operating system applicable for the application."/>
@@ -7919,7 +7926,11 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="The app's package ID."/>
          </Annotations>
          <Annotations Target="microsoft.graph.managedApp/appAvailability">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The Application's availability."/>
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="The Application's availability. This property is read-only."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.managedApp/version">
             <Annotation Term="Org.OData.Core.V1.Description" String="The Application's version."/>
@@ -8096,13 +8107,21 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="The name of the main Lob application file."/>
          </Annotations>
          <Annotations Target="microsoft.graph.managedMobileLobApp/size">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The total size, including all uploaded files."/>
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="The total size, including all uploaded files. This property is read-only."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileAppContent">
             <Annotation Term="Org.OData.Core.V1.Description" String="Contains content properties for a specific app version. Each mobileAppContent can have multiple mobileAppContentFile."/>
          </Annotations>
          <Annotations Target="microsoft.graph.managedMobileLobApp/contentVersions">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The list of content versions for this app."/>
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="The list of content versions for this app. This property is read-only."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.microsoftStoreForBusinessApp">
             <Annotation Term="Org.OData.Core.V1.Description" String="Microsoft Store for Business Apps. This class does not support Create, Delete, or Update."/>
@@ -8123,7 +8142,11 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="The number of Microsoft Store for Business licenses in use."/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileApp/createdDateTime">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The date and time the app was created."/>
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="The date and time the app was created. This property is read-only."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileApp/description">
             <Annotation Term="Org.OData.Core.V1.Description" String="The description of the app."/>
@@ -8144,7 +8167,11 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="The large icon, to be displayed in the app details and used for upload of the icon."/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileApp/lastModifiedDateTime">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The date and time the app was last modified."/>
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="The date and time the app was last modified. This property is read-only."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileApp/notes">
             <Annotation Term="Org.OData.Core.V1.Description" String="Notes for the app."/>
@@ -8159,7 +8186,11 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="The publisher of the app."/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileApp/publishingState">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The publishing state for the app. The app cannot be assigned unless the app is published."/>
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="The publishing state for the app. The app cannot be assigned unless the app is published. This property is read-only."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileAppAssignment">
             <Annotation Term="Org.OData.Core.V1.Description" String="A class containing the properties used for Group Assignment of a Mobile App."/>
@@ -8183,7 +8214,11 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="The name of the app category."/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileAppCategory/lastModifiedDateTime">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The date and time the mobileAppCategory was last modified."/>
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="The date and time the mobileAppCategory was last modified. This property is read-only."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileContainedApp">
             <Annotation Term="Org.OData.Core.V1.Description" String="An abstract class that represents a contained app in a mobileApp acting as a package."/>
@@ -8198,31 +8233,51 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="The list of files for this app content version."/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileAppContentFile/azureStorageUri">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The Azure Storage URI."/>
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates the Azure Storage URI that the file is uploaded to. Created by the service upon receiving a valid mobileAppContentFile. Read-only. This property is read-only."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileAppContentFile/azureStorageUriExpirationDateTime">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The time the Azure storage Uri expires."/>
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates the date and time when the Azure storage URI expires, in ISO 8601 format. For example, midnight UTC on Jan 1, 2014 would look like this: '2014-01-01T00:00:00Z'. Read-only. This property is read-only."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileAppContentFile/createdDateTime">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The time the file was created."/>
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates created date and time associated with app content file, in ISO 8601 format. For example, midnight UTC on Jan 1, 2014 would look like this: '2014-01-01T00:00:00Z'. Read-only. This property is read-only."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileAppContentFile/isCommitted">
-            <Annotation Term="Org.OData.Core.V1.Description" String="A value indicating whether the file is committed."/>
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="A value indicating whether the file is committed. A committed app content file has been fully uploaded and validated by the Intune service. TRUE means that app content file is committed, FALSE means that app content file is not committed. Defaults to FALSE. Read-only. This property is read-only."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileAppContentFile/manifest">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The manifest information."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates the manifest information, containing file metadata."/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileAppContentFile/name">
-            <Annotation Term="Org.OData.Core.V1.Description" String="the file name."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates the name of the file."/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileAppContentFile/size">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The size of the file prior to encryption."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="The size of the file prior to encryption. To be deprecated, please use sizeInBytes property instead."/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileAppContentFile/sizeEncrypted">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The size of the file after encryption."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="The size of the file after encryption. To be deprecated, please use sizeEncryptedInBytes property instead."/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileAppContentFile/uploadState">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The state of the current upload request."/>
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates the state of the current upload request. Possible values are: success, transientError, error, unknown, azureStorageUriRequestSuccess, azureStorageUriRequestPending, azureStorageUriRequestFailed, azureStorageUriRequestTimedOut, azureStorageUriRenewalSuccess, azureStorageUriRenewalPending, azureStorageUriRenewalFailed, azureStorageUriRenewalTimedOut, commitFileSuccess, commitFilePending, commitFileFailed, commitFileTimedOut. Default value is success. This property is read-only."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileLobApp/committedContentVersion">
             <Annotation Term="Org.OData.Core.V1.Description" String="The internal committed content version."/>
@@ -8231,10 +8286,18 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="The name of the main Lob application file."/>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileLobApp/size">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The total size, including all uploaded files."/>
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="The total size, including all uploaded files. This property is read-only."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.mobileLobApp/contentVersions">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The list of content versions for this app."/>
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="The list of content versions for this app. This property is read-only."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.webApp">
             <Annotation Term="Org.OData.Core.V1.Description" String="Contains properties and inherited properties for web apps."/>
@@ -8363,7 +8426,11 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="The value for the minimum applicable Windows operating system."/>
          </Annotations>
          <Annotations Target="microsoft.graph.windowsUniversalAppX/committedContainedApps">
-            <Annotation Term="Org.OData.Core.V1.Description" String="The collection of contained apps in the committed mobileAppContent of a windowsUniversalAppX app."/>
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="The collection of contained apps in the committed mobileAppContent of a windowsUniversalAppX app. This property is read-only."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.windowsUniversalAppXContainedApp">
             <Annotation Term="Org.OData.Core.V1.Description" String="A class that represents a contained app of a WindowsUniversalAppX app."/>
@@ -9350,10 +9417,10 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="Require Google Play Services to be installed and enabled on the device."/>
          </Annotations>
          <Annotations Target="microsoft.graph.androidWorkProfileCompliancePolicy/securityRequireSafetyNetAttestationBasicIntegrity">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Require the device to pass the SafetyNet basic integrity check."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Require the device to pass the Play Integrity basic integrity check."/>
          </Annotations>
          <Annotations Target="microsoft.graph.androidWorkProfileCompliancePolicy/securityRequireSafetyNetAttestationCertifiedDevice">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Require the device to pass the SafetyNet certified device check."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Require the device to pass the Play Integrity device integrity check."/>
          </Annotations>
          <Annotations Target="microsoft.graph.androidWorkProfileCompliancePolicy/securityRequireUpToDateSecurityProviders">
             <Annotation Term="Org.OData.Core.V1.Description" String="Require the device to have up to date security providers. The device will require Google Play Services to be enabled and up to date."/>
@@ -12719,6 +12786,12 @@
          <Annotations Target="microsoft.graph.vppToken/vppTokenAccountType">
             <Annotation Term="Org.OData.Core.V1.Description" String="The type of volume purchase program which the given Apple Volume Purchase Program Token is associated with. Possible values are: `business`, `education`."/>
          </Annotations>
+         <Annotations Target="microsoft.graph.windows10EnrollmentCompletionPageConfiguration">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Windows 10 Enrollment Status Page Configuration"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.windows10EnrollmentCompletionPageConfiguration/allowNonBlockingAppInstallation">
+            <Annotation Term="Org.OData.Core.V1.Description" String="When TRUE, ESP (Enrollment Status Page) installs all required apps targeted during technician phase and ignores any failures for non-blocking apps. When FALSE, ESP fails on any error during app install. The default is false."/>
+         </Annotations>
          <Annotations Target="microsoft.graph.appLogCollectionDownloadDetails/appLogDecryptionAlgorithm">
             <Annotation Term="Org.OData.Core.V1.Description" String="Decryption algorithm for Content. Default is ASE256."/>
          </Annotations>
@@ -14858,41 +14931,44 @@
          <Annotations Target="microsoft.graph.remoteAssistancePartner/onboardingUrl">
             <Annotation Term="Org.OData.Core.V1.Description" String="URL of the partner's onboarding portal, where an administrator can configure their Remote Assistance service."/>
          </Annotations>
+         <Annotations Target="microsoft.graph.deviceManagementCachedReportConfiguration">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Entity representing the configuration of a cached report."/>
+         </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementExportJob">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Entity representing a job to export a report"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Entity representing a job to export a report."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementExportJob/expirationDateTime">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Time that the exported report expires"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Time that the exported report expires."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementExportJob/filter">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Filters applied on the report"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Filters applied on the report. The maximum length allowed for this property is 2000 characters."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementExportJob/format">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Format of the exported report"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Format of the exported report. Possible values are `csv` and `json`."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementExportJob/localizationType">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Configures how the requested export job is localized"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Configures how the requested export job is localized. Possible values are `replaceLocalizableValues` and `localizedValuesAsAdditionalColumn`."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementExportJob/reportName">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Name of the report"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Name of the report. The maximum length allowed for this property is 2000 characters."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementExportJob/requestDateTime">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Time that the exported report was requested"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Time that the exported report was requested."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementExportJob/select">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Columns selected from the report"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Columns selected from the report. The maximum number of allowed columns names is 256. The maximum length allowed for each column name in this property is 1000 characters."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementExportJob/snapshotId">
-            <Annotation Term="Org.OData.Core.V1.Description" String="A snapshot is an identifiable subset of the dataset represented by the ReportName. A sessionId or CachedReportConfiguration id can be used here. If a sessionId is specified, Filter, Select, and OrderBy are applied to the data represented by the sessionId. Filter, Select, and OrderBy cannot be specified together with a CachedReportConfiguration id."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="A snapshot is an identifiable subset of the dataset represented by the ReportName. A sessionId or CachedReportConfiguration id can be used here. If a sessionId is specified, Filter, Select, and OrderBy are applied to the data represented by the sessionId. Filter, Select, and OrderBy cannot be specified together with a CachedReportConfiguration id. The maximum length allowed for this property is 128 characters."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementExportJob/status">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Status of the export job"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Status of the export job. Possible values are `unknown`, `notStarted`, `inProgress`, `completed` and `failed`."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementExportJob/url">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Temporary location of the exported report"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Temporary location of the exported report."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceManagementReports/exportJobs">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Entity representing a job to export a report"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Entity representing a job to export a report."/>
          </Annotations>
          <Annotations Target="microsoft.graph.telecomExpenseManagementPartner/appAuthorized">
             <Annotation Term="Org.OData.Core.V1.Description" String="Whether the partner's AAD app has been authorized to access Intune."/>
@@ -18308,6 +18384,7 @@
             <Member Name="available" Value="1"/>
             <Member Name="enabled" Value="2"/>
             <Member Name="unresponsive" Value="3"/>
+            <Member Name="unknownFutureValue" Value="6"/>
          </EnumType>
          <EnumType Name="vppTokenState">
             <Member Name="unknown" Value="0"/>
@@ -29936,6 +30013,9 @@
             <Property Name="state" Type="graph.enablement" Nullable="false"/>
             <Property Name="unlockWithBiometricsEnabled" Type="Edm.Boolean" Nullable="false"/>
          </EntityType>
+         <EntityType Name="windows10EnrollmentCompletionPageConfiguration" BaseType="graph.deviceEnrollmentConfiguration">
+            <Property Name="allowNonBlockingAppInstallation" Type="Edm.Boolean" Nullable="false"/>
+         </EntityType>
          <ComplexType Name="appLogCollectionDownloadDetails">
             <Property Name="appLogDecryptionAlgorithm" Type="graph.appLogDecryptionAlgorithm" Nullable="false"/>
             <Property Name="decryptionKey" Type="Edm.String"/>
@@ -30271,6 +30351,7 @@
             <Property Name="resourceActions" Type="Collection(graph.resourceAction)"/>
          </ComplexType>
          <EntityType Name="deviceAndAppManagementRoleDefinition" BaseType="graph.roleDefinition"/>
+         <EntityType Name="deviceManagementCachedReportConfiguration" BaseType="graph.entity"/>
          <EntityType Name="deviceManagementExportJob" BaseType="graph.entity">
             <Property Name="expirationDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
             <Property Name="filter" Type="Edm.String"/>
@@ -33388,6 +33469,9 @@
          </Action>
          <Action Name="publish" IsBound="true" EntitySetPath="bindingParameter">
             <Parameter Name="bindingParameter" Type="graph.contentType"/>
+         </Action>
+         <Action Name="publish" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.sitePage"/>
          </Action>
          <Action Name="unpublish" IsBound="true">
             <Parameter Name="bookingBusiness" Type="graph.bookingBusiness" Nullable="false"/>
@@ -36971,6 +37055,18 @@
             <Parameter Name="bindingParameter" Type="graph.contentType"/>
             <ReturnType Type="Edm.Boolean" Nullable="false"/>
          </Function>
+         <Action Name="getPositionOfWebPart" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.webPart"/>
+            <ReturnType Type="graph.webPartPosition"/>
+         </Action>
+         <Action Name="getWebPartsByPosition" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.sitePage"/>
+            <Parameter Name="webPartIndex" Type="Edm.Double"/>
+            <Parameter Name="horizontalSectionId" Type="Edm.Double"/>
+            <Parameter Name="isInVerticalSection" Type="Edm.Boolean"/>
+            <Parameter Name="columnId" Type="Edm.Double"/>
+            <ReturnType Type="Collection(graph.webPart)"/>
+         </Action>
          <Action Name="grant" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.permission"/>
             <Parameter Name="roles" Type="Collection(Edm.String)" Unicode="false"/>
@@ -38586,6 +38682,14 @@
             <Member Name="loadBalancer" Value="4"/>
             <Member Name="unknownFutureValue" Value="31"/>
          </EnumType>
+         <EnumType Name="mailboxConfigurationType">
+            <Member Name="mailForwardingRule" Value="0"/>
+            <Member Name="owaSettings" Value="1"/>
+            <Member Name="ewsSettings" Value="2"/>
+            <Member Name="mailDelegation" Value="3"/>
+            <Member Name="userInboxRule" Value="4"/>
+            <Member Name="unknownFutureValue" Value="31"/>
+         </EnumType>
          <EnumType Name="onboardingStatus">
             <Member Name="insufficientInfo" Value="0"/>
             <Member Name="onboarded" Value="1"/>
@@ -39019,6 +39123,10 @@
             <Property Name="instanceId" Type="Edm.Int64"/>
             <Property Name="instanceName" Type="Edm.String"/>
             <Property Name="saasAppId" Type="Edm.Int64"/>
+            <Property Name="stream" Type="microsoft.graph.security.stream"/>
+         </ComplexType>
+         <ComplexType Name="stream">
+            <Property Name="name" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="containerEvidence" BaseType="microsoft.graph.security.alertEvidence">
             <Property Name="args" Type="Collection(Edm.String)"/>
@@ -39086,6 +39194,7 @@
          <ComplexType Name="ipEvidence" BaseType="microsoft.graph.security.alertEvidence">
             <Property Name="countryLetterCode" Type="Edm.String"/>
             <Property Name="ipAddress" Type="Edm.String"/>
+            <Property Name="stream" Type="microsoft.graph.security.stream"/>
          </ComplexType>
          <ComplexType Name="dynamicColumnValue" OpenType="true"/>
          <ComplexType Name="fileDetails">
@@ -39130,6 +39239,7 @@
             <Property Name="webUrl" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="googleCloudResourceEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="fullResourceName" Type="Edm.String"/>
             <Property Name="location" Type="Edm.String"/>
             <Property Name="locationType" Type="microsoft.graph.security.googleCloudLocationType"/>
             <Property Name="projectId" Type="Edm.String"/>
@@ -39145,6 +39255,7 @@
             <Property Name="startUtcDateTime" Type="Edm.DateTimeOffset"/>
          </ComplexType>
          <ComplexType Name="userEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="stream" Type="microsoft.graph.security.stream"/>
             <Property Name="userAccount" Type="microsoft.graph.security.userAccount"/>
          </ComplexType>
          <ComplexType Name="huntingQueryResults">
@@ -39236,6 +39347,14 @@
             <Property Name="port" Type="Edm.Int32" Nullable="false"/>
             <Property Name="protocol" Type="microsoft.graph.security.containerPortProtocol"/>
             <Property Name="targetPort" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="mailboxConfigurationEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="configurationId" Type="Edm.String"/>
+            <Property Name="configurationType" Type="microsoft.graph.security.mailboxConfigurationType"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="externalDirectoryObjectId" Type="Edm.Guid"/>
+            <Property Name="mailboxPrimaryAddress" Type="Edm.String"/>
+            <Property Name="upn" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="mailboxEvidence" BaseType="microsoft.graph.security.alertEvidence">
             <Property Name="displayName" Type="Edm.String"/>

@@ -328,6 +328,52 @@ class DriveItem(BaseItem):
         self.get_content().after_execute(_save_content)
         return self
 
+    def download_folder(
+        self, download_file, after_file_downloaded=None, recursive=True
+    ):
+        # type: (IO, Callable[[File], None], bool) -> "DriveItem"
+        """
+        Download the folder content
+        """
+        import zipfile
+
+        def _after_file_downloaded(drive_item, base_path, result):
+            # type: ("DriveItem", str, ClientResult[AnyStr]) -> None
+            with zipfile.ZipFile(download_file.name, "a", zipfile.ZIP_DEFLATED) as zf:
+                zip_path = (
+                    "/".join([base_path, drive_item.name])
+                    if base_path is not None
+                    else drive_item.name
+                )
+                zf.writestr(zip_path, result.value)
+                if callable(after_file_downloaded):
+                    after_file_downloaded(drive_item)
+
+        def _after_folder_downloaded(parent_item, base_path=None):
+            # type: ("DriveItem", str) -> None
+            for drive_item in parent_item.children:
+                if drive_item.is_file:
+                    drive_item.get_content().after_execute(
+                        partial(_after_file_downloaded, drive_item, base_path)
+                    )
+                else:
+                    if recursive:
+                        if base_path is None:
+                            next_base_path = str(drive_item.name)
+                        else:
+                            next_base_path = "/".join([base_path, drive_item.name])
+                        _download_folder(drive_item, next_base_path)
+
+        def _download_folder(drive_item, prev_result=None):
+            # type: ("DriveItem", str) -> None
+            drive_item.ensure_properties(
+                ["children", "name"],
+                partial(_after_folder_downloaded, drive_item, prev_result),
+            )
+
+        _download_folder(self)
+        return self
+
     def download_session(
         self, file_object, chunk_downloaded=None, chunk_size=1024 * 1024
     ):
