@@ -47,6 +47,7 @@ class AuthenticationContext(object):
         cert_path=None,
         private_key=None,
         scopes=None,
+        passphrase=None,
     ):
         """Initializes a client to acquire a token via certificate credentials
 
@@ -56,6 +57,7 @@ class AuthenticationContext(object):
         :param str or None cert_path: Path to A PEM encoded certificate private key.
         :param str or None private_key: A PEM encoded certificate private key.
         :param list[str] or None scopes:  Scopes requested to access a protected API (a resource)
+        :param str passphrase: Passphrase if the private_key is encrypted
         """
         if scopes is None:
             resource = get_absolute_url(self.url)
@@ -70,7 +72,11 @@ class AuthenticationContext(object):
 
         def _acquire_token():
             authority_url = "https://login.microsoftonline.com/{0}".format(tenant)
-            credentials = {"thumbprint": thumbprint, "private_key": private_key}
+            credentials = {
+                "thumbprint": thumbprint,
+                "private_key": private_key,
+                "passphrase": passphrase,
+            }
             import msal
 
             app = msal.ConfidentialClientApplication(
@@ -187,7 +193,11 @@ class AuthenticationContext(object):
                 browser_mode = kwargs.get("browser_mode", False)
                 environment = kwargs.get("environment")
                 provider = SamlTokenProvider(
-                    self.url, credentials.userName, credentials.password, browser_mode, environment
+                    self.url,
+                    credentials.userName,
+                    credentials.password,
+                    browser_mode,
+                    environment,
                 )
         else:
             raise ValueError("Unknown credential type")

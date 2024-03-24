@@ -82,8 +82,9 @@ class ClientContext(ClientRuntimeContext):
         cert_path=None,
         private_key=None,
         scopes=None,
+        passphrase=None,
     ):
-        # type: (str, str, str, Optional[str], Optional[str], Optional[List[str]]) -> Self
+        # type: (str, str, str, Optional[str], Optional[str], Optional[List[str]], Optional[str]) -> Self
         """
         Creates authenticated SharePoint context via certificate credentials
 
@@ -93,9 +94,10 @@ class ClientContext(ClientRuntimeContext):
         :param str thumbprint: Hex encoded thumbprint of the certificate.
         :param str client_id: The OAuth client id of the calling application.
         :param list[str] or None scopes:  Scopes requested to access a protected API (a resource)
+        :param str passphrase: Passphrase if the private_key is encrypted
         """
         self.authentication_context.with_client_certificate(
-            tenant, client_id, thumbprint, cert_path, private_key, scopes
+            tenant, client_id, thumbprint, cert_path, private_key, scopes, passphrase
         )
         return self
 
