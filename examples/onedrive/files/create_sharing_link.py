@@ -5,13 +5,15 @@ The following example requests a sharing link to be created for the DriveItem in
 The sharing link is configured to be read-only and usable by anyone with the link.
 All existing permissions are removed when sharing for the first time if retainInheritedPermissions is false.
 
-https://learn.microsoft.com/en-us/graph/api/driveitem-createlink?view=graph-rest-1.0&tabs=http
+https://learn.microsoft.com/en-us/graph/api/driveitem-createlink?view=graph-rest-1.0
 """
 
 from office365.graph_client import GraphClient
-from tests.graph_case import acquire_token_by_username_password
+from tests import test_client_id, test_password, test_tenant, test_username
 
-client = GraphClient(acquire_token_by_username_password)
+client = GraphClient.with_username_and_password(
+    test_tenant, test_client_id, test_username, test_password
+)
 file_path = "Financial Sample.xlsx"
 drive_item = client.me.drive.root.get_by_path(file_path)
 permission = drive_item.create_link(

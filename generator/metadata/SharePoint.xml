@@ -168,6 +168,9 @@
             <Property Name="RoleValue" Type="Edm.Int32" Nullable="false"/>
             <Property Name="StatusCode" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
+         <ComplexType Name="AgreementDocumentsInfo">
+            <Property Name="Documents" Type="Collection(SP.AgreementDocument)"/>
+         </ComplexType>
          <ComplexType Name="AgreementDocument">
             <Property Name="DocumentType" Type="Edm.String"/>
             <Property Name="DocumentUrl" Type="Edm.String"/>
@@ -200,6 +203,7 @@
             <Property Name="TotalValue" Type="Edm.String"/>
             <Property Name="Url" Type="Edm.String"/>
             <Property Name="WebId" Type="Edm.String"/>
+            <Property Name="WebUrl" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="AgreementSearchParameters">
             <Property Name="AgreementNumber" Type="Edm.String"/>
@@ -256,6 +260,25 @@
             <Property Name="Answer" Type="Edm.String"/>
             <Property Name="ContentControlTagName" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="ContentAssemblyModernTemplateColumnsMappingInfo">
+            <Property Name="DestinationListContentTypeId" Type="Edm.String"/>
+            <Property Name="DestinationSiteContentTypeId" Type="Edm.String"/>
+            <Property Name="Placeholders" Type="Collection(SP.PlaceholderV2)"/>
+         </ComplexType>
+         <ComplexType Name="PlaceholderV2">
+            <Property Name="AdditionalFieldsData" Type="Edm.String"/>
+            <Property Name="ColumnId" Type="Edm.String"/>
+            <Property Name="ColumnInternalName" Type="Edm.String"/>
+            <Property Name="DataType" Type="Edm.String"/>
+            <Property Name="FieldLibraryMappedId" Type="Edm.String"/>
+            <Property Name="FieldLibraryMappedVersion" Type="Edm.String"/>
+            <Property Name="Id" Type="Edm.String"/>
+            <Property Name="IsColumnMappingActive" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="IsMandatory" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="Name" Type="Edm.String"/>
+            <Property Name="QuestionTitle" Type="Edm.String"/>
+            <Property Name="Source" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="ContentControlInfo">
             <Property Name="ContentControlTagName" Type="Edm.String"/>
             <Property Name="EndIndex" Type="Edm.Int32" Nullable="false"/>
@@ -295,6 +318,7 @@
          <ComplexType Name="DocumentGenerationInfo">
             <Property Name="ConditionalFieldsToBeDeleted" Type="Collection(Edm.String)"/>
             <Property Name="ContentAssemblyFormAnswers" Type="Collection(SP.ContentAssemblyFormAnswer)"/>
+            <Property Name="CopyFieldsFromExistingDocument" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="FileName" Type="Edm.String"/>
             <Property Name="FolderUrl" Type="Edm.String"/>
             <Property Name="Format" Type="Edm.Int32" Nullable="false"/>
@@ -328,19 +352,6 @@
             <Property Name="jobId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="userId" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
-         <ComplexType Name="PlaceholderV2">
-            <Property Name="AdditionalFieldsData" Type="Edm.String"/>
-            <Property Name="ColumnId" Type="Edm.String"/>
-            <Property Name="DataType" Type="Edm.String"/>
-            <Property Name="FieldLibraryMappedId" Type="Edm.String"/>
-            <Property Name="FieldLibraryMappedVersion" Type="Edm.String"/>
-            <Property Name="Id" Type="Edm.String"/>
-            <Property Name="IsColumnMappingActive" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="IsMandatory" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="Name" Type="Edm.String"/>
-            <Property Name="QuestionTitle" Type="Edm.String"/>
-            <Property Name="Source" Type="Edm.String"/>
-         </ComplexType>
          <ComplexType Name="Placeholder">
             <Property Name="DataType" Type="Edm.String"/>
             <Property Name="EndPosition" Type="Edm.Int32" Nullable="false"/>
@@ -365,6 +376,13 @@
          </ComplexType>
          <ComplexType Name="PublishSnippetPayload">
             <Property Name="Placeholders" Type="Collection(SP.PlaceholderV2)"/>
+            <Property Name="Url" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="PublishTemplateV2Payload">
+            <Property Name="DestinationListContentTypeId" Type="Edm.String"/>
+            <Property Name="DestinationSiteContentTypeId" Type="Edm.String"/>
+            <Property Name="Placeholders" Type="Collection(SP.PlaceholderV2)"/>
+            <Property Name="Snippets" Type="Collection(SP.Snippet)"/>
             <Property Name="Url" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="RecipientLimitsInfo">
@@ -412,6 +430,7 @@
             <Property Name="Embeddable" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="Expiration" Type="Edm.String"/>
             <Property Name="HasExternalGuestInvitees" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="IsAddressBarLink" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="IsAnonymous" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="IsCreateOnlyLink" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="IsFormsLink" Type="Edm.Boolean" Nullable="false"/>
@@ -608,6 +627,7 @@
          <ComplexType Name="ClassificationResult">
             <Property Name="ConfidenceScore" Type="Edm.Double" Nullable="false"/>
             <Property Name="ContentTypeId" Type="Edm.String"/>
+            <Property Name="ContentTypeName" Type="Edm.String"/>
             <Property Name="Error" Type="Edm.String"/>
             <Property Name="Metas" Type="Collection(SP.KeyValue)"/>
             <Property Name="ModelId" Type="Edm.String"/>
@@ -779,6 +799,12 @@
          <ComplexType Name="FileDeleteParameters">
             <Property Name="BypassSharedLock" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ETagMatch" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="FileVersionBatchDeleteParameters">
+            <Property Name="BatchDeleteMode" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="DeleteOlderThanDays" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="MajorVersionLimit" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="MajorWithMinorVersionsLimit" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="FolderColoringInformation">
             <Property Name="ColorHex" Type="Edm.String"/>
@@ -1352,6 +1378,18 @@
             <Property Name="Path" Type="SP.ResourcePath"/>
             <Property Name="Title" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="UpdateAgreementESignConfigPayload">
+            <Property Name="AgreementId" Type="Edm.String"/>
+            <Property Name="AgreementUrl" Type="Edm.String"/>
+            <Property Name="DocumentId" Type="Edm.String"/>
+            <Property Name="eSignStatus" Type="Edm.String"/>
+            <Property Name="RequestorEmail" Type="Edm.String"/>
+            <Property Name="SignersEmail" Type="Collection(Edm.String)"/>
+         </ComplexType>
+         <ComplexType Name="UpdateAgreementMetaDataPayload">
+            <Property Name="FileUrl" Type="Edm.String"/>
+            <Property Name="MarkAsTerminationLetter" Type="Edm.Boolean" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="UpdateAgreementStatePayload">
             <Property Name="AgreementUrl" Type="Edm.String"/>
             <Property Name="CurrentState" Type="Edm.Int32" Nullable="false"/>
@@ -1403,6 +1441,15 @@
             <Property Name="IsExternal" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="Title" Type="Edm.String"/>
             <Property Name="Url" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="DeviationAnalysisRule">
+            <Property Name="Definition" Type="Edm.String"/>
+            <Property Name="FallbackClauses" Type="Collection(Edm.String)"/>
+            <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="IsAcceptable" Type="Edm.Boolean"/>
+            <Property Name="Notes" Type="Collection(Edm.String)"/>
+            <Property Name="RuleName" Type="Edm.String"/>
+            <Property Name="SendForApproval" Type="Edm.Boolean"/>
          </ComplexType>
          <ComplexType Name="RulesDefinition">
             <Property Name="ActionForInvalidRules" Type="Edm.String"/>
@@ -1488,6 +1535,7 @@
             <Property Name="SensitivityLabelId" Type="Edm.String"/>
             <Property Name="SensitivityLabel" Type="Edm.Guid" Nullable="false"/>
             <Property Name="IsHubSite" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="IsRestrictedAccessControlPolicyEnforcedOnSite" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="LockIssue" Type="Edm.String"/>
             <Property Name="MaxItemsPerThrottledOperation" Type="Edm.Int32" Nullable="false"/>
             <Property Name="MediaTranscriptionDisabled" Type="Edm.Boolean" Nullable="false"/>
@@ -2115,7 +2163,6 @@
             <Property Name="ColumnWidth" Type="Edm.String"/>
             <Property Name="ContentTypeId" Type="SP.ContentTypeId"/>
             <Property Name="CustomFormatter" Type="Edm.String"/>
-            <Property Name="CustomOrder" Type="Edm.String"/>
             <Property Name="DefaultView" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="DefaultViewForContentType" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EditorModified" Type="Edm.Boolean" Nullable="false"/>
@@ -2682,7 +2729,7 @@
             </Key>
             <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
             <NavigationProperty Name="AppConfiguration" Relationship="SP.SP_EmployeeEngagement_AppConfiguration_SP_AppConfiguration_AppConfigurationPartner" ToRole="AppConfiguration" FromRole="AppConfigurationPartner"/>
-            <NavigationProperty Name="VivaConnectionsConfiguration" Relationship="Microsoft.SharePoint.EmployeeEngagement.SP_EmployeeEngagement_VivaConnectionsConfiguration_Microsoft_SharePoint_EmployeeEngagement_VivaConnectionsConfiguration_VivaConnectionsConfigurationPartner" ToRole="VivaConnectionsConfiguration" FromRole="VivaConnectionsConfigurationPartner"/>
+            <NavigationProperty Name="VivaConnectionsPage" Relationship="Microsoft.SharePoint.EmployeeEngagement.SP_EmployeeEngagement_VivaConnectionsPage_Microsoft_SharePoint_EmployeeEngagement_VivaConnectionsPage_VivaConnectionsPagePartner" ToRole="VivaConnectionsPage" FromRole="VivaConnectionsPagePartner"/>
             <NavigationProperty Name="VivaResources" Relationship="Microsoft.SharePoint.EmployeeEngagement.SP_EmployeeEngagement_VivaResources_Microsoft_SharePoint_EmployeeEngagement_VivaResources_VivaResourcesPartner" ToRole="VivaResources" FromRole="VivaResourcesPartner"/>
          </EntityType>
          <EntityType Name="EmployeeExperienceController">
@@ -2853,6 +2900,7 @@
             <Property Name="CanCurrentUserRetrieveReadWriteLink" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CanCurrentUserShareExternally" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CanCurrentUserShareInternally" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="CanCurrentUserShareToExistingGuests" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CanSendEmail" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CanSendLink" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CanShareFolder" Type="Edm.Boolean" Nullable="false"/>
@@ -4528,6 +4576,8 @@
             <EntitySet Name="placesInformations" EntityType="Microsoft.SharePoint.AddToOneDrive.placesInformation"/>
             <EntitySet Name="ArchiveFileSizeMetrics" EntityType="Microsoft.SharePoint.Administration.Archiving.ArchiveFileSizeMetric"/>
             <EntitySet Name="FeatureDefinitions" EntityType="Microsoft.SharePoint.Administration.FeatureDefinition"/>
+            <EntitySet Name="SiteMoveServices" EntityType="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
+            <EntitySet Name="SiteMoveServiceInfos" EntityType="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveServiceInfo"/>
             <EntitySet Name="SPAnalyticsUsageServices" EntityType="Microsoft.SharePoint.Administration.SPAnalyticsUsageService"/>
             <EntitySet Name="SPAppStateQueryJobDefinitions" EntityType="Microsoft.SharePoint.Administration.SPAppStateQueryJobDefinition"/>
             <EntitySet Name="SPFarms" EntityType="Microsoft.SharePoint.Administration.SPFarm"/>
@@ -4556,7 +4606,7 @@
             <EntitySet Name="CommentsAPIs" EntityType="Microsoft.SharePoint.Comments.CommentsAPI"/>
             <EntitySet Name="MigrationCompleteStateApis" EntityType="Microsoft.SharePoint.Convergence.MigrationCompleteStateApi"/>
             <EntitySet Name="OdcMetadataCleanedUpApis" EntityType="Microsoft.SharePoint.Convergence.OdcMetadataCleanedUpApi"/>
-            <EntitySet Name="VivaConnectionsConfigurations" EntityType="Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsConfiguration"/>
+            <EntitySet Name="VivaConnectionsPages" EntityType="Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsPage"/>
             <EntitySet Name="VivaHomes" EntityType="Microsoft.SharePoint.EmployeeEngagement.VivaHome"/>
             <EntitySet Name="VivaResourceGetEndpoints" EntityType="Microsoft.SharePoint.EmployeeEngagement.VivaResourceGetEndpoint"/>
             <EntitySet Name="VivaResourcess" EntityType="Microsoft.SharePoint.EmployeeEngagement.VivaResources"/>
@@ -8484,6 +8534,12 @@
             <FunctionImport Name="StartCoAuth" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.CampaignPublication"/>
             </FunctionImport>
+            <FunctionImport Name="TryProcessSourcePageAfterPageMovePublish" ReturnType="Edm.Boolean" IsBindable="true">
+               <Parameter Name="this" Type="SP.Publishing.CampaignPublication"/>
+            </FunctionImport>
+            <FunctionImport Name="TryProcessSourcePageBeforePageMovePublish" ReturnType="Edm.Boolean" IsBindable="true">
+               <Parameter Name="this" Type="SP.Publishing.CampaignPublication"/>
+            </FunctionImport>
             <FunctionImport Name="Update" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.CampaignPublication"/>
             </FunctionImport>
@@ -8674,6 +8730,12 @@
                <Parameter Name="recipientEmails" Type="Collection(Edm.String)"/>
             </FunctionImport>
             <FunctionImport Name="StartCoAuth" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
+               <Parameter Name="this" Type="SP.Publishing.FeedVideoPage"/>
+            </FunctionImport>
+            <FunctionImport Name="TryProcessSourcePageAfterPageMovePublish" ReturnType="Edm.Boolean" IsBindable="true">
+               <Parameter Name="this" Type="SP.Publishing.FeedVideoPage"/>
+            </FunctionImport>
+            <FunctionImport Name="TryProcessSourcePageBeforePageMovePublish" ReturnType="Edm.Boolean" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.FeedVideoPage"/>
             </FunctionImport>
             <FunctionImport Name="Update" IsBindable="true">
@@ -8904,6 +8966,12 @@
             <FunctionImport Name="StartCoAuth" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.RepostPage"/>
             </FunctionImport>
+            <FunctionImport Name="TryProcessSourcePageAfterPageMovePublish" ReturnType="Edm.Boolean" IsBindable="true">
+               <Parameter Name="this" Type="SP.Publishing.RepostPage"/>
+            </FunctionImport>
+            <FunctionImport Name="TryProcessSourcePageBeforePageMovePublish" ReturnType="Edm.Boolean" IsBindable="true">
+               <Parameter Name="this" Type="SP.Publishing.RepostPage"/>
+            </FunctionImport>
             <FunctionImport Name="Update" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.RepostPage"/>
             </FunctionImport>
@@ -9102,6 +9170,12 @@
             <FunctionImport Name="StartCoAuth" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
                <Parameter Name="this" Type="SP.Publishing.SitePage3D"/>
             </FunctionImport>
+            <FunctionImport Name="TryProcessSourcePageAfterPageMovePublish" ReturnType="Edm.Boolean" IsBindable="true">
+               <Parameter Name="this" Type="SP.Publishing.SitePage3D"/>
+            </FunctionImport>
+            <FunctionImport Name="TryProcessSourcePageBeforePageMovePublish" ReturnType="Edm.Boolean" IsBindable="true">
+               <Parameter Name="this" Type="SP.Publishing.SitePage3D"/>
+            </FunctionImport>
             <FunctionImport Name="Update" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.SitePage3D"/>
             </FunctionImport>
@@ -9283,6 +9357,12 @@
                <Parameter Name="recipientEmails" Type="Collection(Edm.String)"/>
             </FunctionImport>
             <FunctionImport Name="StartCoAuth" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
+               <Parameter Name="this" Type="SP.Publishing.SitePage"/>
+            </FunctionImport>
+            <FunctionImport Name="TryProcessSourcePageAfterPageMovePublish" ReturnType="Edm.Boolean" IsBindable="true">
+               <Parameter Name="this" Type="SP.Publishing.SitePage"/>
+            </FunctionImport>
+            <FunctionImport Name="TryProcessSourcePageBeforePageMovePublish" ReturnType="Edm.Boolean" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.SitePage"/>
             </FunctionImport>
             <FunctionImport Name="Update" IsBindable="true">
@@ -9493,6 +9573,12 @@
                <Parameter Name="recipientEmails" Type="Collection(Edm.String)"/>
             </FunctionImport>
             <FunctionImport Name="StartCoAuth" ReturnType="SP.Publishing.SitePage" IsBindable="true" EntitySet="SitePageMetadatas">
+               <Parameter Name="this" Type="SP.Publishing.TopicSitePage"/>
+            </FunctionImport>
+            <FunctionImport Name="TryProcessSourcePageAfterPageMovePublish" ReturnType="Edm.Boolean" IsBindable="true">
+               <Parameter Name="this" Type="SP.Publishing.TopicSitePage"/>
+            </FunctionImport>
+            <FunctionImport Name="TryProcessSourcePageBeforePageMovePublish" ReturnType="Edm.Boolean" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.TopicSitePage"/>
             </FunctionImport>
             <FunctionImport Name="Update" IsBindable="true">
@@ -10097,6 +10183,10 @@
                <Parameter Name="parentName" Type="Edm.String"/>
                <Parameter Name="customSettings" Type="Collection(SP.KeyValue)"/>
             </FunctionImport>
+            <FunctionImport Name="Microsoft_SharePoint_Administration_SiteMove_Service_SiteMoveService" ReturnType="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService" IsComposable="true" EntitySet="SiteMoveServices"/>
+            <FunctionImport Name="GetServiceInfo" ReturnType="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveServiceInfo" IsBindable="true" EntitySet="SiteMoveServiceInfos">
+               <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
+            </FunctionImport>
             <FunctionImport Name="Microsoft_SharePoint_Yammer_WacApi_AddUserToSiteCollection" ReturnType="SP.User" EntitySet="Users1">
                <Parameter Name="spsiteUrl" Type="Edm.String"/>
                <Parameter Name="userLogonName" Type="Edm.String"/>
@@ -10168,12 +10258,12 @@
             </FunctionImport>
             <FunctionImport Name="EnsureTeamForGroup" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Portal.GroupSiteManager"/>
-               <Parameter Name="altGroupId" Type="Edm.String"/>
+               <Parameter Name="siteUrl" Type="Edm.String"/>
                <Parameter Name="teamTemplate" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="EnsureTeamForGroupEx" ReturnType="Microsoft.SharePoint.Portal.EnsureTeamForGroupExResponse" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Portal.GroupSiteManager"/>
-               <Parameter Name="altGroupId" Type="Edm.String"/>
+               <Parameter Name="siteUrl" Type="Edm.String"/>
                <Parameter Name="teamTemplate" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="GetAllOrgLabels" ReturnType="Microsoft.SharePoint.Portal.OrgLabelsContextList" IsSideEffecting="false" IsBindable="true">
@@ -10931,10 +11021,6 @@
                <Parameter Name="vivaConnectionsDefaultStart" Type="Edm.Boolean"/>
                <Parameter Name="isInDraftMode" Type="Edm.Boolean"/>
             </FunctionImport>
-            <FunctionImport Name="SP_SPHSite_ValidateHomeSite">
-               <Parameter Name="validationActionType" Type="Edm.Int32" Nullable="false"/>
-               <Parameter Name="siteUrl" Type="Edm.String"/>
-            </FunctionImport>
             <FunctionImport Name="SP_SPHSite_ValidateHomeSiteCandidate" ReturnType="SP.HomeSiteReference">
                <Parameter Name="siteUrl" Type="Edm.String"/>
             </FunctionImport>
@@ -10978,9 +11064,6 @@
             <FunctionImport Name="EnableGlobalNavigation" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Navigation.REST.HomeSiteNavigationSettings"/>
                <Parameter Name="isEnabled" Type="Edm.Boolean" Nullable="false"/>
-            </FunctionImport>
-            <FunctionImport Name="Update" IsBindable="true">
-               <Parameter Name="this" Type="Microsoft.SharePoint.Navigation.REST.HomeSiteNavigationSettings"/>
             </FunctionImport>
             <FunctionImport Name="Microsoft_SharePoint_Navigation_REST_NavigationServiceRest" ReturnType="Microsoft.SharePoint.Navigation.REST.NavigationServiceRest" IsComposable="true" EntitySet="NavigationServiceRests"/>
             <FunctionImport Name="CurrentResourcesNav" ReturnType="SP.MenuState" IsSideEffecting="false" IsBindable="true">
@@ -11382,12 +11465,12 @@
                <Parameter Name="this" Type="Microsoft.SharePoint.EmployeeEngagement.VivaResources"/>
                <Parameter Name="updatedLink" Type="Microsoft.SharePoint.EmployeeEngagement.VivaResourceLink"/>
             </FunctionImport>
-            <FunctionImport Name="GetConfiguration" ReturnType="Microsoft.SharePoint.EmployeeEngagement.ConnectionsConfiguration" IsSideEffecting="false" IsBindable="true">
-               <Parameter Name="this" Type="Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsConfiguration"/>
+            <FunctionImport Name="GetData" ReturnType="Microsoft.SharePoint.EmployeeEngagement.ConnectionsConfigurationAndData" IsSideEffecting="false" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsPage"/>
             </FunctionImport>
-            <FunctionImport Name="SetConfiguration" IsBindable="true">
-               <Parameter Name="this" Type="Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsConfiguration"/>
-               <Parameter Name="configuration" Type="Microsoft.SharePoint.EmployeeEngagement.ConnectionsConfiguration"/>
+            <FunctionImport Name="SetSpotlightConfiguration" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsPage"/>
+               <Parameter Name="configuration" Type="Microsoft.SharePoint.EmployeeEngagement.SpotlightConfiguration"/>
             </FunctionImport>
             <FunctionImport Name="AddImage" ReturnType="SP.File" IsBindable="true" EntitySet="Files12">
                <Parameter Name="this" Type="Microsoft.SharePoint.EmployeeEngagement.VivaHome"/>
@@ -11636,14 +11719,6 @@
             </FunctionImport>
             <FunctionImport Name="ResetRoleInheritance" IsBindable="true">
                <Parameter Name="this" Type="SP.List"/>
-            </FunctionImport>
-            <FunctionImport Name="AddCustomOrderToView" ReturnType="Edm.String" IsBindable="true">
-               <Parameter Name="this" Type="SP.List"/>
-               <Parameter Name="viewId" Type="Edm.String"/>
-               <Parameter Name="itemIds" Type="Collection(Edm.Int32)" Nullable="false"/>
-               <Parameter Name="relativeItemId" Type="Edm.Int32" Nullable="false"/>
-               <Parameter Name="insertAfter" Type="Edm.Boolean" Nullable="false"/>
-               <Parameter Name="skipSaveView" Type="Edm.Boolean" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="AddItem" ReturnType="SP.ListItem" IsBindable="true" EntitySet="ListItems">
                <Parameter Name="this" Type="SP.List"/>
@@ -12125,6 +12200,9 @@
                <Parameter Name="ViewPath" Type="Edm.String"/>
                <Parameter Name="WebPartId" Type="Edm.String"/>
             </FunctionImport>
+            <FunctionImport Name="GetProgressForDeleteFileVersions" ReturnType="Edm.String" IsBindable="true">
+               <Parameter Name="this" Type="SP.List"/>
+            </FunctionImport>
             <FunctionImport Name="GetProgressForFileVersionExpirationReport" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="SP.List"/>
                <Parameter Name="reportFileUrl" Type="Edm.String"/>
@@ -12153,6 +12231,10 @@
                <Parameter Name="this" Type="SP.List"/>
                <Parameter Name="Id" Type="Edm.String"/>
             </FunctionImport>
+            <FunctionImport Name="MapFieldsToColumnsForModernTemlate" ReturnType="SP.ContentAssemblyModernTemplateColumnsMappingInfo" IsBindable="true">
+               <Parameter Name="this" Type="SP.List"/>
+               <Parameter Name="payload" Type="SP.PublishModernTemplatePayload"/>
+            </FunctionImport>
             <FunctionImport Name="ParseDocumentTemplate" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="SP.List"/>
                <Parameter Name="Name" Type="Edm.String"/>
@@ -12169,6 +12251,10 @@
             <FunctionImport Name="PublishSnippet" IsBindable="true">
                <Parameter Name="this" Type="SP.List"/>
                <Parameter Name="publishSnippetPayload" Type="SP.PublishSnippetPayload"/>
+            </FunctionImport>
+            <FunctionImport Name="PublishTemplateV2" IsBindable="true">
+               <Parameter Name="this" Type="SP.List"/>
+               <Parameter Name="payload" Type="SP.PublishTemplateV2Payload"/>
             </FunctionImport>
             <FunctionImport Name="Recycle" ReturnType="Edm.Guid" IsBindable="true">
                <Parameter Name="this" Type="SP.List"/>
@@ -12399,6 +12485,10 @@
             <FunctionImport Name="StartDeleteFileVersions" IsBindable="true">
                <Parameter Name="this" Type="SP.List"/>
                <Parameter Name="deleteOlderThanDays" Type="Edm.Int32" Nullable="false"/>
+            </FunctionImport>
+            <FunctionImport Name="StartDeleteFileVersionsByMode" IsBindable="true">
+               <Parameter Name="this" Type="SP.List"/>
+               <Parameter Name="batchDeleteParameters" Type="SP.FileVersionBatchDeleteParameters"/>
             </FunctionImport>
             <FunctionImport Name="StartFileVersionExpirationReport" IsBindable="true">
                <Parameter Name="this" Type="SP.List"/>
@@ -12708,6 +12798,7 @@
             <FunctionImport Name="AvailableAddins" ReturnType="Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.SPAvailableAddinsResponse" IsBindable="true">
                <Parameter Name="this" Type="SP.Web"/>
                <Parameter Name="serverRelativeUrls" Type="Collection(Edm.String)"/>
+               <Parameter Name="urls" Type="Collection(Edm.String)"/>
             </FunctionImport>
             <FunctionImport Name="ConsentToPowerPlatform" ReturnType="SP.FlowSynchronizationResult" IsBindable="true" EntitySet="FlowSynchronizationResults">
                <Parameter Name="this" Type="SP.Web"/>
@@ -12812,11 +12903,13 @@
             <FunctionImport Name="GetAddinPrincipalsHavingPermissionsInSites" ReturnType="Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.SPGetAddinPrincipalsResponse" IsBindable="true">
                <Parameter Name="this" Type="SP.Web"/>
                <Parameter Name="serverRelativeUrls" Type="Collection(Edm.String)"/>
+               <Parameter Name="urls" Type="Collection(Edm.String)"/>
             </FunctionImport>
             <FunctionImport Name="GetAddinUninstallJobDetail" ReturnType="Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.SPUninstallAddinJobDetail" IsBindable="true">
                <Parameter Name="this" Type="SP.Web"/>
                <Parameter Name="jobId" Type="Edm.Guid" Nullable="false"/>
                <Parameter Name="serverRelativeUrl" Type="Edm.String"/>
+               <Parameter Name="url" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="GetAllClientSideComponents" ReturnType="Edm.String" IsSideEffecting="false" IsBindable="true">
                <Parameter Name="this" Type="SP.Web"/>
@@ -13263,11 +13356,11 @@
             <FunctionImport Name="SP_eSignInternal_CompleteAgreement" ReturnType="Edm.DateTime">
                <Parameter Name="completeAgreement" Type="Microsoft.SharePoint.ESign.Models.Requests.CompleteAgreementModel"/>
             </FunctionImport>
-            <FunctionImport Name="SP_eSignInternal_CompleteAgreement_V2" ReturnType="Edm.String">
-               <Parameter Name="completeAgreement" Type="Microsoft.SharePoint.ESign.Models.Requests.CompleteAgreementModel"/>
-            </FunctionImport>
             <FunctionImport Name="SP_eSignInternal_CompleteAgreementV3" ReturnType="Edm.String">
                <Parameter Name="completeAgreement" Type="Microsoft.SharePoint.ESign.Models.Requests.CompleteAgreementModel"/>
+            </FunctionImport>
+            <FunctionImport Name="SP_eSignInternal_CompleteAgreementV4" ReturnType="Edm.String">
+               <Parameter Name="completeAgreement" Type="Microsoft.SharePoint.ESign.Models.Requests.CompleteAgreementModelV4"/>
             </FunctionImport>
             <FunctionImport Name="SP_eSignInternal_DeclineAgreement">
                <Parameter Name="declineAgreement" Type="Microsoft.SharePoint.ESign.Models.Requests.DeclineAgreementModel"/>
@@ -13278,6 +13371,9 @@
             </FunctionImport>
             <FunctionImport Name="SP_eSignInternal_StartAgreement" ReturnType="Edm.String">
                <Parameter Name="startAgreement" Type="Microsoft.SharePoint.ESign.Models.Requests.CreateAgreementModel"/>
+            </FunctionImport>
+            <FunctionImport Name="SP_eSignInternal_StartAgreementV2" ReturnType="Edm.String">
+               <Parameter Name="startAgreement" Type="Microsoft.SharePoint.ESign.Models.Requests.CreateAgreementModelV2"/>
             </FunctionImport>
             <FunctionImport Name="SP_eSignInternal_UpdateAuditTrailEntry">
                <Parameter Name="updateAuditTrailEntry" Type="Microsoft.SharePoint.ESign.Models.Requests.UpdateAuditTrailEntryModel"/>
@@ -14497,6 +14593,10 @@
             <FunctionImport Name="Delete" IsBindable="true">
                <Parameter Name="this" Type="SP.FontPackage"/>
             </FunctionImport>
+            <FunctionImport Name="FontStream" ReturnType="Edm.Stream" IsSideEffecting="false" IsBindable="true">
+               <Parameter Name="this" Type="SP.FontPackage"/>
+               <Parameter Name="fontFamily" Type="Edm.String"/>
+            </FunctionImport>
             <FunctionImport Name="Update" IsBindable="true">
                <Parameter Name="this" Type="SP.FontPackage"/>
             </FunctionImport>
@@ -14585,10 +14685,12 @@
             </FunctionImport>
             <FunctionImport Name="SP_Approvals_Disable">
                <Parameter Name="listId" Type="Edm.String"/>
+               <Parameter Name="viewId" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="SP_Approvals_Enable">
                <Parameter Name="listId" Type="Edm.String"/>
                <Parameter Name="addFieldsToDefaultView" Type="Edm.Boolean" Nullable="false"/>
+               <Parameter Name="extraViewToEnable" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="SP_Approvals_GetItemRequest" ReturnType="SP.ApprovalRequest" IsComposable="true" EntitySet="ApprovalRequests">
                <Parameter Name="listId" Type="Edm.String"/>
@@ -15011,6 +15113,9 @@
             <FunctionImport Name="GetMigrationStatus" ReturnType="Collection(SP.SPMigrationJobStatus)" IsComposable="true" IsBindable="true" EntitySet="SPMigrationJobStatuss">
                <Parameter Name="this" Type="SP.Site"/>
             </FunctionImport>
+            <FunctionImport Name="GetProgressForDeleteFileVersions" ReturnType="Edm.String" IsBindable="true">
+               <Parameter Name="this" Type="SP.Site"/>
+            </FunctionImport>
             <FunctionImport Name="GetProgressForExpireFileVersionsBySchedule" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="SP.Site"/>
                <Parameter Name="scheduleFilePath" Type="SP.ResourcePath"/>
@@ -15134,6 +15239,10 @@
                <Parameter Name="queueOnly" Type="Edm.Boolean" Nullable="false"/>
                <Parameter Name="sendEmail" Type="Edm.Boolean" Nullable="false"/>
             </FunctionImport>
+            <FunctionImport Name="SetBlockDownloadPolicyForFiles" IsBindable="true">
+               <Parameter Name="this" Type="SP.Site"/>
+               <Parameter Name="blockDownloadPolicyFileTypeId" Type="Edm.String"/>
+            </FunctionImport>
             <FunctionImport Name="SetIsContributorOwnerEnabledPropertyForDefaultDocLib" ReturnType="Edm.Boolean" IsBindable="true">
                <Parameter Name="this" Type="SP.Site"/>
                <Parameter Name="propertyValue" Type="Edm.Boolean" Nullable="false"/>
@@ -15143,6 +15252,10 @@
             <FunctionImport Name="StartDeleteFileVersions" IsBindable="true">
                <Parameter Name="this" Type="SP.Site"/>
                <Parameter Name="deleteOlderThanDays" Type="Edm.Int32" Nullable="false"/>
+            </FunctionImport>
+            <FunctionImport Name="StartDeleteFileVersionsByMode" IsBindable="true">
+               <Parameter Name="this" Type="SP.Site"/>
+               <Parameter Name="batchDeleteParameters" Type="SP.FileVersionBatchDeleteParameters"/>
             </FunctionImport>
             <FunctionImport Name="StartExpireFileVersionsBySchedule" IsBindable="true">
                <Parameter Name="this" Type="SP.Site"/>
@@ -16368,6 +16481,10 @@
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="siteId" Type="Edm.Guid" Nullable="false"/>
             </FunctionImport>
+            <FunctionImport Name="GetSiteCohortsSummary" ReturnType="Microsoft.Online.SharePoint.TenantAdministration.SiteCohortsSummary" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+               <Parameter Name="view" Type="Edm.String"/>
+            </FunctionImport>
             <FunctionImport Name="GetSiteHealthStatus" ReturnType="SP.Publishing.PortalHealthStatus" IsSideEffecting="false" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="sourceUrl" Type="Edm.String"/>
@@ -16478,9 +16595,15 @@
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="segments" Type="Collection(Edm.Guid)" Nullable="false"/>
             </FunctionImport>
+            <FunctionImport Name="GetTenantSiteCreationSource" ReturnType="Microsoft.Online.SharePoint.TenantAdministration.SiteCreationSource" IsSideEffecting="false" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+            </FunctionImport>
             <FunctionImport Name="GetTopFilesSharingInsights" ReturnType="Collection(Microsoft.Online.SharePoint.TenantAdministration.TopFilesSharingInsights)" IsComposable="true" IsBindable="true" EntitySet="TopFilesSharingInsightss">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="queryMode" Type="Edm.Int32" Nullable="false"/>
+            </FunctionImport>
+            <FunctionImport Name="GetTrackViewFeatureAlwaysVisible" ReturnType="Edm.Boolean" IsSideEffecting="false" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
             </FunctionImport>
             <FunctionImport Name="GetViewByDisplayName" ReturnType="SP.View" IsBindable="true" EntitySet="Views">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -16897,6 +17020,9 @@
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="featureName" Type="Edm.String"/>
                <Parameter Name="activationStatus" Type="Edm.String"/>
+            </FunctionImport>
+            <FunctionImport Name="SetTrackViewFeatureAlwaysVisible" ReturnType="Edm.Boolean" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
             </FunctionImport>
             <FunctionImport Name="SwapSite" ReturnType="Microsoft.Online.SharePoint.TenantAdministration.SpoOperation" IsBindable="true" EntitySet="SpoOperations">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -17405,9 +17531,9 @@
                <End Role="AppConfigurationPartner" EntitySet="EEs"/>
                <End Role="AppConfiguration" EntitySet="AppConfigurations"/>
             </AssociationSet>
-            <AssociationSet Name="SP_EmployeeEngagement_VivaConnectionsConfiguration_Microsoft_SharePoint_EmployeeEngagement_VivaConnectionsConfiguration_VivaConnectionsConfigurationPartnerSet" Association="Microsoft.SharePoint.EmployeeEngagement.SP_EmployeeEngagement_VivaConnectionsConfiguration_Microsoft_SharePoint_EmployeeEngagement_VivaConnectionsConfiguration_VivaConnectionsConfigurationPartner">
-               <End Role="VivaConnectionsConfigurationPartner" EntitySet="EEs"/>
-               <End Role="VivaConnectionsConfiguration" EntitySet="VivaConnectionsConfigurations"/>
+            <AssociationSet Name="SP_EmployeeEngagement_VivaConnectionsPage_Microsoft_SharePoint_EmployeeEngagement_VivaConnectionsPage_VivaConnectionsPagePartnerSet" Association="Microsoft.SharePoint.EmployeeEngagement.SP_EmployeeEngagement_VivaConnectionsPage_Microsoft_SharePoint_EmployeeEngagement_VivaConnectionsPage_VivaConnectionsPagePartner">
+               <End Role="VivaConnectionsPagePartner" EntitySet="EEs"/>
+               <End Role="VivaConnectionsPage" EntitySet="VivaConnectionsPages"/>
             </AssociationSet>
             <AssociationSet Name="SP_EmployeeEngagement_VivaResources_Microsoft_SharePoint_EmployeeEngagement_VivaResources_VivaResourcesPartnerSet" Association="Microsoft.SharePoint.EmployeeEngagement.SP_EmployeeEngagement_VivaResources_Microsoft_SharePoint_EmployeeEngagement_VivaResources_VivaResourcesPartner">
                <End Role="VivaResourcesPartner" EntitySet="EEs"/>
@@ -19724,6 +19850,30 @@
          <Annotations Target="Microsoft.Office.Server.ContentCenter.SPClassificationPublishConfig/ModelClassification">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPRetentionLabelConfig">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPRetentionLabelConfig/Id">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPRetentionLabelConfig/Name">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPClassificationPublishConfig/RetentionLabel">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPSensitivityLabelConfig">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPSensitivityLabelConfig/Id">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPSensitivityLabelConfig/Name">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPClassificationPublishConfig/SensitivityLabel">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="Microsoft.Office.Server.ContentCenter.SPDependentModel">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -20013,6 +20163,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Publishing.PrePublishValidationsErrorCodesForTeams">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Publishing.PrePublishValidationsErrorCodesForVivaEngage">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Publishing.PrePublishValidationsResponse">
@@ -20702,13 +20855,19 @@
          <Annotations Target="SP.ResourcePath/DecodedUrl">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="Microsoft.SharePoint.EmployeeEngagement.ConnectionsConfiguration">
+         <Annotations Target="Microsoft.SharePoint.EmployeeEngagement.ConnectionsConfigurationAndData">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.SharePoint.EmployeeEngagement.SpotlightConfiguration">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="Microsoft.SharePoint.EmployeeEngagement.SpotlightPinnedNews">
+         <Annotations Target="Microsoft.SharePoint.EmployeeEngagement.SpotlightNews">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.EmployeeEngagement.NewsSite">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.EmployeeEngagement.ItemReference">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.SharePoint.EmployeeEngagement.DashboardConfiguration">
@@ -20835,6 +20994,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.SharingLinkData/HasExternalGuestInvitees">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.SharingLinkData/IsAddressBarLink">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.SharingLinkData/IsManageListLink">
@@ -20987,6 +21149,9 @@
          <Annotations Target="SP.ClassificationResult/ContentTypeId">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.ClassificationResult/ContentTypeName">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.ClassificationResult/Error">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -21051,6 +21216,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.FileCollectionAddParameters">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.FileVersionBatchDeleteParameters">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.FontPackageCreationParameters">
@@ -23547,7 +23715,7 @@
          <Annotations Target="SP.EmployeeEngagement">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsConfiguration">
+         <Annotations Target="Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsPage">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.SharePoint.EmployeeEngagement.VivaResources">
@@ -23913,6 +24081,12 @@
          <Annotations Target="SP.Sharing.SharingInformation/ageGroup">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.Sharing.SharingInformation/allOrganizationSecurityGroupId">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Sharing.SharingInformation/discoverableByOrganizationEnabled">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.Sharing.SharingInformation/enforceIBSegmentFiltering">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -24118,24 +24292,6 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.Online.SharePoint.TenantAdministration.Tenant/AnyoneLinkTrackUsers">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
-         <Annotations Target="Microsoft.Online.SharePoint.TenantAdministration.Tenant/ContainerDefaultLinkToExistingAccess">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
-         <Annotations Target="Microsoft.Online.SharePoint.TenantAdministration.Tenant/ContainerDefaultShareLinkRole">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
-         <Annotations Target="Microsoft.Online.SharePoint.TenantAdministration.Tenant/ContainerDefaultShareLinkScope">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
-         <Annotations Target="Microsoft.Online.SharePoint.TenantAdministration.Tenant/ContainerLoopDefaultShareLinkRole">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
-         <Annotations Target="Microsoft.Online.SharePoint.TenantAdministration.Tenant/ContainerLoopDefaultShareLinkScope">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
-         <Annotations Target="Microsoft.Online.SharePoint.TenantAdministration.Tenant/ContainerSharingCapability">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.Online.SharePoint.TenantAdministration.Tenant/CoreBlockGuestsAsSiteAdmin">
@@ -24660,6 +24816,12 @@
          <Annotations Target="SP.ApiData/StartCoAuth(SP.Publishing.CampaignPublication)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.ApiData/TryProcessSourcePageAfterPageMovePublish(SP.Publishing.CampaignPublication)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/TryProcessSourcePageBeforePageMovePublish(SP.Publishing.CampaignPublication)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.ApiData/Update(SP.Publishing.CampaignPublication)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -24828,6 +24990,12 @@
          <Annotations Target="SP.ApiData/StartCoAuth(SP.Publishing.FeedVideoPage)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.ApiData/TryProcessSourcePageAfterPageMovePublish(SP.Publishing.FeedVideoPage)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/TryProcessSourcePageBeforePageMovePublish(SP.Publishing.FeedVideoPage)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.ApiData/Update(SP.Publishing.FeedVideoPage)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -24954,6 +25122,12 @@
          <Annotations Target="SP.ApiData/StartCoAuth(SP.Publishing.RepostPage)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.ApiData/TryProcessSourcePageAfterPageMovePublish(SP.Publishing.RepostPage)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/TryProcessSourcePageBeforePageMovePublish(SP.Publishing.RepostPage)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.ApiData/Update(SP.Publishing.RepostPage)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -25057,6 +25231,12 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/StartCoAuth(SP.Publishing.SitePage3D)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/TryProcessSourcePageAfterPageMovePublish(SP.Publishing.SitePage3D)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/TryProcessSourcePageBeforePageMovePublish(SP.Publishing.SitePage3D)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/Update(SP.Publishing.SitePage3D)">
@@ -25201,6 +25381,12 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/StartCoAuth(SP.Publishing.SitePage)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/TryProcessSourcePageAfterPageMovePublish(SP.Publishing.SitePage)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/TryProcessSourcePageBeforePageMovePublish(SP.Publishing.SitePage)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/Update(SP.Publishing.SitePage)">
@@ -25354,6 +25540,12 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/StartCoAuth(SP.Publishing.TopicSitePage)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/TryProcessSourcePageAfterPageMovePublish(SP.Publishing.TopicSitePage)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/TryProcessSourcePageBeforePageMovePublish(SP.Publishing.TopicSitePage)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/Update(SP.Publishing.TopicSitePage)">
@@ -25851,9 +26043,6 @@
          <Annotations Target="SP.ApiData/SetSPHSite(SP.SPHSite, Edm.String, Edm.Boolean, Edm.Boolean)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SP_SPHSite_ValidateHomeSite(Edm.Int32, Edm.String)">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
          <Annotations Target="SP.ApiData/SP_SPHSite_ValidateHomeSiteCandidate(Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -26055,10 +26244,10 @@
          <Annotations Target="SP.ApiData/UpdateLink(Microsoft.SharePoint.EmployeeEngagement.VivaResources, Microsoft.SharePoint.EmployeeEngagement.VivaResourceLink)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/GetConfiguration(Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsConfiguration)">
+         <Annotations Target="SP.ApiData/GetData(Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsPage)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SetConfiguration(Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsConfiguration, Microsoft.SharePoint.EmployeeEngagement.ConnectionsConfiguration)">
+         <Annotations Target="SP.ApiData/SetSpotlightConfiguration(Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsPage, Microsoft.SharePoint.EmployeeEngagement.SpotlightConfiguration)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/AddImage(Microsoft.SharePoint.EmployeeEngagement.VivaHome, Edm.String, Edm.Stream)">
@@ -26116,9 +26305,6 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/Microsoft_SharePoint_AddToOneDrive_MountService_NotifyChangeToMountPoints(Microsoft.SharePoint.AddToOneDrive.NotifyChangeToMountPointsRequest)">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
-         <Annotations Target="SP.ApiData/AddCustomOrderToView(SP.List, Edm.String, Collection(Edm.Int32), Edm.Int32, Edm.Boolean, Edm.Boolean)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/AddItemUsingPath(SP.List, SP.ListItemCreationInformationUsingPath)">
@@ -26199,6 +26385,9 @@
          <Annotations Target="SP.ApiData/SP_List_GetOneDriveListDataAsStream(SP.RenderListDataParameters, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Collection(SP.KeyValue), Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.ApiData/GetProgressForDeleteFileVersions(SP.List)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.ApiData/GetProgressForFileVersionExpirationReport(SP.List, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -26215,6 +26404,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/StartDeleteFileVersions(SP.List, Edm.Int32)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/StartDeleteFileVersionsByMode(SP.List, SP.FileVersionBatchDeleteParameters)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/StartFileVersionExpirationReport(SP.List, Edm.String)">
@@ -26301,7 +26493,7 @@
          <Annotations Target="SP.ApiData/AddPlaceholderUser(SP.Web, Edm.String, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/AvailableAddins(SP.Web, Collection(Edm.String))">
+         <Annotations Target="SP.ApiData/AvailableAddins(SP.Web, Collection(Edm.String), Collection(Edm.String))">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/ConsentToPowerPlatform(SP.Web)">
@@ -26328,10 +26520,10 @@
          <Annotations Target="SP.ApiData/GetAdaptiveCardExtensions(SP.Web, Edm.Boolean, Edm.Guid)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/GetAddinPrincipalsHavingPermissionsInSites(SP.Web, Collection(Edm.String))">
+         <Annotations Target="SP.ApiData/GetAddinPrincipalsHavingPermissionsInSites(SP.Web, Collection(Edm.String), Collection(Edm.String))">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/GetAddinUninstallJobDetail(SP.Web, Edm.Guid, Edm.String)">
+         <Annotations Target="SP.ApiData/GetAddinUninstallJobDetail(SP.Web, Edm.Guid, Edm.String, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/GetAllClientSideComponents(SP.Web, Collection(Edm.String))">
@@ -26484,10 +26676,10 @@
          <Annotations Target="SP.ApiData/SP_eSignInternal_CompleteAgreement(Microsoft.SharePoint.ESign.Models.Requests.CompleteAgreementModel)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SP_eSignInternal_CompleteAgreement_V2(Microsoft.SharePoint.ESign.Models.Requests.CompleteAgreementModel)">
+         <Annotations Target="SP.ApiData/SP_eSignInternal_CompleteAgreementV3(Microsoft.SharePoint.ESign.Models.Requests.CompleteAgreementModel)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SP_eSignInternal_CompleteAgreementV3(Microsoft.SharePoint.ESign.Models.Requests.CompleteAgreementModel)">
+         <Annotations Target="SP.ApiData/SP_eSignInternal_CompleteAgreementV4(Microsoft.SharePoint.ESign.Models.Requests.CompleteAgreementModelV4)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SP_eSignInternal_DeclineAgreement(Microsoft.SharePoint.ESign.Models.Requests.DeclineAgreementModel)">
@@ -26500,6 +26692,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SP_eSignInternal_StartAgreement(Microsoft.SharePoint.ESign.Models.Requests.CreateAgreementModel)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/SP_eSignInternal_StartAgreementV2(Microsoft.SharePoint.ESign.Models.Requests.CreateAgreementModelV2)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SP_eSignInternal_UpdateAuditTrailEntry(Microsoft.SharePoint.ESign.Models.Requests.UpdateAuditTrailEntryModel)">
@@ -26770,10 +26965,10 @@
          <Annotations Target="SP.ApiData/SP_Approvals_CreateItemRequest(SP.ApprovalsCreateRequestParameters)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SP_Approvals_Disable(Edm.String)">
+         <Annotations Target="SP.ApiData/SP_Approvals_Disable(Edm.String, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SP_Approvals_Enable(Edm.String, Edm.Boolean)">
+         <Annotations Target="SP.ApiData/SP_Approvals_Enable(Edm.String, Edm.Boolean, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SP_Approvals_GetItemRequest(Edm.String, Edm.String, Edm.String, Edm.String)">
@@ -26833,6 +27028,9 @@
          <Annotations Target="SP.ApiData/GetHubSiteJoinApprovalCorrelationId(SP.Site)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.ApiData/GetProgressForDeleteFileVersions(SP.Site)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.ApiData/GetProgressForExpireFileVersionsBySchedule(SP.Site, SP.ResourcePath)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -26872,7 +27070,13 @@
          <Annotations Target="SP.ApiData/RollTenantBringYourOwnKey(SP.Site, Edm.Int32, SP.CustomerKeyVaultInfo)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.ApiData/SetBlockDownloadPolicyForFiles(SP.Site, Edm.String)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.ApiData/StartDeleteFileVersions(SP.Site, Edm.Int32)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/StartDeleteFileVersionsByMode(SP.Site, SP.FileVersionBatchDeleteParameters)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/StartExpireFileVersionsBySchedule(SP.Site, SP.ResourcePath)">
@@ -27184,10 +27388,19 @@
          <Annotations Target="SP.ApiData/GetSiteAdministrators(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.Guid)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.ApiData/GetSiteCohortsSummary(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.String)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.ApiData/GetSiteSecondaryAdministrators(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsFieldsData)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/GetSiteThumbnailLogo(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.String)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/GetTenantSiteCreationSource(Microsoft.Online.SharePoint.TenantAdministration.Tenant)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/GetTrackViewFeatureAlwaysVisible(Microsoft.Online.SharePoint.TenantAdministration.Tenant)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/RemoveFromOrgAssets(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.String, Edm.Guid)">
@@ -27206,6 +27419,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SetSyntexPaygFeatureActivation(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.String, Edm.String)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/SetTrackViewFeatureAlwaysVisible(Microsoft.Online.SharePoint.TenantAdministration.Tenant)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/ValidateMultipleHomeSitesParameterExists(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.Boolean)">
@@ -27488,6 +27704,16 @@
             <Property Name="ContentType" Type="Edm.String"/>
             <Property Name="Kind" Type="Edm.String"/>
             <Property Name="ModelClassification" Type="Edm.String"/>
+            <Property Name="RetentionLabel" Type="Microsoft.Office.Server.ContentCenter.SPRetentionLabelConfig"/>
+            <Property Name="SensitivityLabel" Type="Microsoft.Office.Server.ContentCenter.SPSensitivityLabelConfig"/>
+         </ComplexType>
+         <ComplexType Name="SPRetentionLabelConfig">
+            <Property Name="Id" Type="Edm.String"/>
+            <Property Name="Name" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="SPSensitivityLabelConfig">
+            <Property Name="Id" Type="Edm.String"/>
+            <Property Name="Name" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="SPDependentModel">
             <Property Name="LastRefereshedTimeUtc" Type="Edm.DateTime" Nullable="false"/>
@@ -31590,11 +31816,17 @@
             <Property Name="AudienceId" Type="Edm.String"/>
             <Property Name="ErrorCodes" Type="Collection(Edm.Int32)" Nullable="false"/>
          </ComplexType>
+         <ComplexType Name="PrePublishValidationsErrorCodesForVivaEngage">
+            <Property Name="DestinationName" Type="Edm.String"/>
+            <Property Name="DestinationType" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="ErrorCodes" Type="Collection(Edm.Int32)" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="PrePublishValidationsResponse">
             <Property Name="ErrorCodes" Type="Collection(Edm.Int32)" Nullable="false"/>
             <Property Name="PrePublishValidationsErrorCodesForEmails" Type="Collection(SP.Publishing.PrePublishValidationsErrorCodesForEmail)"/>
             <Property Name="PrePublishValidationsErrorCodesForSharePointSites" Type="Collection(SP.Publishing.PrePublishValidationsErrorCodesForSharePointSite)"/>
             <Property Name="PrePublishValidationsErrorCodesForTeams" Type="Collection(SP.Publishing.PrePublishValidationsErrorCodesForTeams)"/>
+            <Property Name="PrePublishValidationsErrorCodesForVivaEngage" Type="SP.Publishing.PrePublishValidationsErrorCodesForVivaEngage"/>
          </ComplexType>
          <ComplexType Name="ProfileCoreProperties" BaseType="SP.Publishing.PersonIdentity">
             <Property Name="PictureUrl" Type="Edm.String"/>
@@ -33877,6 +34109,7 @@
             <Property Name="serverRelativeUrl" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="SPAddinPermissionInfo">
+            <Property Name="absoluteUrl" Type="Edm.String"/>
             <Property Name="allowAppOnly" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="appIdentifier" Type="Edm.String"/>
             <Property Name="serverRelativeUrl" Type="Edm.String"/>
@@ -33898,12 +34131,14 @@
          <ComplexType Name="SPAddinPermissionRequest">
             <Property Name="appIdentifiers" Type="Collection(Edm.String)"/>
             <Property Name="serverRelativeUrl" Type="Edm.String"/>
+            <Property Name="url" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="SPAddinPermissionResponse">
             <Property Name="addinPermissions" Type="Collection(Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.SPAddinPermissionInfo)"/>
             <Property Name="failedAddins" Type="Collection(Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.SPAddinPermissionFailedInfo)"/>
          </ComplexType>
          <ComplexType Name="SPAddinPrincipalInfo">
+            <Property Name="absoluteUrl" Type="Edm.String"/>
             <Property Name="appIdentifier" Type="Edm.String"/>
             <Property Name="serverRelativeUrl" Type="Edm.String"/>
             <Property Name="title" Type="Edm.String"/>
@@ -33974,6 +34209,7 @@
             <Property Name="ListId" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="SPTriggeredUninstallAddinJobResponse">
+            <Property Name="absoluteUrl" Type="Edm.String"/>
             <Property Name="appInstanceId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="serverRelativeUrl" Type="Edm.String"/>
             <Property Name="uninstallJobId" Type="Edm.Guid" Nullable="false"/>
@@ -33986,6 +34222,7 @@
             <Property Name="type" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="SPUninstallAddinJobDetail">
+            <Property Name="absoluteUrl" Type="Edm.String"/>
             <Property Name="appInstanceId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="errorDetails" Type="Collection(Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.SPUninstallAddinErrorDetail)"/>
             <Property Name="jobId" Type="Edm.Guid" Nullable="false"/>
@@ -33996,6 +34233,7 @@
          <ComplexType Name="SPUninstallAddinRequest">
             <Property Name="appInstanceIds" Type="Collection(Edm.Guid)" Nullable="false"/>
             <Property Name="serverRelativeUrl" Type="Edm.String"/>
+            <Property Name="url" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="SPUninstallAddinResponse">
             <Property Name="executing" Type="Collection(Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.SPTriggeredUninstallAddinJobResponse)"/>
@@ -34234,9 +34472,23 @@
             <Property Name="documentId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="reason" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="CompleteAgreementModelV4">
+            <Property Name="documentId" Type="Edm.Guid" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="CompleteAgreementModel">
             <Property Name="documentId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="originalDocName" Type="Edm.String"/>
+            <Property Name="targetFolderUri" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="CreateAgreementModelV2">
+            <Property Name="agreementId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="documents" Type="Edm.String"/>
+            <Property Name="expirationDateTime" Type="Edm.DateTime"/>
+            <Property Name="formFieldSets" Type="Edm.String"/>
+            <Property Name="locale" Type="Edm.String"/>
+            <Property Name="message" Type="Edm.String"/>
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="recipientSets" Type="Edm.String"/>
             <Property Name="targetFolderUri" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="CreateAgreementModel">
@@ -34265,18 +34517,35 @@
          </ComplexType>
       </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.EmployeeEngagement">
-         <ComplexType Name="ConnectionsConfiguration">
+         <ComplexType Name="ConnectionsConfigurationAndData">
             <Property Name="SpotlightConfiguration" Type="Microsoft.SharePoint.EmployeeEngagement.SpotlightConfiguration"/>
+            <Property Name="SpotlightNews" Type="Collection(Microsoft.SharePoint.EmployeeEngagement.SpotlightNews)"/>
          </ComplexType>
          <ComplexType Name="SpotlightConfiguration">
             <Property Name="NewsSource" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="PinnedNews" Type="Collection(Microsoft.SharePoint.EmployeeEngagement.SpotlightPinnedNews)"/>
-            <Property Name="SelectedOrganizations" Type="Collection(Edm.String)"/>
+            <Property Name="PinnedNews" Type="Collection(Microsoft.SharePoint.EmployeeEngagement.SpotlightNews)"/>
+            <Property Name="SelectedSites" Type="Collection(Microsoft.SharePoint.EmployeeEngagement.NewsSite)"/>
          </ComplexType>
-         <ComplexType Name="SpotlightPinnedNews">
-            <Property Name="ImageURL" Type="Edm.String"/>
+         <ComplexType Name="SpotlightNews">
+            <Property Name="ImageUrl" Type="Edm.String"/>
+            <Property Name="IsBoosted" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="Order" Type="Edm.Int32" Nullable="false"/>
             <Property Name="Title" Type="Edm.String"/>
-            <Property Name="URL" Type="Edm.String"/>
+            <Property Name="Url" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="NewsSite">
+            <Property Name="Acronym" Type="Edm.String"/>
+            <Property Name="BannerColor" Type="Edm.String"/>
+            <Property Name="BannerImageUrl" Type="Edm.String"/>
+            <Property Name="ItemReference" Type="Microsoft.SharePoint.EmployeeEngagement.ItemReference"/>
+            <Property Name="Title" Type="Edm.String"/>
+            <Property Name="Type" Type="Edm.String"/>
+            <Property Name="Url" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="ItemReference">
+            <Property Name="SiteId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="Type" Type="Edm.String"/>
+            <Property Name="WebId" Type="Edm.Guid" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="DashboardConfiguration">
             <Property Name="canvasContent" Type="Edm.String"/>
@@ -34291,7 +34560,7 @@
             <Property Name="Title" Type="Edm.String"/>
             <Property Name="Url" Type="Edm.String"/>
          </ComplexType>
-         <EntityType Name="VivaConnectionsConfiguration">
+         <EntityType Name="VivaConnectionsPage">
             <Key>
                <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
             </Key>
@@ -34316,9 +34585,9 @@
             <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
             <Property Name="CompanyLinks" Type="Collection(Microsoft.SharePoint.EmployeeEngagement.VivaResourceLink)"/>
          </EntityType>
-         <Association Name="SP_EmployeeEngagement_VivaConnectionsConfiguration_Microsoft_SharePoint_EmployeeEngagement_VivaConnectionsConfiguration_VivaConnectionsConfigurationPartner">
-            <End Type="Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsConfiguration" Role="VivaConnectionsConfiguration" Multiplicity="0..1"/>
-            <End Type="SP.EmployeeEngagement" Role="VivaConnectionsConfigurationPartner" Multiplicity="0..1"/>
+         <Association Name="SP_EmployeeEngagement_VivaConnectionsPage_Microsoft_SharePoint_EmployeeEngagement_VivaConnectionsPage_VivaConnectionsPagePartner">
+            <End Type="Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsPage" Role="VivaConnectionsPage" Multiplicity="0..1"/>
+            <End Type="SP.EmployeeEngagement" Role="VivaConnectionsPagePartner" Multiplicity="0..1"/>
          </Association>
          <Association Name="SP_EmployeeEngagement_VivaResources_Microsoft_SharePoint_EmployeeEngagement_VivaResources_VivaResourcesPartner">
             <End Type="Microsoft.SharePoint.EmployeeEngagement.VivaResources" Role="VivaResources" Multiplicity="0..1"/>
@@ -34795,11 +35064,15 @@
          <ComplexType Name="InactiveSitePolicyResourceStorage">
             <Property Name="createdOn" Type="Edm.DateTime"/>
             <Property Name="lastScopedOn" Type="Edm.DateTime"/>
+            <Property Name="lastTransitionedOn" Type="Edm.DateTime"/>
             <Property Name="lookupSiteId" Type="SP.FieldLookupValue"/>
+            <Property Name="notificationData" Type="Edm.String"/>
             <Property Name="resourceId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="resourceStateTransitionData" Type="Edm.String"/>
             <Property Name="resourceStatus" Type="Edm.Int32" Nullable="false"/>
             <Property Name="resourceType" Type="Edm.Int32" Nullable="false"/>
             <Property Name="updatedOn" Type="Edm.DateTime"/>
+            <Property Name="userResponses" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="InsightsSummaryResponse">
             <Property Name="insightsSummary" Type="Edm.String"/>
@@ -34811,9 +35084,10 @@
             <Property Name="lookupSiteId" Type="SP.FieldLookupValue"/>
             <Property Name="notificationData" Type="Edm.String"/>
             <Property Name="notificationStatus" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="policyActionLog" Type="Edm.String"/>
             <Property Name="resourceId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="resourceState" Type="Edm.Int32" Nullable="false"/>
             <Property Name="resourceStateTransitionData" Type="Edm.String"/>
-            <Property Name="resourceStatus" Type="Edm.Int32" Nullable="false"/>
             <Property Name="resourceType" Type="Edm.Int32" Nullable="false"/>
             <Property Name="updatedOn" Type="Edm.DateTime"/>
             <Property Name="userResponses" Type="Edm.String"/>
@@ -34837,6 +35111,8 @@
             <Property Name="impactedDocLibName" Type="Edm.String"/>
             <Property Name="impactedSiteType" Type="Edm.Int32" Nullable="false"/>
             <Property Name="lastActivity" Type="Edm.DateTime" Nullable="false"/>
+            <Property Name="ransomwareDetectionReason" Type="Edm.String"/>
+            <Property Name="ransomwareDetectionScore" Type="Edm.Double" Nullable="false"/>
             <Property Name="siteLabelId" Type="Edm.String"/>
             <Property Name="siteLabelName" Type="Edm.String"/>
             <Property Name="siteName" Type="Edm.String"/>
@@ -34879,11 +35155,13 @@
             <Property Name="policyCreatedTime" Type="Edm.DateTime"/>
             <Property Name="policyCustomName" Type="Edm.String"/>
             <Property Name="policyDefinitionDetails" Type="Edm.String"/>
+            <Property Name="policyDeleteReason" Type="Edm.String"/>
             <Property Name="policyDescription" Type="Edm.String"/>
             <Property Name="policyFrequencyUnit" Type="Edm.Int32" Nullable="false"/>
             <Property Name="policyFrequencyValue" Type="Edm.Int32" Nullable="false"/>
             <Property Name="policyId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="policyState" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="policyTags" Type="Edm.String"/>
             <Property Name="policyTemplate" Type="Edm.Int32" Nullable="false"/>
             <Property Name="policyType" Type="Edm.Int32" Nullable="false"/>
             <Property Name="policyVersion" Type="Edm.Int32" Nullable="false"/>
@@ -34948,6 +35226,7 @@
             <Property Name="classification" Type="Edm.Int32" Nullable="false"/>
             <Property Name="createdTime" Type="Edm.DateTime" Nullable="false"/>
             <Property Name="eventId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="firstOccurrence" Type="Edm.DateTime"/>
             <Property Name="investigationState" Type="Edm.Int32" Nullable="false"/>
             <Property Name="lastOccurrence" Type="Edm.DateTime"/>
             <Property Name="lastUpdatedTime" Type="Edm.DateTime"/>
@@ -35137,7 +35416,12 @@
          <ComplexType Name="DirectSharingAbilities">
             <Property Name="canAddExternalPrincipal" Type="SP.Sharing.SharingAbilityStatus"/>
             <Property Name="canAddInternalPrincipal" Type="SP.Sharing.SharingAbilityStatus"/>
+            <Property Name="canAddNewExternalPrincipal" Type="SP.Sharing.SharingAbilityStatus"/>
             <Property Name="canRequestGrantAccess" Type="SP.Sharing.SharingAbilityStatus"/>
+            <Property Name="supportsEditPermission" Type="SP.Sharing.SharingAbilityStatus"/>
+            <Property Name="supportsManageListPermission" Type="SP.Sharing.SharingAbilityStatus"/>
+            <Property Name="supportsReadPermission" Type="SP.Sharing.SharingAbilityStatus"/>
+            <Property Name="supportsRestrictedViewPermission" Type="SP.Sharing.SharingAbilityStatus"/>
             <Property Name="supportsReviewPermission" Type="SP.Sharing.SharingAbilityStatus"/>
          </ComplexType>
          <ComplexType Name="SharingAbilityStatus">
@@ -35229,6 +35513,7 @@
             <Property Name="siteAdmins" Type="Collection(SP.Sharing.PrincipalInfo)"/>
          </ComplexType>
          <ComplexType Name="PrincipalInfo">
+            <Property Name="ExpirationDateTimeOnACE" Type="Edm.DateTime"/>
             <Property Name="inheritedFrom" Type="SP.Sharing.InheritedFrom"/>
             <Property Name="isInherited" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="principal" Type="SP.Sharing.Principal"/>
@@ -35379,6 +35664,7 @@
             <Property Name="CurrentRole" Type="Edm.Int32" Nullable="false"/>
             <Property Name="DisplayName" Type="Edm.String"/>
             <Property Name="Email" Type="Edm.String"/>
+            <Property Name="ExpirationDateTimeOnACE" Type="Edm.DateTime"/>
             <Property Name="InvitationLink" Type="Edm.String"/>
             <Property Name="IsUserKnown" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="Message" Type="Edm.String"/>
@@ -35441,9 +35727,11 @@
             <Property Name="accessRequestSettings" Type="SP.Sharing.AccessRequestSettings"/>
             <Property Name="addressBarLinkSettings" Type="SP.Sharing.AddressBarLinkSettings"/>
             <Property Name="ageGroup" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="allOrganizationSecurityGroupId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="anonymousLinkExpirationRestrictionDays" Type="Edm.Int32" Nullable="false"/>
             <Property Name="anyoneLinkTrackUsers" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="blockPeoplePickerAndSharing" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="canAddExistingExternalPrincipal" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="canAddExternalPrincipal" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="canAddInternalPrincipal" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="canRequestAccessForGrantAccess" Type="Edm.Boolean" Nullable="false"/>
@@ -35456,6 +35744,7 @@
             <Property Name="defaultShareLinkScope" Type="Edm.Int32" Nullable="false"/>
             <Property Name="defaultShareLinkToExistingAccess" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="directUrl" Type="Edm.String"/>
+            <Property Name="discoverableByOrganizationEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="domainRestrictionSettings" Type="SP.Sharing.DomainRestrictionSettings"/>
             <Property Name="enforceIBSegmentFiltering" Type="Edm.Boolean" Nullable="false"/>
@@ -36111,6 +36400,7 @@
             <Property Name="policyFrequencyUnit" Type="Edm.Int32" Nullable="false"/>
             <Property Name="policyFrequencyValue" Type="Edm.Int32" Nullable="false"/>
             <Property Name="policyId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="policyTags" Type="Edm.String"/>
             <Property Name="policyTemplate" Type="Edm.Int32" Nullable="false"/>
             <Property Name="policyType" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
@@ -36258,6 +36548,7 @@
          </ComplexType>
          <ComplexType Name="SiteCreationProperties">
             <Property Name="CompatibilityLevel" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="EnableHighValueContent" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="Lcid" Type="Edm.Int64" Nullable="false"/>
             <Property Name="Owner" Type="Edm.String"/>
             <Property Name="StorageMaximumLevel" Type="Edm.Int64" Nullable="false"/>
@@ -36341,6 +36632,7 @@
             <Property Name="LimitedAccessFileType" Type="Edm.Int32" Nullable="false"/>
             <Property Name="Managers" Type="Collection(Edm.String)"/>
             <Property Name="Owners" Type="Collection(Edm.String)"/>
+            <Property Name="OwnersCount" Type="Edm.Int32" Nullable="false"/>
             <Property Name="OwningApplicationId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="OwningApplicationName" Type="Edm.String"/>
             <Property Name="Readers" Type="Collection(Edm.String)"/>
@@ -36561,6 +36853,7 @@
             <Property Name="BlockDownloadLinksFileType" Type="Edm.Int32" Nullable="false"/>
             <Property Name="BlockDownloadMicrosoft365GroupIds" Type="Collection(Edm.Guid)" Nullable="false"/>
             <Property Name="BlockDownloadPolicy" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="BlockDownloadPolicyFileTypeId" Type="Edm.String"/>
             <Property Name="BlockGuestsAsSiteAdmin" Type="Edm.Int32" Nullable="false"/>
             <Property Name="BonusDiskQuota" Type="Edm.Int64" Nullable="false"/>
             <Property Name="ClearRestrictedAccessControl" Type="Edm.Boolean" Nullable="false"/>
@@ -36600,6 +36893,7 @@
             <Property Name="LimitedAccessFileType" Type="Edm.Int32" Nullable="false"/>
             <Property Name="ListsShowHeaderAndNavigation" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="LockIssue" Type="Edm.String"/>
+            <Property Name="LockReason" Type="Edm.Int32" Nullable="false"/>
             <Property Name="LockState" Type="Edm.String"/>
             <Property Name="LoopDefaultSharingLinkRole" Type="Edm.Int32" Nullable="false"/>
             <Property Name="LoopDefaultSharingLinkScope" Type="Edm.Int32" Nullable="false"/>
@@ -36753,6 +37047,7 @@
             <Property Name="AIBuilderSiteInfoList" Type="Collection(Microsoft.Online.SharePoint.TenantAdministration.SiteInfoForSitePicker)"/>
             <Property Name="AIBuilderSiteList" Type="Collection(Edm.Guid)" Nullable="false"/>
             <Property Name="AIBuilderSiteListFileName" Type="Edm.String"/>
+            <Property Name="AllOrganizationSecurityGroupId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="AllowAnonymousMeetingParticipantsToAccessWhiteboards" Type="Edm.Int32" Nullable="false"/>
             <Property Name="AllowCommentsTextOnEmailEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="AllowDownloadingNonWebViewableFiles" Type="Edm.Boolean" Nullable="false"/>
@@ -36772,6 +37067,10 @@
             <Property Name="AppOnlyBypassPeoplePickerPolicies" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ArchiveRedirectUrl" Type="Edm.String"/>
             <Property Name="AuthContextResilienceMode" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="AutofillColumnsEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="AutofillColumnsSiteInfoList" Type="Collection(Microsoft.Online.SharePoint.TenantAdministration.SiteInfoForSitePicker)"/>
+            <Property Name="AutofillColumnsSiteList" Type="Collection(Edm.Guid)" Nullable="false"/>
+            <Property Name="AutofillColumnsSiteListFileName" Type="Edm.String"/>
             <Property Name="BccExternalSharingInvitations" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="BccExternalSharingInvitationsList" Type="Edm.String"/>
             <Property Name="BlockAccessOnUnmanagedDevices" Type="Edm.Boolean" Nullable="false"/>
@@ -36796,12 +37095,6 @@
             <Property Name="CompatibilityRange" Type="Edm.String"/>
             <Property Name="ConditionalAccessPolicy" Type="Edm.Int32" Nullable="false"/>
             <Property Name="ConditionalAccessPolicyErrorHelpLink" Type="Edm.String"/>
-            <Property Name="ContainerDefaultLinkToExistingAccess" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="ContainerDefaultShareLinkRole" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="ContainerDefaultShareLinkScope" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="ContainerLoopDefaultShareLinkRole" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="ContainerLoopDefaultShareLinkScope" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="ContainerSharingCapability" Type="Edm.Int32" Nullable="false"/>
             <Property Name="ContentTypeSyncSiteTemplatesList" Type="Collection(Edm.String)"/>
             <Property Name="CoreBlockGuestsAsSiteAdmin" Type="Edm.Int32" Nullable="false"/>
             <Property Name="CoreDefaultLinkToExistingAccess" Type="Edm.Boolean" Nullable="false"/>
@@ -36831,6 +37124,7 @@
             <Property Name="DisablePersonalListCreation" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="DisableReportProblemDialog" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="DisableSpacesActivation" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="DisableVersionExpirationSetting" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="DisableVivaConnectionsAnalytics" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="DisallowInfectedFileDownload" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="DisplayNamesOfFileViewers" Type="Edm.Boolean" Nullable="false"/>
@@ -36848,6 +37142,7 @@
             <Property Name="EnableAutoNewsDigest" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EnableAzureADB2BIntegration" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EnabledFlightAllowAADB2BSkipCheckingOTP" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="EnableDiscoverableByOrganizationForVideos" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EnableGuestSignInAcceleration" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EnableMinimumVersionRequirement" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EnableMipSiteLabel" Type="Edm.Boolean" Nullable="false"/>
@@ -36884,6 +37179,9 @@
             <Property Name="HideSyncButtonOnODB" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="IBImplicitGroupBased" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ImageTaggingOption" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="ImageTaggingSiteInfoList" Type="Collection(Microsoft.Online.SharePoint.TenantAdministration.SiteInfoForSitePicker)"/>
+            <Property Name="ImageTaggingSiteList" Type="Collection(Edm.Guid)" Nullable="false"/>
+            <Property Name="ImageTaggingSiteListFileName" Type="Edm.String"/>
             <Property Name="IncludeAtAGlanceInShareEmails" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="InformationBarriersSuspension" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="IPAddressAllowList" Type="Edm.String"/>
@@ -38188,6 +38486,7 @@
             <Property Name="IsRegistered" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ScopePath" Type="Edm.String"/>
             <Property Name="ServiceHealthStatus" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="Workflow2013Retired" Type="Edm.Boolean" Nullable="false"/>
             <NavigationProperty Name="Current" Relationship="SP.WorkflowServices.SP_WorkflowServices_WorkflowServicesManager_Current_SP_WorkflowServices_WorkflowServicesManager_CurrentPartner" ToRole="Current" FromRole="CurrentPartner"/>
          </EntityType>
          <EntityType Name="WorkflowSubscription">
@@ -38402,6 +38701,21 @@
             <Property Name="SSOApplicationId" Type="Edm.String"/>
             <Property Name="SSOProviderImplId" Type="Edm.String"/>
             <Property Name="Target" Type="Edm.String"/>
+         </EntityType>
+      </Schema>
+      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.Administration.SiteMove.Service">
+         <EntityType Name="SiteMoveService">
+            <Key>
+               <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
+            </Key>
+            <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="SiteMoveServiceInfo">
+            <Key>
+               <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
+            </Key>
+            <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
+            <Property Name="ServiceCapabilities" Type="Collection(Edm.Int32)" Nullable="false"/>
          </EntityType>
       </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="SP.OAuth">
@@ -38916,12 +39230,6 @@
             <Property Name="CommentsOnSitePagesDisabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ConditionalAccessPolicy" Type="Edm.Int32" Nullable="false"/>
             <Property Name="ConditionalAccessPolicyErrorHelpLink" Type="Edm.String"/>
-            <Property Name="ContainerDefaultLinkToExistingAccess" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="ContainerDefaultShareLinkRole" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="ContainerDefaultShareLinkScope" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="ContainerLoopDefaultShareLinkRole" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="ContainerLoopDefaultShareLinkScope" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="ContainerSharingCapability" Type="Edm.Int32" Nullable="false"/>
             <Property Name="ContentTypeSyncSiteTemplatesList" Type="Collection(Edm.String)"/>
             <Property Name="CoreBlockGuestsAsSiteAdmin" Type="Edm.Int32" Nullable="false"/>
             <Property Name="CoreDefaultLinkToExistingAccess" Type="Edm.Boolean" Nullable="false"/>
@@ -38947,6 +39255,7 @@
             <Property Name="DisableOutlookPSTVersionTrimming" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="DisablePersonalListCreation" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="DisableSpacesActivation" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="DisableVersionExpirationSetting" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="DisableVivaConnectionsAnalytics" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="DisplayStartASiteOption" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EmailAttestationEnabled" Type="Edm.Boolean" Nullable="false"/>

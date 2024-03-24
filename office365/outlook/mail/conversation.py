@@ -49,9 +49,7 @@ class Conversation(Entity):
 
     @property
     def unique_senders(self):
-        """
-        All the users that sent a message to this Conversation.
-        """
+        """All the users that sent a message to this Conversation."""
         return self.properties.get("uniqueSenders", StringCollection())
 
     @property

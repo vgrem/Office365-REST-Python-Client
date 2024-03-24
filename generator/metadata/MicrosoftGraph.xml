@@ -21380,6 +21380,7 @@
             <NavigationProperty Name="ownedObjects" Type="Collection(graph.directoryObject)"/>
             <NavigationProperty Name="registeredDevices" Type="Collection(graph.directoryObject)"/>
             <NavigationProperty Name="scopedRoleMemberOf" Type="Collection(graph.scopedRoleMembership)" ContainsTarget="true"/>
+            <NavigationProperty Name="sponsors" Type="Collection(graph.directoryObject)"/>
             <NavigationProperty Name="transitiveMemberOf" Type="Collection(graph.directoryObject)"/>
             <NavigationProperty Name="calendar" Type="graph.calendar" ContainsTarget="true"/>
             <NavigationProperty Name="calendarGroups" Type="Collection(graph.calendarGroup)" ContainsTarget="true"/>
@@ -38239,6 +38240,7 @@
                <NavigationPropertyBinding Path="ownedDevices" Target="directoryObjects"/>
                <NavigationPropertyBinding Path="ownedObjects" Target="directoryObjects"/>
                <NavigationPropertyBinding Path="registeredDevices" Target="directoryObjects"/>
+               <NavigationPropertyBinding Path="sponsors" Target="directoryObjects"/>
                <NavigationPropertyBinding Path="transitiveMemberOf" Target="directoryObjects"/>
             </EntitySet>
             <EntitySet Name="applicationTemplates" EntityType="microsoft.graph.applicationTemplate"/>
@@ -38351,6 +38353,7 @@
                <NavigationPropertyBinding Path="ownedDevices" Target="directoryObjects"/>
                <NavigationPropertyBinding Path="ownedObjects" Target="directoryObjects"/>
                <NavigationPropertyBinding Path="registeredDevices" Target="directoryObjects"/>
+               <NavigationPropertyBinding Path="sponsors" Target="directoryObjects"/>
                <NavigationPropertyBinding Path="transitiveMemberOf" Target="directoryObjects"/>
             </Singleton>
             <Singleton Name="policies" Type="microsoft.graph.policyRoot"/>
@@ -38862,6 +38865,7 @@
             <Property Name="lastModifiedBy" Type="Edm.String"/>
             <Property Name="lastUpdateDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
             <Property Name="redirectIncidentId" Type="Edm.String"/>
+            <Property Name="resolvingComment" Type="Edm.String"/>
             <Property Name="severity" Type="microsoft.graph.security.alertSeverity" Nullable="false"/>
             <Property Name="status" Type="microsoft.graph.security.incidentStatus" Nullable="false"/>
             <Property Name="systemTags" Type="Collection(Edm.String)"/>

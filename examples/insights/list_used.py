@@ -5,9 +5,11 @@ https://learn.microsoft.com/en-us/graph/api/insights-list-used?view=graph-rest-1
 """
 
 from office365.graph_client import GraphClient
-from tests.graph_case import acquire_token_by_username_password
+from tests import test_client_id, test_password, test_tenant, test_username
 
-client = GraphClient(acquire_token_by_username_password)
+client = GraphClient.with_username_and_password(
+    test_tenant, test_client_id, test_username, test_password
+)
 result = client.me.insights.used.get().execute_query()
 for item in result:
-    print("Resource url: {0}".format(item.resource_reference))
+    print("Resource: {0}".format(item.resource_reference))

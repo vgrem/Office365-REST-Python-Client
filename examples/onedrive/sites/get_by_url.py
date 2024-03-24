@@ -1,12 +1,11 @@
 """
 Get site by url
 
-https://learn.microsoft.com/en-us/graph/api/site-get?view=graph-rest-1.0&tabs=http
+https://learn.microsoft.com/en-us/graph/api/site-get?view=graph-rest-1.0
 """
 from office365.graph_client import GraphClient
-from tests import test_team_site_url
-from tests.graph_case import acquire_token_by_client_credentials
+from tests import test_client_id, test_client_secret, test_team_site_url, test_tenant
 
-client = GraphClient(acquire_token_by_client_credentials)
+client = GraphClient.with_client_secret(test_tenant, test_client_id, test_client_secret)
 site = client.sites.get_by_url(test_team_site_url).get().execute_query()
 print("Site Id: {0}".format(site.id))

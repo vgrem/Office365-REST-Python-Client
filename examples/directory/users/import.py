@@ -2,8 +2,13 @@ from faker import Faker
 
 from office365.directory.users.profile import UserProfile
 from office365.graph_client import GraphClient
-from tests import create_unique_name, test_tenant
-from tests.graph_case import acquire_token_by_username_password
+from tests import (
+    create_unique_name,
+    test_client_id,
+    test_password,
+    test_tenant,
+    test_username,
+)
 
 
 def generate_user_profile():
@@ -23,7 +28,9 @@ def generate_user_profile():
     return UserProfile(**user_json)
 
 
-client = GraphClient(acquire_token_by_username_password)
+client = GraphClient.with_username_and_password(
+    test_tenant, test_client_id, test_username, test_password
+)
 
 for idx in range(0, 1):
     user_profile = generate_user_profile()

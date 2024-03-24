@@ -6,12 +6,16 @@ https://developer.microsoft.com/en-us/office/blogs/controlling-app-access-on-spe
 """
 
 from office365.graph_client import GraphClient
-from tests import test_client_credentials, test_team_site_url
-from tests.graph_case import acquire_token_by_client_credentials
+from tests import (
+    test_client_id,
+    test_client_secret,
+    test_team_site_url,
+    test_tenant,
+)
 
-client = GraphClient(acquire_token_by_client_credentials)
+client = GraphClient.with_client_secret(test_tenant, test_client_id, test_client_secret)
 site = client.sites.get_by_url(test_team_site_url)
-app = client.applications.get_by_app_id(test_client_credentials.clientId)
+app = client.applications.get_by_app_id(test_client_id)
 roles = ["read", "write"]
 
 print("Granting {0} permissions for application {1}".format(roles, app))
