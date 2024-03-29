@@ -5,8 +5,8 @@ from office365.onedrive.termstore.groups.group import Group
 from office365.onedrive.termstore.sets.set import Set
 from office365.onedrive.termstore.store import Store
 from office365.onedrive.termstore.terms.term import Term
-from tests import test_root_site_url
-from tests.graph_case import GraphTestCase, acquire_token_by_client_credentials
+from tests import test_client_id, test_client_secret, test_root_site_url, test_tenant
+from tests.graph_case import GraphTestCase
 
 
 class TestTermStore(GraphTestCase):
@@ -18,7 +18,9 @@ class TestTermStore(GraphTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestTermStore, cls).setUpClass()
-        client = GraphClient(acquire_token_by_client_credentials)
+        client = GraphClient.with_client_secret(
+            test_tenant, test_client_id, test_client_secret
+        )
         cls.target_store = client.sites.get_by_url(test_root_site_url).term_store
 
     @classmethod

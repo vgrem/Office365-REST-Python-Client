@@ -8,6 +8,7 @@ from office365.directory.extensions.extension import Extension
 from office365.entity_collection import EntityCollection
 from office365.outlook.calendar.attendees.attendee import Attendee
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
+from office365.outlook.calendar.response_status import ResponseStatus
 from office365.outlook.item import OutlookItem
 from office365.outlook.mail.attachments.collection import AttachmentCollection
 from office365.outlook.mail.item_body import ItemBody
@@ -196,6 +197,30 @@ class Event(OutlookItem):
         return self.properties.get("bodyPreview", None)
 
     @property
+    def reminder_minutes_before_start(self):
+        # type: () -> Optional[int]
+        """The number of minutes before the event start time that the reminder alert occurs."""
+        return self.properties.get("reminderMinutesBeforeStart", None)
+
+    @property
+    def response_requested(self):
+        # type: () -> Optional[bool]
+        """Default is true, which represents the organizer would like an invitee to send a response to the event."""
+        return self.properties.get("responseRequested", None)
+
+    @property
+    def response_status(self):
+        # type: () -> Optional[str]
+        """Indicates the type of response sent in response to an event message."""
+        return self.properties.get("responseStatus", ResponseStatus())
+
+    @property
+    def series_master_id(self):
+        # type: () -> Optional[str]
+        """The ID for the recurring series master item, if this event is part of a recurring series."""
+        return self.properties.get("seriesMasterId", None)
+
+    @property
     def subject(self):
         # type: () -> Optional[str]
         """The text of the event's subject line."""
@@ -211,6 +236,26 @@ class Event(OutlookItem):
     def location(self):
         """The location of the event."""
         return self.properties.get("location", Location())
+
+    @property
+    def transaction_id(self):
+        # type: () -> Optional[str]
+        """
+        A custom identifier specified by a client app for the server to avoid redundant POST operations in case of
+        client retries to create the same event. This is useful when low network connectivity causes the client to
+        time out before receiving a response from the server for the client's prior create-event request.
+        After you set transactionId when creating an event, you cannot change transactionId in a subsequent update.
+        This property is only returned in a response payload if an app has set it
+        """
+        return self.properties.get("transactionId", None)
+
+    @property
+    def type(self):
+        # type: () -> Optional[str]
+        """
+        The event type. Possible values are: singleInstance, occurrence, exception, seriesMaster
+        """
+        return self.properties.get("type", None)
 
     @property
     def web_link(self):
