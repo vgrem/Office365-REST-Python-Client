@@ -135,9 +135,7 @@ class Calendar(Entity):
     @property
     def name(self):
         # type: () -> Optional[str]
-        """
-        The calendar name
-        """
+        """The calendar name"""
         return self.properties.get("name", None)
 
     @property

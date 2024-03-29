@@ -6,10 +6,12 @@ from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.permissions.permission import Permission
 from tests import (
     test_client_credentials,
+    test_client_id,
+    test_client_secret,
     test_team_site_url,
+    test_tenant,
     test_user_principal_name_alt,
 )
-from tests.graph_case import acquire_token_by_client_credentials
 
 
 class TestPermissions(TestCase):
@@ -19,7 +21,9 @@ class TestPermissions(TestCase):
     @classmethod
     def setUpClass(cls):
         super(TestPermissions, cls).setUpClass()
-        client = GraphClient(acquire_token_by_client_credentials)
+        client = GraphClient.with_client_secret(
+            test_tenant, test_client_id, test_client_secret
+        )
         folder_name = "New_" + uuid.uuid4().hex
         cls.target_drive_item = client.sites.root.drive.root.create_folder(
             folder_name

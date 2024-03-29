@@ -3,6 +3,7 @@ from typing import Optional
 from office365.entity_collection import EntityCollection
 from office365.onedrive.sitepages.base import BaseSitePage
 from office365.onedrive.sitepages.canvas_layout import CanvasLayout
+from office365.onedrive.sitepages.title_area import TitleArea
 from office365.onedrive.sitepages.web_part import WebPart
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
@@ -77,6 +78,12 @@ class SitePage(BaseSitePage):
         return self.properties.get("thumbnailWebUrl", None)
 
     @property
+    def title_area(self):
+        # type: () -> Optional[str]
+        """Title area on the SharePoint page."""
+        return self.properties.get("titleArea", TitleArea())
+
+    @property
     def canvas_layout(self):
         # type: () -> CanvasLayout
         """The default termStore under this site."""
@@ -89,7 +96,7 @@ class SitePage(BaseSitePage):
 
     @property
     def web_parts(self):
-        # type: () -> CanvasLayout
+        # type: () -> EntityCollection[WebPart]
         """Collection of webparts on the SharePoint page."""
         return self.properties.get(
             "webParts",
@@ -102,6 +109,7 @@ class SitePage(BaseSitePage):
         if default_value is None:
             property_mapping = {
                 "canvasLayout": self.canvas_layout,
+                "titleArea": self.title_area,
                 "webParts": self.web_parts,
             }
             default_value = property_mapping.get(name, None)

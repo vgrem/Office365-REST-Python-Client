@@ -6,10 +6,14 @@ https://learn.microsoft.com/en-us/graph/api/channel-doesuserhaveaccess?view=grap
 import sys
 
 from office365.graph_client import GraphClient
-from tests import test_user_principal_name
-from tests.graph_case import acquire_token_by_client_credentials
+from tests import (
+    test_client_id,
+    test_client_secret,
+    test_tenant,
+    test_user_principal_name,
+)
 
-client = GraphClient(acquire_token_by_client_credentials)
+client = GraphClient.with_client_secret(test_tenant, test_client_id, test_client_secret)
 teams = client.teams.top(1).get().execute_query()
 if len(teams) < 1:
     sys.exit("No teams found")

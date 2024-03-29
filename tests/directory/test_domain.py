@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from office365.directory.domains.domain import Domain
 from office365.graph_client import GraphClient
-from tests.graph_case import acquire_token_by_client_credentials
+from tests import test_client_id, test_client_secret, test_tenant
 
 
 class TestDomain(TestCase):
@@ -12,7 +12,9 @@ class TestDomain(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.client = GraphClient(acquire_token_by_client_credentials)
+        cls.client = GraphClient.with_client_secret(
+            test_tenant, test_client_id, test_client_secret
+        )
 
     def test1_list_domains(self):
         domains = self.client.domains.top(1).get().execute_query()
