@@ -17,7 +17,7 @@ class List(BaseItem):
     including template and field definitions."""
 
     def __str__(self):
-        return self.display_name
+        return self.display_name or self.entity_type_name
 
     @property
     def display_name(self):

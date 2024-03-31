@@ -9,6 +9,7 @@ from office365.directory.policies.authentication_strength import (
 from office365.directory.policies.authorization import AuthorizationPolicy
 from office365.directory.policies.conditional_access import ConditionalAccessPolicy
 from office365.directory.policies.cross_tenant_access import CrossTenantAccessPolicy
+from office365.directory.policies.device_registration import DeviceRegistrationPolicy
 from office365.directory.policies.permission_grant import PermissionGrantPolicy
 from office365.directory.policies.tenant_app_management import TenantAppManagementPolicy
 from office365.entity import Entity
@@ -30,6 +31,17 @@ class PolicyRoot(Entity):
             AuthenticationMethodsPolicy(
                 self.context,
                 ResourcePath("authenticationMethodsPolicy", self.resource_path),
+            ),
+        )
+
+    @property
+    def device_registration_policy(self):
+        """ """
+        return self.properties.get(
+            "deviceRegistrationPolicy",
+            DeviceRegistrationPolicy(
+                self.context,
+                ResourcePath("deviceRegistrationPolicy", self.resource_path),
             ),
         )
 
@@ -147,6 +159,7 @@ class PolicyRoot(Entity):
                 "conditional_access_policies": self.conditional_access_policies,
                 "crossTenantAccessPolicy": self.cross_tenant_access_policy,
                 "defaultAppManagementPolicy": self.default_app_management_policy,
+                "deviceRegistrationPolicy": self.device_registration_policy,
                 "permissionGrantPolicies": self.permission_grant_policies,
             }
             default_value = property_mapping.get(name, None)

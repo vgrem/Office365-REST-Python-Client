@@ -9,10 +9,13 @@ https://learn.microsoft.com/en-us/graph/api/driveitem-invite?view=graph-rest-1.0
 from datetime import datetime, timedelta
 
 from office365.graph_client import GraphClient
+from tests import test_client_id, test_password, test_tenant, test_username
 from tests.graph_case import acquire_token_by_username_password
 
 file_name = "Financial Sample.xlsx"
-client = GraphClient(acquire_token_by_username_password)
+client = GraphClient.with_username_and_password(
+    test_tenant, test_client_id, test_username, test_password
+)
 file_item = client.me.drive.root.get_by_path(file_name)
 expired = datetime.utcnow() + timedelta(days=1)
 permissions = file_item.invite(

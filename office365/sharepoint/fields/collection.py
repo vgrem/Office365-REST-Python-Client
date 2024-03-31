@@ -13,6 +13,7 @@ from office365.sharepoint.fields.number import FieldNumber
 from office365.sharepoint.fields.text import FieldText
 from office365.sharepoint.fields.type import FieldType
 from office365.sharepoint.fields.url import FieldUrl
+from office365.sharepoint.fields.user import FieldUser
 from office365.sharepoint.fields.xmlSchemaFieldCreationInformation import (
     XmlSchemaFieldCreationInformation,
 )
@@ -123,13 +124,12 @@ class FieldCollection(EntityCollection[Field]):
         :param str title: Specifies the display name of the field.
         """
         from office365.sharepoint.fields.lookup import FieldLookup
+        from office365.sharepoint.lists.list import List  # noqa
 
         return_type = FieldLookup(self.context)
 
         def _add_lookup_field(lookup_list_id):
-            """
-            :type lookup_list_id: str
-            """
+            # type: (str) -> None
             if allow_multiple_values:
                 field_schema = """
                         <Field Type="LookupMulti" Mult="TRUE" DisplayName="{title}" Required="FALSE" Hidden="TRUE" \
@@ -176,6 +176,7 @@ class FieldCollection(EntityCollection[Field]):
         return self.add_field(create_field_info)
 
     def add_user_field(self, title):
+        # type: (str) -> FieldUser
         """
         Creates a User field
 

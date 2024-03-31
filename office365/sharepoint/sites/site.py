@@ -522,6 +522,12 @@ class Site(Entity):
         return self.properties.get("CanUpgrade", None)
 
     @property
+    def channel_group_id(self):
+        # type: () -> Optional[str]
+        """ """
+        return self.properties.get("ChannelGroupId", None)
+
+    @property
     def classification(self):
         # type: () -> Optional[str]
         """Gets the classification of this site."""

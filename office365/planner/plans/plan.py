@@ -7,6 +7,7 @@ from office365.planner.buckets.bucket import PlannerBucket
 from office365.planner.plans.container import PlannerPlanContainer
 from office365.planner.plans.details import PlannerPlanDetails
 from office365.planner.tasks.task import PlannerTask
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.paths.resource_path import ResourcePath
 
 
@@ -18,10 +19,19 @@ class PlannerPlan(Entity):
     """
 
     def __str__(self):
-        return self.title
+        return self.title or self.entity_type_name
 
     def __repr__(self):
         return self.id or self.entity_type_name
+
+    def delete_object(self):
+        def _construct_request(request):
+            # type: (RequestOptions) -> None
+            request.set_header("If-Match", self.properties.get("__etag"))
+
+        return (
+            super(PlannerPlan, self).delete_object().before_execute(_construct_request)
+        )
 
     @property
     def container(self):

@@ -10,7 +10,7 @@ import os
 import tempfile
 
 from office365.graph_client import GraphClient
-from tests.graph_case import acquire_token_by_username_password
+from tests import test_client_id, test_password, test_tenant, test_username
 
 
 def print_progress(offset):
@@ -18,7 +18,9 @@ def print_progress(offset):
     print("Downloaded '{0}' bytes...".format(offset))
 
 
-client = GraphClient(acquire_token_by_username_password)
+client = GraphClient.with_username_and_password(
+    test_tenant, test_client_id, test_username, test_password
+)
 # # 1. address file by path and get file metadata
 file_item = (
     client.me.drive.root.get_by_path("archive/big_buck_bunny.mp4").get().execute_query()

@@ -11,12 +11,32 @@ from office365.runtime.queries.function import FunctionQuery
 class ReportRoot(Entity):
     """Represents a container for Azure Active Directory (Azure AD) reporting resources."""
 
+    def device_configuration_device_activity(self):
+        """
+        Metadata for the device configuration device activity report
+        """
+        return_type = ClientResult(self.context, Report())
+        qry = FunctionQuery(
+            self, "deviceConfigurationDeviceActivity", None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def device_configuration_user_activity(self):
         """
         Metadata for the device configuration user activity report
         """
         return_type = ClientResult(self.context, Report())
         qry = FunctionQuery(self, "deviceConfigurationUserActivity", None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def managed_device_enrollment_failure_details(self):
+        """ """
+        return_type = ClientResult(self.context, Report())
+        qry = FunctionQuery(
+            self, "managedDeviceEnrollmentFailureDetails", None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -185,6 +205,19 @@ class ReportRoot(Entity):
             Dn where n represents the number of days over which the report is aggregated. Required.
         """
         qry = create_report_query(self, "getMailboxUsageMailboxCounts", period)
+        self.context.add_query(qry)
+        return qry.return_type
+
+    def get_mailbox_usage_quota_status_mailbox_counts(self, period):
+        """
+
+        :param str period: Specifies the length of time over which the report is aggregated.
+            The supported values for {period_value} are: D7, D30, D90, and D180. These values follow the format
+            Dn where n represents the number of days over which the report is aggregated. Required.
+        """
+        qry = create_report_query(
+            self, "getMailboxUsageQuotaStatusMailboxCounts", period
+        )
         self.context.add_query(qry)
         return qry.return_type
 

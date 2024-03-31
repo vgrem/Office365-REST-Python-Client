@@ -1,5 +1,5 @@
 """
-Creates a new plannerPlan
+Creates a new planner plan
 https://learn.microsoft.com/en-us/graph/api/planner-post-plans?view=graph-rest-1.0
 """
 
@@ -12,3 +12,6 @@ client = GraphClient.with_username_and_password(
 group = client.groups.get_by_name("My Sample Team")
 plan = client.planner.plans.add("My Plan", group).execute_query()
 print(plan)
+
+
+plan.delete_object().execute_query()  # clean up

@@ -672,9 +672,7 @@ class DriveItem(BaseItem):
     @property
     def audio(self):
         # type: () -> Audio
-        """
-        Audio metadata, if the item is an audio file. Read-only.
-        """
+        """Audio metadata, if the item is an audio file. Read-only."""
         return self.properties.get("audio", Audio())
 
     @property
@@ -688,9 +686,7 @@ class DriveItem(BaseItem):
     @property
     def photo(self):
         # type: () -> Photo
-        """
-        Photo metadata, if the item is a photo. Read-only.
-        """
+        """Photo metadata, if the item is a photo. Read-only."""
         return self.properties.get("photo", Photo())
 
     @property

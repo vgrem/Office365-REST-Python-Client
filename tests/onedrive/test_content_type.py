@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from office365.graph_client import GraphClient
 from office365.onedrive.contenttypes.content_type import ContentType
-from tests.graph_case import acquire_token_by_username_password
+from tests import test_client_id, test_password, test_tenant, test_username
 
 
 class TestContentType(TestCase):
@@ -12,7 +12,9 @@ class TestContentType(TestCase):
     @classmethod
     def setUpClass(cls):
         super(TestContentType, cls).setUpClass()
-        cls.client = GraphClient(acquire_token_by_username_password)
+        cls.client = GraphClient.with_username_and_password(
+            test_tenant, test_client_id, test_username, test_password
+        )
 
     @classmethod
     def tearDownClass(cls):

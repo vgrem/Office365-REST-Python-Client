@@ -4,9 +4,10 @@ from abc import ABCMeta
 class ODataJsonFormat(object):
     """OData JSON format"""
 
-    def __init__(self, metadata_level=None):
-        # type: (str) -> None
+    def __init__(self, metadata_level=None, etag=None):
+        # type: (str, str) -> None
         self.metadata_level = metadata_level
+        self.etag = etag
 
     __metaclass__ = ABCMeta
 

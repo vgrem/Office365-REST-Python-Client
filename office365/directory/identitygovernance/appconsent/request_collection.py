@@ -3,7 +3,7 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.queries.function import FunctionQuery
 
 
-class AppConsentRequestCollection(EntityCollection):
+class AppConsentRequestCollection(EntityCollection[AppConsentRequest]):
     """AppConsentRequest's collection"""
 
     def __init__(self, context, resource_path=None):

@@ -4,7 +4,7 @@ from office365.directory.identitygovernance.userconsent.request import (
 from office365.entity_collection import EntityCollection
 
 
-class UserConsentRequestCollection(EntityCollection):
+class UserConsentRequestCollection(EntityCollection[UserConsentRequest]):
     """AppConsentRequest's collection"""
 
     def __init__(self, context, resource_path=None):

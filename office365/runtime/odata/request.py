@@ -25,7 +25,7 @@ class ODataRequest(ClientRequest):
         """Creates OData request"""
         super(ODataRequest, self).__init__()
         self._default_json_format = json_format
-        self.beforeExecute += self._ensure_json_format
+        self.beforeExecute += self._ensure_http_headers
 
     @property
     def json_format(self):
@@ -111,6 +111,8 @@ class ODataRequest(ClientRequest):
                                 k: v for k, v in self._next_property(value, json_format)
                             }
                         yield name, value
+                    elif name == "@odata.etag":
+                        yield "__etag", value
             else:
                 yield "__value", json
         elif json is not None:
@@ -142,8 +144,16 @@ class ODataRequest(ClientRequest):
             json = {query.parameters_name: json}
         return json
 
-    def _ensure_json_format(self, request):
+    def _ensure_http_headers(self, request):
         # type: (RequestOptions) -> None
+        """
+        Ensures that HTTP Header Fields are specified in the OData request, namely:
+           - The Content-Type header
+           - Accept request-header field
+           - The If-Match request-header field (optional)
+        """
         media_type = self.json_format.media_type
         request.ensure_header("Content-Type", media_type)
         request.ensure_header("Accept", media_type)
+        if self.json_format.etag is not None:
+            request.ensure_header("If-Match", self.json_format.etag)

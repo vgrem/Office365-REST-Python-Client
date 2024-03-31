@@ -15,8 +15,8 @@ from tests import (
 client = GraphClient.with_client_secret(test_tenant, test_client_id, test_client_secret)
 folder = client.users.get_by_principal_name(test_user_principal_name_alt).drive.root
 
-# local_path = "../../data/Financial Sample.xlsx"
-local_path = "../../data/countries.json"
+local_path = "../../data/Financial Sample.xlsx"
+# local_path = "../../data/countries.json"
 # file = folder.upload_file(local_path).execute_query()
 with open(local_path, "rb") as f:
     file = folder.upload_file(f).execute_query()

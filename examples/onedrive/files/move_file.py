@@ -5,9 +5,11 @@ server relative path.
 https://learn.microsoft.com/en-us/graph/api/driveitem-move?view=graph-rest-1.0
 """
 from office365.graph_client import GraphClient
-from tests.graph_case import acquire_token_by_username_password
+from tests import test_client_id, test_password, test_tenant, test_username
 
-client = GraphClient(acquire_token_by_username_password)
+client = GraphClient.with_username_and_password(
+    test_tenant, test_client_id, test_username, test_password
+)
 source_path = "archive/Sample.rtf"
 target_path = "archive/2018"
 source_file_item = client.me.drive.root.get_by_path(source_path)

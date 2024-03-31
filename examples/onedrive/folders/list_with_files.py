@@ -1,6 +1,6 @@
 from office365.graph_client import GraphClient
 from office365.onedrive.driveitems.driveItem import DriveItem
-from tests.graph_case import acquire_token_by_username_password
+from tests import test_client_id, test_password, test_tenant, test_username
 
 
 def enum_folders_and_files(root_folder):
@@ -12,6 +12,8 @@ def enum_folders_and_files(root_folder):
             enum_folders_and_files(drive_item)
 
 
-client = GraphClient(acquire_token_by_username_password)
+client = GraphClient.with_username_and_password(
+    test_tenant, test_client_id, test_username, test_password
+)
 root = client.me.drive.root
 enum_folders_and_files(root)

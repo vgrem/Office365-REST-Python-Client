@@ -10,10 +10,17 @@ The following example gets the availability information for user for the specifi
 from datetime import datetime, timedelta
 
 from office365.graph_client import GraphClient
-from tests import test_user_principal_name
-from tests.graph_case import acquire_token_by_username_password
+from tests import (
+    test_client_id,
+    test_password,
+    test_tenant,
+    test_user_principal_name,
+    test_username,
+)
 
-client = GraphClient(acquire_token_by_username_password)
+client = GraphClient.with_username_and_password(
+    test_tenant, test_client_id, test_username, test_password
+)
 start_time = datetime.utcnow()
 end_time = start_time + timedelta(days=1)
 result = client.me.calendar.get_schedule(

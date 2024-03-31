@@ -86,9 +86,7 @@ class MailFolder(Entity):
     @property
     def parent_folder_id(self):
         # type: () -> Optional[str]
-        """
-        The unique identifier for the mailFolder's parent mailFolder.
-        """
+        """The unique identifier for the mailFolder's parent mailFolder."""
         return self.properties.get("parentFolderId", None)
 
     @property

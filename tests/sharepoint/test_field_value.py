@@ -67,7 +67,7 @@ class TestFieldValue(SPTestCase):
     def test3_create_multi_lookup_field(self):
         lookup_field = self.target_list.fields.add_lookup_field(
             title=self.multi_lookup_field_name,
-            lookup_list=self.target_list.properties["Id"],
+            lookup_list=self.target_list.id,
             lookup_field_name="Title",
             allow_multiple_values=True,
         ).execute_query()
