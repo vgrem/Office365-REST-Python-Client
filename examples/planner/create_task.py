@@ -5,9 +5,11 @@ https://learn.microsoft.com/en-us/graph/api/planner-post-tasks?view=graph-rest-1
 import sys
 
 from office365.graph_client import GraphClient
-from tests.graph_case import acquire_token_by_username_password
+from tests import test_client_id, test_password, test_tenant, test_username
 
-client = GraphClient(acquire_token_by_username_password)
+client = GraphClient.with_username_and_password(
+    test_tenant, test_client_id, test_username, test_password
+)
 group = client.groups.get_by_name("My Sample Team").get().execute_query()
 plans = group.planner.plans.get().execute_query()
 if len(plans) == 0:

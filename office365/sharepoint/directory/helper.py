@@ -1,6 +1,7 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.directory.members_info import MembersInfo
 from office365.sharepoint.directory.membership_result import MembershipResult
 from office365.sharepoint.directory.my_groups_result import MyGroupsResult
@@ -32,6 +33,7 @@ class SPHelper(Entity):
 
     @staticmethod
     def check_site_availability(context, site_url):
+        # type: (ClientContext, str) -> ClientResult[bool]
         """
         :param str site_url: Site Url
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context

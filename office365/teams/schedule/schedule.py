@@ -22,6 +22,7 @@ class Schedule(Entity):
 
     @property
     def open_shift_change_requests(self):
+        # type: () -> EntityCollection[OpenShiftChangeRequest]
         """The shifts in the shifts."""
         return self.properties.get(
             "openShiftChangeRequests",
@@ -34,6 +35,7 @@ class Schedule(Entity):
 
     @property
     def shifts(self):
+        # type: () -> EntityCollection[Shift]
         """The shifts in the shifts."""
         return self.properties.get(
             "shifts",
@@ -43,7 +45,8 @@ class Schedule(Entity):
         )
 
     @property
-    def scheduling_group(self):
+    def scheduling_groups(self):
+        # type: () -> EntityCollection[SchedulingGroup]
         """The logical grouping of users in the shifts (usually by role)."""
         return self.properties.get(
             "schedulingGroups",
@@ -56,6 +59,7 @@ class Schedule(Entity):
 
     @property
     def time_off_reasons(self):
+        # type: () -> EntityCollection[TimeOffReason]
         """The set of reasons for a time off in the schedule."""
         return self.properties.get(
             "timeOffReasons",
@@ -70,7 +74,7 @@ class Schedule(Entity):
         if default_value is None:
             property_mapping = {
                 "openShiftChangeRequests": self.open_shift_change_requests,
-                "schedulingGroups": self.scheduling_group,
+                "schedulingGroups": self.scheduling_groups,
                 "timeOffReasons": self.time_off_reasons,
             }
             default_value = property_mapping.get(name, None)

@@ -5,7 +5,7 @@ from office365.sharepoint.alerts.alert import Alert
 from office365.sharepoint.entity_collection import EntityCollection
 
 
-class AlertCollection(EntityCollection):
+class AlertCollection(EntityCollection[Alert]):
     """Content Type resource collection"""
 
     def __init__(self, context, resource_path=None):
@@ -26,6 +26,7 @@ class AlertCollection(EntityCollection):
         return return_type
 
     def contains(self, id_alert):
+        # type: (str) -> ClientResult[bool]
         """
         Returns true if the given alert exists in the alert collection. False otherwise.
 

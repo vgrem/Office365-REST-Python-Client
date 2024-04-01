@@ -3,7 +3,7 @@ from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.webs.information import WebInformation
 
 
-class WebInformationCollection(EntityCollection):
+class WebInformationCollection(EntityCollection[WebInformation]):
     """Specifies a collection of objects containing metadata about a site"""
 
     def __init__(self, context, resource_path=None):

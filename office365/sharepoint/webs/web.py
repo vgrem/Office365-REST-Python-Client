@@ -1,6 +1,6 @@
 # coding=utf-8
 import datetime
-from typing import AnyStr, Optional
+from typing import TYPE_CHECKING, AnyStr, Optional
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -105,6 +105,9 @@ from office365.sharepoint.webs.multilingual_settings import MultilingualSettings
 from office365.sharepoint.webs.regional_settings import RegionalSettings
 from office365.sharepoint.webs.template_collection import WebTemplateCollection
 from office365.sharepoint.webs.theme_info import ThemeInfo
+
+if TYPE_CHECKING:
+    from office365.sharepoint.client_context import ClientContext
 
 
 class Web(SecurableObject):
@@ -549,7 +552,9 @@ class Web(SecurableObject):
         :param int order_by: the column by which to order the Recycle Bin query.
         :param int item_state: Recycle Bin stage of items to return in the query.
         """
-        return_type = RecycleBinItemCollection(self.context)
+        return_type = RecycleBinItemCollection(
+            self.context, self.recycle_bin.resource_path
+        )
         payload = {
             "rowLimit": row_limit,
             "isAscending": is_ascending,
@@ -651,15 +656,14 @@ class Web(SecurableObject):
         return return_type
 
     def get_sharing_link_data(self, link_url):
+        # type: (str) -> ClientResult[SharingLinkData]
         """
         This method determines basic information about the supplied link URL, including limited data about the object
         the link URL refers to and any additional sharing link data if the link URL is a tokenized sharing link
 
         :param str link_url: A URL that is either a tokenized sharing link or a canonical URL for a document
         """
-        return_type = ClientResult(
-            self.context, SharingLinkData()
-        )  # type: ClientResult[SharingLinkData]
+        return_type = ClientResult(self.context, SharingLinkData())
         payload = {"linkUrl": link_url}
         qry = ServiceOperationQuery(
             self, "GetSharingLinkData", None, payload, None, return_type
@@ -669,6 +673,7 @@ class Web(SecurableObject):
 
     @staticmethod
     def get_context_web_theme_data(context):
+        # type: (ClientContext) -> ClientResult[str]
         """
         Get ThemeData for the context web.
 

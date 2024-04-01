@@ -554,9 +554,7 @@ class Folder(Entity):
     @property
     def time_created(self):
         # type: () -> Optional[datetime]
-        """
-        Gets when the folder was created in UTC.
-        """
+        """Gets when the folder was created in UTC."""
         return self.properties.get("TimeCreated", datetime.min)
 
     @property

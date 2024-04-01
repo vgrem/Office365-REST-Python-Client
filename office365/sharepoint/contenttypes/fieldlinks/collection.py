@@ -7,7 +7,7 @@ from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.fields.field import Field
 
 
-class FieldLinkCollection(EntityCollection):
+class FieldLinkCollection(EntityCollection[FieldLink]):
     """Specifies a Collection for field links."""
 
     def __init__(self, context, resource_path=None):

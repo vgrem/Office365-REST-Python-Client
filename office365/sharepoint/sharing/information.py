@@ -5,6 +5,7 @@ from office365.sharepoint.sharing.access_request_settings import AccessRequestSe
 from office365.sharepoint.sharing.links.default_templates_collection import (
     SharingLinkDefaultTemplatesCollection,
 )
+from office365.sharepoint.sharing.permission_collection import PermissionCollection
 from office365.sharepoint.sharing.picker_settings import PickerSettings
 
 
@@ -20,6 +21,13 @@ class SharingInformation(Entity):
         AccessRequestSettings is an optional property set to retrieve details for pending access requests if present.
         """
         return self.properties.get("accessRequestSettings", AccessRequestSettings())
+
+    @property
+    def permissions_information(self):
+        """
+        The PermissionCollection that are on the list item. It contains a collection of PrincipalInfo and LinkInfo.
+        """
+        return self.properties.get("permissionsInformation", PermissionCollection())
 
     @property
     def picker_settings(self):
@@ -49,6 +57,7 @@ class SharingInformation(Entity):
         if default_value is None:
             property_mapping = {
                 "accessRequestSettings": self.access_request_settings,
+                "permissionsInformation": self.permissions_information,
                 "pickerSettings": self.picker_settings,
                 "sharingAbilities": self.sharing_abilities,
                 "sharingLinkTemplates": self.sharing_link_templates,

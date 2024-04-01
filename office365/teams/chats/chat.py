@@ -41,6 +41,7 @@ class Chat(Entity):
 
     @property
     def members(self):
+        # type: () -> ConversationMemberCollection
         """A collection of membership records associated with the chat."""
         return self.properties.setdefault(
             "members",
@@ -51,6 +52,7 @@ class Chat(Entity):
 
     @property
     def messages(self):
+        # type: () -> EntityCollection[ChatMessage]
         """A collection of all the messages in the chat. Nullable."""
         return self.properties.get(
             "messages",
@@ -61,6 +63,7 @@ class Chat(Entity):
 
     @property
     def operations(self):
+        # type: () -> EntityCollection[TeamsAsyncOperation]
         """
         A collection of all the Teams async operations that ran or are running on the chat. Nullable.
         """
@@ -75,6 +78,7 @@ class Chat(Entity):
 
     @property
     def tabs(self):
+        # type: () -> EntityCollection[TeamsTab]
         """A collection of all the tabs in the chat."""
         return self.properties.get(
             "tabs",

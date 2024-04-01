@@ -5,15 +5,23 @@ https://learn.microsoft.com/en-us/graph/api/attachment-createuploadsession?view=
 """
 
 from office365.graph_client import GraphClient
-from tests import test_user_principal_name_alt
-from tests.graph_case import acquire_token_by_username_password
+from tests import (
+    test_client_id,
+    test_password,
+    test_tenant,
+    test_user_principal_name_alt,
+    test_username,
+)
 
 
 def print_progress(range_pos):
+    # type: (int) -> None
     print("{0} bytes uploaded".format(range_pos))
 
 
-client = GraphClient(acquire_token_by_username_password)
+client = GraphClient.with_username_and_password(
+    test_tenant, test_client_id, test_username, test_password
+)
 local_path = "../../../tests/data/big_buck_bunny.mp4"
 message = (
     (

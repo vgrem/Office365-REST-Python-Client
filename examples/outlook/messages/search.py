@@ -5,10 +5,12 @@ https://learn.microsoft.com/en-us/graph/search-concept-messages
 """
 
 from office365.graph_client import GraphClient
-from tests.graph_case import acquire_token_by_username_password
+from tests import test_client_id, test_password, test_tenant, test_username
 
-client = GraphClient(acquire_token_by_username_password)
+client = GraphClient.with_username_and_password(
+    test_tenant, test_client_id, test_username, test_password
+)
 result = client.search.query_messages("Let's go for lunch").execute_query()
 for item in result.value:
     for hit in item.hitsContainers[0].hits:
-        print(hit.resource.properties.get("webLink"))
+        print(hit.resource.get("webLink"))

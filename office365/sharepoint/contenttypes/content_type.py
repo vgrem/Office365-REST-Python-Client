@@ -20,7 +20,7 @@ class ContentType(Entity):
     """
 
     def __str__(self):
-        return self.name
+        return self.name or self.entity_type_name
 
     def __repr__(self):
         return self.string_id or str(self.id) or self.entity_type_name

@@ -8,7 +8,7 @@ class Principal(Entity):
     """Represents a user or group that can be assigned permissions to control security."""
 
     def __str__(self):
-        return self.title
+        return self.title or self.entity_type_name
 
     def __repr__(self):
         return self.user_principal_name or self.id or self.entity_type_name
@@ -28,9 +28,7 @@ class Principal(Entity):
     @title.setter
     def title(self, value):
         # type: (str) -> None
-        """
-        Sets a value that specifies the name of the principal.
-        """
+        """Sets a value that specifies the name of the principal."""
         self.set_property("Title", value)
 
     @property

@@ -219,7 +219,9 @@ class Site(Entity):
             specified in the orderBy parameter. A value of true indicates ascending order, and a value of false
             indicates descending order.
         """
-        return_type = RecycleBinItemCollection(self.context)
+        return_type = RecycleBinItemCollection(
+            self.context, self.recycle_bin.resource_path
+        )
         payload = {"rowLimit": row_limit, "isAscending": is_ascending}
         qry = ServiceOperationQuery(
             self, "GetRecycleBinItems", None, payload, None, return_type
@@ -228,9 +230,7 @@ class Site(Entity):
         return return_type
 
     def get_site_administrators(self):
-        """
-        Gets site collection administrators
-        """
+        """Gets site collection administrators"""
         return_type = ClientResult(
             self.context, ClientValueCollection(SiteAdministratorsInfo)
         )

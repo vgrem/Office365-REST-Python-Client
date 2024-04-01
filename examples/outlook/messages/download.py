@@ -9,9 +9,11 @@ import os
 import tempfile
 
 from office365.graph_client import GraphClient
-from tests.graph_case import acquire_token_by_username_password
+from tests import test_client_id, test_password, test_tenant, test_username
 
-client = GraphClient(acquire_token_by_username_password)
+client = GraphClient.with_username_and_password(
+    test_tenant, test_client_id, test_username, test_password
+)
 messages = client.me.messages.select(["id", "subject"]).top(1).get().execute_query()
 with tempfile.TemporaryDirectory() as local_path:
     for message in messages:

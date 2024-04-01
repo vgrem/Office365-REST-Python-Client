@@ -8,9 +8,11 @@ https://learn.microsoft.com/en-us/graph/api/singlevaluelegacyextendedproperty-po
 import sys
 
 from office365.graph_client import GraphClient
-from tests.graph_case import acquire_token_by_username_password
+from tests import test_client_id, test_password, test_tenant, test_username
 
-client = GraphClient(acquire_token_by_username_password)
+client = GraphClient.with_username_and_password(
+    test_tenant, test_client_id, test_username, test_password
+)
 messages = client.me.messages.top(1).get().execute_query()
 if len(messages) == 0:
     sys.exit("No messages were found")

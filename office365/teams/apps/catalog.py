@@ -9,6 +9,7 @@ class AppCatalogs(Entity):
 
     @property
     def teams_apps(self):
+        # type: () -> EntityCollection[TeamsApp]
         """List apps from the Microsoft Teams app catalog."""
         return self.properties.get(
             "teamsApps",

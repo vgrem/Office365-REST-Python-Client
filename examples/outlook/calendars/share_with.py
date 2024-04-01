@@ -7,11 +7,13 @@ https://learn.microsoft.com/en-us/graph/api/calendar-post-calendarpermissions?vi
 """
 from office365.graph_client import GraphClient
 from office365.outlook.calendar.role_type import CalendarRoleType
-from tests.graph_case import acquire_token_by_username_password
+from tests import test_client_id, test_password, test_tenant, test_username
 
-client = GraphClient(acquire_token_by_username_password)
-my_cal = client.me.calendar
-cal_perm = my_cal.calendar_permissions.add(
+client = GraphClient.with_username_and_password(
+    test_tenant, test_client_id, test_username, test_password
+)
+
+cal_perm = client.me.calendar.calendar_permissions.add(
     "samanthab@adatum.onmicrosoft.com", CalendarRoleType.read
 ).execute_query()
 print(cal_perm)
