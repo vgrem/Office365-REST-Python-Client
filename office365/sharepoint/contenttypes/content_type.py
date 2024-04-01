@@ -112,6 +112,12 @@ class ContentType(Entity):
         return self.properties.get("Id", ContentTypeId())
 
     @property
+    def scope(self):
+        # type: () -> Optional[str]
+        """Specifies a server-relative path to the content type scope of the content type."""
+        return self.properties.get("Scope", None)
+
+    @property
     def sealed(self):
         # type: () -> Optional[bool]
         """Specifies whether the content type can be changed."""
@@ -141,6 +147,12 @@ class ContentType(Entity):
         """The component properties of an SPFx Form Customizer to connect to this content type for usage with new
         item forms"""
         return self.properties.get("NewFormClientSideComponentProperties", None)
+
+    @property
+    def new_form_url(self):
+        # type: () -> Optional[str]
+        """Specifies the URL of a custom new form to use for list items that have been assigned the content type."""
+        return self.properties.get("NewFormUrl", None)
 
     @property
     def description(self):

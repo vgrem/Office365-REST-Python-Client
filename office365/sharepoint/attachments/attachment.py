@@ -76,16 +76,12 @@ class Attachment(Entity):
     @property
     def file_name(self):
         # type: () -> Optional[str]
-        """
-        Specifies the file name of the list item attachment.
-        """
+        """Specifies the file name of the list item attachment."""
         return self.properties.get("FileName", None)
 
     @property
     def file_name_as_path(self):
-        """
-        The file name of the attachment as a SP.ResourcePath.
-        """
+        """The file name of the attachment as a SP.ResourcePath."""
         return self.properties.get("FileNameAsPath", SPResPath())
 
     @property
@@ -96,9 +92,7 @@ class Attachment(Entity):
 
     @property
     def server_relative_path(self):
-        """
-        The server-relative-path of the attachment.
-        """
+        """The server-relative-path of the attachment."""
         return self.properties.get("ServerRelativePath", SPResPath())
 
     @property
