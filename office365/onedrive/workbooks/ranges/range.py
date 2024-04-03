@@ -83,6 +83,18 @@ class WorkbookRange(Entity):
         return self.properties.get("columnCount", None)
 
     @property
+    def column_hidden(self):
+        # type: () -> Optional[bool]
+        """Represents if all columns of the current range are hidden."""
+        return self.properties.get("columnHidden", None)
+
+    @property
+    def column_index(self):
+        # type: () -> Optional[int]
+        """Represents the column number of the first cell in the range. Zero-indexed. Read-only."""
+        return self.properties.get("columnIndex", None)
+
+    @property
     def format(self):
         """Returns a format object, encapsulating the range's font, fill, borders, alignment, and other properties"""
         return self.properties.get(

@@ -4,6 +4,8 @@ from typing import AnyStr, Optional
 from office365.communications.onlinemeetings.participants import MeetingParticipants
 from office365.entity import Entity
 from office365.outlook.mail.item_body import ItemBody
+from office365.runtime.client_result import ClientResult
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.types.collections import StringCollection
 
 
@@ -12,6 +14,17 @@ class OnlineMeeting(Entity):
     Contains information about a meeting, including the URL used to join a meeting,
     the attendees list, and the description.
     """
+
+    def get_virtual_appointment_join_web_url(self):
+        """Get a join web URL for a Microsoft Virtual Appointment. This web URL includes enhanced
+        business-to-customer experiences such as mobile browser join and virtual lobby rooms.
+        With Teams Premium, you can configure a custom lobby room experience for attendees by adding your company
+        logo and access the Virtual Appointments usage report for organizational analytics.
+        """
+        return_type = ClientResult(self.context, str())
+        qry = FunctionQuery(self, "getVirtualAppointmentJoinWebUrl", None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     @property
     def allow_attendee_to_enable_camera(self):
@@ -74,9 +87,7 @@ class OnlineMeeting(Entity):
     @start_datetime.setter
     def start_datetime(self, value):
         # type: (datetime) -> None
-        """
-        Sets the meeting start time in UTC.
-        """
+        """Sets the meeting start time in UTC."""
         self.set_property("startDateTime", value.isoformat())
 
     @property

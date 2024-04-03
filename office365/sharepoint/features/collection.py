@@ -11,6 +11,7 @@ class FeatureCollection(EntityCollection[Feature]):
         super(FeatureCollection, self).__init__(context, Feature, resource_path, parent)
 
     def add(self, feature_id, force, featdef_scope, verify_if_activated=False):
+        # type: (str, bool, int, bool) -> Feature
         """
         Adds the feature to the collection of activated features and returns the added feature.
 
@@ -43,6 +44,7 @@ class FeatureCollection(EntityCollection[Feature]):
         return return_type
 
     def get_by_id(self, feature_id):
+        # type: (str) -> Feature
         """Returns the feature for the given feature identifier. Returns NULL if no feature is available for the given
             feature identifier.
 

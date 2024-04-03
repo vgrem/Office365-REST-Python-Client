@@ -89,6 +89,7 @@ from office365.sharepoint.sitescripts.serialization_result import (
     SiteScriptSerializationResult,
 )
 from office365.sharepoint.sitescripts.utility import SiteScriptUtility
+from office365.sharepoint.translation.resource_entry import SPResourceEntry
 from office365.sharepoint.translation.user_resource import UserResource
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 from office365.sharepoint.ui.applicationpages.peoplepicker.web_service_interface import (
@@ -1859,10 +1860,50 @@ class Web(SecurableObject):
         return self.properties.get("CustomSiteActionsDisabled", None)
 
     @property
+    def description_translations(self):
+        """"""
+        return self.properties.get(
+            "DescriptionTranslations", ClientValueCollection(SPResourceEntry)
+        )
+
+    @property
+    def design_package_id(self):
+        # type: () -> Optional[str]
+        """Gets or sets the ID of the Design Package used in this SP.Web.
+
+        A value of Guid.Empty will mean that the default Design Package will be used for this SP.Web.
+        The default is determined by the SP.WebTemplate of this SP.Web."""
+        return self.properties.get("DesignPackageId", None)
+
+    @property
+    def disable_app_views(self):
+        # type: () -> Optional[bool]
+        """"""
+        return self.properties.get("DisableAppViews", None)
+
+    @property
+    def disable_flows(self):
+        # type: () -> Optional[bool]
+        """"""
+        return self.properties.get("DisableFlows", None)
+
+    @property
     def id(self):
         # type: () -> Optional[str]
         """Specifies the site identifier for the site"""
         return self.properties.get("Id", None)
+
+    @property
+    def language(self):
+        # type: () -> Optional[int]
+        """Specifies the language code identifier (LCID) for the language that is used on the site"""
+        return self.properties.get("Language", None)
+
+    @property
+    def last_item_modified_date(self):
+        # type: () -> Optional[int]
+        """Specifies when an item was last modified in the site"""
+        return self.properties.get("LastItemModifiedDate", datetime.datetime.min)
 
     @property
     def access_requests_list(self):
@@ -2421,9 +2462,11 @@ class Web(SecurableObject):
                 "ClientWebParts": self.client_web_parts,
                 "CurrentUser": self.current_user,
                 "DescriptionResource": self.description_resource,
+                "DescriptionTranslations": self.description_translations,
                 "EffectiveBasePermissions": self.effective_base_permissions,
                 "EventReceivers": self.event_receivers,
                 "HostedApps": self.hosted_apps,
+                "LastItemModifiedDate": self.last_item_modified_date,
                 "ListTemplates": self.list_templates,
                 "MultilingualSettings": self.multilingual_settings,
                 "OneDriveSharedItems": self.onedrive_shared_items,

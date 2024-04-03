@@ -31,7 +31,13 @@ class TestOnlineMeetings(GraphTestCase):
         )
         self.assertIsNotNone(existing_meeting.resource_path)
 
-    def test3_update_meeting(self):
+    # def test3_get_virtual_appointment_join_web_url(self):
+    #    result = (
+    #        self.__class__.target_meeting.get_virtual_appointment_join_web_url().execute_query()
+    #    )
+    #    self.assertIsNotNone(result.value)
+
+    def test4_update_meeting(self):
         now = datetime.now(pytz.utc)
         update_meeting = self.__class__.target_meeting
         update_meeting.subject = "Patch Meeting Subject"
@@ -39,5 +45,5 @@ class TestOnlineMeetings(GraphTestCase):
         update_meeting.end_datetime = now + timedelta(hours=1)
         update_meeting.update().execute_query()
 
-    def test4_delete_meeting(self):
+    def test5_delete_meeting(self):
         self.__class__.target_meeting.delete_object().execute_query()

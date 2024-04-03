@@ -7,6 +7,9 @@ class WorkbookWorksheetProtectionOptions(ClientValue):
     def __init__(
         self, allowAutoFilter=None, allowDeleteColumns=None, allowDeleteRows=None
     ):
+        """
+        :param bool allowAutoFilter:
+        """
         self.allowAutoFilter = allowAutoFilter
         self.allowDeleteColumns = allowDeleteColumns
         self.allowDeleteRows = allowDeleteRows

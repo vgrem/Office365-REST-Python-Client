@@ -1,5 +1,5 @@
 """
-This example deletes a SharePoint all the list items.
+This example deletes all the list items in a list.
 """
 from office365.sharepoint.client_context import ClientContext
 from tests import test_client_credentials, test_team_site_url

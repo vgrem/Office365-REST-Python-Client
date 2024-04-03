@@ -241,6 +241,7 @@ class ObjectSharingInformation(Entity):
 
     @property
     def sharing_links(self):
+        # type: () -> ClientValueCollection[SharingLinkInfo]
         """Indicates the collection of all available sharing links for the securable object."""
         return self.properties.get(
             "SharingLinks", ClientValueCollection(SharingLinkInfo)
@@ -248,6 +249,7 @@ class ObjectSharingInformation(Entity):
 
     @property
     def shared_with_users_collection(self):
+        # type: () -> EntityCollection[ObjectSharingInformationUser]
         """A collection of shared with users."""
         return self.properties.get(
             "SharedWithUsersCollection",

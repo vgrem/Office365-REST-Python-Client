@@ -172,6 +172,7 @@ class View(Entity):
 
     @property
     def view_fields(self):
+        # type: () -> ViewFieldCollection
         """Gets a value that specifies the collection of fields in the list view."""
         return self.properties.get(
             "ViewFields",
@@ -199,6 +200,7 @@ class View(Entity):
 
     @property
     def server_relative_path(self):
+        # type: () -> Optional[SPResPath]
         """Gets the server-relative Path of the View."""
         return self.properties.get("ServerRelativePath", SPResPath())
 

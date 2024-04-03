@@ -34,6 +34,12 @@ class WorkbookNamedItem(Entity):
         return self.properties.get("comment", None)
 
     @property
+    def scope(self):
+        # type: () -> Optional[str]
+        """Indicates whether the name is scoped to the workbook or to a specific worksheet."""
+        return self.properties.get("scope", None)
+
+    @property
     def worksheet(self):
         """Returns the worksheet on which the named item is scoped to. Available only if the item is scoped
         to the worksheet. Read-only."""

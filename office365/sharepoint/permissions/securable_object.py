@@ -162,6 +162,7 @@ class SecurableObject(Entity):
 
     @property
     def first_unique_ancestor_securable_object(self):
+        # type: () -> SecurableObject
         """Specifies the object where role assignments for this object are defined"""
         return self.properties.get(
             "FirstUniqueAncestorSecurableObject",
@@ -173,6 +174,7 @@ class SecurableObject(Entity):
 
     @property
     def role_assignments(self):
+        # type: () -> RoleAssignmentCollection
         """The role assignments for the securable object."""
         return self.properties.get(
             "RoleAssignments",

@@ -6,7 +6,9 @@ from office365.onedrive.workbooks.charts.chart import WorkbookChart
 from office365.onedrive.workbooks.names.named_item import WorkbookNamedItem
 from office365.onedrive.workbooks.ranges.range import WorkbookRange
 from office365.onedrive.workbooks.tables.collection import WorkbookTableCollection
-from office365.onedrive.workbooks.tables.pivot_table import WorkbookPivotTable
+from office365.onedrive.workbooks.tables.pivot_table_collection import (
+    WorkbookPivotTableCollection,
+)
 from office365.onedrive.workbooks.worksheets.protection import (
     WorkbookWorksheetProtection,
 )
@@ -94,13 +96,12 @@ class WorkbookWorksheet(Entity):
 
     @property
     def pivot_tables(self):
-        # type: () -> EntityCollection[WorkbookPivotTable]
+        # type: () -> WorkbookPivotTableCollection
         """Collection of PivotTables that are part of the worksheet."""
         return self.properties.get(
             "pivotTables",
-            EntityCollection(
+            WorkbookPivotTableCollection(
                 self.context,
-                WorkbookPivotTable,
                 ResourcePath("pivotTables", self.resource_path),
             ),
         )

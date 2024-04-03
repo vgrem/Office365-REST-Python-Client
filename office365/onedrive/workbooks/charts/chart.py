@@ -2,10 +2,23 @@ from office365.entity import Entity
 from office365.onedrive.workbooks.charts.axes import WorkbookChartAxes
 from office365.onedrive.workbooks.charts.data_labels import WorkbookChartDataLabels
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class WorkbookChart(Entity):
     """Represents a chart object in a workbook."""
+
+    def set_position(self, startCell, endCell):
+        """Positions the chart relative to cells on the worksheet.
+        :param str startCell: The start cell. It is where the chart is moved to. The start cell is the top-left or
+             top-right cell, depending on the user's right-to-left display settings.
+        :param str endCell: The end cell. If specified, the chart's width and height is set to fully cover up
+             this cell/range.
+        """
+        payload = {"startCell": startCell, "endCell": endCell}
+        qry = ServiceOperationQuery(self, "setPosition", None, payload)
+        self.context.add_query(qry)
+        return self
 
     @property
     def axes(self):

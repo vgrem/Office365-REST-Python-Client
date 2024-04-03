@@ -22,6 +22,7 @@ from office365.onedrive.driveitems.item_preview_info import ItemPreviewInfo
 from office365.onedrive.driveitems.photo import Photo
 from office365.onedrive.driveitems.publication_facet import PublicationFacet
 from office365.onedrive.driveitems.remote_item import RemoteItem
+from office365.onedrive.driveitems.retention_label import ItemRetentionLabel
 from office365.onedrive.driveitems.special_folder import SpecialFolder
 from office365.onedrive.driveitems.thumbnail_set import ThumbnailSet
 from office365.onedrive.driveitems.uploadable_properties import (
@@ -782,6 +783,17 @@ class DriveItem(BaseItem):
             "permissions",
             PermissionCollection(
                 self.context, ResourcePath("permissions", self.resource_path)
+            ),
+        )
+
+    @property
+    def retention_label(self):
+        # type: () -> ItemRetentionLabel
+        """Information about retention label and settings enforced on the driveItem."""
+        return self.properties.get(
+            "retentionLabel",
+            ItemRetentionLabel(
+                self.context, ResourcePath("retentionLabel", self.resource_path)
             ),
         )
 
