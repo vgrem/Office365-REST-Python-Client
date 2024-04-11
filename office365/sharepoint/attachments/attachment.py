@@ -10,6 +10,9 @@ from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 class Attachment(Entity):
     """Represents an attachment file in a SharePoint List Item."""
 
+    def __repr__(self):
+        return self.server_relative_url or self.entity_type_name
+
     def download(self, file_object, use_path=True):
         """Download attachment file
 

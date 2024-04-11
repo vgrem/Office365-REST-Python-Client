@@ -9,4 +9,4 @@ items = (
 )
 for item in items:
     for attachment_file in item.attachment_files:
-        print(attachment_file.server_relative_url)
+        print(attachment_file)

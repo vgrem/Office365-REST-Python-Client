@@ -1,4 +1,5 @@
-from typing import AnyStr
+import os
+from typing import IO, AnyStr
 
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -55,13 +56,34 @@ class AttachmentCollection(EntityCollection[Attachment]):
         :param str content_stream: Stream containing the content of the attachment.
         """
         return_type = Attachment(self.context)
-        payload = {"DecodedUrl": decoded_url, "contentStream": content_stream}
+        params = {"DecodedUrl": decoded_url}
         qry = ServiceOperationQuery(
-            self, "AddUsingPath", None, payload, None, return_type
+            self, "AddUsingPath", params, content_stream, None, return_type
         )
         self.context.add_query(qry)
         self.add_child(return_type)
         return return_type
+
+    def delete_all(self):
+        """Deletes all attachments"""
+
+        def _delete_all(return_type):
+            # type: ("AttachmentCollection") -> None
+            [a.delete_object() for a in return_type]
+
+        self.get().after_execute(_delete_all)
+        return self
+
+    def upload(self, file, use_path=True):
+        # type: (IO, bool) -> Attachment
+        """
+        Uploads the attachment
+        """
+        info = AttachmentCreationInformation(os.path.basename(file.name), file.read())
+        if use_path:
+            return self.add_using_path(info.filename, info.content)
+        else:
+            return self.add(info)
 
     def get_by_filename(self, filename):
         """Retrieve Attachment file object by filename

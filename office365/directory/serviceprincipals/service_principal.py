@@ -17,6 +17,7 @@ from office365.directory.password_credential import PasswordCredential
 from office365.directory.permissions.grants.oauth2 import OAuth2PermissionGrant
 from office365.directory.permissions.scope import PermissionScope
 from office365.directory.synchronization.synchronization import Synchronization
+from office365.directory.users.user import User
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.appid import AppIdPath
@@ -101,7 +102,82 @@ class ServicePrincipal(DirectoryObject):
         self.context.add_query(qry)
         return return_type
 
-    def grant(self, app, app_role):
+    def _ensure_client_service_principal(self, app, action):
+        if isinstance(app, Application):
+
+            def _after():
+                action(app)
+
+            app.ensure_property("id", _after)
+        else:
+            self.context.service_principals.get_by_app(app).get().after_execute(action)
+
+    def grant_delegated(self, app, principal, scope):
+        # type: (Application|str, User|str, AppRole|str) -> Self
+        """Grants a delegated permission to the client service principal on behalf of a user"""
+
+        def _grant_delegated(principal_id, client_id):
+            # type: (str, str) -> None
+            self.context.oauth2_permission_grants.add(
+                clientId=client_id,
+                consentType="Principal",
+                resourceId=self.id,
+                principalId=principal_id,
+                scope=scope,
+            )
+
+        def _ensure_app(principal_id):
+            def _after(return_type):
+                _grant_delegated(principal_id, return_type.id)
+
+            self._ensure_client_service_principal(app, _after)
+
+        def _ensure_principal():
+            if isinstance(principal, User):
+
+                def _after():
+                    _ensure_app(principal.id)
+
+                principal.ensure_property("id", _after)
+            else:
+                _ensure_app(principal)
+
+        self.ensure_property("id", _ensure_principal)
+        return self
+
+    def revoke_delegated(self, app, principal, scope):
+        # type: (Application|str, User|str, AppRole|str) -> Self
+        """"""
+
+        def _revoke(app_id, principal_id):
+            # type: (str, str) -> None
+
+            def _after(return_type):
+                pass
+
+            query_text = "clientId eq '{0}' and principalId eq '{1}'".format(
+                app_id, principal_id
+            )
+            # query_text = "clientId eq '{0}'".format(app_id)
+            self.context.oauth2_permission_grants.filter(
+                query_text
+            ).get().after_execute(_after)
+
+        def _ensure_principal(return_type):
+            if isinstance(principal, User):
+
+                def _after():
+                    _revoke(principal.id, return_type.id)
+
+                principal.ensure_property("id", _after)
+            else:
+                _revoke(principal, return_type.id)
+
+        self._ensure_client_service_principal(app, _ensure_principal)
+        # self.ensure_property("id", _ensure_principal)
+        return self
+
+    def grant_application(self, app, app_role):
         # type: (Application|str, AppRole|str) -> Self
         """
         Grants an app role assignment to a client service principal
@@ -109,41 +185,54 @@ class ServicePrincipal(DirectoryObject):
         :param AppRole or str app_role: AppRole object or name
         """
 
-        def _grant(principal):
-            # type: ("ServicePrincipal") -> None
+        def _grant(principal_id, app_role_id):
+            # type: (str, str) -> None
             self.app_role_assigned_to.add(
-                principalId=principal.id, resourceId=self.id, appRoleId=app_role.id
+                principalId=principal_id, resourceId=self.id, appRoleId=app_role_id
             )
 
-        def _ensure_principal():
-            self.context.service_principals.get_by_app(app).get().after_execute(_grant)
+        def _ensure_resource():
+            def _after(return_type):
+                if isinstance(app_role, AppRole):
+                    _grant(return_type.id, app_role.id)
+                else:
+                    _grant(return_type.id, self.app_roles[app_role].id)
 
-        self.ensure_property("id", _ensure_principal)
+            self.context.service_principals.get_by_app(app).get().after_execute(_after)
+
+        self.ensure_properties(["id", "appRoles"], _ensure_resource)
         return self
 
-    def revoke(self, app, app_role):
+    def revoke_application(self, app, app_role):
         # type: (Application|str, AppRole|str) -> Self
         """Revokes an app role assignment from a client service principal"""
 
-        def _revoke(principal):
-            # type: ("ServicePrincipal") -> None
-            app_role_assigned_to_ids = [
-                item.id
+        def _revoke(principal_id, app_role_id):
+            # type: (str, str) -> None
+            app_role_to_revoke = [
+                item
                 for item in self.app_role_assigned_to
-                if item.principal_id == principal.id and item.app_role_id == app_role.id
+                # if item.principal_id == principal_id and item.app_role_id == app_role_id
+                if item.principal_id == principal_id
             ]
-            if len(app_role_assigned_to_ids) > 0:
-                self.app_role_assigned_to[app_role_assigned_to_ids[0]].delete_object()
+            if len(app_role_to_revoke) > 0:
+                self.app_role_assigned_to[app_role_to_revoke[0].id].delete_object()
 
-        def _ensure_resource(principal):
-            self.ensure_properties(["id", "appRoleAssignedTo"], _revoke, principal)
+        def _ensure_app_role(principal):
+            # type: ("ServicePrincipal") -> None
+            if isinstance(app_role, AppRole):
+                _revoke(principal.id, app_role.id)
+            else:
+                _revoke(principal.id, self.app_roles[app_role].id)
 
         def _ensure_principal():
-            self.context.service_principals.get_by_app(app).get().after_execute(
-                _ensure_resource
-            )
+            self.context.service_principals.get_by_app(app).select(
+                ["id"]
+            ).get().after_execute(_ensure_app_role)
 
-        self.ensure_property("id", _ensure_principal)
+        self.ensure_properties(
+            ["id", "appId", "appRoles", "appRoleAssignedTo"], _ensure_principal
+        )
         return self
 
     def remove_password(self, key_id):

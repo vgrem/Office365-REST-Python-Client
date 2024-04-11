@@ -2,6 +2,9 @@ from office365.directory.identitygovernance.accessreview.set import AccessReview
 from office365.directory.identitygovernance.appconsent.approval_route import (
     AppConsentApprovalRoute,
 )
+from office365.directory.identitygovernance.entitlementmanagement.entitlement_management import (
+    EntitlementManagement,
+)
 from office365.directory.identitygovernance.privilegedaccess.root import (
     PrivilegedAccessRoot,
 )
@@ -66,5 +69,18 @@ class IdentityGovernance(Entity):
             "termsOfUse",
             TermsOfUseContainer(
                 self.context, ResourcePath("termsOfUse", self.resource_path)
+            ),
+        )
+
+    @property
+    def entitlement_management(self):
+        """
+        Container for entitlement management resources, including accessPackageCatalog, connectedOrganization,
+        and entitlementManagementSettings.
+        """
+        return self.properties.get(
+            "entitlementManagement",
+            EntitlementManagement(
+                self.context, ResourcePath("entitlementManagement", self.resource_path)
             ),
         )

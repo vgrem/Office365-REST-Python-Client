@@ -2,9 +2,12 @@ from datetime import datetime
 from typing import AnyStr, Optional
 
 from office365.communications.onlinemeetings.participants import MeetingParticipants
+from office365.communications.onlinemeetings.recordings.call import CallRecording
 from office365.entity import Entity
+from office365.entity_collection import EntityCollection
 from office365.outlook.mail.item_body import ItemBody
 from office365.runtime.client_result import ClientResult
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.types.collections import StringCollection
 
@@ -117,6 +120,19 @@ class OnlineMeeting(Entity):
         # type: () -> Optional[str]
         """The video teleconferencing ID."""
         return self.properties.get("videoTeleconferenceId", None)
+
+    @property
+    def recordings(self):
+        # type: () -> EntityCollection[CallRecording]
+        """he recordings of an online meeting"""
+        return self.properties.get(
+            "recordings",
+            EntityCollection(
+                self.context,
+                CallRecording,
+                ResourcePath("recordings", self.resource_path),
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
