@@ -5,6 +5,7 @@ class DeleteFacet(ClientValue):
     """"""
 
     def __init__(self, name=None):
+        # type: (str) -> None
         self.name = name
 
     @property

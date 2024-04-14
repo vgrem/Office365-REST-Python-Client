@@ -571,8 +571,8 @@ class Folder(Entity):
 
     @property
     def property_ref_name(self):
-        # type: () -> str
-        return "ServerRelativeUrl"
+        # type: () -> Optional[str]
+        return None
 
     def get_property(self, name, default_value=None):
         if default_value is None:

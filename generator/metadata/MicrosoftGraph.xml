@@ -4867,6 +4867,11 @@
          <Annotations Target="microsoft.graph.bookingAppointment/anonymousJoinWebUrl">
             <Annotation Term="Org.OData.Core.V1.IsURL" Bool="true"/>
          </Annotations>
+         <Annotations Target="microsoft.graph.bookingAppointment/customerNotes">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Notes from the customer associated with this appointment."/>
+            <Annotation Term="Org.OData.Core.V1.Immutable" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.LongDescription" String="The value of this property is only available when reading an individual booking appointment by id. Its value can only be set when creating a new appointment with a new customer, ie, without specifying a CustomerId. After that, the property is computed from the customer represented by CustomerId."/>
+         </Annotations>
          <Annotations Target="microsoft.graph.bookingAppointment/duration">
             <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
          </Annotations>
@@ -16248,6 +16253,12 @@
             <Member Name="outOfOffice" Value="3"/>
             <Member Name="unknownFutureValue" Value="4"/>
          </EnumType>
+         <EnumType Name="bookingStaffMembershipStatus">
+            <Member Name="active" Value="0"/>
+            <Member Name="pendingAcceptance" Value="1"/>
+            <Member Name="rejectedByStaff" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
          <EnumType Name="bookingStaffRole">
             <Member Name="guest" Value="0"/>
             <Member Name="administrator" Value="1"/>
@@ -22887,6 +22898,10 @@
          <EntityType Name="bookingAppointment" BaseType="graph.entity">
             <Property Name="additionalInformation" Type="Edm.String"/>
             <Property Name="anonymousJoinWebUrl" Type="Edm.String"/>
+            <Property Name="customerEmailAddress" Type="Edm.String"/>
+            <Property Name="customerName" Type="Edm.String"/>
+            <Property Name="customerNotes" Type="Edm.String"/>
+            <Property Name="customerPhone" Type="Edm.String"/>
             <Property Name="customers" Type="Collection(graph.bookingCustomerInformationBase)" Nullable="false"/>
             <Property Name="customerTimeZone" Type="Edm.String"/>
             <Property Name="duration" Type="Edm.Duration" Nullable="false"/>
@@ -22974,6 +22989,7 @@
             <Property Name="displayName" Type="Edm.String" Nullable="false"/>
             <Property Name="emailAddress" Type="Edm.String"/>
             <Property Name="isEmailNotificationEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="membershipStatus" Type="graph.bookingStaffMembershipStatus" Nullable="false"/>
             <Property Name="role" Type="graph.bookingStaffRole" Nullable="false"/>
             <Property Name="timeZone" Type="Edm.String"/>
             <Property Name="useBusinessHours" Type="Edm.Boolean" Nullable="false"/>

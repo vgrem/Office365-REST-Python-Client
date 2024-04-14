@@ -5,6 +5,7 @@ from typing_extensions import Self
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.user_credential import UserCredential
 from office365.runtime.client_object import ClientObject
+from office365.runtime.paths.v3.entity import EntityPath
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 
@@ -53,3 +54,17 @@ class Entity(ClientObject):
     @property
     def property_ref_name(self):
         return "Id"
+
+    def set_property(self, name, value, persist_changes=True):
+        super(Entity, self).set_property(name, value, persist_changes)
+        if name == self.property_ref_name:
+            if self.resource_path is None:
+                if self.parent_collection:
+                    self._resource_path = EntityPath(
+                        value, self.parent_collection.resource_path
+                    )
+                else:
+                    pass
+            else:
+                self._resource_path.patch(value)
+        return self

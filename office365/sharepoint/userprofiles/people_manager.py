@@ -173,6 +173,7 @@ class PeopleManager(Entity):
         return_type = PersonProperties(self.context)
 
         def _get_properties_for_inner(account_name):
+            # type: (str) -> None
             params = {"accountName": account_name}
             qry = ServiceOperationQuery(
                 self, "GetPropertiesFor", params, None, None, return_type

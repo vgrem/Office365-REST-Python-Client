@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -30,7 +32,18 @@ class Office365Tenant(Entity):
         super(Office365Tenant, self).__init__(context, static_path)
 
     @property
+    def addressbar_link_permission(self):
+        # type: () -> Optional[int]
+        return self.properties.get("AddressbarLinkPermission", None)
+
+    @property
+    def allow_comments_text_on_email_enabled(self):
+        # type: () -> Optional[bool]
+        return self.properties.get("AllowCommentsTextOnEmailEnabled", None)
+
+    @property
     def allow_editing(self):
+        # type: () -> Optional[bool]
         return self.properties.get("AllowEditing", None)
 
     @property
@@ -62,6 +75,7 @@ class Office365Tenant(Entity):
 
     def disable_sharing_for_non_owners_of_site(self, site_url):
         """
+        Disables Sharing For Non Owners
         :param str site_url:
         """
         payload = {"siteUrl": site_url}
