@@ -411,6 +411,16 @@ class ClientContext(ClientRuntimeContext):
         return AnnouncementsController(self, ResourcePath("Announcements"))
 
     @property
+    def client_people_picker(self):
+        """Query principals service alias"""
+
+        from office365.sharepoint.ui.applicationpages.peoplepicker.web_service_interface import (
+            ClientPeoplePickerWebServiceInterface,
+        )
+
+        return ClientPeoplePickerWebServiceInterface(self)
+
+    @property
     def consumer_permissions(self):
         """Consumer permissions alias"""
         from office365.sharepoint.convergence.consumer_permissions import (
@@ -430,6 +440,15 @@ class ClientContext(ClientRuntimeContext):
         from office365.sharepoint.viva.employee_engagement import EmployeeEngagement
 
         return EmployeeEngagement(self)
+
+    @property
+    def directory_provider(self):
+        """Alias to SharePointDirectoryProvider"""
+        from office365.sharepoint.directory.provider.provider import (
+            SharePointDirectoryProvider,
+        )
+
+        return SharePointDirectoryProvider(self)
 
     @property
     def employee_experience(self):
@@ -611,6 +630,16 @@ class ClientContext(ClientRuntimeContext):
         from office365.sharepoint.sites.sph_site import SPHSite
 
         return SPHSite(self, ResourcePath("SPHSite"))
+
+    @property
+    def people_picker(self):
+        """Query principals service alias"""
+
+        from office365.sharepoint.ui.applicationpages.peoplepicker.web_service_interface import (
+            PeoplePickerWebServiceInterface,
+        )
+
+        return PeoplePickerWebServiceInterface(self)
 
     @property
     def publications(self):

@@ -1,4 +1,7 @@
+from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.sharepoint.directory.provider.object_data import DirectoryObjectData
 from office365.sharepoint.entity import Entity
 
 
@@ -9,6 +12,16 @@ class SharePointDirectoryProvider(Entity):
                 "SP.Directory.Provider.SharePointDirectoryProvider"
             )
         super(SharePointDirectoryProvider, self).__init__(context, resource_path)
+
+    def read_directory_object(self, data):
+        """"""
+        return_type = ClientResult(self.context, DirectoryObjectData())
+        payload = {"data": data}
+        qry = ServiceOperationQuery(
+            self, "ReadDirectoryObject", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
 
     @property
     def entity_type_name(self):

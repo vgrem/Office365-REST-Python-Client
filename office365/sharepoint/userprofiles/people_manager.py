@@ -75,18 +75,30 @@ class PeopleManager(Entity):
         self.context.add_query(qry)
         return result
 
-    def get_followers_for(self, account_name):
+    def get_followers_for(self, account):
+        # type: (str|User) -> EntityCollection[PersonProperties]
         """
         Gets the people who are following the specified user.
 
-        :param str account_name: Account name of the specified user.
+        :param str|User account: Account name of the specified user.
         """
         return_type = EntityCollection(self.context, PersonProperties)
-        params = {"accountName": account_name}
-        qry = ServiceOperationQuery(
-            self, "GetFollowersFor", params, None, None, return_type
-        )
-        self.context.add_query(qry)
+
+        def _get_followers_for(account_name):
+            params = {"accountName": account_name}
+            qry = ServiceOperationQuery(
+                self, "GetFollowersFor", params, None, None, return_type
+            )
+            self.context.add_query(qry)
+
+        if isinstance(account, User):
+
+            def _account_loaded():
+                _get_followers_for(account.login_name)
+
+            account.ensure_property("LoginName", _account_loaded)
+        else:
+            _get_followers_for(account)
         return return_type
 
     def get_user_information(self, account_name, site_id):

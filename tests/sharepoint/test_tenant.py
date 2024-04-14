@@ -3,9 +3,6 @@ from unittest import TestCase
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
-from office365.sharepoint.tenant.administration.settings_service import (
-    TenantAdminSettingsService,
-)
 from office365.sharepoint.tenant.administration.sharing_capabilities import (
     SharingCapabilities,
 )
@@ -14,7 +11,6 @@ from office365.sharepoint.tenant.administration.sites.properties_collection impo
     SitePropertiesCollection,
 )
 from office365.sharepoint.tenant.administration.tenant import Tenant
-from office365.sharepoint.tenant.cdn_api import TenantCdnApi
 from office365.sharepoint.tenant.management.office365_tenant import Office365Tenant
 from office365.sharepoint.tenant.settings import TenantSettings
 from tests import (
@@ -146,12 +142,11 @@ class TestTenant(TestCase):
         self.assertIsInstance(result.value, ClientValueCollection)
 
     def test_17_get_tenant_settings_service(self):
-        tenant_svc = TenantAdminSettingsService(self.client).get().execute_query()
-        self.assertIsNotNone(tenant_svc)
+        result = self.tenant.admin_settings.get().execute_query()
+        self.assertIsNotNone(result.resource_path)
 
     def test_18_get_tenant_sharing_status(self):
-        tenant_svc = TenantAdminSettingsService(self.client)
-        result = tenant_svc.get_tenant_sharing_status().execute_query()
+        result = self.tenant.admin_settings.get_tenant_sharing_status().execute_query()
         self.assertIsNotNone(result.value)
 
     def test_19_get_site_thumbnail_logo(self):
@@ -159,7 +154,7 @@ class TestTenant(TestCase):
         self.assertIsNotNone(result.value)
 
     def test_20_get_tenant_cdn_api(self):
-        cdn_api = TenantCdnApi(self.client).get().execute_query()
+        cdn_api = self.tenant.cdn_api.get().execute_query()
         self.assertIsNotNone(cdn_api.resource_path)
 
     # def test_21_get_onedrive_site_sharing_insights(self):

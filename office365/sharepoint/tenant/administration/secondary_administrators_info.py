@@ -13,3 +13,8 @@ class SecondaryAdministratorsInfo(ClientValue):
         self.email = email
         self.loginName = loginName
         self.userPrincipalName = userPrincipalName
+
+    @property
+    def entity_type_name(self):
+        # type: () -> str
+        return "Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsInfo"

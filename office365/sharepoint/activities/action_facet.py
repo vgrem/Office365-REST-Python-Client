@@ -7,6 +7,8 @@ from office365.sharepoint.activities.facets.delete import DeleteFacet
 from office365.sharepoint.activities.facets.discard_checkout import DiscardCheckoutFacet
 from office365.sharepoint.activities.facets.edit import EditFacet
 from office365.sharepoint.activities.facets.get_comment import GetCommentFacet
+from office365.sharepoint.activities.facets.get_mention import GetMentionFacet
+from office365.sharepoint.activities.facets.move import MoveFacet
 from office365.sharepoint.activities.facets.rename import RenameFacet
 from office365.sharepoint.activities.facets.sharing import SharingFacet
 
@@ -22,6 +24,8 @@ class ActionFacet(ClientValue):
         delete=DeleteFacet(),
         discard_checkout=DiscardCheckoutFacet(),
         edit=EditFacet(),
+        mention=GetMentionFacet(),
+        move=MoveFacet(),
         rename=RenameFacet(),
         share=SharingFacet(),
     ):
@@ -42,6 +46,8 @@ class ActionFacet(ClientValue):
         self.delete = delete
         self.discardCheckout = discard_checkout
         self.edit = edit
+        self.mention = mention
+        self.move = move
         self.rename = rename
         self.share = share
 

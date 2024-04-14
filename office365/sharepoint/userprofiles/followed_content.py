@@ -25,6 +25,21 @@ class FollowedContent(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def get_followed_status(self, url):
+        """
+        The GetFollowedStatus method retrieves the followed status of the specified document or site.
+        An item can be followed if the url parameter identifies a document or site that the current user has access to.
+
+        :param str url: URL that identifies the item
+        """
+        return_type = ClientResult(self.context, int())
+        payload = {"url": url}
+        qry = ServiceOperationQuery(
+            self, "GetFollowedStatus", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
     @property
     def followed_documents_url(self):
         # type: () -> Optional[str]

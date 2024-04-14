@@ -35,5 +35,15 @@ class SPActivityEntity(Entity):
         return self.properties.get("times", ActivityTimeFacet())
 
     @property
+    def property_ref_name(self):
+        return "id"
+
+    @property
     def entity_type_name(self):
         return "Microsoft.SharePoint.Activities.SPActivityEntity"
+
+    def set_property(self, name, value, persist_changes=True):
+        super(SPActivityEntity, self).set_property(name, value, persist_changes)
+        if name == self.property_ref_name:
+            self._resource_path.patch(value)
+        return self

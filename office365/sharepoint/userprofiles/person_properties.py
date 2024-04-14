@@ -1,5 +1,6 @@
 from typing import Optional
 
+from office365.runtime.odata.type import ODataType
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.entity import Entity
 
@@ -78,6 +79,12 @@ class PersonProperties(Entity):
     @property
     def entity_type_name(self):
         return "SP.UserProfiles.PersonProperties"
+
+    def set_property(self, k, v, persist_changes=True):
+        if k == "UserProfileProperties":
+            v = ODataType.parse_key_value_collection(v)
+        super(PersonProperties, self).set_property(k, v)
+        return self
 
     def get_property(self, name, default_value=None):
         if default_value is None:

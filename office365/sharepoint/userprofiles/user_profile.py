@@ -50,9 +50,8 @@ class UserProfile(Entity):
 
     @property
     def followed_content(self):
-        """
-        Gets a FollowedContent object for the user.
-        """
+        # type: () -> FollowedContent
+        """Gets a FollowedContent object for the user."""
         return self.properties.get(
             "FollowedContent",
             FollowedContent(
@@ -62,9 +61,8 @@ class UserProfile(Entity):
 
     @property
     def personal_site(self):
-        """
-        The PersonalSite property specifies the user's personal site
-        """
+        # type: () -> Site
+        """The PersonalSite property specifies the user's personal site"""
         return self.properties.get(
             "PersonalSite",
             Site(self.context, ResourcePath("PersonalSite", self.resource_path)),

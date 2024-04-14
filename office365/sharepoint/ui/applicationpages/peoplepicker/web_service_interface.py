@@ -17,39 +17,6 @@ class ClientPeoplePickerWebServiceInterface(Entity):
     """Specifies an interface that can be used to query principals."""
 
     @staticmethod
-    def get_search_results(
-        context,
-        search_pattern,
-        provider_id=None,
-        hierarchy_node_id=None,
-        entity_types=None,
-    ):
-        """
-        Specifies a JSON formatted CSOM String of principals found in the search.
-
-        :type context: office365.sharepoint.client_context.ClientContext
-        :param str search_pattern: Specifies a pattern used to search for principals.
-            The value is implementation-specific.
-        :param str provider_id: The identifier of a claims provider.
-        :param str hierarchy_node_id: The identifier of a node in the hierarchy. The search MUST be conducted under
-            this node.
-        :param str entity_types: The type of principals to search for.
-        """
-        return_type = ClientResult(context, str())
-        payload = {
-            "searchPattern": search_pattern,
-            "providerID": provider_id,
-            "hierarchyNodeID": hierarchy_node_id,
-            "entityTypes": entity_types,
-        }
-        svc = ClientPeoplePickerWebServiceInterface(context)
-        qry = ServiceOperationQuery(
-            svc, "GetSearchResults", None, payload, None, return_type, True
-        )
-        context.add_query(qry)
-        return return_type
-
-    @staticmethod
     def get_search_results_by_hierarchy(
         context,
         provider_id=None,
@@ -167,3 +134,42 @@ class ClientPeoplePickerWebServiceInterface(Entity):
     @property
     def entity_type_name(self):
         return "SP.UI.ApplicationPages.ClientPeoplePickerWebServiceInterface"
+
+
+class PeoplePickerWebServiceInterface(Entity):
+    @staticmethod
+    def get_search_results(
+        context,
+        search_pattern,
+        provider_id=None,
+        hierarchy_node_id=None,
+        entity_types=None,
+    ):
+        """
+        Specifies a JSON formatted CSOM String of principals found in the search.
+
+        :type context: office365.sharepoint.client_context.ClientContext
+        :param str search_pattern: Specifies a pattern used to search for principals.
+            The value is implementation-specific.
+        :param str provider_id: The identifier of a claims provider.
+        :param str hierarchy_node_id: The identifier of a node in the hierarchy. The search MUST be conducted under
+            this node.
+        :param str entity_types: The type of principals to search for.
+        """
+        return_type = ClientResult(context, str())
+        payload = {
+            "searchPattern": search_pattern,
+            "providerID": provider_id,
+            "hierarchyNodeID": hierarchy_node_id,
+            "entityTypes": entity_types,
+        }
+        svc = PeoplePickerWebServiceInterface(context)
+        qry = ServiceOperationQuery(
+            svc, "GetSearchResults", None, payload, None, return_type, True
+        )
+        context.add_query(qry)
+        return return_type
+
+    @property
+    def entity_type_name(self):
+        return "SP.UI.ApplicationPages.PeoplePickerWebServiceInterface"

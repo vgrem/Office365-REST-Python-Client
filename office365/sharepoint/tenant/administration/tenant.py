@@ -588,6 +588,14 @@ class Tenant(Entity):
         return return_type
 
     @property
+    def admin_settings(self):
+        from office365.sharepoint.tenant.administration.settings_service import (
+            TenantAdminSettingsService,
+        )
+
+        return TenantAdminSettingsService(self.context)
+
+    @property
     def ai_builder_enabled(self):
         # type: () -> Optional[str]
         """Gets the value if the AIBuilder settings should be shown in the tenant"""
@@ -655,6 +663,12 @@ class Tenant(Entity):
                 self.context, ResourcePath("sites", self.resource_path)
             ),
         )
+
+    @property
+    def cdn_api(self):
+        from office365.sharepoint.tenant.cdn_api import TenantCdnApi
+
+        return TenantCdnApi(self.context)
 
     @property
     def syntex_billing_subscription_settings(self):
