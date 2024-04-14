@@ -17,13 +17,6 @@ class TestGraphMail(GraphTestCase):
         self.assertIsNotNone(draft_message.id)
         self.__class__.target_message = draft_message
 
-    def test3_send_message(self):
-        message = self.__class__.target_message
-        message.to_recipients.add(Recipient.from_email(test_user_principal_name))
-        message.to_recipients.add(Recipient.from_email(test_user_principal_name_alt))
-        message.body = "The new cafeteria is open."
-        message.update().send().execute_query()
-
     # def test4_create_reply(self):
     #    message = self.__class__.target_message.create_reply().execute_query()
     #    self.assertIsNotNone(message.resource_path)
@@ -31,21 +24,21 @@ class TestGraphMail(GraphTestCase):
     # def test4_forward_message(self):
     #    self.__class__.target_message.forward([test_user_principal_name_alt]).execute_query()
 
-    def test_5_get_my_messages(self):
+    def test5_get_my_messages(self):
         messages = self.client.me.messages.top(1).get().execute_query()
         self.assertLessEqual(1, len(messages))
         self.assertIsNotNone(messages[0].resource_path)
 
-    def test_6_update_message(self):
+    def test6_update_message(self):
         message_to_update = self.__class__.target_message
         message_to_update.body = "The new cafeteria is close."
         message_to_update.update().execute_query()
 
-    def test_7_delete_message(self):
+    def test7_delete_message(self):
         message_to_delete = self.__class__.target_message
         message_to_delete.delete_object().execute_query()
 
-    def test_8_create_draft_message_with_attachments(self):
+    def test8_create_draft_message_with_attachments(self):
         content = base64.b64encode(
             io.BytesIO(b"This is some file content").read()
         ).decode()
@@ -63,3 +56,12 @@ class TestGraphMail(GraphTestCase):
             == 2
         )
         draft.delete_object().execute_query()
+
+    def test9_send_message(self):
+        message = self.client.me.messages.add(
+            subject="Meet for lunch?", body="The new cafeteria is open."
+        )
+        message.to_recipients.add(Recipient.from_email(test_user_principal_name))
+        message.to_recipients.add(Recipient.from_email(test_user_principal_name_alt))
+        message.body = "The new cafeteria is open."
+        message.update().send().execute_query()

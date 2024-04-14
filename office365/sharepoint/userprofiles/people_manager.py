@@ -165,10 +165,10 @@ class PeopleManager(Entity):
         _ensure_user(user_or_name, _user_resolved)
         return return_type
 
-    def get_properties_for(self, user_or_name):
+    def get_properties_for(self, account):
         """
         Gets user properties for the specified user.
-        :param str or User user_or_name: Specifies the User object or its login name.
+        :param str or User account: Specifies the User object or its login name.
         """
         return_type = PersonProperties(self.context)
 
@@ -180,7 +180,7 @@ class PeopleManager(Entity):
             )
             self.context.add_query(qry)
 
-        _ensure_user(user_or_name, _get_properties_for_inner)
+        _ensure_user(account, _get_properties_for_inner)
         return return_type
 
     def get_default_document_library(
