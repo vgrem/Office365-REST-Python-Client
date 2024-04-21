@@ -1,5 +1,8 @@
 """
 Demonstrates how to update system metadata properties of List Item
+
+Note: When using Entra ID (former Azure AD), some system metadata updates
+(e.g. Author, Editor) require Sites.FullControl permission.
 """
 
 import sys
