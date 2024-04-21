@@ -24,3 +24,21 @@ class FieldDateTime(Field):
         # type: () -> Optional[str]
         """ """
         return self.properties.get("DateFormat", None)
+
+    @property
+    def display_format(self):
+        # type: () -> Optional[int]
+        """Specifies the type of date and time format that is used in the field"""
+        return self.properties.get("DisplayFormat", None)
+
+    @property
+    def friendly_display_format(self):
+        # type: () -> Optional[int]
+        """Gets the type of friendly display format that is used in the field"""
+        return self.properties.get("FriendlyDisplayFormat", None)
+
+    @property
+    def time_format(self):
+        # type: () -> Optional[str]
+        """Gets the time format that is used in the field"""
+        return self.properties.get("TimeFormat", None)

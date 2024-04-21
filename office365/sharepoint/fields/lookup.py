@@ -43,3 +43,23 @@ class FieldLookup(Field):
         """Sets a value that specifies the list identifier of the list that contains the field to use as
         the lookup values."""
         self.set_property("LookupList", val, True)
+
+    @property
+    def primary_field_id(self):
+        # type: () -> Optional[str]
+        """Specifies the primary lookup field identifier if this is a dependent lookup field.
+        Otherwise, it is an empty string."""
+        return self.properties.get("PrimaryFieldId", None)
+
+    @property
+    def relationship_delete_behavior(self):
+        # type: () -> Optional[int]
+        """Gets a value that specifies the relationship delete behavior of the lookup field."""
+        return self.properties.get("RelationshipDeleteBehavior", None)
+
+    @property
+    def unlimited_length_in_document_library(self):
+        # type: () -> Optional[bool]
+        """Gets or sets a Boolean value that specifies whether to allow values with unlimited text
+        in the lookup field."""
+        return self.properties.get("UnlimitedLengthInDocumentLibrary", None)

@@ -589,11 +589,21 @@ class Tenant(Entity):
 
     @property
     def admin_settings(self):
+        """ """
         from office365.sharepoint.tenant.administration.settings_service import (
             TenantAdminSettingsService,
         )
 
         return TenantAdminSettingsService(self.context)
+
+    @property
+    def migration_center(self):
+        """ """
+        from office365.sharepoint.migrationcenter.service.services import (
+            MigrationCenterServices,
+        )
+
+        return MigrationCenterServices(self.context)
 
     @property
     def ai_builder_enabled(self):

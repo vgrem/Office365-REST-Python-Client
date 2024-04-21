@@ -19,22 +19,14 @@ client = GraphClient.with_token_interactive(
     test_tenant, test_client_id, test_admin_principal_name
 )
 
-# Step 1: Get the delegated permissions of the resource service principal
-resource = (
-    client.service_principals.get_by_name("Microsoft Graph")
-    .get()
-    .select(["id", "displayName", "appId", "oauth2PermissionScopes"])
-    .execute_query()
-)
 
-
-# Step 2: Grant a delegated permission to the client service principal on behalf of a user
+resource = client.service_principals.get_by_name("Microsoft Graph")
 app_role = "User.Read.All"
 user = client.users.get_by_principal_name(test_user_principal_name)
 resource.grant_delegated(test_client_id, user, app_role).execute_query()
 
 
-# Step 3. Confirm and print permission grants
+# Confirm and print permission grants
 result = (
     client.oauth2_permission_grants.filter("clientId eq '{0}'".format(test_client_id))
     .get()

@@ -41,6 +41,10 @@ class TestTenant(TestCase):
         tenant_settings = TenantSettings.current(self.client).get().execute_query()
         self.assertIsNotNone(tenant_settings.resource_path)
 
+    def test3_get_migration_center(self):
+        result = self.tenant.migration_center.get().execute_query()
+        self.assertIsNotNone(result.resource_path)
+
     # def test3_check_tenant_licenses(self):
     #    result = self.tenant.check_tenant_licenses(["SharePoint"])
     #    self.tenant.execute_query()
@@ -168,3 +172,11 @@ class TestTenant(TestCase):
     def test_23_get_tenant_all_web_templates(self):
         result = self.tenant.get_spo_tenant_all_web_templates().execute_query()
         self.assertIsNotNone(result.items)
+
+    def test_24_get_perf_data(self):
+        from office365.sharepoint.migrationcenter.service.performance.data import (
+            PerformanceData,
+        )
+
+        result = PerformanceData(self.client).get().execute_query()
+        self.assertIsNotNone(result.resource_path)

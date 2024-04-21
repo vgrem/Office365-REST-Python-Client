@@ -5824,6 +5824,30 @@
                </Record>
             </Annotation>
          </Annotations>
+         <Annotations Target="microsoft.graph.companySubscription">
+            <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
+               <Record>
+                  <PropertyValue Property="Countable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
+               <Record>
+                  <PropertyValue Property="Expandable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.FilterRestrictions">
+               <Record>
+                  <PropertyValue Property="Filterable" Bool="true"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.NavigationRestrictions">
+               <Record>
+                  <PropertyValue Property="Referenceable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="false"/>
+            <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="false"/>
+         </Annotations>
          <Annotations Target="microsoft.graph.certification/certificationDetailsUrl">
             <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
          </Annotations>
@@ -5937,6 +5961,100 @@
          <Annotations Target="microsoft.graph.directoryRoleTemplate">
             <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="false"/>
          </Annotations>
+         <Annotations Target="microsoft.graph.multiTenantOrganization">
+            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+               <Record>
+                  <PropertyValue Property="UpdateMethod">
+                     <EnumMember>Org.OData.Capabilities.V1.HttpMethod/PUT</EnumMember>
+                  </PropertyValue>
+               </Record>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.multiTenantOrganization/joinRequest">
+            <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
+               <Record>
+                  <PropertyValue Property="Deletable" Bool="false"/>
+               </Record>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.multiTenantOrganizationMember">
+            <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
+               <Record>
+                  <PropertyValue Property="Countable" Bool="true"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
+               <Record>
+                  <PropertyValue Property="Expandable" Bool="true"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.FilterRestrictions">
+               <Record>
+                  <PropertyValue Property="Filterable" Bool="true"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.NavigationRestrictions">
+               <Record>
+                  <PropertyValue Property="Referenceable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="false"/>
+            <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="false"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.multiTenantOrganizationIdentitySyncPolicyTemplate">
+            <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
+               <Record>
+                  <PropertyValue Property="Countable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
+               <Record>
+                  <PropertyValue Property="Expandable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.FilterRestrictions">
+               <Record>
+                  <PropertyValue Property="Filterable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.NavigationRestrictions">
+               <Record>
+                  <PropertyValue Property="Referenceable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SelectRestrictions">
+               <Record>
+                  <PropertyValue Property="Selectable" Bool="false"/>
+               </Record>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.multiTenantOrganizationPartnerConfigurationTemplate">
+            <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
+               <Record>
+                  <PropertyValue Property="Countable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
+               <Record>
+                  <PropertyValue Property="Expandable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.FilterRestrictions">
+               <Record>
+                  <PropertyValue Property="Filterable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.NavigationRestrictions">
+               <Record>
+                  <PropertyValue Property="Referenceable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SelectRestrictions">
+               <Record>
+                  <PropertyValue Property="Selectable" Bool="false"/>
+               </Record>
+            </Annotation>
+         </Annotations>
          <Annotations Target="microsoft.graph.organization/mobileDeviceManagementAuthority">
             <Annotation Term="Org.OData.Core.V1.Description" String="Mobile device management authority."/>
          </Annotations>
@@ -5978,6 +6096,13 @@
             </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="false"/>
             <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="false"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.tenantRelationship/multiTenantOrganization">
+            <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
+               <Record>
+                  <PropertyValue Property="Deletable" Bool="false"/>
+               </Record>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.browserSharedCookieHistory/comment">
             <Annotation Term="Org.OData.Core.V1.Description" String="The comment of the cookie"/>
@@ -16656,6 +16781,29 @@
             <Member Name="verticalSplit" Value="1"/>
             <Member Name="unknownFutureValue" Value="10"/>
          </EnumType>
+         <EnumType Name="multiTenantOrganizationMemberProcessingStatus">
+            <Member Name="notStarted" Value="0"/>
+            <Member Name="running" Value="1"/>
+            <Member Name="succeeded" Value="2"/>
+            <Member Name="failed" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
+         <EnumType Name="multiTenantOrganizationMemberRole">
+            <Member Name="owner" Value="0"/>
+            <Member Name="member" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
+         <EnumType Name="multiTenantOrganizationMemberState">
+            <Member Name="pending" Value="0"/>
+            <Member Name="active" Value="1"/>
+            <Member Name="removed" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="multiTenantOrganizationState">
+            <Member Name="active" Value="0"/>
+            <Member Name="inactive" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
          <EnumType Name="onPremisesDirectorySynchronizationDeletionPreventionType">
             <Member Name="disabled" Value="0"/>
             <Member Name="enabledForCount" Value="1"/>
@@ -16687,6 +16835,12 @@
             <Member Name="nativeSupport" Value="1"/>
             <Member Name="disabled" Value="2"/>
             <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="templateApplicationLevel" IsFlags="true">
+            <Member Name="none" Value="0"/>
+            <Member Name="newPartners" Value="1"/>
+            <Member Name="existingPartners" Value="2"/>
+            <Member Name="unknownFutureValue" Value="4"/>
          </EnumType>
          <EnumType Name="weakAlgorithms" IsFlags="true">
             <Member Name="rsaSha1" Value="1"/>
@@ -22707,6 +22861,7 @@
             <Property Name="allowedCloudEndpoints" Type="Collection(Edm.String)" Nullable="false"/>
             <NavigationProperty Name="default" Type="graph.crossTenantAccessPolicyConfigurationDefault" ContainsTarget="true"/>
             <NavigationProperty Name="partners" Type="Collection(graph.crossTenantAccessPolicyConfigurationPartner)" ContainsTarget="true"/>
+            <NavigationProperty Name="templates" Type="graph.policyTemplate" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="tenantAppManagementPolicy" BaseType="graph.policyBase">
             <Property Name="applicationRestrictions" Type="graph.appManagementConfiguration"/>
@@ -24486,6 +24641,7 @@
             <NavigationProperty Name="deletedItems" Type="Collection(graph.directoryObject)" ContainsTarget="true"/>
             <NavigationProperty Name="federationConfigurations" Type="Collection(graph.identityProviderBase)" ContainsTarget="true"/>
             <NavigationProperty Name="onPremisesSynchronization" Type="Collection(graph.onPremisesDirectorySynchronization)" ContainsTarget="true"/>
+            <NavigationProperty Name="subscriptions" Type="Collection(graph.companySubscription)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="administrativeUnit" BaseType="graph.directoryObject" OpenType="true">
             <Property Name="description" Type="Edm.String"/>
@@ -24513,6 +24669,34 @@
          <EntityType Name="onPremisesDirectorySynchronization" BaseType="graph.entity">
             <Property Name="configuration" Type="graph.onPremisesDirectorySynchronizationConfiguration"/>
             <Property Name="features" Type="graph.onPremisesDirectorySynchronizationFeature" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="companySubscription" BaseType="graph.entity">
+            <Property Name="commerceSubscriptionId" Type="Edm.String"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="isTrial" Type="Edm.Boolean"/>
+            <Property Name="nextLifecycleDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="ownerId" Type="Edm.String"/>
+            <Property Name="ownerTenantId" Type="Edm.String"/>
+            <Property Name="ownerType" Type="Edm.String"/>
+            <Property Name="serviceStatus" Type="Collection(graph.servicePlanInfo)" Nullable="false"/>
+            <Property Name="skuId" Type="Edm.String"/>
+            <Property Name="skuPartNumber" Type="Edm.String"/>
+            <Property Name="status" Type="Edm.String"/>
+            <Property Name="totalLicenses" Type="Edm.Int32"/>
+            <Annotation Term="Org.OData.Core.V1.AlternateKeys">
+               <Collection>
+                  <Record Type="Org.OData.Core.V1.AlternateKey">
+                     <PropertyValue Property="Key">
+                        <Collection>
+                           <Record Type="Org.OData.Core.V1.PropertyRef">
+                              <PropertyValue Property="Alias" String="commerceSubscriptionId"/>
+                              <PropertyValue Property="Name" PropertyPath="commerceSubscriptionId"/>
+                           </Record>
+                        </Collection>
+                     </PropertyValue>
+                  </Record>
+               </Collection>
+            </Annotation>
          </EntityType>
          <ComplexType Name="deviceRegistrationMembership"/>
          <ComplexType Name="allDeviceRegistrationMembership" BaseType="graph.deviceRegistrationMembership"/>
@@ -24636,6 +24820,17 @@
             <Property Name="hidePrivacyAndCookies" Type="Edm.Boolean"/>
             <Property Name="hideResetItNow" Type="Edm.Boolean"/>
             <Property Name="hideTermsOfUse" Type="Edm.Boolean"/>
+         </ComplexType>
+         <ComplexType Name="multiTenantOrganizationJoinRequestTransitionDetails">
+            <Property Name="desiredMemberState" Type="graph.multiTenantOrganizationMemberState"/>
+            <Property Name="details" Type="Edm.String"/>
+            <Property Name="status" Type="graph.multiTenantOrganizationMemberProcessingStatus"/>
+         </ComplexType>
+         <ComplexType Name="multiTenantOrganizationMemberTransitionDetails">
+            <Property Name="desiredRole" Type="graph.multiTenantOrganizationMemberRole"/>
+            <Property Name="desiredState" Type="graph.multiTenantOrganizationMemberState"/>
+            <Property Name="details" Type="Edm.String"/>
+            <Property Name="status" Type="graph.multiTenantOrganizationMemberProcessingStatus"/>
          </ComplexType>
          <ComplexType Name="onPremisesAccidentalDeletionPrevention">
             <Property Name="alertThreshold" Type="Edm.Int32"/>
@@ -24779,9 +24974,14 @@
             <Property Name="b2bDirectConnectInbound" Type="graph.crossTenantAccessPolicyB2BSetting"/>
             <Property Name="b2bDirectConnectOutbound" Type="graph.crossTenantAccessPolicyB2BSetting"/>
             <Property Name="inboundTrust" Type="graph.crossTenantAccessPolicyInboundTrust"/>
+            <Property Name="isInMultiTenantOrganization" Type="Edm.Boolean"/>
             <Property Name="isServiceProvider" Type="Edm.Boolean"/>
             <Property Name="tenantId" Type="Edm.String" Nullable="false"/>
             <NavigationProperty Name="identitySynchronization" Type="graph.crossTenantIdentitySyncPolicyPartner" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="policyTemplate" BaseType="graph.entity">
+            <NavigationProperty Name="multiTenantOrganizationIdentitySynchronization" Type="graph.multiTenantOrganizationIdentitySyncPolicyTemplate" ContainsTarget="true"/>
+            <NavigationProperty Name="multiTenantOrganizationPartnerConfiguration" Type="graph.multiTenantOrganizationPartnerConfigurationTemplate" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="crossTenantIdentitySyncPolicyPartner">
             <Key>
@@ -24940,6 +25140,43 @@
             <Property Name="description" Type="Edm.String"/>
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="values" Type="Collection(graph.settingTemplateValue)" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="multiTenantOrganization" BaseType="graph.entity">
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="state" Type="graph.multiTenantOrganizationState"/>
+            <NavigationProperty Name="joinRequest" Type="graph.multiTenantOrganizationJoinRequestRecord" ContainsTarget="true"/>
+            <NavigationProperty Name="tenants" Type="Collection(graph.multiTenantOrganizationMember)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="multiTenantOrganizationJoinRequestRecord" BaseType="graph.entity">
+            <Property Name="addedByTenantId" Type="Edm.String"/>
+            <Property Name="memberState" Type="graph.multiTenantOrganizationMemberState"/>
+            <Property Name="role" Type="graph.multiTenantOrganizationMemberRole"/>
+            <Property Name="transitionDetails" Type="graph.multiTenantOrganizationJoinRequestTransitionDetails"/>
+         </EntityType>
+         <EntityType Name="multiTenantOrganizationMember" BaseType="graph.directoryObject">
+            <Property Name="addedByTenantId" Type="Edm.Guid"/>
+            <Property Name="addedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="joinedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="role" Type="graph.multiTenantOrganizationMemberRole"/>
+            <Property Name="state" Type="graph.multiTenantOrganizationMemberState"/>
+            <Property Name="tenantId" Type="Edm.String" Nullable="false"/>
+            <Property Name="transitionDetails" Type="graph.multiTenantOrganizationMemberTransitionDetails"/>
+         </EntityType>
+         <EntityType Name="multiTenantOrganizationIdentitySyncPolicyTemplate" BaseType="graph.entity">
+            <Property Name="templateApplicationLevel" Type="graph.templateApplicationLevel" Nullable="false"/>
+            <Property Name="userSyncInbound" Type="graph.crossTenantUserSyncInbound"/>
+         </EntityType>
+         <EntityType Name="multiTenantOrganizationPartnerConfigurationTemplate" BaseType="graph.entity">
+            <Property Name="automaticUserConsentSettings" Type="graph.inboundOutboundPolicyConfiguration"/>
+            <Property Name="b2bCollaborationInbound" Type="graph.crossTenantAccessPolicyB2BSetting"/>
+            <Property Name="b2bCollaborationOutbound" Type="graph.crossTenantAccessPolicyB2BSetting"/>
+            <Property Name="b2bDirectConnectInbound" Type="graph.crossTenantAccessPolicyB2BSetting"/>
+            <Property Name="b2bDirectConnectOutbound" Type="graph.crossTenantAccessPolicyB2BSetting"/>
+            <Property Name="inboundTrust" Type="graph.crossTenantAccessPolicyInboundTrust"/>
+            <Property Name="templateApplicationLevel" Type="graph.templateApplicationLevel" Nullable="false"/>
          </EntityType>
          <EntityType Name="organization" BaseType="graph.directoryObject" OpenType="true">
             <Property Name="assignedPlans" Type="Collection(graph.assignedPlan)" Nullable="false"/>
@@ -25189,6 +25426,7 @@
             <Property Name="subscriptionIds" Type="Collection(Edm.String)"/>
          </EntityType>
          <EntityType Name="tenantRelationship">
+            <NavigationProperty Name="multiTenantOrganization" Type="graph.multiTenantOrganization" ContainsTarget="true"/>
             <NavigationProperty Name="delegatedAdminCustomers" Type="Collection(graph.delegatedAdminCustomer)" ContainsTarget="true"/>
             <NavigationProperty Name="delegatedAdminRelationships" Type="Collection(graph.delegatedAdminRelationship)" ContainsTarget="true"/>
          </EntityType>
@@ -38698,6 +38936,7 @@
             <Member Name="scheduledAlerts" Value="1073741845"/>
             <Member Name="microsoftDefenderThreatIntelligenceAnalytics" Value="1073741846"/>
             <Member Name="builtInMl" Value="1073741847"/>
+            <Member Name="microsoftInsiderRiskManagement" Value="1073741848"/>
             <Member Name="microsoftSentinel" Value="268435456"/>
          </EnumType>
          <EnumType Name="detectionStatus">
@@ -38842,6 +39081,7 @@
             <Member Name="unknownFutureValue" Value="255"/>
             <Member Name="microsoftDefenderForCloud" Value="256"/>
             <Member Name="microsoftSentinel" Value="512"/>
+            <Member Name="microsoftInsiderRiskManagement" Value="1024"/>
          </EnumType>
          <EnumType Name="vmCloudProvider">
             <Member Name="unknown" Value="0"/>

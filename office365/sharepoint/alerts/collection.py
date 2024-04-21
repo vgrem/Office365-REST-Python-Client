@@ -39,6 +39,18 @@ class AlertCollection(EntityCollection[Alert]):
         self.context.add_query(qry)
         return return_type
 
+    def delete_alert_at_index(self, index):
+        """Deletes the alert based on the given index.
+
+        :param int index:  A 32-bit integer that is greater than or equal to 0 and less than the count of the
+              alert in the collection. Specifies the index of the alert in the collection.
+        """
+        qry = ServiceOperationQuery(
+            self, "DeleteAlertAtIndex", {"index": index}, None, None, None
+        )
+        self.context.add_query(qry)
+        return self
+
     def get_by_id(self, id_alert):
         """
         Gets an alert based on the Id.

@@ -15,11 +15,8 @@ class FieldRatingScale(FieldMultiChoice):
 
     @grid_start_number.setter
     def grid_start_number(self, value):
-        """
-        Gets the start number for the rating scale.
-
-        :type value: int
-        """
+        # type: (int) -> None
+        """Gets the start number for the rating scale."""
         self.set_property("GridStartNumber", value)
 
     @property

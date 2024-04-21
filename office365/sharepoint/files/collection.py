@@ -24,22 +24,23 @@ class FileCollection(EntityCollection[File]):
         # type: (ClientContext, ResourcePath, Folder) -> None
         super(FileCollection, self).__init__(context, File, resource_path, parent)
 
-    def upload(self, path_or_file):
-        # type: (str|IO) -> File
+    def upload(self, path_or_file, file_name=None):
+        # type: (str|IO, str) -> File
         """Uploads a file into folder.
 
         Note: This method only supports files up to 4MB in size!
         Consider create_upload_session method instead for larger files
-        :param str or typing.IO path_or_file: path where file to upload resides or file handle
+        :param str or typing.IO path_or_file: Path where file to upload resides or file handle
+        :param str file_name: New file name
         """
         if hasattr(path_or_file, "read"):
+            name = file_name or os.path.basename(path_or_file.name)
             content = path_or_file.read()
-            name = os.path.basename(path_or_file.name)
             return self.add(name, content, True)
         else:
             with open(path_or_file, "rb") as f:
                 content = f.read()
-            name = os.path.basename(path_or_file)
+            name = file_name or os.path.basename(path_or_file)
             return self.add(name, content, True)
 
     def upload_with_checksum(self, file_object, chunk_size=1024):

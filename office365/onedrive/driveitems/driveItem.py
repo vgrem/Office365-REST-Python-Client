@@ -73,15 +73,16 @@ class DriveItem(BaseItem):
 
         def _get_files(parent_drive_item):
             # type: (DriveItem) -> None
-            def _after_loaded():
-                for drive_item in parent_drive_item.children:
+            def _after_loaded(col):
+                # type: (EntityCollection[DriveItem]) -> None
+                for drive_item in col:
                     if drive_item.is_folder:
                         if recursive:
                             _get_files(drive_item)
                     else:
                         return_type.add_child(drive_item)
 
-            parent_drive_item.ensure_properties(["children"], _after_loaded)
+            parent_drive_item.children.get_all(page_loaded=_after_loaded)
 
         _get_files(self)
         return return_type
