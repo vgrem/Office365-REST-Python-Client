@@ -9,7 +9,7 @@ from office365.sharepoint.listitems.caml.query import CamlQuery
 from office365.sharepoint.listitems.collection import ListItemCollection
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 from office365.sharepoint.views.field_collection import ViewFieldCollection
-from office365.sharepoint.views.visualization import Visualization
+from office365.sharepoint.views.visualization.visualization import Visualization
 
 if TYPE_CHECKING:
     from office365.sharepoint.views.collection import ViewCollection
