@@ -65,9 +65,10 @@ class DriveItem(BaseItem):
     """The driveItem resource represents a file, folder, or other item stored in a drive. All file system objects in
     OneDrive and SharePoint are returned as driveItem resources"""
 
-    def get_files(self, recursive=False):
+    def get_files(self, recursive=False, page_size=None):
         """Retrieves files
         :param bool recursive: Determines whether to enumerate folders recursively
+        :param int page_size: Page size
         """
         return_type = EntityCollection(self.context, DriveItem, self.resource_path)
 
@@ -75,6 +76,9 @@ class DriveItem(BaseItem):
             # type: (DriveItem) -> None
             def _after_loaded(col):
                 # type: (EntityCollection[DriveItem]) -> None
+                if col.has_next:
+                    return
+
                 for drive_item in col:
                     if drive_item.is_folder:
                         if recursive:
@@ -82,9 +86,38 @@ class DriveItem(BaseItem):
                     else:
                         return_type.add_child(drive_item)
 
-            parent_drive_item.children.get_all(page_loaded=_after_loaded)
+            parent_drive_item.children.get_all(
+                page_size=page_size, page_loaded=_after_loaded
+            )
 
         _get_files(self)
+        return return_type
+
+    def get_folders(self, recursive=False, page_size=None):
+        """Retrieves folders
+        :param bool recursive: Determines whether to enumerate folders recursively
+        :param int page_size: Page size
+        """
+        return_type = EntityCollection(self.context, DriveItem, self.resource_path)
+
+        def _get_folders(parent):
+            # type: (DriveItem) -> None
+
+            def _after_loaded(col):
+                # type: (EntityCollection[DriveItem]) -> None
+                if col.has_next:
+                    return
+
+                for drive_item in col:
+                    if recursive and drive_item.folder.childCount > 0:
+                        _get_folders(drive_item)
+                    return_type.add_child(drive_item)
+
+            parent.children.filter("folder ne null").get_all(
+                page_size=page_size, page_loaded=_after_loaded
+            )
+
+        _get_folders(self)
         return return_type
 
     def get_by_path(self, url_path):
