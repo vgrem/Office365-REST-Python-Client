@@ -28,7 +28,11 @@ class TestSite(SPTestCase):
         result = Site.get_url_by_id(self.client, site_id).execute_query()
         self.assertIsNotNone(result.value)
 
-    def test4_get_site_catalog(self):
+    def test4_check_is_deletable(self):
+        result = self.client.site.check_is_deletable().execute_query()
+        self.assertIsNotNone(result.value)
+
+    def test5_get_site_catalog(self):
         catalog = (
             self.client.site.get_catalog(ListTemplateType.AppDataCatalog)
             .get()
@@ -36,11 +40,11 @@ class TestSite(SPTestCase):
         )
         self.assertIsNotNone(catalog.title)
 
-    def test5_get_web_templates(self):
+    def test6_get_web_templates(self):
         web_templates = self.client.site.get_web_templates().execute_query()
         self.assertIsNotNone(web_templates)
 
-    def test6_get_web_template_by_name(self):
+    def test7_get_web_template_by_name(self):
         template_name = "GLOBAL#0"
         web_template = (
             self.client.site.get_web_templates()
@@ -50,15 +54,15 @@ class TestSite(SPTestCase):
         )
         self.assertIsNotNone(web_template)
 
-    def test7_get_site_logo(self):
+    def test88_get_site_logo(self):
         result = self.client.site.get_site_logo().execute_query()
         self.assertIsNotNone(result.value)
 
-    def test8_get_available_tags(self):
+    def test9_get_available_tags(self):
         result = self.client.site.get_available_tags().execute_query()
         self.assertIsNotNone(result.value)
 
-    def test9_open_web_by_id(self):
+    def test_10_open_web_by_id(self):
         web = self.client.web.get().execute_query()
         sub_site = self.client.site.open_web_by_id(web.id).execute_query()
         self.assertIsNotNone(sub_site.id)
@@ -67,7 +71,7 @@ class TestSite(SPTestCase):
     #    result = self.client.site_linking_manager.get_site_links().execute_query()
     #    self.assertIsNotNone(result.value)
 
-    def test_10_create_site(self):
+    def test_11_create_site(self):
         site_url = "{0}/sites/{1}".format(test_site_url, uuid.uuid4().hex)
         result = self.client.site_manager.create(
             "Comm Site", site_url, test_user_principal_name_alt
@@ -75,19 +79,19 @@ class TestSite(SPTestCase):
         self.assertIsNotNone(result.value)
         self.__class__.site_response = result.value
 
-    def test_11_get_site_status(self):
+    def test_12_get_site_status(self):
         site_url = self.__class__.site_response.SiteUrl
         result = self.client.site_manager.get_status(site_url).execute_query()
         self.assertIsNotNone(result.value.SiteStatus)
         self.assertTrue(result.value.SiteStatus != SiteStatus.Error)
 
-    def test_12_get_site_url(self):
+    def test_13_get_site_url(self):
         site_id = self.__class__.site_response.SiteId
         result = self.client.site_manager.get_site_url(site_id).execute_query()
         self.assertIsNotNone(result.value)
         self.assertTrue(self.__class__.site_response.SiteUrl == result.value)
 
-    def test_13_delete_site(self):
+    def test_14_delete_site(self):
         from office365.sharepoint.client_context import ClientContext
 
         admin_ctx = ClientContext(self.client.base_url).with_credentials(

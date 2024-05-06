@@ -180,3 +180,7 @@ class TestTenant(TestCase):
 
         result = PerformanceData(self.client).get().execute_query()
         self.assertIsNotNone(result.resource_path)
+
+    def test_25_get_power_apps_environments(self):
+        result = self.tenant.get_power_apps_environments().execute_query()
+        self.assertIsNotNone(result.value)

@@ -88,6 +88,18 @@ class Site(Entity):
         self.ensure_properties(["Url", "GroupId", "Id"], _site_resolved)
         return self
 
+    def check_is_deletable(self):
+        """Check Site Is Deletable"""
+        return_type = ClientResult(self.context, bool())
+
+        def _check_is_deletable():
+            SPPolicyStoreProxy.check_site_is_deletable_by_id(
+                self.context, self.id, return_type
+            )
+
+        self.ensure_property("Id", _check_is_deletable)
+        return return_type
+
     def extend_upgrade_reminder_date(self):
         """
         Extend the upgrade reminder date for this site collection, so that site collection administrators will

@@ -13,7 +13,12 @@ class PermissionCollection(ClientValue):
     """
 
     def __init__(
-        self, hasInheritedLinks=None, links=None, principals=None, siteAdmins=None
+        self,
+        hasInheritedLinks=None,
+        links=None,
+        principals=None,
+        siteAdmins=None,
+        totalNumberOfPrincipals=None,
     ):
         """
         :param bool hasInheritedLinks:
@@ -21,11 +26,13 @@ class PermissionCollection(ClientValue):
         :param list[PrincipalInfo] principals: The List of Principals with their roles on this list item.
         :param list[PrincipalInfo] siteAdmins: The List of Principals who are Site Admins. This property is returned
             only if the caller is an Auditor.
+        :param int totalNumberOfPrincipals:
         """
         self.hasInheritedLinks = hasInheritedLinks
         self.links = ClientValueCollection(LinkInfo, links)
         self.principals = ClientValueCollection(PrincipalInfo, principals)
         self.siteAdmins = ClientValueCollection(PrincipalInfo, siteAdmins)
+        self.totalNumberOfPrincipals = totalNumberOfPrincipals
 
     @property
     def entity_type_name(self):

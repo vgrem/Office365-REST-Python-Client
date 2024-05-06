@@ -34,6 +34,15 @@ from office365.sharepoint.tenant.administration.insights.onedrive_site_sharing i
 from office365.sharepoint.tenant.administration.insights.top_files_sharing import (
     TopFilesSharingInsights,
 )
+from office365.sharepoint.tenant.administration.powerapps.environment import (
+    PowerAppsEnvironment,
+)
+from office365.sharepoint.tenant.administration.recent_admin_action_report import (
+    RecentAdminActionReport,
+)
+from office365.sharepoint.tenant.administration.recent_admin_action_report_payload import (
+    RecentAdminActionReportPayload,
+)
 from office365.sharepoint.tenant.administration.secondary_administrators_fields_data import (
     SecondaryAdministratorsFieldsData,
 )
@@ -74,6 +83,16 @@ class Tenant(Entity):
             "Microsoft.Online.SharePoint.TenantAdministration.Tenant"
         )
         super(Tenant, self).__init__(context, static_path)
+
+    def add_recent_admin_action_report(self):
+        """"""
+        return_type = ClientResult(self.context, RecentAdminActionReport())
+        payload = {"payload": RecentAdminActionReportPayload()}
+        qry = ServiceOperationQuery(
+            self, "AddRecentAdminActionReport", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
 
     def get_corporate_catalog_site(self):
         """Retrieves Corporate Catalog Site"""
@@ -281,12 +300,24 @@ class Tenant(Entity):
 
     def get_lock_state_by_id(self, site_id):
         """
-        :param str site_id:
+        :param str site_id: The GUID to uniquely identify a SharePoint site
         """
         return self.sites.get_lock_state_by_id(site_id)
 
     def hub_sites(self, site_url):
         pass
+
+    def get_power_apps_environments(self):
+        """ """
+        return_type = ClientResult(
+            self.context,
+            ClientValueCollection(PowerAppsEnvironment),
+        )
+        qry = ServiceOperationQuery(
+            self, "GetPowerAppsEnvironments", None, None, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
 
     def check_tenant_intune_license(self):
         """

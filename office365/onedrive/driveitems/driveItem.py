@@ -81,7 +81,7 @@ class DriveItem(BaseItem):
 
                 for drive_item in col:
                     if drive_item.is_folder:
-                        if recursive:
+                        if recursive and drive_item.folder.childCount > 0:
                             _get_files(drive_item)
                     else:
                         return_type.add_child(drive_item)

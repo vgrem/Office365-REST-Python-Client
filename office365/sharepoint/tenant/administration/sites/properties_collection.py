@@ -37,6 +37,8 @@ class SitePropertiesCollection(EntityCollection[SiteProperties]):
 
     def get_site_state_properties(self, site_id):
         """
+        Gets site state properties.
+
         :param str site_id: Site identifier
         """
         return_type = ClientResult(self.context, SiteStateProperties())

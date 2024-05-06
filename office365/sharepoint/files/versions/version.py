@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import IO, AnyStr, Optional
 
 from typing_extensions import Self
@@ -53,6 +54,12 @@ class FileVersion(Entity):
         )
         self.context.add_query(qry)
         return return_type
+
+    @property
+    def created(self):
+        # type: () -> Optional[datetime]
+        """Specifies the creation date and time for the file version."""
+        return self.properties.get("Created", datetime.min)
 
     @property
     def created_by(self):

@@ -19,7 +19,7 @@ class AttachmentCollection(EntityCollection[Attachment]):
         )
 
     def add(self, attachment_file_information):
-        # type: (AttachmentCreationInformation) -> Attachment
+        # type: (AttachmentCreationInformation|dict) -> Attachment
         """
         Adds the attachment represented by the file name and stream in the specified parameter to the list item.
 

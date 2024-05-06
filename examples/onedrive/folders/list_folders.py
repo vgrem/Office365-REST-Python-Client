@@ -16,7 +16,9 @@ client = GraphClient.with_username_and_password(
 )
 # items = client.me.drive.root.get_files(False).execute_query()
 site = client.sites.get_by_url(test_team_site_url)
-items = site.lists["Documents"].drive.root.get_folders(True, 1000).execute_query()
+items = (
+    site.lists["Documents_Archive"].drive.root.get_folders(False, 10000).execute_query()
+)
 print("{0} folders found".format(len(items)))
 # for folder_item in items:
 #    print(folder_item.web_url)

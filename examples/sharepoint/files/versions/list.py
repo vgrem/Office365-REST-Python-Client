@@ -15,4 +15,5 @@ file_with_versions = (
 )
 
 for version in file_with_versions.versions:
+    # print(version.properties.get("Created"))
     print(version.version_label)

@@ -3434,6 +3434,231 @@
          <Annotations Target="microsoft.graph.devicePlatformType/unknownFutureValue">
             <Annotation Term="Org.OData.Core.V1.Description" String="Evolvable enumeration sentinel value. Do not use"/>
          </Annotations>
+         <Annotations Target="microsoft.graph.alertFeedback">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.alertSeverity">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.alertStatus">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.connectionDirection">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.connectionStatus">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.emailRole">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.fileHashType">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.logonType">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.processIntegrityLevel">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.registryHive">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.registryOperation">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.registryValueType">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.securityNetworkProtocol">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.securityResourceType">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userAccountSecurityType">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
          <Annotations Target="microsoft.graph.directoryObject">
             <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
                <Record>
@@ -5466,6 +5691,19 @@
                </Record>
             </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.secureScoreControlProfile">
             <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
@@ -6377,6 +6615,12 @@
             <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
          </Annotations>
          <Annotations Target="microsoft.graph.educationRubric/lastModifiedDateTime">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.educationSubmission/excusedBy">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.educationSubmission/excusedDateTime">
             <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
          </Annotations>
          <Annotations Target="microsoft.graph.educationSubmission/reassignedBy">
@@ -15254,6 +15498,261 @@
             </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="false"/>
          </Annotations>
+         <Annotations Target="microsoft.graph.alertDetection">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.alertHistoryState">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.alertTrigger">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.cloudAppSecurityState">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.fileHash">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.fileSecurityState">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.hostSecurityState">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.investigationSecurityState">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.malwareState">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.messageSecurityState">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.networkConnection">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.process">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.registryKeyState">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.securityResource">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.uriClickSecurityState">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.userSecurityState">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.vulnerabilityState">
+            <Annotation Term="Org.OData.Core.V1.Revisions">
+               <Collection>
+                  <Record>
+                     <PropertyValue Property="Date" Date="2024-04-10"/>
+                     <PropertyValue Property="Description" String="The legacy Graph Security API is deprecated and will stop returning data on January 31, 2025. Please use the new Graph Security API."/>
+                     <PropertyValue Property="Kind">
+                        <EnumMember>Org.OData.Core.V1.RevisionKind/Deprecated</EnumMember>
+                     </PropertyValue>
+                     <PropertyValue Property="RemovalDate" Date="2026-04-10"/>
+                     <PropertyValue Property="Version" String="2024-01/Deprecation"/>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </Annotations>
          <Annotations Target="microsoft.graph.authentication/fido2Methods">
             <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
                <Record>
@@ -16935,6 +17434,7 @@
             <Member Name="returned" Value="3"/>
             <Member Name="unknownFutureValue" Value="4"/>
             <Member Name="reassigned" Value="5"/>
+            <Member Name="excused" Value="6"/>
          </EnumType>
          <EnumType Name="contactRelationship">
             <Member Name="parent" Value="0"/>
@@ -19191,6 +19691,7 @@
          <EnumType Name="delegatedAdminRelationshipOperationType">
             <Member Name="delegatedAdminAccessAssignmentUpdate" Value="0"/>
             <Member Name="unknownFutureValue" Value="1"/>
+            <Member Name="delegatedAdminRelationshipUpdate" Value="2"/>
          </EnumType>
          <EnumType Name="delegatedAdminRelationshipRequestAction">
             <Member Name="lockForApproval" Value="0"/>
@@ -21223,6 +21724,7 @@
             <Property Name="type" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="customExtensionClientConfiguration">
+            <Property Name="maximumRetries" Type="Edm.Int32"/>
             <Property Name="timeoutInMilliseconds" Type="Edm.Int32"/>
          </ComplexType>
          <ComplexType Name="customExtensionEndpointConfiguration" Abstract="true"/>
@@ -22375,7 +22877,7 @@
             <Property Name="userRoles" Type="graph.includedUserRoles"/>
             <Property Name="userTypes" Type="graph.includedUserTypes"/>
          </ComplexType>
-         <EntityType Name="auditLogRoot" BaseType="graph.entity">
+         <EntityType Name="auditLogRoot">
             <NavigationProperty Name="directoryAudits" Type="Collection(graph.directoryAudit)" ContainsTarget="true"/>
             <NavigationProperty Name="provisioning" Type="Collection(graph.provisioningObjectSummary)" ContainsTarget="true"/>
             <NavigationProperty Name="signIns" Type="Collection(graph.signIn)" ContainsTarget="true"/>
@@ -24515,6 +25017,29 @@
          <ComplexType Name="assignmentOrder">
             <Property Name="order" Type="Collection(Edm.String)"/>
          </ComplexType>
+         <ComplexType Name="authenticationConditions">
+            <Property Name="applications" Type="graph.authenticationConditionsApplications"/>
+         </ComplexType>
+         <ComplexType Name="authenticationConditionsApplications">
+            <NavigationProperty Name="includeApplications" Type="Collection(graph.authenticationConditionApplication)" ContainsTarget="true"/>
+         </ComplexType>
+         <EntityType Name="authenticationConditionApplication">
+            <Key>
+               <PropertyRef Name="appId"/>
+            </Key>
+            <Property Name="appId" Type="Edm.String" Nullable="false"/>
+         </EntityType>
+         <ComplexType Name="authenticationConfigurationValidation">
+            <Property Name="errors" Type="Collection(graph.genericError)"/>
+            <Property Name="warnings" Type="Collection(graph.genericError)"/>
+         </ComplexType>
+         <ComplexType Name="genericError">
+            <Property Name="code" Type="Edm.String"/>
+            <Property Name="message" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="azureAdTokenAuthentication" BaseType="graph.customExtensionAuthenticationConfiguration">
+            <Property Name="resourceId" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="basicAuthentication" BaseType="graph.apiAuthenticationConfigurationBase">
             <Property Name="password" Type="Edm.String"/>
             <Property Name="username" Type="Edm.String"/>
@@ -24527,6 +25052,24 @@
             <Property Name="notAfter" Type="Edm.Int64" Nullable="false"/>
             <Property Name="notBefore" Type="Edm.Int64" Nullable="false"/>
             <Property Name="thumbprint" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="customExtensionOverwriteConfiguration">
+            <Property Name="clientConfiguration" Type="graph.customExtensionClientConfiguration"/>
+         </ComplexType>
+         <ComplexType Name="httpRequestEndpoint" BaseType="graph.customExtensionEndpointConfiguration">
+            <Property Name="targetUrl" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="onTokenIssuanceStartHandler" Abstract="true"/>
+         <ComplexType Name="onTokenIssuanceStartCustomExtensionHandler" BaseType="graph.onTokenIssuanceStartHandler">
+            <Property Name="configuration" Type="graph.customExtensionOverwriteConfiguration"/>
+            <NavigationProperty Name="customExtension" Type="graph.onTokenIssuanceStartCustomExtension"/>
+         </ComplexType>
+         <EntityType Name="customAuthenticationExtension" BaseType="graph.customCalloutExtension" Abstract="true"/>
+         <EntityType Name="onTokenIssuanceStartCustomExtension" BaseType="graph.customAuthenticationExtension">
+            <Property Name="claimsForTokenConfiguration" Type="Collection(graph.onTokenIssuanceStartReturnClaim)"/>
+         </EntityType>
+         <ComplexType Name="onTokenIssuanceStartReturnClaim">
+            <Property Name="claimIdInApiResponse" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="pkcs12Certificate" BaseType="graph.apiAuthenticationConfigurationBase">
             <Property Name="password" Type="Edm.String"/>
@@ -24557,6 +25100,10 @@
             <Property Name="developerId" Type="Edm.String"/>
             <Property Name="keyId" Type="Edm.String"/>
             <Property Name="serviceId" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="authenticationEventListener" BaseType="graph.entity" Abstract="true" OpenType="true">
+            <Property Name="authenticationEventsFlowId" Type="Edm.String"/>
+            <Property Name="conditions" Type="graph.authenticationConditions"/>
          </EntityType>
          <EntityType Name="identityUserFlow" BaseType="graph.entity">
             <Property Name="userFlowType" Type="graph.userFlowType" Nullable="false"/>
@@ -24601,12 +25148,17 @@
          <EntityType Name="identityBuiltInUserFlowAttribute" BaseType="graph.identityUserFlowAttribute"/>
          <EntityType Name="identityContainer" BaseType="graph.entity">
             <NavigationProperty Name="apiConnectors" Type="Collection(graph.identityApiConnector)" ContainsTarget="true"/>
+            <NavigationProperty Name="authenticationEventListeners" Type="Collection(graph.authenticationEventListener)" ContainsTarget="true"/>
             <NavigationProperty Name="b2xUserFlows" Type="Collection(graph.b2xIdentityUserFlow)" ContainsTarget="true"/>
+            <NavigationProperty Name="customAuthenticationExtensions" Type="Collection(graph.customAuthenticationExtension)" ContainsTarget="true"/>
             <NavigationProperty Name="identityProviders" Type="Collection(graph.identityProviderBase)" ContainsTarget="true"/>
             <NavigationProperty Name="userFlowAttributes" Type="Collection(graph.identityUserFlowAttribute)" ContainsTarget="true"/>
             <NavigationProperty Name="conditionalAccess" Type="graph.conditionalAccessRoot" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="identityCustomUserFlowAttribute" BaseType="graph.identityUserFlowAttribute"/>
+         <EntityType Name="onTokenIssuanceStartListener" BaseType="graph.authenticationEventListener">
+            <Property Name="handler" Type="graph.onTokenIssuanceStartHandler"/>
+         </EntityType>
          <EntityType Name="socialIdentityProvider" BaseType="graph.identityProviderBase">
             <Property Name="clientId" Type="Edm.String"/>
             <Property Name="clientSecret" Type="Edm.String"/>
@@ -24748,6 +25300,12 @@
             <Property Name="issuerSki" Type="Edm.String" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="ComplexExtensionValue" OpenType="true"/>
+         <ComplexType Name="contentCustomization">
+            <Property Name="attributeCollection" Type="Collection(graph.keyValue)" Nullable="false"/>
+            <Property Name="attributeCollectionRelativeUrl" Type="Edm.String"/>
+            <Property Name="registrationCampaign" Type="Collection(graph.keyValue)" Nullable="false"/>
+            <Property Name="registrationCampaignRelativeUrl" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="crossTenantAccessPolicyB2BSetting">
             <Property Name="applications" Type="graph.crossTenantAccessPolicyTargetConfiguration"/>
             <Property Name="usersAndGroups" Type="graph.crossTenantAccessPolicyTargetConfiguration"/>
@@ -25214,6 +25772,7 @@
             <Property Name="bannerLogo" Type="Edm.Stream"/>
             <Property Name="bannerLogoRelativeUrl" Type="Edm.String"/>
             <Property Name="cdnList" Type="Collection(Edm.String)"/>
+            <Property Name="contentCustomization" Type="graph.contentCustomization"/>
             <Property Name="customAccountResetCredentialsUrl" Type="Edm.String"/>
             <Property Name="customCannotAccessYourAccountText" Type="Edm.String"/>
             <Property Name="customCannotAccessYourAccountUrl" Type="Edm.String"/>
@@ -25692,6 +26251,8 @@
             <Property Name="qualities" Type="Collection(graph.rubricQuality)"/>
          </EntityType>
          <EntityType Name="educationSubmission" BaseType="graph.entity">
+            <Property Name="excusedBy" Type="graph.identitySet"/>
+            <Property Name="excusedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="reassignedBy" Type="graph.identitySet"/>
             <Property Name="reassignedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="recipient" Type="graph.educationSubmissionRecipient"/>
@@ -26522,10 +27083,6 @@
             <Property Name="errorDetails" Type="graph.genericError"/>
             <Property Name="sourceId" Type="Edm.String"/>
             <Property Name="targetId" Type="Edm.String"/>
-         </ComplexType>
-         <ComplexType Name="genericError">
-            <Property Name="code" Type="Edm.String"/>
-            <Property Name="message" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="timeZoneBase">
             <Property Name="name" Type="Edm.String"/>
@@ -33927,6 +34484,16 @@
             <Parameter Name="password" Type="Edm.String" Unicode="false"/>
             <ReturnType Type="graph.identityApiConnector"/>
          </Action>
+         <Action Name="validateAuthenticationConfiguration" IsBound="true">
+            <Parameter Name="bindingParameter" Type="Collection(graph.customAuthenticationExtension)"/>
+            <Parameter Name="endpointConfiguration" Type="graph.customExtensionEndpointConfiguration"/>
+            <Parameter Name="authenticationConfiguration" Type="graph.customExtensionAuthenticationConfiguration"/>
+            <ReturnType Type="graph.authenticationConfigurationValidation"/>
+         </Action>
+         <Action Name="validateAuthenticationConfiguration" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.customAuthenticationExtension"/>
+            <ReturnType Type="graph.authenticationConfigurationValidation"/>
+         </Action>
          <Function Name="availableProviderTypes" IsBound="true">
             <Parameter Name="bindingParameter" Type="Collection(graph.identityProvider)"/>
             <ReturnType Type="Collection(Edm.String)" Unicode="false"/>
@@ -34281,20 +34848,16 @@
             <ReturnType Type="graph.educationAssignment"/>
          </Action>
          <Action Name="setUpResourcesFolder" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.educationModule"/>
-            <ReturnType Type="graph.educationModule"/>
-         </Action>
-         <Action Name="setUpResourcesFolder" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.educationSubmission"/>
             <ReturnType Type="graph.educationSubmission"/>
          </Action>
-         <Action Name="pin" IsBound="true">
+         <Action Name="setUpResourcesFolder" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.educationModule"/>
             <ReturnType Type="graph.educationModule"/>
          </Action>
-         <Action Name="unpin" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.educationModule"/>
-            <ReturnType Type="graph.educationModule"/>
+         <Action Name="excuse" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.educationSubmission"/>
+            <ReturnType Type="graph.educationSubmission"/>
          </Action>
          <Action Name="reassign" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.educationSubmission"/>
@@ -34311,6 +34874,14 @@
          <Action Name="unsubmit" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.educationSubmission"/>
             <ReturnType Type="graph.educationSubmission"/>
+         </Action>
+         <Action Name="pin" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.educationModule"/>
+            <ReturnType Type="graph.educationModule"/>
+         </Action>
+         <Action Name="unpin" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.educationModule"/>
+            <ReturnType Type="graph.educationModule"/>
          </Action>
          <Action Name="abs" IsBound="true">
             <Parameter Name="bindparameter" Type="graph.workbookFunctions"/>
