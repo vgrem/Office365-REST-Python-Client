@@ -16,6 +16,11 @@ if TYPE_CHECKING:
 class Entity(ClientObject):
     """SharePoint specific entity"""
 
+    def execute_query_with_incremental_retry(self, max_retry=5):
+        """Handles throttling requests."""
+        self.context.execute_query_with_incremental_retry(max_retry)
+        return self
+
     def execute_batch(self, items_per_batch=100, success_callback=None):
         # type: (int, Callable[[int], None]) -> Self
         """Construct and submit to a server a batch request"""

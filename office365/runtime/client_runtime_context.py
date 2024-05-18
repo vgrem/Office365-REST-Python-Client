@@ -126,8 +126,8 @@ class ClientRuntimeContext(object):
         self.pending_request().beforeExecute += _process_request
         return self
 
-    def after_query_execute(self, action, execute_first=False):
-        # type: (Callable[[T], None], bool) -> Self
+    def after_query_execute(self, action, execute_first=False, include_response=False):
+        # type: (Callable[[T|Response], None], bool, bool) -> Self
         """Attach an event handler which is triggered after query is submitted to server"""
         if len(self._queries) == 0:
             return
@@ -138,7 +138,7 @@ class ClientRuntimeContext(object):
             resp.raise_for_status()
             if self.current_query.id == query.id:
                 self.pending_request().afterExecute -= _process_response
-                action(query.return_type)
+                action(resp if include_response else query.return_type)
 
         self.pending_request().afterExecute += _process_response
 

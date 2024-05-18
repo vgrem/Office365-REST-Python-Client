@@ -47,9 +47,7 @@ class ProfileLoader(ClientObject):
         return return_type
 
     def get_user_profile(self):
-        """
-        The GetUserProfile method returns the user profile for the current user.
-        """
+        """The GetUserProfile method returns the user profile for the current user."""
         result = UserProfile(
             self.context, ResourcePath("GetUserProfile", self.resource_path)
         )

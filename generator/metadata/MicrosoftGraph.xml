@@ -20709,6 +20709,52 @@
             <Member Name="stapleDualRight" Value="30"/>
             <Member Name="stapleDualBottom" Value="31"/>
             <Member Name="unknownFutureValue" Value="32"/>
+            <Member Name="stapleTripleLeft" Value="33"/>
+            <Member Name="stapleTripleTop" Value="34"/>
+            <Member Name="stapleTripleRight" Value="35"/>
+            <Member Name="stapleTripleBottom" Value="36"/>
+            <Member Name="bindLeft" Value="37"/>
+            <Member Name="bindTop" Value="38"/>
+            <Member Name="bindRight" Value="39"/>
+            <Member Name="bindBottom" Value="40"/>
+            <Member Name="foldAccordion" Value="41"/>
+            <Member Name="foldDoubleGate" Value="42"/>
+            <Member Name="foldGate" Value="43"/>
+            <Member Name="foldHalf" Value="44"/>
+            <Member Name="foldHalfZ" Value="45"/>
+            <Member Name="foldLeftGate" Value="46"/>
+            <Member Name="foldLetter" Value="47"/>
+            <Member Name="foldParallel" Value="48"/>
+            <Member Name="foldPoster" Value="49"/>
+            <Member Name="foldRightGate" Value="50"/>
+            <Member Name="foldZ" Value="51"/>
+            <Member Name="foldEngineeringZ" Value="52"/>
+            <Member Name="punchTopLeft" Value="53"/>
+            <Member Name="punchBottomLeft" Value="54"/>
+            <Member Name="punchTopRight" Value="55"/>
+            <Member Name="punchBottomRight" Value="56"/>
+            <Member Name="punchDualLeft" Value="57"/>
+            <Member Name="punchDualTop" Value="58"/>
+            <Member Name="punchDualRight" Value="59"/>
+            <Member Name="punchDualBottom" Value="60"/>
+            <Member Name="punchTripleLeft" Value="61"/>
+            <Member Name="punchTripleTop" Value="62"/>
+            <Member Name="punchTripleRight" Value="63"/>
+            <Member Name="punchTripleBottom" Value="64"/>
+            <Member Name="punchQuadLeft" Value="65"/>
+            <Member Name="punchQuadTop" Value="66"/>
+            <Member Name="punchQuadRight" Value="67"/>
+            <Member Name="punchQuadBottom" Value="68"/>
+            <Member Name="fold" Value="69"/>
+            <Member Name="trim" Value="70"/>
+            <Member Name="bale" Value="71"/>
+            <Member Name="bookletMaker" Value="72"/>
+            <Member Name="coat" Value="73"/>
+            <Member Name="laminate" Value="74"/>
+            <Member Name="trimAfterPages" Value="75"/>
+            <Member Name="trimAfterDocuments" Value="76"/>
+            <Member Name="trimAfterCopies" Value="77"/>
+            <Member Name="trimAfterJob" Value="78"/>
          </EnumType>
          <EnumType Name="printJobProcessingState">
             <Member Name="unknown" Value="0"/>
@@ -24573,9 +24619,10 @@
             <NavigationProperty Name="notes" Type="Collection(graph.authoredNote)" ContainsTarget="true"/>
             <NavigationProperty Name="team" Type="graph.team"/>
          </EntityType>
-         <EntityType Name="security" BaseType="graph.entity">
+         <EntityType Name="security">
             <NavigationProperty Name="subjectRightsRequests" Type="Collection(graph.subjectRightsRequest)" ContainsTarget="true"/>
             <NavigationProperty Name="cases" Type="microsoft.graph.security.casesRoot" ContainsTarget="true"/>
+            <NavigationProperty Name="identities" Type="microsoft.graph.security.identityContainer" ContainsTarget="true"/>
             <NavigationProperty Name="alerts_v2" Type="Collection(microsoft.graph.security.alert)" ContainsTarget="true"/>
             <NavigationProperty Name="incidents" Type="Collection(microsoft.graph.security.incident)" ContainsTarget="true"/>
             <NavigationProperty Name="attackSimulation" Type="graph.attackSimulationRoot" ContainsTarget="true"/>
@@ -39410,6 +39457,23 @@
             <Member Name="site" Value="2"/>
             <Member Name="unknownFutureValue" Value="4"/>
          </EnumType>
+         <EnumType Name="healthIssueSeverity">
+            <Member Name="low" Value="1"/>
+            <Member Name="medium" Value="2"/>
+            <Member Name="high" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
+         <EnumType Name="healthIssueStatus">
+            <Member Name="open" Value="1"/>
+            <Member Name="closed" Value="2"/>
+            <Member Name="suppressed" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
+         <EnumType Name="healthIssueType">
+            <Member Name="sensor" Value="1"/>
+            <Member Name="global" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
          <EnumType Name="behaviorDuringRetentionPeriod">
             <Member Name="doNotRetain" Value="0"/>
             <Member Name="retain" Value="1"/>
@@ -39758,6 +39822,9 @@
          <EntityType Name="casesRoot" BaseType="graph.entity">
             <NavigationProperty Name="ediscoveryCases" Type="Collection(microsoft.graph.security.ediscoveryCase)" ContainsTarget="true"/>
          </EntityType>
+         <EntityType Name="identityContainer" BaseType="graph.entity">
+            <NavigationProperty Name="healthIssues" Type="Collection(microsoft.graph.security.healthIssue)" ContainsTarget="true"/>
+         </EntityType>
          <EntityType Name="alert" BaseType="graph.entity">
             <Property Name="actorDisplayName" Type="Edm.String"/>
             <Property Name="additionalData" Type="microsoft.graph.security.dictionary"/>
@@ -40003,6 +40070,21 @@
          <EntityType Name="ediscoveryHoldOperation" BaseType="microsoft.graph.security.caseOperation"/>
          <EntityType Name="ediscoveryPurgeDataOperation" BaseType="microsoft.graph.security.caseOperation"/>
          <EntityType Name="ediscoveryTagOperation" BaseType="microsoft.graph.security.caseOperation"/>
+         <EntityType Name="healthIssue" BaseType="graph.entity">
+            <Property Name="additionalInformation" Type="Collection(Edm.String)" Nullable="false"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="description" Type="Edm.String" Nullable="false"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="domainNames" Type="Collection(Edm.String)"/>
+            <Property Name="healthIssueType" Type="microsoft.graph.security.healthIssueType"/>
+            <Property Name="issueTypeId" Type="Edm.String"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="recommendations" Type="Collection(Edm.String)" Nullable="false"/>
+            <Property Name="recommendedActionCommands" Type="Collection(Edm.String)" Nullable="false"/>
+            <Property Name="sensorDNSNames" Type="Collection(Edm.String)"/>
+            <Property Name="severity" Type="microsoft.graph.security.healthIssueSeverity"/>
+            <Property Name="status" Type="microsoft.graph.security.healthIssueStatus"/>
+         </EntityType>
          <ComplexType Name="alertComment">
             <Property Name="comment" Type="Edm.String"/>
             <Property Name="createdByDisplayName" Type="Edm.String"/>

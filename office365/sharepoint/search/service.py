@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
@@ -162,6 +164,7 @@ class SearchService(Entity):
         row_limit=None,
         **kwargs
     ):
+        # type: (str, List[str], bool, int, Any) -> ClientResult[SearchResult]
         """The operation is used to retrieve search results through the use of the HTTP protocol
         with method type POST.
 
@@ -172,9 +175,7 @@ class SearchService(Entity):
         :param int row_limit: The number of search results the protocol client wants to receive, starting at the index
             specified in the StartRow element. The RowLimit value MUST be greater than or equal to zero.
         """
-        return_type = ClientResult(
-            self.context, SearchResult()
-        )  # type: ClientResult[SearchResult]
+        return_type = ClientResult(self.context, SearchResult())
         request = SearchRequest(
             query_text=query_text,
             select_properties=select_properties,
@@ -211,6 +212,7 @@ class SearchService(Entity):
         return self
 
     def search_center_url(self):
+        # type: () -> ClientResult[str]
         """The operation is used to get the URI address of the search center by using the HTTP protocol
         with the GET method. The operation returns the URI of the of the search center.
         """

@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, Any, Callable, Generic, List, Optional, TypeVar
 
+from requests import Response
 from typing_extensions import Self
 
 from office365.runtime.client_runtime_context import ClientRuntimeContext
@@ -80,10 +81,10 @@ class ClientObject(Generic[T]):
         self.context.before_execute(action)
         return self
 
-    def after_execute(self, action, execute_first=False):
-        # type: (Callable[[Self], None], bool) -> Self
+    def after_execute(self, action, execute_first=False, include_response=False):
+        # type: (Callable[[Self|Response], None], bool, bool) -> Self
         """Attach an event handler to client object which gets triggered after query is submitted to server"""
-        self.context.after_query_execute(action, execute_first)
+        self.context.after_query_execute(action, execute_first, include_response)
         return self
 
     def get(self):

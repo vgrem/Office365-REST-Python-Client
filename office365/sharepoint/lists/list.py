@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import TYPE_CHECKING, AnyStr, Optional
+from typing import TYPE_CHECKING, AnyStr, Dict, Optional
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -182,11 +182,12 @@ class List(SecurableObject):
         return return_type
 
     def get_site_script(self, options=None):
+        # type: (Dict) -> ClientResult[str]
         """Creates site script syntax
 
         :param dict or None options:
         """
-        return_type = ClientResult(self.context)  # type: ClientResult[str]
+        return_type = ClientResult(self.context)
 
         def _list_loaded():
             list_abs_path = SPResPath.create_absolute(

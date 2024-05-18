@@ -1,5 +1,7 @@
 from typing import Optional
 
+from typing_extensions import Self
+
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -103,6 +105,22 @@ class Office365Tenant(Entity):
         )
         self.context.add_query(qry)
         return return_type
+
+    def set_block_download_file_type_policy_data(
+        self, blockDownloadFileTypePolicy, fileTypeIds, excludedBlockDownloadGroupIds
+    ):
+        # type: (bool, list[int], list[str]) -> Self
+        """"""
+        payload = {
+            "blockDownloadFileTypePolicy": blockDownloadFileTypePolicy,
+            "fileTypeIds": fileTypeIds,
+            "excludedBlockDownloadGroupIds": excludedBlockDownloadGroupIds,
+        }
+        qry = ServiceOperationQuery(
+            self, "SetBlockDownloadFileTypePolicyData", None, payload
+        )
+        self.context.add_query(qry)
+        return self
 
     def set_tenant_cdn_enabled(self, cdn_type, is_enabled):
         """
