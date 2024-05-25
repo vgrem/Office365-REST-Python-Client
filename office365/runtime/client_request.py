@@ -35,7 +35,6 @@ class ClientRequest(object):
         try:
             request = self.build_request(query)
             response = self.execute_request_direct(request)
-            response.raise_for_status()
             self.process_response(response, query)
             self.afterExecute.notify(response)
         except HTTPError as e:
@@ -99,4 +98,5 @@ class ClientRequest(object):
                 stream=request.stream,
                 proxies=request.proxies,
             )
+        response.raise_for_status()
         return response
