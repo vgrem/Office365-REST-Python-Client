@@ -27,6 +27,9 @@ class ResourcePath(object):
     def __str__(self):
         return self.to_url()
 
+    def __eq__(self, other):
+        return self.to_url() == other.to_url()
+
     def to_url(self):
         # type: () -> str
         """Builds url"""

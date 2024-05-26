@@ -16832,6 +16832,11 @@
             <Member Name="push" Value="1"/>
             <Member Name="any" Value="2"/>
          </EnumType>
+         <EnumType Name="x509CertificateAffinityLevel">
+            <Member Name="low" Value="0"/>
+            <Member Name="high" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
          <EnumType Name="x509CertificateAuthenticationMode">
             <Member Name="x509CertificateSingleFactor" Value="0"/>
             <Member Name="x509CertificateMultiFactor" Value="1"/>
@@ -16841,6 +16846,7 @@
             <Member Name="issuerSubject" Value="0"/>
             <Member Name="policyOID" Value="1"/>
             <Member Name="unknownFutureValue" Value="2"/>
+            <Member Name="issuerSubjectAndPolicyOID" Value="3"/>
          </EnumType>
          <EnumType Name="volumeType">
             <Member Name="operatingSystemVolume" Value="1"/>
@@ -17167,6 +17173,13 @@
             <Member Name="tagForAction" Value="3"/>
             <Member Name="unknownFutureValue" Value="4"/>
          </EnumType>
+         <EnumType Name="authenticationAttributeCollectionInputType">
+            <Member Name="text" Value="1"/>
+            <Member Name="radioSingleSelect" Value="2"/>
+            <Member Name="checkboxMultiSelect" Value="3"/>
+            <Member Name="boolean" Value="4"/>
+            <Member Name="unknownFutureValue" Value="5"/>
+         </EnumType>
          <EnumType Name="identityUserFlowAttributeDataType">
             <Member Name="string" Value="1"/>
             <Member Name="boolean" Value="2"/>
@@ -17197,6 +17210,11 @@
             <Member Name="profileUpdate" Value="5"/>
             <Member Name="resourceOwner" Value="6"/>
             <Member Name="unknownFutureValue" Value="7"/>
+         </EnumType>
+         <EnumType Name="userType">
+            <Member Name="member" Value="0"/>
+            <Member Name="guest" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
          </EnumType>
          <EnumType Name="lobbyBypassScope">
             <Member Name="organizer" Value="0"/>
@@ -17717,6 +17735,11 @@
             <Member Name="fourth" Value="3"/>
             <Member Name="last" Value="4"/>
          </EnumType>
+         <EnumType Name="fileStorageContainerStatus">
+            <Member Name="inactive" Value="0"/>
+            <Member Name="active" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
          <EnumType Name="imageTaggingChoice">
             <Member Name="disabled" Value="0"/>
             <Member Name="basic" Value="1"/>
@@ -17822,6 +17845,12 @@
             <Member Name="standard" Value="0"/>
             <Member Name="privileged" Value="1"/>
             <Member Name="auto" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="siteArchiveStatus">
+            <Member Name="recentlyArchived" Value="0"/>
+            <Member Name="fullyArchived" Value="1"/>
+            <Member Name="reactivating" Value="2"/>
             <Member Name="unknownFutureValue" Value="3"/>
          </EnumType>
          <EnumType Name="titleAreaLayoutType">
@@ -22195,6 +22224,8 @@
             <Property Name="lastNonInteractiveSignInRequestId" Type="Edm.String"/>
             <Property Name="lastSignInDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="lastSignInRequestId" Type="Edm.String"/>
+            <Property Name="lastSuccessfulSignInDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="lastSuccessfulSignInRequestId" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="assignedLicense">
             <Property Name="disabledPlans" Type="Collection(Edm.Guid)" Nullable="false"/>
@@ -23252,14 +23283,19 @@
          <ComplexType Name="x509CertificateAuthenticationModeConfiguration">
             <Property Name="rules" Type="Collection(graph.x509CertificateRule)"/>
             <Property Name="x509CertificateAuthenticationDefaultMode" Type="graph.x509CertificateAuthenticationMode"/>
+            <Property Name="x509CertificateDefaultRequiredAffinityLevel" Type="graph.x509CertificateAffinityLevel"/>
          </ComplexType>
          <ComplexType Name="x509CertificateRule">
             <Property Name="identifier" Type="Edm.String"/>
+            <Property Name="issuerSubjectIdentifier" Type="Edm.String"/>
+            <Property Name="policyOidIdentifier" Type="Edm.String"/>
             <Property Name="x509CertificateAuthenticationMode" Type="graph.x509CertificateAuthenticationMode"/>
+            <Property Name="x509CertificateRequiredAffinityLevel" Type="graph.x509CertificateAffinityLevel"/>
             <Property Name="x509CertificateRuleType" Type="graph.x509CertificateRuleType"/>
          </ComplexType>
          <ComplexType Name="x509CertificateUserBinding">
             <Property Name="priority" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="trustAffinityLevel" Type="graph.x509CertificateAffinityLevel"/>
             <Property Name="userProperty" Type="Edm.String"/>
             <Property Name="x509CertificateField" Type="Edm.String"/>
          </ComplexType>
@@ -24953,6 +24989,7 @@
             <Property Name="webId" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="siteCollection">
+            <Property Name="archivalDetails" Type="graph.siteArchivalDetails"/>
             <Property Name="dataLocationCode" Type="Edm.String"/>
             <Property Name="hostname" Type="Edm.String"/>
             <Property Name="root" Type="graph.root"/>
@@ -25064,6 +25101,30 @@
          <ComplexType Name="assignmentOrder">
             <Property Name="order" Type="Collection(Edm.String)"/>
          </ComplexType>
+         <ComplexType Name="authenticationAttributeCollectionInputConfiguration">
+            <Property Name="attribute" Type="Edm.String" Nullable="false"/>
+            <Property Name="defaultValue" Type="Edm.String"/>
+            <Property Name="editable" Type="Edm.Boolean"/>
+            <Property Name="hidden" Type="Edm.Boolean"/>
+            <Property Name="inputType" Type="graph.authenticationAttributeCollectionInputType" Nullable="false"/>
+            <Property Name="label" Type="Edm.String" Nullable="false"/>
+            <Property Name="options" Type="Collection(graph.authenticationAttributeCollectionOptionConfiguration)"/>
+            <Property Name="required" Type="Edm.Boolean"/>
+            <Property Name="validationRegEx" Type="Edm.String"/>
+            <Property Name="writeToDirectory" Type="Edm.Boolean"/>
+         </ComplexType>
+         <ComplexType Name="authenticationAttributeCollectionOptionConfiguration">
+            <Property Name="label" Type="Edm.String" Nullable="false"/>
+            <Property Name="value" Type="Edm.String" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="authenticationAttributeCollectionPage">
+            <Property Name="views" Type="Collection(graph.authenticationAttributeCollectionPageViewConfiguration)"/>
+         </ComplexType>
+         <ComplexType Name="authenticationAttributeCollectionPageViewConfiguration">
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="inputs" Type="Collection(graph.authenticationAttributeCollectionInputConfiguration)"/>
+            <Property Name="title" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="authenticationConditions">
             <Property Name="applications" Type="graph.authenticationConditionsApplications"/>
          </ComplexType>
@@ -25106,6 +25167,28 @@
          <ComplexType Name="httpRequestEndpoint" BaseType="graph.customExtensionEndpointConfiguration">
             <Property Name="targetUrl" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="onAttributeCollectionHandler" Abstract="true"/>
+         <ComplexType Name="onAttributeCollectionExternalUsersSelfServiceSignUp" BaseType="graph.onAttributeCollectionHandler">
+            <Property Name="attributeCollectionPage" Type="graph.authenticationAttributeCollectionPage"/>
+            <NavigationProperty Name="attributes" Type="Collection(graph.identityUserFlowAttribute)"/>
+         </ComplexType>
+         <EntityType Name="identityUserFlowAttribute" BaseType="graph.entity">
+            <Property Name="dataType" Type="graph.identityUserFlowAttributeDataType" Nullable="false"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="userFlowAttributeType" Type="graph.identityUserFlowAttributeType" Nullable="false"/>
+         </EntityType>
+         <ComplexType Name="onAuthenticationMethodLoadStartHandler" Abstract="true"/>
+         <ComplexType Name="onAuthenticationMethodLoadStartExternalUsersSelfServiceSignUp" BaseType="graph.onAuthenticationMethodLoadStartHandler">
+            <NavigationProperty Name="identityProviders" Type="Collection(graph.identityProviderBase)"/>
+         </ComplexType>
+         <EntityType Name="identityProviderBase" BaseType="graph.entity" Abstract="true">
+            <Property Name="displayName" Type="Edm.String"/>
+         </EntityType>
+         <ComplexType Name="onInteractiveAuthFlowStartHandler" Abstract="true"/>
+         <ComplexType Name="onInteractiveAuthFlowStartExternalUsersSelfServiceSignUp" BaseType="graph.onInteractiveAuthFlowStartHandler">
+            <Property Name="isSignUpAllowed" Type="Edm.Boolean" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="onTokenIssuanceStartHandler" Abstract="true"/>
          <ComplexType Name="onTokenIssuanceStartCustomExtensionHandler" BaseType="graph.onTokenIssuanceStartHandler">
             <Property Name="configuration" Type="graph.customExtensionOverwriteConfiguration"/>
@@ -25117,6 +25200,10 @@
          </EntityType>
          <ComplexType Name="onTokenIssuanceStartReturnClaim">
             <Property Name="claimIdInApiResponse" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="onUserCreateStartHandler" Abstract="true"/>
+         <ComplexType Name="onUserCreateStartExternalUsersSelfServiceSignUp" BaseType="graph.onUserCreateStartHandler">
+            <Property Name="userTypeToCreate" Type="graph.userType"/>
          </ComplexType>
          <ComplexType Name="pkcs12Certificate" BaseType="graph.apiAuthenticationConfigurationBase">
             <Property Name="password" Type="Edm.String"/>
@@ -25139,9 +25226,6 @@
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="targetUrl" Type="Edm.String"/>
          </EntityType>
-         <EntityType Name="identityProviderBase" BaseType="graph.entity" Abstract="true">
-            <Property Name="displayName" Type="Edm.String"/>
-         </EntityType>
          <EntityType Name="appleManagedIdentityProvider" BaseType="graph.identityProviderBase">
             <Property Name="certificateData" Type="Edm.String"/>
             <Property Name="developerId" Type="Edm.String"/>
@@ -25151,6 +25235,11 @@
          <EntityType Name="authenticationEventListener" BaseType="graph.entity" Abstract="true" OpenType="true">
             <Property Name="authenticationEventsFlowId" Type="Edm.String"/>
             <Property Name="conditions" Type="graph.authenticationConditions"/>
+         </EntityType>
+         <EntityType Name="authenticationEventsFlow" BaseType="graph.entity" Abstract="true" OpenType="true">
+            <Property Name="conditions" Type="graph.authenticationConditions"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
          </EntityType>
          <EntityType Name="identityUserFlow" BaseType="graph.entity">
             <Property Name="userFlowType" Type="graph.userFlowType" Nullable="false"/>
@@ -25186,16 +25275,17 @@
          <EntityType Name="builtInIdentityProvider" BaseType="graph.identityProviderBase">
             <Property Name="identityProviderType" Type="Edm.String"/>
          </EntityType>
-         <EntityType Name="identityUserFlowAttribute" BaseType="graph.entity">
-            <Property Name="dataType" Type="graph.identityUserFlowAttributeDataType" Nullable="false"/>
-            <Property Name="description" Type="Edm.String"/>
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="userFlowAttributeType" Type="graph.identityUserFlowAttributeType" Nullable="false"/>
+         <EntityType Name="externalUsersSelfServiceSignUpEventsFlow" BaseType="graph.authenticationEventsFlow">
+            <Property Name="onAttributeCollection" Type="graph.onAttributeCollectionHandler"/>
+            <Property Name="onAuthenticationMethodLoadStart" Type="graph.onAuthenticationMethodLoadStartHandler"/>
+            <Property Name="onInteractiveAuthFlowStart" Type="graph.onInteractiveAuthFlowStartHandler"/>
+            <Property Name="onUserCreateStart" Type="graph.onUserCreateStartHandler"/>
          </EntityType>
          <EntityType Name="identityBuiltInUserFlowAttribute" BaseType="graph.identityUserFlowAttribute"/>
          <EntityType Name="identityContainer" BaseType="graph.entity">
             <NavigationProperty Name="apiConnectors" Type="Collection(graph.identityApiConnector)" ContainsTarget="true"/>
             <NavigationProperty Name="authenticationEventListeners" Type="Collection(graph.authenticationEventListener)" ContainsTarget="true"/>
+            <NavigationProperty Name="authenticationEventsFlows" Type="Collection(graph.authenticationEventsFlow)" ContainsTarget="true"/>
             <NavigationProperty Name="b2xUserFlows" Type="Collection(graph.b2xIdentityUserFlow)" ContainsTarget="true"/>
             <NavigationProperty Name="customAuthenticationExtensions" Type="Collection(graph.customAuthenticationExtension)" ContainsTarget="true"/>
             <NavigationProperty Name="identityProviders" Type="Collection(graph.identityProviderBase)" ContainsTarget="true"/>
@@ -25203,8 +25293,20 @@
             <NavigationProperty Name="conditionalAccess" Type="graph.conditionalAccessRoot" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="identityCustomUserFlowAttribute" BaseType="graph.identityUserFlowAttribute"/>
+         <EntityType Name="onAttributeCollectionListener" BaseType="graph.authenticationEventListener">
+            <Property Name="handler" Type="graph.onAttributeCollectionHandler"/>
+         </EntityType>
+         <EntityType Name="onAuthenticationMethodLoadStartListener" BaseType="graph.authenticationEventListener">
+            <Property Name="handler" Type="graph.onAuthenticationMethodLoadStartHandler"/>
+         </EntityType>
+         <EntityType Name="onInteractiveAuthFlowStartListener" BaseType="graph.authenticationEventListener">
+            <Property Name="handler" Type="graph.onInteractiveAuthFlowStartHandler"/>
+         </EntityType>
          <EntityType Name="onTokenIssuanceStartListener" BaseType="graph.authenticationEventListener">
             <Property Name="handler" Type="graph.onTokenIssuanceStartHandler"/>
+         </EntityType>
+         <EntityType Name="onUserCreateStartListener" BaseType="graph.authenticationEventListener">
+            <Property Name="handler" Type="graph.onUserCreateStartHandler"/>
          </EntityType>
          <EntityType Name="socialIdentityProvider" BaseType="graph.identityProviderBase">
             <Property Name="clientId" Type="Edm.String"/>
@@ -27414,11 +27516,34 @@
             <Property Name="displayName" Type="Edm.String"/>
          </EntityType>
          <EntityType Name="referenceAttachment" BaseType="graph.attachment"/>
+         <ComplexType Name="Dictionary" OpenType="true"/>
+         <ComplexType Name="fileStorageContainerCustomPropertyDictionary" BaseType="graph.Dictionary" OpenType="true"/>
+         <ComplexType Name="fileStorageContainerCustomPropertyValue">
+            <Property Name="isSearchable" Type="Edm.Boolean"/>
+            <Property Name="value" Type="Edm.String" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="fileStorageContainerViewpoint">
+            <Property Name="effectiveRole" Type="Edm.String" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="idleSessionSignOut">
             <Property Name="isEnabled" Type="Edm.Boolean"/>
             <Property Name="signOutAfterInSeconds" Type="Edm.Int64"/>
             <Property Name="warnAfterInSeconds" Type="Edm.Int64"/>
          </ComplexType>
+         <EntityType Name="fileStorage" BaseType="graph.entity">
+            <NavigationProperty Name="containers" Type="Collection(graph.fileStorageContainer)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="fileStorageContainer" BaseType="graph.entity">
+            <Property Name="containerTypeId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="customProperties" Type="graph.fileStorageContainerCustomPropertyDictionary"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="status" Type="graph.fileStorageContainerStatus"/>
+            <Property Name="viewpoint" Type="graph.fileStorageContainerViewpoint"/>
+            <NavigationProperty Name="drive" Type="graph.drive" ContainsTarget="true"/>
+            <NavigationProperty Name="permissions" Type="Collection(graph.permission)" ContainsTarget="true"/>
+         </EntityType>
          <EntityType Name="sharepointSettings" BaseType="graph.entity">
             <Property Name="allowedDomainGuidsForSyncApp" Type="Collection(Edm.Guid)"/>
             <Property Name="availableManagedPathsForSiteCreation" Type="Collection(Edm.String)" Nullable="false"/>
@@ -27449,6 +27574,9 @@
             <Property Name="siteCreationDefaultManagedPath" Type="Edm.String" Nullable="false"/>
             <Property Name="siteCreationDefaultStorageLimitInMB" Type="Edm.Int32"/>
             <Property Name="tenantDefaultTimezone" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="storage">
+            <NavigationProperty Name="fileStorage" Type="graph.fileStorage" ContainsTarget="true"/>
          </EntityType>
          <ComplexType Name="accessAction" OpenType="true"/>
          <ComplexType Name="album">
@@ -27677,6 +27805,9 @@
             <Property Name="type" Type="Edm.String"/>
             <Property Name="webHtml" Type="Edm.String"/>
             <Property Name="webUrl" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="siteArchivalDetails">
+            <Property Name="archiveStatus" Type="graph.siteArchiveStatus"/>
          </ComplexType>
          <ComplexType Name="termColumn">
             <Property Name="allowMultipleValues" Type="Edm.Boolean"/>
@@ -31413,7 +31544,6 @@
             <Property Name="body" Type="graph.Json"/>
             <Property Name="displayName" Type="Edm.String"/>
          </ComplexType>
-         <ComplexType Name="Dictionary" OpenType="true"/>
          <ComplexType Name="resultTemplateDictionary" BaseType="graph.Dictionary" OpenType="true"/>
          <ComplexType Name="resultTemplateOption">
             <Property Name="enableResultTemplate" Type="Edm.Boolean"/>
@@ -34881,6 +35011,9 @@
          <Action Name="activate" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.educationAssignment"/>
             <ReturnType Type="graph.educationAssignment"/>
+         </Action>
+         <Action Name="activate" IsBound="true">
+            <Parameter Name="this" Type="graph.fileStorageContainer"/>
          </Action>
          <Action Name="deactivate" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.educationAssignment"/>
@@ -39351,6 +39484,7 @@
             </Singleton>
             <Singleton Name="roleManagement" Type="microsoft.graph.roleManagement"/>
             <Singleton Name="drive" Type="microsoft.graph.drive"/>
+            <Singleton Name="storage" Type="microsoft.graph.storage"/>
             <Singleton Name="communications" Type="microsoft.graph.cloudCommunications"/>
             <Singleton Name="identityProtection" Type="microsoft.graph.identityProtectionRoot"/>
             <Singleton Name="deviceAppManagement" Type="microsoft.graph.deviceAppManagement"/>

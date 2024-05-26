@@ -8,7 +8,7 @@ from tests import create_unique_name
 from tests.graph_case import GraphTestCase
 
 
-class TestDriveItem(GraphTestCase):
+class TestFile(GraphTestCase):
     """OneDrive specific test case base class"""
 
     target_drive = None  # type: Drive
@@ -17,7 +17,7 @@ class TestDriveItem(GraphTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestDriveItem, cls).setUpClass()
+        super(TestFile, cls).setUpClass()
         lib_name = create_unique_name("Lib")
         lib = cls.client.sites.root.lists.add(
             lib_name, "documentLibrary"
