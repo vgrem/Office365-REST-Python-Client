@@ -42,12 +42,9 @@ class TestFile(GraphTestCase):
 
     def test3_upload_file(self):
         file_name = "SharePoint User Guide.docx"
-        path = "{0}/../data/{1}".format(os.path.dirname(__file__), file_name)
-        with open(path, "rb") as content_file:
-            file_content = content_file.read()
-        file_name = os.path.basename(path)
-        self.__class__.target_file = self.target_drive.root.upload(
-            file_name, file_content
+        file_path = "{0}/../data/{1}".format(os.path.dirname(__file__), file_name)
+        self.__class__.target_file = self.target_drive.root.upload_file(
+            file_path
         ).execute_query()
         self.assertIsNotNone(self.target_file.web_url)
 

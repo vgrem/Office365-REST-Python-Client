@@ -911,7 +911,7 @@ class DriveItem(BaseItem):
     def set_property(self, name, value, persist_changes=True):
         super(DriveItem, self).set_property(name, value, persist_changes)
         if name == "parentReference":
-            self._resource_path.parent.patch(self.parent_reference.driveId)
+            pass
         return self
 
     def get_property(self, name, default_value=None):
