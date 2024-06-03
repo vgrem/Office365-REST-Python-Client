@@ -6,13 +6,22 @@ class ItemBody(ClientValue):
 
     def __init__(self, content=None, content_type="Text"):
         """
-
         :param str content: The content of the item.
         :param str content_type: The type of the content. Possible values are text and html.
         """
         super(ItemBody, self).__init__()
         self.content = content
         self.contentType = content_type
+
+    @staticmethod
+    def create_text(content):
+        # type: (str) -> "ItemBody"
+        return ItemBody(content)
+
+    @staticmethod
+    def create_html(content):
+        # type: (str) -> "ItemBody"
+        return ItemBody(content, "html")
 
     def __repr__(self):
         return self.content

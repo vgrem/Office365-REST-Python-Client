@@ -1,3 +1,5 @@
+from typing import List
+
 from office365.delta_collection import DeltaCollection
 from office365.outlook.mail.item_body import ItemBody
 from office365.outlook.mail.messages.message import Message
@@ -10,6 +12,7 @@ class MessageCollection(DeltaCollection[Message]):
         super(MessageCollection, self).__init__(context, Message, resource_path)
 
     def add(self, subject=None, body=None, to_recipients=None, **kwargs):
+        # type: (str, str|ItemBody, List[str], ...) -> Message
         """
         Create a draft of a new message in either JSON or MIME format.
 

@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 from office365.communications.onlinemeetings.collection import OnlineMeetingCollection
 from office365.communications.presences.presence import Presence
@@ -46,6 +46,7 @@ from office365.outlook.contacts.collection import ContactCollection
 from office365.outlook.contacts.folder import ContactFolder
 from office365.outlook.convert_id_result import ConvertIdResult
 from office365.outlook.mail.folders.collection import MailFolderCollection
+from office365.outlook.mail.item_body import ItemBody
 from office365.outlook.mail.mailbox_settings import MailboxSettings
 from office365.outlook.mail.messages.collection import MessageCollection
 from office365.outlook.mail.messages.message import Message
@@ -201,6 +202,7 @@ class User(DirectoryObject):
         bcc_recipients=None,
         save_to_sent_items=False,
     ):
+        # type: (str, str|ItemBody, List[str], List[str], List[str], bool) -> Message
         """Send a new message on the fly
 
         :param str subject: The subject of the message.

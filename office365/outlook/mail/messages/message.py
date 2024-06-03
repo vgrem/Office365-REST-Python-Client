@@ -1,7 +1,7 @@
 import os
 import uuid
 from datetime import datetime
-from typing import IO, AnyStr, Optional
+from typing import IO, AnyStr, List, Optional
 
 from typing_extensions import Self
 
@@ -42,6 +42,7 @@ class Message(OutlookItem):
         return self
 
     def create_forward(self, to_recipients=None, message=None, comment=None):
+        # type: (List[Recipient], "Message", str) -> Message
         """
         Create a draft to forward an existing message, in either JSON or MIME format.
 
@@ -373,9 +374,7 @@ class Message(OutlookItem):
     @property
     def subject(self):
         # type: () -> Optional[str]
-        """
-        The subject of the message.
-        """
+        """The subject of the message."""
         return self.properties.get("subject", None)
 
     @subject.setter

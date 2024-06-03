@@ -72,9 +72,8 @@ class TestGraphChannel(GraphTestCase):
     #    self.assertIsNotNone(drive_item.resource_path)
 
     def test8_send_message(self):
-        item_body = ItemBody("Hello world!")
         message = self.__class__.target_channel.messages.add(
-            body=item_body
+            body=ItemBody("Hello world!")
         ).execute_query()
         self.assertIsNotNone(message.id)
         self.__class__.target_message = message
