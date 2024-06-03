@@ -14,8 +14,11 @@ class Field(Entity):
     def __init__(self, context, resource_path=None):
         super(Field, self).__init__(context, resource_path)
 
+    def __str__(self):
+        return self.title or self.entity_type_name
+
     def __repr__(self):
-        return self.internal_name or self.id
+        return self.internal_name or self.id or self.entity_type_name
 
     @staticmethod
     def resolve_field_type(type_id_or_name):
@@ -63,7 +66,7 @@ class Field(Entity):
                 return Field
 
     @staticmethod
-    def create_field_from_type(context, field_parameters):
+    def create_field(context, field_parameters):
         """
         Creates a field based on its type
 
