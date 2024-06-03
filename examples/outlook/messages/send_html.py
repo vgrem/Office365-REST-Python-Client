@@ -19,6 +19,6 @@ client = GraphClient.with_username_and_password(
 )
 client.me.send_mail(
     subject="Meet for lunch?",
-    body=ItemBody.create_html("<h1>The new cafeteria is open.</h1>"),
+    body=ItemBody.html("<h1>The new cafeteria is open.</h1>"),
     to_recipients=["fannyd@contoso.onmicrosoft.com", test_user_principal_name_alt],
 ).execute_query()

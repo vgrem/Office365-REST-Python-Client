@@ -40,7 +40,7 @@ def is_valid_auth_cookies(values):
 
 
 class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
-    def __init__(self, url, username, password, browser_mode, environment='commercial'):
+    def __init__(self, url, username, password, browser_mode, environment="commercial"):
         """
         SAML Security Token Service provider (claims-based authentication)
 
