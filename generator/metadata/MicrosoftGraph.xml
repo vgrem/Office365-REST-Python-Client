@@ -23676,6 +23676,10 @@
             <Property Name="certificateUserBindings" Type="Collection(graph.x509CertificateUserBinding)"/>
             <NavigationProperty Name="includeTargets" Type="Collection(graph.authenticationMethodTarget)" ContainsTarget="true"/>
          </EntityType>
+         <EntityType Name="x509CertificateCombinationConfiguration" BaseType="graph.authenticationCombinationConfiguration">
+            <Property Name="allowedIssuerSkis" Type="Collection(Edm.String)" Nullable="false"/>
+            <Property Name="allowedPolicyOIDs" Type="Collection(Edm.String)" Nullable="false"/>
+         </EntityType>
          <EntityType Name="bitlocker" BaseType="graph.entity">
             <NavigationProperty Name="recoveryKeys" Type="Collection(graph.bitlockerRecoveryKey)" ContainsTarget="true"/>
          </EntityType>

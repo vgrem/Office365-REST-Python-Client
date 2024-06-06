@@ -319,6 +319,28 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def get_ransomware_activities(self):
+        # type: () -> ClientResult[AnyStr]
+        """ """
+        return_type = ClientResult(self.context)
+        payload = {"parameters": RenderListDataParameters()}
+        qry = ServiceOperationQuery(
+            self, "GetRansomwareActivities", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def get_sp_list_item_count(self, listName):
+        # type: (str) -> ClientResult[int]
+        """ """
+        return_type = ClientResult(self.context)
+        payload = {"listName": listName}
+        qry = ServiceOperationQuery(
+            self, "GetSPListItemCount", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def check_tenant_intune_license(self):
         """
         Checks whether a tenant has the Intune license.

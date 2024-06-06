@@ -9,3 +9,22 @@ class SPBuiltInFieldId:
 
     FSObjType = "FSObjType"
     """Identifies a field that contains information about the file system type"""
+
+    FileType = "FileType"
+    """Identifies a field that contains information about the file type for version history of the specified
+    SharePoint Foundation library picture object."""
+
+    FirstName = "FirstName"
+    """Identifies a field that contains the first name for the specified SharePoint Foundation contact object."""
+
+    FormData = "FormData"
+    """Identifies a field that contains the FormData property for the specified
+    Microsoft SharePoint Foundation contact object."""
+
+    FormURN = "FormURN"
+    """Identifies a field that contains the FormURN property for the specified
+    Microsoft SharePoint Foundation contact object."""
+
+    fRecurrence = "fRecurrence"
+    """Identifies a field that contains information about the recurrence field of the specified SharePoint Foundation
+    calendar event object."""

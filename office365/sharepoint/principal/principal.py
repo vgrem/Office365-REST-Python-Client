@@ -11,7 +11,12 @@ class Principal(Entity):
         return self.title or self.entity_type_name
 
     def __repr__(self):
-        return self.user_principal_name or self.id or self.entity_type_name
+        return (
+            self.user_principal_name
+            or self.login_name
+            or self.id
+            or self.entity_type_name
+        )
 
     @property
     def id(self):
@@ -54,6 +59,10 @@ class Principal(Entity):
         # type: () -> Optional[int]
         """Gets the type of the principal."""
         return self.properties.get("PrincipalType", None)
+
+    @property
+    def property_ref_name(self):
+        return "Id"
 
     def set_property(self, name, value, persist_changes=True):
         super(Principal, self).set_property(name, value, persist_changes)

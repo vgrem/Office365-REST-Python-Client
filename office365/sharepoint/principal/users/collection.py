@@ -19,9 +19,7 @@ class UserCollection(EntityCollection[User]):
         self.add_child(return_type)
 
         def _create_and_add_query(login_name):
-            """
-            :type login_name: str
-            """
+            # type: (str) -> None
             return_type.set_property("LoginName", login_name)
             qry = CreateEntityQuery(self, return_type, return_type)
             self.context.add_query(qry)

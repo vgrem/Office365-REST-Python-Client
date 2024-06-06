@@ -184,3 +184,7 @@ class TestTenant(TestCase):
     def test_25_get_power_apps_environments(self):
         result = self.tenant.get_power_apps_environments().execute_query()
         self.assertIsNotNone(result.value)
+
+    # def test_26_get_ransomware_activities(self):
+    #    result = self.tenant.get_ransomware_activities().execute_query()
+    #    self.assertIsNotNone(result.value)
