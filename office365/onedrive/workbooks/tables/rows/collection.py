@@ -1,5 +1,7 @@
 from office365.entity_collection import EntityCollection
 from office365.onedrive.workbooks.tables.rows.row import WorkbookTableRow
+from office365.runtime.client_result import ClientResult
+from office365.runtime.queries.function import FunctionQuery
 
 
 class WorkbookTableRowCollection(EntityCollection[WorkbookTableRow]):
@@ -25,3 +27,21 @@ class WorkbookTableRowCollection(EntityCollection[WorkbookTableRow]):
              Any rows below the inserted row are shifted downwards. Zero-indexed.
         """
         return super(WorkbookTableRowCollection, self).add(values=values, index=index)
+
+    def count(self):
+        """"""
+        return_type = ClientResult(self.context, int())
+        qry = FunctionQuery(self, "count", None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def item_at(self, index):
+        # type: (int) -> WorkbookTableRow
+        """Gets a row based on its position in the collection.
+        :param int index: Index value of the object to be retrieved. Zero-indexed.
+        """
+        return_type = WorkbookTableRow(self.context)
+        self.add_child(return_type)
+        qry = FunctionQuery(self, "itemAt", [index], return_type)
+        self.context.add_query(qry)
+        return return_type

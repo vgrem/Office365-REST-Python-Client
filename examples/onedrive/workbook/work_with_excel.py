@@ -3,14 +3,17 @@ Demonstrates how to work with the Excel API
 
 https://learn.microsoft.com/en-us/graph/api/resources/excel?view=graph-rest-1.0
 """
-from examples.onedrive import ensure_workbook_sample
 from office365.graph_client import GraphClient
 from tests import test_client_id, test_password, test_tenant, test_username
 
 client = GraphClient.with_username_and_password(
     test_tenant, test_client_id, test_username, test_password
 )
-workbook = ensure_workbook_sample(client)
+
+local_path = "../../data/Financial Sample.xlsx"
+excel_file = client.me.drive.root.upload_file(local_path).execute_query()
+print("File {0} has been uploaded".format(excel_file.web_url))
+workbook = excel_file.workbook
 
 print("Creating a session...")
 result = workbook.create_session().execute_query()
