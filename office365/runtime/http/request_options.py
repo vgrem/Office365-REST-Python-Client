@@ -1,20 +1,22 @@
+from typing import Any
+
 from office365.runtime.http.http_method import HttpMethod
 
 
 class RequestOptions(object):
     """Request options"""
 
-    def __init__(self, url):
+    def __init__(self, url, method=HttpMethod.Get, data=None):
         """
         Request options
 
         :param str url: URL for the new :class:`requests.Request` object
         """
         self.url = url
-        self.data = None
+        self.data = data
         self.headers = {}
         self.auth = None
-        self.method = HttpMethod.Get
+        self.method = method
         self.verify = True
         self.stream = False
         self.proxies = None
@@ -28,8 +30,10 @@ class RequestOptions(object):
         return hasattr(self.data, "decode") and callable(self.data.decode)
 
     def set_header(self, name, value):
+        # type: (str, Any) -> None
         self.headers[name] = value
 
     def ensure_header(self, name, value):
+        # type: (str, Any) -> None
         if name not in self.headers:
             self.headers[name] = value

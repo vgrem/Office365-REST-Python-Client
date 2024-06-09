@@ -23,6 +23,11 @@ class SharingInformation(Entity):
         return self.properties.get("accessRequestSettings", AccessRequestSettings())
 
     @property
+    def anonymous_link_expiration_restriction_days(self):
+        """Tenant's anonymous link expiration restriction in days."""
+        return self.properties.get("anonymousLinkExpirationRestrictionDays", None)
+
+    @property
     def permissions_information(self):
         """
         The PermissionCollection that are on the list item. It contains a collection of PrincipalInfo and LinkInfo.

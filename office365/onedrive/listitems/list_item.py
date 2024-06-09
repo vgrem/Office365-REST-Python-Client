@@ -38,6 +38,7 @@ class ListItem(BaseItem):
 
     @property
     def versions(self):
+        # type: () -> EntityCollection[ListItemVersion]
         """The list of previous versions of the list item."""
         return self.properties.get(
             "versions",

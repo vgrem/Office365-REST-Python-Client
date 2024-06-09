@@ -14,25 +14,27 @@ class PermissionCollection(ClientValue):
 
     def __init__(
         self,
-        hasInheritedLinks=None,
+        app_consent_principals=None,
+        has_inherited_links=None,
         links=None,
         principals=None,
-        siteAdmins=None,
-        totalNumberOfPrincipals=None,
+        site_admins=None,
+        total_number_of_principals=None,
     ):
         """
-        :param bool hasInheritedLinks:
+        :param bool has_inherited_links:
         :param list[LinkInfo] links: The List of tokenized sharing links with their LinkInfo objects.
         :param list[PrincipalInfo] principals: The List of Principals with their roles on this list item.
-        :param list[PrincipalInfo] siteAdmins: The List of Principals who are Site Admins. This property is returned
+        :param list[PrincipalInfo] site_admins: The List of Principals who are Site Admins. This property is returned
             only if the caller is an Auditor.
-        :param int totalNumberOfPrincipals:
+        :param int total_number_of_principals:
         """
-        self.hasInheritedLinks = hasInheritedLinks
+        self.appConsentPrincipals = ClientValueCollection(PrincipalInfo, app_consent_principals)
+        self.hasInheritedLinks = has_inherited_links
         self.links = ClientValueCollection(LinkInfo, links)
         self.principals = ClientValueCollection(PrincipalInfo, principals)
-        self.siteAdmins = ClientValueCollection(PrincipalInfo, siteAdmins)
-        self.totalNumberOfPrincipals = totalNumberOfPrincipals
+        self.siteAdmins = ClientValueCollection(PrincipalInfo, site_admins)
+        self.totalNumberOfPrincipals = total_number_of_principals
 
     @property
     def entity_type_name(self):

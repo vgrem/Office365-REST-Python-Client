@@ -26,13 +26,13 @@ parser.add_argument(
     "--endpoint",
     dest="endpoint",
     help="Import metadata endpoint",
-    default="sharepoint",
+    default="microsoftgraph",
 )
 parser.add_argument(
     "-p",
     "--path",
     dest="path",
-    default="./metadata/SharePoint.xml",
+    default="./metadata/MicrosoftGraph.xml",
     help="Import metadata endpoint",
 )
 
