@@ -1,6 +1,10 @@
 import os
-from typing import IO, AnyStr
+from functools import partial
+from typing import IO, AnyStr, Optional, Callable
 
+from typing_extensions import Self
+
+from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.attachments.attachment import Attachment
@@ -72,6 +76,27 @@ class AttachmentCollection(EntityCollection[Attachment]):
             [a.delete_object() for a in return_type]
 
         self.get().after_execute(_delete_all)
+        return self
+
+    def download(self, download_file, file_downloaded=None):
+        # type: (IO, Optional[Callable[[], None]]) -> Self
+        """Downloads attachments as a zip file"""
+        import zipfile
+
+        def _file_downloaded(attachment_file, result):
+            # type: (Attachment, ClientResult[AnyStr]) -> None
+            with zipfile.ZipFile(download_file.name, "a", zipfile.ZIP_DEFLATED) as zf:
+                zf.writestr(attachment_file.file_name, result.value)
+                if callable(file_downloaded):
+                    file_downloaded(attachment_file)
+
+        def _download(return_type):
+            for attachment_file in return_type:
+                attachment_file.get_content().after_execute(
+                    partial(_file_downloaded, attachment_file)
+                )
+
+        self.get().after_execute(_download)
         return self
 
     def upload(self, file, use_path=True):

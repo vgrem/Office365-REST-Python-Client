@@ -1,6 +1,7 @@
 from typing import AnyStr, Optional
 
 from office365.runtime.client_result import ClientResult
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.internal.queries.upload_file import create_upload_file_query
@@ -41,6 +42,14 @@ class Attachment(Entity):
         else:
             self.ensure_property("ServerRelativeUrl", _download_file_by_url)
         return self
+
+    def get_content(self):
+        # type: () -> ClientResult[AnyStr]
+        """Gets the raw contents of attachment"""
+        return_type = ClientResult(self.context)
+        qry = FunctionQuery(self, "$value", None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     def recycle_object(self):
         """Move this attachment to site recycle bin."""

@@ -1,7 +1,13 @@
+from typing import Optional
+
+from office365.directory.identitygovernance.appconsent.request_scope import (
+    AppConsentRequestScope,
+)
 from office365.directory.identitygovernance.userconsent.request_collection import (
     UserConsentRequestCollection,
 )
 from office365.entity import Entity
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 
@@ -14,6 +20,32 @@ class AppConsentRequest(Entity):
     The user can create a consent request when an app or a permission requires admin authorization and only when
     the admin consent workflow is enabled.
     """
+
+    def __str__(self):
+        return self.app_display_name or self.entity_type_name
+
+    def __repr__(self):
+        return self.app_id or self.entity_type_name
+
+    @property
+    def app_display_name(self):
+        # type: () -> Optional[str]
+        """Display name of the application object on which this extension property is defined. Read-only"""
+        return self.properties.get("appDisplayName", None)
+
+    @property
+    def app_id(self):
+        # type: () -> Optional[str]
+        """The identifier of the application"""
+        return self.properties.get("appId", None)
+
+    @property
+    def pending_scopes(self):
+        # type: () -> ClientValueCollection[AppConsentRequestScope]
+        """A list of pending scopes waiting for approval. Required."""
+        return self.properties.get(
+            "pendingScopes", ClientValueCollection(AppConsentRequestScope)
+        )
 
     @property
     def user_consent_requests(self):

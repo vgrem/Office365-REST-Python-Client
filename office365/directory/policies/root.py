@@ -1,3 +1,4 @@
+from office365.directory.policies.admin_consent_request import AdminConsentRequestPolicy
 from office365.directory.policies.app_management import AppManagementPolicy
 from office365.directory.policies.authentication_flows import AuthenticationFlowsPolicy
 from office365.directory.policies.authentication_methods import (
@@ -19,6 +20,19 @@ from office365.runtime.paths.resource_path import ResourcePath
 
 class PolicyRoot(Entity):
     """Resource type exposing navigation properties for the policies singleton."""
+
+    @property
+    def admin_consent_request_policy(self):
+        """
+        The policy by which consent requests are created and managed for the entire tenant.
+        """
+        return self.properties.get(
+            "adminConsentRequestPolicy",
+            AdminConsentRequestPolicy(
+                self.context,
+                ResourcePath("adminConsentRequestPolicy", self.resource_path),
+            ),
+        )
 
     @property
     def authentication_methods_policy(self):
@@ -151,6 +165,7 @@ class PolicyRoot(Entity):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "adminConsentRequestPolicy": self.admin_consent_request_policy,
                 "authenticationStrengthPolicies": self.authentication_strength_policies,
                 "authenticationFlowsPolicy": self.authentication_flows_policy,
                 "appManagementPolicies": self.app_management_policies,

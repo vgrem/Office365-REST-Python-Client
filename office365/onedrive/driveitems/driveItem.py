@@ -618,9 +618,9 @@ class DriveItem(BaseItem):
                 DriveRecipient, [DriveRecipient.from_email(r) for r in recipients]
             ),
             "message": message,
-            "expirationDateTime": expiration_datetime.isoformat() + "Z"
-            if expiration_datetime
-            else None,
+            "expirationDateTime": (
+                expiration_datetime.isoformat() + "Z" if expiration_datetime else None
+            ),
             "password": password,
             "retainInheritedPermissions": retain_inherited_permissions,
         }

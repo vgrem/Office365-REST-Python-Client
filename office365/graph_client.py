@@ -127,7 +127,7 @@ class GraphClient(ClientRuntimeContext):
                 "thumbprint": thumbprint,
                 "private_key": private_key,
             },
-            token_cache=token_cache  # Default cache is in memory only.
+            token_cache=token_cache,  # Default cache is in memory only.
             # You can learn how to use SerializableTokenCache from
             # https://msal-python.readthedocs.io/en/latest/#msal.SerializableTokenCache
         )

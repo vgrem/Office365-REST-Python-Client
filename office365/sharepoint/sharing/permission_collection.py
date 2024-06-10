@@ -29,7 +29,9 @@ class PermissionCollection(ClientValue):
             only if the caller is an Auditor.
         :param int total_number_of_principals:
         """
-        self.appConsentPrincipals = ClientValueCollection(PrincipalInfo, app_consent_principals)
+        self.appConsentPrincipals = ClientValueCollection(
+            PrincipalInfo, app_consent_principals
+        )
         self.hasInheritedLinks = has_inherited_links
         self.links = ClientValueCollection(LinkInfo, links)
         self.principals = ClientValueCollection(PrincipalInfo, principals)

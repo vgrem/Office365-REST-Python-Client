@@ -30,13 +30,10 @@ class SharePointRequest(ODataRequest):
         :param str environment: The Office 365 Cloud Environment endpoint used for authentication
             defaults to 'commercial'.
         """
-        self._auth_context.with_credentials(
-            credentials, environment=environment
-        )
+        self._auth_context.with_credentials(credentials, environment=environment)
         return self
 
     def _authenticate_request(self, request):
         # type: (RequestOptions) -> None
         """Authenticate request"""
         self._auth_context.authenticate_request(request)
-
