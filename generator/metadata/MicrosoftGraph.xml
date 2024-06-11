@@ -21739,6 +21739,8 @@
             <Member Name="unknownFutureValue" Value="5"/>
             <Member Name="teamifyGroup" Value="6"/>
             <Member Name="createChannel" Value="7"/>
+            <Member Name="archiveChannel" Value="8"/>
+            <Member Name="unarchiveChannel" Value="9"/>
          </EnumType>
          <EnumType Name="teamSpecialization">
             <Member Name="none" Value="0"/>
@@ -24956,6 +24958,7 @@
             <Property Name="description" Type="Edm.String"/>
             <Property Name="displayName" Type="Edm.String" Nullable="false"/>
             <Property Name="email" Type="Edm.String"/>
+            <Property Name="isArchived" Type="Edm.Boolean"/>
             <Property Name="isFavoriteByDefault" Type="Edm.Boolean"/>
             <Property Name="membershipType" Type="graph.channelMembershipType"/>
             <Property Name="summary" Type="graph.channelSummary"/>
@@ -39083,6 +39086,10 @@
             <ReturnType Type="Edm.Boolean"/>
          </Action>
          <Action Name="archive" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.channel"/>
+            <Parameter Name="shouldSetSpoSiteReadOnlyForMembers" Type="Edm.Boolean"/>
+         </Action>
+         <Action Name="archive" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.team"/>
             <Parameter Name="shouldSetSpoSiteReadOnlyForMembers" Type="Edm.Boolean"/>
          </Action>
@@ -39105,6 +39112,9 @@
             <Parameter Name="bindingParameter" Type="Collection(graph.serviceUpdateMessage)"/>
             <Parameter Name="messageIds" Type="Collection(Edm.String)" Unicode="false"/>
             <ReturnType Type="Edm.Boolean"/>
+         </Action>
+         <Action Name="unarchive" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.channel"/>
          </Action>
          <Action Name="unarchive" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.team"/>
@@ -39382,6 +39392,32 @@
          <Action Name="reauthorize" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.subscription"/>
          </Action>
+         <Action Name="completeMigration" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.channel"/>
+         </Action>
+         <Action Name="completeMigration" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.team"/>
+         </Action>
+         <Action Name="provisionEmail" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.channel"/>
+            <ReturnType Type="graph.provisionChannelEmailResult"/>
+         </Action>
+         <Action Name="removeEmail" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.channel"/>
+         </Action>
+         <Function Name="doesUserHaveAccess" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.channel"/>
+            <Parameter Name="userId" Type="Edm.String" Unicode="false">
+               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
+            </Parameter>
+            <Parameter Name="tenantId" Type="Edm.String" Unicode="false">
+               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
+            </Parameter>
+            <Parameter Name="userPrincipalName" Type="Edm.String" Unicode="false">
+               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
+            </Parameter>
+            <ReturnType Type="Edm.Boolean" Nullable="false"/>
+         </Function>
          <Action Name="clone" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.team"/>
             <Parameter Name="displayName" Type="Edm.String" Unicode="false"/>
@@ -39390,12 +39426,6 @@
             <Parameter Name="classification" Type="Edm.String" Unicode="false"/>
             <Parameter Name="visibility" Type="graph.teamVisibilityType" Nullable="false"/>
             <Parameter Name="partsToClone" Type="graph.clonableTeamParts" Nullable="false"/>
-         </Action>
-         <Action Name="completeMigration" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.team"/>
-         </Action>
-         <Action Name="completeMigration" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.channel"/>
          </Action>
          <Action Name="sendActivityNotification" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.team"/>
@@ -39426,26 +39456,6 @@
             <Parameter Name="teamsAppId" Type="Edm.String" Unicode="false"/>
             <Parameter Name="templateParameters" Type="Collection(graph.keyValuePair)"/>
          </Action>
-         <Action Name="provisionEmail" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.channel"/>
-            <ReturnType Type="graph.provisionChannelEmailResult"/>
-         </Action>
-         <Action Name="removeEmail" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.channel"/>
-         </Action>
-         <Function Name="doesUserHaveAccess" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.channel"/>
-            <Parameter Name="userId" Type="Edm.String" Unicode="false">
-               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
-            </Parameter>
-            <Parameter Name="tenantId" Type="Edm.String" Unicode="false">
-               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
-            </Parameter>
-            <Parameter Name="userPrincipalName" Type="Edm.String" Unicode="false">
-               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
-            </Parameter>
-            <ReturnType Type="Edm.Boolean" Nullable="false"/>
-         </Function>
          <Action Name="hideForUser" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.chat"/>
             <Parameter Name="user" Type="graph.teamworkUserIdentity"/>

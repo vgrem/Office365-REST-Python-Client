@@ -1,4 +1,6 @@
-from typing import AnyStr, Optional
+from typing import AnyStr, Optional, IO
+
+from typing_extensions import Self
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.function import FunctionQuery
@@ -58,6 +60,7 @@ class Attachment(Entity):
         return self
 
     def upload(self, file_object, use_path=True):
+        # type: (IO, bool) -> Self
         """
         Upload attachment into list item
 
@@ -99,7 +102,7 @@ class Attachment(Entity):
     @property
     def server_relative_url(self):
         # type: () -> Optional[str]
-        """ """
+        """ The server-relative-url of the attachment """
         return self.properties.get("ServerRelativeUrl", None)
 
     @property

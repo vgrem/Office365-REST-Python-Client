@@ -26,3 +26,9 @@ class ListCollection(EntityCollection[List]):
         qry = CreateEntityQuery(self, payload, return_type)
         self.context.add_query(qry)
         return return_type
+
+    def get_by_name(self, name):
+        return List(self.context, EntityPath(name, self.resource_path))
+
+    def get_by_id(self, list_id):
+        return List(self.context, EntityPath(list_id, self.resource_path))

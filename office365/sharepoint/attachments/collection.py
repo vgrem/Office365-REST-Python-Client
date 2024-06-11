@@ -79,7 +79,7 @@ class AttachmentCollection(EntityCollection[Attachment]):
         return self
 
     def download(self, download_file, file_downloaded=None):
-        # type: (IO, Optional[Callable[[], None]]) -> Self
+        # type: (IO, Optional[Callable[[Attachment], None]]) -> Self
         """Downloads attachments as a zip file"""
         import zipfile
 
@@ -101,9 +101,7 @@ class AttachmentCollection(EntityCollection[Attachment]):
 
     def upload(self, file, use_path=True):
         # type: (IO, bool) -> Attachment
-        """
-        Uploads the attachment
-        """
+        """ Uploads the attachment """
         info = AttachmentCreationInformation(os.path.basename(file.name), file.read())
         if use_path:
             return self.add_using_path(info.filename, info.content)
