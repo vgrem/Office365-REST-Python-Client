@@ -143,6 +143,8 @@
             <Property Name="NameIdIssuer" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="BrandCenterConfiguration">
+            <Property Name="BrandColorsListId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="BrandColorsListUrl" Type="SP.ResourcePath"/>
             <Property Name="BrandFontLibraryId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="BrandFontLibraryUrl" Type="SP.ResourcePath"/>
             <Property Name="IsBrandCenterSiteFeatureEnabled" Type="Edm.Boolean" Nullable="false"/>
@@ -203,6 +205,11 @@
             <Property Name="ExternalReference" Type="Edm.Guid"/>
             <Property Name="SignedDocId" Type="Edm.Guid"/>
             <Property Name="Status" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="AgreementLocationData">
+            <Property Name="LibraryId" Type="Edm.String"/>
+            <Property Name="SiteId" Type="Edm.String"/>
+            <Property Name="WebId" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="AgreementLocation">
             <Property Name="CategoryLabel" Type="Edm.String"/>
@@ -401,6 +408,11 @@
             <Property Name="JobId" Type="Edm.String"/>
             <Property Name="TaskId" Type="Edm.String"/>
             <Property Name="TenantName" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="ItemOrderUpdateValue">
+            <Property Name="HasException" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="ItemId" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="UpdatedOrder" Type="Edm.Single" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="LockFileData">
             <Property Name="lockExpireTimeStamp" Type="Edm.DateTime" Nullable="false"/>
@@ -1076,6 +1088,7 @@
             <Property Name="MonteCarloApproximation" Type="Edm.String"/>
             <Property Name="SensitivityLabel" Type="Edm.String"/>
             <Property Name="SensitivityLabelAssignmentMethod" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="SkipSearchReindex" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="VirusInfo" Type="Edm.String"/>
             <Property Name="VirusStatus" Type="Edm.String"/>
             <Property Name="XTenantLabelInfo" Type="Edm.String"/>
@@ -10359,7 +10372,6 @@
             <FunctionImport Name="Microsoft_SharePoint_Administration_SiteMove_Service_SiteMoveService" ReturnType="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService" IsComposable="true" EntitySet="SiteMoveServices">
                <Parameter Name="siteId" Type="Edm.Guid" Nullable="false"/>
                <Parameter Name="siteSubscriptionId" Type="Edm.Guid" Nullable="false"/>
-               <Parameter Name="isSiteDeleted" Type="Edm.Boolean" Nullable="false"/>
                <Parameter Name="sourceDatabaseId" Type="Edm.Guid" Nullable="false"/>
                <Parameter Name="targetDatabaseId" Type="Edm.Guid" Nullable="false"/>
             </FunctionImport>
@@ -10398,6 +10410,7 @@
             </FunctionImport>
             <FunctionImport Name="SourceCleanupAfterMove" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
+               <Parameter Name="isDeleted" Type="Edm.Boolean" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="Microsoft_SharePoint_Yammer_WacApi_AddUserToSiteCollection" ReturnType="SP.User" EntitySet="Users1">
                <Parameter Name="spsiteUrl" Type="Edm.String"/>
@@ -11641,6 +11654,7 @@
             <FunctionImport Name="FullDashboardContent" ReturnType="Microsoft.SharePoint.EmployeeEngagement.DashboardConfiguration" IsSideEffecting="false" IsBindable="true">
                <Parameter Name="this" Type="SP.EmployeeEngagement"/>
                <Parameter Name="canvasAsJson" Type="Edm.Boolean" Nullable="false"/>
+               <Parameter Name="includePersonalizationData" Type="Edm.Boolean" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="GetDashboardPersonalization" ReturnType="Edm.Boolean" IsSideEffecting="false" IsBindable="true">
                <Parameter Name="this" Type="SP.EmployeeEngagement"/>
@@ -11787,6 +11801,10 @@
                <Parameter Name="this" Type="SP.BusinessData.Infrastructure.ExternalSubscriptionStore"/>
             </FunctionImport>
             <FunctionImport Name="SP_BrandCenter" ReturnType="SP.BrandCenter" IsComposable="true" EntitySet="BrandCenters"/>
+            <FunctionImport Name="AddSiteTheme" ReturnType="SP.ThemeData" IsBindable="true">
+               <Parameter Name="this" Type="SP.BrandCenter"/>
+               <Parameter Name="themeData" Type="SP.ThemeData"/>
+            </FunctionImport>
             <FunctionImport Name="AddTenantTheme" ReturnType="SP.ThemeData" IsBindable="true">
                <Parameter Name="this" Type="SP.BrandCenter"/>
                <Parameter Name="themeData" Type="SP.ThemeData"/>
@@ -12723,7 +12741,7 @@
                <Parameter Name="this" Type="SP.List"/>
                <Parameter Name="value" Type="Edm.Boolean" Nullable="false"/>
             </FunctionImport>
-            <FunctionImport Name="SetItemsOrder" ReturnType="Collection(Edm.Int32)" IsBindable="true">
+            <FunctionImport Name="SetItemsOrder" ReturnType="Collection(SP.ItemOrderUpdateValue)" IsBindable="true">
                <Parameter Name="this" Type="SP.List"/>
                <Parameter Name="itemIds" Type="Collection(Edm.Int32)" Nullable="false"/>
                <Parameter Name="lowerOrderItemId" Type="Edm.Int32" Nullable="false"/>
@@ -20840,6 +20858,9 @@
          <Annotations Target="Microsoft.SharePoint.Portal.Home.SharePointHomeDataCacheContext">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="Microsoft.SharePoint.Portal.Home.SharePointHomeDataCacheContext/CacheKey">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="Microsoft.SharePoint.Portal.Home.SharePointHomeDataCacheContext/Hash">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -21468,6 +21489,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.CurrencyInformation">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ItemOrderUpdateValue">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.RecipientLimitsInfo">
@@ -26922,6 +26946,9 @@
          <Annotations Target="SP.ApiData/SP_CampainAnalytics_GetReport(Microsoft.SharePoint.CampaignAnalytics.VinciAnalyticsReportRequest)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.ApiData/AddSiteTheme(SP.BrandCenter, SP.ThemeData)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.ApiData/AddTenantTheme(SP.BrandCenter, SP.ThemeData)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -28884,6 +28911,7 @@
             <Property Name="SiteId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="SourceDataLocation" Type="Edm.String"/>
             <Property Name="State" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="SubType" Type="Edm.Int32" Nullable="false"/>
             <Property Name="TriggeredBy" Type="Edm.String"/>
             <Property Name="Type" Type="Edm.Int32" Nullable="false"/>
          </EntityType>
@@ -34351,6 +34379,7 @@
             <Property Name="CacheValue" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="SharePointHomeDataCacheContext">
+            <Property Name="CacheKey" Type="Edm.String"/>
             <Property Name="Hash" Type="Edm.String"/>
             <Property Name="ListItemId" Type="Edm.Int32" Nullable="false"/>
             <Property Name="MySiteUrl" Type="Edm.String"/>
@@ -37487,6 +37516,7 @@
             <Property Name="FilteringApplicationName" Type="Edm.String"/>
             <Property Name="FilteringContainerTypeId" Type="Edm.String"/>
             <Property Name="FilteringField" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="OwnersCount" Type="Edm.Int32" Nullable="false"/>
             <Property Name="PublisherName" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="SPContainerSortOrder">

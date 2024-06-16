@@ -25642,6 +25642,13 @@
             <Property Name="target" Type="Edm.String"/>
             <Property Name="targetType" Type="graph.crossTenantAccessPolicyTargetType"/>
          </ComplexType>
+         <ComplexType Name="crossTenantAccessPolicyTenantRestrictions" BaseType="graph.crossTenantAccessPolicyB2BSetting">
+            <Property Name="devices" Type="graph.devicesFilter"/>
+         </ComplexType>
+         <ComplexType Name="devicesFilter">
+            <Property Name="mode" Type="graph.crossTenantAccessPolicyTargetConfigurationAccessType"/>
+            <Property Name="rule" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="crossTenantUserSyncInbound">
             <Property Name="isSyncAllowed" Type="Edm.Boolean"/>
          </ComplexType>
@@ -25840,6 +25847,7 @@
             <Property Name="inboundTrust" Type="graph.crossTenantAccessPolicyInboundTrust"/>
             <Property Name="invitationRedemptionIdentityProviderConfiguration" Type="graph.defaultInvitationRedemptionIdentityProviderConfiguration"/>
             <Property Name="isServiceDefault" Type="Edm.Boolean"/>
+            <Property Name="tenantRestrictions" Type="graph.crossTenantAccessPolicyTenantRestrictions"/>
          </EntityType>
          <EntityType Name="crossTenantAccessPolicyConfigurationPartner">
             <Key>
@@ -25854,6 +25862,7 @@
             <Property Name="isInMultiTenantOrganization" Type="Edm.Boolean"/>
             <Property Name="isServiceProvider" Type="Edm.Boolean"/>
             <Property Name="tenantId" Type="Edm.String" Nullable="false"/>
+            <Property Name="tenantRestrictions" Type="graph.crossTenantAccessPolicyTenantRestrictions"/>
             <NavigationProperty Name="identitySynchronization" Type="graph.crossTenantIdentitySyncPolicyPartner" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="policyTemplate" BaseType="graph.entity">
@@ -40211,6 +40220,7 @@
             <Property Name="resolvingComment" Type="Edm.String"/>
             <Property Name="severity" Type="microsoft.graph.security.alertSeverity" Nullable="false"/>
             <Property Name="status" Type="microsoft.graph.security.incidentStatus" Nullable="false"/>
+            <Property Name="summary" Type="Edm.String"/>
             <Property Name="systemTags" Type="Collection(Edm.String)"/>
             <Property Name="tenantId" Type="Edm.String"/>
             <NavigationProperty Name="alerts" Type="Collection(microsoft.graph.security.alert)"/>
@@ -40498,6 +40508,24 @@
          <ComplexType Name="stream">
             <Property Name="name" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="cloudLogonRequestEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="requestId" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="cloudLogonSessionEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="account" Type="microsoft.graph.security.userEvidence"/>
+            <Property Name="browser" Type="Edm.String"/>
+            <Property Name="deviceName" Type="Edm.String"/>
+            <Property Name="operatingSystem" Type="Edm.String"/>
+            <Property Name="previousLogonDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="protocol" Type="Edm.String"/>
+            <Property Name="sessionId" Type="Edm.String"/>
+            <Property Name="startUtcDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="userAgent" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="userEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="stream" Type="microsoft.graph.security.stream"/>
+            <Property Name="userAccount" Type="microsoft.graph.security.userAccount"/>
+         </ComplexType>
          <ComplexType Name="containerEvidence" BaseType="microsoft.graph.security.alertEvidence">
             <Property Name="args" Type="Collection(Edm.String)"/>
             <Property Name="command" Type="Collection(Edm.String)"/>
@@ -40633,10 +40661,6 @@
             <Property Name="host" Type="microsoft.graph.security.deviceEvidence"/>
             <Property Name="sessionId" Type="Edm.String"/>
             <Property Name="startUtcDateTime" Type="Edm.DateTimeOffset"/>
-         </ComplexType>
-         <ComplexType Name="userEvidence" BaseType="microsoft.graph.security.alertEvidence">
-            <Property Name="stream" Type="microsoft.graph.security.stream"/>
-            <Property Name="userAccount" Type="microsoft.graph.security.userAccount"/>
          </ComplexType>
          <ComplexType Name="huntingQueryResults">
             <Property Name="results" Type="Collection(microsoft.graph.security.huntingRowResult)"/>

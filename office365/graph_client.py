@@ -41,6 +41,7 @@ from office365.directory.users.collection import UserCollection
 from office365.directory.users.user import User
 from office365.education.root import EducationRoot
 from office365.entity_collection import EntityCollection
+from office365.graph_request import GraphRequest
 from office365.intune.devices.app_management import DeviceAppManagement
 from office365.intune.devices.collection import DeviceCollection
 from office365.intune.devices.management.management import DeviceManagement
@@ -58,7 +59,6 @@ from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.odata.request import ODataRequest
 from office365.runtime.odata.v4.batch_request import ODataV4BatchRequest
 from office365.runtime.odata.v4.json_format import V4JsonFormat
 from office365.runtime.paths.resource_path import ResourcePath
@@ -73,31 +73,14 @@ from office365.teams.collection import TeamCollection
 from office365.teams.template import TeamsTemplate
 from office365.teams.viva.employee_experience import EmployeeExperience
 
-environments_endpoints = {
-    "GCCH": {
-        "graph_url": "https://graph.microsoft.com",
-        "entra_url": "https://login.microsoftonline.com",
-    },
-    "GCC High": {
-        "graph_url": "https://graph.microsoft.us",
-        "entra_url": "https://login.microsoftonline.us",
-    },
-    "DoD": {
-        "graph_url": "https://dod-graph.microsoft.us",
-        "entra_url": "https://login.chinacloudapi.cn",
-    },
-}
-
 
 class GraphClient(ClientRuntimeContext):
     """Graph Service client"""
 
-    def __init__(self, acquire_token_callback, version="v1.0", environment="GCCH"):
-        # type: (Callable[[], dict], str, str) -> None
+    def __init__(self, acquire_token_callback):
+        # type: (Callable[[], dict]) -> None
         super(GraphClient, self).__init__()
         self._pending_request = None
-        self._version = version
-        self._environment_endpoints = environments_endpoints.get(environment, None)
         self._acquire_token_callback = acquire_token_callback
 
     @staticmethod
@@ -259,16 +242,16 @@ class GraphClient(ClientRuntimeContext):
         return self
 
     def pending_request(self):
-        # type: () -> ODataRequest
+        # type: () -> GraphRequest
         if self._pending_request is None:
-            self._pending_request = ODataRequest(V4JsonFormat())
+            self._pending_request = GraphRequest()
             self._pending_request.beforeExecute += self._authenticate_request
             self._pending_request.beforeExecute += self._build_specific_query
         return self._pending_request
 
     def service_root_url(self):
         # type: () -> str
-        return "https://graph.microsoft.com/{0}".format(self._version)
+        return self.pending_request().service_root_url
 
     def _build_specific_query(self, request):
         # type: (RequestOptions) -> None
