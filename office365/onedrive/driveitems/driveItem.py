@@ -520,31 +520,43 @@ class DriveItem(BaseItem):
             _create_and_add_query(parent)
         return return_type
 
-    def move(self, name=None, parent=None):
+    def move(self, name=None, parent=None, conflict_behavior=ConflictBehavior.Fail):
+        # type: (str, ItemReference|"DriveItem", str) -> "DriveItem"
         """To move a DriveItem to a new parent item, your app requests to update the parentReference of the DriveItem
         to move.
 
-        return_type = ClientResult(self.context, str())
+        :param str name: The new name for the move. If this isn't provided, the same name will be used as the
+             original.
+        :param ItemReference or DriveItem or None parent: Reference to the
+             parent item the move will be created in.
+        :param str conflict_behavior: query parameter to customize the behavior when a conflict occurs.
+        """
 
-        def _create_and_add_query(parent_reference):
+        return_type = DriveItem(self.context)
+        self.children.add_child(return_type)
+
+        def _move(parent_reference):
+            # type: (ItemReference) -> None
             payload = {"name": name, "parentReference": parent_reference}
 
             def _construct_request(request):
                 # type: (RequestOptions) -> None
                 request.method = HttpMethod.Patch
+                request.url += "?@microsoft.graph.conflictBehavior={0}".format(
+                    conflict_behavior
+                )
 
-            self.context.before_execute(_construct_request)
             qry = ServiceOperationQuery(self, "", None, payload, None, return_type)
-            self.context.add_query(qry)
+            self.context.add_query(qry).before_execute(_construct_request)
 
         if isinstance(parent, DriveItem):
 
             def _drive_item_loaded():
-                _create_and_add_query(ItemReference(_id=parent.id))
+                _move(ItemReference(_id=parent.id))
 
             parent.ensure_property("parentReference", _drive_item_loaded)
         else:
-            _create_and_add_query(parent)
+            _move(parent)
         return return_type
 
     def rename(self, new_name):
