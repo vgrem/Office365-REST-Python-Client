@@ -53,14 +53,12 @@ class Workbook(Entity):
         """Use this API to refresh an existing workbook session.
         :param str session_id: Identifier of the workbook session
         """
-        qry = ServiceOperationQuery(self, "refreshSession")
-        self.context.add_query(qry)
-
         def _construct_request(request):
             # type: (RequestOptions) -> None
             request.set_header("workbook-session-id", session_id)
 
-        self.context.before_execute(_construct_request)
+        qry = ServiceOperationQuery(self, "refreshSession")
+        self.context.add_query(qry).before_execute(_construct_request)
         return self
 
     def close_session(self, session_id):
@@ -73,8 +71,7 @@ class Workbook(Entity):
             # type: (RequestOptions) -> None
             request.set_header("workbook-session-id", session_id)
 
-        self.context.before_execute(_construct_request)
-        self.context.add_query(qry)
+        self.context.add_query(qry).before_execute(_construct_request)
         return self
 
     @property

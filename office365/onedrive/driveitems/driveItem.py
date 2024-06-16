@@ -469,6 +469,7 @@ class DriveItem(BaseItem):
         return self.get_content(format_name)
 
     def copy(self, name=None, parent=None, conflict_behavior=ConflictBehavior.Fail):
+        # type: (str, ItemReference|"DriveItem", str) -> ClientResult[str]
         """Asynchronously creates a copy of an driveItem (including any children), under a new parent item or with a
         new name.
 
@@ -480,32 +481,28 @@ class DriveItem(BaseItem):
 
         Returns location for details about how to monitor the progress of the copy, upon accepting the request.
         """
-        return_type = ClientResult(self.context)  # type: ClientResult[str]
+        return_type = ClientResult(self.context, str())
 
-        def _create_request(request):
-            # type: (RequestOptions) -> None
-            request.url += "?@microsoft.graph.conflictBehavior={0}".format(
-                conflict_behavior
-            )
+        def _copy(parent_reference):
+            # type: (ItemReference) -> None
 
-        def _process_response(resp):
-            # type: (requests.Response) -> None
-            resp.raise_for_status()
-            location = resp.headers.get("Location", None)
-            if location is None:
-                return
-            return_type.set_property("__value", location)
+            def _create_request(request):
+                # type: (RequestOptions) -> None
+                request.url += "?@microsoft.graph.conflictBehavior={0}".format(
+                    conflict_behavior
+                )
 
-        def _create_and_add_query(parent_reference):
-            """
-            :param office365.onedrive.listitems.item_reference.ItemReference or None parent_reference:  Reference to the
-             parent item the copy will be created in.
-            """
+            def _process_response(resp):
+                # type: (requests.Response) -> None
+                resp.raise_for_status()
+                location = resp.headers.get("Location", None)
+                if location is None:
+                    return
+                return_type.set_property("__value", location)
+
             payload = {"name": name, "parentReference": parent_reference}
-            self.context.before_execute(_create_request)
-            self.context.after_execute(_process_response)
             qry = ServiceOperationQuery(self, "copy", None, payload, None, return_type)
-            self.context.add_query(qry)
+            self.context.add_query(qry).before_execute(_create_request).after_execute(_process_response)
 
         if isinstance(parent, DriveItem):
 
@@ -513,11 +510,11 @@ class DriveItem(BaseItem):
                 parent_reference = ItemReference(
                     drive_id=parent.parent_reference.driveId, _id=parent.id
                 )
-                _create_and_add_query(parent_reference)
+                _copy(parent_reference)
 
             parent.ensure_property("parentReference", _drive_item_loaded)
         else:
-            _create_and_add_query(parent)
+            _copy(parent)
         return return_type
 
     def move(self, name=None, parent=None, conflict_behavior=ConflictBehavior.Fail):
@@ -668,7 +665,7 @@ class DriveItem(BaseItem):
         return self
 
     def restore(self, parent_reference=None, name=None):
-        # type: (ItemReference or None, str or None) -> DriveItem
+        # type: (Optional[ItemReference], str) -> "DriveItem"
         """
         Restore a driveItem that has been deleted and is currently in the recycle bin.
         NOTE: This functionality is currently only available for OneDrive Personal.
