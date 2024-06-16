@@ -524,12 +524,6 @@ class DriveItem(BaseItem):
         """To move a DriveItem to a new parent item, your app requests to update the parentReference of the DriveItem
         to move.
 
-        :param str name: The new name for the move. If this isn't provided, the same name will be used as the
-             original.
-        :param ItemReference or DriveItem or None parent: Reference to the
-             parent item the move will be created in.
-        """
-
         return_type = ClientResult(self.context, str())
 
         def _create_and_add_query(parent_reference):
@@ -540,7 +534,7 @@ class DriveItem(BaseItem):
                 request.method = HttpMethod.Patch
 
             self.context.before_execute(_construct_request)
-            qry = ServiceOperationQuery(self, "move", None, payload, None, return_type)
+            qry = ServiceOperationQuery(self, "", None, payload, None, return_type)
             self.context.add_query(qry)
 
         if isinstance(parent, DriveItem):
