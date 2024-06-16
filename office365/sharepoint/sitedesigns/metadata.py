@@ -2,7 +2,6 @@ from office365.sharepoint.sitedesigns.creation_info import SiteDesignCreationInf
 
 
 class SiteDesignMetadata(SiteDesignCreationInfo):
-
     def __init__(self, order=None, version=None):
         super().__init__()
         self.Order = order

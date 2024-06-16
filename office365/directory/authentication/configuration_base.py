@@ -13,6 +13,7 @@ class ApiAuthenticationConfigurationBase(ClientValue):
     - clientCertificateAuthentication for client certificate authentication (used for fetching the client
          certificates of an API connector)
     """
+
     def __init__(self, order=None):
         """
         :param list[str] order:

@@ -1,24 +1,20 @@
 import os
 
+from office365.onedrive.driveitems.driveItem import DriveItem
+from office365.onedrive.drives.drive import Drive
 from office365.onedrive.workbooks.tables.table import WorkbookTable
 from tests.graph_case import GraphTestCase
 
-from office365.onedrive.driveitems.driveItem import DriveItem
-
 
 def upload_excel(target_drive):
-    """
-    :type target_drive: office365.onedrive.drive.Drive
-    """
+    # type: (Drive) -> DriveItem
     path = "{0}/../data/Financial Sample.xlsx".format(os.path.dirname(__file__))
-    with open(path, 'rb') as content_file:
-        file_content = content_file.read()
-    file_name = os.path.basename(path)
-    return target_drive.root.upload(file_name, file_content).execute_query()
+    return target_drive.root.upload_file(path).execute_query()
 
 
 class TestExcel(GraphTestCase):
     """OneDrive specific test case base class"""
+
     target_item = None  # type: DriveItem
     table = None  # type: WorkbookTable
 
@@ -37,7 +33,9 @@ class TestExcel(GraphTestCase):
         self.assertIsNotNone(workbook.resource_path)
 
     def test2_create_workbook_table(self):
-        table = self.__class__.target_item.workbook.tables.add("A10000:C10002", True).execute_query()
+        table = self.__class__.target_item.workbook.tables.add(
+            "A10000:C10002", True
+        ).execute_query()
         self.assertIsNotNone(table.resource_path)
         self.__class__.table = table
 
@@ -54,32 +52,46 @@ class TestExcel(GraphTestCase):
         column = self.__class__.table.columns.add(3, "Column4").execute_query()
         self.assertIsNotNone(column.resource_path)
 
-    def test6_list_table_columns(self):
+    def test6_create_table_column_count(self):
+        result = self.__class__.table.columns.count().execute_query()
+        self.assertGreater(result.value, 0)
+
+    def test7_list_table_columns(self):
         columns = self.__class__.table.columns.get().execute_query()
         self.assertIsNotNone(columns.resource_path)
 
-    def test7_list_table_rows(self):
+    def test8_list_table_rows(self):
         rows = self.__class__.table.rows.get().execute_query()
         self.assertIsNotNone(rows.resource_path)
 
-    def test8_create_table_rows(self):
-        rows = self.__class__.table.rows.add([["Val11", "Val12", "Val13", "Val14"]]).execute_query()
-        self.assertIsNotNone(rows.resource_path)
+    def test9_create_table_rows(self):
+        row = self.__class__.table.rows.add(
+            [["Val11", "Val12", "Val13", "Val14"]]
+        ).execute_query()
+        self.assertIsNotNone(row.resource_path)
+        self.assertIsNotNone(row.index)
+        self.assertIsNotNone(row.values)
 
-    def test9_table_range(self):
+    def test_10_table_rows_count(self):
+        result = self.__class__.table.rows.count().execute_query()
+        self.assertIsNotNone(result.value)
+        self.assertGreater(result.value, 0)
+
+    # def test_11_table_rows_item_at(self):
+    #    result = self.__class__.table.rows.item_at(0).execute_query()
+    #    self.assertIsNotNone(result.resource_path)
+    #    self.assertIsNotNone(result.values)
+
+    def test_12_table_range(self):
         result = self.__class__.table.range().execute_query()
         self.assertIsNotNone(result.address)
 
-    def test_10_delete_workbook_table(self):
+    def test_13_delete_workbook_table(self):
         self.__class__.table.delete_object().execute_query()
 
-    #def test_11_workbook_create_session(self):
+    # def test_14_workbook_create_session(self):
     #    result = self.__class__.target_item.workbook.create_session().execute_query()
     #    self.assertIsNotNone(result.value)
 
-    #def test_12_workbook_close_session(self):
+    # def test_15_workbook_close_session(self):
     #    self.__class__.target_item.workbook.close_session().execute_query()
-
-
-
-

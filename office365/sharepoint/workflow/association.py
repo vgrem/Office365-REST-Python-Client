@@ -1,5 +1,5 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class WorkflowAssociation(BaseEntity):
+class WorkflowAssociation(Entity):
     """Represents the association of a workflow template with a specific list or content type"""

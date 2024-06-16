@@ -3,16 +3,11 @@ from office365.onedrive.workbooks.worksheets.worksheet import WorkbookWorksheet
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
-class WorkbookWorksheetCollection(EntityCollection):
-
+class WorkbookWorksheetCollection(EntityCollection[WorkbookWorksheet]):
     def __init__(self, context, resource_path=None):
-        super(WorkbookWorksheetCollection, self).__init__(context, WorkbookWorksheet, resource_path)
-
-    def __getitem__(self, id_or_name):
-        """
-        :rtype: WorkbookWorksheet
-        """
-        return super(WorkbookWorksheetCollection, self).__getitem__(id_or_name)
+        super(WorkbookWorksheetCollection, self).__init__(
+            context, WorkbookWorksheet, resource_path
+        )
 
     def add(self, name=None):
         """

@@ -1,9 +1,10 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
+from office365.sharepoint.internal.paths.web import WebPath
 from office365.sharepoint.webs.web import Web
 
 
-class WebCollection(BaseEntityCollection):
+class WebCollection(EntityCollection[Web]):
     """Web collection"""
 
     def __init__(self, context, resource_path=None, parent_web=None):
@@ -18,16 +19,24 @@ class WebCollection(BaseEntityCollection):
 
         :type web_creation_information: office365.sharepoint.webs.creation_information.WebCreationInformation
         """
-        target_web = Web(self.context)
-        self.add_child(target_web)
-        qry = ServiceOperationQuery(self, "add", None, web_creation_information, "parameters", target_web)
+        return_type = Web(self.context)
+        self.add_child(return_type)
+        payload = {"parameters": web_creation_information}
+        qry = ServiceOperationQuery(self, "add", None, payload, None, return_type)
         self.context.add_query(qry)
-        return target_web
+        return return_type
+
+    def create_typed_object(self, initial_properties=None, resource_path=None):
+        if resource_path is None:
+            resource_path = WebPath(self.resource_path)
+        return super(EntityCollection, self).create_typed_object(
+            initial_properties, resource_path
+        )
 
     @property
     def resource_url(self):
         val = super(WebCollection, self).resource_url
         parent_web_url = self._parent.get_property("Url")
         if parent_web_url is not None:
-            val = val.replace(self.context.service_root_url(), parent_web_url + '/_api')
+            val = val.replace(self.context.service_root_url(), parent_web_url + "/_api")
         return val

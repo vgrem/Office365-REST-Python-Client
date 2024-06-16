@@ -1,24 +1,35 @@
 from office365.runtime.client_result import ClientResult
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.directory.my_groups_result import MyGroupsResult
+from office365.sharepoint.entity import Entity
 
 
-class User(BaseEntity):
-
+class User(Entity):
     def is_member_of(self, group_id):
-        result = ClientResult(self.context)
+        return_type = ClientResult(self.context)
 
         def _user_loaded():
-            from office365.sharepoint.directory.SPHelper import SPHelper
-            SPHelper.is_member_of(self.context, self.properties["principalName"], group_id, result)
+            from office365.sharepoint.directory.helper import SPHelper
 
-        self.ensure_property('principalName', _user_loaded)
-        return result
+            SPHelper.is_member_of(
+                self.context, self.properties["principalName"], group_id, return_type
+            )
+
+        self.ensure_property("principalName", _user_loaded)
+        return return_type
 
     def get_my_groups(self):
-        result = ClientResult(self.context)
+        return_type = MyGroupsResult(self.context)
 
         def _user_loaded():
-            from office365.sharepoint.directory.SPHelper import SPHelper
-            SPHelper.get_my_groups(self.context, self.properties["principalName"], 0, 10, result)
-        self.ensure_property('principalName', _user_loaded)
-        return result
+            from office365.sharepoint.directory.helper import SPHelper
+
+            SPHelper.get_my_groups(
+                self.context, self.properties["principalName"], 0, 10, return_type
+            )
+
+        self.ensure_property("principalName", _user_loaded)
+        return return_type
+
+    @property
+    def entity_type_name(self):
+        return "SP.Directory.User"

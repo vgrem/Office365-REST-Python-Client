@@ -4,14 +4,22 @@ from office365.onenote.notebooks.notebook import Notebook
 from office365.onenote.notebooks.recent import RecentNotebook
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
-class NotebookCollection(EntityCollection):
-
+class NotebookCollection(EntityCollection[Notebook]):
     def __init__(self, context, resource_path=None):
         super(NotebookCollection, self).__init__(context, Notebook, resource_path)
+
+    def add(self, display_name):
+        """
+        Create a new OneNote notebook.
+
+        :param str display_name: Name for the notebook. Notebook names must be unique. The name cannot contain more
+            than 128 characters or contain the following characters: ?*/:<>|'"
+        """
+        return super(NotebookCollection, self).add(displayName=display_name)
 
     def get_notebook_from_web_url(self, web_url):
         """
@@ -23,7 +31,9 @@ class NotebookCollection(EntityCollection):
         """
         return_type = ClientResult(self.context, CopyNotebookModel())
         params = {"webUrl": web_url}
-        qry = ServiceOperationQuery(self, "getNotebookFromWebUrl", params, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "getNotebookFromWebUrl", params, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -37,11 +47,6 @@ class NotebookCollection(EntityCollection):
 
         return_type = ClientResult(self.context, ClientValueCollection(RecentNotebook))
         params = {"includePersonalNotebooks": include_personal_notebooks}
-        qry = ServiceOperationQuery(self, "getRecentNotebooks", params, None, None, return_type)
+        qry = FunctionQuery(self, "getRecentNotebooks", params, return_type)
         self.context.add_query(qry)
-
-        def _construct_request(request):
-            request.method = HttpMethod.Get
-
-        self.context.before_execute(_construct_request)
         return return_type

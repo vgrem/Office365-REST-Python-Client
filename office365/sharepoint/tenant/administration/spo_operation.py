@@ -1,8 +1,16 @@
+from typing import Optional
+
 from office365.runtime.client_object import ClientObject
 
 
 class SpoOperation(ClientObject):
     """Represents an operation on a site collection."""
+
+    @property
+    def has_timedout(self):
+        # type: () -> Optional[bool]
+        """Gets a value that indicates whether the maximum wait time for the operation has been exceeded."""
+        return self.properties.get("HasTimedout", None)
 
     @property
     def is_complete(self):

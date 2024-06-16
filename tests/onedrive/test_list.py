@@ -6,6 +6,7 @@ from tests.graph_case import GraphTestCase
 
 class TestList(GraphTestCase):
     """OneDrive specific test case base class"""
+
     target_list = None  # type: List
     target_column = None  # type: ColumnDefinition
 

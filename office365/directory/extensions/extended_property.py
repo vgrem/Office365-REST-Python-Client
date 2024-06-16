@@ -1,10 +1,17 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.runtime.types.collections import StringCollection
 
 
 class SingleValueLegacyExtendedProperty(Entity):
     """An extended property that contains a single value."""
-    pass
+
+    @property
+    def value(self):
+        # type: () -> Optional[str]
+        """A property value."""
+        return self.properties.get("value", None)
 
 
 class MultiValueLegacyExtendedProperty(Entity):

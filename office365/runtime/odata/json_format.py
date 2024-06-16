@@ -4,11 +4,10 @@ from abc import ABCMeta
 class ODataJsonFormat(object):
     """OData JSON format"""
 
-    def __init__(self, metadata_level=None):
-        """
-        :type metadata_level: str
-        """
+    def __init__(self, metadata_level=None, etag=None):
+        # type: (str, str) -> None
         self.metadata_level = metadata_level
+        self.etag = etag
 
     __metaclass__ = ABCMeta
 
@@ -26,17 +25,12 @@ class ODataJsonFormat(object):
 
     @property
     def media_type(self):
-        """
-        Gets media type
-
-        :rtype: str
-        """
+        # type: () -> str
+        """Gets media type"""
         raise NotImplementedError
 
     @property
     def include_control_information(self):
-        """Determines whether control information that is represented as annotations should be included in payload
-
-        :rtype: bool
-        """
+        # type: () -> bool
+        """Determines whether control information that is represented as annotations should be included in payload"""
         raise NotImplementedError

@@ -1,11 +1,12 @@
 import json
+from typing import TYPE_CHECKING
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.runtime.paths.v3.entity import EntityPath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.sharepoint.attachments.collection import AttachmentCollection
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.query import ChangeQuery
 from office365.sharepoint.comments.collection import CommentCollection
@@ -16,20 +17,26 @@ from office365.sharepoint.fields.string_values import FieldStringValues
 from office365.sharepoint.likes.liked_by_information import LikedByInformation
 from office365.sharepoint.listitems.compliance_info import ListItemComplianceInfo
 from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateValue
-from office365.sharepoint.listitems.version import ListItemVersion
+from office365.sharepoint.listitems.versions.collection import ListItemVersionCollection
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.policy.dlp_policy_tip import DlpPolicyTip
 from office365.sharepoint.reputationmodel.reputation import Reputation
 from office365.sharepoint.sharing.external_site_option import ExternalSharingSiteOption
-from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
 from office365.sharepoint.sharing.links.share_request import ShareLinkRequest
 from office365.sharepoint.sharing.links.share_response import ShareLinkResponse
 from office365.sharepoint.sharing.links.share_settings import ShareLinkSettings
+from office365.sharepoint.sharing.object_sharing_information import (
+    ObjectSharingInformation,
+)
 from office365.sharepoint.sharing.result import SharingResult
 from office365.sharepoint.taxonomy.field_value import TaxonomyFieldValueCollection
 from office365.sharepoint.ui.applicationpages.peoplepicker.web_service_interface import (
-    ClientPeoplePickerWebServiceInterface
+    ClientPeoplePickerWebServiceInterface,
 )
+
+if TYPE_CHECKING:
+    import datetime
+    from typing import Optional
 
 
 class ListItem(SecurableObject):
@@ -47,22 +54,36 @@ class ListItem(SecurableObject):
         if parent_list is not None:
             self.set_property("ParentList", parent_list, False)
 
-    def share_link(self, link_kind, expiration=None):
+    def share_link(self, link_kind, expiration=None, role=None, password=None):
+        # type: (int, Optional[datetime.datetime], Optional[int], Optional[str]) -> ClientResult[ShareLinkResponse]
         """Creates a tokenized sharing link for a list item based on the specified parameters and optionally
         sends an email to the people that are listed in the specified parameters.
 
-        :param int link_kind: The kind of the tokenized sharing link to be created/updated or retrieved.
-        :param datetime or None expiration: A date/time string for which the format conforms to the ISO 8601:2004(E)
+        :param link_kind: The kind of the tokenized sharing link to be created/updated or retrieved.
+        :param expiration: A date/time string for which the format conforms to the ISO 8601:2004(E)
             complete representation for calendar date and time of day and which represents the time and date of expiry
             for the tokenized sharing link. Both the minutes and hour value MUST be specified for the difference
             between the local and UTC time. Midnight is represented as 00:00:00. A null value indicates no expiry.
             This value is only applicable to tokenized sharing links that are anonymous access links.
+        :param role: The role to be used for the tokenized sharing link. This is required for Flexible links
+            and ignored for all other kinds.
+        :param password: Optional password value to apply to the tokenized sharing link,
+            if it can support password protection.
         """
-        result = ClientResult(self.context, ShareLinkResponse())
-        payload = ShareLinkRequest(settings=ShareLinkSettings(link_kind=link_kind, expiration=expiration))
-        qry = ServiceOperationQuery(self, "ShareLink", None, payload, "request", result)
+        return_type = ClientResult(self.context, ShareLinkResponse())
+        request = ShareLinkRequest(
+            settings=ShareLinkSettings(
+                link_kind=link_kind, expiration=expiration, role=role, password=password
+            )
+        )
+        if password:
+            request.settings.allowAnonymousAccess = True
+            request.settings.updatePassword = True
+
+        payload = {"request": request}
+        qry = ServiceOperationQuery(self, "ShareLink", None, payload, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def unshare_link(self, link_kind, share_id=None):
         """
@@ -102,7 +123,9 @@ class ListItem(SecurableObject):
         return_value = ClientResult(self.context)
 
         def _list_item_loaded():
-            Reputation.set_rating(self.context, self.parent_list.id, self.id, value, return_value)
+            Reputation.set_rating(
+                self.context, self.parent_list.id, self.id, value, return_value
+            )
 
         self.parent_list.ensure_properties(["Id", "ParentList"], _list_item_loaded)
         return return_value
@@ -118,7 +141,9 @@ class ListItem(SecurableObject):
         return_value = ClientResult(self.context)
 
         def _list_item_loaded():
-            Reputation.set_like(self.context, self.parent_list.id, self.id, value, return_value)
+            Reputation.set_like(
+                self.context, self.parent_list.id, self.id, value, return_value
+            )
 
         self.parent_list.ensure_properties(["Id", "ParentList"], _list_item_loaded)
         return return_value
@@ -131,7 +156,9 @@ class ListItem(SecurableObject):
         :param int action: Indicates which user action is indicated in the returned WOPIFrameUrl.
         """
         result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "GetWOPIFrameUrl", [action], None, None, result)
+        qry = ServiceOperationQuery(
+            self, "GetWOPIFrameUrl", [action], None, None, result
+        )
         self.context.add_query(qry)
         return result
 
@@ -151,14 +178,22 @@ class ListItem(SecurableObject):
         """
         if query is None:
             query = ChangeQuery(item=True)
-        changes = ChangeCollection(self.context)
-        qry = ServiceOperationQuery(self, "getChanges", None, query, "query", changes)
+        return_type = ChangeCollection(self.context)
+        payload = {"query": query}
+        qry = ServiceOperationQuery(
+            self, "getChanges", None, payload, None, return_type
+        )
         self.context.add_query(qry)
-        return changes
+        return return_type
 
-    def share(self, user_principal_name,
-              share_option=ExternalSharingSiteOption.View,
-              send_email=True, email_subject=None, email_body=None):
+    def share(
+        self,
+        user_principal_name,
+        share_option=ExternalSharingSiteOption.View,
+        send_email=True,
+        email_subject=None,
+        email_body=None,
+    ):
         """
         Share a ListItem (file or folder facet)
 
@@ -175,30 +210,42 @@ class ListItem(SecurableObject):
             ExternalSharingSiteOption.Edit: "role:1073741827",
         }
 
-        def _picker_value_resolved(resp, picker_result):
-            file_abs_url = self.get_property("EncodedAbsUrl")
+        def _picker_value_resolved(picker_result):
+            # type: (ClientResult) -> None
+            abs_url = self.get_property("EncodedAbsUrl")
             picker_value = "[{0}]".format(picker_result.value)
             from office365.sharepoint.webs.web import Web
-            Web.share_object(self.context, file_abs_url, picker_value, role_values[share_option],
-                             0, False, send_email, False, email_subject, email_body, return_type=return_type)
 
-        def _property_resolved():
-            picker_result = ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(self.context,
-                                                                                                    user_principal_name)
-            self.context.after_execute(_picker_value_resolved, True, picker_result)
+            Web.share_object(
+                self.context,
+                abs_url,
+                picker_value,
+                role_values[share_option],
+                0,
+                False,
+                send_email,
+                False,
+                email_subject,
+                email_body,
+                return_type=return_type,
+            )
 
-        self.ensure_property("EncodedAbsUrl", _property_resolved)
+        def _url_resolved():
+            ClientPeoplePickerWebServiceInterface.client_people_picker_resolve_user(
+                self.context, user_principal_name
+            ).after_execute(_picker_value_resolved)
+
+        self.ensure_property("EncodedAbsUrl", _url_resolved)
         return return_type
 
     def unshare(self):
-        """
-        Unshare a ListItem (file or folder facet)
-        """
+        """Unshare a ListItem (file or folder facet)"""
         return_type = SharingResult(self.context)
 
         def _property_resolved():
             abs_url = self.get_property("EncodedAbsUrl")
             from office365.sharepoint.webs.web import Web
+
             Web.unshare_object(self.context, abs_url, return_type=return_type)
 
         self.ensure_property("EncodedAbsUrl", _property_resolved)
@@ -212,13 +259,19 @@ class ListItem(SecurableObject):
 
         def _item_resolved():
             ObjectSharingInformation.get_list_item_sharing_information(
-                self.context, self.parent_list.id, self.id, return_type=return_type)
+                self.context, self.parent_list.id, self.id, return_type=return_type
+            )
 
         self.ensure_properties(["Id", "ParentList"], _item_resolved)
         return return_type
 
-    def validate_update_list_item(self, form_values, new_document_update=False, checkin_comment=None,
-                                  dates_in_utc=None):
+    def validate_update_list_item(
+        self,
+        form_values,
+        new_document_update=False,
+        checkin_comment=None,
+        dates_in_utc=None,
+    ):
         """Validates and sets the values of the specified collection of fields for the list item.
 
         :param dict form_values: Specifies a collection of field internal names and values for the given field
@@ -228,13 +281,19 @@ class ListItem(SecurableObject):
         :param bool or None dates_in_utc:
         """
         payload = {
-            "formValues": [ListItemFormUpdateValue(k, v) for k, v in form_values.items()],
+            "formValues": [
+                ListItemFormUpdateValue(k, v) for k, v in form_values.items()
+            ],
             "bNewDocumentUpdate": new_document_update,
             "checkInComment": checkin_comment,
-            "datesInUTC": dates_in_utc
+            "datesInUTC": dates_in_utc,
         }
-        return_type = ClientResult(self.context, ClientValueCollection(ListItemFormUpdateValue))
-        qry = ServiceOperationQuery(self, "ValidateUpdateListItem", None, payload, None, return_type)
+        return_type = ClientResult(
+            self.context, ClientValueCollection(ListItemFormUpdateValue)
+        )
+        qry = ServiceOperationQuery(
+            self, "ValidateUpdateListItem", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -265,9 +324,9 @@ class ListItem(SecurableObject):
 
     def set_comments_disabled(self, value):
         """
-        Sets the value of CommentsDisabled (section 3.2.5.87.1.1.8) for the item.
+        Sets the value of CommentsDisabled for the item.
 
-        :type value: bool
+        :param bool value: Indicates whether comments for this item are disabled or not.
         """
         qry = ServiceOperationQuery(self, "SetCommentsDisabled", [value])
         self.context.add_query(qry)
@@ -288,11 +347,10 @@ class ListItem(SecurableObject):
         :param str justification: The reason why the override is being done.
         """
         return_type = ClientResult(self.context, int())
-        payload = {
-            "userAction": user_action,
-            "justification": justification
-        }
-        qry = ServiceOperationQuery(self, "OverridePolicyTip", None, payload, None, return_type)
+        payload = {"userAction": user_action, "justification": justification}
+        qry = ServiceOperationQuery(
+            self, "OverridePolicyTip", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -303,92 +361,100 @@ class ListItem(SecurableObject):
         :param str field_name: Specifies the field internal name.
         :param str value: Specifies the new value for the field (2).
         """
-        payload = {
-            "fieldName": field_name,
-            "value": value
-        }
+        payload = {"fieldName": field_name, "value": value}
         qry = ServiceOperationQuery(self, "ParseAndSetFieldValue", None, payload)
         self.context.add_query(qry)
         return self
 
     @property
     def display_name(self):
-        """Specifies the display name of the list item.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Specifies the display name of the list item."""
         return self.properties.get("DisplayName", None)
 
     @property
     def parent_list(self):
         """Get parent List"""
         from office365.sharepoint.lists.list import List
-        return self.properties.get("ParentList", List(self.context, ResourcePath("ParentList", self.resource_path)))
+
+        return self.properties.get(
+            "ParentList",
+            List(self.context, ResourcePath("ParentList", self.resource_path)),
+        )
 
     @property
     def file(self):
         """Get file"""
         from office365.sharepoint.files.file import File
-        return self.properties.get("File", File(self.context, ResourcePath("File", self.resource_path)))
+
+        return self.properties.get(
+            "File", File(self.context, ResourcePath("File", self.resource_path))
+        )
 
     @property
     def folder(self):
         """Get folder"""
         from office365.sharepoint.folders.folder import Folder
-        return self.properties.get("Folder", Folder(self.context, ResourcePath("Folder", self.resource_path)))
+
+        return self.properties.get(
+            "Folder", Folder(self.context, ResourcePath("Folder", self.resource_path))
+        )
 
     @property
     def attachment_files(self):
+        # type: () -> AttachmentCollection
         """Specifies the collection of attachments that are associated with the list item.<62>"""
-        from office365.sharepoint.attachments.collection import AttachmentCollection
-        return self.properties.get("AttachmentFiles",
-                                   AttachmentCollection(self.context,
-                                                        ResourcePath("AttachmentFiles", self.resource_path), self))
+        from office365.sharepoint.attachments.collection import (
+            AttachmentCollection,  # noqa
+        )
+
+        return self.properties.get(
+            "AttachmentFiles",
+            AttachmentCollection(
+                self.context, ResourcePath("AttachmentFiles", self.resource_path), self
+            ),
+        )
 
     @property
     def content_type(self):
         """Gets a value that specifies the content type of the list item."""
         from office365.sharepoint.contenttypes.content_type import ContentType
-        return self.properties.get("ContentType", ContentType(self.context,
-                                                              ResourcePath("ContentType", self.resource_path)))
+
+        return self.properties.get(
+            "ContentType",
+            ContentType(self.context, ResourcePath("ContentType", self.resource_path)),
+        )
 
     @property
     def effective_base_permissions(self):
         """Gets a value that specifies the effective permissions on the list item that are assigned
-           to the current user."""
+        to the current user."""
         from office365.sharepoint.permissions.base_permissions import BasePermissions
+
         return self.properties.get("EffectiveBasePermissions", BasePermissions())
 
     @property
     def field_values(self):
+        # type: () -> Optional[dict]
         """Gets a collection of key/value pairs containing the names and values for the fields of the list item."""
         return self.properties.get("FieldValues", None)
 
     @property
     def comments_disabled(self):
-        """
-        Indicates whether comments for this item are disabled or not.
-
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Indicates whether comments for this item are disabled or not."""
         return self.properties.get("CommentsDisabled", None)
 
     @property
     def file_system_object_type(self):
-        """
-        Gets a value that specifies whether the list item is a file or a list folder.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets a value that specifies whether the list item is a file or a list folder"""
         return self.properties.get("FileSystemObjectType", None)
 
     @property
     def id(self):
-        """
-        Gets a value that specifies the list item identifier.
-
-        :rtype: int
-        """
+        # type: () -> Optional[int]
+        """Gets a value that specifies the list item identifier."""
         return self.properties.get("Id", None)
 
     @property
@@ -397,37 +463,49 @@ class ListItem(SecurableObject):
 
     @property
     def comments_disabled_scope(self):
+        # type: () -> Optional[str]
         """Indicates at what scope comments are disabled."""
         return self.properties.get("CommentsDisabledScope", None)
 
     @property
     def get_dlp_policy_tip(self):
         """Gets the Data Loss Protection policy tip notification for this item."""
-        return self.properties.get("GetDlpPolicyTip",
-                                   DlpPolicyTip(self.context, ResourcePath("GetDlpPolicyTip", self.resource_path)))
+        return self.properties.get(
+            "GetDlpPolicyTip",
+            DlpPolicyTip(
+                self.context, ResourcePath("GetDlpPolicyTip", self.resource_path)
+            ),
+        )
 
     @property
     def field_values_as_html(self):
         """Specifies the values for the list item as Hypertext Markup Language (HTML)."""
-        return self.properties.get("FieldValuesAsHtml",
-                                   FieldStringValues(self.context, ResourcePath("FieldValuesAsHtml",
-                                                                                self.resource_path)))
+        return self.properties.get(
+            "FieldValuesAsHtml",
+            FieldStringValues(
+                self.context, ResourcePath("FieldValuesAsHtml", self.resource_path)
+            ),
+        )
 
     @property
     def liked_by_information(self):
-        """
-        Gets a value that specifies the list item identifier.
-        """
-        return self.properties.get("LikedByInformation",
-                                   LikedByInformation(self.context,
-                                                      ResourcePath("likedByInformation", self.resource_path)))
+        """Gets a value that specifies the list item identifier."""
+        return self.properties.get(
+            "LikedByInformation",
+            LikedByInformation(
+                self.context, ResourcePath("likedByInformation", self.resource_path)
+            ),
+        )
 
     @property
     def versions(self):
         """Gets the collection of item version objects that represent the versions of the item."""
-        return self.properties.get('Versions',
-                                   BaseEntityCollection(self.context, ListItemVersion,
-                                                        ResourcePath("versions", self.resource_path)))
+        return self.properties.get(
+            "Versions",
+            ListItemVersionCollection(
+                self.context, ResourcePath("versions", self.resource_path)
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
@@ -457,13 +535,19 @@ class ListItem(SecurableObject):
             if isinstance(value, TaxonomyFieldValueCollection):
                 self._set_taxonomy_field_value(name, value)
             elif isinstance(value, ImageFieldValue):
-                super(ListItem, self).set_property(name, json.dumps(value.to_json()), persist_changes)
+                super(ListItem, self).set_property(
+                    name, json.dumps(value.to_json()), persist_changes
+                )
             elif isinstance(value, FieldMultiLookupValue):
                 collection = ClientValueCollection(int, [v.LookupId for v in value])
-                super(ListItem, self).set_property("{name}Id".format(name=name), collection)
+                super(ListItem, self).set_property(
+                    "{name}Id".format(name=name), collection
+                )
                 super(ListItem, self).set_property(name, value, False)
             elif isinstance(value, FieldLookupValue):
-                super(ListItem, self).set_property("{name}Id".format(name=name), value.LookupId)
+                super(ListItem, self).set_property(
+                    "{name}Id".format(name=name), value.LookupId
+                )
                 super(ListItem, self).set_property(name, value, False)
             else:
                 super(ListItem, self).set_property(name, value, persist_changes)
@@ -471,33 +555,56 @@ class ListItem(SecurableObject):
             super(ListItem, self).set_property(name, value, persist_changes)
 
         # fallback: create a new resource path
-        if self._resource_path is None:
-            if name == "Id":
-                self._resource_path = ServiceOperationPath(
-                    "getItemById", [value], self._parent_collection.resource_path.parent)
+        if name == "Id":
+            if self._resource_path is None and self.parent_collection is not None:
+                self._resource_path = EntityPath(
+                    value, self.parent_collection.resource_path
+                )
+            else:
+                self._resource_path.patch(value)
         return self
 
     def _set_taxonomy_field_value(self, name, value):
+        # type: (str, TaxonomyFieldValueCollection) -> None
+        """
+        Sets taxonomy field value
+        :param str name: Taxonomy field name
+        :param TaxonomyFieldValueCollection value: Taxonomy field value
+        """
         tax_field = self.parent_list.fields.get_by_internal_name_or_title(name)
 
         def _tax_field_loaded():
-            tax_text_field = self.parent_list.fields.get_by_id(tax_field.properties["TextField"])
+            tax_text_field = self.parent_list.fields.get_by_id(
+                tax_field.properties["TextField"]
+            )
 
-            def _tax_text_field_loaded():
+            def _tax_text_field_loaded(return_type):
                 self.set_property(tax_text_field.properties["StaticName"], str(value))
-            tax_text_field.ensure_property("StaticName", _tax_text_field_loaded)
+
+            tax_text_field.select(["StaticName"]).get().after_execute(
+                _tax_text_field_loaded, execute_first=True
+            )
 
         tax_field.ensure_property("TextField", _tax_field_loaded)
 
-    def ensure_type_name(self, target_list):
+    def ensure_type_name(self, target_list, action=None):
         """
         Determine metadata annotation for ListItem entity
 
         :param office365.sharepoint.lists.list.List target_list: List resource
+        :param () -> None action: Event handler
         """
+        if self._entity_type_name is None:
 
-        def _init_item_type():
-            self._entity_type_name = target_list.properties['ListItemEntityTypeFullName']
+            def _list_loaded():
+                self._entity_type_name = target_list.properties[
+                    "ListItemEntityTypeFullName"
+                ]
+                if callable(action):
+                    action()
 
-        if not self._entity_type_name:
-            target_list.ensure_property("ListItemEntityTypeFullName", _init_item_type)
+            target_list.ensure_property("ListItemEntityTypeFullName", _list_loaded)
+        else:
+            if callable(action):
+                action()
+        return self

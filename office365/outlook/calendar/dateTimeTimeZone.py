@@ -1,4 +1,5 @@
 import pytz
+
 from office365.runtime.client_value import ClientValue
 
 
@@ -16,10 +17,16 @@ class DateTimeTimeZone(ClientValue):
         self.dateTime = datetime
         self.timeZone = timezone
 
+    def __repr__(self):
+        return "{0}, {1}".format(self.dateTime, self.timeZone)
+
     @staticmethod
     def parse(dt):
         """
+        Parses from datetime
         :type dt: datetime.datetime
         """
         local_dt = dt.replace(tzinfo=pytz.utc)
-        return DateTimeTimeZone(datetime=local_dt.isoformat(), timezone=local_dt.strftime('%Z'))
+        return DateTimeTimeZone(
+            datetime=local_dt.isoformat(), timezone=local_dt.strftime("%Z")
+        )

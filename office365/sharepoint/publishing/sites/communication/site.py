@@ -1,12 +1,16 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.publishing.sites.communication.creation_request import CommunicationSiteCreationRequest
-from office365.sharepoint.publishing.sites.communication.creation_response import CommunicationSiteCreationResponse
+from office365.sharepoint.entity import Entity
+from office365.sharepoint.publishing.sites.communication.creation_request import (
+    CommunicationSiteCreationRequest,
+)
+from office365.sharepoint.publishing.sites.communication.creation_response import (
+    CommunicationSiteCreationResponse,
+)
 
 
-class CommunicationSite(BaseEntity):
+class CommunicationSite(Entity):
     """Represents a Communication Site."""
 
     def create(self, title, site_url, description=None):
@@ -29,7 +33,9 @@ class CommunicationSite(BaseEntity):
         """
         request = CommunicationSiteCreationRequest(title, site_url, description)
         return_type = ClientResult(self.context, CommunicationSiteCreationResponse())
-        qry = ServiceOperationQuery(self, "Create", None, request, "request", return_type)
+        qry = ServiceOperationQuery(
+            self, "Create", None, {"request": request}, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -52,7 +58,9 @@ class CommunicationSite(BaseEntity):
         If the SiteStatus returns 3 or 0, the Communication site failed to be created.
         """
         response = ClientResult(self.context, CommunicationSiteCreationResponse())
-        qry = ServiceOperationQuery(self, "Status", None, {'url': site_url}, None, response)
+        qry = ServiceOperationQuery(
+            self, "Status", None, {"url": site_url}, None, response
+        )
         self.context.add_query(qry)
 
         def _construct_status_request(request):
@@ -63,7 +71,9 @@ class CommunicationSite(BaseEntity):
         return response
 
     def enable(self, design_package_id):
-        qry = ServiceOperationQuery(self, "Enable", None, {"designPackageId": design_package_id})
+        qry = ServiceOperationQuery(
+            self, "Enable", None, {"designPackageId": design_package_id}
+        )
         self.context.add_query(qry)
         return self
 

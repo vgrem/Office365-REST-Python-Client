@@ -1,12 +1,11 @@
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity import Entity
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.likes.user_entity import UserEntity
 
 
-class Comment(BaseEntity):
-
+class Comment(Entity):
     def like(self):
         """
         The Like method makes the current user a liker of the comment.
@@ -29,8 +28,12 @@ class Comment(BaseEntity):
         List of like entries corresponding to individual likes. MUST NOT contain more than one entry
         for the same user in the set.
         """
-        return self.properties.get('likedBy', BaseEntityCollection(self.context, UserEntity,
-                                                                   ResourcePath("likedBy", self.resource_path)))
+        return self.properties.get(
+            "likedBy",
+            EntityCollection(
+                self.context, UserEntity, ResourcePath("likedBy", self.resource_path)
+            ),
+        )
 
     @property
     def entity_type_name(self):

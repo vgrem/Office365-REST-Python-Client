@@ -1,4 +1,6 @@
-from office365.directory.authentication.configuration_base import ApiAuthenticationConfigurationBase
+from office365.directory.authentication.configuration_base import (
+    ApiAuthenticationConfigurationBase,
+)
 
 
 class BasicAuthentication(ApiAuthenticationConfigurationBase):

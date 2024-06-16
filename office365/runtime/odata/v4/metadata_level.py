@@ -1,5 +1,4 @@
 class ODataV4MetadataLevel:
-
     Full = "full"
     """Indicates that the service MUST include all control information explicitly in the payload."""
 

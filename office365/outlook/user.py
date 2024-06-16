@@ -1,7 +1,7 @@
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
-from office365.outlook.locale_info import LocaleInfo
 from office365.outlook.category import OutlookCategory
+from office365.outlook.locale_info import LocaleInfo
 from office365.outlook.timezone_information import TimeZoneInformation
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -32,22 +32,28 @@ class OutlookUser(Entity):
         When setting up an Outlook client, the user selects the preferred time zone from this supported list.
         You can subsequently get the preferred time zone by getting the user's mailbox settings.
         """
-        return_type = ClientResult(self.context, ClientValueCollection(TimeZoneInformation))
+        return_type = ClientResult(
+            self.context, ClientValueCollection(TimeZoneInformation)
+        )
         qry = FunctionQuery(self, "supportedTimeZones", None, return_type)
         self.context.add_query(qry)
         return return_type
 
     @property
     def master_categories(self):
+        # type: () -> EntityCollection[OutlookCategory]
         """A list of categories defined for the user."""
-        return self.properties.get('masterCategories',
-                                   EntityCollection(self.context, OutlookCategory,
-                                                    ResourcePath("masterCategories", self.resource_path)))
+        return self.properties.get(
+            "masterCategories",
+            EntityCollection(
+                self.context,
+                OutlookCategory,
+                ResourcePath("masterCategories", self.resource_path),
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:
-            property_mapping = {
-                "masterCategories": self.master_categories
-            }
+            property_mapping = {"masterCategories": self.master_categories}
             default_value = property_mapping.get(name, None)
         return super(OutlookUser, self).get_property(name, default_value)

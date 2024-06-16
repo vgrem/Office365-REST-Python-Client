@@ -1,9 +1,9 @@
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class VariationsTranslationTimerJob(BaseEntity):
+class VariationsTranslationTimerJob(Entity):
     """
     The VariationsTranslationTimerJob type provides methods to drive translation for list items in a variation label.
     """
@@ -22,10 +22,12 @@ class VariationsTranslationTimerJob(BaseEntity):
         payload = {
             "list": list_url,
             "itemIds": ClientValueCollection(int, item_ids),
-            "addressesToEmail": ClientValueCollection(str, addresses_to_email)
+            "addressesToEmail": ClientValueCollection(str, addresses_to_email),
         }
         binding_type = VariationsTranslationTimerJob(context)
-        qry = ServiceOperationQuery(binding_type, "ExportItems", None, payload, is_static=True)
+        qry = ServiceOperationQuery(
+            binding_type, "ExportItems", None, payload, is_static=True
+        )
         context.add_query(qry)
         return binding_type
 

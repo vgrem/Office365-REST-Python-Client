@@ -7,4 +7,5 @@ class UserFlowLanguagePage(Entity):
     These language pages include both the default language translations provided by Microsoft,
     or custom pages that can be created to customize the language translations.
     """
+
     pass

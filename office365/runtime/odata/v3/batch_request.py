@@ -1,58 +1,49 @@
 import json
 import re
+from email.message import Message
+from typing import AnyStr, Iterator, List, Tuple
 
 import requests
+from requests import Response
 from requests.structures import CaseInsensitiveDict
 
-from office365.runtime.compat import message_from_bytes_or_string, message_as_bytes_or_string
-from email.message import Message
-
+from office365.runtime.compat import (
+    message_as_bytes_or_string,
+    message_from_bytes_or_string,
+)
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.request import ODataRequest
-from office365.runtime.queries.batch import create_boundary
+from office365.runtime.queries.batch import BatchQuery, create_boundary
+from office365.runtime.queries.client_query import ClientQuery
 
 
 class ODataBatchV3Request(ODataRequest):
-
     def build_request(self, query):
-        """
-        Construct a OData v3 Batch request
-
-        :type query: office365.runtime.queries.batch.BatchQuery
-        """
+        # type: (BatchQuery) -> RequestOptions
+        """Construct a OData v3 Batch request"""
         request = RequestOptions(query.url)
         request.method = HttpMethod.Post
         media_type = "multipart/mixed"
-        content_type = "; ".join([media_type, "boundary={0}".format(query.current_boundary)])
-        request.ensure_header('Content-Type', content_type)
+        content_type = "; ".join(
+            [media_type, "boundary={0}".format(query.current_boundary)]
+        )
+        request.ensure_header("Content-Type", content_type)
         request.data = self._prepare_payload(query)
         return request
 
     def process_response(self, response, query):
-        """
-        Parses an HTTP response.
-
-        :type response: requests.Response
-        :type query: office365.runtime.queries.batch.BatchQuery
-        """
+        # type: (Response, BatchQuery) -> None
+        """Parses an HTTP response."""
         for sub_qry, sub_resp in self._extract_response(response, query):
             sub_resp.raise_for_status()
             super(ODataBatchV3Request, self).process_response(sub_resp, sub_qry)
 
     def _extract_response(self, response, query):
-        """Parses a multipart/mixed response body from the position defined by the context.
-
-        :type response: requests.Response
-        :type query: office365.runtime.queries.batch.BatchQuery
-        """
-        content_type = response.headers['Content-Type'].encode("ascii")
-        http_body = (
-            b"Content-Type: "
-            + content_type
-            + b"\r\n\r\n"
-            + response.content
-        )
+        # type: (Response, BatchQuery) -> Iterator[Tuple[ClientQuery, Response]]
+        """Parses a multipart/mixed response body from the position defined by the context."""
+        content_type = response.headers["Content-Type"].encode("ascii")
+        http_body = b"Content-Type: " + content_type + b"\r\n\r\n" + response.content
 
         message = message_from_bytes_or_string(http_body)  # type: Message
 
@@ -64,11 +55,8 @@ class ODataBatchV3Request(ODataRequest):
                 yield qry, self._deserialize_response(raw_response)
 
     def _prepare_payload(self, query):
-        """
-        Serializes a batch request body.
-
-        :type query: office365.runtime.queries.batch.BatchQuery
-        """
+        # type: (BatchQuery) -> AnyStr
+        """Serializes a batch request body."""
         main_message = Message()
         main_message.add_header("Content-Type", "multipart/mixed")
         main_message.set_boundary(query.current_boundary)
@@ -94,9 +82,8 @@ class ODataBatchV3Request(ODataRequest):
 
     @staticmethod
     def _normalize_headers(headers_raw):
-        """
-        :type headers_raw: list[str]
-        """
+        # type: (List[str]) -> CaseInsensitiveDict
+        """ """
         headers = {}
         for header_line in headers_raw:
             k, v = header_line.split(":", 1)
@@ -104,9 +91,7 @@ class ODataBatchV3Request(ODataRequest):
         return CaseInsensitiveDict(headers)
 
     def _deserialize_response(self, raw_response):
-        """
-        :type raw_response: Message
-        """
+        # type: (Message) -> Response
         response = raw_response.get_payload(decode=True)
         lines = list(filter(None, response.decode("utf-8").split("\r\n")))
         response_status_regex = "^HTTP/1\\.\\d (\\d{3}) (.*)$"
@@ -125,22 +110,22 @@ class ODataBatchV3Request(ODataRequest):
 
     @staticmethod
     def _serialize_request(request):
+        # type: (RequestOptions) -> Message
         """Serializes a part of a batch request to a string. A part can be either a GET request or
-            a change set grouping several CUD (create, update, delete) requests.
-
-        :type request: RequestOptions
+        a change set grouping several CUD (create, update, delete) requests.
         """
         eol = "\r\n"
         method = request.method
         if "X-HTTP-Method" in request.headers:
             method = request.headers["X-HTTP-Method"]
-        lines = ["{method} {url} HTTP/1.1".format(method=method, url=request.url)] + \
-                [':'.join(h) for h in request.headers.items()]
+        lines = ["{method} {url} HTTP/1.1".format(method=method, url=request.url)] + [
+            ":".join(h) for h in request.headers.items()
+        ]
         if request.data:
             lines.append(eol)
             lines.append(json.dumps(request.data))
         raw_content = eol + eol.join(lines) + eol
-        payload = raw_content.encode('utf-8').lstrip()
+        payload = raw_content.encode("utf-8").lstrip()
 
         message = Message()
         message.add_header("Content-Type", "application/http")

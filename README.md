@@ -1,12 +1,12 @@
 # About
-Office 365 & Microsoft Graph library for Python
+Microsoft 365 & Microsoft Graph library for Python
 
 # Usage
 
 1. [Installation](#Installation)
 2. [Working with SharePoint API](#Working-with-SharePoint-API) 
 3. [Working with Outlook API](#Working-with-Outlook-API) 
-4. [Working with OneDrive API](#Working-with-OneDrive-API)
+4. [Working with OneDrive and SharePoint API v2 APIs](#working-with-onedrive-and-sharepoint-v2-apis)
 5. [Working with Teams API](#Working-with-Microsoft-Teams-API)
 6. [Working with OneNote API](#Working-with-Microsoft-OneNote-API)
 7. [Working with Planner API](#Working-with-Microsoft-Planner-API)  
@@ -27,51 +27,94 @@ pip install Office365-REST-Python-Client
 
 ### Note 
 >
-
 >Alternatively the _latest_ version could be directly installed via GitHub:
 >```
 >pip install git+https://github.com/vgrem/Office365-REST-Python-Client.git
 >```
 
+# Authentication
+For the following examples, relevant credentials can be found in the Azure Portal.
+
+Steps to access:
+1. Login to the home page of the Azure Portal
+2. Navigate to "Azure Active Directory" using the three bars in the top right corner of the portal
+3. Select "App registrations" in the navigation panel on the left
+4. Search for and select your relevant application
+5. In the application's "Overview" page, the client id can be found under "Application (client) id"
+6. In the application's "Certificates & Secrets" page, the client secret can be found under the "Value" of the "Client Secrets." If there is no client secret yet, create one here.
+
 
 # Working with SharePoint API
 
-The list of supported API versions: 
--   [SharePoint 2013 REST API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and above 
--   SharePoint Online & OneDrive for Business REST API
+   The `ClientContext` client provides the support for a legacy SharePoint REST and OneDrive for Business REST APIs, 
+   the list of supported versions: 
+   -   [SharePoint 2013 REST API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and above 
+   -   [SharePoint Online REST API](https://learn.microsoft.com/en-us/sharepoint/dev/sp-add-ins/get-to-know-the-sharepoint-rest-service)
+   -   OneDrive for Business REST API
 
-#### Authentication
+### Authentication
 
-The following auth flows are supported:
+   The following auth flows are supported:
 
-- app principals flow: 
-  `ClientContext.with_credentials(client_credentials)`
+#### 1. Using a SharePoint App-Only principal (client credentials flow)
+
+   This auth method is compatible with SharePoint on-premises and still relevant 
+   model in both SharePoint on-premises as SharePoint Online, 
+   the following methods are available: 
+
+   - `ClientContext.with_credentials(client_credentials)` 
+   - `ClientContext.with_client_credentials(client_id, client_secret)`
   
+   Usage:
+   ``` 
+   client_credentials = ClientCredential('{client_id}','{client_secret}')
+   ctx = ClientContext('{url}').with_credentials(client_credentials)
+   ```
+  
+   Documentation:
+   - [Granting access using SharePoint App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs)  
+   - [wiki](https://github.com/vgrem/Office365-REST-Python-Client/wiki/How-to-connect-to-SharePoint-Online-and-and-SharePoint-2013-2016-2019-on-premises--with-app-principal)
+  
+   Example: [connect_with_app_principal.py](examples/sharepoint/auth_app_only.py)
+  
+#### 2. Using username and password 
+
+   Usage:
+   ``` 
+   user_credentials = UserCredential('{username}','{password}')
+   ctx = ClientContext('{url}').with_credentials(user_credentials)
+   ```
+  
+   Example: [connect_with_user_credential.py](examples/sharepoint/auth_user_credential.py)
+  
+#### 3. Using an Azure AD application (certificate credentials flow) 
+
+  Documentation: 
+   - [Granting access via Azure AD App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread)  
+   - [wiki](https://github.com/vgrem/Office365-REST-Python-Client/wiki/How-to-connect-to-SharePoint-Online-with-certificate-credentials) 
+  
+  Example: [connect_with_client_certificate.py](examples/sharepoint/auth_client_certificate.py)
+
+#### 4. Interactive
+
+   to login interactively i.e. via a local browser
+
+   Prerequisite: 
+   
+   > In Azure Portal, configure the Redirect URI of your
+   "Mobile and Desktop application" as ``http://localhost``.
+
+  Example: [connect_interactive.py](examples/sharepoint/auth_interactive.py)
+
   Usage:
-  ``` 
-  client_credentials = ClientCredential('{client_id}','{client_secret}')
-  ctx = ClientContext('{url}').with_credentials(client_credentials)
-  ```
-  Documentation: refer [Granting access using SharePoint App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs) for a details  
-  
-  Example: [connect_with_app_principal.py](examples/sharepoint/connect_with_app_only_principal.py)
-  
-- user credentials flow: `ClientContext.with_credentials(user_credentials)`
+```python
+from office365.sharepoint.client_context import ClientContext
+ctx = ClientContext(site_url).with_interactive(tenant_name_or_id, client_id)
+me = ctx.web.current_user.get().execute_query()
+print(me.login_name)
+```
 
-  Usage:
-  ``` 
-  user_credentials = UserCredential('{username}','{password}')
-  ctx = ClientContext('{url}').with_credentials(user_credentials)
-  ```
-  Example: [connect_with_user_credential.py](examples/sharepoint/connect_with_user_credential.py)
-  
-- certificate credentials flow: `ClientContext.with_certificate(tenant, client_id, thumbprint, cert_path)`
-
-  Documentation: [Granting access via Azure AD App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread)  
-  
-  Example: [connect_with_client_certificate.py](examples/sharepoint/connect_with_client_certificate.py)
-
-#### Examples
+### Examples
  
 There are **two approaches** available to perform API queries:
 
@@ -117,20 +160,33 @@ web_title = json['d']['Title']
 print("Web title: {0}".format(web_title))
 ```
 
-
 The list of examples:
 
 - Working with files
-  - [download a file](examples/sharepoint/files/download_file.py) 
-  - [upload a file](examples/sharepoint/files/upload_file.py)
+  - [download a file](examples/sharepoint/files/download.py) 
+  - [upload a file](examples/sharepoint/files/upload.py)
 
 - Working with lists and list items
   -  [create a list item](examples/sharepoint/lists/data_generator.py)
-  -  [read a list item](examples/sharepoint/lists/read_large_list.py)   
-  -  [update a list item](examples/sharepoint/listitems/update_items_batch.py)
-  -  [delete a list item](examples/sharepoint/listitems/delete_list_item.py) 
+  -  [read a list item](examples/sharepoint/lists/read_paged.py)   
+  -  [update a list item](examples/sharepoint/listitems/update_batch.py)
+  -  [delete a list item](examples/sharepoint/listitems/delete.py) 
   
 Refer [examples section](examples/sharepoint) for another scenarios
+
+### Support for non-standard SharePoint Online Environments
+
+  Support for non-standard SharePoint Environments is currently being implemented. Currently supported:
+  - GCC High
+
+  To enable authentication to GCC High endpoints, add the `environment='GCCH'` parameter when calling the 
+  `ClientContext class` with `.with_user_credentials`, `.with_client_credentials`, or `.with_credentials`
+
+   Example:
+   ```python
+   client_credentials = ClientCredential('{client_id}','{client_secret}')
+   ctx = ClientContext('{url}').with_credentials(client_credentials, environment='GCCH')
+   ```
 
 # Working with Outlook API
 
@@ -147,15 +203,15 @@ the following clients are available:
 ~~- `OutlookClient` which targets Outlook API `v1.0` version (not recommended for usage since `v1.0` version is being deprecated.)~~
 
 
-#### Authentication
+### Authentication
 
 [The Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/) which comes as a dependency 
 is used as a default library to obtain tokens to call Microsoft Graph API. 
 
 Using [Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/)
 
-> Note: access token is getting acquired  via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
-> in the provided examples
+> Note: access token is getting acquired via [Client Credential flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow)
+> in the provided examples. Other forms of token acquisition can be found here: https://msal-python.readthedocs.io/en/latest/
 
 ```python
 import msal
@@ -224,7 +280,20 @@ client.me.send_mail(
 ```
 
 
-# Working with OneDrive API
+Additional examples & scenarios:
+
+-  [download a message](examples/outlook/messages/download.py) 
+-  [list messages](examples/outlook/messages/list_all.py)
+-  [move messages to a different folder](examples/outlook/messages/move.py)
+-  [search messages](examples/outlook/messages/search.py)   
+-  [send messages](examples/outlook/messages/send.py)
+-  [send messages with attachments](examples/outlook/messages/send_with_attachment.py) 
+-  [enable sending emails on behalf of another user in your organization](https://learn.microsoft.com/en-us/microsoft-365/solutions/allow-members-to-send-as-or-send-on-behalf-of-group)
+
+Refer to [examples section](examples/outlook) for other scenarios
+
+
+# Working with OneDrive and SharePoint v2 APIs
 
 #### Documentation 
 
@@ -297,8 +366,16 @@ def download_files(remote_folder, local_path):
                 drive_item.download(local_file).execute_query()
 ```
 
+Additional examples:
 
-Refer [OneDrive examples section](examples/onedrive) for a more examples.
+-  [create list column](examples/onedrive/columns/create_text.py) 
+-  [download file](examples/onedrive/files/download.py)
+-  [export files](examples/onedrive/files/export.py)
+-  [upload folder](examples/onedrive/folders/upload.py)   
+-  [list drives](examples/onedrive/drives/list.py)
+-  [list files](examples/onedrive/folders/list_files.py)
+
+Refer to [OneDrive examples section](examples/onedrive) for more examples.
 
 
 # Working with Microsoft Teams API
@@ -320,6 +397,16 @@ from office365.graph_client import GraphClient
 client = GraphClient(acquire_token_func)
 new_team = client.groups["{group_id}"].add_team().execute_query_retry()
 ```
+
+Additional examples:
+
+-  [create a team](examples/teams/create_team.py) 
+-  [create team from group](examples/teams/create_from_group.py)
+-  [list all teams](examples/teams/list_all.py)
+-  [list my teams](examples/teams/list_my_teams.py)   
+-  [send messages](examples/teams/send_message.py)
+  
+Refer to [examples section](examples/teams) for other scenarios
 
 # Working with Microsoft Onenote API
 

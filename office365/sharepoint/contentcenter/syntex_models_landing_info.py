@@ -1,8 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class SyntexModelsLandingInfo(BaseEntity):
-
+class SyntexModelsLandingInfo(Entity):
     @property
     def entity_type_name(self):
         return "Microsoft.Office.Server.ContentCenter.SyntexModelsLandingInfo"

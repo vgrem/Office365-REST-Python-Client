@@ -1,10 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class SPOUserSessionRevocationResult(BaseEntity):
-
+class SPOUserSessionRevocationResult(Entity):
     @property
     def entity_type_name(self):
         return "Microsoft.Online.SharePoint.TenantManagement.SPOUserSessionRevocationResult"
-
-

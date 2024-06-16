@@ -1,20 +1,28 @@
-import json
-import uuid
+"""
+Create a new team.
 
-from examples import acquire_token_by_username_password
+
+Since `TeamCollection.create` is an async operation, execute_query_and_wait is called to ensure teams gets created
+
+https://learn.microsoft.com/en-us/graph/api/team-post?view=graph-rest-1.0
+"""
+
 from office365.graph_client import GraphClient
+from tests import (
+    create_unique_name,
+    test_client_id,
+    test_password,
+    test_tenant,
+    test_username,
+)
 
+client = GraphClient.with_username_and_password(
+    test_tenant, test_client_id, test_username, test_password
+)
+team_name = create_unique_name("Team")
+print("Creating a team '{0}' ...".format(team_name))
+team = client.teams.create(team_name).execute_query_and_wait()
+print("Team has been created")
 
-def print_success(group):
-    """
-    :type group: office365.directory.groups.group.Group
-    """
-    print(f"team has been deleted")
-
-
-client = GraphClient(acquire_token_by_username_password)
-team_name = "Team_" + uuid.uuid4().hex
-team = client.teams.create(team_name).execute_query()
-print(json.dumps(team.to_json(), indent=4))
-
-team.delete_object().execute_query_retry(success_callback=print_success)  # clean up
+print("Cleaning up temporary resources... ")
+team.delete_object().execute_query()

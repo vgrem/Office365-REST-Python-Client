@@ -1,13 +1,14 @@
+from typing import Optional
+
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.sharepoint.client_context import ClientContext
-from tests import test_team_site_url, test_client_credentials
+from office365.sharepoint.files.file import File
+from office365.sharepoint.webs.web import Web
+from tests import test_client_credentials, test_team_site_url
 
 
 def try_get_file(web, url):
-    """
-    :type web: office365.sharepoint.webs.web.Web
-    :type url: str
-    """
+    # type: (Web, str) -> Optional[File]
     try:
         return web.get_file_by_server_relative_url(url).get().execute_query()
     except ClientRequestException as e:
@@ -18,7 +19,7 @@ def try_get_file(web, url):
 
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
-file_url = '/sites/team/Shared Documents/big_buck_bunny111.mp4'
+file_url = "Shared Documents/Financial Sample.xlsx"
 file = try_get_file(ctx.web, file_url)
 if file is None:
     print("File not found")

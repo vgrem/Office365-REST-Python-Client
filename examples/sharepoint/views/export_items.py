@@ -3,7 +3,7 @@ import os
 import tempfile
 
 from office365.sharepoint.client_context import ClientContext
-from tests import test_team_site_url, test_client_credentials
+from tests import test_client_credentials, test_team_site_url
 
 
 def export_to_csv(path, list_items):
@@ -11,7 +11,7 @@ def export_to_csv(path, list_items):
     :param str path: export path
     :param office365.sharepoint.listitems.collection.ListItemCollection list_items: List items
     """
-    with open(path, 'w') as fh:
+    with open(path, "w") as fh:
         fields = list_items[0].properties.keys()
         w = csv.DictWriter(fh, fields)
         w.writeheader()

@@ -2,6 +2,14 @@ from office365.runtime.client_runtime_context import ClientRuntimeContext
 
 
 class ExcelService(ClientRuntimeContext):
+    """
+    A REST API for Excel Services enables operations against Excel workbooks by using operations specified in the
+    HTTP standard
+
+    Note:
+    The Excel Services REST API for SharePoint Online will no longer be supported for Microsoft 365 accounts
+    from February 28th, 2022 forward. Instead, please use the REST API that’s part of the Microsoft Graph endpoint.
+    """
 
     def __init__(self, context):
         """
@@ -20,4 +28,4 @@ class ExcelService(ClientRuntimeContext):
         pass
 
     def get_workbook(self, list_name, file_name):
-        return self
+        raise NotImplementedError("get_workbook")

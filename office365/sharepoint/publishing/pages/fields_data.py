@@ -2,12 +2,14 @@ from office365.runtime.client_value import ClientValue
 
 
 class SitePageFieldsData(ClientValue):
-
-    def __init__(self, title=None,
-                 banner_image_url=None,
-                 canvas_content=None,
-                 topic_header=None,
-                 publish_start_date=None):
+    def __init__(
+        self,
+        title=None,
+        banner_image_url=None,
+        canvas_content=None,
+        topic_header=None,
+        publish_start_date=None,
+    ):
         """
         Represents Site Page metadata for use in page authoring operations.
 

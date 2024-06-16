@@ -4,7 +4,6 @@ from tests.sharepoint.sharepoint_case import SPTestCase
 
 
 class TestHubSite(SPTestCase):
-
     @classmethod
     def setUpClass(cls):
         super(TestHubSite, cls).setUpClass()
@@ -23,4 +22,3 @@ class TestHubSite(SPTestCase):
         if self.target_site.is_hub_site:
             site = self.target_site.unregister_hub_site().get().execute_query()
             self.assertFalse(site.is_hub_site)
-

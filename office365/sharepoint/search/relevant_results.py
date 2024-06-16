@@ -10,9 +10,18 @@ class RelevantResults(ClientValue):
     as specified in section 2.2.5.5
     """
 
-    def __init__(self, group_template_id=None, item_template_id=None, properties=None,
-                 result_title=None, result_title_url=None, table=SimpleDataTable(),
-                 row_count=None, total_rows=None, total_rows_including_duplicates=None):
+    def __init__(
+        self,
+        group_template_id=None,
+        item_template_id=None,
+        properties=None,
+        result_title=None,
+        result_title_url=None,
+        table=SimpleDataTable(),
+        row_count=None,
+        total_rows=None,
+        total_rows_including_duplicates=None,
+    ):
         """
         :param str item_template_id: Specifies the identifier of the layout template that specifies how the result
             item will be displayed.

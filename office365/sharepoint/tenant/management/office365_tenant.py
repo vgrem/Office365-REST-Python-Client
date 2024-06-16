@@ -1,31 +1,58 @@
+from typing import Optional
+
+from typing_extensions import Self
+
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.principal.users.user import User
-from office365.sharepoint.tenant.administration.siteinfo_for_site_picker import SiteInfoForSitePicker
-from office365.sharepoint.tenant.management.externalusers.results.session_revocation import SPOUserSessionRevocationResult
-from office365.sharepoint.tenant.management.externalusers.results.remove import RemoveExternalUsersResults
-from office365.sharepoint.tenant.management.externalusers.results.get import GetExternalUsersResults
+from office365.sharepoint.tenant.administration.siteinfo_for_site_picker import (
+    SiteInfoForSitePicker,
+)
 from office365.sharepoint.tenant.administration.theme_properties import ThemeProperties
+from office365.sharepoint.tenant.management.externalusers.results.get import (
+    GetExternalUsersResults,
+)
+from office365.sharepoint.tenant.management.externalusers.results.remove import (
+    RemoveExternalUsersResults,
+)
+from office365.sharepoint.tenant.management.externalusers.results.session_revocation import (
+    SPOUserSessionRevocationResult,
+)
 
 
-class Office365Tenant(BaseEntity):
+class Office365Tenant(Entity):
     """Represents a SharePoint Online tenant."""
 
     def __init__(self, context):
-        static_path = ResourcePath("Microsoft.Online.SharePoint.TenantManagement.Office365Tenant")
+        static_path = ResourcePath(
+            "Microsoft.Online.SharePoint.TenantManagement.Office365Tenant"
+        )
         super(Office365Tenant, self).__init__(context, static_path)
 
     @property
+    def addressbar_link_permission(self):
+        # type: () -> Optional[int]
+        return self.properties.get("AddressbarLinkPermission", None)
+
+    @property
+    def allow_comments_text_on_email_enabled(self):
+        # type: () -> Optional[bool]
+        return self.properties.get("AllowCommentsTextOnEmailEnabled", None)
+
+    @property
     def allow_editing(self):
+        # type: () -> Optional[bool]
         return self.properties.get("AllowEditing", None)
 
     @property
     def ai_builder_site_info_list(self):
-        return self.properties.get("AIBuilderSiteInfoList", ClientValueCollection(SiteInfoForSitePicker))
+        return self.properties.get(
+            "AIBuilderSiteInfoList", ClientValueCollection(SiteInfoForSitePicker)
+        )
 
     def add_tenant_cdn_origin(self, cdn_type, origin_url):
         """
@@ -50,10 +77,13 @@ class Office365Tenant(BaseEntity):
 
     def disable_sharing_for_non_owners_of_site(self, site_url):
         """
+        Disables Sharing For Non Owners
         :param str site_url:
         """
         payload = {"siteUrl": site_url}
-        qry = ServiceOperationQuery(self, "DisableSharingForNonOwnersOfSite", None, payload)
+        qry = ServiceOperationQuery(
+            self, "DisableSharingForNonOwnersOfSite", None, payload
+        )
         self.context.add_query(qry)
         return self
 
@@ -70,9 +100,27 @@ class Office365Tenant(BaseEntity):
             "cdnType": cdn_type,
         }
         return_type = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "GetTenantCdnEnabled", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetTenantCdnEnabled", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
+
+    def set_block_download_file_type_policy_data(
+        self, blockDownloadFileTypePolicy, fileTypeIds, excludedBlockDownloadGroupIds
+    ):
+        # type: (bool, list[int], list[str]) -> Self
+        """"""
+        payload = {
+            "blockDownloadFileTypePolicy": blockDownloadFileTypePolicy,
+            "fileTypeIds": fileTypeIds,
+            "excludedBlockDownloadGroupIds": excludedBlockDownloadGroupIds,
+        }
+        qry = ServiceOperationQuery(
+            self, "SetBlockDownloadFileTypePolicyData", None, payload
+        )
+        self.context.add_query(qry)
+        return self
 
     def set_tenant_cdn_enabled(self, cdn_type, is_enabled):
         """
@@ -84,10 +132,7 @@ class Office365Tenant(BaseEntity):
         :param int cdn_type: Specifies the CDN type. The valid values are: public or private.
         :param bool is_enabled: Specifies if the CDN is enabled.
         """
-        payload = {
-            "cdnType": cdn_type,
-            "isEnabled": is_enabled
-        }
+        payload = {"cdnType": cdn_type, "isEnabled": is_enabled}
         qry = ServiceOperationQuery(self, "SetTenantCdnEnabled", None, payload)
         self.context.add_query(qry)
         return self
@@ -124,7 +169,9 @@ class Office365Tenant(BaseEntity):
             "cdnType": cdn_type,
         }
         return_type = ClientResult(self.context, ClientValueCollection(str))
-        qry = ServiceOperationQuery(self, "GetTenantCdnPolicies", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetTenantCdnPolicies", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -142,33 +189,37 @@ class Office365Tenant(BaseEntity):
                   ExcludeIfNoScriptDisabled
         :param str policy_value: A String representing the value of the policy type defined by the PolicyType parameter.
         """
-        payload = {
-            "cdnType": cdn_type,
-            "policy": policy,
-            "policyValue": policy_value
-        }
+        payload = {"cdnType": cdn_type, "policy": policy, "policyValue": policy_value}
         qry = ServiceOperationQuery(self, "SetTenantCdnPolicy", None, payload)
         self.context.add_query(qry)
         return self
 
-    def revoke_all_user_sessions(self, user_or_username):
+    def revoke_all_user_sessions(self, user):
         """
         Provides IT administrators the ability to invalidate a particular users' O365 sessions across all their devices.
 
-        :param str or User user_or_username: Specifies a user name
+        :param str or User user: Specifies a user name or user object
               (for example, user1@contoso.com) or User object
         """
         return_type = SPOUserSessionRevocationResult(self.context)
-        if isinstance(user_or_username, User):
-            def _user_loaded():
-                next_qry = ServiceOperationQuery(self, "RevokeAllUserSessions", [user_or_username.login_name], None,
-                                                 None, return_type)
-                self.context.add_query(next_qry)
 
-            user_or_username.ensure_property("LoginName", _user_loaded)
-        else:
-            qry = ServiceOperationQuery(self, "RevokeAllUserSessions", [user_or_username], None, None, return_type)
+        def _revoke_all_user_sessions(login_name):
+            """
+            :type login_name: str
+            """
+            qry = ServiceOperationQuery(
+                self, "RevokeAllUserSessions", [login_name], None, None, return_type
+            )
             self.context.add_query(qry)
+
+        if isinstance(user, User):
+
+            def _user_loaded():
+                _revoke_all_user_sessions(user.login_name)
+
+            user.ensure_property("LoginName", _user_loaded)
+        else:
+            _revoke_all_user_sessions(user)
         return return_type
 
     def get_external_users(self, position=0, page_size=50, _filter=None, sort_order=0):
@@ -189,9 +240,11 @@ class Office365Tenant(BaseEntity):
             "position": position,
             "pageSize": page_size,
             "filter": _filter,
-            "sortOrder": sort_order
+            "sortOrder": sort_order,
         }
-        qry = ServiceOperationQuery(self, "GetExternalUsers", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetExternalUsers", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -206,7 +259,9 @@ class Office365Tenant(BaseEntity):
             "uniqueIds": unique_ids,
         }
         return_type = RemoveExternalUsersResults(self.context)
-        qry = ServiceOperationQuery(self, "RemoveExternalUsers", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "RemoveExternalUsers", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -215,7 +270,9 @@ class Office365Tenant(BaseEntity):
         Get all themes from tenant
         """
         return_type = ClientObjectCollection(self.context, ThemeProperties)
-        qry = ServiceOperationQuery(self, "GetAllTenantThemes", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetAllTenantThemes", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -231,14 +288,15 @@ class Office365Tenant(BaseEntity):
             "name": name,
             "themeJson": theme_json,
         }
-        qry = ServiceOperationQuery(self, "AddTenantTheme", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "AddTenantTheme", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
     def delete_tenant_theme(self, name):
         """
         Removes a theme from tenant
-
         :type name: str
         """
         payload = {
@@ -248,7 +306,9 @@ class Office365Tenant(BaseEntity):
         self.context.add_query(qry)
         return self
 
-    def queue_import_profile_properties(self, id_type, source_data_id_property, property_map, source_uri):
+    def queue_import_profile_properties(
+        self, id_type, source_data_id_property, property_map, source_uri
+    ):
         """Bulk import custom user profile properties
 
         :param int id_type: The type of id to use when looking up the user profile.
@@ -261,8 +321,10 @@ class Office365Tenant(BaseEntity):
             "idType": id_type,
             "sourceDataIdProperty": source_data_id_property,
             "propertyMap": property_map,
-            "sourceUri": source_uri
+            "sourceUri": source_uri,
         }
-        qry = ServiceOperationQuery(self, "QueueImportProfileProperties", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "QueueImportProfileProperties", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type

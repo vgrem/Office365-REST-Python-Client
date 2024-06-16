@@ -16,6 +16,3 @@ class TestSection(GraphTestCase):
     def test2_list_sections(self):
         my_sections = self.client.me.onenote.sections.get().execute_query()
         self.assertIsNotNone(my_sections.resource_path)
-
-
-

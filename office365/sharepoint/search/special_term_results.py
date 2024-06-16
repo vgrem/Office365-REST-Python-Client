@@ -4,7 +4,7 @@ from office365.sharepoint.search.special_term_result import SpecialTermResult
 
 
 class SpecialTermResults(ClientValue):
-    """The SpecialTermResults table contains best bets that apply to the search query. """
+    """The SpecialTermResults table contains best bets that apply to the search query."""
 
     def __init__(self, results=None):
         self.Results = ClientValueCollection(SpecialTermResult, results)

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.teams.members.conversation import ConversationMember
 
@@ -7,19 +9,22 @@ class AadUserConversationMember(ConversationMember):
 
     @property
     def user_id(self):
-        """The guid of the user.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The guid of the user."""
         return self.properties.get("userId", None)
 
     @property
     def user(self):
         from office365.directory.users.user import User
-        return self.properties.get("user", User(self.context, ResourcePath("user", self.resource_path)))
+
+        return self.properties.get(
+            "user", User(self.context, ResourcePath("user", self.resource_path))
+        )
 
     def to_json(self, json_format=None):
         return {
             "roles": self.roles,
-            "user@odata.bind": "https://graph.microsoft.com/v1.0/users/{0}".format(self.user_id)
+            "user@odata.bind": "https://graph.microsoft.com/v1.0/users/{0}".format(
+                self.user_id
+            ),
         }

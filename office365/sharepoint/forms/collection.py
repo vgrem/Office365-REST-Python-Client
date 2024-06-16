@@ -1,10 +1,9 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.forms.form import Form
 
 
-class FormCollection(BaseEntityCollection):
-
+class FormCollection(EntityCollection[Form]):
     def __init__(self, context, resource_path=None):
         """Specifies a collection of list forms for a list."""
         super(FormCollection, self).__init__(context, Form, resource_path)
@@ -14,7 +13,9 @@ class FormCollection(BaseEntityCollection):
 
         :param str _id: Specifies the identifier of the list form.
         """
-        return Form(self.context, ServiceOperationPath("GetById", [_id], self.resource_path))
+        return Form(
+            self.context, ServiceOperationPath("GetById", [_id], self.resource_path)
+        )
 
     def get_by_page_type(self, form_type):
         """
@@ -26,4 +27,7 @@ class FormCollection(BaseEntityCollection):
             form to return. It MUST be DISPLAYFORM, EDITFORM or NEWFORM.
             Type: office365.sharepoint.pages.page_type.PageType
         """
-        return Form(self.context, ServiceOperationPath("GetByPageType", [form_type], self.resource_path))
+        return Form(
+            self.context,
+            ServiceOperationPath("GetByPageType", [form_type], self.resource_path),
+        )

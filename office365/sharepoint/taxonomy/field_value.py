@@ -3,7 +3,6 @@ from office365.runtime.client_value_collection import ClientValueCollection
 
 
 class TaxonomyFieldValue(ClientValue):
-
     def __init__(self, label=None, term_guid=None, wss_id=-1):
         """
         Represents a single value held in a TaxonomyField (section 3.1.5.27) object.
@@ -26,11 +25,16 @@ class TaxonomyFieldValue(ClientValue):
         return "SP.Taxonomy.TaxonomyFieldValue"
 
 
-class TaxonomyFieldValueCollection(ClientValueCollection):
+class TaxonomyFieldValueCollection(ClientValueCollection[TaxonomyFieldValue]):
     """Represents the multi-value object for the taxonomy column."""
 
     def __init__(self, initial_values):
-        super(TaxonomyFieldValueCollection, self).__init__(TaxonomyFieldValue, initial_values)
+        """
+        :param list[TaxonomyFieldValue] initial_values:
+        """
+        super(TaxonomyFieldValueCollection, self).__init__(
+            TaxonomyFieldValue, initial_values
+        )
 
     def __str__(self):
         return ";#".join([str(item) for item in self._data])

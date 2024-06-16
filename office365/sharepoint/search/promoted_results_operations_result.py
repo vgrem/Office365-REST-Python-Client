@@ -1,7 +1,9 @@
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.search.object_owner_result import SearchObjectOwnerResult
-from office365.sharepoint.search.promoted_result_query_rule import PromotedResultQueryRule
+from office365.sharepoint.search.promoted_result_query_rule import (
+    PromotedResultQueryRule,
+)
 
 
 class PromotedResultsOperationsResult(ClientValue):

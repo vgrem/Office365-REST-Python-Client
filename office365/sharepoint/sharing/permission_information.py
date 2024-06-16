@@ -1,13 +1,16 @@
-from office365.sharepoint.base_entity import BaseEntity
+from typing import Optional
+
+from office365.sharepoint.entity import Entity
 
 
-class SharingPermissionInformation(BaseEntity):
+class SharingPermissionInformation(Entity):
     """
     Contains information about a sharing permission entity such as group or role.
     """
 
     @property
     def is_default_permission(self):
+        # type: () -> Optional[bool]
         """
         Identifies whether or not the permission entity is a default SP.Group or role (meaning it is recommended
         for granting permissions).
@@ -20,16 +23,13 @@ class SharingPermissionInformation(BaseEntity):
         For granting permissions to a file or other non-site object, there can be two default permission entities:
         a role for view permissions (StandardViewerRoleDefinitionID) and a role for edit permissions
         (StandardEditorRoleDefinitionID).
-
-        :rtype: bool or None
         """
         return self.properties.get("IsDefaultPermission", None)
 
     @property
     def permission_id(self):
-        """Gets the ID of this permission in the following formats: group:x, role: xxxxxx.
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the ID of this permission in the following formats: group:x, role: xxxxxx."""
         return self.properties.get("PermissionId", None)
 
     @property

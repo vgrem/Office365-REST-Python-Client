@@ -1,27 +1,25 @@
-from office365.sharepoint.base_entity import BaseEntity
+from typing import Optional
+
+from office365.sharepoint.entity import Entity
 
 
-class PrimaryCityTime(BaseEntity):
+class PrimaryCityTime(Entity):
     """Represents the date and time, in UTC, of the geographic location."""
 
     @property
     def location(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """ """
         return self.properties.get("Location", None)
 
     @property
     def time(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """"""
         return self.properties.get("Time", None)
 
     @property
     def utc_offset(self):
-        """
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """"""
         return self.properties.get("UtcOffset", None)
-

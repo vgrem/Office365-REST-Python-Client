@@ -1,36 +1,51 @@
-class ClientResult(object):
+import copy
+from typing import TYPE_CHECKING, Callable, Generic, Optional, TypeVar
+
+from typing_extensions import Self
+
+from office365.runtime.http.request_options import RequestOptions
+
+if TYPE_CHECKING:
+    from office365.runtime.client_runtime_context import ClientRuntimeContext  # noqa
+    from office365.runtime.client_value import ClientValue  # noqa
+
+T = TypeVar("T")
+
+
+class ClientResult(Generic[T]):
     """Client result"""
 
     def __init__(self, context, default_value=None):
-        """
-        Client result
-
-        :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
-        :type default_value: int or str or bytes or bool or dict or office365.runtime.client_value.ClientValue
-        """
+        # type: (ClientRuntimeContext, Optional[T]) -> None
+        """Client result"""
         self._context = context
-        self._value = default_value
+        self._value = copy.deepcopy(default_value)  # type: T
 
-    def after_execute(self, action, *args, **kwargs):
+    def before_execute(self, action):
+        # type: (Callable[[RequestOptions], None]) -> Self
+        """Attach an event handler which is triggered before query is submitted to server"""
+        self._context.before_query_execute(action)
+        return self
 
-        def _process_response(resp):
-            """
-            :type resp: requests.Response
-            """
-            resp.raise_for_status()
-            action(self, *args, **kwargs)
-        self._context.after_execute(_process_response, True)
+    def after_execute(self, action, execute_first=False):
+        # type: (Callable[[Self], None], bool) -> Self
+        """Attach an event handler which is triggered after query is submitted to server"""
+        self._context.after_query_execute(action, execute_first)
         return self
 
     def set_property(self, key, value, persist_changes=False):
-        from office365.runtime.client_value import ClientValue
-        if isinstance(self.value, ClientValue):
-            self.value.set_property(key, value, persist_changes)
+        # type: (str, T, bool) -> Self
+        from office365.runtime.client_value import ClientValue  # noqa
+
+        if isinstance(self._value, ClientValue):
+            self._value.set_property(key, value, persist_changes)
         else:
             self._value = value
+        return self
 
     @property
     def value(self):
+        """Returns the value"""
         return self._value
 
     def execute_query(self):
@@ -38,12 +53,14 @@ class ClientResult(object):
         self._context.execute_query()
         return self
 
-    def execute_query_retry(self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None):
-        """
-        Executes the current set of data retrieval queries and method invocations and retries it if needed.
-        """
-        self._context.execute_query_retry(max_retry=max_retry,
-                                          timeout_secs=timeout_secs,
-                                          success_callback=success_callback,
-                                          failure_callback=failure_callback)
+    def execute_query_retry(
+        self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None
+    ):
+        """Executes the current set of data retrieval queries and method invocations and retries it if needed."""
+        self._context.execute_query_retry(
+            max_retry=max_retry,
+            timeout_secs=timeout_secs,
+            success_callback=success_callback,
+            failure_callback=failure_callback,
+        )
         return self

@@ -1,8 +1,8 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class AnalyticsUsageEntry(BaseEntity):
+class AnalyticsUsageEntry(Entity):
     """Specifies an analytics usage entry to log user or system events"""
 
     @staticmethod
@@ -19,13 +19,16 @@ class AnalyticsUsageEntry(BaseEntity):
             "itemId": item_id,
         }
         binding_type = AnalyticsUsageEntry(context)
-        qry = ServiceOperationQuery(binding_type, "LogAnalyticsEvent", None, payload)
-        qry.static = True
+        qry = ServiceOperationQuery(
+            binding_type, "LogAnalyticsEvent", None, payload, is_static=True
+        )
         context.add_query(qry)
         return binding_type
 
     @staticmethod
-    def log_analytics_app_event2(context, app_event_type_id, item_id, rollup_scope_id, site_id, user_id):
+    def log_analytics_app_event2(
+        context, app_event_type_id, item_id, rollup_scope_id, site_id, user_id
+    ):
         """
         Creates and logs an analytics event into the analytics pipeline with additional parameters.
 
@@ -42,10 +45,12 @@ class AnalyticsUsageEntry(BaseEntity):
             "itemId": item_id,
             "rollupScopeId": rollup_scope_id,
             "site_id": site_id,
-            "userId": user_id
+            "userId": user_id,
         }
         binding_type = AnalyticsUsageEntry(context)
-        qry = ServiceOperationQuery(binding_type, "LogAnalyticsAppEvent2", None, payload)
+        qry = ServiceOperationQuery(
+            binding_type, "LogAnalyticsAppEvent2", None, payload
+        )
         qry.static = True
         context.add_query(qry)
         return binding_type

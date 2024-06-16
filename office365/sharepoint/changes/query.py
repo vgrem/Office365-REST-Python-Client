@@ -4,13 +4,30 @@ from office365.runtime.client_value import ClientValue
 class ChangeQuery(ClientValue):
     """Defines a query that is performed against the change log."""
 
-    def __init__(self,
-                 alert=False, site=False, web=False, list_=False, item=False, activity=False, file=False, folder=False,
-                 user=False, group=False,
-                 view=False, content_type=False,
-                 add=True, update=True, system_update=True, delete_object=True,
-                 role_assignment_add=True, role_assignment_delete=True,
-                 change_token_start=None, change_token_end=None, fetch_limit=None):
+    def __init__(
+        self,
+        alert=False,
+        site=False,
+        web=False,
+        list_=False,
+        item=False,
+        activity=False,
+        file=False,
+        folder=False,
+        user=False,
+        group=False,
+        view=False,
+        content_type=False,
+        add=True,
+        update=True,
+        system_update=True,
+        delete_object=True,
+        role_assignment_add=True,
+        role_assignment_delete=True,
+        change_token_start=None,
+        change_token_end=None,
+        fetch_limit=None,
+    ):
         """
         :param int fetch_limit:
         :param role_assignment_delete: Specifies whether deleting role assignments is included in the query.
@@ -58,8 +75,8 @@ class ChangeQuery(ClientValue):
         self.DeleteObject = delete_object
         self.RoleAssignmentAdd = role_assignment_add
         self.RoleAssignmentDelete = role_assignment_delete
-        self.FetchLimit = fetch_limit
+        self.FetchLimit = str(fetch_limit) if fetch_limit else None
 
     @property
     def entity_type_name(self):
-        return 'SP.ChangeQuery'
+        return "SP.ChangeQuery"

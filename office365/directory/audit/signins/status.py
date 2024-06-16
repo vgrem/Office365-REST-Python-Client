@@ -3,6 +3,7 @@ from office365.runtime.client_value import ClientValue
 
 class SignInStatus(ClientValue):
     """Provides the sign-in status (Success or Failure) of the sign-in."""
+
     def __init__(self, additional_details=None, error_code=None, failure_reason=None):
         """
         :param str additional_details: Provides additional details on the sign-in activity

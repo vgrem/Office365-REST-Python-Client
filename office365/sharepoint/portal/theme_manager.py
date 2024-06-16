@@ -1,9 +1,9 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class ThemeManager(BaseEntity):
+class ThemeManager(Entity):
     """SharePoint site theming REST interface to perform basic create, read, update, and delete (CRUD)
     operations on site themes."""
 
@@ -23,7 +23,9 @@ class ThemeManager(BaseEntity):
             "name": name,
             "themeJson": theme_json,
         }
-        qry = ServiceOperationQuery(self, "AddTenantTheme", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "AddTenantTheme", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 

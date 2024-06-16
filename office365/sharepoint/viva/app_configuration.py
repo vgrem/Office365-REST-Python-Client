@@ -1,5 +1,5 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class AppConfiguration(BaseEntity):
+class AppConfiguration(Entity):
     pass

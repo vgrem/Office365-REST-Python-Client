@@ -5,9 +5,15 @@ from office365.runtime.client_value_collection import ClientValueCollection
 
 
 class SiteDesignCreationInfo(ClientValue):
-
-    def __init__(self, _id=None, title=None, description=None, web_template=None, site_script_ids=None,
-                 design_package_id=None):
+    def __init__(
+        self,
+        _id=None,
+        title=None,
+        description=None,
+        web_template=None,
+        site_script_ids=None,
+        design_package_id=None,
+    ):
         """
         :param str or None _id: The ID of the site design to apply.
         :param str or None title: The display name of the site design.

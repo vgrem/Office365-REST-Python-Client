@@ -1,6 +1,9 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class AppPrincipalIdentityProvider(BaseEntity):
+class AppPrincipalIdentityProvider(Entity):
     """Represents an identity provider for app principals."""
-    pass
+
+    @staticmethod
+    def external(context):
+        pass

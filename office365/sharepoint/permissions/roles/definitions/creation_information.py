@@ -3,8 +3,13 @@ from office365.sharepoint.permissions.base_permissions import BasePermissions
 
 
 class RoleDefinitionCreationInformation(ClientValue):
-
-    def __init__(self, base_permissions=BasePermissions(), name=None, description=None, order=None):
+    def __init__(
+        self,
+        base_permissions=BasePermissions(),
+        name=None,
+        description=None,
+        order=None,
+    ):
         """Contains properties that are used as parameters to initialize a role definition.
 
         :param str name: Specifies the name of the role definition.
@@ -20,5 +25,3 @@ class RoleDefinitionCreationInformation(ClientValue):
     @property
     def entity_type_name(self):
         return "SP.RoleDefinition"
-
-

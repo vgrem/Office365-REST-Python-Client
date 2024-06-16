@@ -1,5 +1,4 @@
 class CredentialType:
-
     def __init__(self):
         pass
 

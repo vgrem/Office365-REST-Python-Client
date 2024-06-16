@@ -15,8 +15,15 @@ class SearchResult(ClientValue):
     are organized in a CSOM array of QueryResults accessed through the SecondaryQueryResults property.
     """
 
-    def __init__(self, elapsed_time=None, primary_query_result=QueryResult(), properties=None,
-                 secondary_query_results=None, spelling_suggestion=None, triggered_rules=None):
+    def __init__(
+        self,
+        elapsed_time=None,
+        primary_query_result=QueryResult(),
+        properties=None,
+        secondary_query_results=None,
+        spelling_suggestion=None,
+        triggered_rules=None,
+    ):
         """
         :param str elapsed_time:  The time it took to execute the search query, in milliseconds.
             This element MUST contain a non-negative number.
@@ -35,7 +42,9 @@ class SearchResult(ClientValue):
         self.PrimaryQueryResult = primary_query_result
         self.ElapsedTime = elapsed_time
         self.Properties = properties
-        self.SecondaryQueryResults = ClientValueCollection(QueryResult, secondary_query_results)
+        self.SecondaryQueryResults = ClientValueCollection(
+            QueryResult, secondary_query_results
+        )
         self.SpellingSuggestion = spelling_suggestion
         self.TriggeredRules = StringCollection(triggered_rules)
 

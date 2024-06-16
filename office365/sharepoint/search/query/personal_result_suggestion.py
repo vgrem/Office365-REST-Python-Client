@@ -2,7 +2,6 @@ from office365.runtime.client_value import ClientValue
 
 
 class PersonalResultSuggestion(ClientValue):
-
     def __init__(self, highlighted_title=None, is_best_bet=None, title=None, url=None):
         """
         The PersonalResultSuggestion complex type contains a personal search result suggestion.

@@ -1,5 +1,5 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class LogFileInfo(BaseEntity):
+class LogFileInfo(Entity):
     pass

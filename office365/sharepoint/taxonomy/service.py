@@ -2,7 +2,7 @@ from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.odata.request import ODataRequest
 from office365.runtime.odata.v4.json_format import V4JsonFormat
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.taxonomy.store import TermStore
+from office365.sharepoint.taxonomy.stores.store import TermStore
 
 
 class TaxonomyService(ClientRuntimeContext):
@@ -14,7 +14,9 @@ class TaxonomyService(ClientRuntimeContext):
         """
         super(TaxonomyService, self).__init__()
         self._pending_request = ODataRequest(V4JsonFormat())
-        self._pending_request.beforeExecute += context.authentication_context.authenticate_request
+        self._pending_request.beforeExecute += (
+            context.authentication_context.authenticate_request
+        )
         self._service_root_url = "{0}/v2.1".format(context.service_root_url())
 
     def pending_request(self):

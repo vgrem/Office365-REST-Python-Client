@@ -1,7 +1,12 @@
 import abc
 from time import sleep
-from typing import TypeVar
+from typing import TYPE_CHECKING, AnyStr, Callable, List
 
+import requests
+from requests import Response
+from typing_extensions import Self
+
+from office365.runtime.client_request import ClientRequest
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
@@ -9,20 +14,18 @@ from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.read_entity import ReadEntityQuery
 
-T = TypeVar('T', bound='ClientObject')
+if TYPE_CHECKING:
+    from office365.runtime.client_object import T
 
 
 class ClientRuntimeContext(object):
-
     def __init__(self):
         self._queries = []
         self._current_query = None
 
     @property
     def current_query(self):
-        """
-        :rtype: office365.runtime.queries.client_query.ClientQuery
-        """
+        # type: () -> ClientQuery
         return self._current_query
 
     @property
@@ -30,16 +33,21 @@ class ClientRuntimeContext(object):
         return len(self._queries) > 0
 
     def build_request(self, query):
-        """
-        Builds a request
-
-        :type query: office365.runtime.queries.client_query.ClientQuery
-        """
+        # type: (ClientQuery) -> RequestOptions
+        """Builds a request"""
         self._current_query = query
-        return self.pending_request().build_custom_request(query)
+        request = self.pending_request().build_request(query)
+        self.pending_request().beforeExecute.notify(request)
+        return request
 
-    def execute_query_retry(self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None,
-                            exceptions=(ClientRequestException,)):
+    def execute_query_retry(
+        self,
+        max_retry=5,
+        timeout_secs=5,
+        success_callback=None,
+        failure_callback=None,
+        exceptions=(ClientRequestException,),
+    ):
         """
         Executes the current set of data retrieval queries and method invocations and retries it if needed.
 
@@ -64,92 +72,96 @@ class ClientRuntimeContext(object):
 
     @abc.abstractmethod
     def pending_request(self):
-        """
-        :rtype: office365.runtime.client_request.ClientRequest
-        """
+        # type: () -> ClientRequest
         pass
 
     @abc.abstractmethod
     def service_root_url(self):
-        """
-        :rtype: str
-        """
+        # type: () -> str
         pass
 
-    def load(self, client_object, properties_to_retrieve=None, before_loaded=None, after_loaded=None):
-        """Prepare retrieval query
-
-        :type properties_to_retrieve: list[str] or None
-        :type client_object: office365.runtime.client_object.ClientObject
-        :type before_loaded: (office365.runtime.http.request_options.RequestOptions) -> None
-        :type after_loaded: (T) -> None
-        """
+    def load(self, client_object, properties_to_retrieve=None):
+        # type: (T, List[str]) -> Self
+        """Prepare retrieval query"""
         qry = ReadEntityQuery(client_object, properties_to_retrieve)
         self.add_query(qry)
-        if callable(before_loaded):
-            self.before_execute(before_loaded)
-        if callable(after_loaded):
-            def _action():
-                after_loaded(client_object)
-            self.after_query_execute(qry, _action)
         return self
 
-    def before_execute(self, action, once=True, *args, **kwargs):
+    def before_query_execute(self, action, once=True):
+        # type: (Callable[[RequestOptions], None], bool) -> Self
+        """
+        Attach an event handler which is triggered before query is submitted to server
+
+        :type action: (office365.runtime.http.request_options.RequestOptions, *args, **kwargs) -> None
+        :param bool once: Flag which determines whether action is executed once or multiple times
+        """
+        if len(self._queries) == 0:
+            return
+        query = self._queries[-1]
+
+        def _prepare_request(request):
+            # type: (RequestOptions) -> None
+            if self.current_query.id == query.id:
+                if once:
+                    self.pending_request().beforeExecute -= _prepare_request
+                action(request)
+
+        self.pending_request().beforeExecute += _prepare_request
+        return self
+
+    def before_execute(self, action, once=True):
+        # type: (Callable[[RequestOptions], None], bool) -> Self
         """
         Attach an event handler which is triggered before request is submitted to server
-
         :param (office365.runtime.http.request_options.RequestOptions, any) -> None action:
         :param bool once: Flag which determines whether action is executed once or multiple times
         """
 
         def _process_request(request):
+            # type: (RequestOptions) -> None
             if once:
                 self.pending_request().beforeExecute -= _process_request
-            action(request, *args, **kwargs)
+            action(request)
 
         self.pending_request().beforeExecute += _process_request
         return self
 
-    def after_query_execute(self, query, action, *args, **kwargs):
-        """
-        Attach an event handler which is triggered after query is submitted to server
-
-        :type query: office365.runtime.queries.client_query.ClientQuery
-        :type action: (Response, *args, **kwargs) -> None
-        """
+    def after_query_execute(self, action, execute_first=False, include_response=False):
+        # type: (Callable[[T|Response], None], bool, bool) -> Self
+        """Attach an event handler which is triggered after query is submitted to server"""
+        if len(self._queries) == 0:
+            return
+        query = self._queries[-1]
 
         def _process_response(resp):
-            """
-            :type resp: requests.Response
-            """
+            # type: (Response) -> None
             resp.raise_for_status()
             if self.current_query.id == query.id:
                 self.pending_request().afterExecute -= _process_response
-                action(*args, **kwargs)
+                action(resp if include_response else query.return_type)
 
         self.pending_request().afterExecute += _process_response
+
+        if execute_first and len(self._queries) > 1:
+            self._queries.insert(0, self._queries.pop())
+
         return self
 
-    def after_execute(self, action, once=True, *args, **kwargs):
-        """
-        Attach an event handler which is triggered after request is submitted to server
-
-        :param (RequestOptions, *args, **kwargs) -> None action:
-        :param bool once:
-        """
+    def after_execute(self, action, once=True):
+        # type: (Callable[[Response], None], bool) -> Self
+        """Attach an event handler which is triggered after request is submitted to server"""
 
         def _process_response(response):
+            # type: (Response) -> None
             if once:
                 self.pending_request().afterExecute -= _process_response
-            action(response, *args, **kwargs)
+            action(response)
 
         self.pending_request().afterExecute += _process_response
         return self
 
     def execute_request_direct(self, path):
-        """
-        :type path: str
-        """
+        # type: (str) -> Response
         full_url = "".join([self.service_root_url(), "/", path])
         request = RequestOptions(full_url)
         return self.pending_request().execute_request_direct(request)
@@ -159,11 +171,10 @@ class ClientRuntimeContext(object):
         while self.has_pending_request:
             qry = self._get_next_query()
             self.pending_request().execute_query(qry)
+        return self
 
     def add_query(self, query):
-        """
-        :type query: office365.runtime.queries.client_query.ClientQuery
-        """
+        # type: (ClientQuery) ->Self
         self._queries.append(query)
         return self
 
@@ -173,36 +184,33 @@ class ClientRuntimeContext(object):
         return self
 
     def get_metadata(self):
+        # type: () -> ClientResult[AnyStr]
+        """Loads API metadata"""
         return_type = ClientResult(self)
 
-        def _construct_download_request(request):
-            """
-            :type request: office365.runtime.http.request_options.RequestOptions
-            """
+        def _construct_request(request):
+            # type: (RequestOptions) -> None
             request.url += "/$metadata"
             request.method = HttpMethod.Get
 
-        def _process_download_response(response):
-            """
-            :type response: requests.Response
-            """
+        def _process_response(response):
+            # type: (requests.Response) -> None
             response.raise_for_status()
             return_type.set_property("__value", response.content)
 
         qry = ClientQuery(self)
-        self.before_execute(_construct_download_request)
-        self.after_execute(_process_download_response)
-        self.add_query(qry)
+        self.add_query(qry).before_execute(_construct_request).after_execute(
+            _process_response
+        )
         return return_type
 
     def _get_next_query(self, count=1):
-        """
-        :type count: int
-        """
+        # type: (int) -> ClientQuery
         if count == 1:
             qry = self._queries.pop(0)
         else:
             from office365.runtime.queries.batch import BatchQuery
+
             qry = BatchQuery(self)
             while self.has_pending_request and count > 0:
                 qry.add(self._queries.pop(0))

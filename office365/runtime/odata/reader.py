@@ -18,10 +18,13 @@ class ODataReader(object):
 
     def format_file(self):
         import xml.dom.minidom
-        with open(self._metadata_path, 'r') as in_file:
+
+        with open(self._metadata_path, "r", encoding="utf8") as in_file:
             metadata_content = in_file.read()
 
-        formatted_metadata_content = xml.dom.minidom.parseString(metadata_content).toprettyxml()
+        formatted_metadata_content = xml.dom.minidom.parseString(
+            metadata_content
+        ).toprettyxml()
 
         with open(self._metadata_path, "w", encoding="utf8") as out_file:
             out_file.write(formatted_metadata_content)
@@ -31,8 +34,8 @@ class ODataReader(object):
         :type model: ODataModel
         """
         root = ET.parse(self._metadata_path).getroot()
-        schema_node = root.find('edmx:DataServices/xmlns:Schema', self._xml_namespaces)
-        for type_node in schema_node.findall('xmlns:ComplexType', self._xml_namespaces):
+        schema_node = root.find("edmx:DataServices/xmlns:Schema", self._xml_namespaces)
+        for type_node in schema_node.findall("xmlns:ComplexType", self._xml_namespaces):
             type_schema = self.process_type_node(type_node, schema_node)
             model.add_type(type_schema)
 
@@ -42,11 +45,11 @@ class ODataReader(object):
         :type schema_node: xml.etree.ElementTree.Element
         """
         type_schema = ODataType()
-        type_schema.namespace = schema_node.attrib['Namespace']
-        type_schema.name = type_node.get('Name')
-        type_schema.baseType = 'ComplexType'
+        type_schema.namespace = schema_node.attrib["Namespace"]
+        type_schema.name = type_node.get("Name")
+        type_schema.baseType = "ComplexType"
 
-        for prop_node in type_node.findall('xmlns:Property', self._xml_namespaces):
+        for prop_node in type_node.findall("xmlns:Property", self._xml_namespaces):
             prop_schema = self.process_property_node(prop_node)
             type_schema.add_property(prop_schema)
 
@@ -60,7 +63,7 @@ class ODataReader(object):
         :type node:  xml.etree.ElementTree.Element
         """
         prop_schema = ODataProperty()
-        prop_schema.name = node.get('Name')
+        prop_schema.name = node.get("Name")
         return prop_schema
 
     def generate_model(self):

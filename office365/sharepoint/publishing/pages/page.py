@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value import ClientValue
 from office365.runtime.paths.resource_path import ResourcePath
@@ -5,12 +7,19 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.publishing.pages.fields_data import SitePageFieldsData
 from office365.sharepoint.publishing.pages.metadata import SitePageMetadata
-from office365.sharepoint.translation.status_collection import TranslationStatusCollection
+from office365.sharepoint.translation.status_collection import (
+    TranslationStatusCollection,
+)
 
 
 class SharePagePreviewByEmailFieldsData(ClientValue):
+    """This class contains the information used by SharePagePreviewByEmail method"""
 
     def __init__(self, message=None, recipient_emails=None):
+        """
+        :param str message:
+        :param list[str] recipient_emails:
+        """
         self.message = message
         self.recipientEmails = StringCollection(recipient_emails)
 
@@ -24,10 +33,9 @@ class SitePage(SitePageMetadata):
 
     def checkout_page(self):
         """Checks out the current Site Page if it is available to be checked out."""
-        site_page = SitePage(self.context)
-        qry = ServiceOperationQuery(self, "CheckoutPage", None, None, None, site_page)
+        qry = ServiceOperationQuery(self, "CheckoutPage", None, None, None, self)
         self.context.add_query(qry)
-        return site_page
+        return self
 
     def copy(self):
         """Creates a copy of the current Site Page and returns the resulting new SitePage."""
@@ -37,16 +45,19 @@ class SitePage(SitePageMetadata):
 
     def discard_page(self):
         """Discards the current checked out version of the Site Page.  Returns the resulting SitePage after discard."""
-        qry = ServiceOperationQuery(self, "DiscardPage")
+        qry = ServiceOperationQuery(self, "DiscardPage", return_type=self)
         self.context.add_query(qry)
         return self
 
     def ensure_title_resource(self):
+        """"""
         qry = ServiceOperationQuery(self, "EnsureTitleResource")
         self.context.add_query(qry)
         return self
 
-    def save_page(self, title, canvas_content=None, banner_image_url=None, topic_header=None):
+    def save_page(
+        self, title, canvas_content=None, banner_image_url=None, topic_header=None
+    ):
         """
         Updates the current Site Page with the provided pageStream content.
 
@@ -55,15 +66,19 @@ class SitePage(SitePageMetadata):
         :param str banner_image_url:
         :param str topic_header:
         """
-        payload = SitePageFieldsData(title=title,
-                                     canvas_content=canvas_content,
-                                     banner_image_url=banner_image_url,
-                                     topic_header=topic_header)
+        payload = SitePageFieldsData(
+            title=title,
+            canvas_content=canvas_content,
+            banner_image_url=banner_image_url,
+            topic_header=topic_header,
+        )
         qry = ServiceOperationQuery(self, "SavePage", None, payload, "pageStream")
         self.context.add_query(qry)
         return self
 
-    def save_draft(self, title, canvas_content=None, banner_image_url=None, topic_header=None):
+    def save_draft(
+        self, title, canvas_content=None, banner_image_url=None, topic_header=None
+    ):
         """
         Updates the Site Page with the provided sitePage metadata and checks in a minor version if the page library
         has minor versions enabled.
@@ -73,16 +88,22 @@ class SitePage(SitePageMetadata):
         :param str banner_image_url:
         :param str topic_header:
         """
-        payload = SitePageFieldsData(title=title,
-                                     canvas_content=canvas_content,
-                                     banner_image_url=banner_image_url,
-                                     topic_header=topic_header)
+        payload = SitePageFieldsData(
+            title=title,
+            canvas_content=canvas_content,
+            banner_image_url=banner_image_url,
+            topic_header=topic_header,
+        )
         return_type = ClientResult(self.context, bool())
-        qry = ServiceOperationQuery(self, "SaveDraft", None, payload, "sitePage", return_type)
+        qry = ServiceOperationQuery(
+            self, "SaveDraft", None, payload, "sitePage", return_type
+        )
         self.context.add_query(qry)
         return return_type
 
-    def save_page_as_draft(self, title, canvas_content=None, banner_image_url=None, topic_header=None):
+    def save_page_as_draft(
+        self, title, canvas_content=None, banner_image_url=None, topic_header=None
+    ):
         """
         Updates the Site Page with the provided pageStream content and checks in a minor version if the page library
         has minor versions enabled.
@@ -92,21 +113,25 @@ class SitePage(SitePageMetadata):
         :param str banner_image_url:
         :param str topic_header:
         """
-        payload = SitePageFieldsData(title=title,
-                                     canvas_content=canvas_content,
-                                     banner_image_url=banner_image_url,
-                                     topic_header=topic_header)
+        payload = SitePageFieldsData(
+            title=title,
+            canvas_content=canvas_content,
+            banner_image_url=banner_image_url,
+            topic_header=topic_header,
+        )
         return_type = ClientResult(self.context, bool())
-        qry = ServiceOperationQuery(self, "SavePageAsDraft", None, payload, "pageStream", return_type)
+        qry = ServiceOperationQuery(
+            self, "SavePageAsDraft", None, payload, "pageStream", return_type
+        )
         self.context.add_query(qry)
         return return_type
 
     def save_page_as_template(self):
-        """
-
-        """
+        """ """
         return_type = SitePage(self.context)
-        qry = ServiceOperationQuery(self, "SavePageAsTemplate", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "SavePageAsTemplate", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -140,22 +165,22 @@ class SitePage(SitePageMetadata):
     def publish(self):
         """
         Publishes a major version of the current Site Page.  Returns TRUE on success, FALSE otherwise.
-
         """
-        result = ClientResult(self.context, bool())
-        qry = ServiceOperationQuery(self, "Publish", None, None, None, result)
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(self, "Publish", None, None, None, return_type)
         self.context.add_query(qry)
-        return result
+        return return_type
 
     def schedule_publish(self, publish_start_date):
         """
         Schedules the page publication for a certain date
-
         :param datetime.datetime publish_start_date: The pending publication scheduled date
         """
         payload = SitePageFieldsData(publish_start_date=publish_start_date)
         result = ClientResult(self.context)
-        qry = ServiceOperationQuery(self, "SchedulePublish", None, payload, "sitePage", result)
+        qry = ServiceOperationQuery(
+            self, "SchedulePublish", None, payload, "sitePage", result
+        )
         self.context.add_query(qry)
         return result
 
@@ -170,6 +195,7 @@ class SitePage(SitePageMetadata):
         return self
 
     def start_co_auth(self):
+        """"""
         return_type = SitePage(self.context, self.resource_path)
         qry = ServiceOperationQuery(self, "StartCoAuth", None, None, None, return_type)
         self.context.add_query(qry)
@@ -177,46 +203,39 @@ class SitePage(SitePageMetadata):
 
     @property
     def canvas_content(self):
-        """
-        Gets the CanvasContent1 for the current Site Page.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the CanvasContent1 for the current Site Page"""
         return self.properties.get("CanvasContent1", None)
 
     @canvas_content.setter
     def canvas_content(self, value):
-        """
-        Sets the CanvasContent1 for the current Site Page.
-
-        :rtype: str or None
-        """
+        # type: (str) -> None
+        """Sets the CanvasContent1 for the current Site Page"""
         self.set_property("CanvasContent1", value)
 
     @property
     def layout_web_parts_content(self):
-        """
-        Gets the LayoutWebPartsContent field for the current Site Page.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Gets the LayoutWebPartsContent field for the current Site Page."""
         return self.properties.get("LayoutWebpartsContent", None)
 
     @layout_web_parts_content.setter
     def layout_web_parts_content(self, value):
-        """
-        Sets the LayoutWebPartsContent field for the current Site Page.
-
-        :rtype: str or None
-        """
+        # type: (str) -> None
+        """Sets the LayoutWebPartsContent field for the current Site Page."""
         self.set_property("LayoutWebpartsContent", value)
 
     @property
     def translations(self):
-        return self.properties.get('Translations',
-                                   TranslationStatusCollection(self.context,
-                                                               ResourcePath("Translations", self.resource_path)))
+        # type: () -> TranslationStatusCollection
+        return self.properties.get(
+            "Translations",
+            TranslationStatusCollection(
+                self.context, ResourcePath("Translations", self.resource_path)
+            ),
+        )
 
     @property
     def entity_type_name(self):
+        # type: () -> str
         return "SP.Publishing.SitePage"

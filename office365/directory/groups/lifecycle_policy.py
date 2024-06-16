@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -21,25 +23,46 @@ class GroupLifecyclePolicy(Entity):
 
         :param str group_id: The identifier of the group to remove from the policy.
         """
-        return_type = ClientResult(self.context, bool())
+        return_type = ClientResult[bool](self.context)
         payload = {"groupId": group_id}
         qry = ServiceOperationQuery(self, "addGroup", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
 
     def remove_group(self, group_id):
+        # type: (str) -> ClientResult[bool]
         """
         Removes a group from a lifecycle policy.
-
         :param str group_id: The identifier of the group to add to the policy.
         """
-        return_type = ClientResult(self.context, bool())
+        return_type = ClientResult(self.context)
         payload = {"groupId": group_id}
-        qry = ServiceOperationQuery(self, "removeGroup", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "removeGroup", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
     @property
+    def alternate_notification_emails(self):
+        # type: () -> Optional[str]
+        """
+        List of email address to send notifications for groups without owners.
+        Multiple email address can be defined by separating email address with a semicolon.
+        """
+        return self.properties.get("alternateNotificationEmails", None)
+
+    @property
+    def group_lifetime_in_days(self):
+        # type: () -> Optional[int]
+        """
+        Number of days before a group expires and needs to be renewed. Once renewed, the group expiration is extended
+        by the number of days defined.
+        """
+        return self.properties.get("groupLifetimeInDays", None)
+
+    @property
     def managed_group_types(self):
+        # type: () -> Optional[str]
         """The group type for which the expiration policy applies. Possible values are All, Selected or None."""
         return self.properties.get("managedGroupTypes", None)

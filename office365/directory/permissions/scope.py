@@ -11,13 +11,26 @@ class PermissionScope(ClientValue):
     application object.
     """
 
-    def __init__(self, admin_consent_display_name=None, admin_consent_description=None):
+    def __init__(
+        self,
+        admin_consent_display_name=None,
+        admin_consent_description=None,
+        _id=None,
+        is_enabled=None,
+    ):
         """
         :param str admin_consent_display_name: The permission's title, intended to be read by an administrator granting
             the permission on behalf of all users.
         :param str admin_consent_description: A description of the delegated permissions, intended to be read
             by an administrator granting the permission on behalf of all users. This text appears in tenant-wide
             admin consent experiences.
+        :param str _id: Unique delegated permission identifier inside the collection of delegated permissions defined
+            for a resource application.
+        :param str is_enabled: When creating or updating a permission, this property must be set to true
+            (which is the default). To delete a permission, this property must first be set to false.
+            At that point, in a subsequent call, the permission may be removed.
         """
         self.adminConsentDescription = admin_consent_description
         self.adminConsentDisplayName = admin_consent_display_name
+        self.id = _id
+        self.isEnabled = is_enabled

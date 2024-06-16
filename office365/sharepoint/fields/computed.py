@@ -1,15 +1,17 @@
+from typing import Optional
+
 from office365.sharepoint.fields.field import Field
 
 
 class FieldComputed(Field):
-    """Specifies a computed field. To set the properties of this class, call the Update method
-    (section 3.2.5.42.2.1.5)."""
+    """
+    Specifies a computed field.
+
+    A field that can perform data manipulation and display functions by using the contents of other fields.
+    """
 
     @property
     def enable_lookup(self):
-        """
-        Specifies whether a lookup field can reference the field (2).
-
-        :rtype: bool or None
-        """
+        # type: () -> Optional[bool]
+        """Specifies whether a lookup field can reference the field."""
         return self.properties.get("EnableLookup", None)

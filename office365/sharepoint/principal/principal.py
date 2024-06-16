@@ -1,73 +1,79 @@
+from typing import Optional
+
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class Principal(BaseEntity):
+class Principal(Entity):
     """Represents a user or group that can be assigned permissions to control security."""
+
+    def __str__(self):
+        return self.title or self.entity_type_name
+
+    def __repr__(self):
+        return (
+            self.user_principal_name
+            or self.login_name
+            or self.id
+            or self.entity_type_name
+        )
 
     @property
     def id(self):
-        """Gets a value that specifies the member identifier for the user or group.
-
-        :rtype: int or None
-        """
-        return self.properties.get('Id', None)
+        # type: () -> Optional[int]
+        """Gets a value that specifies the member identifier for the user or group."""
+        return self.properties.get("Id", None)
 
     @property
     def title(self):
-        """Gets a value that specifies the name of the principal.
-
-        :rtype: str or None
-        """
-        return self.properties.get('Title', None)
+        # type: () -> Optional[str]
+        """Gets a value that specifies the name of the principal."""
+        return self.properties.get("Title", None)
 
     @title.setter
     def title(self, value):
-        """
-        Sets a value that specifies the name of the principal.
-
-        :type value: str
-        """
-        self.set_property('Title', value)
+        # type: (str) -> None
+        """Sets a value that specifies the name of the principal."""
+        self.set_property("Title", value)
 
     @property
     def login_name(self):
-        """Gets the login name of the principal.
-
-        :rtype: str or None
-        """
-        return self.properties.get('LoginName', None)
+        # type: () -> Optional[str]
+        """Gets the login name of the principal."""
+        return self.properties.get("LoginName", None)
 
     @property
     def user_principal_name(self):
-        """Gets the UPN of the principal.
-
-        :rtype: str or None
-        """
-        return self.properties.get('UserPrincipalName', None)
+        # type: () -> Optional[str]
+        """Gets the UPN of the principal."""
+        return self.properties.get("UserPrincipalName", None)
 
     @property
     def is_hidden_in_ui(self):
-        """Gets the login name of the principal.
-
-        :rtype: bool or None
-        """
-        return self.properties.get('IsHiddenInUI', None)
+        # type: () -> Optional[bool]
+        """Gets the login name of the principal."""
+        return self.properties.get("IsHiddenInUI", None)
 
     @property
     def principal_type(self):
-        """Gets the type of the principal.
+        # type: () -> Optional[int]
+        """Gets the type of the principal."""
+        return self.properties.get("PrincipalType", None)
 
-        :rtype: int or None
-        """
-        return self.properties.get('PrincipalType', None)
+    @property
+    def property_ref_name(self):
+        return "Id"
 
     def set_property(self, name, value, persist_changes=True):
         super(Principal, self).set_property(name, value, persist_changes)
         # fallback: create a new resource path
         if self._resource_path is None:
             if name == "Id":
-                self._resource_path = ServiceOperationPath("GetById", [value], self.parent_collection.resource_path)
+                self._resource_path = ServiceOperationPath(
+                    "GetById", [value], self.parent_collection.resource_path
+                )
             elif name == "LoginName":
-                self._resource_path = ServiceOperationPath("GetByName", [value], self.parent_collection.resource_path)
+                self._resource_path = ServiceOperationPath(
+                    "GetByName", [value], self.parent_collection.resource_path
+                )
         return self

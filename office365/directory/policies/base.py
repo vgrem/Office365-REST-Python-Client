@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.directory.object import DirectoryObject
 
 
@@ -6,9 +8,6 @@ class PolicyBase(DirectoryObject):
 
     @property
     def display_name(self):
-        """
-        Display name for this policy
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Display name for this policy"""
         return self.properties.get("displayName", None)

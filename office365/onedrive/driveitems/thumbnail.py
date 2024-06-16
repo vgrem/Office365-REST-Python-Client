@@ -7,7 +7,9 @@ class Thumbnail(ClientValue):
         or any item that has a bitmap representation.
     """
 
-    def __init__(self, content=None, height=None, source_item_id=None, url=None, width=None):
+    def __init__(
+        self, content=None, height=None, source_item_id=None, url=None, width=None
+    ):
         """
         :param str content: The content stream for the thumbnail.
         :param int height: The height of the thumbnail, in pixels.

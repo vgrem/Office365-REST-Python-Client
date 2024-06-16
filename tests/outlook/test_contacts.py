@@ -11,15 +11,10 @@ class TestOutlookContacts(GraphTestCase):
 
     def test1_create_contacts(self):
         new_contact = self.client.me.contacts.add(
-            givenName="Pavel",
-            surname="Bansky",
-            emailAddresses=[
-                {
-                    "address": "pavelb@a830edad9050849NDA1.onmicrosoft.com",
-                    "name": "Pavel Bansky"
-                }
-            ],
-            businessPhones=["+1 732 555 0102"]
+            "Pavel",
+            "Bansky",
+            "pavelb@a830edad9050849NDA1.onmicrosoft.com",
+            "+1 732 555 0102",
         ).execute_query()
         self.assertEqual(new_contact.email_addresses[0].name, "Pavel Bansky")
         self.__class__.target_contact = new_contact

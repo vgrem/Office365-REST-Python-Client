@@ -6,7 +6,13 @@ class AppIdentity(ClientValue):
     Includes application ID, name, and service principal ID and name. This resource is used by the
     Get directoryAudit operation."""
 
-    def __init__(self, app_id=None, display_name=None, service_principal_id=None, service_principal_name=None):
+    def __init__(
+        self,
+        app_id=None,
+        display_name=None,
+        service_principal_id=None,
+        service_principal_name=None,
+    ):
         """
         :param str app_id: Refers to the Unique GUID representing Application Id in the Azure Active Directory.
         :param str display_name: Refers to the Application Name displayed in the Azure Portal.

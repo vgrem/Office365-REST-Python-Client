@@ -1,5 +1,5 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class TeamSiteData(BaseEntity):
-    pass
+class TeamSiteData(Entity):
+    """"""

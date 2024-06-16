@@ -1,15 +1,14 @@
-import copy
-
-
-def _normalize(key, value):
-    if key == "select" or key == "expand":
-        return ",".join(value)
-    return value
-
-
 class QueryOptions(object):
-
-    def __init__(self, select=None, expand=None, filter_expr=None, order_by=None, top=None, skip=None):
+    def __init__(
+        self,
+        select=None,
+        expand=None,
+        filter_expr=None,
+        order_by=None,
+        top=None,
+        skip=None,
+        custom=None,
+    ):
         """
         A query option is a set of query string parameters applied to a resource that can help control the amount
         of data being returned for the resource in the URL
@@ -26,6 +25,7 @@ class QueryOptions(object):
         be included in the result.
         :param int skip: The $skip query option requests the number of items in the queried collection that
         are to be skipped and not included in the result.
+        :param dict custom: A custom query options
         """
         if expand is None:
             expand = []
@@ -37,20 +37,28 @@ class QueryOptions(object):
         self.orderBy = order_by
         self.skip = skip
         self.top = top
+        if custom is None:
+            custom = {}
+        self.custom = custom
 
     @staticmethod
     def build(client_object, properties_to_include=None):
         """
+        Builds query options
+
         :param office365.runtime.client_object.ClientObject client_object: Client object
         :param list[str] or None properties_to_include: The list of properties to include
         """
-        query_options = copy.deepcopy(client_object.query_options)
+        query_options = client_object.query_options
         if properties_to_include is None:
             return query_options
 
         for name in properties_to_include:
             from office365.runtime.client_object import ClientObject
-            from office365.runtime.client_object_collection import ClientObjectCollection
+            from office365.runtime.client_object_collection import (
+                ClientObjectCollection,
+            )
+
             if isinstance(client_object, ClientObjectCollection):
                 prop = client_object.create_typed_object().get_property(name)
             else:
@@ -69,7 +77,7 @@ class QueryOptions(object):
 
     @property
     def is_empty(self):
-        result = {k: v for (k, v) in self.__dict__.items() if v is not None and v}
+        result = {k: v for (k, v) in self}
         return not result
 
     def reset(self):
@@ -79,10 +87,19 @@ class QueryOptions(object):
         self.orderBy = None
         self.skip = None
         self.top = None
+        self.custom = {}
 
     def to_url(self):
-        """Convert query options to url
-        :return: str
-        """
-        return '&'.join(['$%s=%s' % (key, _normalize(key, value))
-                         for (key, value) in self.__dict__.items() if value is not None and value])
+        """Convert query options to url"""
+        return "&".join(["$%s=%s" % (key, value) for (key, value) in self])
+
+    def __iter__(self):
+        for k, v in self.__dict__.items():
+            if v:
+                if k == "select" or k == "expand":
+                    yield k, ",".join(v)
+                elif k == "custom":
+                    for c_k, c_v in self.custom.items():
+                        yield c_k, c_v
+                else:
+                    yield k, v

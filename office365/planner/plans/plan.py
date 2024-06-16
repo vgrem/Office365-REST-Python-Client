@@ -1,9 +1,13 @@
-from office365.directory.identities.identity_set import IdentitySet
+from typing import Optional
+
+from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.planner.buckets.bucket import PlannerBucket
-from office365.planner.plans.plan_details import PlannerPlanDetails
+from office365.planner.plans.container import PlannerPlanContainer
+from office365.planner.plans.details import PlannerPlanDetails
 from office365.planner.tasks.task import PlannerTask
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.paths.resource_path import ResourcePath
 
 
@@ -14,43 +18,68 @@ class PlannerPlan(Entity):
     For more information about the relationships between groups, plans, and tasks, see Planner.
     """
 
+    def __str__(self):
+        return self.title or self.entity_type_name
+
+    def __repr__(self):
+        return self.id or self.entity_type_name
+
+    def delete_object(self):
+        def _construct_request(request):
+            # type: (RequestOptions) -> None
+            request.set_header("If-Match", self.properties.get("__etag"))
+
+        return (
+            super(PlannerPlan, self).delete_object().before_execute(_construct_request)
+        )
+
+    @property
+    def container(self):
+        """Identity of the user, device, or application which created the plan."""
+        return self.properties.get("container", PlannerPlanContainer())
+
     @property
     def title(self):
+        # type: () -> Optional[str]
         """Required. Title of the plan."""
-        return self.properties.get('title', None)
+        return self.properties.get("title", None)
 
     @property
     def created_by(self):
         """Identity of the user, device, or application which created the plan."""
-        return self.properties.get('createdBy', IdentitySet())
+        return self.properties.get("createdBy", IdentitySet())
 
     @property
     def buckets(self):
-        """Read-only. Nullable. Collection of buckets in the plan.
-
-        :rtype: EntityCollection
-        """
-        return self.get_property('buckets',
-                                 EntityCollection(self.context, PlannerBucket,
-                                                  ResourcePath("buckets", self.resource_path)))
+        # type: () -> EntityCollection[PlannerBucket]
+        """Collection of buckets in the plan."""
+        return self.properties.get(
+            "buckets",
+            EntityCollection(
+                self.context, PlannerBucket, ResourcePath("buckets", self.resource_path)
+            ),
+        )
 
     @property
     def details(self):
-        """Read-only. Nullable. Additional details about the plan.
-
-        :rtype: EntityCollection
-        """
-        return self.get_property('details',
-                                 PlannerPlanDetails(self.context, ResourcePath("details", self.resource_path)))
+        """Additional details about the plan."""
+        return self.properties.get(
+            "details",
+            PlannerPlanDetails(
+                self.context, ResourcePath("details", self.resource_path)
+            ),
+        )
 
     @property
     def tasks(self):
-        """Read-only. Nullable. Collection of tasks in the plan.
-
-        :rtype: EntityCollection
-        """
-        return self.get_property('tasks',
-                                 EntityCollection(self.context, PlannerTask, ResourcePath("tasks", self.resource_path)))
+        # type: () -> EntityCollection[PlannerTask]
+        """Collection of tasks in the plan."""
+        return self.properties.get(
+            "tasks",
+            EntityCollection(
+                self.context, PlannerTask, ResourcePath("tasks", self.resource_path)
+            ),
+        )
 
     def get_property(self, name, default_value=None):
         if default_value is None:

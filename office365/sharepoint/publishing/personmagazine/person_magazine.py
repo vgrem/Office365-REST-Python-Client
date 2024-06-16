@@ -1,5 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class PersonMagazine(BaseEntity):
-    pass
+class PersonMagazine(Entity):
+    @property
+    def entity_type_name(self):
+        return "SP.Publishing.PersonMagazine"

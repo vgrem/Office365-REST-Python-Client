@@ -1,15 +1,21 @@
+from typing import Iterator
+
+
 class ResourcePath(object):
     """OData resource path"""
 
-    def __init__(self, name, parent=None):
-        """
-        :type name: str
-        :type parent: ResourcePath or None
-        """
-        self._name = name
+    def __init__(self, key=None, parent=None):
+        # type: (int|str, "ResourcePath") -> None
+        self._key = key
         self._parent = parent
 
+    def patch(self, key):
+        if self._key is None:
+            self._key = key
+        return self
+
     def __iter__(self):
+        # type: () -> Iterator["ResourcePath"]
         current = self
         while current:
             yield current
@@ -21,15 +27,17 @@ class ResourcePath(object):
     def __str__(self):
         return self.to_url()
 
-    def to_url(self):
-        """
-        Builds url
+    def __eq__(self, other):
+        return self.to_url() == other.to_url()
 
-        :rtype: str
-        """
+    def to_url(self):
+        # type: () -> str
+        """Builds url"""
         segments = []
         for path in self:
-            segments = path.segments + segments
+            segments.insert(0, path.segment)
+            if path.delimiter:
+                segments.insert(0, path.delimiter)
         return "".join(segments)
 
     @property
@@ -37,12 +45,8 @@ class ResourcePath(object):
         return self._parent
 
     @property
-    def segments(self):
-        return [self.delimiter, str(self.name)]
-
-    @property
-    def name(self):
-        return self._name
+    def segment(self):
+        return str(self._key)
 
     @property
     def delimiter(self):

@@ -1,10 +1,9 @@
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
 class HashTag(ClientValue):
-
     def __init__(self, name=None, use_count=None):
         """
         The HashTag type specifies a string that is being used as a hash tag and a count of the tags use.
@@ -20,11 +19,10 @@ class HashTag(ClientValue):
         return "SP.UserProfiles.HashTag"
 
 
-class HashTagCollection(BaseEntity):
+class HashTagCollection(Entity):
     """The HashTagCollection class specifies a collection of HashTags. For information about the HashTag type,
     see section 3.1.5.55"""
 
     @property
     def items(self):
         return self.properties.get("Items", ClientValueCollection(HashTag))
-

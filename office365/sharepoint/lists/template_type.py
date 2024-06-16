@@ -19,27 +19,37 @@ class ListTemplateType:
     """Specifies a survey list."""
 
     Links = 103
+    """Specifies a links list."""
 
     Announcements = 104
+    """Specifies an announcements list."""
 
     Contacts = 105
     """Specifies a contacts list."""
 
     Events = 106
+    """Specifies a calendar list."""
 
     Tasks = 107
+    """Specifies a task list."""
 
     DiscussionBoard = 108
+    """Specifies a discussion board."""
 
     PictureLibrary = 109
+    """Specifies a picture library."""
 
     DataSources = 110
+    """Specifies a list of data sources for a site """
 
     WebTemplateCatalog = 111
+    """Specifies a list template gallery."""
 
     UserInformation = 112
+    """Specifies a user information list"""
 
     WebPartCatalog = 113
+    """"""
 
     ListTemplateCatalog = 114
 

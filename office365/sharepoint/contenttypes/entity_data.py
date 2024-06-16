@@ -2,8 +2,9 @@ from office365.runtime.client_value import ClientValue
 
 
 class ContentTypeEntityData(ClientValue):
-
-    def __init__(self, name=None, description=None, group=None, parent_content_type_id=None):
+    def __init__(
+        self, name=None, description=None, group=None, parent_content_type_id=None
+    ):
         self.Name = name
         self.Description = description
         self.Group = group

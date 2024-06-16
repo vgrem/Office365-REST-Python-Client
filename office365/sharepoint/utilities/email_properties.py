@@ -3,8 +3,16 @@ from office365.runtime.client_value_collection import ClientValueCollection
 
 
 class EmailProperties(ClientValue):
-
-    def __init__(self, body, subject, to, from_address=None, cc=None, bcc=None, additional_headers=None):
+    def __init__(
+        self,
+        body,
+        subject,
+        to,
+        from_address=None,
+        cc=None,
+        bcc=None,
+        additional_headers=None,
+    ):
         """
         Specifies the definition of the email to send which includes both the message fields and body
 

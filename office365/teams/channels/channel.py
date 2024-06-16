@@ -1,22 +1,26 @@
-from office365.entity_collection import EntityCollection
-from office365.runtime.client_result import ClientResult
-from office365.runtime.compat import quote
+from typing import Optional
 
 from office365.entity import Entity
+from office365.entity_collection import EntityCollection
 from office365.onedrive.driveitems.driveItem import DriveItem
+from office365.runtime.client_result import ClientResult
+from office365.runtime.compat import quote
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.teams.channels.provision_email_result import ProvisionChannelEmailResult
+from office365.teams.chats.messages.message import ChatMessage
 from office365.teams.members.conversation import ConversationMember
-from office365.teams.chats.message import ChatMessage
 from office365.teams.tabs.tab import TeamsTab
 
 
 class Channel(Entity):
     """Teams are made up of channels, which are the conversations you have with your teammates"""
 
-    def does_user_have_access(self, user_id=None, tenant_id=None, user_principal_name=None):
+    def does_user_have_access(
+        self, user_id=None, tenant_id=None, user_principal_name=None
+    ):
+        # type: (str, str, str) -> ClientResult[bool]
         """Determine whether a user has access to a shared channel.
 
         :param str user_id: Unique identifier for the user. Either specify the userId or the userPrincipalName property
@@ -26,11 +30,11 @@ class Channel(Entity):
         :param str user_principal_name: The user principal name (UPN) of the user. Either specify the userId or the
              userPrincipalName property in the request.
         """
-        return_type = ClientResult(self.context, bool())
+        return_type = ClientResult(self.context)
         params = {
             "userId": user_id,
             "tenantId": tenant_id,
-            "userPrincipalName": user_principal_name
+            "userPrincipalName": user_principal_name,
         }
         qry = FunctionQuery(self, "doesUserHaveAccess", params, return_type)
         self.context.add_query(qry)
@@ -48,14 +52,15 @@ class Channel(Entity):
         To remove the email address of a channel, use the removeEmail method.
         """
         return_type = ClientResult(self.context, ProvisionChannelEmailResult())
-        qry = ServiceOperationQuery(self, "provisionEmail", None, None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "provisionEmail", None, None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
     def remove_email(self):
         """
         Remove the email address of a channel.
-
         You can remove an email address only if it was provisioned using the provisionEmail method or through
         the Microsoft Teams client.
         """
@@ -66,36 +71,49 @@ class Channel(Entity):
     @property
     def files_folder(self):
         """Get the metadata for the location where the files of a channel are stored."""
-        return self.properties.get('filesFolder',
-                                   DriveItem(self.context, ResourcePath("filesFolder", self.resource_path)))
+        return self.properties.get(
+            "filesFolder",
+            DriveItem(self.context, ResourcePath("filesFolder", self.resource_path)),
+        )
 
     @property
     def tabs(self):
+        # type: () -> EntityCollection[TeamsTab]
         """A collection of all the tabs in the channel. A navigation property."""
-        return self.properties.get('tabs',
-                                   EntityCollection(self.context, TeamsTab, ResourcePath("tabs", self.resource_path)))
+        return self.properties.get(
+            "tabs",
+            EntityCollection(
+                self.context, TeamsTab, ResourcePath("tabs", self.resource_path)
+            ),
+        )
 
     @property
     def messages(self):
-        """
-        A collection of all the messages in the channel. A navigation property. Nullable.
-        """
-        return self.properties.get('messages',
-                                   EntityCollection(self.context, ChatMessage,
-                                                    ResourcePath("messages", self.resource_path)))
+        # type: () -> EntityCollection[ChatMessage]
+        """A collection of all the messages in the channel."""
+        return self.properties.get(
+            "messages",
+            EntityCollection(
+                self.context, ChatMessage, ResourcePath("messages", self.resource_path)
+            ),
+        )
 
     @property
     def members(self):
-        """A collection of membership records associated with the channel.
-
-        :rtype: EntityCollection
-        """
-        return self.properties.get('members',
-                                   EntityCollection(self.context, ConversationMember,
-                                                    ResourcePath("members", self.resource_path)))
+        # type: () -> EntityCollection[ConversationMember]
+        """A collection of membership records associated with the channel."""
+        return self.properties.get(
+            "members",
+            EntityCollection(
+                self.context,
+                ConversationMember,
+                ResourcePath("members", self.resource_path),
+            ),
+        )
 
     @property
     def membership_type(self):
+        # type: () -> Optional[str]
         """
         The type of the channel. Can be set during creation and can't be changed.
         The possible values are: standard, private, unknownFutureValue, shared. The default value is standard.
@@ -106,12 +124,11 @@ class Channel(Entity):
 
     @property
     def web_url(self):
+        # type: () -> Optional[str]
         """A hyperlink that will navigate to the channel in Microsoft Teams. This is the URL that you get when you
         right-click a channel in Microsoft Teams and select Get link to channel. This URL should be treated as an
-        opaque blob, and not parsed. Read-only.
-
-        :rtype: str or None """
-        return self.properties.get('webUrl', None)
+        opaque blob, and not parsed. Read-only."""
+        return self.properties.get("webUrl", None)
 
     def get_property(self, name, default_value=None):
         if default_value is None:
@@ -125,6 +142,5 @@ class Channel(Entity):
         super(Channel, self).set_property(name, value, persist_changes)
         # fallback: fix resource path
         if name == "id":
-            channel_id = quote(value)
-            self._resource_path = ResourcePath(channel_id, self.resource_path.parent)
+            self._resource_path = ResourcePath(quote(value), self.resource_path.parent)
         return self

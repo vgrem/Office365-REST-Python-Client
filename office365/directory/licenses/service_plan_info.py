@@ -27,3 +27,6 @@ class ServicePlanInfo(ClientValue):
         self.servicePlanName = name
         self.provisioningStatus = provisioning_status
         self.appliesTo = applies_to
+
+    def __repr__(self):
+        return self.servicePlanName

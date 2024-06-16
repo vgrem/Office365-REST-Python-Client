@@ -1,13 +1,15 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.webparts.definition import WebPartDefinition
 
 
-class WebPartDefinitionCollection(BaseEntityCollection):
+class WebPartDefinitionCollection(EntityCollection[WebPartDefinition]):
     """Implements a collection of Web Part definition objects"""
 
     def __init__(self, context, resource_path=None):
-        super(WebPartDefinitionCollection, self).__init__(context, WebPartDefinition, resource_path)
+        super(WebPartDefinitionCollection, self).__init__(
+            context, WebPartDefinition, resource_path
+        )
 
     def get_by_id(self, def_id):
         """
@@ -16,4 +18,6 @@ class WebPartDefinitionCollection(BaseEntityCollection):
 
         :param str def_id: The Web Part identifier of the Web Part definition to retrieve.
         """
-        return WebPartDefinition(self.context, ServiceOperationPath("GetById", [def_id], self.resource_path))
+        return WebPartDefinition(
+            self.context, ServiceOperationPath("GetById", [def_id], self.resource_path)
+        )

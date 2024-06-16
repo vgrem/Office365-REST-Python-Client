@@ -5,10 +5,11 @@ from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.types.collections import StringCollection
 
 
-class IdentityProviderBaseCollection(EntityCollection):
-
+class IdentityProviderBaseCollection(EntityCollection[IdentityProviderBase]):
     def __init__(self, context, resource_path=None):
-        super(IdentityProviderBaseCollection, self).__init__(context, IdentityProviderBase, resource_path)
+        super(IdentityProviderBaseCollection, self).__init__(
+            context, IdentityProviderBase, resource_path
+        )
 
     def available_provider_types(self):
         """
@@ -21,5 +22,3 @@ class IdentityProviderBaseCollection(EntityCollection):
         qry = FunctionQuery(self, "availableProviderTypes", None, return_type)
         self.context.add_query(qry)
         return return_type
-
-

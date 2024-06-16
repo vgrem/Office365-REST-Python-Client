@@ -1,7 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class SharePointHomeServiceContext(BaseEntity):
+class SharePointHomeServiceContext(Entity):
     """
     This data type is reserved for future use and MUST NOT be used by the protocol implementation.
     """

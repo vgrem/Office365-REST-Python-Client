@@ -1,10 +1,11 @@
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.sharepoint.search.query.auto_completion_match import QueryAutoCompletionMatch
+from office365.sharepoint.search.query.auto_completion_match import (
+    QueryAutoCompletionMatch,
+)
 
 
 class QueryAutoCompletion(ClientValue):
-
     def __init__(self, query=None, score=None, source=None):
         """
         The QueryAutoCompletion complex type represents the matches for the Query in one Source.

@@ -2,11 +2,11 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.social.actor import SocialActor
 
 
-class SocialRestFollowingManager(BaseEntity):
+class SocialRestFollowingManager(Entity):
     """Provides methods for managing a user's list of followed actors (users, documents, sites, and tags)."""
 
     def __init__(self, context, resource_path=None):
@@ -26,7 +26,9 @@ class SocialRestFollowingManager(BaseEntity):
     def my(self):
         """The My method gets a SocialRestActor object that represents the current user. See section 3.1.5.35 for
         details on the SocialRestActor type."""
-        return SocialRestFollowingManager(self.context, ResourcePath("My", self.resource_path))
+        return SocialRestFollowingManager(
+            self.context, ResourcePath("My", self.resource_path)
+        )
 
     @property
     def entity_type_name(self):

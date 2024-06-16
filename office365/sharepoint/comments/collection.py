@@ -1,11 +1,10 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.comments.comment import Comment
+from office365.sharepoint.entity_collection import EntityCollection
 
 
-class CommentCollection(BaseEntityCollection):
-
+class CommentCollection(EntityCollection[Comment]):
     def __init__(self, context, resource_path=None):
         super(CommentCollection, self).__init__(context, Comment, resource_path)
 

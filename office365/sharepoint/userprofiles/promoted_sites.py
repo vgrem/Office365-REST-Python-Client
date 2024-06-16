@@ -1,11 +1,11 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.webparts.tile_data import TileData
 
 
-class PromotedSites(BaseEntity):
+class PromotedSites(Entity):
     """
     The PromotedSites object provides access to a collection of site links that are visible to all users.
     """
@@ -25,10 +25,12 @@ class PromotedSites(BaseEntity):
             "url": url,
             "title": title,
             "description": description,
-            "imageUrl": image_url
+            "imageUrl": image_url,
         }
         binding_type = PromotedSites(context)
-        qry = ServiceOperationQuery(binding_type, "AddSiteLink", None, payload, is_static=True)
+        qry = ServiceOperationQuery(
+            binding_type, "AddSiteLink", None, payload, is_static=True
+        )
         context.add_query(qry)
         return binding_type
 
@@ -40,11 +42,11 @@ class PromotedSites(BaseEntity):
         :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
         :param int item_id: Specifies a number that represents the identifier of the site to remove
         """
-        payload = {
-            "itemID": item_id
-        }
+        payload = {"itemID": item_id}
         binding_type = PromotedSites(context)
-        qry = ServiceOperationQuery(binding_type, "DeleteSiteLink", None, payload, is_static=True)
+        qry = ServiceOperationQuery(
+            binding_type, "DeleteSiteLink", None, payload, is_static=True
+        )
         context.add_query(qry)
         return binding_type
 
@@ -55,7 +57,12 @@ class PromotedSites(BaseEntity):
         """
         return_type = ClientResult(context, ClientValueCollection(TileData))
         binding_type = PromotedSites(context)
-        qry = ServiceOperationQuery(binding_type, "GetPromotedLinksAsTiles", return_type=return_type, is_static=True)
+        qry = ServiceOperationQuery(
+            binding_type,
+            "GetPromotedLinksAsTiles",
+            return_type=return_type,
+            is_static=True,
+        )
         context.add_query(qry)
         return return_type
 

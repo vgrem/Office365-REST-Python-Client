@@ -2,7 +2,6 @@ from office365.runtime.client_value import ClientValue
 
 
 class SecondaryAdministratorsInfo(ClientValue):
-
     def __init__(self, email=None, loginName=None, userPrincipalName=None):
         """
 
@@ -14,3 +13,8 @@ class SecondaryAdministratorsInfo(ClientValue):
         self.email = email
         self.loginName = loginName
         self.userPrincipalName = userPrincipalName
+
+    @property
+    def entity_type_name(self):
+        # type: () -> str
+        return "Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsInfo"

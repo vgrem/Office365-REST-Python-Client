@@ -1,11 +1,11 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.translation.resource_entry import SPResourceEntry
 
 
-class UserResource(BaseEntity):
+class UserResource(Entity):
     """An object representing user-defined localizable resources."""
 
     def get_value_for_ui_culture(self, culture_name):
@@ -17,15 +17,18 @@ class UserResource(BaseEntity):
         """
         return_type = ClientResult(self.context, str())
         payload = {"cultureName": culture_name}
-        qry = ServiceOperationQuery(self, "GetValueForUICulture", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetValueForUICulture", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
     def get_resource_entries(self):
-        """
-        """
+        """ """
         return_type = ClientResult(self.context, ClientValueCollection(SPResourceEntry))
-        qry = ServiceOperationQuery(self, "GetResourceEntries", [], None, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "GetResourceEntries", [], None, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -39,6 +42,8 @@ class UserResource(BaseEntity):
         """
         return_type = ClientResult(self.context, str())
         payload = {"cultureName": culture_name, "value": value}
-        qry = ServiceOperationQuery(self, "SetValueForUICulture", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "SetValueForUICulture", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type

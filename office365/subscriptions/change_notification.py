@@ -6,8 +6,14 @@ from office365.subscriptions.resource_data import ResourceData
 class ChangeNotification(ClientValue):
     """Represents the notification sent to the subscriber."""
 
-    def __init__(self, change_type=None, client_state=None, encrypted_content=ChangeNotificationEncryptedContent(),
-                 resource=None, resource_data=ResourceData()):
+    def __init__(
+        self,
+        change_type=None,
+        client_state=None,
+        encrypted_content=ChangeNotificationEncryptedContent(),
+        resource=None,
+        resource_data=ResourceData(),
+    ):
         """
         :param str change_type: Indicates the type of change that will raise the change notification.
             The supported values are: created, updated, deleted. Required.

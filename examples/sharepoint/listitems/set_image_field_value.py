@@ -4,7 +4,7 @@ import sys
 
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.listitems.listitem import ListItem
-from tests import test_team_site_url, test_client_credentials
+from tests import test_client_credentials, test_team_site_url
 
 
 def upload_image(web, file_path):
@@ -12,10 +12,12 @@ def upload_image(web, file_path):
     :type web: office365.sharepoint.webs.web.Web
     :type file_path: str
     """
-    with open(file_path, 'rb') as content_file:
+    with open(file_path, "rb") as content_file:
         file_content = content_file.read()
     lib = web.lists.ensure_site_assets_library().execute_query()
-    file = lib.root_folder.upload_file(os.path.basename(file_path), file_content).execute_query()
+    file = lib.root_folder.upload_file(
+        os.path.basename(file_path), file_content
+    ).execute_query()
     return file.serverRelativeUrl
 
 

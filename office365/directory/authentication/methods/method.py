@@ -1,4 +1,6 @@
-from office365.directory.authentication.password_reset_response import PasswordResetResponse
+from office365.directory.authentication.password_reset_response import (
+    PasswordResetResponse,
+)
 from office365.entity import Entity
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -31,8 +33,10 @@ class AuthenticationMethod(Entity):
         return_type = ClientResult(self.context, PasswordResetResponse())
         payload = {
             "newPassword": new_password,
-            "requireChangeOnNextSignIn": require_change_on_next_signin
+            "requireChangeOnNextSignIn": require_change_on_next_signin,
         }
-        qry = ServiceOperationQuery(self, "resetPassword", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "resetPassword", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type

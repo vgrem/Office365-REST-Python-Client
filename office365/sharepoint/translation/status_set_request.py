@@ -4,7 +4,6 @@ from office365.sharepoint.translation.requested_translation import RequestedTran
 
 
 class TranslationStatusSetRequest(ClientValue):
-
     def __init__(self, values=None):
         """
         :param list[RequestedTranslation] values:

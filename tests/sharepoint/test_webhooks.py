@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 
+from office365.sharepoint.lists.list import List
 from office365.sharepoint.webhooks.subscription import Subscription
 from tests.sharepoint.sharepoint_case import SPTestCase
-from office365.sharepoint.lists.list import List
 
 
 class TestSPWebHooks(SPTestCase):
@@ -20,7 +20,9 @@ class TestSPWebHooks(SPTestCase):
         pass
 
     def test1_create_subscription(self):
-        subscription = self.target_list.subscriptions.add(self.push_service_url).execute_query()
+        subscription = self.target_list.subscriptions.add(
+            self.push_service_url
+        ).execute_query()
         self.assertIsNotNone(subscription.notification_url)
         self.__class__.target_subscription = subscription
 
@@ -36,4 +38,3 @@ class TestSPWebHooks(SPTestCase):
     def test4_delete_subscription(self):
         subscription = self.__class__.target_subscription
         subscription.delete_object().execute_query()
-

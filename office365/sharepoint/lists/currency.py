@@ -1,10 +1,12 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.lists.currency_information_collection import CurrencyInformationCollection
+from office365.sharepoint.entity import Entity
+from office365.sharepoint.lists.currency_information_collection import (
+    CurrencyInformationCollection,
+)
 
 
-class CurrencyList(BaseEntity):
+class CurrencyList(Entity):
     """List of supported currencies."""
 
     @staticmethod
@@ -16,7 +18,8 @@ class CurrencyList(BaseEntity):
         :type context: office365.sharepoint.client_context.ClientContext
         """
         return_type = ClientResult(context, CurrencyInformationCollection())
-        qry = ServiceOperationQuery(CurrencyList(context), "GetList", None, None, None, return_type, True)
+        qry = ServiceOperationQuery(
+            CurrencyList(context), "GetList", None, None, None, return_type, True
+        )
         context.add_query(qry)
         return return_type
-

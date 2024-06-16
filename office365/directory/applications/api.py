@@ -7,7 +7,12 @@ from office365.runtime.types.collections import StringCollection
 class ApiApplication(ClientValue):
     """Specifies settings for an application that implements a web API."""
 
-    def __init__(self, accept_mapped_claims=None, known_client_applications=None, oauth2_permission_scopes=None):
+    def __init__(
+        self,
+        accept_mapped_claims=None,
+        known_client_applications=None,
+        oauth2_permission_scopes=None,
+    ):
         """
         :param str accept_mapped_claims: When true, allows an application to use claims mapping without specifying
             a custom signing key.
@@ -23,4 +28,6 @@ class ApiApplication(ClientValue):
         """
         self.acceptMappedClaims = accept_mapped_claims
         self.knownClientApplications = StringCollection(known_client_applications)
-        self.oauth2PermissionScopes = ClientValueCollection(PermissionScope, oauth2_permission_scopes)
+        self.oauth2PermissionScopes = ClientValueCollection(
+            PermissionScope, oauth2_permission_scopes
+        )

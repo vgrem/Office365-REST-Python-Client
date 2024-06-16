@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -16,20 +18,17 @@ class ApplicationTemplate(Entity):
         :param str display_name: Custom name of the application
         """
         return_type = ClientResult(self.context)
-        payload = {
-            "displayName": display_name
-        }
-        qry = ServiceOperationQuery(self, "instantiate", None, payload, None, return_type)
+        payload = {"displayName": display_name}
+        qry = ServiceOperationQuery(
+            self, "instantiate", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
     @property
     def display_name(self):
-        """
-        The name of the application.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """The name of the application."""
         return self.properties.get("displayName", None)
 
     @property
@@ -44,9 +43,7 @@ class ApplicationTemplate(Entity):
 
     @property
     def supported_provisioning_types(self):
-        """
-        The list of provisioning modes supported by this application
-        """
+        """The list of provisioning modes supported by this application"""
         return self.properties.get("supportedProvisioningTypes", StringCollection())
 
     @property
@@ -56,4 +53,3 @@ class ApplicationTemplate(Entity):
         The supported values are oidc, password, saml, and notSupported.
         """
         return self.properties.get("supportedSingleSignOnModes", StringCollection())
-

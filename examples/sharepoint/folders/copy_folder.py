@@ -1,13 +1,30 @@
+"""
+Demonstrates how to copy a folder within a site
+"""
+
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.utilities.move_copy_util import MoveCopyUtil
-from tests import test_user_credentials, test_team_site_url
+from tests import create_unique_name, test_team_site_url, test_user_credentials
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_user_credentials)
 
-source_folder_url = "/sites/team/Shared Documents/Archive/2020"
-target_folder_url = "/sites/team/Shared Documents/Archive/2020/01"
+# creates a temporary folder first in a Documents library
+# folder_from = ctx.web.default_document_library().root_folder.add(
+#    create_unique_name("from")
+# )
+folder_from = ctx.web.get_folder_by_server_relative_url("Shared Documents/Archive/2001")
 
-source_folder = ctx.web.get_folder_by_server_relative_url(source_folder_url)
-target_folder = source_folder.copy_to_using_path(target_folder_url, True).get().execute_query()
-# MoveCopyUtil.copy_folder(ctx, source_folder_url, target_folder_url).execute_query()
-#print(f"File copied into {target_folder.serverRelativeUrl}")
+# folder_to = ctx.web.default_document_library().root_folder.add(create_unique_name("to"))
+# folder_to_url = "/sites/team/Shared Documents/Archive/2001/01"
+folder_to = ctx.web.get_folder_by_server_relative_url("Shared Documents/Archive/2002")
+
+# copies the folder with a new name
+folder = folder_from.copy_to(folder_to).execute_query()
+print(
+    "Folder has been copied from '{0}' into '{1}'".format(
+        folder_from.serverRelativeUrl, folder.serverRelativeUrl
+    )
+)
+
+# clean up
+# folder_from.delete_object().execute_query()
+# folder.delete_object().execute_query()

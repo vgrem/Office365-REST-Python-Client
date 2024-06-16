@@ -1,12 +1,54 @@
+from typing import TYPE_CHECKING, Optional
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
-from office365.sharepoint.base_entity import BaseEntity
 from office365.sharepoint.compliance.tag import ComplianceTag
+from office365.sharepoint.entity import Entity
+
+if TYPE_CHECKING:
+    from office365.sharepoint.client_context import ClientContext
 
 
-class SPPolicyStoreProxy(BaseEntity):
+class SPPolicyStoreProxy(Entity):
+    @staticmethod
+    def check_site_is_deletable_by_id(context, site_id, return_type=None):
+        # type: (ClientContext, str, Optional[ClientResult[bool]]) -> ClientResult[bool]
+        """ """
+        if return_type is None:
+            return_type = ClientResult(context, bool())
+        payload = {"siteId": site_id}
+        qry = ServiceOperationQuery(
+            SPPolicyStoreProxy(context),
+            "CheckSiteIsDeletableById",
+            None,
+            payload,
+            None,
+            return_type,
+            True,
+        )
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
+    def is_site_deletable(context, site_url, return_type=None):
+        # type: (ClientContext, str, Optional[ClientResult[bool]]) -> ClientResult[bool]
+        """ """
+        if return_type is None:
+            return_type = ClientResult(context, bool())
+        payload = {"siteUrl": site_url}
+        qry = ServiceOperationQuery(
+            SPPolicyStoreProxy(context),
+            "IsSiteDeletable",
+            None,
+            payload,
+            None,
+            return_type,
+            True,
+        )
+        context.add_query(qry)
+        return return_type
 
     @staticmethod
     def get_available_tags_for_site(context, site_url, return_type=None):
@@ -17,11 +59,16 @@ class SPPolicyStoreProxy(BaseEntity):
         """
         if return_type is None:
             return_type = ClientResult(context, ClientValueCollection(ComplianceTag))
-        payload = {
-            "siteUrl": site_url
-        }
-        qry = ServiceOperationQuery(SPPolicyStoreProxy(context), "GetAvailableTagsForSite", None, payload,
-                                    None, return_type, True)
+        payload = {"siteUrl": site_url}
+        qry = ServiceOperationQuery(
+            SPPolicyStoreProxy(context),
+            "GetAvailableTagsForSite",
+            None,
+            payload,
+            None,
+            return_type,
+            True,
+        )
         context.add_query(qry)
         return return_type
 
@@ -30,10 +77,10 @@ class SPPolicyStoreProxy(BaseEntity):
         :param str site_id:
         """
         return_type = ClientResult(self.context, StringCollection())
-        payload = {
-            "siteId": site_id
-        }
-        qry = ServiceOperationQuery(self, "GetDynamicScopeBindingBySiteId", None, payload, None, return_type)
+        payload = {"siteId": site_id}
+        qry = ServiceOperationQuery(
+            self, "GetDynamicScopeBindingBySiteId", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 

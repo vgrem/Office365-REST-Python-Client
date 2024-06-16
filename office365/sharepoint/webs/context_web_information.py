@@ -9,7 +9,8 @@ class ContextWebInformation(ClientValue):
 
     def __init__(self, form_digest_value=None, form_digest_timeout_secs=None):
         """
-        :param str form_digest_value: Specifies a valid form digest for the site
+        :param str form_digest_value: An object that is inserted into a page and is used by a protocol server
+             to validate client requests. The validation is specific to a user, site, and time period.
         :param int form_digest_timeout_secs: Specifies the amount of time in seconds before security validation expires.
         """
         super(ContextWebInformation, self).__init__()
@@ -20,9 +21,6 @@ class ContextWebInformation(ClientValue):
         self.SupportedSchemaVersions = None
         self.WebFullUrl = None
         self._valid_from = time.time()
-
-    def reset(self):
-        pass
 
     @property
     def is_valid(self):

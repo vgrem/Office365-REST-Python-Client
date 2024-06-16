@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.sharepoint.changes.change import Change
 
 
@@ -6,8 +8,6 @@ class ChangeAlert(Change):
 
     @property
     def alert_id(self):
-        """Identifies the changed alert.
-
-        :rtype: str or None
-        """
+        # type: () -> Optional[str]
+        """Identifies the changed alert."""
         return self.properties.get("AlertId", None)

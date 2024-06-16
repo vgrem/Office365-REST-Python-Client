@@ -1,35 +1,33 @@
-from office365.sharepoint.base_entity_collection import BaseEntityCollection
 from office365.sharepoint.changes.change import Change
+from office365.sharepoint.entity_collection import EntityCollection
 
 
-class ChangeCollection(BaseEntityCollection):
+class ChangeCollection(EntityCollection[Change]):
     """Represents a collection of Change objects"""
 
     def __init__(self, context, resource_path=None):
         super(ChangeCollection, self).__init__(context, Change, resource_path)
 
-    def set_property(self, name, value, persist_changes=False):
-        self.resolve_change_type(value)
-        super(ChangeCollection, self).set_property(name, value)
+    def set_property(self, key, value, persist_changes=False):
+        self._resolve_change_type(value)
+        super(ChangeCollection, self).set_property(key, value)
 
-    def resolve_change_type(self, properties):
-        """
-
-        :type properties: dict
-        """
-        from office365.sharepoint.changes.user import ChangeUser
-        from office365.sharepoint.changes.group import ChangeGroup
-        from office365.sharepoint.changes.list import ChangeList
-        from office365.sharepoint.changes.web import ChangeWeb
-        from office365.sharepoint.changes.content_type import ChangeContentType
+    def _resolve_change_type(self, properties):
+        # type: (dict) -> None
+        """Resolves a change type"""
         from office365.sharepoint.changes.alert import ChangeAlert
+        from office365.sharepoint.changes.content_type import ChangeContentType
         from office365.sharepoint.changes.field import ChangeField
+        from office365.sharepoint.changes.group import ChangeGroup
         from office365.sharepoint.changes.item import ChangeItem
+        from office365.sharepoint.changes.list import ChangeList
+        from office365.sharepoint.changes.user import ChangeUser
+        from office365.sharepoint.changes.web import ChangeWeb
 
-        if "ListId" in properties and "WebId" in properties:
-            self._item_type = ChangeList
-        elif "ItemId" in properties and "ListId" in properties:
+        if "ItemId" in properties and "ListId" in properties:
             self._item_type = ChangeItem
+        elif "ListId" in properties and "WebId" in properties:
+            self._item_type = ChangeList
         elif "WebId" in properties:
             self._item_type = ChangeWeb
         elif "UserId" in properties:

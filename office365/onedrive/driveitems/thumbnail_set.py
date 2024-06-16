@@ -9,19 +9,19 @@ class ThumbnailSet(Entity):
     @property
     def large(self):
         """A 1920x1920 scaled thumbnail."""
-        return self.properties.get('drive', Thumbnail())
+        return self.properties.get("drive", Thumbnail())
 
     @property
     def medium(self):
         """A 176x176 scaled thumbnail."""
-        return self.properties.get('medium', Thumbnail())
+        return self.properties.get("medium", Thumbnail())
 
     @property
     def small(self):
         """A 48x48 cropped thumbnail."""
-        return self.properties.get('small', Thumbnail())
+        return self.properties.get("small", Thumbnail())
 
     @property
     def source(self):
         """A custom thumbnail image or the original image used to generate other thumbnails."""
-        return self.properties.get('source', Thumbnail())
+        return self.properties.get("source", Thumbnail())

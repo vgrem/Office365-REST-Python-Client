@@ -1,4 +1,6 @@
 # coding=utf-8
+from typing import Optional
+
 from office365.directory.object import DirectoryObject
 from office365.runtime.types.collections import StringCollection
 
@@ -13,24 +15,19 @@ class ExtensionProperty(DirectoryObject):
 
     @property
     def name(self):
-        """
-        Name of the extension property.
-
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Name of the extension property"""
         return self.properties.get("name", None)
 
     @property
     def app_display_name(self):
-        """
-        Display name of the application object on which this extension property is defined. Read-only.
-
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """Display name of the application object on which this extension property is defined. Read-only"""
         return self.properties.get("appDisplayName", None)
 
     @property
     def data_type(self):
+        # type: () -> Optional[str]
         """
         Specifies the data type of the value the extension property can hold. Following values are supported.
             Binary - 256 bytes maximum
@@ -39,8 +36,6 @@ class ExtensionProperty(DirectoryObject):
             Integer - 32-bit value.
             LargeInteger - 64-bit value.
             String - 256 characters maximum
-
-        :rtype: str
         """
         return self.properties.get("dataType", None)
 

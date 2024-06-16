@@ -11,4 +11,5 @@ class IdentityUserFlowAttribute(Entity):
     from a user that is not built in to the directory. Custom user flow attributes are an abstraction over
     Azure Active Directory schema extensions.
     """
+
     pass

@@ -1,4 +1,6 @@
 from office365.entity import Entity
+from office365.planner.tasks.task_details import PlannerTaskDetails
+from office365.runtime.paths.resource_path import ResourcePath
 
 
 class PlannerTask(Entity):
@@ -12,4 +14,14 @@ class PlannerTask(Entity):
     @property
     def title(self):
         """Required. Title of the task."""
-        return self.properties.get('title', None)
+        return self.properties.get("title", None)
+
+    @property
+    def details(self):
+        """Additional details about the task."""
+        return self.properties.get(
+            "details",
+            PlannerTaskDetails(
+                self.context, ResourcePath("details", self.resource_path)
+            ),
+        )

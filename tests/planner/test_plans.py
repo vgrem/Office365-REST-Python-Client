@@ -22,10 +22,10 @@ class TestPlanner(GraphTestCase):
         pass
 
     def test1_create_plan(self):
-        #plan_name = create_unique_name("My Plan")
-        #new_plan = self.target_group.planner.plans.add(plan_name, self.client.me).execute_query()
-        #self.assertIsNotNone(new_plan.id)
-        #self.__class__.target_plan = new_plan
+        # plan_name = create_unique_name("My Plan")
+        # new_plan = self.target_group.planner.plans.add(plan_name, self.client.me).execute_query()
+        # self.assertIsNotNone(new_plan.id)
+        # self.__class__.target_plan = new_plan
         pass
 
     def test2_list_my_plans(self):
@@ -34,7 +34,6 @@ class TestPlanner(GraphTestCase):
         self.assertGreaterEqual(len(my_plans), 0)
 
     def test3_delete_plan(self):
-        #plan_to_del = self.__class__.target_plan
-        #plan_to_del.delete_object().execute_query()
+        # plan_to_del = self.__class__.target_plan
+        # plan_to_del.delete_object().execute_query()
         pass
-

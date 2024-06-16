@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from office365.outlook.calendar.event import Event
+from office365.outlook.calendar.events.event import Event
 from tests import test_user_principal_name
 from tests.graph_case import GraphTestCase
 
@@ -9,13 +9,14 @@ class TestOutlookEvent(GraphTestCase):
     target_event = None  # type: Event
 
     def test2_create_event(self):
-        new_event = self.client.me.events.add()  # type: Event
-        new_event.subject = "Let's go for lunch"
-        new_event.body = "Does mid month work for you?"
-        new_event.start = datetime.utcnow() + timedelta(days=1)
-        new_event.end = datetime.utcnow() + timedelta(days=1) + timedelta(hours=1)
-        new_event.attendees = [test_user_principal_name]
-        self.client.execute_query()
+        when = datetime.utcnow() + timedelta(days=1)
+        new_event = self.client.me.calendar.events.add(
+            subject="Let's go for lunch",
+            body="Does mid month work for you?",
+            start=when,
+            end=when + timedelta(hours=1),
+            attendees=[test_user_principal_name],
+        ).execute_query()
         self.assertIsNotNone(new_event.id)
         self.__class__.target_event = new_event
 

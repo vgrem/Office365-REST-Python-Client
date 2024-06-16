@@ -1,3 +1,5 @@
+from typing import AnyStr, Optional
+
 from office365.onedrive.versions.base_item import BaseItemVersion
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
@@ -15,18 +17,12 @@ class DriveItemVersion(BaseItemVersion):
 
     @property
     def content(self):
-        """
-        The content stream for this version of the item.
-
-        :rtype: str or bytes
-        """
-        return self.properties.get('content', None)
+        # type: () -> Optional[AnyStr]
+        """The content stream for this version of the item."""
+        return self.properties.get("content", None)
 
     @property
     def size(self):
-        """
-        Indicates the size of the content stream for this version of the item.
-
-        :rtype: int
-        """
-        return self.properties.get('size', None)
+        # type: () -> Optional[int]
+        """Indicates the size of the content stream for this version of the item."""
+        return self.properties.get("size", None)

@@ -13,7 +13,7 @@ class TestAttachments(GraphTestCase):
         cls.target_message = cls.client.me.messages.add(
             subject="Meet for lunch?",
             body="The new cafeteria is open.",
-            to_recipients=["fannyd@contoso.onmicrosoft.com"]
+            to_recipients=["fannyd@contoso.onmicrosoft.com"],
         ).execute_query()
 
     @classmethod
@@ -22,6 +22,12 @@ class TestAttachments(GraphTestCase):
 
     def test1_create_upload_session(self):
         message_id = self.__class__.target_message.id
-        attachment_item = AttachmentItem(attachment_type=AttachmentType.file, name="flower", size=3483322)
-        result = self.client.me.messages[message_id].attachments.create_upload_session(attachment_item).execute_query()
+        attachment_item = AttachmentItem(
+            attachment_type=AttachmentType.file, name="flower", size=3483322
+        )
+        result = (
+            self.client.me.messages[message_id]
+            .attachments.create_upload_session(attachment_item)
+            .execute_query()
+        )
         self.assertIsNotNone(result.value)

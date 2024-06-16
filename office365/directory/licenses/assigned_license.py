@@ -16,3 +16,6 @@ class AssignedLicense(ClientValue):
         super(AssignedLicense, self).__init__()
         self.skuId = sku_id
         self.disabledPlans = StringCollection(disabled_plans)
+
+    def __repr__(self):
+        return self.skuId

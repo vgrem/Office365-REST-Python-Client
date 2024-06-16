@@ -1,10 +1,10 @@
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.social.thread import SocialThread
 
 
-class SocialRestThread(BaseEntity):
+class SocialRestThread(Entity):
     """
     The SocialRestThread class specifies a thread that is stored on the server. The thread contains a root post
     and zero or more reply posts. The SocialRestThread type is available when the protocol client sends an OData
@@ -12,7 +12,9 @@ class SocialRestThread(BaseEntity):
     """
 
     def __init__(self, context):
-        super(SocialRestThread, self).__init__(context, ResourcePath("SP.Social.SocialRestThread"))
+        super(SocialRestThread, self).__init__(
+            context, ResourcePath("SP.Social.SocialRestThread")
+        )
 
     def like(self, post_id):
         """
@@ -44,8 +46,6 @@ class SocialRestThread(BaseEntity):
 
     def get_property(self, name, default_value=None):
         if default_value is None:
-            property_mapping = {
-                "SocialThread": self.social_thread
-            }
+            property_mapping = {"SocialThread": self.social_thread}
             default_value = property_mapping.get(name, None)
         return super(SocialRestThread, self).get_property(name, default_value)

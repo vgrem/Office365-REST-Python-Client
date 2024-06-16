@@ -2,10 +2,17 @@ from office365.runtime.client_value import ClientValue
 
 
 class CommunicationSiteCreationRequest(ClientValue):
-
-    def __init__(self, title, url, description=None, lcid=None, classification=None,
-                 allow_filesharing_for_guest_users=None,
-                 web_template_extension_id=None, site_design_id=None):
+    def __init__(
+        self,
+        title,
+        url,
+        description=None,
+        lcid=None,
+        classification=None,
+        allow_filesharing_for_guest_users=None,
+        web_template_extension_id=None,
+        site_design_id=None,
+    ):
         """
         Options for configuring the Communication Site that will be created.
 

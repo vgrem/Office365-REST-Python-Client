@@ -1,10 +1,30 @@
+from typing import Optional
+
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.sitehealth.result import SiteHealthResult
 
 
-class SiteHealthSummary(BaseEntity):
+class SiteHealthSummary(Entity):
     """Specifies a summary of the results of running a set of site collection health rules."""
+
+    @property
+    def failed_error_count(self):
+        # type: () -> Optional[int]
+        """Specifies the number of site collection health rules that failed with an error."""
+        return self.properties.get("FailedErrorCount", None)
+
+    @property
+    def failed_warning_count(self):
+        # type: () -> Optional[int]
+        """Specifies the number of site collection health rules that failed with a warning."""
+        return self.properties.get("FailedWarningCount", None)
+
+    @property
+    def passed_count(self):
+        # type: () -> Optional[int]
+        """Specifies the number of site collection health rules that passed."""
+        return self.properties.get("PassedCount", None)
 
     @property
     def results(self):

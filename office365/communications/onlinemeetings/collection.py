@@ -4,10 +4,11 @@ from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
-class OnlineMeetingCollection(EntityCollection):
-
+class OnlineMeetingCollection(EntityCollection[OnlineMeeting]):
     def __init__(self, context, resource_path=None):
-        super(OnlineMeetingCollection, self).__init__(context, OnlineMeeting, resource_path)
+        super(OnlineMeetingCollection, self).__init__(
+            context, OnlineMeeting, resource_path
+        )
 
     def create(self, subject, start_datetime=None, end_datetime=None):
         """
@@ -28,8 +29,15 @@ class OnlineMeetingCollection(EntityCollection):
         self.context.add_query(qry)
         return return_type
 
-    def create_or_get(self, external_id=None, start_datetime=None, end_datetime=None, subject=None, participants=None,
-                      chat_info=None):
+    def create_or_get(
+        self,
+        external_id=None,
+        start_datetime=None,
+        end_datetime=None,
+        subject=None,
+        participants=None,
+        chat_info=None,
+    ):
         """Create an onlineMeeting object with a custom specified external ID. If the external ID already exists,
         this API will return the onlineMeeting object with that external ID.
 
@@ -50,8 +58,10 @@ class OnlineMeetingCollection(EntityCollection):
             "endDateTime": end_datetime,
             "subject": subject,
             "chatInfo": chat_info,
-            "participants": participants
+            "participants": participants,
         }
-        qry = ServiceOperationQuery(self, "createOrGet", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            self, "createOrGet", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type

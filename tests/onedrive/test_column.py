@@ -1,5 +1,4 @@
 from office365.onedrive.columns.definition import ColumnDefinition
-from office365.onedrive.lists.list import List
 from tests import create_unique_name
 from tests.graph_case import GraphTestCase
 
@@ -10,7 +9,7 @@ class TestColumn(GraphTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestColumn, cls).setUpClass()
-        cls.doclib = cls.client.sites.root.lists["Documents"]  # type: List
+        cls.doclib = cls.client.sites.root.lists["Documents"]
 
     def test1_get_list_columns(self):
         columns = self.doclib.columns.get().execute_query()
@@ -24,12 +23,12 @@ class TestColumn(GraphTestCase):
 
     def test3_create_lookup_column(self):
         column_name = create_unique_name("LookupColumn")
-        column = self.doclib.columns.add_lookup(column_name, self.doclib).execute_query()
+        column = self.doclib.columns.add_lookup(
+            column_name, self.doclib
+        ).execute_query()
         self.assertIsNotNone(column.resource_path)
         self.__class__.list_columns.append(column)
 
     def test3_delete_list_columns(self):
         for col_to_del in self.__class__.list_columns:
             col_to_del.delete_object().execute_query()
-
-

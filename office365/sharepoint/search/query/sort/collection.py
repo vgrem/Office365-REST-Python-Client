@@ -1,10 +1,10 @@
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.search.query.sort.sort import Sort
 
 
-class SortCollection(BaseEntity):
+class SortCollection(Entity):
     """Contains information about how to sort the search results."""
 
     def add(self, property_name, direction):
@@ -22,10 +22,7 @@ class SortCollection(BaseEntity):
             (as specified in section 2.2.4.11) is SearchServer.SharepointSearch and direction is set to
             SortDirection.FQLFormula, the value of strProperty MUST be ignored by the protocol server.
         """
-        payload = {
-            "strProperty": property_name,
-            "direction": direction
-        }
+        payload = {"strProperty": property_name, "direction": direction}
         qry = ServiceOperationQuery(self, "Add", None, payload)
         self.context.add_query(qry)
         return self

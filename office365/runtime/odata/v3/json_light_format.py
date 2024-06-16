@@ -22,6 +22,7 @@ class JsonLightFormat(ODataJsonFormat):
 
     @property
     def collection_next(self):
+        """Property name for a reference to the next page of results"""
         return "__next"
 
     @property
@@ -30,9 +31,11 @@ class JsonLightFormat(ODataJsonFormat):
 
     @property
     def media_type(self):
-        return 'application/json;odata={0}'.format(self.metadata_level)
+        return "application/json;odata={0}".format(self.metadata_level)
 
     @property
     def include_control_information(self):
-        return self.metadata_level == ODataV3MetadataLevel.Verbose \
-               or self.metadata_level == ODataV3MetadataLevel.MinimalMetadata
+        return (
+            self.metadata_level == ODataV3MetadataLevel.Verbose
+            or self.metadata_level == ODataV3MetadataLevel.MinimalMetadata
+        )

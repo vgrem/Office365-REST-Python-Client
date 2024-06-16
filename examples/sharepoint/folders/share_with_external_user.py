@@ -1,16 +1,20 @@
-# Example: share a Document with External User
-
-import json
+"""
+Share a folder with a set of users
+"""
 
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.sharing.document_manager import DocumentSharingManager
-from office365.sharepoint.sharing.role_type import RoleType
+from office365.sharepoint.sharing.role import Role
 from office365.sharepoint.sharing.user_role_assignment import UserRoleAssignment
-from tests import test_team_site_url, test_client_credentials
+from tests import (
+    test_client_credentials,
+    test_team_site_url,
+    test_user_principal_name_alt,
+)
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
-folder_url = "/".join([test_team_site_url, "Shared Documents"])
-assignment = UserRoleAssignment(RoleType.Guest, "jdoe@contoso.com")
-result = DocumentSharingManager.update_document_sharing_info(ctx, folder_url, [assignment],
-                                                             send_server_managed_notification=True).execute_query()
-print(json.dumps(result.value.to_json(), indent=4))
+folder_url = "Shared Documents/Archive"
+folder = ctx.web.get_folder_by_server_relative_path(folder_url)
+assignment = UserRoleAssignment(Role.Edit, test_user_principal_name_alt)
+result = folder.update_document_sharing_info([assignment]).execute_query()
+for item in result.value:
+    print(item)

@@ -8,8 +8,15 @@ class RefinementResults(ClientValue):
     The RefinementResults table contains refinement results that apply to the search query.
     """
 
-    def __init__(self, group_template_id=None, item_template_id=None, refiners=None, properties=None,
-                 result_title=None, result_title_url=None):
+    def __init__(
+        self,
+        group_template_id=None,
+        item_template_id=None,
+        refiners=None,
+        properties=None,
+        result_title=None,
+        result_title_url=None,
+    ):
         """
         :param str group_template_id:  Specifies the identifier of the layout template that specifies how the results
             returned will be arranged.

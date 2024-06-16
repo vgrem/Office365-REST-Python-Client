@@ -1,5 +1,6 @@
 class ViewType:
     """Specifies the type of the list view."""
+
     def __init__(self):
         pass
 

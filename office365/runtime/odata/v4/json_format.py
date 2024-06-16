@@ -26,9 +26,13 @@ class V4JsonFormat(ODataJsonFormat):
 
     @property
     def media_type(self):
-        return "application/json;odata.metadata={0};odata.streaming={1};IEEE754Compatible={2}" \
-            .format(self.metadata_level, self.streaming, self.IEEE754Compatible)
+        return "application/json;odata.metadata={0};odata.streaming={1};IEEE754Compatible={2}".format(
+            self.metadata_level, self.streaming, self.IEEE754Compatible
+        )
 
     @property
     def include_control_information(self):
-        return self.metadata_level == ODataV4MetadataLevel.Minimal or self.metadata_level == ODataV4MetadataLevel.Full
+        return (
+            self.metadata_level == ODataV4MetadataLevel.Minimal
+            or self.metadata_level == ODataV4MetadataLevel.Full
+        )

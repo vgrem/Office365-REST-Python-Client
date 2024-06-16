@@ -3,9 +3,10 @@ from office365.runtime.types.collections import StringCollection
 
 
 class SPACSServicePrincipalInfo(ClientValue):
-
     def __init__(self, application_endpoint_authorities=None, display_name=None):
-        self.ApplicationEndpointAuthorities = StringCollection(application_endpoint_authorities)
+        self.ApplicationEndpointAuthorities = StringCollection(
+            application_endpoint_authorities
+        )
         self.DisplayName = display_name
 
     @property

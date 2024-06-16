@@ -1,12 +1,12 @@
 import uuid
 
 from office365.graph_client import GraphClient
-from office365.onedrive.termstore.group import Group
-from office365.onedrive.termstore.set import Set
+from office365.onedrive.termstore.groups.group import Group
+from office365.onedrive.termstore.sets.set import Set
 from office365.onedrive.termstore.store import Store
-from office365.onedrive.termstore.term import Term
-from tests import test_root_site_url
-from tests.graph_case import GraphTestCase, acquire_token_by_client_credentials
+from office365.onedrive.termstore.terms.term import Term
+from tests import test_client_id, test_client_secret, test_root_site_url, test_tenant
+from tests.graph_case import GraphTestCase
 
 
 class TestTermStore(GraphTestCase):
@@ -18,7 +18,9 @@ class TestTermStore(GraphTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestTermStore, cls).setUpClass()
-        client = GraphClient(acquire_token_by_client_credentials)
+        client = GraphClient.with_client_secret(
+            test_tenant, test_client_id, test_client_secret
+        )
         cls.target_store = client.sites.get_by_url(test_root_site_url).term_store
 
     @classmethod
@@ -37,33 +39,38 @@ class TestTermStore(GraphTestCase):
         self.assertIsNotNone(new_group.resource_path)
         self.__class__.target_group = new_group
 
-    def test3_create_set(self):
+    def test3_get_group_by_name(self):
+        name = self.__class__.target_group.display_name
+        group = self.target_store.groups.get_by_name(name).get().execute_query()
+        self.assertIsNotNone(group.resource_path)
+
+    def test4_create_set(self):
         set_name = "Set_" + uuid.uuid4().hex
         new_set = self.target_group.sets.add(set_name).execute_query()
         self.assertIsNotNone(new_set.resource_path)
         self.__class__.target_set = new_set
 
-    def test4_list_sets(self):
+    def test5_list_sets(self):
         sets = self.target_group.sets.get().execute_query()
         self.assertIsNotNone(sets.resource_path)
         self.assertGreaterEqual(1, len(sets))
 
-    def test5_create_term(self):
+    def test6_create_term(self):
         label_name = "Term_" + uuid.uuid4().hex
         new_term = self.target_set.children.add(label_name).execute_query()
         self.assertIsNotNone(new_term.resource_path)
         self.__class__.target_term = new_term
 
-    def test6_list_terms(self):
+    def test7_list_terms(self):
         terms = self.target_set.terms.get().execute_query()
         self.assertIsNotNone(terms.resource_path)
         self.assertGreaterEqual(1, len(terms))
 
-    def test7_delete_term(self):
+    def test8_delete_term(self):
         self.target_term.delete_object().execute_query()
 
-    def test8_delete_set(self):
+    def test9_delete_set(self):
         self.target_set.delete_object().execute_query()
 
-    def test9_delete_group(self):
+    def test_10_delete_group(self):
         self.target_group.delete_object().execute_query()

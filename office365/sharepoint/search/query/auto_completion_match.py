@@ -5,6 +5,7 @@ class QueryAutoCompletionMatch(ClientValue):
     """Represents one match in the Source for the Query"""
 
     def __init__(self, alternation=None, key=None):
+        """ """
         self.Alternation = alternation
         self.Key = key
 

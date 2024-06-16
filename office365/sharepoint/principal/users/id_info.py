@@ -2,7 +2,6 @@ from office365.runtime.client_value import ClientValue
 
 
 class UserIdInfo(ClientValue):
-
     def __init__(self, name_id=None, name_id_issuer=None):
         """Represents an identity providers unique identifier information
 

@@ -14,5 +14,10 @@ class PlannerGroup(Entity):
         Returns the plannerPlans owned by the group.
         """
         from office365.planner.plans.collection import PlannerPlanCollection
-        return self.properties.get('plans',
-                                   PlannerPlanCollection(self.context, ResourcePath("plans", self.resource_path)))
+
+        return self.properties.get(
+            "plans",
+            PlannerPlanCollection(
+                self.context, ResourcePath("plans", self.resource_path)
+            ),
+        )

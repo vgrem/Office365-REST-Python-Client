@@ -7,7 +7,6 @@ import astunparse
 
 
 class TypeBuilder(ast.NodeTransformer):
-
     def __init__(self, type_schema, options):
         """
         :type type_schema: office365.runtime.odata.type.ODataType
@@ -25,7 +24,7 @@ class TypeBuilder(ast.NodeTransformer):
         ast.NodeVisitor.generic_visit(self, node)
 
     def build(self):
-        if self.state == 'attached':
+        if self.state == "attached":
             with open(self.file) as f:
                 self._source_tree = ast.parse(f.read())
             self._status = "updated"
@@ -39,15 +38,17 @@ class TypeBuilder(ast.NodeTransformer):
 
     def save(self):
         code = astunparse.unparse(self._source_tree)
-        with open(self.file, 'w') as f:
+        with open(self.file, "w") as f:
             f.write(code)
 
     def _resolve_template_file(self, type_name):
         file_mapping = {
             "ComplexType": "complex_type.py",
-            "EntityType": "entity_type.py"
+            "EntityType": "entity_type.py",
         }
-        path = abspath(os.path.join(self._options['templatePath'], file_mapping[type_name]))
+        path = abspath(
+            os.path.join(self._options["templatePath"], file_mapping[type_name])
+        )
         return path
 
     def _resolve_type(self, type_name):
@@ -55,15 +56,17 @@ class TypeBuilder(ast.NodeTransformer):
         :type type_name: str
         """
         type_info = {}
-        namespaces = ['directory', 'onedrive', 'mail', 'teams']
+        namespaces = ["directory", "onedrive", "mail", "teams"]
         types = [locate("office365.{0}.{1}".format(ns, type_name)) for ns in namespaces]
         found_modules = [t for t in types if t is not None]
         if any(found_modules):
-            type_info['state'] = 'attached'
-            type_info['file'] = found_modules[0].__file__
+            type_info["state"] = "attached"
+            type_info["file"] = found_modules[0].__file__
         else:
-            type_info['state'] = 'detached'
-            type_info['file'] = abspath(os.path.join(self._options['outputPath'], type_name + ".py"))
+            type_info["state"] = "detached"
+            type_info["file"] = abspath(
+                os.path.join(self._options["outputPath"], type_name + ".py")
+            )
         return type_info
 
     def _ensure_type_info(self):
@@ -74,12 +77,12 @@ class TypeBuilder(ast.NodeTransformer):
     @property
     def state(self):
         self._ensure_type_info()
-        return self._type_info['state']
+        return self._type_info["state"]
 
     @property
     def file(self):
         self._ensure_type_info()
-        return self._type_info['file']
+        return self._type_info["file"]
 
     @property
     def status(self):

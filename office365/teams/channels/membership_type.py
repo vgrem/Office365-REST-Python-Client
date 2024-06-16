@@ -1,5 +1,4 @@
 class ChannelMembershipType:
-
     standard = "standard"
     """Channel inherits the list of members of the parent team."""
 

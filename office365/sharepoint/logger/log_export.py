@@ -1,16 +1,17 @@
 from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.logger.logFileInfoCollection import LogFileInfoCollection
 
 
-class LogExport(BaseEntity):
-
+class LogExport(Entity):
     def __init__(self, context):
         """This is the primary class that should be instantiated to obtain metadata about the
         logs that you can download."""
-        super(LogExport, self).__init__(context, ResourcePath("Microsoft.Online.SharePoint.SPLogger.LogExport"))
+        super(LogExport, self).__init__(
+            context, ResourcePath("Microsoft.Online.SharePoint.SPLogger.LogExport")
+        )
 
     def get_files(self):
         return_type = LogFileInfoCollection(self.context)

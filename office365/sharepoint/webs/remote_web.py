@@ -1,7 +1,7 @@
 from office365.onedrive.lists.list import List
 from office365.runtime.client_object import ClientObject
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.webs.web import Web
 
 
@@ -15,7 +15,14 @@ class RemoteWeb(ClientObject):
         :param str server_relative_url: A string that contains the site-relative URL for a list.
         """
         target_list = List(self.context)
-        qry = ServiceOperationQuery(self, "GetListByServerRelativeUrl", [server_relative_url], None, None, target_list)
+        qry = ServiceOperationQuery(
+            self,
+            "GetListByServerRelativeUrl",
+            [server_relative_url],
+            None,
+            None,
+            target_list,
+        )
         self.context.add_query(qry)
         return target_list
 
@@ -26,7 +33,9 @@ class RemoteWeb(ClientObject):
         :type request_url: str
         """
         remote_web = RemoteWeb(context)
-        qry = ServiceOperationQuery(context, None, [request_url], None, None, remote_web)
+        qry = ServiceOperationQuery(
+            context, None, [request_url], None, None, remote_web
+        )
         qry.static = True
         context.add_query(qry)
         return remote_web
@@ -34,4 +43,6 @@ class RemoteWeb(ClientObject):
     @property
     def web(self):
         """Gets the SPWeb."""
-        return self.properties.get('Web', Web(self.context, ResourcePath("Web", self.resource_path)))
+        return self.properties.get(
+            "Web", Web(self.context, ResourcePath("Web", self.resource_path))
+        )

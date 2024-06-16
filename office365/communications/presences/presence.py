@@ -1,4 +1,9 @@
+from typing import Optional
+
+from office365.communications.presences.status_message import PresenceStatusMessage
 from office365.entity import Entity
+from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
+from office365.outlook.mail.item_body import ItemBody
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
@@ -25,7 +30,9 @@ class Presence(Entity):
         self.context.add_query(qry)
         return self
 
-    def set_presence(self, session_id, availability=None, activity=None, expiration_duration=None):
+    def set_presence(
+        self, session_id, availability=None, activity=None, expiration_duration=None
+    ):
         """
         Set the state of a user's presence session as an application.
 
@@ -40,13 +47,35 @@ class Presence(Entity):
             "sessionId": session_id,
             "availability": availability,
             "activity": activity,
-            "expirationDuration": expiration_duration
+            "expirationDuration": expiration_duration,
         }
         qry = ServiceOperationQuery(self, "setPresence", None, payload)
         self.context.add_query(qry)
         return self
 
-    def set_user_preferred_presence(self, availability="Available", activity="Available", expiration_duration=None):
+    def set_status_message(self, message, expiry=None):
+        """
+        Set a presence status message for a user. An optional expiration date and time can be supplied.
+        :param str or ItemBody message: Status message item.
+        :param datetime.datetime expiry: Time in which the status message expires. If not provided, the status message
+            doesn't expire.
+        """
+        if not isinstance(message, ItemBody):
+            message = ItemBody(message)
+        if expiry:
+            expiry = DateTimeTimeZone.parse(expiry)
+        payload = {
+            "statusMessage": PresenceStatusMessage(
+                message=message, expiry_datetime=expiry
+            )
+        }
+        qry = ServiceOperationQuery(self, "setStatusMessage", None, payload)
+        self.context.add_query(qry)
+        return self
+
+    def set_user_preferred_presence(
+        self, availability="Available", activity="Available", expiration_duration=None
+    ):
         """
         Set the preferred availability and activity status for a user. If the preferred presence of a user is set,
         the user's presence shows as the preferred status.
@@ -64,7 +93,7 @@ class Presence(Entity):
         payload = {
             "availability": availability,
             "activity": activity,
-            "expirationDuration": expiration_duration
+            "expirationDuration": expiration_duration,
         }
         qry = ServiceOperationQuery(self, "setUserPreferredPresence", None, payload)
         self.context.add_query(qry)
@@ -72,22 +101,20 @@ class Presence(Entity):
 
     @property
     def activity(self):
+        # type: () -> Optional[str]
         """
         The supplemental information to a user's availability.
         Possible values are Available, Away, BeRightBack, Busy, DoNotDisturb, InACall, InAConferenceCall, Inactive,
         InAMeeting, Offline, OffWork, OutOfOffice, PresenceUnknown, Presenting, UrgentInterruptionsOnly.
-
-        :rtype: str or None
         """
         return self.properties.get("activity", None)
 
     @property
     def availability(self):
+        # type: () -> Optional[str]
         """
         The base presence information for a user.
         Possible values are Available, AvailableIdle, Away, BeRightBack, Busy, BusyIdle, DoNotDisturb, Offline,
            PresenceUnknown
-
-        :rtype: str or None
         """
         return self.properties.get("availability", None)

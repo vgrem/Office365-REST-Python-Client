@@ -2,7 +2,6 @@ from office365.runtime.client_value import ClientValue
 
 
 class WikiPageCreationInformation(ClientValue):
-
     def __init__(self, server_relative_url, content):
         """
         Specifies wiki page creation information

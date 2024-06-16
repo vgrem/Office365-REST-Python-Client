@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 
 
@@ -7,11 +9,11 @@ class IdentityProviderBase(Entity):
     an Azure AD B2C tenant.
     """
 
+    def __str__(self):
+        return self.display_name or self.entity_type_name
+
     @property
     def display_name(self):
-        """
-        The display name for the identity provider.
-
-        :rtype: str or None
-        """
-        return self.properties.get('displayName', None)
+        # type: () -> Optional[str]
+        """The display name for the identity provider."""
+        return self.properties.get("displayName", None)

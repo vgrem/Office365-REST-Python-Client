@@ -1,4 +1,5 @@
 import inspect
+from typing import Iterator
 
 from office365.runtime.client_value import ClientValue
 from office365.sharepoint.permissions.kind import PermissionKind
@@ -12,9 +13,15 @@ class BasePermissions(ClientValue):
         self.High = 0
         self.Low = 0
 
+    def __iter__(self):
+        # type: () -> Iterator[str]
+        for k, v in inspect.getmembers(PermissionKind):
+            if isinstance(v, int) and self.has(v):
+                yield k
+
     def set(self, perm):
         """
-
+        Assigns the permission
         :type perm: int
         """
         if perm == PermissionKind.FullMask:
@@ -34,8 +41,8 @@ class BasePermissions(ClientValue):
                 self.High |= low << high - 32
 
     def has(self, perm):
-        """Determines whether the current instance has the specified permission.
-        """
+        # type: (int) -> bool
+        """Determines whether the current instance has the specified permission."""
         if perm == PermissionKind.EmptyMask:
             return True
         if perm == PermissionKind.FullMask:
@@ -56,12 +63,9 @@ class BasePermissions(ClientValue):
         self.High = 0
 
     def to_json(self, json_format=None):
-        return {'Low': str(self.High), 'High': str(self.Low)}
+        return {"Low": str(self.High), "High": str(self.Low)}
 
     @property
     def permission_levels(self):
-        result = []
-        for k, v in inspect.getmembers(PermissionKind):
-            if isinstance(v, int) and self.has(v):
-                result.append(k)
-        return result
+        """Gets permission levels"""
+        return list(self)

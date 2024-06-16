@@ -6,10 +6,10 @@ class ObjectIdentity(ClientValue):
     Represents an identity used to sign in to a user account.
     """
 
-    def __init__(self, signInType=None, issuer=None, issuer_assigned_id=None):
+    def __init__(self, sign_in_type=None, issuer=None, issuer_assigned_id=None):
         """
 
-        :param str signInType: Specifies the user sign-in types in your directory, such as emailAddress, userName
+        :param str sign_in_type: Specifies the user sign-in types in your directory, such as emailAddress, userName
             or federated. Here, federated represents a unique identifier for a user from an issuer, that can be in
             any format chosen by the issuer. Additional validation is enforced on issuerAssignedId when the sign-in
             type is set to emailAddress or userName. This property can also be set to any custom string.
@@ -24,6 +24,6 @@ class ObjectIdentity(ClientValue):
             (also known as local accounts).
         """
         super(ObjectIdentity, self).__init__()
-        self.signInType = signInType
+        self.signInType = sign_in_type
         self.issuer = issuer
         self.issuerAssignedId = issuer_assigned_id

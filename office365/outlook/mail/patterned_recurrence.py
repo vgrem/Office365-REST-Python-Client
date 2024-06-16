@@ -1,3 +1,5 @@
+from office365.outlook.mail.recurrence_pattern import RecurrencePattern
+from office365.outlook.mail.recurrence_range import RecurrenceRange
 from office365.runtime.client_value import ClientValue
 
 
@@ -10,4 +12,15 @@ class PatternedRecurrence(ClientValue):
         unifiedRoleAssignmentScheduleRequest and unifiedRoleEligibilityScheduleRequest objects in PIM
         accessPackageAssignment objects in Azure AD entitlement management.
     """
-    pass
+
+    def __init__(self, pattern=RecurrencePattern(), recurrence_range=RecurrenceRange()):
+        """
+        :param RecurrencePattern pattern: The frequency of an event.
+             For access reviews:
+                 - Do not specify this property for a one-time access review.
+                 - Only interval, dayOfMonth, and type (weekly, absoluteMonthly) properties of recurrencePattern
+                   are supported.
+        :param RecurrenceRange recurrence_range: The duration of an event.
+        """
+        self.pattern = pattern
+        self.range = recurrence_range

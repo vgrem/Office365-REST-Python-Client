@@ -1,5 +1,7 @@
 import uuid
+from typing import List
 
+from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.read_entity import ReadEntityQuery
 
@@ -20,11 +22,7 @@ class BatchQuery(ClientQuery):
     """Client query collection"""
 
     def __init__(self, context, queries=None):
-        """
-
-        :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
-        :type queries: list[ClientQuery]
-        """
+        # type: (ClientRuntimeContext, List[ClientQuery]) -> None
         super(BatchQuery, self).__init__(context)
         self._current_boundary = create_boundary("batch_")
         if queries is None:
@@ -32,9 +30,7 @@ class BatchQuery(ClientQuery):
         self._queries = queries
 
     def add(self, query):
-        """
-        :type query: ClientQuery
-        """
+        # type: (ClientQuery) -> None
         self._queries.append(query)
 
     @property
@@ -51,9 +47,7 @@ class BatchQuery(ClientQuery):
 
     @property
     def queries(self):
-        """
-        :rtype: list[ClientQuery]
-        """
+        # type: () -> List[ClientQuery]
         return self._queries
 
     @property
@@ -67,5 +61,3 @@ class BatchQuery(ClientQuery):
     @property
     def url(self):
         return "{0}/$batch".format(self.context.service_root_url())
-
-

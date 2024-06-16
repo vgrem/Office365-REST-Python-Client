@@ -17,7 +17,9 @@ class TestApplication(GraphTestCase):
         self.assertIsNotNone(templates.resource_path)
 
     def test2_create_app(self):
-        new_app = self.client.applications.add(displayName=self.app_name).execute_query()
+        new_app = self.client.applications.add(
+            displayName=self.app_name
+        ).execute_query()
         self.assertIsNotNone(new_app.resource_path)
         self.__class__.target_app = new_app
 
@@ -27,7 +29,9 @@ class TestApplication(GraphTestCase):
         self.__class__.target_password = result.value
 
     def test4_remove_password(self):
-        self.__class__.target_app.remove_password(self.__class__.target_password.keyId).execute_query()
+        self.__class__.target_app.remove_password(
+            self.__class__.target_password.keyId
+        ).execute_query()
 
     def test5_delete_app(self):
         app_to_del = self.__class__.target_app

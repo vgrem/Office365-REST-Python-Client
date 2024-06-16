@@ -1,11 +1,11 @@
 from office365.entity_collection import EntityCollection
 from office365.runtime.queries.function import FunctionQuery
 from office365.teams.channels.channel import Channel
-from office365.teams.chats.message import ChatMessage
+from office365.teams.chats.messages.message import ChatMessage
 
 
-class ChannelCollection(EntityCollection):
-    """Team's collection"""
+class ChannelCollection(EntityCollection[Channel]):
+    """Team's channel collection"""
 
     def __init__(self, context, resource_path=None):
         super(ChannelCollection, self).__init__(context, Channel, resource_path)
@@ -16,7 +16,6 @@ class ChannelCollection(EntityCollection):
         :param str description: Optional textual description for the channel.
         :param str display_name: Channel name as it will appear to the user in Microsoft Teams.
         :param str membership_type: The type of the channel.
-        :rtype: Channel
         """
         return super(ChannelCollection, self).add(
             displayName=display_name,
@@ -32,4 +31,4 @@ class ChannelCollection(EntityCollection):
         return_type = EntityCollection(self.context, ChatMessage, self.resource_path)
         qry = FunctionQuery(self, "getAllMessages", None, return_type)
         self.context.add_query(qry)
-        return self
+        return return_type

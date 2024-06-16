@@ -1,11 +1,11 @@
 from office365.runtime.client_result import ClientResult
-from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.sharepoint.base_entity import BaseEntity
+from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.sharepoint.entity import Entity
 from office365.sharepoint.sharing.user_directory_info import UserDirectoryInfo
 
 
-class SharingUtility(BaseEntity):
+class SharingUtility(Entity):
     """Provides sharing related utility methods."""
 
     def __init__(self, context):
@@ -19,15 +19,15 @@ class SharingUtility(BaseEntity):
         :param str email: The email address of a user.
         :param office365.sharepoint.client_context.ClientContext context: SharePoint client context
         """
-        result = ClientResult(context, UserDirectoryInfo())
-        payload = {
-            "email": email
-        }
+        return_type = ClientResult(context, UserDirectoryInfo())
+        payload = {"email": email}
         utility = SharingUtility(context)
-        qry = ServiceOperationQuery(utility, "GetUserDirectoryInfoByEmail", None, payload, None, result)
+        qry = ServiceOperationQuery(
+            utility, "GetUserDirectoryInfoByEmail", None, payload, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
-        return result
+        return return_type
 
     @staticmethod
     def validate_same_user_emails(context, primary_email, other_email, principal_name):
@@ -43,10 +43,12 @@ class SharingUtility(BaseEntity):
         payload = {
             "primaryEmail": primary_email,
             "otherEmail": other_email,
-            "principalName": principal_name
+            "principalName": principal_name,
         }
         result = ClientResult(context)
-        qry = ServiceOperationQuery(utility, "ValidateSameUserEmails", None, payload, None, result)
+        qry = ServiceOperationQuery(
+            utility, "ValidateSameUserEmails", None, payload, None, result
+        )
         qry.static = True
         context.add_query(qry)
         return result

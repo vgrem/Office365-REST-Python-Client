@@ -1,5 +1,4 @@
-from office365.runtime.paths.entity import EntityPath
-from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.v4.entity import EntityPath
 
 
 class RootPath(EntityPath):
@@ -7,9 +6,3 @@ class RootPath(EntityPath):
 
     def __init__(self, parent=None, collection=None):
         super(RootPath, self).__init__("root", parent, collection)
-
-    @property
-    def collection(self):
-        if self._collection is None:
-            self._collection = ResourcePath("items", self.parent)
-        return self._collection

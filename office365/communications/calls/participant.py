@@ -1,6 +1,12 @@
-from office365.communications.calls.invitation_participant_info import InvitationParticipantInfo
+from typing import Optional
+
+from office365.communications.calls.invitation_participant_info import (
+    InvitationParticipantInfo,
+)
 from office365.communications.calls.participant_info import ParticipantInfo
-from office365.communications.operations.invite_participants import InviteParticipantsOperation
+from office365.communications.operations.invite_participants import (
+    InviteParticipantsOperation,
+)
 from office365.communications.operations.start_hold_music import StartHoldMusicOperation
 from office365.communications.operations.stop_hold_music import StopHoldMusicOperation
 from office365.entity import Entity
@@ -19,8 +25,10 @@ class Participant(Entity):
         """
         return_type = InviteParticipantsOperation(self.context)
         payload = {
-            "participants": ClientValueCollection(InvitationParticipantInfo, participants),
-            "clientContext": client_context
+            "participants": ClientValueCollection(
+                InvitationParticipantInfo, participants
+            ),
+            "clientContext": client_context,
         }
         qry = ServiceOperationQuery(self, "invite", None, payload, None, return_type)
         self.context.add_query(qry)
@@ -34,11 +42,10 @@ class Participant(Entity):
         :param str or None client_context: Unique client context string. Can have a maximum of 256 characters.
         """
         return_type = StartHoldMusicOperation(self.context)
-        payload = {
-            "customPrompt": custom_prompt,
-            "clientContext": client_context
-        }
-        qry = ServiceOperationQuery(self, "startHoldMusic", None, payload, None, return_type)
+        payload = {"customPrompt": custom_prompt, "clientContext": client_context}
+        qry = ServiceOperationQuery(
+            self, "startHoldMusic", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -49,10 +56,10 @@ class Participant(Entity):
         :param str or None client_context: Unique client context string. Can have a maximum of 256 characters.
         """
         return_type = StopHoldMusicOperation(self.context)
-        payload = {
-            "clientContext": client_context
-        }
-        qry = ServiceOperationQuery(self, "stopHoldMusic", None, payload, None, return_type)
+        payload = {"clientContext": client_context}
+        qry = ServiceOperationQuery(
+            self, "stopHoldMusic", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -63,9 +70,6 @@ class Participant(Entity):
 
     @property
     def metadata(self):
-        """
-        A blob of data provided by the participant in the roster.
-
-        :rtype: str
-        """
+        # type: () -> Optional[str]
+        """A blob of data provided by the participant in the roster."""
         return self.properties.get("metadata", None)

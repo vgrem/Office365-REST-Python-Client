@@ -4,17 +4,27 @@ from office365.sharepoint.principal.type import PrincipalType
 
 
 class ClientPeoplePickerQueryParameters(ClientValue):
-
-    def __init__(self, query_string, allow_emai_addresses=True, allow_multiple_entities=True,
-                 allow_only_email_addresses=False,
-                 all_url_zones=False, enabled_claim_providers=None, force_claims=False, maximum_entity_suggestions=1,
-                 principal_source=PrincipalSource.All, principal_type=PrincipalType.All, url_zone=0,
-                 url_zone_specified=False, sharepoint_group_id=0):
+    def __init__(
+        self,
+        query_string,
+        allow_emai_addresses=True,
+        allow_multiple_entities=True,
+        allow_only_email_addresses=False,
+        all_url_zones=False,
+        enabled_claim_providers=None,
+        force_claims=False,
+        maximum_entity_suggestions=1,
+        principal_source=PrincipalSource.All,
+        principal_type=PrincipalType.All,
+        url_zone=0,
+        url_zone_specified=False,
+        sharepoint_group_id=0,
+    ):
         """
         Specifies the properties of a principal query
 
         :type int urlZone: Specifies a location in the topology of the farm for the principal query.
-        :param int sharepoint_group_id: specifies a group containing allowed principals to be used in the principal query.
+        :param int sharepoint_group_id: specifies a group containing allowed principals to be used in the principal query
         :param str query_string: Specifies the value to be used in the principal query.
         :param int principal_type: Specifies the type to be used in the principal query.
         :param int principal_source: Specifies the source to be used in the principal query.

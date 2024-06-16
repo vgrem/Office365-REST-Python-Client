@@ -1,8 +1,10 @@
-from office365.sharepoint.base_entity import BaseEntity
-from office365.sharepoint.ui.applicationpages.peoplepicker.query_settings import PeoplePickerQuerySettings
+from office365.sharepoint.entity import Entity
+from office365.sharepoint.ui.applicationpages.peoplepicker.query_settings import (
+    PeoplePickerQuerySettings,
+)
 
 
-class PickerSettings(BaseEntity):
+class PickerSettings(Entity):
     """
     This class contains configuration settings for the client people picker control hosted
     by the SharePoint sharing UI.

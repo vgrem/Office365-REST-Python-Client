@@ -1,4 +1,4 @@
-from office365.runtime.paths.entity import EntityPath
+from office365.runtime.paths.v4.entity import EntityPath
 
 
 class ChildrenPath(EntityPath):
@@ -13,5 +13,5 @@ class ChildrenPath(EntityPath):
             if isinstance(self.parent, EntityPath):
                 self._collection = self.parent.collection
             else:
-                self._collection = self.parent.parent
+                self._collection = self.parent
         return self._collection

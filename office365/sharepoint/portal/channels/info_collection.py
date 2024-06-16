@@ -4,7 +4,6 @@ from office365.sharepoint.portal.channels.info import ChannelInfo
 
 
 class ChannelInfoCollection(ClientValue):
-
     def __init__(self, value=None):
         self.value = ClientValueCollection(ChannelInfo, value)
 

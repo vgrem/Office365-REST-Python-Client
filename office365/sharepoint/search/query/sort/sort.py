@@ -13,6 +13,9 @@ class Sort(ClientValue):
         self.Direction = direction
         self.Property = property_name
 
+    def __str__(self):
+        return "{0}:{1}".format(self.Property, self.Direction)
+
     @property
     def entity_type_name(self):
         return "Microsoft.SharePoint.Client.Search.Query.Sort"

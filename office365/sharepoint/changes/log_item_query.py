@@ -2,8 +2,14 @@ from office365.runtime.client_value import ClientValue
 
 
 class ChangeLogItemQuery(ClientValue):
-
-    def __init__(self, change_token=None, query=None, query_options=None, contains=None, row_limit=None):
+    def __init__(
+        self,
+        change_token=None,
+        query=None,
+        query_options=None,
+        contains=None,
+        row_limit=None,
+    ):
         """
         Specifies an object that is used as the input parameter of
         GetListItemChangesSinceToken (section 3.2.5.79.2.1.7) method.
@@ -22,8 +28,8 @@ class ChangeLogItemQuery(ClientValue):
         self.QueryOptions = query_options
         self.ChangeToken = change_token
         self.Contains = contains
-        self.RowLimit = str(row_limit)
+        self.RowLimit = str(row_limit) if row_limit else None
 
     @property
     def entity_type_name(self):
-        return 'SP.ChangeLogItemQuery'
+        return "SP.ChangeLogItemQuery"

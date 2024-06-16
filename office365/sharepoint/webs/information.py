@@ -1,6 +1,7 @@
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class WebInformation(BaseEntity):
-    """Specifies metadata about a site """
+class WebInformation(Entity):
+    """Specifies metadata about a site"""
+
     pass

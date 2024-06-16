@@ -1,9 +1,9 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.base_entity import BaseEntity
+from office365.sharepoint.entity import Entity
 
 
-class MySiteRecommendations(BaseEntity):
+class MySiteRecommendations(Entity):
     """Provides a method to get site and document recommendations for the current user, and methods to follow or
     stop following a particular item."""
 
@@ -22,10 +22,12 @@ class MySiteRecommendations(BaseEntity):
         payload = {
             "uri": uri,
             "personalSiteUri": personal_site_uri,
-            "category": category
+            "category": category,
         }
         manager = MySiteRecommendations(context)
-        qry = ServiceOperationQuery(manager, "FollowItem", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            manager, "FollowItem", None, payload, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type
@@ -46,10 +48,12 @@ class MySiteRecommendations(BaseEntity):
         payload = {
             "uri": uri,
             "personalSiteUri": personal_site_uri,
-            "category": category
+            "category": category,
         }
         manager = MySiteRecommendations(context)
-        qry = ServiceOperationQuery(manager, "StopFollowingItem", None, payload, None, return_type)
+        qry = ServiceOperationQuery(
+            manager, "StopFollowingItem", None, payload, None, return_type
+        )
         qry.static = True
         context.add_query(qry)
         return return_type

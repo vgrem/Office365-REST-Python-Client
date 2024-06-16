@@ -9,8 +9,13 @@ from office365.sharepoint.social.posts.actor_info import SocialPostActorInfo
 class SocialPost(ClientValue):
     """The SocialPost specifies a post read from the server."""
 
-    def __init__(self, attachment=SocialAttachment(), overlays=None, source=SocialLink(),
-                 liker_info=SocialPostActorInfo()):
+    def __init__(
+        self,
+        attachment=SocialAttachment(),
+        overlays=None,
+        source=SocialLink(),
+        liker_info=SocialPostActorInfo(),
+    ):
         """
         :param SocialAttachment attachment: The Attachment property specifies an image, document preview,
             or video preview attachment.

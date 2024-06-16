@@ -4,8 +4,19 @@ from office365.runtime.types.collections import StringCollection
 
 
 class UserProfile(ClientValue):
-    def __init__(self, principal_name, password, display_name=None, given_name=None, company_name=None,
-                 business_phones=None, office_location=None, city=None, country=None, account_enabled=False):
+    def __init__(
+        self,
+        principal_name,
+        password,
+        display_name=None,
+        given_name=None,
+        company_name=None,
+        business_phones=None,
+        office_location=None,
+        city=None,
+        country=None,
+        account_enabled=False,
+    ):
         """
         User profile
 
