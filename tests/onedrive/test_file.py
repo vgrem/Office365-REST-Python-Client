@@ -111,7 +111,7 @@ class TestFile(GraphTestCase):
     #    self.assertIsNotNone(result.value)
 
     def test_15_get_activities_by_interval(self):
-        end_time = datetime.utcnow()
+        end_time = datetime.now()
         start_time = end_time - timedelta(days=14)
         result = self.__class__.target_file.get_activities_by_interval(
             start_time, end_time, "day"

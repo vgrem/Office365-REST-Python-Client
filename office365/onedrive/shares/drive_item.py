@@ -8,7 +8,6 @@ from office365.onedrive.lists.list import List
 from office365.onedrive.permissions.permission import Permission
 from office365.onedrive.sites.site import Site
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.runtime.paths.v4.entity import EntityPath
 
 
 class SharedDriveItem(BaseItem):
@@ -48,7 +47,7 @@ class SharedDriveItem(BaseItem):
         """Used to access the underlying driveItem"""
         return self.properties.get(
             "driveItem",
-            DriveItem(self.context, EntityPath("driveItem", self.resource_path)),
+            DriveItem(self.context, ResourcePath("driveItem", self.resource_path)),
         )
 
     @property

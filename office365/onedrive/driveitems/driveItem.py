@@ -913,8 +913,6 @@ class DriveItem(BaseItem):
 
     def set_property(self, name, value, persist_changes=True):
         super(DriveItem, self).set_property(name, value, persist_changes)
-        if name == "parentReference":
-            pass
         return self
 
     def get_property(self, name, default_value=None):
